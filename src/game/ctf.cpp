@@ -166,7 +166,7 @@ namespace ctf
             }
             else if(f.base&BASE_HOME) trans = f.team ? 0.125f : 0.25f;
             if(trans > 0) rendermodel(&entities::ents[f.ent]->light, flagname, ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
-            above.z += enttype[FLAG].radius/2+1.5f;
+            above.z += enttype[FLAG].radius/2+2.5f;
             if((f.base&BASE_HOME) || (!f.owner && !f.droptime))
             {
                 defformatstring(info)("<super>%s %s", teamtype[f.team].name, f.base&BASE_HOME ? "base" : "flag");
@@ -210,7 +210,7 @@ namespace ctf
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
             const char *flagname = teamtype[f.team].flag;
             vec above(f.pos());
-            float trans = 1.f, yaw = 90;
+            float trans = 1.f, yaw = 0;
             if(f.owner)
             {
                 yaw += f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
