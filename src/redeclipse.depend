@@ -1,0 +1,700 @@
+# depslib dependency file v1.0
+1270385423 source:d:\work\redeclipse\src\shared\cube.h
+	<math.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<stdarg.h>
+	<limits.h>
+	<assert.h>
+	<new>
+	<new.h>
+	<time.h>
+	"windows.h"
+	"io.h"
+	<eh.h>
+	<dbghelp.h>
+	<zlib.h>
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_syswm.h>
+	<SDL_opengl.h>
+	"GL/glext.h"
+	<enet/enet.h>
+	"tools.h"
+	"command.h"
+	"geom.h"
+	"ents.h"
+	"iengine.h"
+	"igame.h"
+
+1274937042 d:\work\redeclipse\src\include\zlib.h
+	"zconf.h"
+
+1274937042 d:\work\redeclipse\src\include\zconf.h
+	<windows.h>
+	<sys/types.h>
+	<unistd.h>
+	<unixio.h>
+
+1267447571 d:\work\redeclipse\src\include\sdl.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1274937042 d:\work\redeclipse\src\include\sdl_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_config.h
+	"SDL_platform.h"
+	"SDL_config_dreamcast.h"
+	"SDL_config_macos.h"
+	"SDL_config_macosx.h"
+	"SDL_config_symbian.h"
+	"SDL_config_win32.h"
+	"SDL_config_os2.h"
+	"SDL_config_minimal.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_platform.h
+
+1274936177 d:\work\redeclipse\src\include\sdl_config_macosx.h
+	"SDL_platform.h"
+	<AvailabilityMacros.h>
+
+1274936177 d:\work\redeclipse\src\include\sdl_config_win32.h
+	"SDL_platform.h"
+
+1274937042 d:\work\redeclipse\src\include\begin_code.h
+
+1274936177 d:\work\redeclipse\src\include\close_code.h
+
+1267447571 d:\work\redeclipse\src\include\sdl_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_endian.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1274937042 d:\work\redeclipse\src\include\sdl_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1274937042 d:\work\redeclipse\src\include\sdl_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1274937042 d:\work\redeclipse\src\include\sdl_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_keysym.h
+
+1267447571 d:\work\redeclipse\src\include\sdl_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_image.h
+	"SDL.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1274937042 d:\work\redeclipse\src\include\sdl_syswm.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_version.h"
+	"begin_code.h"
+	<X11/Xlib.h>
+	<X11/Xatom.h>
+	<microwin/nano-X.h>
+	<windows.h>
+	<sys/neutrino.h>
+	<Ph.h>
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_opengl.h
+	"SDL_config.h"
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<gl.h>
+	<glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<windows.h>
+	<stddef.h>
+
+1267447571 d:\work\redeclipse\src\include\gl\glext.h
+	<windows.h>
+	<stddef.h>
+
+1274631577 d:\work\redeclipse\src\enet\include\enet\enet.h
+	<stdlib.h>
+	"enet/win32.h"
+	"enet/unix.h"
+	"enet/types.h"
+	"enet/protocol.h"
+	"enet/list.h"
+	"enet/callbacks.h"
+
+1267447695 d:\work\redeclipse\src\enet\include\enet\win32.h
+	<stdlib.h>
+	<winsock2.h>
+
+1267447695 d:\work\redeclipse\src\enet\include\enet\unix.h
+	<stdlib.h>
+	<sys/time.h>
+	<sys/types.h>
+	<netinet/in.h>
+	<unistd.h>
+
+1267447695 d:\work\redeclipse\src\enet\include\enet\types.h
+
+1274430492 d:\work\redeclipse\src\enet\include\enet\protocol.h
+	"enet/types.h"
+
+1273992427 d:\work\redeclipse\src\enet\include\enet\list.h
+	<stdlib.h>
+
+1274430492 d:\work\redeclipse\src\enet\include\enet\callbacks.h
+	<stdlib.h>
+
+1269216470 d:\work\redeclipse\src\shared\tools.h
+	<crtdbg.h>
+
+1274935211 d:\work\redeclipse\src\shared\command.h
+
+1273992425 d:\work\redeclipse\src\shared\geom.h
+
+1274813103 d:\work\redeclipse\src\shared\ents.h
+
+1275525256 d:\work\redeclipse\src\shared\iengine.h
+
+1273992425 d:\work\redeclipse\src\shared\igame.h
+
+1275545745 source:d:\work\redeclipse\src\engine\engine.h
+	"cube.h"
+	"irc.h"
+	"sound.h"
+	"world.h"
+	"octa.h"
+	"lightmap.h"
+	"bih.h"
+	"texture.h"
+	"model.h"
+	"varray.h"
+
+1270385423 d:\work\redeclipse\src\shared\cube.h
+	<math.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<stdarg.h>
+	<limits.h>
+	<assert.h>
+	<new>
+	<new.h>
+	<time.h>
+	"windows.h"
+	"io.h"
+	<eh.h>
+	<dbghelp.h>
+	<zlib.h>
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_syswm.h>
+	<SDL_opengl.h>
+	"GL/glext.h"
+	<enet/enet.h>
+	"tools.h"
+	"command.h"
+	"geom.h"
+	"ents.h"
+	"iengine.h"
+	"igame.h"
+
+1268397341 d:\work\redeclipse\src\engine\irc.h
+
+1267447608 d:\work\redeclipse\src\engine\sound.h
+	"SDL_mixer.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_mixer.h
+	"SDL_types.h"
+	"SDL_rwops.h"
+	"SDL_audio.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1267447571 d:\work\redeclipse\src\include\sdl_types.h
+	"SDL_stdinc.h"
+
+1275525256 d:\work\redeclipse\src\engine\world.h
+
+1273369465 d:\work\redeclipse\src\engine\octa.h
+
+1272426656 d:\work\redeclipse\src\engine\lightmap.h
+
+1272342431 d:\work\redeclipse\src\engine\bih.h
+
+1272698894 d:\work\redeclipse\src\engine\texture.h
+
+1272342431 d:\work\redeclipse\src\engine\model.h
+
+1268397341 d:\work\redeclipse\src\engine\varray.h
+
+1274936176 source:d:\work\redeclipse\src\engine\client.cpp
+	"engine.h"
+
+1275545745 d:\work\redeclipse\src\engine\engine.h
+	"cube.h"
+	"irc.h"
+	"sound.h"
+	"world.h"
+	"octa.h"
+	"lightmap.h"
+	"bih.h"
+	"texture.h"
+	"model.h"
+	"varray.h"
+
+1274936176 source:d:\work\redeclipse\src\engine\command.cpp
+	"engine.h"
+
+1274936618 source:d:\work\redeclipse\src\engine\console.cpp
+	"engine.h"
+	<X11/Xlib.h>
+
+1272624433 source:d:\work\redeclipse\src\engine\decal.cpp
+	"engine.h"
+
+1271568285 source:d:\work\redeclipse\src\engine\dynlight.cpp
+	"engine.h"
+
+1272624433 source:d:\work\redeclipse\src\engine\blob.cpp
+	"engine.h"
+
+1272988305 source:d:\work\redeclipse\src\engine\glare.cpp
+	"engine.h"
+	"rendertarget.h"
+
+1272988305 d:\work\redeclipse\src\engine\rendertarget.h
+
+1269768148 source:d:\work\redeclipse\src\engine\grass.cpp
+	"engine.h"
+
+1275544052 source:d:\work\redeclipse\src\engine\irc.cpp
+	"engine.h"
+
+1275118003 source:d:\work\redeclipse\src\engine\lightmap.cpp
+	"engine.h"
+
+1275525335 source:d:\work\redeclipse\src\engine\main.cpp
+	"engine.h"
+	<signal.h>
+
+1272570383 source:d:\work\redeclipse\src\engine\material.cpp
+	"engine.h"
+
+1273453055 source:d:\work\redeclipse\src\engine\menus.cpp
+	"engine.h"
+
+1275525255 source:d:\work\redeclipse\src\engine\movie.cpp
+	"engine.h"
+	"SDL_mixer.h"
+
+1272573090 source:d:\work\redeclipse\src\engine\normal.cpp
+	"engine.h"
+
+1274936176 source:d:\work\redeclipse\src\engine\octa.cpp
+	"engine.h"
+
+1273176126 source:d:\work\redeclipse\src\engine\octarender.cpp
+	"engine.h"
+
+1272988305 source:d:\work\redeclipse\src\engine\physics.cpp
+	"engine.h"
+	"mpr.h"
+
+1272927661 d:\work\redeclipse\src\engine\mpr.h
+
+1273754768 source:d:\work\redeclipse\src\engine\blend.cpp
+	"engine.h"
+
+1273992425 source:d:\work\redeclipse\src\engine\rendergl.cpp
+	"engine.h"
+	"varray.h"
+
+1275551744 source:d:\work\redeclipse\src\game\game.h
+	"engine.h"
+	"weapons.h"
+	"ai.h"
+	"vars.h"
+	"ctf.h"
+	"stf.h"
+	"scoreboard.h"
+
+1275551323 d:\work\redeclipse\src\game\weapons.h
+
+1275200940 d:\work\redeclipse\src\game\ai.h
+
+1275554919 d:\work\redeclipse\src\game\vars.h
+
+1275288674 d:\work\redeclipse\src\game\ctf.h
+
+1268397345 d:\work\redeclipse\src\game\stf.h
+
+1275208459 d:\work\redeclipse\src\game\scoreboard.h
+
+1275532936 source:d:\work\redeclipse\src\engine\octaedit.cpp
+	"engine.h"
+
+1275118003 source:d:\work\redeclipse\src\engine\rendermodel.cpp
+	"engine.h"
+	"ragdoll.h"
+	"animmodel.h"
+	"vertmodel.h"
+	"skelmodel.h"
+	"md2.h"
+	"md3.h"
+	"md5.h"
+	"obj.h"
+	"smd.h"
+	"iqm.h"
+
+1274900771 d:\work\redeclipse\src\engine\ragdoll.h
+
+1273754768 d:\work\redeclipse\src\engine\animmodel.h
+
+1272342431 d:\work\redeclipse\src\engine\vertmodel.h
+
+1274900771 d:\work\redeclipse\src\engine\skelmodel.h
+
+1272927661 d:\work\redeclipse\src\engine\md2.h
+
+1272927661 d:\work\redeclipse\src\engine\md3.h
+
+1272927661 d:\work\redeclipse\src\engine\md5.h
+
+1272927661 d:\work\redeclipse\src\engine\obj.h
+
+1272927661 d:\work\redeclipse\src\engine\smd.h
+
+1272927661 d:\work\redeclipse\src\engine\iqm.h
+
+1275269056 source:d:\work\redeclipse\src\engine\renderparticles.cpp
+	"engine.h"
+	"rendertarget.h"
+	"depthfx.h"
+	"lensflare.h"
+	"explosion.h"
+	"lightning.h"
+
+1267447608 d:\work\redeclipse\src\engine\depthfx.h
+
+1272437980 d:\work\redeclipse\src\engine\lensflare.h
+
+1275268983 d:\work\redeclipse\src\engine\explosion.h
+
+1275269055 d:\work\redeclipse\src\engine\lightning.h
+
+1273369464 source:d:\work\redeclipse\src\engine\rendersky.cpp
+	"engine.h"
+
+1274936176 source:d:\work\redeclipse\src\engine\rendertext.cpp
+	"engine.h"
+
+1275017980 source:d:\work\redeclipse\src\engine\renderva.cpp
+	"engine.h"
+
+1275525255 source:d:\work\redeclipse\src\engine\server.cpp
+	"engine.h"
+	<shlobj.h>
+	<signal.h>
+
+1274934694 source:d:\work\redeclipse\src\engine\serverbrowser.cpp
+	"engine.h"
+	"SDL_thread.h"
+
+1273992425 source:d:\work\redeclipse\src\engine\shader.cpp
+	"engine.h"
+
+1272927661 source:d:\work\redeclipse\src\engine\shadowmap.cpp
+	"engine.h"
+	"rendertarget.h"
+
+1275525255 source:d:\work\redeclipse\src\engine\sound.cpp
+	"engine.h"
+	<wchar.h>
+	<unistd.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<sys/mman.h>
+	<fcntl.h>
+	<wchar.h>
+
+1275532925 source:d:\work\redeclipse\src\engine\texture.cpp
+	"engine.h"
+	"scale.h"
+	"scale.h"
+	"scale.h"
+	"scale.h"
+
+1267447608 d:\work\redeclipse\src\engine\scale.h
+
+1273453055 source:d:\work\redeclipse\src\engine\ui.cpp
+	"engine.h"
+	"textedit.h"
+
+1272988305 d:\work\redeclipse\src\engine\textedit.h
+
+1273754768 source:d:\work\redeclipse\src\engine\water.cpp
+	"engine.h"
+
+1275525255 source:d:\work\redeclipse\src\engine\world.cpp
+	"engine.h"
+
+1275526210 source:d:\work\redeclipse\src\engine\worldio.cpp
+	"engine.h"
+
+1275531722 source:d:\work\redeclipse\src\game\ai.cpp
+	"game.h"
+
+1275551744 d:\work\redeclipse\src\game\game.h
+	"engine.h"
+	"weapons.h"
+	"ai.h"
+	"vars.h"
+	"ctf.h"
+	"stf.h"
+	"scoreboard.h"
+
+1275525255 source:d:\work\redeclipse\src\game\client.cpp
+	"game.h"
+
+1275288710 source:d:\work\redeclipse\src\game\ctf.cpp
+	"game.h"
+
+1275526292 source:d:\work\redeclipse\src\game\entities.cpp
+	"game.h"
+
+1275349041 source:d:\work\redeclipse\src\game\game.cpp
+	"game.h"
+
+1272698894 source:d:\work\redeclipse\src\engine\pvs.cpp
+	"engine.h"
+	"SDL_thread.h"
+
+1275555990 source:d:\work\redeclipse\src\game\hud.cpp
+	"game.h"
+	"compass.h"
+
+1273453055 d:\work\redeclipse\src\game\compass.h
+
+1275349041 source:d:\work\redeclipse\src\game\physics.cpp
+	"game.h"
+
+1275526292 source:d:\work\redeclipse\src\game\server.cpp
+	"game.h"
+	"auth.h"
+	"stfmode.h"
+	"ctfmode.h"
+	"duelmut.h"
+	"aiman.h"
+	"extinfo.h"
+
+1273453055 d:\work\redeclipse\src\game\auth.h
+
+1274352318 d:\work\redeclipse\src\game\stfmode.h
+
+1274354172 d:\work\redeclipse\src\game\ctfmode.h
+
+1275280201 d:\work\redeclipse\src\game\duelmut.h
+
+1274819809 d:\work\redeclipse\src\game\aiman.h
+
+1269139765 d:\work\redeclipse\src\game\extinfo.h
+
+1274550930 source:d:\work\redeclipse\src\game\stf.cpp
+	"game.h"
+
+1275350863 source:d:\work\redeclipse\src\game\weapons.cpp
+	"game.h"
+
+1275525256 source:d:\work\redeclipse\src\redeclipse.rc
+	"winresrc.h"
+
+1267447637 source:d:\work\redeclipse\src\shared\crypto.cpp
+	"cube.h"
+
+1272908156 source:d:\work\redeclipse\src\engine\bih.cpp
+	"engine.h"
+
+1275258617 source:d:\work\redeclipse\src\shared\geom.cpp
+	"cube.h"
+
+1271568285 source:d:\work\redeclipse\src\shared\stream.cpp
+	"cube.h"
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<dirent.h>
+
+1267447637 source:d:\work\redeclipse\src\shared\tools.cpp
+	"cube.h"
+
+1267447637 source:d:\work\redeclipse\src\shared\zip.cpp
+	"cube.h"
+
+1274464154 source:d:\work\redeclipse\src\engine\master.cpp
+	"engine.h"
+	<sys/types.h>
+	<enet/time.h>
+	<winerror.h>
+	<errno.h>
+
+1267447695 d:\work\redeclipse\src\enet\include\enet\time.h
+
+1275528411 source:d:\work\redeclipse\src\game\projs.cpp
+	"game.h"
+
