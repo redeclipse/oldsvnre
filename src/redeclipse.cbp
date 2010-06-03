@@ -16,7 +16,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option parameters="-hhome -r -dw800 -dh400" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh400" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -59,7 +59,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option parameters="-hhome -r -dw800 -dh400" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh400" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -254,15 +254,6 @@
 		<VirtualTargets>
 			<Add alias="All" targets="client;server;" />
 		</VirtualTargets>
-		<Unit filename="redeclipse.rc">
-			<Option compilerVar="WINDRES" />
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="server" />
-			<Option target="genkey" />
-			<Option target="client-prof" />
-			<Option target="server-dbg" />
-		</Unit>
 		<Unit filename="engine\animmodel.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
@@ -1016,6 +1007,15 @@
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
+		</Unit>
+		<Unit filename="redeclipse.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="genkey" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
 		</Unit>
 		<Unit filename="shared\command.h">
 			<Option target="client" />

@@ -43,7 +43,7 @@ namespace stf
             else formatstring(b.info)("<super>\fs%s%s\fS", teamtype[defend].chat, teamtype[defend].name);
             float occupy = attack ? (!b.owner || b.enemy ? clamp(b.converted/float((!stfstyle && b.owner ? 2 : 1)*stfoccupy), 0.f, 1.f) : 1.f) : 0.f;
             vec above = b.o;
-            above.z += enttype[FLAG].radius/2+1.5f;
+            above.z += enttype[FLAG].radius/2+2.5f;
             part_text(above, b.info);
             above.z += 2.5f;
             if(b.enemy)

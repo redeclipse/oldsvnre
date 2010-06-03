@@ -1365,6 +1365,7 @@ namespace game
                     if(e.type == MAPMODEL)
                     {
                         mapmodelinfo &mmi = getmminfo(e.attrs[0]);
+                        if(!&mmi) continue;
                         vec center, radius;
                         mmi.m->collisionbox(0, center, radius);
                         if(e.attrs[4]) { center.mul(e.attrs[4]/100.f); radius.mul(e.attrs[4]/100.f); }
