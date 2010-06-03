@@ -281,17 +281,18 @@ namespace hud
     {
         static string timestr; timestr[0] = 0;
         int tm = dur, ms = 0, ss = 0, mn = 0;
-        if(style <= 1 && tm > 0)
+        if(style < 2 && tm > 0)
         {
             ms = tm%1000;
             tm = (tm-ms)/1000;
         }
-        if(style <= 2 && tm > 0)
+        if(style < 0 && tm > 0) ss = tm;
+        else if(style < 3 && tm > 0)
         {
             ss = tm%60;
             tm = (tm-ss)/60;
+            if(tm > 0) mn = tm;
         }
-        if(style >= 0 && tm > 0) mn = tm;
         switch(style)
         {
             case -1: formatstring(timestr)("%d.%d", ss, ms/100); break;
