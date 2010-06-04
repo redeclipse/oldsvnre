@@ -931,7 +931,7 @@ int main(int argc, char **argv)
     trytofindocta();
     conoutf("loading main..");
     progress(0, "loading main..");
-    if(initscript) execute(initscript);
+    if(initscript) execute(initscript, true);
 
 #ifdef WIN32
     SDL_SysWMinfo wminfo;

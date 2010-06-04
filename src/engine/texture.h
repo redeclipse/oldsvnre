@@ -745,3 +745,5 @@ extern void setblurshader(int pass, int size, int radius, float *weights, float 
 
 #define _ITVAR(f, n, c, m) _ISVAR(n, c, void changed() { if(*val.s) textureload(val.s, m, true); }, f|IDF_TEXTURE)
 #define ITVAR(f, n, c, m)  _ITVAR(f, n, c, m)
+
+extern void screentexture(char *name, int size);

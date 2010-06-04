@@ -1054,6 +1054,7 @@ namespace game
             loadmodel(teamtype[i].tpmdl, -1, true);
             loadmodel(teamtype[i].fpmdl, -1, true);
         }
+        ai::preload();
         weapons::preload();
         projs::preload();
         if(m_edit(gamemode) || m_stf(gamemode)) stf::preload();
