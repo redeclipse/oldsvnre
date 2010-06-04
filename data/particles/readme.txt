@@ -8,3 +8,7 @@ smoke.png, and explosion.png
 
 fire.png, lightning.png, hint.png, mflare.png, sflare.png, spark.png
     Created by Quinton Reeves, released into the public domain
+
+blood.png
+    Created by FischKopF, source: http://www.quadropolis.us/node/2693
+    "Feel free to edit, claim it's yours, use it in own projects"
