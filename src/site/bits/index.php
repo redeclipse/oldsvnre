@@ -1,6 +1,6 @@
 <?php
     $app['releasever'] = "Pre-Beta";
-    $app['releasedate'] = "Still in Development";
+    $app['releasedate'] = "NOT YET";
     $app['background'] = "/bits/background_01.jpg";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
@@ -13,8 +13,8 @@
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://redeclipse.svn.sourceforge.net/redeclipse/', 'alturl' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse/?view=rev&amp;rev=', 'nav' => 1, 'redir' => 1);
     $app['targets']['repo'] = array('name' => 'Repository', 'url' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse', 'alturl' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse/', 'nav' => -1, 'redir' => 1);
-    $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Blood%20Frontier%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Blood%20Frontier%22+', 'nav' => 0, 'redir' => 1);
-    $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Blood%20Frontier%22', 'alturl' => 'http://www.google.com/search?q=%22Blood%20Frontier%22+', 'nav' => 0, 'redir' => 1);
+    $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
+    $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     //$app['targets']['facebook'] = array('name' => 'facebook', 'url' => 'http://www.facebook.com/group.php?gid=86675052192&amp;ref=mf', 'nav' => 0, 'redir' => 1);
     //$app['targets']['blackboxbeta'] = array('name' => 'blackboxbeta', 'url' => 'http://www.blackboxbeta.net/blood-frontier-oss', 'nav' => 0, 'redir' => 1);
     //$app['targets']['playdeb'] = array('name' => 'playdeb', 'url' => 'http://www.playdeb.net/software/Blood%20Frontier', 'nav' => 0, 'redir' => 1);
@@ -48,7 +48,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
     <head>
-        <title>Red Eclipse<?php echo ($app['targets'][$app['target']]['name'] != "" ? ": ".$app['targets'][$app['target']]['name'] : ", It's Bloody Fun!"); ?></title>
+        <title>Red Eclipse: <?php echo ($app['targets'][$app['target']]['name'] != "" ? $app['targets'][$app['target']]['name'] : "Home"); ?></title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <link rel="shortcut icon" href="/bits/favicon.ico" />
         <link rel="stylesheet" type="text/css" href="/bits/style.css" />
@@ -92,13 +92,12 @@
             <div id="video">
                 <div id="main">
                     <h1>Red Eclipse</h1>
-                    <h2><i>It's Bloody Fun!</i></h2>
                     <h3>Free and open source game for Windows, Linux/BSD and Mac OSX</h3>
                     <h3>Agile gameplay in low gravity environments: sprint, wall run/kick, and impulse dash</h3>
                     <h3>Create your own maps cooperatively with friends online using the builtin map editor</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br />
                     released <i><?php echo $app['releasedate']; ?></i></em></a>
-                    <p id="svn">or <a href="/svn">get the SVN version</a> and live on the bleeding edge</p>
+                    <p id="svn">or <a href="http://sourceforge.net/scm/?type=svn&group_id=326559">get the SVN version</a> and live on the bleeding edge</p>
                 </div>
                 <div id="player">
                     <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/uKnLsAiCVLk&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
@@ -135,16 +134,13 @@
             </div>
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
-                <h4>About the Project</h4>
-                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or grab a development copy from our <a href="/svn">Subversion</a> repository and live on the bleeding edge. If you're an Ubuntu user, you might like to use the <a href="/playdeb">easy-to-install package available on PlayDeb.net</a>.</p>
+                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or grab a development copy from our <a href="http://sourceforge.net/scm/?type=svn&group_id=326559">Subversion</a> repository and live on the bleeding edge.</p>
                 <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a low gravity environment. For more information, please see our <a href="/chat">Chat</a>.</p>
-                <p>In a true open source <i>by the people for the people</i> nature, it tries to work closely with the gaming and open source communities to provide a better overall experience, taking all sorts of feedback from your average player, to your seasoned developer, aiming to create a story-driven game environment that is flexible, fun, easy to use, and pleasing to the eye.</p>
             </div>
             <div class="vbar">&nbsp;</div>
-            <!-- <div class="leftcol">
-                <h4>Synopsis</h4>
-                <p>In the distant future, humanity has spread throughout the universe, to ends of the galaxy and beyond. A vast communications network bridges from colony to colony, human to machine, and machine to human. This seemingly benign keystone of modern inter-planetary society, however, appears to be the carrier of a mysterious techno-biological plague. Any persons so-connected seem to fall ill and die, only to return as ravenous, sub-human cannibals.You, a machine intelligence, an android, remain unafflicted by this strange phenomenon and have been tasked with destroying the growing hordes of the infected, while, hopefully, locating and stopping the source of the epidemic.</p>
-            </div> -->
+            <div class="leftcol">
+                <p>In a true open source <i>by the people for the people</i> nature, it tries to work closely with the gaming and open source communities to provide a better overall experience, taking all sorts of feedback from your average player, to your seasoned developer, aiming to create a story-driven game environment that is flexible, fun, easy to use, and pleasing to the eye.</p>
+            </div>
             <div class="rightblock">
                 <h4>Support Us</h4>
                 <p id="donatemsg">Red Eclipse is developed by volunteers, and you get it free of charge; your donations go toward ongoing costs which keep this project alive.</p>
