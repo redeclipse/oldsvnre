@@ -1,6 +1,4 @@
-* Model layering colour customisation via shaders
 * Commands to perform common geometry operations: slope, arch, stairs, circle, sphere
-* Fix /newmap issues with autoget/send
 * Optical effects (sprinting. etc)
 * Make 'tags' and/or 'theme' fields (or just mark modified gameplay)
 * Move things like mastermode, ban, etc to server side commands/variables
@@ -8,24 +6,21 @@
 * Make checkpoints/triggers linkable for a determined order (add to kinship system)
 * Create "assisted secures" for stf (player1, player2, player3 secured flag N)
 * Create "assisted deaths" (make server aware of floor state too for assisted falling?)
-* Allow premature detonation by firing/exploding certain weapons at plasma/grenades
-* Try to balance kamikaze grenades better (timer? penalty?)
-* Elaborate and refine AI (campaign, fix zombie "spinning", add turret, smarter "cooking")
-* Add sword and modify projectile subsystems accordingly
+* Allow premature detonation by firing/exploding certain weapons at plasma/grenades?
+* Refine AI elements (campaign, fix "spinning", smarter "cooking")
 * Master server tracking and unlockable system
 
-! Keep an eye out for the elusive grenade bugs
-
 = Models =
-* New player model (tag_affinity, tag_camera, tag_weapon, tag_lfoot, tag_rfoot, tag_head, tag_torso, tag_hat)
-* Turret/Pyro/Heavy models
-* Weapons (esp. rocket?)
+* New player model (tag_affinity, tag_weapon, tag_lfoot, tag_rfoot, tag_head, tag_torso)
+* Enemy models
+* Weapons
 
 = Art =
 * Dead, Arrow, Dominated/Dominating
 * Current "widgets" need glow removed so they are not clipped by image dimensions
 
 = Sounds =
+* Pistol/Rifle
 * Double/Triple/Multi kill
 * Spree 5/6 (7/8/9/10?)
 * Team-alert and damage tones
