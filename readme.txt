@@ -69,46 +69,51 @@ Developers
  Lee "Eihrul" Salzman - Lead Advisor
     Cube 2 Backports, Support, Speed Improvements, Encouragement
 
- Kevin "Hirato" Meyer - Project Timmy
+ Kevin "Hirato" Meyer - Timmy
     Testing and Development Assistance, Collaboration
 
- Robert "Baby-Rabbit" Pointon - Project Support
+ Robert "Baby-Rabbit" Pointon - Support
     Mac OSX Porting and Packaging
 
- Joshua L. "Verbalshadow" Blocher - Project Artist
+ Joshua L. "Verbalshadow" Blocher - Artist
     GUI and HUD artwork, Collaboration
 
- Mike "MitaMan" Poeschl - Project Artist
+ Mike "MitaMan" Poeschl - Artist
     Sound Bytes, Theme Song Opposing Force
 
- Kurt "Kurtis84" Kessler - Project Artist
+ Kurt "Kurtis84" Kessler - Artist
     Maps, Collaboration
 
- Alex "Blackshoe" Anguix - Project Artist
+ Alex "Blackshoe" Anguix - Artist
     Sound Effects Design
 
- "LuckystrikeRx" - Project Artist
+ "LuckystrikeRx" - Artist
     Maps, Collaboration, Website Design
 
- Jonathan "W!ck3d" Roels - Project Artist
+ Jonathan "W!ck3d" Roels - Artist
     Maps, Collaboration
 
- Derek "Favorito" Ponicki - Project Artist
-    Maps, Collaboration, Testing
+ Derek "Favorito" Ponicki - Artist
+    Maps, Textures, Collaboration
 
- John "Geartrooper" Siar - Project Artist
+ John "Geartrooper" Siar - Artist
     Modelling
 
- Slawek "Q009" Blauciak - Project Artist
+ Slawek "Q009" Blauciak - Artist
     Ambient Sounds
 
- "SkiingPenguins" - Project Artist
+ "SkiingPenguins" - Artist
     Skyboxes
+ 
+ Jeroen "appleflap" Boukens - Collaborator
+    Textures, Collaboration
+
+ Stefan Norman and Peter McInerney - Hosting
+    Master and Game server hosting
 
 Supporters
  
- Stefan Norman, Peter McInerney, "w00p|dazza", Corey "c0rdawg" Maher,
+ "w00p|dazza", Corey "c0rdawg" Maher, Rob "Lloir" Shannon
  Henrik "ahven" Pihl, Robert "Homicidal" Crane, Wayne Bennett,
  Cameron "Rhubarb" Dawdy, Christopher "paroneayea" Webber,
  Mark "xtort-" Doodeman, Vadim Peretokin, Taiyo Rawle, CD Xbow,
- Rob "Lloir" Shannon, Jeroen "appleflap" Boukens
