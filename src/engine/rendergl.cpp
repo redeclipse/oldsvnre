@@ -1993,13 +1993,13 @@ void drawview(int targtype)
     glClearColor(0, 0, 0, 0);
     glClear(GL_DEPTH_BUFFER_BIT|(wireframe && editmode && clearview(viewtype, targtype) ? GL_COLOR_BUFFER_BIT : 0)|(hasstencil ? GL_STENCIL_BUFFER_BIT : 0));
 
-    if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if(rendermainview && wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     if(limitsky()) drawskybox(farplane, true);
 
     rendergeom(causticspass);
     extern int outline, blankgeom;
-    if(!wireframe && editmode && (outline || (fullbright && blankgeom))) renderoutline();
+    if(rendermainview && !wireframe && editmode && (outline || (fullbright && blankgeom))) renderoutline();
 
     queryreflections();
     generategrass();
@@ -2012,7 +2012,7 @@ void drawview(int targtype)
     rendermapmodels();
     rendergame();
 
-    if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    if(rendermainview && wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if(hasFBO)
     {
@@ -2021,7 +2021,7 @@ void drawview(int targtype)
         drawreflections();
     }
 
-    if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if(rendermainview && wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     renderwater();
     rendergrass();
@@ -2031,28 +2031,30 @@ void drawview(int targtype)
 
     renderparticles(true);
 
-    if(game::thirdpersonview()) renderavatar(false);
-    else
+    if(rendermainview)
     {
-        viewproject(0.5f);
-        renderavatar(false);
-        viewproject();
+        if(game::thirdpersonview()) renderavatar(false);
+        else
+        {
+            viewproject(0.5f);
+            renderavatar(false);
+            viewproject();
+        }
+        if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
-
-    if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glDisable(GL_FOG);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
-    addmotionblur();
+    if(rendermainview) addmotionblur();
     addglare();
     if(fogmat==MAT_WATER || fogmat==MAT_LAVA) drawfogoverlay(fogmat, fogblend, abovemat);
     renderpostfx();
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
-    if(editmode)
+    if(rendermainview && editmode)
     {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
@@ -2073,33 +2075,36 @@ void drawview(int targtype)
     glOrtho(0, w, h, 0, -1, 1);
     glColor3f(1, 1, 1);
 
-    extern int debugsm;
-    if(debugsm)
+    if(rendermainview)
     {
-        extern void viewshadowmap();
-        viewshadowmap();
-    }
+        extern int debugsm;
+        if(debugsm)
+        {
+            extern void viewshadowmap();
+            viewshadowmap();
+        }
 
-    extern int debugglare;
-    if(debugglare)
-    {
-        extern void viewglaretex();
-        viewglaretex();
-    }
+        extern int debugglare;
+        if(debugglare)
+        {
+            extern void viewglaretex();
+            viewglaretex();
+        }
 
-    extern int debugdepthfx;
-    if(debugdepthfx)
-    {
-        extern void viewdepthfxtex();
-        viewdepthfxtex();
-    }
+        extern int debugdepthfx;
+        if(debugdepthfx)
+        {
+            extern void viewdepthfxtex();
+            viewdepthfxtex();
+        }
 
-    glEnable(GL_TEXTURE_2D);
-    defaultshader->set();
-    hud::drawhud();
-    render_texture_panel(w, h);
-    hud::drawlast();
-    glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_2D);
+        defaultshader->set();
+        hud::drawhud();
+        render_texture_panel(w, h);
+        hud::drawlast();
+        glDisable(GL_TEXTURE_2D);
+    }
 
     renderedgame = false;
 
@@ -2140,18 +2145,18 @@ void gl_drawframe(int w, int h)
         game::project(w, h);
         setenvmatrix();
 
-        int copies = 0, oldcurtime = curtime;
-        loopi(VP_MAX) if(needsview(viewtype, i))
+        int copies = 0, oldcurtime = curtime, vt = rendermainview ? viewtype : 0;
+        loopi(VP_MAX) if(needsview(vt, i))
         {
             drawview(i);
-            if(copyview(viewtype, i))
+            if(copyview(vt, i))
             {
                 views[i].copy();
                 copies++;
             }
             curtime = 0;
         }
-        if(needsview(viewtype, VP_CAMERA)) drawview(VP_CAMERA);
+        if(needsview(vt, VP_CAMERA)) drawview(VP_CAMERA);
         curtime = oldcurtime;
 
         if(!copies) return;
@@ -2165,7 +2170,7 @@ void gl_drawframe(int w, int h)
         glEnable(GL_TEXTURE_2D);
         defaultshader->set();
         glColor3f(1.f, 1.f, 1.f);
-        switch(viewtype)
+        switch(vt)
         {
             case VW_MAGIC:
             {
@@ -2178,9 +2183,9 @@ void gl_drawframe(int w, int h)
             {
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                if(viewtype == VW_STEREO_BLEND) glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);
+                if(vt == VW_STEREO_BLEND) glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);
                 glColor4f(1.f, 1.f, 1.f, stereoblend); views[VP_RIGHT].draw(0, 0, 1, 1);
-                if(viewtype == VW_STEREO_BLEND) glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+                if(vt == VW_STEREO_BLEND) glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                 glDisable(GL_BLEND);
                 break;
             }

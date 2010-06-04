@@ -267,7 +267,7 @@ bool checkglslsupport()
 #if 0
     /* check if GLSL profile supports loops
      */
-    const GLcharARB *source = 
+    const GLcharARB *source =
         "uniform int N;\n"
         "uniform vec4 delta;\n"
         "void main(void) {\n"
@@ -369,12 +369,12 @@ static void setglsluniformformat(Shader &s, const char *name, GLenum format, int
 {
     switch(format)
     {
-        case GL_FLOAT: 
+        case GL_FLOAT:
         case GL_FLOAT_VEC2_ARB:
-        case GL_FLOAT_VEC3_ARB: 
+        case GL_FLOAT_VEC3_ARB:
             break;
-        case GL_FLOAT_VEC4_ARB: 
-        default: 
+        case GL_FLOAT_VEC4_ARB:
+        default:
             return;
     }
     if(size > 1 || !strncmp(name, "gl_", 3)) return;
@@ -407,9 +407,9 @@ static void allocglslactiveuniforms(Shader &s)
         name[0] = '\0';
         glGetActiveUniform_(s.program, i, sizeof(name)-1, &namelen, &size, &format, name);
         if(namelen <= 0) continue;
-        name[clamp(int(namelen), 0, (int)sizeof(name)-2)] = '\0'; 
+        name[clamp(int(namelen), 0, (int)sizeof(name)-2)] = '\0';
         setglsluniformformat(s, name, format, size);
-    } 
+    }
 }
 
 static inline bool duplicateenvparam(GlobalShaderParamState &param)
@@ -982,7 +982,7 @@ void genemufog(vector<char> &vsbuf, vector<char> &psbuf, int fogtc, int fogcomp)
     {
         memcpy(str, fogtcstr, fragfogcoordlen);
         psbuf.insert(&str[fragfogcoordlen] - psbuf.getbuf(), &fogtcstr[fragfogcoordlen], strlen(fogtcstr) - fragfogcoordlen);
-    } 
+    }
     char *end = strstr(psbuf.getbuf(), "END");
     if(end) psbuf.setsize(end - psbuf.getbuf());
     defformatstring(calcfog)(
@@ -1014,7 +1014,7 @@ static void gengenericvariant(Shader &s, const char *sname, const char *vs, cons
         memset(vspragma, ' ', len);
         vspragma += len;
         if(!strncmp(vspragma, "override", olen))
-        { 
+        {
             memset(vspragma, ' ', olen);
             vspragma += olen;
             char *end = vspragma + strcspn(vspragma, "\n\r");
@@ -1029,7 +1029,7 @@ static void gengenericvariant(Shader &s, const char *sname, const char *vs, cons
         memset(pspragma, ' ', len);
         pspragma += len;
         if(!strncmp(pspragma, "override", olen))
-        { 
+        {
             memset(pspragma, ' ', olen);
             pspragma += olen;
             char *end = pspragma + strcspn(pspragma, "\n\r");
@@ -1157,7 +1157,7 @@ static void gendynlightvariant(Shader &s, const char *sname, const char *vs, con
         {
             loopk(i+1)
             {
-                defformatstring(pos)("%sdynlight%d%s%s", 
+                defformatstring(pos)("%sdynlight%d%s%s",
                     !k || k==numlights ? "uniform vec4 " : " ",
                     k,
                     k < numlights ? "pos" : "offset",
@@ -1448,7 +1448,7 @@ void defershader(int *type, const char *name, const char *contents)
 {
     Shader *exists = shaders.access(name);
     if(exists && !(exists->type&SHADER_INVALID)) return;
-    if(!defershaders) { execute(contents); return; }
+    if(!defershaders) { execute(contents, true); return; }
     char *rname = exists ? exists->name : newstring(name);
     Shader &s = shaders[rname];
     s.name = rname;
@@ -1468,7 +1468,7 @@ void useshader(Shader *s)
     standardshader = s->standard;
     forceshaders = false;
     curparams.shrink(0);
-    execute(defer);
+    execute(defer, true);
     forceshaders = wasforcing;
     standardshader = wasstandard;
     delete[] defer;
@@ -1728,7 +1728,7 @@ void linkvslotshader(VSlot &s, bool load)
     {
         ShaderParam *cparam = findshaderparam(s, "glowcolor");
         if(cparam) loopk(3) s.glowcolor[k] = clamp(cparam->val[k], 0.0f, 1.0f);
-        ShaderParam *pulseparam = findshaderparam(s, "pulseglowcolor"), 
+        ShaderParam *pulseparam = findshaderparam(s, "pulseglowcolor"),
                     *speedparam = findshaderparam(s, "pulseglowspeed");
         if(pulseparam) loopk(3) s.pulseglowcolor[k] = clamp(pulseparam->val[k], 0.0f, 1.0f);
         if(speedparam) s.pulseglowspeed = speedparam->val[0]/1000.0f;

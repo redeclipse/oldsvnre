@@ -222,6 +222,7 @@ namespace ai
     extern float viewdist(int x = 101);
     extern float viewfieldx(int x = 101);
     extern float viewfieldy(int x = 101);
+
     extern bool targetable(gameent *d, gameent *e, bool z = true);
     extern bool cansee(gameent *d, vec &x, vec &y, vec &targ = aitarget);
     extern bool altfire(gameent *d, gameent *e);
@@ -247,4 +248,5 @@ namespace ai
     extern void avoid();
     extern void think(gameent *d, bool run);
     extern void render();
+    extern void preload();
 };

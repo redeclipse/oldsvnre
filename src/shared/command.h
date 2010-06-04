@@ -119,9 +119,9 @@ extern ident *getident(const char *name);
 extern ident *newident(const char *name);
 extern bool addcommand(const char *name, void (*fun)(), const char *narg, int flags = IDF_COMPLETE);
 
-extern int execute(const char *p);
-extern char *executeret(const char *p);
-extern bool execfile(const char *cfgfile, bool msg = true);
+extern int execute(const char *p, bool nonworld = false);
+extern char *executeret(const char *p, bool nonworld = false);
+extern bool execfile(const char *cfgfile, bool msg = true, bool nonworld = false);
 extern void alias(const char *name, const char *action);
 extern void worldalias(const char *name, const char *action);
 extern const char *getalias(const char *name);

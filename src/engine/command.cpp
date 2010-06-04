@@ -636,8 +636,10 @@ static inline bool isinteger(char *c)
 
 char *commandret = NULL;
 
-char *executeret(const char *p)            // all evaluation happens here, recursively
+char *executeret(const char *p, bool nonworld)            // all evaluation happens here, recursively
 {
+    bool oldworld = worldidents;
+    if(nonworld) worldidents = false;
     const int MAXWORDS = 25;                    // limit, remove
     char *w[MAXWORDS];
     char *retval = NULL;
@@ -797,18 +799,19 @@ char *executeret(const char *p)            // all evaluation happens here, recur
         }
         loopj(numargs) if(w[j]) delete[] w[j];
     }
+    if(nonworld) worldidents = oldworld;
     return retval;
 }
 
-int execute(const char *p)
+int execute(const char *p, bool nonworld)
 {
-    char *ret = executeret(p);
+    char *ret = executeret(p, nonworld);
     int i = 0;
     if(ret) { i = parseint(ret); delete[] ret; }
     return i;
 }
 
-bool execfile(const char *cfgfile, bool msg)
+bool execfile(const char *cfgfile, bool msg, bool nonworld)
 {
     string s;
     copystring(s, cfgfile);
@@ -818,7 +821,7 @@ bool execfile(const char *cfgfile, bool msg)
         if(msg) conoutf("\frcould not read %s", cfgfile);
         return false;
     }
-    execute(buf);
+    execute(buf, nonworld);
     delete[] buf;
     if(verbose >= 3) conoutf("\faloaded script %s", cfgfile);
     return true;
@@ -994,7 +997,7 @@ void getalias_(char *s)
     result(getalias(s));
 }
 
-ICOMMAND(0, exec, "s", (char *file), execfile(file));
+ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n!=0));
 COMMAND(0, concat, "C");
 COMMAND(0, result, "s");
 COMMAND(0, concatword, "V");

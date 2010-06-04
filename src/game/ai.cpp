@@ -1566,4 +1566,13 @@ namespace ai
             }
         }
     }
+
+    void preload()
+    {
+        loopi(AI_MAX-AI_START)
+        {
+            loadmodel(aistyle[AI_START+i].tpmdl, -1, true);
+            loadmodel(aistyle[AI_START+i].fpmdl, -1, true);
+        }
+    }
 }

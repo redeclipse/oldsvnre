@@ -2807,3 +2807,23 @@ void mergenormalmaps(char *heightfile, char *normalfile) // jpg/png/tga + tga ->
 COMMAND(0, flipnormalmapy, "ss");
 COMMAND(0, mergenormalmaps, "ss");
 
+void screentexture(char *name, int size)
+{
+    GLuint tex;
+    glGenTextures(1, &tex);
+    //glViewport(0, 0, mapshotsize, mapshotsize);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    int x = 0, y = 0, s = size;
+    if(screen->w > screen->h) { x = screen->h/2; s = screen->h; }
+    else { y = screen->w/2; s = screen->w; }
+    ImageData image(s, s, 3);
+    memset(image.data, 0, 3*s*s);
+    envmapping = true;
+    gl_drawframe(screen->w, screen->h);
+    envmapping = false;
+    glReadPixels(x, y, s, s, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+    scaleimage(image, size, size);
+    saveimage(name, image, imageformat, compresslevel, true);
+    glDeleteTextures(1, &tex);
+    //glViewport(0, 0, screen->w, screen->h);
+}
