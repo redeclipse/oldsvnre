@@ -307,13 +307,15 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
     else if((mode&RAY_ENTS)!=RAY_ENTS && !m->collide) return false;
     if(!m->bih && (lightmapping > 1 || !m->setBIH())) return false;
     if(!maxdist) maxdist = 1e16f;
+    float scale = e.attrs[4] ? 100.0f/e.attrs[4] : 1.0f;
     vec yo(o);
-    yo.sub(e.o);
+    yo.sub(e.o).mul(scale);
     float yaw = -(float)(e.attrs[1]%360);
     vec yray(ray);
     if(yaw != 0) yawray(yo, yray, yaw);
-    if(m->bih->traverse(yo, yray, maxdist, dist, mode))
+    if(m->bih->traverse(yo, yray, maxdist*scale, dist, mode))
     {
+        dist /= scale;
         if(!(mode&RAY_SHADOW) && yaw != 0) hitsurface.rotate_around_z(-yaw*RAD);
         return true;
     }
