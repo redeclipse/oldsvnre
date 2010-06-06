@@ -91,7 +91,7 @@
             </div>
             <div id="video">
                 <div id="main">
-                    <h1>Red Eclipse</h1>
+                    <h1>Red Eclipse,&nbsp;</h1><h2> an open source FPS</h2>
                     <h3>Free and open source game for Windows, Linux/BSD and Mac OSX</h3>
                     <h3>Agile gameplay in low gravity environments: sprint, wall run/kick, and impulse dash</h3>
                     <h3>Create your own maps cooperatively with friends online using the builtin map editor</h3>

@@ -1,8 +1,8 @@
 @charset "utf-8"; body { margin: 0px; padding: 0px; font: 14px sans-serif; }
-h1 { color: #a34b14; float: left; margin: 0px 0px 10px; padding: 0px; font: bold 28px "Trebuchet MS", Arial, Helvetica, sans-serif; }
-h2 { color: #999999; float: left; margin: 0px 0px 10px 10px; padding: 0px; font: bold normal 28px "Trebuchet MS", Arial, Helvetica, sans-serif; }
+h1 { color: #ffffff; float: left; margin: 0px 0px 10px; padding: 0px; font: bold 26px "Trebuchet MS", Arial, Helvetica, sans-serif;  text-shadow: 0px 0px 15px #ff3333; }
+h2 { color: #990000; float: left; margin: 0px 0px 10px 0px; padding: 0px; font: bold normal 26px "Trebuchet MS", Arial, Helvetica, sans-serif; }
 h3 { font: 16px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -860px -777px; float: left; margin: 0px 0px 10px; padding: 0px 0px 0px 20px; width: 390px; }
-h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #a34b14; margin: 0px 0px 10px; padding: 0px; }
+h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF; margin: 0px 0px 10px; padding: 0px; text-shadow: 0px 0px 15px #ff3333;}
 #container { margin: 0px auto; width: 980px; padding: 0px; }
 #main { margin: 5px 0px 0px 30px; width: 410px; float: left; }
 #button { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1126px; margin: 0px 0px 0px 65px; padding: 15px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #773a00; }
