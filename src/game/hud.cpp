@@ -1515,10 +1515,9 @@ namespace hud
         {
             int glow = int(width*inventoryglow), heal = m_health(game::gamemode, game::mutators);
             bool pulse = inventoryflash && game::focus->health < heal;
-            float gr = 1.f, gg = 1.f, gb = 1.f;
             if(inventoryhealth && (glow || pulse))
             {
-                float gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
+                float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
                 if(teamglow) skewcolour(gr, gg, gb);
                 if(pulse)
                 {
@@ -1587,6 +1586,15 @@ namespace hud
             }
             if(inventoryhealth)
             {
+                float gr = 1.f, gg = 1.f, gb = 1.f;
+                if(pulse)
+                {
+                    int timestep = totalmillis%1000;
+                    float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
+                    gr += (1.f-gr)*skew;
+                    gg -= gg*skew;
+                    gb -= gb*skew;
+                }
                 pushfont("super");
                 int dt = draw_textx("%d", x+width/2, y-sy, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
                 if(!sy) sy += dt;
