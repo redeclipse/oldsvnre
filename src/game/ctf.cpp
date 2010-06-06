@@ -516,7 +516,8 @@ namespace ctf
         loopv(st.flags)
         {
             ctfstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || f.owner || (f.pickuptime && lastmillis-f.pickuptime <= 3000)) continue;
+            if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || f.owner) continue;
+            if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
             if(f.team == d->team && ctfstyle <= 2 && (ctfstyle == 2 || !f.droptime)) continue;
             if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
             if(o.dist(f.pos()) <= enttype[FLAG].radius*2/3)
