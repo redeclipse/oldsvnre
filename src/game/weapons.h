@@ -19,13 +19,16 @@ enum
 
 enum
 {
-    HIT_NONE = 0, HIT_ALT = 1<<0, HIT_LEGS = 1<<1, HIT_TORSO = 1<<2, HIT_HEAD = 1<<3, HIT_FULL = 1<<4, HIT_PROJ = 1<<5,
-    HIT_EXPLODE = 1<<6, HIT_BURN = 1<<7, HIT_MELT = 1<<8, HIT_DEATH = 1<<9, HIT_WATER = 1<<10, HIT_WAVE = 1<<11, HIT_SPAWN = 1<<12,
-    HIT_LOST = 1<<13, HIT_KILL = 1<<14, HIT_CRIT = 1<<15, HIT_SFLAGS = HIT_KILL|HIT_CRIT
+    HIT_NONE = 0, HIT_ALT = 1<<0, HIT_LEGS = 1<<1, HIT_TORSO = 1<<2, HIT_HEAD = 1<<3,
+    HIT_WAVE = 1<<4, HIT_PROJ = 1<<5, HIT_EXPLODE = 1<<6, HIT_BURN = 1<<7,
+    HIT_MELT = 1<<8, HIT_DEATH = 1<<9, HIT_WATER = 1<<10, HIT_SPAWN = 1<<11,
+    HIT_LOST = 1<<12, HIT_KILL = 1<<13, HIT_CRIT = 1<<14,
+    HIT_CLEAR = HIT_PROJ|HIT_EXPLODE|HIT_BURN|HIT_MELT|HIT_DEATH|HIT_WATER|HIT_SPAWN|HIT_LOST,
+    HIT_SFLAGS = HIT_KILL|HIT_CRIT
 };
 
 #define hithurts(x)     (x&HIT_BURN || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
-#define doesburn(x,y)   (isweap(x) && WEAP2(x, burns, y&HIT_ALT) && y&HIT_FULL)
+#define doesburn(x,y)   (isweap(x) && WEAP2(x, burns, y&HIT_ALT))
 
 #define WEAPON(name, \
     w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, wa, wb1, wb2, wc, wd, we1, we2, we3, we4, we5, we6, \

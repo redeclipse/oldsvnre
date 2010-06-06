@@ -577,10 +577,10 @@ namespace game
 
     bool fireburn(gameent *d, int weap, int flags)
     {
-        if(fireburntime && (doesburn(weap, flags) || flags&HIT_MELT || (weap == -1 && flags&HIT_BURN)))
+        if(fireburntime && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
         {
             if(!issound(d->fschan)) playsound(S_BURNFIRE, d->o, d, SND_LOOP, d != focus ? 128 : 224, -1, -1, &d->fschan);
-            if(flags&HIT_FULL) d->lastfire = lastmillis;
+            if(isweap(weap)) d->lastfire = lastmillis;
             else return true;
         }
         return false;

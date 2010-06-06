@@ -866,7 +866,7 @@ namespace physics
             if(curmat == MAT_LAVA) mattrig(vec(bottom).add(vec(0, 0, radius)), lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNING);
         }
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->state == CS_ALIVE && flagmat == MAT_DEATH)
-            game::suicide((gameent *)pl, (curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH))|HIT_FULL);
+            game::suicide((gameent *)pl, curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH));
         pl->inmaterial = matid;
         if((pl->inliquid = !floating && isliquid(curmat)) != false)
         {
@@ -968,7 +968,7 @@ namespace physics
                 {
                     if(d->o.z < 0)
                     {
-                        game::suicide(d, HIT_DEATH|HIT_FULL);
+                        game::suicide(d, HIT_DEATH);
                         return false;
                     }
                     if(d->turnmillis > 0)

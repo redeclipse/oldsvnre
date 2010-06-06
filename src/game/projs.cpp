@@ -31,7 +31,6 @@ namespace projs
     int calcdamage(gameent *actor, gameent *target, int weap, int &flags, int radial, float size, float dist)
     {
         int damage = WEAP2(weap, damage, flags&HIT_ALT), nodamage = 0; flags &= ~HIT_SFLAGS;
-        if((flags&HIT_WAVE || (isweap(weap) && !WEAPEX(weap, flags&HIT_ALT, game::gamemode, game::mutators, 1.f))) && flags&HIT_FULL) flags &= ~HIT_FULL;
         if(radial) damage = int(ceilf(damage*clamp(1.f-dist/size, 1e-3f, 1.f)));
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) damage = int(ceilf(damage*clamp(dist, 0.f, 1.f)));
         if(actor->aitype < AI_START)
@@ -47,15 +46,17 @@ namespace projs
                 }
             }
         }
-        if(nodamage || !hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
-        if(hithurts(flags))
+
+        if(nodamage || !hithurts(flags))
         {
-            if(flags&HIT_FULL || flags&HIT_HEAD) damage = int(ceilf(damage*damagescale));
-            else if(flags&HIT_TORSO) damage = int(ceilf(damage*0.5f*damagescale));
-            else if(flags&HIT_LEGS) damage = int(ceilf(damage*0.25f*damagescale));
-            else damage = 0;
+            flags &= ~HIT_CLEAR;
+            flags |= HIT_WAVE;
         }
-        else damage = int(ceilf(damage*damagescale));
+        if(flags&HIT_HEAD) damage = int(ceilf(damage*damagescale));
+        else if(flags&HIT_TORSO) damage = int(ceilf(damage*0.5f*damagescale));
+        else if(flags&HIT_LEGS) damage = int(ceilf(damage*0.25f*damagescale));
+        else damage = 0;
+
         return damage;
     }
 
@@ -130,22 +131,26 @@ namespace projs
     {
         bool radiated = false;
         float maxdist = explode ? radius*WEAP(proj.weap, pusharea) : radius, dist = 1e16f;
+        int flags = 0;
         if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(d->aitype) || aistyle[d->aitype].canmove)))
         {
             if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
             {
                 vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
                 dist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
+                flags |= HIT_LEGS;
             }
             if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
             {
                 vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
                 dist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
+                flags |= HIT_LEGS;
             }
             if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
             {
                 vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
                 dist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
+                flags |= HIT_HEAD;
             }
         }
         else
@@ -153,8 +158,8 @@ namespace projs
             vec bottom(d->o), top(d->o); bottom.z -= d->height; top.z += d->aboveeye;
             dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
         }
-        if(explode && dist <= radius*WEAP(proj.weap, pusharea)) { hitpush(d, proj, HIT_WAVE, radius, dist); radiated = true; }
-        if(dist <= radius) { hitpush(d, proj, HIT_FULL|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist); radiated = true; }
+        if(explode && dist <= radius*WEAP(proj.weap, pusharea)) { hitpush(d, proj, flags|HIT_WAVE, radius, dist); radiated = true; }
+        if(dist <= radius) { hitpush(d, proj, flags|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist); radiated = true; }
         return radiated;
     }
 

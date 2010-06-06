@@ -2313,8 +2313,6 @@ namespace server
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0))
     {
         int realdamage = damage, realflags = flags, nodamage = 0; realflags &= ~HIT_SFLAGS;
-        if((realflags&HIT_WAVE || (isweap(weap) && !WEAPEX(weap, realflags&HIT_ALT, gamemode, mutators, 1.f))) && (realflags&HIT_FULL))
-            realflags &= ~HIT_FULL;
         if(smode && !smode->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; }
         mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; });
         if(actor->state.aitype < AI_START)
@@ -2330,7 +2328,11 @@ namespace server
                 }
             }
         }
-        if(nodamage || !hithurts(realflags)) realflags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
+        if(nodamage || !hithurts(realflags))
+        {
+            realflags &= ~HIT_CLEAR;
+            realflags |= HIT_WAVE;
+        }
         else
         {
             if(isweap(weap))
@@ -2501,7 +2503,6 @@ namespace server
         }
         ci->state.deaths++;
         dropitems(ci); givepoints(ci, pointvalue);
-        if(!(flags&HIT_FULL)) flags |= HIT_FULL;
         if(GAME(fireburntime) && (flags&HIT_MELT || flags&HIT_BURN))
         {
             ci->state.lastfire = ci->state.lastfireburn = gamemillis;
@@ -2518,18 +2519,13 @@ namespace server
     int calcdamage(int weap, int &flags, int radial, float size, float dist)
     {
         int damage = WEAP2(weap, damage, flags&HIT_ALT); flags &= ~HIT_SFLAGS;
-        if((flags&HIT_WAVE || (isweap(weap) && !WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, 1.f))) && flags&HIT_FULL) flags &= ~HIT_FULL;
         if(radial) damage = int(ceilf(damage*clamp(1.f-dist/size, 1e-3f, 1.f)));
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) damage = int(ceilf(damage*clamp(dist, 0.f, 1.f)));
         if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
-        if(hithurts(flags))
-        {
-            if(flags&HIT_FULL || flags&HIT_HEAD) damage = int(ceilf(damage*GAME(damagescale)));
-            else if(flags&HIT_TORSO) damage = int(ceilf(damage*0.5f*GAME(damagescale)));
-            else if(flags&HIT_LEGS) damage = int(ceilf(damage*0.25f*GAME(damagescale)));
-            else damage = 0;
-        }
-        else damage = int(ceilf(damage*GAME(damagescale)));
+        if(flags&HIT_HEAD) damage = int(ceilf(damage*GAME(damagescale)));
+        else if(flags&HIT_TORSO) damage = int(ceilf(damage*0.5f*GAME(damagescale)));
+        else if(flags&HIT_LEGS) damage = int(ceilf(damage*0.25f*GAME(damagescale)));
+        else damage = 0;
         return damage;
     }
 
