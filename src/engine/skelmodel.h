@@ -1195,7 +1195,7 @@ struct skelmodel : animmodel
             }
         }
 
-        void cleanup()
+        void cleanup(bool full = true)
         {
             loopv(skelcache)
             {
@@ -1207,7 +1207,7 @@ struct skelmodel : animmodel
             }
             skelcache.setsize(0);
             lastsdata = lastbdata = NULL;
-            loopv(users) users[i]->cleanup();
+            if(full) loopv(users) users[i]->cleanup();
         }
 
         skelcacheentry &checkskelcache(part *p, const animstate *as, float pitch, const vec &axis, ragdolldata *rdata)
@@ -1725,6 +1725,7 @@ struct skelmodel : animmodel
             }
             if(hasVBO) { if(ebuf) { glDeleteBuffers_(1, &ebuf); ebuf = 0; } }
             else DELETEA(vdata);
+            if(skel) skel->cleanup(false);
         }
 
         #define SEARCHCACHE(cachesize, cacheentry, cache, reusecheck) \
