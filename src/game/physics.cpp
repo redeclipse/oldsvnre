@@ -885,13 +885,16 @@ namespace physics
             pl->submerged = found ? found/10.f : 1.f;
             if(local)
             {
-                if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= 0.25f && ((gameent *)pl)->onfire(lastmillis, fireburntime))
+                if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= 0.25f)
                 {
                     gameent *d = (gameent *)pl;
-                    d->resetfire();
-                    playsound(S_EXTINGUISH, d->o, d, 0, d != game::focus ? 128 : 224, -1, -1);
-                    part_create(PART_SMOKE, 500, d->feetpos(d->height/2), 0xAAAAAA, d->height/2, 0.5f, -10);
-                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);
+                    if(d->onfire(lastmillis, fireburntime) && lastmillis-d->lastfire > PHYSMILLIS)
+                    {
+                        d->resetfire();
+                        playsound(S_EXTINGUISH, d->o, d, 0, d != game::focus ? 128 : 224, -1, -1);
+                        part_create(PART_SMOKE, 500, d->feetpos(d->height/2), 0xAAAAAA, d->height/2, 1, -10);
+                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);
+                    }
                 }
                 if(pl->physstate < PHYS_SLIDE && sub >= 0.5f && pl->submerged < 0.5f && pl->vel.z > 1e-16f)
                     pl->vel.z = max(pl->vel.z, max(jumpforce(pl, false), max(gravityforce(pl), 50.f)));

@@ -1222,7 +1222,7 @@ namespace client
                         {
                             t->resetfire();
                             playsound(S_EXTINGUISH, t->o, t, 0, t != game::focus ? 128 : 224, -1, -1);
-                            part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->height/2, 0.5f, -10);
+                            part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->height/2, 1, -10);
                             break;
                         }
                         default: break;
