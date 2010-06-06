@@ -6,9 +6,8 @@ RewriteCond %{HTTP_HOST} ^redeclipse.sourceforge.net$ [OR,NC]
 RewriteCond %{HTTP_HOST} ^redeclipse.net$
 RewriteRule ^(.*)$ http://www.redeclipse.net/$1 [R=301,L,NC]
 
-RewriteRule ^(chat|svn|repo|project|google|youtube)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
-RewriteRule ^(download|chat|svn|repo|project|google|youtube)$ /bits/index.php?target=$1 [QSA,L,NC]
-RewriteRule ^(download)/(.+)$ /bits/index.php?target=$1 [QSA,L,NC]
+RewriteRule ^(chat|svn|devel|donate|project|google|youtube)/(.+)$ /bits/index.php?target=$1&title=$2 [QSA,L,NC]
+RewriteRule ^(download|chat|svn|devel|donate|project|google|youtube)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^(home)$ /bits/index.php?target=$1 [QSA,L,NC]
 RewriteRule ^(irc)$ /bits/index.php?target=chat [QSA,L,NC]
 

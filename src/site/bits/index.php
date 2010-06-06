@@ -4,20 +4,18 @@
     $app['background'] = "/bits/background_01.jpg";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
-    $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
-    //$app['targets']['blog'] = array('name' => 'Blog', 'url' => 'http://sourceforge.net/apps/wordpress/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/wordpress/redeclipse/', 'nav' => 1, 'redir' => 1);
-    //$app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=', 'nav' => 1, 'redir' => 1);
-    //$app['targets']['forums'] = array('name' => 'Forums', 'url' => 'http://sourceforge.net/apps/phpbb/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/phpbb/redeclipse/viewforum.php?f=', 'nav' => 1, 'redir' => 1);
-    $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    //$app['targets']['gallery'] = array('name' => 'Gallery', 'url' => 'http://sourceforge.net/apps/gallery/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/gallery/redeclipse/index.php?g2_itemId=', 'nav' => 1, 'redir' => 1);
+
+    // nav items should be in reverse order for the top navbar
+    $app['targets']['donate'] = array('name' => 'Donate', 'url' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'alturl' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'nav' => 1, 'redir' => 1);
+    $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://redeclipse.svn.sourceforge.net/redeclipse/', 'alturl' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse/?view=rev&rev=', 'nav' => 1, 'redir' => 1);
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://redeclipse.svn.sourceforge.net/redeclipse/', 'alturl' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse/?view=rev&amp;rev=', 'nav' => 1, 'redir' => 1);
-    $app['targets']['repo'] = array('name' => 'Repository', 'url' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse', 'alturl' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'alturl' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'nav' => 1, 'redir' => 1);
+    $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
+    $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
+
     $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
-    //$app['targets']['facebook'] = array('name' => 'facebook', 'url' => 'http://www.facebook.com/group.php?gid=86675052192&amp;ref=mf', 'nav' => 0, 'redir' => 1);
-    //$app['targets']['blackboxbeta'] = array('name' => 'blackboxbeta', 'url' => 'http://www.blackboxbeta.net/blood-frontier-oss', 'nav' => 0, 'redir' => 1);
-    //$app['targets']['playdeb'] = array('name' => 'playdeb', 'url' => 'http://www.playdeb.net/software/Blood%20Frontier', 'nav' => 0, 'redir' => 1);
+    //$app['targets']['playdeb'] = array('name' => 'playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
@@ -91,13 +89,13 @@
             </div>
             <div id="video">
                 <div id="main">
-                    <h1>Red Eclipse,&nbsp;</h1><h2> an open source FPS</h2>
-                    <h3>Free and open source game for Windows, Linux/BSD and Mac OSX</h3>
-                    <h3>Agile gameplay in low gravity environments: sprint, wall run/kick, and impulse dash</h3>
-                    <h3>Create your own maps cooperatively with friends online using the builtin map editor</h3>
+                    <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
+                    <h3>Available for Windows, Linux/BSD and Mac OSX</h3>
+                    <h3>Agile gameplay: sprint, wall run/kick, and impulse dash</h3>
+                    <h3>Builtin Editor: create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br />
                     released <i><?php echo $app['releasedate']; ?></i></em></a>
-                    <p id="svn">or <a href="http://sourceforge.net/scm/?type=svn&group_id=326559">get the SVN version</a> and live on the bleeding edge</p>
+                    <p id="svn">or <a href="/devel">get the SVN version</a> and live on the bleeding edge</p>
                 </div>
                 <div id="player">
                     <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/uKnLsAiCVLk&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
@@ -134,7 +132,7 @@
             </div>
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
-                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or grab a development copy from our <a href="http://sourceforge.net/scm/?type=svn&group_id=326559">Subversion</a> repository and live on the bleeding edge.</p>
+                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
                 <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a low gravity environment. For more information, please see our <a href="/chat">Chat</a>.</p>
             </div>
             <div class="vbar">&nbsp;</div>
