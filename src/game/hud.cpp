@@ -31,7 +31,7 @@ namespace hud
     VAR(IDF_PERSIST, showfps, 0, 1, 3);
     VAR(IDF_PERSIST, showstats, 0, 1, 2);
     VAR(IDF_PERSIST, statrate, 0, 200, 1000);
-    FVAR(IDF_PERSIST, statblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, statblend, 0, 1, 1);
 
     bool fullconsole = false;
     void toggleconsole() { fullconsole = !fullconsole; }
@@ -69,7 +69,7 @@ namespace hud
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.4f, 1);
-    FVAR(IDF_PERSIST, noticeblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-3f, 1, 1);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
@@ -105,7 +105,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
-    FVAR(IDF_PERSIST, indicatorblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, indicatorblend, 0, 1, 1);
     TVAR(IDF_PERSIST, indicatortex, "textures/progress", 3);
     TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
 
@@ -144,9 +144,9 @@ namespace hud
     FVAR(IDF_PERSIST, inventorysize, 0, 0.07f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-3f, 0.6f, 1000);
     FVAR(IDF_PERSIST, inventorygrow, 1e-3f, 0.75f, 1);
-    FVAR(IDF_PERSIST, inventoryblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
-    FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.85f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -169,8 +169,6 @@ namespace hud
     TVAR(IDF_PERSIST, rifletex, "textures/rifle", 3);
     TVAR(IDF_PERSIST, healthtex, "textures/health", 3);
     TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
-    TVAR(IDF_PERSIST, inventoryenttex, "textures/progress", 3);
-    TVAR(IDF_PERSIST, inventoryedittex, "textures/blip", 3);
     TVAR(IDF_PERSIST, inventorywaittex, "textures/wait", 3);
     TVAR(IDF_PERSIST, inventorydeadtex, "textures/dead", 3);
     TVAR(IDF_PERSIST, inventorychattex, "textures/conopen", 3);
@@ -182,7 +180,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showclips, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
-    FVAR(IDF_PERSIST, clipblend, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, clipblend, 0, 0.75f, 1000);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
     TVAR(IDF_PERSIST, pistolcliptex, "textures/pistolclip", 3);
     TVAR(IDF_PERSIST, shotguncliptex, "textures/shotgunclip", 3);
@@ -209,14 +207,14 @@ namespace hud
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, radarcardblend, 0, 0.75f, 1);
-    FVAR(IDF_PERSIST, radarplayerblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, radarcardblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayersize, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, radarblipblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
-    FVAR(IDF_PERSIST, radaritemblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaritemsize, 0, 0.9f, 1000);
     FVAR(IDF_PERSIST, radarsize, 0, 0.035f, 1000);
     FVAR(IDF_PERSIST, radaroffset, 0, 0.035f, 1000);
@@ -967,7 +965,7 @@ namespace hud
     {
         static vector<int> refs; refs.setsize(0);
         bool full = fullconsole || commandmillis > 0;
-        pushfont("console");
+        pushfont("sub");
         if(type >= 2)
         {
             int numl = chatconsize, numo = chatconsize+chatconoverflow;
@@ -1046,7 +1044,7 @@ namespace hud
             }
             if(commandmillis > 0)
             {
-                pushfont("command");
+                pushfont("emphasis");
                 Texture *t = textureload(commandicon ? commandicon : inputtex, 3);
                 float f = float(totalmillis%1000)/1000.f;
                 if(f < 0.5f) f = 1.f-f;
@@ -1421,7 +1419,7 @@ namespace hud
         {
             gameentity &e = *(gameentity *)entities::ents[n];
             const char *itext = itemtex(e.type, e.attrs[0]);
-            int ty = drawitem(itext && *itext ? itext : inventoryenttex, x, y, s, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew, "default", "%s (%d)", enttype[e.type].name, n);
+            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew, "default", "%s (%d)", enttype[e.type].name, n);
             mkstring(attrstr);
             loopi(enttype[e.type].numattrs)
             {
@@ -1498,7 +1496,7 @@ namespace hud
         else if(game::focus->state == CS_EDITING && inventoryedit)
         {
             int hover = entities::ents.inrange(enthover) ? enthover : (!entgroup.empty() ? entgroup[0] : -1);
-            if(y-sy-s >= m) sy += drawitem(inventoryedittex, x, y-sy, s-s/4, false, 1.f, 1.f, 1.f, blend*inventoryblend*0.25f, 1.f);
+            sy += FONTH*4;
             if(y-sy-s >= m) sy += drawentitem(hover, x, y-sy, s, 1.f, blend*inventoryeditblend);
             loopv(entgroup) if(entgroup[i] != hover)
             {
@@ -1517,9 +1515,10 @@ namespace hud
         {
             int glow = int(width*inventoryglow), heal = m_health(game::gamemode, game::mutators);
             bool pulse = inventoryflash && game::focus->health < heal;
+            float gr = 1.f, gg = 1.f, gb = 1.f;
             if(inventoryhealth && (glow || pulse))
             {
-                float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
+                float gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
                 if(teamglow) skewcolour(gr, gg, gb);
                 if(pulse)
                 {
@@ -1589,7 +1588,7 @@ namespace hud
             if(inventoryhealth)
             {
                 pushfont("super");
-                int dt = draw_textx("%d", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
+                int dt = draw_textx("%d", x+width/2, y-sy, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
                 if(!sy) sy += dt;
                 popfont();
             }
@@ -1805,55 +1804,35 @@ namespace hud
 
     void drawbackground(int w, int h)
     {
-        #if 0
-        Texture *t = textureload(bglefttex, 3);
-        glBindTexture(GL_TEXTURE_2D, t->id);
-        glBegin(GL_TRIANGLE_STRIP); // goes off the edge on purpose
-        glTexCoord2f(0, 0); glVertex2f(512, h/2-256);
-        glTexCoord2f(1, 0); glVertex2f(0, h/2-256);
-        glTexCoord2f(0, 1); glVertex2f(512, h/2+256);
-        glTexCoord2f(1, 1); glVertex2f(0, h/2+256);
-        glEnd();
-
-        t = textureload(bgrighttex, 3);
-        glBindTexture(GL_TEXTURE_2D, t->id);
-        glBegin(GL_TRIANGLE_STRIP); // goes off the edge on purpose
-        glTexCoord2f(0, 0); glVertex2f(w, h/2-256);
-        glTexCoord2f(1, 0); glVertex2f(w-512, h/2-256);
-        glTexCoord2f(0, 1); glVertex2f(w, h/2+256);
-        glTexCoord2f(1, 1); glVertex2f(w-512, h/2+256);
-        glEnd();
-        #endif
-
         Texture *t = textureload(logotex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0, 0); glVertex2f(w-512, 0);
+        glTexCoord2f(0, 0); glVertex2f(w-1024, 0);
         glTexCoord2f(1, 0); glVertex2f(w, 0);
-        glTexCoord2f(0, 1); glVertex2f(w-512, 128);
-        glTexCoord2f(1, 1); glVertex2f(w, 128);
+        glTexCoord2f(0, 1); glVertex2f(w-1024, 256);
+        glTexCoord2f(1, 1); glVertex2f(w, 256);
         glEnd();
 
         t = textureload(badgetex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP); // goes off the edge on purpose
-        glTexCoord2f(0, 0); glVertex2f(w-208, 96);
-        glTexCoord2f(1, 0); glVertex2f(w-16, 96);
-        glTexCoord2f(0, 1); glVertex2f(w-208, 192);
-        glTexCoord2f(1, 1); glVertex2f(w-16, 192);
+        glTexCoord2f(0, 0); glVertex2f(w-336, 0);
+        glTexCoord2f(1, 0); glVertex2f(w-80, 0);
+        glTexCoord2f(0, 1); glVertex2f(w-336, 128);
+        glTexCoord2f(1, 1); glVertex2f(w-80, 128);
         glEnd();
 
         pushfont("radar");
         int y = h-FONTH/2;
         if(progressing)
         {
-            if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
-            else y -= draw_textx("%s", FONTH/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
+            if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
+            else y -= draw_textx("%s", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
         }
         y = h-FONTH/2;
         y -= draw_textx("v%.2f-%s (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE);
-        y -= draw_textx("%s", w-FONTH/2, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, ENG_URL);
-        if(loadbackinfo && *loadbackinfo) y -= draw_textx("%s",  w-FONTH/2, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, loadbackinfo);
+        y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, ENG_URL);
+        if(loadbackinfo && *loadbackinfo) y -= draw_textx("%s",  w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, loadbackinfo);
         popfont();
     }
 
@@ -1894,8 +1873,8 @@ namespace hud
             loopi(NUMSTATS) if(prevstats[i] == curstats[i]) curstats[i] = nextstats[i];
             if(showfps)
             {
-                draw_textx("%d", w-(br+FONTW)/2, by-FONTH*2, 255, 255, 255, bf, TEXT_CENTERED, -1, bs, curstats[8]);
-                draw_textx("fps", w-(br+FONTW)/2, by-FONTH, 255, 255, 255, bf, TEXT_CENTERED, -1, -1);
+                draw_textx("%d", w-br/2, by-FONTH*2, 255, 255, 255, bf, TEXT_CENTERED, -1, bs, curstats[8]);
+                draw_textx("fps", w-br/2, by-FONTH, 255, 255, 255, bf, TEXT_CENTERED, -1, -1);
                 switch(showfps)
                 {
                     case 3:

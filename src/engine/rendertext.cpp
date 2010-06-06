@@ -176,7 +176,8 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
             }\
             else { TEXTCHAR(i) }\
         }\
-    }
+    }\
+    TEXTINDEX(i)
 
 //all the chars are guaranteed to be either drawable or color commands
 #define TEXTWORDSKELETON \
@@ -209,7 +210,7 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
 //inverse of text_visible
 void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int flags)
 {
-    #define TEXTINDEX(idx) if(cursor == idx+1) { cx = x; cy = y; }
+    #define TEXTINDEX(idx) if(cursor == idx) { cx = x; cy = y; }
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
@@ -247,7 +248,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
 
 int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, int flags, int cursor, int maxwidth)
 {
-    #define TEXTINDEX(idx) if(cursor == idx+1) { cx = x; cy = y; }
+    #define TEXTINDEX(idx) if(cursor == idx) { cx = x; cy = y; }
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) ly += FONTH;
     #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
@@ -269,8 +270,8 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     xtraverts += varray::end();
     if(cursor >= 0)
     {
-        glColor4ub(color.x, color.y, color.z, int(a*(1.f-(float(totalmillis%1000)/1000.f))));
-        draw_char('|', left+cx+FONTW/2, top+cy);
+        glColor4ub(255, 255, 255, int(255*clamp(1.f-(float(totalmillis%500)/500.f), 0.5f, 1.f)));
+        draw_char('_', left+cx, top+cy+FONTH/6);
         xtraverts += varray::end();
     }
     varray::disable();

@@ -2233,7 +2233,7 @@ struct texturegui : guicb
                         if(!j)
                         {
                             {
-                                g.pushfont("console");
+                                g.pushfont("sub");
                                 defformatstring(index)("%d", vslot.rotation);
                                 g.space(1);
                                 if(g.button(index, 0x666666)&GUI_UP) vslot.rotation = (vslot.rotation+1)%4;
