@@ -133,7 +133,7 @@
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
                 <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
-                <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a low gravity environment. For more information, please see our <a href="/chat">Chat</a>.</p>
+                <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a variety of environments. For more information, please see our <a href="/chat">Chat</a>.</p>
             </div>
             <div class="vbar">&nbsp;</div>
             <div class="leftcol">
