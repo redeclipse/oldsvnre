@@ -116,7 +116,7 @@ struct gui : guient
             else if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
             {
                 if(!guiclicktab || mouseaction[0]&GUI_UP) *tcurrent = tpos; // switch tab
-                tcolor = 0xFF2222;
+                tcolor = 0xFF4444;
                 alpha = max(guiblend, 200);
             }
             text_(tabtitle, x1, y1, tcolor, alpha, visible());
@@ -315,7 +315,7 @@ struct gui : guient
                 else px = x + guibound[0]/2 - w/2 + ((xsize-w)*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at left
                 py = y;
             }
-            text_(label, px, py, hit ? 0xFF2222 : color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN);
+            text_(label, px, py, hit ? 0xFF4444 : color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN);
             if(hit)
             {
                 if(mouseaction[0]&GUI_PRESSED)
@@ -346,12 +346,12 @@ struct gui : guient
 
     char *field(const char *name, int color, int length, int height, const char *initval, int initmode)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDEDIT, "console");
+        return field_(name, color, length, height, initval, initmode, FIELDEDIT, "sub");
     }
 
     char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDKEY, "console");
+        return field_(name, color, length, height, initval, initmode, FIELDKEY, "sub");
     }
 
     char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, const char *font = "")
@@ -419,7 +419,7 @@ struct gui : guient
 
             lineshader->set();
             glDisable(GL_TEXTURE_2D);
-            if(editing) glColor3f(0.5f, 0.125f, 0.125f);
+            if(editing) glColor3f(0.75f, 0.25f, 0.25f);
             else glColor3ub(color>>16, (color>>8)&0xFF, color&0xFF);
             rect_(curx, cury, w, h, -1, true);
             glEnable(GL_TEXTURE_2D);
@@ -758,7 +758,7 @@ struct gui : guient
         if(visible())
         {
             bool hit = ishit(w, FONTH);
-            if(hit && clickable) color = 0xFF2222;
+            if(hit && clickable) color = 0xFF4444;
             int x = curx;
             if(icon)
             {
@@ -864,13 +864,9 @@ namespace UI
 
     void setup()
     {
-        const char *fonts[2] = { "sub", "console" };
-        loopi(2)
-        {
-            pushfont(fonts[i]);
-            loopk(2) if((k ? FONTH : FONTW) > guibound[k]) guibound[k] = (k ? FONTH : FONTW);
-            popfont();
-        }
+        pushfont("sub");
+        loopk(2) guibound[k] = (k ? FONTH : FONTW);
+        popfont();
         ready = true;
     }
 

@@ -583,7 +583,7 @@ struct editor
 
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                glColor3f(0.125f, 0.125f, 0.5f);
+                glColor3f(0.25f, 0.25f, 0.75f);
                 glBegin(GL_QUADS);
                 if(psy == pey)
                 {
@@ -627,7 +627,7 @@ struct editor
             {
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                glColor3f(0.25f, 0.25f, 0.25f);
+                glColor3f(0.5f, 0.5f, 0.5f);
                 glBegin(GL_TRIANGLE_STRIP);
                 glVertex2f(x,         y+h+guibound[1]);
                 glVertex2f(x,         y+h+height);

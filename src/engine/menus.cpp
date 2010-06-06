@@ -486,7 +486,7 @@ void guifield(char *var, int *maxlength, char *onchange)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->field(var, 0x666666, *maxlength ? *maxlength : 12, 0, initval);
+    char *result = cgui->field(var, 0xFFFFFF, *maxlength ? *maxlength : 12, 0, initval);
     if(result) updateval(var, result, onchange);
 }
 
@@ -494,7 +494,7 @@ void guifield(char *var, int *maxlength, char *onchange)
 void guieditor(char *name, int *maxlength, int *height, int *mode)
 {
     if(!cgui) return;
-    cgui->field(name, 0x666666, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode);
+    cgui->field(name, 0xFFFFFF, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode);
     //returns a non-NULL pointer (the currentline) when the user commits, could then manipulate via text* commands
 }
 
@@ -503,7 +503,7 @@ void guikeyfield(char *var, int *maxlength, char *onchange)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->keyfield(var, 0x666666, *maxlength ? *maxlength : -8, 0, initval);
+    char *result = cgui->keyfield(var, 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval);
     if(result) updateval(var, result, onchange);
 }
 
