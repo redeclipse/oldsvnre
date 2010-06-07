@@ -1361,22 +1361,11 @@ namespace game
                 physent d = *player1;
                 d.radius = d.height = 4.f;
                 d.state = CS_ALIVE;
-                loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (k && !enttype[entities::ents[i]->type].noisy))
+                loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (k && !enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL))
                 {
                     gameentity &e = *(gameentity *)entities::ents[i];
-                    vec pos(e.o);
-                    if(e.type == MAPMODEL)
-                    {
-                        mapmodelinfo &mmi = getmminfo(e.attrs[0]);
-                        if(!&mmi) continue;
-                        vec center, radius;
-                        mmi.m->collisionbox(0, center, radius);
-                        if(e.attrs[4]) { center.mul(e.attrs[4]/100.f); radius.mul(e.attrs[4]/100.f); }
-                        if(!mmi.m->ellipsecollide) rotatebb(center, radius, int(e.attrs[1]));
-                        pos.z += ((center.z-radius.z)+radius.z*2*mmi.m->height)*3.f;
-                    }
-                    else if(enttype[e.type].radius) pos.z += enttype[e.type].radius;
-                    d.o = pos;
+                    d.o = e.o;
+                    if(enttype[e.type].radius) d.o.z += enttype[e.type].radius;
                     if(physics::entinmap(&d, false))
                     {
                         camstate &c = cameras.add();
