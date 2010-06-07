@@ -833,7 +833,7 @@ struct gameent : dynent, gamestate
         if(origin == vec(-1, -1, -1))
         {
             vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-            dir.mul(radius*0.5f); right.mul(radius); dir.z -= height*0.0625f;
+            dir.mul(radius*0.5f); right.mul(radius); dir.z -= height*0.075f;
             origin = vec(o).add(dir).add(right);
         }
         return origin;
@@ -841,7 +841,7 @@ struct gameent : dynent, gamestate
 
     vec originpos(bool melee = false, bool secondary = false)
     {
-        if(melee) return secondary ? feetpos() : headpos(height*0.0625f);
+        if(melee) return secondary ? feetpos() : headpos(height*0.075f);
         return checkoriginpos();
     }
 
@@ -874,7 +874,7 @@ struct gameent : dynent, gamestate
             else
             {
                 vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-                dir.mul(radius); right.mul(radius); dir.z -= height*0.0625f;
+                dir.mul(radius); right.mul(radius); dir.z -= height*0.075f;
                 muzzle = vec(o).add(dir).add(right);
             }
         }
