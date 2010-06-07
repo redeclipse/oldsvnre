@@ -557,6 +557,7 @@ namespace ai
         d->aientity = ent;
         if(d->ai)
         {
+            d->ai->clearsetup();
             d->ai->reset(tryreset);
             d->ai->lastrun = lastmillis;
             if(d->aitype >= AI_START)
@@ -581,11 +582,7 @@ namespace ai
 
     void spawned(gameent *d, int ent)
     {
-        if(d->ai)
-        {
-            d->ai->cleartimers();
-            setup(d, false, ent);
-        }
+        if(d->ai) setup(d, false, ent);
     }
 
     void killed(gameent *d, gameent *e)
@@ -1392,11 +1389,7 @@ namespace ai
         // the state stack works like a chain of commands, certain commands simply replace each other
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
-        if(d->ai->state.empty())
-        {
-            d->ai->cleartimers();
-            setup(d, false, d->aientity);
-        }
+        if(d->ai->state.empty()) setup(d, false, d->aientity);
         bool cleannext = false;
         loopvrev(d->ai->state)
         {

@@ -123,15 +123,16 @@ namespace ai
 
         aiinfo()
         {
-            cleartimers();
+            clearsetup();
             reset();
             loopk(3) views[k] = aimrnd[k] = 0.f;
             suspended = true;
         }
         ~aiinfo() {}
 
-        void cleartimers()
+        void clearsetup()
         {
+            spot = target = vec(0, 0, 0);
             lastaction = lasthunt = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
@@ -156,10 +157,8 @@ namespace ai
         {
             if(!tryit)
             {
-                spot = target = vec(0, 0, 0);
                 enemy = -1;
                 becareful = dontmove = false;
-                cleartimers();
             }
             targyaw = rnd(360);
             targpitch = 0.f;
