@@ -61,25 +61,30 @@
         <script type="text/javascript">
             $(document).ready(function(){   
                 $("#slider").easySlider({
-            auto: true,
-            continuous: true,
-            nextId: "slider1next",
-            prevId: "slider1prev"
+                    auto:           true,
+                    continuous:     true,
+                    nextId:         "slider1next",
+                    prevId:         "slider1prev",
+                    prevText: 		"Previous",
+                    nextText: 		"Next",
+                    controlsShow:	true,
+                    controlsBefore:	"",
+                    controlsAfter:	"",	
+                    controlsFade:	true,
+                    firstId: 		"firstBtn",
+                    firstText: 		"First",
+                    firstShow:		false,
+                    lastId: 		"lastBtn",	
+                    lastText: 		"Last",
+                    lastShow:		false,				
+                    vertical:		false,
+                    speed: 			5000,
+                    pause:			10000,
+                    numeric: 		false,
+                    numericId: 		"controls"
                 });
-            
             }); 
         </script>
-        <script type="text/javascript"><!--
-            var pkBaseURL = (("https:" == document.location.protocol) ? "https://sourceforge.net/apps/piwik/redeclipse/" : "http://sourceforge.net/apps/piwik/redeclipse/");
-            document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
-        --></script>
-        <script type="text/javascript"><!--
-            piwik_action_name = '<?php echo $app['target']; ?>';
-            piwik_idsite = 1;
-            piwik_url = pkBaseURL + "piwik.php";
-            piwik_log(piwik_action_name, piwik_idsite, piwik_url);
-        --></script>
-        <object><noscript><p><img src="http://sourceforge.net/apps/piwik/redeclipse/piwik.php?idsite=1" alt="piwik"/></p></noscript></object>
     </head>
     <body style="background: #111111 url(<?php echo $app['background']; ?>) no-repeat center top">
         <div id="container">
