@@ -422,7 +422,7 @@ void renderreflectedmapmodels()
         for(vtxarray *va = reflectedva; va; va = va->rnext)
         {
             if(va->mapmodels.empty() || va->distance > reflectdist) continue;
-            loopv(va->mapmodels) 
+            loopv(va->mapmodels)
             {
                 octaentities *oe = va->mapmodels[i];
                 *lastmms = oe;
@@ -664,7 +664,7 @@ void renderblendbrush(GLuint tex, float x, float y, float w, float h)
     glColor4ub((blendbrushcolor>>16)&0xFF, (blendbrushcolor>>8)&0xFF, blendbrushcolor&0xFF, 0x40);
 
     GLfloat s[4] = { 1.0f/w, 0, 0, -x/w }, t[4] = { 0, 1.0f/h, 0, -y/h };
-    if(renderpath==R_FIXEDFUNCTION) 
+    if(renderpath==R_FIXEDFUNCTION)
     {
         setuptexgen();
         glTexGenfv(GL_S, GL_OBJECT_PLANE, s);
@@ -1231,7 +1231,7 @@ static inline void enableglow(renderstate &cur, bool shouldsetuptmu = true)
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_TEXTURE_2D);
 }
-    
+
 static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geombatch *b = NULL)
 {
     if(pass==RENDERPASS_ENVMAP)
@@ -1253,14 +1253,14 @@ static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geom
                     if(cur.envscale.x != cur.envscale.y || cur.envscale.y != cur.envscale.z)
                         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     // fake it, take the average and do a constant blend
-                    float envscale = (min(vslot.envscale.x, min(vslot.envscale.y, vslot.envscale.z)) + 
+                    float envscale = (min(vslot.envscale.x, min(vslot.envscale.y, vslot.envscale.z)) +
                                       max(vslot.envscale.x, max(vslot.envscale.y, vslot.envscale.z)))/2;
                     glColor4f(1, 1, 1, envscale);
                     cur.envscale = vec(envscale, envscale, envscale);
                 }
-                    
+
             }
-            else 
+            else
             {
                 if(cur.envscale.x != cur.envscale.y || cur.envscale.y != cur.envscale.z)
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1280,14 +1280,14 @@ static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geom
             if(b->es.envmap==EMID_CUSTOM) return;
             tex = lookupenvmap(b->es.envmap);
         }
-        else 
+        else
         {
             if(!(slot.texmask&(1<<TEX_ENVMAP))) return;
             loopvj(slot.sts)
             {
                 Slot::Tex &t = slot.sts[j];
                 if(t.type==TEX_ENVMAP) { tex = t.t->id; break; }
-            } 
+            }
         }
         glActiveTexture_(GL_TEXTURE0_ARB+cur.glowtmu);
         glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, cur.textures[cur.glowtmu] = tex);
@@ -1314,7 +1314,7 @@ static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geom
     }
     else if(!cur.mtglow)
     {
-        glEnable(GL_TEXTURE_CUBE_MAP_ARB); 
+        glEnable(GL_TEXTURE_CUBE_MAP_ARB);
         cur.mtglow = true;
     }
     if(cur.envscale.x != vslot.envscale.x)
@@ -1326,7 +1326,7 @@ static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geom
     if(slot.texmask&(1<<TEX_ENVMAP)) loopvj(slot.sts)
     {
         Slot::Tex &t = slot.sts[j];
-        if(t.type==TEX_ENVMAP) 
+        if(t.type==TEX_ENVMAP)
         {
             if(cur.textures[cur.glowtmu]!=t.t->id)
                 glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, cur.textures[cur.glowtmu] = t.t->id);
@@ -1334,7 +1334,7 @@ static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geom
         }
     }
 }
-                        
+
 static void changeglow(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
 {
     vec color = vslot.glowcolor;
@@ -1386,10 +1386,10 @@ static void changeglow(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
             }
         }
         else glActiveTexture_(GL_TEXTURE0_ARB+cur.glowtmu);
-        if(!cur.mtglow) 
-        { 
-            glEnable(GL_TEXTURE_2D); 
-            cur.mtglow = true; 
+        if(!cur.mtglow)
+        {
+            glEnable(GL_TEXTURE_2D);
+            cur.mtglow = true;
         }
     }
     loopvj(slot.sts)
@@ -1464,10 +1464,10 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
                     glColor4fv(cur.color);
                 }
                 else if(cur.alphascale != alpha)
-                { 
-                    cur.alphascale = alpha; 
-                    cur.color[3] = alpha; 
-                    glColor4fv(cur.color); 
+                {
+                    cur.alphascale = alpha;
+                    cur.color[3] = alpha;
+                    glColor4fv(cur.color);
                 }
             }
             else if(cur.colorscale != vslot.colorscale)
@@ -1479,12 +1479,12 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
         }
         else if(pass==RENDERPASS_DYNLIGHT)
         {
-            if(cur.colorscale != vslot.colorscale) 
-            { 
-                cur.colorscale = vslot.colorscale; 
+            if(cur.colorscale != vslot.colorscale)
+            {
+                cur.colorscale = vslot.colorscale;
                 glColor3f(cur.lightcolor.x*vslot.colorscale.x, cur.lightcolor.y*vslot.colorscale.y, cur.lightcolor.z*vslot.colorscale.z);
-            } 
-        } 
+            }
+        }
         if((pass==RENDERPASS_LIGHTMAP || pass==RENDERPASS_ENVMAP) && slot.shader->type&SHADER_ENVMAP && slot.ffenv && hasCM && maxtmus >= 2 && envpass)
         {
             if(cur.glowtmu<0) { cur.skipped |= 1<<TEX_ENVMAP; vslot.skipped |= 1<<TEX_ENVMAP; }
@@ -1517,7 +1517,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
         if(cur.alphaing)
         {
             float alpha = cur.alphaing > 1 ? vslot.alphafront : vslot.alphaback;
-            if(cur.colorscale != vslot.colorscale || cur.alphascale != alpha) 
+            if(cur.colorscale != vslot.colorscale || cur.alphascale != alpha)
             {
                 cur.colorscale = vslot.colorscale;
                 cur.alphascale = alpha;
@@ -1633,7 +1633,7 @@ static void changetexgen(renderstate &cur, int dim, Slot &slot, VSlot &vslot)
         cur.mttexgen = mtglow;
         glMatrixMode(GL_MODELVIEW);
     }
-    else 
+    else
     {
         if(cur.texgendim == dim) return;
         setenvparamf("texgenscroll", SHPARAM_VERTEX, 0, cur.texgenscrollS, cur.texgenscrollT);
@@ -1709,7 +1709,7 @@ static void renderbatches(renderstate &cur, int pass)
         curbatch = b.next;
 
         if(cur.vbuf != b.va->vbuf) changevbuf(cur, pass, b.va);
-        if(cur.vslot != &b.vslot) 
+        if(cur.vslot != &b.vslot)
         {
             changeslottmus(cur, pass, *b.vslot.slot, b.vslot);
             if(cur.texgendim != b.es.dim || (cur.texgendim <= 2 && cur.texgenvslot != &b.vslot) || (!cur.mttexgen && cur.mtglow && !cur.envscale.x)) changetexgen(cur, b.es.dim, *b.vslot.slot, b.vslot);
@@ -1959,17 +1959,9 @@ static GLuint createattenztex(int size)
     return tex;
 }
 
-Texture *caustic = NULL;
-void loadcaustic(const char *name)
-{
-    if(*name)
-    {
-        defformatstring(s)("%s%s", renderpath==R_FIXEDFUNCTION ? "<grey><mad:0.6,0.4>" : "<grey><mad:-0.6,0.6>", name);
-        caustic = textureload(s);
-    }
-    else caustic = notexture;
-}
-SVARF(IDF_WORLD, caustictex, "<anim:75>textures/caustics", loadcaustic(caustictex));
+#define NUMCAUSTICS 32
+
+static Texture *caustictex[NUMCAUSTICS] = { NULL };
 
 void loadcaustics(bool force)
 {
@@ -1977,11 +1969,17 @@ void loadcaustics(bool force)
     if(force) needcaustics = true;
     if(!caustics || !needcaustics) return;
     useshaderbyname("caustic");
-    loadcaustic(caustictex);
+    if(caustictex[0]) return;
+    loopi(NUMCAUSTICS)
+    {
+        defformatstring(name)(
+            renderpath==R_FIXEDFUNCTION ?
+                "<grey><mad:0.6,0.4>caustics/caust%.2d.png" :
+                "<grey><mad:-0.6,0.6>caustics/caust%.2d.png",
+            i);
+        caustictex[i] = textureload(name);
+    }
 }
-
-VAR(IDF_WORLD, causticscale, 0, 100, 10000);
-VARF(IDF_PERSIST, caustics, 0, 1, 1, loadcaustics());
 
 void cleanupva()
 {
@@ -1989,8 +1987,12 @@ void cleanupva()
     clearqueries();
     if(attenxytex) { glDeleteTextures(1, &attenxytex); attenxytex = 0; }
     if(attenztex) { glDeleteTextures(1, &attenztex); attenztex = 0; }
-    caustic = NULL;
+    loopi(NUMCAUSTICS) caustictex[i] = NULL;
 }
+
+VAR(IDF_WORLD, causticscale, 0, 100, 10000);
+VAR(IDF_WORLD, causticmillis, 0, 75, 1000);
+VARF(IDF_PERSIST, caustics, 0, 1, 1, loadcaustics());
 
 void setupcaustics(int tmu, float blend, GLfloat *color = NULL)
 {
@@ -2003,15 +2005,15 @@ void setupcaustics(int tmu, float blend, GLfloat *color = NULL)
         s[k] *= 100.0f/causticscale;
         t[k] *= 100.0f/causticscale;
     }
-    int tex = (lastmillis/caustic->delay)%caustic->frames.length();
-    float frac = float(lastmillis%caustic->delay)/caustic->delay;
+    int tex = (lastmillis/causticmillis)%NUMCAUSTICS;
+    float frac = float(lastmillis%causticmillis)/causticmillis;
     if(color) color[3] = frac;
     else glColor4f(1, 1, 1, frac);
     loopi(2)
     {
         glActiveTexture_(GL_TEXTURE0_ARB+tmu+i);
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, caustic->frames[(tex+i)%caustic->frames.length()]);
+        glBindTexture(GL_TEXTURE_2D, caustictex[(tex+i)%NUMCAUSTICS]->id);
         if(renderpath==R_FIXEDFUNCTION)
         {
             setuptexgen();
@@ -2581,7 +2583,7 @@ void renderalphageom(bool fogpass)
         {
             if(va->geommax.z <= reflectz) continue;
         }
-        else 
+        else
         {
             if(va->occluded >= OCCLUDE_BB) continue;
             if(va->occluded >= OCCLUDE_GEOM && pvsoccluded(va->geommin, va->geommax)) continue;
@@ -2611,7 +2613,7 @@ void renderalphageom(bool fogpass)
         if(cur.depthmask) { cur.depthmask = false; glDepthMask(GL_FALSE); }
         cur.colormask = true;
         glColorMask(COLORMASK, GL_FALSE);
-    
+
         setupTMUs(cur, 0, fogpass);
 
         glDepthFunc(GL_LEQUAL);
@@ -2657,7 +2659,7 @@ void renderalphageom(bool fogpass)
                 glDisableClientState(GL_TEXTURE_COORD_ARRAY);
                 glFogfv(GL_FOG_COLOR, cur.fogcolor);
             }
-            if(!front) 
+            if(!front)
             {
                 cur.diffusetmu = 0;
                 cur.lightmaptmu = 1;
@@ -2665,7 +2667,7 @@ void renderalphageom(bool fogpass)
                 setupTMUs(cur, 0, fogpass);
             }
         }
-        else if(renderpath!=R_FIXEDFUNCTION) 
+        else if(renderpath!=R_FIXEDFUNCTION)
         {
             glFogfv(GL_FOG_COLOR, cur.fogcolor);
         }
@@ -2684,7 +2686,7 @@ void renderalphageom(bool fogpass)
     }
     glDisableClientState(GL_VERTEX_ARRAY);
 }
- 
+
 void findreflectedvas(vector<vtxarray *> &vas, int prevvfc = VFC_PART_VISIBLE)
 {
     loopv(vas)
