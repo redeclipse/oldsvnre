@@ -1048,6 +1048,7 @@ namespace game
     void preload()
     {
         maskpackagedirs(~PACKAGEDIR_OCTA);
+#if 0 // NOMODELS
         int n = m_fight(gamemode) && m_team(gamemode, mutators) ? numteams(gamemode, mutators)+1 : 1;
         loopi(n)
         {
@@ -1056,6 +1057,7 @@ namespace game
         }
         ai::preload();
         weapons::preload();
+#endif
         projs::preload();
         if(m_edit(gamemode) || m_stf(gamemode)) stf::preload();
         if(m_edit(gamemode) || m_ctf(gamemode)) ctf::preload();
@@ -1899,7 +1901,8 @@ namespace game
             else return; // screw it, don't render them
         }
 
-        int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL, weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, animdelay = 0;
+        // NOMODELS int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL;
+        int weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, animdelay = 0;
         bool secondary = false, showweap = d->aitype < AI_START ? isweap(weap) : aistyle[d->aitype].useweap;
 
         if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -2017,7 +2020,7 @@ namespace game
                 }
             }
         }
-
+        #if 0 // NOMODELS
         const char *wepmdl = third ? weaptype[weap].vwep : weaptype[weap].hwep;
         bool hasweapon = showweap && *wepmdl;
         modelattach a[10]; int ai = 0;
@@ -2042,6 +2045,30 @@ namespace game
             }
         }
         renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
+        #endif
+    }
+
+    void playerstrip(vec &o, float x, float y, float z)
+    {
+        glBegin(GL_TRIANGLE_STRIP);
+        glVertex3f(o.x, o.y, o.z);
+        glVertex3f(o.x, o.y+y, o.z);
+        glVertex3f(o.x, o.y, o.z+z);
+        glVertex3f(o.x, o.y+y, o.z+z);
+        glEnd();
+    }
+
+    void playerbox(vec &o, float tofloor, float toceil, float xradius, float yradius)
+    {
+        vec c = vec(o).sub(vec(xradius, yradius, tofloor));
+        float xsz = xradius*2, ysz = yradius*2;
+        float h = tofloor+toceil;
+        playerstrip(c, xsz, 0, h);
+        playerstrip(c, 0, ysz, h);
+        c.add(vec(xsz, ysz, 0));
+        playerstrip(c, -xsz, 0, h);
+        playerstrip(c, 0, -ysz, h);
+        xtraverts += 16;
     }
 
     void rendercheck(gameent *d)
@@ -2049,6 +2076,30 @@ namespace game
         d->checktags();
         impulseeffect(d, false);
         fireeffect(d);
+        if(!shadowmapping && !reflecting && !refracting && d->state == CS_ALIVE && (d != focus || thirdpersonview()))
+        {
+            glPushMatrix();
+            notextureshader->set();
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_CULL_FACE);
+            //glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+
+            glColor3f((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f);
+            if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(d->aitype) || aistyle[d->aitype].canmove)))
+            {
+                playerbox(d->head, d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
+                playerbox(d->torso, d->trad.z, d->trad.z, d->trad.x, d->trad.y);
+                playerbox(d->legs, d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
+            }
+            else playerbox(d->o, d->height, d->aboveeye, d->radius, d->radius);
+
+            defaultshader->set();
+            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_CULL_FACE);
+            //glDisable(GL_BLEND);
+            glPopMatrix();
+        }
     }
 
     void render()
