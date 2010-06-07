@@ -379,9 +379,9 @@ teamtypes teamtype[] = {
         "flags/red",    "teambeta",         "\fr",      "red"
     },
     {
-        TEAM_ENEMY,     0x222222,           "enemy",
+        TEAM_ENEMY,     0x664422,           "enemy",
         "actors/player",                    "actors/player/hwep",
-        "flags/neutral","team",             "\fd",      "dark grey"
+        "flags/neutral","team",             "\fo",      "brown"
     }
 };
 #else

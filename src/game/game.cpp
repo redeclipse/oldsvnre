@@ -2072,6 +2072,10 @@ namespace game
         xtraverts += 24;
     }
 
+    FVAR(IDF_PERSIST, polycolour, 0, 1, 1);
+    FVAR(IDF_PERSIST, polylight, 0, 1, 1);
+    FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
+
     void rendercheck(gameent *d)
     {
         d->checktags();
@@ -2085,7 +2089,17 @@ namespace game
             glDisable(GL_CULL_FACE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glColor4f((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f, transscale(d, true));
+            if(d->light.millis != lastmillis)
+            {
+                vec pos = d->feetpos(0.75f*(d->height + d->aboveeye));
+                lightreaching(pos, d->light.color, d->light.dir, false);
+                dynlightreaching(pos, d->light.color, d->light.dir);
+                lighteffects(d, d->light.color, d->light.dir);
+                d->light.millis = lastmillis;
+            }
+            vec t((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f),
+                c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
+            glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), transscale(d, true));
             if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(d->aitype) || aistyle[d->aitype].canmove)))
             {
                 glTranslatef(d->head.x, d->head.y, d->head.z);
