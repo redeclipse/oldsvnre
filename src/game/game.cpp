@@ -2083,27 +2083,24 @@ namespace game
             notextureshader->set();
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_CULL_FACE);
-            //glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE);
-
-            glColor3f((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glColor4f((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f, transscale(d, true));
             if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(d->aitype) || aistyle[d->aitype].canmove)))
             {
                 glTranslatef(d->head.x, d->head.y, d->head.z);
-                glRotatef(d->yaw,   0, 0, 1);
-                glRotatef(d->roll,  0, -1, 0);
-                glRotatef(d->pitch, 1, 0, 0);
-
+                glRotatef(d->yaw,         0, 0,  1);
+                glRotatef(d->roll,        0, -1, 0);
+                glRotatef(d->pitch*0.4f,  1, 0,  0);
                 playerbox(vec(0, 0, 0), d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
                 playerbox(vec(d->torso).sub(d->head), d->trad.z, d->trad.z, d->trad.x, d->trad.y);
                 playerbox(vec(d->legs).sub(d->head), d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
             }
             else playerbox(d->o, d->height, d->aboveeye, d->radius, d->radius);
-
             defaultshader->set();
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_CULL_FACE);
-            //glDisable(GL_BLEND);
+            glDisable(GL_BLEND);
             glPopMatrix();
         }
     }
