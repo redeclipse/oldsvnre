@@ -2040,24 +2040,36 @@ namespace game
     void playerstrip(vec &o, float x, float y, float z)
     {
         glBegin(GL_TRIANGLE_STRIP);
-        glVertex3f(o.x, o.y, o.z);
-        glVertex3f(o.x, o.y+y, o.z);
-        glVertex3f(o.x, o.y, o.z+z);
-        glVertex3f(o.x, o.y+y, o.z+z);
+        if(z)
+        {
+            glVertex3f(o.x, o.y, o.z);
+            glVertex3f(o.x+x, o.y+y, o.z);
+            glVertex3f(o.x, o.y, o.z+z);
+            glVertex3f(o.x+x, o.y+y, o.z+z);
+        }
+        else
+        {
+            glVertex3f(o.x, o.y, o.z);
+            glVertex3f(o.x+x, o.y, o.z);
+            glVertex3f(o.x, o.y+y, o.z);
+            glVertex3f(o.x+x, o.y+y, o.z);
+        }
         glEnd();
     }
 
-    void playerbox(vec &o, float tofloor, float toceil, float xradius, float yradius)
+    void playerbox(vec o, float tofloor, float toceil, float xradius, float yradius)
     {
         vec c = vec(o).sub(vec(xradius, yradius, tofloor));
         float xsz = xradius*2, ysz = yradius*2;
         float h = tofloor+toceil;
+        playerstrip(c, xsz, ysz, 0);
         playerstrip(c, xsz, 0, h);
         playerstrip(c, 0, ysz, h);
-        c.add(vec(xsz, ysz, 0));
-        playerstrip(c, -xsz, 0, h);
-        playerstrip(c, 0, -ysz, h);
-        xtraverts += 16;
+        c.add(vec(xsz, ysz, h));
+        playerstrip(c, -xsz, -ysz, 0);
+        playerstrip(c, -xsz, 0, -h);
+        playerstrip(c, 0, -ysz, -h);
+        xtraverts += 24;
     }
 
     void rendercheck(gameent *d)
@@ -2077,9 +2089,14 @@ namespace game
             glColor3f((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f);
             if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(d->aitype) || aistyle[d->aitype].canmove)))
             {
-                playerbox(d->head, d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
-                playerbox(d->torso, d->trad.z, d->trad.z, d->trad.x, d->trad.y);
-                playerbox(d->legs, d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
+                glTranslatef(d->head.x, d->head.y, d->head.z);
+                glRotatef(d->yaw,   0, 0, 1);
+                glRotatef(d->roll,  0, -1, 0);
+                glRotatef(d->pitch, 1, 0, 0);
+
+                playerbox(vec(0, 0, 0), d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
+                playerbox(vec(d->torso).sub(d->head), d->trad.z, d->trad.z, d->trad.x, d->trad.y);
+                playerbox(vec(d->legs).sub(d->head), d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
             }
             else playerbox(d->o, d->height, d->aboveeye, d->radius, d->radius);
 
