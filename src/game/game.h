@@ -470,18 +470,10 @@ struct gamestate
 
     int drop(int sweap)
     {
-        int weap = -1;
-        loopi(WEAP_MAX) if(i != weapselect && i != lastweap && hasweap(i, sweap, 1))
-        {
-            weap = i;
-            break;
-        }
-        if(!isweap(weap))
-        {
-            if(hasweap(lastweap, sweap, 1)) weap = lastweap;
-            else if(hasweap(weapselect, sweap, 1)) weap = weapselect;
-        }
-        return weap;
+        if(hasweap(weapselect, sweap, 1)) return weapselect;
+        if(hasweap(lastweap, sweap, 1)) return lastweap;
+        loopi(WEAP_MAX) if(hasweap(i, sweap, 1)) return i;
+        return -1;
     }
 
     void weapreset(bool full = false)

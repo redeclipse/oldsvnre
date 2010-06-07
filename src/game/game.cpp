@@ -1923,23 +1923,6 @@ namespace game
             animflags = ANIM_EDIT|ANIM_LOOP;
             showweap = false;
         }
-#if 0
-        else if(intermission)
-        {
-            lastaction = lastmillis;
-            animflags = ANIM_LOSE|ANIM_LOOP;
-            animdelay = 1000;
-            if(m_fight(gamemode) && m_team(gamemode, mutators))
-            {
-                loopv(bestteams) if(bestteams[i] == d->team)
-                {
-                    animflags = ANIM_WIN|ANIM_LOOP;
-                    break;
-                }
-            }
-            else if(bestplayers.find(d) >= 0) animflags = ANIM_WIN|ANIM_LOOP;
-        }
-#endif
         else if(third && lastmillis-d->lastpain <= 300)
         {
             secondary = third;
