@@ -845,20 +845,45 @@ struct gameent : dynent, gamestate
         return checkoriginpos();
     }
 
-    vec checkmuzzlepos()
+    vec checkmuzzlepos(int weap = -1)
     {
         if(muzzle == vec(-1, -1, -1))
         {
-            vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-            dir.mul(radius); right.mul(radius); dir.z -= height*0.0625f;
-            muzzle = vec(o).add(dir).add(right);
+            if(!isweap(weap)) weap = weapselect;
+            if(weap == WEAP_SWORD && ((weapstate[weap] == WEAP_S_PRIMARY) || (weapstate[weap] == WEAP_S_SECONDARY)))
+            {
+                float frac = (lastmillis-weaplast[weap])/float(weapwait[weap]), yx = yaw, px = pitch;
+                if(weapstate[weap] == WEAP_S_PRIMARY)
+                {
+                    yx -= 90;
+                    yx += frac*180;
+                    if(yx >= 360) yx -= 360;
+                    if(yx < 0) yx += 360;
+                }
+                else
+                {
+                    px += 90;
+                    px -= frac*180;
+                    if(px >= 180) px -= 360;
+                    if(px < -180) px += 360;
+                }
+                vec dir;
+                vecfromyawpitch(yx, px, 1, 0, dir);
+                muzzle = vec(originpos()).add(dir.mul(8));
+            }
+            else
+            {
+                vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
+                dir.mul(radius); right.mul(radius); dir.z -= height*0.0625f;
+                muzzle = vec(o).add(dir).add(right);
+            }
         }
         return muzzle;
     }
 
     vec muzzlepos(int weap, bool secondary = false)
     {
-        if(isweap(weap) && weaptype[weap].muzzle) return checkmuzzlepos();
+        if(isweap(weap) && weaptype[weap].muzzle) return checkmuzzlepos(weap);
         return originpos(weap == WEAP_MELEE, secondary);
     }
 
