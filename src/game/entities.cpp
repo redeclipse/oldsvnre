@@ -246,14 +246,16 @@ namespace entities
     {
         switch(type)
         {
+            case FLAG: return teamtype[attr[0]].flag;
+            #if 0 // NOMODELS
             case PLAYERSTART: return teamtype[attr[0]].tpmdl;
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case FLAG: return teamtype[attr[0]].flag;
             case ACTOR: if(attr[0] >= AI_START && attr[0] < AI_MAX) return aistyle[attr[0]].tpmdl;
+            #endif
             default: break;
         }
         return "";
@@ -2336,6 +2338,7 @@ namespace entities
         {
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
             part_create(PART_HINT_SOFT, 1, o, colour, radius, fluc*skew);
+            part_create(PART_EDIT, 1, o, colour, radius*0.75f, fluc*skew);
         }
         if(isedit ? (showentinfo >= (hasent ? 2 : 3)) : (item && showentdescs >= 3))
         {

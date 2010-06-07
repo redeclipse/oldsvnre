@@ -184,11 +184,13 @@ namespace projs
 
     void preload()
     {
+        #if 0 // NOMODELS
         loopi(WEAP_MAX)
         {
             if(*weaptype[i].proj) loadmodel(weaptype[i].proj, -1, true);
             if(*weaptype[i].eprj) loadmodel(weaptype[i].eprj, -1, true);
         }
+        #endif
         const char *mdls[] = { "projs/gibs/gib01", "projs/gibs/gib02", "projs/gibs/gib03", "projs/debris/debris01", "projs/debris/debris02", "projs/debris/debris03", "projs/debris/debris04", "" };
         for(int i = 0; *mdls[i]; i++) loadmodel(mdls[i], -1, true);
     }
@@ -355,13 +357,16 @@ namespace projs
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT);
                 proj.lifesize = 1;
+                #if 0 // NOMODELS
                 proj.mdl = weaptype[proj.weap].proj;
+                #endif
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
                 break;
             }
             case PRJ_GIBS:
             {
+                proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 if(!kidmode && game::bloodscale > 0 && game::debrisscale > 0)
                 {
                     if(proj.owner)
@@ -398,6 +403,7 @@ namespace projs
             }
             case PRJ_DEBRIS:
             {
+                proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
                 switch(rnd(4))
                 {
@@ -421,6 +427,7 @@ namespace projs
             }
             case PRJ_EJECT:
             {
+                proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 if(!isweap(proj.weap) && proj.owner) proj.weap = proj.owner->weapselect;
                 if(isweap(proj.weap))
                 {
@@ -451,6 +458,18 @@ namespace projs
             }
             case PRJ_ENT:
             {
+                #if 0 // NOMODELS
+                proj.height = proj.radius = proj.xradius = proj.yradius = 1;
+                proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
+                #else
+                if(entities::ents.inrange(proj.id))
+                {
+                    gameentity &e = *(gameentity *)entities::ents[proj.id];
+                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];;
+                    proj.height = proj.radius = proj.xradius = proj.yradius = (e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f);
+                }
+                else proj.height = proj.radius = proj.xradius = proj.yradius = 1;
+                #endif
                 proj.lifesize = proj.aboveeye = 1.f;
                 proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
@@ -1318,9 +1337,10 @@ namespace projs
             hits.setsize(0);
             if((proj.projtype != PRJ_SHOT || proj.owner) && proj.state != CS_DEAD)
             {
-                if(proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id) && entities::ents[proj.id]->type == WEAPON) // in case spawnweapon changes
+                #if 0 // NOMODELS
+                if(proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id)) // in case spawnweapon changes
                     proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
-
+                #endif
                 if(proj.waittime > 0)
                 {
                     if((proj.waittime -= curtime) <= 0)
