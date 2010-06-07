@@ -132,17 +132,6 @@ namespace hud
             return strcmp((*a)->name, (*b)->name);
         }
 
-        void bestplayers(vector<gameent *> &best)
-        {
-            loopi(game::numdynents())
-            {
-                gameent *o = (gameent *)game::iterdynents(i);
-                if(o && o->type==ENT_PLAYER && o->state!=CS_SPECTATOR) best.add(o);
-            }
-            best.sort(playersort);
-            while(best.length()>1 && best.last()->points < best[0]->points) best.drop();
-        }
-
         void sortteams(vector<teamscore> &teamscores)
         {
             if(m_stf(game::gamemode))
@@ -153,27 +142,22 @@ namespace hud
             {
                 loopv(ctf::st.scores) teamscores.add(teamscore(ctf::st.scores[i].team, ctf::st.scores[i].total));
             }
-            loopi(game::numdynents())
+            else loopi(game::numdynents())
             {
                 gameent *o = (gameent *)game::iterdynents(i);
                 if(o && o->type==ENT_PLAYER)
                 {
                     teamscore *ts = NULL;
                     loopv(teamscores) if(teamscores[i].team == o->team) { ts = &teamscores[i]; break; }
-                    if(!ts) teamscores.add(teamscore(o->team, m_stf(game::gamemode) || m_ctf(game::gamemode) ? 0 : (m_trial(game::gamemode) ? o->cptime : o->points)));
-                    else if(m_trial(game::gamemode)) { if(o->cptime && (!ts->score || o->cptime < ts->score)) ts->score = o->cptime; }
-                    else if(!m_stf(game::gamemode) && !m_ctf(game::gamemode)) ts->score += o->points;
+                    if(!ts) teamscores.add(teamscore(o->team, m_trial(game::gamemode) ? o->cptime : o->points));
+                    else if(m_trial(game::gamemode))
+                    {
+                        if(o->cptime && (!ts->score || o->cptime < ts->score)) ts->score = o->cptime;
+                    }
+                    else ts->score += o->points;
                 }
             }
             teamscores.sort(teamscorecmp);
-        }
-
-        void bestteams(vector<int> &best)
-        {
-            vector<teamscore> teamscores;
-            sortteams(teamscores);
-            while(teamscores.length()>1 && teamscores.last().score < teamscores[0].score) teamscores.drop();
-            loopv(teamscores) best.add(teamscores[i].team);
         }
 
         static int scoregroupcmp(const scoregroup **x, const scoregroup **y)
@@ -340,15 +324,6 @@ namespace hud
                 g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, speconkey);
                 SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
                 g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, specmodekey, game::tvmode() ? "interact" : "switch to TV");
-                g.popfont();
-            }
-
-            if((game::player1->state == CS_WAITING || game::player1->state == CS_SPECTATOR) && !game::tvmode())
-            {
-                g.pushfont("radar");
-                SEARCHBINDCACHE(uvf1key)("universaldelta 1", game::player1->state == CS_WAITING ? 3 : 1);
-                SEARCHBINDCACHE(uvf2key)("universaldelta -1", game::player1->state == CS_WAITING ? 3 : 1);
-                g.textf("Press \fs\fc%s\fS and \fs\fc%s\fS to change views", 0xFFFFFF, NULL, uvf1key, uvf2key);
                 g.popfont();
             }
 

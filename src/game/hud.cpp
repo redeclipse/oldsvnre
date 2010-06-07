@@ -60,7 +60,7 @@ namespace hud
     VAR(IDF_PERSIST, conoverflow, 0, 6, INT_MAX-1);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
-    FVAR(IDF_PERSIST, conblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, conblend, 0, 0.65f, 1);
     VAR(IDF_PERSIST, chatconsize, 0, 6, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, INT_MAX-1);
     VAR(IDF_PERSIST, chatconfade, 0, 2000, INT_MAX-1);
@@ -206,16 +206,16 @@ namespace hud
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, radarcardsize, 0, 0.75f, 1000);
     FVAR(IDF_PERSIST, radarcardblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.75f, 1000);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, radarblipsize, 0, 0.75f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radaritemsize, 0, 0.9f, 1000);
+    FVAR(IDF_PERSIST, radaritemsize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radarsize, 0, 0.035f, 1000);
     FVAR(IDF_PERSIST, radaroffset, 0, 0.035f, 1000);
     VAR(IDF_PERSIST, radardist, 0, 0, INT_MAX-1); // 0 = use world size
@@ -927,15 +927,6 @@ namespace hud
                         SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
                         ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV")*noticescale;
                     }
-                    popfont();
-                }
-
-                if(shownotices >= 3 && (game::player1->state == CS_WAITING || game::player1->state == CS_SPECTATOR) && !game::tvmode())
-                {
-                    pushfont("radar");
-                    SEARCHBINDCACHE(uvf1key)("universaldelta 1", game::player1->state == CS_WAITING ? 3 : 1);
-                    SEARCHBINDCACHE(uvf2key)("universaldelta -1", game::player1->state == CS_WAITING ? 3 : 1);
-                    ty += draw_textx("Press \fs\fc%s\fS and \fs\fc%s\fS to change views", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, uvf1key, uvf2key)*noticescale;
                     popfont();
                 }
 
