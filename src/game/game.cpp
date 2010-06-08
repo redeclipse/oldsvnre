@@ -2037,38 +2037,15 @@ namespace game
         #endif
     }
 
-    void playerstrip(vec &o, float x, float y, float z)
-    {
-        glBegin(GL_TRIANGLE_STRIP);
-        if(z)
-        {
-            glVertex3f(o.x, o.y, o.z);
-            glVertex3f(o.x+x, o.y+y, o.z);
-            glVertex3f(o.x, o.y, o.z+z);
-            glVertex3f(o.x+x, o.y+y, o.z+z);
-        }
-        else
-        {
-            glVertex3f(o.x, o.y, o.z);
-            glVertex3f(o.x+x, o.y, o.z);
-            glVertex3f(o.x, o.y+y, o.z);
-            glVertex3f(o.x+x, o.y+y, o.z);
-        }
-        glEnd();
-    }
-
     void playerbox(vec o, float tofloor, float toceil, float xradius, float yradius)
     {
-        vec c = vec(o).sub(vec(xradius, yradius, tofloor));
-        float xsz = xradius*2, ysz = yradius*2;
-        float h = tofloor+toceil;
-        playerstrip(c, xsz, ysz, 0);
-        playerstrip(c, xsz, 0, h);
-        playerstrip(c, 0, ysz, h);
-        c.add(vec(xsz, ysz, h));
-        playerstrip(c, -xsz, -ysz, 0);
-        playerstrip(c, -xsz, 0, -h);
-        playerstrip(c, 0, -ysz, -h);
+        glBegin(GL_QUADS);
+        loopi(6) loopj(4)
+        {
+            const ivec &cc = cubecoords[fv[i][j]];
+            glVertex3f(o.x + (cc.x ? xradius : -xradius), o.y + (cc.y ? yradius : -yradius), o.z + (cc.z ? toceil : -tofloor));
+        }
+        glEnd();
         xtraverts += 24;
     }
 
@@ -2096,12 +2073,15 @@ namespace game
                 glPushMatrix();
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                glDisable(GL_CULL_FACE);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 vec t((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f),
                     c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
-                glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), transscale(d, true));
+                float trans = transscale(d, true);
+                glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
+                if(trans < 1)
+                {
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
                 if(d->wantshitbox())
                 {
                     glTranslatef(d->head.x, d->head.y, d->head.z);
@@ -2120,10 +2100,9 @@ namespace game
                     glRotatef(d->pitch*0.4f, 1, 0, 0);
                     playerbox(vec(0, 0, 0), d->height, d->aboveeye, d->xradius, d->yradius);
                 }
+                if(trans < 1) glDisable(GL_BLEND);
                 defaultshader->set();
                 glEnable(GL_TEXTURE_2D);
-                glEnable(GL_CULL_FACE);
-                glDisable(GL_BLEND);
                 glPopMatrix();
             }
             int weap = d->weapselect;
@@ -2175,7 +2154,7 @@ namespace game
             }
             if(showweap)
             {
-                const struct polyweaps
+                static const struct polyweaps
                 {
                     float h, r, l;
                 } polyweap[WEAP_MAX] = {
@@ -2193,9 +2172,6 @@ namespace game
                 glPushMatrix();
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                glDisable(GL_CULL_FACE);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 vec o = d->origin;
                 if(d == focus && !thirdpersonview() && firstpersonsway && !intermission)
                 {
@@ -2224,12 +2200,17 @@ namespace game
                 glRotatef(pitch, 1, 0, 0);
                 vec t((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f),
                     c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
-                glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), transscale(d, d == focus && thirdpersonview()));
+                float trans = transscale(d, d == focus && thirdpersonview());
+                if(trans < 1)
+                {
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
+                glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
                 playerbox(vec(0, 0, 0), polyweap[weap].h, polyweap[weap].h, polyweap[weap].r, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
+                if(trans < 1) glDisable(GL_BLEND);
                 defaultshader->set();
                 glEnable(GL_TEXTURE_2D);
-                glEnable(GL_CULL_FACE);
-                glDisable(GL_BLEND);
                 glPopMatrix();
             }
         }
