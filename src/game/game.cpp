@@ -1950,7 +1950,7 @@ namespace game
                     if(fireburning && fireburntime && ((lastmillis%1000)/100)%10 && d->onfire(lastmillis, fireburntime))
                         colour = firecols[rnd(FIRECOLOURS)];
                     vec c((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
-                    polyhue(d, c);
+                    polyhue(d, c, true);
                     glColor4f(c[0], c[1], c[2], trans);
                     if(trans < 1)
                     {
