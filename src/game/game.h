@@ -7,8 +7,6 @@
 #define GAMEVERSION         200
 #define DEMO_VERSION        GAMEVERSION
 
-#define NOMODELS 1
-
 #define MAXAI 256
 #define MAXPLAYERS (MAXCLIENTS + MAXAI)
 
@@ -1113,7 +1111,7 @@ namespace game
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             zoomtime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
                 bloodfade, bloodsize, debrisfade, fogdist, aboveheadfade, announcefilter, dynlighteffects, shownamesabovehead, thirdpersonfollow;
-    extern float bloodscale, debrisscale, polycolour, polylight, polybright;
+    extern float bloodscale, debrisscale, polymodels, polycolour, polylight, polybright;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
     extern string clientmap;

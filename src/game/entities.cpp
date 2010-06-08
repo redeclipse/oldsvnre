@@ -247,15 +247,14 @@ namespace entities
         switch(type)
         {
             case FLAG: return teamtype[attr[0]].flag;
-            #ifndef NOMODELS
-            case PLAYERSTART: return teamtype[attr[0]].tpmdl;
+            case PLAYERSTART: return game::polymodels ? "" : teamtype[attr[0]].tpmdl;
             case WEAPON:
             {
+                if(game::polymodels) return "";
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: if(attr[0] >= AI_START && attr[0] < AI_MAX) return aistyle[attr[0]].tpmdl;
-            #endif
+            case ACTOR: if(attr[0] >= AI_START && attr[0] < AI_MAX) return game::polymodels ? "" : aistyle[attr[0]].tpmdl;
             default: break;
         }
         return "";
@@ -2335,25 +2334,28 @@ namespace entities
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
-            #ifndef NOMODELS
-            float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
-            part_create(PART_HINT_SOFT, 1, o, colour, radius, fluc*skew);
-            part_create(PART_EDIT, 1, o, colour, radius*0.75f, fluc*skew);
-            #else
-            float fade = active ? 1 : 0.5f;
-            if(active) part_create(PART_HINT_SOFT, 1, o, colour, ((enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, fluc*skew);
-            const char *texname = hud::itemtex(e.type, attr);
-            if(texname && *texname) part_icon(o, textureload(texname, 3), enttype[e.type].radius*0.2f*skew, skew*fade, 0, 0, 1, colour);
-            else
+            if(game::polymodels)
             {
-                const char *item = entinfo(e.type, e.attrs, false);
-                if(item && *item)
+                float fade = active ? 1 : 0.5f;
+                if(active) part_create(PART_HINT_SOFT, 1, o, colour, ((enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, fluc*skew);
+                const char *texname = hud::itemtex(e.type, attr);
+                if(texname && *texname) part_icon(o, textureload(texname, 3), enttype[e.type].radius*0.2f*skew, skew*fade, 0, 0, 1, colour);
+                else
                 {
-                    defformatstring(ds)("<emphasis>%s", item);
-                    part_textcopy(o, ds, PART_TEXT, 1, colour, enttype[e.type].radius*0.12f*skew, skew*fade, 0);
+                    const char *item = entinfo(e.type, e.attrs, false);
+                    if(item && *item)
+                    {
+                        defformatstring(ds)("<emphasis>%s", item);
+                        part_textcopy(o, ds, PART_TEXT, 1, colour, enttype[e.type].radius*0.12f*skew, skew*fade, 0);
+                    }
                 }
             }
-            #endif
+            else
+            {
+                float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
+                part_create(PART_HINT_SOFT, 1, o, colour, radius, fluc*skew);
+                part_create(PART_EDIT, 1, o, colour, radius*0.75f, fluc*skew);
+            }
         }
         if(isedit ? (showentinfo >= (hasent ? 2 : 3)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
