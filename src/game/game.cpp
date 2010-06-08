@@ -30,6 +30,11 @@ namespace game
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 
+    FVAR(IDF_PERSIST, polymodels, 0, 1, 1);
+    FVAR(IDF_PERSIST, polycolour, 0, 1, 1);
+    FVAR(IDF_PERSIST, polylight, 0, 1, 1);
+    FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
+
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 0.45f, 1);
@@ -350,12 +355,21 @@ namespace game
         float total = amt;
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
-            int len = d->aitype >= AI_START ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
-            if(len > 0 && (!timechk || len > 1000))
+            if(polymodels)
             {
-                int interval = min(len/3, 1000), over = max(len-interval, 500), millis = lastmillis-d->lastdeath;
-                if(millis <= len) { if(millis >= over) total *= 1.f-(float(millis-over)/float(interval)); }
+                int millis = lastmillis-d->lastdeath;
+                if(millis < 1000) total *= 1.f-(float(millis)/1000.f);
                 else total = 0;
+            }
+            else
+            {
+                int len = d->aitype >= AI_START ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
+                if(len > 0 && (!timechk || len > 1000))
+                {
+                    int interval = min(len/3, 1000), over = max(len-interval, 500), millis = lastmillis-d->lastdeath;
+                    if(millis <= len) { if(millis >= over) total *= 1.f-((millis-over)/float(interval)); }
+                    else total = 0;
+                }
             }
         }
         return total;
@@ -371,7 +385,7 @@ namespace game
             if(d == player1 && inzoom())
             {
                 int frame = lastmillis-lastzoom;
-                float pc = frame <= zoomtime ? float(frame)/float(zoomtime) : 1.f;
+                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
                 total *= zooming ? 1.f-pc : pc;
             }
         }
@@ -1048,17 +1062,18 @@ namespace game
     void preload()
     {
         maskpackagedirs(~PACKAGEDIR_OCTA);
-#ifndef NOMODELS
-        int n = m_fight(gamemode) && m_team(gamemode, mutators) ? numteams(gamemode, mutators)+1 : 1;
-        loopi(n)
+        if(!polymodels)
         {
-            loadmodel(teamtype[i].tpmdl, -1, true);
-            loadmodel(teamtype[i].fpmdl, -1, true);
+            int n = m_fight(gamemode) && m_team(gamemode, mutators) ? numteams(gamemode, mutators)+1 : 1;
+            loopi(n)
+            {
+                loadmodel(teamtype[i].tpmdl, -1, true);
+                loadmodel(teamtype[i].fpmdl, -1, true);
+            }
+            ai::preload();
+            weapons::preload();
+            projs::preload();
         }
-        ai::preload();
-        weapons::preload();
-        projs::preload();
-#endif
         if(m_edit(gamemode) || m_stf(gamemode)) stf::preload();
         if(m_edit(gamemode) || m_ctf(gamemode)) ctf::preload();
         maskpackagedirs(~0);
@@ -1880,103 +1895,8 @@ namespace game
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
-    void renderplayer(gameent *d, bool third, float trans, float size, bool early = false)
+    void renderabovehead(gameent *d, bool third, float trans)
     {
-        if(d->state == CS_SPECTATOR) return;
-        if(trans <= 0.f || (d == focus && (third ? thirdpersonmodel : firstpersonmodel) < 1))
-        {
-            if(d->state == CS_ALIVE && rendernormally && (early || d != focus))
-                trans = 1e-16f; // we need tag_muzzle/tag_waist
-            else return; // screw it, don't render them
-        }
-
-        // NOMODELS int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL;
-        int weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, animdelay = 0;
-        bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
-
-        if(d->state == CS_DEAD || d->state == CS_WAITING)
-        {
-            showweap = false;
-            animflags = ANIM_DYING;
-            lastaction = d->lastpain;
-            if(ragdolls)
-            {
-                if(!validragdoll(d, lastaction)) animflags |= ANIM_RAGDOLL;
-            }
-            else
-            {
-                int t = lastmillis-lastaction;
-                if(t < 0) return;
-                if(t > 1000) animflags = ANIM_DEAD|ANIM_LOOP;
-            }
-        }
-        else if(d->state == CS_EDITING)
-        {
-            animflags = ANIM_EDIT|ANIM_LOOP;
-            showweap = false;
-        }
-        else if(third && lastmillis-d->lastpain <= 300)
-        {
-            secondary = third;
-            lastaction = d->lastpain;
-            animflags = ANIM_PAIN;
-            animdelay = 300;
-        }
-        else
-        {
-            secondary = third;
-            if(showweap)
-            {
-                lastaction = d->weaplast[weap];
-                animdelay = d->weapwait[weap];
-                switch(d->weapstate[weap])
-                {
-                    case WEAP_S_SWITCH:
-                    case WEAP_S_PICKUP:
-                    {
-                        if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
-                        {
-                            if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
-                            else weap = d->lastweap;
-                        }
-                        else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        animflags = ANIM_SWITCH+(d->weapstate[weap]-WEAP_S_SWITCH);
-                        break;
-                    }
-                    case WEAP_S_POWER:
-                    {
-                        if(weaptype[weap].anim == ANIM_GRASP) animflags = weaptype[weap].anim+d->weapstate[weap];
-                        else animflags = weaptype[weap].anim|ANIM_LOOP;
-                        break;
-                    }
-                    case WEAP_S_PRIMARY:
-                    case WEAP_S_SECONDARY:
-                    {
-                        if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
-                            showweap = false;
-                        animflags = weaptype[weap].anim+d->weapstate[weap];
-                        break;
-                    }
-                    case WEAP_S_RELOAD:
-                    {
-                        if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
-                        {
-                            if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
-                                showweap = false;
-                            animflags = weaptype[weap].anim+d->weapstate[weap];
-                            break;
-                        }
-                    }
-                    case WEAP_S_IDLE: case WEAP_S_WAIT: default:
-                    {
-                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        animflags = weaptype[weap].anim|ANIM_LOOP;
-                        break;
-                    }
-                }
-            }
-        }
-
         if(third && d->type == ENT_PLAYER && !shadowmapping && !envmapping && trans > 1e-16f && d->o.squaredist(camera1->o) <= maxparticledistance*maxparticledistance)
         {
             vec pos = d->abovehead(2);
@@ -2009,32 +1929,293 @@ namespace game
                 }
             }
         }
-        #ifndef NOMODELS
-        const char *wepmdl = third ? weaptype[weap].vwep : weaptype[weap].hwep;
-        bool hasweapon = showweap && *wepmdl;
-        modelattach a[10]; int ai = 0;
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", wepmdl, ANIM_VWEP|ANIM_LOOP, 0); // we could probably animate this too now..
-        if(rendernormally && (early || d != focus))
+    }
+
+    void renderplayer(gameent *d, bool third, float trans, float size, bool early = false)
+    {
+        if(d->state == CS_SPECTATOR) return;
+        if(trans <= 0.f || (d == focus && (third ? thirdpersonmodel : firstpersonmodel) < 1))
         {
-            const char *muzzle = "tag_weapon";
-            if(hasweapon)
+            if(d->state == CS_ALIVE && rendernormally && (early || d != focus))
+                trans = 1e-16f; // we need tag_muzzle/tag_waist
+            else return; // screw it, don't render them
+        }
+        if(polymodels)
+        {
+            renderabovehead(d, third, trans);
+            d->cleartags();
+            if(d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING)
             {
-                muzzle = "tag_muzzle";
-                if(weaptype[weap].eject) a[ai++] = modelattach("tag_eject", &d->eject);
-            }
-            a[ai++] = modelattach(muzzle, &d->muzzle);
-            a[ai++] = modelattach("tag_weapon", &d->origin);
-            if(third && d->wantshitbox())
-            {
-                a[ai++] = modelattach("tag_head", &d->head);
-                a[ai++] = modelattach("tag_torso", &d->torso);
-                a[ai++] = modelattach("tag_waist", &d->waist);
-                a[ai++] = modelattach("tag_lfoot", &d->lfoot);
-                a[ai++] = modelattach("tag_rfoot", &d->rfoot);
+                d->checktags();
+                if(d->light.millis != lastmillis)
+                {
+                    vec pos = d->feetpos(0.75f*(d->height + d->aboveeye));
+                    lightreaching(pos, d->light.color, d->light.dir, false);
+                    dynlightreaching(pos, d->light.color, d->light.dir);
+                    lighteffects(d, d->light.color, d->light.dir);
+                    d->light.millis = lastmillis;
+                }
+                if(third)
+                {
+                    glPushMatrix();
+                    notextureshader->set();
+                    glDisable(GL_TEXTURE_2D);
+                    int colour = teamtype[d->team].colour;
+                    if(fireburning && fireburntime && ((lastmillis%1000)/100)%10 && d->onfire(lastmillis, fireburntime))
+                        colour = firecols[rnd(FIRECOLOURS)];
+                    vec t((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f),
+                        c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
+                    glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
+                    if(trans < 1)
+                    {
+                        glEnable(GL_BLEND);
+                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    }
+                    if(d->wantshitbox())
+                    {
+                        glTranslatef(d->head.x, d->head.y, d->head.z);
+                        glRotatef(d->yaw, 0, 0, 1);
+                        glRotatef(d->roll, 0, -1, 0);
+                        glRotatef(d->pitch*0.4f, 1, 0, 0);
+                        playerbox(vec(0, 0, 0), d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
+                        playerbox(vec(d->torso).sub(d->head), d->trad.z, d->trad.z, d->trad.x, d->trad.y);
+                        playerbox(vec(d->legs).sub(d->head), d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
+                    }
+                    else
+                    {
+                        glTranslatef(d->o.x, d->o.y, d->o.z);
+                        glRotatef(d->yaw, 0, 0, 1);
+                        glRotatef(d->roll, 0, -1, 0);
+                        glRotatef(d->pitch*0.4f, 1, 0, 0);
+                        playerbox(vec(0, 0, 0), d->height, d->aboveeye, d->xradius, d->yradius);
+                    }
+                    if(trans < 1) glDisable(GL_BLEND);
+                    defaultshader->set();
+                    glEnable(GL_TEXTURE_2D);
+                    glPopMatrix();
+                }
+                int weap = d->weapselect;
+                bool showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
+                float zoff = 0;
+                if(showweap) switch(d->weapstate[weap])
+                {
+                    case WEAP_S_SWITCH:
+                    case WEAP_S_PICKUP:
+                    {
+                        if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
+                        {
+                            zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]/3);
+                            if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
+                            else weap = d->lastweap;
+                        }
+                        else
+                        {
+                            zoff = 1.f-((lastmillis-d->weaplast[weap]-d->weapwait[weap]/3)/float(d->weapwait[weap]*2/3));
+                            if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                        }
+                        break;
+                    }
+                    case WEAP_S_POWER: break;
+                    case WEAP_S_PRIMARY:
+                    case WEAP_S_SECONDARY:
+                    {
+                        if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
+                            showweap = false;
+                        break;
+                    }
+                    case WEAP_S_RELOAD:
+                    {
+                        zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]);
+                        if(zoff > 0.5f) zoff = (1.f-zoff)*2;
+                        else if(zoff < 0.5f) zoff = zoff*2;
+                        if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
+                        {
+                            if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
+                                showweap = false;
+                            break;
+                        }
+                    }
+                    case WEAP_S_IDLE: case WEAP_S_WAIT: default:
+                    {
+                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                        break;
+                    }
+                }
+                if(showweap)
+                {
+                    static const struct polyweaps
+                    {
+                        float h, r, l;
+                    } polyweap[WEAP_MAX] = {
+                        { 0.1f, 0.1f, 0.1f }, // melee
+                        { 0.2f, 0.2f, 0.4f }, // pistol
+                        { 0.2f, 0.2f, 1.0f }, // sword
+                        { 0.3f, 0.5f, 0.9f }, // shotgun
+                        { 0.3f, 0.3f, 0.6f }, // smg
+                        { 0.3f, 0.5f, 0.7f }, // flamer
+                        { 0.4f, 0.4f, 0.5f }, // plasma
+                        { 0.3f, 0.2f, 0.9f }, // rifle
+                        { 0.3f, 0.3f, 0.3f }, // grenade
+                        { 0.4f, 0.4f, 1.2f }, // rocket
+                    };
+                    glPushMatrix();
+                    notextureshader->set();
+                    glDisable(GL_TEXTURE_2D);
+                    vec o = d->origin;
+                    if(!third && firstpersonsway && !intermission)
+                    {
+                        vec dir;
+                        vecfromyawpitch(d->yaw, 0, 0, 1, dir);
+                        float steps = swaydist/firstpersonswaystep*M_PI;
+                        dir.mul(firstpersonswayside*cosf(steps));
+                        dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
+                        o.add(dir).add(swaydir).add(swaypush);
+                    }
+                    vec dir = vec(d->muzzle).sub(o).normalize();
+                    if(third)
+                    {
+                        vec offset = vec(dir).mul(d->radius*0.5f);
+                        o.add(offset); o.z -= 1; d->origin = o;
+                        d->muzzle.add(offset); d->muzzle.z -= 1;
+                    }
+                    d->muzzle.sub(vec(dir).mul(1.f-polyweap[weap].l));
+                    bool isshow = weaptype[weap].muzzle || weap == WEAP_SWORD;
+                    if(!isshow) o = d->origin = d->muzzle;
+                    glTranslatef(o.x, o.y, o.z-(d->height*0.6f*zoff));
+                    float yaw, pitch, roll = d->roll;
+                    vectoyawpitch(dir, yaw, pitch);
+                    glRotatef(yaw, 0, 0, 1);
+                    glRotatef(roll, 0, -1, 0);
+                    glRotatef(pitch, 1, 0, 0);
+                    vec t((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f),
+                        c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
+                    if(trans < 1)
+                    {
+                        glEnable(GL_BLEND);
+                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    }
+                    glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
+                    playerbox(vec(0, 0, 0), polyweap[weap].h, polyweap[weap].h, polyweap[weap].r, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
+                    if(trans < 1) glDisable(GL_BLEND);
+                    defaultshader->set();
+                    glEnable(GL_TEXTURE_2D);
+                    glPopMatrix();
+                }
             }
         }
-        renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
-        #endif
+        else
+        {
+            int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL, weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, animdelay = 0;
+            bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
+
+            if(d->state == CS_DEAD || d->state == CS_WAITING)
+            {
+                showweap = false;
+                animflags = ANIM_DYING;
+                lastaction = d->lastpain;
+                if(ragdolls)
+                {
+                    if(!validragdoll(d, lastaction)) animflags |= ANIM_RAGDOLL;
+                }
+                else
+                {
+                    int t = lastmillis-lastaction;
+                    if(t < 0) return;
+                    if(t > 1000) animflags = ANIM_DEAD|ANIM_LOOP;
+                }
+            }
+            else if(d->state == CS_EDITING)
+            {
+                animflags = ANIM_EDIT|ANIM_LOOP;
+                showweap = false;
+            }
+            else if(third && lastmillis-d->lastpain <= 300)
+            {
+                secondary = third;
+                lastaction = d->lastpain;
+                animflags = ANIM_PAIN;
+                animdelay = 300;
+            }
+            else
+            {
+                secondary = third;
+                if(showweap)
+                {
+                    lastaction = d->weaplast[weap];
+                    animdelay = d->weapwait[weap];
+                    switch(d->weapstate[weap])
+                    {
+                        case WEAP_S_SWITCH:
+                        case WEAP_S_PICKUP:
+                        {
+                            if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
+                            {
+                                if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
+                                else weap = d->lastweap;
+                            }
+                            else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                            animflags = ANIM_SWITCH+(d->weapstate[weap]-WEAP_S_SWITCH);
+                            break;
+                        }
+                        case WEAP_S_POWER:
+                        {
+                            if(weaptype[weap].anim == ANIM_GRASP) animflags = weaptype[weap].anim+d->weapstate[weap];
+                            else animflags = weaptype[weap].anim|ANIM_LOOP;
+                            break;
+                        }
+                        case WEAP_S_PRIMARY:
+                        case WEAP_S_SECONDARY:
+                        {
+                            if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
+                                showweap = false;
+                            animflags = weaptype[weap].anim+d->weapstate[weap];
+                            break;
+                        }
+                        case WEAP_S_RELOAD:
+                        {
+                            if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
+                            {
+                                if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
+                                    showweap = false;
+                                animflags = weaptype[weap].anim+d->weapstate[weap];
+                                break;
+                            }
+                        }
+                        case WEAP_S_IDLE: case WEAP_S_WAIT: default:
+                        {
+                            if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                            animflags = weaptype[weap].anim|ANIM_LOOP;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(!early) renderabovehead(d, third, trans);
+            const char *wepmdl = third ? weaptype[weap].vwep : weaptype[weap].hwep;
+            bool hasweapon = showweap && *wepmdl;
+            modelattach a[10]; int ai = 0;
+            if(hasweapon) a[ai++] = modelattach("tag_weapon", wepmdl, ANIM_VWEP|ANIM_LOOP, 0); // we could probably animate this too now..
+            if(rendernormally && (early || d != focus))
+            {
+                const char *muzzle = "tag_weapon";
+                if(hasweapon)
+                {
+                    muzzle = "tag_muzzle";
+                    if(weaptype[weap].eject) a[ai++] = modelattach("tag_eject", &d->eject);
+                }
+                a[ai++] = modelattach(muzzle, &d->muzzle);
+                a[ai++] = modelattach("tag_weapon", &d->origin);
+                if(third && d->wantshitbox())
+                {
+                    a[ai++] = modelattach("tag_head", &d->head);
+                    a[ai++] = modelattach("tag_torso", &d->torso);
+                    a[ai++] = modelattach("tag_waist", &d->waist);
+                    a[ai++] = modelattach("tag_lfoot", &d->lfoot);
+                    a[ai++] = modelattach("tag_rfoot", &d->rfoot);
+                }
+            }
+            renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
+        }
     }
 
     void playerbox(vec o, float tofloor, float toceil, float xradius, float yradius)
@@ -2049,173 +2230,11 @@ namespace game
         xtraverts += 24;
     }
 
-    FVAR(IDF_PERSIST, polycolour, 0, 1, 1);
-    FVAR(IDF_PERSIST, polylight, 0, 1, 1);
-    FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
-
     void rendercheck(gameent *d)
     {
-        d->checktags();
+        if(!polymodels) d->checktags();
         impulseeffect(d, false);
         fireeffect(d);
-        #ifdef NOMODELS
-        if(d->state == CS_ALIVE)
-        {
-            if(d->light.millis != lastmillis)
-            {
-                vec pos = d->feetpos(0.75f*(d->height + d->aboveeye));
-                lightreaching(pos, d->light.color, d->light.dir, false);
-                dynlightreaching(pos, d->light.color, d->light.dir);
-                lighteffects(d, d->light.color, d->light.dir);
-                d->light.millis = lastmillis;
-            }
-            if(d != focus || thirdpersonview())
-            {
-                glPushMatrix();
-                notextureshader->set();
-                glDisable(GL_TEXTURE_2D);
-                vec t((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f),
-                    c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
-                float trans = transscale(d, true);
-                glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
-                if(trans < 1)
-                {
-                    glEnable(GL_BLEND);
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                }
-                if(d->wantshitbox())
-                {
-                    glTranslatef(d->head.x, d->head.y, d->head.z);
-                    glRotatef(d->yaw, 0, 0, 1);
-                    glRotatef(d->roll, 0, -1, 0);
-                    glRotatef(d->pitch*0.4f, 1, 0, 0);
-                    playerbox(vec(0, 0, 0), d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
-                    playerbox(vec(d->torso).sub(d->head), d->trad.z, d->trad.z, d->trad.x, d->trad.y);
-                    playerbox(vec(d->legs).sub(d->head), d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
-                }
-                else
-                {
-                    glTranslatef(d->o.x, d->o.y, d->o.z);
-                    glRotatef(d->yaw, 0, 0, 1);
-                    glRotatef(d->roll, 0, -1, 0);
-                    glRotatef(d->pitch*0.4f, 1, 0, 0);
-                    playerbox(vec(0, 0, 0), d->height, d->aboveeye, d->xradius, d->yradius);
-                }
-                if(trans < 1) glDisable(GL_BLEND);
-                defaultshader->set();
-                glEnable(GL_TEXTURE_2D);
-                glPopMatrix();
-            }
-            int weap = d->weapselect;
-            bool showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
-            float zoff = 0;
-            if(showweap) switch(d->weapstate[weap])
-            {
-                case WEAP_S_SWITCH:
-                case WEAP_S_PICKUP:
-                {
-                    if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
-                    {
-                        zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]/3);
-                        if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
-                        else weap = d->lastweap;
-                    }
-                    else
-                    {
-                        zoff = 1.f-((lastmillis-d->weaplast[weap]-d->weapwait[weap]/3)/float(d->weapwait[weap]*2/3));
-                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                    }
-                    break;
-                }
-                case WEAP_S_POWER: break;
-                case WEAP_S_PRIMARY:
-                case WEAP_S_SECONDARY:
-                {
-                    if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
-                        showweap = false;
-                    break;
-                }
-                case WEAP_S_RELOAD:
-                {
-                    zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]);
-                    if(zoff > 0.5f) zoff = (1.f-zoff)*2;
-                    else if(zoff < 0.5f) zoff = zoff*2;
-                    if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
-                    {
-                        if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
-                            showweap = false;
-                        break;
-                    }
-                }
-                case WEAP_S_IDLE: case WEAP_S_WAIT: default:
-                {
-                    if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                    break;
-                }
-            }
-            if(showweap)
-            {
-                static const struct polyweaps
-                {
-                    float h, r, l;
-                } polyweap[WEAP_MAX] = {
-                    { 0.1f, 0.1f, 0.1f }, // melee
-                    { 0.2f, 0.2f, 0.4f }, // pistol
-                    { 0.2f, 0.2f, 1.0f }, // sword
-                    { 0.3f, 0.5f, 0.9f }, // shotgun
-                    { 0.3f, 0.3f, 0.6f }, // smg
-                    { 0.3f, 0.5f, 0.7f }, // flamer
-                    { 0.4f, 0.4f, 0.5f }, // plasma
-                    { 0.3f, 0.2f, 0.9f }, // rifle
-                    { 0.3f, 0.3f, 0.3f }, // grenade
-                    { 0.4f, 0.4f, 1.2f }, // rocket
-                };
-                glPushMatrix();
-                notextureshader->set();
-                glDisable(GL_TEXTURE_2D);
-                vec o = d->origin;
-                if(d == focus && !thirdpersonview() && firstpersonsway && !intermission)
-                {
-                    vec dir;
-                    vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                    float steps = swaydist/firstpersonswaystep*M_PI;
-                    dir.mul(firstpersonswayside*cosf(steps));
-                    dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
-                    o.add(dir).add(swaydir).add(swaypush);
-                }
-                vec dir = vec(d->muzzle).sub(o).normalize();
-                if(d != focus || thirdpersonview())
-                {
-                    vec offset = vec(dir).mul(d->radius);
-                    o.add(offset); o.z -= 1; d->origin = o;
-                    d->muzzle.add(offset); d->muzzle.z -= 1;
-                }
-                d->muzzle.sub(vec(dir).mul(1.f-polyweap[weap].l));
-                bool isshow = weaptype[weap].muzzle || weap == WEAP_SWORD;
-                if(!isshow) o = d->origin = d->muzzle;
-                glTranslatef(o.x, o.y, o.z-(d->height*0.6f*zoff));
-                float yaw, pitch, roll = d->roll;
-                vectoyawpitch(dir, yaw, pitch);
-                glRotatef(yaw, 0, 0, 1);
-                glRotatef(roll, 0, -1, 0);
-                glRotatef(pitch, 1, 0, 0);
-                vec t((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f),
-                    c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
-                float trans = transscale(d, d == focus && thirdpersonview());
-                if(trans < 1)
-                {
-                    glEnable(GL_BLEND);
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                }
-                glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
-                playerbox(vec(0, 0, 0), polyweap[weap].h, polyweap[weap].h, polyweap[weap].r, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
-                if(trans < 1) glDisable(GL_BLEND);
-                defaultshader->set();
-                glEnable(GL_TEXTURE_2D);
-                glPopMatrix();
-            }
-        }
-        #endif
     }
 
     void render()
@@ -2228,7 +2247,7 @@ namespace game
         if(m_stf(gamemode)) stf::render();
         if(m_ctf(gamemode)) ctf::render();
         ai::render();
-        if(rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
+        if(!polymodels && rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
         endmodelbatches();
         if(rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) rendercheck(d);
     }
@@ -2236,7 +2255,7 @@ namespace game
     void renderavatar(bool early)
     {
         if(rendernormally && early) focus->cleartags();
-        if((thirdpersonview() || !rendernormally))
+        if(thirdpersonview() || !rendernormally)
             renderplayer(focus, true, transscale(focus, thirdpersonview(true)), deadscale(focus, 1, true), early);
         else if(!thirdpersonview() && focus->state == CS_ALIVE)
             renderplayer(focus, false, transscale(focus, false), deadscale(focus, 1, true), early);
