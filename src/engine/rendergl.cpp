@@ -2240,23 +2240,15 @@ void polyhue(dynent *d, vec &colour, bool light, bool fast)
 {
     vec lightpos = d->o;
     if(d->type == ENT_PLAYER || d->type == ENT_AI) lightpos = d->feetpos(0.75f*(d->height + d->aboveeye));
-    float dist = camera1->o.dist(lightpos);
-    if(dist >= fog) colour = vec((fogcolour>>16)/255.f, ((fogcolour>>8)&0xFF)/255.f, (fogcolour&0xFF)/255.f);
-    else
+    if(light && d->light.millis != lastmillis)
     {
-        if(light && d->light.millis != lastmillis)
-        {
-            lightreaching(lightpos, d->light.color, d->light.dir, fast);
-            dynlightreaching(lightpos, d->light.color, d->light.dir);
-            game::lighteffects(d, d->light.color, d->light.dir);
-            d->light.millis = lastmillis;
-        }
-        vec c = vec(colour).mul(polycolour).mul(vec(d->light.color).mul(polylight));
-        loopi(3) colour[i] = max(c[i], colour[i]*polybright);
-        float amt = dist/float(fog);
-        vec col((fogcolour>>16)/255.f, ((fogcolour>>8)&0xFF)/255.f, (fogcolour&0xFF)/255.f);
-        loopi(3) colour[i] = col[i]*amt + colour[i]*(1-amt); //(col[i]-colour[i])*amt;
+        lightreaching(lightpos, d->light.color, d->light.dir, fast);
+        dynlightreaching(lightpos, d->light.color, d->light.dir);
+        game::lighteffects(d, d->light.color, d->light.dir);
+        d->light.millis = lastmillis;
     }
+    vec c = vec(colour).mul(polycolour).mul(vec(d->light.color).mul(polylight));
+    loopi(3) colour[i] = max(c[i], colour[i]*polybright);
 }
 
 void polybox(vec o, float tofloor, float toceil, float xradius, float yradius)
