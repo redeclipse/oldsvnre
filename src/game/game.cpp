@@ -1938,7 +1938,7 @@ namespace game
         {
             renderabovehead(d, third, trans);
             d->cleartags();
-            if(d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING)
+            if(!glaring && !shadowmapping && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
             {
                 d->checktags();
                 if(third)
