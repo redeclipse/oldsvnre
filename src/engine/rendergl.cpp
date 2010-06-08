@@ -2238,10 +2238,9 @@ FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
 
 void polyhue(dynent *d, vec &colour, bool light, bool fast)
 {
-    vec lightpos = d->o;
-    if(d->type == ENT_PLAYER || d->type == ENT_AI) lightpos = d->feetpos(0.75f*(d->height + d->aboveeye));
     if(light && d->light.millis != lastmillis)
     {
+        vec lightpos = d->type == ENT_PLAYER || d->type == ENT_AI ? d->feetpos(0.75f*(d->height + d->aboveeye)) : d->o;
         lightreaching(lightpos, d->light.color, d->light.dir, fast);
         dynlightreaching(lightpos, d->light.color, d->light.dir);
         game::lighteffects(d, d->light.color, d->light.dir);

@@ -1452,7 +1452,7 @@ namespace projs
                     case PRJ_DEBRIS: default: colour = 0x888888; break;
                 }
                 glPushMatrix();
-                notextureshader->set();
+                foggednotextureshader->set();
                 glDisable(GL_TEXTURE_2D);
                 vec c((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f);
                 polyhue(&proj, c, true, true);
