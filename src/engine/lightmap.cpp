@@ -539,6 +539,8 @@ static void calcskylight(lightmapworker *w, const vec &o, const vec &normal, flo
 
 void calcsunlight(lightmapworker *w, const vec &o, const vec &normal, float tolerance, uchar *slight, int flags = RAY_ALPHAPOLY, extentity *t = NULL)
 {
+    flags |= RAY_SHADOW;
+    if(skytexturelight) flags |= RAY_SKIPSKY;
     loopv(sunlights) if(sunlights[i])
     {
         const extentity &light = *sunlights[i];
@@ -546,8 +548,8 @@ void calcsunlight(lightmapworker *w, const vec &o, const vec &normal, float tole
         int yaw = light.attrs[0], pitch = light.attrs[1]+90, offset = light.attrs.inrange(5) && light.attrs[5] ? light.attrs[5] : 10, hit = 0;
         vec dir(yaw*RAD, pitch*RAD);
         if(normal.dot(dir) >= 0 && 
-            (w ? shadowray(w->shadowraycache, vec(dir).mul(tolerance).add(o), dir, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f :
-                 shadowray(vec(dir).mul(tolerance).add(o), dir, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f))
+            (w ? shadowray(w->shadowraycache, vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f :
+                 shadowray(vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f))
             hit++;
         matrix3x3 rot;
         rot.rotate(90*RAD, dir);
@@ -556,8 +558,8 @@ void calcsunlight(lightmapworker *w, const vec &o, const vec &normal, float tole
         loopk(4)
         {
             if(normal.dot(spoke) >= 0 && 
-                (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f :
-                     shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f))
+                (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f :
+                     shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f))
                 hit++;
             spoke = rot.transform(spoke);
         }
@@ -565,8 +567,8 @@ void calcsunlight(lightmapworker *w, const vec &o, const vec &normal, float tole
         loopk(4)
         {
             if(normal.dot(spoke) >= 0 && 
-                (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f :
-                     shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f))
+                (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f :
+                     shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f))
                 hit++;
             spoke = rot.transform(spoke);
         }
@@ -2531,13 +2533,15 @@ static inline void fastskylight(const vec &o, float tolerance, uchar *skylight, 
 
 static inline void fastsunlight(const vec &o, float tolerance, uchar *slight, int flags = RAY_ALPHAPOLY, extentity *t = NULL)
 {
+    flags |= RAY_SHADOW;
+    if(skytexturelight) flags |= RAY_SKIPSKY;
     loopv(sunlights) if(sunlights[i])
     {
         const extentity &light = *sunlights[i];
         if(light.attrs.length() < 5 || (slight[0] >= light.attrs[2] && slight[1] >= light.attrs[3] && slight[2] >= light.attrs[4])) continue;
         int yaw = light.attrs[0], pitch = light.attrs[1]+90;
         vec dir(yaw*RAD, pitch*RAD);
-        if(shadowray(vec(dir).mul(tolerance).add(o), dir, 1e16f, RAY_SHADOW|RAY_SKIPSKY | flags, t) > 1e15f)
+        if(shadowray(vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f)
         {
             loopk(3) slight[k] = max(uchar(light.attrs[2+k]), slight[k]);
         }
