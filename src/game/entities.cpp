@@ -247,14 +247,14 @@ namespace entities
         switch(type)
         {
             case FLAG: return teamtype[attr[0]].flag;
-            case PLAYERSTART: return game::polymodels ? "" : teamtype[attr[0]].tpmdl;
+            case PLAYERSTART: return polymodels ? "" : teamtype[attr[0]].tpmdl;
             case WEAPON:
             {
-                if(game::polymodels) return "";
+                if(polymodels) return "";
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: if(attr[0] >= AI_START && attr[0] < AI_MAX) return game::polymodels ? "" : aistyle[attr[0]].tpmdl;
+            case ACTOR: if(attr[0] >= AI_START && attr[0] < AI_MAX) return polymodels ? "" : aistyle[attr[0]].tpmdl;
             default: break;
         }
         return "";
@@ -2334,7 +2334,7 @@ namespace entities
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
-            if(game::polymodels)
+            if(polymodels)
             {
                 float fade = active ? 1 : 0.5f;
                 if(active) part_create(PART_HINT_SOFT, 1, o, colour, ((enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, fluc*skew);

@@ -3,7 +3,7 @@
 namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
-        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1, fogdist = 0;
+        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1;
     bool intermission = false, prevzoom = false, zooming = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
@@ -29,11 +29,6 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfollow, 0, 0, 1);
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
-
-    FVAR(IDF_PERSIST, polymodels, 0, 1, 1);
-    FVAR(IDF_PERSIST, polycolour, 0, 1, 1);
-    FVAR(IDF_PERSIST, polylight, 0, 1, 1);
-    FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
@@ -1103,7 +1098,6 @@ namespace game
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
         if(!empty) client::sendinfo = client::sendcrc = true;
-        fogdist = max(float(getvar("fog")), ai::SIGHTMIN);
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
         resetsway();
     }
@@ -1430,7 +1424,7 @@ namespace game
                     {
                         vec trg, pos = d->feetpos();
                         float dist = c.pos.dist(d->feetpos());
-                        if(dist >= c.mindist && dist <= min(c.maxdist, float(fogdist)) && (raycubelos(c.pos, pos, trg) || raycubelos(c.pos, pos = d->headpos(), trg)))
+                        if(dist >= c.mindist && dist <= min(c.maxdist, float(fog)) && (raycubelos(c.pos, pos, trg) || raycubelos(c.pos, pos = d->headpos(), trg)))
                         {
                             float yaw = t ? t->yaw : camera1->yaw, pitch = t ? t->pitch : camera1->pitch;
                             if(!t && (k || renew))
@@ -1440,7 +1434,7 @@ namespace game
                                 dir.sub(c.pos).normalize();
                                 vectoyawpitch(dir, yaw, pitch);
                             }
-                            if(k || renew || getsight(c.pos, yaw, pitch, pos, trg, min(c.maxdist, float(fogdist)), curfov, fovy) || getsight(c.pos, yaw, pitch, pos = d->headpos(), trg, min(c.maxdist, float(fogdist)), curfov, fovy))
+                            if(k || renew || getsight(c.pos, yaw, pitch, pos, trg, min(c.maxdist, float(fog)), curfov, fovy) || getsight(c.pos, yaw, pitch, pos = d->headpos(), trg, min(c.maxdist, float(fog)), curfov, fovy))
                             {
                                 c.cansee.add(i);
                                 c.dir.add(pos);
@@ -1947,14 +1941,6 @@ namespace game
             if(d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 d->checktags();
-                if(d->light.millis != lastmillis)
-                {
-                    vec pos = d->feetpos(0.75f*(d->height + d->aboveeye));
-                    lightreaching(pos, d->light.color, d->light.dir, false);
-                    dynlightreaching(pos, d->light.color, d->light.dir);
-                    lighteffects(d, d->light.color, d->light.dir);
-                    d->light.millis = lastmillis;
-                }
                 if(third)
                 {
                     glPushMatrix();
@@ -1963,9 +1949,9 @@ namespace game
                     int colour = teamtype[d->team].colour;
                     if(fireburning && fireburntime && ((lastmillis%1000)/100)%10 && d->onfire(lastmillis, fireburntime))
                         colour = firecols[rnd(FIRECOLOURS)];
-                    vec t((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f),
-                        c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
-                    glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
+                    vec c((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
+                    polyhue(d, c);
+                    glColor4f(c[0], c[1], c[2], trans);
                     if(trans < 1)
                     {
                         glEnable(GL_BLEND);
@@ -1977,9 +1963,9 @@ namespace game
                         glRotatef(d->yaw, 0, 0, 1);
                         glRotatef(d->roll, 0, -1, 0);
                         glRotatef(d->pitch*0.4f, 1, 0, 0);
-                        playerbox(vec(0, 0, 0), d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
-                        playerbox(vec(d->torso).sub(d->head), d->trad.z, d->trad.z, d->trad.x, d->trad.y);
-                        playerbox(vec(d->legs).sub(d->head), d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
+                        polybox(vec(0, 0, 0), d->hrad.z, d->hrad.z, d->hrad.x, d->hrad.y);
+                        polybox(vec(d->torso).sub(d->head), d->trad.z, d->trad.z, d->trad.x, d->trad.y);
+                        polybox(vec(d->legs).sub(d->head), d->lrad.z, d->lrad.z, d->lrad.x, d->lrad.y);
                     }
                     else
                     {
@@ -1987,7 +1973,7 @@ namespace game
                         glRotatef(d->yaw, 0, 0, 1);
                         glRotatef(d->roll, 0, -1, 0);
                         glRotatef(d->pitch*0.4f, 1, 0, 0);
-                        playerbox(vec(0, 0, 0), d->height, d->aboveeye, d->xradius, d->yradius);
+                        polybox(vec(0, 0, 0), d->height, d->aboveeye, d->xradius, d->yradius);
                     }
                     if(trans < 1) glDisable(GL_BLEND);
                     defaultshader->set();
@@ -2074,28 +2060,32 @@ namespace game
                     vec dir = vec(d->muzzle).sub(o).normalize();
                     if(third)
                     {
-                        vec offset = vec(dir).mul(d->radius*0.5f);
+                        vec offset = vec(dir).mul(d->radius*0.65f);
                         o.add(offset); o.z -= 1; d->origin = o;
                         d->muzzle.add(offset); d->muzzle.z -= 1;
+                        d->muzzle.add(vec(dir).mul(polyweap[weap].l*0.5f));
                     }
                     d->muzzle.sub(vec(dir).mul(1.f-polyweap[weap].l));
                     bool isshow = weaptype[weap].muzzle || weap == WEAP_SWORD;
                     if(!isshow) o = d->origin = d->muzzle;
-                    glTranslatef(o.x, o.y, o.z-(d->height*0.6f*zoff));
+                    vec down; vecfromyawpitch(d->yaw, d->pitch-90, 1, 0, down);
+                    o.add(down.mul(d->height*(third ? 0.25f : 0.5f)*zoff));
+                    glTranslatef(o.x, o.y, o.z);
                     float yaw, pitch, roll = d->roll;
                     vectoyawpitch(dir, yaw, pitch);
                     glRotatef(yaw, 0, 0, 1);
                     glRotatef(roll, 0, -1, 0);
                     glRotatef(pitch, 1, 0, 0);
-                    vec t((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f),
-                        c = vec(t).mul(polycolour).mul(vec(d->light.color).mul(polylight));
                     if(trans < 1)
                     {
                         glEnable(GL_BLEND);
                         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     }
-                    glColor4f(max(c[0], t[0]*polybright), max(c[1], t[1]*polybright), max(c[2], t[2]*polybright), trans);
-                    playerbox(vec(0, 0, 0), polyweap[weap].h, polyweap[weap].h, polyweap[weap].r, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
+                    vec c((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f);
+                    polyhue(d, c, false);
+                    glColor4f(c[0], c[1], c[2], trans);
+                    float mult = third ? 2 : 1;
+                    polybox(vec(0, 0, 0), polyweap[weap].h*mult, polyweap[weap].h*mult, polyweap[weap].r*mult, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
                     if(trans < 1) glDisable(GL_BLEND);
                     defaultshader->set();
                     glEnable(GL_TEXTURE_2D);
@@ -2216,18 +2206,6 @@ namespace game
             }
             renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
         }
-    }
-
-    void playerbox(vec o, float tofloor, float toceil, float xradius, float yradius)
-    {
-        glBegin(GL_QUADS);
-        loopi(6) loopj(4)
-        {
-            const ivec &cc = cubecoords[fv[i][j]];
-            glVertex3f(o.x + (cc.x ? xradius : -xradius), o.y + (cc.y ? yradius : -yradius), o.z + (cc.z ? toceil : -tofloor));
-        }
-        glEnd();
-        xtraverts += 24;
     }
 
     void rendercheck(gameent *d)
