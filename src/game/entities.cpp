@@ -2429,30 +2429,20 @@ namespace entities
         loopv(projs::projs)
         {
             projent &proj = *projs::projs[i];
-            if(proj.projtype != PRJ_ENT || !ents.inrange(proj.id)) continue;
+            if(proj.projtype != PRJ_ENT || !ents.inrange(proj.id) || !proj.ready()) continue;
             gameentity &e = *(gameentity *)ents[proj.id];
             float skew = 1;
-            bool active = false;
             if(proj.fadetime && proj.lifemillis)
             {
                 int interval = min(proj.lifemillis, proj.fadetime);
-                if(proj.lifetime < interval)
-                {
-                    skew = float(proj.lifetime)/float(interval);
-                    active = true;
-                }
+                if(proj.lifetime < interval) skew = float(proj.lifetime)/float(interval);
                 else if(proj.lifemillis > interval)
                 {
                     interval = min(proj.lifemillis-interval, proj.fadetime);
-                    if(proj.lifemillis-proj.lifetime < interval)
-                    {
-                        skew = float(proj.lifemillis-proj.lifetime)/float(interval);
-                        active = true;
-                    }
+                    if(proj.lifemillis-proj.lifetime < interval) skew = float(proj.lifemillis-proj.lifetime)/float(interval);
                 }
             }
-            else if(proj.ready()) active = true;
-            drawparticle(e, proj.o, -1, proj.ready(), active, skew);
+            drawparticle(e, proj.o, -1, true, true, skew);
         }
     }
 }

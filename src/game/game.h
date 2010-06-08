@@ -833,7 +833,7 @@ struct gameent : dynent, gamestate
         if(origin == vec(-1, -1, -1))
         {
             vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-            dir.mul(radius*0.5f); right.mul(radius); dir.z -= height*0.075f;
+            dir.mul(radius*0.75f); right.mul(radius*0.85f); dir.z -= height*0.075f;
             origin = vec(o).add(dir).add(right);
         }
         return origin;
@@ -874,16 +874,16 @@ struct gameent : dynent, gamestate
             else
             {
                 vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-                dir.mul(radius); right.mul(radius); dir.z -= height*0.075f;
+                dir.mul(radius*1.25f); right.mul(radius*0.75f); dir.z -= height*0.075f;
                 muzzle = vec(o).add(dir).add(right);
             }
         }
         return muzzle;
     }
 
-    vec muzzlepos(int weap, bool secondary = false)
+    vec muzzlepos(int weap = -1, bool secondary = false)
     {
-        if(isweap(weap) && weaptype[weap].muzzle) return checkmuzzlepos(weap);
+        if(isweap(weap)) return checkmuzzlepos(weap);
         return originpos(weap == WEAP_MELEE, secondary);
     }
 
@@ -893,22 +893,22 @@ struct gameent : dynent, gamestate
         return eject;
     }
 
-    vec ejectpos(int weap)
+    vec ejectpos(int weap = -1)
     {
-        if(isweap(weap) && weaptype[weap].eject) return checkejectpos();
-        return muzzlepos(weap);
+        if(isweap(weap)) return checkejectpos();
+        return muzzlepos();
     }
 
     void checkhitboxes()
     {
-        float hsize = max(xradius*0.45f, yradius*0.45f); if(head == vec(-1, -1, -1)) { torso = head; head = o; head.z -= hsize; }
-        vec dir; vecfromyawpitch(yaw, pitch+90, 1, 0, dir); dir.mul(hsize); head.add(dir); hrad = vec(xradius*0.45f, yradius*0.45f, hsize);
-        if(torso == vec(-1, -1, -1)) { torso = o; torso.z -= height*0.5f; } torso.z += hsize*0.5f;
+        float hsize = max(xradius*0.4f, yradius*0.4f); if(head == vec(-1, -1, -1)) { torso = head; head = o; head.z -= hsize; }
+        vec dir; vecfromyawpitch(yaw, pitch+90, 1, 0, dir); dir.mul(hsize); head.add(dir); hrad = vec(xradius*0.4f, yradius*0.4f, hsize);
+        if(torso == vec(-1, -1, -1)) { torso = o; torso.z -= height*0.4f; } torso.z += hsize*0.4f;
         float tsize = (head.z-hrad.z)-torso.z; trad = vec(xradius, yradius, tsize);
         float lsize = ((torso.z-trad.z)-(o.z-height))*0.5f; legs = torso; legs.z -= trad.z+lsize; lrad = vec(xradius*0.8f, yradius*0.8f, lsize);
         if(waist == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.15f); dir.z -= height*0.5f;
+            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.5f); dir.z -= height*0.5f;
             waist = vec(o).add(dir);
         }
         if(lfoot == vec(-1, -1, -1))
