@@ -1443,28 +1443,31 @@ namespace projs
             if(polymodels)
             {
                 if(proj.projtype == PRJ_ENT || (proj.projtype == PRJ_SHOT && proj.weap != WEAP_GRENADE && proj.weap != WEAP_ROCKET)) continue;
-                int colour = 0xAAAAAA;
-                switch(proj.projtype)
+                if(!glaring && !shadowmapping)
                 {
-                    case PRJ_SHOT: colour = weaptype[proj.weap].colour; break;
-                    case PRJ_GIBS: colour = 0x880000; break;
-                    case PRJ_EJECT: colour = 0xBBBB22; break;
-                    case PRJ_DEBRIS: default: colour = 0x888888; break;
+                    int colour = 0xAAAAAA;
+                    switch(proj.projtype)
+                    {
+                        case PRJ_SHOT: colour = weaptype[proj.weap].colour; break;
+                        case PRJ_GIBS: colour = 0x880000; break;
+                        case PRJ_EJECT: colour = 0xBBBB22; break;
+                        case PRJ_DEBRIS: default: colour = 0x888888; break;
+                    }
+                    glPushMatrix();
+                    foggednotextureshader->set();
+                    glDisable(GL_TEXTURE_2D);
+                    vec c((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f);
+                    polyhue(&proj, c, true, true);
+                    glColor3f(c[0], c[1], c[2]);
+                    glTranslatef(proj.o.x, proj.o.y, proj.o.z);
+                    glRotatef(proj.yaw, 0, 0, 1);
+                    glRotatef(proj.roll, 0, -1, 0);
+                    glRotatef(proj.pitch, 1, 0, 0);
+                    polybox(vec(0, 0, 0), proj.height/2*proj.lifesize, proj.height/2*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
+                    defaultshader->set();
+                    glEnable(GL_TEXTURE_2D);
+                    glPopMatrix();
                 }
-                glPushMatrix();
-                foggednotextureshader->set();
-                glDisable(GL_TEXTURE_2D);
-                vec c((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f);
-                polyhue(&proj, c, true, true);
-                glColor3f(c[0], c[1], c[2]);
-                glTranslatef(proj.o.x, proj.o.y, proj.o.z);
-                glRotatef(proj.yaw, 0, 0, 1);
-                glRotatef(proj.roll, 0, -1, 0);
-                glRotatef(proj.pitch, 1, 0, 0);
-                polybox(vec(0, 0, 0), proj.height/2*proj.lifesize, proj.height/2*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
-                defaultshader->set();
-                glEnable(GL_TEXTURE_2D);
-                glPopMatrix();
             }
             else
             {
