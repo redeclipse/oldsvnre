@@ -7,6 +7,8 @@
 #define GAMEVERSION         200
 #define DEMO_VERSION        GAMEVERSION
 
+#define NOMODELS 1
+
 #define MAXAI 256
 #define MAXPLAYERS (MAXCLIENTS + MAXAI)
 
@@ -379,9 +381,9 @@ teamtypes teamtype[] = {
         "flags/red",    "teambeta",         "\fr",      "red"
     },
     {
-        TEAM_ENEMY,     0x664422,           "enemy",
+        TEAM_ENEMY,     0xAAAA22,           "enemy",
         "actors/player",                    "actors/player/hwep",
-        "flags/neutral","team",             "\fo",      "brown"
+        "flags/neutral","team",             "\fy",      "yellow"
     }
 };
 #else
@@ -1111,7 +1113,7 @@ namespace game
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             zoomtime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
                 bloodfade, bloodsize, debrisfade, fogdist, aboveheadfade, announcefilter, dynlighteffects, shownamesabovehead, thirdpersonfollow;
-    extern float bloodscale, debrisscale;
+    extern float bloodscale, debrisscale, polycolour, polylight, polybright;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
     extern string clientmap;
@@ -1180,6 +1182,8 @@ namespace game
     extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir);
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, int style);
     extern void timeupdate(int timeremain);
+
+    extern void playerbox(vec o, float tofloor, float toceil, float xradius, float yradius);
 }
 
 namespace entities

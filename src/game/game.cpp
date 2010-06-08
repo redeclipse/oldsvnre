@@ -762,7 +762,7 @@ namespace game
         {
             concatstring(d->obit, "was ");
             if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
-            else if(isaitype(actor->aitype) && actor->aitype == AI_ZOMBIE) concatstring(d->obit, "a tasty snack for");
+            else if(isaitype(actor->aitype) && actor->aitype == AI_GRUNT) concatstring(d->obit, "a tasty snack for");
             else
             {
                 static const char *obitnames[4][WEAP_MAX] = {
@@ -1048,7 +1048,7 @@ namespace game
     void preload()
     {
         maskpackagedirs(~PACKAGEDIR_OCTA);
-#if 0 // NOMODELS
+#ifndef NOMODELS
         int n = m_fight(gamemode) && m_team(gamemode, mutators) ? numteams(gamemode, mutators)+1 : 1;
         loopi(n)
         {
@@ -1057,8 +1057,8 @@ namespace game
         }
         ai::preload();
         weapons::preload();
-#endif
         projs::preload();
+#endif
         if(m_edit(gamemode) || m_stf(gamemode)) stf::preload();
         if(m_edit(gamemode) || m_ctf(gamemode)) ctf::preload();
         maskpackagedirs(~0);
@@ -2009,7 +2009,7 @@ namespace game
                 }
             }
         }
-        #if 0 // NOMODELS
+        #ifndef NOMODELS
         const char *wepmdl = third ? weaptype[weap].vwep : weaptype[weap].hwep;
         bool hasweapon = showweap && *wepmdl;
         modelattach a[10]; int ai = 0;
@@ -2058,7 +2058,8 @@ namespace game
         d->checktags();
         impulseeffect(d, false);
         fireeffect(d);
-        if(!shadowmapping && !reflecting && !refracting && d->state == CS_ALIVE)
+        #ifdef NOMODELS
+        if(d->state == CS_ALIVE)
         {
             if(d->light.millis != lastmillis)
             {
@@ -2214,6 +2215,7 @@ namespace game
                 glPopMatrix();
             }
         }
+        #endif
     }
 
     void render()
