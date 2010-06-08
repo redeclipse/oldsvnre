@@ -463,11 +463,7 @@ namespace projs
                 proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 #else
                 if(entities::ents.inrange(proj.id))
-                {
-                    gameentity &e = *(gameentity *)entities::ents[proj.id];
-                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];;
-                    proj.height = proj.radius = proj.xradius = proj.yradius = (e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f);
-                }
+                    proj.height = proj.radius = proj.xradius = proj.yradius = enttype[entities::ents[proj.id]->type].radius*0.25f;
                 else proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 #endif
                 proj.lifesize = proj.aboveeye = 1.f;
