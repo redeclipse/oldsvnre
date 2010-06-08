@@ -247,7 +247,7 @@ namespace entities
         switch(type)
         {
             case FLAG: return teamtype[attr[0]].flag;
-            #if 0 // NOMODELS
+            #ifndef NOMODELS
             case PLAYERSTART: return teamtype[attr[0]].tpmdl;
             case WEAPON:
             {
@@ -2335,7 +2335,7 @@ namespace entities
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
-            #if 0 // NOMODELS
+            #ifndef NOMODELS
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
             part_create(PART_HINT_SOFT, 1, o, colour, radius, fluc*skew);
             part_create(PART_EDIT, 1, o, colour, radius*0.75f, fluc*skew);

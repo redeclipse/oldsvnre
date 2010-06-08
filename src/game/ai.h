@@ -1,43 +1,43 @@
 struct gameent;
 
-enum { AI_BOT, AI_TURRET, AI_ZOMBIE, AI_GUARD, AI_HEAVY, AI_PYRO, AI_SNIPER, AI_MAX, AI_START = AI_TURRET };
+enum { AI_BOT, AI_TURRET, AI_GRUNT, AI_GUARD, AI_HEAVY, AI_PYRO, AI_SNIPER, AI_MAX, AI_START = AI_TURRET };
 enum { AI_F_NONE = 0, AI_F_RANDWEAP = 1<<0 };
 #define isaitype(a) (a >= 0 && a <= AI_MAX-1)
 
 struct aistyles
 {
     int type,           weap,           health, maxspeed;  float   xradius,    yradius,    height,     weight;
-    bool    canmove,    canstrafe,  canjump,    useweap,    living;    const char  *name,      *tpmdl,                      *fpmdl;
+    bool    canmove,    canstrafe,  canjump,    useweap,    living;    const char  *name,      *tpmdl,              *fpmdl;
 };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
     {
         AI_BOT,         -1,             0,      50,                 0,          0,          0,          200,
-            true,       true,       true,       true,       true,                  "bot",      "actors/player",             "actors/player/hwep"
+            true,       true,       true,       true,       true,                  "bot",      "actors/player",     "actors/player/hwep"
     },
     {
         AI_TURRET,      WEAP_SMG,       100,    0,                  3,          3,          4,          0,
-            false,      false,      false,      true,       false,                 "turret",   "weapons/smg/hwep",          "actors/player/gamma/hwep"
+            false,      false,      false,      true,       false,                 "turret",   "actors/turret",     "actors/turret/hwep"
     },
     {
-        AI_ZOMBIE,      WEAP_MELEE,     50,     40,                 3,          3,          14,         150,
-            true,       false,      true,       true,       true,                  "zombie",   "actors/z1",                 "actors/player/gamma/hwep"
+        AI_GRUNT,       WEAP_MELEE,     50,     40,                 3,          3,          14,         150,
+            true,       false,      true,       true,       true,                  "grunt",    "actors/grunt",      "actors/player/gamma/hwep"
     },
     {
         AI_GUARD,       WEAP_PISTOL,    50,     50,                 3,          3,          14,         165,
-            true,       true,       true,       true,       true,                  "guard",    "actors/player/gamma",       "actors/player/gamma/hwep"
+            true,       true,       true,       true,       true,                  "guard",    "actors/guard",      "actors/guard/hwep"
     },
     {
         AI_HEAVY,       WEAP_SHOTGUN,   200,    30,                 3,          3,          14,         200,
-            true,       true,       true,       true,       true,                  "heavy",    "actors/player/gamma",       "actors/player/gamma/hwep"
+            true,       true,       true,       true,       true,                  "heavy",    "actors/heavy",      "actors/heavy/hwep"
     },
     {
         AI_PYRO,        WEAP_FLAMER,    150,    40,                 3,          3,          14,         175,
-            true,       true,       true,       true,       true,                  "pyro",     "actors/player/gamma",       "actors/player/gamma/hwep"
+            true,       true,       true,       true,       true,                  "pyro",     "actors/puro",       "actors/puro/hwep"
     },
     {
         AI_SNIPER,      WEAP_RIFLE,     100,    40,                 3,          3,          14,         175,
-            true,       true,       true,       true,       true,                  "sniper",   "actors/player/gamma",       "actors/player/gamma/hwep"
+            true,       true,       true,       true,       true,                  "sniper",   "actors/sniper",      "actors/sniper/hwep"
     },
 };
 #else

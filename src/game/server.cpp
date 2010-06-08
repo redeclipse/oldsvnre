@@ -1104,7 +1104,7 @@ namespace server
                 health = max(health+rnd(health), max(health/5, 10));
                 if(GAME(enemystrength) != 1) health = max(int(health*GAME(enemystrength)), 1);
             }
-            else if(ci->state.aitype == AI_ZOMBIE) weap = aistyle[ci->state.aitype].weap;
+            else if(ci->state.aitype == AI_GRUNT) weap = aistyle[ci->state.aitype].weap;
             if(!isweap(weap)) weap = rnd(WEAP_MAX-1)+1;
         }
         gs.spawnstate(gamemode, mutators, weap, health);

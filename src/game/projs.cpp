@@ -184,13 +184,11 @@ namespace projs
 
     void preload()
     {
-        #if 0 // NOMODELS
         loopi(WEAP_MAX)
         {
             if(*weaptype[i].proj) loadmodel(weaptype[i].proj, -1, true);
             if(*weaptype[i].eprj) loadmodel(weaptype[i].eprj, -1, true);
         }
-        #endif
         const char *mdls[] = { "projs/gibs/gib01", "projs/gibs/gib02", "projs/gibs/gib03", "projs/debris/debris01", "projs/debris/debris02", "projs/debris/debris03", "projs/debris/debris04", "" };
         for(int i = 0; *mdls[i]; i++) loadmodel(mdls[i], -1, true);
     }
@@ -285,6 +283,7 @@ namespace projs
 
     void updatebb(projent &proj, bool init = false)
     {
+        #ifndef NOMODELS
         if(proj.mdl && *proj.mdl)
         {
             float size = 1;
@@ -312,6 +311,7 @@ namespace projs
                 case PRJ_ENT: proj.height += size*proj.scale*4.f; break;
             }
         }
+        #endif
         if(init)
         {
             vec orig = proj.o;
@@ -357,7 +357,7 @@ namespace projs
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT);
                 proj.lifesize = 1;
-                #if 0 // NOMODELS
+                #ifndef NOMODELS
                 proj.mdl = weaptype[proj.weap].proj;
                 #endif
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
@@ -405,6 +405,7 @@ namespace projs
             {
                 proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
+                #ifndef NOMODELS
                 switch(rnd(4))
                 {
                     case 3: proj.mdl = "projs/debris/debris04"; break;
@@ -412,6 +413,7 @@ namespace projs
                     case 1: proj.mdl = "projs/debris/debris02"; break;
                     case 0: default: proj.mdl = "projs/debris/debris01"; break;
                 }
+                #endif
                 proj.aboveeye = 1.0f;
                 proj.elasticity = 0.6f;
                 proj.reflectivity = 0.f;
@@ -429,6 +431,7 @@ namespace projs
             {
                 proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 if(!isweap(proj.weap) && proj.owner) proj.weap = proj.owner->weapselect;
+                #ifndef NOMODELS
                 if(isweap(proj.weap))
                 {
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
@@ -436,6 +439,7 @@ namespace projs
                     proj.lifesize = weaptype[proj.weap].esize;
                 }
                 else { proj.mdl = "projs/catridge"; proj.lifesize = 1; }
+                #endif
                 proj.aboveeye = 1.0f;
                 proj.elasticity = 0.3f;
                 proj.reflectivity = 0.f;
@@ -458,7 +462,7 @@ namespace projs
             }
             case PRJ_ENT:
             {
-                #if 0 // NOMODELS
+                #ifndef NOMODELS
                 proj.height = proj.radius = proj.xradius = proj.yradius = 1;
                 proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 #else
@@ -1333,7 +1337,7 @@ namespace projs
             hits.setsize(0);
             if((proj.projtype != PRJ_SHOT || proj.owner) && proj.state != CS_DEAD)
             {
-                #if 0 // NOMODELS
+                #ifndef NOMODELS
                 if(proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id)) // in case spawnweapon changes
                     proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 #endif
@@ -1431,10 +1435,11 @@ namespace projs
 
     void render()
     {
-        loopv(projs) if(projs[i]->ready(false) && projs[i]->mdl && *projs[i]->mdl)
+        loopv(projs) if(projs[i]->ready(false))
         {
             projent &proj = *projs[i];
-            if(proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id)) continue;
+            #ifndef NOMODELS
+            if(!projs[i]->mdl || !*projs[i]->mdl || (proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id))) continue;
             float trans = 1, size = 1;
             int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_DYNSHADOW|MDL_LIGHT|MDL_CULL_DIST;
             switch(proj.projtype)
@@ -1465,6 +1470,38 @@ namespace projs
                 default: break;
             }
             rendermodel(&proj.light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
+            #else
+            if(proj.projtype == PRJ_ENT || (proj.projtype == PRJ_SHOT && proj.weap != WEAP_GRENADE && proj.weap != WEAP_ROCKET)) continue;
+            int colour = 0xAAAAAA;
+            switch(proj.projtype)
+            {
+                case PRJ_SHOT: colour = weaptype[proj.weap].colour; break;
+                case PRJ_GIBS: colour = 0x880000; break;
+                case PRJ_EJECT: colour = 0xBBBB22; break;
+                case PRJ_DEBRIS: default: colour = 0x888888; break;
+            }
+            if(proj.light.millis != lastmillis)
+            {
+                lightreaching(proj.o, proj.light.color, proj.light.dir, true);
+                dynlightreaching(proj.o, proj.light.color, proj.light.dir);
+                game::lighteffects(&proj, proj.light.color, proj.light.dir);
+                proj.light.millis = lastmillis;
+            }
+            glPushMatrix();
+            notextureshader->set();
+            glDisable(GL_TEXTURE_2D);
+            vec t((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f),
+                c = vec(t).mul(game::polycolour).mul(vec(proj.light.color).mul(game::polylight));
+            glColor3f(max(c[0], t[0]*game::polybright), max(c[1], t[1]*game::polybright), max(c[2], t[2]*game::polybright));
+            glTranslatef(proj.o.x, proj.o.y, proj.o.z);
+            glRotatef(proj.yaw, 0, 0, 1);
+            glRotatef(proj.roll, 0, -1, 0);
+            glRotatef(proj.pitch, 1, 0, 0);
+            game::playerbox(vec(0, 0, 0), proj.height/2*proj.lifesize, proj.height/2*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
+            defaultshader->set();
+            glEnable(GL_TEXTURE_2D);
+            glPopMatrix();
+            #endif
         }
     }
 
@@ -1495,4 +1532,3 @@ namespace projs
         }
     }
 }
-
