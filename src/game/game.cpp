@@ -520,7 +520,7 @@ namespace game
             }
             else if(d->weapselect == i && d->weapstate[i] == WEAP_S_POWER && lastmillis-d->weaplast[i] > 0)
             {
-                const struct powerfxs {
+                static const struct powerfxs {
                     int type, parttype, colour;
                     float size, radius;
                 } powerfx[WEAP_MAX] = {
@@ -1944,7 +1944,7 @@ namespace game
                 if(third)
                 {
                     glPushMatrix();
-                    notextureshader->set();
+                    foggednotextureshader->set();
                     glDisable(GL_TEXTURE_2D);
                     int colour = teamtype[d->team].colour;
                     if(fireburning && fireburntime && ((lastmillis%1000)/100)%10 && d->onfire(lastmillis, fireburntime))
@@ -2045,7 +2045,7 @@ namespace game
                         { 0.4f, 0.4f, 1.2f }, // rocket
                     };
                     glPushMatrix();
-                    notextureshader->set();
+                    foggednotextureshader->set();
                     glDisable(GL_TEXTURE_2D);
                     vec o = d->origin;
                     if(!third && firstpersonsway && !intermission)
