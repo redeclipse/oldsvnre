@@ -2311,7 +2311,7 @@ namespace entities
         part_portal(e.o, radius, 1, yaw, e.attrs[1], PART_TELEPORT, 0, colour);
     }
 
-    void drawparticle(gameentity &e, const vec &o, int idx, bool spawned, float skew)
+    void drawparticle(gameentity &e, const vec &o, int idx, bool spawned, bool active, float skew)
     {
         switch(e.type)
         {
@@ -2329,18 +2329,33 @@ namespace entities
         vec off(0, 0, 2.f), pos(o);
         if(enttype[e.type].usetype == EU_ITEM) pos.add(off);
         bool edit = m_edit(game::gamemode) && cansee(e), isedit = edit && game::player1->state == CS_EDITING,
-                item = enttype[e.type].usetype == EU_ITEM && (spawned || (e.lastuse && lastmillis-e.lastuse < 500)),
                 hasent = isedit && idx >= 0 && (entgroup.find(idx) >= 0 || enthover == idx);
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-        if(item)
+        if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
+            #if 0 // NOMODELS
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
             part_create(PART_HINT_SOFT, 1, o, colour, radius, fluc*skew);
             part_create(PART_EDIT, 1, o, colour, radius*0.75f, fluc*skew);
+            #else
+            float fade = active ? 1 : 0.5f;
+            if(active) part_create(PART_HINT_SOFT, 1, o, colour, ((enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, fluc*skew);
+            const char *texname = hud::itemtex(e.type, attr);
+            if(texname && *texname) part_icon(o, textureload(texname, 3), enttype[e.type].radius*0.2f*skew, skew*fade, 0, 0, 1, colour);
+            else
+            {
+                const char *item = entinfo(e.type, e.attrs, false);
+                if(item && *item)
+                {
+                    defformatstring(ds)("<emphasis>%s", item);
+                    part_textcopy(o, ds, PART_TEXT, 1, colour, enttype[e.type].radius*0.12f*skew, skew*fade, 0);
+                }
+            }
+            #endif
         }
-        if(isedit ? (showentinfo >= (hasent ? 2 : 3)) : (item && showentdescs >= 3))
+        if(isedit ? (showentinfo >= (hasent ? 2 : 3)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
             const char *itxt = entinfo(e.type, e.attrs, isedit);
             if(itxt && *itxt)
@@ -2393,17 +2408,23 @@ namespace entities
             if(e.type != PARTICLES && e.type != TELEPORT && !m_edit(game::gamemode) && enttype[e.type].usetype != EU_ITEM) continue;
             if(e.o.squaredist(camera1->o) > maxdist) continue;
             float skew = 1;
+            bool active = false;
             if(e.spawned)
             {
                 int millis = lastmillis-e.lastspawn;
                 if(millis < 500) skew = float(millis)/500.f;
+                active = true;
             }
             else if(e.lastuse)
             {
                 int millis = lastmillis-e.lastuse;
-                if(millis < 500) skew = 1.f-(float(millis)/500.f);
+                if(millis < 500)
+                {
+                    skew = 1.f-(float(millis)/500.f);
+                    active = true;
+                }
             }
-            drawparticle(e, e.o, i, e.spawned, skew);
+            drawparticle(e, e.o, i, e.spawned, active, skew);
         }
         loopv(projs::projs)
         {
@@ -2411,17 +2432,27 @@ namespace entities
             if(proj.projtype != PRJ_ENT || !ents.inrange(proj.id)) continue;
             gameentity &e = *(gameentity *)ents[proj.id];
             float skew = 1;
+            bool active = false;
             if(proj.fadetime && proj.lifemillis)
             {
                 int interval = min(proj.lifemillis, proj.fadetime);
-                if(proj.lifetime < interval) skew = float(proj.lifetime)/float(interval);
+                if(proj.lifetime < interval)
+                {
+                    skew = float(proj.lifetime)/float(interval);
+                    active = true;
+                }
                 else if(proj.lifemillis > interval)
                 {
                     interval = min(proj.lifemillis-interval, proj.fadetime);
-                    if(proj.lifemillis-proj.lifetime < interval) skew = float(proj.lifemillis-proj.lifetime)/float(interval);
+                    if(proj.lifemillis-proj.lifetime < interval)
+                    {
+                        skew = float(proj.lifemillis-proj.lifetime)/float(interval);
+                        active = true;
+                    }
                 }
             }
-            drawparticle(e, proj.o, -1, proj.ready(), skew);
+            else if(proj.ready()) active = true;
+            drawparticle(e, proj.o, -1, proj.ready(), active, skew);
         }
     }
 }
