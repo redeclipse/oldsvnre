@@ -283,7 +283,7 @@ namespace projs
 
     void updatebb(projent &proj, bool init = false)
     {
-        if(!game::polymodels && proj.mdl && *proj.mdl)
+        if(!polymodels && proj.mdl && *proj.mdl)
         {
             float size = 1;
             switch(proj.projtype)
@@ -346,7 +346,8 @@ namespace projs
         {
             case PRJ_SHOT:
             {
-                proj.height = proj.radius = proj.xradius = proj.yradius = WEAP2(proj.weap, radius, proj.flags&HIT_ALT);
+                proj.radius = proj.xradius = proj.yradius = WEAP2(proj.weap, radius, proj.flags&HIT_ALT);
+                proj.height = proj.radius*2;
                 proj.elasticity = WEAP2(proj.weap, elasticity, proj.flags&HIT_ALT);
                 proj.reflectivity = WEAP2(proj.weap, reflectivity, proj.flags&HIT_ALT);
                 proj.relativity = WEAP2(proj.weap, relativity, proj.flags&HIT_ALT);
@@ -355,7 +356,7 @@ namespace projs
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT);
                 proj.lifesize = 1;
-                if(!game::polymodels) proj.mdl = weaptype[proj.weap].proj;
+                if(!polymodels) proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
                 break;
@@ -405,7 +406,7 @@ namespace projs
                 proj.radius = proj.xradius = 1.5f-(rnd(100)/100.f);
                 proj.yradius = 1.5f-(rnd(100)/100.f);
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
-                if(!game::polymodels) switch(rnd(4))
+                if(!polymodels) switch(rnd(4))
                 {
                     case 3: proj.mdl = "projs/debris/debris04"; break;
                     case 2: proj.mdl = "projs/debris/debris03"; break;
@@ -432,12 +433,12 @@ namespace projs
                 if(isweap(proj.weap))
                 {
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
-                    if(!game::polymodels) proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
+                    if(!polymodels) proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
                 }
                 else
                 {
-                    if(!game::polymodels) proj.mdl = "projs/catridge";
+                    if(!polymodels) proj.mdl = "projs/catridge";
                     proj.lifesize = 1;
                 }
                 proj.aboveeye = 1.0f;
@@ -462,7 +463,7 @@ namespace projs
             }
             case PRJ_ENT:
             {
-                if(game::polymodels)
+                if(polymodels)
                 {
                     if(entities::ents.inrange(proj.id))
                         proj.height = proj.radius = proj.xradius = proj.yradius = enttype[entities::ents[proj.id]->type].radius*0.25f;
@@ -1340,7 +1341,7 @@ namespace projs
             hits.setsize(0);
             if((proj.projtype != PRJ_SHOT || proj.owner) && proj.state != CS_DEAD)
             {
-                if(!game::polymodels && proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id)) // in case spawnweapon changes
+                if(!polymodels && proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id)) // in case spawnweapon changes
                     proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 if(proj.waittime > 0)
                 {
@@ -1439,7 +1440,7 @@ namespace projs
         loopv(projs) if(projs[i]->ready(false))
         {
             projent &proj = *projs[i];
-            if(game::polymodels)
+            if(polymodels)
             {
                 if(proj.projtype == PRJ_ENT || (proj.projtype == PRJ_SHOT && proj.weap != WEAP_GRENADE && proj.weap != WEAP_ROCKET)) continue;
                 int colour = 0xAAAAAA;
@@ -1450,24 +1451,17 @@ namespace projs
                     case PRJ_EJECT: colour = 0xBBBB22; break;
                     case PRJ_DEBRIS: default: colour = 0x888888; break;
                 }
-                if(proj.light.millis != lastmillis)
-                {
-                    lightreaching(proj.o, proj.light.color, proj.light.dir, true);
-                    dynlightreaching(proj.o, proj.light.color, proj.light.dir);
-                    game::lighteffects(&proj, proj.light.color, proj.light.dir);
-                    proj.light.millis = lastmillis;
-                }
                 glPushMatrix();
                 notextureshader->set();
                 glDisable(GL_TEXTURE_2D);
-                vec t((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f),
-                    c = vec(t).mul(game::polycolour).mul(vec(proj.light.color).mul(game::polylight));
-                glColor3f(max(c[0], t[0]*game::polybright), max(c[1], t[1]*game::polybright), max(c[2], t[2]*game::polybright));
+                vec c((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f);
+                polyhue(&proj, c, true, true);
+                glColor3f(c[0], c[1], c[2]);
                 glTranslatef(proj.o.x, proj.o.y, proj.o.z);
                 glRotatef(proj.yaw, 0, 0, 1);
                 glRotatef(proj.roll, 0, -1, 0);
                 glRotatef(proj.pitch, 1, 0, 0);
-                game::playerbox(vec(0, 0, 0), proj.height/2*proj.lifesize, proj.height/2*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
+                polybox(vec(0, 0, 0), proj.height/2*proj.lifesize, proj.height/2*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
                 defaultshader->set();
                 glEnable(GL_TEXTURE_2D);
                 glPopMatrix();

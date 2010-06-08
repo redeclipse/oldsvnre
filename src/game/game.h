@@ -1110,8 +1110,8 @@ namespace game
 {
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             zoomtime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
-                bloodfade, bloodsize, debrisfade, fogdist, aboveheadfade, announcefilter, dynlighteffects, shownamesabovehead, thirdpersonfollow;
-    extern float bloodscale, debrisscale, polymodels, polycolour, polylight, polybright;
+                bloodfade, bloodsize, debrisfade, aboveheadfade, announcefilter, dynlighteffects, shownamesabovehead, thirdpersonfollow;
+    extern float bloodscale, debrisscale;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
     extern string clientmap;
@@ -1180,8 +1180,6 @@ namespace game
     extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir);
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, int style);
     extern void timeupdate(int timeremain);
-
-    extern void playerbox(vec o, float tofloor, float toceil, float xradius, float yradius);
 }
 
 namespace entities
