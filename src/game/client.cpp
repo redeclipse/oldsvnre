@@ -475,7 +475,8 @@ namespace client
             defformatstring(ft)("%s", escapetext(text));
             defformatstring(fs)("%s", escapetext(s));
             defformatstring(act)("%s %d %d \"%s\" \"%s\" \"%s\"", flags&SAY_ACTION ? "on_action" : "on_text", d->clientnum, flags&SAY_TEAM ? 1 : 0, fn, ft, fs);
-            snd = execute(act);
+            int ret = execute(act);
+            if(ret > 0) snd = ret;
         }
         conoutft(CON_CHAT, "%s", s);
         playsound(snd, d->o, d, d == game::focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
