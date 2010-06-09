@@ -261,7 +261,7 @@ namespace projs
                 {
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude(), 0.25f, 2.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = clamp(mag*2, 10, 255);
-                    playsound(S_SPLOSH, proj.o, NULL, 0, vol);
+                    playsound(S_SPLOSH+rnd(S_R_SPLOSH), proj.o, NULL, 0, vol);
                     break;
                 } // otherwise fall through
             }
@@ -274,7 +274,7 @@ namespace projs
             case PRJ_EJECT:
             {
                 int mag = int(proj.vel.magnitude()), vol = clamp(mag*3, 10, 255);
-                playsound(S_SHELL1+rnd(6), proj.o, NULL, 0, vol);
+                playsound(S_SHELL+rnd(S_R_SHELL), proj.o, NULL, 0, vol);
                 break;
             }
             default: break;
@@ -601,10 +601,10 @@ namespace projs
             {
                 int ends = lastmillis+(WEAP2(weap, adelay, flags&HIT_ALT)*2);
                 if(issound(d->wschan)) sounds[d->wschan].ends = ends;
-                else playsound(weaptype[weap].sound+(flags&HIT_ALT ? 1 : 0), d->o, d, SND_LOOP, -1, -1, -1, &d->wschan, ends);
+                else playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY), d->o, d, SND_LOOP, -1, -1, -1, &d->wschan, ends);
             }
             else if(!WEAP2(weap, time, flags&HIT_ALT) || life)
-                playsound(weaptype[weap].sound+(flags&HIT_ALT ? 1 : 0), d->o, d, 0, -1, -1, -1, &d->wschan);
+                playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY), d->o, d, 0, -1, -1, -1, &d->wschan);
         }
         float muz = muzzleblend; if(d == game::focus) muz *= 0.5f;
         const struct weapfxs
@@ -639,11 +639,7 @@ namespace projs
         }
 
         loopv(locs)
-        {
-            int pdelay = delay*i, plife = life;
-            if(weaptype[weap].traced && plife > adelay-pdelay) plife = max(adelay-pdelay, 40);
-            create(from, locs[i], local, d, PRJ_SHOT, max(plife, 1), WEAP2(weap, time, flags&HIT_ALT), millis+pdelay, speed, 0, weap, flags, scale);
-        }
+            create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), millis+delay*i, speed, 0, weap, flags, scale);
         if(ejectfade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
@@ -688,7 +684,7 @@ namespace projs
                 switch(weaptype[proj.weap].fsound)
                 {
                     case S_BEEP: case S_BURN: case S_BURNING: vol = 55+int(200*proj.lifespan*proj.scale); break;
-                    case S_WHIZZ: case S_WHIRR: vol = 55+int(200*(1.f-proj.lifespan)*proj.scale); break;
+                    case S_WHIZZ: vol = 55+int(200*(1.f-proj.lifespan)*proj.scale); break;
                     default: break;
                 }
                 if(issound(proj.schan)) sounds[proj.schan].vol = vol;
