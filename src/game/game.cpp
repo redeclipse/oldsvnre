@@ -515,7 +515,7 @@ namespace game
             if(d->state != CS_ALIVE || lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS))
             {
                 if(playreloadnotify >= ((d == focus ? 1 : 2)*(WEAP(i, add) < WEAP(i, max) ? 2 : 1)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
-                    playsound(S_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+                    playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
                 d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
             }
             else if(d->weapselect == i && d->weapstate[i] == WEAP_S_POWER && lastmillis-d->weaplast[i] > 0)
@@ -614,17 +614,13 @@ namespace game
 
         void play()
         {
-            int snd = S_DAMAGE1;
-            if(flags&CRIT) snd = S_CRITDAMAGE;
-            else if(flags&BURN) snd = S_BURNDAMAGE;
-            else if(damage >= 200) snd += 7;
-            else if(damage >= 150) snd += 6;
-            else if(damage >= 100) snd += 5;
-            else if(damage >= 75) snd += 4;
-            else if(damage >= 50) snd += 3;
-            else if(damage >= 25) snd += 2;
-            else if(damage >= 10) snd += 1;
-            playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+            const int dmgsnd[S_R_DAMAGE] = { 0, 10, 25, 50, 75, 100, 150, 200 };
+            int snd = -1;
+            if(flags&CRIT) snd = S_CRITICAL;
+            else if(flags&BURN) snd = S_BURNED;
+            else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
+            if(snd >= 0 && snd < S_MAX)
+                playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
         }
     };
     vector<damagetone> damagetones;
@@ -672,7 +668,7 @@ namespace game
                             part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 100, DECAL_BLOOD, int(d->radius*4));
                         else part_splash(PART_HINT, int(clamp(damage/2, 2, 10)), bloodfade, p, 0xFFFF88, 1.5f, 1, 50, DECAL_STAIN, int(d->radius*4));
                     }
-                    if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN1+rnd(5), d->o, d, 0, -1, -1, -1, &d->vschan);
+                    if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);
                     if(!burning) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
                     d->lastpain = lastmillis;
                 }
@@ -733,7 +729,7 @@ namespace game
         d->state = CS_DEAD;
         d->deaths++;
         d->obliterated = (style&FRAG_OBLITERATE) != 0;
-        int anc = -1, dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DIE1+rnd(2);
+        int anc = -1, dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH+rnd(S_R_SPLOSH) : S_PAIN+rnd(S_R_DIE);
         if(d == focus) anc = !m_duke(gamemode, mutators) && !m_trial(gamemode) ? S_V_FRAGGED : -1;
         else d->resetinterp();
         formatstring(d->obit)("%s ", colorname(d));
@@ -869,21 +865,21 @@ namespace game
                     concatstring(d->obit, " \fs\fzRedouble-killing\fS");
                     part_text(az, "<super>\fzvrDOUBLE-KILL", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
                     if(actor == focus) { part_text(dz, "<super>\fzvrDOUBLE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4; }
-                    if(!override) anc = S_V_MKILL1;
+                    if(!override) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     concatstring(d->obit, " \fs\fzRetriple-killing\fS");
                     part_text(az, "<super>\fzvrTRIPLE-KILL", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
                     if(actor == focus) { part_text(dz, "<super>\fzvrTRIPLE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4; }
-                    if(!override) anc = S_V_MKILL1;
+                    if(!override) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzRemulti-killing\fS");
                     part_text(az, "<super>\fzvrMULTI-KILL", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
                     if(actor == focus) { part_text(dz, "<super>\fzvrMULTI", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4; }
-                    if(!override) anc = S_V_MKILL1;
+                    if(!override) anc = S_V_MULTI;
                 }
             }
 
@@ -898,7 +894,7 @@ namespace game
             {
                 concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
                 part_text(az, "<super>\fzcgCARNAGE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                if(!override) anc = S_V_SPREE1;
+                if(!override) anc = S_V_SPREE;
                 override = true;
             }
             else if(style&FRAG_SPREE2)
@@ -920,20 +916,6 @@ namespace game
                 concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
                 part_text(az, "<super>\fzcgBLOODBATH", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
                 if(!override) anc = S_V_SPREE4;
-                override = true;
-            }
-            else if(style&FRAG_SPREE5)
-            {
-                concatstring(d->obit," on a \fs\fzcgrampage\fS");
-                part_text(az, "<super>\fzcgRAMPAGE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                if(!override) anc = S_V_SPREE5;
-                override = true;
-            }
-            else if(style&FRAG_SPREE6)
-            {
-                concatstring(d->obit, " who seems \fs\fzcgunstoppable\fS");
-                part_text(az, "<super>\fzcgUNSTOPPABLE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                if(!override) anc = S_V_SPREE6;
                 override = true;
             }
         }
