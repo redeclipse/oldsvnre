@@ -24,7 +24,7 @@ namespace physics
     VAR(IDF_PERSIST, physinterp,        0, 1, 1);
 
     VAR(IDF_PERSIST, impulseaction,     0, 1, 2);               // determines if impulse remains active when pushed, 0 = off, 1 = only if no gravity or impulsestyle requires no ground contact, 2 = always
-    VAR(IDF_PERSIST, impulsedash,       0, 1, 3);               // determines how impulsedash works, 0 = off, 1 = double jump, 2 = double tap, 3 = double jump only
+    VAR(IDF_PERSIST, impulsedash,       0, 3, 3);               // determines how impulsedash works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
     VAR(IDF_PERSIST, crouchstyle,       0, 1, 2);               // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
     VAR(IDF_PERSIST, sprintstyle,       0, 4, 5);               // 0 = press and hold, 1 = double-tap toggle, 2 = toggle, 3-5 = inverted
@@ -41,7 +41,7 @@ namespace physics
             game::player1->v = dir; \
             if(down) \
             { \
-                if(allowimpulse(1) && impulsedash == 2 && last##v && lastdir##v && dir == lastdir##v && lastmillis-last##v < PHYSMILLIS) \
+                if(allowimpulse(1) && impulsedash >= 2 && last##v && lastdir##v && dir == lastdir##v && lastmillis-last##v < PHYSMILLIS) \
                 { \
                     game::player1->action[AC_DASH] = true; \
                     game::player1->actiontime[AC_DASH] = lastmillis; \
@@ -666,10 +666,10 @@ namespace physics
                 d->resetphys();
             }
 
-            if((d->ai || (impulsedash > 0 && impulsedash < 3)) && canimpulse(d, 0, 1) && (d->move || d->strafe) && (!d->ai && impulsedash == 2 ? d->action[AC_DASH] : d->action[AC_JUMP] && !onfloor))
+            if((d->ai || impulsedash) && canimpulse(d, 0, 1) && (d->move || d->strafe) && (!d->ai && ((impulsedash >= 2 && d->action[AC_DASH]) || (impulsedash != 2 && d->action[AC_JUMP] && !onfloor))))
             {
                 float mag = impulsespeed+max(d->vel.magnitude(), 1.f);
-                vecfromyawpitch(d->aimyaw, !d->ai && impulsedash == 2 ? max(d->aimpitch, 10.f) : d->aimpitch, d->move, d->strafe, d->vel);
+                vecfromyawpitch(d->aimyaw, onfloor ? max(d->aimpitch, 10.f) : d->aimpitch, d->move, d->strafe, d->vel);
                 d->vel.normalize().mul(mag); d->vel.z += mag/4;
                 d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_DASH, lastmillis);
                 playsound(S_IMPULSE, d->o, d); game::impulseeffect(d, true);
