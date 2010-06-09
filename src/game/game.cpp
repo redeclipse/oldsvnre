@@ -23,7 +23,7 @@ namespace game
     VAR(IDF_PERSIST, mouseabsolute, 0, 0, 1);
     VAR(IDF_PERSIST, mousetype, 0, 0, 2);
     VAR(IDF_PERSIST, mousedeadzone, 0, 10, 100);
-    VAR(IDF_PERSIST, mousepanspeed, 1, 30, INT_MAX-1);
+    VAR(IDF_PERSIST, mousepanspeed, 1, 50, INT_MAX-1);
 
     VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
     VAR(IDF_PERSIST, thirdpersonfollow, 0, 0, 1);
