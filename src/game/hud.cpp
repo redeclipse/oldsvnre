@@ -42,9 +42,10 @@ namespace hud
     VAR(IDF_PERSIST, spawnfade, 0, 2000, INT_MAX-1);
 
     VAR(IDF_PERSIST, commandfade, 0, 250, INT_MAX-1);
-    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.8f, 1);
+    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, commandfadeskew, 0, 0.25f, 1);
     VAR(IDF_PERSIST, uifade, 0, 250, INT_MAX-1);
-    FVAR(IDF_PERSIST, uifadeamt, 0, 0.8f, 1);
+    FVAR(IDF_PERSIST, uifadeamt, 0, 0.75f, 1);
 
     int conskip = 0;
     void setconskip(int *n)
@@ -952,7 +953,7 @@ namespace hud
         if(!progressing) drawpointers(hudwidth, hudheight);
     }
 
-    void drawconsole(int type, int w, int h, int x, int y, int s)
+    void drawconsole(int type, int w, int h, int x, int y, int s, float fade)
     {
         static vector<int> refs; refs.setsize(0);
         bool full = fullconsole || commandmillis > 0;
@@ -992,7 +993,7 @@ namespace hud
                     int len = !full && conlines[refs[j]].type > CON_CHAT ? chatcontime/2 : chatcontime;
                     float f = full || !chatconfade ? 1.f : clamp(((len+chatconfade)-(totalmillis-conlines[refs[j]].reftime))/float(chatconfade), 0.f, 1.f),
                         g = conlines[refs[j]].type > CON_CHAT ? conblend : chatconblend;
-                    z -= draw_textx("%s", r, z, 255, 255, 255, int(255*hudblend*f*g), TEXT_LEFT_UP, -1, s, conlines[refs[j]].cref)*f;
+                    z -= draw_textx("%s", r, z, 255, 255, 255, int(255*fade*f*g), TEXT_LEFT_UP, -1, s, conlines[refs[j]].cref)*f;
                 }
             }
         }
@@ -1030,7 +1031,7 @@ namespace hud
                     int len = !full && conlines[refs[i]].type < CON_IMPORTANT ? contime/2 : contime;
                     float f = full || !confade ? 1.f : clamp(((len+confade)-(totalmillis-conlines[refs[i]].reftime))/float(confade), 0.f, 1.f),
                         g = full || conlines[refs[i]].type >= CON_IMPORTANT ? fullconblend : conblend;
-                    z += draw_textx("%s", concenter ? x+s/2 : x, z, 255, 255, 255, int(255*hudblend*f*g), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s, conlines[refs[i]].cref)*f;
+                    z += draw_textx("%s", concenter ? x+s/2 : x, z, 255, 255, 255, int(255*fade*f*g), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s, conlines[refs[i]].cref)*f;
                 }
             }
             if(commandmillis > 0)
@@ -1040,9 +1041,9 @@ namespace hud
                 float f = float(totalmillis%1000)/1000.f;
                 if(f < 0.5f) f = 1.f-f;
                 glBindTexture(GL_TEXTURE_2D, t->id);
-                glColor4f(1.f, 1.f, 1.f, fullconblend*hudblend*f);
+                glColor4f(1.f, 1.f, 1.f, fullconblend*fade*f);
                 drawtex(x, z, FONTH, FONTH);
-                z += draw_textx("%s", (concenter ? x+s/2-FONTW*3 : x)+(FONTH+FONTW), z, 255, 255, 255, int(255*fullconblend*hudblend), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, commandpos >= 0 ? commandpos : strlen(commandbuf), s-(FONTH+FONTW), commandbuf);
+                z += draw_textx("%s", (concenter ? x+s/2-FONTW*3 : x)+(FONTH+FONTW), z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, commandpos >= 0 ? commandpos : strlen(commandbuf), s-(FONTH+FONTW), commandbuf);
                 popfont();
             }
         }
@@ -1908,7 +1909,7 @@ namespace hud
 
     void drawhud(bool noview)
     {
-        float fade = hudblend;
+        float fade = hudblend, consolefade = hudblend;
         if(!progressing)
         {
             vec colour = vec(1, 1, 1);
@@ -1967,7 +1968,9 @@ namespace hud
                 usetexturing(false);
                 drawblend(0, 0, screen->w, screen->h, colour.x, colour.y, colour.z);
                 usetexturing(true);
-                fade *= min(colour.x, min(colour.y, colour.z));
+                float amt = (colour.x+colour.y+colour.z)/3.f;
+                if(!commandmillis || (commandmillis < 0 && totalmillis-abs(commandmillis) > commandfade)) consolefade *= amt+((1.f-amt)*commandfadeskew);
+                fade *= amt;
             }
         }
 
@@ -1982,9 +1985,9 @@ namespace hud
         else if(showhud && client::ready() && fade > 0) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
         if(UI::ready && showconsole)
         {
-            drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2);
+            drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
             if(showconsole >= 2 && !noview && !progressing)
-                drawconsole(2, hudwidth, hudheight, br+gap, by, showfps > 1 || showstats > (m_edit(game::gamemode) ? 0 : 1) ? bs-gap*2 : (bs-gap*2)*2);
+                drawconsole(2, hudwidth, hudheight, br+gap, by, showfps > 1 || showstats > (m_edit(game::gamemode) ? 0 : 1) ? bs-gap*2 : (bs-gap*2)*2, consolefade);
         }
 
         glDisable(GL_BLEND);
