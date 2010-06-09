@@ -53,8 +53,8 @@ namespace projs
             flags |= HIT_WAVE;
         }
         if(flags&HIT_HEAD) damage = int(ceilf(damage*damagescale));
-        else if(flags&HIT_TORSO) damage = int(ceilf(damage*0.5f*damagescale));
-        else if(flags&HIT_LEGS) damage = int(ceilf(damage*0.25f*damagescale));
+        else if(flags&HIT_TORSO) damage = int(ceilf(damage*WEAP2(weap, torsodam, flags&HIT_ALT)*damagescale));
+        else if(flags&HIT_LEGS) damage = int(ceilf(damage*WEAP2(weap, legsdam, flags&HIT_ALT)*damagescale));
         else damage = 0;
 
         return damage;
@@ -137,20 +137,20 @@ namespace projs
             if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
             {
                 vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
-                dist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
-                flags |= HIT_LEGS;
+                float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
+                if(fdist/WEAP2(proj.weap, legsdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags |= HIT_LEGS; }
             }
             if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
             {
                 vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
-                dist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
-                flags |= HIT_LEGS;
+                float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
+                if(fdist/WEAP2(proj.weap, torsodam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags |= HIT_TORSO; }
             }
             if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
             {
                 vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
-                dist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
-                flags |= HIT_HEAD;
+                float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
+                if(fdist <= dist) { dist = fdist; flags |= HIT_HEAD; }
             }
         }
         else
