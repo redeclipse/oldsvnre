@@ -116,7 +116,7 @@ namespace hud
     FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairthrob, 1e-3f, 0.3f, 1000);
-    TVAR(IDF_PERSIST, relativecursortex, "textures/crosshair", 3);
+    TVAR(IDF_PERSIST, relativecursortex, "textures/relative", 3);
     TVAR(IDF_PERSIST, guicursortex, "textures/cursor", 3);
     TVAR(IDF_PERSIST, editcursortex, "textures/crosshair", 3);
     TVAR(IDF_PERSIST, speccursortex, "textures/crosshair", 3);
@@ -646,18 +646,23 @@ namespace hud
                 cs += int(cs*crosshairthrob*skew);
             }
         }
-        int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory), nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f);
-        drawpointerindex(index, game::mousestyle() != 1 ? cx : nx, game::mousestyle() != 1 ? cy : ny, cs, r, g, b, fade);
-        if(index > POINTER_GUI)
+        int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory);
+        if(index != POINTER_GUI)
         {
-            if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
+            int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f);
+            drawpointerindex(index, game::mousestyle() != 1 ? cx : nx, game::mousestyle() != 1 ? cy : ny, cs, r, g, b, fade);
+            if(index > POINTER_GUI)
             {
-                if(showclips) drawclip(game::focus->weapselect, nx, ny, clipsize*hudsize);
-                if(showindicator && game::focus == game::player1) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), game::focus->action[AC_ALTERNATE]);
+                if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
+                {
+                    if(showclips) drawclip(game::focus->weapselect, nx, ny, clipsize*hudsize);
+                    if(showindicator && game::focus == game::player1) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), game::focus->action[AC_ALTERNATE]);
+                }
+                if(game::mousestyle() >= 1) // renders differently
+                    drawpointerindex(POINTER_RELATIVE, game::mousestyle() != 1 ? nx : cx, game::mousestyle() != 1 ? ny : cy, int(crosshairsize*hudsize), 1, 1, 1, crosshairblend*hudblend);
             }
-            if(game::mousestyle() >= 1) // renders differently
-                drawpointerindex(POINTER_RELATIVE, game::mousestyle() != 1 ? nx : cx, game::mousestyle() != 1 ? ny : cy, int(crosshairsize*hudsize), 1, 1, 1, crosshairblend*hudblend);
         }
+        else drawpointerindex(index, cx, cy, cs, r, g, b, fade);
     }
 
     void drawpointers(int w, int h)
