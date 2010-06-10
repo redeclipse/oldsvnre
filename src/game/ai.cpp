@@ -1146,7 +1146,8 @@ namespace ai
 
     bool hasrange(gameent *d, gameent *e, int weap)
     {
-        if(e && targetable(d, e, true))
+        if(!e) return true;
+        if(targetable(d, e, true))
         {
             loopk(2)
             {
