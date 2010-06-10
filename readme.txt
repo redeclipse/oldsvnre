@@ -117,3 +117,4 @@ Supporters
  Henrik "ahven" Pihl, Robert "Homicidal" Crane, Wayne Bennett,
  Cameron "Rhubarb" Dawdy, Christopher "paroneayea" Webber,
  Mark "xtort-" Doodeman, Vadim Peretokin, Taiyo Rawle, CD Xbow,
+ FearFighter
