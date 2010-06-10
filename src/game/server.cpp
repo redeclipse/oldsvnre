@@ -2911,7 +2911,7 @@ namespace server
                     bool found = finditem(i, true);
                     if(allowed && thresh && i == lowest[sents[i].type])
                     {
-                        float dist = float(items[sents[i].type])/float(numclients(-1, true, AI_BOT))/float(GAME(maxcarry));
+                        float dist = items[sents[i].type]/float(numclients(-1, true, AI_BOT)*GAME(maxcarry));
                         if(dist < GAME(itemthreshold)) found = false;
                     }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))

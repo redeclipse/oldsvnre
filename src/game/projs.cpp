@@ -365,10 +365,10 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
-                proj.lifesize = 1.5f-(rnd(100)/100.f);
                 if(!kidmode)
                 {
+                    proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
+                    proj.lifesize = 1.5f-(rnd(100)/100.f);
                     if(proj.owner)
                     {
                         if(proj.owner->state == CS_DEAD || proj.owner->state == CS_WAITING)
@@ -396,6 +396,7 @@ namespace projs
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                     proj.escaped = !proj.owner;
                     proj.fadetime = rnd(250)+250;
+                    proj.extinguish = 2;
                     break;
                 } // otherwise fall through
             }
@@ -445,6 +446,7 @@ namespace projs
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = rnd(250)+250;
+                proj.extinguish = 2;
                 if(proj.owner)
                 {
                     if(proj.owner == game::focus && !game::thirdpersonview())
@@ -480,6 +482,7 @@ namespace projs
                 if(proj.owner) proj.o.sub(vec(0, 0, proj.owner->height*0.2f));
                 proj.vel.add(vec(rnd(51)-25, rnd(51)-25, rnd(25)));
                 proj.fadetime = 500;
+                proj.extinguish = 2;
                 break;
             }
             default: break;
