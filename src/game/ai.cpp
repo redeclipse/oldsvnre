@@ -503,7 +503,7 @@ namespace ai
             }
             if(proceed && (!aistyle[d->aitype].canmove || makeroute(d, b, n.node, false)))
             {
-                d->ai->addstate(n.state, n.targtype, n.target);
+                d->ai->switchstate(b, n.state, n.targtype, n.target);
                 return true;
             }
         }
@@ -616,7 +616,7 @@ namespace ai
                         }
                         continue;
                     }
-                    d->ai->addstate(AI_S_INTEREST, AI_T_ENTITY, ent);
+                    d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
                 }
             }
         }
@@ -659,7 +659,7 @@ namespace ai
             if(target(d, b, true, true)) return 1;
             if(aistyle[d->aitype].canmove && randomnode(d, b, SIGHTMIN, 1e16f))
             {
-                d->ai->addstate(AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
+                d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
                 return 1;
             }
             d->ai->suspended = true; // fine then..
