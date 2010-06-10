@@ -147,9 +147,9 @@ namespace entities
             }
             case ACTOR:
             {
-                if(full && attr[0] >= AI_START && attr[0] < AI_MAX)
+                if(full && attr[0] >= 0 && attr[0] < AI_MAX-AI_START)
                 {
-                    addentinfo(aistyle[attr[0]].name);
+                    addentinfo(aistyle[attr[0]+AI_START].name);
                     if(attr[3] && attr[3] > -G_MAX && attr[3] < G_MAX)
                     {
                         string ds;
@@ -157,7 +157,7 @@ namespace entities
                         else formatstring(ds)("%s", gametype[attr[3]].name);
                         addentinfo(ds);
                     }
-                    addentinfo(weaptype[attr[5] > 0 && attr[5] <= WEAP_MAX ? attr[5]-1 : aistyle[attr[0]].weap].name);
+                    addentinfo(weaptype[attr[5] > 0 && attr[5] <= WEAP_MAX ? attr[5]-1 : aistyle[attr[0]+AI_START].weap].name);
                 }
                 break;
             }
@@ -254,7 +254,7 @@ namespace entities
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: if(attr[0] >= AI_START && attr[0] < AI_MAX) return polymodels ? "" : aistyle[attr[0]].tpmdl;
+            case ACTOR: if(attr[0] >= 0 && attr[0] < AI_MAX-AI_START) return polymodels ? "" : aistyle[attr[0]+AI_START].tpmdl;
             default: break;
         }
         return "";
@@ -1083,16 +1083,16 @@ namespace entities
                 }
                 break;
             case ACTOR:
-                while(e.attrs[0] <= 0) e.attrs[0] += AI_MAX-1;
-                while(e.attrs[0] >= AI_MAX) e.attrs[0] -= AI_MAX-1;
+                while(e.attrs[0] < 0) e.attrs[0] += AI_MAX-AI_START;
+                while(e.attrs[0] >= AI_MAX-AI_START) e.attrs[0] -= AI_MAX-AI_START;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
                 while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
                 while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
-                while(e.attrs[4] < 0) e.attrs[4] += TRIGGERIDS+1;
-                while(e.attrs[4] > TRIGGERIDS) e.attrs[4] -= TRIGGERIDS+1;
+                while(e.attrs[4] < 0) e.attrs[4] += TRIGGERIDS;
+                while(e.attrs[4] >= TRIGGERIDS) e.attrs[4] -= TRIGGERIDS;
                 while(e.attrs[5] < 0) e.attrs[5] += WEAP_MAX+1; // allow any weapon
                 while(e.attrs[5] > WEAP_MAX) e.attrs[5] -= WEAP_MAX+1;
                 if(e.attrs[6] < 0) e.attrs[6] = 0;
@@ -1950,7 +1950,8 @@ namespace entities
                     }
                     break;
                 }
-                case CHECKPOINT: case ACTOR:
+                case ACTOR: if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe AI_BOT from array
+                case CHECKPOINT:
                     if((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39)) e.attrs[1] = (e.attrs[1] + 180)%360;
                     break;
                 default: break;

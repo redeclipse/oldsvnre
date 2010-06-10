@@ -864,7 +864,7 @@ namespace server
         int sweap = m_weapon(gamemode, mutators);
         loopv(sents)
         {
-            if(!m_campaign(gamemode) && sents[i].type == ACTOR && sents[i].attrs[0] >= AI_START && sents[i].attrs[0] < AI_MAX && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
+            if(!m_campaign(gamemode) && sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_MAX-AI_START && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
             {
                 sents[i].millis += GAME(enemyspawndelay);
                 switch(GAME(enemyspawnstyle) == 3 ? rnd(2)+1 : GAME(enemyspawnstyle))
