@@ -147,7 +147,7 @@ namespace entities
             }
             case ACTOR:
             {
-                if(full && attr[0] >= 0 && attr[0] < AI_MAX-AI_START)
+                if(full && attr[0] >= 0 && attr[0] < AI_TOTAL)
                 {
                     addentinfo(aistyle[attr[0]+AI_START].name);
                     if(attr[3] && attr[3] > -G_MAX && attr[3] < G_MAX)
@@ -254,7 +254,7 @@ namespace entities
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: if(attr[0] >= 0 && attr[0] < AI_MAX-AI_START) return polymodels ? "" : aistyle[attr[0]+AI_START].tpmdl;
+            case ACTOR: if(attr[0] >= 0 && attr[0] < AI_TOTAL) return polymodels ? "" : aistyle[attr[0]+AI_START].tpmdl;
             default: break;
         }
         return "";
@@ -1083,8 +1083,8 @@ namespace entities
                 }
                 break;
             case ACTOR:
-                while(e.attrs[0] < 0) e.attrs[0] += AI_MAX-AI_START;
-                while(e.attrs[0] >= AI_MAX-AI_START) e.attrs[0] -= AI_MAX-AI_START;
+                while(e.attrs[0] < 0) e.attrs[0] += AI_TOTAL;
+                while(e.attrs[0] >= AI_TOTAL) e.attrs[0] -= AI_TOTAL;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
