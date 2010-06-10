@@ -156,6 +156,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
     FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-3f, 0.8f, 1000);
+    VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
 
     TVAR(IDF_PERSIST, meleetex, "textures/melee", 3);
@@ -1594,6 +1595,12 @@ namespace hud
                 pushfont("super");
                 int dt = draw_textx("%d", x+width/2, y-sy, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
                 if(!sy) sy += dt;
+                popfont();
+            }
+            if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
+            {
+                pushfont("default");
+                sy += draw_textx("\fd%d", x+width/2, inventoryhealth ? y : y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(game::focus->vel.magnitude()));
                 popfont();
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse() && impulsemeter && impulsecost && inventoryimpulse)
