@@ -1,6 +1,6 @@
 struct gameent;
 
-enum { AI_BOT, AI_TURRET, AI_GRUNT, AI_GUARD, AI_HEAVY, AI_PYRO, AI_SNIPER, AI_MAX, AI_START = AI_TURRET };
+enum { AI_BOT, AI_TURRET, AI_GRUNT, AI_GUARD, AI_HEAVY, AI_PYRO, AI_SNIPER, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
 enum { AI_F_NONE = 0, AI_F_RANDWEAP = 1<<0 };
 #define isaitype(a) (a >= 0 && a <= AI_MAX-1)
 
