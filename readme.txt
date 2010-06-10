@@ -116,5 +116,5 @@ Supporters
  "w00p|dazza", Corey "c0rdawg" Maher, Rob "Lloir" Shannon
  Henrik "ahven" Pihl, Robert "Homicidal" Crane, Wayne Bennett,
  Cameron "Rhubarb" Dawdy, Christopher "paroneayea" Webber,
- Mark "xtort-" Doodeman, Vadim Peretokin, Taiyo Rawle, CD Xbow,
- FearFighter
+ Mark "xtort-" Doodeman, Vadim Peretokin, Taiyo Rawle, "CD Xbow",
+ "FearFighter"
