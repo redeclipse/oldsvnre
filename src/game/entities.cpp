@@ -1337,7 +1337,7 @@ namespace entities
 
     static inline float heapscore(linkq *q) { return q->score(); }
 
-    float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d, bool check)
+    float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d, bool retry)
     {
         if(!ents.inrange(node) || !ents.inrange(goal) || ents[goal]->type != ents[node]->type || goal == node || ents[node]->links.empty())
             return 0;
@@ -1355,7 +1355,7 @@ namespace entities
         }
         while(nodes.length() < ents.length()) nodes.add();
 
-        if(d)
+        if(d && !retry)
         {
             if(d->ai) loopi(ai::NUMPREVNODES) if(d->ai->prevnodes[i] != node && nodes.inrange(d->ai->prevnodes[i]))
             {
@@ -1363,18 +1363,15 @@ namespace entities
                 nodes[d->ai->prevnodes[i]].curscore = -1.f;
                 nodes[d->ai->prevnodes[i]].estscore = 0.f;
             }
-            if(check)
+            loopavoid(obstacles, d, { if(ents.inrange(ent) && ents[ent]->type == ents[node]->type)
             {
-                loopavoid(obstacles, d, { if(ents.inrange(ent) && ents[ent]->type == ents[node]->type)
+                if(ent != node && ents[node]->links.find(ent) < 0)
                 {
-                    if(ent != node && ents[node]->links.find(ent) < 0)
-                    {
-                        nodes[ent].id = routeid;
-                        nodes[ent].curscore = -1.f;
-                        nodes[ent].estscore = 0.f;
-                    }
-                }});
-            }
+                    nodes[ent].id = routeid;
+                    nodes[ent].curscore = -1.f;
+                    nodes[ent].estscore = 0.f;
+                }
+            }});
         }
 
         nodes[node].id = routeid;

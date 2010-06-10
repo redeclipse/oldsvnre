@@ -1305,7 +1305,7 @@ namespace entities
             return false;
         }
 
-        int remap(gameent *d, int n, vec &pos)
+        int remap(gameent *d, int n, vec &pos, bool retry = false)
         {
             if(!obstacles.empty())
             {
@@ -1318,10 +1318,10 @@ namespace entities
                     {
                         for(; cur < next; cur++) if(entities[cur] == n)
                         {
-                            if(ob.above < 0) return -1;
+                            if(ob.above < 0) return retry ? n : -1;
                             vec above(pos.x, pos.y, ob.above);
                             if(above.z-d->o.z >= ai::JUMPMAX)
-                                return -1; // too much scotty
+                                return retry ? n : -1; // too much scotty
                             int node = closestent(WAYPOINT, above, ai::SIGHTMIN, true);
                             if(ents.inrange(node) && node != n)
                             { // try to reroute above their head?
@@ -1330,7 +1330,7 @@ namespace entities
                                     pos = ents[node]->o;
                                     return node;
                                 }
-                                else return -1;
+                                else return retry ? n : -1;
                             }
                             else
                             {
@@ -1343,7 +1343,7 @@ namespace entities
                                     pos = above;
                                     return n;
                                 }
-                                else return -1;
+                                else return retry ? n : -1;
                             }
                         }
                     }
@@ -1354,7 +1354,7 @@ namespace entities
         }
     };
     extern void findentswithin(int type, const vec &pos, float mindist, float maxdist, vector<int> &results);
-    extern float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d = NULL, bool check = true);
+    extern float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d = NULL, bool retry = false);
 }
 #elif defined(GAMESERVER)
 namespace client

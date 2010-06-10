@@ -241,24 +241,24 @@ namespace ai
         return !targets.empty();
     }
 
-    bool makeroute(gameent *d, aistate &b, int node, bool changed, int retries)
+    bool makeroute(gameent *d, aistate &b, int node, bool changed, bool retry)
     {
         if(d->lastnode < 0) return false;
         if(changed && !d->ai->route.empty() && d->ai->route[0] == node) return true;
-        if(entities::route(d->lastnode, node, d->ai->route, obs, d, retries <= 1) > 0)
+        if(entities::route(d->lastnode, node, d->ai->route, obs, d, retry) > 0)
         {
             b.override = false;
             return true;
         }
         d->ai->clear(true);
-        if(retries <= 1) return makeroute(d, b, node, false, retries+1);
+        if(!retry) return makeroute(d, b, node, false, true);
         return false;
     }
 
-    bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed, int retries)
+    bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed, bool retry)
     {
         int node = entities::closestent(WAYPOINT, pos, SIGHTMIN, true);
-        return makeroute(d, b, node, changed, retries);
+        return makeroute(d, b, node, changed, retry);
     }
 
     bool randomnode(gameent *d, aistate &b, const vec &pos, float guard, float wander)
@@ -270,7 +270,7 @@ namespace ai
         while(!candidates.empty())
         {
             int w = rnd(candidates.length()), n = candidates.removeunordered(w);
-            if(n != d->lastnode && !d->ai->hasprevnode(n) && !obs.find(n, d) && makeroute(d, b, n)) return true;
+            if(n != d->lastnode && !d->ai->hasprevnode(n) && makeroute(d, b, n)) return true;
         }
         return false;
     }
@@ -827,7 +827,7 @@ namespace ai
         return 0;
     }
 
-    int closenode(gameent *d, bool force = false)
+    int closenode(gameent *d, bool retry = false)
     {
         vec pos = d->feetpos();
         int node = -1;
@@ -836,8 +836,8 @@ namespace ai
         {
             gameentity &e = *(gameentity *)entities::ents[d->ai->route[i]];
             vec epos = e.o;
-            int entid = obs.remap(d, d->ai->route[i], epos);
-            if(entities::ents.inrange(entid) && (force || entid == d->ai->route[i] || !d->ai->hasprevnode(entid)))
+            int entid = obs.remap(d, d->ai->route[i], epos, retry);
+            if(entities::ents.inrange(entid) && (retry || entid == d->ai->route[i] || !d->ai->hasprevnode(entid)))
             {
                 float dist = epos.squaredist(pos);
                 if(dist < mindist)
@@ -850,14 +850,14 @@ namespace ai
         return node;
     }
 
-    bool wpspot(gameent *d, int n, bool force = false)
+    bool wpspot(gameent *d, int n, bool retry = false)
     {
         if(entities::ents.inrange(n))
         {
             gameentity &e = *(gameentity *)entities::ents[n];
             vec epos = e.o;
-            int entid = obs.remap(d, n, epos);
-            if(entities::ents.inrange(entid) && (force || entid == n || !d->ai->hasprevnode(entid)))
+            int entid = obs.remap(d, n, epos, retry);
+            if(entities::ents.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
             {
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;
