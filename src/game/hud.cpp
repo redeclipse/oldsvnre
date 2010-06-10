@@ -207,12 +207,12 @@ namespace hud
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarcardsize, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radarcardblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarblipsize, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
@@ -250,10 +250,9 @@ namespace hud
     FVAR(IDF_PERSIST, motionblurmax, 0, 0.75f, 1); // maximum
     FVAR(IDF_PERSIST, motionbluramt, 0, 0.5f, 1); // used for override
 
+    TVAR(IDF_PERSIST, bgtex, "textures/background", 3);
     TVAR(IDF_PERSIST, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST, badgetex, "textures/cube2badge", 3);
-    //TVAR(IDF_PERSIST, bglefttex, "textures/bgleft", 3);
-    //TVAR(IDF_PERSIST, bgrighttex, "textures/bgright", 3);
 
 
     bool needminimap() { return false; }
@@ -1809,7 +1808,16 @@ namespace hud
 
     void drawbackground(int w, int h)
     {
-        Texture *t = textureload(logotex, 3);
+        Texture *t = textureload(bgtex, 3);
+        glBindTexture(GL_TEXTURE_2D, t->id);
+        glBegin(GL_TRIANGLE_STRIP);
+        glTexCoord2f(0, 0); glVertex2f(0, 0);
+        glTexCoord2f(1, 0); glVertex2f(w, 0);
+        glTexCoord2f(0, 1); glVertex2f(0, h);
+        glTexCoord2f(1, 1); glVertex2f(w, h);
+        glEnd();
+
+        t = textureload(logotex, 3);
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2f(0, 0); glVertex2f(w-1024, 0);

@@ -283,31 +283,34 @@ namespace projs
 
     void updatebb(projent &proj, bool init = false)
     {
-        if(!polymodels && proj.mdl && *proj.mdl)
+        float size = 1;
+        switch(proj.projtype)
         {
-            float size = 1;
-            switch(proj.projtype)
-            {
-                case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_EJECT: size = proj.lifesize;
-                case PRJ_ENT:
-                    if(init) break;
-                    else if(proj.lifemillis && proj.fadetime)
+            case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_EJECT: size = proj.lifesize;
+            case PRJ_ENT:
+                if(init) break;
+                else if(proj.lifemillis && proj.fadetime)
+                {
+                    int interval = min(proj.lifemillis, proj.fadetime);
+                    if(proj.lifetime < interval)
                     {
-                        int interval = min(proj.lifemillis, proj.fadetime);
-                        if(proj.lifetime < interval)
-                        {
-                            size *= float(proj.lifetime)/float(interval);
-                            break;
-                        }
-                    } // all falls through to ..
-                default: return;
-            }
-            setbbfrommodel(&proj, proj.mdl, size*proj.scale);
-            switch(proj.projtype)
+                        size *= float(proj.lifetime)/float(interval);
+                        break;
+                    }
+                } // all falls through to ..
+            default: return;
+        }
+        if(!polymodels && proj.mdl && *proj.mdl) setbbfrommodel(&proj, proj.mdl, size*proj.scale);
+        else switch(proj.projtype)
+        {
+            case PRJ_GIBS: case PRJ_DEBRIS: proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f*size*proj.scale; break;
+            case PRJ_EJECT: proj.height = proj.aboveeye = 0.25f*size*proj.scale; proj.radius = proj.yradius = 0.5f*size*proj.scale; proj.xradius = 0.125f*size*proj.scale; break;
+            case PRJ_ENT:
             {
-                case PRJ_GIBS: case PRJ_DEBRIS: proj.height += size*proj.scale*0.5f; break;
-                case PRJ_EJECT: proj.height += size*proj.scale*0.25f; break;
-                case PRJ_ENT: proj.height += size*proj.scale*4.f; break;
+                if(entities::ents.inrange(proj.id))
+                    proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = enttype[entities::ents[proj.id]->type].radius*0.25f*size*proj.scale;
+                else proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = size*proj.scale;
+                break;
             }
         }
         if(init)
@@ -346,8 +349,7 @@ namespace projs
         {
             case PRJ_SHOT:
             {
-                proj.radius = proj.xradius = proj.yradius = WEAP2(proj.weap, radius, proj.flags&HIT_ALT);
-                proj.height = proj.radius*2;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = WEAP2(proj.weap, radius, proj.flags&HIT_ALT);
                 proj.elasticity = WEAP2(proj.weap, elasticity, proj.flags&HIT_ALT);
                 proj.reflectivity = WEAP2(proj.weap, reflectivity, proj.flags&HIT_ALT);
                 proj.relativity = WEAP2(proj.weap, relativity, proj.flags&HIT_ALT);
@@ -363,9 +365,7 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                proj.height = 1.5f-(rnd(100)/100.f);
-                proj.radius = proj.xradius = 1.5f-(rnd(100)/100.f);
-                proj.yradius = 1.5f-(rnd(100)/100.f);
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
                 if(!kidmode)
                 {
@@ -387,7 +387,6 @@ namespace projs
                         case 1: proj.mdl = "projs/gibs/gib02"; break;
                         case 0: default: proj.mdl = "projs/gibs/gib01"; break;
                     }
-                    proj.aboveeye = 1.0f;
                     proj.elasticity = 0.3f;
                     proj.reflectivity = 0.f;
                     proj.relativity = 0.95f;
@@ -402,9 +401,7 @@ namespace projs
             }
             case PRJ_DEBRIS:
             {
-                proj.height = 1.5f-(rnd(100)/100.f);
-                proj.radius = proj.xradius = 1.5f-(rnd(100)/100.f);
-                proj.yradius = 1.5f-(rnd(100)/100.f);
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
                 if(!polymodels) switch(rnd(4))
                 {
@@ -413,7 +410,6 @@ namespace projs
                     case 1: proj.mdl = "projs/debris/debris02"; break;
                     case 0: default: proj.mdl = "projs/debris/debris01"; break;
                 }
-                proj.aboveeye = 1.0f;
                 proj.elasticity = 0.6f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 0.0f;
@@ -428,7 +424,7 @@ namespace projs
             }
             case PRJ_EJECT:
             {
-                proj.height = proj.radius = proj.yradius = 1; proj.xradius = 0.25f;
+                proj.height = proj.aboveeye = 0.5f; proj.radius = proj.yradius = 1; proj.xradius = 0.25f;
                 if(!isweap(proj.weap) && proj.owner) proj.weap = proj.owner->weapselect;
                 if(isweap(proj.weap))
                 {
@@ -441,7 +437,6 @@ namespace projs
                     if(!polymodels) proj.mdl = "projs/catridge";
                     proj.lifesize = 1;
                 }
-                proj.aboveeye = 1.0f;
                 proj.elasticity = 0.3f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 0.95f;
@@ -466,15 +461,15 @@ namespace projs
                 if(polymodels)
                 {
                     if(entities::ents.inrange(proj.id))
-                        proj.height = proj.radius = proj.xradius = proj.yradius = enttype[entities::ents[proj.id]->type].radius*0.25f;
-                    else proj.height = proj.radius = proj.xradius = proj.yradius = 1;
+                        proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = enttype[entities::ents[proj.id]->type].radius*0.25f;
+                    else proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
                 }
                 else
                 {
-                    proj.height = proj.radius = proj.xradius = proj.yradius = 1;
+                    proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
                     proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 }
-                proj.lifesize = proj.aboveeye = 1.f;
+                proj.lifesize = 1.f;
                 proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 0.95f;
@@ -1459,7 +1454,7 @@ namespace projs
                     glRotatef(proj.yaw, 0, 0, 1);
                     glRotatef(proj.roll, 0, -1, 0);
                     glRotatef(proj.pitch, 1, 0, 0);
-                    polybox(vec(0, 0, 0), proj.height/2*proj.lifesize, proj.height/2*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
+                    polybox(vec(0, 0, 0), proj.height*proj.lifesize, proj.aboveeye*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
                     defaultshader->set();
                     glEnable(GL_TEXTURE_2D);
                     glPopMatrix();
