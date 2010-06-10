@@ -2,6 +2,7 @@
     $app['releasever'] = "Pre-Beta";
     $app['releasedate'] = "NOT YET";
     $app['background'] = "/bits/background_01.jpg";
+    $app['screenshots'] = 16;
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
@@ -113,25 +114,24 @@
             <div class="endblock">&nbsp;</div>
             <div class="sliderblock">
                 <div id="slider">
-                    <ul id="gallery">               
-                        <li>
-                            <a href="/bits/images/screenshot.0006.jpg"><img src="/bits/thumbs/screenshot.0006.jpg" width="220" height="140" border="0" alt="Screenshot 1" /></a>
-                            <a href="/bits/images/screenshot.0008.jpg"><img src="/bits/thumbs/screenshot.0008.jpg" width="220" height="140" border="0" alt="Screenshot 2" /></a>
-                            <a href="/bits/images/screenshot.0010.jpg"><img src="/bits/thumbs/screenshot.0010.jpg" width="220" height="140" border="0" alt="Screenshot 3" /></a>
-                            <a href="/bits/images/screenshot.0020.jpg"><img src="/bits/thumbs/screenshot.0020.jpg" width="220" height="140" border="0" alt="Screenshot 4" /></a>
-                        </li>
-                        <li>
-                            <a href="/bits/images/screenshot.0013.jpg"><img src="/bits/thumbs/screenshot.0013.jpg" width="220" height="140" border="0" alt="Screenshot 5" /></a>
-                            <a href="/bits/images/screenshot.0033.jpg"><img src="/bits/thumbs/screenshot.0033.jpg" width="220" height="140" border="0" alt="Screenshot 6" /></a>
-                            <a href="/bits/images/screenshot.0036.jpg"><img src="/bits/thumbs/screenshot.0036.jpg" width="220" height="140" border="0" alt="Screenshot 7" /></a>
-                            <a href="/bits/images/screenshot.0038.jpg"><img src="/bits/thumbs/screenshot.0038.jpg" width="220" height="140" border="0" alt="Screenshot 8" /></a>
-                        </li>
-                        <li>
-                            <a href="/bits/images/screenshot.0034.jpg"><img src="/bits/thumbs/screenshot.0034.jpg" width="220" height="140" border="0" alt="Screenshot 9" /></a>
-                            <a href="/bits/images/screenshot.0008.jpg"><img src="/bits/thumbs/screenshot.0008.jpg" width="220" height="140" border="0" alt="Screenshot 10" /></a>
-                            <a href="/bits/images/screenshot.0010.jpg"><img src="/bits/thumbs/screenshot.0010.jpg" width="220" height="140" border="0" alt="Screenshot 11" /></a>
-                            <a href="/bits/images/screenshot.0020.jpg"><img src="/bits/thumbs/screenshot.0020.jpg" width="220" height="140" border="0" alt="Screenshot 12" /></a>
-                        </li>
+                    <ul id="gallery">
+<?php                   $i = 1;
+                        $c = true;
+                        while ($app['screenshots'] >= $i) {
+                            $j = $i%4;
+                            if ($j == 1) {
+                                echo "<li>";
+                                $c = false;
+                            }
+                            $k = $i < 10 ? "0".$i."" : "".$i."";
+                            echo "<a href=\"/bits/images/".$k.".jpg\"><img src=\"/bits/thumbs/".$k.".jpg\" width=\"184\" height=\"138\" border=\"0\" alt=\"Screenshot ".$k."\" /></a>";
+                            if ($j == 4) {
+                                echo "</li>";
+                                $c = true;
+                            }
+                            $i++;
+                        }
+                        if ($c != true) { echo "</li>"; } ?>
                     </ul>
                 </div>
             </div>
