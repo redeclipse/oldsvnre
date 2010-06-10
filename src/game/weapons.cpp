@@ -49,7 +49,7 @@ namespace weapons
         if(!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
         {
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-            playsound(S_SWITCH, d->o, d);
+            playsound(weaptype[weap].sound+S_W_SWITCH, d->o, d);
             d->weapswitch(weap, lastmillis);
             d->action[AC_RELOAD] = false;
             return true;
