@@ -268,7 +268,7 @@ namespace projs
             case PRJ_DEBRIS:
             {
                 int mag = int(proj.vel.magnitude()), vol = clamp(mag*2, 10, 255);
-                playsound(S_DEBRIS, proj.o, NULL, 0, vol);
+                playsound(S_DEBRIS+rnd(S_R_DEBRIS), proj.o, NULL, 0, vol);
                 break;
             }
             case PRJ_EJECT:
