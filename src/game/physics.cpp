@@ -686,7 +686,6 @@ namespace physics
                     d->action[AC_JUMP] = d->action[AC_DASH] = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
                     game::impulseeffect(d, true);
-                    d->action[AC_JUMP] = d->action[AC_DASH] = false;
                 }
             }
             if(!d->turnside && onfloor && d->action[AC_JUMP])
@@ -698,12 +697,12 @@ namespace physics
                     d->vel.x *= scale;
                     d->vel.y *= scale;
                 }
-                d->action[AC_JUMP] = d->action[AC_DASH] = false;
                 d->resetphys();
                 d->lastjump = lastmillis;
+                d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                 playsound(S_JUMP, d->o, d);
                 regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
-                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
             }
             bool found = false;
             if(d->turnside || d->action[AC_JUMP] || d->action[AC_SPECIAL])
@@ -737,7 +736,6 @@ namespace physics
                         d->vel = vec(d->turnside ? wall : vec(dir).reflect(wall)).add(vec(d->vel).reflect(wall).rescale(1)).mul(mag/2);
                         d->vel.z += mag/2;
                         d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
-                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
                         float yaw = 0, pitch = 0;
                         vectoyawpitch(d->vel, yaw, pitch);
                         float off = yaw-d->aimyaw;
@@ -747,6 +745,7 @@ namespace physics
                         d->turnside = 0;
                         d->turnyaw = off;
                         d->turnroll = 0;
+                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                         game::impulseeffect(d, true);
                         break;
