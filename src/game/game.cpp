@@ -92,8 +92,8 @@ namespace game
     VAR(IDF_PERSIST, showobitdists, 0, 0, 1);
     VAR(IDF_PERSIST, showplayerinfo, 0, 2, 2); // 0 = none, 1 = CON_MESG, 2 = CON_EVENT
 
-    VAR(IDF_PERSIST, damagetonedelay, 0, 75, INT_MAX-1);
-    VAR(IDF_PERSIST, damageburndelay, 0, 250, INT_MAX-1);
+    VAR(IDF_PERSIST, damagemergedelay, 0, 75, INT_MAX-1);
+    VAR(IDF_PERSIST, damagemergeburn, 0, 250, INT_MAX-1);
     VAR(IDF_PERSIST, playdamagetones, 0, 1, 3);
     VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
     VAR(IDF_PERSIST, playreloadnotify, 0, 1, 4);
@@ -541,17 +541,17 @@ namespace game
         return false;
     }
 
-    struct damagetone
+    struct damagemerge
     {
         enum { BURN = 1<<0, CRIT = 1<<1 };
 
         gameent *d, *actor;
-        int damage, flags, millis;
+        int weap, damage, flags, millis;
 
-        damagetone() { millis = totalmillis; }
-        damagetone(gameent *d, gameent *actor, int damage, int flags) : d(d), actor(actor), damage(damage), flags(flags) { millis = totalmillis; }
+        damagemerge() { millis = totalmillis; }
+        damagemerge(gameent *d, gameent *actor, int weap, int damage, int flags) : d(d), actor(actor), weap(weap), damage(damage), flags(flags) { millis = totalmillis; }
 
-        bool merge(const damagetone &m)
+        bool merge(const damagemerge &m)
         {
             if(actor != m.actor || flags != m.flags) return false;
             damage += m.damage;
@@ -560,37 +560,55 @@ namespace game
 
         void play()
         {
-            const int dmgsnd[S_R_DAMAGE] = { 0, 10, 25, 50, 75, 100, 150, 200 };
-            int snd = -1;
-            if(flags&CRIT) snd = S_CRITICAL;
-            else if(flags&BURN) snd = S_BURNED;
-            else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-            if(snd >= 0 && snd < S_MAX)
-                playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+            if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
+            if(flags&CRIT)
+            {
+                if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
+                    playsound(S_CRITICAL, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+                if(showcritabovehead >= (d != focus ? 1 : 2))
+                    part_text(d->abovehead(), "<super>\fzgrCRITICAL", d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
+            }
+            else
+            {
+                if(playdamagetones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
+                {
+                    const int dmgsnd[S_R_DAMAGE] = { 0, 10, 25, 50, 75, 100, 150, 200 };
+                    int snd = -1;
+                    if(flags&BURN) snd = S_BURNED;
+                    else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
+                    if(snd >= 0 && snd < S_MAX)
+                        playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+                }
+                if(showdamageabovehead >= (d != focus ? 1 : 2))
+                {
+                    defformatstring(ds)("<sub>\fr+%d", damage);
+                    part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
+                }
+            }
         }
     };
-    vector<damagetone> damagetones;
+    vector<damagemerge> damagemerges;
 
-    void removedamagetones(gameent *d)
+    void removedamagemerges(gameent *d)
     {
-        loopvrev(damagetones) if(damagetones[i].d == d || damagetones[i].actor == d) damagetones.removeunordered(i);
+        loopvrev(damagemerges) if(damagemerges[i].d == d || damagemerges[i].actor == d) damagemerges.removeunordered(i);
     }
 
-    void mergedamagetone(gameent *d, gameent *actor, int damage, int flags)
+    void pushdamagemerge(gameent *d, gameent *actor, int weap, int damage, int flags)
     {
-        damagetone dt(d, actor, damage, flags);
-        loopv(damagetones) if(damagetones[i].merge(dt)) return;
-        damagetones.add(dt);
+        damagemerge dt(d, actor, weap, damage, flags);
+        loopv(damagemerges) if(damagemerges[i].merge(dt)) return;
+        damagemerges.add(dt);
     }
 
-    void flushdamagetones()
+    void flushdamagemerges()
     {
-        loopv(damagetones)
+        loopv(damagemerges)
         {
-            if(damagetones[i].flags&damagetone::CRIT || totalmillis-damagetones[i].millis >= (damagetones[i].flags&damagetone::BURN ? damageburndelay : damagetonedelay))
+            if(damagemerges[i].flags&damagemerge::CRIT || totalmillis-damagemerges[i].millis >= (damagemerges[i].flags&damagemerge::BURN ? damagemergeburn : damagemergedelay))
             {
-                damagetones[i].play();
-                damagetones.remove(i--);
+                damagemerges[i].play();
+                damagemerges.remove(i--);
             }
         }
     }
@@ -603,7 +621,6 @@ namespace game
         {
             if(hithurts(flags))
             {
-                if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
                     vec p = d->headpos();
@@ -621,8 +638,9 @@ namespace game
                 if(d != actor)
                 {
                     bool sameteam = m_team(gamemode, mutators) && d->team == actor->team;
-                    if(sameteam) { if(actor == focus && !burning && !issound(alarmchan)) playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan); }
-                    else if(playdamagetones >= (actor == focus ? 1 : (d == focus ? 2 : 3))) mergedamagetone(d, actor, damage, burning ? damagetone::BURN : 0);
+                    if(!sameteam) pushdamagemerge(d, actor, weap, damage, burning ? damagemerge::BURN : 0);
+                    else if(actor == focus && !burning && !issound(alarmchan))
+                        playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan);
                     if(!burning && !sameteam) actor->lasthit = totalmillis;
                 }
             }
@@ -653,17 +671,7 @@ namespace game
             if(actor->type == ENT_PLAYER || actor->type == ENT_AI) actor->totaldamage += damage;
         }
         hiteffect(weap, flags, damage, d, actor, dir, actor == player1 || actor->ai);
-        if(hithurts(flags) && showdamageabovehead >= (d != focus ? 1 : 2))
-        {
-            defformatstring(ds)("<sub>\fr+%d", damage);
-            part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
-        }
-        if(flags&HIT_CRIT)
-        {
-            if(showcritabovehead >= (d != focus ? 1 : 2))
-                part_text(d->abovehead(), "<super>\fzgrCRITICAL", d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
-            if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3))) mergedamagetone(d, actor, damage, damagetone::CRIT);
-        }
+        if(flags&HIT_CRIT) pushdamagemerge(d, actor, weap, damage, damagemerge::CRIT);
     }
 
     void killed(int weap, int flags, int damage, gameent *d, gameent *actor, int style)
@@ -974,7 +982,7 @@ namespace game
         cameras.shrink(0);
         client::clearvotes(d);
         projs::remove(d);
-        removedamagetones(d);
+        removedamagemerges(d);
         if(m_ctf(gamemode)) ctf::removeplayer(d);
         if(m_stf(gamemode)) stf::removeplayer(d);
         DELETEP(players[cn]);
@@ -1577,7 +1585,7 @@ namespace game
         adjustscaled(int, hud::damageresidue, hud::damageresiduefade);
         if(connected())
         {
-            flushdamagetones();
+            flushdamagemerges();
             if(player1->state == CS_DEAD || player1->state == CS_WAITING)
             {
                 if(player1->ragdoll) moveragdoll(player1, true);
