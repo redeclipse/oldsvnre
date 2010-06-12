@@ -671,7 +671,7 @@ namespace physics
                 bool dash = !d->ai && impulsedash >= 2 && d->action[AC_DASH],  pulse = impulsedash != 2 && d->action[AC_JUMP] && !onfloor;
                 if(dash || pulse)
                 {
-                    float mag = min(impulsespeed+max(d->vel.magnitude(), 1.f), max(d->vel.magnitude(), impulselimit));
+                    float mag = min(impulsespeed+d->vel.magnitude(), max(d->vel.magnitude(), impulselimit));
                     if(onfloor)
                     {
                         mag += mag/2;
@@ -725,14 +725,14 @@ namespace physics
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor))
                         {
                             d->action[AC_SPECIAL] = false;
-                            if(!onfloor) (d->vel = vec(0, 0, 1)).mul(min((impulsespeed+max(d->vel.magnitude(), 1.f))*2/3, max(d->vel.magnitude(), impulselimit)));
+                            if(!onfloor) (d->vel = vec(0, 0, 1)).mul(min((impulsespeed+d->vel.magnitude())*2/3, max(d->vel.magnitude(), impulselimit)));
                         }
                         break;
                     }
                     wall.normalize();
                     if(d->action[AC_JUMP] && d->turnside)
                     {
-                        float mag = min((impulsespeed+max(d->vel.magnitude(), 1.f))*2/3, max(d->vel.magnitude(), impulselimit));
+                        float mag = min((impulsespeed+d->vel.magnitude())*2/3, max(d->vel.magnitude(), impulselimit));
                         d->vel = vec(d->turnside ? wall : vec(dir).reflect(wall)).add(vec(d->vel).reflect(wall).rescale(1)).mul(mag/2);
                         d->vel.z += mag/2;
                         d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
@@ -763,7 +763,7 @@ namespace physics
                         vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
                         if(!d->turnside)
                         {
-                            float mag = min((impulsespeed+max(d->vel.magnitude(), 1.f))*2/3, max(d->vel.magnitude(), impulselimit));
+                            float mag = min((impulsespeed+d->vel.magnitude())*2/3, max(d->vel.magnitude(), impulselimit));
                             d->vel = vec(rft).mul(mag);
                             off = yaw-d->aimyaw;
                             if(off > 180) off -= 360;
