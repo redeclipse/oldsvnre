@@ -671,10 +671,9 @@ namespace physics
                 bool dash = !d->ai && impulsedash >= 2 && d->action[AC_DASH],  pulse = impulsedash != 2 && d->action[AC_JUMP] && !onfloor;
                 if(dash || pulse)
                 {
-                    float mag = min(impulsespeed+d->vel.magnitude(), max(d->vel.magnitude(), impulselimit));
+                    float mag = min((impulsespeed+d->vel.magnitude())*(onfloor && (!d->strafe || !d->move) ? 1.5f : 1.f), max(d->vel.magnitude(), impulselimit));
                     if(onfloor)
                     {
-                        mag += mag/2;
                         d->resetphys();
                         d->lastjump = lastmillis;
                     }
