@@ -1208,16 +1208,8 @@ namespace client
                             t->actiontime[AC_JUMP] = lastmillis;
                             break;
                         }
-                        case SPHY_DASH: case SPHY_BOOST: case SPHY_KICK:
-                        {
-                            playsound(S_IMPULSE, t->o, t); game::impulseeffect(t, true);
-                            break;
-                        }
-                        case SPHY_POWER:
-                        {
-                            t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis);
-                            break;
-                        }
+                        case SPHY_DASH: case SPHY_BOOST: case SPHY_KICK: game::impulseeffect(t, true); break;
+                        case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis); break;
                         case SPHY_EXTINGUISH:
                         {
                             t->resetfire();

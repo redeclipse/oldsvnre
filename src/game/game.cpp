@@ -418,6 +418,7 @@ namespace game
 
     void impulseeffect(gameent *d, bool effect)
     {
+        if(effect) playsound(S_IMPULSE, d->o, d);
         if(effect || (d->state == CS_ALIVE && physics::sprinting(d, true)))
         {
             int num = int((effect ? 25 : 5)*impulsescale), len = effect ? impulsefade : impulsefade/5;
