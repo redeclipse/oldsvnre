@@ -1079,7 +1079,6 @@ namespace server
 
     void setupgameinfo(int np)
     {
-        loopvk(clients) clients[k]->state.dropped.reset();
         setuptriggers(true);
         if(m_fight(gamemode)) setupitems(true);
         setupspawns(true, m_trial(gamemode) ? 0 : np);
@@ -3445,8 +3444,6 @@ namespace server
                     int val = getint(p);
                     if(!ci || ci->state.aitype >= 0) break;
                     if(!allowstate(ci, val ? 4 : 5) && !haspriv(ci, PRIV_MASTER, "unspectate and edit")) { spectator(ci); break; }
-                    ci->state.dropped.reset();
-                    loopk(WEAP_MAX) loopj(2) ci->state.weapshots[k][j].reset();
                     ci->state.editspawn(gamemode, mutators);
                     if(val)
                     {

@@ -233,32 +233,79 @@ enum
 {
     G_M_NONE = 0,
     G_M_TEAM = 1<<0, G_M_INSTA = 1<<1, G_M_MEDIEVAL = 1<<2, G_M_DEMOLITION = 1<<3,
-    G_M_DUEL = 1<<4, G_M_SURVIVOR = 1<<5, G_M_ARENA = 1<<6,
-    G_M_ALL = G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA,
-    G_M_NUM = 7
+    G_M_DUEL = 1<<4, G_M_SURVIVOR = 1<<5, G_M_ARENA = 1<<6, G_M_INVASION = 1<<7,
+    G_M_ALL = G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_INVASION,
+    G_M_NUM = 8
 };
 
 struct gametypes
 {
-    int type,           mutators,                                                                           implied;        const char *name;
+    int type,           implied,            mutators;
+    const char *name;
 };
 #ifdef GAMESERVER
 gametypes gametype[] = {
-    { G_DEMO,           G_M_NONE,                                                                           G_M_NONE,       "demo" },
-    { G_EDITMODE,       G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,                                    G_M_NONE,       "editing" },
-    { G_CAMPAIGN,       G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,                           G_M_TEAM,       "campaign" },
-    { G_DEATHMATCH,     G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,     G_M_NONE,       "deathmatch" },
-    { G_STF,            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,                           G_M_TEAM,       "secure-the-flag" },
-    { G_CTF,            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,                           G_M_TEAM,       "capture-the-flag" },
-    { G_TRIAL,          G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,                           G_M_NONE,       "time-trial" },
+    {
+        G_DEMO,         G_M_NONE,           G_M_NONE,
+        "demo"
+    },
+    {
+        G_EDITMODE,     G_M_NONE,           G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,
+        "editing"
+    },
+    {
+        G_CAMPAIGN,     G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,
+        "campaign"
+    },
+    {
+        G_DEATHMATCH,   G_M_NONE,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "deathmatch"
+    },
+    {
+        G_STF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "secure-the-flag"
+    },
+    {
+        G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "capture-the-flag"
+    },
+    {
+        G_TRIAL,        G_M_NONE,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "time-trial"
+    },
 }, mutstype[] = {
-    { G_M_TEAM,         G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,     G_M_TEAM,       "team" },
-    { G_M_INSTA,        G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,     G_M_INSTA,      "insta" },
-    { G_M_MEDIEVAL,     G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL,                              G_M_MEDIEVAL,   "medieval" },
-    { G_M_DEMOLITION,   G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_DEMOLITION,                            G_M_DEMOLITION, "demolition" },
-    { G_M_DUEL,         G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,                  G_M_DUEL,       "duel" },
-    { G_M_SURVIVOR,     G_M_TEAM|G_M_INSTA|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION,              G_M_SURVIVOR,   "survivor" },
-    { G_M_ARENA,        G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA,                                 G_M_ARENA,      "arena" },
+    {
+        G_M_TEAM,       G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "team"
+    },
+    {
+        G_M_INSTA,      G_M_INSTA,          G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "insta"
+    },
+    {
+        G_M_MEDIEVAL,   G_M_MEDIEVAL,       G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_INVASION,
+        "medieval"
+    },
+    {
+        G_M_DEMOLITION, G_M_DEMOLITION,     G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_DEMOLITION|G_M_INVASION,
+        "demolition"
+    },
+    {
+        G_M_DUEL,       G_M_DUEL,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "duel"
+    },
+    {
+        G_M_SURVIVOR,   G_M_SURVIVOR,       G_M_TEAM|G_M_INSTA|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_DEMOLITION|G_M_INVASION,
+        "survivor"
+    },
+    {
+        G_M_ARENA,      G_M_ARENA,          G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_INVASION,
+        "arena"
+    },
+    {
+        G_M_INVASION,   G_M_INVASION,       G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_INVASION,
+        "invasion"
+    },
 };
 #else
 extern gametypes gametype[], mutstype[];
@@ -286,10 +333,12 @@ extern gametypes gametype[], mutstype[];
 #define m_duel(a,b)         ((b & G_M_DUEL) || (gametype[a].implied & G_M_DUEL))
 #define m_survivor(a,b)     ((b & G_M_SURVIVOR) || (gametype[a].implied & G_M_SURVIVOR))
 #define m_arena(a,b)        ((b & G_M_ARENA) || (gametype[a].implied & G_M_ARENA))
+#define m_invasion(a,b)     ((b & G_M_INVASION) || (gametype[a].implied & G_M_INVASION))
 
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b) || m_demolition(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
+#define m_enemies(a,b)      (m_campaign(a) || m_invasion(a, b))
 
 #define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_demolition(a,b) ? WEAP_ROCKET : (m_edit(a) || m_trial(a) ? GAME(limitedweapon) : (m_insta(a,b) ? GAME(instaweapon) : GAME(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : ((m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
