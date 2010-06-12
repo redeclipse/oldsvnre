@@ -129,6 +129,7 @@ namespace ai
 
     bool hasweap(gameent *d, int weap)
     {
+        if(!isweap(weap)) return false;
         if(w_carry(weap, m_weapon(game::gamemode, game::mutators)))
             return d->hasweap(weap, m_weapon(game::gamemode, game::mutators));
         return d->ammo[weap] >= WEAP(weap, max);
@@ -136,7 +137,7 @@ namespace ai
 
     bool wantsweap(gameent *d, int weap, bool all = false)
     {
-        if(hasweap(d, weap)) return false;
+        if(!isweap(weap) || hasweap(d, weap)) return false;
         if(d->carry(m_weapon(game::gamemode, game::mutators)) >= maxcarry && (hasweap(d, d->loadweap) || weap != d->loadweap))
             return false;
         return true;
