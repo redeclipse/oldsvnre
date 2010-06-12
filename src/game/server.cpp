@@ -2572,10 +2572,10 @@ namespace server
         {
             if(ci->state.ammo[weap] < sub)
             {
-                int maxscale = int(ci->state.ammo[weap]/float(sub)*DMF);
+                int maxscale = int(ci->state.ammo[weap]/float(sub)*WEAP2(weap, power, flags&HIT_ALT));
                 if(scale > maxscale) scale = maxscale;
             }
-            if(scale < int(DMF)) sub = int(ceilf(sub*scale/DMF));
+            sub = int(ceilf(sub*scale/float(WEAP2(weap, power, flags&HIT_ALT))));
         }
         if(!gs.canshoot(weap, flags, m_weapon(gamemode, mutators), millis))
         {
@@ -3566,10 +3566,14 @@ namespace server
                     shotevent *ev = new shotevent;
                     ev->id = getint(p);
                     ev->weap = getint(p);
-                    if(!isweap(ev->weap)) havecn = false;
                     ev->flags = getint(p);
-                    ev->scale = clamp(getint(p), 0, int(DMF));
-                    if(havecn) ev->millis = cp->getmillis(gamemillis, ev->id);
+                    ev->scale = getint(p);
+                    if(!isweap(ev->weap)) havecn = false;
+                    else
+                    {
+                        ev->scale = clamp(ev->scale, 0, WEAP2(ev->weap, power, ev->flags&HIT_ALT));
+                        if(havecn) ev->millis = cp->getmillis(gamemillis, ev->id);
+                    }
                     loopk(3) ev->from[k] = getint(p);
                     ev->num = getint(p);
                     loopj(ev->num)
@@ -3582,7 +3586,7 @@ namespace server
                     if(havecn)
                     {
                         int rays = WEAP2(ev->weap, rays, ev->flags&HIT_ALT);
-                        if(rays > 1 && WEAP2(ev->weap, power, ev->flags&HIT_ALT)) rays = int(ceilf(rays*ev->scale/DMF));
+                        if(rays > 1 && WEAP2(ev->weap, power, ev->flags&HIT_ALT)) rays = int(ceilf(rays*ev->scale/float(WEAP2(ev->weap, power, ev->flags&HIT_ALT))));
                         while(ev->shots.length() > rays) ev->shots.remove(rnd(ev->shots.length()));
                         cp->addevent(ev);
                     }

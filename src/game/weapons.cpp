@@ -197,13 +197,13 @@ namespace weapons
             else offset = -1;
         }
         float scale = 1;
-        int sub = WEAP2(weap, sub, secondary);
+        int sub = WEAP2(weap, sub, secondary), cooked = force;
         if(WEAP2(weap, power, secondary) && !WEAP(weap, zooms))
         {
             float maxscale = 1;
             if(sub > 1 && d->ammo[weap] < sub) maxscale = d->ammo[weap]/float(sub);
             int len = int(WEAP2(weap, power, secondary)*maxscale);
-            if(!force)
+            if(!cooked)
             {
                 if(d->weapstate[weap] != WEAP_S_POWER)
                 {
@@ -214,10 +214,10 @@ namespace weapons
                     }
                     else return false;
                 }
-                force = clamp(lastmillis-d->weaplast[weap], 0, len);
-                if(pressed && force < len) return false;
+                cooked = clamp(lastmillis-d->weaplast[weap], 1, len);
+                if(pressed && cooked < len) return false;
             }
-            scale = clamp(clamp(force, 1, len)/float(WEAP2(weap, power, secondary)), 1e-3f, maxscale);
+            scale = cooked/float(WEAP2(weap, power, secondary));
             if(sub > 1 && scale < 1) sub = int(ceilf(sub*scale));
         }
         else if(!pressed) return false;
@@ -301,7 +301,7 @@ namespace weapons
             }
         }
         projs::shootv(weap, secondary ? HIT_ALT : 0, offset, scale, from, vshots, d, true);
-        client::addmsg(N_SHOOT, "ri8iv", d->clientnum, lastmillis-game::maptime, weap, secondary ? HIT_ALT : 0, int(scale*DMF), int(from.x*DMF), int(from.y*DMF), int(from.z*DMF), shots.length(), shots.length()*sizeof(ivec)/sizeof(int), shots.getbuf());
+        client::addmsg(N_SHOOT, "ri8iv", d->clientnum, lastmillis-game::maptime, weap, secondary ? HIT_ALT : 0, cooked, int(from.x*DMF), int(from.y*DMF), int(from.z*DMF), shots.length(), shots.length()*sizeof(ivec)/sizeof(int), shots.getbuf());
 
         return true;
     }
