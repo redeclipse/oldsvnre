@@ -725,7 +725,7 @@ namespace physics
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor))
                         {
                             d->action[AC_SPECIAL] = false;
-                            if(!onfloor) d->vel.z += impulsespeed+max(d->vel.magnitude(), 1.f);
+                            if(!onfloor) d->vel.z += (impulsespeed+max(d->vel.magnitude(), 1.f))*2/3;
                         }
                         break;
                     }
