@@ -435,18 +435,6 @@ namespace game
         }
     }
 
-    void fireeffect(gameent *d)
-    {
-        if(fireburning >= (d != focus || thirdpersonview() ? 1 : 2) && fireburntime && d->onfire(lastmillis, fireburntime))
-        {
-            int millis = lastmillis-d->lastfire; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-            if(fireburntime-millis < fireburndelay) pc = float(fireburntime-millis)/float(fireburndelay);
-            else pc = 0.75f+(float(millis%fireburndelay)/float(fireburndelay*4));
-            vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
-            regular_part_create(PART_FIREBALL_SOFT, max(fireburnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*deadscale(d, intensity*pc), blend*pc*fireburnblend, -15, 0);
-        }
-    }
-
     gameent *pointatplayer()
     {
         loopv(players)
@@ -513,56 +501,11 @@ namespace game
         d->checktags();
         adjustscaled(int, d->quake, quakefade);
         if(d->aitype < AI_START) heightoffset(d, local);
-        loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE)
+        loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE && (d->state != CS_ALIVE || lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS)))
         {
-            if(d->state != CS_ALIVE || lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS))
-            {
-                if(playreloadnotify >= ((d == focus ? 1 : 2)*(WEAP(i, add) < WEAP(i, max) ? 2 : 1)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
-                    playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
-                d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
-            }
-            else if(d->weapselect == i && d->weapstate[i] == WEAP_S_POWER && lastmillis-d->weaplast[i] > 0)
-            {
-                static const struct powerfxs {
-                    int type, parttype, colour;
-                    float size, radius;
-                } powerfx[WEAP_MAX] = {
-                    { 0, 0, 0, 0 },
-                    { 2, PART_SPARK, 0xFFCC22, 0.1f, 1.5f },
-                    { 4, PART_LIGHTNING_FLARE, 0x1111CC, 1, 1 },
-                    { 2, PART_SPARK, 0xFFAA00, 0.15f, 2 },
-                    { 2, PART_SPARK, 0xFF8800, 0.1f, 2 },
-                    { 2, PART_FIREBALL_SOFT, 0, 0.25f, 3 },
-                    { 1, PART_PLASMA_SOFT, 0x226688, 0.15f, 2 },
-                    { 2, PART_PLASMA_SOFT, 0x6611FF, 0.1f, 2.5f },
-                    { 3, PART_PLASMA_SOFT, 0, 0.5f, 0.125f },
-                    { 0, 0, 0, 0 },
-                };
-                float amt = (lastmillis-d->weaplast[i])/float(d->weapwait[i]);
-                switch(powerfx[i].type)
-                {
-                    case 1: case 2:
-                    {
-                        int colour = powerfx[i].colour > 0 ? powerfx[i].colour : firecols[rnd(FIRECOLOURS)];
-                        regularshape(powerfx[i].parttype, 1+(amt*powerfx[i].radius), colour, powerfx[i].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(i), powerfx[i].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
-                        break;
-                    }
-                    case 3:
-                    {
-                        int colour = powerfx[i].colour > 0 ? powerfx[i].colour : ((int(254*max(1.f-amt,0.5f))<<16)+1)|((int(128*max(1.f-amt,0.f))+1)<<8), interval = lastmillis%1000;
-                        float fluc = powerfx[i].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(powerfx[i].parttype, 1, d->originpos(), colour, (powerfx[i].radius*max(amt, 0.25f))+fluc);
-                        break;
-                    }
-                    case 4:
-                    {
-                        int colour = powerfx[i].colour > 0 ? powerfx[i].colour : firecols[rnd(FIRECOLOURS)];
-                        part_flare(d->originpos(), d->muzzlepos(i), 1, PART_LIGHTNING, colour, powerfx[i].size, max(amt, 0.1f));
-                        break;
-                    }
-                    case 0: default: break;
-                }
-            }
+            if(playreloadnotify >= ((d == focus ? 1 : 2)*(WEAP(i, add) < WEAP(i, max) ? 2 : 1)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
+                playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+            d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
         }
         if(d->respawned > 0 && lastmillis-d->respawned >= PHYSMILLIS*4) d->respawned = -1;
         if(d->suicided > 0 && lastmillis-d->suicided >= PHYSMILLIS*4) d->suicided = -1;
@@ -2196,8 +2139,60 @@ namespace game
     void rendercheck(gameent *d)
     {
         if(!polymodels) d->checktags();
-        impulseeffect(d, false);
-        fireeffect(d);
+        if(rendernormally)
+        {
+            if(d->weapstate[d->weapselect] == WEAP_S_POWER && lastmillis-d->weaplast[d->weapselect] > 0)
+            {
+                static const struct powerfxs {
+                    int type, parttype, colour;
+                    float size, radius;
+                } powerfx[WEAP_MAX] = {
+                    { 0, 0, 0, 0 },
+                    { 2, PART_SPARK, 0xFFCC22, 0.1f, 1.5f },
+                    { 4, PART_LIGHTNING_FLARE, 0x1111CC, 1, 1 },
+                    { 2, PART_SPARK, 0xFFAA00, 0.15f, 2 },
+                    { 2, PART_SPARK, 0xFF8800, 0.1f, 2 },
+                    { 2, PART_FIREBALL_SOFT, 0, 0.25f, 3 },
+                    { 1, PART_PLASMA_SOFT, 0x226688, 0.15f, 2 },
+                    { 2, PART_PLASMA_SOFT, 0x6611FF, 0.1f, 2.5f },
+                    { 3, PART_PLASMA_SOFT, 0, 0.5f, 0.125f },
+                    { 0, 0, 0, 0 },
+                };
+                float amt = (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]);
+                switch(powerfx[d->weapselect].type)
+                {
+                    case 1: case 2:
+                    {
+                        int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[rnd(FIRECOLOURS)];
+                        regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
+                        break;
+                    }
+                    case 3:
+                    {
+                        int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : ((int(254*max(1.f-amt,0.5f))<<16)+1)|((int(128*max(1.f-amt,0.f))+1)<<8), interval = lastmillis%1000;
+                        float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
+                        part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc);
+                        break;
+                    }
+                    case 4:
+                    {
+                        int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[rnd(FIRECOLOURS)];
+                        part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, powerfx[d->weapselect].size, max(amt, 0.1f));
+                        break;
+                    }
+                    case 0: default: break;
+                }
+            }
+            if(fireburning >= (d != focus || thirdpersonview() ? 1 : 2) && fireburntime && d->onfire(lastmillis, fireburntime))
+            {
+                int millis = lastmillis-d->lastfire; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
+                if(fireburntime-millis < fireburndelay) pc = float(fireburntime-millis)/float(fireburndelay);
+                else pc = 0.75f+(float(millis%fireburndelay)/float(fireburndelay*4));
+                vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
+                regular_part_create(PART_FIREBALL_SOFT, max(fireburnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*deadscale(d, intensity*pc), blend*pc*fireburnblend, -15, 0);
+            }
+            impulseeffect(d, false);
+        }
     }
 
     void render()
