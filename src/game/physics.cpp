@@ -666,7 +666,7 @@ namespace physics
                 d->resetphys();
             }
 
-            if(!d->turnside && (d->ai || impulsedash) && canimpulse(d, 0, 1))
+            if(!d->turnside && (d->ai || impulsedash) && canimpulse(d, 0, 1) && (!d->lastboost || lastmillis-d->lastboost > impulseboost))
             {
                 bool dash = !d->ai && impulsedash >= 2 && d->action[AC_DASH],  pulse = impulsedash != 2 && d->action[AC_JUMP] && !onfloor;
                 if(dash || pulse)
