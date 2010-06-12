@@ -131,7 +131,7 @@ WEAPON(shotgun,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,                  IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,
     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,      0,      0,
     2,      0,      0,
-    0.125f, 0.125f, 0.125f, 0.125f, 0.5f,   0.35f,  50,     50,     0.05f,  0.05f,  2,      2,      25,     25,     1,      1,
+    0.05f,  0.1f,   0.05f,  0.1f,   0.5f,   0.35f,  50,     50,     0.05f,  0.05f,  2,      2,      25,     25,     1,      1,
     15,     15,     25,     20,     0.25f,  0.25f,  150,    150,    1,      1,      50,     50,     1,      1.5f,
     2,      6,      10,     10,     1,      1,      0.6f,   0.6f,   0.35f,  0.35f
 );
