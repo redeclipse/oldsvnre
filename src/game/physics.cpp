@@ -672,23 +672,19 @@ namespace physics
                 if(dash || pulse)
                 {
                     float mag = impulsespeed+max(d->vel.magnitude(), 1.f);
-                    if(onfloor) mag *= 2;
+                    if(onfloor)
+                    {
+                        mag += mag/2;
+                        d->resetphys();
+                        d->lastjump = lastmillis;
+                    }
                     bool moving = d->move || d->strafe;
-                    if(!pulse || moving)
-                    {
-                        vec dir;
-                        vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                        (d->vel = dir).mul(mag); d->vel.z += mag/4;
-                        d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_DASH, lastmillis);
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_DASH);
-                    }
-                    else
-                    {
-                        (d->vel = vec(0, 0, 1)).mul(mag); d->vel.z += mag/4;
-                        d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
-                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
-                    }
+                    vec dir(0, 0, 1);
+                    if(!pulse || moving) vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                    (d->vel = dir).mul(mag); d->vel.z += mag/4;
+                    d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
+                    d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
                     game::impulseeffect(d, true);
                     d->action[AC_JUMP] = d->action[AC_DASH] = false;
                 }
