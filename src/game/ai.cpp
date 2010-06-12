@@ -85,7 +85,8 @@ namespace ai
         {
             switch(d->weapselect)
             {
-                case WEAP_PISTOL: case WEAP_MELEE: case WEAP_ROCKET: default: return false; break;
+                case WEAP_PISTOL: return true; break;
+                case WEAP_MELEE: case WEAP_ROCKET: default: return false; break;
                 case WEAP_SWORD: case WEAP_SHOTGUN: case WEAP_SMG: case WEAP_PLASMA: case WEAP_GRENADE: if(rnd(d->skill*3) <= d->skill) return false; break;
                 case WEAP_RIFLE: if(weaprange(d, d->weapselect, false, e->o.squaredist(d->o))) return false; break;
             }
