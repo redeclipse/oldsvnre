@@ -2012,7 +2012,7 @@ namespace game
                         break;
                     }
                 }
-                if(showweap)
+                if(showweap && (weap != WEAP_MELEE || third))
                 {
                     static const struct polyweaps
                     {
