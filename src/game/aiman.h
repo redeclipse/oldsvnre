@@ -119,11 +119,7 @@ namespace aiman
         if(ci->state.ownernum < 0) deleteai(ci);
         else if(ci->state.aireinit >= 1)
         {
-            if(ci->state.aireinit == 2)
-            {
-                ci->state.dropped.reset();
-                loopk(WEAP_MAX) loopj(2) ci->state.weapshots[k][j].reset();
-            }
+            if(ci->state.aireinit == 2) loopk(WEAP_MAX) loopj(2) ci->state.weapshots[k][j].reset();
             sendf(-1, 1, "ri6si", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team);
             if(ci->state.aireinit == 2)
             {
@@ -257,7 +253,7 @@ namespace aiman
 
     void checkenemies()
     {
-        if(GAME(enemybalance) && GAME(enemyallowed) >= (m_campaign(gamemode) ? 0 : (m_insta(gamemode, mutators) ? 2 : 1)))
+        if(GAME(enemybalance) && m_enemies(gamemode, mutators))
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[4] == triggerid || !sents[j].attrs[4]) && m_check(sents[j].attrs[3], gamemode))
             {

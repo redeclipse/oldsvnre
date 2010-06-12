@@ -378,6 +378,7 @@ namespace projs
                             proj.lifemillis = proj.lifetime = 1;
                             proj.lifespan = 1.f;
                             proj.state = CS_DEAD;
+                            proj.escaped = true;
                             return;
                         }
                     }
@@ -1315,6 +1316,7 @@ namespace projs
             if(canremove.inrange(oldest))
             {
                 canremove[oldest]->state = CS_DEAD;
+                canremove[oldest]->escaped = true;
                 canremove.removeunordered(oldest);
             }
             else break;
@@ -1356,7 +1358,7 @@ namespace projs
                             }
                             if(proj.lifetime > 0) break;
                         }
-                        default: proj.state = CS_DEAD; break;
+                        default: proj.state = CS_DEAD; proj.escaped = true; break;
                     }
                 }
                 else for(int rtime = curtime; proj.state != CS_DEAD && rtime > 0;)
@@ -1368,12 +1370,17 @@ namespace projs
                     {
                         if(proj.lifetime < 0) proj.lifetime = 0;
                         proj.state = CS_DEAD;
+                        proj.escaped = true;
                         break;
                     }
                 }
                 effect(proj);
             }
-            else proj.state = CS_DEAD;
+            else
+            {
+                proj.state = CS_DEAD;
+                proj.escaped = true;
+            }
             if(proj.local && proj.owner && proj.projtype == PRJ_SHOT)
             {
                 int radius = 0;
