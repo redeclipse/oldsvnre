@@ -671,16 +671,17 @@ namespace physics
                 bool dash = !d->ai && impulsedash >= 2 && d->action[AC_DASH],  pulse = impulsedash != 2 && d->action[AC_JUMP] && !onfloor;
                 if(dash || pulse)
                 {
-                    float mag = min((impulsespeed+d->vel.magnitude())*(onfloor && (!d->strafe || !d->move) ? 1.5f : 1.f), max(d->vel.magnitude(), impulselimit));
+                    bool moving = d->move || d->strafe;
+                    float mag = min((impulsespeed*(onfloor && !moving ? 2.f : 1.f))+d->vel.magnitude(), max(d->vel.magnitude(), impulselimit));
                     if(onfloor)
                     {
                         d->resetphys();
                         d->lastjump = lastmillis;
                     }
-                    bool moving = d->move || d->strafe;
                     vec dir(0, 0, 1);
-                    if(!pulse || moving) vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                    (d->vel = dir).mul(mag); d->vel.z += mag/4;
+                    if(!pulse || moving)
+                        vecfromyawpitch(d->aimyaw, d->aimpitch+(onfloor ? 25 : 0), moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                    (d->vel = dir).mul(mag);
                     d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                     d->action[AC_JUMP] = d->action[AC_DASH] = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
