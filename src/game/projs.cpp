@@ -702,12 +702,10 @@ namespace projs
                 }
                 case WEAP_PISTOL:
                 {
-                    if(proj.movement > 0.f)
+                    float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from)));
+                    if(size > 0)
                     {
-                        bool iter = proj.lastbounce || proj.lifemillis-proj.lifetime >= 200;
-                        float dist = proj.o.dist(proj.from), size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, iter ? min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement) : dist);
-                        vec dir = iter || dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
-                        proj.to = vec(proj.o).sub(vec(dir).mul(size));
+                        proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                         int col = ((int(220*max(1.f-proj.lifespan,0.3f))<<16))|((int(160*max(1.f-proj.lifespan,0.2f)))<<8);
                         part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
                         part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.25f);
@@ -757,12 +755,10 @@ namespace projs
                 }
                 case WEAP_SHOTGUN:
                 {
-                    if(proj.movement > 0.f)
+                    float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from)));
+                    if(size > 0)
                     {
-                        bool iter = proj.lastbounce || proj.lifemillis-proj.lifetime >= 200;
-                        float dist = proj.o.dist(proj.from), size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, iter ? min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement) : dist);
-                        vec dir = iter || dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
-                        proj.to = vec(proj.o).sub(vec(dir).mul(size));
+                        proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                         int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16)+1)|((int(144*max(1.f-proj.lifespan,0.15f))+1)<<8);
                         part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                         part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.25f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
@@ -771,12 +767,10 @@ namespace projs
                 }
                 case WEAP_SMG:
                 {
-                    if(proj.movement > 0.f)
+                    float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from)));
+                    if(size > 0)
                     {
-                        bool iter = proj.lastbounce || proj.lifemillis-proj.lifetime >= 200;
-                        float dist = proj.o.dist(proj.from), size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, iter ? min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement) : dist);
-                        vec dir = iter || dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
-                        proj.to = vec(proj.o).sub(vec(dir).mul(size));
+                        proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                         int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16))|((int(80*max(1.f-proj.lifespan,0.1f)))<<8);
                         part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                         part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.125f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
@@ -793,11 +787,13 @@ namespace projs
                 }
                 case WEAP_RIFLE:
                 {
-                    float dist = proj.o.dist(proj.from), size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), 1.f, min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement));
-                    vec dir = dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
-                    proj.to = vec(proj.o).sub(vec(dir).mul(size));
-                    part_flare(proj.to, proj.o, 1, PART_FLARE, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
-                    part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.25f);
+                    float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan), 1.f, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from)));
+                    if(size > 0)
+                    {
+                        proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
+                        part_flare(proj.to, proj.o, 1, PART_FLARE, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
+                        part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.25f);
+                    }
                     break;
                 }
                 default: break;
