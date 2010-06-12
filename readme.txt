@@ -91,7 +91,7 @@ Developers
     Maps, Collaboration, Website Design
 
  Jonathan "W!ck3d" Roels - Artist
-    Maps, Collaboration
+    Maps, Textures, Collaboration
 
  Derek "Favorito" Ponicki - Artist
     Maps, Textures, Collaboration
