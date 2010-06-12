@@ -148,10 +148,10 @@ namespace server
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
         int score, spree, crits, rewards, flags, teamkills, shotdamage, damage;
-        int lasttimeplayed, timeplayed, aireinit, lastfireburn, lastfireowner, lastdash;
+        int lasttimeplayed, timeplayed, aireinit, lastfireburn, lastfireowner;
         vector<int> fraglog, fragmillis, cpnodes;
 
-        servstate() : state(CS_SPECTATOR), aireinit(0), lastfireburn(0), lastfireowner(-1), lastdash(0) {}
+        servstate() : state(CS_SPECTATOR), aireinit(0), lastfireburn(0), lastfireowner(-1) {}
 
         bool isalive(int millis)
         {
@@ -172,7 +172,7 @@ namespace server
 
         void respawn(int millis, int heal)
         {
-            lastfireburn = lastdash = 0;
+            lastfireburn = 0;
             lastfireowner = -1;
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
@@ -2337,7 +2337,7 @@ namespace server
             if(isweap(weap))
             {
                 bool docrit = false;
-                if(WEAP2(weap, critdash, flags&HIT_ALT) && actor->state.lastdash && gamemillis-actor->state.lastdash <= WEAP2(weap, critdash, flags&HIT_ALT))
+                if(WEAP2(weap, critdash, flags&HIT_ALT) && actor->state.lastboost && gamemillis-actor->state.lastboost <= WEAP2(weap, critdash, flags&HIT_ALT))
                     docrit = true;
                 else if(GAME(damagecritchance) > 0)
                 {
@@ -3433,7 +3433,8 @@ namespace server
                         if(cp->state.onfire(gamemillis, GAME(fireburntime))) cp->state.lastfire = cp->state.lastfireburn = 0;
                         else break; // don't propogate
                     }
-                    else if(idx == SPHY_BOOST) cp->state.lastdash = gamemillis;
+                    else if(idx == SPHY_BOOST && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulseboost)))
+                        cp->state.lastboost = gamemillis;
                     else if(idx == SPHY_POWER) getint(p);
                     QUEUE_MSG;
                     break;

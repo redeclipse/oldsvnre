@@ -501,10 +501,10 @@ struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX];
     int lastweap, loadweap, weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastfire;
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastfire, lastboost;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : loadweap(-1), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0),
+    gamestate() : loadweap(-1), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0), lastboost(0),
         aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0) {}
     ~gamestate() {}
 
@@ -653,7 +653,7 @@ struct gamestate
 
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastfire = 0;
+        lastdeath = lastpain = lastregen = lastfire = lastboost = 0;
         lastrespawn = -1;
     }
 
@@ -1023,6 +1023,7 @@ struct gameent : dynent, gamestate
     {
         impulse[IM_METER] += cost;
         impulse[IM_TIME] = millis;
+        if(type == IM_T_BOOST) lastboost = millis;
         if(!lastjump && type > IM_T_NONE && type < IM_T_WALL)
         {
             impulse[IM_TYPE] = IM_T_NONE;
