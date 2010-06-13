@@ -108,8 +108,8 @@ namespace projs
         {
             proj.hit = d;
             proj.hitflags = flags;
-            proj.norm = norm;
-            if(!WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) && (d->type == ENT_PLAYER || d->type == ENT_AI)) hitproj((gameent *)d, proj);
+            if(!WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) && (d->type == ENT_PLAYER || d->type == ENT_AI))
+                hitproj((gameent *)d, proj);
             switch(proj.weap)
             {
                 case WEAP_RIFLE:
@@ -226,7 +226,7 @@ namespace projs
         else proj.vel = vec(0, 0, 0);
     }
 
-    void bounceeffect(projent &proj)
+    void bounce(projent &proj)
     {
         if(proj.movement > 1 && (!proj.lastbounce || lastmillis-proj.lastbounce > 500)) switch(proj.projtype)
         {
@@ -356,7 +356,7 @@ namespace projs
                 proj.waterfric = WEAP2(proj.weap, waterfric, proj.flags&HIT_ALT);
                 proj.weight = WEAP2(proj.weap, weight, proj.flags&HIT_ALT);
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
-                proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT);
+                proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
                 if(!polymodels) proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
@@ -397,7 +397,7 @@ namespace projs
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                     proj.escaped = !proj.owner;
                     proj.fadetime = rnd(250)+250;
-                    proj.extinguish = 2;
+                    proj.extinguish = 6;
                     break;
                 } // otherwise fall through
             }
@@ -421,7 +421,7 @@ namespace projs
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER;
                 proj.escaped = !proj.owner;
                 proj.fadetime = rnd(250)+250;
-                proj.extinguish = 2;
+                proj.extinguish = 1;
                 break;
             }
             case PRJ_EJECT:
@@ -447,7 +447,7 @@ namespace projs
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = rnd(250)+250;
-                proj.extinguish = 2;
+                proj.extinguish = 6;
                 if(proj.owner)
                 {
                     if(proj.owner == game::focus && !game::thirdpersonview())
@@ -483,7 +483,7 @@ namespace projs
                 if(proj.owner) proj.o.sub(vec(0, 0, proj.owner->height*0.2f));
                 proj.vel.add(vec(rnd(51)-25, rnd(51)-25, rnd(25)));
                 proj.fadetime = 500;
-                proj.extinguish = 2;
+                proj.extinguish = 6;
                 break;
             }
             default: break;
@@ -986,87 +986,46 @@ namespace projs
         }
     }
 
-    int checkmaterial(projent &proj)
+    int check(projent &proj, const vec &dir)
     {
-        int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));
-        if(proj.extinguish >= 2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH || proj.o.z < 0)) return 2;
-        else if(proj.extinguish >= 1 && (isliquid(mat&MATF_VOLUME))) return 1;
-        return 0;
-    }
-
-    int bounce(projent &proj, const vec &dir)
-    {
-        int check = checkmaterial(proj);
-        if(((!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_PLAYER) || inside) && (hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)) || check)
+        int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2)), chk = 0;
+        if(proj.extinguish&1 && (isliquid(mat&MATF_VOLUME))) chk |= 1;
+        if(proj.extinguish&2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH || proj.o.z < 0)) chk |= 2;
+        if(chk)
         {
-            if(hitplayer)
+            if(chk&1 && !proj.limited)
             {
-                if(!hiteffect(proj, hitplayer, hitflags, vec(hitplayer->o).sub(proj.o).normalize())) return 1;
+                playsound(S_EXTINGUISH, proj.o);
+                part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, proj.radius*max(WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale), 2), 1, -10);
+                proj.limited = true;
             }
-            else if(check)
-            {
-                if(check == 1 && proj.extinguish >= 2) proj.limited = true;
-                proj.norm = dir;
-            }
-            else
-            {
-                if(proj.projcollide&COLLIDE_STICK)
-                {
-                    proj.o.sub(vec(dir).mul(proj.radius*0.125f));
-                    proj.stuck = true;
-                    return 1;
-                }
-                proj.norm = wall;
-            }
-            bounceeffect(proj);
-            if(check && proj.projtype != PRJ_DEBRIS) return 0;
-            else if(proj.projcollide&(hitplayer ? BOUNCE_PLAYER : BOUNCE_GEOM))
-            {
-                reflect(proj, proj.norm);
-                proj.movement = 0;
-                proj.lastbounce = lastmillis;
-                return 2; // bounce
-            }
-            else if(proj.projcollide&(hitplayer ? IMPACT_PLAYER : IMPACT_GEOM))
-                return 0; // die on impact
+            proj.norm = dir;
+            if(proj.extinguish&4) return 0;
         }
-        return 1; // live!
+        return 1;
     }
 
-    int trace(projent &proj, const vec &dir)
+    int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
-        vec to(proj.o), ray = dir;
-        to.add(dir);
-        float maxdist = ray.magnitude();
-        if(maxdist <= 0) return 1; // not moving anywhere, so assume still alive since it was already alive
-        ray.mul(1/maxdist);
-        float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT | RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
-        proj.o.add(vec(ray).mul(dist >= 0 ? dist : maxdist));
-        int check = checkmaterial(proj);
-        if((dist >= 0 && (hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)) || check)
+        if(hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
         {
-            if(hitplayer)
+            if(d)
             {
-                if(!hiteffect(proj, hitplayer, hitflags, vec(hitplayer->o).sub(proj.o).normalize())) return 1;
-            }
-            else if(check)
-            {
-                if(check == 1 && proj.extinguish >= 2) proj.limited = true;
-                proj.norm = dir;
+                proj.norm = vec(d->o).sub(proj.o).normalize();
+                if(!hiteffect(proj, d, flags, proj.norm)) return 1;
             }
             else
             {
+                proj.norm = norm;
                 if(proj.projcollide&COLLIDE_STICK)
                 {
                     proj.o.sub(vec(dir).mul(proj.radius*0.125f));
                     proj.stuck = true;
                     return 1;
                 }
-                proj.norm = hitsurface;
             }
-            bounceeffect(proj);
-            if(check && proj.projtype != PRJ_DEBRIS) return 0;
-            else if(proj.projcollide&(hitplayer ? BOUNCE_PLAYER : BOUNCE_GEOM))
+            bounce(proj);
+            if(proj.projcollide&(d ? BOUNCE_PLAYER : BOUNCE_GEOM))
             {
                 reflect(proj, proj.norm);
                 proj.o.add(vec(proj.norm).mul(0.1f)); // offset from surface slightly to avoid initial collision
@@ -1074,13 +1033,39 @@ namespace projs
                 proj.lastbounce = lastmillis;
                 return 2; // bounce
             }
-            else if(proj.projcollide&(hitplayer ? IMPACT_PLAYER : IMPACT_GEOM))
-                return 0; // die on impact
+            else if(proj.projcollide&(d ? IMPACT_PLAYER : IMPACT_GEOM)) return 0; // die on impact
         }
         return 1; // live!
     }
 
-    void checkescaped(projent &proj, const vec &pos, const vec &dir)
+    int step(projent &proj, const vec &dir)
+    {
+        int ret = check(proj, dir);
+        if(ret == 1 && (!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_PLAYER) || inside))
+            ret = impact(proj, dir, hitplayer, hitflags, wall);
+        return ret;
+    }
+
+    int trace(projent &proj, const vec &dir)
+    {
+        int ret = check(proj, dir);
+        if(ret == 1)
+        {
+            vec to(proj.o), ray = dir;
+            to.add(dir);
+            float maxdist = ray.magnitude();
+            if(maxdist > 0)
+            {
+                ray.mul(1/maxdist);
+                float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT | RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
+                proj.o.add(vec(ray).mul(dist >= 0 ? dist : maxdist));
+                if(dist >= 0) ret = impact(proj, dir, hitplayer, hitflags, hitsurface);
+            }
+        }
+        return ret;
+    }
+
+    void escaped(projent &proj, const vec &pos, const vec &dir)
     {
         if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
         else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? WEAP2(proj.weap, edelay, proj.flags&HIT_ALT) : PHYSMILLIS))
@@ -1161,7 +1146,7 @@ namespace projs
         if(isliquid(mat&MATF_VOLUME) && proj.waterfric > 0) dir.div(proj.waterfric);
         dir.mul(secs);
 
-        if(!proj.escaped && proj.owner) checkescaped(proj, pos, dir);
+        if(!proj.escaped && proj.owner) escaped(proj, pos, dir);
 
         bool blocked = false;
         if(proj.projcollide&COLLIDE_TRACE)
@@ -1184,7 +1169,7 @@ namespace projs
                 if(barrier < stepdist)
                 {
                     proj.o.add(ray.mul(barrier-0.15f));
-                    switch(bounce(proj, ray))
+                    switch(step(proj, ray))
                     {
                         case 2: proj.o = pos; blocked = true; break;
                         case 1: proj.o = pos; break;
@@ -1195,7 +1180,7 @@ namespace projs
             if(!blocked)
             {
                 proj.o.add(dir);
-                switch(bounce(proj, dir))
+                switch(step(proj, dir))
                 {
                     case 2: proj.o = pos; if(proj.projtype == PRJ_SHOT) blocked = true; break;
                     case 1: default: break;
@@ -1290,7 +1275,8 @@ namespace projs
                 if(hitplayer)
                 {
                     proj.lastbounce = lastmillis;
-                    if(!hiteffect(proj, hitplayer, hitflags, vec(hitplayer->o).sub(proj.from).normalize())) return true;
+                    proj.norm = vec(hitplayer->o).sub(proj.from).normalize();
+                    if(!hiteffect(proj, hitplayer, hitflags, proj.norm)) return true;
                 }
                 else proj.norm = hitsurface;
                 if(proj.projcollide&(hitplayer ? IMPACT_PLAYER : IMPACT_GEOM))
