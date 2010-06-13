@@ -241,7 +241,6 @@ void calcvol(int flags, int vol, int slotvol, int slotmat, int maxrad, int minra
             v.rotate_around_z(-camera1->yaw*RAD);
             span = int(255.9f*(0.5f - 0.5f*v.x/v.magnitude2())); // range is from 0 (left) to 255 (right)
         }
-        else *curpan = 127;
         if(!(flags&SND_NODIST))
         {
             float mrad = maxrad > 0 ? maxrad : 256, nrad = minrad > 0 ? (minrad <= mrad ? minrad : mrad) : 0;
@@ -254,7 +253,7 @@ void calcvol(int flags, int vol, int slotvol, int slotmat, int maxrad, int minra
     }
     if(flags&SND_CLAMPED) svol = max(svol, vol);
     *curvol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(slotvol/255.f)*(svol/255.f)*MIX_MAX_VOLUME), 0, MIX_MAX_VOLUME);
-    *curpan = 127;
+    *curpan = span;
 }
 
 void updatesound(int chan)
