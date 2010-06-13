@@ -1,5 +1,4 @@
-All sounds in this directory are original works by Quinton "quin" Reeves and Alex "blackshoe" Anguix
-
+All sounds in this directory are original works by Quinton "quin" Reeves, Alex "blackshoe" Anguix and Derek "JoJo" Stegall
 Files in this directory are released under the Creative Commons license:
 
     Attribution-ShareAlike 3.0
