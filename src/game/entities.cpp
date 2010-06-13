@@ -205,6 +205,7 @@ namespace entities
                     if(attr[4]&SND_NOPAN) addentinfo("nopan");
                     if(attr[4]&SND_NODIST) addentinfo("nodist");
                     if(attr[4]&SND_NOQUIET) addentinfo("noquiet");
+                    if(attr[4]&SND_CLAMPED) addentinfo("clamped");
                 }
                 break;
             }

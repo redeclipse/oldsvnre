@@ -231,27 +231,30 @@ ICOMMAND(0, mapsound, "sisssi", (char *n, int *v, char *m, char *w, char *x, int
 
 void calcvol(int flags, int vol, int slotvol, int slotmat, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan)
 {
-    int svol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(vol/255.f)*(slotvol/255.f)*MIX_MAX_VOLUME), 0, MIX_MAX_VOLUME);
-    if(!(flags&SND_NOATTEN))
+    int svol = flags&SND_CLAMPED ? 255 : vol, span = 127; vec v; float dist = pos.dist(camera1->o, v);
+    if(!(flags&SND_NOQUIET) && (isliquid(lookupmaterial(pos)&MATF_VOLUME) || isliquid(lookupmaterial(camera1->o)&MATF_VOLUME)))
+        svol = int(svol*0.75f);
+    if(!(flags&SND_NOATTEN) && dist > 0)
     {
-        if(!(flags&SND_NOQUIET) && (isliquid(lookupmaterial(pos)&MATF_VOLUME) || isliquid(lookupmaterial(camera1->o)&MATF_VOLUME))) svol = int(svol*0.75f);
-        vec v; float dist = pos.dist(camera1->o, v);
         if(!(flags&SND_NOPAN) && !soundmono && (v.x != 0 || v.y != 0))
         {
             v.rotate_around_z(-camera1->yaw*RAD);
-            *curpan = int(255.9f*(0.5f - 0.5f*v.x/v.magnitude2())); // range is from 0 (left) to 255 (right)
+            span = int(255.9f*(0.5f - 0.5f*v.x/v.magnitude2())); // range is from 0 (left) to 255 (right)
         }
         else *curpan = 127;
         if(!(flags&SND_NODIST))
         {
             float mrad = maxrad > 0 ? maxrad : 256, nrad = minrad > 0 ? (minrad <= mrad ? minrad : mrad) : 0;
-            if(dist <= nrad) *curvol = svol;
-            else if(dist <= mrad) *curvol = int(svol*(1.f-((dist-nrad)/max(mrad-nrad,1e-16f))));
-            else *curvol = 0;
+            if(dist > nrad)
+            {
+                if(dist <= mrad) svol = int(svol*(1.f-((dist-nrad)/max(mrad-nrad,1e-16f))));
+                else svol = 0;
+            }
         }
-        else *curvol = svol;
     }
-    else { *curvol = svol; *curpan = 127; }
+    if(flags&SND_CLAMPED) svol = max(svol, vol);
+    *curvol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(slotvol/255.f)*(svol/255.f)*MIX_MAX_VOLUME), 0, MIX_MAX_VOLUME);
+    *curpan = 127;
 }
 
 void updatesound(int chan)
@@ -323,9 +326,9 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
     if(soundset.inrange(n) && soundset[n].sample->sound)
     {
         soundslot *slot = &soundset[n];
-        int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : 255,
-            x = maxrad > 0 ? maxrad : (slot->maxrad > 0 ? slot->maxrad : 256),
-            y = minrad >= 0 ? minrad : (slot->minrad >= 0 ? slot->minrad : 0);
+        int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : (flags&SND_CLAMPED ? 64 : 255),
+            x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : 256)),
+            y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : 0));
 
         calcvol(flags, v, slot->vol, slot->material, x, y, pos, &cvol, &cpan);
 

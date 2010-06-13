@@ -257,7 +257,7 @@ namespace game
         {
             if(d && issound(d->aschan)) removesound(d->aschan);
             physent *t = !d || d == focus ? camera1 : d;
-            playsound(idx, t->o, t, t == camera1 ? SND_FORCED : 0, 255, getworldsize()/2, 0, d ? &d->aschan : NULL);
+            playsound(idx, t->o, t, t == camera1 ? SND_FORCED : SND_DIRECT, -1, -1, -1, d ? &d->aschan : NULL);
         }
     }
     ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announce(*idx, *targ, NULL, "\fw%s", s));
@@ -504,7 +504,7 @@ namespace game
         loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE && (d->state != CS_ALIVE || lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS)))
         {
             if(playreloadnotify >= ((d == focus ? 1 : 2)*(WEAP(i, add) < WEAP(i, max) ? 2 : 1)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
-                playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+                playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
             d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
         }
         if(d->respawned > 0 && lastmillis-d->respawned >= PHYSMILLIS*4) d->respawned = -1;
@@ -560,11 +560,10 @@ namespace game
 
         void play()
         {
-            if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
             if(flags&CRIT)
             {
                 if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
-                    playsound(S_CRITICAL, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+                    playsound(S_CRITICAL, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 if(showcritabovehead >= (d != focus ? 1 : 2))
                     part_text(d->abovehead(), "<super>\fzgrCRITICAL", d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
             }
@@ -576,8 +575,7 @@ namespace game
                     int snd = -1;
                     if(flags&BURN) snd = S_BURNED;
                     else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                    if(snd >= 0 && snd < S_MAX)
-                        playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+                    if(snd >= 0 && snd < S_MAX) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 }
                 if(showdamageabovehead >= (d != focus ? 1 : 2))
                 {
@@ -621,6 +619,7 @@ namespace game
         {
             if(hithurts(flags))
             {
+                if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
                     vec p = d->headpos();
