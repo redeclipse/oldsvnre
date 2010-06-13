@@ -236,9 +236,9 @@ namespace hud
     VAR(IDF_PERSIST, radardamagemerge, 1, 250, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagetime, 1, 500, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagefade, 1, 2500, INT_MAX-1);
-    FVAR(IDF_PERSIST, radardamagesize, 0, 10, 1000);
+    FVAR(IDF_PERSIST, radardamagesize, 0, 8, 1000);
     FVAR(IDF_PERSIST, radardamageblend, 0, 0.85f, 1);
-    FVAR(IDF_PERSIST, radardamagetrack, 0, 2, 1000);
+    FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
     VAR(IDF_PERSIST, radardamagemin, 1, 10, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, INT_MAX-1);
 
