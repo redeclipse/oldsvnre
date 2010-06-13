@@ -25,11 +25,11 @@ GVAR(IDF_ADMIN, defaultmode, -1, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, -2, G_M_TEAM, G_M_ALL);
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility enigma forge ghost hinder hollow keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
-GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot enigma ghost keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility warp wet venus");
+GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility enigma forge futuresport ghost hinder hollow keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
+GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot enigma forge futuresport ghost hollow keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility warp wet venus");
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility keystone longestyard mainframe panic venus");
-GSVAR(IDF_ADMIN, ctfmaps, "bath darkness deadsimple deli depot enigma forge ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
-GSVAR(IDF_ADMIN, stfmaps, "bath bloodgrounds darkness deadsimple deli depot enigma forge ghost keystone mist nova panic smouldering stone tower tranquility warp wet venus");
+GSVAR(IDF_ADMIN, ctfmaps, "bath darkness deadsimple deli depot enigma forge futuresport ghost hollow keystone mist nova panic smouldering stone tranquility warp wet venus");
+GSVAR(IDF_ADMIN, stfmaps, "bath bloodgrounds darkness deadsimple deli depot enigma forge futuresport ghost hollow keystone mist nova panic smouldering stone tower tranquility warp wet venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
