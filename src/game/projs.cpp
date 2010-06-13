@@ -989,7 +989,7 @@ namespace projs
     int check(projent &proj, const vec &dir)
     {
         int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2)), chk = 0;
-        if(proj.extinguish&1 && (isliquid(mat&MATF_VOLUME))) chk |= 1;
+        if(proj.extinguish&1 && int(mat&MATF_VOLUME) == MAT_WATER) chk |= 1;
         if(proj.extinguish&2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH || proj.o.z < 0)) chk |= 2;
         if(chk)
         {
