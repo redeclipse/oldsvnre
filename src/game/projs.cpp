@@ -996,7 +996,11 @@ namespace projs
             if(chk&1 && !proj.limited)
             {
                 playsound(S_EXTINGUISH, proj.o);
-                part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, proj.radius*max(WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale), 2), 1, -10);
+                float size = max(proj.radius, 1.f);
+                if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) > 0)
+                    size *= WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale);
+                else size *= 2;
+                part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, max(size, 1.f), 1, -10);
                 proj.limited = true;
             }
             proj.norm = dir;
