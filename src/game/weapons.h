@@ -126,7 +126,7 @@ WEAPON(sword,
 );
 WEAPON(shotgun,
     1,      8,      1,      2,      375,    750,    750,    15,     10,     1600,   800,    0,      0,      750,    250,
-    0,      0,      0,      0,      200,    200,    0,      16,     10,     15,     10,     20,
+    0,      0,      0,      0,      200,    200,    0,      16,     10,     15,     15,     30,
     2,      1,      10,     10,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,                  IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,
     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,      0,      0,
@@ -169,7 +169,7 @@ WEAPON(plasma,
     3,      12,     10,     10,     1,      1,      0.5f,   0.5f,   0.3f,   0.3f
 );
 WEAPON(rifle,
-    5,      5,      1,      1,      750,    750,    1500,   50,     100,    2000,   5000,   0,      0,      5000,   5000,
+    5,      5,      1,      1,      750,    750,    1500,   50,     100,    5000,   15000,  0,      0,      5000,   5000,
     0,      0,      0,      0,      200,    200,    24,     0,      1,      1,      1,      0,
     0,      0,      40,     40,
     IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_OWNER|COLLIDE_TRACE,                  IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_CONT,

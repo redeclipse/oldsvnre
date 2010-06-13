@@ -479,7 +479,7 @@ namespace client
             if(ret > 0) snd = ret;
         }
         conoutft(CON_CHAT, "%s", s);
-        playsound(snd, d->o, d, d == game::focus ? SND_FORCED : SND_DIRECT, 255-int(camera1->o.dist(d->o)/(getworldsize()/2)*200));
+        playsound(snd, d->o, d, d == game::focus ? SND_FORCED : SND_DIRECT);
     }
 
     void toserver(int flags, char *text)

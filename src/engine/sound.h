@@ -13,12 +13,13 @@ enum
     SND_NOPAN   = 1<<3, // disable panning (distance only attenuation)
     SND_NODIST  = 1<<4, // disable distance (panning only)
     SND_NOQUIET = 1<<5, // disable water effects (panning only)
-    SND_LOOP    = 1<<6,
-    SND_MAP     = 1<<7,
-    SND_FORCED  = SND_NOATTEN|SND_NODELAY|SND_NOCULL,
-    SND_DIRECT  = SND_NODELAY|SND_NOCULL|SND_NODIST|SND_NOQUIET,
+    SND_CLAMPED = 1<<6, // makes volume the minimum volume to clamp to
+    SND_LOOP    = 1<<7,
+    SND_MAP     = 1<<8,
+    SND_FORCED  = SND_NOATTEN|SND_NODELAY|SND_NOCULL|SND_NOQUIET|SND_CLAMPED,
+    SND_DIRECT  = SND_NODELAY|SND_NOCULL|SND_NOQUIET|SND_CLAMPED,
     SND_MASKF   = SND_LOOP|SND_MAP,
-    SND_LAST    = 6
+    SND_LAST    = 7
 };
 
 #ifndef STANDALONE

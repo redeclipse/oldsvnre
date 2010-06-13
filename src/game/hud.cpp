@@ -233,12 +233,13 @@ namespace hud
     VAR(IDF_PERSIST, radaraffinitynames, 0, 1, 2);
 
     VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
+    VAR(IDF_PERSIST, radardamagemerge, 1, 250, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagetime, 1, 500, INT_MAX-1);
-    VAR(IDF_PERSIST, radardamagefade, 1, 4500, INT_MAX-1);
-    FVAR(IDF_PERSIST, radardamagesize, 0, 6, 1000);
-    FVAR(IDF_PERSIST, radardamageblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
-    VAR(IDF_PERSIST, radardamagemin, 1, 25, INT_MAX-1);
+    VAR(IDF_PERSIST, radardamagefade, 1, 2500, INT_MAX-1);
+    FVAR(IDF_PERSIST, radardamagesize, 0, 10, 1000);
+    FVAR(IDF_PERSIST, radardamageblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, radardamagetrack, 0, 2, 1000);
+    VAR(IDF_PERSIST, radardamagemin, 1, 10, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, INT_MAX-1);
 
     VAR(IDF_PERSIST, showeditradar, 0, 0, 1);
@@ -330,6 +331,16 @@ namespace hud
     {
         damageresidue = clamp(damageresidue+n, 0, 200);
         vec colour = doesburn(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0));
+        loopv(damagelocs)
+        {
+            damageloc &d = damagelocs[i];
+            if(actor->clientnum != d.attacker) continue;
+            if(lastmillis-d.outtime > radardamagemerge) continue;
+            if(d.colour != colour) continue;
+            d.damage += n;
+            d.dir = vec(loc).sub(camera1->o).normalize();
+            return; // accumulate
+        }
         damagelocs.add(damageloc(actor->clientnum, lastmillis, n, vec(loc).sub(camera1->o).normalize(), colour));
     }
 
@@ -1247,8 +1258,8 @@ namespace hud
             if(game::focus->state != CS_SPECTATOR && game::focus->state != CS_EDITING)
             {
                 float amt = millis >= radardamagetime ? 1.f-(float(millis-radardamagetime)/float(radardamagefade)) : float(millis)/float(radardamagetime),
-                    range = clamp(max(d.damage, radardamagemin)/float(max(radardamagemax-radardamagemin, 1)), radardamagemin/100.f, 1.f)*amt,
-                    fade = clamp(range*radardamageblend*blend, min(radardamageblend*radardamagemin/100.f, 1.f), radardamageblend)*amt,
+                    range = clamp(max(d.damage, radardamagemin)/float(max(radardamagemax-radardamagemin, 1)), radardamagemin/100.f, 1.f),
+                    fade = clamp(radardamageblend*blend, min(radardamageblend*radardamagemin/100.f, 1.f), radardamageblend)*amt,
                     size = clamp(range*radardamagesize, min(radardamagesize*radardamagemin/100.f, 1.f), radardamagesize)*amt;
                 vec dir = vec(d.dir).normalize().rotate_around_z(-camera1->yaw*RAD);
                 if(radardamage >= 5)
