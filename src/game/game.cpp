@@ -96,7 +96,7 @@ namespace game
     VAR(IDF_PERSIST, damagemergeburn, 0, 250, INT_MAX-1);
     VAR(IDF_PERSIST, playdamagetones, 0, 1, 3);
     VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
-    VAR(IDF_PERSIST, playreloadnotify, 0, 1, 4);
+    VAR(IDF_PERSIST, playreloadnotify, 0, 3, 15);
 
     VAR(IDF_PERSIST, quakefade, 0, 100, INT_MAX-1);
     VAR(IDF_PERSIST, ragdolls, 0, 1, 1);
@@ -255,7 +255,6 @@ namespace game
         }
         if(idx >= 0)
         {
-            if(d && issound(d->aschan)) removesound(d->aschan);
             physent *t = !d || d == focus ? camera1 : d;
             playsound(idx, t->o, t, t == camera1 ? SND_FORCED : SND_DIRECT, -1, -1, -1, d ? &d->aschan : NULL);
         }
@@ -503,8 +502,8 @@ namespace game
         if(d->aitype < AI_START) heightoffset(d, local);
         loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE && (d->state != CS_ALIVE || lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS)))
         {
-            if(playreloadnotify >= ((d == focus ? 1 : 2)*(WEAP(i, add) < WEAP(i, max) ? 2 : 1)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
-                playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
+            if(playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
+                playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : 0);
             d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
         }
         if(d->respawned > 0 && lastmillis-d->respawned >= PHYSMILLIS*4) d->respawned = -1;
@@ -880,11 +879,7 @@ namespace game
                 actor->lastkill = totalmillis;
             }
         }
-        if(dth >= 0)
-        {
-            if(issound(d->vschan)) removesound(d->vschan);
-            playsound(dth, d->o, d, 0, -1, -1, -1, &d->vschan);
-        }
+        if(dth >= 0) playsound(dth, d->o, d, 0, -1, -1, -1, &d->vschan);
         if(showobituaries && d->aitype < AI_START)
         {
             bool isme = (d == player1 || actor == player1), show = false;

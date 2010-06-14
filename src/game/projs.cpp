@@ -600,10 +600,10 @@ namespace projs
             {
                 int ends = lastmillis+(WEAP2(weap, adelay, flags&HIT_ALT)*2);
                 if(issound(d->wschan)) sounds[d->wschan].ends = ends;
-                else playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY), d->o, d, SND_LOOP, -1, -1, -1, &d->wschan, ends);
+                else playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &d->wschan, ends);
             }
             else if(!WEAP2(weap, time, flags&HIT_ALT) || life)
-                playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY), d->o, d, 0, -1, -1, -1, &d->wschan);
+                playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
         }
         float muz = muzzleblend; if(d == game::focus) muz *= 0.5f;
         const struct weapfxs
