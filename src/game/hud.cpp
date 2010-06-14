@@ -71,7 +71,7 @@ namespace hud
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.4f, 1);
     FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, noticescale, 1e-3f, 1, 1);
+    FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
@@ -115,7 +115,7 @@ namespace hud
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, INT_MAX-1);
     FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
-    FVAR(IDF_PERSIST, crosshairthrob, 1e-3f, 0.3f, 1000);
+    FVAR(IDF_PERSIST, crosshairthrob, 1e-4f, 0.3f, 1000);
     TVAR(IDF_PERSIST, relativecursortex, "textures/relative", 3);
     TVAR(IDF_PERSIST, guicursortex, "textures/cursor", 3);
     TVAR(IDF_PERSIST, editcursortex, "textures/crosshair", 3);
@@ -143,19 +143,19 @@ namespace hud
     VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorythrob, 0, 0.125f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.07f, 1000);
-    FVAR(IDF_PERSIST, inventoryskew, 1e-3f, 0.6f, 1000);
-    FVAR(IDF_PERSIST, inventorygrow, 1e-3f, 0.75f, 1);
+    FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.6f, 1000);
+    FVAR(IDF_PERSIST, inventorygrow, 1e-4f, 0.75f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.85f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryeditskew, 1e-3f, 0.65f, 1000);
+    FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.65f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
-    FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-3f, 0.8f, 1000);
+    FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
     VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
 

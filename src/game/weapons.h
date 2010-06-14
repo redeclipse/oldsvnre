@@ -35,20 +35,20 @@ enum
     wf, wg, wh, wi, wj, wk, wl, wm, wn, wo, wp, wq, \
     x21, x22, x31, x32, x33, x34, x4, x5, x6, x7, x81, x82, x9, xa, xb, xc, xd, xe, \
     t0, t1, t2, t3, y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, ya, yb, yc, yd, ye1, ye2, yf1, yf2, yg, yh, \
-    yi, yj, yk, yl, ym, yn, yo, yp, yq, yr, ys, yt, yu, yv, yw, yx \
+    yi, yj, yk, yl, ym, yn, yo, yp, yq, yr, ys, yt, yu, yv, yw, yx, yy, yz \
  ) \
     GVAR(0, name##add, 1, w0, 10000);                   GVAR(0, name##max, 1, w1, 10000); \
     GVAR(0, name##sub1, 0, w2, 10000);                  GVAR(0, name##sub2, 0, w3, 10000); \
     GVAR(0, name##adelay1, 20, w4, 10000);              GVAR(0, name##adelay2, 20, w5, 10000);          GVAR(0, name##rdelay, 50, w6, 10000); \
     GVAR(0, name##damage1, -10000, w7, 10000);          GVAR(0, name##damage2, -10000, w8, 10000); \
-    GVAR(0, name##speed1, -10000, w9, 10000);           GVAR(0, name##speed2, -10000, wa, 10000); \
+    GVAR(0, name##speed1, -100000, w9, 100000);         GVAR(0, name##speed2, -100000, wa, 100000); \
     GVAR(0, name##power1, 0, wb1, 10000);               GVAR(0, name##power2, 0, wb2, 10000); \
-    GVAR(0, name##time1, 0, wc, 10000);                 GVAR(0, name##time2, 0, wd, 10000); \
+    GVAR(0, name##time1, 0, wc, 100000);                GVAR(0, name##time2, 0, wd, 100000); \
     GVAR(0, name##pdelay1, 0, we1, 10000);              GVAR(0, name##pdelay2, 0, we2, 10000); \
     GVAR(0, name##gdelay1, 0, we3, 10000);              GVAR(0, name##gdelay2, 0, we4, 10000); \
     GVAR(0, name##edelay1, 0, we5, 10000);              GVAR(0, name##edelay2, 0, we6, 10000); \
     GVAR(0, name##explode1, 0, wf, 10000);              GVAR(0, name##explode2, 0, wg, 10000); \
-    GVAR(0, name##rays1, 1, wh, 100);                   GVAR(0, name##rays2, 1, wi, 100); \
+    GVAR(0, name##rays1, 1, wh, 1000);                  GVAR(0, name##rays2, 1, wi, 1000); \
     GVAR(0, name##spread1, 0, wj, 10000);               GVAR(0, name##spread2, 0, wk, 10000); \
     GVAR(0, name##zdiv1, 0, wl, 10000);                 GVAR(0, name##zdiv2, 0, wm, 10000); \
     GVAR(0, name##aiskew1, 0, wn, 10000);               GVAR(0, name##aiskew2, 0, wo, 10000); \
@@ -67,20 +67,21 @@ enum
     GFVAR(0, name##reflectivity1, 0, y2, 360);          GFVAR(0, name##reflectivity2, 0, y3, 360); \
     GFVAR(0, name##relativity1, -10000, y4, 10000);     GFVAR(0, name##relativity2, -10000, y5, 10000); \
     GFVAR(0, name##waterfric1, 0, y6, 10000);           GFVAR(0, name##waterfric2, 0, y7, 10000); \
-    GFVAR(0, name##weight1, -10000, y8, 10000);         GFVAR(0, name##weight2, -10000, y9, 10000); \
+    GFVAR(0, name##weight1, -100000, y8, 100000);       GFVAR(0, name##weight2, -100000, y9, 100000); \
     GFVAR(0, name##radius1, 1, ya, 10000);              GFVAR(0, name##radius2, 1, yb, 10000); \
     GFVAR(0, name##kickpush1, -10000, yc, 10000);       GFVAR(0, name##kickpush2, -10000, yd, 10000); \
     GFVAR(0, name##hitpush1, -10000, ye1, 10000);       GFVAR(0, name##hitpush2, -10000, ye2, 10000); \
     GFVAR(0, name##slow1, 0, yf1, 10000);               GFVAR(0, name##slow2, 0, yf2, 10000); \
-    GFVAR(0, name##aidist1, 0, yg, 10000);              GFVAR(0, name##aidist2, 0, yh, 10000); \
-    GFVAR(0, name##partsize1, 0, yi, 10000);            GFVAR(0, name##partsize2, 0, yj, 10000); \
-    GFVAR(0, name##partlen1, 0, yk, 10000);             GFVAR(0, name##partlen2, 0, yl, 10000); \
+    GFVAR(0, name##aidist1, 0, yg, 100000);             GFVAR(0, name##aidist2, 0, yh, 10000); \
+    GFVAR(0, name##partsize1, 0, yi, 100000);           GFVAR(0, name##partsize2, 0, yj, 100000); \
+    GFVAR(0, name##partlen1, 0, yk, 100000);            GFVAR(0, name##partlen2, 0, yl, 100000); \
     GFVAR(0, name##frequency, 0, ym, 10000);            GFVAR(0, name##pusharea, 0, yn, 10000); \
     GFVAR(0, name##critmult, 0, yo, 10000);             GFVAR(0, name##critdist, 0, yp, 10000); \
     GFVAR(0, name##delta1, 1, yq, 10000);               GFVAR(0, name##delta2, 1, yr, 10000); \
-    GFVAR(0, name##tracemult1, 1e-3f, ys, 10000);       GFVAR(0, name##tracemult2, 1e-3f, yt, 10000); \
-    GFVAR(0, name##torsodam1, 1e-3f, yu, 1);            GFVAR(0, name##torsodam2, 1e-3f, yv, 1); \
-    GFVAR(0, name##legsdam1, 1e-3f, yw, 1);             GFVAR(0, name##legsdam2, 1e-3f, yx, 1);
+    GFVAR(0, name##tracemult1, 1e-4f, ys, 10000);       GFVAR(0, name##tracemult2, 1e-4f, yt, 10000); \
+    GFVAR(0, name##headdam1, 1e-4f, yu, 1000);          GFVAR(0, name##headdam2, 1e-4f, yv, 1000); \
+    GFVAR(0, name##torsodam1, 1e-4f, yw, 1000);         GFVAR(0, name##torsodam2, 1e-4f, yx, 1000); \
+    GFVAR(0, name##legsdam1, 1e-4f, yy, 1000);          GFVAR(0, name##legsdam2, 1e-4f, yz, 1000);
 
 //  add     max     sub1    sub2    adly1   adly2   rdly    dam1    dam2    spd1    spd2     pow1   pow2    time1   time2
 //  pdly1   pdly2   gdly1   gdly2   edly1   edly2   expl1   expl2   rays1   rays2   sprd1   sprd2
@@ -90,7 +91,7 @@ enum
 //  allw    cdash1  cdash2
 //  tpr1    tpr2    tspan1  tspan2  elas1   elas2   rflt1   rflt2   relt1   relt2   wfrc1   wfrc2   wght1   wght2   rads1   rads2
 //  kpsh1   kpsh2   hpsh1   hpsh2   slow1   slow2   aidst1  aidst2  psz1    psz2    plen1   plen2   freq    push
-//  cmult   cdist   dlta1   dlta2   tmult1  tmult2  tordm1  tordm2  legdm1  legdm2
+//  cmult   cdist   dlta1   dlta2   tmult1  tmult2  headm1  headm2  tordm1  tordm2  legdm1  legdm2
 WEAPON(melee,
     1,      1,      0,      0,      500,    750,    0,      20,     40,     0,      0,      0,      0,      100,    80,
     20,     0,      0,      0,      200,    200,    0,      0,      1,      1,      1,      1,
@@ -100,7 +101,7 @@ WEAPON(melee,
     2,      500,    500,
     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
     -1,     -1,     250,    250,    0.15f,  0.15f,  24,     24,     1,      2,      0,      0,      0,      1,
-    2,      0,      10,     10,     2,      4,      0.5f,   0.5f,   0.3f,   0.3f
+    2,      0,      10,     10,     2,      4,      1,      1,      0.5f,   0.5f,   0.3f,   0.3f
 );
 WEAPON(pistol,
     10,     10,     1,      1,      150,    300,    1000,   40,     40,     2000,   2000,   0,      0,      2000,   2000,
@@ -111,7 +112,7 @@ WEAPON(pistol,
     2,      0,      0,
     0,      0,      0,      0,      0,      0,      0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
     2,      2,      150,    150,    0.05f,  0.05f,  300,    300,    1,      1,      10,     10,     1,      1,
-    4,      16,     10,     10,     1,      1,      0.5f,   0.5f,   0.25f,  0.25f
+    4,      16,     10,     10,     1,      1,      1,      1,      0.5f,   0.5f,   0.25f,  0.25f
 );
 WEAPON(sword,
     1,      1,      0,      0,      500,    750,    50,     50,     100,    0,      0,      0,      0,      300,    300,
@@ -122,7 +123,7 @@ WEAPON(sword,
     2,      500,    500,
     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
     -1,     -1,     250,    500,    0.25f,  0.5f,   32,     32,     1,      1.25f,  0,      0,      1,      1,
-    2,      0,      10,     10,     2,      1.5f,   0.5f,   0.5f,   0.25f,  0.25f
+    2,      0,      10,     10,     2,      1.5f,   1,      1,      0.5f,   0.5f,   0.25f,  0.25f
 );
 WEAPON(shotgun,
     1,      8,      1,      2,      375,    750,    750,    15,     10,     1600,   800,    0,      0,      750,    250,
@@ -133,7 +134,7 @@ WEAPON(shotgun,
     2,      0,      0,
     0.05f,  0.1f,   0.05f,  0.1f,   0.5f,   0.35f,  50,     50,     0.05f,  0.05f,  2,      2,      25,     25,     1,      1,
     15,     15,     25,     20,     0.25f,  0.25f,  150,    150,    1,      1,      50,     50,     1,      1.5f,
-    2,      6,      10,     10,     1,      1,      0.6f,   0.6f,   0.35f,  0.35f
+    2,      6,      10,     10,     1,      1,      1,      1,      0.6f,   0.6f,   0.35f,  0.35f
 );
 WEAPON(smg,
     40,     40,     1,      5,      75,     250,    1500,   15,     15,     5000,   3000,   0,      0,      750,    500,
@@ -144,7 +145,7 @@ WEAPON(smg,
     2,      0,      0,
     0.1f,   0.1f,   0,      0,      0.75f,  0.5f,   30,     30,     0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
     0.5f,   3,      50,     60,     0.2f,   0.2f,   300,    300,    1,      1,      40,     40,     1,      1.5f,
-    3,      12,     10,     10,     1,      1,      0.5f,   0.5f,   0.3f,   0.3f
+    3,      12,     10,     10,     1,      1,      1,      1,      0.5f,   0.5f,   0.3f,   0.3f
 );
 WEAPON(flamer,
     50,     50,     1,      10,     100,    500,    2000,   5,      15,     200,    200,    0,      500,    250,    750,
@@ -155,7 +156,7 @@ WEAPON(flamer,
     2,      0,      0,
     0,      0,      0,      0,      0.15f,  0,      45,     0,      0.95f,  0.5f,   1,      1,      -300,   50,     1,      1,
     0.25f,  1,      20,     40,     0,      0,      20,     60,     12,     24,     0,      5,      2,      1.5f,
-    5,      12,     10,     10,     1,      1,      0.6f,   0.6f,   0.3f,   0.3f
+    5,      12,     10,     10,     1,      1,      1,      1,      0.6f,   0.6f,   0.3f,   0.3f
 );
 WEAPON(plasma,
     20,     20,     1,      20,     400,    1000,   2000,   20,     10,     500,    35,     0,      2000,   500,    5000,
@@ -166,10 +167,10 @@ WEAPON(plasma,
     2,      0,      0,
     0.5f,   0.75f,  0.0625f,0.25f,  0,      0,      0,      0,      0.125f, 0.175f, 1,      1,      0,      0,      4,      2,
     3,      6,      50,     -50,    0.1f,   0.1f,   200,    50,     18,     44,     0,      0,      2,      1.5f,
-    3,      12,     10,     10,     1,      1,      0.5f,   0.5f,   0.3f,   0.3f
+    3,      12,     10,     10,     1,      1,      1,      1,      0.5f,   0.5f,   0.3f,   0.3f
 );
 WEAPON(rifle,
-    5,      5,      1,      1,      750,    750,    1500,   50,     100,    5000,   15000,  0,      0,      5000,   5000,
+    5,      5,      1,      1,      750,    750,    1500,   50,     100,    5000,   25000,  0,      0,      5000,   5000,
     0,      0,      0,      0,      200,    200,    24,     0,      1,      1,      1,      0,
     0,      0,      40,     40,
     IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_OWNER|COLLIDE_TRACE,                  IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_CONT,
@@ -177,7 +178,7 @@ WEAPON(rifle,
     2,      0,      0,
     0,      0,      0,      0,      0,      0,      0,      0,      1,      0,      2,      2,      0,      0,      1,      1,
     5,      0,      100,    200,    0.1f,   0.25f,  600,    0,      1,      2,      256,    512,    1,      1.5f,
-    2,      12,     10,     10,     1,      1,      0.6f,   0.6f,   0.3f,   0.3f
+    2,      12,     10,     10,     1,      1,      1,      1,      0.6f,   0.6f,   0.3f,   0.3f
 );
 WEAPON(grenade,
     1,      2,      1,      1,      1000,   1000,   1500,   150,    150,    250,    250,    5000,   5000,   5000,   5000,
@@ -188,7 +189,7 @@ WEAPON(grenade,
     3,      0,      0,
     0,      0,      0,      0,      0.5f,   0,      0,      0,      1,      1,      2,      2,      64,     64,     1,      1,
     5,      5,      500,    500,    0.1f,   0.1f,   400,    400,    2,      2,      0,      0,      2,      2,
-    2,      0,      10,     10,     1,      1,      0.6f,   0.6f,   0.3f,   0.3f
+    2,      0,      10,     10,     1,      1,      1,      1,      0.6f,   0.6f,   0.3f,   0.3f
 );
 WEAPON(rocket,
     1,      1,      1,      1,      1000,   1000,   1500,   150,     150,    1000,   250,    2500,   2500,  5000,   5000,
@@ -199,7 +200,7 @@ WEAPON(rocket,
     1,      0,      0,
     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      2,      2,      0,      0,      1,      1,
     15,     15,     500,    500,    0.25f,  0.25f,  400,    400,    3,      3,      0,      0,      3,      3,
-    2,      0,      10,     10,     1,      1,      0.75f,  0.75f,  0.5f,   0.5f
+    2,      0,      10,     10,     1,      1,      1,      1,      0.75f,  0.75f,  0.5f,   0.5f
 );
 
 struct weaptypes
@@ -344,6 +345,7 @@ WEAPDEF(float, critmult);
 WEAPDEF(float, critdist);
 WEAPDEF2(float, delta);
 WEAPDEF2(float, tracemult);
+WEAPDEF2(float, headdam);
 WEAPDEF2(float, torsodam);
 WEAPDEF2(float, legsdam);
 

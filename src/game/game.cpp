@@ -61,10 +61,10 @@ namespace game
     VAR(IDF_PERSIST, deathcamstyle, 0, 1, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
 
-    FVAR(IDF_PERSIST, sensitivity, 1e-3f, 10.0f, 1000);
-    FVAR(IDF_PERSIST, yawsensitivity, 1e-3f, 10.0f, 1000);
-    FVAR(IDF_PERSIST, pitchsensitivity, 1e-3f, 7.5f, 1000);
-    FVAR(IDF_PERSIST, mousesensitivity, 1e-3f, 1.0f, 1000);
+    FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10.0f, 1000);
+    FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 10.0f, 1000);
+    FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 7.5f, 1000);
+    FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1.0f, 1000);
     FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.75f, 1);
 
     VAR(IDF_PERSIST, zoommousetype, 0, 0, 2);

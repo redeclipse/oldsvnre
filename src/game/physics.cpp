@@ -11,10 +11,10 @@ namespace physics
     FVAR(IDF_WORLD, floorz,             0, 0.867f, 1);
     FVAR(IDF_WORLD, slopez,             0, 0.5f, 1);
     FVAR(IDF_WORLD, wallz,              0, 0.2f, 1);
-    FVAR(IDF_WORLD, stepspeed,          1e-3f, 1.f, 1000);
-    FVAR(IDF_WORLD, ladderspeed,        1e-3f, 1.f, 1000);
+    FVAR(IDF_WORLD, stepspeed,          1e-4f, 1.f, 1000);
+    FVAR(IDF_WORLD, ladderspeed,        1e-4f, 1.f, 1000);
 
-    FVAR(IDF_PERSIST, floatspeed,       1e-3f, 100, 1000);
+    FVAR(IDF_PERSIST, floatspeed,       1e-4f, 100, 1000);
     FVAR(IDF_PERSIST, floatcurb,        0, 1.f, 1000);
 
     FVAR(IDF_PERSIST, impulseroll,      0, 15, 90);
