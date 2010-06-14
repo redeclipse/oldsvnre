@@ -370,6 +370,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 s.chan = chan;
                 if(hook)
                 {
+                    if(issound(*hook)) removesound(*hook);
                     *hook = s.chan;
                     s.hook = hook;
                 }
