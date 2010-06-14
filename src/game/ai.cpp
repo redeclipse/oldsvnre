@@ -1182,7 +1182,7 @@ namespace ai
         {
             if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != WEAP_S_WAIT)
             {
-                loopirev(WEAP_MAX) if(i >= WEAP_OFFSET && i < WEAP_ITEM && i != d->loadweap && i != d->weapselect && entities::ents.inrange(d->entid[i]))
+                loopirev(WEAP_ITEM) if(i >= WEAP_OFFSET && i != d->loadweap && i != d->weapselect && entities::ents.inrange(d->entid[i]))
                 {
                     client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, i);
                     d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
