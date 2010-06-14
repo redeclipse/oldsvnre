@@ -117,6 +117,17 @@ namespace physics
     }
     ICOMMAND(0, action, "Di", (int *n, int *i), { doaction(*i, *n!=0); });
 
+    bool secondaryweap(gameent *d)
+    {
+        if(WEAP(d->weapselect, zooms)) { if(d == game::player1 && game::zooming && game::inzoomswitch()) return true; }
+        else if(d->weapselect != WEAP_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
+        {
+            if(d->action[AC_ALTERNATE] && (!d->action[AC_ATTACK] || d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK])) return true;
+            else if(d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK] && WEAP2(d->weapselect, power, true) && d->weapstate[d->weapselect] == WEAP_S_POWER) return true;
+        }
+        return false;
+    }
+
     bool issolid(physent *d, physent *e, bool esc)
     {
         bool projectile = false, actor = false;

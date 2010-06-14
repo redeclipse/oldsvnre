@@ -500,12 +500,35 @@ namespace game
         d->checktags();
         adjustscaled(int, d->quake, quakefade);
         if(d->aitype < AI_START) heightoffset(d, local);
-        loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE && (d->state != CS_ALIVE || lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS)))
+        loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE)
         {
-            if(playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)) && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD)
-                playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : 0);
-            d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
+            bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS);
+            if(i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
+            {
+                if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
+                    playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : 0);
+            }
+            if(d->state != CS_ALIVE || timeexpired)
+                d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
         }
+        if(d->weapstate[d->weapselect] == WEAP_S_POWER)
+        {
+            int millis = lastmillis-d->weaplast[d->weapselect];
+            if(millis > 0)
+            {
+                bool secondary = physics::secondaryweap(d);
+                float amt = millis/float(d->weapwait[d->weapselect]);
+                int vol = 255;
+                if(WEAP2(d->weapselect, power, secondary)) switch(WEAP2(d->weapselect, cooked, secondary))
+                {
+                    case 4: case 5: vol = 10+int(245*(1.f-amt)); break; // longer
+                    case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
+                }
+                if(issound(d->pschan)) sounds[d->pschan].vol = vol;
+                else playsound(weaptype[d->weapselect].sound+S_W_POWER, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
+            }
+        }
+        else if(issound(d->pschan)) removesound(d->pschan);
         if(d->respawned > 0 && lastmillis-d->respawned >= PHYSMILLIS*4) d->respawned = -1;
         if(d->suicided > 0 && lastmillis-d->suicided >= PHYSMILLIS*4) d->suicided = -1;
         if(d->lastfire > 0 && lastmillis-d->lastfire >= fireburntime-500)
@@ -1916,7 +1939,7 @@ namespace game
                 if(showweap) switch(d->weapstate[weap])
                 {
                     case WEAP_S_SWITCH:
-                    case WEAP_S_PICKUP:
+                    case WEAP_S_USE:
                     {
                         if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
                         {
@@ -2066,7 +2089,7 @@ namespace game
                     switch(d->weapstate[weap])
                     {
                         case WEAP_S_SWITCH:
-                        case WEAP_S_PICKUP:
+                        case WEAP_S_USE:
                         {
                             if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
                             {
