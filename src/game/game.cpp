@@ -529,8 +529,8 @@ namespace game
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);
-        if(d->respawned > 0 && lastmillis-d->respawned >= PHYSMILLIS*4) d->respawned = -1;
-        if(d->suicided > 0 && lastmillis-d->suicided >= PHYSMILLIS*4) d->suicided = -1;
+        if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
+        if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
         if(d->lastfire > 0 && lastmillis-d->lastfire >= fireburntime-500)
         {
             if(lastmillis-d->lastfire >= fireburntime) d->resetfire();
@@ -1606,7 +1606,7 @@ namespace game
             if(player1->state == CS_DEAD || player1->state == CS_WAITING)
             {
                 if(player1->ragdoll) moveragdoll(player1, true);
-                else if(lastmillis-player1->lastpain <= 2000)
+                else if(lastmillis-player1->lastpain < 5000)
                     physics::move(player1, 10, false);
             }
             else

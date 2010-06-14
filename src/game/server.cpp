@@ -1750,12 +1750,14 @@ namespace server
             case 1: // try spawn
             {
                 if(!isai && (ci->wantsmap || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR))) return false;
-                if(ci->state.state == CS_ALIVE || (ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS)) return false;
+                if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
+                if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 break;
             }
             case 2: // spawn
             {
-                if((ci->state.state != CS_DEAD && ci->state.state != CS_WAITING) || (ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS)) return false;
+                if(ci->state.state != CS_DEAD && ci->state.state != CS_WAITING) return false;
+                if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 break;
             }
             case 3: return !isai; // spec

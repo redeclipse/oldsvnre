@@ -1356,7 +1356,7 @@ namespace ai
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
             if(d->ragdoll) moveragdoll(d, true);
-            else if(lastmillis-d->lastpain < 2000)
+            else if(lastmillis-d->lastpain < 5000)
                 physics::move(d, 1, false);
         }
         else
@@ -1431,11 +1431,14 @@ namespace ai
                 c.override = false;
                 cleannext = false;
             }
-            if((d->state == CS_DEAD || d->state == CS_WAITING) && (d->aitype == AI_BOT || !m_campaign(game::gamemode)) && (d->respawned < 0 || lastmillis-d->respawned >= 5000) && (!d->lastdeath || lastmillis-d->lastdeath > (d->aitype == AI_BOT || m_duke(game::gamemode, game::mutators) ? 500 : enemyspawntime)))
+            if(d->state == CS_DEAD)
             {
-                if(m_arena(game::gamemode, game::mutators)) client::addmsg(N_LOADWEAP, "ri2", d->clientnum, d->loadweap);
-                client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
-                d->respawned = lastmillis;
+                if((d->aitype == AI_BOT || !m_campaign(game::gamemode)) && d->respawned < 0 && (!d->lastdeath || lastmillis-d->lastdeath > (d->aitype == AI_BOT || m_duke(game::gamemode, game::mutators) ? 500 : enemyspawntime)))
+                {
+                    if(m_arena(game::gamemode, game::mutators)) client::addmsg(N_LOADWEAP, "ri2", d->clientnum, d->loadweap);
+                    client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
+                    d->respawned = lastmillis;
+                }
             }
             else if(d->state == CS_ALIVE && run)
             {
