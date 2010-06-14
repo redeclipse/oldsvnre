@@ -2518,10 +2518,10 @@ namespace server
     int calcdamage(int weap, int &flags, int radial, float size, float dist)
     {
         int damage = WEAP2(weap, damage, flags&HIT_ALT); flags &= ~HIT_SFLAGS;
-        if(radial) damage = int(ceilf(damage*clamp(1.f-dist/size, 1e-3f, 1.f)));
+        if(radial) damage = int(ceilf(damage*clamp(1.f-dist/size, 1e-6f, 1.f)));
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) damage = int(ceilf(damage*clamp(dist, 0.f, 1.f)));
         if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
-        if(flags&HIT_HEAD) damage = int(ceilf(damage*GAME(damagescale)));
+        if(flags&HIT_HEAD) damage = int(ceilf(damage*WEAP2(weap, headdam, flags&HIT_ALT)*GAME(damagescale)));
         else if(flags&HIT_TORSO) damage = int(ceilf(damage*WEAP2(weap, torsodam, flags&HIT_ALT)*GAME(damagescale)));
         else if(flags&HIT_LEGS) damage = int(ceilf(damage*WEAP2(weap, legsdam, flags&HIT_ALT)*GAME(damagescale)));
         else damage = 0;
