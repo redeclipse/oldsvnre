@@ -2729,7 +2729,7 @@ namespace server
         int weap = -1, amt = -1, dropped = -1, value = -1;
         if(sents[ent].type == WEAPON)
         {
-            if(gs.ammo[attr] < 0 && w_carry(attr, sweap) && gs.carry(sweap) >= GAME(maxcarry)) weap = gs.drop(sweap);
+            if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= GAME(maxcarry)) weap = gs.drop(sweap);
             loopvk(clients) if(clients[k]->state.dropped.find(ent)) { amt = clients[k]->state.dropped.value(ent); break; }
         }
         if(isweap(weap) && sents.inrange(dropped = gs.entid[weap]))
