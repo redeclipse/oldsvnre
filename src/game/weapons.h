@@ -8,7 +8,7 @@ enum
 #define isweap(a)       (a >= 0 && a < WEAP_MAX)
 
 enum { WEAP_F_NONE = 0, WEAP_F_FORCED = 1<<0 };
-enum { WEAP_S_IDLE = 0, WEAP_S_PRIMARY, WEAP_S_SECONDARY, WEAP_S_RELOAD, WEAP_S_POWER, WEAP_S_SWITCH, WEAP_S_PICKUP, WEAP_S_WAIT };
+enum { WEAP_S_IDLE = 0, WEAP_S_PRIMARY, WEAP_S_SECONDARY, WEAP_S_RELOAD, WEAP_S_POWER, WEAP_S_SWITCH, WEAP_S_USE, WEAP_S_WAIT };
 
 enum
 {
@@ -205,7 +205,7 @@ WEAPON(rocket,
 
 struct weaptypes
 {
-    int     anim,               colour,         sound,      esound,     fsound,     rsound,         espeed;
+    int     anim,               colour,         sound,      espeed;
     bool    melee,      traced,     muzzle,     eject;
     float   thrown[2],              halo,       esize;
     const char *name,       *text,  *item,                      *vwep, *hwep,                     *proj,                  *eprj;
@@ -214,61 +214,61 @@ struct weaptypes
 weaptypes weaptype[] =
 {
     {
-            ANIM_MELEE,         0x888888,       S_MELEE,    -1,          -1,         -1,             1,
+            ANIM_MELEE,         0x888888,       S_MELEE,    1,
             true,       true,       false,      false,
             { 0, 0 },               1,          0,
             "melee",        "\fa",  "",                         "", "",                        "",                     ""
     },
     {
-            ANIM_LIGHT,         0xDDDDDD,       S_PISTOL,   S_BZAP,     S_WHIZZ,    -1,             10,
+            ANIM_LIGHT,         0xDDDDDD,       S_PISTOL,   10,
             false,      false,      true,       true,
             { 0, 0 },               4,          0.35f,
             "pistol",       "\fw",  "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projs/cartridge"
     },
     {
-            ANIM_WIELD,          0x2222FF,      S_SWORD,    -1,          -1,         -1,             1,
+            ANIM_WIELD,          0x2222FF,      S_SWORD,    1,
             true,       true,       true,       false,
             { 0, 0 },               14,         0,
             "sword",     "\fb",     "weapons/sword/item",       "weapons/sword/vwep", "weapons/sword/hwep",    "",                     ""
     },
     {
-            ANIM_HEAVY,         0xFFFF22,       S_SHOTGUN,  S_BZAP,     S_WHIZZ,    S_RICOCHET,     10,
+            ANIM_HEAVY,         0xFFFF22,       S_SHOTGUN,  10,
             false,      false,      true,       true,
             { 0, 0 },               6,          0.45f,
             "shotgun",      "\fy",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projs/shell"
     },
     {
-            ANIM_LIGHT,         0xFF8822,       S_SMG,      S_BZAP,     S_WHIZZ,    S_RICOCHET,     20,
+            ANIM_LIGHT,         0xFF8822,       S_SMG,      20,
             false,      false,      true,       true,
             { 0, 0 },               5.5f,       0.35f,
             "smg",          "\fo",  "weapons/smg/item",         "weapons/smg/vwep", "weapons/smg/hwep",        "",                     "projs/cartridge"
     },
     {
-            ANIM_HEAVY,         0xFF2222,       S_FLAMER,   S_BURN,     S_BURNING,  -1,             1,
+            ANIM_HEAVY,         0xFF2222,       S_FLAMER,   1,
             false,      false,      true,       false,
             { 0, 0 },               7,          0,
             "flamer",       "\fr",  "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
     },
     {
-            ANIM_LIGHT,         0x22FFFF,       S_PLASMA,   S_ENERGY,   S_HUM,      -1,             1,
+            ANIM_LIGHT,         0x22FFFF,       S_PLASMA,   1,
             false,      false,      true,       false,
             { 0, 0 },               5,          0,
             "plasma",       "\fc",  "weapons/plasma/item",      "weapons/plasma/vwep", "weapons/plasma/hwep",     "",                     ""
     },
     {
-            ANIM_HEAVY,         0xAA66FF,       S_RIFLE,    S_ENERGY,   S_BZZT,     -1,             1,
+            ANIM_HEAVY,         0xAA66FF,       S_RIFLE,    1,
             false,      false,      true,       false,
             { 0, 0 },               7,          0,
             "rifle",        "\fv",  "weapons/rifle/item",       "weapons/rifle/vwep", "weapons/rifle/hwep",      "",                     ""
     },
     {
-            ANIM_GRASP,         0x22FF22,       S_GRENADE,  S_EXPLODE,  S_BEEP, S_TINK,             1,
+            ANIM_GRASP,         0x22FF22,       S_GRENADE,  1,
             false,      false,      false,      false,
             { 0.0625f, 0.0625f },   3,          0,
             "grenade",      "\fg",  "weapons/grenade/item",     "weapons/grenade/vwep", "weapons/grenade/hwep",    "weapons/grenade/proj", ""
     },
     {
-            ANIM_HEAVY,         0x993311,       S_ROCKET,   S_EXPLODE,  S_WHIZZ,    -1,             1,
+            ANIM_HEAVY,         0x993311,       S_ROCKET,   1,
             false,      false,      true,      false,
             { 0, 0 },               8,          0,
             "rocket",      "\fn",  "weapons/rocket/item",       "weapons/rocket/vwep", "weapons/rocket/hwep",     "weapons/rocket/proj",  ""

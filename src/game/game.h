@@ -22,20 +22,19 @@ enum
     S_SPLASH, S_SPLASH2, S_UNDERWATER,
     S_SPLOSH, S_SPLOSH2, S_SPLOSH3,
     S_DEBRIS, S_DEBRIS2, S_DEBRIS3,
-    S_TINK, S_RICOCHET, S_WHIZZ, S_BEEP, S_EXPLODE, S_ENERGY, S_HUM, S_BURN,
-    S_BURNING, S_BURNFIRE, S_EXTINGUISH, S_BZAP, S_BZZT,
+    S_BURNING, S_BURNFIRE, S_EXTINGUISH,
     S_SHELL, S_SHELL2, S_SHELL3, S_SHELL4, S_SHELL5, S_SHELL6,
-    S_MELEE, S_MELEE2, S_MELEE_S, S_MELEE_R, S_MELEE_N,
-    S_PISTOL, S_PISTOL2, S_PISTOL_S, S_PISTOL_R, S_PISTOL_N,
-    S_SWORD, S_SWORD2, S_SWORD_S, S_SWORD_R, S_SWORD_N, S_SWORD_P, S_SWORD_I,
-    S_SHOTGUN, S_SHOTGUN2, S_SHOTGUN_S, S_SHOTGUN_R, S_SHOTGUN_N, S_SHOTGUN_P, S_SHOTGUN_I,
-    S_SMG, S_SMG2, S_SMG_S, S_SMG_R, S_SMG_N, S_SMG_P, S_SMG_I,
-    S_FLAMER, S_FLAMER2, S_FLAMER_S, S_FLAMER_R, S_FLAMER_N, S_FLAMER_P, S_FLAMER_I,
-    S_PLASMA, S_PLASMA2, S_PLASMA_S, S_PLASMA_R, S_PLASMA_N, S_PLASMA_P, S_PLASMA_I,
-    S_RIFLE, S_RIFLE2, S_RIFLE_S, S_RIFLE_R, S_RIFLE_N, S_RIFLE_P, S_RIFLE_I,
-    S_GRENADE, S_GRENADE2, S_GRENADE_S, S_GRENADE_R, S_GRENADE_N, S_GRENADE_P, S_GRENADE_I,
-    S_ROCKET, S_ROCKET2, S_ROCKET_S, S_ROCKET_R, S_ROCKET_N, S_ROCKET_P, S_ROCKET_I,
-    S_ITEMPICKUP, S_ITEMSPAWN,
+    S_MELEE, S_MELEE2, S_MELEE_P, S_MELEE_S, S_MELEE_R, S_MELEE_N, S_MELEE_D, S_MELEE_E, S_MELEE_T, S_MELEE_B,
+    S_PISTOL, S_PISTOL2, S_PISTOL_P, S_PISTOL_S, S_PISTOL_R, S_PISTOL_N, S_PISTOL_D, S_PISTOL_E, S_PISTOL_T, S_PISTOL_B,
+    S_SWORD, S_SWORD2, S_SWORD_P, S_SWORD_S, S_SWORD_R, S_SWORD_N, S_SWORD_D, S_SWORD_E, S_SWORD_T, S_SWORD_B, S_SWORD_U, S_SWORD_I,
+    S_SHOTGUN, S_SHOTGUN2, S_SHOTGUN_P, S_SHOTGUN_S, S_SHOTGUN_R, S_SHOTGUN_N, S_SHOTGUN_D, S_SHOTGUN_E, S_SHOTGUN_T, S_SHOTGUN_B, S_SHOTGUN_U, S_SHOTGUN_I,
+    S_SMG, S_SMG2, S_SMG_P, S_SMG_S, S_SMG_R, S_SMG_N, S_SMG_D, S_SMG_E, S_SMG_T, S_SMG_B, S_SMG_U, S_SMG_I,
+    S_FLAMER, S_FLAMER2, S_FLAMER_P, S_FLAMER_S, S_FLAMER_R, S_FLAMER_N, S_FLAMER_D, S_FLAMER_E, S_FLAMER_T, S_FLAMER_B, S_FLAMER_U, S_FLAMER_I,
+    S_PLASMA, S_PLASMA2, S_PLASMA_P, S_PLASMA_S, S_PLASMA_R, S_PLASMA_N, S_PLASMA_D, S_PLASMA_E, S_PLASMA_T, S_PLASMA_B, S_PLASMA_U, S_PLASMA_I,
+    S_RIFLE, S_RIFLE2, S_RIFLE_P, S_RIFLE_S, S_RIFLE_R, S_RIFLE_N, S_RIFLE_D, S_RIFLE_E, S_RIFLE_T, S_RIFLE_B, S_RIFLE_U, S_RIFLE_I,
+    S_GRENADE, S_GRENADE2, S_GRENADE_P, S_GRENADE_S, S_GRENADE_R, S_GRENADE_N, S_GRENADE_D, S_GRENADE_E, S_GRENADE_T, S_GRENADE_B, S_GRENADE_U, S_GRENADE_I,
+    S_ROCKET, S_ROCKET2, S_ROCKET_P, S_ROCKET_S, S_ROCKET_R, S_ROCKET_N, S_ROCKET_D, S_ROCKET_E, S_ROCKET_T, S_ROCKET_B, S_ROCKET_U, S_ROCKET_I,
+    S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8, S_BURNED, S_CRITICAL,
     S_RESPAWN, S_CHAT, S_ERROR, S_ALARM,
     S_V_FLAGSECURED, S_V_FLAGOVERTHROWN, S_V_FLAGPICKUP, S_V_FLAGDROP, S_V_FLAGRETURN, S_V_FLAGSCORE, S_V_FLAGRESET,
@@ -49,7 +48,7 @@ enum
 };
 
 enum { S_R_DIE = 2, S_R_PAIN = 6, S_R_SPLOSH = 3, S_R_DEBRIS = 3, S_R_SHELL = 6, S_R_DAMAGE = 8 };
-enum { S_W_PRIMARY = 0, S_W_ALTERNATE, S_W_SWITCH, S_W_RELOAD, S_W_NOTIFY, S_W_OFFSET, S_W_PICKUP = S_W_OFFSET, S_W_SPAWN };
+enum { S_W_PRIMARY = 0, S_W_ALTERNATE, S_W_POWER, S_W_SWITCH, S_W_RELOAD, S_W_NOTIFY, S_W_DESTROY, S_W_EXTINGUISH, S_W_TRANSIT, S_W_BOUNCE, S_W_OFFSET, S_W_USE = S_W_OFFSET, S_W_SPAWN };
 
 enum                                // entity types
 {
@@ -193,7 +192,7 @@ enum
 {
     ANIM_PAIN = ANIM_GAMESPECIFIC, ANIM_JUMP,
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT, ANIM_IMPULSE_DASH,
-    ANIM_SINK, ANIM_EDIT, ANIM_LAG, ANIM_SWITCH, ANIM_PICKUP, ANIM_WIN, ANIM_LOSE,
+    ANIM_SINK, ANIM_EDIT, ANIM_LAG, ANIM_SWITCH, ANIM_USE, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
     ANIM_MELEE, ANIM_MELEE_PRIMARY, ANIM_MELEE_SECONDARY,
     ANIM_WIELD, ANIM_WIELD_PRIMARY, ANIM_WIELD_SECONDARY,
@@ -641,7 +640,7 @@ struct gamestate
             case WEAPON:
             {
                 int prev = ammo[attr], value = amt >= 0 ? amt : WEAP(attr, add);
-                weapswitch(attr, millis, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_PICKUP);
+                weapswitch(attr, millis, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_USE);
                 ammo[attr] = clamp(max(ammo[attr], 0)+value, 1, WEAP(attr, max));
                 weapload[attr] = ammo[attr]-prev;
                 entid[attr] = id;
@@ -779,7 +778,7 @@ const char * const animnames[] =
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
     "mapmodel", "trigger on", "trigger off", "pain", "jump",
     "impulse forward", "impulse backward", "impulse left", "impulse right", "impulse dash",
-    "sink", "edit", "lag", "switch", "pickup", "win", "lose",
+    "sink", "edit", "lag", "switch", "use", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
     "melee", "melee primary", "melee secondary",
     "wield", "wield primary", "wield secondary",
@@ -797,7 +796,7 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], lastsprint, smoothmillis, turnmillis, turnside, aschan, vschan, wschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake,
+        actiontime[AC_MAX], impulse[IM_MAX], lastsprint, smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake,
         lastpush, lastjump;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, lfoot, rfoot, legs, hrad, trad, lrad;
@@ -807,7 +806,7 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
 
     gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
-        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), fschan(-1),
+        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1),
         lastattacker(-1), lastpoints(0), quake(0), lastpush(0), lastjump(0),
         head(-1, -1, -1), torso(-1, -1, -1), muzzle(-1, -1, -1), origin(-1, -1, -1), eject(-1, -1, -1), waist(-1, -1, -1),
         lfoot(-1, -1, -1), rfoot(-1, -1, -1), legs(-1, -1, -1), hrad(-1, -1, -1), trad(-1, -1, -1), lrad(-1, -1, -1),
@@ -835,8 +834,9 @@ struct gameent : dynent, gamestate
         if(issound(aschan)) removesound(aschan);
         if(issound(vschan)) removesound(vschan);
         if(issound(wschan)) removesound(wschan);
+        if(issound(pschan)) removesound(pschan);
         if(issound(fschan)) removesound(fschan);
-        aschan = vschan = wschan = fschan = -1;
+        aschan = vschan = wschan = pschan = fschan = -1;
     }
 
     void stopmoving(bool full)
@@ -1112,6 +1112,7 @@ namespace physics
 {
     extern float gravity, liquidspeed, liquidcurb, floorcurb, aircurb;
     extern int smoothmove, smoothdist;
+    extern bool secondaryweap(gameent *d);
     extern bool allowimpulse(int level = 2);
     extern bool sprinting(physent *d, bool last = false, bool turn = true, bool move = true);
     extern bool canimpulse(physent *d, int cost = 0, int level = 2);

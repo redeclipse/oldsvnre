@@ -16,7 +16,7 @@ enum
     SND_CLAMPED = 1<<6, // makes volume the minimum volume to clamp to
     SND_LOOP    = 1<<7,
     SND_MAP     = 1<<8,
-    SND_FORCED  = SND_NOATTEN|SND_NODELAY|SND_NOCULL|SND_NOQUIET|SND_CLAMPED,
+    SND_FORCED  = SND_NOATTEN|SND_NODELAY|SND_NOCULL|SND_NOQUIET,
     SND_DIRECT  = SND_NODELAY|SND_NOCULL|SND_NOQUIET|SND_CLAMPED,
     SND_MASKF   = SND_LOOP|SND_MAP,
     SND_LAST    = 7
@@ -70,8 +70,8 @@ struct sound
         owner = NULL;
         vol = curvol = 255;
         curpan = 127;
-        flags = maxrad = minrad = millis = ends = slotnum = 0;
-        chan = -1;
+        flags = maxrad = minrad = millis = ends = 0;
+        slotnum = chan = -1;
         if(hook) *hook = -1;
         hook = NULL;
     }
@@ -92,7 +92,7 @@ extern void updatesounds();
 extern int addsound(const char *name, int vol, int material, int maxrad, int minrad, vector<soundslot> &sounds);
 extern void removesound(int c);
 extern void clearsound();
-extern int playsound(int n, const vec &pos, physent *d = NULL, int flags = 0, int vol = -1, int maxrad = -1, int minrad = -1, int *hook = NULL, int ends = 0);
+extern int playsound(int n, const vec &pos, physent *d = NULL, int flags = 0, int vol = -1, int maxrad = -1, int minrad = -1, int *hook = NULL, int ends = 0, int *oldhook = NULL);
 extern void removetrackedsounds(physent *d);
 
 extern void initmumble();

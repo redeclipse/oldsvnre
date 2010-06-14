@@ -533,7 +533,7 @@ namespace hud
                 }
                 // falls through
             }
-            case WEAP_S_PICKUP: case WEAP_S_SWITCH:
+            case WEAP_S_USE: case WEAP_S_SWITCH:
             {
                 float amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f); fade *= amt;
                 if(showclips >= 2 && game::focus->weapstate[weap] != WEAP_S_RELOAD) size *= amt;
@@ -1456,15 +1456,15 @@ namespace hud
                 {
                     if(y-sy-s < m) break;
                     float fade = blend*inventoryblend, size = s, skew = 0.f;
-                    if((game::focus->weapstate[i] == WEAP_S_SWITCH || game::focus->weapstate[i] == WEAP_S_PICKUP) && (i != game::focus->weapselect || i != game::focus->lastweap))
+                    if((game::focus->weapstate[i] == WEAP_S_SWITCH || game::focus->weapstate[i] == WEAP_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
                     {
                         float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
                         if(i != game::focus->weapselect) skew = game::focus->hasweap(i, sweap) ? 1.f-(amt*(1.f-inventoryskew)) : 1.f-amt;
-                        else skew = game::focus->weapstate[i] == WEAP_S_PICKUP ? amt : inventoryskew+(amt*(1.f-inventoryskew));
+                        else skew = game::focus->weapstate[i] == WEAP_S_USE ? amt : inventoryskew+(amt*(1.f-inventoryskew));
                     }
                     else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
                     else continue;
-                    bool instate = (i == game::focus->weapselect || game::focus->weapstate[i] != WEAP_S_PICKUP);
+                    bool instate = (i == game::focus->weapselect || game::focus->weapstate[i] != WEAP_S_USE);
                     float r = 1.f, g = 1.f, b = 1.f;
                     if(inventorycolour)
                     {

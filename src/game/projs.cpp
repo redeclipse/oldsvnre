@@ -227,7 +227,7 @@ namespace projs
         else proj.vel = vec(0, 0, 0);
     }
 
-    void bounce(projent &proj)
+    void bounce(projent &proj, bool ricochet)
     {
         if(proj.movement > 1 && (!proj.lastbounce || lastmillis-proj.lastbounce > 500)) switch(proj.projtype)
         {
@@ -249,10 +249,10 @@ namespace projs
                     }
                     default: break;
                 }
-                if(weaptype[proj.weap].rsound >= 0)
+                if(ricochet)
                 {
-                    int vol = int(245*(1.f-proj.lifespan)*proj.scale)+10;
-                    playsound(weaptype[proj.weap].rsound, proj.o, NULL, 0, vol);
+                    int mag = int(proj.vel.magnitude()), vol = clamp(mag*2, 10, 255);
+                    playsound(weaptype[proj.weap].sound+S_W_BOUNCE, proj.o, NULL, 0, vol);
                 }
                 break;
             }
@@ -557,6 +557,8 @@ namespace projs
         proj.scale = scale;
         proj.movement = 0;
         proj.owner = d;
+        if(proj.projtype == PRJ_SHOT && proj.owner && isweap(proj.weap) && issound(proj.owner->pschan))
+            playsound(weaptype[proj.weap].sound+S_W_TRANSIT, proj.o, &proj, SND_LOOP, sounds[proj.owner->pschan].vol, -1, -1, &proj.schan, 0, &proj.owner->pschan);
         if(!proj.waittime) init(proj, false);
         projs.add(&proj);
     }
@@ -678,18 +680,14 @@ namespace projs
     {
         if(proj.projtype == PRJ_SHOT)
         {
-            if(weaptype[proj.weap].fsound >= 0)
+            int vol = 255;
+            if(WEAP2(proj.weap, power, proj.flags&HIT_ALT)) switch(WEAP2(proj.weap, cooked, proj.flags&HIT_ALT))
             {
-                int vol = 255;
-                switch(weaptype[proj.weap].fsound)
-                {
-                    case S_BEEP: case S_BURN: case S_BURNING: vol = 55+int(200*proj.lifespan*proj.scale); break;
-                    case S_WHIZZ: vol = 55+int(200*(1.f-proj.lifespan)*proj.scale); break;
-                    default: break;
-                }
-                if(issound(proj.schan)) sounds[proj.schan].vol = vol;
-                else playsound(weaptype[proj.weap].fsound, proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
+                case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.scale); break; // longer
+                case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale); break; // shorter
             }
+            if(issound(proj.schan)) sounds[proj.schan].vol = vol;
+            else playsound(weaptype[proj.weap].sound+S_W_TRANSIT, proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
             switch(proj.weap)
             {
                 case WEAP_SWORD:
@@ -972,7 +970,7 @@ namespace projs
                     }
                     default: break;
                 }
-                if(vol && weaptype[proj.weap].esound >= 0) playsound(weaptype[proj.weap].esound, proj.o, NULL, 0, vol);
+                if(vol) playsound(weaptype[proj.weap].sound+S_W_DESTROY, proj.o, NULL, 0, vol);
                 if(proj.local && proj.owner)
                     client::addmsg(N_DESTROY, "ri7", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.id >= 0 ? proj.id-game::maptime : proj.id, 0, 0);
                 break;
@@ -996,11 +994,18 @@ namespace projs
         {
             if(chk&1 && !proj.limited)
             {
-                playsound(S_EXTINGUISH, proj.o, NULL, 0, 128);
+                int vol = 64, snd = S_EXTINGUISH;
                 float size = max(proj.radius, 1.f);
-                if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) > 0)
-                    size *= WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*1.5f);
+                if(proj.projtype == PRJ_SHOT && isweap(proj.weap))
+                {
+                    snd = weaptype[proj.weap].sound+S_W_EXTINGUISH;
+                    vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale);
+                    if(WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) > 0)
+                        size *= WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*1.5f);
+                    else size *= 2.5f;
+                }
                 else size *= 2.5f;
+                playsound(snd, proj.o, NULL, 0, vol);
                 part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, max(size, 1.5f), 1, -10);
                 proj.limited = true;
             }
@@ -1029,8 +1034,9 @@ namespace projs
                     return 1;
                 }
             }
-            bounce(proj);
-            if(proj.projcollide&(d ? BOUNCE_PLAYER : BOUNCE_GEOM))
+            bool ricochet = proj.projcollide&(d ? BOUNCE_PLAYER : BOUNCE_GEOM);
+            bounce(proj, ricochet);
+            if(ricochet)
             {
                 reflect(proj, proj.norm);
                 proj.o.add(vec(proj.norm).mul(0.1f)); // offset from surface slightly to avoid initial collision

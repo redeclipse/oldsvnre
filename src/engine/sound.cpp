@@ -316,7 +316,7 @@ void updatesounds()
     }
 }
 
-int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad, int minrad, int *hook, int ends)
+int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad, int minrad, int *hook, int ends, int *oldhook)
 {
     if(nosound || !mastervol || !soundvol) return -1;
 
@@ -325,32 +325,38 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
     if(soundset.inrange(n) && soundset[n].sample->sound)
     {
         soundslot *slot = &soundset[n];
+        if(!oldhook || !issound(*oldhook) || (n != sounds[*oldhook].slotnum && strcmp(slot->sample->name, gamesounds[sounds[*oldhook].slotnum].sample->name)))
+            oldhook = NULL;
+
         int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : (flags&SND_CLAMPED ? 64 : 255),
             x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : 256)),
             y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : 0));
-
         calcvol(flags, v, slot->vol, slot->material, x, y, pos, &cvol, &cpan);
 
         if((flags&SND_NOCULL) || cvol > 0)
         {
-            int chan = Mix_PlayChannel(-1, soundset[n].sample->sound, flags&SND_LOOP ? -1 : 0);
-            if(chan < 0)
+            int chan = -1;
+            if(oldhook) chan = *oldhook;
+            else
             {
-                int lowest = -1;
-                loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP))
-                    if(((flags&SND_NOCULL) || sounds[i].vol < cvol) && (!sounds.inrange(lowest) || sounds[i].vol < sounds[lowest].vol))
-                        lowest = i;
-
-                if(sounds.inrange(lowest))
+                oldhook = NULL;
+                if((chan = Mix_PlayChannel(-1, soundset[n].sample->sound, flags&SND_LOOP ? -1 : 0)) < 0)
                 {
-                    removesound(lowest);
-                    chan = Mix_PlayChannel(-1, soundset[n].sample->sound, flags&SND_LOOP ? -1 : 0);
-                    if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].vol);
+                    int lowest = -1;
+                    loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP))
+                        if(((flags&SND_NOCULL) || sounds[i].vol < cvol) && (!sounds.inrange(lowest) || sounds[i].vol < sounds[lowest].vol))
+                            lowest = i;
+                    if(sounds.inrange(lowest))
+                    {
+                        removesound(lowest);
+                        chan = Mix_PlayChannel(-1, soundset[n].sample->sound, flags&SND_LOOP ? -1 : 0);
+                        if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].vol);
+                    }
                 }
             }
             if(chan >= 0)
             {
-                if(!(flags&SND_NODELAY)) Mix_Pause(chan);
+                if(!oldhook && !(flags&SND_NODELAY)) Mix_Pause(chan);
 
                 while(chan >= sounds.length()) sounds.add();
 
@@ -360,7 +366,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 s.maxrad = x;
                 s.minrad = y;
                 s.flags = flags;
-                s.millis = lastmillis;
+                if(!oldhook) s.millis = lastmillis;
                 s.ends = ends;
                 s.slotnum = n;
                 s.owner = d;
@@ -370,11 +376,12 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 s.chan = chan;
                 if(hook)
                 {
-                    if(issound(*hook)) removesound(*hook);
+                    if(issound(*hook) && (!oldhook || *hook != *oldhook)) removesound(*hook);
                     *hook = s.chan;
                     s.hook = hook;
                 }
                 else s.hook = NULL;
+                if(oldhook) *oldhook = -1;
                 updatesound(chan);
                 return chan;
             }
@@ -384,6 +391,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
         else if(verbose >= 4) conoutf("culled sound %d (%d)", n, cvol);
     }
     else if(n > 0) conoutf("\frunregistered sound: %d", n);
+    if(oldhook && issound(*oldhook)) removesound(*oldhook);
     return -1;
 }
 
