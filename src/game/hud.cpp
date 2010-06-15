@@ -75,12 +75,20 @@ namespace hud
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
+    TVAR(IDF_PERSIST, neutraltex, "textures/team", 3);
+    TVAR(IDF_PERSIST, alphatex, "textures/teamalpha", 3);
+    TVAR(IDF_PERSIST, betatex, "textures/teambeta", 3);
     TVAR(IDF_PERSIST, conopentex, "textures/conopen", 3);
     TVAR(IDF_PERSIST, playertex, "textures/player", 3);
     TVAR(IDF_PERSIST, deadtex, "textures/dead", 3);
     TVAR(IDF_PERSIST, dominatingtex, "textures/dominating", 3);
     TVAR(IDF_PERSIST, dominatedtex, "textures/dominated", 3);
     TVAR(IDF_PERSIST, inputtex, "textures/menu", 3);
+    TVAR(IDF_PERSIST, waittex, "textures/wait", 3);
+    TVAR(IDF_PERSIST, chattex, "textures/conopen", 3);
+    TVAR(IDF_PERSIST, healthtex, "textures/health", 3);
+    TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
+    TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
 
     VAR(IDF_PERSIST, teamglow, 0, 1, 1); // colour based on team
     VAR(IDF_PERSIST, teamclips, 0, 1, 2);
@@ -169,16 +177,6 @@ namespace hud
     TVAR(IDF_PERSIST, flamertex, "textures/flamer", 3);
     TVAR(IDF_PERSIST, plasmatex, "textures/plasma", 3);
     TVAR(IDF_PERSIST, rifletex, "textures/rifle", 3);
-    TVAR(IDF_PERSIST, healthtex, "textures/health", 3);
-    TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
-    TVAR(IDF_PERSIST, inventorywaittex, "textures/wait", 3);
-    TVAR(IDF_PERSIST, inventorydeadtex, "textures/dead", 3);
-    TVAR(IDF_PERSIST, inventorychattex, "textures/conopen", 3);
-    TVAR(IDF_PERSIST, inventoryhinttex, "particles/plasma", 3);
-
-    TVAR(IDF_PERSIST, neutraltex, "textures/team", 3);
-    TVAR(IDF_PERSIST, alphatex, "textures/teamalpha", 3);
-    TVAR(IDF_PERSIST, betatex, "textures/teambeta", 3);
 
     VAR(IDF_PERSIST, showclips, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
@@ -1363,7 +1361,7 @@ namespace hud
                 gf += (1.f-gf)*amt;
                 glow += int(glow*amt);
             }
-            settexture(inventoryhinttex, 3);
+            settexture(inventorytex, 3);
             glColor4f(gr, gg, gb, f*gf);
             drawsized(left ? x-glow : x-int(s)-glow, y-int(s)-glow, int(s)+glow*2);
         }
@@ -1522,8 +1520,8 @@ namespace hud
         if(game::focus->state == CS_ALIVE)
         {
             int glow = int(width*inventoryglow), heal = m_health(game::gamemode, game::mutators);
-            bool pulse = inventoryflash && game::focus->health < heal;
-            if(inventoryhealth && (glow || pulse))
+            bool hashealth = inventoryhealth && (!m_trial(game::gamemode) || trialdamage), pulse = inventoryflash && game::focus->health < heal;
+            if(hashealth && (glow || pulse))
             {
                 float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
                 if(teamglow) skewcolour(gr, gg, gb);
@@ -1537,7 +1535,7 @@ namespace hud
                     gf += (1.f-gf)*skew;
                     glow += int(glow*skew);
                 }
-                settexture(inventoryhinttex, 3);
+                settexture(inventorytex, 3);
                 glColor4f(gr, gg, gb, fade*gf);
                 drawtex(x-glow, y-size-glow, width+glow*2, size+glow*2);
             }
@@ -1548,7 +1546,7 @@ namespace hud
                 float amt = clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f);
                 offset = int(width*inventorythrob*(amt > 1.f ? amt-1.f : 1.f-amt));
             }
-            if(inventoryhealth >= 2)
+            if(hashealth && inventoryhealth >= 2)
             {
                 const struct healthbarstep
                 {
@@ -1592,7 +1590,7 @@ namespace hud
                 glEnd();
                 if(!sy) sy += size;
             }
-            if(inventoryhealth)
+            if(hashealth)
             {
                 float gr = 1.f, gg = 1.f, gb = 1.f;
                 if(pulse)
@@ -1610,8 +1608,8 @@ namespace hud
             }
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
-                pushfont("default");
-                sy += draw_textx("\fd%d", x+width/2, inventoryhealth ? y : y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(game::focus->vel.magnitude()));
+                pushfont(!hashealth || m_trial(game::gamemode) ? "super" : "default");
+                sy += draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), hashealth ? TEXT_CENTER_UP : TEXT_LEFT_UP, -1, -1, int(game::focus->vel.magnitude()));
                 popfont();
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse() && impulsemeter && impulsecost && inventoryimpulse)
@@ -1625,7 +1623,8 @@ namespace hud
                 drawslice(0, 1, ix, iy, is);
                 drawslice(0, 1, ix, iy, is*2/3);
                 glColor4f(r, g, b, fade);
-                if(physics::sprinting(game::focus, false, false)) drawslice(((lastmillis-game::focus->actiontime[AC_SPRINT])%1000)/1000.f, 0.1f, ix, iy, is);
+                if(physics::sprinting(game::focus, false, false))
+                    drawslice(((lastmillis-game::focus->actiontime[AC_SPRINT])%1000)/1000.f, 0.1f, ix, iy, is);
                 else drawslice(1-len, len, ix, iy, is);
                 drawslice(1-len, len, ix, iy, is*2/3);
                 if(game::focus == game::player1 && inventoryimpulse >= 2)
@@ -1644,10 +1643,10 @@ namespace hud
             const char *state = "", *tex = "";
             switch(game::player1->state)
             {
-                case CS_EDITING: state = "EDIT"; tex = inventorychattex; break;
-                case CS_SPECTATOR: state = "SPEC"; tex = inventorychattex; break;
-                case CS_WAITING: state = "WAIT"; tex = inventorywaittex; break;
-                case CS_DEAD: state = "DEAD"; tex = inventorydeadtex; break;
+                case CS_EDITING: state = "EDIT"; break;
+                case CS_SPECTATOR: state = "SPEC"; break;
+                case CS_WAITING: state = "WAIT"; tex = waittex; break;
+                case CS_DEAD: state = "DEAD"; tex = deadtex; break;
             }
             if(inventoryhealth >= 3 && *state)
             {
@@ -1891,8 +1890,7 @@ namespace hud
         if(!texpaneltimer)
         {
             int bf = int(255*fade*statblend);
-            pushfont("sub");
-            bx -= FONTW;
+            bx -= os;
             if(totalmillis-laststats >= statrate)
             {
                 memcpy(prevstats, curstats, sizeof(prevstats));
@@ -1904,8 +1902,11 @@ namespace hud
             loopi(NUMSTATS) if(prevstats[i] == curstats[i]) curstats[i] = nextstats[i];
             if(showfps)
             {
+                pushfont("sub");
                 draw_textx("%d", w-br/2, by-FONTH*2, 255, 255, 255, bf, TEXT_CENTERED, -1, bs, curstats[8]);
                 draw_textx("fps", w-br/2, by-FONTH, 255, 255, 255, bf, TEXT_CENTERED, -1, -1);
+                popfont();
+                pushfont("radar");
                 switch(showfps)
                 {
                     case 3:
@@ -1917,6 +1918,7 @@ namespace hud
                     default: break;
                 }
             }
+            else pushfont("radar");
             if(showstats > (m_edit(game::gamemode) ? 0 : 1))
             {
                 by -= draw_textx("ond:%d va:%d gl:%d(%d) oq:%d", bx, by, 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, allocnodes*8, allocva, curstats[4], curstats[5], curstats[6]);

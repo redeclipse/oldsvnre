@@ -278,6 +278,11 @@ namespace physics
         return vel;
     }
 
+    float impulsevelocity(physent *d, float amt)
+    {
+        return min((impulsespeed+d->vel.magnitude())*amt, max(d->vel.magnitude(), impulselimit));
+    }
+
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
@@ -664,18 +669,35 @@ namespace physics
             bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d);
             if(millis && allowimpulse() && impulsemeter)
             {
-                if(sprinting(d) && canimpulse(d, millis))
+                bool sprint = sprinting(d);
+                if(sprint)
                 {
-                    d->impulse[IM_METER] += millis;
+                    if(impulsesprint && canimpulse(d, millis)) d->impulse[IM_METER] += millis;
                     d->lastsprint = lastmillis;
                 }
-                else if(d->impulse[IM_METER] > 0 && impulseregen > 0)
+                if(d->impulse[IM_METER] > 0 && impulseregen > 0)
                 {
-                    int timeslice = max(int(millis*impulseregen), 1);
-                    if(iscrouching(d)) timeslice += timeslice;
-                    if(d->move || d->strafe) timeslice -= timeslice/2;
-                    if(d->physstate == PHYS_FALL && !d->onladder) timeslice -= timeslice/2;
-                    if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
+                    bool collect = true; // collect time until it is able to act upon it
+                    int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
+                    #define impulsemod(x,y) \
+                        if(collect) \
+                        { \
+                            if(y > 0) { if(timeslice > 0 && (x)) timeslice = int(timeslice*y); } \
+                            else collect = false; \
+                        }
+                    impulsemod(sprint, impulseregensprint);
+                    impulsemod(d->move || d->strafe, impulseregenmove);
+                    impulsemod(!onfloor, impulseregeninair);
+                    impulsemod(iscrouching(d), impulseregencrouch);
+                    if(collect)
+                    {
+                        if(timeslice > 0)
+                        {
+                            if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
+                            d->impulse[IM_COLLECT] = 0;
+                        }
+                        else d->impulse[IM_COLLECT] += millis;
+                    }
                 }
             }
 
@@ -690,10 +712,10 @@ namespace physics
                 bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
                 if(dash || pulse)
                 {
-                    float skew = onfloor && ((d->strafe && !d->move) || (d->move && !d->strafe)) ? impulsedash : 1.f,
-                          mag = min((impulsespeed*skew)+d->vel.magnitude(), max(d->vel.magnitude(), impulselimit));
+                    float skew = 1;
                     if(onfloor)
                     {
+                        if((d->strafe && !d->move) || (d->move && !d->strafe)) skew = impulsedash;
                         d->resetphys();
                         d->lastjump = lastmillis;
                     }
@@ -701,7 +723,7 @@ namespace physics
                     bool moving = d->move || d->strafe;
                     if(!pulse || moving)
                         vecfromyawpitch(d->aimyaw, d->aimpitch+(onfloor ? 25 : 0), moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                    (d->vel = dir).normalize().mul(mag);
+                    (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                     d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                     d->action[AC_JUMP] = d->action[AC_DASH] = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
@@ -745,14 +767,14 @@ namespace physics
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor))
                         {
                             d->action[AC_SPECIAL] = false;
-                            if(!onfloor) (d->vel = vec(0, 0, 1)).normalize().mul(min((impulsespeed+d->vel.magnitude())*2/3, max(d->vel.magnitude(), impulselimit)));
+                            if(!onfloor) (d->vel = vec(0, 0, 1)).normalize().mul(impulsevelocity(d, impulsemelee));
                         }
                         break;
                     }
                     wall.normalize();
                     if(d->action[AC_JUMP] && d->turnside)
                     {
-                        float mag = min((impulsespeed+d->vel.magnitude())*2/3, max(d->vel.magnitude(), impulselimit));
+                        float mag = impulsevelocity(d, impulseparkour);
                         d->vel = vec(d->turnside ? wall : vec(dir).reflect(wall)).add(vec(d->vel).reflect(wall).rescale(1)).normalize().mul(mag/2);
                         d->vel.z += mag/2;
                         d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
@@ -783,8 +805,7 @@ namespace physics
                         vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
                         if(!d->turnside)
                         {
-                            float mag = min((impulsespeed+d->vel.magnitude())*2/3, max(d->vel.magnitude(), impulselimit));
-                            d->vel = vec(rft).normalize().mul(mag);
+                            d->vel = vec(rft).normalize().mul(impulsevelocity(d, impulseparkour));
                             off = yaw-d->aimyaw;
                             if(off > 180) off -= 360;
                             else if(off < -180) off += 360;
