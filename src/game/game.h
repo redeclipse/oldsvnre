@@ -486,7 +486,7 @@ enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_BOOST, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_KICK };
 
 #define CROUCHHEIGHT 0.7f
@@ -500,10 +500,10 @@ struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX];
     int lastweap, loadweap, weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastfire, lastboost;
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastfire;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : loadweap(-1), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0), lastboost(0),
+    gamestate() : loadweap(-1), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0),
         aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0) {}
     ~gamestate() {}
 
@@ -652,7 +652,7 @@ struct gamestate
 
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastfire = lastboost = 0;
+        lastdeath = lastpain = lastregen = lastfire = 0;
         lastrespawn = -1;
     }
 
@@ -1023,7 +1023,7 @@ struct gameent : dynent, gamestate
     {
         impulse[IM_METER] += cost;
         impulse[IM_TIME] = millis;
-        if(type == IM_T_BOOST) lastboost = millis;
+        if(type == IM_T_BOOST) impulse[IM_BOOST] = millis;
         if(!lastjump && type > IM_T_NONE && type < IM_T_WALL)
         {
             impulse[IM_TYPE] = IM_T_NONE;

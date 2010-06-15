@@ -148,7 +148,7 @@ namespace server
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
         int score, spree, crits, rewards, flags, teamkills, shotdamage, damage;
-        int lasttimeplayed, timeplayed, aireinit, lastfireburn, lastfireowner;
+        int lasttimeplayed, timeplayed, aireinit, lastfireburn, lastfireowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes;
 
         servstate() : state(CS_SPECTATOR), aireinit(0), lastfireburn(0), lastfireowner(-1) {}
@@ -172,7 +172,7 @@ namespace server
 
         void respawn(int millis, int heal)
         {
-            lastfireburn = 0;
+            lastfireburn = lastboost = 0;
             lastfireowner = -1;
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
@@ -3435,7 +3435,7 @@ namespace server
                         if(cp->state.onfire(gamemillis, GAME(fireburntime))) cp->state.lastfire = cp->state.lastfireburn = 0;
                         else break; // don't propogate
                     }
-                    else if(idx == SPHY_BOOST && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulseboost)))
+                    else if(idx == SPHY_BOOST && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulsedelay)))
                         cp->state.lastboost = gamemillis;
                     else if(idx == SPHY_POWER) getint(p);
                     QUEUE_MSG;
