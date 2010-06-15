@@ -6,6 +6,7 @@ namespace physics
     FVAR(IDF_WORLD, liquidcurb, 0, 10.f, 1000);
     FVAR(IDF_WORLD, floorcurb, 0, 5.f, 1000);
     FVAR(IDF_WORLD, aircurb, 0, 25.f, 1000);
+    FVAR(IDF_WORLD, slidecurb, 0, 50.f, 1000);
 
     FVAR(IDF_WORLD, stairheight, 0, 4.1f, 1000);
     FVAR(IDF_WORLD, floorz, 0, 0.867f, 1);
@@ -209,13 +210,17 @@ namespace physics
         return 1.f;
     }
 
+    bool sliding(gameent *d)
+    {
+        return d->impulse[IM_SLIDE] && lastmillis-d->impulse[IM_SLIDE] <= impulseslide;
+    }
+
     bool sticktofloor(physent *d)
     {
         if(!d->onladder && !liquidcheck(d) && (d->type == ENT_PLAYER || d->type == ENT_AI) && PHYS(gravity) > 0)
         {
             gameent *e = (gameent *)d;
-            if(e->turnside || (e->lastpush && lastmillis-e->lastpush <= PHYSMILLIS/2) || (e->actiontime[AC_JUMP] && lastmillis-e->actiontime[AC_JUMP] <= PHYSMILLIS/2))
-                return false;
+            if(e->turnside || sliding(e)) return false;
             return true;
         }
         return false;
@@ -713,7 +718,7 @@ namespace physics
                     {
                         if(moving && ((d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
                         d->resetphys();
-                        d->lastjump = lastmillis;
+                        d->impulse[IM_JUMP] = lastmillis;
                     }
                     vec dir(0, 0, 1);
                     if(!pulse || moving)
@@ -735,7 +740,7 @@ namespace physics
                     d->vel.y *= scale;
                 }
                 d->resetphys();
-                d->lastjump = lastmillis;
+                d->impulse[IM_JUMP] = lastmillis;
                 d->action[AC_JUMP] = d->action[AC_DASH] = false;
                 client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                 playsound(S_JUMP, d->o, d);
@@ -852,9 +857,9 @@ namespace physics
         if(floating || pl->type==ENT_CAMERA) pl->vel.lerp(d, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
         else
         {
-            bool floor = pl->physstate >= PHYS_SLOPE;
-            if(floor && sprinting(pl, true)) floor = false;
-            float curb = floor ? PHYS(floorcurb) : PHYS(aircurb), fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
+            bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
+            float curb = pl->physstate >= PHYS_SLOPE ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb),
+                  fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
             pl->vel.lerp(d, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
         }
     }
