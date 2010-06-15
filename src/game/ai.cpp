@@ -1097,7 +1097,7 @@ namespace ai
             bool wantsimpulse = false;
             if(physics::allowimpulse())
             {
-                if(!impulsemeter) wantsimpulse = true;
+                if(!impulsemeter || !impulsesprint || impulseregensprint > 0) wantsimpulse = true;
                 else if(b.idle == -1 && !d->ai->dontmove)
                     wantsimpulse = (d->action[AC_SPRINT] || !d->actiontime[AC_SPRINT] || lastmillis-d->actiontime[AC_SPRINT] > PHYSMILLIS*2);
             }

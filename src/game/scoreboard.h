@@ -552,7 +552,7 @@ namespace hud
                 case 3: colour = "\fr"; break;
                 default: break;
             }
-            int sy = hud::drawitem(hud::inventoryhinttex, x, y, s-s/4, false, 1.f, 1.f, 1.f, fade, skew, "default", "\fs%s[\fS%d\fs%s]\fS", colour, score, colour);
+            int sy = hud::drawitem(hud::inventorytex, x, y, s-s/4, false, 1.f, 1.f, 1.f, fade, skew, "default", "\fs%s[\fS%d\fs%s]\fS", colour, score, colour);
             hud::drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "sub", fade, "%s%s", teamtype[team].chat, name);
             return sy;
         }
