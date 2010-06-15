@@ -1521,7 +1521,7 @@ namespace client
                     if(isweap(weap) && target)
                     {
                         target->weapswitch(weap, lastmillis);
-                        playsound(weaptype[weap].sound+S_W_SWITCH, target->o, target, target == game::focus ? SND_FORCED : 0);
+                        playsound(weaptype[weap].sound+S_W_SWITCH, target->o, target, target == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
                     }
                     break;
                 }

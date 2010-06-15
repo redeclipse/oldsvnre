@@ -172,7 +172,6 @@ namespace physics
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
-            if(last && e->lastsprint && lastmillis-e->lastsprint <= PHYSMILLIS) return true;
             if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
@@ -670,11 +669,7 @@ namespace physics
             if(millis && allowimpulse() && impulsemeter)
             {
                 bool sprint = sprinting(d);
-                if(sprint)
-                {
-                    if(impulsesprint && canimpulse(d, millis)) d->impulse[IM_METER] += millis;
-                    d->lastsprint = lastmillis;
-                }
+                if(sprint && impulsesprint && canimpulse(d, millis)) d->impulse[IM_METER] += millis;
                 if(d->impulse[IM_METER] > 0 && impulseregen > 0)
                 {
                     bool collect = true; // collect time until it is able to act upon it
