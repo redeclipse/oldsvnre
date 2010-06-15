@@ -486,7 +486,7 @@ enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_BOOST, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_BOOST, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_KICK };
 
 #define CROUCHHEIGHT 0.7f
@@ -796,8 +796,7 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake,
-        lastpush, lastjump;
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, lfoot, rfoot, legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
@@ -806,8 +805,7 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
 
     gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
-        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1),
-        lastattacker(-1), lastpoints(0), quake(0), lastpush(0), lastjump(0),
+        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1),  lastattacker(-1), lastpoints(0), quake(0),
         head(-1, -1, -1), torso(-1, -1, -1), muzzle(-1, -1, -1), origin(-1, -1, -1), eject(-1, -1, -1), waist(-1, -1, -1),
         lfoot(-1, -1, -1), rfoot(-1, -1, -1), legs(-1, -1, -1), hrad(-1, -1, -1), trad(-1, -1, -1), lrad(-1, -1, -1),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
@@ -852,7 +850,7 @@ struct gameent : dynent, gamestate
     void clearstate()
     {
         loopi(IM_MAX) impulse[i] = 0;
-        cplast = lasthit = lastkill = quake = lastpush = turnmillis = turnside = 0;
+        cplast = lasthit = lastkill = quake = turnmillis = turnside = 0;
         turnroll = turnyaw = 0;
         lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
@@ -1022,12 +1020,12 @@ struct gameent : dynent, gamestate
     void doimpulse(int cost, int type, int millis)
     {
         impulse[IM_METER] += cost;
-        impulse[IM_TIME] = millis;
+        impulse[IM_TIME] = impulse[IM_SLIDE] = millis;
         if(type == IM_T_BOOST) impulse[IM_BOOST] = millis;
-        if(!lastjump && type > IM_T_NONE && type < IM_T_WALL)
+        if(!impulse[IM_JUMP] && type > IM_T_NONE && type < IM_T_WALL)
         {
             impulse[IM_TYPE] = IM_T_NONE;
-            lastjump = millis;
+            impulse[IM_JUMP] = millis;
         }
         else
         {
@@ -1039,7 +1037,7 @@ struct gameent : dynent, gamestate
 
     void dojumpreset(bool full = false)
     {
-        if(full) lastjump = 0;
+        if(full) impulse[IM_JUMP] = 0;
         else resetphys();
         timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = 0;
     }
@@ -1110,7 +1108,7 @@ namespace client
 
 namespace physics
 {
-    extern float gravity, liquidspeed, liquidcurb, floorcurb, aircurb;
+    extern float gravity, liquidspeed, liquidcurb, floorcurb, aircurb, slidecurb;
     extern int smoothmove, smoothdist;
     extern bool secondaryweap(gameent *d);
     extern bool allowimpulse(int level = 2);
