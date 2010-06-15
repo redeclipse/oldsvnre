@@ -702,22 +702,22 @@ namespace physics
                 d->resetphys();
             }
 
-            if(!d->turnside && (d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->lastboost || lastmillis-d->lastboost > impulseboost))
+            if(!d->turnside && (d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_BOOST] || lastmillis-d->impulse[IM_BOOST] > impulsedelay))
             {
                 bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
                 if(dash || pulse)
                 {
-                    float skew = 1;
+                    bool moving = d->move || d->strafe;
+                    float skew = moving ? impulseboost : impulsejump;
                     if(onfloor)
                     {
-                        if((d->strafe && !d->move) || (d->move && !d->strafe)) skew = impulsedash;
+                        if(moving && ((d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
                         d->resetphys();
                         d->lastjump = lastmillis;
                     }
                     vec dir(0, 0, 1);
-                    bool moving = d->move || d->strafe;
                     if(!pulse || moving)
-                        vecfromyawpitch(d->aimyaw, d->aimpitch+(onfloor ? 25 : 0), moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                        vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                     (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                     d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                     d->action[AC_JUMP] = d->action[AC_DASH] = false;
