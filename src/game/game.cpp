@@ -506,7 +506,7 @@ namespace game
             if(i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
             {
                 if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
-                    playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : 0);
+                    playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
             }
             if(d->state != CS_ALIVE || timeexpired)
                 d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);

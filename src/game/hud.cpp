@@ -1609,7 +1609,8 @@ namespace hud
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
                 pushfont(!hashealth || m_trial(game::gamemode) ? "super" : "default");
-                sy += draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), hashealth ? TEXT_CENTER_UP : TEXT_LEFT_UP, -1, -1, int(game::focus->vel.magnitude()));
+                int ty = draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), hashealth ? TEXT_CENTER_UP : TEXT_LEFT_UP, -1, -1, int(game::focus->vel.magnitude()));
+                if(!hashealth) sy += ty;
                 popfont();
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse() && impulsemeter && impulsecost && inventoryimpulse)

@@ -796,7 +796,7 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], lastsprint, smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake,
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake,
         lastpush, lastjump;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, lfoot, rfoot, legs, hrad, trad, lrad;
@@ -841,7 +841,7 @@ struct gameent : dynent, gamestate
 
     void stopmoving(bool full)
     {
-        if(full) move = strafe = lastsprint = 0;
+        if(full) move = strafe = 0;
         loopi(AC_MAX)
         {
             action[i] = false;

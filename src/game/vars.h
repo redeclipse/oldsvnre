@@ -140,7 +140,7 @@ GVAR(0, impulseskate, 0, 1000, INT_MAX-1); // length of time a run along a wall 
 GVAR(0, impulsesprint, 0, 0, 1); // sprinting counts toward impulse; 0 = off, 1 = on
 GFVAR(0, impulseregen, 0, 1, 1000); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, 1000); // impulse regen crouch modifier
-GFVAR(0, impulseregensprint, 0, 0.5f, 1000); // impulse regen sprinting modifier
+GFVAR(0, impulseregensprint, 0, 0.75f, 1000); // impulse regen sprinting modifier
 GFVAR(0, impulseregenmove, 0, 0.75f, 1000); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.5f, 1000); // impulse regen in-air modifier
 
