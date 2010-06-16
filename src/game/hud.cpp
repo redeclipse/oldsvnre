@@ -1617,22 +1617,29 @@ namespace hud
             {
                 float len = game::focus == game::player1 ? 1-clamp(game::focus->impulse[IM_METER]/float(impulsemeter), 0.f, 1.f) : 1;
                 settexture(progresstex, 3);
-                float r = 1.f, g = 1.f, b = 1.f;
+                float r = 1, g = 1, b = 1, f = 1;
                 int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
                 if(teaminventory) skewcolour(r, g, b);
-                glColor4f(r, g, b, fade*0.25f);
+                if(inventoryflash && game::focus->impulse[IM_METER])
+                {
+                    int timestep = totalmillis%1000;
+                    float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(game::focus->impulse[IM_METER])/float(impulsemeter)), 0.f, 1.f);
+                    r += (1.f-r)*amt;
+                    g += (1.f-g)*amt;
+                    b -= b*amt;
+                    f += (1.f-f)*amt;
+                }
+                glColor4f(r, g, b, fade*f*0.5f);
                 drawslice(0, 1, ix, iy, is);
                 drawslice(0, 1, ix, iy, is*2/3);
-                glColor4f(r, g, b, fade);
-                if(physics::sprinting(game::focus, false, false))
-                    drawslice(((lastmillis-game::focus->actiontime[AC_SPRINT])%1000)/1000.f, 0.1f, ix, iy, is);
-                else drawslice(1-len, len, ix, iy, is);
+                glColor4f(r, g, b, fade*f);
+                drawslice(1-len, len, ix, iy, is);
                 drawslice(1-len, len, ix, iy, is*2/3);
                 if(game::focus == game::player1 && inventoryimpulse >= 2)
                 {
                     pushfont("sub");
                     draw_textx("%s%d%%", x+iw/2+ow, y-sy-iw/2-FONTH/2, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1,
-                        game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fy" : "\fw") : "\fg",
+                        game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fy" : "\fo") : "\fg",
                             int(len*100));
                     popfont();
                 }
