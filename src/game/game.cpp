@@ -221,7 +221,7 @@ namespace game
     {
         if(firstpersonsway)
         {
-            float maxspeed = physics::movevelocity(d);
+            float maxspeed = physics::movevelocity(d)*0.5f;
             if(d->physstate >= PHYS_SLOPE)
             {
                 swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), maxspeed);
