@@ -116,23 +116,23 @@ GFVAR(0, forcefloorcurb, -1, -1, 1000);
 GFVAR(0, forceaircurb, -1, -1, 1000);
 GFVAR(0, forceslidecurb, -1, -1, 1000);
 
-GFVAR(0, movespeed, 0, 100.f, 1000); // speed
+GFVAR(0, movespeed, 0, 110.f, 1000); // speed
 GFVAR(0, movecrawl, 0, 0.5f, 1000); // crawl modifier
-GFVAR(0, movesprint, 0, 1.6f, 1000); // sprinting modifier
+GFVAR(0, movesprint, 0, 1.5f, 1000); // sprinting modifier
 GFVAR(0, movestraight, 0, 1.3f, 1000); // non-strafe modifier
-GFVAR(0, movestrafe, 0, 1.f, 1000); // strafe modifier
+GFVAR(0, movestrafe, 0, 1.1f, 1000); // strafe modifier
 GFVAR(0, moveinair, 0, 0.9f, 1000); // in-air modifier
 GFVAR(0, movestepup, 0, 0.75f, 1000); // step-up modifier
 GFVAR(0, movestepdown, 0, 1.25f, 1000); // step-down modifier
 
-GFVAR(0, jumpspeed, 0, 100.f, 1000); // extra velocity to add when jumping
-GFVAR(0, impulsespeed, 0, 100.f, 1000); // extra velocity to add when impulsing
-GFVAR(0, impulselimit, 0, 200.f, 10000); // maximum impulse speed
-GFVAR(0, impulseboost, 0, 1.f, 1000); // thrust modifier
-GFVAR(0, impulsedash, 0, 1.6f, 1000); // dashing modifier
-GFVAR(0, impulsejump, 0, 1.2f, 1000); // jump modifier
+GFVAR(0, jumpspeed, 0, 110.f, 1000); // extra velocity to add when jumping
+GFVAR(0, impulsespeed, 0, 110.f, 1000); // extra velocity to add when impulsing
+GFVAR(0, impulselimit, 0, 220.f, 10000); // maximum impulse speed
+GFVAR(0, impulseboost, 0, 1.3f, 1000); // thrust modifier
+GFVAR(0, impulsedash, 0, 1.5f, 1000); // dashing modifier
+GFVAR(0, impulsejump, 0, 1.4f, 1000); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.6f, 1000); // melee modifier
-GFVAR(0, impulseparkour, 0, 0.9f, 1000); // parkour modifier
+GFVAR(0, impulseparkour, 0, 1.f, 1000); // parkour modifier
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 10, INT_MAX-1); // number of impulse actions per air transit
