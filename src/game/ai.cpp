@@ -31,7 +31,7 @@ namespace ai
 
     float weapmindist(int weap, bool alt)
     {
-        return WEAPEX(weap, alt, game::gamemode, game::mutators, 1.f) && WEAP2(weap, collide, alt)&COLLIDE_OWNER ? WEAPEX(weap, alt, game::gamemode, game::mutators, 1.f) : 4;
+        return WEAPEX(weap, alt, game::gamemode, game::mutators, 1.f) && WEAP2(weap, collide, alt)&COLLIDE_OWNER ? WEAPEX(weap, alt, game::gamemode, game::mutators, 1.f) : 2;
     }
 
     float weapmaxdist(int weap, bool alt)
@@ -978,7 +978,7 @@ namespace ai
         if(weaptype[d->weapselect].melee && !d->blocked && !d->timeinair)
         {
             vec dir = vec(e->o).sub(d->o);
-            float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius;
+            float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
             if(zdist <= ddist && xydist >= ddist+4 && xydist <= mdist+ddist) return true;
         }
         return false;
