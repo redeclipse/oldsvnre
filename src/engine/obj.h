@@ -322,6 +322,11 @@ void objcullface(char *meshname, int *cullface)
     loopobjskins(meshname, s, s.cullface = *cullface!=0);
 }
 
+void objmaterial(char *meshname, int *material)
+{
+    loopobjskins(meshname, s, s.material = *material!=0);
+}
+
 void objenvmap(char *meshname, char *envmap)
 {
     Texture *tex = cubemapload(envmap);
@@ -366,6 +371,7 @@ COMMAND(0, objglare, "sff");
 COMMAND(0, objalphatest, "sf");
 COMMAND(0, objalphablend, "si");
 COMMAND(0, objcullface, "si");
+COMMAND(0, objmaterial, "si");
 COMMAND(0, objenvmap, "ss");
 COMMAND(0, objbumpmap, "sss");
 COMMAND(0, objfullbright, "sf");

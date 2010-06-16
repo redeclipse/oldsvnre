@@ -660,6 +660,11 @@ void smdcullface(char *meshname, int *cullface)
     loopsmdskins(meshname, s, s.cullface = *cullface!=0);
 }
 
+void smdmaterial(char *meshname, int *material)
+{
+    loopsmdskins(meshname, s, s.material = *material!=0);
+}
+
 void smdenvmap(char *meshname, char *envmap)
 {
     Texture *tex = cubemapload(envmap);
@@ -758,6 +763,7 @@ COMMAND(0, smdglare, "sff");
 COMMAND(0, smdalphatest, "sf");
 COMMAND(0, smdalphablend, "si");
 COMMAND(0, smdcullface, "si");
+COMMAND(0, smdmaterial, "si");
 COMMAND(0, smdenvmap, "ss");
 COMMAND(0, smdbumpmap, "sss");
 COMMAND(0, smdfullbright, "sf");
