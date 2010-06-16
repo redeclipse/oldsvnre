@@ -2096,10 +2096,10 @@ void texduplicate()
 
 COMMAND(0, texduplicate, "");
 
-VAR(IDF_PERSIST, thumbwidth, 0, 30, 1000);
-VAR(IDF_PERSIST, thumbheight, 0, 10, 1000);
+VAR(IDF_PERSIST, thumbwidth, 0, 16, 1000);
+VAR(IDF_PERSIST, thumbheight, 0, 5, 1000);
 VAR(IDF_PERSIST, thumbtime, 0, 25, 1000);
-FVAR(IDF_PERSIST, thumbsize, 0, 1, 8);
+FVAR(IDF_PERSIST, thumbsize, 0, 2, 8);
 FVAR(IDF_PERSIST, thumbpreview, 0, 5, 8);
 
 static int lastthumbnail = 0;
