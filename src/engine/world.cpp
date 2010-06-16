@@ -453,6 +453,7 @@ void entpush(int *dir)
         physent *player = (physent *)game::focusedent(true);
         if(!player) player = camera1;
         player->o[d] += s*sel.grid;
+        player->resetinterp();
     }
 }
 
