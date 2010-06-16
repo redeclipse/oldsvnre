@@ -39,8 +39,8 @@ namespace game
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonswaystep, 1, 18.0f, 100);
-    FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.06f, 1);
-    FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.08f, 1);
+    FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 1);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersondist, -10000, -0.25f, 10000);
     FVAR(IDF_PERSIST, firstpersonshift, -10000, 0.3f, 10000);
@@ -221,7 +221,7 @@ namespace game
     {
         if(firstpersonsway)
         {
-            float maxspeed = physics::movevelocity(d)*0.5f;
+            float maxspeed = physics::movevelocity(d);
             if(d->physstate >= PHYS_SLOPE)
             {
                 swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), maxspeed);
@@ -238,7 +238,7 @@ namespace game
 
             float k = pow(0.7f, curtime/25.0f);
             swaydir.mul(k);
-            vec vel = vec(d->vel).add(d->falling).mul(physics::sprinting(d) ? 5 : 1);
+            vec vel = vec(d->vel).add(d->falling);
             float speedscale = max(vel.magnitude(), maxspeed);
             if(speedscale > 0) swaydir.add(vec(vel).mul((1-k)/(15*speedscale)));
             swaypush.mul(pow(0.5f, curtime/25.0f));
