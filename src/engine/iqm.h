@@ -576,6 +576,11 @@ void iqmcullface(char *meshname, int *cullface)
     loopiqmskins(meshname, s, s.cullface = *cullface!=0);
 }
 
+void iqmmaterial(char *meshname, int *material)
+{
+    loopiqmskins(meshname, s, s.material = *material!=0);
+}
+
 void iqmenvmap(char *meshname, char *envmap)
 {
     Texture *tex = cubemapload(envmap);
@@ -674,6 +679,7 @@ COMMAND(0, iqmglare, "sff");
 COMMAND(0, iqmalphatest, "sf");
 COMMAND(0, iqmalphablend, "si");
 COMMAND(0, iqmcullface, "si");
+COMMAND(0, iqmmaterial, "si");
 COMMAND(0, iqmenvmap, "ss");
 COMMAND(0, iqmbumpmap, "sss");
 COMMAND(0, iqmfullbright, "sf");

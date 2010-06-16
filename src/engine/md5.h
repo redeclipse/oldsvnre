@@ -633,6 +633,11 @@ void md5cullface(char *meshname, int *cullface)
     loopmd5skins(meshname, s, s.cullface = *cullface!=0);
 }
 
+void md5material(char *meshname, int *material)
+{
+    loopmd5skins(meshname, s, s.material = *material!=0);
+}
+
 void md5envmap(char *meshname, char *envmap)
 {
     Texture *tex = cubemapload(envmap);
@@ -731,6 +736,7 @@ COMMAND(0, md5glare, "sff");
 COMMAND(0, md5alphatest, "sf");
 COMMAND(0, md5alphablend, "si");
 COMMAND(0, md5cullface, "si");
+COMMAND(0, md5material, "si");
 COMMAND(0, md5envmap, "ss");
 COMMAND(0, md5bumpmap, "sss");
 COMMAND(0, md5fullbright, "sf");

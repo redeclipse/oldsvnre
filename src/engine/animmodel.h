@@ -75,9 +75,9 @@ struct animmodel : model
         Texture *tex, *masks, *envmap, *unlittex, *normalmap;
         Shader *shader;
         float spec, ambient, glow, specglare, glowglare, fullbright, envmapmin, envmapmax, scrollu, scrollv, alphatest;
-        bool alphablend, cullface;
+        bool alphablend, cullface, material;
 
-        skin() : owner(0), tex(notexture), masks(notexture), envmap(NULL), unlittex(NULL), normalmap(NULL), shader(NULL), spec(1.0f), ambient(0.3f), glow(3.0f), specglare(1), glowglare(1), fullbright(0), envmapmin(0), envmapmax(0), scrollu(0), scrollv(0), alphatest(0.9f), alphablend(true), cullface(true) {}
+        skin() : owner(0), tex(notexture), masks(notexture), envmap(NULL), unlittex(NULL), normalmap(NULL), shader(NULL), spec(1.0f), ambient(0.3f), glow(3.0f), specglare(1), glowglare(1), fullbright(0), envmapmin(0), envmapmax(0), scrollu(0), scrollv(0), alphatest(0.9f), alphablend(true), cullface(true), material(false) {}
 
         bool multitextured() { return enableglow; }
         bool envmapped() { return hasCM && envmapmax>0 && envmapmodels && (renderpath!=R_FIXEDFUNCTION || maxtmus >= 3); }
@@ -98,21 +98,15 @@ struct animmodel : model
                 if(!enablerescale) { glEnable(hasRN ? GL_RESCALE_NORMAL_EXT : GL_NORMALIZE); enablerescale = true; }
             }
             if(masked!=enableglow) lasttex = lastmasks = NULL;
-            float mincolor = as->anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0,
-                  r = max(lightcolor.x, mincolor), g = max(lightcolor.y, mincolor), b = max(lightcolor.z, mincolor);
+            float mincolor = as->anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f;
+            vec color = vec(lightcolor).max(mincolor), matcolor = material ? lightmaterial : vec(1, 1, 1);
             if(masked)
             {
                 bool needenvmap = envmaptmu>=0 && envmapmax>0;
                 if(enableoverbright) disableoverbright();
                 if(!enableglow || enableenvmap!=needenvmap) setuptmu(0, "1 , C @ T", needenvmap ? "= Ta" : "= Ca");
                 int glowscale = glow>2 ? 4 : (glow>1 || mincolor>1 ? 2 : 1);
-                if(fullbright) glColor4f(fullbright/glowscale, fullbright/glowscale, fullbright/glowscale, transparent);
-                else if(lightmodels)
-                {
-                    GLfloat material[4] = { 1.0f/glowscale, 1.0f/glowscale, 1.0f/glowscale, transparent };
-                    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material);
-                }
-                else glColor4f(r/glowscale, g/glowscale, b/glowscale, transparent);
+                matcolor.div(glowscale);
 
                 glActiveTexture_(GL_TEXTURE1_ARB);
                 if(!enableglow || enableenvmap!=needenvmap)
@@ -128,27 +122,26 @@ struct animmodel : model
             else
             {
                 if(enableglow) disableglow();
-                int colorscale = 1;
                 if(mincolor>1 && maxtmus>=1)
                 {
-                    colorscale = 2;
+                    matcolor.div(2);
                     if(!enableoverbright) { setuptmu(0, "C * T x 2"); enableoverbright = true; }
                 }
                 else if(enableoverbright) disableoverbright();
-                if(fullbright) glColor4f(fullbright/colorscale, fullbright/colorscale, fullbright, transparent);
-                else if(lightmodels)
-                {
-                    GLfloat material[4] = { 1.0f/colorscale, 1.0f/colorscale, 1.0f/colorscale, transparent };
-                    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material);
-                }
-                else glColor4f(r/colorscale, g/colorscale, b/colorscale, transparent);
             }
+            if(fullbright) glColor4f(matcolor.x*fullbright, matcolor.y*fullbright, matcolor.z*fullbright, transparent);
+            else if(lightmodels)
+            {
+                GLfloat material[4] = { matcolor.x, matcolor.y, matcolor.z, transparent };
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material);
+            }
+            else glColor4f(matcolor.x*color.x, matcolor.y*color.y, matcolor.z*color.z, transparent);
             if(lightmodels && !fullbright)
             {
                 float ambientk = min(max(ambient, mincolor)*0.75f, 1.0f),
                       diffusek = 1-ambientk;
-                GLfloat ambientcol[4] = { r*ambientk, g*ambientk, b*ambientk, 1 },
-                        diffusecol[4] = { r*diffusek, g*diffusek, b*diffusek, 1 };
+                GLfloat ambientcol[4] = { color.x*ambientk, color.y*ambientk, color.z*ambientk, 1 },
+                        diffusecol[4] = { color.x*diffusek, color.y*diffusek, color.z*diffusek, 1 };
                 float ambientmax = max(ambientcol[0], max(ambientcol[1], ambientcol[2])),
                       diffusemax = max(diffusecol[0], max(diffusecol[1], diffusecol[2]));
                 if(ambientmax>1e-3f) loopk(3) ambientcol[k] *= min(1.5f, 1.0f/min(ambientmax, 1.0f));
@@ -168,15 +161,14 @@ struct animmodel : model
             }
             else
             {
-                float mincolor = as->anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0,
-                      minshade = max(ambient, mincolor);
-                glColor4f(max(lightcolor.x, mincolor),
-                          max(lightcolor.y, mincolor),
-                          max(lightcolor.z, mincolor),
-                          transparent);
+                float mincolor = as->anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f, minshade = max(ambient, mincolor);
+                vec color = vec(lightcolor).max(mincolor);
+                glColor4f(color.x, color.y, color.z, transparent);
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec, minshade, glow);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, spec, minshade, glow);
             }
+            vec matcolor = material ? lightmaterial : vec(1, 1, 1);
+            setenvparamf("lightmaterial", SHPARAM_PIXEL, 6, matcolor.x, matcolor.y, matcolor.z, 1);
             setenvparamf("texscroll", SHPARAM_VERTEX, 5, lastmillis/1000.0f, scrollu*lastmillis/1000.0f, scrollv*lastmillis/1000.0f);
             if(envmaptmu>=0 && envmapmax>0) setenvparamf("envmapscale", bumpmapped() ? SHPARAM_PIXEL : SHPARAM_VERTEX, 3, envmapmin-envmapmax, envmapmax);
             if(glaring) setenvparamf("glarescale", SHPARAM_PIXEL, 4, 16*specglare, 4*glowglare);
@@ -867,7 +859,7 @@ struct animmodel : model
         }
     }
 
-    void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a, const vec &color, const vec &dir, float trans, float size)
+    void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a, const vec &color, const vec &dir, const vec &material, float trans, float size)
     {
         if(!loaded) return;
 
@@ -910,6 +902,7 @@ struct animmodel : model
 
             transparent = trans;
             lightcolor = color;
+            lightmaterial = material;
 
             rdir = dir;
             campos = camera1->o;
@@ -1150,6 +1143,12 @@ struct animmodel : model
         loopv(parts) loopvj(parts[i]->skins) parts[i]->skins[j].cullface = cullface;
     }
 
+    void setmaterial(bool material)
+    {
+        if(parts.empty()) loaddefaultparts();
+        loopv(parts) loopvj(parts[i]->skins) parts[i]->skins[j].material = material;
+    }
+
     void calcbb(int frame, vec &center, vec &radius)
     {
         if(parts.empty()) return;
@@ -1165,7 +1164,7 @@ struct animmodel : model
     }
 
     static bool enabletc, enablemtc, enablealphatest, enablealphablend, enableenvmap, enableglow, enableoverbright, enablelighting, enablelight0, enablecullface, enablenormals, enabletangents, enablebones, enablerescale, enabledepthoffset;
-    static vec lightcolor;
+    static vec lightcolor, lightmaterial;
     static float transparent, lastalphatest, sizescale;
     static void *lastvbuf, *lasttcbuf, *lastmtcbuf, *lastnbuf, *lastxbuf, *lastbbuf, *lastsdata, *lastbdata;
     static GLuint lastebuf, lastenvmaptex, closestenvmaptex;
@@ -1296,7 +1295,7 @@ struct animmodel : model
 bool animmodel::enabletc = false, animmodel::enablemtc = false, animmodel::enablealphatest = false, animmodel::enablealphablend = false,
      animmodel::enableenvmap = false, animmodel::enableglow = false, animmodel::enableoverbright = false, animmodel::enablelighting = false, animmodel::enablelight0 = false, animmodel::enablecullface = true,
      animmodel::enablenormals = false, animmodel::enabletangents = false, animmodel::enablebones = false, animmodel::enablerescale = false, animmodel::enabledepthoffset = false;
-vec animmodel::lightcolor;
+vec animmodel::lightcolor(1, 1, 1), animmodel::lightmaterial(1, 1, 1);
 float animmodel::transparent = 1, animmodel::lastalphatest = -1, animmodel::sizescale = 1;
 void *animmodel::lastvbuf = NULL, *animmodel::lasttcbuf = NULL, *animmodel::lastmtcbuf = NULL, *animmodel::lastnbuf = NULL, *animmodel::lastxbuf = NULL, *animmodel::lastbbuf = NULL, *animmodel::lastsdata = NULL, *animmodel::lastbdata = NULL;
 GLuint animmodel::lastebuf = 0, animmodel::lastenvmaptex = 0, animmodel::closestenvmaptex = 0;
