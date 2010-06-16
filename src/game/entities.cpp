@@ -184,7 +184,9 @@ namespace entities
             }
             case MAPMODEL:
             {
-                if(mapmodels.inrange(attr[0])) addentinfo(mapmodels[attr[0]].name);
+                mapmodelinfo &mmi = getmminfo(attr[0]);
+                if(!&mmi) break;
+                addentinfo(mmi.name);
                 if(full)
                 {
                     if(attr[5]&MMT_HIDE) addentinfo("hide");
