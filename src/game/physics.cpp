@@ -264,15 +264,15 @@ namespace physics
 
     float movevelocity(physent *d, bool floating)
     {
-        if(d->type == ENT_CAMERA) d = game::player1;
-        float vel = max(d->maxspeed, 1.f);
+        physent *pl = d->type == ENT_CAMERA ? game::player1 : d;
+        float vel = max(pl->maxspeed, 1.f);
         if(floating) vel *= floatspeed/100.0f;
-        else if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             vel *= movespeed/100.f;
             if(iscrouching(d) || (d == game::player1 && game::inzoom())) vel *= movecrawl;
-            if(d->move >= 0) vel *= d->strafe ? movestrafe : movestraight;
-            switch(d->physstate)
+            if(pl->move >= 0) vel *= pl->strafe ? movestrafe : movestraight;
+            switch(pl->physstate)
             {
                 case PHYS_FALL: vel *= moveinair; break;
                 case PHYS_STEP_DOWN: vel *= movestepdown; break;
