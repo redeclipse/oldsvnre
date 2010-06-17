@@ -1008,6 +1008,7 @@ namespace projs
                 playsound(snd, proj.o, NULL, 0, vol);
                 part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, max(size, 1.5f), 1, -10);
                 proj.limited = true;
+                if(proj.projtype == PRJ_DEBRIS) proj.light.material = vec(0, 0, 0);
             }
             proj.norm = dir;
             if(proj.extinguish&4) return 0;
@@ -1468,11 +1469,22 @@ namespace projs
                 if(!projs[i]->mdl || !*projs[i]->mdl || (proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id))) continue;
                 float trans = 1, size = 1;
                 int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_DYNSHADOW|MDL_LIGHT|MDL_CULL_DIST;
+                entitylight *light = &proj.light;
                 switch(proj.projtype)
                 {
-                    case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_EJECT:
+                    case PRJ_DEBRIS:
+                    {
+                        if(light->millis != lastmillis && !proj.limited)
+                        {
+                            int col = firecols[rnd(FIRECOLOURS)];
+                            light->material = vec(teamtype[col].colour>>16, (teamtype[col].colour>>8)&0xFF, teamtype[col].colour&0xFF).div(255.f);
+                        }
+                    }
+                    case PRJ_GIBS: case PRJ_EJECT:
+                    {
                         size = proj.lifesize;
                         flags |= MDL_LIGHT_FAST;
+                    }
                     case PRJ_ENT:
                         if(proj.fadetime && proj.lifemillis)
                         {
@@ -1495,7 +1507,7 @@ namespace projs
                         break;
                     default: break;
                 }
-                rendermodel(&proj.light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
+                rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
             }
         }
     }

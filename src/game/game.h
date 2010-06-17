@@ -431,29 +431,29 @@ struct teamtypes
 {
     int type,           colour; const char  *name,
         *tpmdl,                             *fpmdl,
-        *flag,          *icon,              *chat,      *colname;
+        *icon,              *chat,      *colname;
 };
 #ifdef GAMESERVER
 teamtypes teamtype[] = {
     {
         TEAM_NEUTRAL,   0x666666,           "neutral",
         "actors/player",                    "actors/player/hwep",
-        "flags/neutral","team",             "\fa",      "grey"
+        "team",             "\fa",      "grey"
     },
     {
         TEAM_ALPHA,     0x2222AA,           "alpha",
         "actors/player/alpha",              "actors/player/alpha/hwep",
-        "flags/blue",   "teamalpha",        "\fb",      "blue"
+        "teamalpha",        "\fb",      "blue"
     },
     {
         TEAM_BETA,      0xAA2222,           "beta",
         "actors/player/beta",               "actors/player/beta/hwep",
-        "flags/red",    "teambeta",         "\fr",      "red"
+        "teambeta",         "\fr",      "red"
     },
     {
         TEAM_ENEMY,     0xAAAA22,           "enemy",
         "actors/player",                    "actors/player/hwep",
-        "flags/neutral","team",             "\fy",      "yellow"
+        "team",             "\fy",      "yellow"
     }
 };
 #else

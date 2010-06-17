@@ -249,7 +249,7 @@ namespace entities
     {
         switch(type)
         {
-            case FLAG: return teamtype[attr[0]].flag;
+            case FLAG: return "flag";
             case PLAYERSTART: return polymodels ? "" : teamtype[attr[0]].tpmdl;
             case WEAPON:
             {
@@ -1103,6 +1103,7 @@ namespace entities
             case FLAG:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_COUNT;
                 while(e.attrs[0] >= TEAM_COUNT) e.attrs[0] -= TEAM_COUNT;
+                e.light.material = vec(teamtype[e.attrs[0]].colour>>16, (teamtype[e.attrs[0]].colour>>8)&0xFF, teamtype[e.attrs[0]].colour&0xFF).div(255.f);
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;

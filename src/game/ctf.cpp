@@ -13,7 +13,7 @@ namespace ctf
 
     void preload()
     {
-        loopi(numteams(game::gamemode, game::mutators)+TEAM_FIRST) loadmodel(teamtype[i].flag, -1, true);
+        loadmodel("flag", -1, true);
     }
 
     void drawblips(int w, int h, float blend)
@@ -155,7 +155,6 @@ namespace ctf
         {
             ctfstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            const char *flagname = teamtype[f.team].flag;
             vec above(f.spawnloc);
             float trans = 0.f;
             if((f.base&BASE_FLAG) && !f.owner && !f.droptime)
@@ -164,8 +163,8 @@ namespace ctf
                 if(millis <= 1000) trans += float(millis)/1000.f;
                 else trans = 1.f;
             }
-            else if(f.base&BASE_HOME) trans = f.team ? 0.125f : 0.25f;
-            if(trans > 0) rendermodel(&entities::ents[f.ent]->light, flagname, ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+            else if(f.base&BASE_HOME) trans = 0.25f;
+            if(trans > 0) rendermodel(&entities::ents[f.ent]->light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             above.z += enttype[FLAG].radius/2+2.5f;
             if((f.base&BASE_HOME) || (!f.owner && !f.droptime))
             {
@@ -208,7 +207,6 @@ namespace ctf
         {
             ctfstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
-            const char *flagname = teamtype[f.team].flag;
             vec above(f.pos());
             float trans = 1.f, yaw = 0;
             if(f.owner)
@@ -219,7 +217,7 @@ namespace ctf
             else yaw += (f.interptime+(360/st.flags.length()*i))%360;
             int millis = totalmillis-f.interptime;
             if(millis <= 1000) trans = float(millis)/1000.f;
-            rendermodel(NULL, flagname, ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, trans);
+            rendermodel(&f.light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, trans);
             above.z += enttype[FLAG].radius*2/3;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
             defformatstring(info)("<super>%s flag", teamtype[f.team].name);
@@ -260,7 +258,11 @@ namespace ctf
         #define setupaddflag(a,b) \
         { \
             index = st.addflag(entities::ents[a]->o, entities::ents[a]->attrs[0], b); \
-            if(st.flags.inrange(index)) st.flags[index].ent = a; \
+            if(st.flags.inrange(index)) \
+            { \
+                st.flags[index].ent = a; \
+                entities::ents[a]->light.material = st.flags[index].light.material = vec(teamtype[st.flags[index].team].colour>>16, (teamtype[st.flags[index].team].colour>>8)&0xFF, teamtype[st.flags[index].team].colour&0xFF).div(255.f); \
+            } \
             else continue; \
         }
         #define setupchkflag(a,b) \
