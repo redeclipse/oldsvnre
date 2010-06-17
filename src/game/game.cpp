@@ -506,7 +506,7 @@ namespace game
             if(i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
             {
                 if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
-                    playsound(weaptype[i].sound+S_W_NOTIFY, d->o, d, d == focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+                    playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, d == focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
             }
             if(d->state != CS_ALIVE || timeexpired)
                 d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
@@ -525,7 +525,7 @@ namespace game
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
                 }
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
-                else playsound(weaptype[d->weapselect].sound+(secondary ? S_W_POWER2 : S_W_POWER), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
+                else playsound(WEAPSND2(d->weapselect, secondary, S_W_POWER), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);

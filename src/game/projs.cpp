@@ -252,7 +252,7 @@ namespace projs
                 if(ricochet)
                 {
                     int mag = int(proj.vel.magnitude()), vol = clamp(mag*2, 10, 255);
-                    playsound(weaptype[proj.weap].sound+(proj.flags&HIT_ALT ? S_W_BOUNCE2 : S_W_BOUNCE), proj.o, NULL, 0, vol);
+                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_BOUNCE), proj.o, NULL, 0, vol);
                 }
                 break;
             }
@@ -558,7 +558,7 @@ namespace projs
         proj.movement = 0;
         proj.owner = d;
         if(proj.projtype == PRJ_SHOT && proj.owner && isweap(proj.weap) && issound(proj.owner->pschan))
-            playsound(weaptype[proj.weap].sound+(proj.flags&HIT_ALT ? S_W_TRANSIT2 : S_W_TRANSIT), proj.o, &proj, SND_LOOP, sounds[proj.owner->pschan].vol, -1, -1, &proj.schan, 0, &proj.owner->pschan);
+            playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, sounds[proj.owner->pschan].vol, -1, -1, &proj.schan, 0, &proj.owner->pschan);
         if(!proj.waittime) init(proj, false);
         projs.add(&proj);
     }
@@ -599,14 +599,22 @@ namespace projs
 
         if(weaptype[weap].sound >= 0)
         {
+            int slot = WEAPSNDF(weap, flags&HIT_ALT);
             if(weap == WEAP_FLAMER && !(flags&HIT_ALT))
             {
-                int ends = lastmillis+(WEAP2(weap, adelay, flags&HIT_ALT)*2);
+                int ends = lastmillis+WEAP2(weap, adelay, flags&HIT_ALT)+PHYSMILLIS;
                 if(issound(d->wschan)) sounds[d->wschan].ends = ends;
-                else playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY)+rnd(S_W_SHOOT), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &d->wschan, ends);
+                else playsound(slot+rnd(S_W_SHOOT), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &d->wschan, ends);
             }
             else if(!WEAP2(weap, time, flags&HIT_ALT) || life)
-                playsound(weaptype[weap].sound+(flags&HIT_ALT ? S_W_ALTERNATE : S_W_PRIMARY)+rnd(S_W_SHOOT), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+            {
+                if(issound(d->wschan) && sounds[d->wschan].slotnum >= WEAPSNDF(weap, false) && sounds[d->wschan].slotnum < WEAPSNDF(weap, true)+S_W_SHOOT)
+                {
+                    sounds[d->wschan].hook = NULL;
+                    d->wschan = -1;
+                }
+                playsound(slot+rnd(S_W_SHOOT), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+            }
         }
         float muz = muzzleblend; if(d == game::focus) muz *= 0.5f;
         const struct weapfxs
@@ -687,7 +695,7 @@ namespace projs
                 case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale); break; // shorter
             }
             if(issound(proj.schan)) sounds[proj.schan].vol = vol;
-            else playsound(weaptype[proj.weap].sound+(proj.flags&HIT_ALT ? S_W_TRANSIT2 : S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
+            else playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
             switch(proj.weap)
             {
                 case WEAP_SWORD:
@@ -970,7 +978,7 @@ namespace projs
                     }
                     default: break;
                 }
-                if(vol) playsound(weaptype[proj.weap].sound+(proj.flags&HIT_ALT ? S_W_DESTROY2 : S_W_DESTROY), proj.o, NULL, 0, vol);
+                if(vol) playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_DESTROY), proj.o, NULL, 0, vol);
                 if(proj.local && proj.owner)
                     client::addmsg(N_DESTROY, "ri7", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.id >= 0 ? proj.id-game::maptime : proj.id, 0, 0);
                 break;
@@ -999,7 +1007,7 @@ namespace projs
                 float size = max(proj.radius, 1.f);
                 if(proj.projtype == PRJ_SHOT && isweap(proj.weap))
                 {
-                    snd = weaptype[proj.weap].sound+(proj.flags&HIT_ALT ? S_W_EXTINGUISH2 : S_W_EXTINGUISH);
+                    snd = WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_EXTINGUISH);
                     vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale);
                     if(WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) > 0)
                         size *= WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*1.5f);

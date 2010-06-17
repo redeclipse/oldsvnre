@@ -13,7 +13,7 @@ enum { WEAP_S_IDLE = 0, WEAP_S_PRIMARY, WEAP_S_SECONDARY, WEAP_S_RELOAD, WEAP_S_
 enum
 {
     S_W_PRIMARY = 0, S_W_PRIMARY2, S_W_PRIMARY3,
-    S_W_ALTERNATE, S_W_ALTERNATE2, S_W_ALTERNATE3,
+    S_W_SECONDARY, S_W_SECONDARY2, S_W_SECONDARY3,
     S_W_POWER, S_W_POWER2,
     S_W_SWITCH, S_W_RELOAD, S_W_NOTIFY,
     S_W_DESTROY, S_W_DESTROY2,
@@ -325,6 +325,9 @@ extern weaptypes weaptype[];
 #define WEAPLM(a,b,c)           (a*(m_limited(b, c) || m_arena(b, c) ? GAME(limitedscale) : GAME(normalscale)))
 #define WEAPEX(a,b,c,d,e)       (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? int(ceilf(WEAPLM(WEAP2(a, explode, b)*e, c, d))) : 0)
 #define WEAPSP(a,b,c,d,e)       (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? WEAP2(a, spread, b)+(int(min(WEAP2(a, spread, b), 1)*e)) : 0)
+#define WEAPSND(a,b)            (weaptype[a].sound+b)
+#define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
+#define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
 
 WEAPDEF(int, add);
 WEAPDEF(int, max);
