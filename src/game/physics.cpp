@@ -257,27 +257,29 @@ namespace physics
         return false;
     }
 
-    float movevelocity(physent *d)
+    bool isfloating(physent *d)
+    {
+        return d->type == ENT_CAMERA || (d->type == ENT_PLAYER && d->state == CS_EDITING);
+    }
+
+    float movevelocity(physent *d, bool floating)
     {
         if(d->type == ENT_CAMERA) d = game::player1;
         float vel = max(d->maxspeed, 1.f);
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(floating) vel *= floatspeed/100.0f;
+        else if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(d->state == CS_EDITING || d->state == CS_SPECTATOR) vel *= floatspeed/100.0f;
-            else
+            vel *= movespeed/100.f;
+            if(iscrouching(d) || (d == game::player1 && game::inzoom())) vel *= movecrawl;
+            if(d->move >= 0) vel *= d->strafe ? movestrafe : movestraight;
+            switch(d->physstate)
             {
-                vel *= movespeed/100.f;
-                if(iscrouching(d) || (d == game::player1 && game::inzoom())) vel *= movecrawl;
-                if(d->move >= 0) vel *= d->strafe ? movestrafe : movestraight;
-                switch(d->physstate)
-                {
-                    case PHYS_FALL: vel *= moveinair; break;
-                    case PHYS_STEP_DOWN: vel *= movestepdown; break;
-                    case PHYS_STEP_UP: vel *= movestepup; break;
-                    default: break;
-                }
-                if(physics::sprinting(d, false, false)) vel *= movesprint;
+                case PHYS_FALL: vel *= moveinair; break;
+                case PHYS_STEP_DOWN: vel *= movestepdown; break;
+                case PHYS_STEP_UP: vel *= movestepup; break;
+                default: break;
             }
+            if(physics::sprinting(d, false, false)) vel *= movesprint;
         }
         return vel;
     }
@@ -848,19 +850,18 @@ namespace physics
                 float dz = -(m.x*pl->floor.x + m.y*pl->floor.y)/pl->floor.z;
                 m.z = liquidcheck(pl) ? max(m.z, dz) : dz;
             }
-            m.normalize();
+            m.normalize().mul(movevelocity(pl, floating));
         }
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifyinput((gameent *)pl, m, wantsmove, floating, millis);
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
         else pl->timeinair = 0;
-        vec d = vec(m).mul(movevelocity(pl));
-        if(floating || pl->type==ENT_CAMERA) pl->vel.lerp(d, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
+        if(floating || pl->type==ENT_CAMERA) pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
         else
         {
             bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
             float curb = pl->physstate >= PHYS_SLOPE ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb),
                   fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
-            pl->vel.lerp(d, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
+            pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
         }
     }
 
@@ -964,7 +965,7 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = pl->type == ENT_CAMERA || (pl->type == ENT_PLAYER && pl->state == CS_EDITING);
+        bool floating = isfloating(pl);
         float secs = millis/1000.f;
 
         pl->blocked = false;

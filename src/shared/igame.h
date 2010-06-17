@@ -66,7 +66,8 @@ namespace physics
     extern float liquidmerge(physent *d, float from, float to);
     extern bool liquidcheck(physent *d);
     extern float gravityforce(physent *d);
-    extern float movevelocity(physent *d);
+    extern bool isfloating(physent *d);
+    extern float movevelocity(physent *d, bool floating = false);
     extern bool issolid(physent *d, physent *e = NULL, bool esc = true);
     extern bool move(physent *d, vec &dir);
     extern void move(physent *d, int moveres = 10, bool local = true);
