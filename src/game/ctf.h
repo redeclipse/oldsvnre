@@ -15,6 +15,7 @@ struct ctfstate
         vector<int> votes;
 #else
         gameent *owner, *lastowner;
+        entitylight light;
         int ent, interptime, pickuptime;
 #endif
 

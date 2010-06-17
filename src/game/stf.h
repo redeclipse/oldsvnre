@@ -96,6 +96,11 @@ struct stfstate
             if(!instant && owner) { owner = kinship; converted = 0; enemy = team; return 0; }
             else { owner = team; securetime = 0; owners = enemies; noenemy(); return 1; }
         }
+
+        float occupied(int style, float amt)
+        {
+            return (enemy ? enemy : owner) ? (!owner || enemy ? clamp(converted/float((!style && owner ? 2 : 1)*amt), 0.f, 1.f) : 1.f) : 0.f;
+        }
     };
 
     vector<flag> flags;
