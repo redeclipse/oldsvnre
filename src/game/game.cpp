@@ -525,7 +525,7 @@ namespace game
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
                 }
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
-                else playsound(weaptype[d->weapselect].sound+S_W_POWER, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
+                else playsound(weaptype[d->weapselect].sound+(secondary ? S_W_POWER2 : S_W_POWER), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);
@@ -597,7 +597,7 @@ namespace game
                     int snd = -1;
                     if(flags&BURN) snd = S_BURNED;
                     else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                    if(snd >= 0 && snd < S_MAX) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
+                    if(snd >= 0) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 }
                 if(showdamageabovehead >= (d != focus ? 1 : 2))
                 {
