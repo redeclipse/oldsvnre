@@ -178,7 +178,7 @@ static Mix_Chunk *loadwav(const char *name)
     return c;
 }
 
-int addsound(const char *name, int vol, int material, int maxrad, int minrad, bool unique, vector<soundslot> &sounds)
+int addsound(const char *name, int vol, int maxrad, int minrad, bool unique, vector<soundslot> &sounds)
 {
     soundsample *sample = soundsamples.access(name);
     if(!sample)
@@ -214,22 +214,21 @@ int addsound(const char *name, int vol, int material, int maxrad, int minrad, bo
         loopv(sounds)
         {
             soundslot &slot = sounds[i];
-            if(slot.sample == sample && slot.vol == vol && slot.material == material && slot.maxrad == maxrad && slot.minrad == minrad) return i;
+            if(slot.sample == sample && slot.vol == vol && slot.maxrad == maxrad && slot.minrad == minrad) return i;
         }
     }
     soundslot &slot = sounds.add();
     slot.sample = sample;
     slot.vol = vol;
-    slot.material = material;
     slot.maxrad = maxrad; // use these values if none are supplied when playing
     slot.minrad = minrad;
     return sounds.length()-1;
 }
 
-ICOMMAND(0, registersound, "sisssi", (char *n, int *v, char *m, char *w, char *x, int *u), intret(addsound(n, *v, *m ? findmaterial(m, true) : MAT_AIR, *w ? atoi(w) : -1, *x ? atoi(x) : -1, *u > 0, gamesounds)));
-ICOMMAND(0, mapsound, "sisssi", (char *n, int *v, char *m, char *w, char *x, int *u), intret(addsound(n, *v, *m ? findmaterial(m, true) : MAT_AIR, *w ? atoi(w) : -1, *x ? atoi(x) : -1, *u > 0, mapsounds)));
+ICOMMAND(0, registersound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? atoi(w) : -1, *x ? atoi(x) : -1, *u > 0, gamesounds)));
+ICOMMAND(0, mapsound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? atoi(w) : -1, *x ? atoi(x) : -1, *u > 0, mapsounds)));
 
-void calcvol(int flags, int vol, int slotvol, int slotmat, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan)
+void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan)
 {
     int svol = flags&SND_CLAMPED ? 255 : vol, span = 127; vec v; float dist = pos.dist(camera1->o, v);
     if(!(flags&SND_NOQUIET) && (isliquid(lookupmaterial(pos)&MATF_VOLUME) || isliquid(lookupmaterial(camera1->o)&MATF_VOLUME)))
@@ -299,7 +298,7 @@ void updatesounds()
         if((!s.ends || lastmillis < s.ends) && Mix_Playing(i))
         {
             if(s.owner) s.pos = s.owner->o;
-            calcvol(s.flags, s.vol, s.slot->vol, s.slot->material, s.maxrad, s.minrad, s.pos, &s.curvol, &s.curpan);
+            calcvol(s.flags, s.vol, s.slot->vol, s.maxrad, s.minrad, s.pos, &s.curvol, &s.curpan);
             updatesound(i);
         }
         else removesound(i);
@@ -331,7 +330,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
         int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : (flags&SND_CLAMPED ? 64 : 255),
             x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : 256)),
             y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : 0));
-        calcvol(flags, v, slot->vol, slot->material, x, y, pos, &cvol, &cpan);
+        calcvol(flags, v, slot->vol, x, y, pos, &cvol, &cpan);
 
         if((flags&SND_NOCULL) || cvol > 0)
         {
