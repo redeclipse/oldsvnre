@@ -1017,6 +1017,7 @@ namespace entities
                 while(e.attrs[3] < 0) e.attrs[3] += 101;
                 while(e.attrs[3] >= 101) e.attrs[3] -= 101;
                 if(e.attrs[4] < 0) e.attrs[4] = 0;
+                e.light.material = e.attrs[6] ? vec(e.attrs[6]>>16, (e.attrs[6]>>8)&0xFF, e.attrs[6]&0xFF).div(255.f) : vec(1, 1, 1);
             case PARTICLES:
             case MAPSOUND:
             case LIGHTFX:
@@ -1103,13 +1104,13 @@ namespace entities
             case FLAG:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_COUNT;
                 while(e.attrs[0] >= TEAM_COUNT) e.attrs[0] -= TEAM_COUNT;
-                e.light.material = vec(teamtype[e.attrs[0]].colour>>16, (teamtype[e.attrs[0]].colour>>8)&0xFF, teamtype[e.attrs[0]].colour&0xFF).div(255.f);
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
                 while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
                 while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
+                e.light.material = vec(teamtype[e.attrs[0]].colour>>16, (teamtype[e.attrs[0]].colour>>8)&0xFF, teamtype[e.attrs[0]].colour&0xFF).div(255.f);
                 break;
             case TELEPORT:
                 while(e.attrs[0] < -1) e.attrs[0] += 361;
