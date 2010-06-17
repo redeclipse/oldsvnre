@@ -987,9 +987,10 @@ namespace projs
 
     int check(projent &proj, const vec &dir)
     {
+        if(proj.o.z < 0) return 0; // remove, always..
         int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2)), chk = 0;
         if(proj.extinguish&1 && int(mat&MATF_VOLUME) == MAT_WATER) chk |= 1;
-        if(proj.extinguish&2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH || proj.o.z < 0)) chk |= 2;
+        if(proj.extinguish&2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH)) chk |= 2;
         if(chk)
         {
             if(chk&1 && !proj.limited)
@@ -1008,7 +1009,7 @@ namespace projs
                 playsound(snd, proj.o, NULL, 0, vol);
                 part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, max(size, 1.5f), 1, -10);
                 proj.limited = true;
-                if(proj.projtype == PRJ_DEBRIS) proj.light.material = vec(0, 0, 0);
+                if(proj.projtype == PRJ_DEBRIS) proj.light.material = vec(1, 1, 1);
             }
             proj.norm = dir;
             if(proj.extinguish&4) return 0;
