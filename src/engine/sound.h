@@ -45,9 +45,9 @@ struct soundsample
 struct soundslot
 {
     soundsample *sample;
-    int vol, material, maxrad, minrad;
+    int vol, maxrad, minrad;
 
-    soundslot() : sample(NULL), vol(255), material(MAT_AIR), maxrad(-1), minrad(-1) {}
+    soundslot() : sample(NULL), vol(255), maxrad(-1), minrad(-1) {}
     ~soundslot() {}
 };
 
@@ -89,7 +89,7 @@ extern void playmusic(const char *name, const char *cmd);
 extern void smartmusic(bool cond, bool autooff);
 extern void musicdone(bool docmd);
 extern void updatesounds();
-extern int addsound(const char *name, int vol, int material, int maxrad, int minrad, vector<soundslot> &sounds);
+extern int addsound(const char *name, int vol, int maxrad, int minrad, vector<soundslot> &sounds);
 extern void removesound(int c);
 extern void clearsound();
 extern int playsound(int n, const vec &pos, physent *d = NULL, int flags = 0, int vol = -1, int maxrad = -1, int minrad = -1, int *hook = NULL, int ends = 0, int *oldhook = NULL);

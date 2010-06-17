@@ -978,7 +978,11 @@ namespace projs
                     }
                     default: break;
                 }
-                if(vol) playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_DESTROY), proj.o, NULL, 0, vol);
+                if(vol)
+                {
+                    int slot = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale) > 0 ? S_W_EXPLODE : S_W_DESTROY;
+                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
+                }
                 if(proj.local && proj.owner)
                     client::addmsg(N_DESTROY, "ri7", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.id >= 0 ? proj.id-game::maptime : proj.id, 0, 0);
                 break;
