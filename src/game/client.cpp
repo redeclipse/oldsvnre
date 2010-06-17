@@ -1521,7 +1521,7 @@ namespace client
                     if(isweap(weap) && target)
                     {
                         target->weapswitch(weap, lastmillis);
-                        playsound(weaptype[weap].sound+S_W_SWITCH, target->o, target, target == game::focus ? SND_FORCED : 0, -1, -1, -1, &target->wschan);
+                        playsound(WEAPSND(weap, S_W_SWITCH), target->o, target, target == game::focus ? SND_FORCED : 0, -1, -1, -1, &target->wschan);
                     }
                     break;
                 }
@@ -1559,7 +1559,7 @@ namespace client
                     {
                         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
                             colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF;
-                        playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? weaptype[attr].sound+S_W_SPAWN : S_ITEMSPAWN, e.o);
+                        playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_SPAWN) : S_ITEMSPAWN, e.o);
                         if(entities::showentdescs)
                         {
                             vec pos = vec(e.o).add(vec(0, 0, 4));
