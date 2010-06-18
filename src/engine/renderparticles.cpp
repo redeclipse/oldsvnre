@@ -26,7 +26,7 @@ static bool emit_particles()
     return emit;
 }
 
-const char *partnames[] = { "part", "tape", "trail", "text", "fireball", "lightning", "flare", "portal", "icon", "line", "triangle", "ellipse", "cone" };
+const char *partnames[] = { "part", "tape", "trail", "text", "explosion", "lightning", "flare", "portal", "icon", "line", "triangle", "ellipse", "cone" };
 
 struct partvert
 {
@@ -1024,7 +1024,7 @@ static partrenderer *parts[] =
     new quadrenderer("<grey>particles/muzzle", PT_PART|PT_GLARE|PT_RND4|PT_FLIP),
     new quadrenderer("<grey>particles/snow", PT_PART|PT_GLARE|PT_FLIP),
     &texts, &textontop,
-    &fireballs, &lightnings,
+    &explosions, &shockwaves, &shockballs, &lightnings,
     &flares // must be done last!
 };
 
@@ -1032,7 +1032,7 @@ void finddepthfxranges()
 {
     depthfxmin = vec(1e16f, 1e16f, 1e16f);
     depthfxmax = vec(0, 0, 0);
-    numdepthfxranges = fireballs.finddepthfxranges(depthfxowners, depthfxranges, 0, MAXDFXRANGES, depthfxmin, depthfxmax);
+    numdepthfxranges = explosions.finddepthfxranges(depthfxowners, depthfxranges, 0, MAXDFXRANGES, depthfxmin, depthfxmax);
     loopk(3)
     {
         depthfxmin[k] -= depthfxmargin;
@@ -1338,7 +1338,7 @@ void part_flare(const vec &p, const vec &dest, int fade, int type, int color, fl
     newparticle(p, dest, fade, type, color, size, blend, grav, collide, pl);
 }
 
-void part_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, float blend, int grav, int collide)
+void part_explosion(const vec &dest, float maxsize, int type, int fade, int color, float size, float blend, int grav, int collide)
 {
     if(!canaddparticles()) return;
     float growth = maxsize - size;
@@ -1346,10 +1346,10 @@ void part_fireball(const vec &dest, float maxsize, int type, int fade, int color
     newparticle(dest, vec(0, 0, 1), fade, type, color, size, blend, grav, collide)->val = growth;
 }
 
-void regular_part_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, float blend, int grav, int collide)
+void regular_part_explosion(const vec &dest, float maxsize, int type, int fade, int color, float size, float blend, int grav, int collide)
 {
     if(!canaddparticles() || !emit_particles()) return;
-    part_fireball(dest, maxsize, type, fade, color, size, blend, grav, collide);
+    part_explosion(dest, maxsize, type, fade, color, size, blend, grav, collide);
 }
 
 void part_spawn(const vec &o, const vec &v, float z, uchar type, int amt, int fade, int color, float size, float blend, int grav, int collide)
@@ -1625,9 +1625,14 @@ void makeparticle(const vec &o, vector<int> &attr)
             regularsplash(PART_SPARK, color, 10, 4, 200, offsetvec(o, attr[1], rnd(10)), 0.6f, 1, 20);
             break;
         }
-        case 3: //fire ball - <size> <rgb>
-            newparticle(o, vec(0, 0, 1), 1, PART_EXPLOSION, attr[2], 4.0f)->val = 1+attr[1];
+        case 3: //fire ball - <size> <rgb> <type> <blend>
+        {
+            int types[3] = { PART_EXPLOSION, PART_SHOCKWAVE, PART_SHOCKBALL },
+                type = types[attr[3] >= 0 && attr[3] <= 2 ? attr[3] : 0];
+            float blend = attr[4] > 0 && attr[4] < 100 ? attr[4]/100.f : 1.f;
+            newparticle(o, vec(0, 0, 1), 1, type, attr[2], 4.f, blend)->val = 1+attr[1];
             break;
+        }
         case 4:  //tape - <dir> <length> <rgb>
         case 7:  //lightning
         case 8:  //fire
