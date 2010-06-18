@@ -390,9 +390,9 @@ static void deleteexplosions()
 
 static const float WOBBLE = 1.25f;
 
-struct fireballrenderer : sharedlistrenderer
+struct explosionrenderer : sharedlistrenderer
 {
-    fireballrenderer(const char *texname)
+    explosionrenderer(const char *texname)
         : sharedlistrenderer(texname, 0, PT_FIREBALL|PT_GLARE)
     {}
 
@@ -414,9 +414,9 @@ struct fireballrenderer : sharedlistrenderer
 
     int finddepthfxranges(void **owners, float *ranges, int numranges, int maxranges, vec &bbmin, vec &bbmax)
     {
-        static struct fireballent : physent
+        static struct explosionent : physent
         {
-            fireballent()
+            explosionent()
             {
                 type = ENT_CAMERA;
                 collidetype = COLLIDE_AABB;
@@ -475,7 +475,7 @@ struct fireballrenderer : sharedlistrenderer
         float pmax = p->val,
               fsize = p->fade ? float(ts)/p->fade : 1,
               psize = size + pmax * fsize;
-
+        int pblend = int(blend*p->blend);
         if(isfoggedsphere(psize*WOBBLE, p->o)) return;
 
         glPushMatrix();
@@ -515,15 +515,16 @@ struct fireballrenderer : sharedlistrenderer
         {
             setlocalparamf("center", SHPARAM_VERTEX, 0, p->o.x, p->o.y, p->o.z);
             setlocalparamf("animstate", SHPARAM_VERTEX, 1, fsize, psize, pmax, float(lastmillis));
-            binddepthfxparams(depthfxblend, inside ? blend/(2*255.0f) : 0, 2*(size + pmax)*WOBBLE >= depthfxblend, p);
+            binddepthfxparams(depthfxblend, inside ? pblend/512.f : 0, 2*(size + pmax)*WOBBLE >= depthfxblend, p);
         }
 
         glRotatef(lastmillis/7.0f, -rotdir.x, rotdir.y, -rotdir.z);
         glScalef(-psize, psize, -psize);
-        drawexplosion(inside, color[0], color[1], color[2], blend);
+        drawexplosion(inside, color[0], color[1], color[2], pblend);
 
         glPopMatrix();
     }
 };
-static fireballrenderer fireballs("<grey>particles/explosion");
+static explosionrenderer explosions("<grey>particles/explosion"),
+    shockwaves("<grey>particles/solid"), shockballs("<grey>particles/shockball");
 
