@@ -703,7 +703,7 @@ namespace physics
                 }
             }
 
-            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || lastmillis-d->impulse[IM_TIME] > impulseskate))
+            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || lastmillis-d->impulse[IM_TIME] > impulseskate || d->vel.magnitude() <= 1))
             {
                 d->turnside = 0;
                 d->resetphys();
@@ -850,11 +850,12 @@ namespace physics
                 float dz = -(m.x*pl->floor.x + m.y*pl->floor.y)/pl->floor.z;
                 m.z = liquidcheck(pl) ? max(m.z, dz) : dz;
             }
-            m.normalize().mul(movevelocity(pl, floating));
+            m.normalize();
         }
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifyinput((gameent *)pl, m, wantsmove, floating, millis);
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
         else pl->timeinair = 0;
+        m.mul(movevelocity(pl, floating));
         if(floating || pl->type==ENT_CAMERA) pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
         else
         {
