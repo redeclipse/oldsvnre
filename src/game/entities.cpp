@@ -1205,15 +1205,17 @@ namespace entities
         }
         else if(d->type == ENT_PLAYER)
         {
-            loopk(3)
+            vector<int> spawns;
+            loopk(4)
             {
-                vector<int> spawns;
+                spawns.shrink(0);
                 switch(k)
                 {
                     case 0: if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                                 loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && ents[i]->attrs[0] == d->team && m_check(ents[i]->attrs[3], game::gamemode)) spawns.add(i);
-                    case 1: if(spawns.empty()) loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && m_check(ents[i]->attrs[3], game::gamemode)) spawns.add(i);
-                    case 2: if(spawns.empty()) loopi(lastenttype[WEAPON]) if(ents[i]->type == WEAPON && m_check(ents[i]->attrs[2], game::gamemode)) spawns.add(i);
+                            break;
+                    case 1: case 2: loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && (k == 2 || m_check(ents[i]->attrs[3], game::gamemode))) spawns.add(i); break;
+                    case 3: loopi(lastenttype[WEAPON]) if(ents[i]->type == WEAPON && m_check(ents[i]->attrs[2], game::gamemode)) spawns.add(i); break;
                     default: break;
                 }
                 while(!spawns.empty())
