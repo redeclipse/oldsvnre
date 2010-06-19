@@ -328,7 +328,7 @@ extern gametypes gametype[], mutstype[];
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
 #define m_enemies(a,b)      (m_campaign(a) || m_invasion(a, b))
 
-#define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_demolition(a,b) ? WEAP_ROCKET : (m_edit(a) || m_trial(a) ? GAME(limitedweapon) : (m_insta(a,b) ? GAME(instaweapon) : GAME(spawnweapon))))))
+#define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_demolition(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_edit(a) || m_trial(a) ? GAME(limitedweapon) : GAME(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : ((m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))

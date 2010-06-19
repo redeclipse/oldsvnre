@@ -709,44 +709,47 @@ namespace physics
                 d->resetphys();
             }
 
-            if(!d->turnside && (d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_BOOST] || lastmillis-d->impulse[IM_BOOST] > impulsedelay))
+            if(!d->turnside)
             {
-                bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
-                if(dash || pulse)
+                if((d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_BOOST] || lastmillis-d->impulse[IM_BOOST] > impulsedelay))
                 {
-                    bool moving = d->move || d->strafe;
-                    float skew = moving ? impulseboost : impulsejump;
-                    if(onfloor)
+                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
+                    if(dash || pulse)
                     {
-                        if(moving && ((d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
-                        d->resetphys();
-                        d->impulse[IM_JUMP] = lastmillis;
+                        bool moving = d->move || d->strafe;
+                        float skew = moving ? impulseboost : impulsejump;
+                        if(onfloor)
+                        {
+                            if(moving && ((d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
+                            d->resetphys();
+                            d->impulse[IM_JUMP] = lastmillis;
+                        }
+                        vec dir(0, 0, 1);
+                        if(!pulse || moving)
+                            vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                        (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
+                        d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
+                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
+                        game::impulseeffect(d, true);
                     }
-                    vec dir(0, 0, 1);
-                    if(!pulse || moving)
-                        vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                    (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
-                    d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
-                    d->action[AC_JUMP] = d->action[AC_DASH] = false;
-                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
-                    game::impulseeffect(d, true);
                 }
-            }
-            if(!d->turnside && onfloor && d->action[AC_JUMP])
-            {
-                d->vel.z += jumpforce(d, true);
-                if(d->inliquid)
+                if(onfloor && d->action[AC_JUMP])
                 {
-                    float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
-                    d->vel.x *= scale;
-                    d->vel.y *= scale;
+                    d->vel.z += jumpforce(d, true);
+                    if(d->inliquid)
+                    {
+                        float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
+                        d->vel.x *= scale;
+                        d->vel.y *= scale;
+                    }
+                    d->resetphys();
+                    d->impulse[IM_JUMP] = lastmillis;
+                    d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
+                    playsound(S_JUMP, d->o, d);
+                    regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
                 }
-                d->resetphys();
-                d->impulse[IM_JUMP] = lastmillis;
-                d->action[AC_JUMP] = d->action[AC_DASH] = false;
-                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
-                playsound(S_JUMP, d->o, d);
-                regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
             }
             bool found = false;
             if(d->turnside || d->action[AC_JUMP] || d->action[AC_SPECIAL])
@@ -769,7 +772,7 @@ namespace physics
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor))
                         {
                             d->action[AC_SPECIAL] = false;
-                            if(!onfloor) (d->vel = vec(0, 0, 1)).normalize().mul(impulsevelocity(d, impulsemelee));
+                            if(!onfloor) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
                         }
                         break;
                     }
@@ -821,7 +824,11 @@ namespace physics
                     }
                 }
             }
-            if(!found) { if(d->turnside) { d->turnside = 0; d->resetphys(); } }
+            if(!found && d->turnside)
+            {
+                d->turnside = 0;
+                d->resetphys();
+            }
         }
         else d->action[AC_JUMP] = false;
         d->action[AC_DASH] = false;
