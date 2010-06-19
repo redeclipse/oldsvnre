@@ -485,6 +485,12 @@ namespace server
     }
 
     void start() { cleanup(true); }
+    void shutdown()
+    {
+        srvmsgf(-1, "\fyserver shutdown in progress..");
+        aiman::clearai();
+        loopv(clients) if(getinfo(i)) disconnect_client(i, DISC_SHUTDOWN);
+    }
 
     void *newinfo() { return new clientinfo; }
     void deleteinfo(void *ci) { delete (clientinfo *)ci; }
@@ -3080,17 +3086,22 @@ namespace server
         bool complete = !numclients(n);
         if(ci->connected)
         {
-            loopv(clients) if(clients[i] != ci)
+            if(reason != DISC_SHUTDOWN)
             {
-                loopvk(clients[i]->state.fraglog) if(clients[i]->state.fraglog[k] == ci->clientnum)
-                    clients[i]->state.fraglog.remove(k--);
+                loopv(clients) if(clients[i] != ci)
+                {
+                    loopvk(clients[i]->state.fraglog) if(clients[i]->state.fraglog[k] == ci->clientnum)
+                        clients[i]->state.fraglog.remove(k--);
+                }
+                if(ci->state.state == CS_ALIVE) dropitems(ci, 0);
+                if(ci->privilege) auth::setmaster(ci, false);
+                if(smode) smode->leavegame(ci, true);
+                mutate(smuts, mut->leavegame(ci, true));
+                ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
+                distpoints(ci, true); savescore(ci);
+                aiman::removeai(ci, complete);
+                if(!complete) aiman::dorefresh = true;
             }
-            if(ci->state.state == CS_ALIVE) dropitems(ci, 0);
-            if(ci->privilege) auth::setmaster(ci, false);
-            if(smode) smode->leavegame(ci, true);
-            mutate(smuts, mut->leavegame(ci, true));
-            ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-            distpoints(ci, true); savescore(ci);
             sendf(-1, 1, "ri2", N_DISCONNECT, n, reason);
             ci->connected = false;
             if(ci->name[0])
@@ -3098,8 +3109,6 @@ namespace server
                 int amt = numclients(ci->clientnum);
                 relayf(2, "\fo%s (%s) has left the game (%s, %d %s)", colorname(ci), gethostname(n), reason >= 0 ? disc_reasons[reason] : "normal", amt, amt != 1 ? "players" : "player");
             }
-            aiman::removeai(ci, complete);
-            if(!complete) aiman::dorefresh = true;
             clients.removeobj(ci);
         }
         else connects.removeobj(ci);

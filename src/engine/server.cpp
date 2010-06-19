@@ -10,7 +10,7 @@ VAR(0, version, 1, ENG_VERSION, -1); // for scripts
 int kidmode = 0;
 ICOMMAND(0, getkidmode, "", (void), intret(kidmode));
 
-const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was banned", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow" };
+const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was banned", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
 
 SVAR(IDF_PERSIST, consoletimefmt, "%c");
 char *gettime(char *format)
@@ -278,6 +278,7 @@ ENetSocket pongsock = ENET_SOCKET_NULL;
 
 void cleanupserver()
 {
+    server::shutdown();
     if(serverhost) enet_host_destroy(serverhost);
     serverhost = NULL;
 #ifdef IRC
