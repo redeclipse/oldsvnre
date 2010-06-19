@@ -1559,7 +1559,7 @@ void texcolor(float *r, float *g, float *b)
 {
     if(slots.empty()) return;
     Slot &s = *slots.last();
-    s.variants->colorscale = vec(clamp(*r, 0.0f, 1.0f), clamp(*g, 0.0f, 1.0f), clamp(*b, 0.0f, 1.0f));
+    s.variants->colorscale = vec(max(*r, 0.f), max(*g, 0.f), max(*b, 0.f));
     propagatevslot(s.variants, 1<<VSLOT_COLOR);
 }
 COMMAND(0, texcolor, "fff");
