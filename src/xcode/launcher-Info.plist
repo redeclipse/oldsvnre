@@ -14,7 +14,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>map.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>Blood Frontier demo</string>
+			<string>Red Eclipse demo</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSTypeIsPackage</key>
@@ -30,7 +30,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>map.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>Blood Frontier map</string>
+			<string>Red Eclipse map</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSTypeIsPackage</key>
@@ -44,11 +44,11 @@
 	<key>CFBundleHelpBookFolder</key>
 	<string>help</string>
 	<key>CFBundleHelpBookName</key>
-	<string>Blood Frontier help</string>
+	<string>Red Eclipse help</string>
 	<key>CFBundleIconFile</key>
-	<string>bloodfrontier</string>
+	<string>redeclipse</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.bloodfrontier</string>
+	<string>com.redeclipse</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -61,10 +61,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>Blood Frontier Server</string>
+			<string>Red Eclipse Server</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>bloodfrontier</string>
+				<string>redeclipse</string>
 			</array>
 		</dict>
 	</array>
