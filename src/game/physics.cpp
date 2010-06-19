@@ -777,18 +777,11 @@ namespace physics
                     if(d->action[AC_JUMP] && d->turnside)
                     {
                         float mag = impulsevelocity(d, impulseparkour);
-                        d->vel = vec(d->turnside ? wall : vec(dir).reflect(wall)).add(vec(d->vel).reflect(wall).rescale(1)).normalize().mul(mag/2);
-                        d->vel.z += mag/2;
+                        vec rft; vecfromyawpitch(d->aimyaw, 0, 1, 0, rft);
+                        (d->vel = rft).normalize().mul(mag); d->vel.z += mag/2;
                         d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
-                        float yaw = 0, pitch = 0;
-                        vectoyawpitch(d->vel, yaw, pitch);
-                        float off = yaw-d->aimyaw;
-                        if(off > 180) off -= 360;
-                        else if(off < -180) off += 360;
                         d->turnmillis = PHYSMILLIS;
-                        d->turnside = 0;
-                        d->turnyaw = off;
-                        d->turnroll = 0;
+                        d->turnside = 0; d->turnyaw = d->turnroll = 0;
                         d->action[AC_JUMP] = d->action[AC_DASH] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                         game::impulseeffect(d, true);
@@ -807,15 +800,14 @@ namespace physics
                         vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
                         if(!d->turnside)
                         {
-                            d->vel = vec(rft).normalize().mul(impulsevelocity(d, impulseparkour));
+                            (d->vel = rft).normalize().mul(impulsevelocity(d, impulseparkour));
                             off = yaw-d->aimyaw;
                             if(off > 180) off -= 360;
                             else if(off < -180) off += 360;
                             d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_SKATE, lastmillis);
                             d->action[AC_SPECIAL] = false;
                             d->turnmillis = PHYSMILLIS;
-                            d->turnside = side;
-                            d->turnyaw = off;
+                            d->turnside = side; d->turnyaw = off;
                             d->turnroll = (impulseroll*d->turnside)-d->roll;
                             found = true;
                             break;
