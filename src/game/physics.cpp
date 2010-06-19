@@ -4,8 +4,8 @@ namespace physics
     FVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
     FVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
     FVAR(IDF_WORLD, liquidcurb, 0, 10.f, 1000);
-    FVAR(IDF_WORLD, floorcurb, 0, 5.f, 1000);
-    FVAR(IDF_WORLD, aircurb, 0, 20.f, 1000);
+    FVAR(IDF_WORLD, floorcurb, 0, 7.5f, 1000);
+    FVAR(IDF_WORLD, aircurb, 0, 25.f, 1000);
     FVAR(IDF_WORLD, slidecurb, 0, 40.f, 1000);
 
     FVAR(IDF_WORLD, stairheight, 0, 4.1f, 1000);

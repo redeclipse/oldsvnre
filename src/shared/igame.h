@@ -116,6 +116,8 @@ namespace game
 #endif
 namespace server
 {
+    extern void start();
+    extern void shutdown();
     extern void srvmsgf(int cn, const char *s, ...);
     extern void srvoutf(const char *s, ...);
     extern bool serveroption(char *arg);
@@ -141,6 +143,5 @@ namespace server
     extern const char *choosemap(const char *suggest = NULL, int mode = -1, int muts = -1, int force = 0);
     extern void changemap(const char *name = NULL, int mode = -1, int muts = -1);
     extern bool canload(const char *type);
-    extern void start();
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
 }
