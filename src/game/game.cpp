@@ -102,7 +102,7 @@ namespace game
     VAR(IDF_PERSIST, ragdolls, 0, 1, 1);
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
     VAR(IDF_PERSIST, bloodfade, 1, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, bloodsize, 1, 15, 1000);
+    VAR(IDF_PERSIST, bloodsize, 1, 20, 1000);
     FVAR(IDF_PERSIST, debrisscale, 0, 1, 1000);
     VAR(IDF_PERSIST, debrisfade, 1, 5000, INT_MAX-1);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
@@ -649,7 +649,7 @@ namespace game
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 100, DECAL_BLOOD, int(d->radius*4));
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 100, DECAL_BLOOD, int(d->radius*8));
                         else part_splash(PART_HINT, int(clamp(damage/2, 2, 10)), bloodfade, p, 0xFFFF88, 1.5f, 1, 50, DECAL_STAIN, int(d->radius*4));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);
@@ -1900,7 +1900,7 @@ namespace game
                     foggednotextureshader->set();
                     glDisable(GL_TEXTURE_2D);
                     int colour = teamtype[d->team].colour;
-                    if(fireburning && fireburntime && ((lastmillis%1000)/100)%10 && d->onfire(lastmillis, fireburntime))
+                    if(fireburning && fireburntime && lastmillis%100 < 50 && d->onfire(lastmillis, fireburntime))
                         colour = firecols[rnd(FIRECOLOURS)];
                     vec c((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
                     polyhue(d, c, true);
