@@ -3,13 +3,13 @@ AllowLanguageSelection
 Yes
 
 AppName
-{Blood Frontier}
+{Red Eclipse}
 
 ApplicationID
 A54D9152-D7BB-4098-9C0B-852F43BA9D76
 
 ApplicationURL
-http://bloodfrontier.com/
+http://www.redeclipse.net/
 
 AutoRefreshFiles
 Yes
@@ -27,7 +27,7 @@ CommandLineFailureAction
 {Fail (recommended)}
 
 Company
-{Anthony Cord and Quinton Reeves}
+{Red Eclipse Team}
 
 CompressionLevel
 6
@@ -36,7 +36,7 @@ CompressionMethod
 zlib
 
 Copyright
-{(C) 2007-2008 Anthony Cord and Quinton Reeves}
+{(C) 2010 Red Eclipse Team}
 
 CreateDesktopShortcut
 Yes
@@ -54,10 +54,10 @@ ExtractSolidArchivesOnStartup
 No
 
 Icon
-C:/Media/Games/BloodFrontier/src/install/small.gif
+C:/Media/Games/RedEclipse/src/install/small.gif
 
 Image
-C:/Media/Games/BloodFrontier/src/install/large.gif
+C:/Media/Games/RedEclipse/src/install/large.gif
 
 IncludeDebugging
 No
@@ -102,7 +102,7 @@ LaunchApplication
 Yes
 
 PackageDescription
-{Blood Frontier}
+{Red Eclipse}
 
 PackageLicense
 {ZLIB License}
@@ -144,7 +144,7 @@ ScriptExt
 .bat
 
 ShortAppName
-bloodfrontier
+redeclipse
 
 SkipUnusedFileGroups
 Yes
@@ -224,8 +224,8 @@ test
 {Testing Switch Yes No {} {run uninstaller without uninstalling any files}}
 
 }
-FileGroup ::3A46FBF5-F027-4222-9E3F-35923F5A8540 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 Solaris-sparc Windows TarArchive ZipArchive} -name {Blood Frontier} -parent FileGroups
-File ::221D41B7-0B9F-451A-823C-877653153708 -type dir -name C:/Media/Games/BloodFrontier/export/BloodFrontier/bin -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
+FileGroup ::3A46FBF5-F027-4222-9E3F-35923F5A8540 -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 Solaris-sparc Windows TarArchive ZipArchive} -name {Red Eclipse} -parent FileGroups
+File ::221D41B7-0B9F-451A-823C-877653153708 -type dir -name C:/Media/Games/RedEclipse/export/RedEclipse/bin -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
 File ::A8A757FA-22FA-4841-AA59-84A3F93D6A72 -name bfclient -permissions 00775 -parent 221D41B7-0B9F-451A-823C-877653153708
 File ::BBFD02C7-5E05-47D6-975E-4B95545D9C92 -name bfclient.exe -parent 221D41B7-0B9F-451A-823C-877653153708
 File ::069B1DE4-4DBA-4DDA-8416-AC7BBC50E320 -name bfclient.exe.manifest -parent 221D41B7-0B9F-451A-823C-877653153708
@@ -255,7 +255,7 @@ File ::8DE8B9F6-E4E2-4C2C-89C1-A154BF5079AA -name smpeg.dll -parent 221D41B7-0B9
 File ::A520548F-47CA-4BAC-BC20-5F4F4F77DC3B -name ttf2font -permissions 00775 -parent 221D41B7-0B9F-451A-823C-877653153708
 File ::FEB9C49D-9969-45F4-8C6C-5F254CF630A4 -name ttf2font.exe -parent 221D41B7-0B9F-451A-823C-877653153708
 File ::17F6EF51-84B3-4E5A-A93E-9BA97B65ABF3 -name zlib1.dll -parent 221D41B7-0B9F-451A-823C-877653153708
-File ::76AFDE17-A291-4BF7-9BE1-A2EF9ECC4061 -type dir -name C:/Media/Games/BloodFrontier/export/BloodFrontier/data -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
+File ::76AFDE17-A291-4BF7-9BE1-A2EF9ECC4061 -type dir -name C:/Media/Games/RedEclipse/export/RedEclipse/data -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
 File ::BC480F4D-9519-4A7E-9F81-A6CEFB0041B2 -name brush.cfg -parent 76AFDE17-A291-4BF7-9BE1-A2EF9ECC4061
 File ::DEF94848-A3ED-4D17-AABA-241B2A7103A2 -name defaults.cfg -parent 76AFDE17-A291-4BF7-9BE1-A2EF9ECC4061
 File ::7253B75C-83F6-428D-9D37-93B726980BA5 -name engine.cfg -parent 76AFDE17-A291-4BF7-9BE1-A2EF9ECC4061
@@ -1407,10 +1407,10 @@ File ::441DBB93-753C-4FED-8DB3-EEFF40523084 -name readme.txt -parent B68914B0-56
 File ::8F0F039C-7267-4C5E-B995-C46134ECD324 -name readme.txt -parent B68914B0-569C-4EE8-9A6F-FF21600AF903
 File ::D5CA9FBA-C9BE-40AC-8ACF-C29017FCA13D -name readme.txt -parent B68914B0-569C-4EE8-9A6F-FF21600AF903
 File ::CDC2129C-9541-4F5A-9148-5C43646C17FC -name readme.txt -parent B68914B0-569C-4EE8-9A6F-FF21600AF903
-File ::358B6FBD-A248-40A2-BE45-8E6D28913742 -type dir -name C:/Media/Games/BloodFrontier/export/BloodFrontier/src -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
-File ::8A5D3CA8-9EA4-499B-9514-B133828F2657 -name bloodfrontier.cbp -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
-File ::0A4065F5-F741-47F5-BD66-AABA6F8A9EA1 -name bloodfrontier.ico -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
-File ::6C1FA271-0E1B-4B36-B138-16E90669214B -name bloodfrontier.rc -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
+File ::358B6FBD-A248-40A2-BE45-8E6D28913742 -type dir -name C:/Media/Games/RedEclipse/export/RedEclipse/src -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
+File ::8A5D3CA8-9EA4-499B-9514-B133828F2657 -name redeclipse.cbp -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
+File ::0A4065F5-F741-47F5-BD66-AABA6F8A9EA1 -name redeclipse.ico -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
+File ::6C1FA271-0E1B-4B36-B138-16E90669214B -name redeclipse.rc -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::19717B8F-0CF7-4FEB-82A5-C39D707660A5 -name img2anim.ico -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::71B713B7-6E2F-457B-92CD-2395ABA0FE47 -name img2anim.rc -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::27724D85-12B3-4235-89DF-60C43F2284DE -name Makefile -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
@@ -1618,9 +1618,9 @@ File ::80B1D43B-16A8-44FA-8472-02CE09FD6C12 -name tools.cpp -parent F26A1811-505
 File ::145B41AF-AA0C-4B64-8718-D497B7BC80D0 -name tools.h -parent F26A1811-505E-47B3-9467-DB40E50E8F0B
 File ::B62EDA1A-6138-48E5-A18E-F091F1F62121 -name ttf2font.cpp -parent F26A1811-505E-47B3-9467-DB40E50E8F0B
 File ::2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43 -type dir -name vcpp -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
-File ::7DBD8BF0-6F8A-4AAC-AA4A-C5B0D3DF0E31 -name bloodfrontier.sln -parent 2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43
-File ::249F216F-620E-4DF7-BBAF-E4CFDED3DB1C -name bloodfrontier.suo -parent 2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43
-File ::70150CAB-6344-4E56-A6A1-581BFDC3A20B -name bloodfrontier.vcproj -parent 2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43
+File ::7DBD8BF0-6F8A-4AAC-AA4A-C5B0D3DF0E31 -name redeclipse.sln -parent 2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43
+File ::249F216F-620E-4DF7-BBAF-E4CFDED3DB1C -name redeclipse.suo -parent 2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43
+File ::70150CAB-6344-4E56-A6A1-581BFDC3A20B -name redeclipse.vcproj -parent 2DBE02DC-36C9-4F5F-80DC-E6F43D31FA43
 File ::49A9983E-B324-407A-AB84-98A3BFF9CFCE -name readme.txt -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::D044274D-B696-423D-9655-2BAA5AAC21AA -type dir -name install -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::948CDDFD-8363-4DEA-B07D-E175066357F1 -name install.mpi -parent D044274D-B696-423D-9655-2BAA5AAC21AA
@@ -1630,10 +1630,10 @@ File ::B4D0C2F8-0DE1-4D99-97BF-917E4AD52EBA -name readme.txt -parent 358B6FBD-A2
 File ::94599291-CAE2-4EE4-A562-5B888E0B686B -name readme.txt -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::3B39610C-4010-41A7-BC6C-43D3EB3045F1 -name readme.txt -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
 File ::23D0396B-CE67-4E0F-875E-F52B455882B1 -name readme.txt -parent 358B6FBD-A248-40A2-BE45-8E6D28913742
-File ::027119D8-1EDF-490B-BFC4-920D8BF31235 -name C:/Media/Games/BloodFrontier/export/BloodFrontier/bloodfrontier.bat -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
-File ::34325A3A-7F08-4F41-A901-6A82CC34AEF0 -name C:/Media/Games/BloodFrontier/export/BloodFrontier/bloodfrontier.sh -permissions 00775 -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
-File ::AC18D8FF-B204-4C92-9C6C-58EAE7CF074D -name C:/Media/Games/BloodFrontier/export/BloodFrontier/readme.txt -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
-Component ::445414A7-445A-4B1F-BE68-574CA88E5A8A -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 Solaris-sparc Windows} -name {Blood Frontier} -parent Components
+File ::027119D8-1EDF-490B-BFC4-920D8BF31235 -name C:/Media/Games/RedEclipse/export/RedEclipse/redeclipse.bat -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
+File ::34325A3A-7F08-4F41-A901-6A82CC34AEF0 -name C:/Media/Games/RedEclipse/export/RedEclipse/redeclipse.sh -permissions 00775 -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
+File ::AC18D8FF-B204-4C92-9C6C-58EAE7CF074D -name C:/Media/Games/RedEclipse/export/RedEclipse/readme.txt -parent 3A46FBF5-F027-4222-9E3F-35923F5A8540
+Component ::445414A7-445A-4B1F-BE68-574CA88E5A8A -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 Solaris-sparc Windows} -name {Red Eclipse} -parent Components
 SetupType ::07E8A9EE-0FE9-41EC-95CF-197541E74FAF -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 Solaris-sparc Windows} -name Typical -parent SetupTypes
 SetupType ::7C1D9A1D-E997-4AB0-B852-D7FE19B93E3A -setup Install -active Yes -platforms {AIX-ppc FreeBSD-4-x86 FreeBSD-x86 HPUX-hppa Linux-x86 Solaris-sparc Windows} -name Custom -parent SetupTypes
 
@@ -1970,7 +1970,7 @@ Yes
 167530863
 
 3A46FBF5-F027-4222-9E3F-35923F5A8540,Name
-{Blood Frontier}
+{Red Eclipse}
 
 3A78AB68-18C2-43E2-B8ED-482DF5EFC4B3,Background
 white
@@ -2045,7 +2045,7 @@ No
 3A46FBF5-F027-4222-9E3F-35923F5A8540
 
 445414A7-445A-4B1F-BE68-574CA88E5A8A,Name
-{Blood Frontier}
+{Red Eclipse}
 
 445414A7-445A-4B1F-BE68-574CA88E5A8A,RequiredComponent
 Yes
@@ -2480,7 +2480,7 @@ AIX-ppc,InstallType
 Typical
 
 AIX-ppc,ProgramExecutable
-<%InstallDir%>/bloodfrontier.sh
+<%InstallDir%>/redeclipse.sh
 
 AIX-ppc,ProgramFolderAllUsers
 No
@@ -2816,7 +2816,7 @@ FreeBSD-4-x86,InstallType
 Typical
 
 FreeBSD-4-x86,ProgramExecutable
-<%InstallDir%>/bloodfrontier.sh
+<%InstallDir%>/redeclipse.sh
 
 FreeBSD-4-x86,ProgramFolderAllUsers
 No
@@ -2867,7 +2867,7 @@ FreeBSD-x86,InstallType
 Typical
 
 FreeBSD-x86,ProgramExecutable
-<%InstallDir%>/bloodfrontier.sh
+<%InstallDir%>/redeclipse.sh
 
 FreeBSD-x86,ProgramFolderAllUsers
 No
@@ -2918,7 +2918,7 @@ HPUX-hppa,InstallType
 Typical
 
 HPUX-hppa,ProgramExecutable
-<%InstallDir%>/bloodfrontier.sh
+<%InstallDir%>/redeclipse.sh
 
 HPUX-hppa,ProgramFolderAllUsers
 No
@@ -2969,7 +2969,7 @@ Linux-x86,InstallType
 Typical
 
 Linux-x86,ProgramExecutable
-<%InstallDir%>/bloodfrontier.sh
+<%InstallDir%>/redeclipse.sh
 
 Linux-x86,ProgramFolderAllUsers
 No
@@ -3020,7 +3020,7 @@ Solaris-sparc,InstallType
 Typical
 
 Solaris-sparc,ProgramExecutable
-<%InstallDir%>/bloodfrontier.sh
+<%InstallDir%>/redeclipse.sh
 
 Solaris-sparc,ProgramFolderAllUsers
 No
@@ -3125,7 +3125,7 @@ Windows,InstallType
 Typical
 
 Windows,ProgramExecutable
-<%InstallDir%>/bloodfrontier.bat
+<%InstallDir%>/redeclipse.bat
 
 Windows,ProgramFolderAllUsers
 Yes
@@ -3143,7 +3143,7 @@ Windows,ProgramReadme
 <%InstallDir%>/readme.txt
 
 Windows,WindowsIcon
-C:/Media/Games/BloodFrontier/src/bloodfrontier.ico
+C:/Media/Games/RedEclipse/src/redeclipse.ico
 
 ZipArchive,Active
 Yes

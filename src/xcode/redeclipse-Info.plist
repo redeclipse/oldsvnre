@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>bloodfrontier</string>
+	<string>redeclipse</string>
 	<key>CFBundleIconFile</key>
-	<string>bloodfrontier</string>
+	<string>redeclipse</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
