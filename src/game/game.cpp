@@ -1348,7 +1348,7 @@ namespace game
                 camstate &c = cameras.add();
                 c.pos = d->headpos();
                 c.ent = -1; c.idx = i;
-                if(d->state == CS_DEAD || d->state == CS_WAITING) deathcamyawpitch(d, d->yaw, d->pitch);
+                if(d->state == CS_DEAD) deathcamyawpitch(d, d->yaw, d->pitch);
                 vecfromyawpitch(d->yaw, d->pitch, 1, 0, c.dir);
             }
         }
@@ -1356,8 +1356,8 @@ namespace game
         {
             gameent *d = (gameent *)iterdynents(cameras[i].idx);
             if(!d) { cameras.remove(i--); continue; }
-            if(d->state != CS_DEAD && d->state != CS_WAITING) cameras[i].pos = d->headpos();
-            else deathcamyawpitch(d, d->yaw, d->pitch);
+            cameras[i].pos = d->headpos();
+            if(d->state == CS_DEAD) deathcamyawpitch(d, d->yaw, d->pitch);
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, cameras[i].dir);
         }
 
@@ -1379,8 +1379,9 @@ namespace game
                         float dist = c.pos.dist(d->feetpos());
                         if(dist >= c.mindist && dist <= min(c.maxdist, float(fog)) && (raycubelos(c.pos, pos, trg) || raycubelos(c.pos, pos = d->headpos(), trg)))
                         {
-                            float yaw = t ? t->yaw : camera1->yaw, pitch = t ? t->pitch : camera1->pitch;
-                            if(!t && (k || renew))
+                            bool fixed = t && t->state != CS_WAITING;
+                            float yaw = fixed ? t->yaw : camera1->yaw, pitch = fixed ? t->pitch : camera1->pitch;
+                            if(!fixed && (k || renew))
                             {
                                 vec dir = pos;
                                 if(c.cansee.length()) dir.add(vec(c.dir).div(c.cansee.length()));
@@ -1436,16 +1437,15 @@ namespace game
                 }
                 else { focus = player1; follow = 0; }
             }
-            if(cam->ent < 0 && focus != player1)
+            camera1->o = cam->pos;
+            if(cam->ent < 0 && focus != player1 && focus->state != CS_WAITING)
             {
-                camera1->o = focus->headpos();
                 camera1->yaw = camera1->aimyaw = focus->yaw;
                 camera1->pitch = camera1->aimpitch = focus->pitch;
                 camera1->roll = focus->roll;
             }
             else
             {
-                camera1->o = cam->pos;
                 vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
                 if(spectvspeed > 0) scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, (float(curtime)/1000.f)*spectvspeed, spectvpitch);
                 else { camera1->yaw = camera1->aimyaw; camera1->pitch = camera1->aimpitch; }
