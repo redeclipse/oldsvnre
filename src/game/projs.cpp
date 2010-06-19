@@ -16,10 +16,10 @@ namespace projs
     VAR(IDF_PERSIST, ejectspin, 0, 1, 1);
     VAR(IDF_PERSIST, ejecthint, 0, 1, 1);
 
-    VAR(IDF_PERSIST, firetrail, 0, 1, 1);
-    VAR(IDF_PERSIST, firedelay, 1, 75, INT_MAX-1);
-    VAR(IDF_PERSIST, firelength, 1, 350, INT_MAX-1);
-    VAR(IDF_PERSIST, firehint, 0, 1, 1);
+    VAR(IDF_PERSIST, projtrails, 0, 1, 1);
+    VAR(IDF_PERSIST, projtraildelay, 1, 25, INT_MAX-1);
+    VAR(IDF_PERSIST, projtraillength, 1, 500, INT_MAX-1);
+    VAR(IDF_PERSIST, projfirehint, 0, 1, 1);
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     VAR(IDF_PERSIST, muzzleflare, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
@@ -260,7 +260,7 @@ namespace projs
             {
                 if(!kidmode && game::bloodscale > 0)
                 {
-                    adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude(), 0.25f, 2.f), bvec(125, 255, 255));
+                    adddecal(DECAL_BLOOD, proj.o, proj.norm, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = clamp(mag*2, 10, 255);
                     playsound(S_SPLOSH+rnd(S_R_SPLOSH), proj.o, NULL, 0, vol);
                     break;
@@ -723,16 +723,15 @@ namespace projs
                 }
                 case WEAP_FLAMER:
                 {
-                    if(proj.movement > 0.f)
+                    float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
+                        size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.85f)*(0.65f+(rnd(35)/100.f))*proj.scale;
+                    if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 1)) part_create(PART_HINT_SOFT, 1, proj.o, 0x120228, size*1.5f, blend);
+                    if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                     {
-                        bool effect = false;
-                        float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.85f)*(0.65f+(rnd(35)/100.f))*proj.scale;
-                        if(firetrail && lastmillis-proj.lasteffect >= firedelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%firedelay); }
-                        int len = effect ? max(int(firelength*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
-                        if(firehint && effect && notrayspam(proj.weap, proj.flags&HIT_ALT, 1)) part_create(PART_HINT_SOFT, 1, proj.o, 0x120226, size*1.5f, blend*(proj.flags&HIT_ALT ? 0.75f : 1.f));
-                        part_create(PART_FIREBALL_SOFT, len, proj.o, firecols[rnd(FIRECOLOURS)], size, blend, -15);
+                        part_create(PART_FIREBALL_SOFT, max(int(projtraillength*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, firecols[rnd(FIRECOLOURS)], size, blend, -10);
+                        proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                     }
+                    else part_create(PART_FIREBALL_SOFT, 1, proj.o, firecols[rnd(FIRECOLOURS)], size, blend, -10);
                     break;
                 }
                 case WEAP_GRENADE:
@@ -740,11 +739,10 @@ namespace projs
                     int col = ((int(254*max(1.f-proj.lifespan,0.5f))<<16)+1)|((int(98*max(1.f-proj.lifespan,0.f))+1)<<8), interval = lastmillis%1000;
                     float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
                     part_create(PART_PLASMA_SOFT, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*fluc);
-                    bool moving = proj.movement > 0.f;
-                    if(lastmillis-proj.lasteffect >= (moving ? 50 : 100))
+                    if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                     {
-                        part_create(PART_SMOKE_LERP, 250, proj.o, 0x222222, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(moving ? 0.5f : 1.f), 0.5f, -20);
-                        proj.lasteffect = lastmillis - (lastmillis%(moving ? 50 : 100));
+                        part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x888888, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), 0.75f, -10);
+                        proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                     }
                     break;
                 }
@@ -753,11 +751,11 @@ namespace projs
                     int col = ((int(254*max(1.f-proj.lifespan,0.5f))<<16)+1)|((int(98*max(1.f-proj.lifespan,0.f))+1)<<8), interval = lastmillis%1000;
                     float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
                     part_create(PART_PLASMA_SOFT, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*fluc);
-                    bool moving = proj.movement > 0.f;
-                    if(lastmillis-proj.lasteffect >= (moving ? 50 : 100))
+                    if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                     {
-                        part_create(PART_SMOKE_LERP, 150, proj.o, 0x666666, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(moving ? 0.5f : 1.f), 0.5f, -10);
-                        proj.lasteffect = lastmillis - (lastmillis%(moving ? 50 : 100));
+                        part_create(PART_FIREBALL_SOFT, max(projtraillength/3, 1), proj.o, firecols[rnd(FIRECOLOURS)], WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.5f, -5);
+                        part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x222222, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), 1.f, -10);
+                        proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                     }
                     break;
                 }
@@ -814,8 +812,7 @@ namespace projs
             {
                 if(proj.movement > 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                 {
-                    float size = ((rnd(game::bloodsize)+1)/10.f)*proj.radius;
-                    part_create(PART_BLOOD, game::bloodfade, proj.o, 0x88FFFF, size, 1, 100, DECAL_BLOOD);
+                    part_create(PART_BLOOD, game::bloodfade, proj.o, 0x88FFFF, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*2, 1, 100, DECAL_BLOOD);
                     proj.lasteffect = lastmillis - (lastmillis%1000);
                 }
             }
@@ -823,8 +820,8 @@ namespace projs
             {
                 bool effect = false;
                 float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
-                if(firetrail && lastmillis-proj.lasteffect >= firedelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%firedelay); }
-                int len = effect ? max(int(firelength*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
+                if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
+                int len = effect ? max(int(projtraillength*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
                 part_create(PART_FIREBALL_SOFT, len, proj.o, firecols[rnd(FIRECOLOURS)], radius, blend, -10);
             }
         }
@@ -892,11 +889,11 @@ namespace projs
                             if(proj.weap == WEAP_FLAMER)
                             {
                                 if(expl <= 0) expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
-                                part_create(PART_SMOKE_LERP_SOFT, firelength*3, proj.o, 0x666666, expl*0.75f, 0.25f+(rnd(50)/100.f), -15);
+                                part_create(PART_SMOKE_LERP_SOFT, projtraillength*3, proj.o, 0x666666, expl*0.75f, 0.25f+(rnd(50)/100.f), -15);
                             }
                             else
                             {
-                                part_create(PART_PLASMA_SOFT, firelength*(proj.weap == WEAP_GRENADE ? 2 : 3), proj.o, 0xAA4400, max(expl*0.5f, 0.5f)); // corona
+                                part_create(PART_PLASMA_SOFT, projtraillength*(proj.weap == WEAP_GRENADE ? 2 : 3), proj.o, 0xAA4400, max(expl*0.5f, 0.5f)); // corona
                                 if(expl > 0)
                                 {
                                     quake(proj.o, proj.weap, proj.flags, proj.scale);
@@ -912,9 +909,9 @@ namespace projs
                                     loopi(proj.weap == WEAP_GRENADE ? 3 : 6)
                                     {
                                         vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
-                                        part_create(PART_FIREBALL_SOFT, firelength*(proj.weap == WEAP_GRENADE ? 2 : 3), to, firecols[rnd(FIRECOLOURS)], expl, 0.25f+(rnd(50)/100.f), -5);
+                                        part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap == WEAP_GRENADE ? 2 : 3), to, firecols[rnd(FIRECOLOURS)], expl, 0.25f+(rnd(50)/100.f), -5);
                                     }
-                                    part_create(PART_SMOKE_LERP_SOFT, firelength*(proj.weap == WEAP_GRENADE ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
+                                    part_create(PART_SMOKE_LERP_SOFT, projtraillength*(proj.weap == WEAP_GRENADE ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
                                     int debris = rnd(proj.weap == WEAP_GRENADE ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
                                     loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
                                     adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec(196, 24, 0));
@@ -1478,7 +1475,11 @@ namespace projs
                         case PRJ_SHOT: colour = weaptype[proj.weap].colour; break;
                         case PRJ_GIBS: colour = 0x880000; break;
                         case PRJ_EJECT: colour = 0xBBBB22; break;
-                        case PRJ_DEBRIS: default: colour = 0x888888; break;
+                        case PRJ_DEBRIS: default:
+                        {
+                            colour = !proj.limited && lastmillis%100 < 50 ? firecols[rnd(FIRECOLOURS)] : 0x888888;
+                            break;
+                        }
                     }
                     glPushMatrix();
                     foggednotextureshader->set();
