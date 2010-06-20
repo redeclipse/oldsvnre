@@ -41,9 +41,9 @@ struct ctfstate
         }
 
 #ifndef GAMESERVER
-        vec &pos()
+        vec &pos(bool render = false)
         {
-            if(owner) return owner->waist;
+            if(owner) return render ? owner->waist : owner->o;
             if(droptime) return droploc;
             return spawnloc;
         }

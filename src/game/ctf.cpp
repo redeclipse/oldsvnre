@@ -55,7 +55,7 @@ namespace ctf
                         tex = hud::alerttex;
                     }
                 }
-                dir.rotate_around_z(-camera1->yaw*RAD); dir.normalize();
+                dir.rotate_around_z(-camera1->yaw*RAD).normalize();
                 if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, dir, r, g, b, "radar", "%s%s", teamtype[f.team].chat, k ? "flag" : "base");
                 else hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, dir, r, g, b);
             }
@@ -207,7 +207,7 @@ namespace ctf
         {
             ctfstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
-            vec above(f.pos());
+            vec above(f.pos(true));
             float trans = 1.f, yaw = 0;
             if(f.owner)
             {
