@@ -317,6 +317,7 @@ namespace hud
                 if(fireburntime && game::focus->onfire(lastmillis, fireburntime))
                     amt += 0.25f+(float((lastmillis-game::focus->lastfire)%fireburndelay)/float(fireburndelay))*0.35f;
                 if(physics::sprinting(game::focus)) amt += game::focus->turnside ? 0.125f : 0.25f;
+                if(physics::jetpack(game::focus)) amt += 0.125f;
                 break;
             }
             case 2: amt += motionbluramt; break;
