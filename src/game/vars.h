@@ -134,6 +134,7 @@ GFVAR(0, impulsejump, 0, 1.2f, 1000); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.6f, 1000); // melee modifier
 GFVAR(0, impulseparkour, 0, 0.9f, 1000); // parkour modifier
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
+GVAR(0, impulsetype, 0, 1, 2); // impulse type; 0 = normal, 1 = jetpack in zero g, 2 = jetpack always
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 10, INT_MAX-1); // number of impulse actions per air transit
 GVAR(0, impulsedelay, 0, 500, INT_MAX-1); // minimum time between boosts

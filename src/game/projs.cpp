@@ -726,10 +726,10 @@ namespace projs
                     float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
                         size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.85f)*(0.65f+(rnd(35)/100.f))*proj.scale;
                     if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 1)) part_create(PART_HINT_SOFT, 1, proj.o, 0x120228, size*1.5f, blend);
-                    if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
+                    if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
                     {
-                        part_create(PART_FIREBALL_SOFT, max(int(projtraillength*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, firecols[rnd(FIRECOLOURS)], size, blend, -10);
-                        proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
+                        part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, firecols[rnd(FIRECOLOURS)], size, blend, -10);
+                        proj.lasteffect = lastmillis - (lastmillis%(projtraildelay*2));
                     }
                     else part_create(PART_FIREBALL_SOFT, 1, proj.o, firecols[rnd(FIRECOLOURS)], size, blend, -10);
                     break;
@@ -821,7 +821,7 @@ namespace projs
                 bool effect = false;
                 float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
                 if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
-                int len = effect ? max(int(projtraillength*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
+                int len = effect ? max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
                 part_create(PART_FIREBALL_SOFT, len, proj.o, firecols[rnd(FIRECOLOURS)], radius, blend, -10);
             }
         }
@@ -889,7 +889,7 @@ namespace projs
                             if(proj.weap == WEAP_FLAMER)
                             {
                                 if(expl <= 0) expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
-                                part_create(PART_SMOKE_LERP_SOFT, projtraillength*3, proj.o, 0x666666, expl*0.75f, 0.25f+(rnd(50)/100.f), -15);
+                                part_create(PART_SMOKE_LERP_SOFT, projtraillength, proj.o, 0x666666, expl*0.75f, 0.25f+(rnd(50)/100.f), -15);
                             }
                             else
                             {
