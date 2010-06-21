@@ -168,7 +168,7 @@ namespace physics
         return false;
     }
 
-    bool jetboost(physent *d)
+    bool jetpack(physent *d)
     {
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->physstate == PHYS_FALL && !d->onladder && !liquidcheck(d))
             return impulsetype >= (PHYS(gravity) > 0 ? 2 : 1) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START;
@@ -180,7 +180,7 @@ namespace physics
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
-            if(jetboost(e)) return true;
+            if(jetpack(e)) return true;
             if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
@@ -252,10 +252,10 @@ namespace physics
                 if(cost <= 0)
                 {
                     if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= PHYSMILLIS) return false;
-                    if(PHYS(gravity) > 0)
+                    if(PHYS(gravity) > 0 || impulsetype)
                     {
                         if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
-                        if(cost == 0 && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL)
+                        if(cost == 0 && (impulsestyle == 1 || impulsetype >= (PHYS(gravity) > 0 ? 2 : 1))  && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL)
                             return false;
                     }
                 }
@@ -288,7 +288,7 @@ namespace physics
                 default: break;
             }
             if(physics::sprinting(d, false, false)) vel *= movesprint;
-            if(jetboost(d)) vel *= movesprint;
+            if(jetpack(d)) vel *= movesprint;
         }
         return vel;
     }
@@ -301,7 +301,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if((d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetboost(d)) return true;
+        if((d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d)) return true;
         return false;
     }
 
@@ -679,10 +679,10 @@ namespace physics
         }
         else if(game::allowmove(d))
         {
-            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetpack = jetboost(d);
+            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
             if(!allowimpulse())
             {
-                if(jetpack) jetpack = d->action[AC_JUMP] = false;
+                if(jetting) jetting = d->action[AC_JUMP] = false;
             }
             else if(impulsemeter)
             {
@@ -692,10 +692,10 @@ namespace physics
                     if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
                     else d->action[AC_SPRINT] = false;
                 }
-                if(jetpack)
+                if(jetting)
                 {
                     if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
-                    else jetpack = d->action[AC_JUMP] = false;
+                    else jetting = d->action[AC_JUMP] = false;
                 }
                 if(d->impulse[IM_METER] > 0 && impulseregen > 0)
                 {
@@ -707,7 +707,7 @@ namespace physics
                             if(y > 0) { if(timeslice > 0 && (x)) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
-                    impulsemod(sprint || jetpack, impulseregensprint);
+                    impulsemod(sprint || jetting, impulseregensprint);
                     impulsemod(d->move || d->strafe, impulseregenmove);
                     impulsemod(!onfloor, impulseregeninair);
                     impulsemod(iscrouching(d), impulseregencrouch);
@@ -733,7 +733,7 @@ namespace physics
             {
                 if((d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_BOOST] || lastmillis-d->impulse[IM_BOOST] > impulsedelay))
                 {
-                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor && !jetpack;
+                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
                     if(dash || pulse)
                     {
                         bool moving = d->move || d->strafe;
@@ -749,7 +749,8 @@ namespace physics
                             vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
-                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                        d->action[AC_DASH] = false;
+                        if(!jetting) d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
                         game::impulseeffect(d, true);
                     }
@@ -844,9 +845,9 @@ namespace physics
                     }
                 }
             }
-            if(!found && (d->turnside || jetpack))
+            if(!found && (d->turnside || jetting))
             {
-                if(jetpack && m.iszero()) m = vec(0, 0, 1);
+                if(jetting && m.iszero()) m = vec(0, 0, 1);
                 d->turnside = 0;
                 d->resetphys();
             }
@@ -985,7 +986,7 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl), jetpack = jetboost(pl);
+        bool floating = isfloating(pl), jetting = jetpack(pl);
         float secs = millis/1000.f;
 
         pl->blocked = false;
@@ -1021,7 +1022,7 @@ namespace physics
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
-                if(jetpack && !jetboost(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
+                if(jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
                 if(!pl->timeinair && timeinair > PHYSMILLIS*4) playsound(S_LAND, pl->o, pl);
             }
         }
