@@ -168,11 +168,19 @@ namespace physics
         return false;
     }
 
+    bool jetboost(physent *d)
+    {
+        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->physstate == PHYS_FALL && !d->onladder && !liquidcheck(d))
+            return impulsetype >= (PHYS(gravity) > 0 ? 2 : 1) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START;
+        return false;
+    }
+
     bool sprinting(physent *d, bool last, bool turn, bool move)
     {
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
+            if(jetboost(e)) return true;
             if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
@@ -280,6 +288,7 @@ namespace physics
                 default: break;
             }
             if(physics::sprinting(d, false, false)) vel *= movesprint;
+            if(jetboost(d)) vel *= movesprint;
         }
         return vel;
     }
@@ -292,7 +301,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->state == CS_ALIVE && PHYS(gravity) <= 0 && d->physstate == PHYS_FALL) return true;
+        if((d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetboost(d)) return true;
         return false;
     }
 
@@ -531,9 +540,7 @@ namespace physics
 
     void falling(physent *d, vec &dir, const vec &floor)
     {
-        if(d->physstate >= PHYS_SLOPE && dir.dot(d->floor) <= 0.01f*dir.magnitude() && trystepdown(d, dir, true))
-            return;
-
+        if(d->physstate >= PHYS_SLOPE && dir.dot(d->floor) <= 0.01f*dir.magnitude() && trystepdown(d, dir, true)) return;
         if(floor.z > 0.0f && floor.z < slopez)
         {
             if(floor.z >= wallz) switchfloor(d, dir, floor);
@@ -672,11 +679,24 @@ namespace physics
         }
         else if(game::allowmove(d))
         {
-            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d);
-            if(millis && allowimpulse() && impulsemeter)
+            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetpack = jetboost(d);
+            if(!allowimpulse())
+            {
+                if(jetpack) jetpack = d->action[AC_JUMP] = false;
+            }
+            else if(impulsemeter)
             {
                 bool sprint = sprinting(d);
-                if(sprint && impulsesprint && canimpulse(d, millis)) d->impulse[IM_METER] += millis;
+                if(sprint && impulsesprint)
+                {
+                    if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
+                    else d->action[AC_SPRINT] = false;
+                }
+                if(jetpack)
+                {
+                    if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
+                    else jetpack = d->action[AC_JUMP] = false;
+                }
                 if(d->impulse[IM_METER] > 0 && impulseregen > 0)
                 {
                     bool collect = true; // collect time until it is able to act upon it
@@ -687,7 +707,7 @@ namespace physics
                             if(y > 0) { if(timeslice > 0 && (x)) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
-                    impulsemod(sprint, impulseregensprint);
+                    impulsemod(sprint || jetpack, impulseregensprint);
                     impulsemod(d->move || d->strafe, impulseregenmove);
                     impulsemod(!onfloor, impulseregeninair);
                     impulsemod(iscrouching(d), impulseregencrouch);
@@ -713,7 +733,7 @@ namespace physics
             {
                 if((d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_BOOST] || lastmillis-d->impulse[IM_BOOST] > impulsedelay))
                 {
-                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
+                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor && !jetpack;
                     if(dash || pulse)
                     {
                         bool moving = d->move || d->strafe;
@@ -752,7 +772,7 @@ namespace physics
                 }
             }
             bool found = false;
-            if(d->turnside || d->action[AC_JUMP] || d->action[AC_SPECIAL])
+            if(d->turnside || d->action[AC_SPECIAL])
             {
                 const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
                 loopi(d->turnside ? 6 : 4)
@@ -817,23 +837,23 @@ namespace physics
                         }
                         if(side == d->turnside)
                         {
-                            m = rft; // re-project and override
+                            (m = rft).normalize(); // re-project and override
                             found = true;
                             break;
                         }
                     }
                 }
             }
-            if(!found && d->turnside)
+            if(!found && (d->turnside || jetpack))
             {
+                if(jetpack && m.iszero()) m = vec(0, 0, 1);
                 d->turnside = 0;
                 d->resetphys();
             }
         }
         else d->action[AC_JUMP] = false;
         d->action[AC_DASH] = false;
-        if((d->physstate == PHYS_FALL && !d->onladder) || d->turnside)
-            d->timeinair += millis;
+        if((d->physstate == PHYS_FALL && !d->onladder) || d->turnside) d->timeinair += millis;
         else d->dojumpreset(true);
     }
 
@@ -843,7 +863,7 @@ namespace physics
         bool wantsmove = game::allowmove(pl) && (pl->move || pl->strafe);
         if(wantsmove)
         {
-            vecfromyawpitch(pl->aimyaw, floating || (pl->inliquid && (liquidcheck(pl) || pl->aimpitch < 0.f)) || movepitch(pl) ? pl->aimpitch : 0, pl->move, pl->strafe, m);
+            vecfromyawpitch(pl->aimyaw, movepitch(pl) ? pl->aimpitch : 0, pl->move, pl->strafe, m);
             if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !floating && pl->physstate >= PHYS_SLOPE)
             { // move up or down slopes in air but only move up slopes in liquid
                 float dz = -(m.x*pl->floor.x + m.y*pl->floor.y)/pl->floor.z;
@@ -965,7 +985,7 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl);
+        bool floating = isfloating(pl), jetpack = jetboost(pl);
         float secs = millis/1000.f;
 
         pl->blocked = false;
@@ -999,8 +1019,11 @@ namespace physics
 
             d.mul(f);
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
-            if(pl->type == ENT_PLAYER && !pl->timeinair && timeinair > PHYSMILLIS*4) // if we land after long time must have been a high jump, make thud sound
-                playsound(S_LAND, pl->o, pl);
+            if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+            {
+                if(jetpack && !jetboost(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
+                if(!pl->timeinair && timeinair > PHYSMILLIS*4) playsound(S_LAND, pl->o, pl);
+            }
         }
 
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
