@@ -866,8 +866,8 @@ namespace client
     {
         putint(q, N_POS);
         putuint(q, d->clientnum);
-        // 3 bits phys state, 1 bit sprinting, 2 bits move, 2 bits strafe
-        uchar physstate = d->physstate | ((physics::sprinting(d) ? 1 : 0)<<3) | ((d->move&3)<<4) | ((d->strafe&3)<<6);
+        // 3 bits phys state, 1 bit jump, 1 bit sprint, 2 bits move, 2 bits strafe
+        uchar physstate = d->physstate | ((d->action[AC_JUMP] ? 1 : 0)<<3) | ((d->action[AC_SPRINT] ? 1 : 0)<<4) | ((d->move&3)<<5) | ((d->strafe&3)<<7);
         q.put(physstate);
         ivec o = ivec(vec(d->o.x, d->o.y, d->o.z-d->height).mul(DMF));
         uint vel = min(int(d->vel.magnitude()*DVELF), 0xFFFF), fall = min(int(d->falling.magnitude()*DVELF), 0xFFFF);
@@ -1088,15 +1088,16 @@ namespace client
                 gameent *d = game::getclient(lcn);
                 if(!d || d==game::player1 || d->ai) continue;
                 float oldyaw = d->yaw, oldpitch = d->pitch, oldaimyaw = d->aimyaw, oldaimpitch = d->aimpitch;
-                d->action[AC_SPRINT] = physstate&(1<<3) ? true : false;
+                d->action[AC_JUMP] = physstate&(1<<3) ? true : false;
+                d->action[AC_SPRINT] = physstate&(1<<4) ? true : false;
                 d->conopen = flags&(1<<9) ? true : false;
                 d->yaw = yaw;
                 d->pitch = pitch;
                 d->roll = roll;
                 d->aimyaw = aimyaw;
                 d->aimpitch = aimpitch;
-                d->move = (physstate>>4)&2 ? -1 : (physstate>>4)&1;
-                d->strafe = (physstate>>6)&2 ? -1 : (physstate>>6)&1;
+                d->move = (physstate>>5)&2 ? -1 : (physstate>>5)&1;
+                d->strafe = (physstate>>7)&2 ? -1 : (physstate>>7)&1;
                 bool crouch = d->action[AC_CROUCH];
                 d->action[AC_CROUCH] = flags&(1<<8) ? true : false;
                 if(crouch != d->action[AC_CROUCH]) d->actiontime[AC_CROUCH] = lastmillis;
@@ -1205,10 +1206,23 @@ namespace client
                         case SPHY_JUMP:
                         {
                             playsound(S_JUMP, t->o, t); regularshape(PART_SMOKE, int(t->radius), 0x111111, 21, 20, 150, t->feetpos(), 1, 1, -10, 0, 10.f);
-                            t->actiontime[AC_JUMP] = t->impulse[IM_JUMP] = lastmillis;
+                            t->impulse[IM_JUMP] = lastmillis;
                             break;
                         }
-                        case SPHY_BOOST: case SPHY_KICK: game::impulseeffect(t, true); break;
+                        case SPHY_BOOST:
+                        {
+                            t->impulse[IM_TYPE] = IM_T_BOOST;
+                            t->impulse[IM_TIME] = lastmillis;
+                            game::impulseeffect(t, true);
+                            break;
+                        }
+                        case SPHY_KICK:
+                        {
+                            t->impulse[IM_TYPE] = IM_T_KICK;
+                            t->impulse[IM_TIME] = lastmillis;
+                            game::impulseeffect(t, true);
+                            break;
+                        }
                         case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis); break;
                         case SPHY_EXTINGUISH:
                         {

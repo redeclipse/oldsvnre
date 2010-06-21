@@ -17,7 +17,7 @@
 
 enum
 {
-    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_LAND,
+    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_JETPACK, S_LAND,
     S_PAIN, S_PAIN2, S_PAIN3, S_PAIN4, S_PAIN5, S_PAIN6, S_DEATH, S_DEATH2,
     S_SPLASH, S_SPLASH2, S_UNDERWATER,
     S_SPLOSH, S_SPLOSH2, S_SPLOSH3,
@@ -785,7 +785,7 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, lasthit, lastkill, lastattacker, lastpoints, quake;
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, lfoot, rfoot, legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
@@ -794,7 +794,7 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
 
     gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
-        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1),  lastattacker(-1), lastpoints(0), quake(0),
+        totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         head(-1, -1, -1), torso(-1, -1, -1), muzzle(-1, -1, -1), origin(-1, -1, -1), eject(-1, -1, -1), waist(-1, -1, -1),
         lfoot(-1, -1, -1), rfoot(-1, -1, -1), legs(-1, -1, -1), hrad(-1, -1, -1), trad(-1, -1, -1), lrad(-1, -1, -1),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
@@ -823,7 +823,8 @@ struct gameent : dynent, gamestate
         if(issound(wschan)) removesound(wschan);
         if(issound(pschan)) removesound(pschan);
         if(issound(fschan)) removesound(fschan);
-        aschan = vschan = wschan = pschan = fschan = -1;
+        if(issound(jschan)) removesound(wschan);
+        aschan = vschan = wschan = pschan = fschan = jschan = -1;
     }
 
     void stopmoving(bool full)
@@ -1101,7 +1102,8 @@ namespace physics
     extern int smoothmove, smoothdist;
     extern bool secondaryweap(gameent *d);
     extern bool allowimpulse(int level = 2);
-    extern bool sprinting(physent *d, bool last = false, bool turn = true, bool move = true);
+    extern bool jetpack(physent *d);
+    extern bool sprinting(physent *d, bool turn = true);
     extern bool canimpulse(physent *d, int cost = 0, int level = 2);
     extern bool movecamera(physent *pl, const vec &dir, float dist, float stepdist);
     extern void smoothplayer(gameent *d, int res, bool local);

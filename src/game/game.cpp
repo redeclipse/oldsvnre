@@ -418,7 +418,7 @@ namespace game
     void impulseeffect(gameent *d, bool effect)
     {
         if(effect) playsound(S_IMPULSE, d->o, d);
-        if(effect || (d->state == CS_ALIVE && physics::sprinting(d, true)))
+        if(effect || (d->state == CS_ALIVE && (physics::sprinting(d) || physics::jetpack(d))))
         {
             int num = int((effect ? 25 : 5)*impulsescale), len = effect ? impulsefade : impulsefade/5;
             if(num > 0 && len > 0)
@@ -1792,7 +1792,7 @@ namespace game
                 else if(d->physstate == PHYS_FALL && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000) { anim |= ANIM_IMPULSE_DASH<<ANIM_SECONDARY; basetime2 = d->impulse[IM_TIME]; }
                 else if(d->physstate == PHYS_FALL && !d->onladder && d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) { anim |= ANIM_JUMP<<ANIM_SECONDARY; basetime2 = d->impulse[IM_JUMP]; }
                 else if(d->physstate == PHYS_FALL && !d->onladder && d->timeinair >= 1000) anim |= (ANIM_JUMP|ANIM_END)<<ANIM_SECONDARY;
-                else if(physics::sprinting(d))
+                else if(physics::sprinting(d) || physics::jetpack(d))
                 {
                     if(d->move>0)       anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe)  anim |= ((d->strafe>0 ? ANIM_IMPULSE_LEFT : ANIM_IMPULSE_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;

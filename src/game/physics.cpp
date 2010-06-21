@@ -170,12 +170,12 @@ namespace physics
 
     bool jetpack(physent *d)
     {
-        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->physstate == PHYS_FALL && !d->onladder && !liquidcheck(d))
+        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->physstate == PHYS_FALL && !d->onladder)
             return impulsetype >= (PHYS(gravity) > 0 ? 2 : 1) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START;
         return false;
     }
 
-    bool sprinting(physent *d, bool last, bool turn, bool move)
+    bool sprinting(physent *d, bool turn)
     {
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
@@ -188,7 +188,7 @@ namespace physics
                 {
                     bool value = e->action[AC_SPRINT];
                     if(d == game::player1 && sprintstyle >= 3) value = !value;
-                    if(value && (!move || d->move || d->strafe)) return true;
+                    if(value && (d->move || d->strafe)) return true;
                 }
             }
         }
@@ -287,7 +287,7 @@ namespace physics
                 case PHYS_STEP_UP: vel *= movestepup; break;
                 default: break;
             }
-            if(physics::sprinting(d, false, false)) vel *= movesprint;
+            if(sprinting(d, false)) vel *= movesprint;
             if(jetpack(d)) vel *= movesprint;
         }
         return vel;
@@ -686,7 +686,7 @@ namespace physics
             }
             else if(impulsemeter)
             {
-                bool sprint = sprinting(d);
+                bool sprint = sprinting(d, false);
                 if(sprint && impulsesprint)
                 {
                     if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
@@ -702,9 +702,9 @@ namespace physics
                     bool collect = true; // collect time until it is able to act upon it
                     int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
                     #define impulsemod(x,y) \
-                        if(collect) \
+                        if(collect && (x)) \
                         { \
-                            if(y > 0) { if(timeslice > 0 && (x)) timeslice = int(timeslice*y); } \
+                            if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
                     impulsemod(sprint || jetting, impulseregensprint);
@@ -1022,8 +1022,15 @@ namespace physics
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
-                if(jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
-                if(!pl->timeinair && timeinair > PHYSMILLIS*4) playsound(S_LAND, pl->o, pl);
+                gameent *e = (gameent *)pl;
+                if(jetpack(e))
+                {
+                    int ends = lastmillis+PHYSMILLIS;
+                    if(issound(e->jschan)) sounds[e->jschan].ends = ends;
+                    else playsound(S_JETPACK, e->o, e, (e == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &e->jschan, ends);
+                }
+                else if(jetting) e->action[AC_JUMP] = false;
+                if(!e->timeinair && timeinair > PHYSMILLIS*4) playsound(S_LAND, e->o, e, e == game::focus ? SND_FORCED : 0);
             }
         }
 
@@ -1032,31 +1039,31 @@ namespace physics
             if(pl->state == CS_ALIVE) updatedynentcache(pl);
             if(local)
             {
-                gameent *d = (gameent *)pl;
-                if(d->state == CS_ALIVE)
+                gameent *e = (gameent *)pl;
+                if(e->state == CS_ALIVE)
                 {
-                    if(d->o.z < 0)
+                    if(e->o.z < 0)
                     {
-                        game::suicide(d, HIT_DEATH);
+                        game::suicide(e, HIT_DEATH);
                         return false;
                     }
-                    if(d->turnmillis > 0)
+                    if(e->turnmillis > 0)
                     {
-                        float amt = float(millis)/float(PHYSMILLIS), yaw = d->turnyaw*amt, roll = d->turnroll*amt;
-                        if(yaw != 0) { d->aimyaw += yaw; d->yaw += yaw; }
-                        if(roll != 0) d->roll += roll;
-                        d->turnmillis -= millis;
+                        float amt = float(millis)/float(PHYSMILLIS), yaw = e->turnyaw*amt, roll = e->turnroll*amt;
+                        if(yaw != 0) { e->aimyaw += yaw; e->yaw += yaw; }
+                        if(roll != 0) e->roll += roll;
+                        e->turnmillis -= millis;
                     }
                     else
                     {
-                        d->turnmillis = 0;
-                        if(d->roll != 0 && !d->turnside) adjustscaled(float, d->roll, PHYSMILLIS);
+                        e->turnmillis = 0;
+                        if(e->roll != 0 && !e->turnside) adjustscaled(float, e->roll, PHYSMILLIS);
                     }
                 }
                 else
                 {
-                    d->turnmillis = d->turnside = 0;
-                    d->roll = 0;
+                    e->turnmillis = e->turnside = 0;
+                    e->roll = 0;
                 }
             }
         }
