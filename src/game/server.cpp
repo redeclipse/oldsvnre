@@ -1157,8 +1157,8 @@ namespace server
             int conlevel = CON_MESG;
             switch(cn)
             {
-                case -3: conlevel = CON_CHAT; break;
-                case -2: conlevel = CON_EVENT; break;
+                case -3: conlevel = CON_CHAT; cn = -1; break;
+                case -2: conlevel = CON_EVENT; cn = -1; break;
                 default: break;
             }
             sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
@@ -1168,8 +1168,8 @@ namespace server
     void srvoutf(int r, const char *s, ...)
     {
         defvformatstring(str, s, s);
-        srvmsgf(-1, "%s", str);
-        relayf(r, "%s", str);
+        srvmsgf(r >= 0 ? -1 : -2, "%s", str);
+        relayf(abs(r), "%s", str);
     }
 
     void writedemo(int chan, void *data, int len)
@@ -1406,7 +1406,7 @@ namespace server
             endmatch();
             if(gotvotes)
             {
-                srvoutf(3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
+                srvoutf(-3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
                 sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, best->map, 0, best->mode, best->muts);
                 changemap(best->map, best->mode, best->muts);
             }
@@ -1415,7 +1415,7 @@ namespace server
                 int mode = GAME(defaultmode) >= 0 ? gamemode : -1, muts = GAME(defaultmuts) >= -1 ? mutators : -2;
                 changemode(mode, muts);
                 const char *map = choosemap(smapname, mode, muts);
-                srvoutf(3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
+                srvoutf(-3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
                 sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, map, 0, mode, muts);
                 changemap(map, mode, muts);
             }
@@ -1510,7 +1510,7 @@ namespace server
         if(hasveto)
         {
             endmatch();
-            srvoutf(3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+            srvoutf(-3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
             sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, ci->mapvote, 0, ci->modevote, ci->mutsvote);
             changemap(ci->mapvote, ci->modevote, ci->mutsvote);
             return;
@@ -1937,7 +1937,7 @@ namespace server
                     char *ret = executeret(s);
                     if(ret)
                     {
-                        if(*ret) conoutft(CON_MESG, "\fg%s returned %s", cmd, ret);
+                        if(*ret) conoutft(CON_MESG, "\fc%s returned %s", cmd, ret);
                         delete[] ret;
                     }
                     return true;
@@ -1946,7 +1946,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fg%s = 0x%.6X" : "\fg%s = 0x%X") : "\fg%s = %d", cmd, *id->storage.i);
+                        conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
                         return true;
                     }
                     if(id->maxval < id->minval)
@@ -1972,7 +1972,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, "\fg%s = %s", cmd, floatstr(*id->storage.f));
+                        conoutft(CON_MESG, "\fc%s = %s", cmd, floatstr(*id->storage.f));
                         return true;
                     }
                     float ret = atof(arg);
@@ -1990,7 +1990,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fg%s = [%s]" : "\fg%s = \"%s\"", cmd, *id->storage.s);
+                        conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", cmd, *id->storage.s);
                         return true;
                     }
                     delete[] *id->storage.s;
@@ -2026,8 +2026,8 @@ namespace server
                     if(nargs <= 1 || !arg) formatstring(s)("sv_%s", cmd);
                     else formatstring(s)("sv_%s %s", cmd, arg);
                     char *ret = executeret(s);
-                    if(ret && *ret) srvoutf(3, "\fg%s executed %s (returned: %s)", colorname(ci), cmd, ret);
-                    else srvoutf(3, "\fg%s executed %s", colorname(ci), cmd);
+                    if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), cmd, ret);
+                    else srvoutf(-3, "\fc%s executed %s", colorname(ci), cmd);
                     if(ret) delete[] ret;
                     return;
                 }
@@ -2035,7 +2035,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fg%s = 0x%.6X" : "\fg%s = 0x%X") : "\fg%s = %d", cmd, *id->storage.i);
+                        srvmsgf(ci->clientnum, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
                         return;
                     }
                     else if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
@@ -2067,7 +2067,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, "\fg%s = %s", cmd, floatstr(*id->storage.f));
+                        srvmsgf(ci->clientnum, "\fc%s = %s", cmd, floatstr(*id->storage.f));
                         return;
                     }
                     else if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
@@ -2091,7 +2091,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fg%s = [%s]" : "\fg%s = \"%s\"", cmd, *id->storage.s);
+                        srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", cmd, *id->storage.s);
                         return;
                     }
                     else if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
@@ -2109,7 +2109,7 @@ namespace server
                 default: return;
             }
             sendf(-1, 1, "ri2ss", N_COMMAND, ci->clientnum, &id->name[3], val);
-            relayf(3, "\fg%s set %s to %s", colorname(ci), &id->name[3], val);
+            relayf(3, "\fc%s set %s to %s", colorname(ci), &id->name[3], val);
         }
         else srvmsgf(ci->clientnum, "\frunknown command: %s", cmd);
     }
@@ -3970,7 +3970,7 @@ namespace server
                                     allow.ip = getclientip(clients[i]->clientnum);
                                 }
                             }
-                            srvoutf(3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mm));
+                            srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mm));
                         }
                         else srvmsgf(sender, "\frmastermode %d (%s) is disabled on this server", mm, mastermodename(mm));
                     }
@@ -4137,14 +4137,14 @@ namespace server
                         case ID_VAR:
                         {
                             int val = getint(p);
-                            relayf(3, "\fg%s set worldvar %s to %d", colorname(ci), text, val);
+                            relayf(3, "\fc%s set worldvar %s to %d", colorname(ci), text, val);
                             QUEUE_INT(val);
                             break;
                         }
                         case ID_FVAR:
                         {
                             float val = getfloat(p);
-                            relayf(3, "\fg%s set worldvar %s to %s", colorname(ci), text, floatstr(val));
+                            relayf(3, "\fc%s set worldvar %s to %s", colorname(ci), text, floatstr(val));
                             QUEUE_FLT(val);
                             break;
                         }
@@ -4153,7 +4153,7 @@ namespace server
                         {
                             string val;
                             getstring(val, p);
-                            relayf(3, "\fg%s set world%s %s to %s", colorname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
+                            relayf(3, "\fc%s set world%s %s to %s", colorname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
                             QUEUE_STR(val);
                             break;
                         }

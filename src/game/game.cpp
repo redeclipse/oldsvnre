@@ -90,7 +90,7 @@ namespace game
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 0, 1);
-    VAR(IDF_PERSIST, showplayerinfo, 0, 2, 2); // 0 = none, 1 = CON_MESG, 2 = CON_EVENT
+    VAR(IDF_PERSIST, showplayerinfo, 0, 1, 1); // 0 = none, 1 = show events
 
     VAR(IDF_PERSIST, damagemergedelay, 0, 75, INT_MAX-1);
     VAR(IDF_PERSIST, damagemergeburn, 0, 250, INT_MAX-1);
@@ -983,7 +983,7 @@ namespace game
         gameent *d = players[cn];
         if(!d) return;
         if(d->name[0] && showplayerinfo && (d->aitype < 0 || ai::showaiinfo))
-            conoutft(showplayerinfo > 1 ? int(CON_EVENT) : int(CON_MESG), "\fo%s left the game (%s)", colorname(d), reason >= 0 ? disc_reasons[reason] : "normal");
+            conoutft(CON_EVENT, "\fo%s left the game (%s)", colorname(d), reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         loopi(numdynents()) if((e = (gameent *)iterdynents(i)))
         {

@@ -113,8 +113,6 @@ void resetvar(char *name)
 {
     ident *id = idents->access(name);
     if(!id) return;
-    //if(id->flags&IDF_READONLY) conoutft(CON_MESG, "variable %s is read-only", id->name);
-    //else
     clearoverride(*id);
 }
 
@@ -740,7 +738,7 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                 }
 
                 case ID_VAR:                        // game defined variables
-                    if(numargs <= 1) conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fg%s = 0x%.6X" : "\fg%s = 0x%X") : "\fg%s = %d", c, *id->storage.i);      // var with no value just prints its current value
+                    if(numargs <= 1) conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", c, *id->storage.i);      // var with no value just prints its current value
                     else
                     {
                         int val = parseint(w[1]);
@@ -755,7 +753,7 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                     break;
 
                 case ID_FVAR:
-                    if(numargs <= 1) conoutft(CON_MESG, "\fg%s = %s", c, floatstr(*id->storage.f));
+                    if(numargs <= 1) conoutft(CON_MESG, "\fc%s = %s", c, floatstr(*id->storage.f));
                     else setfvarchecked(id, parsefloat(w[1]));
                     break;
 
