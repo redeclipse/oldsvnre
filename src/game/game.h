@@ -534,9 +534,12 @@ struct gamestate
 
     int drop(int sweap)
     {
-        if(hasweap(weapselect, sweap, 1)) return weapselect;
-        if(hasweap(lastweap, sweap, 1)) return lastweap;
-        loopi(WEAP_MAX) if(hasweap(i, sweap, 1)) return i;
+        loopj(2)
+        {
+            if(hasweap(weapselect, sweap, 1) && (j || entid[weapselect] >= 0)) return weapselect;
+            if(hasweap(lastweap, sweap, 1) && (j || entid[lastweap] >= 0)) return lastweap;
+            loopi(WEAP_MAX) if(hasweap(i, sweap, 1) && (j || entid[i] >= 0)) return i;
+        }
         return -1;
     }
 
