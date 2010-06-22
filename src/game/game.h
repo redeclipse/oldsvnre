@@ -401,7 +401,7 @@ char msgsizelookup(int msg)
 #else
 extern char msgsizelookup(int msg);
 #endif
-enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_KICK, SPHY_POWER, SPHY_EXTINGUISH, SPHY_MAX };
+enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_KICK, SPHY_SKATE, SPHY_POWER, SPHY_EXTINGUISH, SPHY_MAX };
 enum { CON_CHAT = CON_GAMESPECIFIC, CON_EVENT, CON_MAX, CON_LO = CON_MESG, CON_HI = CON_SELF, CON_IMPORTANT = CON_SELF };
 
 #define DEMO_MAGIC "DMOZ"
@@ -1044,7 +1044,7 @@ enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_MAX };
 
 struct projent : dynent
 {
-    vec from, to, norm;
+    vec from, to, norm, inertia;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
     float movement, roll, lifespan, lifesize, scale;
     bool local, limited, stuck, escaped;
@@ -1056,7 +1056,7 @@ struct projent : dynent
     physent *hit, *target;
     const char *mdl;
 
-    projent() : norm(0, 0, 1), projtype(PRJ_SHOT), id(-1), hitflags(HITFLAG_NONE), owner(NULL), hit(NULL), target(NULL), mdl(NULL) { reset(); }
+    projent() : projtype(PRJ_SHOT), id(-1), hitflags(HITFLAG_NONE), owner(NULL), hit(NULL), target(NULL), mdl(NULL) { reset(); }
     ~projent()
     {
         removetrackedparticles(this);
@@ -1071,6 +1071,7 @@ struct projent : dynent
         type = ENT_PROJ;
         state = CS_ALIVE;
         norm = vec(0, 0, 1);
+        inertia = vec(0, 0, 0);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = -1;
         movement = roll = lifespan = lifesize = 0.f;
@@ -1117,11 +1118,11 @@ namespace projs
 
     extern void reset();
     extern void update();
-    extern void create(vec &from, vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1);
+    extern void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1);
     extern void preload();
     extern void remove(gameent *owner);
     extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<vec> &locs, gameent *d, bool local);
-    extern void drop(gameent *d, int g, int n, int v = -1, bool local = true);
+    extern void drop(gameent *d, int g, int n, int v = -1, bool local = true, int c = 0);
     extern void adddynlights();
     extern void render();
 }

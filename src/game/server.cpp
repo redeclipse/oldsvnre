@@ -3415,6 +3415,7 @@ namespace server
                         havecn = false;
 
                     p.get();
+                    getuint(p);
                     uint flags = getuint(p);
                     vec pos;
                     loopk(3)

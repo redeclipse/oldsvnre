@@ -922,10 +922,10 @@ namespace game
         }
         if(gibscale > 0)
         {
-            vec pos = vec(d->o).sub(vec(0, 0, d->height*0.5f));
+            vec pos = d->headpos(-d->height*0.5f);
             int gib = clamp(max(damage,5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
             if(d->obliterated) amt *= 3;
-            loopi(amt) projs::create(pos, vec(pos).add(d->vel), true, d, !isaitype(d->aitype) || aistyle[d->aitype].living ? PRJ_GIBS : PRJ_DEBRIS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
+            loopi(amt) projs::create(pos, pos, true, d, !isaitype(d->aitype) || aistyle[d->aitype].living ? PRJ_GIBS : PRJ_DEBRIS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
         if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
         {

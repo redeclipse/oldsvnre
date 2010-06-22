@@ -346,6 +346,12 @@ namespace projs
 
     void init(projent &proj, bool waited)
     {
+        if(waited && proj.owner && proj.owner->state == CS_ALIVE)
+        {
+            proj.inertia = vec(proj.owner->vel).add(proj.owner->falling);
+            proj.yaw = proj.owner->yaw;
+            proj.pitch = proj.owner->pitch;
+        }
         switch(proj.projtype)
         {
             case PRJ_SHOT:
@@ -415,7 +421,7 @@ namespace projs
                 }
                 proj.elasticity = 0.6f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 0.0f;
+                proj.relativity = 0.f;
                 proj.waterfric = 1.7f;
                 proj.weight = 150.f*proj.lifesize;
                 proj.vel.add(vec(rnd(101)-50, rnd(101)-50, rnd(151)-50)).mul(2);
@@ -442,7 +448,7 @@ namespace projs
                 }
                 proj.elasticity = 0.3f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 0.95f;
+                proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
                 proj.weight = (180+(proj.maxspeed*2))*proj.lifesize; // so they fall better in relation to their speed
                 proj.projcollide = BOUNCE_GEOM;
@@ -453,10 +459,8 @@ namespace projs
                 {
                     if(proj.owner == game::focus && !game::thirdpersonview())
                         proj.o = proj.from.add(vec(proj.from).sub(camera1->o).normalize().mul(5));
-                    vecfromyawpitch(proj.owner->yaw+40+rnd(41), proj.owner->pitch+50-proj.maxspeed+rnd(41), 1, 0, proj.to);
-                    proj.to.mul(10).add(proj.from);
-                    proj.yaw = proj.owner->yaw;
-                    proj.pitch = proj.owner->pitch;
+                    vecfromyawpitch(proj.yaw+40+rnd(41), proj.pitch+50-proj.maxspeed+rnd(41), 1, 0, proj.to);
+                    proj.to.add(proj.from);
                 }
                 break;
             }
@@ -476,13 +480,19 @@ namespace projs
                 proj.lifesize = 1.f;
                 proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 0.95f;
+                proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
                 proj.weight = 175.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
-                if(proj.owner) proj.o.sub(vec(0, 0, proj.owner->height*0.2f));
-                proj.vel.add(vec(rnd(51)-25, rnd(51)-25, rnd(25)));
+                float mag = proj.inertia.magnitude();
+                if(mag <= 50)
+                {
+                    if(mag <= 0) vecfromyawpitch(proj.yaw, proj.pitch, 1, 0, proj.inertia);
+                    proj.inertia.normalize().mul(50);
+                }
+                proj.to.add(proj.inertia);
+                if(proj.flags) proj.inertia.div(proj.flags+1);
                 proj.fadetime = 500;
                 proj.extinguish = 6;
                 break;
@@ -511,11 +521,8 @@ namespace projs
             vec rel = vec(proj.vel).add(dir);
             if(proj.owner && proj.relativity > 0)
             {
-                vec r = vec(proj.owner->vel).add(proj.owner->falling);
-                if(r.x*rel.x < 0) r.x = 0;
-                if(r.y*rel.y < 0) r.y = 0;
-                if(r.z*rel.z < 0) r.z = 0;
-                rel.add(r.mul(proj.relativity));
+                loopi(3) if(proj.inertia[i]*rel[i] < 0) proj.inertia[i] = 0;
+                rel.add(proj.inertia.mul(proj.relativity));
             }
             proj.vel = vec(rel).add(vec(dir).mul(physics::movevelocity(&proj)));
         }
@@ -537,7 +544,7 @@ namespace projs
         proj.resetinterp();
     }
 
-    void create(vec &from, vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale)
+    void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale)
     {
         if(!d) return;
 
@@ -556,25 +563,31 @@ namespace projs
         proj.flags = flags;
         proj.scale = scale;
         proj.movement = 0;
-        proj.owner = d;
-        if(proj.projtype == PRJ_SHOT && proj.owner && isweap(proj.weap) && issound(proj.owner->pschan))
-            playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, sounds[proj.owner->pschan].vol, -1, -1, &proj.schan, 0, &proj.owner->pschan);
+        if(d)
+        {
+            proj.owner = d;
+            proj.yaw = d->yaw;
+            proj.pitch = d->pitch;
+            proj.inertia = vec(d->vel).add(d->falling);
+            if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan))
+                playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, sounds[d->pschan].vol, -1, -1, &proj.schan, 0, &d->pschan);
+        }
         if(!proj.waittime) init(proj, false);
         projs.add(&proj);
     }
 
-    void drop(gameent *d, int g, int n, int v, bool local)
+    void drop(gameent *d, int g, int n, int v, bool local, int c)
     {
         if(g >= WEAP_OFFSET && isweap(g))
         {
-            vec from(d->o), to(d->muzzlepos(g));
             if(entities::ents.inrange(n))
             {
-                create(from, to, local, d, PRJ_ENT, w_spawn(g), w_spawn(g), 1, 1, n, v);
+                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(g), w_spawn(g), 1, 1, n, v, c);
                 d->ammo[g] = -1;
                 d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
             }
-            else if(g == WEAP_GRENADE) create(from, to, local, d, PRJ_SHOT, 1, WEAP2(g, time, false), 1, 1, -1, g);
+            else if(g == WEAP_GRENADE)
+                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, PHYSMILLIS, WEAP2(g, time, false), 1, 1, -1, g);
             else
             {
                 d->ammo[g] = -1;

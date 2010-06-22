@@ -620,7 +620,7 @@ namespace physics
         {
             obstacle = wall;
             /* check to see if there is an obstacle that would prevent this one from being used as a floor */
-            if((d->type==ENT_PLAYER || d->type==ENT_AI) && ((wall.z>=slopez && dir.z<0) || (wall.z<=-slopez && dir.z>0)) && (dir.x || dir.y) && !collide(d, vec(dir.x, dir.y, 0)))
+            if((d->type == ENT_PLAYER || d->type == ENT_AI) && ((wall.z>=slopez && dir.z<0) || (wall.z<=-slopez && dir.z>0)) && (dir.x || dir.y) && !collide(d, vec(dir.x, dir.y, 0)))
             {
                 if(wall.dot(dir) >= 0) slidecollide = true;
                 obstacle = wall;
@@ -724,10 +724,7 @@ namespace physics
             }
 
             if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || lastmillis-d->impulse[IM_TIME] > impulseskate || d->vel.magnitude() <= 1))
-            {
                 d->turnside = 0;
-                d->resetphys();
-            }
 
             if(!d->turnside)
             {
@@ -741,7 +738,6 @@ namespace physics
                         if(onfloor)
                         {
                             if(moving && ((d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
-                            d->resetphys();
                             d->impulse[IM_JUMP] = lastmillis;
                         }
                         vec dir(0, 0, 1);
@@ -833,6 +829,8 @@ namespace physics
                             d->turnmillis = PHYSMILLIS;
                             d->turnside = side; d->turnyaw = off;
                             d->turnroll = (impulseroll*d->turnside)-d->roll;
+                            client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
+                            game::impulseeffect(d, true);
                             found = true;
                             break;
                         }
@@ -845,12 +843,7 @@ namespace physics
                     }
                 }
             }
-            if(!found && (d->turnside || jetting))
-            {
-                if(jetting && m.iszero()) m = vec(0, 0, 1);
-                d->turnside = 0;
-                d->resetphys();
-            }
+            if(!found && d->turnside) d->turnside = 0;
         }
         else d->action[AC_JUMP] = false;
         d->action[AC_DASH] = false;
@@ -875,8 +868,9 @@ namespace physics
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifyinput((gameent *)pl, m, wantsmove, floating, millis);
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
         else pl->timeinair = 0;
+        if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
         m.mul(movevelocity(pl, floating));
-        if(floating || pl->type==ENT_CAMERA) pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
+        if(floating || pl->type == ENT_CAMERA) pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
         else
         {
             bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
@@ -986,19 +980,21 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl), jetting = jetpack(pl);
+        bool floating = isfloating(pl), jetting = false;
         float secs = millis/1000.f;
 
         pl->blocked = false;
-        if(pl->type==ENT_PLAYER || pl->type==ENT_AI)
+        if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             updatematerial(pl, local, floating);
-            if(!floating && !sticktospecial(pl)) modifygravity(pl, millis); // apply gravity
+            jetting = jetpack(pl);
+            if(!floating && !sticktospecial(pl) && !jetting) modifygravity(pl, millis); // apply gravity
+            else pl->resetphys();
         }
         modifyvelocity(pl, local, floating, millis); // apply any player generated changes in velocity
 
         vec d(pl->vel);
-        if((pl->type==ENT_PLAYER || pl->type==ENT_AI) && !floating && pl->inliquid) d.mul(liquidmerge(pl, 1.f, PHYS(liquidspeed)));
+        if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !floating && pl->inliquid) d.mul(liquidmerge(pl, 1.f, PHYS(liquidspeed)));
         d.add(pl->falling);
         d.mul(secs);
 
