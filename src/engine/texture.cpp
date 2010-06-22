@@ -1105,7 +1105,6 @@ static inline void assignvslotlayer(VSlot &vs)
     {
         VSlot &layer = *vslots[vs.layer];
         if(layer.index < 0) assignvslot(layer);
-        if(!markingvslots) vs.layer = layer.index;
     }
 }
 
@@ -1195,6 +1194,11 @@ int compactvslots(bool cull)
         compacteditvslots();
     }
     compactmruvslots();
+    loopv(vslots)
+    {
+        VSlot &vs = *vslots[i];
+        if(vs.index >= 0 && vs.layer && vslots.inrange(vs.layer)) vs.layer = vslots[vs.layer]->index;
+    }
     if(cull)
     {
         loopvrev(slots)
