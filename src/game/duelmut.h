@@ -183,7 +183,7 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                srvmsgf(-1, "\fcteam \fs%s%s\fS are the victors", teamtype[alive[0]->team].chat, teamtype[alive[0]->team].name);
+                                srvmsgf(-1, "\fyteam \fs%s%s\fS are the victors", teamtype[alive[0]->team].chat, teamtype[alive[0]->team].name);
                                 loopv(playing) if(allowbroadcast(playing[i]->clientnum))
                                 {
                                     if(playing[i]->team == alive[0]->team)
@@ -204,7 +204,7 @@ struct duelservmode : servmode
                     {
                         if(!cleanup)
                         {
-                            srvmsgf(-1, "\fceveryone died, \fzoyepic fail");
+                            srvmsgf(-1, "\fyeveryone died, \fzoyepic fail");
                             loopv(playing) if(allowbroadcast(playing[i]->clientnum))
                                 sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
                         }
@@ -218,7 +218,7 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                srvmsgf(-1, "\fc%s was the victor", colorname(alive[0]));
+                                srvmsgf(-1, "\fy%s was the victor", colorname(alive[0]));
                                 loopv(playing) if(allowbroadcast(playing[i]->clientnum))
                                 {
                                     if(playing[i] == alive[0])
