@@ -839,7 +839,7 @@ namespace server
             {
                 int attr = w_attr(gamemode, sents[i].attrs[0], m_weapon(gamemode, mutators));
                 if(!isweap(attr)) return false;
-                if(m_arena(gamemode, mutators) && attr < WEAP_ITEM) return false;
+                if(m_arena(gamemode, mutators) && attr < WEAP_ITEM && GAME(maxcarry) <= 2) return false;
                 switch(WEAP(attr, allowed))
                 {
                     case 0: return false;
@@ -2897,7 +2897,7 @@ namespace server
 
     void checkents()
     {
-        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_arena(gamemode, mutators) && !m_limited(gamemode, mutators);
+        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_limited(gamemode, mutators);
         int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators);
         memset(items, 0, sizeof(items)); memset(lowest, -1, sizeof(lowest));
         if(thresh)
