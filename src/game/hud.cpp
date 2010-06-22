@@ -1636,7 +1636,7 @@ namespace hud
                 glColor4f(r, g, b, fade*f);
                 drawslice(1-len, len, ix, iy, is);
                 drawslice(1-len, len, ix, iy, is*2/3);
-                if(game::focus == game::player1 && inventoryimpulse >= 2)
+                if(inventoryimpulse >= 2)
                 {
                     pushfont("sub");
                     draw_textx("%s%d%%", x+iw/2+ow, y-sy-iw/2-FONTH/2, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1,

@@ -866,9 +866,10 @@ namespace client
     {
         putint(q, N_POS);
         putuint(q, d->clientnum);
-        // 3 bits phys state, 1 bit jump, 1 bit sprint, 2 bits move, 2 bits strafe
-        uchar physstate = d->physstate | ((d->action[AC_JUMP] ? 1 : 0)<<3) | ((d->action[AC_SPRINT] ? 1 : 0)<<4) | ((d->move&3)<<5) | ((d->strafe&3)<<7);
+        // 3 bits phys state, 2 bits move, 2 bits strafe, 2 bits turnside
+        uchar physstate = d->physstate | ((d->move&3)<<3) | ((d->strafe&3)<<5) | ((d->turnside&3)<<7);
         q.put(physstate);
+        putuint(q, d->impulse[IM_METER]);
         ivec o = ivec(vec(d->o.x, d->o.y, d->o.z-d->height).mul(DMF));
         uint vel = min(int(d->vel.magnitude()*DVELF), 0xFFFF), fall = min(int(d->falling.magnitude()*DVELF), 0xFFFF);
         // 3 bits position, 1 bit velocity, 3 bits falling, 1 bit aim, 1 bit crouching, 1 bit conopen
@@ -884,8 +885,10 @@ namespace client
             if(d->falling.x || d->falling.y || d->falling.z > 0) flags |= 1<<6;
         }
         if((int)d->aimyaw!=(int)d->yaw || (int)d->aimpitch!=(int)d->pitch) flags |= 1<<7;
-        if(d->action[AC_CROUCH]) flags |= 1<<8;
-        if(d->conopen) flags |= 1<<9;
+        if(d->action[AC_JUMP]) flags |= 1<<8;
+        if(d->action[AC_SPRINT]) flags |= 1<<9;
+        if(d->action[AC_CROUCH]) flags |= 1<<10;
+        if(d->conopen) flags |= 1<<11;
         putuint(q, flags);
         loopk(3)
         {
@@ -1051,7 +1054,7 @@ namespace client
         {
             case N_POS:                        // position of another client
             {
-                int lcn = getuint(p), physstate = p.get(), flags = getuint(p);
+                int lcn = getuint(p), physstate = p.get(), meter = getuint(p), flags = getuint(p);
                 vec o, vel, falling;
                 float yaw, pitch, roll, aimyaw, aimpitch;
                 loopk(3)
@@ -1088,30 +1091,33 @@ namespace client
                 gameent *d = game::getclient(lcn);
                 if(!d || d==game::player1 || d->ai) continue;
                 float oldyaw = d->yaw, oldpitch = d->pitch, oldaimyaw = d->aimyaw, oldaimpitch = d->aimpitch;
-                d->action[AC_JUMP] = physstate&(1<<3) ? true : false;
-                d->action[AC_SPRINT] = physstate&(1<<4) ? true : false;
-                d->conopen = flags&(1<<9) ? true : false;
                 d->yaw = yaw;
                 d->pitch = pitch;
                 d->roll = roll;
                 d->aimyaw = aimyaw;
                 d->aimpitch = aimpitch;
-                d->move = (physstate>>5)&2 ? -1 : (physstate>>5)&1;
-                d->strafe = (physstate>>7)&2 ? -1 : (physstate>>7)&1;
-                bool crouch = d->action[AC_CROUCH];
-                d->action[AC_CROUCH] = flags&(1<<8) ? true : false;
-                if(crouch != d->action[AC_CROUCH]) d->actiontime[AC_CROUCH] = lastmillis;
+                d->move = (physstate>>3)&2 ? -1 : (physstate>>3)&1;
+                d->strafe = (physstate>>5)&2 ? -1 : (physstate>>5)&1;
+                d->turnside = (physstate>>7)&2 ? -1 : (physstate>>7)&1;
+                d->impulse[IM_METER] = meter;
+                #define actmod(x,y) \
+                { \
+                    bool val = d->action[x]; \
+                    d->action[x] = flags&(1<<y) ? true : false; \
+                    if(val != d->action[x]) d->actiontime[x] = lastmillis; \
+                }
+                actmod(AC_JUMP, 8);
+                actmod(AC_SPRINT, 9);
+                actmod(AC_CROUCH, 10);
+                d->conopen = flags&(1<<11) ? true : false;
                 vec oldpos(d->o);
-                //if(game::allowmove(d))
-                //{
-                    d->o = o;
-                    d->o.z += d->height;
-                    d->vel = vel;
-                    d->falling = falling;
-                    d->physstate = physstate&7;
-                    physics::updatephysstate(d);
-                    updatepos(d);
-                //}
+                d->o = o;
+                d->o.z += d->height;
+                d->vel = vel;
+                d->falling = falling;
+                d->physstate = physstate&7;
+                physics::updatephysstate(d);
+                updatepos(d);
                 if(d->state==CS_DEAD || d->state==CS_WAITING)
                 {
                     d->resetinterp();
@@ -1207,19 +1213,14 @@ namespace client
                         {
                             playsound(S_JUMP, t->o, t); regularshape(PART_SMOKE, int(t->radius), 0x111111, 21, 20, 150, t->feetpos(), 1, 1, -10, 0, 10.f);
                             t->impulse[IM_JUMP] = lastmillis;
+                            t->resetphys();
                             break;
                         }
-                        case SPHY_BOOST:
+                        case SPHY_BOOST: case SPHY_KICK: case SPHY_SKATE:
                         {
-                            t->impulse[IM_TYPE] = IM_T_BOOST;
+                            t->impulse[IM_TYPE] = IM_T_BOOST+(st-SPHY_BOOST);
                             t->impulse[IM_TIME] = lastmillis;
-                            game::impulseeffect(t, true);
-                            break;
-                        }
-                        case SPHY_KICK:
-                        {
-                            t->impulse[IM_TYPE] = IM_T_KICK;
-                            t->impulse[IM_TIME] = lastmillis;
+                            t->resetphys();
                             game::impulseeffect(t, true);
                             break;
                         }
@@ -1530,7 +1531,7 @@ namespace client
                     if(ds) loopj(ds)
                     {
                         int gs = getint(p), drop = getint(p), value = getint(p);
-                        if(target) projs::drop(target, gs, drop, value, local);
+                        if(target) projs::drop(target, gs, drop, value, local, j);
                     }
                     if(isweap(weap) && target)
                     {
