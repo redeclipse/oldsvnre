@@ -138,7 +138,7 @@ namespace ai
     bool wantsweap(gameent *d, int weap, bool all = false)
     {
         if(!isweap(weap) || hasweap(d, weap)) return false;
-        if(d->carry(m_weapon(game::gamemode, game::mutators)) >= maxcarry && (hasweap(d, d->loadweap) || weap != d->loadweap))
+        if(d->carry(m_weapon(game::gamemode, game::mutators)) >= maxcarry && (hasweap(d, d->ai->weappref) || weap != d->ai->weappref))
             return false;
         return true;
     }
@@ -405,7 +405,7 @@ namespace ai
             n.node = e->lastnode;
             n.target = e->clientnum;
             n.targtype = AI_T_PLAYER;
-            n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->loadweap) ? 1e4f : 1e2f));
+            n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->ai->weappref) ? 1e4f : 1e2f));
         }
     }
 
@@ -429,7 +429,7 @@ namespace ai
                         n.node = entities::closestent(WAYPOINT, e.o, SIGHTMIN, true);
                         n.target = j;
                         n.targtype = AI_T_ENTITY;
-                        n.score =  pos.squaredist(e.o)/(attr == d->loadweap ? 1e8f : (force ? 1e4f : 1e2f));
+                        n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
                     }
                     break;
                 }
@@ -455,7 +455,7 @@ namespace ai
                         n.node = entities::closestent(WAYPOINT, proj.o, SIGHTMIN, true);
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
-                        n.score = pos.squaredist(proj.o)/(attr == d->loadweap ? 1e8f : (force ? 1e4f : 1e2f));
+                        n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
                     }
                     break;
                 }
@@ -470,7 +470,7 @@ namespace ai
         if(d->aitype == AI_BOT)
         {
             int sweap = m_weapon(game::gamemode, game::mutators);
-            if(!hasweap(d, d->loadweap) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
+            if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
             if(m_fight(game::gamemode))
             {
                 if(m_stf(game::gamemode)) stf::aifind(d, b, interests);
@@ -578,16 +578,16 @@ namespace ai
             if(d->aitype >= AI_START)
             {
                 if(entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[5] > 0)
-                    d->loadweap = entities::ents[d->aientity]->attrs[5]-1;
-                else d->loadweap = aistyle[d->aitype].weap;
-                if(!isweap(d->loadweap)) d->loadweap = rnd(WEAP_MAX-1)+1;
+                    d->ai->weappref = entities::ents[d->aientity]->attrs[5]-1;
+                else d->ai->weappref = aistyle[d->aitype].weap;
+                if(!isweap(d->ai->weappref)) d->ai->weappref = rnd(WEAP_MAX-1)+1;
             }
             else
             {
                 if(m_limited(game::gamemode, game::mutators) && !m_arena(game::gamemode, game::mutators))
-                    d->loadweap = m_weapon(game::gamemode, game::mutators);
-                else if(aiforcegun >= 0 && aiforcegun < WEAP_MAX) d->loadweap = aiforcegun;
-                else d->loadweap = rnd(WEAP_MAX-WEAP_OFFSET)+WEAP_OFFSET;
+                    d->ai->weappref = m_weapon(game::gamemode, game::mutators);
+                else if(aiforcegun >= 0 && aiforcegun < WEAP_MAX) d->ai->weappref = aiforcegun;
+                else d->ai->weappref = rnd(WEAP_MAX-WEAP_OFFSET)+WEAP_OFFSET;
             }
             d->ai->suspended = true;
             vec dp = d->headpos();
@@ -617,7 +617,7 @@ namespace ai
             loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT)
             {
                 gameent *d = game::players[i];
-                if(!hasweap(d, attr) && (!hasweap(d, d->loadweap) || d->carry(sweap) == 0))
+                if(!hasweap(d, attr) && (!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0))
                 {
                     aistate &b = d->ai->getstate();
                     if(b.type == AI_S_PURSUE && b.targtype == AI_T_AFFINITY) continue;
@@ -626,7 +626,7 @@ namespace ai
                         if(entities::ents.inrange(b.target))
                         {
                             int weap = w_attr(game::gamemode, entities::ents[b.target]->attrs[0], sweap);
-                            if((attr == d->loadweap && weap != d->loadweap) || d->o.squaredist(entities::ents[ent]->o) < d->o.squaredist(entities::ents[b.target]->o))
+                            if((attr == d->ai->weappref && weap != d->ai->weappref) || d->o.squaredist(entities::ents[ent]->o) < d->o.squaredist(entities::ents[b.target]->o))
                                 d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
                         }
                         continue;
@@ -1182,7 +1182,7 @@ namespace ai
         {
             if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != WEAP_S_WAIT)
             {
-                loopirev(WEAP_ITEM) if(i >= WEAP_OFFSET && i != d->loadweap && i != d->weapselect && entities::ents.inrange(d->entid[i]))
+                loopirev(WEAP_ITEM) if(i >= WEAP_OFFSET && i != d->ai->weappref && i != d->weapselect && entities::ents.inrange(d->entid[i]))
                 {
                     client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, i);
                     d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
@@ -1249,7 +1249,7 @@ namespace ai
         bool timepassed = d->weapstate[d->weapselect] == WEAP_S_IDLE && (!d->ammo[d->weapselect] || lastmillis-d->weaplast[d->weapselect] >= 6000-(d->skill*50));
         if(busy <= 2 && haswaited && timepassed)
         {
-            int weap = d->loadweap;
+            int weap = d->ai->weappref;
             gameent *e = game::getclient(d->ai->enemy);
             if(!isweap(weap) || !d->hasweap(weap, sweap) || !hasrange(d, e, weap))
             {
@@ -1435,7 +1435,11 @@ namespace ai
             {
                 if((d->aitype == AI_BOT || !m_campaign(game::gamemode)) && d->respawned < 0 && (!d->lastdeath || lastmillis-d->lastdeath > (d->aitype == AI_BOT || m_duke(game::gamemode, game::mutators) ? 500 : enemyspawntime)))
                 {
-                    if(m_arena(game::gamemode, game::mutators)) client::addmsg(N_LOADWEAP, "ri2", d->clientnum, d->loadweap);
+                    if(m_arena(game::gamemode, game::mutators))
+                    {
+                        d->loadweap[0] = d->ai->weappref; d->loadweap[1] = WEAP_PISTOL;
+                        client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
+                    }
                     client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
                     d->respawned = lastmillis;
                 }
@@ -1569,8 +1573,8 @@ namespace ai
                 }
                 if(aidebug > 2)
                 {
-                    if(isweap(d->loadweap))
-                        part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), weaptype[d->loadweap].name);
+                    if(isweap(d->ai->weappref))
+                        part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), weaptype[d->ai->weappref].name);
                     gameent *e = game::getclient(d->ai->enemy);
                     if(e) part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), game::colorname(e, NULL, "<default>"));
                 }

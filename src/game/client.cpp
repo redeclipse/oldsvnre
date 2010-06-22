@@ -1017,7 +1017,6 @@ namespace client
         {
             d->weapreset(true);
             d->lastweap = d->weapselect = getint(p);
-            if(m_arena(game::gamemode, game::mutators)) d->loadweap = d->weapselect;
             loopi(WEAP_MAX) d->ammo[i] = getint(p);
         }
     }
@@ -1398,7 +1397,7 @@ namespace client
                 case N_LOADWEAP:
                 {
                     hud::sb.showscores(false);
-                    game::player1->loadweap = -1;
+                    loopj(2) game::player1->loadweap[j] = -1;
                     if(!menuactive()) showgui("loadout", -1);
                     break;
                 }
