@@ -55,14 +55,14 @@ namespace hud
     }
     COMMANDN(0, conskip, setconskip, "i");
 
-    VAR(IDF_PERSIST, consize, 0, 6, 100);
+    VAR(IDF_PERSIST, consize, 0, 5, 100);
     VAR(IDF_PERSIST, contime, 0, 30000, INT_MAX-1);
     VAR(IDF_PERSIST, confade, 0, 1000, INT_MAX-1);
-    VAR(IDF_PERSIST, conoverflow, 0, 6, INT_MAX-1);
+    VAR(IDF_PERSIST, conoverflow, 0, 5, INT_MAX-1);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
     FVAR(IDF_PERSIST, conblend, 0, 0.65f, 1);
-    VAR(IDF_PERSIST, chatconsize, 0, 6, 100);
+    VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, INT_MAX-1);
     VAR(IDF_PERSIST, chatconfade, 0, 2000, INT_MAX-1);
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, INT_MAX-1);
