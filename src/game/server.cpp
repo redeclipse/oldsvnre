@@ -764,7 +764,7 @@ namespace server
             {
                 loopv(clients) if(clients[i]->state.cpmillis < 0 && gamemillis+clients[i]->state.cpmillis >= GAME(triallimit))
                 {
-                    sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fctime trial wait period has timed out");
+                    sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fytime trial wait period has timed out");
                     startintermission();
                     return;
                 }
@@ -786,14 +786,14 @@ namespace server
                     else timeremaining = -1;
                     if(!timeremaining)
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fctime limit has been reached");
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fytime limit has been reached");
                         startintermission();
                         return; // bail
                     }
                     else
                     {
                         sendf(-1, 1, "ri2", N_TICK, timeremaining);
-                        if(timeremaining == 60) sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_ONEMINUTE, CON_MESG, "\fcone minute remains");
+                        if(timeremaining == 60) sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_ONEMINUTE, CON_MESG, "\fzygone minute remains");
                     }
                 }
             }
@@ -809,7 +809,7 @@ namespace server
                         best = i;
                     if(best >= 0 && teamscores[best] >= GAME(fraglimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fcfrag limit has been reached");
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyfrag limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -821,7 +821,7 @@ namespace server
                         best = i;
                     if(best >= 0 && clients[best]->state.frags >= GAME(fraglimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fcfrag limit has been reached");
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyfrag limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -1406,7 +1406,7 @@ namespace server
             endmatch();
             if(gotvotes)
             {
-                srvoutf(-3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
+                srvoutf(3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
                 sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, best->map, 0, best->mode, best->muts);
                 changemap(best->map, best->mode, best->muts);
             }
@@ -1415,7 +1415,7 @@ namespace server
                 int mode = GAME(defaultmode) >= 0 ? gamemode : -1, muts = GAME(defaultmuts) >= -1 ? mutators : -2;
                 changemode(mode, muts);
                 const char *map = choosemap(smapname, mode, muts);
-                srvoutf(-3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
+                srvoutf(3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
                 sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, map, 0, mode, muts);
                 changemap(map, mode, muts);
             }
@@ -1510,7 +1510,7 @@ namespace server
         if(hasveto)
         {
             endmatch();
-            srvoutf(-3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+            srvoutf(3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
             sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, ci->mapvote, 0, ci->modevote, ci->mutsvote);
             changemap(ci->mapvote, ci->modevote, ci->mutsvote);
             return;
@@ -3985,7 +3985,7 @@ namespace server
                     if(haspriv(ci, PRIV_MASTER, "clear bans"))
                     {
                         loopv(bans) if(bans[i].time >= 0) bans.remove(i--);
-                        srvoutf(3, "\fccleared existing bans");
+                        srvoutf(3, "cleared existing bans");
                     }
                     break;
                 }

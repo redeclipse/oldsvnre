@@ -133,7 +133,7 @@ namespace client
             copystring(game::player1->name, text, MAXNAMELEN);
             addmsg(N_SWITCHNAME, "rs", game::player1->name);
         }
-        else conoutft(CON_EVENT, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
+        else conoutft(CON_INFO, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
     ICOMMAND(0, name, "s", (char *s), switchname(s));
 
@@ -172,9 +172,9 @@ namespace client
                     addmsg(N_SWITCHTEAM, "ri", game::player1->team);
                 }
             }
-            else conoutft(CON_EVENT, "\frcan only change teams when actually playing in team games");
+            else conoutft(CON_INFO, "\frcan only change teams when actually playing in team games");
         }
-        else conoutft(CON_EVENT, "\fs\fgyour team is:\fS \fs%s%s\fS", teamtype[game::player1->team].chat, teamtype[game::player1->team].name);
+        else conoutft(CON_INFO, "\fs\fgyour team is:\fS \fs%s%s\fS", teamtype[game::player1->team].chat, teamtype[game::player1->team].name);
     }
     ICOMMAND(0, team, "s", (char *s), switchteam(s));
 
@@ -233,7 +233,7 @@ namespace client
     bool allowedittoggle(bool edit)
     {
         bool allow = edit || m_edit(game::gamemode); // && game::player1->state == CS_ALIVE);
-        if(!allow) conoutft(CON_EVENT, "\fryou must start an editing game to edit the map");
+        if(!allow) conoutft(CON_INFO, "\fryou must start an editing game to edit the map");
         return allow;
     }
 
@@ -364,7 +364,7 @@ namespace client
                 if(t) addmsg(N_SETTEAM, "ri2", i, t);
             }
         }
-        else conoutft(CON_EVENT, "\frcan only change teams in team games");
+        else conoutft(CON_INFO, "\frcan only change teams in team games");
     }
     ICOMMAND(0, setteam, "ss", (char *who, char *team), setteam(who, team));
 
@@ -1287,13 +1287,13 @@ namespace client
                     {
                         case 0: case 2:
                         {
-                            conoutft(CON_MESG, "\fcserver requested map change to %s, and we need it, so asking for it", hasmap ? text : "<temp>");
+                            conoutft(CON_MESG, "server requested map change to %s, and we need it, so asking for it", hasmap ? text : "<temp>");
                             addmsg(N_GETMAP, "r");
                             break;
                         }
                         case 1:
                         {
-                            conoutft(CON_MESG, "\fcserver is requesting the map from another client for us");
+                            conoutft(CON_MESG, "server is requesting the map from another client for us");
                             break;
                         }
                         default: needsmap = false; break;
@@ -1967,12 +1967,12 @@ namespace client
 
                 case N_GETMAP:
                 {
-                    conoutft(CON_MESG, "\fcserver has requested we send the map..");
+                    conoutft(CON_MESG, "server has requested we send the map..");
                     if(!needsmap && !gettingmap) sendmap();
                     else
                     {
-                        if(!gettingmap) conoutft(CON_MESG, "\fowe don't have the map though, so asking for it instead");
-                        else conoutft(CON_MESG, "\fobut we're in the process of getting it");
+                        if(!gettingmap) conoutft(CON_MESG, "..we don't have the map though, so asking for it instead");
+                        else conoutft(CON_MESG, "..but we're in the process of getting it");
                         addmsg(N_GETMAP, "r");
                     }
                     break;
@@ -1980,7 +1980,7 @@ namespace client
 
                 case N_SENDMAP:
                 {
-                    conoutft(CON_MESG, "\fcmap data has been uploaded");
+                    conoutft(CON_MESG, "map data has been uploaded");
                     if(needsmap && !gettingmap)
                     {
                         conoutft(CON_MESG, "\fowe want the map too, so asking for it");
