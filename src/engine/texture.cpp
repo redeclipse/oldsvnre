@@ -1214,10 +1214,10 @@ int compactvslots(bool cull)
     return total;
 }
 
-ICOMMAND(0, compactvslots, "", (),
+ICOMMAND(0, compactvslots, "i", (int *a),
 {
     if(multiplayer()) return;
-    compactvslots();
+    compactvslots(*a!=0);
     allchanged();
 });
 
@@ -1471,20 +1471,6 @@ void texture(char *type, char *name, int *rot, int *xoffset, int *yoffset, float
 }
 
 COMMAND(0, texture, "ssiiif");
-
-void texturecull(bool local)
-{
-    if(slots.length() > 8) compactvslots(true);
-}
-
-ICOMMAND(0, texturecull, "", (void), {
-    if(slots.length() > 8)
-    {
-        texturecull(true);
-        allchanged();
-    }
-    else conoutf("\frnot enough texture slots");
-});
 
 void autograss(char *name)
 {
