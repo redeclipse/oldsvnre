@@ -1142,7 +1142,11 @@ int compactvslots(bool cull)
     loopv(vslots) vslots[i]->index = -1;
     if(!cull)
     {
-        loopv(slots) assignvslot(*slots[i]->variants);
+        loopv(slots) 
+        {
+            VSlot &vs = *slots[i]->variants;
+            if(vs.index < 0) assignvslot(vs);
+        }
         loopv(vslots)
         {
             VSlot &vs = *vslots[i];
