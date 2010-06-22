@@ -116,7 +116,7 @@ namespace ai
         vector<aistate> state;
         vector<int> route;
         vec target, spot;
-        int enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
+        int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lasthunt, lastaction, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd;
         float targyaw, targpitch, views[3], aimrnd[3];
         bool suspended, dontmove, becareful, tryreset, trywipe;
@@ -136,7 +136,7 @@ namespace ai
             lastaction = lasthunt = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
-            targnode = targlast = -1;
+            weappref = targnode = targlast = -1;
         }
 
         void clear(bool prev = true)

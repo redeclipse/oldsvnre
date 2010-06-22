@@ -819,7 +819,7 @@ namespace hud
                         {
                             SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                             pushfont("sub");
-                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap < 0 ? "\fzoyselect" : "change")*noticescale;
+                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change")*noticescale;
                             popfont();
                         }
                         if(target == game::player1 && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))

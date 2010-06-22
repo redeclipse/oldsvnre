@@ -2833,22 +2833,25 @@ namespace server
 
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
-        int aweap = ci->state.loadweap;
-        if(ci->state.loadweap >= WEAP_ITEM) ci->state.loadweap = -1;
-        else if(ci->state.loadweap >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap, allowed))
+        loopj(2)
         {
-            case 0: ci->state.loadweap = -1; break;
-            case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap = -1; break; } // fall through
-            case 2: case 3: default: break;
-        }
-        if(ci->state.loadweap < 0 && ci->state.aitype < 0)
-        {
-            if(request)
+            int aweap = ci->state.loadweap[j];
+            if(ci->state.loadweap[j] >= WEAP_ITEM) ci->state.loadweap[j] = -1;
+            else if(ci->state.loadweap[j] >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap[j], allowed))
             {
-                if(isweap(aweap)) srvmsgf(ci->clientnum, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
-                sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
+                case 0: ci->state.loadweap[j] = -1; break;
+                case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
+                case 2: case 3: default: break;
             }
-            return false;
+            if(ci->state.loadweap[j] < 0 && ci->state.aitype < 0)
+            {
+                if(request)
+                {
+                    if(isweap(aweap)) srvmsgf(ci->clientnum, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
+                    sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
+                }
+                return false;
+            }
         }
         return true;
     }
@@ -3539,10 +3542,11 @@ namespace server
 
                 case N_LOADWEAP:
                 {
-                    int lcn = getint(p), aweap = getint(p);
+                    int lcn = getint(p), aweap = getint(p), bweap = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci) || !isweap(aweap) || !m_arena(gamemode, mutators)) break;
-                    cp->state.loadweap = aweap;
+                    cp->state.loadweap[0] = aweap;
+                    cp->state.loadweap[1] = bweap;
                     chkloadweap(cp);
                     break;
                 }

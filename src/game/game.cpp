@@ -311,23 +311,32 @@ namespace game
         return true;
     }
 
-    void chooseloadweap(gameent *d, const char *s)
+    void chooseloadweap(gameent *d, const char *a, const char *b)
     {
         if(m_arena(gamemode, mutators))
         {
-            if(*s >= '0' && *s <= '9') d->loadweap = atoi(s);
-            else loopi(WEAP_MAX) if(!strcasecmp(weaptype[i].name, s))
+            loopj(2)
             {
-                d->loadweap = i;
-                break;
+                const char *s = j ? b : a;
+                if(*s >= '0' && *s <= '9') d->loadweap[j] = atoi(s);
+                else loopi(WEAP_MAX) if(!strcasecmp(weaptype[i].name, s))
+                {
+                    d->loadweap[j] = i;
+                    break;
+                }
+                if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
             }
-            if(d->loadweap < WEAP_OFFSET || d->loadweap >= WEAP_ITEM) d->loadweap = WEAP_MELEE;
-            client::addmsg(N_LOADWEAP, "ri2", d->clientnum, d->loadweap);
-            conoutft(CON_SELF, "setting weapon to: %s%s", weaptype[d->loadweap].text, (d->loadweap >= WEAP_OFFSET ? weaptype[d->loadweap].name : "random weapons"));
+            client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
+            conoutft(CON_SELF, "weapon selection is now: \fs%s%s\fS and \fs%s%s\fS",
+                weaptype[d->loadweap[0]].text, (d->loadweap[0] >= WEAP_OFFSET ? weaptype[d->loadweap[0]].name : "random"),
+                weaptype[d->loadweap[1]].text, (d->loadweap[1] >= WEAP_OFFSET ? weaptype[d->loadweap[1]].name : "random")
+            );
         }
         else conoutft(CON_MESG, "\foweapon selection is only available in arena");
     }
-    ICOMMAND(0, loadweap, "s", (char *s), chooseloadweap(player1, s));
+    ICOMMAND(0, loadweap, "ss", (char *a, char *b), chooseloadweap(player1, a, b));
+    ICOMMAND(0, getloadweap, "i", (int *n), intret(game::player1->loadweap[*n!=0 ? 1 : 0]));
+    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && WEAP(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
 
     void respawn(gameent *d)
     {
@@ -1585,7 +1594,7 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(m_arena(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap < 0 && client::ready() && !menuactive())
+            if(m_arena(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap[0] < 0 && client::ready() && !menuactive())
                 showgui("loadout", -1);
         }
         else if(!menuactive()) showgui("main", -1);

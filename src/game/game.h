@@ -488,12 +488,15 @@ enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = I
 struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX];
-    int lastweap, loadweap, weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
+    int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastfire;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : loadweap(-1), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0),
-        aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0) {}
+    gamestate() : weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0),
+        aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
+    {
+        loopj(2) loadweap[j] = -1;
+    }
     ~gamestate() {}
 
     int hasweap(int weap, int sweap, int level = 0, int exclude = -1)
@@ -648,6 +651,7 @@ struct gamestate
     void mapchange()
     {
         points = cpmillis = cptime = 0;
+        loopj(2) loadweap[j] = -1;
     }
 
     void respawn(int millis, int heal)
@@ -666,7 +670,7 @@ struct gamestate
         if(isweap(sweap)) ammo[sweap] = max(WEAP(sweap, reloads) ? WEAP(sweap, add) : WEAP(sweap, max), 1);
         if(aitype >= AI_START)
         {
-            loadweap = -1;
+            loopj(2) loadweap[j] = -1;
             lastweap = weapselect = sweap;
         }
         else
@@ -676,14 +680,26 @@ struct gamestate
                 ammo[WEAP_GRENADE] = max(WEAP(WEAP_GRENADE, max), 1);
             if(m_arena(gamemode, mutators))
             {
-                int aweap = loadweap;
-                while(aweap < WEAP_OFFSET || aweap >= WEAP_ITEM) aweap = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // pistol = random
-                ammo[aweap] = max(WEAP(aweap, reloads) ? WEAP(aweap, add) : WEAP(aweap, max), 1);
-                lastweap = weapselect = aweap;
+                int aweap[2] = { -1, -1 };
+                loopj(2)
+                {
+                    aweap[j] = loadweap[j];
+                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= WEAP_ITEM || (j && aweap[0] == aweap[1]))
+                    {
+                        aweap[j] = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // random
+                        int iters = 0;
+                        while(++iters < 10 && ((j && aweap[0] == aweap[1]) || WEAP(aweap[j], allowed) <= (m_duke(gamemode, mutators) ? 1 : 0)))
+                        {
+                            if(++aweap[j] >= WEAP_ITEM) aweap[j] = WEAP_OFFSET;
+                        }
+                    }
+                    ammo[aweap[j]] = max(WEAP(aweap[j], reloads) ? WEAP(aweap[j], add) : WEAP(aweap[j], max), 1);
+                }
+                lastweap = weapselect = aweap[0];
             }
             else
             {
-                loadweap = -1;
+                loopj(2) loadweap[j] = -1;
                 lastweap = weapselect = sweap;
             }
         }
