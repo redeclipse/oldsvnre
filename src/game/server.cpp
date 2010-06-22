@@ -584,7 +584,7 @@ namespace server
         return 0;
     }
     ICOMMAND(0, getversion, "i", (int *a), intret(getver(*a)));
-    const char *gamename(int mode, int muts)
+    const char *gamename(int mode, int muts, int compact)
     {
         if(!m_game(mode))
         {
@@ -597,7 +597,13 @@ namespace server
         {
             if((gametype[mode].mutators&mutstype[i].type) && (muts&mutstype[i].type) && (!gametype[mode].implied || !(gametype[mode].implied&mutstype[i].type)))
             {
-                defformatstring(name)("%s%s%s", *gname ? gname : "", *gname ? "-" : "", mutstype[i].name);
+                string name;
+                switch(compact)
+                {
+                    case 2: formatstring(name)("%s%c", *gname ? gname : "", mutstype[i].name[0]); break;
+                    case 1: formatstring(name)("%s%s%c", *gname ? gname : "", *gname ? "-" : "", mutstype[i].name[0]); break;
+                    case 0: default: formatstring(name)("%s%s%s", *gname ? gname : "", *gname ? "-" : "", mutstype[i].name); break;
+                }
                 copystring(gname, name);
             }
         }
@@ -605,7 +611,7 @@ namespace server
         copystring(gname, mname);
         return gname;
     }
-    ICOMMAND(0, gamename, "iii", (int *g, int *m), result(gamename(*g, *m)));
+    ICOMMAND(0, gamename, "iii", (int *g, int *m, int *c), result(gamename(*g, *m, *c)));
 
     void modecheck(int &mode, int &muts, int trying)
     {
