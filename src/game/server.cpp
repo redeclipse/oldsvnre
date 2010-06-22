@@ -2834,8 +2834,13 @@ namespace server
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
         int aweap = ci->state.loadweap;
-        if(ci->state.loadweap >= WEAP_ITEM || (ci->state.loadweap >= WEAP_OFFSET && !WEAP(ci->state.loadweap, allowed)))
-            ci->state.loadweap = -1;
+        if(ci->state.loadweap >= WEAP_ITEM) ci->state.loadweap = -1;
+        else if(ci->state.loadweap >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap, allowed))
+        {
+            case 0: ci->state.loadweap = -1; break;
+            case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap = -1; break; } // fall through
+            case 2: case 3: default: break;
+        }
         if(ci->state.loadweap < 0 && ci->state.aitype < 0)
         {
             if(request)
