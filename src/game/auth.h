@@ -105,7 +105,7 @@ namespace auth
             loopv(clients) if(clients[i]->privilege >= PRIV_MASTER || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
         }
-        srvoutf(2, "\fy%s %s \fs\fc%s\fS", colorname(ci), val ? "claimed" : "relinquished", privname(privilege));
+        srvoutf(-2, "\fy%s %s \fs\fc%s\fS", colorname(ci), val ? "claimed" : "relinquished", privname(privilege));
         masterupdate = true;
         if(paused)
         {
@@ -176,7 +176,7 @@ namespace auth
             case 'u': n = PRIV_NONE; break;
         }
         ci->authlevel = n;
-        srvoutf(2, "\fy%s identified as '\fs\fc%s\fS'", colorname(ci), name);
+        srvoutf(-2, "\fy%s identified as '\fs\fc%s\fS'", colorname(ci), name);
         if(ci->authlevel > PRIV_NONE && GAME(automaster)) setmaster(ci, true, ci->authlevel);
         if(ci->connectauth)
         {

@@ -884,7 +884,7 @@ bool findoctadir(const char *name, bool fallback)
     defformatstring(octalogo)("%s/data/default_map_settings.cfg", s);
     if(fileexists(findfile(octalogo, "r"), "r"))
     {
-        conoutf("\fgfound octa directory: %s", s);
+        conoutf("\fafound octa directory: %s", s);
         defformatstring(octadata)("%s/data", s);
         defformatstring(octapaks)("%s/packages", s);
         addpackagedir(s, PACKAGEDIR_OCTA);

@@ -282,7 +282,7 @@ namespace physics
             if(pl->move >= 0) vel *= pl->strafe ? movestrafe : movestraight;
             switch(pl->physstate)
             {
-                case PHYS_FALL: vel *= moveinair; break;
+                case PHYS_FALL: if(PHYS(gravity) > 0) vel *= moveinair; break;
                 case PHYS_STEP_DOWN: vel *= movestepdown; break;
                 case PHYS_STEP_UP: vel *= movestepup; break;
                 default: break;
@@ -709,7 +709,7 @@ namespace physics
                         }
                     impulsemod(sprint || jetting, impulseregensprint);
                     impulsemod(d->move || d->strafe, impulseregenmove);
-                    impulsemod(!onfloor, impulseregeninair);
+                    impulsemod(!onfloor && PHYS(gravity) > 0, impulseregeninair);
                     impulsemod(iscrouching(d), impulseregencrouch);
                     if(collect)
                     {
