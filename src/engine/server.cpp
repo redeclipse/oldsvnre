@@ -884,7 +884,7 @@ bool findoctadir(const char *name, bool fallback)
     defformatstring(octalogo)("%s/data/default_map_settings.cfg", s);
     if(fileexists(findfile(octalogo, "r"), "r"))
     {
-        conoutf("\fafound octa directory: %s", s);
+        conoutf("\fwfound octa directory: %s", s);
         defformatstring(octadata)("%s/data", s);
         defformatstring(octapaks)("%s/packages", s);
         addpackagedir(s, PACKAGEDIR_OCTA);
@@ -1070,7 +1070,7 @@ void rehash(bool reload)
     interactive = false;
     initing = NOT_INITING;
 #endif
-    conoutf("\fcconfiguration reloaded");
+    conoutf("\fwconfiguration reloaded");
     rehashing = 0;
 }
 ICOMMAND(0, rehash, "i", (int *nosave), rehash(*nosave ? false : true));
