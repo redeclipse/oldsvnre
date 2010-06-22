@@ -322,16 +322,8 @@ namespace game
                 break;
             }
             if(d->loadweap < WEAP_OFFSET || d->loadweap >= WEAP_ITEM) d->loadweap = WEAP_MELEE;
-            if(WEAP(d->loadweap, allowed) >= (m_limited(gamemode, mutators) ? 2 : 1))
-            {
-                client::addmsg(N_LOADWEAP, "ri2", d->clientnum, d->loadweap);
-                conoutft(CON_SELF, "you will spawn with: %s%s", weaptype[d->loadweap].text, (d->loadweap >= WEAP_OFFSET ? weaptype[d->loadweap].name : "random weapons"));
-            }
-            else
-            {
-                conoutft(CON_SELF, "sorry, the \fs%s%s\fS has been disabled, please select a different weapon", weaptype[d->loadweap].text, (d->loadweap >= WEAP_OFFSET ? weaptype[d->loadweap].name : "random weapons"));
-                d->loadweap = -1;
-            }
+            client::addmsg(N_LOADWEAP, "ri2", d->clientnum, d->loadweap);
+            conoutft(CON_SELF, "setting weapon to: %s%s", weaptype[d->loadweap].text, (d->loadweap >= WEAP_OFFSET ? weaptype[d->loadweap].name : "random weapons"));
         }
         else conoutft(CON_MESG, "\foweapon selection is only available in arena");
     }
