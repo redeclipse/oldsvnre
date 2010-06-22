@@ -235,7 +235,9 @@ namespace hud
             }
             g.pushlist();
             g.pushfont("default");
-            g.textf("%s", 0xFFFFFF, NULL, server::gamename(game::gamemode, game::mutators));
+            defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
+            if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
+            g.textf("%s", 0xFFFFFF, NULL, gname);
             if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
             {
                 if(!game::timeremaining) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL);
