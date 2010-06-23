@@ -1021,7 +1021,7 @@ namespace ai
 
         gameent *e = game::getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
-        if(!enemyok || d->skill > 70)
+        if(!enemyok || d->skill >= 50)
         {
             gameent *f = game::intersectclosest(dp, d->ai->target, d);
             if(f)
