@@ -666,7 +666,7 @@ namespace hud
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
                 {
                     if(showclips) drawclip(game::focus->weapselect, nx, ny, clipsize*hudsize);
-                    if(showindicator && game::focus == game::player1) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), game::focus->action[AC_ALTERNATE]);
+                    if(showindicator) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), game::focus->action[AC_ALTERNATE]);
                 }
                 if(game::mousestyle() >= 1) // renders differently
                     drawpointerindex(POINTER_RELATIVE, game::mousestyle() != 1 ? nx : cx, game::mousestyle() != 1 ? ny : cy, int(crosshairsize*hudsize), 1, 1, 1, crosshairblend*hudblend);
@@ -1618,7 +1618,7 @@ namespace hud
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse() && impulsemeter && impulsecost && inventoryimpulse)
             {
-                float len = game::focus == game::player1 ? 1-clamp(game::focus->impulse[IM_METER]/float(impulsemeter), 0.f, 1.f) : 1;
+                float len = clamp(game::focus->impulse[IM_METER]/float(impulsemeter), 0.f, 1.f);
                 settexture(progresstex, 3);
                 float r = 1, g = 1, b = 1, f = 1;
                 int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
@@ -1626,7 +1626,7 @@ namespace hud
                 if(inventoryflash && game::focus->impulse[IM_METER])
                 {
                     int timestep = totalmillis%1000;
-                    float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(game::focus->impulse[IM_METER])/float(impulsemeter)), 0.f, 1.f);
+                    float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
                     r += (1.f-r)*amt;
                     g += (1.f-g)*amt;
                     b -= b*amt;
@@ -1636,14 +1636,14 @@ namespace hud
                 drawslice(0, 1, ix, iy, is);
                 drawslice(0, 1, ix, iy, is*2/3);
                 glColor4f(r, g, b, fade*f);
-                drawslice(1-len, len, ix, iy, is);
-                drawslice(1-len, len, ix, iy, is*2/3);
+                drawslice(len, 1-len, ix, iy, is);
+                drawslice(len, 1-len, ix, iy, is*2/3);
                 if(inventoryimpulse >= 2)
                 {
                     pushfont("sub");
                     draw_textx("%s%d%%", x+iw/2+ow, y-sy-iw/2-FONTH/2, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1,
                         game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fy" : "\fo") : "\fg",
-                            int(len*100));
+                            int((1-len)*100));
                     popfont();
                 }
                 sy += iw;
