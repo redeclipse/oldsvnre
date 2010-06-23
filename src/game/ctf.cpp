@@ -615,7 +615,7 @@ namespace ctf
             if(d->aitype == AI_BOT)
             {
                 gameent *e = NULL;
-                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && ai::owner(d) == ai::owner(e) && ai::targetable(d, e, false))
+                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
                     vec ep = e->feetpos();
                     if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (enttype[FLAG].radius*enttype[FLAG].radius*4) || f.owner == e))
@@ -711,7 +711,7 @@ namespace ctf
                     targets.setsize(0);
                     ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
                     gameent *e = NULL;
-                    loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && ai::owner(d) == ai::owner(e) && ai::targetable(d, e, false))
+                    loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
                         vec ep = e->feetpos();
                         if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (enttype[FLAG].radius*enttype[FLAG].radius*4) || f.owner == e))
