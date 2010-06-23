@@ -1127,7 +1127,7 @@ ICOMMAND(0, atan, "f", (float *a), floatret(atan(*a)/RAD));
 ICOMMAND(0, sqrt, "f", (float *a), floatret(sqrt(*a)));
 ICOMMAND(0, pow, "ff", (float *a, float *b), floatret(pow(*a, *b)));
 ICOMMAND(0, loge, "f", (float *a), floatret(log(*a)));
-ICOMMAND(0, log2, "f", (float *a), floatret(log2(*a)));
+ICOMMAND(0, log2, "f", (float *a), floatret(log(*a)/M_LN2));
 ICOMMAND(0, log10, "f", (float *a), floatret(log10(*a)));
 ICOMMAND(0, exp, "f", (float *a), floatret(exp(*a)));
 ICOMMAND(0, min, "V", (char **args, int *numargs),
