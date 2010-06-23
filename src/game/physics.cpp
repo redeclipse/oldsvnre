@@ -170,14 +170,14 @@ namespace physics
 
     bool jetpack(physent *d)
     {
-        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->physstate == PHYS_FALL && !d->onladder)
+        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && d->physstate == PHYS_FALL && !d->onladder)
             return impulsetype >= (PHYS(gravity) > 0 ? 2 : 1) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START;
         return false;
     }
 
     bool sprinting(physent *d, bool turn)
     {
-        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
         {
             gameent *e = (gameent *)d;
             if(jetpack(e)) return true;
