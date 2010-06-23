@@ -222,7 +222,7 @@ namespace ai
     extern float viewfieldx(int x = 101);
     extern float viewfieldy(int x = 101);
 
-    extern bool targetable(gameent *d, gameent *e, bool z = true);
+    extern bool targetable(gameent *d, gameent *e);
     extern bool cansee(gameent *d, vec &x, vec &y, vec &targ = aitarget);
     extern bool altfire(gameent *d, gameent *e);
     extern int owner(gameent *d);
