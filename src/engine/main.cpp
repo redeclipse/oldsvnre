@@ -757,7 +757,7 @@ void eastereggs()
     if(month == 2 && mday == 9)     loadbackinfo = "Happy Birthday Quin!";
     if(month == 4 && mday == 18)    loadbackinfo = "Happy Birthday Geartrooper!";
     if(month == 6 && mday == 9)     loadbackinfo = "Happy Birthday W!CK3D!";
-    if(month == 7 && mday == 2)     loadbackinfo = "Happy Birthday c0rdawg and LedIris!";
+    if(month == 7 && mday == 2)     loadbackinfo = "Happy Birthday c0rdawg and LedInfrared!";
     if(month == 9 && mday == 26)    loadbackinfo = "Happy Birthday Dazza!";
     if(month == 12 && mday == 8)    loadbackinfo = "Happy Birthday Hirato!";
 }
