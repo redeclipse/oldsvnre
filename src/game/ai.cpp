@@ -1024,11 +1024,15 @@ namespace ai
         if(!enemyok || d->skill > 70)
         {
             gameent *f = game::intersectclosest(dp, d->ai->target, d);
-            if(f && targetable(d, f))
+            if(f)
             {
-                if(!enemyok) violence(d, b, f, weaptype[d->weapselect].melee);
-                enemyok = true;
-                e = f;
+                if(targetable(d, f))
+                {
+                    if(!enemyok) violence(d, b, f, weaptype[d->weapselect].melee);
+                    enemyok = true;
+                    e = f;
+                }
+                else enemyok = false;
             }
             else if(!enemyok && target(d, b, weaptype[d->weapselect].melee, false, SIGHTMIN))
                 enemyok = (e = game::getclient(d->ai->enemy)) != NULL;
