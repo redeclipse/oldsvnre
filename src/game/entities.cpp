@@ -802,7 +802,7 @@ namespace entities
                             {
                                 int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
                                 gameentity &f = *(gameentity *)ents[teleports[r]];
-                                d->dojumpreset();
+                                d->resetphys();
                                 d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
                                 d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
                                 d->pitch = f.attrs[1];
@@ -836,7 +836,7 @@ namespace entities
                     }
                     vec dir; vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir); dir.normalize().mul(mag);
                     if(d->ai) d->ai->becareful = true;
-                    d->dojumpreset();
+                    d->resetphys();
                     switch(e.attrs[5])
                     {
                         case 0:
