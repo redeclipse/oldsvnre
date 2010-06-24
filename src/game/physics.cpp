@@ -31,7 +31,26 @@ namespace physics
 
     int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastsprint = 0;
 
-    bool allowimpulse(int level) { return impulseallowed >= level && impulsestyle; }
+    bool allowimpulse(int level) { return impulseallowed >= level && (impulsestyle || m_jetpack(game::gamemode, game::mutators)); }
+    bool canimpulse(physent *d, int cost, int level)
+    {
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        {
+            gameent *e = (gameent *)d;
+            if(e->aitype < AI_START && allowimpulse(level))
+            {
+                if(allowimpulse() && impulsemeter && e->impulse[IM_METER]+(cost > 0 ? cost : impulsecost) > impulsemeter) return false;
+                if(cost <= 0)
+                {
+                    if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= PHYSMILLIS) return false;
+                    if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
+                    if(cost == 0 && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 
     #define imov(name,v,u,d,s,os) \
         void do##name(bool down) \
@@ -172,7 +191,7 @@ namespace physics
         if(m_jetpack(game::gamemode, game::mutators) && allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
         {
             gameent *e = (gameent *)d;
-            if(e->physstate == PHYS_FALL && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsedelay) && e->aitype < AI_START)
+            if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsedelay) && e->aitype < AI_START)
                 return true;
         }
         return false;
@@ -183,7 +202,7 @@ namespace physics
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && !jetpack(d))
         {
             gameent *e = (gameent *)d;
-            if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
+            if(canimpulse(e, 1, 2) && !iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
                 if((d != game::player1 && !e->ai) || !impulsemeter || e->impulse[IM_METER] < impulsemeter)
@@ -238,30 +257,6 @@ namespace physics
     bool sticktospecial(physent *d)
     {
         if(d->type == ENT_PLAYER || d->type == ENT_AI) { if(((gameent *)d)->turnside) return true; }
-        return false;
-    }
-
-    bool canimpulse(physent *d, int cost, int level)
-    {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
-        {
-            gameent *e = (gameent *)d;
-            if(e->aitype < AI_START && allowimpulse(level))
-            {
-                if(allowimpulse() && impulsemeter && e->impulse[IM_METER]+(cost > 0 ? cost : impulsecost) > impulsemeter) return false;
-                if(cost <= 0)
-                {
-                    if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= PHYSMILLIS) return false;
-                    if(PHYS(gravity) > 0 || m_jetpack(game::gamemode, game::mutators))
-                    {
-                        if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
-                        if(cost == 0 && (impulsestyle == 1 || m_jetpack(game::gamemode, game::mutators))  && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL)
-                            return false;
-                    }
-                }
-                return true;
-            }
-        }
         return false;
     }
 
@@ -667,12 +662,14 @@ namespace physics
                 bool sprint = sprinting(d, false);
                 if(sprint && impulsesprint > 0)
                 {
-                    if(canimpulse(d, millis)) d->impulse[IM_METER] += int(ceilf(millis*impulsesprint));
-                    else d->action[AC_SPRINT] = false;
+                    int len = int(ceilf(millis*impulsesprint));
+                    if(canimpulse(d, len, 2)) d->impulse[IM_METER] += len;
+                    else sprint = d->action[AC_SPRINT] = false;
                 }
-                if(jetting)
+                if(jetting && impulsejetpack > 0)
                 {
-                    if(canimpulse(d, millis)) d->impulse[IM_METER] += int(ceilf(millis*impulsejetpack));
+                    int len = int(ceilf(millis*impulsejetpack));
+                    if(canimpulse(d, len, 0)) d->impulse[IM_METER] += len;
                     else jetting = d->action[AC_JUMP] = false;
                 }
                 if(d->impulse[IM_METER] > 0 && impulseregen > 0)
@@ -707,7 +704,7 @@ namespace physics
 
             if(!d->turnside)
             {
-                if((d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedelay))
+                if((d->ai || dashaction) && canimpulse(d, 0, 1))
                 {
                     bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
                     if(dash || pulse)
@@ -725,7 +722,6 @@ namespace physics
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                         d->action[AC_DASH] = false;
-                        if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
                         game::impulseeffect(d, true);
                     }
