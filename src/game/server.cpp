@@ -662,17 +662,12 @@ namespace server
 
     void changemode(int &mode, int &muts)
     {
-        if(mode < 0)
-        {
-            if(GAME(defaultmode) >= G_START) mode = GAME(defaultmode);
-            else mode = rnd(G_RAND)+G_FIGHT;
-        }
+        if(mode < 0) mode = GAME(rotatemode) ? rnd(G_RAND)+G_FIGHT : GAME(defaultmode);
         if(muts < 0)
         {
-            if(GAME(defaultmuts) >= G_M_NONE) muts = GAME(defaultmuts);
-            else
+            muts = GAME(defaultmuts);
+            if(GAME(rotatemuts))
             {
-                muts = G_M_NONE;
                 int num = rnd(G_M_NUM+1);
                 if(num) loopi(num)
                 {
@@ -1422,7 +1417,7 @@ namespace server
             }
             else
             {
-                int mode = GAME(defaultmode) >= 0 ? gamemode : -1, muts = GAME(defaultmuts) >= -1 ? mutators : -2;
+                int mode = GAME(rotatemode) ? -1 : gamemode, muts = GAME(rotatemuts) ? -1 : mutators;
                 changemode(mode, muts);
                 const char *map = choosemap(smapname, mode, muts);
                 srvoutf(3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);

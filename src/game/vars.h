@@ -21,8 +21,10 @@ GVARF(IDF_ADMIN, gamespeed, 1, 100, 1000, timescale = sv_gamespeed, timescale = 
 GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepaused);
 
 GSVAR(IDF_ADMIN, defaultmap, "");
-GVAR(IDF_ADMIN, defaultmode, -1, G_DEATHMATCH, G_MAX-1);
-GVAR(IDF_ADMIN, defaultmuts, -2, G_M_TEAM, G_M_ALL);
+GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
+GVAR(IDF_ADMIN, defaultmuts, 0, G_M_TEAM, G_M_ALL);
+GVAR(IDF_ADMIN, rotatemode, 0, 0, 1);
+GVAR(IDF_ADMIN, rotatemuts, 0, 0, 1);
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
