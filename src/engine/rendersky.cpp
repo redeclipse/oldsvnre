@@ -412,6 +412,31 @@ void drawskyoutline()
 
 VAR(0, clampsky, 0, 1, 1);
 
+VAR(IDF_WORLD, fogdomeclouds, 0, 1, 1);
+
+static void drawfogdome(int farplane)
+{
+    notextureshader->set();
+    glDisable(GL_TEXTURE_2D);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glPushMatrix();
+    glLoadMatrixf(viewmatrix.v);
+    glRotatef(camera1->roll, 0, 1, 0);
+    glRotatef(camera1->pitch, -1, 0, 0);
+    glRotatef(camera1->yaw, 0, 0, -1);
+    if(reflecting) glScalef(1, 1, -1);
+    glTranslatef(0, 0, farplane*fogdomeheight*0.5f);
+    glScalef(farplane/2, farplane/2, farplane*(0.5f - fogdomeheight*0.5f));
+    drawdome();
+    glPopMatrix();
+
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+}
+
 static int yawskyfaces(int faces, int yaw = 0, float spin = 0)
 {
     if(spin || yaw%90) return faces&0x0F ? faces | 0x0F : faces;
@@ -501,20 +526,14 @@ void drawskybox(int farplane, bool limited)
         glEnable(GL_TEXTURE_2D);
     }
 
-    if(glaring)
-    {
-        static Shader *skyboxglareshader = NULL;
-        if(!skyboxglareshader) skyboxglareshader = lookupshaderbyname("skyboxglare");
-        skyboxglareshader->set();
-    }
+    if(glaring) SETSHADER(skyboxglare);
     else defaultshader->set();
 
     if((!glaring || skyglare) && skybox[0])
     {
-        if(fading) glColorMask(COLORMASK, GL_FALSE);
-
         if(blendsky)
         {
+            if(fading) glColorMask(COLORMASK, GL_FALSE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
@@ -530,6 +549,13 @@ void drawskybox(int farplane, bool limited)
         glPopMatrix();
 
         if(blendsky) glDisable(GL_BLEND);
+    }
+
+    if(!glaring && fogdomemax && !fogdomeclouds)
+    {
+        if(fading) glColorMask(COLORMASK, GL_FALSE);
+        drawfogdome(farplane);
+        defaultshader->set();
     }
 
     if((!glaring || cloudglare) && cloudbox[0])
@@ -575,29 +601,10 @@ void drawskybox(int farplane, bool limited)
         glEnable(GL_CULL_FACE);
     }
 
-    if(!glaring && fogdomemax)
+    if(!glaring && fogdomemax && fogdomeclouds)
     {
         if(fading) glColorMask(COLORMASK, GL_FALSE);
-
-        notextureshader->set();
-        glDisable(GL_TEXTURE_2D);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glPushMatrix();
-        glLoadMatrixf(viewmatrix.v);
-        glRotatef(camera1->roll, 0, 1, 0);
-        glRotatef(camera1->pitch, -1, 0, 0);
-        glRotatef(camera1->yaw, 0, 0, -1);
-        if(reflecting) glScalef(1, 1, -1);
-        glTranslatef(0, 0, farplane*fogdomeheight*0.5f);
-        glScalef(farplane/2, farplane/2, farplane*(0.5f - fogdomeheight*0.5f));
-        drawdome();
-        glPopMatrix();
-
-        glDisable(GL_BLEND);
-        glEnable(GL_TEXTURE_2D);
+        drawfogdome(farplane);
     }
 
     if(clampsky) glDepthRange(0, 1);
