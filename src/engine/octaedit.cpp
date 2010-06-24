@@ -2075,7 +2075,9 @@ struct texturegui : guicb
 
     void gui(guient &g, bool firstpass)
     {
-        int origtab = menutab, nextslot = menutex, numtabs = max((slots.length() + thumbwidth*thumbheight - 1)/(thumbwidth*thumbheight), 1);;
+        extern VSlot dummyvslot;
+        int origtab = menutab, nextslot = menutex,
+            numtabs = max((texmru.length() + thumbwidth*thumbheight - 1)/(thumbwidth*thumbheight), 1);;
         g.start(menustart, menuscale, &menutab, true);
         loopi(numtabs)
         {
@@ -2084,16 +2086,25 @@ struct texturegui : guicb
             g.pushlist();
             g.pushlist();
             g.pushlist();
-            if(slots.inrange(menutex))
+            if(texmru.inrange(menutex))
             {
-                Slot &s = lookupslot(menutex, false);
-                VSlot &v = *s.variants;
-                if(s.sts.length() && !s.loaded && !s.thumbnail && totalmillis-lastthumbnail<thumbtime)
+                VSlot &v = lookupvslot(texmru[menutex]);
+                if(v.slot->sts.empty()) continue;
+                else if(!v.slot->loaded && !v.slot->thumbnail)
                 {
-                    loadthumbnail(s);
+                    if(totalmillis-lastthumbnail<thumbtime)
+                    {
+                        g.texture(dummyvslot, thumbsize, false); //create an empty space
+                        continue;
+                    }
+                    loadthumbnail(*v.slot);
                     lastthumbnail = totalmillis;
                 }
-                if(g.texture(v, thumbheight*thumbsize, true)&GUI_UP) { edittex(menutex); menuon = false; }
+                if(g.texture(v, thumbheight*thumbsize, true)&GUI_UP)
+                {
+                    edittex(texmru[menutex]);
+                    menuon = false;
+                }
             }
             else g.image(textureload("textures/nothumb", 3), thumbheight*thumbsize, true);
             g.space(1);
@@ -2103,30 +2114,25 @@ struct texturegui : guicb
                 g.pushlist();
                 loop(w, thumbwidth)
                 {
-                    extern VSlot dummyvslot;
                     int ti = (i*thumbheight+h)*thumbwidth+w;
-                    if(ti<slots.length())
+                    if(ti<texmru.length())
                     {
-                        Slot &s = lookupslot(ti, false);
-                        VSlot &v = *s.variants;
-                        if(s.sts.empty()) continue;
-                        else if(!s.loaded && !s.thumbnail)
+                        VSlot &v = lookupvslot(texmru[ti]);
+                        if(v.slot->sts.empty()) continue;
+                        else if(!v.slot->loaded && !v.slot->thumbnail)
                         {
                             if(totalmillis-lastthumbnail<thumbtime)
                             {
                                 g.texture(dummyvslot, thumbsize, false); //create an empty space
                                 continue;
                             }
-                            loadthumbnail(s);
+                            loadthumbnail(*v.slot);
                             lastthumbnail = totalmillis;
                         }
-                        if(g.texture(v, thumbsize, true)&GUI_UP && (s.loaded || s.thumbnail!=notexture))
-                            nextslot = v.index;
+                        if(g.texture(v, thumbsize, true)&GUI_UP && (v.slot->loaded || v.slot->thumbnail!=notexture))
+                            nextslot = ti;
                     }
-                    else
-                    {
-                        g.texture(dummyvslot, thumbsize, false); //create an empty space
-                    }
+                    else g.texture(dummyvslot, thumbsize, false); //create an empty space
                 }
                 g.poplist();
             }
@@ -2135,10 +2141,10 @@ struct texturegui : guicb
             g.space(1);
             g.pushlist();
             g.space(1);
-            if(slots.inrange(menutex))
+            if(texmru.inrange(menutex))
             {
-                Slot &s = lookupslot(menutex, false);
-                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, menutex, s.sts.empty() ? "<unknown texture>" : s.sts[0].name);
+                VSlot &v = lookupvslot(texmru[menutex]);
+                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, texmru[menutex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
             }
             else g.textf("no texture selected", 0x888888, NULL);
             g.poplist();
@@ -2154,10 +2160,10 @@ struct texturegui : guicb
         if(on != menuon && (menuon = on))
         {
             if(menustart <= lasttexmillis)
-                menutab = 1+clamp(lookupvslot(lasttex, false).slot->index, 0, slots.length()-1)/(thumbwidth*thumbheight);
+                menutab = 1+clamp(texmru.find(lasttex), 0, texmru.length()-1)/(thumbwidth*thumbheight);
             menustart = starttime();
             cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
-            menutex = !isempty(c) ? c.texture[sel.orient] : -1;
+            menutex = !isempty(c) ? texmru.find(c.texture[sel.orient]) : -1;
         }
     }
 

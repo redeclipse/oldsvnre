@@ -652,7 +652,7 @@ struct gui : guient
         static Shader *rgbonlyshader = NULL;
         if(!rgbonlyshader) rgbonlyshader = lookupshaderbyname("rgbonly");
         rgbonlyshader->set();
-        const vec &color = hit && !overlaid ? vec(0.5f, 0.5f, 0.5f) : vec(1, 1, 1);
+        const vec &color = hit && !overlaid ? vec(1.25f, 1.25f, 1.25f) : vec(1, 1, 1);
         float tc[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
         int xoff = vslot.xoffset, yoff = vslot.yoffset;
         if(vslot.rotation)
