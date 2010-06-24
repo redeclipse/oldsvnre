@@ -1278,16 +1278,15 @@ namespace client
 
                 case N_MAPCHANGE:
                 {
-                    int hasmap = getint(p);
-                    if(hasmap) getstring(text, p);
+                    getstring(text, p);
                     int getit = getint(p), mode = getint(p), muts = getint(p);
-                    changemapserv(hasmap && getit != 1 ? text : NULL, mode, muts, getit == 2);
+                    changemapserv(getit != 1 ? text : NULL, mode, muts, getit == 2);
                     mapchanged = true;
                     if(needsmap) switch(getit)
                     {
                         case 0: case 2:
                         {
-                            conoutft(CON_MESG, "server requested map change to %s, and we need it, so asking for it", hasmap ? text : "<temp>");
+                            conoutft(CON_MESG, "server requested map change to %s, and we need it, so asking for it", text);
                             addmsg(N_GETMAP, "r");
                             break;
                         }

@@ -463,7 +463,7 @@ namespace server
     {
         const char *map = GAME(defaultmap);
         if(!map || !*map) map = choosemap(suggest, mode, muts, m_campaign(gamemode) ? 1 : GAME(maprotate));
-        return map;
+        return map && *map ? map : "maps/untitled";
     }
 
     void setpause(bool on = false)
@@ -711,7 +711,12 @@ namespace server
     const char *choosemap(const char *suggest, int mode, int muts, int force)
     {
         static string chosen;
-        if(suggest && *suggest) copystring(chosen, suggest);
+        if(suggest && *suggest)
+        {
+            if(!strncasecmp(suggest, "maps/", 5) || !strncasecmp(suggest, "maps\\", 5))
+                copystring(chosen, suggest+5);
+            else copystring(chosen, suggest);
+        }
         else *chosen = 0;
         int rotate = force ? force : GAME(maprotate);
         if(rotate)
@@ -1412,7 +1417,7 @@ namespace server
             if(gotvotes)
             {
                 srvoutf(3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
-                sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, best->map, 0, best->mode, best->muts);
+                sendf(-1, 1, "risi3", N_MAPCHANGE, best->map, 0, best->mode, best->muts);
                 changemap(best->map, best->mode, best->muts);
             }
             else
@@ -1421,7 +1426,7 @@ namespace server
                 changemode(mode, muts);
                 const char *map = choosemap(smapname, mode, muts);
                 srvoutf(3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
-                sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, map, 0, mode, muts);
+                sendf(-1, 1, "risi3", N_MAPCHANGE, map, 0, mode, muts);
                 changemap(map, mode, muts);
             }
             return true;
@@ -1439,14 +1444,14 @@ namespace server
         return true;
     }
 
-    void vote(char *reqmap, int &reqmode, int &reqmuts, int sender)
+    void vote(const char *reqmap, int &reqmode, int &reqmuts, int sender)
     {
         clientinfo *ci = (clientinfo *)getinfo(sender); modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
         if(GAME(modelock) == 5 && GAME(mapslock) == 5 && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
         else switch(GAME(votelock))
         {
-            case 1: case 2: if(!m_edit(reqmode) && smapname[0] && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock) == 1 ? PRIV_MASTER : PRIV_ADMIN, "vote for the same map again")) return; break;
+            case 1: case 2: if(!m_edit(reqmode) && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock) == 1 ? PRIV_MASTER : PRIV_ADMIN, "vote for the same map again")) return; break;
             case 3: case 4: if(!haspriv(ci, GAME(votelock) == 3 ? PRIV_MASTER : PRIV_ADMIN, "vote for a new game")) return; break;
             case 5: if(!haspriv(ci, PRIV_MAX, "vote for a new game")) return; break;
         }
@@ -1502,7 +1507,7 @@ namespace server
         {
             endmatch();
             srvoutf(3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
-            sendf(-1, 1, "ri2si3", N_MAPCHANGE, 1, ci->mapvote, 0, ci->modevote, ci->mutsvote);
+            sendf(-1, 1, "risi3", N_MAPCHANGE, ci->mapvote, 0, ci->modevote, ci->mutsvote);
             changemap(ci->mapvote, ci->modevote, ci->mutsvote);
             return;
         }
@@ -1867,7 +1872,7 @@ namespace server
 
     void checkmaps(int req = -1)
     {
-        if(m_edit(gamemode) || !smapname[0]) return;
+        if(m_edit(gamemode)) return;
         vector<crcinfo> crcs;
         int total = 0, unsent = 0, invalid = 0;
         loopv(clients)
@@ -2193,12 +2198,7 @@ namespace server
     {
         putint(p, N_WELCOME);
         putint(p, N_MAPCHANGE);
-        if(!smapname[0]) putint(p, 0);
-        else
-        {
-            putint(p, 1);
-            sendstring(smapname, p);
-        }
+        sendstring(smapname, p);
         if(!ci) putint(p, 0);
         else if(!ci->online && m_edit(gamemode) && numclients(ci->clientnum))
         {
@@ -3841,13 +3841,10 @@ namespace server
                 {
                     getstring(text, p);
                     filtertext(text, text);
-                    if(!strncasecmp(text, "maps/", 5) || !strncasecmp(text, "maps\\", 5))
-                    {
-                        defformatstring(map)("%s", &text[5]);
-                        copystring(text, map);
-                    }
+                    const char *s = text;
+                    if(!strncasecmp(s, "maps/", 5) || !strncasecmp(s, "maps\\", 5)) s += 5;
                     int reqmode = getint(p), reqmuts = getint(p);
-                    vote(text, reqmode, reqmuts, sender);
+                    vote(s, reqmode, reqmuts, sender);
                     break;
                 }
 
@@ -4193,7 +4190,7 @@ namespace server
                     if(ci->state.state == CS_SPECTATOR) break;
                     if(size >= 0)
                     {
-                        smapname[0] = '\0';
+                        copystring(smapname, "maps/untitled");
                         sents.shrink(0);
                         hasgameinfo = true;
                         if(smode) smode->reset(true);
