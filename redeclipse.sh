@@ -1,14 +1,14 @@
 #!/bin/sh
-# BF_DATA should refer to the directory in which Red Eclipse data files are placed.
-#BF_DATA=~/redeclipse
-#BF_DATA=/usr/local/redeclipse
-BF_DATA=.
+# RE_DATA should refer to the directory in which Red Eclipse data files are placed.
+#RE_DATA=~/redeclipse
+#RE_DATA=/usr/local/redeclipse
+RE_DATA=.
 
-# BF_BIN should refer to the directory in which Red Eclipse executable files are placed.
-BF_BIN=${BF_DATA}/bin
+# RE_BIN should refer to the directory in which Red Eclipse executable files are placed.
+RE_BIN=${RE_DATA}/bin
 
-# BF_OPTIONS contains any command line options you would like to start Red Eclipse with.
-BF_OPTIONS="-r"
+# RE_OPTIONS contains any command line options you would like to start Red Eclipse with.
+RE_OPTIONS="-r"
 
 # SYSTEM_NAME should be set to the name of your operating system.
 #SYSTEM_NAME=Linux
@@ -40,23 +40,23 @@ x86_64)
     ;;
 esac
 
-if [ -x ${BF_BIN}/reclient ]
+if [ -x ${RE_BIN}/reclient ]
 then
     SYSTEM_SUFFIX=
     MACHINE_SUFFIX=
 fi
 
 
-if [ -x ${BF_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]; 
+if [ -x ${RE_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]; 
 then
-    cd ${BF_DATA}
-    exec ${BF_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ${BF_OPTIONS} "$@"
+    cd ${RE_DATA}
+    exec ${RE_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ${RE_OPTIONS} "$@"
 else
     echo "Your platform does not have a pre-compiled Red Eclipse client."
     echo -n "Would you like to build one now? [Yn] "
     read CC
     if [ "${CC}" != "n" ]; then
-        cd ${BF_DATA}/src
+        cd ${RE_DATA}/src
         make clean install
         echo "Build complete, please try running the script again."
     else
