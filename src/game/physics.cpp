@@ -725,7 +725,7 @@ namespace physics
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                         d->action[AC_DASH] = false;
-                        if(!jetting) d->action[AC_JUMP] = false;
+                        if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
                         game::impulseeffect(d, true);
                     }
