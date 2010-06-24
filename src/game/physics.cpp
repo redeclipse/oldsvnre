@@ -13,7 +13,6 @@ namespace physics
     FVAR(IDF_WORLD, slopez, 0, 0.5f, 1);
     FVAR(IDF_WORLD, wallz, 0, 0.2f, 1);
     FVAR(IDF_WORLD, stepspeed, 1e-4f, 1.f, 1000);
-    FVAR(IDF_WORLD, ladderspeed, 1e-4f, 1.f, 1000);
 
     FVAR(IDF_PERSIST, floatspeed, 1e-4f, 100, 1000);
     FVAR(IDF_PERSIST, floatcurb, 0, 1.f, 1000);
@@ -170,9 +169,10 @@ namespace physics
 
     bool jetpack(physent *d)
     {
-        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && d->physstate == PHYS_FALL && !d->onladder)
+        if(m_jetpack(game::gamemode, game::mutators) && allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
         {
-            if(m_jetpack(game::gamemode, game::mutators) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START)
+            gameent *e = (gameent *)d;
+            if(e->physstate == PHYS_FALL && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsedelay) && e->aitype < AI_START)
                 return true;
         }
         return false;
@@ -215,7 +215,6 @@ namespace physics
 
     float stepforce(physent *d, bool up)
     {
-        if(up && d->onladder) return ladderspeed;
         if(d->physstate > PHYS_FALL) return stepspeed;
         return 1.f;
     }
@@ -238,7 +237,6 @@ namespace physics
 
     bool sticktospecial(physent *d)
     {
-        if(d->onladder) return true;
         if(d->type == ENT_PLAYER || d->type == ENT_AI) { if(((gameent *)d)->turnside) return true; }
         return false;
     }
@@ -303,7 +301,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if((d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d)) return true;
+        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d)) return true;
         return false;
     }
 
@@ -354,28 +352,6 @@ namespace physics
     {
         vec old(d->o), stairdir = (obstacle.z >= 0 && obstacle.z < slopez ? vec(-obstacle.x, -obstacle.y, 0) : vec(dir.x, dir.y, 0)).rescale(1);
         float force = stepforce(d, true);
-        if(d->onladder)
-        {
-            vec laddir = vec(stairdir).add(vec(0, 0, maxstep)).mul(0.1f*force);
-            loopi(2)
-            {
-                d->o.add(laddir);
-                if(collide(d))
-                {
-                    if(d->physstate == PHYS_FALL || d->floor != floor)
-                    {
-                        d->timeinair = 0;
-                        d->floor = vec(0, 0, 1);
-                        switchfloor(d, dir, d->floor);
-                    }
-                    d->physstate = PHYS_STEP_UP;
-                    return true;
-                }
-                d->o = old; // try again, but only up
-                laddir.x = laddir.y = 0;
-            }
-            return false;
-        }
         bool cansmooth = true;
         d->o = old;
         /* check if there is space atop the stair to move to */
@@ -631,11 +607,11 @@ namespace physics
             d->o = old;
             d->o.z -= stairheight;
             d->zmargin = -stairheight;
-            if(d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR  || (!collide(d, vec(0, 0, -1), slopez) && (d->physstate == PHYS_STEP_UP || d->physstate == PHYS_STEP_DOWN || wall.z >= floorz || d->onladder)))
+            if(d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR  || (!collide(d, vec(0, 0, -1), slopez) && (d->physstate == PHYS_STEP_UP || d->physstate == PHYS_STEP_DOWN || wall.z >= floorz)))
             {
                 d->o = old;
                 d->zmargin = 0;
-                if(trystepup(d, dir, obstacle, stairheight, d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR || d->onladder ? d->floor : vec(wall)))
+                if(trystepup(d, dir, obstacle, stairheight, d->physstate == PHYS_SLOPE || d->physstate == PHYS_FLOOR ? d->floor : vec(wall)))
                     return true;
             }
             else
@@ -645,12 +621,12 @@ namespace physics
             }
             collided = true; // can't step over the obstacle, so just slide against it
         }
-        else if(d->physstate == PHYS_STEP_UP || d->onladder)
+        else if(d->physstate == PHYS_STEP_UP)
         {
             if(!collide(d, vec(0, 0, -1), slopez))
             {
                 d->o = old;
-                if(trystepup(d, dir, vec(0, 0, 1), stairheight, d->onladder ? d->floor : vec(wall))) return true;
+                if(trystepup(d, dir, vec(0, 0, 1), stairheight, vec(wall))) return true;
                 d->o.add(dir);
             }
         }
@@ -731,7 +707,7 @@ namespace physics
 
             if(!d->turnside)
             {
-                if((d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_BOOST] || lastmillis-d->impulse[IM_BOOST] > impulsedelay))
+                if((d->ai || dashaction) && canimpulse(d, 0, 1) && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedelay))
                 {
                     bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
                     if(dash || pulse)
@@ -871,7 +847,8 @@ namespace physics
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifyinput((gameent *)pl, m, wantsmove, floating, millis);
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
         else pl->timeinair = 0;
-        if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
+        if(pl->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
+        else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
         m.mul(movevelocity(pl, floating));
         if(floating || pl->type == ENT_CAMERA) pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
         else
@@ -991,7 +968,7 @@ namespace physics
         {
             updatematerial(pl, local, floating);
             jetting = jetpack(pl);
-            if(!floating && !sticktospecial(pl) && !jetting) modifygravity(pl, millis); // apply gravity
+            if(!floating && !sticktospecial(pl) && !pl->onladder && !jetting) modifygravity(pl, millis); // apply gravity
             else pl->resetphys();
         }
         modifyvelocity(pl, local, floating, millis); // apply any player generated changes in velocity
