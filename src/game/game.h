@@ -480,7 +480,7 @@ enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_BOOST, IM_SLIDE, IM_JUMP, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_KICK };
 
 #define CROUCHHEIGHT 0.7f
@@ -1035,7 +1035,6 @@ struct gameent : dynent, gamestate
     {
         impulse[IM_METER] += cost;
         impulse[IM_TIME] = impulse[IM_SLIDE] = millis;
-        if(type == IM_T_BOOST) impulse[IM_BOOST] = millis;
         if(!impulse[IM_JUMP] && type > IM_T_NONE && type < IM_T_WALL)
         {
             impulse[IM_TYPE] = IM_T_NONE;
