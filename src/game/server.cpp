@@ -684,39 +684,58 @@ namespace server
         modecheck(mode, muts);
     }
 
+    #define mapshrink(a,b,c) \
+        if(a) \
+        { \
+            char *p = shrinklist(b, c, 1); \
+            if(p) \
+            { \
+                copystring(b, p); \
+                DELETEA(p); \
+            } \
+        }
+
+    #define mapcull(a,b,c) \
+        mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
+        mapshrink(m_jetpack(b, c), a, GAME(jetpackmaps));
+
+    #define maplist(a,b,c) \
+        if(m_campaign(b)) copystring(a, GAME(campaignmaps)); \
+        else if(m_stf(b)) copystring(a, GAME(stfmaps)); \
+        else if(m_ctf(b)) copystring(a, GAME(ctfmaps)); \
+        else if(m_trial(b)) copystring(a, GAME(trialmaps)); \
+        else if(m_fight(b)) copystring(a, GAME(mainmaps)); \
+        else copystring(a, GAME(allowmaps)); \
+        mapcull(a, b, c);
+
     const char *choosemap(const char *suggest, int mode, int muts, int force)
     {
-        static string mapchosen;
-        if(suggest && *suggest) copystring(mapchosen, suggest);
-        else *mapchosen = 0;
+        static string chosen;
+        if(suggest && *suggest) copystring(chosen, suggest);
+        else *chosen = 0;
         int rotate = force ? force : GAME(maprotate);
         if(rotate)
         {
-            const char *maplist = GAME(mainmaps);
-            if(m_campaign(mode)) maplist = GAME(campaignmaps);
-            else if(m_duel(mode, muts)) maplist = GAME(duelmaps);
-            else if(m_stf(mode)) maplist = GAME(stfmaps);
-            else if(m_ctf(mode)) maplist = GAME(ctfmaps);
-            else if(m_trial(mode)) maplist = GAME(trialmaps);
-            if(maplist && *maplist)
+            string list; maplist(list, mode, muts);
+            if(*list)
             {
-                int n = listlen(maplist), p = -1, c = -1;
-                if(*mapchosen)
+                int n = listlen(list), p = -1, c = -1;
+                if(*chosen)
                 {
                     loopi(n)
                     {
-                        char *maptxt = indexlist(maplist, i);
-                        if(maptxt)
+                        char *a = indexlist(list, i);
+                        if(a)
                         {
-                            string maploc;
-                            if(strpbrk(maptxt, "/\\")) copystring(maploc, maptxt);
-                            else formatstring(maploc)("maps/%s", maptxt);
-                            if(!strcmp(mapchosen, maptxt) || !strcmp(mapchosen, maploc))
+                            string b;
+                            if(strpbrk(a, "/\\")) copystring(b, a);
+                            else formatstring(b)("maps/%s", a);
+                            if(!strcmp(chosen, a) || !strcmp(chosen, b))
                             {
                                 p = i;
                                 if(rotate == 1) c = i >= 0 && i < n-1 ? i+1 : 0;
                             }
-                            DELETEA(maptxt);
+                            DELETEA(a);
                         }
                         if(p >= 0) break;
                     }
@@ -726,15 +745,15 @@ namespace server
                     c = n ? rnd(n) : 0;
                     if(c == p) c = p >= 0 && p < n-1 ? p+1 : 0;
                 }
-                char *mapidx = c >= 0 ? indexlist(maplist, c) : NULL;
-                if(mapidx)
+                char *q = c >= 0 ? indexlist(list, c) : NULL;
+                if(q)
                 {
-                    copystring(mapchosen, mapidx);
-                    DELETEA(mapidx);
+                    copystring(chosen, q);
+                    DELETEA(q);
                 }
             }
         }
-        return *mapchosen ? mapchosen : pickmap(suggest, mode, muts);
+        return *chosen ? chosen : pickmap(suggest, mode, muts);
     }
 
     bool canload(const char *type)
@@ -1465,41 +1484,40 @@ namespace server
         }
         if(reqmode != G_EDITMODE && GAME(mapslock))
         {
-            const char *maplist = NULL;
+            string list;
             switch(GAME(mapslock))
             {
-                case 1: case 2: maplist = GAME(allowmaps); break;
+                case 1: case 2:
+                {
+                    concatstring(list, GAME(allowmaps));
+                    mapcull(list, reqmode, reqmuts);
+                    break;
+                }
                 case 3: case 4:
                 {
-                    if(m_campaign(reqmode)) maplist = GAME(campaignmaps);
-                    else if(m_duel(reqmode, reqmuts)) maplist = GAME(duelmaps);
-                    else if(m_stf(reqmode)) maplist = GAME(stfmaps);
-                    else if(m_ctf(reqmode)) maplist = GAME(ctfmaps);
-                    else if(m_trial(reqmode)) maplist = GAME(trialmaps);
-                    else if(m_fight(reqmode)) maplist = GAME(mainmaps);
-                    else maplist = GAME(allowmaps);
+                    maplist(list, reqmode, reqmuts);
                     break;
                 }
                 case 5: if(!haspriv(ci, PRIV_MAX, "select a custom maps")) return; break;
                 case 0: default: break;
             }
-            if(maplist && *maplist)
+            if(*list)
             {
-                int n = listlen(maplist);
+                int n = listlen(list);
                 bool found = false;
-                string maploc;
-                if(strpbrk(reqmap, "/\\")) copystring(maploc, reqmap);
-                else formatstring(maploc)("maps/%s", reqmap);
+                string b;
+                if(strpbrk(reqmap, "/\\")) copystring(b, reqmap);
+                else formatstring(b)("maps/%s", reqmap);
                 loopi(n)
                 {
-                    char *maptxt = indexlist(maplist, i);
-                    if(maptxt)
+                    char *a = indexlist(list, i);
+                    if(a)
                     {
                         string cmapname;
-                        if(strpbrk(maptxt, "/\\")) copystring(cmapname, maptxt);
-                        else formatstring(cmapname)("maps/%s", maptxt);
-                        if(!strcmp(maploc, cmapname)) found = true;
-                        DELETEA(maptxt);
+                        if(strpbrk(a, "/\\")) copystring(cmapname, a);
+                        else formatstring(cmapname)("maps/%s", a);
+                        if(!strcmp(b, cmapname)) found = true;
+                        DELETEA(a);
                     }
                     if(found) break;
                 }
