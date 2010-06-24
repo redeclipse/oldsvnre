@@ -171,16 +171,18 @@ namespace physics
     bool jetpack(physent *d)
     {
         if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && d->physstate == PHYS_FALL && !d->onladder)
-            return impulsetype >= (PHYS(gravity) > 0 ? 2 : 1) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START;
+        {
+            if(m_jetpack(game::gamemode, game::mutators) && ((gameent *)d)->action[AC_JUMP] && ((gameent *)d)->aitype < AI_START)
+                return true;
+        }
         return false;
     }
 
     bool sprinting(physent *d, bool turn)
     {
-        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
+        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && !jetpack(d))
         {
             gameent *e = (gameent *)d;
-            if(jetpack(e)) return true;
             if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
@@ -252,10 +254,10 @@ namespace physics
                 if(cost <= 0)
                 {
                     if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= PHYSMILLIS) return false;
-                    if(PHYS(gravity) > 0 || impulsetype)
+                    if(PHYS(gravity) > 0 || m_jetpack(game::gamemode, game::mutators))
                     {
                         if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
-                        if(cost == 0 && (impulsestyle == 1 || impulsetype >= (PHYS(gravity) > 0 ? 2 : 1))  && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL)
+                        if(cost == 0 && (impulsestyle == 1 || m_jetpack(game::gamemode, game::mutators))  && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL)
                             return false;
                     }
                 }
@@ -287,8 +289,8 @@ namespace physics
                 case PHYS_STEP_UP: vel *= movestepup; break;
                 default: break;
             }
-            if(sprinting(d, false)) vel *= movesprint;
-            if(jetpack(d)) vel *= movesprint;
+            if(sprinting(pl, false)) vel *= movesprint;
+            if(jetpack(pl)) vel *= movejetpack;
         }
         return vel;
     }
@@ -687,14 +689,14 @@ namespace physics
             else if(impulsemeter)
             {
                 bool sprint = sprinting(d, false);
-                if(sprint && impulsesprint)
+                if(sprint && impulsesprint > 0)
                 {
-                    if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
+                    if(canimpulse(d, millis)) d->impulse[IM_METER] += int(ceilf(millis*impulsesprint));
                     else d->action[AC_SPRINT] = false;
                 }
                 if(jetting)
                 {
-                    if(canimpulse(d, millis)) d->impulse[IM_METER] += millis;
+                    if(canimpulse(d, millis)) d->impulse[IM_METER] += int(ceilf(millis*impulsejetpack));
                     else jetting = d->action[AC_JUMP] = false;
                 }
                 if(d->impulse[IM_METER] > 0 && impulseregen > 0)
@@ -707,7 +709,8 @@ namespace physics
                             if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
-                    impulsemod(sprint || jetting, impulseregensprint);
+                    impulsemod(sprint, impulseregensprint);
+                    impulsemod(jetting, impulseregenjetpack);
                     impulsemod(d->move || d->strafe, impulseregenmove);
                     impulsemod(!onfloor && PHYS(gravity) > 0, impulseregeninair);
                     impulsemod(iscrouching(d), impulseregencrouch);

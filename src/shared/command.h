@@ -134,6 +134,7 @@ extern void writeescapedstring(stream *f, const char *s);
 extern void explodelist(const char *s, vector<char *> &elems);
 extern int listlen(const char *s);
 extern char *indexlist(const char *s, int pos);
+extern char *shrinklist(const char *list, const char *limit, int failover);
 
 extern int sortidents(ident **x, ident **y);
 extern void writeescapedstring(stream *f, const char *s);

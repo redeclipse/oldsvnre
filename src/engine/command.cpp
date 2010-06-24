@@ -984,6 +984,42 @@ void at(char *s, int *pos)
     commandret = indexlist(s, *pos);
 }
 
+char *shrinklist(const char *list, const char *limit, int failover)
+{
+    string shrink; shrink[0] = 0;
+    int x = listlen(list), y = listlen(limit);
+    if(!y) copystring(shrink, (x && failover == 1) || !y ? list : limit);
+    else if(x)
+    {
+        loopi(x)
+        {
+            char *a = indexlist(list, i);
+            if(a)
+            {
+                loopj(y)
+                {
+                    char *b = indexlist(limit, j);
+                    if(b)
+                    {
+                        if(!strcmp(a, b))
+                        {
+                            if(*shrink) concatstring(shrink, " ");
+                            concatstring(shrink, b);
+                            DELETEA(b);
+                            break;
+                        }
+                        DELETEA(b);
+                    }
+                }
+                DELETEA(a);
+            }
+        }
+        if(failover > 0 && !*shrink) copystring(shrink, failover == 1 ? list : limit);
+    }
+    else return NULL;
+    return newstring(shrink);
+}
+
 void substr(char *s, int *start, char *count)
 {
     int len = strlen(s), offset = clamp(*start, 0, len);
@@ -1003,6 +1039,7 @@ COMMAND(0, format, "V");
 COMMAND(0, at, "si");
 COMMAND(0, substr, "sis");
 ICOMMAND(0, listlen, "s", (char *s), intret(listlen(s)));
+ICOMMAND(0, shrinklist, "ssi", (char *s, char *t, int *n), char *p = shrinklist(s, t, *n); result(p); if(p) DELETEA(p));
 COMMANDN(0, getalias, getalias_, "s");
 
 void looplist(const char *var, const char *list, const char *body, bool search)
