@@ -1035,16 +1035,9 @@ struct gameent : dynent, gamestate
     {
         impulse[IM_METER] += cost;
         impulse[IM_TIME] = impulse[IM_SLIDE] = millis;
-        if(!impulse[IM_JUMP] && type > IM_T_NONE && type < IM_T_WALL)
-        {
-            impulse[IM_TYPE] = IM_T_NONE;
-            impulse[IM_JUMP] = millis;
-        }
-        else
-        {
-            impulse[IM_TYPE] = type;
-            impulse[IM_COUNT]++;
-        }
+        if(!impulse[IM_JUMP] && type > IM_T_NONE && type < IM_T_WALL) impulse[IM_JUMP] = millis;
+        impulse[IM_TYPE] = type;
+        impulse[IM_COUNT]++;
         resetphys();
     }
 

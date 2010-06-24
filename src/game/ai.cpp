@@ -951,7 +951,7 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder,
-            jumper = off.z >= JUMPMIN && (!offground || (d->timeinair > 500 && physics::canimpulse(d))),
+            jumper = off.z >= JUMPMIN && (!offground || (d->timeinair > 250 && physics::canimpulse(d, 0, 1))),
             jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;
         if(jump)
         {

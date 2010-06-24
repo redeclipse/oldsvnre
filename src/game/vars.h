@@ -36,7 +36,7 @@ GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo longestyard mainframe panic venus");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost hinder keystone longestyard mainframe mist nova smouldering spacetech testchamber tower tranquility venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
 
 namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
@@ -124,7 +124,7 @@ GFVAR(0, forceslidecurb, -1, -1, 1000);
 GFVAR(0, movespeed, 0, 100.f, 1000); // speed
 GFVAR(0, movecrawl, 0, 0.5f, 1000); // crawl modifier
 GFVAR(0, movesprint, 0, 1.825f, 1000); // sprinting modifier
-GFVAR(0, movejetpack, 0, 1.9f, 1000); // jetpack modifier
+GFVAR(0, movejetpack, 0, 2.25f, 1000); // jetpack modifier
 GFVAR(0, movestraight, 0, 1.1f, 1000); // non-strafe modifier
 GFVAR(0, movestrafe, 0, 1.f, 1000); // strafe modifier
 GFVAR(0, moveinair, 0, 0.9f, 1000); // in-air modifier
