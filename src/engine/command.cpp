@@ -971,6 +971,28 @@ char *indexlist(const char *s, int pos)
     return newstring(e, s-e);
 }
 
+
+int pointlist(const char *s, int pos, int &len)
+{
+    const char *start = s;
+    whitespaceskip;
+    loopi(pos)
+    {
+        elementskip;
+        whitespaceskip;
+        if(!*s) break;
+    }
+    const char *e = s;
+    elementskip;
+    if(*e=='"')
+    {
+        e++;
+        if(s[-1]=='"') --s;
+    }
+    len = s-e;
+    return e-start;
+}
+
 int listlen(const char *s)
 {
     int n = 0;
@@ -984,10 +1006,11 @@ void at(char *s, int *pos)
     commandret = indexlist(s, *pos);
 }
 
-bool checklist(const char *word, int size, const char *list)
+int checklist(const char *word, int size, const char *list)
 {
     const char *s = list;
     whitespaceskip;
+    int x = 0;
     while(*s)
     {
         const char *elem = s;
@@ -998,10 +1021,11 @@ bool checklist(const char *word, int size, const char *list)
             elem++;
             len -= s[-1]=='"' ? 2 : 1;
         }
-        if(size == len && !strncmp(word, elem, len)) return true;
+        if(size == len && !strncmp(word, elem, len)) return x;
         whitespaceskip;
+        x++;
     }
-    return false;
+    return -1;
 }
 
 char *shrinklist(const char *list, const char *limit, int failover)
@@ -1019,7 +1043,7 @@ char *shrinklist(const char *list, const char *limit, int failover)
             elem++;
             len -= s[-1]=='"' ? 2 : 1;
         }
-        if(checklist(elem, len, limit))
+        if(checklist(elem, len, limit) >= 0)
         {
             if(!p.empty()) p.add(' ');
             p.put(elem, len);
