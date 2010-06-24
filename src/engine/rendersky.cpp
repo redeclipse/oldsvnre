@@ -577,7 +577,7 @@ void drawskybox(int farplane, bool limited)
 
     if(!glaring && fogdomemax)
     {
-        if(fading) glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
+        if(fading) glColorMask(COLORMASK, GL_FALSE);
 
         notextureshader->set();
         glDisable(GL_TEXTURE_2D);
