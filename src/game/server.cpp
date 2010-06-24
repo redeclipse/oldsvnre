@@ -685,13 +685,13 @@ namespace server
     }
 
     #define mapshrink(a,b,c) \
-        if(a) \
+        if(a && b) \
         { \
             char *p = shrinklist(b, c, 1); \
             if(p) \
             { \
-                copystring(b, p); \
-                DELETEA(p); \
+                DELETEA(b); \
+                b = p; \
             } \
         }
 
@@ -700,12 +700,12 @@ namespace server
         mapshrink(m_jetpack(b, c), a, GAME(jetpackmaps));
 
     #define maplist(a,b,c) \
-        if(m_campaign(b)) copystring(a, GAME(campaignmaps)); \
-        else if(m_stf(b)) copystring(a, GAME(stfmaps)); \
-        else if(m_ctf(b)) copystring(a, GAME(ctfmaps)); \
-        else if(m_trial(b)) copystring(a, GAME(trialmaps)); \
-        else if(m_fight(b)) copystring(a, GAME(mainmaps)); \
-        else copystring(a, GAME(allowmaps)); \
+        if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
+        else if(m_stf(b)) a = newstring(GAME(stfmaps)); \
+        else if(m_ctf(b)) a = newstring(GAME(ctfmaps)); \
+        else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
+        else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
+        else a = newstring(GAME(allowmaps)); \
         mapcull(a, b, c);
 
     const char *choosemap(const char *suggest, int mode, int muts, int force)
@@ -716,41 +716,27 @@ namespace server
         int rotate = force ? force : GAME(maprotate);
         if(rotate)
         {
-            string list; maplist(list, mode, muts);
-            if(*list)
+            char *list = NULL;
+            maplist(list, mode, muts);
+            if(list)
             {
                 int n = listlen(list), p = -1, c = -1;
                 if(*chosen)
                 {
-                    loopi(n)
-                    {
-                        char *a = indexlist(list, i);
-                        if(a)
-                        {
-                            string b;
-                            if(strpbrk(a, "/\\")) copystring(b, a);
-                            else formatstring(b)("maps/%s", a);
-                            if(!strcmp(chosen, a) || !strcmp(chosen, b))
-                            {
-                                p = i;
-                                if(rotate == 1) c = i >= 0 && i < n-1 ? i+1 : 0;
-                            }
-                            DELETEA(a);
-                        }
-                        if(p >= 0) break;
-                    }
+                    p = checklist(chosen, strlen(chosen), list);
+                    if(p >= 0 && rotate == 1) c = p >= 0 && p < n-1 ? p+1 : 0;
                 }
                 if(c < 0)
                 {
                     c = n ? rnd(n) : 0;
                     if(c == p) c = p >= 0 && p < n-1 ? p+1 : 0;
                 }
-                char *q = c >= 0 ? indexlist(list, c) : NULL;
-                if(q)
+                if(c >= 0)
                 {
-                    copystring(chosen, q);
-                    DELETEA(q);
+                    int len = 0, pos = pointlist(list, c, len);
+                    if(len > 0) copystring(chosen, list+pos, len+1);
                 }
+                DELETEA(list);
             }
         }
         return *chosen ? chosen : pickmap(suggest, mode, muts);
@@ -1484,12 +1470,12 @@ namespace server
         }
         if(reqmode != G_EDITMODE && GAME(mapslock))
         {
-            string list;
+            char *list = NULL;
             switch(GAME(mapslock))
             {
                 case 1: case 2:
                 {
-                    concatstring(list, GAME(allowmaps));
+                    list = newstring(GAME(allowmaps));
                     mapcull(list, reqmode, reqmuts);
                     break;
                 }
@@ -1501,27 +1487,14 @@ namespace server
                 case 5: if(!haspriv(ci, PRIV_MAX, "select a custom maps")) return; break;
                 case 0: default: break;
             }
-            if(*list)
+            if(list)
             {
-                int n = listlen(list);
-                bool found = false;
-                string b;
-                if(strpbrk(reqmap, "/\\")) copystring(b, reqmap);
-                else formatstring(b)("maps/%s", reqmap);
-                loopi(n)
+                if(checklist(reqmap, strlen(reqmap), list) < 0 && !haspriv(ci, GAME(mapslock)%2 ? PRIV_MASTER : PRIV_ADMIN, "select a custom maps"))
                 {
-                    char *a = indexlist(list, i);
-                    if(a)
-                    {
-                        string cmapname;
-                        if(strpbrk(a, "/\\")) copystring(cmapname, a);
-                        else formatstring(cmapname)("maps/%s", a);
-                        if(!strcmp(b, cmapname)) found = true;
-                        DELETEA(a);
-                    }
-                    if(found) break;
+                    DELETEA(list);
+                    return;
                 }
-                if(!found && !haspriv(ci, GAME(mapslock)%2 ? PRIV_MASTER : PRIV_ADMIN, "select a custom maps")) return;
+                DELETEA(list);
             }
         }
         copystring(ci->mapvote, reqmap); ci->modevote = reqmode; ci->mutsvote = reqmuts;

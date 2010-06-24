@@ -83,6 +83,11 @@ namespace ai
     {
         if(e && !WEAP(d->weapselect, zooms) && canshoot(d, e, true))
         {
+            if(d->weapstate[d->weapselect] == WEAP_S_POWER)
+            {
+                if(d->action[AC_ALTERNATE] && (!d->action[AC_ATTACK] || d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK]))
+                    return true;
+            }
             switch(d->weapselect)
             {
                 case WEAP_PISTOL: return true; break;
@@ -1060,7 +1065,13 @@ namespace ai
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick)
                 {
-                    if(canshoot(d, e, alt) && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
+                    bool shoot = canshoot(d, e, alt);
+                    if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && WEAP2(d->weapselect, power, alt)) switch(WEAP2(d->weapselect, cooked, alt))
+                    {
+                        case 2: case 3: shoot = false; break; // shorter
+                        case 1: case 4: case 5: default: break;
+                    }
+                    if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
                     {
                         d->action[alt ? AC_ALTERNATE : AC_ATTACK] = true;
                         d->actiontime[alt ? AC_ALTERNATE : AC_ATTACK] = lastmillis;
@@ -1091,6 +1102,7 @@ namespace ai
             enemyok = false;
             result = 0;
         }
+        if(result < 3) d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = false;
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         d->aimyaw = d->ai->targyaw; d->aimpitch = d->ai->targpitch;
@@ -1383,7 +1395,6 @@ namespace ai
                 }
             }
         }
-        d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = d->action[AC_RELOAD] = d->action[AC_USE] = false;
     }
 
     void avoid()

@@ -1380,6 +1380,7 @@ namespace game
                         float dist = c.pos.dist(d->feetpos());
                         if(dist >= c.mindist && dist <= min(c.maxdist, float(fog)) && (raycubelos(c.pos, pos, trg) || raycubelos(c.pos, pos = d->headpos(), trg)))
                         {
+                            if(t && (t->state == CS_DEAD || t->state == CS_WAITING) && !t->lastdeath) continue;
                             bool fixed = t && t->state != CS_WAITING;
                             float yaw = fixed ? t->yaw : camera1->yaw, pitch = fixed ? t->pitch : camera1->pitch;
                             if(!fixed && (k || renew))
