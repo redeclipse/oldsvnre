@@ -847,7 +847,7 @@ struct gameent : dynent, gamestate
         if(issound(wschan)) removesound(wschan);
         if(issound(pschan)) removesound(pschan);
         if(issound(fschan)) removesound(fschan);
-        if(issound(jschan)) removesound(wschan);
+        if(issound(jschan)) removesound(jschan);
         aschan = vschan = wschan = pschan = fschan = jschan = -1;
     }
 
@@ -1041,11 +1041,16 @@ struct gameent : dynent, gamestate
         resetphys();
     }
 
-    void dojumpreset(bool full = false)
+    void resetjump()
     {
-        if(full) impulse[IM_JUMP] = 0;
-        else resetphys();
+        impulse[IM_JUMP] = 0;
         timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = 0;
+    }
+
+    void resetair()
+    {
+        resetphys();
+        resetjump();
     }
 
     void resetfire()

@@ -120,7 +120,6 @@ struct physent                                  // base entity type, can be affe
     void resetphys()
     {
         falling = vec(0, 0, 0);
-        timeinair = 0;
         physstate = PHYS_FALL;
         floor = vec(0, 0, 1);
     }

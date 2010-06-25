@@ -1042,7 +1042,7 @@ namespace projs
         {
             if(chk&1 && !proj.limited)
             {
-                int vol = 64, snd = S_EXTINGUISH;
+                int vol = 48, snd = S_EXTINGUISH;
                 float size = max(proj.radius, 1.f);
                 if(proj.projtype == PRJ_SHOT && isweap(proj.weap))
                 {
@@ -1155,8 +1155,7 @@ namespace projs
             }
             else if(proj.owner->state == CS_ALIVE && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
             {
-                bool failed = false;
-                vec targ, dir = proj.vel.normalize();
+                vec targ = proj.o, dir = proj.vel.normalize();
                 switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))
                 {
                     case 5: case 4: case 3: case 2:
@@ -1183,19 +1182,15 @@ namespace projs
                             }
                         }
                         if(proj.target) targ = proj.target->headpos();
-                        else failed = true;
                     }
                     case 1: default: findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, targ); break;
                 }
-                if(!failed)
+                targ.sub(proj.o).normalize();
+                if(!targ.iszero())
                 {
-                    targ.sub(proj.o).normalize();
-                    if(!targ.iszero())
-                    {
-                        float amt = clamp(WEAP2(proj.weap, delta, proj.flags&HIT_ALT)*secs, 1e-8f, 1.f);
-                        dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
-                        if(!dir.iszero()) proj.vel = dir.mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
-                    }
+                    float amt = clamp(WEAP2(proj.weap, delta, proj.flags&HIT_ALT)*secs, 1e-8f, 1.f);
+                    dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
+                    if(!dir.iszero()) proj.vel = dir.mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
                 }
             }
         }

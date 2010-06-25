@@ -290,7 +290,8 @@ namespace physics
 
     float impulsevelocity(physent *d, float amt)
     {
-        return min((impulsespeed+d->vel.magnitude())*amt, max(d->vel.magnitude(), impulselimit));
+        float mag = vec(d->vel).add(d->falling).magnitude();
+        return min((impulsespeed+mag)*amt, max(mag, impulselimit));
     }
 
     bool movepitch(physent *d)
@@ -829,7 +830,7 @@ namespace physics
         else d->action[AC_JUMP] = false;
         d->action[AC_DASH] = false;
         if((d->physstate == PHYS_FALL && !d->onladder) || d->turnside) d->timeinair += millis;
-        else d->dojumpreset(true);
+        else d->resetjump();
     }
 
     void modifyvelocity(physent *pl, bool local, bool floating, int millis)
@@ -1008,7 +1009,8 @@ namespace physics
                     else playsound(S_JETPACK, e->o, e, (e == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &e->jschan, ends);
                 }
                 else if(jetting) e->action[AC_JUMP] = false;
-                if(!e->timeinair && timeinair > PHYSMILLIS*4) playsound(S_LAND, e->o, e, e == game::focus ? SND_FORCED : 0);
+                if(!e->timeinair && timeinair && vec(e->vel).add(e->falling).magnitude() >= 50)
+                    playsound(S_LAND, e->o, e, e == game::focus ? SND_FORCED : 0);
             }
         }
 
