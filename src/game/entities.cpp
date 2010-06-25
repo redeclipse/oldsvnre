@@ -802,13 +802,13 @@ namespace entities
                             {
                                 int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
                                 gameentity &f = *(gameentity *)ents[teleports[r]];
-                                d->resetphys();
+                                d->resetair();
                                 d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
                                 d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
                                 d->pitch = f.attrs[1];
                                 if(physics::entinmap(d, true))
                                 {
-                                    float mag = max(d->vel.magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f);
+                                    float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f);
                                     vecfromyawpitch(d->yaw, d->pitch, 1, 0, d->vel);
                                     d->vel.mul(mag);
                                     game::fixfullrange(d->yaw, d->pitch, d->roll, true);
@@ -836,7 +836,7 @@ namespace entities
                     }
                     vec dir; vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir); dir.normalize().mul(mag);
                     if(d->ai) d->ai->becareful = true;
-                    d->resetphys();
+                    d->resetair();
                     switch(e.attrs[5])
                     {
                         case 0:
@@ -849,7 +849,7 @@ namespace entities
                             break;
                         }
                         case 1: d->vel.add(dir); break;
-                        case 2: dir.add(vec(dir).normalize().mul(d->vel.magnitude())); // fall through
+                        case 2: dir.add(vec(dir).normalize().mul(vec(d->vel).add(d->falling).magnitude())); // fall through
                         case 3: d->vel = dir; break;
                         default: break;
                     }

@@ -1145,7 +1145,7 @@ namespace hud
             {
                 int len = m_protect(game::gamemode, game::mutators), millis = d->protect(lastmillis, len);
                 if(millis > 0) fade *= clamp(float(len-millis)/float(len), 0.f, 1.f);
-                fade *= clamp(d->vel.magnitude()/movespeed, 0.f, 1.f);
+                fade *= clamp(vec(d->vel).add(d->falling).magnitude()/movespeed, 0.f, 1.f);
             }
             else if(d->state != CS_EDITING) return;
             if(chkcond(radarplayernames, game::tvmode()))
@@ -1614,7 +1614,7 @@ namespace hud
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
                 pushfont(!hashealth || m_trial(game::gamemode) ? "super" : "default");
-                int ty = draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), hashealth ? TEXT_CENTER_UP : TEXT_LEFT_UP, -1, -1, int(game::focus->vel.magnitude()));
+                int ty = draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), hashealth ? TEXT_CENTER_UP : TEXT_LEFT_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
                 if(!hashealth) sy += ty;
                 popfont();
             }

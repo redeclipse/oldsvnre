@@ -37,7 +37,7 @@ namespace ctf
                     (dir = f.pos()).sub(camera1->o);
                     int interval = totalmillis%500;
                     if(interval >= 300 || interval <= 200) fade *= clamp(interval >= 300 ? 1.f-((interval-300)/200.f) : interval/200.f, 0.f, 1.f);
-                    if(f.owner) fade *= clamp(f.owner->vel.magnitude()/movespeed, 0.f, 1.f);
+                    if(f.owner) fade *= clamp(vec(f.owner->vel).add(f.owner->falling).magnitude()/movespeed, 0.f, 1.f);
                 }
                 else
                 {
