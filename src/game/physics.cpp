@@ -829,8 +829,22 @@ namespace physics
         }
         else d->action[AC_JUMP] = false;
         d->action[AC_DASH] = false;
-        if((d->physstate == PHYS_FALL && !d->onladder) || d->turnside) d->timeinair += millis;
-        else d->resetjump();
+    }
+
+    void modifyinair(physent *pl, vec &m, bool local, bool floating, bool wantsmove, int millis)
+    {
+        if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+        {
+            gameent *d = (gameent *)pl;
+            if(local) modifyinput(d, m, wantsmove, floating, millis);
+            if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
+            else if(d->physstate > PHYS_FALL || d->onladder) d->resetjump();
+            else d->timeinair = 0;
+        }
+        else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
+        else pl->timeinair = 0;
+        if(pl->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
+        else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
     }
 
     void modifyvelocity(physent *pl, bool local, bool floating, int millis)
@@ -847,20 +861,17 @@ namespace physics
             }
             m.normalize();
         }
-        if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifyinput((gameent *)pl, m, wantsmove, floating, millis);
-        else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
-        else pl->timeinair = 0;
-        if(pl->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
-        else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
+        modifyinair(pl, m, local, floating, wantsmove, millis);
         m.mul(movevelocity(pl, floating));
-        if(floating || pl->type == ENT_CAMERA) pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/floatcurb, 0.0f), millis/20.0f));
+        float fric = PHYS(floorcurb);
+        if(floating || pl->type == ENT_CAMERA) fric = floatcurb;
         else
         {
             bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
-            float curb = pl->physstate >= PHYS_SLOPE ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb),
-                  fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
-            pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
+            float curb = pl->physstate >= PHYS_SLOPE ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb);
+            fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
         }
+        pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
     }
 
     void modifygravity(physent *pl, int curtime)
@@ -1009,8 +1020,11 @@ namespace physics
                     else playsound(S_JETPACK, e->o, e, (e == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &e->jschan, ends);
                 }
                 else if(jetting) e->action[AC_JUMP] = false;
-                if(!e->timeinair && timeinair && vec(e->vel).add(e->falling).magnitude() >= 50)
-                    playsound(S_LAND, e->o, e, e == game::focus ? SND_FORCED : 0);
+                if(!e->timeinair && timeinair > PHYSMILLIS*2)
+                {
+                    float mag = vec(e->vel).add(e->falling).magnitude();
+                    if(mag >= 8) playsound(S_LAND, e->o, e, e == game::focus ? SND_FORCED : 0, clamp(int(mag*4), 32, 255));
+                }
             }
         }
 
