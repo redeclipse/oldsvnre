@@ -509,7 +509,8 @@ namespace hud
             case WEAP_S_PRIMARY:
             case WEAP_S_SECONDARY:
             {
-                float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f); fade *= amt;
+                float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                fade *= amt;
                 if(showclips >= 2) size *= amt;
                 break;
             }
@@ -520,8 +521,9 @@ namespace hud
                     int check = game::focus->weapwait[weap]/2;
                     if(interval >= check)
                     {
-                        float amt = clamp(float(interval-check)/float(check), 0.f, 1.f); fade *= amt;
-                        if(showclips >= 2) size *= amt;
+                        float amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
+                        fade *= amt;
+                        if(showclips >= 2) size *= amt*3/4;
                     }
                     else
                     {
