@@ -2,7 +2,7 @@
 namespace entities
 {
     vector<extentity *> ents;
-    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
+    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numwaypoints = 0;
     bool haswaypoints = false;
 
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
@@ -12,15 +12,17 @@ namespace entities
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
-    VAR(0, dropwaypoints, 0, 0, 2); // drop waypoints during play, 2 = render as well
+    VAR(0, maxwaypoints, 128, 1024, INT_MAX-1); // max waypoints to drop unless forced
+    VAR(0, dropwaypoints, 0, 0, 1); // drop waypoints during play
+    VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
 
-    bool waypointdrop(bool render = false)
+    bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (render ? 2 : 1) || (!render && !haswaypoints && m_play(game::gamemode));
+        return dropwaypoints || (hasai && !haswaypoints && numwaypoints < maxwaypoints);
     }
 
     vector<extentity *> &getents() { return ents; }
-     int lastent(int type) { return lastenttype[type]; }
+    int lastent(int type) { return lastenttype[type]; }
 
     int triggertime(extentity &e)
     {
@@ -1118,8 +1120,8 @@ namespace entities
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
                 break;
-            default:
-                break;
+            case WAYPOINT: if(create) numwaypoints++; break;
+            default: break;
         }
     }
 
@@ -1457,13 +1459,13 @@ namespace entities
         return false;
     }
 
-    void entitycheck(gameent *d)
+    void entitycheck(gameent *d, bool hasai)
     {
         int cleanairnodes = 0;
         if(d->state == CS_ALIVE)
         {
             vec v = d->feetpos();
-            bool clip = clipped(v, true), shoulddrop = waypointdrop() && !d->ai && !clip;
+            bool clip = clipped(v, true), shoulddrop = !d->ai && !clip && hasai && waypointdrop(hasai);
             float dist = float(shoulddrop ? enttype[WAYPOINT].radius : (d->ai ? ai::JUMPMIN : ai::SIGHTMIN));
             int curnode = closestent(WAYPOINT, v, dist, false), prevnode = d->lastnode;
 
@@ -2002,6 +2004,7 @@ namespace entities
     void initents(stream *g, int mtype, int mver, char *gid, int gver)
     {
         haswaypoints = false;
+        numwaypoints = 0;
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
@@ -2015,7 +2018,8 @@ namespace entities
         loopv(ents)
         {
             fixentity(i, false);
-            if(!haswaypoints && ents[i]->type == WAYPOINT) haswaypoints = true;
+            if(ents[i]->type == WAYPOINT) numwaypoints++;
+            if(numwaypoints) haswaypoints = true;
         }
         memset(lastenttype, 0, sizeof(lastenttype));
         memset(lastusetype, 0, sizeof(lastusetype));
@@ -2071,7 +2075,7 @@ namespace entities
 
     bool shouldshowents(int level)
     {
-        return max(showentradius, max(showentdir, showentlinks)) >= level || dropwaypoints >= 2 || ai::aidebug >= 6;
+        return max(showentradius, max(showentdir, showentlinks)) >= level || showwaypoints || ai::aidebug >= 6;
     }
 
     void renderentshow(gameentity &e, int idx, int level)
@@ -2202,7 +2206,7 @@ namespace entities
                 default: break;
             }
         }
-        if(enttype[e.type].links && (showentlinks >= level || (e.type == WAYPOINT && (dropwaypoints >= 2 || ai::aidebug >= 6))))
+        if(enttype[e.type].links && (showentlinks >= level || (e.type == WAYPOINT && (showwaypoints || ai::aidebug >= 6))))
             renderlinked(e, idx);
     }
 
@@ -2245,8 +2249,10 @@ namespace entities
 
     void update()
     {
-        entitycheck(game::player1);
-        loopv(game::players) if(game::players[i]) entitycheck(game::players[i]);
+        bool hasai = false;
+        loopv(game::players) if(game::players[i]->aitype >= AI_BOT) { hasai = true; break; }
+        entitycheck(game::player1, hasai);
+        loopv(game::players) if(game::players[i]) entitycheck(game::players[i], hasai);
         loopi(lastenttype[MAPSOUND])
         {
             gameentity &e = *(gameentity *)ents[i];
