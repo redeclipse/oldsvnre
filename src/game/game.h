@@ -181,6 +181,7 @@ enum
 {
     ANIM_PAIN = ANIM_GAMESPECIFIC, ANIM_JUMP,
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT, ANIM_IMPULSE_DASH,
+    ANIM_JETPACK_FORWARD, ANIM_JETPACK_BACKWARD, ANIM_JETPACK_LEFT, ANIM_JETPACK_RIGHT, ANIM_JETPACK_UP,
     ANIM_SINK, ANIM_EDIT, ANIM_LAG, ANIM_SWITCH, ANIM_USE, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
     ANIM_MELEE, ANIM_MELEE_PRIMARY, ANIM_MELEE_SECONDARY,
@@ -791,6 +792,7 @@ const char * const animnames[] =
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
     "mapmodel", "trigger on", "trigger off", "pain", "jump",
     "impulse forward", "impulse backward", "impulse left", "impulse right", "impulse dash",
+    "jetpack forward", "jetpack backward", "jetpack left", "jetpack right", "jetpack up",
     "sink", "edit", "lag", "switch", "use", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
     "melee", "melee primary", "melee secondary",
@@ -811,7 +813,7 @@ struct gameent : dynent, gamestate
     int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
-    vec head, torso, muzzle, origin, eject, waist, lfoot, rfoot, legs, hrad, trad, lrad;
+    vec head, torso, muzzle, origin, eject, waist, foot[2], jet, legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string name, info, obit;
     vector<int> airnodes;
@@ -819,8 +821,6 @@ struct gameent : dynent, gamestate
 
     gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
-        head(-1, -1, -1), torso(-1, -1, -1), muzzle(-1, -1, -1), origin(-1, -1, -1), eject(-1, -1, -1), waist(-1, -1, -1),
-        lfoot(-1, -1, -1), rfoot(-1, -1, -1), legs(-1, -1, -1), hrad(-1, -1, -1), trad(-1, -1, -1), lrad(-1, -1, -1),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
         name[0] = info[0] = obit[0] = 0;
@@ -828,6 +828,7 @@ struct gameent : dynent, gamestate
         maxspeed = 50; // ditto for movement
         dominating.shrink(0);
         dominated.shrink(0);
+        cleartags();
         checktags();
         respawn(-1, 100);
     }
@@ -911,7 +912,7 @@ struct gameent : dynent, gamestate
         gamestate::mapchange();
     }
 
-    void cleartags() { head = torso = muzzle = origin = eject = waist = lfoot = rfoot = vec(-1, -1, -1); }
+    void cleartags() { head = torso = muzzle = origin = eject = waist = foot[0] = foot[1] = jet = vec(-1, -1, -1); }
 
     vec checkoriginpos()
     {
@@ -996,15 +997,20 @@ struct gameent : dynent, gamestate
             vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.5f); dir.z -= height*0.5f;
             waist = vec(o).add(dir);
         }
-        if(lfoot == vec(-1, -1, -1))
+        if(jet == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, 0, -1, dir); dir.mul(radius); dir.z -= height;
-            lfoot = vec(o).add(dir);
+            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.25f); dir.z -= height*0.35f;
+            jet = vec(o).add(dir);
         }
-        if(rfoot == vec(-1, -1, -1))
+        if(foot[0] == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, 0, 1, dir); dir.mul(radius); dir.z -= height;
-            rfoot = vec(o).add(dir);
+            vecfromyawpitch(yaw, 0, -1, -1, dir); dir.mul(radius); dir.z -= height;
+            foot[0] = vec(o).add(dir);
+        }
+        if(foot[1] == vec(-1, -1, -1))
+        {
+            vecfromyawpitch(yaw, 0, -1, 1, dir); dir.mul(radius); dir.z -= height;
+            foot[1] = vec(o).add(dir);
         }
     }
 
@@ -1244,7 +1250,7 @@ namespace game
     extern char *colorname(gameent *d, char *name = NULL, const char *prefix = "", bool team = true, bool dupname = true);
     extern void announce(int idx, int targ, gameent *d, const char *msg, ...);
     extern void respawn(gameent *d);
-    extern void impulseeffect(gameent *d, bool effect);
+    extern void impulseeffect(gameent *d, int effect = 0);
     extern void suicide(gameent *d, int flags);
     extern void fixrange(float &yaw, float &pitch);
     extern void fixfullrange(float &yaw, float &pitch, float &roll, bool full);
