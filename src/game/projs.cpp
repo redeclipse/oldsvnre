@@ -365,6 +365,7 @@ namespace projs
                 proj.waterfric = WEAP2(proj.weap, waterfric, proj.flags&HIT_ALT);
                 proj.weight = WEAP2(proj.weap, weight, proj.flags&HIT_ALT);
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
+                if(m_insta(game::gamemode, game::mutators)) proj.projcollide &= ~COLLIDE_FLAK;
                 if(proj.child)
                 {
                     proj.projcollide &= ~(IMPACT_GEOM|BOUNCE_PLAYER);
@@ -1454,7 +1455,7 @@ namespace projs
                             radialeffect(f, proj, true, radius);
                         }
                     }
-                    if(proj.projcollide&COLLIDE_FLAK && !proj.child)
+                    if(proj.projcollide&COLLIDE_FLAK && !proj.child && !m_insta(game::gamemode, game::mutators))
                     {
                         bool s = proj.weap == WEAP_ROCKET || proj.weap == WEAP_GRENADE, alt = !s && proj.flags&HIT_ALT;
                         int w = s ? WEAP_SHOTGUN : proj.weap, id = 0-proj.id, r = WEAP2(w, rays, alt)*(s ? 2 : 1);

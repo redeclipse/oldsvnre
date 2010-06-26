@@ -2571,7 +2571,7 @@ namespace server
                     dodamage(target, ci, damage, weap, hflags, h.dir);
                 }
             }
-            if(id >= 0 && WEAP2(weap, collide, flags&HIT_ALT)&COLLIDE_FLAK)
+            if(id >= 0 && WEAP2(weap, collide, flags&HIT_ALT)&COLLIDE_FLAK && !m_insta(gamemode, mutators))
             {
                 bool s = weap == WEAP_ROCKET || weap == WEAP_GRENADE, alt = !s && flags&HIT_ALT;
                 int w = s ? WEAP_SHOTGUN : weap, r = WEAP2(w, rays, false)*(s ? 2 : 1);
