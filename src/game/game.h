@@ -1069,7 +1069,7 @@ struct projent : dynent
     vec from, to, norm, inertia;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
     float movement, roll, lifespan, lifesize, scale;
-    bool local, limited, stuck, escaped;
+    bool local, limited, stuck, escaped, child;
     int projtype, projcollide;
     float elasticity, reflectivity, relativity, waterfric;
     int schan, id, weap, flags, hitflags;
@@ -1099,7 +1099,7 @@ struct projent : dynent
         movement = roll = lifespan = lifesize = 0.f;
         scale = 1.f;
         extinguish = 0;
-        limited = stuck = escaped = false;
+        limited = stuck = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
     }
 
@@ -1140,7 +1140,7 @@ namespace projs
 
     extern void reset();
     extern void update();
-    extern void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1);
+    extern void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1, bool child = false);
     extern void preload();
     extern void remove(gameent *owner);
     extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<vec> &locs, gameent *d, bool local);
