@@ -199,7 +199,7 @@ namespace physics
 
     bool sprinting(physent *d, bool turn)
     {
-        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && !jetpack(d))
+        if(allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
         {
             gameent *e = (gameent *)d;
             if(canimpulse(e, 1, 2) && !iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
