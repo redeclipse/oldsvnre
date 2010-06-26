@@ -2232,7 +2232,6 @@ namespace game
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);
-
         }
     }
 
