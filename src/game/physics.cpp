@@ -836,12 +836,7 @@ namespace physics
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             gameent *d = (gameent *)pl;
-            if(local)
-            {
-                bool jetting = jetpack(d);
-                modifyinput(d, m, wantsmove, floating, millis);
-                if(!jetpack(d) && jetting) d->action[AC_JUMP] = false;
-            }
+            if(local) modifyinput(d, m, wantsmove, floating, millis);
             if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
             else if(d->physstate > PHYS_FALL || d->onladder) d->resetjump();
             else d->timeinair = 0;
@@ -979,7 +974,7 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl);
+        bool floating = isfloating(pl), jetting = false;
         float secs = millis/1000.f;
 
         pl->blocked = false;
@@ -987,7 +982,9 @@ namespace physics
         {
             updatematerial(pl, local, floating);
             modifyvelocity(pl, local, floating, millis);
-            if(!floating && !sticktospecial(pl) && !pl->onladder && !jetpack(pl)) modifygravity(pl, millis); // apply gravity
+            jetting = jetpack(pl);
+            if(!floating && !sticktospecial(pl) && !pl->onladder && !jetting)
+                modifygravity(pl, millis); // apply gravity
             else pl->resetphys();
         }
         else modifyvelocity(pl, local, floating, millis);
@@ -1014,8 +1011,12 @@ namespace physics
             vec vel(pl->vel);
             d.mul(f);
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
-            if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !pl->timeinair && timeinair > PHYSMILLIS*2 && mag >= 8)
-                playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, clamp(int(mag*4), 32, 255));
+            if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+            {
+                if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
+                if(!pl->timeinair && timeinair > PHYSMILLIS*2 && mag >= 8)
+                    playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, clamp(int(mag*4), 32, 255));
+            }
         }
 
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
