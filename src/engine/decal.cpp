@@ -25,8 +25,8 @@ enum
     DF_SATURATE   = 1<<5
 };
 
-VARF(IDF_PERSIST, maxdecaltris, 1, 512, INT_MAX-1, initdecals());
-VAR(IDF_PERSIST, decalfade, 1000, 5000, INT_MAX-1);
+VARF(IDF_PERSIST, maxdecaltris, 1, 1024, INT_MAX-1, initdecals());
+FVAR(IDF_PERSIST, decalfade, 1e-4f, 1, 1000);
 VAR(0, dbgdec, 0, 0, 1);
 
 struct decalrenderer
@@ -134,7 +134,7 @@ struct decalrenderer
 
     void clearfadeddecals()
     {
-        int threshold = lastmillis - (timetolive>=0 ? timetolive : decalfade) - fadeouttime;
+        int threshold = lastmillis - int(ceilf((timetolive>=0 ? timetolive : 1000)*decalfade)) - fadeouttime;
         decalinfo *d = &decals[startdecal],
                   *end = &decals[enddecal < startdecal ? maxdecals : enddecal];
         while(d < end && d->millis <= threshold) d++;
@@ -180,7 +180,7 @@ struct decalrenderer
     {
         decalinfo *d = &decals[startdecal],
                   *end = &decals[enddecal < startdecal ? maxdecals : enddecal];
-        int offset = (timetolive>=0 ? timetolive : decalfade) + fadeouttime - lastmillis;
+        int offset = int(ceilf((timetolive>=0 ? timetolive : 1000)*decalfade)) + fadeouttime - lastmillis;
         while(d < end)
         {
             int fade = d->millis + offset;

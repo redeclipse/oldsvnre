@@ -1220,7 +1220,7 @@ namespace client
                             t->impulse[IM_TYPE] = IM_T_BOOST+(st-SPHY_BOOST);
                             t->impulse[IM_TIME] = lastmillis;
                             t->resetphys();
-                            game::impulseeffect(t, true);
+                            game::impulseeffect(t);
                             break;
                         }
                         case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis); break;

@@ -725,7 +725,7 @@ namespace physics
                         d->action[AC_DASH] = false;
                         if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
-                        game::impulseeffect(d, true);
+                        game::impulseeffect(d);
                     }
                 }
                 if(onfloor && d->action[AC_JUMP])
@@ -786,7 +786,7 @@ namespace physics
                         d->turnside = 0; d->turnyaw = d->turnroll = 0;
                         d->action[AC_JUMP] = d->action[AC_DASH] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
-                        game::impulseeffect(d, true);
+                        game::impulseeffect(d);
                         break;
                     }
                     if(d->turnside || (!onfloor && d->action[AC_SPECIAL] && canimpulse(d, -1, 3)))
@@ -812,7 +812,7 @@ namespace physics
                             d->turnside = side; d->turnyaw = off;
                             d->turnroll = (impulseroll*d->turnside)-d->roll;
                             client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
-                            game::impulseeffect(d, true);
+                            game::impulseeffect(d);
                             found = true;
                             break;
                         }
@@ -831,12 +831,17 @@ namespace physics
         d->action[AC_DASH] = false;
     }
 
-    void modifyinair(physent *pl, vec &m, bool local, bool floating, bool wantsmove, int millis)
+    void modifymovement(physent *pl, vec &m, bool local, bool floating, bool wantsmove, int millis)
     {
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             gameent *d = (gameent *)pl;
-            if(local) modifyinput(d, m, wantsmove, floating, millis);
+            if(local)
+            {
+                bool jetting = jetpack(d);
+                modifyinput(d, m, wantsmove, floating, millis);
+                if(!jetpack(d) && jetting) d->action[AC_JUMP] = false;
+            }
             if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
             else if(d->physstate > PHYS_FALL || d->onladder) d->resetjump();
             else d->timeinair = 0;
@@ -861,7 +866,7 @@ namespace physics
             }
             m.normalize();
         }
-        modifyinair(pl, m, local, floating, wantsmove, millis);
+        modifymovement(pl, m, local, floating, wantsmove, millis);
         m.mul(movevelocity(pl, floating));
         float fric = PHYS(floorcurb);
         if(floating || pl->type == ENT_CAMERA) fric = floatcurb;
@@ -974,18 +979,18 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl), jetting = false;
+        bool floating = isfloating(pl);
         float secs = millis/1000.f;
 
         pl->blocked = false;
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             updatematerial(pl, local, floating);
-            jetting = jetpack(pl);
-            if(!floating && !sticktospecial(pl) && !pl->onladder && !jetting) modifygravity(pl, millis); // apply gravity
+            modifyvelocity(pl, local, floating, millis);
+            if(!floating && !sticktospecial(pl) && !pl->onladder && !jetpack(pl)) modifygravity(pl, millis); // apply gravity
             else pl->resetphys();
         }
-        modifyvelocity(pl, local, floating, millis); // apply any player generated changes in velocity
+        else modifyvelocity(pl, local, floating, millis);
 
         vec d(pl->vel);
         if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !floating && pl->inliquid) d.mul(liquidmerge(pl, 1.f, PHYS(liquidspeed)));
@@ -1004,28 +1009,13 @@ namespace physics
         }
         else                        // apply velocity with collision
         {
-            const float f = 1.0f/moveres;
+            const float f = 1.0f/moveres, mag = vec(pl->vel).add(pl->falling).magnitude();
             int collisions = 0, timeinair = pl->timeinair;
             vec vel(pl->vel);
-
             d.mul(f);
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
-            if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
-            {
-                gameent *e = (gameent *)pl;
-                if(jetpack(e))
-                {
-                    int ends = lastmillis+PHYSMILLIS;
-                    if(issound(e->jschan)) sounds[e->jschan].ends = ends;
-                    else playsound(S_JETPACK, e->o, e, (e == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &e->jschan, ends);
-                }
-                else if(jetting) e->action[AC_JUMP] = false;
-                if(!e->timeinair && timeinair > PHYSMILLIS*2)
-                {
-                    float mag = vec(e->vel).add(e->falling).magnitude();
-                    if(mag >= 8) playsound(S_LAND, e->o, e, e == game::focus ? SND_FORCED : 0, clamp(int(mag*4), 32, 255));
-                }
-            }
+            if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !pl->timeinair && timeinair > PHYSMILLIS*2 && mag >= 8)
+                playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, clamp(int(mag*4), 32, 255));
         }
 
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
@@ -1034,7 +1024,7 @@ namespace physics
             if(local)
             {
                 gameent *e = (gameent *)pl;
-                if(e->state == CS_ALIVE)
+                if(e->state == CS_ALIVE && !floating)
                 {
                     if(e->o.z < 0)
                     {

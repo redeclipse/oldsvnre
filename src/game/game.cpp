@@ -416,21 +416,32 @@ namespace game
         }
     }
 
-    void impulseeffect(gameent *d, bool effect)
+    void boosteffect(gameent *d, const vec &pos, int num, int len)
     {
-        if(effect) playsound(S_IMPULSE, d->o, d);
-        if(effect || (d->state == CS_ALIVE && (physics::sprinting(d) || physics::jetpack(d))))
+        float intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
+        regularshape(PART_FIREBALL, int(d->radius)*2, firecols[rnd(FIRECOLOURS)], 21, num, len, pos, intensity, blend, -1, 0, 5);
+    }
+
+    void impulseeffect(gameent *d, int effect)
+    {
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            int num = int((effect ? 25 : 5)*impulsescale), len = effect ? impulsefade : impulsefade/5;
-            if(num > 0 && len > 0)
+            int num = int((effect ? 5 : 25)*impulsescale), len = effect ? impulsefade/5 : impulsefade;
+            switch(effect)
             {
-                float intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-                if(d->type == ENT_PLAYER || d->type == ENT_AI)
+                case 0: playsound(S_IMPULSE, d->o, d); // faill through
+                case 1:
                 {
-                    regularshape(PART_FIREBALL, int(d->radius), firecols[effect ? 0 : rnd(FIRECOLOURS)], 21, num, len, d->lfoot, intensity, blend, -15, 0, 5);
-                    regularshape(PART_FIREBALL, int(d->radius), firecols[effect ? 0 : rnd(FIRECOLOURS)], 21, num, len, d->rfoot, intensity, blend, -15, 0, 5);
+                    if(num > 0 && len > 0) loopi(2) boosteffect(d, d->foot[i], num, len);
+                    break;
                 }
-                else regularshape(PART_FIREBALL, int(d->radius)*2, firecols[effect ? 0 : rnd(FIRECOLOURS)], 21, num, len, d->feetpos(), intensity, blend, -15, 0, 5);
+                case 2:
+                {
+                    int ends = lastmillis+PHYSMILLIS;
+                    if(issound(d->jschan)) sounds[d->jschan].ends = ends;
+                    else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &d->jschan, ends);
+                    if(num > 0 && len > 0) boosteffect(d, d->jet, num, len);
+                }
             }
         }
     }
@@ -1787,14 +1798,21 @@ namespace game
         }
         else
         {
-            if(secondary && (!isaitype(d->aitype) || aistyle[d->aitype].canmove))
+            if(secondary && allowmove(d) && (!isaitype(d->aitype) || aistyle[d->aitype].canmove))
             {
-                if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
-                    anim |= (((allowmove(d) && (d->move || d->strafe)) || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
+                if(physics::jetpack(d))
+                {
+                    if(d->move>0)       anim |= (ANIM_JETPACK_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->strafe)  anim |= ((d->strafe>0 ? ANIM_JETPACK_LEFT : ANIM_JETPACK_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->move<0)  anim |= (ANIM_JETPACK_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else                anim |= (ANIM_JETPACK_UP|ANIM_LOOP)<<ANIM_SECONDARY;
+                }
+                else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
+                    anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(d->physstate == PHYS_FALL && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000) { anim |= ANIM_IMPULSE_DASH<<ANIM_SECONDARY; basetime2 = d->impulse[IM_TIME]; }
                 else if(d->physstate == PHYS_FALL && !d->onladder && d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) { anim |= ANIM_JUMP<<ANIM_SECONDARY; basetime2 = d->impulse[IM_JUMP]; }
                 else if(d->physstate == PHYS_FALL && !d->onladder && d->timeinair >= 1000) anim |= (ANIM_JUMP|ANIM_END)<<ANIM_SECONDARY;
-                else if(physics::sprinting(d) || physics::jetpack(d))
+                else if(physics::sprinting(d))
                 {
                     if(d->move>0)       anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe)  anim |= ((d->strafe>0 ? ANIM_IMPULSE_LEFT : ANIM_IMPULSE_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2155,8 +2173,8 @@ namespace game
                     a[ai++] = modelattach("tag_head", &d->head);
                     a[ai++] = modelattach("tag_torso", &d->torso);
                     a[ai++] = modelattach("tag_waist", &d->waist);
-                    a[ai++] = modelattach("tag_lfoot", &d->lfoot);
-                    a[ai++] = modelattach("tag_rfoot", &d->rfoot);
+                    a[ai++] = modelattach("tag_lfoot", &d->foot[0]);
+                    a[ai++] = modelattach("tag_rfoot", &d->foot[1]);
                 }
             }
             renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
@@ -2218,7 +2236,9 @@ namespace game
                 vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
                 regular_part_create(PART_FIREBALL_SOFT, max(fireburnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*deadscale(d, intensity*pc), blend*pc*fireburnblend, -15, 0);
             }
-            impulseeffect(d, false);
+            if(physics::sprinting(d)) impulseeffect(d, 1);
+            if(physics::jetpack(d)) impulseeffect(d, 2);
+
         }
     }
 
