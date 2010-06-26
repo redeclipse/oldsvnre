@@ -2250,7 +2250,7 @@ namespace entities
     void update()
     {
         bool hasai = false;
-        loopv(game::players) if(game::players[i]->aitype >= AI_BOT) { hasai = true; break; }
+        loopv(game::players) if(game::players[i] && game::players[i]->aitype >= AI_BOT) { hasai = true; break; }
         entitycheck(game::player1, hasai);
         loopv(game::players) if(game::players[i]) entitycheck(game::players[i], hasai);
         loopi(lastenttype[MAPSOUND])
