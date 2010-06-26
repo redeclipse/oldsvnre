@@ -1024,12 +1024,6 @@ namespace game
         maskpackagedirs(~PACKAGEDIR_OCTA);
         if(!polymodels)
         {
-            int n = m_fight(gamemode) && m_team(gamemode, mutators) ? numteams(gamemode, mutators)+1 : 1;
-            loopi(n)
-            {
-                loadmodel(teamtype[i].tpmdl, -1, true);
-                loadmodel(teamtype[i].fpmdl, -1, true);
-            }
             ai::preload();
             weapons::preload();
             projs::preload();
@@ -1752,11 +1746,11 @@ namespace game
 
     void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-        const char *mdl = "";
-        if(d->aitype < AI_START) mdl = third ? teamtype[team].tpmdl : teamtype[team].fpmdl;
-        else if(d->aitype < AI_MAX) mdl = third ? aistyle[d->aitype].tpmdl : aistyle[d->aitype].fpmdl;
-        else return;
-
+        int type = clamp(d->aitype, 0, AI_MAX-1);
+        const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
+        bool burning = fireburning && fireburntime && lastmillis%100 < 50 && d->onfire(lastmillis, fireburntime);
+        int colour = burning ? firecols[rnd(FIRECOLOURS)] : (type >= AI_START ? 0xFFFFFF : teamtype[d->team].colour);
+        d->light.material = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
         float yaw = d->yaw, pitch = d->pitch, roll = d->calcroll(physics::iscrouching(d));
         vec o = vec(third ? d->feetpos() : d->headpos());
         if(!third)
@@ -1919,9 +1913,8 @@ namespace game
                     glPushMatrix();
                     foggednotextureshader->set();
                     glDisable(GL_TEXTURE_2D);
-                    int colour = teamtype[d->team].colour;
-                    if(fireburning && fireburntime && lastmillis%100 < 50 && d->onfire(lastmillis, fireburntime))
-                        colour = firecols[rnd(FIRECOLOURS)];
+                    bool burning = fireburning && fireburntime && lastmillis%100 < 50 && d->onfire(lastmillis, fireburntime);
+                    int colour = burning ? firecols[rnd(FIRECOLOURS)] : teamtype[d->team].colour;
                     vec c((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
                     polyhue(d, c, true);
                     glColor4f(c[0], c[1], c[2], trans);
@@ -2055,7 +2048,7 @@ namespace game
                         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     }
                     vec c((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f);
-                    polyhue(d, c, false);
+                    polyhue(d, c, true);
                     glColor4f(c[0], c[1], c[2], trans);
                     float mult = third ? 2 : 1;
                     polybox(vec(0, 0, 0), polyweap[weap].h*mult, polyweap[weap].h*mult, polyweap[weap].r*mult, isshow ? o.dist(d->muzzle) : polyweap[weap].l);

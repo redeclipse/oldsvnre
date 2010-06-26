@@ -250,14 +250,14 @@ namespace entities
         switch(type)
         {
             case FLAG: return "flag";
-            case PLAYERSTART: return polymodels ? "" : teamtype[attr[0]].tpmdl;
+            case PLAYERSTART: return polymodels ? "" : aistyle[AI_BOT].tpmdl;
             case WEAPON:
             {
                 if(polymodels) return "";
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: if(attr[0] >= 0 && attr[0] < AI_TOTAL) return polymodels ? "" : aistyle[attr[0]+AI_START].tpmdl;
+            case ACTOR: return polymodels ? "" : aistyle[clamp(attr[0]+AI_START, int(AI_START), int(AI_MAX-1))].tpmdl;
             default: break;
         }
         return "";

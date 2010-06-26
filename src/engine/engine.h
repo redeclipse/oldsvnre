@@ -687,7 +687,7 @@ extern void usetexturing(bool on);
 
 extern void drawslice(float start, float length, float x, float y, float size);
 extern void drawfadedslice(float start, float length, float x, float y, float size, float alpha, float r = 1.f, float g = 1.f, float b = 1.f, float minsize = 0.25f);
-void polyhue(dynent *d, vec &colour, bool light = false, bool fast = false);
+extern void polyhue(dynent *d, vec &colour, bool light = false, bool fast = false);
 extern void polybox(vec o, float tofloor, float toceil, float xradius, float yradius);
 
 // grass
