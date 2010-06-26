@@ -159,7 +159,7 @@ WEAPON(sword,
     2,      0,      10,     10,     2,      1.5f,   1,      1,      0.65f,  0.65f,  0.25f,  0.25f,  0.5f,   0.5f
 );
 WEAPON(shotgun,
-    1,      8,      1,      2,      375,    750,    750,    16,     16,     1600,   500,    0,      0,      750,    250,
+    1,      8,      1,      2,      375,    750,    750,    16,     16,     1600,   500,    0,      0,      750,    500,
     0,      0,      0,      0,      200,    200,    0,      0,      10,     6,      15,     20,
     2,      1,      10,     10,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,                  IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER|COLLIDE_FLAK,
