@@ -52,6 +52,7 @@ namespace projs
             flags &= ~HIT_CLEAR;
             flags |= HIT_WAVE;
         }
+        if(flags&HIT_FLAK) damage = int(ceilf(damage*WEAP2(weap, flakdam, flags&HIT_ALT)));
         if(flags&HIT_HEAD) damage = int(ceilf(damage*WEAP2(weap, headdam, flags&HIT_ALT)*damagescale));
         else if(flags&HIT_TORSO) damage = int(ceilf(damage*WEAP2(weap, torsodam, flags&HIT_ALT)*damagescale));
         else if(flags&HIT_LEGS) damage = int(ceilf(damage*WEAP2(weap, legsdam, flags&HIT_ALT)*damagescale));
@@ -87,6 +88,7 @@ namespace projs
         }
         hitmsg &h = hits.add();
         h.flags = flags;
+        if(proj.flags&HIT_FLAK) h.flags |= HIT_FLAK;
         h.target = d->clientnum;
         h.id = lastmillis-game::maptime;
         h.dist = int(dist*DNF);
@@ -328,7 +330,7 @@ namespace projs
 
     void updatetargets(projent &proj, int style = 0)
     {
-        if(proj.projtype == PRJ_SHOT && proj.weap != WEAP_MELEE && proj.owner && proj.owner->state == CS_ALIVE)
+        if(proj.projtype == PRJ_SHOT && proj.weap != WEAP_MELEE && !proj.child && proj.owner && proj.owner->state == CS_ALIVE)
         {
             if(weaptype[proj.weap].traced)
             {
@@ -346,7 +348,7 @@ namespace projs
 
     void init(projent &proj, bool waited)
     {
-        if(waited && proj.owner && proj.owner->state == CS_ALIVE)
+        if(waited && !proj.child && proj.owner && proj.owner->state == CS_ALIVE)
         {
             proj.inertia = vec(proj.owner->vel).add(proj.owner->falling);
             proj.yaw = proj.owner->yaw;
@@ -363,6 +365,11 @@ namespace projs
                 proj.waterfric = WEAP2(proj.weap, waterfric, proj.flags&HIT_ALT);
                 proj.weight = WEAP2(proj.weap, weight, proj.flags&HIT_ALT);
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
+                if(proj.child)
+                {
+                    proj.projcollide &= ~(IMPACT_GEOM|BOUNCE_PLAYER);
+                    proj.projcollide |= BOUNCE_GEOM|IMPACT_PLAYER;
+                }
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
                 if(!polymodels) proj.mdl = weaptype[proj.weap].proj;
@@ -500,7 +507,7 @@ namespace projs
             default: break;
         }
         if(proj.projtype != PRJ_SHOT) updatebb(proj, true);
-        if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
+        if(!proj.child && (proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced))
         {
             vec dir = vec(proj.to).sub(proj.o), orig = proj.o;
             float maxdist = dir.magnitude();
@@ -544,7 +551,7 @@ namespace projs
         proj.resetinterp();
     }
 
-    void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale)
+    void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale, bool child)
     {
         if(!d) return;
 
@@ -563,7 +570,13 @@ namespace projs
         proj.flags = flags;
         proj.scale = scale;
         proj.movement = 0;
-        if(d)
+        if(child)
+        {
+            proj.child = true;
+            proj.owner = d;
+            proj.vel = vec(proj.to).sub(proj.from);
+        }
+        else if(d)
         {
             proj.owner = d;
             proj.yaw = d->yaw;
@@ -662,7 +675,7 @@ namespace projs
         }
 
         loopv(locs)
-            create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), millis+delay*i, speed, 0, weap, flags, scale);
+            create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, 0, weap, flags, scale);
         if(ejectfade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
@@ -1093,7 +1106,8 @@ namespace projs
                 proj.lastbounce = lastmillis;
                 return 2; // bounce
             }
-            else if(proj.projcollide&(d ? IMPACT_PLAYER : IMPACT_GEOM)) return 0; // die on impact
+            else if(proj.projcollide&(d ? IMPACT_PLAYER : IMPACT_GEOM))
+                return 0; // die on impact
         }
         return 1; // live!
     }
@@ -1438,6 +1452,20 @@ namespace projs
                             gameent *f = (gameent *)game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
                             radialeffect(f, proj, true, radius);
+                        }
+                    }
+                    if(proj.projcollide&COLLIDE_FLAK && !proj.child)
+                    {
+                        bool s = proj.weap == WEAP_ROCKET || proj.weap == WEAP_GRENADE, alt = !s && proj.flags&HIT_ALT;
+                        int w = s ? WEAP_SHOTGUN : proj.weap, id = 0-proj.id, r = WEAP2(w, rays, alt)*(s ? 2 : 1);
+                        float mag = proj.vel.magnitude()*0.5f;
+                        loopi(r)
+                        {
+                            if(s) mag = rnd(WEAP2(w, speed, alt))*0.125f+WEAP2(w, speed, alt)*0.125f;
+                            vec dir = vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(mag);
+                            if(!s) dir.add(proj.vel);
+                            dir.add(proj.o);
+                            create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(w, time, alt), WEAP2(w, time, alt), 0, WEAP2(w, speed, alt), id, w, (alt ? HIT_ALT : 0)|HIT_FLAK, 1, true);
                         }
                     }
                 }

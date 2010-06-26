@@ -707,7 +707,7 @@ namespace physics
             {
                 if((d->ai || dashaction) && canimpulse(d, 0, 1))
                 {
-                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH], pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
+                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH] && !iscrouching(d), pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
                     if(dash || pulse)
                     {
                         bool moving = d->move || d->strafe;
@@ -722,7 +722,6 @@ namespace physics
                             vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
-                        d->action[AC_DASH] = false;
                         if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
                         game::impulseeffect(d);
@@ -743,7 +742,7 @@ namespace physics
                         }
                         d->resetphys();
                         d->impulse[IM_JUMP] = lastmillis;
-                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                        d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                         playsound(S_JUMP, d->o, d);
                         regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
@@ -784,7 +783,7 @@ namespace physics
                         d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                         d->turnmillis = PHYSMILLIS;
                         d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                        d->action[AC_JUMP] = d->action[AC_DASH] = false;
+                        d->action[AC_JUMP] = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                         game::impulseeffect(d);
                         break;
