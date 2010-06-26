@@ -425,29 +425,24 @@ enum
 struct teamtypes
 {
     int type,           colour; const char  *name,
-        *tpmdl,                             *fpmdl,
         *icon,              *chat,      *colname;
 };
 #ifdef GAMESERVER
 teamtypes teamtype[] = {
     {
         TEAM_NEUTRAL,   0x666666,           "neutral",
-        "actors/player",                    "actors/player/hwep",
         "team",             "\fa",      "grey"
     },
     {
         TEAM_ALPHA,     0x2222AA,           "alpha",
-        "actors/player/alpha",              "actors/player/alpha/hwep",
         "teamalpha",        "\fb",      "blue"
     },
     {
         TEAM_BETA,      0xAA2222,           "beta",
-        "actors/player/beta",               "actors/player/beta/hwep",
         "teambeta",         "\fr",      "red"
     },
     {
         TEAM_ENEMY,     0xAAAA22,           "enemy",
-        "actors/player",                    "actors/player/hwep",
         "team",             "\fy",      "yellow"
     }
 };

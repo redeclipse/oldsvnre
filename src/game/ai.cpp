@@ -1617,8 +1617,8 @@ namespace ai
     {
         loopi(AI_TOTAL)
         {
-            loadmodel(aistyle[AI_START+i].tpmdl, -1, true);
-            loadmodel(aistyle[AI_START+i].fpmdl, -1, true);
+            loadmodel(aistyle[i].tpmdl, -1, true);
+            loadmodel(aistyle[i].fpmdl, -1, true);
         }
     }
 }
