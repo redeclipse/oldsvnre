@@ -813,7 +813,7 @@ struct gameent : dynent, gamestate
     int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
-    vec head, torso, muzzle, origin, eject, waist, foot[2], jet, legs, hrad, trad, lrad;
+    vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string name, info, obit;
     vector<int> airnodes;
@@ -912,7 +912,7 @@ struct gameent : dynent, gamestate
         gamestate::mapchange();
     }
 
-    void cleartags() { head = torso = muzzle = origin = eject = waist = foot[0] = foot[1] = jet = vec(-1, -1, -1); }
+    void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = vec(-1, -1, -1); }
 
     vec checkoriginpos()
     {
@@ -997,20 +997,20 @@ struct gameent : dynent, gamestate
             vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.5f); dir.z -= height*0.5f;
             waist = vec(o).add(dir);
         }
-        if(jet == vec(-1, -1, -1))
-        {
-            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.25f); dir.z -= height*0.35f;
-            jet = vec(o).add(dir);
-        }
-        if(foot[0] == vec(-1, -1, -1))
+        if(jet[0] == vec(-1, -1, -1))
         {
             vecfromyawpitch(yaw, 0, -1, -1, dir); dir.mul(radius); dir.z -= height;
-            foot[0] = vec(o).add(dir);
+            jet[0] = vec(o).add(dir);
         }
-        if(foot[1] == vec(-1, -1, -1))
+        if(jet[1] == vec(-1, -1, -1))
         {
             vecfromyawpitch(yaw, 0, -1, 1, dir); dir.mul(radius); dir.z -= height;
-            foot[1] = vec(o).add(dir);
+            jet[1] = vec(o).add(dir);
+        }
+        if(jet[2] == vec(-1, -1, -1))
+        {
+            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.25f); dir.z -= height*0.35f;
+            jet[2] = vec(o).add(dir);
         }
     }
 

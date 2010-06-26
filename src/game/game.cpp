@@ -432,7 +432,7 @@ namespace game
                 case 0: playsound(S_IMPULSE, d->o, d); // faill through
                 case 1:
                 {
-                    if(num > 0 && len > 0) loopi(2) boosteffect(d, d->foot[i], num, len);
+                    if(num > 0 && len > 0) loopi(2) boosteffect(d, d->jet[i], num, len);
                     break;
                 }
                 case 2:
@@ -440,7 +440,7 @@ namespace game
                     int ends = lastmillis+PHYSMILLIS;
                     if(issound(d->jschan)) sounds[d->jschan].ends = ends;
                     else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &d->jschan, ends);
-                    if(num > 0 && len > 0) boosteffect(d, d->jet, num, len);
+                    if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
         }
@@ -2173,8 +2173,9 @@ namespace game
                     a[ai++] = modelattach("tag_head", &d->head);
                     a[ai++] = modelattach("tag_torso", &d->torso);
                     a[ai++] = modelattach("tag_waist", &d->waist);
-                    a[ai++] = modelattach("tag_lfoot", &d->foot[0]);
-                    a[ai++] = modelattach("tag_rfoot", &d->foot[1]);
+                    a[ai++] = modelattach("tag_ljet", &d->jet[0]);
+                    a[ai++] = modelattach("tag_rjet", &d->jet[1]);
+                    a[ai++] = modelattach("tag_bjet", &d->jet[2]);
                 }
             }
             renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
