@@ -757,7 +757,7 @@ namespace game
             else if(isaitype(actor->aitype) && actor->aitype == AI_GRUNT) concatstring(d->obit, "a tasty snack for");
             else
             {
-                static const char *obitnames[4][WEAP_MAX] = {
+                static const char *obitnames[5][WEAP_MAX] = {
                     {
                         "punched by",
                         "pierced by",
@@ -805,10 +805,22 @@ namespace game
                         "given laser shock treatment by",
                         "turned into shrapnel by",
                         "obliterated by",
+                    },
+                    {
+                        "given kung-fu lessons by",
+                        "picked to pieces by",
+                        "melted in half by",
+                        "filled with shrapnel by",
+                        "given air-conditioning by",
+                        "cooked alive by",
+                        "melted alive by",
+                        "electrified by",
+                        "turned into shrapnel by",
+                        "obliterated by",
                     }
                 };
 
-                int o = d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0));
+                int o = style&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)));
                 concatstring(d->obit, burning ? "set ablaze by" : (isweap(weap) ? obitnames[o][weap] : "killed by"));
             }
             bool override = false;

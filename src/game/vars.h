@@ -165,6 +165,7 @@ GFVAR(0, normalscale, 0, 1, 1000);
 GFVAR(0, limitedscale, 0, 0.75f, 1000);
 GFVAR(0, damagescale, 0, 1, 1000);
 GVAR(0, damagecritchance, 0, 100, INT_MAX-1);
+GFVAR(0, flakscale, 0, 5, 1000);
 
 GFVAR(0, hitpushscale, 0, 1, 1000);
 GFVAR(0, slowscale, 0, 1, 1000);
