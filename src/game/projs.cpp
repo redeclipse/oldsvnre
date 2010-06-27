@@ -1465,7 +1465,7 @@ namespace projs
                             bool a = f >= WEAP_MAX;
                             int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, a);
                             bool s = proj.weap != w;
-                            float mag = proj.vel.magnitude()*WEAP2(proj.weap, flakspeed, a);
+                            float mag = proj.vel.magnitude();
                             loopi(r)
                             {
                                 if(s) mag = rnd(WEAP2(proj.weap, flakspeed, a))*0.5f+WEAP2(proj.weap, flakspeed, a)*0.5f;
