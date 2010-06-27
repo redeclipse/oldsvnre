@@ -2006,13 +2006,13 @@ namespace server
         if(id && id->flags&IDF_SERVER)
         {
             mkstring(val);
-            int locked = max(id->flags&IDF_ADMIN ? 1 : 0, GAME(varslock));
+            int locked = max(id->flags&IDF_ADMIN ? 2 : 0, GAME(varslock));
             switch(id->type)
             {
                 case ID_CCOMMAND:
                 case ID_COMMAND:
                 {
-                    if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "execute commands")) return;
+                    if(locked && !haspriv(ci, locked >= 3 ? PRIV_MAX : (locked >= 2 ? PRIV_ADMIN : PRIV_MASTER), "execute commands")) return;
                     string s;
                     if(nargs <= 1 || !arg) formatstring(s)("sv_%s", cmd);
                     else formatstring(s)("sv_%s %s", cmd, arg);
@@ -2029,7 +2029,7 @@ namespace server
                         srvmsgf(ci->clientnum, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
                         return;
                     }
-                    else if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
+                    else if(locked && !haspriv(ci, locked >= 3 ? PRIV_MAX : (locked >= 2 ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
                     {
                         formatstring(val)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
                         sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, &id->name[3], val);
@@ -2061,7 +2061,7 @@ namespace server
                         srvmsgf(ci->clientnum, "\fc%s = %s", cmd, floatstr(*id->storage.f));
                         return;
                     }
-                    else if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
+                    else if(locked && !haspriv(ci, locked >= 3 ? PRIV_MAX : (locked >= 2 ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
                     {
                         formatstring(val)("%s", floatstr(*id->storage.f));
                         sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, &id->name[3], val);
@@ -2085,7 +2085,7 @@ namespace server
                         srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", cmd, *id->storage.s);
                         return;
                     }
-                    else if(!haspriv(ci, locked >= 2 ? PRIV_MAX : (locked ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
+                    else if(locked && !haspriv(ci, locked >= 3 ? PRIV_MAX : (locked >= 2 ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
                     {
                         formatstring(val)("%s", *id->storage.s);
                         sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, &id->name[3], val);
