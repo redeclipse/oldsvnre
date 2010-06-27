@@ -1446,18 +1446,7 @@ namespace projs
                 float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                 if(proj.state == CS_DEAD)
                 {
-                    if(expl > 0)
-                    {
-                        if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                        radius = int(ceilf(expl));
-                        if(!proj.limited && radius > 0) loopj(game::numdynents())
-                        {
-                            gameent *f = (gameent *)game::iterdynents(j);
-                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
-                            radialeffect(f, proj, true, radius);
-                        }
-                    }
-                    if(hits.empty() && !proj.child && !m_insta(game::gamemode, game::mutators))
+                    if(!proj.child && !m_insta(game::gamemode, game::mutators))
                     {
                         int f = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT);
                         if(f >= 0)
@@ -1473,6 +1462,17 @@ namespace projs
                                 dir.add(proj.o);
                                 create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, 1, true);
                             }
+                        }
+                    }
+                    if(expl > 0)
+                    {
+                        if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
+                        radius = int(ceilf(expl));
+                        if(!proj.limited && radius > 0) loopj(game::numdynents())
+                        {
+                            gameent *f = (gameent *)game::iterdynents(j);
+                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
+                            radialeffect(f, proj, true, radius);
                         }
                     }
                 }
