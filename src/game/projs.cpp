@@ -1033,7 +1033,10 @@ namespace projs
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
                 }
                 if(proj.local && proj.owner)
-                    client::addmsg(N_DESTROY, "ri7", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.id >= 0 ? proj.id-game::maptime : proj.id, 0, 0);
+                {
+                    int id = proj.id >= 0 ? proj.id-game::maptime : proj.id;
+                    client::addmsg(N_DESTROY, "ri7", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -id : id, 0, 0);
+                }
                 break;
             }
             case PRJ_ENT:
@@ -1458,15 +1461,16 @@ namespace projs
                     if(proj.projcollide&COLLIDE_FLAK && !proj.child && !m_insta(game::gamemode, game::mutators))
                     {
                         bool s = proj.weap == WEAP_ROCKET || proj.weap == WEAP_GRENADE, alt = !s && proj.flags&HIT_ALT;
-                        int w = s ? WEAP_SHOTGUN : proj.weap, id = 0-proj.id, r = WEAP2(w, rays, alt)*(s ? 2 : 1);
+                        int w = s ? WEAP_SHOTGUN : proj.weap, r = WEAP2(w, rays, alt);
                         float mag = proj.vel.magnitude()*0.5f;
+                        if(s) r = int(ceilf(r*flakscale));
                         loopi(r)
                         {
                             if(s) mag = rnd(WEAP2(w, speed, alt))*0.125f+WEAP2(w, speed, alt)*0.125f;
                             vec dir = vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(mag);
                             if(!s) dir.add(proj.vel);
                             dir.add(proj.o);
-                            create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(w, time, alt), WEAP2(w, time, alt), 0, WEAP2(w, speed, alt), id, w, (alt ? HIT_ALT : 0)|HIT_FLAK, 1, true);
+                            create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(w, time, alt), WEAP2(w, time, alt), 0, WEAP2(w, speed, alt), proj.id, w, (alt ? HIT_ALT : 0)|HIT_FLAK, 1, true);
                         }
                     }
                 }
@@ -1483,7 +1487,8 @@ namespace projs
                 }
                 if(!hits.empty())
                 {
-                    client::addmsg(N_DESTROY, "ri6iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.id >= 0 ? proj.id-game::maptime : proj.id,
+                    int id = proj.id >= 0 ? proj.id-game::maptime : proj.id;
+                    client::addmsg(N_DESTROY, "ri6iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -id : id,
                             int(radius), hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 }
             }
