@@ -52,7 +52,7 @@ namespace projs
             flags &= ~HIT_CLEAR;
             flags |= HIT_WAVE;
         }
-        if(flags&HIT_FLAK) damage = int(ceilf(damage*WEAP2(weap, flakdam, flags&HIT_ALT)));
+        if(flags&HIT_FLAK) damage = int(ceilf(damage*WEAP2(weap, flakscale, flags&HIT_ALT)));
         if(flags&HIT_HEAD) damage = int(ceilf(damage*WEAP2(weap, headdam, flags&HIT_ALT)*damagescale));
         else if(flags&HIT_TORSO) damage = int(ceilf(damage*WEAP2(weap, torsodam, flags&HIT_ALT)*damagescale));
         else if(flags&HIT_LEGS) damage = int(ceilf(damage*WEAP2(weap, legsdam, flags&HIT_ALT)*damagescale));
@@ -365,7 +365,6 @@ namespace projs
                 proj.waterfric = WEAP2(proj.weap, waterfric, proj.flags&HIT_ALT);
                 proj.weight = WEAP2(proj.weap, weight, proj.flags&HIT_ALT);
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
-                if(m_insta(game::gamemode, game::mutators)) proj.projcollide &= ~COLLIDE_FLAK;
                 if(proj.child)
                 {
                     proj.projcollide &= ~(IMPACT_GEOM|BOUNCE_PLAYER);
@@ -1458,19 +1457,23 @@ namespace projs
                             radialeffect(f, proj, true, radius);
                         }
                     }
-                    if(proj.projcollide&COLLIDE_FLAK && !proj.child && !m_insta(game::gamemode, game::mutators))
+                    if(!proj.child && !m_insta(game::gamemode, game::mutators))
                     {
-                        bool s = proj.weap == WEAP_ROCKET || proj.weap == WEAP_GRENADE, alt = !s && proj.flags&HIT_ALT;
-                        int w = s ? WEAP_SHOTGUN : proj.weap, r = WEAP2(w, rays, alt);
-                        float mag = proj.vel.magnitude()*0.5f;
-                        if(s) r = int(ceilf(r*flakscale));
-                        loopi(r)
+                        int f = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT);
+                        if(f >= 0)
                         {
-                            if(s) mag = rnd(WEAP2(w, speed, alt))*0.125f+WEAP2(w, speed, alt)*0.125f;
-                            vec dir = vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(mag);
-                            if(!s) dir.add(proj.vel);
-                            dir.add(proj.o);
-                            create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(w, time, alt), WEAP2(w, time, alt), 0, WEAP2(w, speed, alt), proj.id, w, (alt ? HIT_ALT : 0)|HIT_FLAK, 1, true);
+                            bool a = f >= WEAP_MAX;
+                            int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, a);
+                            bool s = proj.weap != w;
+                            float mag = proj.vel.magnitude()*WEAP2(proj.weap, flakspeed, a);
+                            loopi(r)
+                            {
+                                if(s) mag = rnd(WEAP2(proj.weap, flakspeed, a))*0.5f+WEAP2(proj.weap, flakspeed, a)*0.5f;
+                                vec dir = vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(mag);
+                                if(!s) dir.add(proj.vel);
+                                dir.add(proj.o);
+                                create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(proj.weap, flaktime, a), WEAP2(proj.weap, flaktime, a), 0, WEAP2(proj.weap, flakspeed, a), proj.id, w, (a ? HIT_ALT : 0)|HIT_FLAK, WEAP2(proj.weap, flakscale, a), true);
+                            }
                         }
                     }
                 }
