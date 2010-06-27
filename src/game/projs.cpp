@@ -1457,22 +1457,21 @@ namespace projs
                             radialeffect(f, proj, true, radius);
                         }
                     }
-                    if(!proj.child && !m_insta(game::gamemode, game::mutators))
+                    if(hits.empty() && !proj.child && !m_insta(game::gamemode, game::mutators))
                     {
                         int f = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT);
                         if(f >= 0)
                         {
-                            bool a = f >= WEAP_MAX;
-                            int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, a);
+                            int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, proj.flags&HIT_ALT);
                             bool s = proj.weap != w;
                             float mag = proj.vel.magnitude();
                             loopi(r)
                             {
-                                if(s) mag = rnd(WEAP2(proj.weap, flakspeed, a))*0.5f+WEAP2(proj.weap, flakspeed, a)*0.5f;
-                                vec dir = vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(mag);
+                                if(s) mag = rnd(WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT))*0.5f+WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT)*0.5f;
+                                vec dir = vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT)*mag);
                                 if(!s) dir.add(proj.vel);
                                 dir.add(proj.o);
-                                create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(proj.weap, flaktime, a), WEAP2(proj.weap, flaktime, a), 0, WEAP2(proj.weap, flakspeed, a), proj.id, w, (a ? HIT_ALT : 0)|HIT_FLAK, WEAP2(proj.weap, flakscale, a), true);
+                                create(proj.o, dir, proj.local, proj.owner, PRJ_SHOT, WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, 1, true);
                             }
                         }
                     }

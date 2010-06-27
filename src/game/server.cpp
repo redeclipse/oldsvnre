@@ -2555,31 +2555,30 @@ namespace server
         else if(isweap(weap))
         {
             if(gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id) < 0) return;
-            if(hits.empty()) gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].remove(id);
-            else
+            if(hits.empty())
             {
-                loopv(hits)
+                gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].remove(id);
+                if(id >= 0 && !m_insta(gamemode, mutators))
                 {
-                    hitset &h = hits[i];
-                    int hflags = flags|h.flags;
-                    if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, 1.f));
-                    float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
-                    clientinfo *target = (clientinfo *)getinfo(h.target);
-                    if(!target || target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
-                        continue;
-                    int damage = calcdamage(weap, hflags, radial, size, dist);
-                    dodamage(target, ci, damage, weap, hflags, h.dir);
+                    int f = WEAP2(weap, flakweap, flags&HIT_ALT);
+                    if(f >= 0)
+                    {
+                        int w = f%WEAP_MAX, r = WEAP2(weap, flakrays, flags&HIT_ALT);
+                        loopi(r) gs.weapshots[w][f >= WEAP_MAX ? 1 : 0].add(-id);
+                    }
                 }
             }
-            if(id >= 0 && !m_insta(gamemode, mutators))
+            else loopv(hits)
             {
-                int f = WEAP2(weap, flakweap, flags&HIT_ALT);
-                if(f >= 0)
-                {
-                    bool a = f >= WEAP_MAX;
-                    int w = f%WEAP_MAX, r = WEAP2(weap, flakrays, a);
-                    loopi(r) gs.weapshots[w][a ? 1 : 0].add(-id);
-                }
+                hitset &h = hits[i];
+                int hflags = flags|h.flags;
+                if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, 1.f));
+                float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
+                clientinfo *target = (clientinfo *)getinfo(h.target);
+                if(!target || target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
+                    continue;
+                int damage = calcdamage(weap, hflags, radial, size, dist);
+                dodamage(target, ci, damage, weap, hflags, h.dir);
             }
         }
     }
