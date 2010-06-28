@@ -13,12 +13,12 @@ namespace entities
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(0, maxwaypoints, 128, 1024, INT_MAX-1); // max waypoints to drop unless forced
-    VAR(0, dropwaypoints, 0, 0, 1); // drop waypoints during play
+    VAR(0, dropwaypoints, 0, 1, 2); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = forced
     VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints || (hasai && !haswaypoints && numwaypoints < maxwaypoints);
+        return dropwaypoints >= (hasai && !haswaypoints && numwaypoints < maxwaypoints ? 1 : 2);
     }
 
     vector<extentity *> &getents() { return ents; }
@@ -1465,7 +1465,7 @@ namespace entities
         if(d->state == CS_ALIVE)
         {
             vec v = d->feetpos();
-            bool clip = clipped(v, true), shoulddrop = !d->ai && !clip && hasai && waypointdrop(hasai);
+            bool clip = clipped(v, true), shoulddrop = !d->ai && !clip && waypointdrop(hasai);
             float dist = float(shoulddrop ? enttype[WAYPOINT].radius : (d->ai ? ai::JUMPMIN : ai::SIGHTMIN));
             int curnode = closestent(WAYPOINT, v, dist, false), prevnode = d->lastnode;
 
