@@ -77,7 +77,7 @@ namespace server
 
     struct destroyevent : timedevent
     {
-        int id, weap, flags, radial;
+        int id, weap, flags, radial, scale;
         vector<hitset> hits;
         bool keepable() const { return true; }
         void process(clientinfo *ci);
@@ -2530,13 +2530,13 @@ namespace server
         gs.lastdeath = gamemillis;
     }
 
-    int calcdamage(int weap, int &flags, int radial, float size, float dist)
+    int calcdamage(int weap, int &flags, int radial, float size, float dist, float scale)
     {
-        int damage = WEAP2(weap, damage, flags&HIT_ALT); flags &= ~HIT_SFLAGS;
+        int damage = int(ceilf(WEAP2(weap, damage, flags&HIT_ALT)*clamp(scale, 0.f, 1.f))); flags &= ~HIT_SFLAGS;
         if(radial) damage = int(ceilf(damage*clamp(1.f-dist/size, 1e-6f, 1.f)));
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) damage = int(ceilf(damage*clamp(dist, 0.f, 1.f)));
         if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
-        if(flags&HIT_FLAK) damage = int(ceilf(damage*WEAP2(weap, flakscale, flags&HIT_ALT)));
+        if(flags&HIT_FLAK) damage = int(ceilf(damage*WEAP2(weap, flakdam, flags&HIT_ALT)));
         if(flags&HIT_HEAD) damage = int(ceilf(damage*WEAP2(weap, headdam, flags&HIT_ALT)*GAME(damagescale)));
         else if(flags&HIT_TORSO) damage = int(ceilf(damage*WEAP2(weap, torsodam, flags&HIT_ALT)*GAME(damagescale)));
         else if(flags&HIT_LEGS) damage = int(ceilf(damage*WEAP2(weap, legsdam, flags&HIT_ALT)*GAME(damagescale)));
@@ -2572,12 +2572,13 @@ namespace server
             {
                 hitset &h = hits[i];
                 int hflags = flags|h.flags;
-                if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, 1.f));
+                float skew = float(scale)/DNF;
+                if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, skew));
                 float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
                 clientinfo *target = (clientinfo *)getinfo(h.target);
                 if(!target || target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     continue;
-                int damage = calcdamage(weap, hflags, radial, size, dist);
+                int damage = calcdamage(weap, hflags, radial, size, dist, skew);
                 dodamage(target, ci, damage, weap, hflags, h.dir);
             }
         }
@@ -3663,6 +3664,7 @@ namespace server
                     if(havecn) ev->millis = cp->getmillis(gamemillis, millis);
                     ev->id = getint(p);
                     ev->radial = getint(p);
+                    ev->scale = getint(p);
                     int hits = getint(p);
                     loopj(hits)
                     {
