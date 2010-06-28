@@ -1917,7 +1917,7 @@ namespace game
         {
             renderabovehead(d, third, trans);
             d->cleartags();
-            if(!glaring && !shadowmapping && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
+            if(!glaring && !shadowmapping)
             {
                 d->checktags();
                 if(third)
@@ -1958,116 +1958,119 @@ namespace game
                     glEnable(GL_TEXTURE_2D);
                     glPopMatrix();
                 }
-                int weap = d->weapselect;
-                bool showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
-                float zoff = 0;
-                if(showweap) switch(d->weapstate[weap])
+                if(d->state == CS_ALIVE)
                 {
-                    case WEAP_S_SWITCH:
-                    case WEAP_S_USE:
+                    int weap = d->weapselect;
+                    bool showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
+                    float zoff = 0;
+                    if(showweap) switch(d->weapstate[weap])
                     {
-                        if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
+                        case WEAP_S_SWITCH:
+                        case WEAP_S_USE:
                         {
-                            zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]/3);
-                            if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
-                            else weap = d->lastweap;
+                            if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
+                            {
+                                zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]/3);
+                                if(!d->hasweap(d->lastweap, m_weapon(gamemode, mutators))) showweap = false;
+                                else weap = d->lastweap;
+                            }
+                            else
+                            {
+                                zoff = 1.f-((lastmillis-d->weaplast[weap]-d->weapwait[weap]/3)/float(d->weapwait[weap]*2/3));
+                                if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                            }
+                            break;
                         }
-                        else
+                        case WEAP_S_POWER: break;
+                        case WEAP_S_PRIMARY:
+                        case WEAP_S_SECONDARY:
                         {
-                            zoff = 1.f-((lastmillis-d->weaplast[weap]-d->weapwait[weap]/3)/float(d->weapwait[weap]*2/3));
-                            if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        }
-                        break;
-                    }
-                    case WEAP_S_POWER: break;
-                    case WEAP_S_PRIMARY:
-                    case WEAP_S_SECONDARY:
-                    {
-                        if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
-                            showweap = false;
-                        break;
-                    }
-                    case WEAP_S_RELOAD:
-                    {
-                        zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]);
-                        if(zoff > 0.5f) zoff = (1.f-zoff)*2;
-                        else if(zoff < 0.5f) zoff = zoff*2;
-                        if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
-                        {
-                            if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
+                            if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
                                 showweap = false;
                             break;
                         }
+                        case WEAP_S_RELOAD:
+                        {
+                            zoff = (lastmillis-d->weaplast[weap])/float(d->weapwait[weap]);
+                            if(zoff > 0.5f) zoff = (1.f-zoff)*2;
+                            else if(zoff < 0.5f) zoff = zoff*2;
+                            if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
+                            {
+                                if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
+                                    showweap = false;
+                                break;
+                            }
+                        }
+                        case WEAP_S_IDLE: case WEAP_S_WAIT: default:
+                        {
+                            if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
+                            break;
+                        }
                     }
-                    case WEAP_S_IDLE: case WEAP_S_WAIT: default:
+                    if(showweap && (weap != WEAP_MELEE || third))
                     {
-                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        break;
+                        static const struct polyweaps
+                        {
+                            float h, r, l;
+                        } polyweap[WEAP_MAX] = {
+                            { 0.1f, 0.1f, 0.1f }, // melee
+                            { 0.2f, 0.2f, 0.4f }, // pistol
+                            { 0.2f, 0.2f, 1.0f }, // sword
+                            { 0.3f, 0.5f, 0.9f }, // shotgun
+                            { 0.3f, 0.3f, 0.6f }, // smg
+                            { 0.3f, 0.5f, 0.7f }, // flamer
+                            { 0.4f, 0.4f, 0.5f }, // plasma
+                            { 0.3f, 0.2f, 0.9f }, // rifle
+                            { 0.3f, 0.3f, 0.3f }, // grenade
+                            { 0.4f, 0.4f, 1.2f }, // rocket
+                        };
+                        glPushMatrix();
+                        foggednotextureshader->set();
+                        glDisable(GL_TEXTURE_2D);
+                        vec o = d->origin;
+                        if(!third && firstpersonsway && !intermission)
+                        {
+                            vec dir;
+                            vecfromyawpitch(d->yaw, 0, 0, 1, dir);
+                            float steps = swaydist/firstpersonswaystep*M_PI;
+                            dir.mul(firstpersonswayside*cosf(steps));
+                            dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
+                            o.add(dir).add(swaydir).add(swaypush);
+                        }
+                        vec dir = vec(d->muzzle).sub(o).normalize();
+                        if(third)
+                        {
+                            vec offset = vec(dir).mul(d->radius*0.65f);
+                            o.add(offset); o.z -= 1; d->origin = o;
+                            d->muzzle.add(offset); d->muzzle.z -= 1;
+                            d->muzzle.add(vec(dir).mul(polyweap[weap].l*0.5f));
+                        }
+                        d->muzzle.sub(vec(dir).mul(1.f-polyweap[weap].l));
+                        bool isshow = weaptype[weap].muzzle || weap == WEAP_SWORD;
+                        if(!isshow) o = d->origin = d->muzzle;
+                        vec down; vecfromyawpitch(d->yaw, d->pitch-90, 1, 0, down);
+                        o.add(down.mul(d->height*(third ? 0.25f : 0.5f)*zoff));
+                        glTranslatef(o.x, o.y, o.z);
+                        float yaw, pitch, roll = d->roll;
+                        vectoyawpitch(dir, yaw, pitch);
+                        glRotatef(yaw, 0, 0, 1);
+                        glRotatef(roll, 0, -1, 0);
+                        glRotatef(pitch, 1, 0, 0);
+                        if(trans < 1)
+                        {
+                            glEnable(GL_BLEND);
+                            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                        }
+                        vec c((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f);
+                        polyhue(d, c, true);
+                        glColor4f(c[0], c[1], c[2], trans);
+                        float mult = third ? 2 : 1;
+                        polybox(vec(0, 0, 0), polyweap[weap].h*mult, polyweap[weap].h*mult, polyweap[weap].r*mult, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
+                        if(trans < 1) glDisable(GL_BLEND);
+                        defaultshader->set();
+                        glEnable(GL_TEXTURE_2D);
+                        glPopMatrix();
                     }
-                }
-                if(showweap && (weap != WEAP_MELEE || third))
-                {
-                    static const struct polyweaps
-                    {
-                        float h, r, l;
-                    } polyweap[WEAP_MAX] = {
-                        { 0.1f, 0.1f, 0.1f }, // melee
-                        { 0.2f, 0.2f, 0.4f }, // pistol
-                        { 0.2f, 0.2f, 1.0f }, // sword
-                        { 0.3f, 0.5f, 0.9f }, // shotgun
-                        { 0.3f, 0.3f, 0.6f }, // smg
-                        { 0.3f, 0.5f, 0.7f }, // flamer
-                        { 0.4f, 0.4f, 0.5f }, // plasma
-                        { 0.3f, 0.2f, 0.9f }, // rifle
-                        { 0.3f, 0.3f, 0.3f }, // grenade
-                        { 0.4f, 0.4f, 1.2f }, // rocket
-                    };
-                    glPushMatrix();
-                    foggednotextureshader->set();
-                    glDisable(GL_TEXTURE_2D);
-                    vec o = d->origin;
-                    if(!third && firstpersonsway && !intermission)
-                    {
-                        vec dir;
-                        vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                        float steps = swaydist/firstpersonswaystep*M_PI;
-                        dir.mul(firstpersonswayside*cosf(steps));
-                        dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
-                        o.add(dir).add(swaydir).add(swaypush);
-                    }
-                    vec dir = vec(d->muzzle).sub(o).normalize();
-                    if(third)
-                    {
-                        vec offset = vec(dir).mul(d->radius*0.65f);
-                        o.add(offset); o.z -= 1; d->origin = o;
-                        d->muzzle.add(offset); d->muzzle.z -= 1;
-                        d->muzzle.add(vec(dir).mul(polyweap[weap].l*0.5f));
-                    }
-                    d->muzzle.sub(vec(dir).mul(1.f-polyweap[weap].l));
-                    bool isshow = weaptype[weap].muzzle || weap == WEAP_SWORD;
-                    if(!isshow) o = d->origin = d->muzzle;
-                    vec down; vecfromyawpitch(d->yaw, d->pitch-90, 1, 0, down);
-                    o.add(down.mul(d->height*(third ? 0.25f : 0.5f)*zoff));
-                    glTranslatef(o.x, o.y, o.z);
-                    float yaw, pitch, roll = d->roll;
-                    vectoyawpitch(dir, yaw, pitch);
-                    glRotatef(yaw, 0, 0, 1);
-                    glRotatef(roll, 0, -1, 0);
-                    glRotatef(pitch, 1, 0, 0);
-                    if(trans < 1)
-                    {
-                        glEnable(GL_BLEND);
-                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    }
-                    vec c((weaptype[weap].colour>>16)/512.f, ((weaptype[weap].colour>>8)&0xFF)/512.f, (weaptype[weap].colour&0xFF)/512.f);
-                    polyhue(d, c, true);
-                    glColor4f(c[0], c[1], c[2], trans);
-                    float mult = third ? 2 : 1;
-                    polybox(vec(0, 0, 0), polyweap[weap].h*mult, polyweap[weap].h*mult, polyweap[weap].r*mult, isshow ? o.dist(d->muzzle) : polyweap[weap].l);
-                    if(trans < 1) glDisable(GL_BLEND);
-                    defaultshader->set();
-                    glEnable(GL_TEXTURE_2D);
-                    glPopMatrix();
                 }
             }
         }
