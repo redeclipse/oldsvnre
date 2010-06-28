@@ -12,7 +12,7 @@ namespace entities
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
-    VAR(0, maxwaypoints, 128, 1024, INT_MAX-1); // max waypoints to drop unless forced
+    VAR(0, maxwaypoints, 128, 8192, INT_MAX-1); // max waypoints to drop unless forced
     VAR(0, dropwaypoints, 0, 1, 2); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = forced
     VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
 
