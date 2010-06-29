@@ -1044,8 +1044,7 @@ struct gameent : dynent, gamestate
 
     void resetjump()
     {
-        impulse[IM_JUMP] = 0;
-        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = 0;
+        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = 0;
     }
 
     void resetair()

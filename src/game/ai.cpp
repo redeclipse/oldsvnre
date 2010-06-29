@@ -1111,7 +1111,7 @@ namespace ai
         if(d->aitype == AI_BOT)
         {
             bool wantsimpulse = false;
-            if(physics::allowimpulse())
+            if(physics::allowimpulse(m_jetpack(game::gamemode, game::mutators) ? 0 : 2))
             {
                 if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsimpulse = true;
                 else if(b.idle == -1 && !d->ai->dontmove)

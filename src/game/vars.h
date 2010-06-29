@@ -143,6 +143,8 @@ GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost on
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 10, INT_MAX-1); // number of impulse actions per air transit
 GVAR(0, impulsedelay, 0, 250, INT_MAX-1); // minimum time between boosts
+GVAR(0, impulsedashdelay, 0, 1000, INT_MAX-1); // minimum time between dashes
+GVAR(0, impulsejetdelay, 0, 250, INT_MAX-1); // minimum time between jetpack
 GVAR(0, impulseslide, 0, 500, INT_MAX-1); // minimum time before floor friction kicks back in
 GVAR(0, impulsemeter, 0, 30000, INT_MAX-1); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 1000, INT_MAX-1); // cost of impulse jump
