@@ -39,10 +39,10 @@ namespace physics
             gameent *e = (gameent *)d;
             if(e->aitype < AI_START && allowimpulse(level))
             {
-                if(allowimpulse() && impulsemeter && e->impulse[IM_METER]+(cost > 0 ? cost : impulsecost) > impulsemeter) return false;
+                if(impulsemeter && e->impulse[IM_METER]+(cost > 0 ? cost : impulsecost) > impulsemeter) return false;
                 if(cost <= 0)
                 {
-                    if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= PHYSMILLIS) return false;
+                    if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
                     if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
                     if(cost == 0 && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
                 }
@@ -188,10 +188,10 @@ namespace physics
 
     bool jetpack(physent *d)
     {
-        if(m_jetpack(game::gamemode, game::mutators) && allowimpulse() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
+        if(m_jetpack(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
         {
             gameent *e = (gameent *)d;
-            if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsedelay) && e->aitype < AI_START)
+            if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsejetdelay) && e->aitype < AI_START)
                 return true;
         }
         return false;
@@ -654,11 +654,7 @@ namespace physics
         else if(game::allowmove(d))
         {
             bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
-            if(!allowimpulse())
-            {
-                if(jetting) jetting = d->action[AC_JUMP] = false;
-            }
-            else if(impulsemeter)
+            if(impulsemeter)
             {
                 bool sprint = sprinting(d, false);
                 if(sprint && impulsesprint > 0)
@@ -700,14 +696,17 @@ namespace physics
                 }
             }
 
-            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || lastmillis-d->impulse[IM_TIME] > impulseskate || d->vel.magnitude() <= 1))
+            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || (d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
                 d->turnside = 0;
 
             if(!d->turnside)
             {
                 if((d->ai || dashaction) && canimpulse(d, 0, 1))
                 {
-                    bool dash = !d->ai && dashaction >= 2 && d->action[AC_DASH] && !iscrouching(d), pulse = dashaction != 2 && d->action[AC_JUMP] && !onfloor;
+                    bool dash = false, pulse = false;
+                    if(onfloor)
+                        dash = dashaction >= 2 && d->action[AC_DASH] && !iscrouching(d) && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
+                    else pulse = dashaction != 2 && d->action[AC_JUMP];
                     if(dash || pulse)
                     {
                         bool moving = d->move || d->strafe;
@@ -729,24 +728,19 @@ namespace physics
                 }
                 if(onfloor && d->action[AC_JUMP])
                 {
-                    if(m_jetpack(game::gamemode, game::mutators) && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
-                        d->action[AC_JUMP] = false;
-                    else
+                    d->vel.z += jumpforce(d, true);
+                    if(d->inliquid)
                     {
-                        d->vel.z += jumpforce(d, true);
-                        if(d->inliquid)
-                        {
-                            float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
-                            d->vel.x *= scale;
-                            d->vel.y *= scale;
-                        }
-                        d->resetphys();
-                        d->impulse[IM_JUMP] = lastmillis;
-                        d->action[AC_JUMP] = false;
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
-                        playsound(S_JUMP, d->o, d);
-                        regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
+                        float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
+                        d->vel.x *= scale;
+                        d->vel.y *= scale;
                     }
+                    d->resetphys();
+                    d->impulse[IM_JUMP] = lastmillis;
+                    d->action[AC_JUMP] = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
+                    playsound(S_JUMP, d->o, d);
+                    regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
                 }
             }
             bool found = false;
