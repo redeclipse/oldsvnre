@@ -537,7 +537,7 @@ struct vacollect : verthash
                 }
                 if(k.layer&LAYER_BLEND) { va->texs--; va->tris -= e.length[1]/3; va->blends++; va->blendtris += e.length[1]/3; }
                 else if(k.alpha==ALPHA_BACK) { va->texs--; va->tris -= e.length[1]/3; va->alphaback++; va->alphabacktris += e.length[1]/3; }
-                else if(k.alpha==ALPHA_FRONT) { va->texs--; va->tris -= e.length[1]/3; va->alphafront++; va->alphafronttris += e.length[1]/3; } 
+                else if(k.alpha==ALPHA_FRONT) { va->texs--; va->tris -= e.length[1]/3; va->alphafront++; va->alphafronttris += e.length[1]/3; }
             }
         }
 
@@ -660,7 +660,7 @@ void addtris(const sortkey &key, int orient, vertex verts[4], int index[4], int 
             if(d[axis] < 0) d.neg();
             reduceslope(d);
             int origin = int(min(v1.pos[axis], v2.pos[axis])*8)&~0x7FFF,
-                offset1 = (int(v1.pos[axis]*8) - origin) / d[axis], 
+                offset1 = (int(v1.pos[axis]*8) - origin) / d[axis],
                 offset2 = (int(v2.pos[axis]*8) - origin) / d[axis];
             vec o = vec(v1.pos).sub(d.tovec().mul(offset1/8.0f));
             float doffset = 1.0f / (offset2 - offset1);
@@ -1059,7 +1059,7 @@ void gencubeverts(cube &c, int x, int y, int z, int size, int csi, uchar &vismas
                envmap2 = layer && layer->slot->shader->type&SHADER_ENVMAP ? (layer->slot->texmask&(1<<TEX_ENVMAP) ? EMID_CUSTOM : closestenvmap(i, x, y, z, size)) : EMID_NONE;
         while(tj >= 0 && tjoints[tj].edge < i*4) tj = tjoints[tj].next;
         int hastj = tj >= 0 && tjoints[tj].edge/4 == i ? tj : -1;
-        int grassy = vslot.slot->autograss && i!=O_BOTTOM ? (vis!=3 || faceconvexity(c, i) ? 1 : 2) : 0;
+        int grassy = vslot.slot->texgrass && i!=O_BOTTOM ? (vis!=3 || faceconvexity(c, i) ? 1 : 2) : 0;
         if(!e.surfaces || e.surfaces[i].layer!=LAYER_BOTTOM)
             addcubeverts(vslot, i, size, pos, c.texture[i], e.surfaces ? &e.surfaces[i] : NULL, e.normals ? &e.normals[i] : NULL, hastj, envmap, grassy, c.ext && c.ext->material&MAT_ALPHA);
         if(e.surfaces && e.surfaces[i].layer!=LAYER_TOP)
@@ -1389,7 +1389,7 @@ void addmergedverts(int level)
     {
         mergedface &mf = mfl[i];
         VSlot &vslot = lookupvslot(mf.tex, true);
-        int grassy = vslot.slot->autograss && mf.orient!=O_BOTTOM && (!mf.surface || mf.surface->layer!=LAYER_BOTTOM) ? 2 : 0;
+        int grassy = vslot.slot->texgrass && mf.orient!=O_BOTTOM && (!mf.surface || mf.surface->layer!=LAYER_BOTTOM) ? 2 : 0;
         addcubeverts(vslot, mf.orient, 1<<level, mf.v, mf.tex, mf.surface, mf.normals, mf.tjoints, mf.envmap, grassy, (mf.mat&MAT_ALPHA)!=0);
         vahasmerges |= MERGE_USE;
     }
@@ -1760,7 +1760,7 @@ void allchanged(bool load)
     invalidatepostfx();
     updatevabbs(true);
     resetblobs();
-    if(load) 
+    if(load)
     {
         genenvmaps();
         drawminimap();

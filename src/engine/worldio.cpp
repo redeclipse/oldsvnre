@@ -446,7 +446,15 @@ void saveslotconfig(stream *h, Slot &s, int index)
             h->printf("texalpha %f %f\n", s.variants->alphafront, s.variants->alphaback);
         if(s.variants->colorscale != vec(1, 1, 1))
             h->printf("texcolor %f %f %f\n", s.variants->colorscale.x, s.variants->colorscale.y, s.variants->colorscale.z);
-        if(s.autograss) h->printf("autograss \"%s\"\n", s.autograss);
+        if(s.texgrass)
+        {
+            h->printf("texgrass \"%s\"\n", s.texgrass);
+            if(s.grasscolor != vec(0, 0, 0))
+                h->printf("texgrasscolor %f %f %f\n", s.grasscolor.x, s.grasscolor.y, s.grasscolor.z);
+            if(s.grassblend > 0) h->printf("texgrassblend %f\n", s.grassblend);
+            if(s.grassscale > 0) h->printf("texgrassscale %d\n", s.grassscale);
+            if(s.grassheight > 0) h->printf("texgrassheight %d\n", s.grassheight);
+        }
         if(s.ffenv) h->printf("texffenv 1\n");
     }
     h->printf("\n");

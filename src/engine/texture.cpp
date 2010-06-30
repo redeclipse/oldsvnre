@@ -1476,14 +1476,71 @@ void texture(char *type, char *name, int *rot, int *xoffset, int *yoffset, float
 
 COMMAND(0, texture, "ssiiif");
 
-void autograss(char *name)
+void texgrass(Slot &s, char *name)
 {
-    if(slots.empty()) return;
-    Slot &s = *slots.last();
-    DELETEA(s.autograss);
-    s.autograss = name[0] ? newstring(name) : NULL;
+    DELETEA(s.texgrass);
+    s.texgrass = name[0] ? newstring(name) : NULL;
 }
-COMMAND(0, autograss, "s");
+ICOMMAND(0, autograss, "s", (char *name), if(!slots.empty()) texgrass(*slots.last(), name));
+ICOMMAND(0, texgrass, "s", (char *name), if(!slots.empty()) texgrass(*slots.last(), name));
+ICOMMAND(0, setgrass, "s", (char *name), {
+    if(noedit() || multiplayer() || slots.empty()) return;
+    cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
+    int tex = !isempty(c) ? c.texture[sel.orient] : texmru[0];
+    if(slots.inrange(tex))
+    {
+        texgrass(*slots[tex], name);
+        allchanged();
+    }
+});
+
+void texgrasscolor(Slot &s, float r, float g, float b)
+{
+    s.grasscolor = vec(max(r, 0.f), max(g, 0.f), max(b, 0.f));
+}
+ICOMMAND(0, texgrasscolor, "fff", (float *r, float *g, float *b), if(!slots.empty()) texgrasscolor(*slots.last(), *r, *g, *b));
+ICOMMAND(0, setgrasscolor, "fff", (float *r, float *g, float *b), {
+    if(noedit() || multiplayer() || slots.empty()) return;
+    cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
+    int tex = !isempty(c) ? c.texture[sel.orient] : texmru[0];
+    if(slots.inrange(tex)) texgrasscolor(*slots[tex], *r, *g, *b);
+});
+
+void texgrassblend(Slot &s, float blend)
+{
+    s.grassblend = clamp(blend, 0.f, 1.f);
+}
+ICOMMAND(0, texgrassblend, "f", (float *blend), if(!slots.empty()) texgrassblend(*slots.last(), *blend));
+ICOMMAND(0, setgrassblend, "f", (float *blend), {
+    if(noedit() || multiplayer() || slots.empty()) return;
+    cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
+    int tex = !isempty(c) ? c.texture[sel.orient] : texmru[0];
+    if(slots.inrange(tex)) texgrassblend(*slots[tex], *blend);
+});
+
+void texgrassscale(Slot &s, int scale)
+{
+    s.grassscale = clamp(scale, 0, 64);
+}
+ICOMMAND(0, texgrassscale, "i", (int *scale), if(!slots.empty()) texgrassscale(*slots.last(), *scale));
+ICOMMAND(0, setgrassscale, "i", (int *scale), {
+    if(noedit() || multiplayer() || slots.empty()) return;
+    cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
+    int tex = !isempty(c) ? c.texture[sel.orient] : texmru[0];
+    if(slots.inrange(tex)) texgrassscale(*slots[tex], *scale);
+});
+
+void texgrassheight(Slot &s, int height)
+{
+    s.grassheight = clamp(height, 0, 64);
+}
+ICOMMAND(0, texgrassheight, "i", (int *height), if(!slots.empty()) texgrassheight(*slots.last(), *height));
+ICOMMAND(0, setgrassheight, "i", (int *height), {
+    if(noedit() || multiplayer() || slots.empty()) return;
+    cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
+    int tex = !isempty(c) ? c.texture[sel.orient] : texmru[0];
+    if(slots.inrange(tex)) texgrassheight(*slots[tex], *height);
+});
 
 void texscroll(float *scrollS, float *scrollT)
 {

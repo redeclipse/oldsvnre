@@ -2163,7 +2163,7 @@ struct texturegui : guicb
                 menutab = 1+clamp(texmru.find(lasttex), 0, texmru.length()-1)/(thumbwidth*thumbheight);
             menustart = starttime();
             cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
-            menutex = !isempty(c) ? texmru.find(c.texture[sel.orient]) : -1;
+            menutex = !isempty(c) ? texmru.find(c.texture[sel.orient]) : 0;
         }
     }
 
