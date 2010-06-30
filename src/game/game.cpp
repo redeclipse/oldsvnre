@@ -438,8 +438,12 @@ namespace game
                 case 2:
                 {
                     int ends = lastmillis+PHYSMILLIS;
-                    if(issound(d->jschan)) sounds[d->jschan].ends = ends;
-                    else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, -1, -1, -1, &d->jschan, ends);
+                    if(issound(d->jschan))
+                    {
+                        sounds[d->jschan].vol = 255;
+                        sounds[d->jschan].ends = ends;
+                    }
+                    else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, 255, -1, -1, &d->jschan, ends);
                     if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
@@ -549,6 +553,11 @@ namespace game
             else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastfire-(fireburntime-500))/500.f));
         }
         else if(issound(d->fschan)) removesound(d->fschan);
+        if(issound(d->jschan) && !physics::jetpack(d))
+        {
+            if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
+            else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/float(PHYSMILLIS))));
+        }
     }
 
 
@@ -811,7 +820,7 @@ namespace game
                         "picked to pieces by",
                         "melted in half by",
                         "filled with shrapnel by",
-                        "given air-conditioning by",
+                        "air-conditioned by",
                         "cooked alive by",
                         "melted alive by",
                         "electrified by",
@@ -820,7 +829,7 @@ namespace game
                     }
                 };
 
-                int o = style&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)));
+                int o = flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)));
                 concatstring(d->obit, burning ? "set ablaze by" : (isweap(weap) ? obitnames[o][weap] : "killed by"));
             }
             bool override = false;
