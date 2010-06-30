@@ -916,11 +916,11 @@ namespace projs
                         }
                         else
                         {
-                            part_create(PART_PLASMA_SOFT, projtraillength*(proj.weap == WEAP_GRENADE ? 2 : 3), proj.o, 0xAA4400, max(expl*0.5f, 0.5f)); // corona
+                            part_create(PART_PLASMA_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 2 : 3), proj.o, 0xAA4400, max(expl*0.5f, 0.5f)); // corona
                             if(expl > 0)
                             {
                                 quake(proj.o, proj.weap, proj.flags, proj.scale);
-                                int len = proj.weap == WEAP_GRENADE ? 500 : 1000;
+                                int len = proj.weap != WEAP_ROCKET ? 500 : 1000;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, 0xAA4400, 1.f, 0.5f);
                                 if(WEAP(proj.weap, pusharea) >= 1)
                                     part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, 0xAA4400, 1.f, 0.1f);
@@ -928,22 +928,22 @@ namespace projs
                             else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             {
-                                int deviation = max(int(expl*0.5f), 1);
-                                loopi(proj.weap == WEAP_GRENADE ? 3 : 6)
-                                {
-                                    vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
-                                    part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap == WEAP_GRENADE ? 2 : 3), to, firecols[rnd(FIRECOLOURS)], expl, 0.25f+(rnd(50)/100.f), -5);
-                                }
-                                part_create(PART_SMOKE_LERP_SOFT, projtraillength*(proj.weap == WEAP_GRENADE ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
-                                int debris = rnd(proj.weap == WEAP_GRENADE ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
+                                part_create(PART_SMOKE_LERP_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
+                                int debris = rnd(proj.weap != WEAP_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
                                 loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
                                 adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec(196, 24, 0));
                             }
                         }
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                         {
+                            int deviation = max(int(expl*0.5f), 1);
+                            loopi(proj.weap != WEAP_ROCKET ? 3 : 6)
+                            {
+                                vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
+                                part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 2 : 3), to, firecols[rnd(FIRECOLOURS)], expl, 0.25f+(rnd(50)/100.f), -5);
+                            }
                             adddecal(proj.weap == WEAP_FLAMER ? DECAL_SCORCH_SHORT : DECAL_SCORCH, proj.o, proj.norm, expl*0.5f);
-                            adddynlight(proj.o, expl, vec(1.1f, 0.22f, 0.02f), proj.weap == WEAP_FLAMER ? 250 : 1000, 10);
+                            adddynlight(proj.o, expl, vec(1.1f, 0.22f, 0.02f), proj.weap != WEAP_ROCKET ? 500 : 1000, 10);
                         }
                         break;
                     }
@@ -1453,7 +1453,9 @@ namespace projs
                                     dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT)*mag));
                                 if(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0)
                                     dir.add(vec(proj.vel).normalize().mul(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
-                                create(proj.o, dir.add(proj.o), proj.local, proj.owner, PRJ_SHOT, WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true);
+                                int len = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
+                                if(WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) len -= int(ceilf(len*WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
+                                create(proj.o, dir.add(proj.o), proj.local, proj.owner, PRJ_SHOT, max(len, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true);
                             }
                         }
                     }
