@@ -764,7 +764,8 @@ namespace game
             concatstring(d->obit, "was ");
             if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
             else if(isaitype(actor->aitype) && actor->aitype == AI_GRUNT) concatstring(d->obit, "a tasty snack for");
-            else
+            else if(burning) concatstring(d->obit, "set ablaze by");
+            else if(isweap(weap))
             {
                 static const char *obitnames[5][WEAP_MAX] = {
                     {
@@ -828,10 +829,9 @@ namespace game
                         "obliterated by",
                     }
                 };
-
-                int o = flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)));
-                concatstring(d->obit, burning ? "set ablaze by" : (isweap(weap) ? obitnames[o][weap] : "killed by"));
+                concatstring(d->obit, obitnames[flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)))][weap]);
             }
+            else concatstring(d->obit, "killed by");
             bool override = false;
             vec az = actor->abovehead(), dz = d->abovehead();
             if(!m_fight(gamemode) || actor->aitype >= AI_START)
