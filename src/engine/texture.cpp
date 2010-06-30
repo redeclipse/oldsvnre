@@ -1480,6 +1480,7 @@ void texgrass(Slot &s, char *name)
 {
     DELETEA(s.texgrass);
     s.texgrass = name[0] ? newstring(name) : NULL;
+    s.grasstex = NULL;
 }
 ICOMMAND(0, autograss, "s", (char *name), if(!slots.empty()) texgrass(*slots.last(), name));
 ICOMMAND(0, texgrass, "s", (char *name), if(!slots.empty()) texgrass(*slots.last(), name));

@@ -22,14 +22,14 @@ struct grasswedge
         bound2 = plane(vec(2*M_PI*((i+1)/float(n) + 0.5f), 0), 0);
     }
 };
-grasswedge *grassws = NULL;
+grasswedge *grasswedges = NULL;
 void resetgrasswedges(int n)
 {
-    DELETEA(grassws);
-    grassws = new grasswedge[n];
-    loopi(n) grassws[i].init(i, n);
+    DELETEA(grasswedges);
+    grasswedges = new grasswedge[n];
+    loopi(n) grasswedges[i].init(i, n);
 }
-VARF(IDF_PERSIST, grasswedges, 8, 8, 1024, resetgrasswedges(grasswedges));
+VARFN(IDF_PERSIST, grasswedges, numgrasswedges, 8, 8, 1024, resetgrasswedges(numgrasswedges));
 
 struct grassvert
 {
@@ -58,12 +58,12 @@ void resetgrassoffsets(int n)
     grassanimoffsets = new float[n];
     loopi(n) grassoffsets[i] = rnd(0x1000000)/float(0x1000000);
 }
-VARF(IDF_PERSIST, grassoffset, 8, 32, 1024, resetgrassoffsets(grassoffset));
+VARFN(IDF_PERSIST, grassoffsets, numgrassoffsets, 8, 32, 1024, resetgrassoffsets(numgrassoffsets));
 
-void checkgrass()
+void initgrass()
 {
-    if(!grassws) resetgrasswedges(grasswedges);
-    if(!grassoffsets) resetgrassoffsets(grassoffset);
+    if(!grasswedges) resetgrasswedges(numgrasswedges);
+    if(!grassoffsets) resetgrassoffsets(numgrassoffsets);
 }
 
 static int lastgrassanim = -1;
@@ -73,7 +73,7 @@ FVAR(IDF_WORLD, grassanimscale, 0, 0.03f, 1);
 
 static void animategrass()
 {
-    loopi(grassoffset) grassanimoffsets[i] = grassanimscale*sinf(2*M_PI*(grassoffsets[i] + lastmillis/float(grassanimmillis)));
+    loopi(numgrassoffsets) grassanimoffsets[i] = grassanimscale*sinf(2*M_PI*(grassoffsets[i] + lastmillis/float(grassanimmillis)));
     lastgrassanim = lastmillis;
 }
 
@@ -131,8 +131,8 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
     tc.cross(g.surface, w.dir).mul(texscale);
 
     int color = tstep + maxstep;
-    if(color < 0) color = grassoffset - (-color)%grassoffset;
-    color += numsteps + grassoffset - numsteps%grassoffset;
+    if(color < 0) color = numgrassoffsets - (-color)%numgrassoffsets;
+    color += numsteps + numgrassoffsets - numsteps%numgrassoffsets;
 
     float taperdist = grassdist*grasstaper,
           taperscale = 1.0f / (grassdist - taperdist);
@@ -162,8 +162,8 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
 
         group->numquads++;
 
-        float offset = grassoffsets[color%grassoffset],
-              animoffset = animscale*grassanimoffsets[color%grassoffset],
+        float offset = grassoffsets[color%numgrassoffsets],
+              animoffset = animscale*grassanimoffsets[color%numgrassoffsets],
               tc1 = tc.dot(p1) + offset, tc2 = tc.dot(p2) + offset,
               lm1u = g.tcu.dot(p1), lm1v = g.tcv.dot(p1),
               lm2u = g.tcu.dot(p2), lm2v = g.tcv.dot(p2),
@@ -206,9 +206,9 @@ static void gengrassquads(vtxarray *va)
         }
 
         grassgroup *group = NULL;
-        loopi(grasswedges)
+        loopi(numgrasswedges)
         {
-            grasswedge &w = grassws[i];
+            grasswedge &w = grasswedges[i];
             if(w.bound1.dist(g.center) > g.radius || w.bound2.dist(g.center) > g.radius) continue;
             gengrassquads(group, w, g, s.grasstex, s.grasscolor, s.grassblend, s.grassscale, s.grassheight);
         }
@@ -227,14 +227,14 @@ void generategrass()
 {
     if(!grass || !grassdist) return;
 
-    checkgrass();
+    initgrass();
 
     grassgroups.setsize(0);
     grassverts.setsize(0);
 
-    loopi(grasswedges)
+    loopi(numgrasswedges)
     {
-        grasswedge &w = grassws[i];
+        grasswedge &w = grasswedges[i];
         w.bound1.offset = -camera1->o.dot(w.bound1);
         w.bound2.offset = -camera1->o.dot(w.bound2);
     }
@@ -254,8 +254,6 @@ void generategrass()
 void rendergrass()
 {
     if(!grass || !grassdist || grassgroups.empty() || dbggrass) return;
-
-    checkgrass();
 
     glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
