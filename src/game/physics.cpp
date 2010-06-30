@@ -696,7 +696,7 @@ namespace physics
                 }
             }
 
-            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || (d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
+            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || lastmillis-d->impulse[IM_TIME] > impulseskate || d->vel.magnitude() <= 1))
                 d->turnside = 0;
 
             if(!d->turnside)
@@ -728,19 +728,24 @@ namespace physics
                 }
                 if(onfloor && d->action[AC_JUMP])
                 {
-                    d->vel.z += jumpforce(d, true);
-                    if(d->inliquid)
+                    if(m_jetpack(game::gamemode, game::mutators) && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
+                        d->action[AC_JUMP] = false;
+                    else
                     {
-                        float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
-                        d->vel.x *= scale;
-                        d->vel.y *= scale;
+                        d->vel.z += jumpforce(d, true);
+                        if(d->inliquid)
+                        {
+                            float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
+                            d->vel.x *= scale;
+                            d->vel.y *= scale;
+                        }
+                        d->resetphys();
+                        d->impulse[IM_JUMP] = lastmillis;
+                        d->action[AC_JUMP] = false;
+                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
+                        playsound(S_JUMP, d->o, d);
+                        regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
                     }
-                    d->resetphys();
-                    d->impulse[IM_JUMP] = lastmillis;
-                    d->action[AC_JUMP] = false;
-                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
-                    playsound(S_JUMP, d->o, d);
-                    regularshape(PART_SMOKE, int(d->radius), 0x111111, 21, 20, 150, d->feetpos(), 1, 1, -10, 0, 10.f);
                 }
             }
             bool found = false;
@@ -831,7 +836,7 @@ namespace physics
             gameent *d = (gameent *)pl;
             if(local) modifyinput(d, m, wantsmove, floating, millis);
             if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
-            else if(d->physstate > PHYS_FALL || d->onladder) d->resetjump();
+            else if(!d->turnside && (d->physstate > PHYS_FALL || d->onladder)) d->resetjump();
             else d->timeinair = 0;
         }
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
@@ -861,7 +866,7 @@ namespace physics
         else
         {
             bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
-            float curb = pl->physstate >= PHYS_SLOPE ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb);
+            float curb = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb);
             fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
         }
         pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
