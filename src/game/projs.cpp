@@ -1445,8 +1445,9 @@ namespace projs
                         int f = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT);
                         if(f >= 0)
                         {
-                            int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, proj.flags&HIT_ALT);
+                            int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, proj.flags&HIT_ALT), life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
                             float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.scale;
+                            if(WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) life -= int(ceilf(life*WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
                             loopi(r)
                             {
                                 vec dir(0, 0, 0);
@@ -1456,9 +1457,7 @@ namespace projs
                                     dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT)*mag));
                                 if(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0)
                                     dir.add(vec(proj.vel).normalize().mul(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
-                                int len = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
-                                if(WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) len -= int(ceilf(len*WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
-                                create(proj.o, dir.add(proj.o), proj.local, proj.owner, PRJ_SHOT, max(len, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true);
+                                create(proj.o, dir.add(proj.o), proj.local, proj.owner, PRJ_SHOT, max(life, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true);
                             }
                         }
                     }
