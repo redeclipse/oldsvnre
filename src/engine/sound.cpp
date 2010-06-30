@@ -230,7 +230,7 @@ ICOMMAND(0, mapsound, "sissi", (char *n, int *v, char *w, char *x, int *u), intr
 
 void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan)
 {
-    int svol = flags&SND_CLAMPED ? 255 : vol, span = 127; vec v; float dist = pos.dist(camera1->o, v);
+    int svol = flags&SND_CLAMPED ? 255 : clamp(vol, 0, 255), span = 127; vec v; float dist = pos.dist(camera1->o, v);
     if(!(flags&SND_NOQUIET) && (isliquid(lookupmaterial(pos)&MATF_VOLUME) || isliquid(lookupmaterial(camera1->o)&MATF_VOLUME)))
         svol = int(svol*0.75f);
     if(!(flags&SND_NOATTEN) && dist > 0)
@@ -250,7 +250,7 @@ void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec 
             }
         }
     }
-    if(flags&SND_CLAMPED) svol = max(svol, vol);
+    if(flags&SND_CLAMPED) svol = max(svol, clamp(vol, 0, 255));
     *curvol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(slotvol/255.f)*(svol/255.f)*MIX_MAX_VOLUME), 0, MIX_MAX_VOLUME);
     *curpan = span;
 }
