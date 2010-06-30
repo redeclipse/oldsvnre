@@ -44,7 +44,7 @@ struct grassgroup
 {
     const grasstri *tri;
     float dist;
-    int tex, lmtex, offset, numquads;
+    int tex, lmtex, offset, numquads, scale, height;
 };
 
 static vector<grassgroup> grassgroups;
@@ -96,13 +96,13 @@ static inline bool clipgrassquad(const grasstri &g, vec &p1, vec &p2)
 VAR(IDF_WORLD, grassscale, 1, 2, 64);
 bvec grasscolor(255, 255, 255);
 VARF(IDF_HEX|IDF_WORLD, grasscolour, 0, 0xFFFFFF, 0xFFFFFF,
-{   
+{
     if(!grasscolour) grasscolour = 0xFFFFFF;
     grasscolor = bvec((grasscolour>>16)&0xFF, (grasscolour>>8)&0xFF, grasscolour&0xFF);
 });
 FVAR(IDF_WORLD, grassblend, 0, 1, 1);
 
-static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstri &g, Texture *tex)
+static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstri &g, Texture *tex, vec &col, float blend, int scale, int height)
 {
     float t = camera1->o.dot(w.dir);
     int tstep = int(ceil(t/grassstep));
@@ -122,9 +122,11 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
 
     int minstep = max(int(ceil(tmin/grassstep)) - tstep, 1),
         maxstep = int(floor(min(tmax, t + grassdist)/grassstep)) - tstep,
-        numsteps = maxstep - minstep + 1;
+        numsteps = maxstep - minstep + 1,
+        gs = scale > 0 ? scale : grassscale,
+        gh = height > 0 ? height : grassheight;
 
-    float texscale = (grassscale*tex->ys)/float(grassheight*tex->xs), animscale = grassheight*texscale;
+    float texscale = (gs*tex->ys)/float(gh*tex->xs), animscale = gh*texscale;
     vec tc;
     tc.cross(g.surface, w.dir).mul(texscale);
 
@@ -153,6 +155,8 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
             group->lmtex = lightmaptexs.inrange(g.lmid) ? lightmaptexs[g.lmid].id : notexture->id;
             group->offset = grassverts.length();
             group->numquads = 0;
+            group->scale = gs;
+            group->height = gh;
             if(lastgrassanim!=lastmillis) animategrass();
         }
 
@@ -164,8 +168,10 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
               lm1u = g.tcu.dot(p1), lm1v = g.tcv.dot(p1),
               lm2u = g.tcu.dot(p2), lm2v = g.tcv.dot(p2),
               fade = dist > taperdist ? (grassdist - dist)*taperscale : 1,
-              height = grassheight * fade;
+              height = gh * fade;
         uchar color[4] = { grasscolor.x, grasscolor.y, grasscolor.z, uchar(fade*grassblend*255) };
+        if(col != vec(0, 0, 0)) loopj(3) color[j] = uchar(col[j]*255);
+        if(blend > 0) color[3] = uchar(fade*blend*255);
 
         #define GRASSVERT(n, tcv, modify) { \
             grassvert &gv = grassverts.add(); \
@@ -195,8 +201,8 @@ static void gengrassquads(vtxarray *va)
         Slot &s = *lookupvslot(g.texture, false).slot;
         if(!s.grasstex)
         {
-            if(!s.autograss) continue;
-            s.grasstex = textureload(s.autograss, 2);
+            if(!s.texgrass) continue;
+            s.grasstex = textureload(s.texgrass, 2);
         }
 
         grassgroup *group = NULL;
@@ -204,7 +210,7 @@ static void gengrassquads(vtxarray *va)
         {
             grasswedge &w = grassws[i];
             if(w.bound1.dist(g.center) > g.radius || w.bound2.dist(g.center) > g.radius) continue;
-            gengrassquads(group, w, g, s.grasstex);
+            gengrassquads(group, w, g, s.grasstex, s.grasscolor, s.grassblend, s.grassscale, s.grassheight);
         }
         if(group) group->dist = dist;
     }
@@ -288,7 +294,7 @@ void rendergrass()
         {
             if(refracting < 0 ?
                 min(g.tri->numv>3 ? min(g.tri->v[0].z, g.tri->v[3].z) : g.tri->v[0].z, min(g.tri->v[1].z, g.tri->v[2].z)) > reflectz :
-                max(g.tri->numv>3 ? max(g.tri->v[0].z, g.tri->v[3].z) : g.tri->v[0].z, max(g.tri->v[1].z, g.tri->v[2].z)) + grassheight < reflectz)
+                max(g.tri->numv>3 ? max(g.tri->v[0].z, g.tri->v[3].z) : g.tri->v[0].z, max(g.tri->v[1].z, g.tri->v[2].z)) + g.height < reflectz)
                 continue;
             if(isfoggedsphere(g.tri->radius, g.tri->center)) continue;
         }

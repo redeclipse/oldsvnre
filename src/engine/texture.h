@@ -579,7 +579,10 @@ struct Slot
     VSlot *variants;
     bool loaded;
     uint texmask;
-    char *autograss;
+    char *texgrass;
+    vec grasscolor;
+    float grassblend;
+    int grassscale, grassheight;
     Texture *grasstex, *thumbnail;
     char *layermaskname;
     int layermaskmode;
@@ -587,7 +590,7 @@ struct Slot
     ImageData *layermask;
     bool ffenv;
 
-    Slot(int index = -1) : index(index), variants(NULL), autograss(NULL), layermaskname(NULL), layermask(NULL) { reset(); }
+    Slot(int index = -1) : index(index), variants(NULL), texgrass(NULL), layermaskname(NULL), layermask(NULL) { reset(); }
 
     void reset()
     {
@@ -596,7 +599,10 @@ struct Slot
         params.shrink(0);
         loaded = false;
         texmask = 0;
-        DELETEA(autograss);
+        DELETEA(texgrass);
+        grasscolor = vec(0, 0, 0);
+        grassblend = 0;
+        grassscale = grassheight = 0;
         grasstex = NULL;
         thumbnail = NULL;
         DELETEA(layermaskname);
