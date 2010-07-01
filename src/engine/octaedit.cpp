@@ -508,7 +508,7 @@ void readychanges(block3 &b, cube *c, const ivec &cor, int size)
             if(size<=1)
             {
                 solidfaces(c[i]);
-                discardchildren(c[i]);
+                discardchildren(c[i], true);
                 brightencube(c[i]);
             }
             else readychanges(b, c[i].children, o, size/2);
@@ -1108,7 +1108,7 @@ namespace hmap
         if(t[d] > nz || t[d] < mz) return NULL;
         cube *c = &lookupcube(t.x, t.y, t.z, gridsize);
         if(c->children) forcemip(*c);
-        discardchildren(*c);
+        discardchildren(*c, true);
         if(!isheightmap(sel.orient, d, true, c)) return NULL;
         if     (t.x < changes.o.x) changes.o.x = t.x;
         else if(t.x > changes.s.x) changes.s.x = t.x;
@@ -1446,7 +1446,7 @@ void mpeditface(int dir, int mode, selinfo &sel, bool local)
     loopselxyz(
         if(c.children) solidfaces(c);
         uchar mat = getmaterial(c);
-        discardchildren(c);
+        discardchildren(c, true);
         if(mat!=MAT_AIR) ext(c).material = mat;
         if(mode==1) // fill command
         {
@@ -1531,7 +1531,7 @@ void pushsel(int *dir)
 void mpdelcube(selinfo &sel, bool local)
 {
     if(local) client::edittrigger(sel, EDIT_DELCUBE);
-    loopselxyz(discardchildren(c); emptyfaces(c));
+    loopselxyz(discardchildren(c, true); emptyfaces(c));
 }
 
 void delcube()
