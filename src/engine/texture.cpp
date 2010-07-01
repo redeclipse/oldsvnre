@@ -1418,6 +1418,24 @@ VSlot *editvslot(const VSlot &src, const VSlot &delta)
     return clonevslot(src, delta);
 }
 
+static void fixinsidefaces(cube *c, const ivec &o, int size, int tex)
+{
+    loopi(8) 
+    {
+        ivec co(i, o.x, o.y, o.z, size);
+        if(c[i].children) fixinsidefaces(c[i].children, co, size>>1, tex);
+        else loopj(6) if(!visibletris(c[i], j, co.x, co.y, co.z, size))
+            c[i].texture[j] = tex;
+    }
+}
+
+ICOMMAND(0, fixinsidefaces, "i", (int *tex),
+{
+    if(noedit(true) || multiplayer()) return;
+    fixinsidefaces(worldroot, ivec(0, 0, 0), hdr.worldsize>>1, *tex && vslots.inrange(*tex) ? *tex : DEFAULT_GEOM);
+    allchanged();
+});
+
 generic textypes[] =
 {
     {"c", TEX_DIFFUSE},
@@ -1853,13 +1871,13 @@ MSlot &lookupmaterialslot(int index, bool load)
 
 Slot &lookupslot(int index, bool load)
 {
-    Slot &s = slots.inrange(index) ? *slots[index] : (slots.length() ? *slots[0] : dummyslot);
+    Slot &s = slots.inrange(index) ? *slots[index] : (slots.inrange(DEFAULT_GEOM) ? *slots[DEFAULT_GEOM] : dummyslot);
     return s.loaded || !load ? s : loadslot(s, false);
 }
 
 VSlot &lookupvslot(int index, bool load)
 {
-    VSlot &s = vslots.inrange(index) && vslots[index]->slot ? *vslots[index] : (vslots.length() && vslots[0]->slot ? *vslots[0] : dummyvslot);
+    VSlot &s = vslots.inrange(index) && vslots[index]->slot ? *vslots[index] : (slots.inrange(DEFAULT_GEOM) && slots[DEFAULT_GEOM]->variants ? *slots[DEFAULT_GEOM]->variants : dummyvslot);
     if(load && !s.linked)
     {
         if(!s.slot->loaded) loadslot(*s.slot, false);
