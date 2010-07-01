@@ -1362,9 +1362,7 @@ namespace projs
         while(!canremove.empty() && canremove.length() > maxprojectiles)
         {
             int oldest = 0;
-            loopv(canremove)
-                if(lastmillis-canremove[i]->addtime >= lastmillis-canremove[oldest]->addtime)
-                    oldest = i;
+            loopv(canremove) if(canremove[i]->addtime < canremove[oldest]->addtime) oldest = i;
             if(canremove.inrange(oldest))
             {
                 canremove[oldest]->state = CS_DEAD;
