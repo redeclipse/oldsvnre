@@ -991,8 +991,8 @@ namespace ai
 
     int process(gameent *d, aistate &b)
     {
-        int result = 0, stupify = d->skill <= 30+rnd(20) ? rnd(d->skill*1111) : 0, skmod = max((111-d->skill)*10, 100);
-        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(max(skmod,1)) : 1;
+        int result = 0, stupify = d->skill <= 30+rnd(20) ? rnd(d->skill*111) : 0, skmod = 111-d->skill;
+        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(max(skmod,1)*2) : 1;
         if(!aistyle[d->aitype].canstrafe && d->skill <= 100) frame *= 2;
         vec dp = d->headpos();
 
@@ -1059,7 +1059,7 @@ namespace ai
                 {
                     d->ai->targyaw = yaw;
                     d->ai->targpitch = pitch;
-                    if(!idle && d->skill <= 100) frame *= 2;
+                    if(!idle) frame *= 2;
                     d->ai->becareful = false;
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
@@ -1106,7 +1106,7 @@ namespace ai
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         d->aimyaw = d->ai->targyaw; d->aimpitch = d->ai->targpitch;
-        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, 1.f);
+        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame*0.25f, 1.f);
 
         if(d->aitype == AI_BOT)
         {
