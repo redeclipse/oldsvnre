@@ -992,8 +992,8 @@ namespace ai
     int process(gameent *d, aistate &b)
     {
         int result = 0, stupify = d->skill <= 30+rnd(20) ? rnd(d->skill*1111) : 0, skmod = max((111-d->skill)*10, 100);
-        float frame = float(lastmillis-d->ai->lastrun)/float(max(skmod,1));
-        if(!aistyle[d->aitype].canstrafe) frame *= 2;
+        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(max(skmod,1)) : 1;
+        if(!aistyle[d->aitype].canstrafe && d->skill <= 100) frame *= 2;
         vec dp = d->headpos();
 
         bool wasdontmove = d->ai->dontmove, idle = b.idle == 1 || (stupify && stupify <= skmod) || !aistyle[d->aitype].canmove || d->ai->suspended;
@@ -1054,12 +1054,12 @@ namespace ai
             if(insight) d->ai->enemyseen = lastmillis;
             if(idle || insight || hasseen || quick)
             {
-                float sskew = insight ? 1.5f : (hasseen ? 1.f : 0.5f);
+                float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
                 if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16))
                 {
                     d->ai->targyaw = yaw;
                     d->ai->targpitch = pitch;
-                    if(!idle) frame *= 2;
+                    if(!idle && d->skill <= 100) frame *= 2;
                     d->ai->becareful = false;
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
