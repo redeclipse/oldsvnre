@@ -908,9 +908,9 @@ namespace entities
                 if(ents.inrange(ent)) execitem(ent, d, tried);
                 actitems.pop();
             }
-            if(tried && d->action[AC_USE] && d == game::player1)
+            if(tried && d->action[AC_USE])
             {
-                playsound(S_ERROR, d->o, d);
+                if(d == game::player1) playsound(S_ERROR, d->o, d);
                 d->action[AC_USE] = false;
             }
         }
