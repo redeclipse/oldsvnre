@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		666E40F00B67D87F005B491F /* macutils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 666E40EF0B67D87F005B491F /* macutils.mm */; };
-		B90357B509D09B9D002C9DC7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		B90ADD4509B344D800A5B00B /* callbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = B90ADD0009B344D800A5B00B /* callbacks.c */; };
 		B90ADD5709B344D800A5B00B /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = B90ADD1309B344D800A5B00B /* host.c */; };
 		B90ADD6A09B344D800A5B00B /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = B90ADD2809B344D800A5B00B /* list.c */; };
@@ -23,15 +22,10 @@
 		B92DC0FC09D08CF9008219BD /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC0F909D08CF9008219BD /* SDL_image.framework */; };
 		B92DC0FD09D08CF9008219BD /* SDL_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC0FA09D08CF9008219BD /* SDL_mixer.framework */; };
 		B92DC0FE09D08CF9008219BD /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B92DC0FB09D08CF9008219BD /* SDL.framework */; };
-		B930D0920A3D9BC700BDFB85 /* ConsoleView.m in Sources */ = {isa = PBXBuildFile; fileRef = B930D0910A3D9BC700BDFB85 /* ConsoleView.m */; };
-		B930D0D20A3DA92300BDFB85 /* map.icns in Resources */ = {isa = PBXBuildFile; fileRef = B930D0D10A3DA92300BDFB85 /* map.icns */; };
 		B941988C09207E810029DAD1 /* SDLMain.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A47A9D01A0482F01D3D55B /* SDLMain.h */; };
 		B94198A809207E810029DAD1 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = F5A47A9E01A0483001D3D55B /* SDLMain.m */; };
 		B94198C309207E810029DAD1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		B94198C409207E810029DAD1 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2F67ED704C74A3F00A80002 /* OpenGL.framework */; };
-		B96D0D590920970C00B6C936 /* Launcher.m in Sources */ = {isa = PBXBuildFile; fileRef = B96D0D580920970C00B6C936 /* Launcher.m */; };
-		B96D0D630920971300B6C936 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = B96D0D5A0920971300B6C936 /* MainMenu.nib */; };
-		B96D0D6D0920976E00B6C936 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B96D0D6C0920976E00B6C936 /* main.m */; };
 		B9AC7AD00D06DB44005506F8 /* bih.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9AC7A850D06DB44005506F8 /* bih.cpp */; };
 		B9AC7AD10D06DB44005506F8 /* bih.h in Headers */ = {isa = PBXBuildFile; fileRef = B9AC7A860D06DB44005506F8 /* bih.h */; };
 		B9AC7AD20D06DB44005506F8 /* client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9AC7A870D06DB44005506F8 /* client.cpp */; };
@@ -80,7 +74,6 @@
 		B9AC7B100D06DB44005506F8 /* igame.h in Headers */ = {isa = PBXBuildFile; fileRef = B9AC7AC80D06DB44005506F8 /* igame.h */; };
 		B9AC7B150D06DB44005506F8 /* tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9AC7ACD0D06DB44005506F8 /* tools.cpp */; };
 		B9AC7B160D06DB44005506F8 /* tools.h in Headers */ = {isa = PBXBuildFile; fileRef = B9AC7ACE0D06DB44005506F8 /* tools.h */; };
-		B9CACA2509209A5800A13F04 /* redeclipse.icns in Resources */ = {isa = PBXBuildFile; fileRef = B97E99CE085F4B3E002F9BC6 /* redeclipse.icns */; };
 		D116C0AB0D9F7DB500E8B945 /* rendertarget.h in Headers */ = {isa = PBXBuildFile; fileRef = D116C0AA0D9F7DB500E8B945 /* rendertarget.h */; };
 		D118DEB60D979281000E8C4C /* glare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D118DEB50D979281000E8C4C /* glare.cpp */; };
 		D11B5A6510CBB4D8003F0098 /* ai.h in Headers */ = {isa = PBXBuildFile; fileRef = D11B5A6310CBB4D8003F0098 /* ai.h */; };
@@ -90,7 +83,6 @@
 		D11B5A8210CBB637003F0098 /* crypto.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D11B5A7F10CBB637003F0098 /* crypto.cpp */; };
 		D11B5A8310CBB637003F0098 /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D11B5A8010CBB637003F0098 /* stream.cpp */; };
 		D11B5A8410CBB637003F0098 /* zip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D11B5A8110CBB637003F0098 /* zip.cpp */; };
-		D167A1970C493AED007F7D96 /* Nomap.png in Resources */ = {isa = PBXBuildFile; fileRef = D167A1960C493AED007F7D96 /* Nomap.png */; };
 		D16A83480F130E9500EABB1F /* ai.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83360F130E9500EABB1F /* ai.cpp */; };
 		D16A83490F130E9500EABB1F /* client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83370F130E9500EABB1F /* client.cpp */; };
 		D16A834A0F130E9500EABB1F /* ctf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83380F130E9500EABB1F /* ctf.cpp */; };
@@ -116,9 +108,6 @@
 		D16C16930E04812500A522EB /* textedit.h in Headers */ = {isa = PBXBuildFile; fileRef = D16C16910E04812500A522EB /* textedit.h */; };
 		D1776F1F0E485DC5004CC402 /* depthfx.h in Headers */ = {isa = PBXBuildFile; fileRef = D1776F190E485DC5004CC402 /* depthfx.h */; };
 		D1776F230E485DC5004CC402 /* sound.h in Headers */ = {isa = PBXBuildFile; fileRef = D1776F1D0E485DC5004CC402 /* sound.h */; };
-		D17E0F2C0BAF1FA9008BB696 /* Keys.gif in Resources */ = {isa = PBXBuildFile; fileRef = D17E0F280BAF1FA9008BB696 /* Keys.gif */; };
-		D17E0F2E0BAF1FA9008BB696 /* Server.gif in Resources */ = {isa = PBXBuildFile; fileRef = D17E0F2A0BAF1FA9008BB696 /* Server.gif */; };
-		D17E0F310BAF2031008BB696 /* Help.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D17E0F300BAF2031008BB696 /* Help.tiff */; };
 		D18B8FC10DB0AF8200171439 /* explosion.h in Headers */ = {isa = PBXBuildFile; fileRef = D18B8FBE0DB0AF8200171439 /* explosion.h */; };
 		D18B8FC20DB0AF8200171439 /* lensflare.h in Headers */ = {isa = PBXBuildFile; fileRef = D18B8FBF0DB0AF8200171439 /* lensflare.h */; };
 		D18B8FC30DB0AF8200171439 /* lightning.h in Headers */ = {isa = PBXBuildFile; fileRef = D18B8FC00DB0AF8200171439 /* lightning.h */; };
@@ -127,26 +116,12 @@
 		D1CEB40B0F548C0B004FD11F /* ctfmode.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4070F548C0B004FD11F /* ctfmode.h */; };
 		D1CEB40C0F548C0B004FD11F /* duelmut.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4080F548C0B004FD11F /* duelmut.h */; };
 		D1CEB40D0F548C0B004FD11F /* stfmode.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4090F548C0B004FD11F /* stfmode.h */; };
-		D1D0C7640E48FECC00C361DE /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D0C7630E48FECC00C361DE /* libpng.framework */; };
-		D1D0C8BB0E49236400C361DE /* help in Resources */ = {isa = PBXBuildFile; fileRef = D1D0C8BA0E49236400C361DE /* help */; };
 		D1D88A8B0F350DFE000680E4 /* auth.h in Headers */ = {isa = PBXBuildFile; fileRef = D1D88A8A0F350DFE000680E4 /* auth.h */; };
 		D1D88A8D0F350E31000680E4 /* ragdoll.h in Headers */ = {isa = PBXBuildFile; fileRef = D1D88A8C0F350E31000680E4 /* ragdoll.h */; };
 		D1D88AB80F350EDE000680E4 /* irc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1D88AB60F350EDE000680E4 /* irc.cpp */; };
 		D1D88AB90F350EDE000680E4 /* irc.h in Headers */ = {isa = PBXBuildFile; fileRef = D1D88AB70F350EDE000680E4 /* irc.h */; };
-		D1DB53E80D70F1CD003AE25C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D1DB53E70D70F1CD003AE25C /* Localizable.strings */; };
 		D1E605B90E2416150045244E /* redeclipse.icns in Resources */ = {isa = PBXBuildFile; fileRef = B97E99CE085F4B3E002F9BC6 /* redeclipse.icns */; };
-		D1F0AC200BB0688A00CE4E84 /* Maps.gif in Resources */ = {isa = PBXBuildFile; fileRef = D1F0AC1F0BB0688A00CE4E84 /* Maps.gif */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		B96D0D780920980E00B6C936 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B96D0D4B092096F200B6C936;
-			remoteInfo = launcher;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -171,11 +146,7 @@
 		B92DC0FB09D08CF9008219BD /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
 		B930D0900A3D9BC700BDFB85 /* ConsoleView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ConsoleView.h; sourceTree = "<group>"; };
 		B930D0910A3D9BC700BDFB85 /* ConsoleView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = ConsoleView.m; sourceTree = "<group>"; };
-		B930D0D10A3DA92300BDFB85 /* map.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = map.icns; sourceTree = "<group>"; };
 		B94198CB09207E810029DAD1 /* redeclipse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = redeclipse.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B96D0D4C092096F200B6C936 /* launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = launcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B96D0D570920970C00B6C936 /* Launcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Launcher.h; sourceTree = "<group>"; };
-		B96D0D580920970C00B6C936 /* Launcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = Launcher.m; sourceTree = "<group>"; };
 		B96D0D5B0920971300B6C936 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		B96D0D6C0920976E00B6C936 /* main.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B97E99CE085F4B3E002F9BC6 /* redeclipse.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = redeclipse.icns; sourceTree = "<group>"; };
@@ -227,7 +198,6 @@
 		B9AC7AC80D06DB44005506F8 /* igame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = igame.h; sourceTree = "<group>"; };
 		B9AC7ACD0D06DB44005506F8 /* tools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tools.cpp; sourceTree = "<group>"; };
 		B9AC7ACE0D06DB44005506F8 /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
-		B9CACA12092099DF00A13F04 /* launcher-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "launcher-Info.plist"; sourceTree = "<group>"; };
 		B9CACA14092099E700A13F04 /* redeclipse-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "redeclipse-Info.plist"; sourceTree = "<group>"; };
 		D116C0AA0D9F7DB500E8B945 /* rendertarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendertarget.h; sourceTree = "<group>"; };
 		D118DEB50D979281000E8C4C /* glare.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glare.cpp; sourceTree = "<group>"; };
@@ -238,7 +208,6 @@
 		D11B5A7F10CBB637003F0098 /* crypto.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = crypto.cpp; sourceTree = "<group>"; };
 		D11B5A8010CBB637003F0098 /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream.cpp; sourceTree = "<group>"; };
 		D11B5A8110CBB637003F0098 /* zip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zip.cpp; sourceTree = "<group>"; };
-		D167A1960C493AED007F7D96 /* Nomap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Nomap.png; sourceTree = "<group>"; };
 		D16A83360F130E9500EABB1F /* ai.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ai.cpp; sourceTree = "<group>"; };
 		D16A83370F130E9500EABB1F /* client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = client.cpp; sourceTree = "<group>"; };
 		D16A83380F130E9500EABB1F /* ctf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ctf.cpp; sourceTree = "<group>"; };
@@ -264,9 +233,6 @@
 		D16C16910E04812500A522EB /* textedit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = textedit.h; sourceTree = "<group>"; };
 		D1776F190E485DC5004CC402 /* depthfx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = depthfx.h; sourceTree = "<group>"; };
 		D1776F1D0E485DC5004CC402 /* sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sound.h; sourceTree = "<group>"; };
-		D17E0F280BAF1FA9008BB696 /* Keys.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Keys.gif; sourceTree = "<group>"; };
-		D17E0F2A0BAF1FA9008BB696 /* Server.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Server.gif; sourceTree = "<group>"; };
-		D17E0F300BAF2031008BB696 /* Help.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Help.tiff; sourceTree = "<group>"; };
 		D18B8FBE0DB0AF8200171439 /* explosion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = explosion.h; sourceTree = "<group>"; };
 		D18B8FBF0DB0AF8200171439 /* lensflare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lensflare.h; sourceTree = "<group>"; };
 		D18B8FC00DB0AF8200171439 /* lightning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lightning.h; sourceTree = "<group>"; };
@@ -275,14 +241,11 @@
 		D1CEB4070F548C0B004FD11F /* ctfmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ctfmode.h; sourceTree = "<group>"; };
 		D1CEB4080F548C0B004FD11F /* duelmut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = duelmut.h; sourceTree = "<group>"; };
 		D1CEB4090F548C0B004FD11F /* stfmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stfmode.h; sourceTree = "<group>"; };
-		D1D0C7630E48FECC00C361DE /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/libpng.framework; sourceTree = "<absolute>"; };
-		D1D0C8BA0E49236400C361DE /* help */ = {isa = PBXFileReference; explicitFileType = folder; includeInIndex = 1; path = help; sourceTree = "<group>"; };
 		D1D88A8A0F350DFE000680E4 /* auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = auth.h; sourceTree = "<group>"; };
 		D1D88A8C0F350E31000680E4 /* ragdoll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ragdoll.h; sourceTree = "<group>"; };
 		D1D88AB60F350EDE000680E4 /* irc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = irc.cpp; sourceTree = "<group>"; };
 		D1D88AB70F350EDE000680E4 /* irc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = irc.h; sourceTree = "<group>"; };
 		D1DB53E50D70F1C3003AE25C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
-		D1F0AC1F0BB0688A00CE4E84 /* Maps.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Maps.gif; sourceTree = "<group>"; };
 		F5A47A9D01A0482F01D3D55B /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
 		F5A47A9E01A0483001D3D55B /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -297,14 +260,6 @@
 				B92DC0FC09D08CF9008219BD /* SDL_image.framework in Frameworks */,
 				B92DC0FD09D08CF9008219BD /* SDL_mixer.framework in Frameworks */,
 				B92DC0FE09D08CF9008219BD /* SDL.framework in Frameworks */,
-				D1D0C7640E48FECC00C361DE /* libpng.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B96D0D4A092096F200B6C936 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -318,8 +273,6 @@
 				B96D0D6C0920976E00B6C936 /* main.m */,
 				B930D0900A3D9BC700BDFB85 /* ConsoleView.h */,
 				B930D0910A3D9BC700BDFB85 /* ConsoleView.m */,
-				B96D0D570920970C00B6C936 /* Launcher.h */,
-				B96D0D580920970C00B6C936 /* Launcher.m */,
 				F5A47A9D01A0482F01D3D55B /* SDLMain.h */,
 				F5A47A9E01A0483001D3D55B /* SDLMain.m */,
 			);
@@ -329,7 +282,6 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D1D0C7630E48FECC00C361DE /* libpng.framework */,
 				B92DC0F909D08CF9008219BD /* SDL_image.framework */,
 				B92DC0FA09D08CF9008219BD /* SDL_mixer.framework */,
 				B92DC0FB09D08CF9008219BD /* SDL.framework */,
@@ -352,7 +304,6 @@
 			isa = PBXGroup;
 			children = (
 				B94198CB09207E810029DAD1 /* redeclipse.app */,
-				B96D0D4C092096F200B6C936 /* launcher.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -383,15 +334,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				D1D0C8BA0E49236400C361DE /* help */,
-				D167A1960C493AED007F7D96 /* Nomap.png */,
-				D1F0AC1F0BB0688A00CE4E84 /* Maps.gif */,
-				D17E0F280BAF1FA9008BB696 /* Keys.gif */,
-				D17E0F2A0BAF1FA9008BB696 /* Server.gif */,
-				D17E0F300BAF2031008BB696 /* Help.tiff */,
-				B930D0D10A3DA92300BDFB85 /* map.icns */,
 				B9CACA14092099E700A13F04 /* redeclipse-Info.plist */,
-				B9CACA12092099DF00A13F04 /* launcher-Info.plist */,
 				B97E99CE085F4B3E002F9BC6 /* redeclipse.icns */,
 				B96D0D5A0920971300B6C936 /* MainMenu.nib */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
@@ -612,34 +555,15 @@
 				B94198A409207E810029DAD1 /* Resources */,
 				B94198A709207E810029DAD1 /* Sources */,
 				B94198C209207E810029DAD1 /* Frameworks */,
-				B94199400920820E0029DAD1 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				B96D0D790920980E00B6C936 /* PBXTargetDependency */,
 			);
 			name = redeclipse;
-			productInstallPath = "$(HOME)/Applications";
+			productInstallPath = "$(HOME)/Desktop/RedEclipse";
 			productName = redeclipse;
 			productReference = B94198CB09207E810029DAD1 /* redeclipse.app */;
-			productType = "com.apple.product-type.application";
-		};
-		B96D0D4B092096F200B6C936 /* launcher */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = B96D0D4F092096F300B6C936 /* Build configuration list for PBXNativeTarget "launcher" */;
-			buildPhases = (
-				B96D0D48092096F200B6C936 /* Resources */,
-				B96D0D49092096F200B6C936 /* Sources */,
-				B96D0D4A092096F200B6C936 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = launcher;
-			productName = launcher;
-			productReference = B96D0D4C092096F200B6C936 /* launcher.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -655,7 +579,6 @@
 			projectRoot = ../..;
 			targets = (
 				B941988A09207E810029DAD1 /* redeclipse */,
-				B96D0D4B092096F200B6C936 /* launcher */,
 			);
 		};
 /* End PBXProject section */
@@ -669,41 +592,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B96D0D48092096F200B6C936 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B96D0D630920971300B6C936 /* MainMenu.nib in Resources */,
-				B9CACA2509209A5800A13F04 /* redeclipse.icns in Resources */,
-				B90357B509D09B9D002C9DC7 /* InfoPlist.strings in Resources */,
-				B930D0D20A3DA92300BDFB85 /* map.icns in Resources */,
-				D17E0F2C0BAF1FA9008BB696 /* Keys.gif in Resources */,
-				D17E0F2E0BAF1FA9008BB696 /* Server.gif in Resources */,
-				D17E0F310BAF2031008BB696 /* Help.tiff in Resources */,
-				D1F0AC200BB0688A00CE4E84 /* Maps.gif in Resources */,
-				D167A1970C493AED007F7D96 /* Nomap.png in Resources */,
-				D1DB53E80D70F1CD003AE25C /* Localizable.strings in Resources */,
-				D1D0C8BB0E49236400C361DE /* help in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		B94199400920820E0029DAD1 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-			shellPath = /bin/sh;
-			shellScript = "echo $TARGET_BUILD_DIR\ncd $TARGET_BUILD_DIR\n\n#ensure old package is gone\nrm -f redeclipse.dmg\n\n#make the directory which our disk image will be made of\n#use /tmp as a destination because copying ourself (xcode folder) whilst compling causes the dog to chase its tail\nBFPKG=`mktemp -d /tmp/bfpkg.XXXXXX` || exit 1\n\n#leave indicator of where temp directory is in case things break\nln -sf $BFPKG $TARGET_BUILD_DIR/bfpkg\n\n#copy launcher\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/launcher.app $BFPKG/redeclipse.app\n\nHELPDIR=$BFPKG/redeclipse.app/Contents/Resources/help/\nGAMEDIR=$BFPKG/redeclipse.app/Contents/gamedata\nmkdir $GAMEDIR\n\n#copy redeclipse\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/redeclipse.app $GAMEDIR/\nstrip -u -r $GAMEDIR/redeclipse.app/Contents/MacOS/redeclipse\n\n#install all frameworks into app bundle\nmkdir $GAMEDIR/redeclipse.app/Contents/Frameworks\nfor framework in SDL.framework SDL_mixer.framework SDL_image.framework libpng.framework\ndo\n\tif [ -d $LOCAL_LIBRARY_DIR/Frameworks/$framework/ ] \n\tthen\t\n\t\t/Developer/Tools/CpMac -r $LOCAL_LIBRARY_DIR/Frameworks/$framework/ $GAMEDIR/redeclipse.app/Contents/Frameworks\n\t\trm -rf $GAMEDIR/redeclipse.app/Contents/Frameworks/$framework/Versions/A/Headers\n\telse\n\t\texit 1\n\tfi\ndone\n\n\n#copy readme and data and remove unneccesary stuff\n/Developer/Tools/CpMac -r $SRCROOT/../../readme.html $HELPDIR/\n/Developer/Tools/CpMac -r $SRCROOT/../../docs $HELPDIR/\n/Developer/Tools/CpMac -r $SRCROOT/../../data $GAMEDIR/\n/Developer/Tools/CpMac -r $SRCROOT/../../packages $GAMEDIR/\n/Developer/Tools/CpMac -r $SRCROOT/../../src $BFPKG/sourcecode\nfind -d $BFPKG -name \".svn\" -exec rm -rf {} \\;\nfind $BFPKG -name \".DS_Store\" -exec rm -f {} \\;\nrm -rf $BFPKG/sourcecode/xcode/build\n\n#add alias to readme\n/usr/bin/osascript <<EOT\ntell application \"Finder\"\nset macSrcPath to POSIX file \"$HELPDIR/readme.html\" as text\nset macDestPath to POSIX file \"$BFPKG\" as text\nmake new alias file to file macSrcPath at folder macDestPath\nend tell\nEOT\n\n#finally make a disk image out of the stuff\nhdiutil create -srcfolder $BFPKG -volname redeclipse redeclipse.dmg\nhdiutil internet-enable -yes redeclipse.dmg\n\n#cleanup\nrm -rf $BFPKG\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B94198A709207E810029DAD1 /* Sources */ = {
@@ -776,25 +665,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B96D0D49092096F200B6C936 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B96D0D590920970C00B6C936 /* Launcher.m in Sources */,
-				B96D0D6D0920976E00B6C936 /* main.m in Sources */,
-				B930D0920A3D9BC700BDFB85 /* ConsoleView.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		B96D0D790920980E00B6C936 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = B96D0D4B092096F200B6C936 /* launcher */;
-			targetProxy = B96D0D780920980E00B6C936 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
@@ -847,6 +718,8 @@
 		B94198C809207E810029DAD1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = HAS_SOCKLEN_T;
@@ -855,6 +728,7 @@
 					../include/,
 				);
 				INFOPLIST_FILE = "redeclipse-Info.plist";
+				INSTALL_PATH = "";
 				OTHER_CFLAGS = (
 					"-DINTERFACE",
 					"-DIRC",
@@ -865,6 +739,7 @@
 				);
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = redeclipse;
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -899,19 +774,20 @@
 					ppc,
 					i386,
 				);
-				COPY_PHASE_STRIP = NO;
+				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(USER_LIBRARY_DIR)/Frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = 4.0;
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
 				PREBINDING = NO;
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
 				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				STRIP_INSTALLED_PRODUCT = NO;
+				STRIP_INSTALLED_PRODUCT = YES;
 			};
 			name = "Release-Deployment";
 		};
@@ -925,6 +801,7 @@
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = 4.0;
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
 				PREBINDING = NO;
@@ -937,75 +814,27 @@
 		B960CF37085F3CC7004FB142 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				COPY_PHASE_STRIP = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(USER_LIBRARY_DIR)/Frameworks",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = 4.0;
+				INSTALL_PATH = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
 				PREBINDING = NO;
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
 				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				STRIP_INSTALLED_PRODUCT = NO;
+				SKIP_INSTALL = NO;
+				STRIP_INSTALLED_PRODUCT = YES;
 			};
 			name = Release;
-		};
-		B96D0D50092096F300B6C936 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "launcher-Info.plist";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-bind_at_load",
-				);
-				PRODUCT_NAME = launcher;
-			};
-			name = Debug;
-		};
-		B96D0D51092096F300B6C936 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "launcher-Info.plist";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-bind_at_load",
-				);
-				PRODUCT_NAME = launcher;
-			};
-			name = Release;
-		};
-		B96D0D52092096F300B6C936 /* Release-Deployment */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "launcher-Info.plist";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-					"-bind_at_load",
-				);
-				PRODUCT_NAME = launcher;
-			};
-			name = "Release-Deployment";
 		};
 /* End XCBuildConfiguration section */
 
@@ -1018,7 +847,7 @@
 				B94198EB09207F510029DAD1 /* Release-Deployment */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		B960CF35085F3CC7004FB142 /* Build configuration list for PBXProject "redeclipse" */ = {
 			isa = XCConfigurationList;
@@ -1028,17 +857,7 @@
 				B94198EC09207F510029DAD1 /* Release-Deployment */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		B96D0D4F092096F300B6C936 /* Build configuration list for PBXNativeTarget "launcher" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				B96D0D50092096F300B6C936 /* Debug */,
-				B96D0D51092096F300B6C936 /* Release */,
-				B96D0D52092096F300B6C936 /* Release-Deployment */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
