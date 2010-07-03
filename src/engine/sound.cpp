@@ -225,8 +225,8 @@ int addsound(const char *name, int vol, int maxrad, int minrad, bool unique, vec
     return sounds.length()-1;
 }
 
-ICOMMAND(0, registersound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? atoi(w) : -1, *x ? atoi(x) : -1, *u > 0, gamesounds)));
-ICOMMAND(0, mapsound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? atoi(w) : -1, *x ? atoi(x) : -1, *u > 0, mapsounds)));
+ICOMMAND(0, registersound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? parseint(w) : -1, *x ? parseint(x) : -1, *u > 0, gamesounds)));
+ICOMMAND(0, mapsound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? parseint(w) : -1, *x ? parseint(x) : -1, *u > 0, mapsounds)));
 
 void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan)
 {

@@ -114,7 +114,7 @@ namespace client
         vector<char *> styles;
         explodelist(serversort, styles);
         serversortstyles.setsize(0);
-        loopi(min(styles.length(), int(SINFO_MAX))) serversortstyles.add(atoi(styles[i]));
+        loopi(min(styles.length(), int(SINFO_MAX))) serversortstyles.add(parseint(styles[i]));
         styles.deletearrays();
     });
 
@@ -382,7 +382,7 @@ namespace client
         if(!arg[0]) return;
         int val = 1;
         mkstring(hash);
-        if(!arg[1] && isdigit(arg[0])) val = atoi(arg);
+        if(!arg[1] && isdigit(arg[0])) val = parseint(arg);
         else server::hashpassword(game::player1->clientnum, sessionid, arg, hash);
         addmsg(N_SETMASTER, "ris", val, hash);
     }
@@ -520,7 +520,7 @@ namespace client
                 }
                 case ID_VAR:
                 {
-                    int ret = atoi(arg);
+                    int ret = parseint(arg);
                     *id->storage.i = ret;
                     id->changed();
                     formatstring(val)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
@@ -528,7 +528,7 @@ namespace client
                 }
                 case ID_FVAR:
                 {
-                    float ret = atof(arg);
+                    float ret = parsefloat(arg);
                     *id->storage.f = ret;
                     id->changed();
                     formatstring(val)("%s", floatstr(*id->storage.f));

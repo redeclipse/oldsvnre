@@ -87,7 +87,7 @@ struct delayedupdate
         {
             case INT: return float(val.i);
             case FLOAT: return val.f;
-            case STRING: return float(atof(val.s));
+            case STRING: return float(parsefloat(val.s));
             default: return 0;
         }
     }
@@ -361,8 +361,8 @@ static int getval(char *var)
     {
         case ID_VAR: return *id->storage.i;
         case ID_FVAR: return int(*id->storage.f);
-        case ID_SVAR: return atoi(*id->storage.s);
-        case ID_ALIAS: return atoi(id->action);
+        case ID_SVAR: return parseint(*id->storage.s);
+        case ID_ALIAS: return parseint(id->action);
         default: return 0;
     }
 }
@@ -375,8 +375,8 @@ static float getfval(char *var)
     {
         case ID_VAR: return *id->storage.i;
         case ID_FVAR: return *id->storage.f;
-        case ID_SVAR: return atof(*id->storage.s);
-        case ID_ALIAS: return atof(id->action);
+        case ID_SVAR: return parsefloat(*id->storage.s);
+        case ID_ALIAS: return parsefloat(id->action);
         default: return 0;
     }
 }
@@ -421,7 +421,7 @@ void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scr
     list += strspn(list, "\n\t ");
     while(*list)
     {
-        vals.add(atoi(list));
+        vals.add(parseint(list));
         list += strcspn(list, "\n\t \0");
         list += strspn(list, "\n\t ");
     }
@@ -440,7 +440,7 @@ void guinameslider(char *var, char *names, char *list, char *onchange, int *reve
     list += strspn(list, "\n\t ");
     while(*list)
     {
-        vals.add(atoi(list));
+        vals.add(parseint(list));
         list += strcspn(list, "\n\t \0");
         list += strspn(list, "\n\t ");
     }
@@ -576,7 +576,7 @@ COMMAND(0, guimodify, "ss");
 COMMAND(0, guibutton, "ssss");
 COMMAND(0, guitext, "ss");
 COMMANDN(0, cleargui, cleargui_, "i");
-ICOMMAND(0, showgui, "ss", (const char *s, const char *n), showgui(s, n[0] ? atoi(n) : 0));
+ICOMMAND(0, showgui, "ss", (const char *s, const char *n), showgui(s, n[0] ? parseint(n) : 0));
 COMMAND(0, guishowtitle, "i");
 COMMAND(0, guistayopen, "s");
 COMMAND(0, guinoautotab, "s");

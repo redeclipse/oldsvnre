@@ -318,7 +318,7 @@ namespace game
             loopj(2)
             {
                 const char *s = j ? b : a;
-                if(*s >= '0' && *s <= '9') d->loadweap[j] = atoi(s);
+                if(*s >= '0' && *s <= '9') d->loadweap[j] = parseint(s);
                 else loopi(WEAP_MAX) if(!strcasecmp(weaptype[i].name, s))
                 {
                     d->loadweap[j] = i;

@@ -201,8 +201,8 @@ ICOMMAND(0, ircserv, "ss", (const char *name, const char *s), {
 ICOMMAND(0, ircport, "ss", (const char *name, const char *s), {
     ircnet *n = ircfind(name);
     if(!n) { conoutf("no such ircnet: %s", name); return; }
-    if(!s || !*s || !atoi(s)) { conoutf("%s current port is: %d", n->name, n->port); return; }
-    n->port = atoi(s);
+    if(!s || !*s || !parseint(s)) { conoutf("%s current port is: %d", n->name, n->port); return; }
+    n->port = parseint(s);
 });
 ICOMMAND(0, ircnick, "ss", (const char *name, const char *s), {
     ircnet *n = ircfind(name);
@@ -321,7 +321,7 @@ ICOMMAND(0, ircrelaychan, "sss", (const char *name, const char *chan, const char
     ircchan *c = ircfindchan(n, chan);
     if(!c) { conoutf("no such %s channel: %s", n->name, chan); return; }
     if(!s || !*s) { conoutf("%s channel %s current relay level is: %d", n->name, c->name, c->relay); return; }
-    c->relay = atoi(s);
+    c->relay = parseint(s);
 });
 ICOMMAND(0, ircfriendlychan, "sss", (const char *name, const char *chan, const char *s), {
     ircnet *n = ircfind(name);
