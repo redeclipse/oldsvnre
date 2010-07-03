@@ -586,8 +586,9 @@ namespace client
             setnames(name, MAP_MAPZ);
             needsmap = true;
         }
-        if(m_dtf(gamemode)) dtf::setupflags();
-        else if(m_ctf(gamemode)) ctf::setupflags();
+        if(m_ctf(gamemode)) ctf::setupaffinity();
+        else if(m_dtf(gamemode)) dtf::setupaffinity();
+        else if(m_etf(gamemode)) etf::setupaffinity();
     }
 
     void receivefile(uchar *data, int len)
@@ -967,8 +968,9 @@ namespace client
             putint(p, game::numplayers);
             entities::putitems(p);
             putint(p, -1);
-            if(m_dtf(game::gamemode)) dtf::sendflags(p);
-            else if(m_ctf(game::gamemode)) ctf::sendflags(p);
+            if(m_ctf(game::gamemode)) ctf::sendaffinity(p);
+            else if(m_dtf(game::gamemode)) dtf::sendaffinity(p);
+            else if(m_etf(game::gamemode)) etf::sendaffinity(p);
             sendinfo = false;
         }
         if(messages.length())
@@ -1863,21 +1865,21 @@ namespace client
                     break;
                 }
 
-                case N_FLAGINFO:
+                case N_INFOAFFIN:
                 {
                     int flag = getint(p), converted = getint(p),
                             owner = getint(p), enemy = getint(p);
-                    if(m_dtf(game::gamemode)) dtf::updateflag(flag, owner, enemy, converted);
+                    if(m_dtf(game::gamemode)) dtf::updateaffinity(flag, owner, enemy, converted);
                     break;
                 }
 
-                case N_FLAGS:
+                case N_AFFIN:
                 {
                     int numflags = getint(p);
                     loopi(numflags)
                     {
                         int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
-                        dtf::st.initflag(i, kin, owner, enemy, converted);
+                        dtf::st.initaffinity(i, kin, owner, enemy, converted);
                     }
                     break;
                 }
@@ -1912,55 +1914,70 @@ namespace client
                 case N_SCORE:
                 {
                     int team = getint(p), total = getint(p);
-                    if(m_dtf(game::gamemode)) dtf::setscore(team, total);
-                    else if(m_ctf(game::gamemode)) ctf::setscore(team, total);
+                    if(m_ctf(game::gamemode)) ctf::setscore(team, total);
+                    else if(m_dtf(game::gamemode)) dtf::setscore(team, total);
+                    else if(m_etf(game::gamemode)) etf::setscore(team, total);
                     break;
                 }
 
-                case N_INITFLAGS:
+                case N_INITAFFIN:
                 {
-                    ctf::parseflags(p, m_ctf(game::gamemode));
+                    if(m_ctf(game::gamemode)) ctf::parseaffinity(p, m_ctf(game::gamemode));
+                    else if(m_etf(game::gamemode)) etf::parseaffinity(p, m_etf(game::gamemode));
                     break;
                 }
 
-                case N_DROPFLAG:
+                case N_DROPAFFIN:
                 {
                     int ocn = getint(p), flag = getint(p);
                     vec droploc;
                     loopk(3) droploc[k] = getint(p)/DMF;
                     gameent *o = game::newclient(ocn);
-                    if(o && m_ctf(game::gamemode)) ctf::dropflag(o, flag, droploc);
+                    if(o)
+                    {
+                        if(m_ctf(game::gamemode)) ctf::dropaffinity(o, flag, droploc);
+                        else if(m_etf(game::gamemode)) etf::dropaffinity(o, flag, droploc);
+                    }
                     break;
                 }
 
-                case N_SCOREFLAG:
+                case N_SCOREAFFIN:
                 {
                     int ocn = getint(p), relayflag = getint(p), goalflag = getint(p), score = getint(p);
                     gameent *o = game::newclient(ocn);
-                    if(o && m_ctf(game::gamemode)) ctf::scoreflag(o, relayflag, goalflag, score);
+                    if(o)
+                    {
+                        if(m_ctf(game::gamemode)) ctf::scoreaffinity(o, relayflag, goalflag, score);
+                        else if(m_etf(game::gamemode)) etf::scoreaffinity(o, relayflag, goalflag, score);
+                    }
                     break;
                 }
 
-                case N_RETURNFLAG:
+                case N_RETURNAFFIN:
                 {
                     int ocn = getint(p), flag = getint(p);
                     gameent *o = game::newclient(ocn);
-                    if(o && m_ctf(game::gamemode)) ctf::returnflag(o, flag);
+                    if(o && m_ctf(game::gamemode)) ctf::returnaffinity(o, flag);
                     break;
                 }
 
-                case N_TAKEFLAG:
+                case N_TAKEAFFIN:
                 {
                     int ocn = getint(p), flag = getint(p);
                     gameent *o = game::newclient(ocn);
-                    if(o && m_ctf(game::gamemode)) ctf::takeflag(o, flag);
+                    if(o)
+                    {
+                        if(m_ctf(game::gamemode)) ctf::takeaffinity(o, flag);
+                        else if(m_etf(game::gamemode)) etf::takeaffinity(o, flag);
+                    }
                     break;
                 }
 
-                case N_RESETFLAG:
+                case N_RESETAFFIN:
                 {
                     int flag = getint(p);
-                    if(m_ctf(game::gamemode)) ctf::resetflag(flag);
+                    if(m_ctf(game::gamemode)) ctf::resetaffinity(flag);
+                    else if(m_etf(game::gamemode)) etf::resetaffinity(flag);
                     break;
                 }
 

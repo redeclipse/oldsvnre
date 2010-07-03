@@ -136,7 +136,7 @@ struct dtfstate
         return cs;
     }
 
-    void addflag(const vec &o, int team)
+    void addaffinity(const vec &o, int team)
     {
         flag &b = flags.add();
         b.o = o;
@@ -144,7 +144,7 @@ struct dtfstate
         b.reset();
     }
 
-    void initflag(int i, int kin, int owner, int enemy, int converted)
+    void initaffinity(int i, int kin, int owner, int enemy, int converted)
     {
         if(!flags.inrange(i)) return;
         flag &b = flags[i];
@@ -155,7 +155,7 @@ struct dtfstate
         b.converted = converted;
     }
 
-    bool hasflags(int team)
+    bool hasaffinity(int team)
     {
         loopv(flags)
         {
@@ -177,10 +177,10 @@ struct dtfstate
         return dist;
     }
 
-    bool insideflag(const flag &b, const vec &o, float scale = 1.f)
+    bool insideaffinity(const flag &b, const vec &o, float scale = 1.f)
     {
         float dx = (b.o.x-o.x), dy = (b.o.y-o.y), dz = (b.o.z-o.z);
-        return dx*dx + dy*dy <= (enttype[FLAG].radius*enttype[FLAG].radius)*scale && fabs(dz) <= enttype[FLAG].radius*scale;
+        return dx*dx + dy*dy <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius)*scale && fabs(dz) <= enttype[AFFINITY].radius*scale;
     }
 };
 
@@ -188,10 +188,10 @@ struct dtfstate
 namespace dtf
 {
     extern dtfstate st;
-    extern void sendflags(packetbuf &p);
-    extern void updateflag(int i, int owner, int enemy, int converted);
+    extern void sendaffinity(packetbuf &p);
+    extern void updateaffinity(int i, int owner, int enemy, int converted);
     extern void setscore(int team, int total);
-    extern void setupflags();
+    extern void setupaffinity();
     extern void drawlast(int w, int h, int &tx, int &ty, float blend);
     extern void drawblips(int w, int h, float blend);
     extern int drawinventory(int x, int y, int s, int m, float blend);

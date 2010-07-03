@@ -13,47 +13,47 @@ struct dtfservmode : dtfstate, servmode
         hasflaginfo = false;
     }
 
-    void stealflag(int n, int team)
+    void stealaffinity(int n, int team)
     {
         flag &b = flags[n];
         loopv(clients) if(clients[i]->state.aitype < AI_START)
         {
             server::clientinfo *ci = clients[i];
-            if(ci->state.state==CS_ALIVE && ci->team && ci->team == team && insideflag(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team && ci->team == team && insideaffinity(b, ci->state.o))
                 b.enter(ci->team);
         }
-        sendflag(n);
+        sendaffinity(n);
     }
 
-    void moveflags(int team, const vec &oldpos, const vec &newpos)
+    void moveaffinity(int team, const vec &oldpos, const vec &newpos)
     {
         if(!team) return;
         loopv(flags)
         {
             flag &b = flags[i];
-            bool leave = insideflag(b, oldpos),
-                 enter = insideflag(b, newpos);
-            if(leave && !enter && b.leave(team)) sendflag(i);
-            else if(enter && !leave && b.enter(team)) sendflag(i);
-            else if(leave && enter && b.steal(team)) stealflag(i, team);
+            bool leave = insideaffinity(b, oldpos),
+                 enter = insideaffinity(b, newpos);
+            if(leave && !enter && b.leave(team)) sendaffinity(i);
+            else if(enter && !leave && b.enter(team)) sendaffinity(i);
+            else if(leave && enter && b.steal(team)) stealaffinity(i, team);
         }
     }
 
-    void leaveflags(int team, const vec &o)
+    void leaveaffinity(int team, const vec &o)
     {
-        moveflags(team, o, vec(-1e10f, -1e10f, -1e10f));
+        moveaffinity(team, o, vec(-1e10f, -1e10f, -1e10f));
     }
 
-    void enterflags(int team, const vec &o)
+    void enteraffinity(int team, const vec &o)
     {
-        moveflags(team, vec(-1e10f, -1e10f, -1e10f), o);
+        moveaffinity(team, vec(-1e10f, -1e10f, -1e10f), o);
     }
 
     void addscore(int i, int team, int n)
     {
         if(!n) return;
         flag &b = flags[i];
-        loopvk(clients) if(clients[k]->state.aitype < AI_START && team == clients[k]->team && insideflag(b, clients[k]->state.o)) givepoints(clients[k], n);
+        loopvk(clients) if(clients[k]->state.aitype < AI_START && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], n);
         score &cs = findscore(team);
         cs.total += n;
         sendf(-1, 1, "ri3", N_SCORE, team, cs.total);
@@ -73,27 +73,27 @@ struct dtfservmode : dtfstate, servmode
                 if(!b.owners || !b.enemies)
                 {
                     int pts = b.occupy(b.enemy, GAME(dtfpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, GAME(dtfoccupy), GAME(dtfstyle) != 0);
-                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideflag(b, clients[k]->state.o)) givepoints(clients[k], 3);
+                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], 3);
                 }
-                sendflag(i);
+                sendaffinity(i);
             }
             else if(b.owner)
             {
                 b.securetime += t;
                 int score = b.securetime/SCORESECS - (b.securetime-t)/SCORESECS;
                 if(score) addscore(i, b.owner, score);
-                sendflag(i);
+                sendaffinity(i);
             }
         }
     }
 
-    void sendflag(int i)
+    void sendaffinity(int i)
     {
         flag &b = flags[i];
-        sendf(-1, 1, "ri5", N_FLAGINFO, i, b.enemy ? b.converted : 0, b.owner, b.enemy);
+        sendf(-1, 1, "ri5", N_INFOAFFIN, i, b.enemy ? b.converted : 0, b.owner, b.enemy);
     }
 
-    void sendflags()
+    void sendaffinity()
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         initclient(NULL, p, false);
@@ -112,7 +112,7 @@ struct dtfservmode : dtfstate, servmode
                 putint(p, cs.total);
             }
         }
-        putint(p, N_FLAGS);
+        putint(p, N_AFFIN);
         putint(p, flags.length());
         loopv(flags)
         {
@@ -178,31 +178,31 @@ struct dtfservmode : dtfstate, servmode
     void entergame(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
-        enterflags(ci->team, ci->state.o);
+        enteraffinity(ci->team, ci->state.o);
     }
 
     void spawned(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
-        enterflags(ci->team, ci->state.o);
+        enteraffinity(ci->team, ci->state.o);
     }
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         if(!hasflaginfo || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
-        leaveflags(ci->team, ci->state.o);
+        leaveaffinity(ci->team, ci->state.o);
     }
 
     void died(clientinfo *ci, clientinfo *actor)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
-        leaveflags(ci->team, ci->state.o);
+        leaveaffinity(ci->team, ci->state.o);
     }
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
-        moveflags(ci->team, oldpos, newpos);
+        moveaffinity(ci->team, oldpos, newpos);
     }
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
@@ -210,7 +210,7 @@ struct dtfservmode : dtfstate, servmode
         if(hasflaginfo && GAME(regenflag)) loopv(flags)
         {
             flag &b = flags[i];
-            if(b.owner == ci->team && !b.enemy && insideflag(b, ci->state.o, 2.f))
+            if(b.owner == ci->team && !b.enemy && insideaffinity(b, ci->state.o, 2.f))
             {
                 if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
                 if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
@@ -220,7 +220,7 @@ struct dtfservmode : dtfstate, servmode
         }
     }
 
-    void parseflags(ucharbuf &p)
+    void parseaffinity(ucharbuf &p)
     {
         int numflags = getint(p);
         if(numflags)
@@ -232,12 +232,12 @@ struct dtfservmode : dtfstate, servmode
                 o.x = getint(p)/DMF;
                 o.y = getint(p)/DMF;
                 o.z = getint(p)/DMF;
-                if(!hasflaginfo) addflag(o, kin);
+                if(!hasflaginfo) addaffinity(o, kin);
             }
             if(!hasflaginfo)
             {
                 hasflaginfo = true;
-                sendflags();
+                sendaffinity();
                 loopv(clients) if(clients[i]->state.state==CS_ALIVE) entergame(clients[i]);
             }
         }
@@ -247,7 +247,7 @@ struct dtfservmode : dtfstate, servmode
     {
         bool isteam = victim==actor || victim->team == actor->team;
         int p = isteam ? -1 : 1, v = p;
-        loopv(flags) if(insideflag(flags[i], victim->state.o)) p += v;
+        loopv(flags) if(insideaffinity(flags[i], victim->state.o)) p += v;
         return p;
     }
 } dtfmode;

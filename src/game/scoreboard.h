@@ -134,13 +134,17 @@ namespace hud
 
         void sortteams(vector<teamscore> &teamscores)
         {
-            if(m_dtf(game::gamemode))
+            if(m_ctf(game::gamemode))
+            {
+                loopv(ctf::st.scores) teamscores.add(teamscore(ctf::st.scores[i].team, ctf::st.scores[i].total));
+            }
+            else if(m_dtf(game::gamemode))
             {
                 loopv(dtf::st.scores) teamscores.add(teamscore(dtf::st.scores[i].team, dtf::st.scores[i].total));
             }
-            else if(m_ctf(game::gamemode))
+            else if(m_etf(game::gamemode))
             {
-                loopv(ctf::st.scores) teamscores.add(teamscore(ctf::st.scores[i].team, ctf::st.scores[i].total));
+                loopv(etf::st.scores) teamscores.add(teamscore(etf::st.scores[i].team, etf::st.scores[i].total));
             }
             else loopi(game::numdynents())
             {
@@ -189,7 +193,7 @@ namespace hud
                 {
                     scoregroup &g = *groups[j];
                     if(team != g.team) continue;
-                    if(team && !m_dtf(game::gamemode) && !m_ctf(game::gamemode)) g.score += o->points;
+                    if(team && !m_ctf(game::gamemode) && !m_dtf(game::gamemode) && !m_etf(game::gamemode)) g.score += o->points;
                     g.players.add(o);
                     found = true;
                 }
@@ -198,8 +202,9 @@ namespace hud
                 scoregroup &g = *groups[numgroups++];
                 g.team = team;
                 if(!team) g.score = 0;
-                else if(m_dtf(game::gamemode)) g.score = dtf::st.findscore(o->team).total;
                 else if(m_ctf(game::gamemode)) g.score = ctf::st.findscore(o->team).total;
+                else if(m_dtf(game::gamemode)) g.score = dtf::st.findscore(o->team).total;
+                else if(m_etf(game::gamemode)) g.score = etf::st.findscore(o->team).total;
                 else g.score = o->points;
 
                 g.players.shrink(0);
@@ -412,7 +417,7 @@ namespace hud
                     g.poplist();
                 }
 
-                if(showscore() && (showscore() >= 2 || !m_flag(game::gamemode)))
+                if(showscore() && (showscore() >= 2 || !m_affinity(game::gamemode)))
                 {
                     g.pushlist();
                     if(m_trial(game::gamemode))

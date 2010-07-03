@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         201
+#define GAMEVERSION         202
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -28,6 +28,7 @@ enum
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8, S_BURNED, S_CRITICAL,
     S_RESPAWN, S_CHAT, S_ERROR, S_ALARM,
     S_V_FLAGSECURED, S_V_FLAGOVERTHROWN, S_V_FLAGPICKUP, S_V_FLAGDROP, S_V_FLAGRETURN, S_V_FLAGSCORE, S_V_FLAGRESET,
+    S_V_BOMBPICKUP, S_V_BOMBDROP, S_V_BOMBSCORE, S_V_BOMBRESET,
     S_V_FIGHT, S_V_CHECKPOINT, S_V_ONEMINUTE, S_V_HEADSHOT,
     S_V_SPREE, S_V_SPREE2, S_V_SPREE3, S_V_SPREE4,
     S_V_MULTI, S_V_MULTI2, S_V_MULTI3,
@@ -43,7 +44,7 @@ enum                                // entity types
 {
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
-    TELEPORT, ACTOR, TRIGGER, PUSHER, FLAG, CHECKPOINT, CAMERA, WAYPOINT, MAXENTTYPES
+    TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT, CAMERA, WAYPOINT, MAXENTTYPES
 };
 
 enum { EU_NONE = 0, EU_ITEM, EU_AUTO, EU_ACT, EU_MAX };
@@ -132,7 +133,7 @@ enttypes enttype[] = {
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    8,
-            (1<<FLAG)|(1<<WAYPOINT),
+            (1<<AFFINITY)|(1<<WAYPOINT),
             0,
             false,              "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed" }
     },
@@ -149,10 +150,10 @@ enttypes enttype[] = {
             false,              "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        FLAG,           1,          48,     36,     EU_NONE,    5,
-            (1<<FLAG),
+        AFFINITY,       1,          48,     36,     EU_NONE,    5,
+            (1<<AFFINITY),
             0,
-            false,              "flag",         { "team",   "yaw",      "pitch",    "mode",     "id" }
+            false,              "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
     },
     {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    6,
@@ -215,8 +216,8 @@ enum
 
 enum
 {
-    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_DTF, G_CTF, G_TRIAL, G_MAX,
-    G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH, G_RAND = G_CTF-G_DEATHMATCH+1
+    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CTF, G_DTF, G_ETF, G_TRIAL, G_MAX,
+    G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH, G_RAND = G_ETF-G_DEATHMATCH+1
 };
 enum
 {
@@ -251,12 +252,16 @@ gametypes gametype[] = {
         "deathmatch"
     },
     {
+        G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        "capture-the-flag"
+    },
+    {
         G_DTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
         "defend-the-flag"
     },
     {
-        G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
-        "capture-the-flag"
+        G_ETF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        "explode-the-flag"
     },
     {
         G_TRIAL,        G_M_NONE,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
@@ -311,12 +316,13 @@ extern gametypes gametype[], mutstype[];
 #define m_edit(a)           (a == G_EDITMODE)
 #define m_campaign(a)       (a == G_CAMPAIGN)
 #define m_dm(a)             (a == G_DEATHMATCH)
-#define m_dtf(a)            (a == G_DTF)
 #define m_ctf(a)            (a == G_CTF)
+#define m_dtf(a)            (a == G_DTF)
+#define m_etf(a)            (a == G_ETF)
 #define m_trial(a)          (a == G_TRIAL)
 
 #define m_play(a)           (a >= G_PLAY)
-#define m_flag(a)           (m_dtf(a) || m_ctf(a))
+#define m_affinity(a)       (m_dtf(a) || m_ctf(a) || m_etf(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
 #define m_team(a,b)         ((b & G_M_TEAM) || (gametype[a].implied & G_M_TEAM))
@@ -356,8 +362,8 @@ enum
     N_EDITMODE, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_REMIP, N_CLIPBOARD, N_NEWMAP,
     N_GETMAP, N_SENDMAP, N_SENDMAPFILE, N_SENDMAPSHOT, N_SENDMAPCONFIG,
     N_MASTERMODE, N_KICK, N_CLEARBANS, N_CURRENTMASTER, N_SPECTATOR, N_WAITING, N_SETMASTER, N_SETTEAM,
-    N_FLAGS, N_FLAGINFO,
-    N_TAKEFLAG, N_RETURNFLAG, N_RESETFLAG, N_DROPFLAG, N_SCOREFLAG, N_INITFLAGS, N_SCORE,
+    N_AFFIN, N_INFOAFFIN,
+    N_TAKEAFFIN, N_RETURNAFFIN, N_RESETAFFIN, N_DROPAFFIN, N_SCOREAFFIN, N_INITAFFIN, N_SCORE,
     N_LISTDEMOS, N_SENDDEMOLIST, N_GETDEMO, N_SENDDEMO,
     N_DEMOPLAYBACK, N_RECORDDEMO, N_STOPDEMO, N_CLEARDEMOS,
     N_CLIENT, N_RELOAD, N_REGEN,
@@ -385,8 +391,8 @@ char msgsizelookup(int msg)
         N_EDITMODE, 2, N_EDITENT, 0, N_EDITLINK, 4, N_EDITVAR, 0, N_EDITF, 16, N_EDITT, 16, N_EDITM, 15, N_FLIP, 14, N_COPY, 14, N_PASTE, 14, N_ROTATE, 15, N_REPLACE, 16, N_DELCUBE, 14, N_REMIP, 1, N_NEWMAP, 2,
         N_GETMAP, 0, N_SENDMAP, 0, N_SENDMAPFILE, 0, N_SENDMAPSHOT, 0, N_SENDMAPCONFIG, 0,
         N_MASTERMODE, 2, N_KICK, 2, N_CLEARBANS, 1, N_CURRENTMASTER, 3, N_SPECTATOR, 3, N_WAITING, 2, N_SETMASTER, 0, N_SETTEAM, 0,
-        N_FLAGS, 0, N_FLAGINFO, 0,
-        N_DROPFLAG, 0, N_SCOREFLAG, 5, N_RETURNFLAG, 3, N_TAKEFLAG, 3, N_RESETFLAG, 2, N_INITFLAGS, 0, N_SCORE, 0,
+        N_AFFIN, 0, N_INFOAFFIN, 0,
+        N_DROPAFFIN, 0, N_SCOREAFFIN, 5, N_RETURNAFFIN, 3, N_TAKEAFFIN, 3, N_RESETAFFIN, 2, N_INITAFFIN, 0, N_SCORE, 0,
         N_LISTDEMOS, 1, N_SENDDEMOLIST, 0, N_GETDEMO, 2, N_SENDDEMO, 0,
         N_DEMOPLAYBACK, 3, N_RECORDDEMO, 2, N_STOPDEMO, 1, N_CLEARDEMOS, 2,
         N_CLIENT, 0, N_RELOAD, 0, N_REGEN, 0,
@@ -1427,6 +1433,7 @@ namespace client
 #endif
 #include "ctf.h"
 #include "dtf.h"
+#include "etf.h"
 #ifndef GAMESERVER
 #include "scoreboard.h"
 #endif

@@ -1,13 +1,13 @@
-// server-side ctf manager
-struct ctfservmode : ctfstate, servmode
+// server-side etf manager
+struct etfservmode : etfstate, servmode
 {
     bool hasflaginfo;
 
-    ctfservmode() : hasflaginfo(false) {}
+    etfservmode() : hasflaginfo(false) {}
 
     void reset(bool empty)
     {
-        ctfstate::reset();
+        etfstate::reset();
         hasflaginfo = false;
     }
 
@@ -18,7 +18,7 @@ struct ctfservmode : ctfstate, servmode
         {
             ivec p(vec(ci->state.o.dist(o) > enttype[AFFINITY].radius ? ci->state.o : o).mul(DMF));
             sendf(-1, 1, "ri6", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z);
-            ctfstate::dropaffinity(i, p.tovec().div(DMF), gamemillis);
+            etfstate::dropaffinity(i, p.tovec().div(DMF), gamemillis);
         }
     }
 
@@ -42,21 +42,21 @@ struct ctfservmode : ctfstate, servmode
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
-        loopv(flags) if(flags[i].owner == ci->clientnum)
+        loopv(flags) if(isetfaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(isctfhome(f, ci->team) && (f.owner < 0 || (GAME(ctfstyle) == 1 && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
+                if(isetftarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
-                    ctfstate::returnaffinity(i, gamemillis);
+                    etfstate::returnaffinity(i, gamemillis);
                     givepoints(ci, 5);
                     if(flags[i].team != ci->team)
                     {
                         ci->state.flags++;
                         int score = addscore(ci->team);
                         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                        if(GAME(ctflimit) && score >= GAME(ctflimit))
+                        if(GAME(etflimit) && score >= GAME(etflimit))
                         {
                             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fycpature limit has been reached");
                             startintermission();
@@ -72,30 +72,21 @@ struct ctfservmode : ctfstate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
-        if(!(f.base&BASE_FLAG) || f.owner >= 0 || (f.team == ci->team && GAME(ctfstyle) <= 2 && (GAME(ctfstyle) == 2 || !f.droptime))) return;
-        if(!GAME(ctfstyle) && f.team == ci->team)
-        {
-            ctfstate::returnaffinity(i, gamemillis);
-            givepoints(ci, 5);
-            sendf(-1, 1, "ri3", N_RETURNAFFIN, ci->clientnum, i);
-        }
-        else
-        {
-            ctfstate::takeaffinity(i, ci->clientnum, gamemillis);
-            if(f.team != ci->team) givepoints(ci, 3);
-            sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
-        }
+        if(!isetfaffinity(f) || f.owner >= 0) return;
+        etfstate::takeaffinity(i, ci->clientnum, gamemillis);
+        givepoints(ci, 3);
+        sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
 
     void resetaffinity(clientinfo *ci, int i)
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
-        if(!(f.base&BASE_FLAG) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
+        if(!isetfaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
-            ctfstate::returnaffinity(i, gamemillis);
+            etfstate::returnaffinity(i, gamemillis);
             sendf(-1, 1, "ri2", N_RESETAFFIN, i);
         }
     }
@@ -103,39 +94,15 @@ struct ctfservmode : ctfstate, servmode
     void update()
     {
         if(!hasflaginfo) return;
-        loopv(flags)
+        loopv(flags) if(isetfaffinity(flags[i]))
         {
             flag &f = flags[i];
-            switch(GAME(ctfstyle))
+            if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(etfresetdelay))
             {
-                case 3:
-                    if(f.owner >= 0 && f.taketime && gamemillis-f.taketime >= GAME(ctfresetdelay))
-                    {
-                        clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                        if(f.team != ci->team)
-                        {
-                            ctfstate::returnaffinity(i, gamemillis);
-                            givepoints(ci, 5);
-                            ci->state.flags++;
-                            int score = addscore(ci->team);
-                            sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
-                            if(GAME(ctflimit) && score >= GAME(ctflimit))
-                            {
-                                sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fycpature limit has been reached");
-                                startintermission();
-                            }
-                        }
-                        break;
-                    }
-                default:
-                    if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(ctfresetdelay))
-                    {
-                        ctfstate::returnaffinity(i, gamemillis);
-                        loopvk(clients) if(isctfaffinity(f, clients[k]->team)) givepoints(clients[k], -5);
-                        sendf(-1, 1, "ri2", N_RESETAFFIN, i);
-                    }
-                    break;
+                etfstate::returnaffinity(i, gamemillis);
+                sendf(-1, 1, "ri2", N_RESETAFFIN, i);
             }
+            break;
         }
     }
 
@@ -157,7 +124,6 @@ struct ctfservmode : ctfstate, servmode
         {
             flag &f = flags[i];
             putint(p, f.team);
-            putint(p, f.base);
             putint(p, f.owner);
             if(f.owner<0)
             {
@@ -177,7 +143,7 @@ struct ctfservmode : ctfstate, servmode
         if(hasflaginfo && GAME(regenflag)) loopv(flags)
         {
             flag &f = flags[i];
-            bool insidehome = (isctfhome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f);
+            bool insidehome = (isetfhome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f);
             if(insidehome || (GAME(regenflag) == 2 && f.owner == ci->clientnum))
             {
                 if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
@@ -195,10 +161,10 @@ struct ctfservmode : ctfstate, servmode
         {
             loopi(numflags)
             {
-                int team = getint(p), base = getint(p);
+                int team = getint(p);
                 vec o;
                 loopk(3) o[k] = getint(p)/DMF;
-                if(!hasflaginfo) addaffinity(o, team, base, i);
+                if(!hasflaginfo) addaffinity(o, team, i);
             }
             hasflaginfo = true;
         }
@@ -211,4 +177,4 @@ struct ctfservmode : ctfstate, servmode
         loopv(flags) if(flags[i].owner == victim->clientnum) p += v;
         return p;
     }
-} ctfmode;
+} etfmode;

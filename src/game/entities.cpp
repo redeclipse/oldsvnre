@@ -111,7 +111,7 @@ namespace entities
                 }
                 break;
             }
-            case PLAYERSTART: case FLAG: case CHECKPOINT:
+            case PLAYERSTART: case AFFINITY: case CHECKPOINT:
             {
                 if(type != CHECKPOINT)
                 {
@@ -251,7 +251,7 @@ namespace entities
     {
         switch(type)
         {
-            case FLAG: return "flag";
+            case AFFINITY: return "flag";
             case PLAYERSTART: return polymodels ? "" : aistyle[AI_BOT].tpmdl;
             case WEAPON:
             {
@@ -914,7 +914,8 @@ namespace entities
                 d->action[AC_USE] = false;
             }
         }
-        if(m_ctf(game::gamemode)) ctf::checkflags(d);
+        if(m_ctf(game::gamemode)) ctf::checkaffinity(d);
+        else if(m_etf(game::gamemode)) etf::checkaffinity(d);
     }
 
     void putitems(packetbuf &p)
@@ -1103,7 +1104,7 @@ namespace entities
                 if(e.attrs[6] < 0) e.attrs[6] = 0;
                 if(e.attrs[7] < 0) e.attrs[7] = 0;
                 break;
-            case FLAG:
+            case AFFINITY:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_COUNT;
                 while(e.attrs[0] >= TEAM_COUNT) e.attrs[0] -= TEAM_COUNT;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
@@ -1253,7 +1254,7 @@ namespace entities
 
     float dropheight(extentity &e)
     {
-        if(e.type==MAPMODEL || e.type==FLAG) return 0.0f;
+        if(e.type==MAPMODEL || e.type==AFFINITY) return 0.0f;
         return 4.0f;
     }
 
@@ -1605,10 +1606,10 @@ namespace entities
                     f.type = PUSHER;
                     break;
                 }
-                // BASE             -   FLAG        1:idx       TEAM_NEUTRAL
+                // BASE             -   AFFINITY    1:idx       TEAM_NEUTRAL
                 case 25:
                 {
-                    f.type = FLAG;
+                    f.type = AFFINITY;
                     if(f.attrs[0] < 0) f.attrs[0] = 0;
                     f.attrs[1] = TEAM_NEUTRAL; // spawn as neutrals
                     break;
@@ -1619,10 +1620,10 @@ namespace entities
                     f.type = CHECKPOINT;
                     break;
                 }
-                // FLAG             -   FLAG        #           2:team
+                // FLAG             -   AFFINITY        #           2:team
                 case 31:
                 {
-                    f.type = FLAG;
+                    f.type = AFFINITY;
                     f.attrs[0] = 0;
                     if(f.attrs[1] <= 0) f.attrs[1] = -1; // needs a team
                     break;
@@ -1731,7 +1732,7 @@ namespace entities
                     e.attrs[0] = best;
                     break;
                 }
-                case FLAG: // replace bases/neutral flags near team flags
+                case AFFINITY: // replace bases/neutral flags near team flags
                 {
                     if(valteam(e.attrs[1], TEAM_FIRST)) teams[e.attrs[1]-TEAM_FIRST]++;
                     else if(e.attrs[1] == TEAM_NEUTRAL)
@@ -1742,9 +1743,9 @@ namespace entities
                         {
                             gameentity &f = *(gameentity *)ents[j];
 
-                            if(f.type == FLAG && f.attrs[1] != TEAM_NEUTRAL &&
+                            if(f.type == AFFINITY && f.attrs[1] != TEAM_NEUTRAL &&
                                 (!ents.inrange(dest) || e.o.dist(f.o) < ents[dest]->o.dist(f.o)) &&
-                                    e.o.dist(f.o) <= enttype[FLAG].radius*4.f)
+                                    e.o.dist(f.o) <= enttype[AFFINITY].radius*4.f)
                                         dest = j;
                         }
 
@@ -1810,7 +1811,7 @@ namespace entities
                     }
                     break;
                 }
-                case FLAG:
+                case AFFINITY:
                 {
                     if(!e.attrs[0]) e.attrs[0] = ++flag; // assign a sane idx
                     if(!valteam(e.attrs[1], TEAM_NEUTRAL)) // assign a team
@@ -1854,6 +1855,19 @@ namespace entities
                         e.attrs[2] = e.attrs[3] = e.attrs[4] = 0;
                     }
                     if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_LAST) e.attrs[0] = TEAM_NEUTRAL;
+                    if(mtype == MAP_MAPZ && gver <= 201)
+                    {
+                        if(e.attrs[3] > 3)
+                        {
+                            if(e.attrs[3] != 5) e.attrs[3]++;
+                            else e.attrs[3]--;
+                        }
+                        else if(e.attrs[3] < -3)
+                        {
+                            if(e.attrs[3] != -5) e.attrs[3]--;
+                            else e.attrs[3]++;
+                        }
+                    }
                     break;
                 }
                 case PARTICLES:
@@ -1931,7 +1945,7 @@ namespace entities
                     else if(mtype == MAP_MAPZ && mver <= 39) e.attrs[0] = (e.attrs[0] + 180)%360;
                     break;
                 }
-                case FLAG:
+                case AFFINITY:
                 {
                     if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver <= 158))
                     {
@@ -1942,6 +1956,19 @@ namespace entities
                     }
                     if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_LAST) e.attrs[0] = TEAM_NEUTRAL;
                     if((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39)) e.attrs[1] = (e.attrs[1] + 180)%360;
+                    if(mtype == MAP_MAPZ && gver <= 201)
+                    {
+                        if(e.attrs[3] > 3)
+                        {
+                            if(e.attrs[3] != 5) e.attrs[3]++;
+                            else e.attrs[3]--;
+                        }
+                        else if(e.attrs[3] < -3)
+                        {
+                            if(e.attrs[3] != -5) e.attrs[3]--;
+                            else e.attrs[3]++;
+                        }
+                    }
                     break;
                 }
                 case WAYPOINT:
@@ -1961,6 +1988,19 @@ namespace entities
                 case ACTOR: if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe AI_BOT from array
                 case CHECKPOINT:
                     if((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39)) e.attrs[1] = (e.attrs[1] + 180)%360;
+                    if(mtype == MAP_MAPZ && gver <= 201)
+                    {
+                        if(e.attrs[3] > 3)
+                        {
+                            if(e.attrs[3] != 5) e.attrs[3]++;
+                            else e.attrs[3]--;
+                        }
+                        else if(e.attrs[3] < -3)
+                        {
+                            if(e.attrs[3] != -5) e.attrs[3]--;
+                            else e.attrs[3]++;
+                        }
+                    }
                     break;
                 default: break;
             }
@@ -2146,7 +2186,7 @@ namespace entities
                     }
                     break;
                 }
-                case FLAG:
+                case AFFINITY:
                 {
                     float radius = (float)enttype[e.type].radius;
                     part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, teamtype[e.attrs[0]].colour);
@@ -2293,7 +2333,7 @@ namespace entities
                         if(!active)
                         {
                             fade = 0.5f;
-                            if(e.type == FLAG || e.type == PLAYERSTART) { yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0); pitch = e.attrs[2]; }
+                            if(e.type == AFFINITY || e.type == PLAYERSTART) { yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0); pitch = e.attrs[2]; }
                             else if(e.type == ACTOR) { yaw = e.attrs[1]+90; pitch = e.attrs[2]; }
                         }
                         else if(e.spawned)

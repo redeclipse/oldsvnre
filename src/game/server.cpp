@@ -696,8 +696,9 @@ namespace server
 
     #define maplist(a,b,c) \
         if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
-        else if(m_dtf(b)) a = newstring(GAME(dtfmaps)); \
         else if(m_ctf(b)) a = newstring(GAME(ctfmaps)); \
+        else if(m_dtf(b)) a = newstring(GAME(dtfmaps)); \
+        else if(m_etf(b)) a = newstring(GAME(etfmaps)); \
         else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
         else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
         else a = newstring(GAME(allowmaps)); \
@@ -802,7 +803,7 @@ namespace server
                     }
                 }
             }
-            if(GAME(fraglimit) && !m_flag(gamemode) && !m_trial(gamemode))
+            if(GAME(fraglimit) && !m_affinity(gamemode) && !m_trial(gamemode))
             {
                 if(m_team(gamemode, mutators))
                 {
@@ -1552,7 +1553,7 @@ namespace server
 
     void distpoints(clientinfo *ci, bool discon = false)
     {
-        if(m_team(gamemode, mutators) && !m_flag(gamemode))
+        if(m_team(gamemode, mutators) && !m_affinity(gamemode))
         {
             int friends = 0;
             loopv(clients) if(ci != clients[i] && clients[i]->state.aitype < AI_START && clients[i]->team == ci->team) friends++;
@@ -1775,8 +1776,9 @@ namespace server
         return true;
     }
 
-    #include "dtfmode.h"
     #include "ctfmode.h"
+    #include "dtfmode.h"
+    #include "etfmode.h"
     #include "duelmut.h"
     #include "aiman.h"
 
@@ -1821,8 +1823,9 @@ namespace server
         copystring(smapname, reqmap);
 
         // server modes
-        if(m_dtf(gamemode)) smode = &dtfmode;
-        else if(m_ctf(gamemode)) smode = &ctfmode;
+        if(m_ctf(gamemode)) smode = &ctfmode;
+        else if(m_dtf(gamemode)) smode = &dtfmode;
+        else if(m_etf(gamemode)) smode = &etfmode;
         else smode = NULL;
         smuts.shrink(0);
         if(m_duke(gamemode, mutators)) smuts.add(&duelmutator);
@@ -3198,7 +3201,7 @@ namespace server
         // only allow edit messages in coop-edit mode
         if(type >= N_EDITENT && type <= N_NEWMAP && (!m_edit(gamemode) || !ci || ci->state.state != CS_EDITING)) return -1;
         // server only messages
-        static const int servtypes[] = { N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTMASTER, N_PONG, N_RESUME, N_SCORE, N_FLAGINFO, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_SCOREFLAG, N_RETURNFLAG, N_CLIENT, N_AUTHCHAL };
+        static const int servtypes[] = { N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTMASTER, N_PONG, N_RESUME, N_SCORE, N_INFOAFFIN, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_SCOREAFFIN, N_RETURNAFFIN, N_CLIENT, N_AUTHCHAL };
         if(ci)
         {
             loopi(sizeof(servtypes)/sizeof(int)) if(type == servtypes[i]) return -1;
@@ -3888,7 +3891,7 @@ namespace server
                     QUEUE_MSG;
                     break;
 
-                case N_FLAGINFO:
+                case N_INFOAFFIN:
                     getint(p);
                     getint(p);
                     getint(p);
@@ -3896,41 +3899,45 @@ namespace server
                     QUEUE_MSG;
                     break;
 
-                case N_FLAGS:
-                    if(smode==&dtfmode) dtfmode.parseflags(p);
+                case N_AFFIN:
+                    if(smode==&dtfmode) dtfmode.parseaffinity(p);
                     break;
 
-                case N_TAKEFLAG:
+                case N_TAKEAFFIN:
                 {
                     int lcn = getint(p), flag = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
-                    if(smode==&ctfmode) ctfmode.takeflag(cp, flag);
+                    if(smode==&ctfmode) ctfmode.takeaffinity(cp, flag);
+                    else if(smode==&etfmode) etfmode.takeaffinity(cp, flag);
                     break;
                 }
 
-                case N_RESETFLAG:
+                case N_RESETAFFIN:
                 {
                     int flag = getint(p);
                     if(!ci) break;
-                    if(smode==&ctfmode) ctfmode.resetflag(ci, flag);
+                    if(smode==&ctfmode) ctfmode.resetaffinity(ci, flag);
+                    else if(smode==&etfmode) etfmode.resetaffinity(ci, flag);
                     break;
                 }
 
-                case N_DROPFLAG:
+                case N_DROPAFFIN:
                 {
                     int lcn = getint(p);
                     vec droploc;
                     loopk(3) droploc[k] = getint(p)/DMF;
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
-                    if(smode==&ctfmode) ctfmode.dropflag(cp, droploc);
+                    if(smode==&ctfmode) ctfmode.dropaffinity(cp, droploc);
+                    else if(smode==&etfmode) etfmode.dropaffinity(cp, droploc);
                     break;
                 }
 
-                case N_INITFLAGS:
+                case N_INITAFFIN:
                 {
-                    if(smode==&ctfmode) ctfmode.parseflags(p);
+                    if(smode==&ctfmode) ctfmode.parseaffinity(p);
+                    else if(smode==&etfmode) etfmode.parseaffinity(p);
                     break;
                 }
 
