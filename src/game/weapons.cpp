@@ -126,7 +126,7 @@ namespace weapons
         }
         if(d == game::player1) playsound(S_ERROR, d->o, d);
     }
-    ICOMMAND(0, weapon, "ss", (char *a, char *b), weaponswitch(game::player1, *a ? atoi(a) : -1, *b ? atoi(b) : -1));
+    ICOMMAND(0, weapon, "ss", (char *a, char *b), weaponswitch(game::player1, *a ? parseint(a) : -1, *b ? parseint(b) : -1));
 
     void drop(gameent *d, int a = -1)
     {
@@ -144,7 +144,7 @@ namespace weapons
         }
         if(!found && d == game::player1) playsound(S_ERROR, d->o, d);
     }
-    ICOMMAND(0, drop, "s", (char *n), drop(game::player1, *n ? atoi(n) : -1));
+    ICOMMAND(0, drop, "s", (char *n), drop(game::player1, *n ? parseint(n) : -1));
 
     bool autoreload(gameent *d, int flags = 0)
     {

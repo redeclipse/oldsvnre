@@ -601,7 +601,7 @@ void entattrs(const char *str, vector<int> &attrs)
         char *a = indexlist(str, k);
         if(a)
         {
-            attrs.add(atoi(a));
+            attrs.add(parseint(a));
             DELETEA(a);
         }
     }

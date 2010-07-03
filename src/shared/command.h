@@ -97,6 +97,19 @@ extern const char *floatstr(float v);
 extern void floatret(float v);
 extern void result(const char *s);
 
+static inline int parseint(const char *s)
+{
+    return int(strtol(s, NULL, 0));
+}
+
+static inline float parsefloat(const char *s)
+{
+    // not all platforms (windows) can parse hexadecimal integers via strtod
+    char *end;
+    double val = strtod(s, &end);
+    return val || (*end!='x' && *end!='X') ? float(val) : float(parseint(s));
+}
+
 typedef hashtable<const char *, ident> identtable;
 extern identtable *idents;
 

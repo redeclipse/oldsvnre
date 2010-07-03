@@ -306,9 +306,9 @@ void rdjoint(int *n, int *t, const char *v1, const char *v2, const char *v3)
     ragdollskel::joint &j = ragdoll->joints.add();
     j.bone = *n;
     j.tri = *t;
-    j.vert[0] = v1[0] ? atoi(v1) : -1;
-    j.vert[1] = v2[0] ? atoi(v2) : -1;
-    j.vert[2] = v3[0] ? atoi(v3) : -1;
+    j.vert[0] = v1[0] ? parseint(v1) : -1;
+    j.vert[1] = v2[0] ? parseint(v2) : -1;
+    j.vert[2] = v3[0] ? parseint(v3) : -1;
 }
 COMMAND(0, rdjoint, "iisss");
 
@@ -368,7 +368,7 @@ ICOMMAND(0, mapmodelindex, "s", (char *a), {
     if(!*a) intret(mapmodels.length());
     else
     {
-        int num = atoi(a);
+        int num = parseint(a);
         if(mapmodels.inrange(num)) result(mapmodels[num].name);
     }
 });

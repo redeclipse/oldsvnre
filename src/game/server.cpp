@@ -1945,7 +1945,7 @@ namespace server
                         conoutft(CON_MESG, "\frcannot override variable: %s", cmd);
                         return true;
                     }
-                    int ret = atoi(arg);
+                    int ret = parseint(arg);
                     if(ret < id->minval || ret > id->maxval)
                     {
                         conoutft(CON_MESG,
@@ -1966,7 +1966,7 @@ namespace server
                         conoutft(CON_MESG, "\fc%s = %s", cmd, floatstr(*id->storage.f));
                         return true;
                     }
-                    float ret = atof(arg);
+                    float ret = parsefloat(arg);
                     if(ret < id->minvalf || ret > id->maxvalf)
                     {
                         conoutft(CON_MESG, "\frvalid range for %s is %s..%s", cmd, floatstr(id->minvalf), floatstr(id->maxvalf));
@@ -2040,7 +2040,7 @@ namespace server
                         srvmsgf(ci->clientnum, "\frcannot override variable: %s", cmd);
                         return;
                     }
-                    int ret = atoi(arg);
+                    int ret = parseint(arg);
                     if(ret < id->minval || ret > id->maxval)
                     {
                         srvmsgf(ci->clientnum,
@@ -2067,7 +2067,7 @@ namespace server
                         sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, &id->name[3], val);
                         return;
                     }
-                    float ret = atof(arg);
+                    float ret = parsefloat(arg);
                     if(ret < id->minvalf || ret > id->maxvalf)
                     {
                         srvmsgf(ci->clientnum, "\frvalid range for %s is %s..%s", cmd, floatstr(id->minvalf), floatstr(id->maxvalf));
