@@ -80,7 +80,7 @@ namespace hud
                         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                         {
                             int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
-                            if(m_stf(game::gamemode) && sg.score==INT_MAX)
+                            if(m_dtf(game::gamemode) && sg.score==INT_MAX)
                                 game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team secured all flags", teamtype[sg.team].chat, teamtype[sg.team].name);
                             else if(m_trial(game::gamemode)) game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.score ? timetostr(sg.score) : "dnf");
                             else game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.score);
@@ -134,9 +134,9 @@ namespace hud
 
         void sortteams(vector<teamscore> &teamscores)
         {
-            if(m_stf(game::gamemode))
+            if(m_dtf(game::gamemode))
             {
-                loopv(stf::st.scores) teamscores.add(teamscore(stf::st.scores[i].team, stf::st.scores[i].total));
+                loopv(dtf::st.scores) teamscores.add(teamscore(dtf::st.scores[i].team, dtf::st.scores[i].total));
             }
             else if(m_ctf(game::gamemode))
             {
@@ -189,7 +189,7 @@ namespace hud
                 {
                     scoregroup &g = *groups[j];
                     if(team != g.team) continue;
-                    if(team && !m_stf(game::gamemode) && !m_ctf(game::gamemode)) g.score += o->points;
+                    if(team && !m_dtf(game::gamemode) && !m_ctf(game::gamemode)) g.score += o->points;
                     g.players.add(o);
                     found = true;
                 }
@@ -198,7 +198,7 @@ namespace hud
                 scoregroup &g = *groups[numgroups++];
                 g.team = team;
                 if(!team) g.score = 0;
-                else if(m_stf(game::gamemode)) g.score = stf::st.findscore(o->team).total;
+                else if(m_dtf(game::gamemode)) g.score = dtf::st.findscore(o->team).total;
                 else if(m_ctf(game::gamemode)) g.score = ctf::st.findscore(o->team).total;
                 else g.score = o->points;
 
@@ -391,7 +391,7 @@ namespace hud
                 if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
                     g.pushlist(); // vertical
-                    if(m_stf(game::gamemode) && stflimit && sg.score >= stflimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
+                    if(m_dtf(game::gamemode) && dtflimit && sg.score >= dtflimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
                     else g.textf("%s: %d", fgcolor, NULL, teamtype[sg.team].name, sg.score);
                     g.pushlist(); // horizontal
                 }

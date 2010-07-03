@@ -1,9 +1,9 @@
 #include "game.h"
-namespace stf
+namespace dtf
 {
-    stfstate st;
+    dtfstate st;
 
-    bool insideflag(const stfstate::flag &b, gameent *d)
+    bool insideflag(const dtfstate::flag &b, gameent *d)
     {
         return st.insideflag(b, d->feetpos());
     }
@@ -33,9 +33,9 @@ namespace stf
     {
         loopv(st.flags)
         {
-            stfstate::flag &b = st.flags[i];
+            dtfstate::flag &b = st.flags[i];
             if(!entities::ents.inrange(b.ent)) continue;
-            float occupy = b.occupied(stfstyle, stfoccupy);
+            float occupy = b.occupied(dtfstyle, dtfoccupy);
             entitylight *light = &entities::ents[b.ent]->light;
             if(light->millis != lastmillis) skewrgb(light->material.x, light->material.y, light->material.z, b.owner, b.enemy, occupy);
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
@@ -71,9 +71,9 @@ namespace stf
     {
         loopv(st.flags)
         {
-            stfstate::flag &f = st.flags[i];
+            dtfstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float occupy = f.occupied(stfstyle, stfoccupy), r = 1, g = 1, b = 1;
+            float occupy = f.occupied(dtfstyle, dtfoccupy), r = 1, g = 1, b = 1;
             skewrgb(r, g, b, f.owner, f.enemy, occupy);
             adddynlight(vec(f.o).add(vec(0, 0, enttype[FLAG].radius)), enttype[FLAG].radius*2, vec(r, g, b), 0, 0, DL_KEEP);
         }
@@ -83,9 +83,9 @@ namespace stf
     {
         loopv(st.flags)
         {
-            stfstate::flag &f = st.flags[i];
+            dtfstate::flag &f = st.flags[i];
             vec dir(f.o); dir.sub(camera1->o);
-            float occupy = f.occupied(stfstyle, stfoccupy), r = 1, g = 1, b = 1, fade = blend*hud::radaraffinityblend;
+            float occupy = f.occupied(dtfstyle, dtfoccupy), r = 1, g = 1, b = 1, fade = blend*hud::radaraffinityblend;
             skewrgb(r, g, b, f.owner, f.enemy, occupy);
             if(f.owner != game::focus->team && f.enemy != game::focus->team)
             {
@@ -112,9 +112,9 @@ namespace stf
         {
             loopv(st.flags) if(insideflag(st.flags[i], game::player1) && (st.flags[i].owner == game::player1->team || st.flags[i].enemy == game::player1->team))
             {
-                stfstate::flag &f = st.flags[i];
+                dtfstate::flag &f = st.flags[i];
                 pushfont("super");
-                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!stfstyle && f.owner ? 2 : 1) * stfoccupy), 0.f, 1.f) : 1.f;
+                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!dtfstyle && f.owner ? 2 : 1) * dtfoccupy), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::player1->team;
                 ty += draw_textx("\fzwa%s \fs%s%d%%\fS complete", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
@@ -129,7 +129,7 @@ namespace stf
         loopv(st.flags)
         {
             if(y-sy-s < m) break;
-            stfstate::flag &f = st.flags[i];
+            dtfstate::flag &f = st.flags[i];
             bool hasflag = game::focus->state == CS_ALIVE && insideflag(f, game::focus);
             if(f.hasflag != hasflag) { f.hasflag = hasflag; f.lasthad = lastmillis-max(1000-(lastmillis-f.lasthad), 0); }
             int millis = lastmillis-f.lasthad;
@@ -138,7 +138,7 @@ namespace stf
             {
                 int prevsy = sy; bool skewed = false;
                 float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend,
-                    occupy = f.enemy ? clamp(f.converted/float((!stfstyle && f.owner ? 2 : 1)*stfoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f),
+                    occupy = f.enemy ? clamp(f.converted/float((!dtfstyle && f.owner ? 2 : 1)*dtfoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f),
                     r = (teamtype[f.owner].colour>>16)/255.f, g = ((teamtype[f.owner].colour>>8)&0xFF)/255.f, b = (teamtype[f.owner].colour&0xFF)/255.f,
                         r1 = r, g1 = g, b1 = b;
                 if(f.enemy)
@@ -186,7 +186,7 @@ namespace stf
             extentity *e = entities::ents[i];
             if(e->type != FLAG || !m_check(e->attrs[3], game::gamemode)) continue;
             int team = e->attrs[0];
-            switch(stfflags)
+            switch(dtfflags)
             {
                 case 3:
                 {
@@ -205,7 +205,7 @@ namespace stf
                 }
                 case 0: team = TEAM_NEUTRAL; break;
             }
-            stfstate::flag &b = st.flags.add();
+            dtfstate::flag &b = st.flags.add();
             b.o = e->o;
             defformatstring(alias)("flag_%d", e->attrs[4]);
             const char *name = getalias(alias);
@@ -223,7 +223,7 @@ namespace stf
         putint(p, st.flags.length());
         loopv(st.flags)
         {
-            stfstate::flag &b = st.flags[i];
+            dtfstate::flag &b = st.flags[i];
             putint(p, b.kinship);
             putint(p, int(b.o.x*DMF));
             putint(p, int(b.o.y*DMF));
@@ -234,7 +234,7 @@ namespace stf
     void updateflag(int i, int owner, int enemy, int converted)
     {
         if(!st.flags.inrange(i)) return;
-        stfstate::flag &b = st.flags[i];
+        dtfstate::flag &b = st.flags[i];
         if(owner)
         {
             if(b.owner != owner)
@@ -287,7 +287,7 @@ namespace stf
             vec pos = d->feetpos();
             loopvj(st.flags)
             {
-                stfstate::flag &f = st.flags[j];
+                dtfstate::flag &f = st.flags[j];
                 static vector<int> targets; // build a list of others who are interested in this
                 targets.setsize(0);
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
@@ -316,7 +316,7 @@ namespace stf
     {
         if(st.flags.inrange(b.target))
         {
-            stfstate::flag &f = st.flags[b.target];
+            dtfstate::flag &f = st.flags[b.target];
             bool regen = d->aitype != AI_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
             int walk = f.enemy && f.enemy != ai::owner(d) ? 1 : 0;
             if(regen && (!f.enemy && ai::owner(d) == f.owner))

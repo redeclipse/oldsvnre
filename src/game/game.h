@@ -215,7 +215,7 @@ enum
 
 enum
 {
-    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_STF, G_CTF, G_TRIAL, G_MAX,
+    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_DTF, G_CTF, G_TRIAL, G_MAX,
     G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH, G_RAND = G_CTF-G_DEATHMATCH+1
 };
 enum
@@ -251,8 +251,8 @@ gametypes gametype[] = {
         "deathmatch"
     },
     {
-        G_STF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
-        "secure-the-flag"
+        G_DTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        "defend-the-flag"
     },
     {
         G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
@@ -311,12 +311,12 @@ extern gametypes gametype[], mutstype[];
 #define m_edit(a)           (a == G_EDITMODE)
 #define m_campaign(a)       (a == G_CAMPAIGN)
 #define m_dm(a)             (a == G_DEATHMATCH)
-#define m_stf(a)            (a == G_STF)
+#define m_dtf(a)            (a == G_DTF)
 #define m_ctf(a)            (a == G_CTF)
 #define m_trial(a)          (a == G_TRIAL)
 
 #define m_play(a)           (a >= G_PLAY)
-#define m_flag(a)           (m_stf(a) || m_ctf(a))
+#define m_flag(a)           (m_dtf(a) || m_ctf(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
 #define m_team(a,b)         ((b & G_M_TEAM) || (gametype[a].implied & G_M_TEAM))
@@ -1426,7 +1426,7 @@ namespace client
 }
 #endif
 #include "ctf.h"
-#include "stf.h"
+#include "dtf.h"
 #ifndef GAMESERVER
 #include "scoreboard.h"
 #endif

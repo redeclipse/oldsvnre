@@ -950,7 +950,7 @@ namespace hud
                     popfont();
                 }
 
-                if(m_stf(game::gamemode)) stf::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
+                if(m_dtf(game::gamemode)) dtf::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
                 else if(m_ctf(game::gamemode)) ctf::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
 
                 if(noticescale < 1) glPopMatrix();
@@ -1301,7 +1301,7 @@ namespace hud
         if(chkcond(radaritems, game::tvmode()) || m_edit(game::gamemode)) drawentblips(w, h, blend*radarblend); // 2
         if(chkcond(radaraffinity, game::tvmode())) // 3
         {
-            if(m_stf(game::gamemode)) stf::drawblips(w, h, blend);
+            if(m_dtf(game::gamemode)) dtf::drawblips(w, h, blend);
             else if(m_ctf(game::gamemode)) ctf::drawblips(w, h, blend*radarblend);
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode) || game::tvmode())) // 4
@@ -1765,7 +1765,7 @@ namespace hud
                     if(!m_edit(game::gamemode) && inventoryscore && ((cc = sb.drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
                     if(inventorygame)
                     {
-                        if(m_stf(game::gamemode) && ((cc = stf::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
+                        if(m_dtf(game::gamemode) && ((cc = dtf::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
                         else if(m_ctf(game::gamemode) && ((cc = ctf::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
                     }
                 }

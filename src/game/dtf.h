@@ -1,7 +1,7 @@
 #ifdef GAMESERVER
-#define stfstate stfservstate
+#define dtfstate stfservstate
 #endif
-struct stfstate
+struct dtfstate
 {
     static const int SCORESECS = 100;
 
@@ -114,7 +114,7 @@ struct stfstate
 
     int secured;
 
-    stfstate() : secured(0) {}
+    dtfstate() : secured(0) {}
 
     void reset()
     {
@@ -185,9 +185,9 @@ struct stfstate
 };
 
 #ifndef GAMESERVER
-namespace stf
+namespace dtf
 {
-    extern stfstate st;
+    extern dtfstate st;
     extern void sendflags(packetbuf &p);
     extern void updateflag(int i, int owner, int enemy, int converted);
     extern void setscore(int team, int total);

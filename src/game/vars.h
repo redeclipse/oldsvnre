@@ -31,7 +31,7 @@ GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness deadsimple
 GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility warp wet venus");
 
 GSVAR(IDF_ADMIN, ctfmaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
-GSVAR(IDF_ADMIN, stfmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tower tranquility warp wet venus");
+GSVAR(IDF_ADMIN, dtfmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tower tranquility warp wet venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
@@ -97,12 +97,12 @@ GVAR(0, ctflimit, 0, 0, INT_MAX-1); // finish when score is this or more
 GVAR(0, ctfstyle, 0, 0, 3); // 0 = classic touch-and-return, 1 = grab and take home, 2 = defend and reset, 3 = dominate and protect
 GVAR(0, ctfresetdelay, 0, 30000, INT_MAX-1);
 
-GVAR(0, stflimit, 0, 0, INT_MAX-1); // finish when score is this or more
-GVAR(0, stfstyle, 0, 1, 1); // 0 = overthrow and secure, 1 = instant secure
-GVAR(0, stffinish, 0, 0, 1); // finish when all bases captured
-GVAR(0, stfpoints, 0, 1, INT_MAX-1); // points added to score
-GVAR(0, stfoccupy, 0, 100, INT_MAX-1); // points needed to occupy
-GVAR(0, stfflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
+GVAR(0, dtflimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, dtfstyle, 0, 1, 1); // 0 = overthrow and secure, 1 = instant secure
+GVAR(0, dtffinish, 0, 0, 1); // finish when all bases captured
+GVAR(0, dtfpoints, 0, 1, INT_MAX-1); // points added to score
+GVAR(0, dtfoccupy, 0, 100, INT_MAX-1); // points needed to occupy
+GVAR(0, dtfflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
 GVAR(0, skillmin, 1, 65, 101);
 GVAR(0, skillmax, 1, 85, 101);

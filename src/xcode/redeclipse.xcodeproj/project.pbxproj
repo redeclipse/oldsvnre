@@ -95,8 +95,8 @@
 		D16A83520F130E9500EABB1F /* projs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83400F130E9500EABB1F /* projs.cpp */; };
 		D16A83530F130E9500EABB1F /* scoreboard.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83410F130E9500EABB1F /* scoreboard.h */; };
 		D16A83540F130E9500EABB1F /* server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83420F130E9500EABB1F /* server.cpp */; };
-		D16A83550F130E9500EABB1F /* stf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83430F130E9500EABB1F /* stf.cpp */; };
-		D16A83560F130E9500EABB1F /* stf.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83440F130E9500EABB1F /* stf.h */; };
+		D16A83550F130E9500EABB1F /* dtf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83430F130E9500EABB1F /* dtf.cpp */; };
+		D16A83560F130E9500EABB1F /* dtf.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83440F130E9500EABB1F /* dtf.h */; };
 		D16A83570F130E9500EABB1F /* vars.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83450F130E9500EABB1F /* vars.h */; };
 		D16A83580F130E9500EABB1F /* weapons.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83460F130E9500EABB1F /* weapons.cpp */; };
 		D16A83710F130EBC00EABB1F /* blend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A836A0F130EBC00EABB1F /* blend.cpp */; };
@@ -115,7 +115,7 @@
 		D1CEB40A0F548C0B004FD11F /* aiman.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4060F548C0B004FD11F /* aiman.h */; };
 		D1CEB40B0F548C0B004FD11F /* ctfmode.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4070F548C0B004FD11F /* ctfmode.h */; };
 		D1CEB40C0F548C0B004FD11F /* duelmut.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4080F548C0B004FD11F /* duelmut.h */; };
-		D1CEB40D0F548C0B004FD11F /* stfmode.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4090F548C0B004FD11F /* stfmode.h */; };
+		D1CEB40D0F548C0B004FD11F /* dtfmode.h in Headers */ = {isa = PBXBuildFile; fileRef = D1CEB4090F548C0B004FD11F /* dtfmode.h */; };
 		D1D88A8B0F350DFE000680E4 /* auth.h in Headers */ = {isa = PBXBuildFile; fileRef = D1D88A8A0F350DFE000680E4 /* auth.h */; };
 		D1D88A8D0F350E31000680E4 /* ragdoll.h in Headers */ = {isa = PBXBuildFile; fileRef = D1D88A8C0F350E31000680E4 /* ragdoll.h */; };
 		D1D88AB80F350EDE000680E4 /* irc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1D88AB60F350EDE000680E4 /* irc.cpp */; };
@@ -220,8 +220,8 @@
 		D16A83400F130E9500EABB1F /* projs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = projs.cpp; sourceTree = "<group>"; };
 		D16A83410F130E9500EABB1F /* scoreboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scoreboard.h; sourceTree = "<group>"; };
 		D16A83420F130E9500EABB1F /* server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = server.cpp; sourceTree = "<group>"; };
-		D16A83430F130E9500EABB1F /* stf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stf.cpp; sourceTree = "<group>"; };
-		D16A83440F130E9500EABB1F /* stf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stf.h; sourceTree = "<group>"; };
+		D16A83430F130E9500EABB1F /* dtf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dtf.cpp; sourceTree = "<group>"; };
+		D16A83440F130E9500EABB1F /* dtf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtf.h; sourceTree = "<group>"; };
 		D16A83450F130E9500EABB1F /* vars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vars.h; sourceTree = "<group>"; };
 		D16A83460F130E9500EABB1F /* weapons.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weapons.cpp; sourceTree = "<group>"; };
 		D16A836A0F130EBC00EABB1F /* blend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blend.cpp; sourceTree = "<group>"; };
@@ -240,7 +240,7 @@
 		D1CEB4060F548C0B004FD11F /* aiman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aiman.h; sourceTree = "<group>"; };
 		D1CEB4070F548C0B004FD11F /* ctfmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ctfmode.h; sourceTree = "<group>"; };
 		D1CEB4080F548C0B004FD11F /* duelmut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = duelmut.h; sourceTree = "<group>"; };
-		D1CEB4090F548C0B004FD11F /* stfmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stfmode.h; sourceTree = "<group>"; };
+		D1CEB4090F548C0B004FD11F /* dtfmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dtfmode.h; sourceTree = "<group>"; };
 		D1D88A8A0F350DFE000680E4 /* auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = auth.h; sourceTree = "<group>"; };
 		D1D88A8C0F350E31000680E4 /* ragdoll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ragdoll.h; sourceTree = "<group>"; };
 		D1D88AB60F350EDE000680E4 /* irc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = irc.cpp; sourceTree = "<group>"; };
@@ -466,7 +466,7 @@
 				D1CEB4060F548C0B004FD11F /* aiman.h */,
 				D1CEB4070F548C0B004FD11F /* ctfmode.h */,
 				D1CEB4080F548C0B004FD11F /* duelmut.h */,
-				D1CEB4090F548C0B004FD11F /* stfmode.h */,
+				D1CEB4090F548C0B004FD11F /* dtfmode.h */,
 				D1D88A8A0F350DFE000680E4 /* auth.h */,
 				D16A83360F130E9500EABB1F /* ai.cpp */,
 				D16A83370F130E9500EABB1F /* client.cpp */,
@@ -480,8 +480,8 @@
 				D16A83400F130E9500EABB1F /* projs.cpp */,
 				D16A83410F130E9500EABB1F /* scoreboard.h */,
 				D16A83420F130E9500EABB1F /* server.cpp */,
-				D16A83430F130E9500EABB1F /* stf.cpp */,
-				D16A83440F130E9500EABB1F /* stf.h */,
+				D16A83430F130E9500EABB1F /* dtf.cpp */,
+				D16A83440F130E9500EABB1F /* dtf.h */,
 				D16A83450F130E9500EABB1F /* vars.h */,
 				D16A83460F130E9500EABB1F /* weapons.cpp */,
 			);
@@ -529,7 +529,7 @@
 				D16A834E0F130E9500EABB1F /* extinfo.h in Headers */,
 				D16A834F0F130E9500EABB1F /* game.h in Headers */,
 				D16A83530F130E9500EABB1F /* scoreboard.h in Headers */,
-				D16A83560F130E9500EABB1F /* stf.h in Headers */,
+				D16A83560F130E9500EABB1F /* dtf.h in Headers */,
 				D16A83570F130E9500EABB1F /* vars.h in Headers */,
 				D16A83760F130EBC00EABB1F /* scale.h in Headers */,
 				D1D88A8B0F350DFE000680E4 /* auth.h in Headers */,
@@ -538,7 +538,7 @@
 				D1CEB40A0F548C0B004FD11F /* aiman.h in Headers */,
 				D1CEB40B0F548C0B004FD11F /* ctfmode.h in Headers */,
 				D1CEB40C0F548C0B004FD11F /* duelmut.h in Headers */,
-				D1CEB40D0F548C0B004FD11F /* stfmode.h in Headers */,
+				D1CEB40D0F548C0B004FD11F /* dtfmode.h in Headers */,
 				D11B5A6510CBB4D8003F0098 /* ai.h in Headers */,
 				D11B5A6B10CBB500003F0098 /* mpr.h in Headers */,
 			);
@@ -651,7 +651,7 @@
 				D16A83510F130E9500EABB1F /* physics.cpp in Sources */,
 				D16A83520F130E9500EABB1F /* projs.cpp in Sources */,
 				D16A83540F130E9500EABB1F /* server.cpp in Sources */,
-				D16A83550F130E9500EABB1F /* stf.cpp in Sources */,
+				D16A83550F130E9500EABB1F /* dtf.cpp in Sources */,
 				D16A83580F130E9500EABB1F /* weapons.cpp in Sources */,
 				D16A83710F130EBC00EABB1F /* blend.cpp in Sources */,
 				D16A83720F130EBC00EABB1F /* blob.cpp in Sources */,

@@ -1,14 +1,14 @@
 // server side stf manager
-struct stfservmode : stfstate, servmode
+struct dtfservmode : dtfstate, servmode
 {
     int scoresec;
     bool hasflaginfo;
 
-    stfservmode() : scoresec(0), hasflaginfo(false) {}
+    dtfservmode() : scoresec(0), hasflaginfo(false) {}
 
     void reset(bool empty)
     {
-        stfstate::reset();
+        dtfstate::reset();
         scoresec = 0;
         hasflaginfo = false;
     }
@@ -72,7 +72,7 @@ struct stfservmode : stfstate, servmode
             {
                 if(!b.owners || !b.enemies)
                 {
-                    int pts = b.occupy(b.enemy, GAME(stfpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, GAME(stfoccupy), GAME(stfstyle) != 0);
+                    int pts = b.occupy(b.enemy, GAME(dtfpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, GAME(dtfoccupy), GAME(dtfstyle) != 0);
                     if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideflag(b, clients[k]->state.o)) givepoints(clients[k], 3);
                 }
                 sendflag(i);
@@ -132,7 +132,7 @@ struct stfservmode : stfstate, servmode
 
     void endcheck()
     {
-        int maxscore = GAME(stflimit) ? GAME(stflimit) : INT_MAX-1;
+        int maxscore = GAME(dtflimit) ? GAME(dtflimit) : INT_MAX-1;
         loopi(numteams(gamemode, mutators))
         {
             int steam = i+TEAM_FIRST;
@@ -144,7 +144,7 @@ struct stfservmode : stfstate, servmode
                 return;
             }
         }
-        if(GAME(stffinish))
+        if(GAME(dtffinish))
         {
             int steam = TEAM_NEUTRAL;
             loopv(flags)
@@ -250,4 +250,4 @@ struct stfservmode : stfstate, servmode
         loopv(flags) if(insideflag(flags[i], victim->state.o)) p += v;
         return p;
     }
-} stfmode;
+} dtfmode;
