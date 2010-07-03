@@ -760,19 +760,19 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\stf.cpp">
+		<Unit filename="game\dtf.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\stf.h">
+		<Unit filename="game\dtf.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\stfmode.h">
+		<Unit filename="game\dtfmode.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />

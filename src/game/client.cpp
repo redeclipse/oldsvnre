@@ -586,7 +586,7 @@ namespace client
             setnames(name, MAP_MAPZ);
             needsmap = true;
         }
-        if(m_stf(gamemode)) stf::setupflags();
+        if(m_dtf(gamemode)) dtf::setupflags();
         else if(m_ctf(gamemode)) ctf::setupflags();
     }
 
@@ -967,7 +967,7 @@ namespace client
             putint(p, game::numplayers);
             entities::putitems(p);
             putint(p, -1);
-            if(m_stf(game::gamemode)) stf::sendflags(p);
+            if(m_dtf(game::gamemode)) dtf::sendflags(p);
             else if(m_ctf(game::gamemode)) ctf::sendflags(p);
             sendinfo = false;
         }
@@ -1867,7 +1867,7 @@ namespace client
                 {
                     int flag = getint(p), converted = getint(p),
                             owner = getint(p), enemy = getint(p);
-                    if(m_stf(game::gamemode)) stf::updateflag(flag, owner, enemy, converted);
+                    if(m_dtf(game::gamemode)) dtf::updateflag(flag, owner, enemy, converted);
                     break;
                 }
 
@@ -1877,7 +1877,7 @@ namespace client
                     loopi(numflags)
                     {
                         int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
-                        stf::st.initflag(i, kin, owner, enemy, converted);
+                        dtf::st.initflag(i, kin, owner, enemy, converted);
                     }
                     break;
                 }
@@ -1912,7 +1912,7 @@ namespace client
                 case N_SCORE:
                 {
                     int team = getint(p), total = getint(p);
-                    if(m_stf(game::gamemode)) stf::setscore(team, total);
+                    if(m_dtf(game::gamemode)) dtf::setscore(team, total);
                     else if(m_ctf(game::gamemode)) ctf::setscore(team, total);
                     break;
                 }

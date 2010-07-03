@@ -696,7 +696,7 @@ namespace server
 
     #define maplist(a,b,c) \
         if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
-        else if(m_stf(b)) a = newstring(GAME(stfmaps)); \
+        else if(m_dtf(b)) a = newstring(GAME(dtfmaps)); \
         else if(m_ctf(b)) a = newstring(GAME(ctfmaps)); \
         else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
         else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
@@ -1775,7 +1775,7 @@ namespace server
         return true;
     }
 
-    #include "stfmode.h"
+    #include "dtfmode.h"
     #include "ctfmode.h"
     #include "duelmut.h"
     #include "aiman.h"
@@ -1821,7 +1821,7 @@ namespace server
         copystring(smapname, reqmap);
 
         // server modes
-        if(m_stf(gamemode)) smode = &stfmode;
+        if(m_dtf(gamemode)) smode = &dtfmode;
         else if(m_ctf(gamemode)) smode = &ctfmode;
         else smode = NULL;
         smuts.shrink(0);
@@ -3897,7 +3897,7 @@ namespace server
                     break;
 
                 case N_FLAGS:
-                    if(smode==&stfmode) stfmode.parseflags(p);
+                    if(smode==&dtfmode) dtfmode.parseflags(p);
                     break;
 
                 case N_TAKEFLAG:
