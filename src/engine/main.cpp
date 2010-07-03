@@ -812,11 +812,17 @@ int main(int argc, char **argv)
 
     char *initscript = NULL;
     initing = INIT_RESET;
+    bool hashome = findarg(argc, argv, "-h"), hasinit = findarg(argc, argv, "-r");
+    if(!hashome && !hasinit)
+    {
+        execfile("init.cfg", false);
+        restoredinits = hasinit = true;
+    }
     for(int i = 1; i<argc; i++)
     {
         if(argv[i][0]=='-') switch(argv[i][1])
         {
-            case 'r': execfile(argv[i][2] ? &argv[i][2] : "init.cfg", false); restoredinits = true; break;
+            case 'r': execfile(argv[i][2] ? &argv[i][2] : "init.cfg", false); restoredinits = hasinit = true; break;
             case 'd':
             {
                 switch(argv[i][2])
@@ -843,6 +849,12 @@ int main(int argc, char **argv)
                 break;
             }
             case 'x': initscript = &argv[i][2]; break;
+            case 'h':
+                if(!hasinit)
+                {
+                    execfile("init.cfg", false);
+                    restoredinits = hasinit = true;
+                } // fall through to serveroption
             default: if(!serveroption(argv[i])) gameargs.add(argv[i]); break;
         }
         else gameargs.add(argv[i]);
