@@ -1,15 +1,16 @@
-#define isctfhome(a,b)  ((a.base&BASE_HOME) && (a.team == b || a.team == TEAM_NEUTRAL))
-#define isctfaffinity(a,b)  ((a.base&BASE_FLAG) && (a.team == b || a.team == TEAM_NEUTRAL))
+#define isetfaffinity(a) (a.team == TEAM_NEUTRAL)
+#define isetfhome(a,b)   (!isetfaffinity(a) && a.team == b)
+#define isetftarg(a,b)   (!isetfaffinity(a) && a.team != b)
 
 #ifdef GAMESERVER
-#define ctfstate ctfservstate
+#define etfstate etfservstate
 #endif
-struct ctfstate
+struct etfstate
 {
     struct flag
     {
         vec droploc, spawnloc;
-        int team, droptime, taketime, base;
+        int team, droptime, taketime;
 #ifdef GAMESERVER
         int owner;
         vector<int> votes;
@@ -28,7 +29,6 @@ struct ctfstate
         void reset()
         {
             droploc = spawnloc = vec(-1, -1, -1);
-            base = BASE_NONE;
 #ifdef GAMESERVER
             owner = -1;
             votes.shrink(0);
@@ -64,7 +64,7 @@ struct ctfstate
         scores.shrink(0);
     }
 
-    int addaffinity(const vec &o, int team, int base = BASE_NONE, int i = -1)
+    int addaffinity(const vec &o, int team, int i = -1)
     {
         int x = i < 0 ? flags.length() : i;
         while(!flags.inrange(x)) flags.add();
@@ -72,7 +72,6 @@ struct ctfstate
         f.reset();
         f.team = team;
         f.spawnloc = o;
-        f.base = base;
         return x;
     }
 
@@ -145,9 +144,9 @@ struct ctfstate
 };
 
 #ifndef GAMESERVER
-namespace ctf
+namespace etf
 {
-    extern ctfstate st;
+    extern etfstate st;
     extern void sendaffinity(packetbuf &p);
     extern void parseaffinity(ucharbuf &p, bool commit);
     extern void dropaffinity(gameent *d, int i, const vec &droploc);

@@ -399,7 +399,8 @@ namespace game
             if(dynlighteffects >= 2)
             {
                 if(m_ctf(gamemode)) ctf::adddynlights();
-                if(m_dtf(gamemode)) dtf::adddynlights();
+                else if(m_dtf(gamemode)) dtf::adddynlights();
+                else if(m_etf(gamemode)) etf::adddynlights();
             }
             if(fireburning && fireburntime)
             {
@@ -1034,7 +1035,8 @@ namespace game
         projs::remove(d);
         removedamagemerges(d);
         if(m_ctf(gamemode)) ctf::removeplayer(d);
-        if(m_dtf(gamemode)) dtf::removeplayer(d);
+        else if(m_dtf(gamemode)) dtf::removeplayer(d);
+        else if(m_etf(gamemode)) etf::removeplayer(d);
         DELETEP(players[cn]);
         players[cn] = NULL;
         cleardynentcache();
@@ -1049,8 +1051,9 @@ namespace game
             weapons::preload();
             projs::preload();
         }
-        if(m_edit(gamemode) || m_dtf(gamemode)) dtf::preload();
         if(m_edit(gamemode) || m_ctf(gamemode)) ctf::preload();
+        if(m_edit(gamemode) || m_dtf(gamemode)) dtf::preload();
+        if(m_edit(gamemode) || m_etf(gamemode)) etf::preload();
         maskpackagedirs(~0);
     }
 
@@ -2266,8 +2269,9 @@ namespace game
         loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, transscale(d, true), deadscale(d, 1, true));
         entities::render();
         projs::render();
-        if(m_dtf(gamemode)) dtf::render();
         if(m_ctf(gamemode)) ctf::render();
+        else if(m_dtf(gamemode)) dtf::render();
+        else if(m_etf(gamemode)) etf::render();
         ai::render();
         if(!polymodels && rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
         endmodelbatches();

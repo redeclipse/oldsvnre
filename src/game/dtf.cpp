@@ -3,9 +3,9 @@ namespace dtf
 {
     dtfstate st;
 
-    bool insideflag(const dtfstate::flag &b, gameent *d)
+    bool insideaffinity(const dtfstate::flag &b, gameent *d)
     {
-        return st.insideflag(b, d->feetpos());
+        return st.insideaffinity(b, d->feetpos());
     }
 
     void preload()
@@ -47,7 +47,7 @@ namespace dtf
                 formatstring(b.info)("<super>\fs%s%s\fS", teamtype[defend].chat, teamtype[defend].name);
             }
             vec above = b.o;
-            above.z += enttype[FLAG].radius/2+2.5f;
+            above.z += enttype[AFFINITY].radius/2+2.5f;
             part_text(above, b.info);
             above.z += 2.5f;
             if(b.enemy)
@@ -75,7 +75,7 @@ namespace dtf
             if(!entities::ents.inrange(f.ent)) continue;
             float occupy = f.occupied(dtfstyle, dtfoccupy), r = 1, g = 1, b = 1;
             skewrgb(r, g, b, f.owner, f.enemy, occupy);
-            adddynlight(vec(f.o).add(vec(0, 0, enttype[FLAG].radius)), enttype[FLAG].radius*2, vec(r, g, b), 0, 0, DL_KEEP);
+            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(r, g, b), 0, 0, DL_KEEP);
         }
     }
 
@@ -110,7 +110,7 @@ namespace dtf
     {
         if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
         {
-            loopv(st.flags) if(insideflag(st.flags[i], game::player1) && (st.flags[i].owner == game::player1->team || st.flags[i].enemy == game::player1->team))
+            loopv(st.flags) if(insideaffinity(st.flags[i], game::player1) && (st.flags[i].owner == game::player1->team || st.flags[i].enemy == game::player1->team))
             {
                 dtfstate::flag &f = st.flags[i];
                 pushfont("super");
@@ -130,7 +130,7 @@ namespace dtf
         {
             if(y-sy-s < m) break;
             dtfstate::flag &f = st.flags[i];
-            bool hasflag = game::focus->state == CS_ALIVE && insideflag(f, game::focus);
+            bool hasflag = game::focus->state == CS_ALIVE && insideaffinity(f, game::focus);
             if(f.hasflag != hasflag) { f.hasflag = hasflag; f.lasthad = lastmillis-max(1000-(lastmillis-f.lasthad), 0); }
             int millis = lastmillis-f.lasthad;
             bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.owner == game::focus->team || st.flags.length() == 1);
@@ -178,13 +178,13 @@ namespace dtf
         return sy;
     }
 
-    void setupflags()
+    void setupaffinity()
     {
         st.reset();
         loopv(entities::ents)
         {
             extentity *e = entities::ents[i];
-            if(e->type != FLAG || !m_check(e->attrs[3], game::gamemode)) continue;
+            if(e->type != AFFINITY || !m_check(e->attrs[3], game::gamemode)) continue;
             int team = e->attrs[0];
             switch(dtfflags)
             {
@@ -217,9 +217,9 @@ namespace dtf
         }
     }
 
-    void sendflags(packetbuf &p)
+    void sendaffinity(packetbuf &p)
     {
-        putint(p, N_FLAGS);
+        putint(p, N_AFFIN);
         putint(p, st.flags.length());
         loopv(st.flags)
         {
@@ -231,7 +231,7 @@ namespace dtf
         }
     }
 
-    void updateflag(int i, int owner, int enemy, int converted)
+    void updateaffinity(int i, int owner, int enemy, int converted)
     {
         if(!st.flags.inrange(i)) return;
         dtfstate::flag &b = st.flags[i];
@@ -240,23 +240,23 @@ namespace dtf
             if(b.owner != owner)
             {
                 gameent *d = NULL, *e = NULL;
-                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideflag(b, e))
+                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
                 game::announce(S_V_FLAGSECURED, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS secured %s", teamtype[owner].chat, teamtype[owner].name, b.name);
                 defformatstring(text)("<super>%s\fzReSECURED", teamtype[owner].chat);
-                part_textcopy(vec(b.o).add(vec(0, 0, enttype[FLAG].radius)), text, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 3, 1, -10);
-                if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[FLAG].radius)), enttype[FLAG].radius*2, vec(teamtype[owner].colour>>16, (teamtype[owner].colour>>8)&0xFF, teamtype[owner].colour&0xFF).mul(2.f/0xFF), 500, 250);
+                part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 3, 1, -10);
+                if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[owner].colour>>16, (teamtype[owner].colour>>8)&0xFF, teamtype[owner].colour&0xFF).mul(2.f/0xFF), 500, 250);
             }
         }
         else if(b.owner)
         {
             gameent *d = NULL, *e = NULL;
-            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideflag(b, e))
+            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                 if((d = e) == game::focus) break;
             game::announce(S_V_FLAGOVERTHROWN, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS overthrew %s", teamtype[enemy].chat, teamtype[enemy].name, b.name);
             defformatstring(text)("<super>%s\fzReOVERTHROWN", teamtype[enemy].chat);
-            part_textcopy(vec(b.o).add(vec(0, 0, enttype[FLAG].radius)), text, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 3, 1, -10);
-            if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[FLAG].radius)), enttype[FLAG].radius*2, vec(teamtype[enemy].colour>>16, (teamtype[enemy].colour>>8)&0xFF, teamtype[enemy].colour&0xFF).mul(2.f/0xFF), 500, 250);
+            part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 3, 1, -10);
+            if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[enemy].colour>>16, (teamtype[enemy].colour>>8)&0xFF, teamtype[enemy].colour&0xFF).mul(2.f/0xFF), 500, 250);
         }
         b.owner = owner;
         b.enemy = enemy;
@@ -296,7 +296,7 @@ namespace dtf
                 loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
                     vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (enttype[FLAG].radius*enttype[FLAG].radius))
+                    if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius))
                         targets.add(e->clientnum);
                 }
                 if((!regen && f.owner == ai::owner(d)) || (targets.empty() && (f.owner != ai::owner(d) || f.enemy)))
@@ -330,7 +330,7 @@ namespace dtf
                     loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
                         vec ep = e->feetpos();
-                        if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (enttype[FLAG].radius*enttype[FLAG].radius*4)))
+                        if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4)))
                             targets.add(e->clientnum);
                     }
                 }
@@ -345,7 +345,7 @@ namespace dtf
                 }
                 else walk = 1;
             }
-            return ai::defend(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[FLAG].radius), !f.enemy ? ai::SIGHTMIN : float(enttype[FLAG].radius*(1+walk)), walk);
+            return ai::defend(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
         }
         return false;
     }

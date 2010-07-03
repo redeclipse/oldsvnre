@@ -700,6 +700,25 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
+		<Unit filename="game\etf.cpp">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+		</Unit>
+		<Unit filename="game\etf.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
+		</Unit>
+		<Unit filename="game\etfmode.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
+		</Unit>
 		<Unit filename="game\duelmut.h">
 			<Option target="client" />
 			<Option target="client-dbg" />

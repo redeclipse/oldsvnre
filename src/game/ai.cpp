@@ -22,8 +22,9 @@ namespace ai
         {
             if(entities::ents.inrange(d->aientity))
             {
-                if(m_dtf(game::gamemode)) return dtf::aiowner(d);
-                else if(m_ctf(game::gamemode)) return ctf::aiowner(d);
+                if(m_ctf(game::gamemode)) return ctf::aiowner(d);
+                else if(m_dtf(game::gamemode)) return dtf::aiowner(d);
+                else if(m_etf(game::gamemode)) return etf::aiowner(d);
             }
         }
         return d->team;
@@ -478,8 +479,9 @@ namespace ai
             if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
             if(m_fight(game::gamemode))
             {
-                if(m_dtf(game::gamemode)) dtf::aifind(d, b, interests);
-                else if(m_ctf(game::gamemode)) ctf::aifind(d, b, interests);
+                if(m_ctf(game::gamemode)) ctf::aifind(d, b, interests);
+                else if(m_dtf(game::gamemode)) dtf::aifind(d, b, interests);
+                else if(m_etf(game::gamemode)) etf::aifind(d, b, interests);
             }
             if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, m_campaign(game::gamemode));
             if(m_campaign(game::gamemode) && aicampaign)
@@ -646,8 +648,9 @@ namespace ai
     {
         if(d->aitype == AI_BOT)
         {
-            if(m_dtf(game::gamemode) && dtf::aicheck(d, b)) return true;
-            else if(m_ctf(game::gamemode) && ctf::aicheck(d, b)) return true;
+            if(m_ctf(game::gamemode) && ctf::aicheck(d, b)) return true;
+            else if(m_dtf(game::gamemode) && dtf::aicheck(d, b)) return true;
+            else if(m_etf(game::gamemode) && etf::aicheck(d, b)) return true;
         }
         return false;
     }
@@ -711,8 +714,9 @@ namespace ai
                     {
                         if(aicampaign && entities::ents.inrange(b.target)) return defend(d, b, entities::ents[b.target]->o) ? 1 : 0;
                     }
-                    else if(m_dtf(game::gamemode)) return dtf::aidefend(d, b) ? 1 : 0;
                     else if(m_ctf(game::gamemode)) return ctf::aidefend(d, b) ? 1 : 0;
+                    else if(m_dtf(game::gamemode)) return dtf::aidefend(d, b) ? 1 : 0;
+                    else if(m_etf(game::gamemode)) return etf::aidefend(d, b) ? 1 : 0;
                     break;
                 }
                 case AI_T_PLAYER:
@@ -811,8 +815,9 @@ namespace ai
                     {
                         if(aicampaign && entities::ents.inrange(b.target)) return defend(d, b, entities::ents[b.target]->o) ? 1 : 0;
                     }
-                    else if(m_dtf(game::gamemode)) return dtf::aipursue(d, b) ? 1 : 0;
                     else if(m_ctf(game::gamemode)) return ctf::aipursue(d, b) ? 1 : 0;
+                    else if(m_dtf(game::gamemode)) return dtf::aipursue(d, b) ? 1 : 0;
+                    else if(m_etf(game::gamemode)) return etf::aipursue(d, b) ? 1 : 0;
                     break;
                 }
 
