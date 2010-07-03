@@ -849,13 +849,14 @@ int main(int argc, char **argv)
                 break;
             }
             case 'x': initscript = &argv[i][2]; break;
-            case 'h':
-                if(!hasinit)
+            default:
+                if(!serveroption(argv[i])) gameargs.add(argv[i]);
+                else if(argv[i][1] == 'h' && !hasinit)
                 {
                     execfile("init.cfg", false);
                     restoredinits = hasinit = true;
-                } // fall through to serveroption
-            default: if(!serveroption(argv[i])) gameargs.add(argv[i]); break;
+                }
+                break;
         }
         else gameargs.add(argv[i]);
     }
