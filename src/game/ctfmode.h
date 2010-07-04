@@ -11,14 +11,14 @@ struct ctfservmode : ctfstate, servmode
         hasflaginfo = false;
     }
 
-    void dropaffinity(clientinfo *ci, const vec &o)
+    void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0))
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(ci->state.o.dist(o) > enttype[AFFINITY].radius ? ci->state.o : o).mul(DMF));
-            sendf(-1, 1, "ri6", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z);
-            ctfstate::dropaffinity(i, p.tovec().div(DMF), gamemillis);
+            ivec p(vec(o).mul(DMF)), q(vec(inertia).mul(DMF));
+            sendf(-1, 1, "ri9", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z, q.x, q.y, q.z);
+            ctfstate::dropaffinity(i, o, inertia, gamemillis);
         }
     }
 
@@ -172,6 +172,9 @@ struct ctfservmode : ctfstate, servmode
                     putint(p, int(f.droploc.x*DMF));
                     putint(p, int(f.droploc.y*DMF));
                     putint(p, int(f.droploc.z*DMF));
+                    putint(p, int(f.inertia.x*DMF));
+                    putint(p, int(f.inertia.y*DMF));
+                    putint(p, int(f.inertia.z*DMF));
                 }
             }
         }

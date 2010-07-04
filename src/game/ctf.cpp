@@ -3,13 +3,18 @@ namespace ctf
 {
     ctfstate st;
 
-    void dropaffinity(gameent *d)
+    bool dropaffinity(gameent *d)
     {
         if(m_ctf(game::gamemode) && ctfstyle <= 2)
-            client::addmsg(N_DROPAFFIN, "ri4", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF));
-        else if(d == game::player1) playsound(S_ERROR, d->o, d);
+        {
+            loopv(st.flags) if(st.flags[i].owner == d)
+            {
+                client::addmsg(N_DROPAFFIN, "ri7", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(d->vel.x*DMF), int(d->vel.y*DMF), int(d->vel.z*DMF));
+                return true;
+            }
+        }
+        return false;
     }
-    ICOMMAND(0, dropflag, "", (), dropaffinity(game::player1));
 
     void preload()
     {
@@ -208,16 +213,14 @@ namespace ctf
             ctfstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
-            float trans = 1.f, yaw = 0;
+            float yaw = 0;
             if(f.owner)
             {
                 yaw += f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
                 while(yaw >= 360.f) yaw -= 360.f;
             }
             else yaw += (f.interptime+(360/st.flags.length()*i))%360;
-            int millis = totalmillis-f.interptime;
-            if(millis <= 1000) trans = float(millis)/1000.f;
-            rendermodel(&f.light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, trans);
+            rendermodel(&f.light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
             above.z += enttype[AFFINITY].radius*2/3;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
             defformatstring(info)("<super>%s flag", teamtype[f.team].name);
@@ -226,11 +229,11 @@ namespace ctf
             if((f.base&BASE_FLAG) && (f.droptime || (ctfstyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
             {
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(ctfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(ctfresetdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, trans, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, trans*0.25f, 0, 0, 1, teamtype[f.team].colour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, trans, 0, 0, 1, teamtype[f.team].colour, 0, wait);
+                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, teamtype[f.team].colour);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[f.team].colour, 0, wait);
                 above.z += 0.5f;
-                defformatstring(str)("%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, trans);
+                defformatstring(str)("%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
                 above.z += 2.5f;
             }
         }
@@ -385,11 +388,15 @@ namespace ctf
         loopi(numflags)
         {
             int team = getint(p), base = getint(p), owner = getint(p), dropped = 0;
-            vec droploc(0, 0, 0);
+            vec droploc(0, 0, 0), inertia(0, 0, 0);
             if(owner < 0)
             {
                 dropped = getint(p);
-                if(dropped) loopk(3) droploc[k] = getint(p)/DMF;
+                if(dropped)
+                {
+                    loopk(3) droploc[k] = getint(p)/DMF;
+                    loopk(3) inertia[k] = getint(p)/DMF;
+                }
             }
             if(commit && st.flags.inrange(i))
             {
@@ -399,32 +406,25 @@ namespace ctf
                 f.owner = owner >= 0 ? game::newclient(owner) : NULL;
                 if(f.owner) { if(!f.taketime) f.taketime = lastmillis; }
                 else f.taketime = 0;
-                f.droptime = dropped ? lastmillis : 0;
-                f.droploc = dropped ? droploc : f.spawnloc;
-                if(dropped) f.proj = projs::create(droploc, vec(0, 0, 0), false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+                if(dropped)
+                {
+                    f.droploc = droploc;
+                    f.droploc = inertia;
+                    f.droptime = lastmillis;
+                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+                }
             }
         }
     }
 
-    void dropaffinity(gameent *d, int i, const vec &droploc)
+    void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia)
     {
         if(!st.flags.inrange(i)) return;
         ctfstate::flag &f = st.flags[i];
-        bool denied = false;
-        loopvk(st.flags)
-        {
-            ctfstate::flag &g = st.flags[k];
-            if(!entities::ents.inrange(g.ent) || g.owner || g.droptime || !isctfhome(st.flags[k], d->team)) continue;
-            if(d->o.dist(g.pos()) <= enttype[AFFINITY].radius*4)
-            {
-                denied = true;
-                break;
-            }
-        }
-        game::announce(denied ? S_V_DENIED : S_V_FLAGDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s%s dropped the the \fs%s%s\fS flag", game::colorname(d), denied ? " was denied a capture and" : "", teamtype[f.team].chat, teamtype[f.team].name);
-        st.dropaffinity(i, droploc, lastmillis);
+        game::announce(S_V_FLAGDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the \fs%s%s\fS flag", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name);
+        st.dropaffinity(i, droploc, inertia, lastmillis);
         st.interp(i, totalmillis);
-        f.proj = projs::create(droploc, d->vel, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
     }
 
     void removeplayer(gameent *d)
@@ -432,7 +432,7 @@ namespace ctf
         loopv(st.flags) if(st.flags[i].owner == d)
         {
             ctfstate::flag &f = st.flags[i];
-            st.dropaffinity(i, f.owner->o, lastmillis);
+            st.dropaffinity(i, f.owner->o, f.owner->vel, lastmillis);
             st.interp(i, totalmillis);
             f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
         }

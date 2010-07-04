@@ -879,6 +879,11 @@ namespace entities
 
     void checkitems(gameent *d)
     {
+        if(d->aitype < AI_START && d->action[AC_USE] && m_affinhold(game::gamemode))
+        {
+            if(m_ctf(game::gamemode)) { if(ctf::dropaffinity(d)) d->action[AC_USE] = false; }
+            else if(m_etf(game::gamemode)) { if(etf::dropaffinity(d)) d->action[AC_USE] = false; }
+        }
         static vector<actitem> actitems;
         actitems.setsize(0);
         if(collateitems(d, actitems))

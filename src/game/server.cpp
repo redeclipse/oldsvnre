@@ -3932,12 +3932,13 @@ namespace server
                 case N_DROPAFFIN:
                 {
                     int lcn = getint(p);
-                    vec droploc;
+                    vec droploc, inertia;
                     loopk(3) droploc[k] = getint(p)/DMF;
+                    loopk(3) inertia[k] = getint(p)/DMF;
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
-                    if(smode==&ctfmode) ctfmode.dropaffinity(cp, droploc);
-                    else if(smode==&etfmode) etfmode.dropaffinity(cp, droploc);
+                    if(smode==&ctfmode) ctfmode.dropaffinity(cp, droploc, inertia);
+                    else if(smode==&etfmode) etfmode.dropaffinity(cp, droploc, inertia);
                     break;
                 }
 

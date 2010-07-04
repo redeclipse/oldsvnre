@@ -9,7 +9,7 @@ struct etfstate
 {
     struct flag
     {
-        vec droploc, spawnloc;
+        vec droploc, inertia, spawnloc;
         int team, droptime, taketime;
 #ifdef GAMESERVER
         int owner;
@@ -29,6 +29,7 @@ struct etfstate
 
         void reset()
         {
+            inertia = vec(0, 0, 0);
             droploc = spawnloc = vec(-1, -1, -1);
 #ifdef GAMESERVER
             owner = -1;
@@ -101,10 +102,11 @@ struct etfstate
 #endif
     }
 
-    void dropaffinity(int i, const vec &o, int t)
+    void dropaffinity(int i, const vec &o, const vec &p, int t)
     {
         flag &f = flags[i];
         f.droploc = o;
+        f.inertia = p;
         f.droptime = t;
         f.taketime = 0;
 #ifdef GAMESERVER
@@ -167,9 +169,10 @@ struct etfstate
 namespace etf
 {
     extern etfstate st;
+    extern bool dropaffinity(gameent *d);
     extern void sendaffinity(packetbuf &p);
     extern void parseaffinity(ucharbuf &p, bool commit);
-    extern void dropaffinity(gameent *d, int i, const vec &droploc);
+    extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void returnaffinity(gameent *d, int i);
     extern void takeaffinity(gameent *d, int i);

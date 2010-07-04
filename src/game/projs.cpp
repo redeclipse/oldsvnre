@@ -504,7 +504,7 @@ namespace projs
             }
             case PRJ_AFFINITY:
             {
-                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 2;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
@@ -515,13 +515,6 @@ namespace projs
                 proj.weight = 150.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
-                float mag = proj.inertia.magnitude();
-                if(mag <= 50)
-                {
-                    if(mag <= 0) vecfromyawpitch(proj.yaw, proj.pitch, 1, 0, proj.inertia);
-                    proj.inertia.normalize().mul(50);
-                }
-                proj.to.add(proj.inertia);
                 proj.fadetime = 500;
                 proj.extinguish = 6;
                 break;
