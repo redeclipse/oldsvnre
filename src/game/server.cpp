@@ -1559,6 +1559,7 @@ namespace server
         d.ent = d.value = -1;
         sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
         if(sub) takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
+        else waiting(ci, 0, 1);
     }
 
     void givepoints(clientinfo *ci, int points)
