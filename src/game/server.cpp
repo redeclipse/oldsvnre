@@ -817,7 +817,7 @@ namespace server
                         best = i;
                     if(best >= 0 && teamscores[best] >= GAME(fraglimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyfrag limit has been reached");
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -829,7 +829,7 @@ namespace server
                         best = i;
                     if(best >= 0 && clients[best]->state.frags >= GAME(fraglimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyfrag limit has been reached");
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();
                         return; // bail
                     }

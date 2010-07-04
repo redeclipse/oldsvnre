@@ -50,16 +50,16 @@ struct etfservmode : etfstate, servmode
                 if(isetftarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     etfstate::returnaffinity(i, gamemillis);
+                    givepoints(ci, 5);
                     ci->state.flags++;
-                    int score = addscore(ci->team), points = 5;
+                    int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                    if(!m_duke(gamemode, mutators)) kamikaze(ci);
-                    givepoints(ci, points);
+                    kamikaze(ci);
                     loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team)
                         kamikaze(clients[j]);
                     if(GAME(etflimit) && score >= GAME(etflimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fycpature limit has been reached");
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();
                     }
                 }
