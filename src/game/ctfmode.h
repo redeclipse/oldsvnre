@@ -56,6 +56,11 @@ struct ctfservmode : ctfstate, servmode
                         ci->state.flags++;
                         int score = addscore(ci->team);
                         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
+                        if(m_duke(gamemode, mutators))
+                        {
+                            loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == flags[i].team)
+                                kamikaze(clients[j]);
+                        }
                         if(GAME(ctflimit) && score >= GAME(ctflimit))
                         {
                             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fycpature limit has been reached");

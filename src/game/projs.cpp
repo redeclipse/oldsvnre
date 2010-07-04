@@ -598,7 +598,7 @@ namespace projs
                 d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
             }
             else if(g == WEAP_GRENADE)
-                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, PHYSMILLIS, WEAP2(g, time, false), 1, 1, -1, g);
+                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 25, WEAP2(g, time, false), 1, 1, -1, g);
             else
             {
                 d->ammo[g] = -1;
