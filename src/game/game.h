@@ -252,7 +252,7 @@ gametypes gametype[] = {
         "deathmatch"
     },
     {
-        G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
         "capture-the-flag"
     },
     {
@@ -260,7 +260,7 @@ gametypes gametype[] = {
         "defend-the-flag"
     },
     {
-        G_ETF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        G_ETF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
         "explode-the-flag"
     },
     {

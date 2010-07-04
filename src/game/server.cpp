@@ -659,6 +659,8 @@ namespace server
         return mt;
     }
     ICOMMAND(0, mutscheck, "iii", (int *g, int *m, int *t), intret(mutscheck(*g, *m, *t)));
+    ICOMMAND(0, mutsallowed, "i", (int *g), intret(*g >= 0 && *g < G_MAX ? gametype[*g].mutators : 0));
+    ICOMMAND(0, mutsimplied, "i", (int *g), intret(*g >= 0 && *g < G_MAX ? gametype[*g].implied : 0));
 
     void changemode(int &mode, int &muts)
     {
@@ -1545,6 +1547,20 @@ namespace server
         return sc;
     }
 
+    void takeammo(clientinfo *ci, int weap, int amt = 1) { ci->state.ammo[weap] = max(ci->state.ammo[weap]-amt, 0); }
+
+    struct droplist { int weap, ent, value; };
+    void kamikaze(clientinfo *ci, bool sub = false)
+    {
+        vector<droplist> drop;
+        ci->state.weapshots[WEAP_GRENADE][0].add(-1);
+        droplist &d = drop.add();
+        d.weap = WEAP_GRENADE;
+        d.ent = d.value = -1;
+        sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
+        if(sub) takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
+    }
+
     void givepoints(clientinfo *ci, int points)
     {
         ci->state.score += points; ci->state.points += points;
@@ -1686,8 +1702,6 @@ namespace server
         else enddemorecord();
     }
 
-    void takeammo(clientinfo *ci, int weap, int amt = 1) { ci->state.ammo[weap] = max(ci->state.ammo[weap]-amt, 0); }
-
     void setspawn(int ent, bool spawned)
     {
         if(sents.inrange(ent))
@@ -1699,7 +1713,6 @@ namespace server
         }
     }
 
-    struct droplist { int weap, ent, value; };
     void dropitems(clientinfo *ci, int level = 2)
     {
         if(ci->state.aitype >= AI_START) ci->state.weapreset(false);
@@ -1709,13 +1722,7 @@ namespace server
             vector<droplist> drop;
             int sweap = m_weapon(gamemode, mutators);
             if(level >= 2 && GAME(kamikaze) && (GAME(kamikaze) > 2 || (ts.hasweap(WEAP_GRENADE, sweap) && (GAME(kamikaze) > 1 || ts.weapselect == WEAP_GRENADE))))
-            {
-                ts.weapshots[WEAP_GRENADE][0].add(-1);
-                droplist &d = drop.add();
-                d.weap = WEAP_GRENADE;
-                d.ent = d.value = -1;
-                takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
-            }
+                kamikaze(ci, true);
             if(level)
             {
                 loopi(WEAP_MAX) if(i != sweap && ts.hasweap(i, sweap) && sents.inrange(ts.entid[i]))
