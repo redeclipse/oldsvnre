@@ -15,6 +15,7 @@ struct ctfstate
         vector<int> votes;
 #else
         gameent *owner, *lastowner;
+        projent *proj;
         entitylight light;
         int ent, interptime, pickuptime;
 #endif
@@ -34,6 +35,7 @@ struct ctfstate
             votes.shrink(0);
 #else
             owner = lastowner = NULL;
+            proj = NULL;
             interptime = pickuptime = 0;
 #endif
             team = TEAM_NEUTRAL;
@@ -44,7 +46,7 @@ struct ctfstate
         vec &pos(bool render = false)
         {
             if(owner) return render ? owner->waist : owner->o;
-            if(droptime) return droploc;
+            if(droptime) return proj ? proj->o : droploc;
             return spawnloc;
         }
 #endif
@@ -91,6 +93,12 @@ struct ctfstate
 #else
         f.pickuptime = 0;
         f.lastowner = owner;
+        if(f.proj)
+        {
+            f.proj->beenused = 2;
+            f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
+        }
+        f.proj = NULL;
 #endif
     }
 
@@ -106,6 +114,12 @@ struct ctfstate
 #else
         f.pickuptime = 0;
         f.owner = NULL;
+        if(f.proj)
+        {
+            f.proj->beenused = 2;
+            f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
+        }
+        f.proj = NULL;
 #endif
     }
 
@@ -119,6 +133,12 @@ struct ctfstate
 #else
         f.pickuptime = 0;
         f.owner = NULL;
+        if(f.proj)
+        {
+            f.proj->beenused = 2;
+            f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
+        }
+        f.proj = NULL;
 #endif
     }
 
