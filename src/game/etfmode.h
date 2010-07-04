@@ -53,19 +53,10 @@ struct etfservmode : etfstate, servmode
                     ci->state.flags++;
                     int score = addscore(ci->team), points = 5;
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                    if(!m_duke(gamemode, mutators))
-                    {
-                        kamikaze(ci);
-                        ci->state.frags++;
-                        points += 3;
-                    }
+                    if(!m_duke(gamemode, mutators)) kamikaze(ci);
                     givepoints(ci, points);
                     loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team)
-                    {
-                        clients[j]->state.frags++;
-                        clients[j]->state.points += 3;
                         kamikaze(clients[j]);
-                    }
                     if(GAME(etflimit) && score >= GAME(etflimit))
                     {
                         sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fycpature limit has been reached");

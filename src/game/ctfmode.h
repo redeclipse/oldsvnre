@@ -59,11 +59,7 @@ struct ctfservmode : ctfstate, servmode
                         if(m_duke(gamemode, mutators))
                         {
                             loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == flags[i].team)
-                            {
-                                clients[j]->state.frags++;
-                                clients[j]->state.points += 3;
                                 kamikaze(clients[j]);
-                            }
                         }
                         if(GAME(ctflimit) && score >= GAME(ctflimit))
                         {
