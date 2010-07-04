@@ -1528,7 +1528,6 @@ namespace game
     {
         lastcamera = 0;
         zoomset(false, 0);
-        if(focus == player1) resetcursor();
         checkcamera();
         camera1->o = focus->o;
         camera1->yaw = focus->yaw;
@@ -1667,7 +1666,6 @@ namespace game
         {
             if(!lastcamera)
             {
-                resetcursor();
                 cameras.shrink(0);
                 if(mousestyle() == 2 && focus->state != CS_WAITING && focus->state != CS_SPECTATOR)
                 {
