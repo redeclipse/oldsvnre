@@ -1930,13 +1930,14 @@ namespace client
                 case N_DROPAFFIN:
                 {
                     int ocn = getint(p), flag = getint(p);
-                    vec droploc;
+                    vec droploc, inertia;
                     loopk(3) droploc[k] = getint(p)/DMF;
+                    loopk(3) inertia[k] = getint(p)/DMF;
                     gameent *o = game::newclient(ocn);
                     if(o)
                     {
-                        if(m_ctf(game::gamemode)) ctf::dropaffinity(o, flag, droploc);
-                        else if(m_etf(game::gamemode)) etf::dropaffinity(o, flag, droploc);
+                        if(m_ctf(game::gamemode)) ctf::dropaffinity(o, flag, droploc, inertia);
+                        else if(m_etf(game::gamemode)) etf::dropaffinity(o, flag, droploc, inertia);
                     }
                     break;
                 }

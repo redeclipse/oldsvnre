@@ -34,7 +34,7 @@ enum
     S_V_MULTI, S_V_MULTI2, S_V_MULTI3,
     S_V_REVENGE, S_V_DOMINATE,
     S_V_YOUWIN, S_V_YOULOSE, S_V_MCOMPLETE,
-    S_V_FRAGGED, S_V_OWNED, S_V_DENIED,
+    S_V_FRAGGED, S_V_OWNED,
     S_GAME
 };
 
@@ -322,7 +322,8 @@ extern gametypes gametype[], mutstype[];
 #define m_trial(a)          (a == G_TRIAL)
 
 #define m_play(a)           (a >= G_PLAY)
-#define m_affinity(a)       (m_dtf(a) || m_ctf(a) || m_etf(a))
+#define m_affinity(a)       (m_ctf(a) || m_dtf(a) || m_etf(a))
+#define m_affinhold(a)      (m_ctf(a) || m_etf(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
 #define m_team(a,b)         ((b & G_M_TEAM) || (gametype[a].implied & G_M_TEAM))

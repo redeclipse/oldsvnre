@@ -106,7 +106,8 @@ GVAR(0, dtfoccupy, 0, 100, INT_MAX-1); // points needed to occupy
 GVAR(0, dtfflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
 GVAR(0, etflimit, 0, 0, INT_MAX-1); // finish when score is this or more
-GVAR(0, etfresetdelay, 0, 15000, INT_MAX-1);
+GVAR(0, etfresetdelay, 0, 30000, INT_MAX-1);
+GFVAR(0, etfbombspeed, 0, 250, 10000);
 
 GVAR(0, skillmin, 1, 65, 101);
 GVAR(0, skillmax, 1, 85, 101);

@@ -11,14 +11,14 @@ struct etfservmode : etfstate, servmode
         hasflaginfo = false;
     }
 
-    void dropaffinity(clientinfo *ci, const vec &o)
+    void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0))
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(ci->state.o.dist(o) > enttype[AFFINITY].radius ? ci->state.o : o).mul(DMF));
-            sendf(-1, 1, "ri6", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z);
-            etfstate::dropaffinity(i, p.tovec().div(DMF), gamemillis);
+            ivec p(vec(o).mul(DMF)), q(vec(inertia).mul(DMF));
+            sendf(-1, 1, "ri9", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z, q.x, q.y, q.z);
+            etfstate::dropaffinity(i, o, inertia, gamemillis);
         }
     }
 
@@ -50,11 +50,16 @@ struct etfservmode : etfstate, servmode
                 if(isetftarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     etfstate::returnaffinity(i, gamemillis);
-                    givepoints(ci, 5);
                     ci->state.flags++;
-                    int score = addscore(ci->team);
+                    int score = addscore(ci->team), points = 5;
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                    if(!m_duke(gamemode, mutators)) kamikaze(ci);
+                    if(!m_duke(gamemode, mutators))
+                    {
+                        kamikaze(ci);
+                        ci->state.frags++;
+                        points++;
+                    }
+                    givepoints(ci, points);
                     loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team)
                         kamikaze(clients[j]);
                     if(GAME(etflimit) && score >= GAME(etflimit))
@@ -132,6 +137,9 @@ struct etfservmode : etfstate, servmode
                     putint(p, int(f.droploc.x*DMF));
                     putint(p, int(f.droploc.y*DMF));
                     putint(p, int(f.droploc.z*DMF));
+                    putint(p, int(f.inertia.x*DMF));
+                    putint(p, int(f.inertia.y*DMF));
+                    putint(p, int(f.inertia.z*DMF));
                 }
             }
         }

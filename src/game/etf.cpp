@@ -3,12 +3,21 @@ namespace etf
 {
     etfstate st;
 
-    void dropaffinity(gameent *d)
+    bool dropaffinity(gameent *d)
     {
-        if(m_etf(game::gamemode)) client::addmsg(N_DROPAFFIN, "ri4", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF));
-        else if(d == game::player1) playsound(S_ERROR, d->o, d);
+        if(m_etf(game::gamemode))
+        {
+            loopv(st.flags) if(st.flags[i].owner == d)
+            {
+                vec inertia;
+                vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
+                inertia.normalize().mul(etfbombspeed).add(d->vel);
+                client::addmsg(N_DROPAFFIN, "ri7", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
+                return true;
+            }
+        }
+        return false;
     }
-    ICOMMAND(0, dropbomb, "", (), dropaffinity(game::player1));
 
     void preload()
     {
@@ -138,8 +147,20 @@ namespace etf
                 else trans = 1.f;
             }
             else if(!isetfaffinity(f)) trans = 0.5f;
-            if(trans > 0) rendermodel(&entities::ents[f.ent]->light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
-            above.z += enttype[AFFINITY].radius/2+2.5f;
+            if(trans > 0)
+            {
+                float yaw = entities::ents[f.ent]->attrs[1], pitch = entities::ents[f.ent]->attrs[2];
+                if(isetfaffinity(f))
+                {
+                    above.z += enttype[AFFINITY].radius/4;
+                    int interval = lastmillis%1000;
+                    float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
+                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 8, fluc*trans);
+                    if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
+                }
+                rendermodel(&entities::ents[f.ent]->light, isetfaffinity(f) ? "bomb" : "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+            }
+            above.z += (isetfaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
             if(!isetfaffinity(f))
             {
                 defformatstring(info)("<super>%s flag", teamtype[f.team].name);
@@ -182,32 +203,28 @@ namespace etf
             etfstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !isetfaffinity(f) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
-            float trans = 1.f, yaw = 0;
+            float yaw = 0;
             if(f.owner)
             {
                 yaw += f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
                 while(yaw >= 360.f) yaw -= 360.f;
             }
             else yaw += (f.interptime+(360/st.flags.length()*i))%360;
-            int millis = totalmillis-f.interptime;
-            if(millis <= 1000) trans = float(millis)/1000.f;
-            rendermodel(&f.light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, trans);
-            above.z += enttype[AFFINITY].radius*2/3;
+            int interval = lastmillis%1000;
+            float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
+            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 8, fluc);
+            if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
+            rendermodel(&f.light, "bomb", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
+            above.z += (isetfaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
-            if(!isetfaffinity(f))
-            {
-                defformatstring(info)("<super>%s flag", teamtype[f.team].name);
-                part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, 1);
-                above.z += 2.5f;
-            }
-            if(isetfaffinity(f) && (f.droptime || (f.taketime && f.owner && f.owner->team != f.team)))
+            if(f.droptime || (f.taketime && f.owner && f.owner->team != f.team))
             {
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(etfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(etfresetdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, trans, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, trans*0.25f, 0, 0, 1, teamtype[f.team].colour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, trans, 0, 0, 1, teamtype[f.team].colour, 0, wait);
+                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, teamtype[f.team].colour);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[f.team].colour, 0, wait);
                 above.z += 0.5f;
-                defformatstring(str)("%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, trans);
+                defformatstring(str)("%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
                 above.z += 2.5f;
             }
         }
@@ -289,10 +306,15 @@ namespace etf
         loopi(numflags)
         {
             int team = getint(p), owner = getint(p), dropped = 0;
-            vec droploc(0, 0, 0);
+            vec droploc(0, 0, 0), inertia(0, 0, 0);
             if(owner < 0)
             {
                 dropped = getint(p);
+                if(dropped)
+                {
+                    loopk(3) droploc[k] = getint(p)/DMF;
+                    loopk(3) inertia[k] = getint(p)/DMF;
+                }
                 if(dropped) loopk(3) droploc[k] = getint(p)/DMF;
             }
             if(commit && st.flags.inrange(i))
@@ -302,32 +324,25 @@ namespace etf
                 f.owner = owner >= 0 ? game::newclient(owner) : NULL;
                 if(f.owner) { if(!f.taketime) f.taketime = lastmillis; }
                 else f.taketime = 0;
-                f.droptime = dropped ? lastmillis : 0;
-                f.droploc = dropped ? droploc : f.spawnloc;
-                if(dropped) f.proj = projs::create(droploc, vec(0, 0, 0), false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
+                if(dropped)
+                {
+                    f.droploc = droploc;
+                    f.droploc = inertia;
+                    f.droptime = lastmillis;
+                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+                }
             }
         }
     }
 
-    void dropaffinity(gameent *d, int i, const vec &droploc)
+    void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia)
     {
         if(!st.flags.inrange(i)) return;
         etfstate::flag &f = st.flags[i];
-        bool denied = false;
-        loopvk(st.flags)
-        {
-            etfstate::flag &g = st.flags[k];
-            if(!entities::ents.inrange(g.ent) || g.owner || g.droptime || !isetftarg(st.flags[k], d->team)) continue;
-            if(d->o.dist(g.pos()) <= enttype[AFFINITY].radius*4)
-            {
-                denied = true;
-                break;
-            }
-        }
-        game::announce(denied ? S_V_DENIED : S_V_BOMBDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s%s dropped the the bomb", game::colorname(d), denied ? " was denied the score and" : "");
-        st.dropaffinity(i, droploc, lastmillis);
+        game::announce(S_V_BOMBDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the bomb", game::colorname(d));
+        st.dropaffinity(i, droploc, inertia, lastmillis);
         st.interp(i, totalmillis);
-        f.proj = projs::create(droploc, d->vel, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
+        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
     }
 
     void removeplayer(gameent *d)
@@ -335,7 +350,7 @@ namespace etf
         loopv(st.flags) if(st.flags[i].owner == d)
         {
             etfstate::flag &f = st.flags[i];
-            st.dropaffinity(i, f.owner->o, lastmillis);
+            st.dropaffinity(i, f.owner->o, f.owner->vel, lastmillis);
             st.interp(i, totalmillis);
             f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
         }
@@ -379,12 +394,17 @@ namespace etf
         if(!st.flags.inrange(relay) || !st.flags.inrange(goal)) return;
         etfstate::flag &f = st.flags[relay], &g = st.flags[goal];
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "EXPLODED");
-        part_create(PART_PLASMA_SOFT, 250, g.spawnloc, 0xAA4400, enttype[AFFINITY].radius*0.5f);
-        part_explosion(g.spawnloc, enttype[AFFINITY].radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
-        part_explosion(g.spawnloc, enttype[AFFINITY].radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
-        part_create(PART_SMOKE_LERP_SOFT, 500, g.spawnloc, 0x333333, enttype[AFFINITY].radius*0.75f, 0.5f, -15);
-        int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
-        loopi(amt) projs::create(g.spawnloc, g.spawnloc, true, d, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
+        if(m_duke(game::gamemode, game::mutators))
+        {
+            float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius);
+            part_create(PART_PLASMA_SOFT, 250, g.spawnloc, 0xAA4400, radius*0.5f);
+            part_explosion(g.spawnloc, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
+            part_explosion(g.spawnloc, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
+            part_create(PART_SMOKE_LERP_SOFT, 500, g.spawnloc, 0x333333, radius*0.75f, 0.5f, -15);
+            int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
+            loopi(amt) projs::create(g.spawnloc, g.spawnloc, true, d, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
+            playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), g.spawnloc, NULL, 0, 255);
+        }
         (st.findscore(d->team)).total = score;
         game::announce(S_V_BOMBSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s exploded the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
