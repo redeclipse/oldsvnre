@@ -301,7 +301,7 @@ namespace projs
                 } // all falls through to ..
             default: return;
         }
-        if(!polymodels && proj.mdl && *proj.mdl) setbbfrommodel(&proj, proj.mdl, size*proj.scale);
+        if(proj.mdl && *proj.mdl) setbbfrommodel(&proj, proj.mdl, size*proj.scale);
         else switch(proj.projtype)
         {
             case PRJ_GIBS: case PRJ_DEBRIS: proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f*size*proj.scale; break;
@@ -502,6 +502,30 @@ namespace projs
                 proj.extinguish = 6;
                 break;
             }
+            case PRJ_AFFINITY:
+            {
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 2;
+                vec dir = vec(proj.to).sub(proj.from).normalize();
+                vectoyawpitch(dir, proj.yaw, proj.pitch);
+                proj.lifesize = 1.f;
+                proj.elasticity = 0.5f;
+                proj.reflectivity = 0.f;
+                proj.relativity = 1.f;
+                proj.waterfric = 1.75f;
+                proj.weight = 150.f;
+                proj.projcollide = BOUNCE_GEOM;
+                proj.escaped = true;
+                float mag = proj.inertia.magnitude();
+                if(mag <= 50)
+                {
+                    if(mag <= 0) vecfromyawpitch(proj.yaw, proj.pitch, 1, 0, proj.inertia);
+                    proj.inertia.normalize().mul(50);
+                }
+                proj.to.add(proj.inertia);
+                proj.fadetime = 500;
+                proj.extinguish = 6;
+                break;
+            }
             default: break;
         }
         if(proj.projtype != PRJ_SHOT) updatebb(proj, true);
@@ -524,9 +548,9 @@ namespace projs
                 vecfromyawpitch(proj.yaw, proj.pitch, 1, 0, dir);
             }
             vec rel = vec(proj.vel).add(dir);
-            if(proj.owner && proj.relativity > 0)
+            if(proj.relativity > 0)
             {
-                loopi(3) if(proj.inertia[i]*rel[i] < 0) proj.inertia[i] = 0;
+                if(proj.owner) loopi(3) if(proj.inertia[i]*rel[i] < 0) proj.inertia[i] = 0;
                 rel.add(proj.inertia.mul(proj.relativity));
             }
             proj.vel = vec(rel).add(vec(dir).mul(physics::movevelocity(&proj)));
@@ -549,10 +573,8 @@ namespace projs
         proj.resetinterp();
     }
 
-    void create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale, bool child)
+    projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale, bool child)
     {
-        if(!d) return;
-
         projent &proj = *new projent;
         proj.o = proj.from = from;
         proj.to = to;
@@ -563,12 +585,17 @@ namespace projs
         proj.lifemillis = lifemillis ? lifemillis : proj.lifetime;
         proj.waittime = waittime;
         proj.maxspeed = speed;
-        proj.id = id ? id : lastmillis;
+        proj.id = id;
         proj.weap = weap;
         proj.flags = flags;
         proj.scale = scale;
         proj.movement = 0;
-        if(child)
+        if(proj.projtype == PRJ_AFFINITY)
+        {
+            proj.inertia = proj.to;
+            proj.to.add(proj.from);
+        }
+        else if(child)
         {
             proj.child = true;
             proj.owner = d;
@@ -585,6 +612,7 @@ namespace projs
         }
         if(!proj.waittime) init(proj, false);
         projs.add(&proj);
+        return &proj;
     }
 
     void drop(gameent *d, int g, int n, int v, bool local, int c)
@@ -1038,6 +1066,13 @@ namespace projs
                     client::addmsg(N_DESTROY, "ri8", proj.owner->clientnum, lastmillis-game::maptime, -1, 0, proj.id, 0, int(proj.scale*DNF), 0);
                 break;
             }
+            case PRJ_AFFINITY:
+            {
+                if(proj.beenused <= 1) client::addmsg(N_RESETAFFIN, "ri", proj.id);
+                if(m_ctf(game::gamemode) && ctf::st.flags.inrange(proj.id)) ctf::st.flags[proj.id].proj = NULL;
+                else if(m_etf(game::gamemode) && etf::st.flags.inrange(proj.id)) etf::st.flags[proj.id].proj = NULL;
+                break;
+            }
             default: break;
         }
     }
@@ -1276,7 +1311,7 @@ namespace projs
                 }
                 if(proj.projtype == PRJ_GIBS) break;
             }
-            case PRJ_ENT:
+            case PRJ_ENT: case PRJ_AFFINITY:
             {
                 if(proj.pitch != 0)
                 {
@@ -1395,11 +1430,11 @@ namespace projs
                     else continue;
                 }
                 iter(proj);
-                if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT)
+                if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)
                 {
                     if(proj.projtype == PRJ_SHOT && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj)) switch(proj.projtype)
                     {
-                        case PRJ_ENT:
+                        case PRJ_ENT: case PRJ_AFFINITY:
                         {
                             if(!proj.beenused)
                             {
@@ -1498,10 +1533,10 @@ namespace projs
 
     void render()
     {
-        loopv(projs) if(projs[i]->ready(false))
+        loopv(projs) if(projs[i]->ready(false) && projs[i]->projtype != PRJ_AFFINITY)
         {
             projent &proj = *projs[i];
-            if(polymodels)
+            if(polymodels && (!projs[i]->mdl || !*projs[i]->mdl))
             {
                 if(proj.projtype == PRJ_ENT || (proj.projtype == PRJ_SHOT && proj.weap != WEAP_GRENADE && proj.weap != WEAP_ROCKET)) continue;
                 if(!glaring && !shadowmapping)
@@ -1555,7 +1590,7 @@ namespace projs
                         size = proj.lifesize;
                         flags |= MDL_LIGHT_FAST;
                     }
-                    case PRJ_ENT:
+                    case PRJ_ENT: case PRJ_AFFINITY:
                         if(proj.fadetime && proj.lifemillis)
                         {
                             int interval = min(proj.lifemillis, proj.fadetime);

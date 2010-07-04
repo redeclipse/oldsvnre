@@ -278,12 +278,6 @@ namespace etf
         }
     }
 
-    void dodrop(etfstate::flag &f, int idx)
-    {
-        if((lookupmaterial(f.droploc)&MATF_FLAGS) == MAT_DEATH || !physics::droptofloor(f.droploc, 2, 0) || (lookupmaterial(f.droploc)&MATF_FLAGS) == MAT_DEATH)
-            client::addmsg(N_RESETAFFIN, "ri", idx);
-    }
-
     void setscore(int team, int total)
     {
         st.findscore(team).total = total;
@@ -310,7 +304,7 @@ namespace etf
                 else f.taketime = 0;
                 f.droptime = dropped ? lastmillis : 0;
                 f.droploc = dropped ? droploc : f.spawnloc;
-                if(dropped) dodrop(f, i);
+                if(dropped) f.proj = projs::create(droploc, vec(0, 0, 0), false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
             }
         }
     }
@@ -333,7 +327,7 @@ namespace etf
         game::announce(denied ? S_V_DENIED : S_V_BOMBDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s%s dropped the the bomb", game::colorname(d), denied ? " was denied the score and" : "");
         st.dropaffinity(i, droploc, lastmillis);
         st.interp(i, totalmillis);
-        dodrop(f, i);
+        f.proj = projs::create(droploc, d->vel, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
     }
 
     void removeplayer(gameent *d)
@@ -343,6 +337,7 @@ namespace etf
             etfstate::flag &f = st.flags[i];
             st.dropaffinity(i, f.owner->o, lastmillis);
             st.interp(i, totalmillis);
+            f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
         }
     }
 
