@@ -2416,9 +2416,9 @@ namespace server
         if(realflags&HIT_KILL)
         {
             bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode);
-            int fragvalue = isai ? 0 : 1;
-            if(fragvalue && (target == actor || (m_team(gamemode, mutators) && target->team == actor->team))) fragvalue = -fragvalue;
-            int pointvalue = smode && !isai ? smode->points(target, actor) : fragvalue, style = FRAG_NONE;
+            int fragvalue = 1;
+            if(target == actor || (m_team(gamemode, mutators) && target->team == actor->team)) fragvalue = -fragvalue;
+            int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue)*(isai ? 1 : 3), style = FRAG_NONE;
             if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators) : m_health(gamemode, mutators)*3/2)))
                 style = FRAG_OBLITERATE;
             actor->state.frags += fragvalue;

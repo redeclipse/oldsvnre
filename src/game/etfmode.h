@@ -57,11 +57,15 @@ struct etfservmode : etfstate, servmode
                     {
                         kamikaze(ci);
                         ci->state.frags++;
-                        points++;
+                        points += 3;
                     }
                     givepoints(ci, points);
                     loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team)
+                    {
+                        clients[j]->state.frags++;
+                        clients[j]->state.points += 3;
                         kamikaze(clients[j]);
+                    }
                     if(GAME(etflimit) && score >= GAME(etflimit))
                     {
                         sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fycpature limit has been reached");
