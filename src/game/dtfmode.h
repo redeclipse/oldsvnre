@@ -139,7 +139,7 @@ struct dtfservmode : dtfstate, servmode
             if(findscore(steam).total >= maxscore)
             {
                 findscore(steam).total = maxscore;
-                sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fysecure limit has been reached");
+                sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                 winner(steam, maxscore);
                 return;
             }
