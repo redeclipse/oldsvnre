@@ -1,13 +1,13 @@
-// server-side etf manager
-struct etfservmode : etfstate, servmode
+// server-side bomber manager
+struct bomberservmode : bomberstate, servmode
 {
     bool hasflaginfo;
 
-    etfservmode() : hasflaginfo(false) {}
+    bomberservmode() : hasflaginfo(false) {}
 
     void reset(bool empty)
     {
-        etfstate::reset();
+        bomberstate::reset();
         hasflaginfo = false;
     }
 
@@ -18,7 +18,7 @@ struct etfservmode : etfstate, servmode
         {
             ivec p(vec(o).mul(DMF)), q(vec(inertia).mul(DMF));
             sendf(-1, 1, "ri9", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            etfstate::dropaffinity(i, o, inertia, gamemillis);
+            bomberstate::dropaffinity(i, o, inertia, gamemillis);
         }
     }
 
@@ -42,22 +42,26 @@ struct etfservmode : etfstate, servmode
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
-        loopv(flags) if(isetfaffinity(flags[i]) && flags[i].owner == ci->clientnum)
+        loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(isetftarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
+                if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2)
                 {
-                    etfstate::returnaffinity(i, gamemillis);
+                    bomberstate::returnaffinity(i, gamemillis);
                     givepoints(ci, 5);
                     ci->state.flags++;
                     int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                    kamikaze(ci);
-                    loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team)
-                        kamikaze(clients[j]);
-                    if(GAME(etflimit) && score >= GAME(etflimit))
+                    loopvj(clients) if(clients[j]->state.aitype < AI_START)
+                    {
+                        if(clients[j]->state.state == CS_ALIVE && (clients[j]->team == f.team || (!m_duke(gamemode, mutators) && clients[j] == ci)))
+                            kamikaze(clients[j]);
+                        if(!m_duke(gamemode, mutators)) waiting(clients[j], 0, 1);
+                    }
+                    if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
+                    if(GAME(bomberlimit) && score >= GAME(bomberlimit))
                     {
                         sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();
@@ -71,8 +75,8 @@ struct etfservmode : etfstate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
-        if(!isetfaffinity(f) || f.owner >= 0) return;
-        etfstate::takeaffinity(i, ci->clientnum, gamemillis);
+        if(!isbomberaffinity(f) || f.owner >= 0) return;
+        bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
         givepoints(ci, 3);
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
@@ -81,11 +85,11 @@ struct etfservmode : etfstate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
-        if(!isetfaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
+        if(!isbomberaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
-            etfstate::returnaffinity(i, gamemillis);
+            bomberstate::returnaffinity(i, gamemillis);
             sendf(-1, 1, "ri2", N_RESETAFFIN, i);
         }
     }
@@ -93,12 +97,12 @@ struct etfservmode : etfstate, servmode
     void update()
     {
         if(!hasflaginfo) return;
-        loopv(flags) if(isetfaffinity(flags[i]))
+        loopv(flags) if(isbomberaffinity(flags[i]))
         {
             flag &f = flags[i];
-            if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(etfresetdelay))
+            if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay))
             {
-                etfstate::returnaffinity(i, gamemillis);
+                bomberstate::returnaffinity(i, gamemillis);
                 sendf(-1, 1, "ri2", N_RESETAFFIN, i);
             }
             break;
@@ -145,7 +149,7 @@ struct etfservmode : etfstate, servmode
         if(hasflaginfo && GAME(regenflag)) loopv(flags)
         {
             flag &f = flags[i];
-            bool insidehome = (isetfhome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f);
+            bool insidehome = (isbomberhome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius);
             if(insidehome || (GAME(regenflag) == 2 && f.owner == ci->clientnum))
             {
                 if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
@@ -179,4 +183,4 @@ struct etfservmode : etfstate, servmode
         loopv(flags) if(flags[i].owner == victim->clientnum) p += v;
         return p;
     }
-} etfmode;
+} bombermode;

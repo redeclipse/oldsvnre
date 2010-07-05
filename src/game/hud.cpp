@@ -950,9 +950,9 @@ namespace hud
                     popfont();
                 }
 
-                if(m_ctf(game::gamemode)) ctf::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
-                else if(m_dtf(game::gamemode)) dtf::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
-                else if(m_etf(game::gamemode)) etf::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
+                if(m_capture(game::gamemode)) capture::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
+                else if(m_defend(game::gamemode)) defend::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
+                else if(m_bomber(game::gamemode)) bomber::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
 
                 if(noticescale < 1) glPopMatrix();
                 popfont();
@@ -1302,9 +1302,9 @@ namespace hud
         if(chkcond(radaritems, game::tvmode()) || m_edit(game::gamemode)) drawentblips(w, h, blend*radarblend); // 2
         if(chkcond(radaraffinity, game::tvmode())) // 3
         {
-            if(m_ctf(game::gamemode)) ctf::drawblips(w, h, blend*radarblend);
-            else if(m_dtf(game::gamemode)) dtf::drawblips(w, h, blend);
-            else if(m_etf(game::gamemode)) etf::drawblips(w, h, blend*radarblend);
+            if(m_capture(game::gamemode)) capture::drawblips(w, h, blend*radarblend);
+            else if(m_defend(game::gamemode)) defend::drawblips(w, h, blend);
+            else if(m_bomber(game::gamemode)) bomber::drawblips(w, h, blend*radarblend);
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode) || game::tvmode())) // 4
         {
@@ -1767,9 +1767,9 @@ namespace hud
                     if(!m_edit(game::gamemode) && inventoryscore && ((cc = sb.drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
                     if(inventorygame)
                     {
-                        if(m_ctf(game::gamemode) && ((cc = ctf::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
-                        else if(m_dtf(game::gamemode) && ((cc = dtf::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
-                        else if(m_etf(game::gamemode) && ((cc = etf::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
+                        if(m_capture(game::gamemode) && ((cc = capture::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
+                        else if(m_defend(game::gamemode) && ((cc = defend::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
+                        else if(m_bomber(game::gamemode) && ((cc = bomber::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
                     }
                 }
                 break;

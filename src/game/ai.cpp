@@ -22,9 +22,9 @@ namespace ai
         {
             if(entities::ents.inrange(d->aientity))
             {
-                if(m_ctf(game::gamemode)) return ctf::aiowner(d);
-                else if(m_dtf(game::gamemode)) return dtf::aiowner(d);
-                else if(m_etf(game::gamemode)) return etf::aiowner(d);
+                if(m_capture(game::gamemode)) return capture::aiowner(d);
+                else if(m_defend(game::gamemode)) return defend::aiowner(d);
+                else if(m_bomber(game::gamemode)) return bomber::aiowner(d);
             }
         }
         return d->team;
@@ -352,7 +352,7 @@ namespace ai
         return true;
     }
 
-    bool defend(gameent *d, aistate &b, const vec &pos, float guard, float wander, int walk)
+    bool defense(gameent *d, aistate &b, const vec &pos, float guard, float wander, int walk)
     {
         bool hasenemy = enemy(d, b, pos, wander, weaptype[d->weapselect].melee, false);
         if(!aistyle[d->aitype].canmove) { b.idle = hasenemy ? 2 : 1; return true; }
@@ -479,9 +479,9 @@ namespace ai
             if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
             if(m_fight(game::gamemode))
             {
-                if(m_ctf(game::gamemode)) ctf::aifind(d, b, interests);
-                else if(m_dtf(game::gamemode)) dtf::aifind(d, b, interests);
-                else if(m_etf(game::gamemode)) etf::aifind(d, b, interests);
+                if(m_capture(game::gamemode)) capture::aifind(d, b, interests);
+                else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
+                else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
             }
             if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, m_campaign(game::gamemode));
             if(m_campaign(game::gamemode) && aicampaign)
@@ -648,9 +648,9 @@ namespace ai
     {
         if(d->aitype == AI_BOT)
         {
-            if(m_ctf(game::gamemode) && ctf::aicheck(d, b)) return true;
-            else if(m_dtf(game::gamemode) && dtf::aicheck(d, b)) return true;
-            else if(m_etf(game::gamemode) && etf::aicheck(d, b)) return true;
+            if(m_capture(game::gamemode) && capture::aicheck(d, b)) return true;
+            else if(m_defend(game::gamemode) && defend::aicheck(d, b)) return true;
+            else if(m_bomber(game::gamemode) && bomber::aicheck(d, b)) return true;
         }
         return false;
     }
@@ -691,7 +691,7 @@ namespace ai
         return 0; // but don't pop the state
     }
 
-    int dodefend(gameent *d, aistate &b)
+    int dodefense(gameent *d, aistate &b)
     {
         if(!d->ai->suspended && d->state == CS_ALIVE)
         {
@@ -704,7 +704,7 @@ namespace ai
                     if(entities::ents.inrange(b.target))
                     {
                         gameentity &e = *(gameentity *)entities::ents[b.target];
-                        return defend(d, b, e.o) ? 1 : 0;
+                        return defense(d, b, e.o) ? 1 : 0;
                     }
                     break;
                 }
@@ -712,18 +712,18 @@ namespace ai
                 {
                     if(m_campaign(game::gamemode))
                     {
-                        if(aicampaign && entities::ents.inrange(b.target)) return defend(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                        if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
                     }
-                    else if(m_ctf(game::gamemode)) return ctf::aidefend(d, b) ? 1 : 0;
-                    else if(m_dtf(game::gamemode)) return dtf::aidefend(d, b) ? 1 : 0;
-                    else if(m_etf(game::gamemode)) return etf::aidefend(d, b) ? 1 : 0;
+                    else if(m_capture(game::gamemode)) return capture::aidefense(d, b) ? 1 : 0;
+                    else if(m_defend(game::gamemode)) return defend::aidefense(d, b) ? 1 : 0;
+                    else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b) ? 1 : 0;
                     break;
                 }
                 case AI_T_PLAYER:
                 {
                     if(check(d, b)) return 1;
                     gameent *e = game::getclient(b.target);
-                    if(e && e->state == CS_ALIVE) return defend(d, b, e->feetpos()) ? 1 : 0;
+                    if(e && e->state == CS_ALIVE) return defense(d, b, e->feetpos()) ? 1 : 0;
                     break;
                 }
                 default: break;
@@ -813,11 +813,11 @@ namespace ai
                 {
                     if(m_campaign(game::gamemode))
                     {
-                        if(aicampaign && entities::ents.inrange(b.target)) return defend(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                        if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
                     }
-                    else if(m_ctf(game::gamemode)) return ctf::aipursue(d, b) ? 1 : 0;
-                    else if(m_dtf(game::gamemode)) return dtf::aipursue(d, b) ? 1 : 0;
-                    else if(m_etf(game::gamemode)) return etf::aipursue(d, b) ? 1 : 0;
+                    else if(m_capture(game::gamemode)) return capture::aipursue(d, b) ? 1 : 0;
+                    else if(m_defend(game::gamemode)) return defend::aipursue(d, b) ? 1 : 0;
+                    else if(m_bomber(game::gamemode)) return bomber::aipursue(d, b) ? 1 : 0;
                     break;
                 }
 
@@ -1471,7 +1471,7 @@ namespace ai
                 switch(c.type)
                 {
                     case AI_S_WAIT: result = dowait(d, c); break;
-                    case AI_S_DEFEND: result = dodefend(d, c); break;
+                    case AI_S_DEFEND: result = dodefense(d, c); break;
                     case AI_S_PURSUE: result = dopursue(d, c); break;
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;

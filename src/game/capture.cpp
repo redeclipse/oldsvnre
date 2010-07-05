@@ -1,11 +1,11 @@
 #include "game.h"
-namespace ctf
+namespace capture
 {
-    ctfstate st;
+    capturestate st;
 
     bool dropaffinity(gameent *d)
     {
-        if(m_ctf(game::gamemode) && ctfstyle <= 2)
+        if(m_capture(game::gamemode) && capturestyle <= 2)
         {
             loopv(st.flags) if(st.flags[i].owner == d)
             {
@@ -27,7 +27,7 @@ namespace ctf
         loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && st.flags[i].owner == game::focus) hasflags.add(i);
         loopv(st.flags)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             loopk(2)
             {
@@ -48,7 +48,7 @@ namespace ctf
                 {
                     (dir = f.spawnloc).sub(camera1->o);
                     float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
-                    if(isctfhome(f, game::focus->team) && ctfstyle <= 2 && !hasflags.empty())
+                    if(iscapturehome(f, game::focus->team) && capturestyle <= 2 && !hasflags.empty())
                     {
                         fade += (1.f-fade)*diff;
                         tex = hud::arrowtex;
@@ -75,16 +75,16 @@ namespace ctf
             hasflags.setsize(0); takenflags.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
-                ctfstate::flag &f = st.flags[i];
+                capturestate::flag &f = st.flags[i];
                 if(f.owner == game::player1) hasflags.add(i);
-                else if(isctfaffinity(f, game::player1->team))
+                else if(iscaptureaffinity(f, game::player1->team))
                 {
                     if(f.owner && f.owner->team != game::player1->team) takenflags.add(i);
                     else if(f.droptime) droppedflags.add(i);
                 }
             }
             pushfont("super");
-            if(!hasflags.empty() && ctfstyle <= 2) ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+            if(!hasflags.empty() && capturestyle <= 2) ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             if(!takenflags.empty()) ty += draw_textx("\fzwaFlag has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             popfont();
@@ -97,7 +97,7 @@ namespace ctf
         loopv(st.flags) if(st.flags[i].base&BASE_FLAG)
         {
             if(y-sy-s < m) break;
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.team == TEAM_NEUTRAL || f.team == game::focus->team);
             if(headsup || f.lastowner == game::focus)
             {
@@ -141,9 +141,9 @@ namespace ctf
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 sy += int(hud::drawitem(hud::flagtex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""))*rescale);
-                if((f.base&BASE_FLAG) && (f.droptime || (ctfstyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
+                if((f.base&BASE_FLAG) && (f.droptime || (capturestyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
                 {
-                    float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(ctfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(ctfresetdelay), 0.f, 1.f);
+                    float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                     if(wait < 1) hud::drawprogress(pos[0], pos[1], wait, 1-wait, s, false, r, g, b, fade*0.25f, skew);
                     if(f.owner) hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "sub", "\fs%s\fS (%d%%)", game::colorname(f.owner), int(wait*100.f));
                     else hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%d%%", int(wait*100.f));
@@ -158,7 +158,7 @@ namespace ctf
     {
         loopv(st.flags) // flags/bases
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             vec above(f.spawnloc);
             float trans = 0.f;
@@ -177,9 +177,9 @@ namespace ctf
                 part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
                 above.z += 2.5f;
             }
-            if((f.base&BASE_FLAG) && ((ctfstyle >= 1 && f.droptime) || (ctfstyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
+            if((f.base&BASE_FLAG) && ((capturestyle >= 1 && f.droptime) || (capturestyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
             {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(ctfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(ctfresetdelay), 0.f, 1.f);
+                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                 part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, teamtype[f.team].colour);
                 part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, 0, wait);
@@ -203,14 +203,14 @@ namespace ctf
         loopv(numflags) numflags[i] = iterflags[i] = 0;
         loopv(st.flags)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || !f.owner) continue;
             while(numflags.length() <= f.owner->clientnum) { numflags.add(0); iterflags.add(0); }
             numflags[f.owner->clientnum]++;
         }
         loopv(st.flags)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
             float yaw = 0;
@@ -226,9 +226,9 @@ namespace ctf
             defformatstring(info)("<super>%s flag", teamtype[f.team].name);
             part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, 1);
             above.z += 2.5f;
-            if((f.base&BASE_FLAG) && (f.droptime || (ctfstyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
+            if((f.base&BASE_FLAG) && (f.droptime || (capturestyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
             {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(ctfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(ctfresetdelay), 0.f, 1.f);
+                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, teamtype[f.team].colour);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[f.team].colour, 0, wait);
@@ -243,7 +243,7 @@ namespace ctf
     {
         loopv(st.flags)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             float trans = 1.f;
             if(!f.owner)
@@ -293,7 +293,7 @@ namespace ctf
             {
                 setupchkaffinity(entities::ents[i]->links[j],
                 {
-                    ctfstate::flag &f = st.flags[already];
+                    capturestate::flag &f = st.flags[already];
                     if((f.base&BASE_FLAG) && (f.base&BASE_HOME)) // got found earlier, but it is linked!
                         f.base &= ~BASE_HOME;
                     setuphomeaffinity(i);
@@ -370,7 +370,7 @@ namespace ctf
         putint(p, st.flags.length());
         loopv(st.flags)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             putint(p, f.team);
             putint(p, f.base);
             loopk(3) putint(p, int(f.spawnloc[k]*DMF));
@@ -400,7 +400,7 @@ namespace ctf
             }
             if(commit && st.flags.inrange(i))
             {
-                ctfstate::flag &f = st.flags[i];
+                capturestate::flag &f = st.flags[i];
                 f.team = team;
                 f.base = base;
                 f.owner = owner >= 0 ? game::newclient(owner) : NULL;
@@ -411,7 +411,7 @@ namespace ctf
                     f.droploc = droploc;
                     f.droploc = inertia;
                     f.droptime = lastmillis;
-                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, i);
                 }
             }
         }
@@ -420,21 +420,21 @@ namespace ctf
     void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia)
     {
         if(!st.flags.inrange(i)) return;
-        ctfstate::flag &f = st.flags[i];
+        capturestate::flag &f = st.flags[i];
         game::announce(S_V_FLAGDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the \fs%s%s\fS flag", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name);
         st.dropaffinity(i, droploc, inertia, lastmillis);
         st.interp(i, totalmillis);
-        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, i);
     }
 
     void removeplayer(gameent *d)
     {
         loopv(st.flags) if(st.flags[i].owner == d)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             st.dropaffinity(i, f.owner->o, f.owner->vel, lastmillis);
             st.interp(i, totalmillis);
-            f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+            f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, i);
         }
     }
 
@@ -464,9 +464,9 @@ namespace ctf
     void returnaffinity(gameent *d, int i)
     {
         if(!st.flags.inrange(i)) return;
-        ctfstate::flag &f = st.flags[i];
-        affinityeffect(i, d->team, d->feetpos(), f.spawnloc, ctfstyle ? 2 : 3, "RETURNED");
-        game::announce(S_V_FLAGRETURN, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s returned the \fs%s%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, hud::timetostr(lastmillis-(ctfstyle%2 ? f.taketime : f.droptime)));
+        capturestate::flag &f = st.flags[i];
+        affinityeffect(i, d->team, d->feetpos(), f.spawnloc, capturestyle ? 2 : 3, "RETURNED");
+        game::announce(S_V_FLAGRETURN, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s returned the \fs%s%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, hud::timetostr(lastmillis-(capturestyle%2 ? f.taketime : f.droptime)));
         st.returnaffinity(i, lastmillis);
         st.interp(i, totalmillis);
     }
@@ -474,7 +474,7 @@ namespace ctf
     void resetaffinity(int i)
     {
         if(!st.flags.inrange(i)) return;
-        ctfstate::flag &f = st.flags[i];
+        capturestate::flag &f = st.flags[i];
         affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
         game::announce(S_V_FLAGRESET, CON_INFO, NULL, "\fathe \fs%s%s\fS flag has been reset", teamtype[f.team].chat, teamtype[f.team].name);
         st.returnaffinity(i, lastmillis);
@@ -484,10 +484,10 @@ namespace ctf
     void scoreaffinity(gameent *d, int relay, int goal, int score)
     {
         if(!st.flags.inrange(relay)) return;
-        ctfstate::flag &f = st.flags[relay];
+        capturestate::flag &f = st.flags[relay];
         if(st.flags.inrange(goal))
         {
-            ctfstate::flag &g = st.flags[goal];
+            capturestate::flag &g = st.flags[goal];
             affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "CAPTURED");
         }
         else affinityeffect(goal, d->team, f.pos(), f.spawnloc, 3, "CAPTURED");
@@ -500,7 +500,7 @@ namespace ctf
     void takeaffinity(gameent *d, int i)
     {
         if(!st.flags.inrange(i)) return;
-        ctfstate::flag &f = st.flags[i];
+        capturestate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, f.team == d->team ? "SECURED" : "TAKEN");
         game::announce(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s %s the \fs%s%s\fS flag", game::colorname(d), f.droptime ? (f.team == d->team ? "secured" : "picked up") : "stole", teamtype[f.team].chat, teamtype[f.team].name);
         st.takeaffinity(i, d, lastmillis);
@@ -512,10 +512,10 @@ namespace ctf
         vec o = d->feetpos();
         loopv(st.flags)
         {
-            ctfstate::flag &f = st.flags[i];
+            capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || f.owner) continue;
             if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
-            if(f.team == d->team && ctfstyle <= 2 && (ctfstyle == 2 || !f.droptime)) continue;
+            if(f.team == d->team && capturestyle <= 2 && (capturestyle == 2 || !f.droptime)) continue;
             if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
             {
@@ -527,7 +527,7 @@ namespace ctf
 
     bool aihomerun(gameent *d, ai::aistate &b)
     {
-        if(ctfstyle <= 2)
+        if(capturestyle <= 2)
         {
             vec pos = d->feetpos();
             loopk(2)
@@ -535,8 +535,8 @@ namespace ctf
                 int goal = -1;
                 loopv(st.flags)
                 {
-                    ctfstate::flag &g = st.flags[i];
-                    if(isctfhome(g, ai::owner(d)) && (k || (!g.owner && !g.droptime)) &&
+                    capturestate::flag &g = st.flags[i];
+                    if(iscapturehome(g, ai::owner(d)) && (k || (!g.owner && !g.droptime)) &&
                         (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
                     {
                         goal = i;
@@ -568,12 +568,12 @@ namespace ctf
             takenflags.setsize(0);
             loopv(st.flags)
             {
-                ctfstate::flag &g = st.flags[i];
+                capturestate::flag &g = st.flags[i];
                 if(g.owner == d) hasflags.add(i);
-                else if(isctfaffinity(g, ai::owner(d)) && (ctfstyle >= 3 || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
+                else if(iscaptureaffinity(g, ai::owner(d)) && (capturestyle >= 3 || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
                     takenflags.add(i);
             }
-            if(!hasflags.empty() && ctfstyle <= 2)
+            if(!hasflags.empty() && capturestyle <= 2)
             {
                 aihomerun(d, b);
                 return true;
@@ -600,12 +600,12 @@ namespace ctf
         vec pos = d->feetpos();
         loopvj(st.flags)
         {
-            ctfstate::flag &f = st.flags[j];
-            bool home = isctfhome(f, ai::owner(d));
-            if(d->aitype == AI_BOT && (!home || ctfstyle >= 3) && !(f.base&BASE_FLAG)) continue; // don't bother with other bases
+            capturestate::flag &f = st.flags[j];
+            bool home = iscapturehome(f, ai::owner(d));
+            if(d->aitype == AI_BOT && (!home || capturestyle >= 3) && !(f.base&BASE_FLAG)) continue; // don't bother with other bases
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || ctfstyle >= 3 || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
+            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || capturestyle >= 3 || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
             ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {
@@ -671,15 +671,15 @@ namespace ctf
         }
     }
 
-    bool aidefend(gameent *d, ai::aistate &b)
+    bool aidefense(gameent *d, ai::aistate &b)
     {
-        if(ctfstyle <= 2 && d->aitype == AI_BOT)
+        if(capturestyle <= 2 && d->aitype == AI_BOT)
         {
             static vector<int> hasflags;
             hasflags.setsize(0);
             loopv(st.flags)
             {
-                ctfstate::flag &g = st.flags[i];
+                capturestate::flag &g = st.flags[i];
                 if(g.owner == d) hasflags.add(i);
             }
             if(!hasflags.empty())
@@ -690,8 +690,8 @@ namespace ctf
         }
         if(st.flags.inrange(b.target))
         {
-            ctfstate::flag &f = st.flags[b.target];
-            if(isctfaffinity(f, ai::owner(d)) && f.owner)
+            capturestate::flag &f = st.flags[b.target];
+            if(iscaptureaffinity(f, ai::owner(d)) && f.owner)
             {
                 ai::violence(d, b, f.owner, false);
                 if(d->aitype != AI_BOT) return true;
@@ -727,7 +727,7 @@ namespace ctf
                 float mindist = float(enttype[AFFINITY].radius*enttype[AFFINITY].radius*8);
                 loopv(st.flags)
                 { // get out of the way of the returnee!
-                    ctfstate::flag &g = st.flags[i];
+                    capturestate::flag &g = st.flags[i];
                     if(pos.squaredist(g.pos()) <= mindist)
                     {
                         if(g.owner && ai::owner(g.owner) == ai::owner(d)) walk = 1;
@@ -735,7 +735,7 @@ namespace ctf
                     }
                 }
             }
-            return ai::defend(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
+            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
         }
         return false;
     }
@@ -744,14 +744,14 @@ namespace ctf
     {
         if(st.flags.inrange(b.target) && d->aitype == AI_BOT)
         {
-            ctfstate::flag &f = st.flags[b.target];
+            capturestate::flag &f = st.flags[b.target];
             b.idle = -1;
-            if(isctfhome(f, ai::owner(d)) && ctfstyle <= 2)
+            if(iscapturehome(f, ai::owner(d)) && capturestyle <= 2)
             {
                 static vector<int> hasflags; hasflags.setsize(0);
                 loopv(st.flags)
                 {
-                    ctfstate::flag &g = st.flags[i];
+                    capturestate::flag &g = st.flags[i];
                     if(g.owner == d) hasflags.add(i);
                 }
                 if(!hasflags.empty())
@@ -759,9 +759,9 @@ namespace ctf
                     if(ai::makeroute(d, b, f.pos())) b.idle = -1;
                     return true;
                 }
-                else if(!isctfaffinity(f, ai::owner(d))) return false;
+                else if(!iscaptureaffinity(f, ai::owner(d))) return false;
             }
-            if(isctfaffinity(f, ai::owner(d))) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
+            if(iscaptureaffinity(f, ai::owner(d))) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
             else return ai::makeroute(d, b, f.pos());
         }
         return false;

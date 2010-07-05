@@ -1,16 +1,15 @@
-#define isetfaffinity(a) (a.team == TEAM_NEUTRAL)
-#define isetfhome(a,b)   (!isetfaffinity(a) && a.team == b)
-#define isetftarg(a,b)   (!isetfaffinity(a) && a.team != b)
+#define iscapturehome(a,b)  ((a.base&BASE_HOME) && (a.team == b || a.team == TEAM_NEUTRAL))
+#define iscaptureaffinity(a,b)  ((a.base&BASE_FLAG) && (a.team == b || a.team == TEAM_NEUTRAL))
 
 #ifdef GAMESERVER
-#define etfstate etfservstate
+#define capturestate captureservstate
 #endif
-struct etfstate
+struct capturestate
 {
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, droptime, taketime;
+        int team, droptime, taketime, base;
 #ifdef GAMESERVER
         int owner;
         vector<int> votes;
@@ -31,6 +30,7 @@ struct etfstate
         {
             inertia = vec(0, 0, 0);
             droploc = spawnloc = vec(-1, -1, -1);
+            base = BASE_NONE;
 #ifdef GAMESERVER
             owner = -1;
             votes.shrink(0);
@@ -67,7 +67,7 @@ struct etfstate
         scores.shrink(0);
     }
 
-    int addaffinity(const vec &o, int team, int i = -1)
+    int addaffinity(const vec &o, int team, int base = BASE_NONE, int i = -1)
     {
         int x = i < 0 ? flags.length() : i;
         while(!flags.inrange(x)) flags.add();
@@ -75,6 +75,7 @@ struct etfstate
         f.reset();
         f.team = team;
         f.spawnloc = o;
+        f.base = base;
         return x;
     }
 
@@ -166,9 +167,9 @@ struct etfstate
 };
 
 #ifndef GAMESERVER
-namespace etf
+namespace capture
 {
-    extern etfstate st;
+    extern capturestate st;
     extern bool dropaffinity(gameent *d);
     extern void sendaffinity(packetbuf &p);
     extern void parseaffinity(ucharbuf &p, bool commit);
@@ -189,7 +190,7 @@ namespace etf
     extern int aiowner(gameent *d);
     extern void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests);
     extern bool aicheck(gameent *d, ai::aistate &b);
-    extern bool aidefend(gameent *d, ai::aistate &b);
+    extern bool aidefense(gameent *d, ai::aistate &b);
     extern bool aipursue(gameent *d, ai::aistate &b);
     extern void removeplayer(gameent *d);
 }

@@ -12,7 +12,7 @@ namespace projs
 
     VAR(IDF_PERSIST, maxprojectiles, 1, 128, INT_MAX-1);
 
-    VAR(IDF_PERSIST, ejectfade, 0, 3500, INT_MAX-1);
+    VAR(IDF_PERSIST, ejecaptureade, 0, 3500, INT_MAX-1);
     VAR(IDF_PERSIST, ejectspin, 0, 1, 1);
     VAR(IDF_PERSIST, ejecthint, 0, 1, 1);
 
@@ -698,8 +698,8 @@ namespace projs
 
         loopv(locs)
             create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, 0, weap, flags, scale);
-        if(ejectfade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
-            create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
+        if(ejecaptureade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
+            create(from, from, local, d, PRJ_EJECT, rnd(ejecaptureade)+ejecaptureade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
         if(d->aitype >= AI_BOT && d->skill <= 100 && (!WEAP2(weap, fullauto, flags&HIT_ALT) || adelay >= PHYSMILLIS))
             adelay += int(ceilf(adelay*(10.f/d->skill)));
@@ -1062,8 +1062,8 @@ namespace projs
             case PRJ_AFFINITY:
             {
                 if(proj.beenused <= 1) client::addmsg(N_RESETAFFIN, "ri", proj.id);
-                if(m_ctf(game::gamemode) && ctf::st.flags.inrange(proj.id)) ctf::st.flags[proj.id].proj = NULL;
-                else if(m_etf(game::gamemode) && etf::st.flags.inrange(proj.id)) etf::st.flags[proj.id].proj = NULL;
+                if(m_capture(game::gamemode) && capture::st.flags.inrange(proj.id)) capture::st.flags[proj.id].proj = NULL;
+                else if(m_bomber(game::gamemode) && bomber::st.flags.inrange(proj.id)) bomber::st.flags[proj.id].proj = NULL;
                 break;
             }
             default: break;

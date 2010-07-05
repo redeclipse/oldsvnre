@@ -681,38 +681,38 @@
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\ctf.cpp">
+		<Unit filename="game\capture.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\ctf.h">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="server" />
-			<Option target="client-prof" />
-			<Option target="server-dbg" />
-		</Unit>
-		<Unit filename="game\ctfmode.h">
+		<Unit filename="game\capture.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\etf.cpp">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="client-prof" />
-		</Unit>
-		<Unit filename="game\etf.h">
+		<Unit filename="game\capturemode.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\etfmode.h">
+		<Unit filename="game\bomber.cpp">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+		</Unit>
+		<Unit filename="game\bomber.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
+		</Unit>
+		<Unit filename="game\bombermode.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
@@ -779,19 +779,19 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\dtf.cpp">
+		<Unit filename="game\defend.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\dtf.h">
+		<Unit filename="game\defend.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\dtfmode.h">
+		<Unit filename="game\defendmode.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />

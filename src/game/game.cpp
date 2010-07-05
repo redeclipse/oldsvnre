@@ -398,9 +398,9 @@ namespace game
             entities::adddynlights();
             if(dynlighteffects >= 2)
             {
-                if(m_ctf(gamemode)) ctf::adddynlights();
-                else if(m_dtf(gamemode)) dtf::adddynlights();
-                else if(m_etf(gamemode)) etf::adddynlights();
+                if(m_capture(gamemode)) capture::adddynlights();
+                else if(m_defend(gamemode)) defend::adddynlights();
+                else if(m_bomber(gamemode)) bomber::adddynlights();
             }
             if(fireburning && fireburntime)
             {
@@ -550,7 +550,7 @@ namespace game
         if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
         if(d->lastfire > 0 && lastmillis-d->lastfire >= fireburntime-500)
         {
-            if(lastmillis-d->lastfire >= fireburntime) d->resetfire();
+            if(lastmillis-d->lastfire >= fireburntime) d->resbomberire();
             else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastfire-(fireburntime-500))/500.f));
         }
         else if(issound(d->fschan)) removesound(d->fschan);
@@ -1034,9 +1034,9 @@ namespace game
         client::clearvotes(d);
         projs::remove(d);
         removedamagemerges(d);
-        if(m_ctf(gamemode)) ctf::removeplayer(d);
-        else if(m_dtf(gamemode)) dtf::removeplayer(d);
-        else if(m_etf(gamemode)) etf::removeplayer(d);
+        if(m_capture(gamemode)) capture::removeplayer(d);
+        else if(m_defend(gamemode)) defend::removeplayer(d);
+        else if(m_bomber(gamemode)) bomber::removeplayer(d);
         DELETEP(players[cn]);
         players[cn] = NULL;
         cleardynentcache();
@@ -1051,9 +1051,9 @@ namespace game
             weapons::preload();
             projs::preload();
         }
-        if(m_edit(gamemode) || m_ctf(gamemode)) ctf::preload();
-        if(m_edit(gamemode) || m_dtf(gamemode)) dtf::preload();
-        if(m_edit(gamemode) || m_etf(gamemode)) etf::preload();
+        if(m_edit(gamemode) || m_capture(gamemode)) capture::preload();
+        if(m_edit(gamemode) || m_defend(gamemode)) defend::preload();
+        if(m_edit(gamemode) || m_bomber(gamemode)) bomber::preload();
         maskpackagedirs(~0);
     }
 
@@ -2267,9 +2267,9 @@ namespace game
         loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, transscale(d, true), deadscale(d, 1, true));
         entities::render();
         projs::render();
-        if(m_ctf(gamemode)) ctf::render();
-        else if(m_dtf(gamemode)) dtf::render();
-        else if(m_etf(gamemode)) etf::render();
+        if(m_capture(gamemode)) capture::render();
+        else if(m_defend(gamemode)) defend::render();
+        else if(m_bomber(gamemode)) bomber::render();
         ai::render();
         if(!polymodels && rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
         endmodelbatches();

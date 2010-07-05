@@ -237,7 +237,7 @@ namespace ai
     extern bool randomnode(gameent *d, aistate &b, float guard = SIGHTMIN, float wander = SIGHTMAX);
     extern bool violence(gameent *d, aistate &b, gameent *e, bool pursue = false);
     extern bool patrol(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 1, bool retry = false);
-    extern bool defend(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 0);
+    extern bool defense(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 0);
 
     extern void spawned(gameent *d, int ent);
     extern void damaged(gameent *d, gameent *e, int weap, int flags, int damage);

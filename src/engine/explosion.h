@@ -193,7 +193,7 @@ static void initsphere(int slices, int stacks)
     }
 }
 
-VAR(IDF_PERSIST, explosion2d, 0, 1, 1);
+VAR(IDF_PERSIST, explosion2d, 0, 0, 1);
 
 static void setupexplosion()
 {

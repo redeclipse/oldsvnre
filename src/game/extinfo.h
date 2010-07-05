@@ -62,20 +62,20 @@
         vector<teamscore> scores;
 
         //most taken from scoreboard.h
-        if(m_dtf(gamemode))
+        if(m_defend(gamemode))
         {
-            loopv(dtfmode.scores) scores.add(teamscore(dtfmode.scores[i].team, dtfmode.scores[i].total));
-            loopv(clients) if(clients[i]->team) //check all teams available, since dtfmode.scores contains only teams with scores
+            loopv(defendmode.scores) scores.add(teamscore(defendmode.scores[i].team, defendmode.scores[i].total));
+            loopv(clients) if(clients[i]->team) //check all teams available, since defendmode.scores contains only teams with scores
             {
                 teamscore *ts = NULL;
                 loopvj(scores) if(scores[j].team == clients[i]->team) { ts = &scores[j]; break; }
                 if(!ts) scores.add(teamscore(clients[i]->team, 0));
             }
         }
-        else if(m_ctf(gamemode))
+        else if(m_capture(gamemode))
         {
-            loopv(ctfmode.scores) scores.add(teamscore(ctfmode.scores[i].team, ctfmode.scores[i].total));
-            loopv(clients) if(clients[i]->team) //check all teams available, since ctfmode.scores contains only teams with scores
+            loopv(capturemode.scores) scores.add(teamscore(capturemode.scores[i].team, capturemode.scores[i].total));
+            loopv(clients) if(clients[i]->team) //check all teams available, since capturemode.scores contains only teams with scores
             {
                 teamscore *ts = NULL;
                 loopvj(scores) if(scores[j].team == clients[i]->team) { ts = &scores[j]; break; }
@@ -99,12 +99,12 @@
             sendstring(teamtype[scores[i].team].name, p); //backward compatibility mode
             putint(p, (int)scores[i].score);
 
-            if(m_dtf(gamemode))
+            if(m_defend(gamemode))
             {
                 int flags = 0;
-                loopvj(dtfmode.flags) if(dtfmode.flags[j].owner == scores[i].team) flags++;
+                loopvj(defendmode.flags) if(defendmode.flags[j].owner == scores[i].team) flags++;
                 putint(p, flags);
-                loopvj(dtfmode.flags) if(dtfmode.flags[j].owner == scores[i].team) putint(p, j);
+                loopvj(defendmode.flags) if(defendmode.flags[j].owner == scores[i].team) putint(p, j);
             }
             else putint(p,-1); //no flags follow
         }

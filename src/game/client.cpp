@@ -586,9 +586,9 @@ namespace client
             setnames(name, MAP_MAPZ);
             needsmap = true;
         }
-        if(m_ctf(gamemode)) ctf::setupaffinity();
-        else if(m_dtf(gamemode)) dtf::setupaffinity();
-        else if(m_etf(gamemode)) etf::setupaffinity();
+        if(m_capture(gamemode)) capture::setupaffinity();
+        else if(m_defend(gamemode)) defend::setupaffinity();
+        else if(m_bomber(gamemode)) bomber::setupaffinity();
     }
 
     void receivefile(uchar *data, int len)
@@ -968,9 +968,9 @@ namespace client
             putint(p, game::numplayers);
             entities::putitems(p);
             putint(p, -1);
-            if(m_ctf(game::gamemode)) ctf::sendaffinity(p);
-            else if(m_dtf(game::gamemode)) dtf::sendaffinity(p);
-            else if(m_etf(game::gamemode)) etf::sendaffinity(p);
+            if(m_capture(game::gamemode)) capture::sendaffinity(p);
+            else if(m_defend(game::gamemode)) defend::sendaffinity(p);
+            else if(m_bomber(game::gamemode)) bomber::sendaffinity(p);
             sendinfo = false;
         }
         if(messages.length())
@@ -1228,7 +1228,7 @@ namespace client
                         case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis); break;
                         case SPHY_EXTINGUISH:
                         {
-                            t->resetfire();
+                            t->resbomberire();
                             playsound(S_EXTINGUISH, t->o, t);
                             part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->radius*4, 1, -10);
                             break;
@@ -1491,7 +1491,7 @@ namespace client
                     if(!amt)
                     {
                         f->impulse[IM_METER] = 0;
-                        f->resetfire();
+                        f->resbomberire();
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal; f->lastregen = lastmillis;
@@ -1846,10 +1846,10 @@ namespace client
                     {
                         if(editmode) toggleedit();
                         hud::sb.showscores(false);
-                        game::focus = game::player1;
+                        s->stopmoving(true);
                     }
                     else if(!s->ai) s->resetinterp();
-                    if(s->state == CS_ALIVE) s->lastdeath = lastmillis; // so spawndelay shows properly
+                    if(s->state == CS_ALIVE || m_bomber(game::gamemode)) s->lastdeath = lastmillis; // so spawndelay shows properly
                     s->state = CS_WAITING;
                     s->weapreset(true);
                     break;
@@ -1869,7 +1869,7 @@ namespace client
                 {
                     int flag = getint(p), converted = getint(p),
                             owner = getint(p), enemy = getint(p);
-                    if(m_dtf(game::gamemode)) dtf::updateaffinity(flag, owner, enemy, converted);
+                    if(m_defend(game::gamemode)) defend::updateaffinity(flag, owner, enemy, converted);
                     break;
                 }
 
@@ -1879,7 +1879,7 @@ namespace client
                     loopi(numflags)
                     {
                         int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
-                        dtf::st.initaffinity(i, kin, owner, enemy, converted);
+                        defend::st.initaffinity(i, kin, owner, enemy, converted);
                     }
                     break;
                 }
@@ -1914,16 +1914,16 @@ namespace client
                 case N_SCORE:
                 {
                     int team = getint(p), total = getint(p);
-                    if(m_ctf(game::gamemode)) ctf::setscore(team, total);
-                    else if(m_dtf(game::gamemode)) dtf::setscore(team, total);
-                    else if(m_etf(game::gamemode)) etf::setscore(team, total);
+                    if(m_capture(game::gamemode)) capture::setscore(team, total);
+                    else if(m_defend(game::gamemode)) defend::setscore(team, total);
+                    else if(m_bomber(game::gamemode)) bomber::setscore(team, total);
                     break;
                 }
 
                 case N_INITAFFIN:
                 {
-                    if(m_ctf(game::gamemode)) ctf::parseaffinity(p, m_ctf(game::gamemode));
-                    else if(m_etf(game::gamemode)) etf::parseaffinity(p, m_etf(game::gamemode));
+                    if(m_capture(game::gamemode)) capture::parseaffinity(p, m_capture(game::gamemode));
+                    else if(m_bomber(game::gamemode)) bomber::parseaffinity(p, m_bomber(game::gamemode));
                     break;
                 }
 
@@ -1936,8 +1936,8 @@ namespace client
                     gameent *o = game::newclient(ocn);
                     if(o)
                     {
-                        if(m_ctf(game::gamemode)) ctf::dropaffinity(o, flag, droploc, inertia);
-                        else if(m_etf(game::gamemode)) etf::dropaffinity(o, flag, droploc, inertia);
+                        if(m_capture(game::gamemode)) capture::dropaffinity(o, flag, droploc, inertia);
+                        else if(m_bomber(game::gamemode)) bomber::dropaffinity(o, flag, droploc, inertia);
                     }
                     break;
                 }
@@ -1948,8 +1948,8 @@ namespace client
                     gameent *o = game::newclient(ocn);
                     if(o)
                     {
-                        if(m_ctf(game::gamemode)) ctf::scoreaffinity(o, relayflag, goalflag, score);
-                        else if(m_etf(game::gamemode)) etf::scoreaffinity(o, relayflag, goalflag, score);
+                        if(m_capture(game::gamemode)) capture::scoreaffinity(o, relayflag, goalflag, score);
+                        else if(m_bomber(game::gamemode)) bomber::scoreaffinity(o, relayflag, goalflag, score);
                     }
                     break;
                 }
@@ -1958,7 +1958,7 @@ namespace client
                 {
                     int ocn = getint(p), flag = getint(p);
                     gameent *o = game::newclient(ocn);
-                    if(o && m_ctf(game::gamemode)) ctf::returnaffinity(o, flag);
+                    if(o && m_capture(game::gamemode)) capture::returnaffinity(o, flag);
                     break;
                 }
 
@@ -1968,8 +1968,8 @@ namespace client
                     gameent *o = game::newclient(ocn);
                     if(o)
                     {
-                        if(m_ctf(game::gamemode)) ctf::takeaffinity(o, flag);
-                        else if(m_etf(game::gamemode)) etf::takeaffinity(o, flag);
+                        if(m_capture(game::gamemode)) capture::takeaffinity(o, flag);
+                        else if(m_bomber(game::gamemode)) bomber::takeaffinity(o, flag);
                     }
                     break;
                 }
@@ -1977,8 +1977,8 @@ namespace client
                 case N_RESETAFFIN:
                 {
                     int flag = getint(p);
-                    if(m_ctf(game::gamemode)) ctf::resetaffinity(flag);
-                    else if(m_etf(game::gamemode)) etf::resetaffinity(flag);
+                    if(m_capture(game::gamemode)) capture::resetaffinity(flag);
+                    else if(m_bomber(game::gamemode)) bomber::resetaffinity(flag);
                     break;
                 }
 

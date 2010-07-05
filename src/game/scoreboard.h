@@ -80,7 +80,7 @@ namespace hud
                         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                         {
                             int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
-                            if(m_dtf(game::gamemode) && sg.score==INT_MAX)
+                            if(m_defend(game::gamemode) && sg.score==INT_MAX)
                                 game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team secured all flags", teamtype[sg.team].chat, teamtype[sg.team].name);
                             else if(m_trial(game::gamemode)) game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.score ? timetostr(sg.score) : "dnf");
                             else game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.score);
@@ -134,17 +134,17 @@ namespace hud
 
         void sortteams(vector<teamscore> &teamscores)
         {
-            if(m_ctf(game::gamemode))
+            if(m_capture(game::gamemode))
             {
-                loopv(ctf::st.scores) teamscores.add(teamscore(ctf::st.scores[i].team, ctf::st.scores[i].total));
+                loopv(capture::st.scores) teamscores.add(teamscore(capture::st.scores[i].team, capture::st.scores[i].total));
             }
-            else if(m_dtf(game::gamemode))
+            else if(m_defend(game::gamemode))
             {
-                loopv(dtf::st.scores) teamscores.add(teamscore(dtf::st.scores[i].team, dtf::st.scores[i].total));
+                loopv(defend::st.scores) teamscores.add(teamscore(defend::st.scores[i].team, defend::st.scores[i].total));
             }
-            else if(m_etf(game::gamemode))
+            else if(m_bomber(game::gamemode))
             {
-                loopv(etf::st.scores) teamscores.add(teamscore(etf::st.scores[i].team, etf::st.scores[i].total));
+                loopv(bomber::st.scores) teamscores.add(teamscore(bomber::st.scores[i].team, bomber::st.scores[i].total));
             }
             else loopi(game::numdynents())
             {
@@ -193,7 +193,7 @@ namespace hud
                 {
                     scoregroup &g = *groups[j];
                     if(team != g.team) continue;
-                    if(team && !m_ctf(game::gamemode) && !m_dtf(game::gamemode) && !m_etf(game::gamemode)) g.score += o->points;
+                    if(team && !m_capture(game::gamemode) && !m_defend(game::gamemode) && !m_bomber(game::gamemode)) g.score += o->points;
                     g.players.add(o);
                     found = true;
                 }
@@ -202,9 +202,9 @@ namespace hud
                 scoregroup &g = *groups[numgroups++];
                 g.team = team;
                 if(!team) g.score = 0;
-                else if(m_ctf(game::gamemode)) g.score = ctf::st.findscore(o->team).total;
-                else if(m_dtf(game::gamemode)) g.score = dtf::st.findscore(o->team).total;
-                else if(m_etf(game::gamemode)) g.score = etf::st.findscore(o->team).total;
+                else if(m_capture(game::gamemode)) g.score = capture::st.findscore(o->team).total;
+                else if(m_defend(game::gamemode)) g.score = defend::st.findscore(o->team).total;
+                else if(m_bomber(game::gamemode)) g.score = bomber::st.findscore(o->team).total;
                 else g.score = o->points;
 
                 g.players.shrink(0);
@@ -396,7 +396,7 @@ namespace hud
                 if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
                     g.pushlist(); // vertical
-                    if(m_dtf(game::gamemode) && dtflimit && sg.score >= dtflimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
+                    if(m_defend(game::gamemode) && defendlimit && sg.score >= defendlimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
                     else g.textf("%s: %d", fgcolor, NULL, teamtype[sg.team].name, sg.score);
                     g.pushlist(); // horizontal
                 }

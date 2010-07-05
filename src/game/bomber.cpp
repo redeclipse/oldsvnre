@@ -1,17 +1,17 @@
 #include "game.h"
-namespace etf
+namespace bomber
 {
-    etfstate st;
+    bomberstate st;
 
     bool dropaffinity(gameent *d)
     {
-        if(m_etf(game::gamemode))
+        if(m_bomber(game::gamemode))
         {
             loopv(st.flags) if(st.flags[i].owner == d)
             {
                 vec inertia;
                 vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
-                inertia.normalize().mul(etfbombspeed).add(d->vel);
+                inertia.normalize().mul(bomberspeed).add(d->vel);
                 client::addmsg(N_DROPAFFIN, "ri7", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
                 return true;
             }
@@ -22,6 +22,7 @@ namespace etf
     void preload()
     {
         loadmodel("flag", -1, true);
+        loadmodel("bomb", -1, true);
     }
 
     void drawblips(int w, int h, float blend)
@@ -30,20 +31,20 @@ namespace etf
         loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && st.flags[i].owner == game::focus) hasflags.add(i);
         loopv(st.flags)
         {
-            etfstate::flag &f = st.flags[i];
+            bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             vec dir;
-            int colour = isetfaffinity(f) ? 0xFFFFFF : teamtype[f.team].colour;
+            int colour = isbomberaffinity(f) ? 0xFFFFFF : teamtype[f.team].colour;
             float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend;
-            if(isetfaffinity(f)) (dir = f.pos()).sub(camera1->o);
+            if(isbomberaffinity(f)) (dir = f.pos()).sub(camera1->o);
             else
             {
                 (dir = f.spawnloc).sub(camera1->o);
                 float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
-                if(isetftarg(f, game::focus->team) && !hasflags.empty()) fade += (1.f-fade)*diff;
+                if(isbombertarg(f, game::focus->team) && !hasflags.empty()) fade += (1.f-fade)*diff;
             }
             dir.rotate_around_z(-camera1->yaw*RAD).normalize();
-            hud::drawblip(isetfaffinity(f) ? hud::bliptex : hud::flagtex, 3, w, h, hud::radaraffinitysize*(isetfaffinity(f) ? 0.5f : 1.f), fade, dir, r, g, b);
+            hud::drawblip(isbomberaffinity(f) ? hud::bliptex : hud::flagtex, 3, w, h, hud::radaraffinitysize*(isbomberaffinity(f) ? 0.5f : 1.f), fade, dir, r, g, b);
         }
     }
 
@@ -55,9 +56,9 @@ namespace etf
             hasflags.setsize(0); takenflags.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
-                etfstate::flag &f = st.flags[i];
+                bomberstate::flag &f = st.flags[i];
                 if(f.owner == game::player1) hasflags.add(i);
-                else if(isetfaffinity(f))
+                else if(isbomberaffinity(f))
                 {
                     if(f.owner && f.owner->team != game::player1->team) takenflags.add(i);
                     else if(f.droptime) droppedflags.add(i);
@@ -74,10 +75,10 @@ namespace etf
     int drawinventory(int x, int y, int s, int m, float blend)
     {
         int sy = 0;
-        loopv(st.flags) if(isetfaffinity(st.flags[i]))
+        loopv(st.flags) if(isbomberaffinity(st.flags[i]))
         {
             if(y-sy-s < m) break;
-            etfstate::flag &f = st.flags[i];
+            bomberstate::flag &f = st.flags[i];
             bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.team == TEAM_NEUTRAL || f.team == game::focus->team);
             if(headsup || f.lastowner == game::focus)
             {
@@ -120,9 +121,9 @@ namespace etf
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 sy += int(hud::drawitem(hud::bliptex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? "\frtaken by" : (f.droptime ? "\fodropped" : ""))*rescale);
-                if(isetfaffinity(f) && f.droptime)
+                if(isbomberaffinity(f) && f.droptime)
                 {
-                    float wait = clamp((lastmillis-f.droptime)/float(etfresetdelay), 0.f, 1.f);
+                    float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
                     if(wait < 1) hud::drawprogress(pos[0], pos[1], wait, 1-wait, s, false, r, g, b, fade*0.25f, skew);
                     else hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%d%%", int(wait*100.f));
                 }
@@ -136,21 +137,21 @@ namespace etf
     {
         loopv(st.flags) // flags/bases
         {
-            etfstate::flag &f = st.flags[i];
+            bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             vec above(f.spawnloc);
             float trans = 0.f;
-            if(isetfaffinity(f) && !f.owner && !f.droptime)
+            if(isbomberaffinity(f) && !f.owner && !f.droptime)
             {
                 int millis = totalmillis-f.interptime;
                 if(millis <= 1000) trans += float(millis)/1000.f;
                 else trans = 1.f;
             }
-            else if(!isetfaffinity(f)) trans = 0.5f;
+            else if(!isbomberaffinity(f)) trans = 0.5f;
             if(trans > 0)
             {
                 float yaw = entities::ents[f.ent]->attrs[1], pitch = entities::ents[f.ent]->attrs[2];
-                if(isetfaffinity(f))
+                if(isbomberaffinity(f))
                 {
                     above.z += enttype[AFFINITY].radius/4;
                     int interval = lastmillis%1000;
@@ -158,18 +159,19 @@ namespace etf
                     part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 8, fluc*trans);
                     if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
                 }
-                rendermodel(&entities::ents[f.ent]->light, isetfaffinity(f) ? "bomb" : "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+                else part_explosion(above, enttype[AFFINITY].radius, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, 0.25f);
+                rendermodel(&entities::ents[f.ent]->light, isbomberaffinity(f) ? "bomb" : "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             }
-            above.z += (isetfaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
-            if(!isetfaffinity(f))
+            above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
+            if(!isbomberaffinity(f))
             {
                 defformatstring(info)("<super>%s flag", teamtype[f.team].name);
                 part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
                 above.z += 2.5f;
             }
-            if(isetfaffinity(f) && (f.droptime || (f.taketime && f.owner && f.owner->team != f.team)))
+            if(isbomberaffinity(f) && (f.droptime || (f.taketime && f.owner && f.owner->team != f.team)))
             {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(etfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(etfresetdelay), 0.f, 1.f);
+                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bomberresetdelay), 0.f, 1.f);
                 part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, teamtype[f.team].colour);
                 part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, 0, wait);
@@ -177,7 +179,7 @@ namespace etf
                 defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f)*0.5f);
                 above.z += 2.5f;
             }
-            if(isetfaffinity(f) && (f.owner || f.droptime))
+            if(isbomberaffinity(f) && (f.owner || f.droptime))
             {
                 if(f.owner)
                 {
@@ -193,15 +195,15 @@ namespace etf
         loopv(numflags) numflags[i] = iterflags[i] = 0;
         loopv(st.flags)
         {
-            etfstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isetfaffinity(f) || !f.owner) continue;
+            bomberstate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || !f.owner) continue;
             while(numflags.length() <= f.owner->clientnum) { numflags.add(0); iterflags.add(0); }
             numflags[f.owner->clientnum]++;
         }
         loopv(st.flags)
         {
-            etfstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isetfaffinity(f) || (!f.owner && !f.droptime)) continue;
+            bomberstate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
             float yaw = 0;
             if(f.owner)
@@ -215,11 +217,11 @@ namespace etf
             part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 8, fluc);
             if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
             rendermodel(&f.light, "bomb", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
-            above.z += (isetfaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
+            above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
             if(f.droptime || (f.taketime && f.owner && f.owner->team != f.team))
             {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(etfresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(etfresetdelay), 0.f, 1.f);
+                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bomberresetdelay), 0.f, 1.f);
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, teamtype[f.team].colour);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[f.team].colour, 0, wait);
@@ -234,7 +236,7 @@ namespace etf
     {
         loopv(st.flags)
         {
-            etfstate::flag &f = st.flags[i];
+            bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             float trans = 1.f;
             if(!f.owner)
@@ -242,7 +244,7 @@ namespace etf
                 int millis = totalmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
-            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2*trans, vec((teamtype[f.team].colour>>16), ((teamtype[f.team].colour>>8)&0xFF), (teamtype[f.team].colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
+            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius*trans, vec((teamtype[f.team].colour>>16), ((teamtype[f.team].colour>>8)&0xFF), (teamtype[f.team].colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
         }
     }
 
@@ -289,7 +291,7 @@ namespace etf
         putint(p, st.flags.length());
         loopv(st.flags)
         {
-            etfstate::flag &f = st.flags[i];
+            bomberstate::flag &f = st.flags[i];
             putint(p, f.team);
             loopk(3) putint(p, int(f.spawnloc[k]*DMF));
         }
@@ -319,7 +321,7 @@ namespace etf
             }
             if(commit && st.flags.inrange(i))
             {
-                etfstate::flag &f = st.flags[i];
+                bomberstate::flag &f = st.flags[i];
                 f.team = team;
                 f.owner = owner >= 0 ? game::newclient(owner) : NULL;
                 if(f.owner) { if(!f.taketime) f.taketime = lastmillis; }
@@ -329,7 +331,7 @@ namespace etf
                     f.droploc = droploc;
                     f.droploc = inertia;
                     f.droptime = lastmillis;
-                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, ctfresetdelay, ctfresetdelay, 1, 1, i);
+                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, i);
                 }
             }
         }
@@ -338,21 +340,21 @@ namespace etf
     void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia)
     {
         if(!st.flags.inrange(i)) return;
-        etfstate::flag &f = st.flags[i];
+        bomberstate::flag &f = st.flags[i];
         game::announce(S_V_BOMBDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the bomb", game::colorname(d));
         st.dropaffinity(i, droploc, inertia, lastmillis);
         st.interp(i, totalmillis);
-        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
+        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i);
     }
 
     void removeplayer(gameent *d)
     {
         loopv(st.flags) if(st.flags[i].owner == d)
         {
-            etfstate::flag &f = st.flags[i];
+            bomberstate::flag &f = st.flags[i];
             st.dropaffinity(i, f.owner->o, f.owner->vel, lastmillis);
             st.interp(i, totalmillis);
-            f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, etfresetdelay, etfresetdelay, 1, 1, i);
+            f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i);
         }
     }
 
@@ -382,7 +384,7 @@ namespace etf
     void resetaffinity(int i)
     {
         if(!st.flags.inrange(i)) return;
-        etfstate::flag &f = st.flags[i];
+        bomberstate::flag &f = st.flags[i];
         affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
         game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
         st.returnaffinity(i, lastmillis);
@@ -392,7 +394,7 @@ namespace etf
     void scoreaffinity(gameent *d, int relay, int goal, int score)
     {
         if(!st.flags.inrange(relay) || !st.flags.inrange(goal)) return;
-        etfstate::flag &f = st.flags[relay], &g = st.flags[goal];
+        bomberstate::flag &f = st.flags[relay], &g = st.flags[goal];
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "EXPLODED");
         if(m_duke(game::gamemode, game::mutators))
         {
@@ -414,7 +416,7 @@ namespace etf
     void takeaffinity(gameent *d, int i)
     {
         if(!st.flags.inrange(i)) return;
-        etfstate::flag &f = st.flags[i];
+        bomberstate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
         game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the bomb", game::colorname(d));
         st.takeaffinity(i, d, lastmillis);
@@ -426,11 +428,11 @@ namespace etf
         vec o = d->feetpos();
         loopv(st.flags)
         {
-            etfstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isetfaffinity(f) || f.owner) continue;
+            bomberstate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || f.owner) continue;
             if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
             if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
-            if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
+            if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
                 f.pickuptime = lastmillis;
@@ -444,8 +446,8 @@ namespace etf
         int goal = -1;
         loopv(st.flags)
         {
-            etfstate::flag &g = st.flags[i];
-            if(isetftarg(g, ai::owner(d)) && (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
+            bomberstate::flag &g = st.flags[i];
+            if(isbombertarg(g, ai::owner(d)) && (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
             {
                 goal = i;
             }
@@ -474,7 +476,7 @@ namespace etf
             takenflags.setsize(0);
             loopv(st.flags)
             {
-                etfstate::flag &g = st.flags[i];
+                bomberstate::flag &g = st.flags[i];
                 if(g.owner == d) hasflags.add(i);
                 else if((g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime) takenflags.add(i);
             }
@@ -505,8 +507,8 @@ namespace etf
         vec pos = d->feetpos();
         loopvj(st.flags)
         {
-            etfstate::flag &f = st.flags[j];
-            bool home = isetfhome(f, ai::owner(d));
+            bomberstate::flag &f = st.flags[j];
+            bool home = isbomberhome(f, ai::owner(d));
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
             bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
@@ -547,7 +549,7 @@ namespace etf
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
                 }
             }
-            else if(isetfaffinity(f))
+            else if(isbomberaffinity(f))
             {
                 if(targets.empty())
                 { // attack the flag
@@ -575,7 +577,7 @@ namespace etf
         }
     }
 
-    bool aidefend(gameent *d, ai::aistate &b)
+    bool aidefense(gameent *d, ai::aistate &b)
     {
         if(d->aitype == AI_BOT)
         {
@@ -583,8 +585,8 @@ namespace etf
             hasflags.setsize(0);
             loopv(st.flags)
             {
-                etfstate::flag &g = st.flags[i];
-                if(isetfaffinity(g) && g.owner == d) hasflags.add(i);
+                bomberstate::flag &g = st.flags[i];
+                if(isbomberaffinity(g) && g.owner == d) hasflags.add(i);
             }
             if(!hasflags.empty())
             {
@@ -594,8 +596,8 @@ namespace etf
         }
         if(st.flags.inrange(b.target))
         {
-            etfstate::flag &f = st.flags[b.target];
-            if(isetfaffinity(f) && f.owner)
+            bomberstate::flag &f = st.flags[b.target];
+            if(isbomberaffinity(f) && f.owner)
             {
                 ai::violence(d, b, f.owner, false);
                 if(d->aitype != AI_BOT) return true;
@@ -631,7 +633,7 @@ namespace etf
                 float mindist = float(enttype[AFFINITY].radius*enttype[AFFINITY].radius*8);
                 loopv(st.flags)
                 { // get out of the way of the returnee!
-                    etfstate::flag &g = st.flags[i];
+                    bomberstate::flag &g = st.flags[i];
                     if(pos.squaredist(g.pos()) <= mindist)
                     {
                         if(g.owner && ai::owner(g.owner) == ai::owner(d)) walk = 1;
@@ -639,7 +641,7 @@ namespace etf
                     }
                 }
             }
-            return ai::defend(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
+            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
         }
         return false;
     }
@@ -648,9 +650,9 @@ namespace etf
     {
         if(st.flags.inrange(b.target) && d->aitype == AI_BOT)
         {
-            etfstate::flag &f = st.flags[b.target];
+            bomberstate::flag &f = st.flags[b.target];
             b.idle = -1;
-            if(isetfaffinity(f)) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
+            if(isbomberaffinity(f)) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
             else return ai::makeroute(d, b, f.pos());
         }
         return false;

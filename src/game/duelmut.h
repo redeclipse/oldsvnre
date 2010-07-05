@@ -39,7 +39,7 @@ struct duelservmode : servmode
                 duelqueue.insert(0, ci);
             }
             else if(n < 0) duelqueue.add(ci);
-            if(wait && ci->state.state != CS_WAITING) waiting(ci, 1, 1);
+            if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, 1);
             if(!clean) position(ci, false);
         }
     }
@@ -71,7 +71,7 @@ struct duelservmode : servmode
 
     void clearitems()
     {
-        loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i)) setspawn(i, true);
+        loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i));
     }
 
     void cleanup()
@@ -119,7 +119,7 @@ struct duelservmode : servmode
                         clientinfo *ci = duelqueue[i];
                         if(ci->state.state != CS_ALIVE)
                         {
-                            if(ci->state.state != CS_WAITING) waiting(ci, 1, 1);
+                            if(ci->state.state != CS_WAITING) waiting(ci, 0, 1);
                             if(ci->state.aitype < AI_START && m_duel(gamemode, mutators) && m_team(gamemode, mutators))
                             {
                                 bool skip = false;
