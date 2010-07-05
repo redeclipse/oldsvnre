@@ -54,7 +54,7 @@ struct bomberservmode : bomberstate, servmode
                     ci->state.flags++;
                     int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                    loopvj(clients) if(clients[j]->state.aitype < AI_START)
+                    loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
                     {
                         bool kamikaze = clients[j]->state.state == CS_ALIVE && (clients[j]->team == f.team || (!m_duke(gamemode, mutators) && clients[j] == ci));
                         if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);

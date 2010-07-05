@@ -679,8 +679,8 @@ namespace physics
                             if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
+                    impulsemod(m_jetpack(game::gamemode, game::mutators), impulseregenjetpack);
                     impulsemod(sprint, impulseregensprint);
-                    impulsemod(jetting, impulseregenjetpack);
                     impulsemod(d->move || d->strafe, impulseregenmove);
                     impulsemod(!onfloor && PHYS(gravity) > 0, impulseregeninair);
                     impulsemod(iscrouching(d), impulseregencrouch);
