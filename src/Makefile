@@ -73,9 +73,9 @@ CLIENT_OBJS= \
 	engine/worldio.o \
 	game/ai.o \
 	game/client.o \
-	game/ctf.o \
-	game/dtf.o \
-	game/etf.o \
+	game/capture.o \
+	game/defend.o \
+	game/bomber.o \
 	game/entities.o \
 	game/game.o \
 	game/hud.o \
@@ -389,75 +389,75 @@ game/ai.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/ai.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/ai.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/ai.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/ai.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
+game/ai.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
 game/ai.o: game/scoreboard.h game/weapons.h
 game/client.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/client.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/client.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/client.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/client.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
+game/client.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
 game/client.o: game/scoreboard.h game/weapons.h
-game/ctf.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
-game/ctf.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
-game/ctf.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
-game/ctf.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/ctf.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
-game/ctf.o: game/scoreboard.h game/weapons.h
-game/dtf.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
-game/dtf.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
-game/dtf.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
-game/dtf.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/dtf.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
-game/dtf.o: game/scoreboard.h game/weapons.h
-game/etf.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
-game/etf.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
-game/etf.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
-game/etf.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/etf.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
-game/etf.o: game/scoreboard.h game/weapons.h
+game/capture.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
+game/capture.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
+game/capture.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
+game/capture.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
+game/capture.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
+game/capture.o: game/scoreboard.h game/weapons.h
+game/defend.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
+game/defend.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
+game/defend.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
+game/defend.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
+game/defend.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
+game/defend.o: game/scoreboard.h game/weapons.h
+game/bomber.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
+game/bomber.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
+game/bomber.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
+game/bomber.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
+game/bomber.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
+game/bomber.o: game/scoreboard.h game/weapons.h
 game/entities.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/entities.o: shared/command.h shared/geom.h shared/ents.h
 game/entities.o: shared/iengine.h shared/igame.h engine/sound.h
 game/entities.o: engine/world.h engine/octa.h engine/lightmap.h engine/bih.h
 game/entities.o: engine/texture.h engine/model.h engine/varray.h game/ai.h
-game/entities.o: game/ctf.h game/dtf.h game/etf.h game/vars.h game/scoreboard.h game/weapons.h
+game/entities.o: game/capture.h game/defend.h game/bomber.h game/vars.h game/scoreboard.h game/weapons.h
 game/game.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/game.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/game.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/game.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/game.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
+game/game.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
 game/game.o: game/scoreboard.h game/weapons.h
 game/hud.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/hud.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/hud.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/hud.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/hud.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
+game/hud.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
 game/hud.o: game/scoreboard.h game/compass.h game/weapons.h
 game/physics.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/physics.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/physics.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/physics.o: engine/lightmap.h engine/bih.h engine/texture.h
-game/physics.o: engine/model.h engine/varray.h game/ai.h game/ctf.h
-game/physics.o: game/dtf.h game/etf.h game/vars.h game/scoreboard.h game/weapons.h
+game/physics.o: engine/model.h engine/varray.h game/ai.h game/capture.h
+game/physics.o: game/defend.h game/bomber.h game/vars.h game/scoreboard.h game/weapons.h
 game/projs.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/projs.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/projs.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/projs.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/projs.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
+game/projs.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
 game/projs.o: game/scoreboard.h game/weapons.h
 game/server.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/server.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/server.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/server.o: engine/lightmap.h engine/bih.h engine/texture.h engine/model.h
-game/server.o: engine/varray.h game/ai.h game/ctf.h game/dtf.h game/etf.h game/vars.h
-game/server.o: game/scoreboard.h game/ctfmode.h game/dtfmode.h game/etfmode.h game/duelmut.h
+game/server.o: engine/varray.h game/ai.h game/capture.h game/defend.h game/bomber.h game/vars.h
+game/server.o: game/scoreboard.h game/capturemode.h game/defendmode.h game/bombermode.h game/duelmut.h
 game/server.o: game/aiman.h game/auth.h game/extinfo.h game/weapons.h
 game/weapons.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/weapons.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/weapons.o: shared/igame.h engine/sound.h engine/world.h engine/octa.h
 game/weapons.o: engine/lightmap.h engine/bih.h engine/texture.h
-game/weapons.o: engine/model.h engine/varray.h game/ai.h game/ctf.h
-game/weapons.o: game/dtf.h game/etf.h game/vars.h game/scoreboard.h game/weapons.h
+game/weapons.o: engine/model.h engine/varray.h game/ai.h game/capture.h
+game/weapons.o: game/defend.h game/bomber.h game/vars.h game/scoreboard.h game/weapons.h
 
 shared/crypto-standalone.o: shared/cube.h shared/tools.h shared/command.h
 shared/crypto-standalone.o: shared/geom.h shared/ents.h shared/iengine.h
@@ -491,9 +491,9 @@ game/server-standalone.o: shared/tools.h shared/command.h shared/geom.h
 game/server-standalone.o: shared/ents.h shared/iengine.h shared/igame.h
 game/server-standalone.o: engine/sound.h engine/world.h engine/octa.h
 game/server-standalone.o: engine/lightmap.h engine/bih.h engine/texture.h
-game/server-standalone.o: engine/model.h engine/varray.h game/ai.h game/ctf.h
-game/server-standalone.o: game/dtf.h game/etf.h game/vars.h game/dtfmode.h
-game/server-standalone.o: game/ctfmode.h game/dtfmode.h game/etfmode.h game/duelmut.h
+game/server-standalone.o: engine/model.h engine/varray.h game/ai.h game/capture.h
+game/server-standalone.o: game/defend.h game/bomber.h game/vars.h game/defendmode.h
+game/server-standalone.o: game/capturemode.h game/defendmode.h game/bombermode.h game/duelmut.h
 game/server-standalone.o: game/aiman.h game/auth.h game/extinfo.h game/weapons.h
 
 shared/cube.h.gch: shared/tools.h shared/command.h shared/geom.h
@@ -508,4 +508,4 @@ game/game.h.gch: shared/command.h shared/geom.h shared/ents.h
 game/game.h.gch: shared/iengine.h shared/igame.h engine/sound.h
 game/game.h.gch: engine/world.h engine/octa.h engine/lightmap.h engine/bih.h
 game/game.h.gch: engine/texture.h engine/model.h engine/varray.h game/ai.h
-game/game.h.gch: game/ctf.h game/dtf.h game/etf.h game/vars.h game/scoreboard.h game/weapons.h
+game/game.h.gch: game/capture.h game/defend.h game/bomber.h game/vars.h game/scoreboard.h game/weapons.h

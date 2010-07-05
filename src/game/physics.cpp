@@ -939,7 +939,7 @@ namespace physics
                     gameent *d = (gameent *)pl;
                     if(d->onfire(lastmillis, fireburntime) && lastmillis-d->lastfire > PHYSMILLIS)
                     {
-                        d->resetfire();
+                        d->resbomberire();
                         playsound(S_EXTINGUISH, d->o, d);
                         part_create(PART_SMOKE, 500, d->feetpos(d->height/2), 0xAAAAAA, d->radius*4, 1, -10);
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);

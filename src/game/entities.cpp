@@ -881,8 +881,8 @@ namespace entities
     {
         if(d->aitype < AI_START && d->action[AC_USE] && m_affinhold(game::gamemode))
         {
-            if(m_ctf(game::gamemode)) { if(ctf::dropaffinity(d)) d->action[AC_USE] = false; }
-            else if(m_etf(game::gamemode)) { if(etf::dropaffinity(d)) d->action[AC_USE] = false; }
+            if(m_capture(game::gamemode)) { if(capture::dropaffinity(d)) d->action[AC_USE] = false; }
+            else if(m_bomber(game::gamemode)) { if(bomber::dropaffinity(d)) d->action[AC_USE] = false; }
         }
         static vector<actitem> actitems;
         actitems.setsize(0);
@@ -919,8 +919,8 @@ namespace entities
                 d->action[AC_USE] = false;
             }
         }
-        if(m_ctf(game::gamemode)) ctf::checkaffinity(d);
-        else if(m_etf(game::gamemode)) etf::checkaffinity(d);
+        if(m_capture(game::gamemode)) capture::checkaffinity(d);
+        else if(m_bomber(game::gamemode)) bomber::checkaffinity(d);
     }
 
     void putitems(packetbuf &p)
@@ -2195,7 +2195,7 @@ namespace entities
                 {
                     float radius = (float)enttype[e.type].radius;
                     part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, teamtype[e.attrs[0]].colour);
-                    radius = radius*2/3; // ctf pickup dist
+                    radius = radius*2/3; // capture pickup dist
                     part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, teamtype[e.attrs[0]].colour);
                     break;
                 }

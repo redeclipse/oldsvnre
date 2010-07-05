@@ -30,9 +30,9 @@ GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
 GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility warp wet venus");
 
-GSVAR(IDF_ADMIN, ctfmaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
-GSVAR(IDF_ADMIN, dtfmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tower tranquility warp wet venus");
-GSVAR(IDF_ADMIN, etfmaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
+GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
+GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tower tranquility warp wet venus");
+GSVAR(IDF_ADMIN, bombermaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
@@ -54,6 +54,7 @@ GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = alwa
 GVAR(0, spawndelay, 0, 3000, INT_MAX-1); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 1500, INT_MAX-1); // .. in instagib/arena matches
 GVAR(0, trialdelay, 0, 500, INT_MAX-1); // .. in time trial matches
+GVAR(0, bomberdelay, 0, 5000, INT_MAX-1); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, INT_MAX-1); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, INT_MAX-1); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
@@ -94,20 +95,20 @@ GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all play
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
 GVAR(0, fraglimit, 0, 0, INT_MAX-1); // finish when score is this or more
 
-GVAR(0, ctflimit, 0, 0, INT_MAX-1); // finish when score is this or more
-GVAR(0, ctfstyle, 0, 0, 3); // 0 = classic touch-and-return, 1 = grab and take home, 2 = defend and reset, 3 = dominate and protect
-GVAR(0, ctfresetdelay, 0, 30000, INT_MAX-1);
+GVAR(0, capturelimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, capturestyle, 0, 0, 3); // 0 = classic touch-and-return, 1 = grab and take home, 2 = defend and reset, 3 = dominate and protect
+GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 
-GVAR(0, dtflimit, 0, 0, INT_MAX-1); // finish when score is this or more
-GVAR(0, dtfstyle, 0, 1, 1); // 0 = overthrow and secure, 1 = instant secure
-GVAR(0, dtffinish, 0, 0, 1); // finish when all bases captured
-GVAR(0, dtfpoints, 0, 1, INT_MAX-1); // points added to score
-GVAR(0, dtfoccupy, 0, 100, INT_MAX-1); // points needed to occupy
-GVAR(0, dtfflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
+GVAR(0, defendlimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, defendstyle, 0, 1, 1); // 0 = overthrow and secure, 1 = instant secure
+GVAR(0, defendfinish, 0, 0, 1); // finish when all bases captured
+GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
+GVAR(0, defendoccupy, 0, 100, INT_MAX-1); // points needed to occupy
+GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
-GVAR(0, etflimit, 0, 0, INT_MAX-1); // finish when score is this or more
-GVAR(0, etfresetdelay, 0, 30000, INT_MAX-1);
-GFVAR(0, etfbombspeed, 0, 250, 10000);
+GVAR(0, bomberlimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, bomberresetdelay, 0, 30000, INT_MAX-1);
+GFVAR(0, bomberspeed, 0, 250, 10000);
 
 GVAR(0, skillmin, 1, 65, 101);
 GVAR(0, skillmax, 1, 85, 101);

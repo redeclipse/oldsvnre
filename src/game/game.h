@@ -216,8 +216,8 @@ enum
 
 enum
 {
-    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CTF, G_DTF, G_ETF, G_TRIAL, G_MAX,
-    G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH, G_RAND = G_ETF-G_DEATHMATCH+1
+    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
+    G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH, G_RAND = G_BOMBER-G_DEATHMATCH+1
 };
 enum
 {
@@ -252,16 +252,16 @@ gametypes gametype[] = {
         "deathmatch"
     },
     {
-        G_CTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        G_CAPTURE,          G_M_TEAM,       G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
         "capture-the-flag"
     },
     {
-        G_DTF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        G_DEFEND,          G_M_TEAM,        G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
         "defend-the-flag"
     },
     {
-        G_ETF,          G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
-        "explode-the-flag"
+        G_BOMBER,          G_M_TEAM,        G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
+        "bomber-ball"
     },
     {
         G_TRIAL,        G_M_NONE,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK,
@@ -316,14 +316,14 @@ extern gametypes gametype[], mutstype[];
 #define m_edit(a)           (a == G_EDITMODE)
 #define m_campaign(a)       (a == G_CAMPAIGN)
 #define m_dm(a)             (a == G_DEATHMATCH)
-#define m_ctf(a)            (a == G_CTF)
-#define m_dtf(a)            (a == G_DTF)
-#define m_etf(a)            (a == G_ETF)
+#define m_capture(a)        (a == G_CAPTURE)
+#define m_defend(a)         (a == G_DEFEND)
+#define m_bomber(a)         (a == G_BOMBER)
 #define m_trial(a)          (a == G_TRIAL)
 
 #define m_play(a)           (a >= G_PLAY)
-#define m_affinity(a)       (m_ctf(a) || m_dtf(a) || m_etf(a))
-#define m_affinhold(a)      (m_ctf(a) || m_etf(a))
+#define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
+#define m_affinhold(a)      (m_capture(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
 #define m_team(a,b)         ((b & G_M_TEAM) || (gametype[a].implied & G_M_TEAM))
@@ -342,7 +342,7 @@ extern gametypes gametype[], mutstype[];
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
 
 #define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_edit(a) || m_trial(a) ? GAME(limitedweapon) : GAME(spawnweapon))))))
-#define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : ((m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
+#define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
 #define m_health(a,b)       (m_insta(a,b) ? 1 : GAME(maxhealth))
@@ -1061,7 +1061,7 @@ struct gameent : dynent, gamestate
         resetjump();
     }
 
-    void resetfire()
+    void resbomberire()
     {
         if(issound(fschan)) removesound(fschan);
         fschan = -1;
@@ -1433,9 +1433,9 @@ namespace client
     extern const char *getname();
 }
 #endif
-#include "ctf.h"
-#include "dtf.h"
-#include "etf.h"
+#include "capture.h"
+#include "defend.h"
+#include "bomber.h"
 #ifndef GAMESERVER
 #include "scoreboard.h"
 #endif

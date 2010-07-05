@@ -698,9 +698,9 @@ namespace server
 
     #define maplist(a,b,c) \
         if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
-        else if(m_ctf(b)) a = newstring(GAME(ctfmaps)); \
-        else if(m_dtf(b)) a = newstring(GAME(dtfmaps)); \
-        else if(m_etf(b)) a = newstring(GAME(etfmaps)); \
+        else if(m_capture(b)) a = newstring(GAME(capturemaps)); \
+        else if(m_defend(b)) a = newstring(GAME(defendmaps)); \
+        else if(m_bomber(b)) a = newstring(GAME(bombermaps)); \
         else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
         else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
         else a = newstring(GAME(allowmaps)); \
@@ -1559,7 +1559,6 @@ namespace server
         d.ent = d.value = -1;
         sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
         if(sub) takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
-        else waiting(ci, 0, 1);
     }
 
     void givepoints(clientinfo *ci, int points)
@@ -1784,9 +1783,9 @@ namespace server
         return true;
     }
 
-    #include "ctfmode.h"
-    #include "dtfmode.h"
-    #include "etfmode.h"
+    #include "capturemode.h"
+    #include "defendmode.h"
+    #include "bombermode.h"
     #include "duelmut.h"
     #include "aiman.h"
 
@@ -1831,9 +1830,9 @@ namespace server
         copystring(smapname, reqmap);
 
         // server modes
-        if(m_ctf(gamemode)) smode = &ctfmode;
-        else if(m_dtf(gamemode)) smode = &dtfmode;
-        else if(m_etf(gamemode)) smode = &etfmode;
+        if(m_capture(gamemode)) smode = &capturemode;
+        else if(m_defend(gamemode)) smode = &defendmode;
+        else if(m_bomber(gamemode)) smode = &bombermode;
         else smode = NULL;
         smuts.shrink(0);
         if(m_duke(gamemode, mutators)) smuts.add(&duelmutator);
@@ -2877,7 +2876,7 @@ namespace server
             }
             if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
         }
-        if(ci->state.state == CS_ALIVE)
+        if(ci->state.state == CS_ALIVE || (!doteam && drop == 1))
         {
             dropitems(ci, drop);
             if(smode) smode->died(ci);
@@ -3908,7 +3907,7 @@ namespace server
                     break;
 
                 case N_AFFIN:
-                    if(smode==&dtfmode) dtfmode.parseaffinity(p);
+                    if(smode==&defendmode) defendmode.parseaffinity(p);
                     break;
 
                 case N_TAKEAFFIN:
@@ -3916,8 +3915,8 @@ namespace server
                     int lcn = getint(p), flag = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
-                    if(smode==&ctfmode) ctfmode.takeaffinity(cp, flag);
-                    else if(smode==&etfmode) etfmode.takeaffinity(cp, flag);
+                    if(smode==&capturemode) capturemode.takeaffinity(cp, flag);
+                    else if(smode==&bombermode) bombermode.takeaffinity(cp, flag);
                     break;
                 }
 
@@ -3925,8 +3924,8 @@ namespace server
                 {
                     int flag = getint(p);
                     if(!ci) break;
-                    if(smode==&ctfmode) ctfmode.resetaffinity(ci, flag);
-                    else if(smode==&etfmode) etfmode.resetaffinity(ci, flag);
+                    if(smode==&capturemode) capturemode.resetaffinity(ci, flag);
+                    else if(smode==&bombermode) bombermode.resetaffinity(ci, flag);
                     break;
                 }
 
@@ -3938,15 +3937,15 @@ namespace server
                     loopk(3) inertia[k] = getint(p)/DMF;
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
-                    if(smode==&ctfmode) ctfmode.dropaffinity(cp, droploc, inertia);
-                    else if(smode==&etfmode) etfmode.dropaffinity(cp, droploc, inertia);
+                    if(smode==&capturemode) capturemode.dropaffinity(cp, droploc, inertia);
+                    else if(smode==&bombermode) bombermode.dropaffinity(cp, droploc, inertia);
                     break;
                 }
 
                 case N_INITAFFIN:
                 {
-                    if(smode==&ctfmode) ctfmode.parseaffinity(p);
-                    else if(smode==&etfmode) etfmode.parseaffinity(p);
+                    if(smode==&capturemode) capturemode.parseaffinity(p);
+                    else if(smode==&bombermode) bombermode.parseaffinity(p);
                     break;
                 }
 

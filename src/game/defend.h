@@ -1,7 +1,7 @@
 #ifdef GAMESERVER
-#define dtfstate stfservstate
+#define defendstate stfservstate
 #endif
-struct dtfstate
+struct defendstate
 {
     static const int SCORESECS = 100;
 
@@ -114,7 +114,7 @@ struct dtfstate
 
     int secured;
 
-    dtfstate() : secured(0) {}
+    defendstate() : secured(0) {}
 
     void reset()
     {
@@ -185,9 +185,9 @@ struct dtfstate
 };
 
 #ifndef GAMESERVER
-namespace dtf
+namespace defend
 {
-    extern dtfstate st;
+    extern defendstate st;
     extern void sendaffinity(packetbuf &p);
     extern void updateaffinity(int i, int owner, int enemy, int converted);
     extern void setscore(int team, int total);
@@ -201,7 +201,7 @@ namespace dtf
     extern int aiowner(gameent *d);
     extern void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests);
     extern bool aicheck(gameent *d, ai::aistate &b);
-    extern bool aidefend(gameent *d, ai::aistate &b);
+    extern bool aidefense(gameent *d, ai::aistate &b);
     extern bool aipursue(gameent *d, ai::aistate &b);
     extern void removeplayer(gameent *d);
 }
