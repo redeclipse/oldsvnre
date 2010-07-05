@@ -1069,6 +1069,7 @@ namespace game
         projs::reset();
         physics::reset();
         resetworld();
+        resetcursor();
         if(*name)
         {
             conoutft(CON_MESG, "\fs\fw%s by %s [\fa%s\fS]", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
