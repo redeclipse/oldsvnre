@@ -56,9 +56,8 @@ struct bomberservmode : bomberstate, servmode
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
                     loopvj(clients) if(clients[j]->state.aitype < AI_START)
                     {
-                        if(clients[j]->state.state == CS_ALIVE && (clients[j]->team == f.team || (!m_duke(gamemode, mutators) && clients[j] == ci)))
-                            kamikaze(clients[j]);
-                        if(!m_duke(gamemode, mutators)) waiting(clients[j], 0, 1);
+                        bool kamikaze = clients[j]->state.state == CS_ALIVE && (clients[j]->team == f.team || (!m_duke(gamemode, mutators) && clients[j] == ci));
+                        if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
                     }
                     if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
                     if(GAME(bomberlimit) && score >= GAME(bomberlimit))

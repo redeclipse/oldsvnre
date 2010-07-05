@@ -59,7 +59,7 @@ struct captureservmode : capturestate, servmode
                         if(m_duke(gamemode, mutators))
                         {
                             loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == flags[i].team)
-                                kamikaze(clients[j]);
+                                waiting(clients[j], 0, 3);
                         }
                         if(GAME(capturelimit) && score >= GAME(capturelimit))
                         {

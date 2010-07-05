@@ -1547,20 +1547,6 @@ namespace server
         return sc;
     }
 
-    void takeammo(clientinfo *ci, int weap, int amt = 1) { ci->state.ammo[weap] = max(ci->state.ammo[weap]-amt, 0); }
-
-    struct droplist { int weap, ent, value; };
-    void kamikaze(clientinfo *ci, bool sub = false)
-    {
-        vector<droplist> drop;
-        ci->state.weapshots[WEAP_GRENADE][0].add(-1);
-        droplist &d = drop.add();
-        d.weap = WEAP_GRENADE;
-        d.ent = d.value = -1;
-        sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
-        if(sub) takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
-    }
-
     void givepoints(clientinfo *ci, int points)
     {
         ci->state.score += points; ci->state.points += points;
@@ -1713,6 +1699,9 @@ namespace server
         }
     }
 
+    void takeammo(clientinfo *ci, int weap, int amt = 1) { ci->state.ammo[weap] = max(ci->state.ammo[weap]-amt, 0); }
+
+    struct droplist { int weap, ent, value; };
     void dropitems(clientinfo *ci, int level = 2)
     {
         if(ci->state.aitype >= AI_START) ci->state.weapreset(false);
@@ -1721,8 +1710,14 @@ namespace server
             servstate &ts = ci->state;
             vector<droplist> drop;
             int sweap = m_weapon(gamemode, mutators);
-            if(level >= 2 && GAME(kamikaze) && (GAME(kamikaze) > 2 || (ts.hasweap(WEAP_GRENADE, sweap) && (GAME(kamikaze) > 1 || ts.weapselect == WEAP_GRENADE))))
-                kamikaze(ci, true);
+            if(level == 3 || (level == 2 && GAME(kamikaze) && (GAME(kamikaze) > 2 || (ts.hasweap(WEAP_GRENADE, sweap) && (GAME(kamikaze) > 1 || ts.weapselect == WEAP_GRENADE)))))
+            {
+                ci->state.weapshots[WEAP_GRENADE][0].add(-1);
+                droplist &d = drop.add();
+                d.weap = WEAP_GRENADE;
+                d.ent = d.value = -1;
+                takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
+            }
             if(level)
             {
                 loopi(WEAP_MAX) if(i != sweap && ts.hasweap(i, sweap) && sents.inrange(ts.entid[i]))
@@ -2876,7 +2871,7 @@ namespace server
             }
             if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
         }
-        if(ci->state.state == CS_ALIVE || (!doteam && drop == 1))
+        if(ci->state.state == CS_ALIVE || (!doteam && drop%2 == 1))
         {
             dropitems(ci, drop);
             if(smode) smode->died(ci);
