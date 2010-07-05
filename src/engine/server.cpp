@@ -933,6 +933,7 @@ void trytofindocta(bool fallback)
 
 void setlocations(bool wanthome)
 {
+    if(!fileexists(findfile("data/defaults.cfg", "r"), "r") && fileexists(findfile("../data/defaults.cfg", "r"), "r")) chdir("..");
     addpackagedir("data");
     if(wanthome)
     {
