@@ -156,7 +156,7 @@ namespace bomber
                     above.z += enttype[AFFINITY].radius/4;
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 8, fluc*trans);
+                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans);
                     if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
                 }
                 else part_explosion(above, enttype[AFFINITY].radius, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, 0.25f);
@@ -169,66 +169,17 @@ namespace bomber
                 part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
                 above.z += 2.5f;
             }
-            if(isbomberaffinity(f) && (f.droptime || (f.taketime && f.owner && f.owner->team != f.team)))
-            {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bomberresetdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, teamtype[f.team].colour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, 0, wait);
-                above.z += 0.5f;
-                defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f)*0.5f);
-                above.z += 2.5f;
-            }
-            if(isbomberaffinity(f) && (f.owner || f.droptime))
-            {
-                if(f.owner)
-                {
-                    defformatstring(info)("<super>%s", game::colorname(f.owner));
-                    part_textcopy(above, info, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
-                    above.z += 1.5f;
-                }
-                const char *info = f.owner ? "\frtaken by" : "\fodropped";
-                part_text(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
-            }
-        }
-        static vector<int> numflags, iterflags; // dropped/owned
-        loopv(numflags) numflags[i] = iterflags[i] = 0;
-        loopv(st.flags)
-        {
-            bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || !f.owner) continue;
-            while(numflags.length() <= f.owner->clientnum) { numflags.add(0); iterflags.add(0); }
-            numflags[f.owner->clientnum]++;
         }
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
-            float yaw = 0;
-            if(f.owner)
-            {
-                yaw += f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
-                while(yaw >= 360.f) yaw -= 360.f;
-            }
-            else yaw += (f.interptime+(360/st.flags.length()*i))%360;
+            float yaw = f.owner ? f.owner->yaw : (f.proj ? f.proj->yaw : float((f.interptime+(360/st.flags.length()*i))%360));
             int interval = lastmillis%1000;
             float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 8, fluc);
-            if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
+            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc);
             rendermodel(&f.light, "bomb", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
-            above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
-            if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
-            if(f.droptime || (f.taketime && f.owner && f.owner->team != f.team))
-            {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bomberresetdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, teamtype[f.team].colour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[f.team].colour, 0, wait);
-                above.z += 0.5f;
-                defformatstring(str)("%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
-                above.z += 2.5f;
-            }
         }
     }
 
