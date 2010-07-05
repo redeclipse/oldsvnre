@@ -159,7 +159,7 @@ namespace bomber
                     part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans);
                     if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
                 }
-                else part_explosion(above, enttype[AFFINITY].radius, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, 0.25f);
+                else part_explosion(above, enttype[AFFINITY].radius/2, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, 0.125f);
                 rendermodel(&entities::ents[f.ent]->light, isbomberaffinity(f) ? "bomb" : "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             }
             above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
@@ -349,7 +349,7 @@ namespace bomber
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "EXPLODED");
         if(m_duke(game::gamemode, game::mutators))
         {
-            float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius);
+            float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius/2);
             part_create(PART_PLASMA_SOFT, 250, g.spawnloc, 0xAA4400, radius*0.5f);
             part_explosion(g.spawnloc, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
             part_explosion(g.spawnloc, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
