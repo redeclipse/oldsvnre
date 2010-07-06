@@ -21,8 +21,6 @@ namespace bomber
 
     void preload()
     {
-        loadmodel("flag", -1, true);
-        loadmodel("bomb", -1, true);
     }
 
     void drawblips(int w, int h, float blend)
@@ -353,7 +351,7 @@ namespace bomber
         (st.findscore(d->team)).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team == d->team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
-        game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s exploded the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
+        game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
         st.interp(relay, totalmillis);
     }
