@@ -119,7 +119,10 @@ namespace projs
                     break;
                 default:
                     if(weaptype[proj.weap].melee)
-                        part_create(PART_PLASMA_SOFT, 250, proj.o, 0xAA8811, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
+                    {
+                        part_flare(proj.o, proj.from, 500, proj.weap == WEAP_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, proj.weap == WEAP_SWORD ? 0x1111CC : 0xAA8811, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, 0.75f);
+                        part_create(PART_PLASMA_SOFT, 500, proj.o, proj.weap == WEAP_SWORD ? 0x1111CC : 0xAA8811, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
+                    }
                     break;
             }
             return (proj.projcollide&COLLIDE_CONT) ? false : true;
@@ -202,27 +205,36 @@ namespace projs
         {
             vec dir[2]; dir[0] = dir[1] = vec(proj.vel).normalize();
             float mag = proj.vel.magnitude()*elasticity; // conservation of energy
-            dir[1].reflect(pos);
-            if(!proj.lastbounce && reflectivity > 0.f)
-            { // if projectile returns at 180 degrees [+/-]reflectivity, skew the reflection
-                float aim[2][2] = { { 0.f, 0.f }, { 0.f, 0.f } };
-                loopi(2) vectoyawpitch(dir[i], aim[0][i], aim[1][i]);
-                loopi(2)
-                {
-                    float rmax = 180.f+reflectivity, rmin = 180.f-reflectivity,
-                        off = aim[i][1]-aim[i][0];
-                    if(fabs(off) <= rmax && fabs(off) >= rmin)
-                    {
-                        if(off > 0.f ? off > 180.f : off < -180.f)
-                            aim[i][1] += rmax-off;
-                        else aim[i][1] -= off-rmin;
-                    }
-                    while(aim[i][1] < 0.f) aim[i][1] += 360.f;
-                    while(aim[i][1] >= 360.f) aim[i][1] -= 360.f;
-                }
-                vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
+            if(proj.bouncexy)
+            {
+                dir[1].reflect(pos).normalize().mul(mag);
+                loopi(3) if(fabs(dir[1][i]) < (i == 2 ? 10 : 100)) dir[1][i] = dir[1][i] >= 0 ? (i == 2 ? 10 : 100) : (i == 2 ? -10 : -100);
+                proj.vel = dir[1];
             }
-            proj.vel = vec(dir[1]).mul(mag);
+            else
+            {
+                dir[1].reflect(pos);
+                if(!proj.lastbounce && reflectivity > 0.f)
+                { // if projectile returns at 180 degrees [+/-]reflectivity, skew the reflection
+                    float aim[2][2] = { { 0.f, 0.f }, { 0.f, 0.f } };
+                    loopi(2) vectoyawpitch(dir[i], aim[0][i], aim[1][i]);
+                    loopi(2)
+                    {
+                        float rmax = 180.f+reflectivity, rmin = 180.f-reflectivity,
+                            off = aim[i][1]-aim[i][0];
+                        if(fabs(off) <= rmax && fabs(off) >= rmin)
+                        {
+                            if(off > 0.f ? off > 180.f : off < -180.f)
+                                aim[i][1] += rmax-off;
+                            else aim[i][1] -= off-rmin;
+                        }
+                        while(aim[i][1] < 0.f) aim[i][1] += 360.f;
+                        while(aim[i][1] >= 360.f) aim[i][1] -= 360.f;
+                    }
+                    vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
+                }
+                proj.vel = vec(dir[1]).mul(mag);
+            }
         }
         else proj.vel = vec(0, 0, 0);
     }
@@ -504,19 +516,20 @@ namespace projs
             }
             case PRJ_AFFINITY:
             {
-                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 8;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 6;
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
-                proj.elasticity = 0.5f;
+                proj.elasticity = 0.75f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 150.f;
+                proj.weight = 100.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
                 proj.extinguish = 6;
+                if(m_bomber(game::gamemode)) proj.bouncexy = true;
                 break;
             }
             default: break;

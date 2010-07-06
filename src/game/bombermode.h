@@ -16,7 +16,7 @@ struct bomberservmode : bomberstate, servmode
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(o).mul(DMF)), q(vec(inertia).mul(DMF));
+            ivec p(vec(o).mul(DMF)), q((inertia.iszero() ? vec(0, 0, GAME(bomberspeed)) : vec(inertia)).mul(DMF));
             sendf(-1, 1, "ri9", N_DROPAFFIN, ci->clientnum, i, p.x, p.y, p.z, q.x, q.y, q.z);
             bomberstate::dropaffinity(i, o, inertia, gamemillis);
         }
@@ -25,6 +25,11 @@ struct bomberservmode : bomberstate, servmode
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         dropaffinity(ci, ci->state.o);
+    }
+
+    void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush)
+    {
+        if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o);
     }
 
     void died(clientinfo *ci, clientinfo *actor)

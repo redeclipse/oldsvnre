@@ -97,9 +97,9 @@ struct defendstate
             else { owner = team; securetime = 0; owners = enemies; noenemy(); return 1; }
         }
 
-        float occupied(int style, float amt)
+        float occupied(bool instant, float amt)
         {
-            return (enemy ? enemy : owner) ? (!owner || enemy ? clamp(converted/float((!style && owner ? 2 : 1)*amt), 0.f, 1.f) : 1.f) : 0.f;
+            return (enemy ? enemy : owner) ? (!owner || enemy ? clamp(converted/float((!instant && owner ? 2 : 1)*amt), 0.f, 1.f) : 1.f) : 0.f;
         }
     };
 

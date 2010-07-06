@@ -234,7 +234,7 @@ namespace weapons
         #define addshot(p) { vshots.add(p); shots.add(ivec(int(p.x*DMF), int(p.y*DMF), int(p.z*DMF))); }
         if(weaptype[weap].traced)
         {
-            from = d->originpos();
+            from = d->originpos(weap == WEAP_MELEE, secondary);
             if(weap == WEAP_MELEE) to = vec(targ).sub(from).normalize().mul(d->radius).add(from);
             else to = d->muzzlepos(weap, secondary);
             int rays = WEAP2(weap, rays, secondary);

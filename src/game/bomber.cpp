@@ -163,10 +163,14 @@ namespace bomber
                     above.z += enttype[AFFINITY].radius/4;
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans*0.5f);
-                    part_icon(above, textureload(hud::bombtex, 3), 4*trans, trans, 0, 0, 1, 0x888888);
+                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans);
+                    part_icon(above, textureload(hud::bombtex, 3), 3*trans, trans, 0, 0, 1, 0xAAAAAA);
                 }
-                else part_explosion(above, enttype[AFFINITY].radius/2, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, 0.125f);
+                else
+                {
+                    part_explosion(above, enttype[AFFINITY].radius/2, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, 0.125f);
+                    part_explosion(above, enttype[AFFINITY].radius/4, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, 0.5f);
+                }
             }
             above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
             if(!isbomberaffinity(f))
@@ -183,8 +187,8 @@ namespace bomber
             vec above(f.pos(true));
             int interval = lastmillis%1000;
             float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*0.5f);
-            part_icon(above, textureload(hud::bombtex, 3), 4, 1, 0, 0, 1, 0x888888);
+            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc);
+            part_icon(above, textureload(hud::bombtex, 3), 3, 1, 0, 0, 1, 0xAAAAAA);
         }
     }
 
