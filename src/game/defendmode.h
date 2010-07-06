@@ -144,7 +144,7 @@ struct defendservmode : defendstate, servmode
                 return;
             }
         }
-        if(GAME(defendfinish))
+        if(m_gsp2(gamemode, mutators))
         {
             int steam = TEAM_NEUTRAL;
             loopv(flags)

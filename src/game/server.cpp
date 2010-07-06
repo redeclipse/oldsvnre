@@ -597,14 +597,18 @@ namespace server
         {
             if((gametype[mode].mutators&mutstype[i].type) && (muts&mutstype[i].type) && (!gametype[mode].implied || !(gametype[mode].implied&mutstype[i].type)))
             {
-                string name;
-                switch(compact)
+                const char *mut = i < G_M_GSP ? mutstype[i].name : gametype[mode].gsp[i-G_M_GSP];
+                if(mut && *mut)
                 {
-                    case 2: formatstring(name)("%s%c", *gname ? gname : "", mutstype[i].name[0]); break;
-                    case 1: formatstring(name)("%s%s%c", *gname ? gname : "", *gname ? "-" : "", mutstype[i].name[0]); break;
-                    case 0: default: formatstring(name)("%s%s%s", *gname ? gname : "", *gname ? "-" : "", mutstype[i].name); break;
+                    string name;
+                    switch(compact)
+                    {
+                        case 2: formatstring(name)("%s%c", *gname ? gname : "", mut[0]); break;
+                        case 1: formatstring(name)("%s%s%c", *gname ? gname : "", *gname ? "-" : "", mut[0]); break;
+                        case 0: default: formatstring(name)("%s%s%s", *gname ? gname : "", *gname ? "-" : "", mut); break;
+                    }
+                    copystring(gname, name);
                 }
-                copystring(gname, name);
             }
         }
         defformatstring(mname)("%s%s%s", *gname ? gname : "", *gname ? " " : "", gametype[mode].name);
@@ -661,6 +665,7 @@ namespace server
     ICOMMAND(0, mutscheck, "iii", (int *g, int *m, int *t), intret(mutscheck(*g, *m, *t)));
     ICOMMAND(0, mutsallowed, "i", (int *g), intret(*g >= 0 && *g < G_MAX ? gametype[*g].mutators : 0));
     ICOMMAND(0, mutsimplied, "i", (int *g), intret(*g >= 0 && *g < G_MAX ? gametype[*g].implied : 0));
+    ICOMMAND(0, gspmutname, "ii", (int *g, int *n), result(*g >= 0 && *g < G_MAX && *n >= 0 && *n < G_M_GSN ? gametype[*g].gsp[*n] : ""));
 
     void changemode(int &mode, int &muts)
     {
@@ -805,17 +810,17 @@ namespace server
                     }
                 }
             }
-            if(GAME(fraglimit) && !m_affinity(gamemode) && !m_trial(gamemode))
+            if(GAME(pointlimit) && !m_affinity(gamemode) && !m_trial(gamemode))
             {
                 if(m_team(gamemode, mutators))
                 {
                     int teamscores[TEAM_NUM] = {0};
                     loopv(clients) if(clients[i]->state.aitype < AI_START && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
-                        teamscores[clients[i]->team-TEAM_FIRST] += clients[i]->state.frags;
+                        teamscores[clients[i]->team-TEAM_FIRST] += clients[i]->state.points;
                     int best = -1;
                     loopi(TEAM_NUM) if(best < 0 || teamscores[i] > teamscores[best])
                         best = i;
-                    if(best >= 0 && teamscores[best] >= GAME(fraglimit))
+                    if(best >= 0 && teamscores[best] >= GAME(pointlimit))
                     {
                         sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();
@@ -825,9 +830,9 @@ namespace server
                 else
                 {
                     int best = -1;
-                    loopv(clients) if(clients[i]->state.aitype < AI_START && (best < 0 || clients[i]->state.frags > clients[best]->state.frags))
+                    loopv(clients) if(clients[i]->state.aitype < AI_START && (best < 0 || clients[i]->state.points > clients[best]->state.points))
                         best = i;
-                    if(best >= 0 && clients[best]->state.frags >= GAME(fraglimit))
+                    if(best >= 0 && clients[best]->state.points >= GAME(pointlimit))
                     {
                         sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();

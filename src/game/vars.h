@@ -93,22 +93,21 @@ GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
-GVAR(0, fraglimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, pointlimit, 0, 100, INT_MAX-1); // finish when score is this or more
 
-GVAR(0, capturelimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, capturelimit, 0, 10, INT_MAX-1); // finish when score is this or more
 GVAR(0, capturestyle, 0, 0, 3); // 0 = classic touch-and-return, 1 = grab and take home, 2 = defend and reset, 3 = dominate and protect
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 
 GVAR(0, defendlimit, 0, 0, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendstyle, 0, 1, 1); // 0 = overthrow and secure, 1 = instant secure
-GVAR(0, defendfinish, 0, 0, 1); // finish when all bases captured
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
 GVAR(0, defendoccupy, 0, 100, INT_MAX-1); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
-GVAR(0, bomberlimit, 0, 0, INT_MAX-1); // finish when score is this or more
-GVAR(0, bomberresetdelay, 0, 30000, INT_MAX-1);
-GFVAR(0, bomberspeed, 0, 250, 10000);
+GVAR(0, bomberlimit, 0, 10, INT_MAX-1); // finish when score is this or more
+GVAR(0, bomberresetdelay, 0, 10000, INT_MAX-1);
+GFVAR(0, bomberspeed, 0, 300, 10000);
 
 GVAR(0, skillmin, 1, 65, 101);
 GVAR(0, skillmax, 1, 85, 101);
