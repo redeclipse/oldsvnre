@@ -54,7 +54,7 @@ namespace game
 
     VAR(IDF_PERSIST, follow, 0, 0, INT_MAX-1);
     VARF(IDF_PERSIST, specmode, 0, 1, 1, follow = 0); // 0 = float, 1 = tv
-    VARF(IDF_PERSIST, waitmode, 0, 0, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
+    VARF(IDF_PERSIST, waitmode, 0, 1, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, INT_MAX-1);
     FVAR(IDF_PERSIST, spectvspeed, 0, 0.5f, 1000);

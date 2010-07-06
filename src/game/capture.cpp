@@ -522,7 +522,12 @@ namespace capture
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
                 f.pickuptime = lastmillis;
             }
-       }
+        }
+        if(d->action[AC_AFFINITY])
+        {
+            if(!dropaffinity(d) && d == game::player1) playsound(S_ERROR, d->o, d);
+            d->action[AC_AFFINITY] = false;
+        }
     }
 
     bool aihomerun(gameent *d, ai::aistate &b)
