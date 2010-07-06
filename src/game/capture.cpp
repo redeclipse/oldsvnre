@@ -112,7 +112,7 @@ namespace capture
                         {
                             int off[2] = { hud::hudwidth/2, hud::hudheight/4 };
                             skew = 1; // override it
-                            if(millis <= hud::inventoryaffinity/2)
+                            if(millis <= hud::inventoryaffinity*3/4)
                             {
                                 float tweak = millis <= hud::inventoryaffinity/4 ? clamp(float(millis)/float(hud::inventoryaffinity/4), 0.f, 1.f) : 1.f;
                                 skew += tweak*hud::inventorygrow;
@@ -121,7 +121,7 @@ namespace capture
                             }
                             else
                             {
-                                float tweak = clamp(float(millis-(hud::inventoryaffinity/2))/float(hud::inventoryaffinity/2), 0.f, 1.f);
+                                float tweak = clamp(float(millis-(hud::inventoryaffinity*3/4))/float(hud::inventoryaffinity/4), 0.f, 1.f);
                                 skew += (1.f-tweak)*hud::inventorygrow;
                                 loopk(2) pos[k] -= int((pos[k]-(off[k]+s/2*skew))*(1.f-tweak));
                                 rescale = tweak;
