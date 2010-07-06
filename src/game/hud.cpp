@@ -1739,7 +1739,7 @@ namespace hud
                             {
                                 pre = "\fzRw";
                                 int off[2] = { hudwidth/2, hudheight/4 };
-                                if(millis <= inventoryteams/2)
+                                if(millis <= inventoryteams*3/4)
                                 {
                                     float tweak = millis <= inventoryteams/4 ? clamp(float(millis)/float(inventoryteams/4), 0.f, 1.f) : 1.f;
                                     skew += tweak*inventorygrow;
@@ -1748,7 +1748,7 @@ namespace hud
                                 }
                                 else
                                 {
-                                    float tweak = clamp(float(millis-(inventoryteams/2))/float(inventoryteams/2), 0.f, 1.f);
+                                    float tweak = clamp(float(millis-(inventoryteams*3/4))/float(inventoryteams/4), 0.f, 1.f);
                                     skew += (1.f-tweak)*inventorygrow;
                                     loopk(2) pos[k] -= int((pos[k]-(off[k]+cs/2*skew))*(1.f-tweak));
                                     rescale = tweak;

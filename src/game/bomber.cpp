@@ -93,7 +93,7 @@ namespace bomber
                         {
                             int off[2] = { hud::hudwidth/2, hud::hudheight/4 };
                             skew = 1; // override it
-                            if(millis <= hud::inventoryaffinity/2)
+                            if(millis <= hud::inventoryaffinity*3/4)
                             {
                                 float tweak = millis <= hud::inventoryaffinity/4 ? clamp(float(millis)/float(hud::inventoryaffinity/4), 0.f, 1.f) : 1.f;
                                 skew += tweak*hud::inventorygrow;
@@ -102,7 +102,7 @@ namespace bomber
                             }
                             else
                             {
-                                float tweak = clamp(float(millis-(hud::inventoryaffinity/2))/float(hud::inventoryaffinity/2), 0.f, 1.f);
+                                float tweak = clamp(float(millis-(hud::inventoryaffinity*3/4))/float(hud::inventoryaffinity/4), 0.f, 1.f);
                                 skew += (1.f-tweak)*hud::inventorygrow;
                                 loopk(2) pos[k] -= int((pos[k]-(off[k]+s/2*skew))*(1.f-tweak));
                                 rescale = tweak;
@@ -121,22 +121,20 @@ namespace bomber
                     else skew = 0.5f;
                 }
                 else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)))*0.5f;
-                sy += int(hud::drawitem(hud::bombtex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? "\frtaken by" : (f.droptime ? "\fodropped" : ""))*rescale);
+                sy += int(hud::drawitem(hud::bombtex, pos[0], pos[1], s, false, r, g, b, fade, skew)*rescale);
                 if(f.droptime)
                 {
                     int time = lastmillis-f.droptime, delay = bomberresetdelay-time;
-                    float wait = clamp(delay/float(bomberresetdelay), 0.f, 1.f);
-                    hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%s", hud::timetostr(delay, -1));
+                    hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fy%s", hud::timetostr(delay, -1));
                 }
                 else if(f.owner)
                 {
-                    if(bomberholdtime)
+                    if(bomberholdtime && f.owner == game::focus)
                     {
                         int time = lastmillis-f.taketime, delay = bomberholdtime-time;
-                        float wait = clamp(delay/float(bomberholdtime), 0.f, 1.f);
-                        hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%s", hud::timetostr(delay, -1));
+                        hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fy%s", hud::timetostr(delay, -1));
                     }
-                    hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
+                    else hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
                 }
             }
         }
