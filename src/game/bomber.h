@@ -10,7 +10,7 @@ struct bomberstate
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, droptime, taketime;
+        int team, droptime, taketime, inittime;
 #ifdef GAMESERVER
         int owner;
         vector<int> votes;
@@ -40,7 +40,7 @@ struct bomberstate
             interptime = pickuptime = 0;
 #endif
             team = TEAM_NEUTRAL;
-            taketime = droptime = 0;
+            inittime = taketime = droptime = 0;
         }
 
 #ifndef GAMESERVER
@@ -87,6 +87,7 @@ struct bomberstate
         flag &f = flags[i];
         f.owner = owner;
         f.taketime = t;
+        if(!f.inittime) f.inittime = t;
         f.droptime = 0;
 #ifdef GAMESERVER
         f.votes.shrink(0);
@@ -124,10 +125,11 @@ struct bomberstate
 #endif
     }
 
-    void returnaffinity(int i, int t)
+    void returnaffinity(int i, int t, bool score)
     {
         flag &f = flags[i];
         f.droptime = f.taketime = 0;
+        if(score) f.inittime = 0;
 #ifdef GAMESERVER
         f.owner = -1;
         f.votes.shrink(0);
@@ -174,7 +176,6 @@ namespace bomber
     extern void parseaffinity(ucharbuf &p, bool commit);
     extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
-    extern void returnaffinity(gameent *d, int i);
     extern void takeaffinity(gameent *d, int i);
     extern void resetaffinity(int i);
     extern void setupaffinity();

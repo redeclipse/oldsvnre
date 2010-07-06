@@ -60,6 +60,13 @@ namespace bomber
                     pushfont("super");
                     ty += draw_textx("\fzwaYou have the bomb", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
                     popfont();
+                    if(bomberholdtime)
+                    {
+                        int delay = bomberholdtime-(lastmillis-f.taketime);
+                        pushfont("emphasis");
+                        ty += draw_textx("Explodes in \fs\fy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
+                        popfont();
+                    }
                     break;
                 }
             }
@@ -110,18 +117,27 @@ namespace bomber
                             else skew = 1; // override it
                         }
                     }
-                    else if(millis <= 1000) skew += (1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f);
-                    else skew = 1;
+                    else if(millis <= 1000) skew += ((1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f))*0.5f;
+                    else skew = 0.5f;
                 }
-                else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
+                else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)))*0.5f;
                 sy += int(hud::drawitem(hud::bombtex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? "\frtaken by" : (f.droptime ? "\fodropped" : ""))*rescale);
-                if(isbomberaffinity(f) && f.droptime)
+                if(f.droptime)
                 {
-                    float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
-                    if(wait < 1) hud::drawprogress(pos[0], pos[1], wait, 1-wait, s, false, r, g, b, fade*0.25f, skew);
-                    else hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%d%%", int(wait*100.f));
+                    int time = lastmillis-f.droptime, delay = bomberresetdelay-time;
+                    float wait = clamp(delay/float(bomberresetdelay), 0.f, 1.f);
+                    hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%s", hud::timetostr(delay, -1));
                 }
-                else if(f.owner) hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
+                else if(f.owner)
+                {
+                    if(bomberholdtime)
+                    {
+                        int time = lastmillis-f.taketime, delay = bomberholdtime-time;
+                        float wait = clamp(delay/float(bomberholdtime), 0.f, 1.f);
+                        hud::drawprogress(pos[0], pos[1], 0, wait, s, false, r, g, b, fade, skew, "default", "%s", hud::timetostr(delay, -1));
+                    }
+                    hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
+                }
             }
         }
         return sy;
@@ -266,13 +282,13 @@ namespace bomber
                 bomberstate::flag &f = st.flags[i];
                 f.team = team;
                 f.owner = owner >= 0 ? game::newclient(owner) : NULL;
-                if(f.owner) { if(!f.taketime) f.taketime = lastmillis; }
-                else f.taketime = 0;
+                if(f.owner) { if(!f.taketime) f.inittime = f.taketime = lastmillis; }
+                else f.inittime = f.taketime = 0;
                 if(dropped)
                 {
                     f.droploc = droploc;
                     f.droploc = inertia;
-                    f.droptime = lastmillis;
+                    f.inittime = f.droptime = lastmillis;
                     f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, i);
                 }
             }
@@ -328,7 +344,7 @@ namespace bomber
         bomberstate::flag &f = st.flags[i];
         affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
         game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
-        st.returnaffinity(i, lastmillis);
+        st.returnaffinity(i, lastmillis, false);
         st.interp(i, totalmillis);
     }
 
@@ -351,8 +367,8 @@ namespace bomber
         (st.findscore(d->team)).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team == d->team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
-        game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
-        st.returnaffinity(relay, lastmillis);
+        game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
+        st.returnaffinity(relay, lastmillis, true);
         st.interp(relay, totalmillis);
     }
 
@@ -375,7 +391,20 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || f.owner) continue;
+            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f)) continue;
+            if(f.owner)
+            {
+                if(bomberholdtime && f.owner == d && d->ai && !d->action[AC_AFFINITY])
+                {
+                    int time = lastmillis-f.taketime, delay = bomberholdtime-time;
+                    if(delay <= bomberholdtime/3)
+                    {
+                        d->action[AC_AFFINITY] = true;
+                        break;
+                    }
+                }
+                continue;
+            }
             if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
             if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
