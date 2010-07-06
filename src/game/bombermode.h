@@ -49,7 +49,7 @@ struct bomberservmode : bomberstate, servmode
                 flag &f = flags[k];
                 if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2)
                 {
-                    bomberstate::returnaffinity(i, gamemillis);
+                    bomberstate::returnaffinity(i, gamemillis, true);
                     givepoints(ci, 5);
                     ci->state.flags++;
                     int score = addscore(ci->team);
@@ -88,7 +88,7 @@ struct bomberservmode : bomberstate, servmode
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
-            bomberstate::returnaffinity(i, gamemillis);
+            bomberstate::returnaffinity(i, gamemillis, false);
             sendf(-1, 1, "ri2", N_RESETAFFIN, i);
         }
     }
@@ -99,12 +99,22 @@ struct bomberservmode : bomberstate, servmode
         loopv(flags) if(isbomberaffinity(flags[i]))
         {
             flag &f = flags[i];
-            if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay))
+            if(f.owner >= 0)
             {
-                bomberstate::returnaffinity(i, gamemillis);
+                clientinfo *ci = (clientinfo *)getinfo(f.owner);
+                if(ci && GAME(bomberholdtime) && gamemillis-f.taketime >= GAME(bomberholdtime))
+                {
+                    ci->state.weapshots[WEAP_GRENADE][0].add(-1);
+                    sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 3, WEAP_GRENADE, -1, -1);
+                    dropaffinity(ci, ci->state.o);
+                }
+                continue;
+            }
+            if(f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay))
+            {
+                bomberstate::returnaffinity(i, gamemillis, false);
                 sendf(-1, 1, "ri2", N_RESETAFFIN, i);
             }
-            break;
         }
     }
 

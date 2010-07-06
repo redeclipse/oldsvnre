@@ -504,7 +504,7 @@ namespace projs
             }
             case PRJ_AFFINITY:
             {
-                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 8;
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
