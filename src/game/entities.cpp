@@ -879,11 +879,6 @@ namespace entities
 
     void checkitems(gameent *d)
     {
-        if(d->aitype < AI_START && d->action[AC_USE] && m_affinhold(game::gamemode))
-        {
-            if(m_capture(game::gamemode)) { if(capture::dropaffinity(d)) d->action[AC_USE] = false; }
-            else if(m_bomber(game::gamemode)) { if(bomber::dropaffinity(d)) d->action[AC_USE] = false; }
-        }
         static vector<actitem> actitems;
         actitems.setsize(0);
         if(collateitems(d, actitems))

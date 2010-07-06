@@ -28,23 +28,25 @@ namespace bomber
     void drawblips(int w, int h, float blend)
     {
         static vector<int> hasflags; hasflags.setsize(0);
-        loopv(st.flags) if(entities::ents.inrange(st.flags[i].ent) && st.flags[i].owner == game::focus) hasflags.add(i);
+        loopv(st.flags) if(st.flags[i].owner == game::focus) hasflags.add(i);
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
-            vec dir;
-            int colour = isbomberaffinity(f) ? 0xFFFFFF : teamtype[f.team].colour;
-            float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend;
-            if(isbomberaffinity(f)) (dir = f.pos()).sub(camera1->o);
-            else
+            if(!entities::ents.inrange(f.ent) || hasflags.find(i) >= 0) continue;
+            vec dir = vec(f.pos()).sub(camera1->o);
+            int colour = isbomberaffinity(f) ? 0x888888 : teamtype[f.team].colour;
+            float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend, size = 1;
+            if(!isbomberaffinity(f))
             {
-                (dir = f.spawnloc).sub(camera1->o);
                 float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
-                if(isbombertarg(f, game::focus->team) && !hasflags.empty()) fade += (1.f-fade)*diff;
+                if(isbombertarg(f, game::focus->team) && !hasflags.empty())
+                {
+                    fade += (1.f-fade)*diff;
+                    size *= 2;
+                }
             }
             dir.rotate_around_z(-camera1->yaw*RAD).normalize();
-            hud::drawblip(isbomberaffinity(f) ? hud::bliptex : hud::flagtex, 3, w, h, hud::radaraffinitysize*(isbomberaffinity(f) ? 0.5f : 1.f), fade, dir, r, g, b);
+            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), 3, w, h, hud::radaraffinitysize*size, fade, dir, r, g, b);
         }
     }
 
@@ -52,23 +54,17 @@ namespace bomber
     {
         if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
         {
-            static vector<int> hasflags, takenflags, droppedflags;
-            hasflags.setsize(0); takenflags.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
                 bomberstate::flag &f = st.flags[i];
-                if(f.owner == game::player1) hasflags.add(i);
-                else if(isbomberaffinity(f))
+                if(f.owner == game::player1)
                 {
-                    if(f.owner && f.owner->team != game::player1->team) takenflags.add(i);
-                    else if(f.droptime) droppedflags.add(i);
+                    pushfont("super");
+                    ty += draw_textx("\fzwaYou have the bomb", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+                    popfont();
+                    break;
                 }
             }
-            pushfont("super");
-            if(!hasflags.empty()) ty += draw_textx("\fzwaYou have the bomb", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-            if(!takenflags.empty()) ty += draw_textx("\fzwaBomb has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-            if(!droppedflags.empty()) ty += draw_textx("\fzwaBomb has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-            popfont();
         }
     }
 
@@ -83,7 +79,7 @@ namespace bomber
             if(headsup || f.lastowner == game::focus)
             {
                 int millis = totalmillis-f.interptime, pos[2] = { x, y-sy };
-                float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend, r = 1, g = 1, b = 1, rescale = 1.f;
+                float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend, r = 0.5f, g = 0.5f, b = 0.5f, rescale = 1.f;
                 if(f.owner || f.droptime)
                 {
                     if(f.owner == game::focus)
@@ -120,7 +116,7 @@ namespace bomber
                     else skew = 1;
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
-                sy += int(hud::drawitem(hud::bliptex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? "\frtaken by" : (f.droptime ? "\fodropped" : ""))*rescale);
+                sy += int(hud::drawitem(hud::bombtex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? "\frtaken by" : (f.droptime ? "\fodropped" : ""))*rescale);
                 if(isbomberaffinity(f) && f.droptime)
                 {
                     float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
@@ -150,17 +146,15 @@ namespace bomber
             else if(!isbomberaffinity(f)) trans = 0.5f;
             if(trans > 0)
             {
-                float yaw = entities::ents[f.ent]->attrs[1], pitch = entities::ents[f.ent]->attrs[2];
                 if(isbomberaffinity(f))
                 {
                     above.z += enttype[AFFINITY].radius/4;
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans);
-                    if((yaw += (360*(interval/1000.f))) >= 360) yaw -= 360;
+                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans*0.5f);
+                    part_icon(above, textureload(hud::bombtex, 3), 4*trans, trans, 0, 0, 1, 0x888888);
                 }
                 else part_explosion(above, enttype[AFFINITY].radius/2, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, 0.125f);
-                rendermodel(&entities::ents[f.ent]->light, isbomberaffinity(f) ? "bomb" : "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             }
             above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
             if(!isbomberaffinity(f))
@@ -175,11 +169,10 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
-            float yaw = f.owner ? f.owner->yaw : (f.proj ? f.proj->yaw : float((f.interptime+(360/st.flags.length()*i))%360));
             int interval = lastmillis%1000;
             float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc);
-            rendermodel(&f.light, "bomb", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
+            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*0.5f);
+            part_icon(above, textureload(hud::bombtex, 3), 4, 1, 0, 0, 1, 0x888888);
         }
     }
 
@@ -292,7 +285,6 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        game::announce(S_V_BOMBDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the bomb", game::colorname(d));
         st.dropaffinity(i, droploc, inertia, lastmillis);
         st.interp(i, totalmillis);
         f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i);
@@ -359,7 +351,9 @@ namespace bomber
             playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), g.spawnloc, NULL, 0, 255);
         }
         (st.findscore(d->team)).total = score;
-        game::announce(S_V_BOMBSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s exploded the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
+        gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
+        int snd = e->team == d->team ? S_V_YOUWIN : S_V_YOULOSE;
+        game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s exploded the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
         st.interp(relay, totalmillis);
     }
@@ -368,8 +362,11 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
-        game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the bomb", game::colorname(d));
+        if(!f.droptime)
+        {
+            affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
+            game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the bomb", game::colorname(d));
+        }
         st.takeaffinity(i, d, lastmillis);
         st.interp(i, totalmillis);
     }
@@ -388,7 +385,12 @@ namespace bomber
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
                 f.pickuptime = lastmillis;
             }
-       }
+        }
+        if(d->action[AC_AFFINITY])
+        {
+            if(!dropaffinity(d) && d == game::player1) playsound(S_ERROR, d->o, d);
+            d->action[AC_AFFINITY] = false;
+        }
     }
 
     bool aihomerun(gameent *d, ai::aistate &b)
