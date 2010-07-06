@@ -15,6 +15,9 @@ namespace game
     vector<camstate> cameras;
 
     VAR(IDF_WORLD, numplayers, 0, 8, MAXCLIENTS);
+    FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
+    VAR(IDF_WORLD, illumradius, 0, 0, INT_MAX-1);
+    SVAR(IDF_WORLD, obitlava, "");
     SVAR(IDF_WORLD, obitwater, "");
     SVAR(IDF_WORLD, obitdeath, "");
     SVAR(IDF_WORLD, mapmusic, "");
@@ -402,16 +405,22 @@ namespace game
                 else if(m_defend(gamemode)) defend::adddynlights();
                 else if(m_bomber(gamemode)) bomber::adddynlights();
             }
-            if(fireburning && fireburntime)
+            gameent *d = NULL;
+            loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
             {
-                gameent *d = NULL;
-                loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d->onfire(lastmillis, fireburntime))
+                if(fireburning && fireburntime && d->onfire(lastmillis, fireburntime))
                 {
                     int millis = lastmillis-d->lastfire; float pc = 1, intensity = 0.25f+(rnd(75)/100.f);
                     if(fireburntime-millis < fireburndelay) pc = float(fireburntime-millis)/float(fireburndelay);
                     else pc = 0.5f+(float(millis%fireburndelay)/float(fireburndelay*2));
                     pc = deadscale(d, pc);
                     adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
+                    continue;
+                }
+                if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
+                {
+                    vec col((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f);
+                    adddynlight(d->headpos(-d->height*0.5f), illumradius, col.mul(illumlevel), 0, 0, DL_KEEP);
                 }
             }
         }
@@ -735,9 +744,9 @@ namespace game
         if(d == actor)
         {
             if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
-            else if(flags&HIT_DEATH) concatstring(d->obit, *obitdeath ? obitdeath : "died");
+            else if(flags&HIT_MELT) concatstring(d->obit, *obitlava ? obitlava : "melted into a ball of fire");
             else if(flags&HIT_WATER) concatstring(d->obit, *obitwater ? obitwater : "died");
-            else if(flags&HIT_MELT) concatstring(d->obit, "melted into a ball of fire");
+            else if(flags&HIT_DEATH) concatstring(d->obit, *obitdeath ? obitdeath : "died");
             else if(flags&HIT_SPAWN) concatstring(d->obit, "tried to spawn inside solid matter");
             else if(flags&HIT_LOST) concatstring(d->obit, "got very, very lost");
             else if(flags && isweap(weap) && !burning)
