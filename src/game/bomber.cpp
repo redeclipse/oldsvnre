@@ -69,7 +69,7 @@ namespace bomber
                     }
                     SEARCHBINDCACHE(dropaffinitykey)("action 8", 3);
                     pushfont("sub");
-                    ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
+                    ty += draw_textx("Press \fs\fc%s\fS to throw it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
                     popfont();
                     break;
                 }
