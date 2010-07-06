@@ -24,6 +24,7 @@ namespace physics
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     VAR(IDF_PERSIST, impulseaction, 0, 1, 2); // determines if impulse remains active when pushed, 0 = off, 1 = only if no gravity or impulsestyle requires no ground contact, 2 = always
+    FVAR(IDF_PERSIST, impulsekick, 0, 135, 179.9f);
     VAR(IDF_PERSIST, dashaction, 0, 3, 3); // determines how dash action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
     VAR(IDF_PERSIST, crouchstyle, 0, 1, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
@@ -699,13 +700,27 @@ namespace physics
             if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || lastmillis-d->impulse[IM_TIME] > impulseskate || d->vel.magnitude() <= 1))
                 d->turnside = 0;
 
-            if(!d->turnside)
+            if(d->turnside)
             {
-                if((d->ai || dashaction) && canimpulse(d, 0, 1))
+                if(d->action[AC_JUMP] && canimpulse(d, -1, 3))
+                {
+                    float mag = impulsevelocity(d, impulseparkour);
+                    vec rft; vecfromyawpitch(d->aimyaw, 0, 1, 0, rft);
+                    (d->vel = rft).normalize().mul(mag); d->vel.z += mag/2;
+                    d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
+                    d->turnmillis = PHYSMILLIS;
+                    d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                    d->action[AC_JUMP] = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
+                    game::impulseeffect(d);
+                }
+            }
+            else
+            {
+                if((d->ai || dashaction) && canimpulse(d, 0, 1) && !iscrouching(d))
                 {
                     bool dash = false, pulse = false;
-                    if(onfloor)
-                        dash = dashaction >= 2 && d->action[AC_DASH] && !iscrouching(d) && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
+                    if(onfloor) dash = dashaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
                     else pulse = dashaction != 2 && d->action[AC_JUMP];
                     if(dash || pulse)
                     {
@@ -764,35 +779,42 @@ namespace physics
                     bool collided = collide(d, dir);
                     d->o = oldpos;
                     if(collided || (hitplayer ? !d->action[AC_SPECIAL] && !d->turnside : wall.iszero())) continue;
-                    if(d->action[AC_SPECIAL] && hitplayer && !d->turnside)
+                    if(d->action[AC_SPECIAL] && hitplayer)
                     {
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor))
                         {
                             d->action[AC_SPECIAL] = false;
                             if(!onfloor) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
+                            if(d->turnside)
+                            {
+                                d->turnmillis = PHYSMILLIS;
+                                d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                            }
                         }
                         break;
                     }
                     wall.normalize();
-                    if(d->action[AC_JUMP] && d->turnside)
-                    {
-                        float mag = impulsevelocity(d, impulseparkour);
-                        vec rft; vecfromyawpitch(d->aimyaw, 0, 1, 0, rft);
-                        (d->vel = rft).normalize().mul(mag); d->vel.z += mag/2;
-                        d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
-                        d->turnmillis = PHYSMILLIS;
-                        d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                        d->action[AC_JUMP] = false;
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
-                        game::impulseeffect(d);
-                        break;
-                    }
-                    if(d->turnside || (!onfloor && d->action[AC_SPECIAL] && canimpulse(d, -1, 3)))
+                    bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3);
+                    if(d->turnside || (!onfloor && parkour))
                     {
                         float yaw = 0, pitch = 0;
                         vectoyawpitch(wall, yaw, pitch);
                         float off = yaw-d->aimyaw;
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
+                        if(parkour && impulsekick > 0 && fabs(off) >= impulsekick)
+                        {
+                            float mag = impulsevelocity(d, impulsejump);
+                            (d->vel = dir).reflect(wall).normalize().mul(mag);
+                            d->vel.z += mag;
+                            d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
+                            d->turnmillis = PHYSMILLIS;
+                            d->turnside = 0; d->turnroll = 0;
+                            d->turnyaw = off;
+                            d->action[AC_SPECIAL] = false;
+                            client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
+                            game::impulseeffect(d);
+                            break;
+                        }
                         int side = off < 0 ? -1 : 1;
                         if(off < 0) yaw += 90; else yaw -= 90;
                         while(yaw >= 360) yaw -= 360;
