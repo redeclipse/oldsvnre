@@ -3932,6 +3932,15 @@ namespace server
                     break;
                 }
 
+                case N_SCOREAFFIN:
+                {
+                    int lcn = getint(p), relay = getint(p), goal = getint(p);
+                    clientinfo *cp = (clientinfo *)getinfo(lcn);
+                    if(!hasclient(cp, ci) || cp->state.state == CS_SPECTATOR) break;
+                    if(smode==&bombermode) bombermode.scoreaffinity(ci, relay, goal);
+                    break;
+                }
+
                 case N_DROPAFFIN:
                 {
                     int lcn = getint(p);

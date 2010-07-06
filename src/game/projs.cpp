@@ -208,7 +208,7 @@ namespace projs
             if(proj.bouncexy)
             {
                 dir[1].reflect(pos).normalize().mul(mag);
-                loopi(3) if(fabs(dir[1][i]) < (i == 2 ? 10 : 100)) dir[1][i] = dir[1][i] >= 0 ? (i == 2 ? 10 : 100) : (i == 2 ? -10 : -100);
+                loopi(3) if(fabs(dir[1][i]) < (i == 2 ? 10 : 20)) dir[1][i] += dir[1][i] >= 0 ? (i == 2 ? 10 : 20) : (i == 2 ? -10 : -20);
                 proj.vel = dir[1];
             }
             else
@@ -1471,6 +1471,20 @@ namespace projs
             {
                 proj.state = CS_DEAD;
                 proj.escaped = true;
+            }
+            if(m_bomber(game::gamemode) && proj.projtype == PRJ_AFFINITY && !proj.beenused && bomber::st.flags.inrange(proj.id))
+            {
+                gameent *d = bomber::st.flags[proj.id].lastowner;
+                if(d && (d == game::player1 || d->ai))
+                {
+                    loopv(bomber::st.flags) if(!isbomberaffinity(bomber::st.flags[i]) && proj.o.dist(bomber::st.flags[i].spawnloc) <= enttype[AFFINITY].radius/2)
+                    {
+                        proj.beenused = 1;
+                        proj.lifetime = min(proj.lifetime, proj.fadetime);
+                        client::addmsg(N_SCOREAFFIN, "ri3", d->clientnum, proj.id, i);
+                        break;
+                    }
+                }
             }
             if(proj.local && proj.owner && proj.projtype == PRJ_SHOT)
             {
