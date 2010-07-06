@@ -47,7 +47,7 @@ struct captureservmode : capturestate, servmode
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(iscapturehome(f, ci->team) && (f.owner < 0 || (GAME(capturestyle) == 1 && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
+                if(iscapturehome(f, ci->team) && (f.owner < 0 || (m_gsp1(gamemode, mutators) && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     capturestate::returnaffinity(i, gamemillis);
                     givepoints(ci, 5);
@@ -77,8 +77,8 @@ struct captureservmode : capturestate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
-        if(!(f.base&BASE_FLAG) || f.owner >= 0 || (f.team == ci->team && GAME(capturestyle) <= 2 && (GAME(capturestyle) == 2 || !f.droptime))) return;
-        if(!GAME(capturestyle) && f.team == ci->team)
+        if(!(f.base&BASE_FLAG) || f.owner >= 0 || (f.team == ci->team && !m_gsp3(gamemode, mutators) && (m_gsp2(gamemode, mutators) || !f.droptime))) return;
+        if(!m_gsp(gamemode, mutators) && f.team == ci->team)
         {
             capturestate::returnaffinity(i, gamemillis);
             givepoints(ci, 5);
@@ -111,35 +111,28 @@ struct captureservmode : capturestate, servmode
         loopv(flags)
         {
             flag &f = flags[i];
-            switch(GAME(capturestyle))
+            if(m_gsp3(gamemode, mutators) && f.owner >= 0 && f.taketime && gamemillis-f.taketime >= GAME(captureresetdelay))
             {
-                case 3:
-                    if(f.owner >= 0 && f.taketime && gamemillis-f.taketime >= GAME(captureresetdelay))
+                clientinfo *ci = (clientinfo *)getinfo(f.owner);
+                if(f.team != ci->team)
+                {
+                    capturestate::returnaffinity(i, gamemillis);
+                    givepoints(ci, 5);
+                    ci->state.flags++;
+                    int score = addscore(ci->team);
+                    sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
+                    if(GAME(capturelimit) && score >= GAME(capturelimit))
                     {
-                        clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                        if(f.team != ci->team)
-                        {
-                            capturestate::returnaffinity(i, gamemillis);
-                            givepoints(ci, 5);
-                            ci->state.flags++;
-                            int score = addscore(ci->team);
-                            sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
-                            if(GAME(capturelimit) && score >= GAME(capturelimit))
-                            {
-                                sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
-                                startintermission();
-                            }
-                        }
-                        break;
+                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+                        startintermission();
                     }
-                default:
-                    if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(captureresetdelay))
-                    {
-                        capturestate::returnaffinity(i, gamemillis);
-                        loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -5);
-                        sendf(-1, 1, "ri2", N_RESETAFFIN, i);
-                    }
-                    break;
+                }
+            }
+            else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(captureresetdelay))
+            {
+                capturestate::returnaffinity(i, gamemillis);
+                loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -5);
+                sendf(-1, 1, "ri2", N_RESETAFFIN, i);
             }
         }
     }

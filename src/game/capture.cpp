@@ -5,7 +5,7 @@ namespace capture
 
     bool dropaffinity(gameent *d)
     {
-        if(m_capture(game::gamemode) && capturestyle <= 2)
+        if(m_capture(game::gamemode) && !m_gsp3(game::gamemode, game::mutators))
         {
             loopv(st.flags) if(st.flags[i].owner == d)
             {
@@ -48,7 +48,7 @@ namespace capture
                 {
                     (dir = f.spawnloc).sub(camera1->o);
                     float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
-                    if(iscapturehome(f, game::focus->team) && capturestyle <= 2 && !hasflags.empty())
+                    if(iscapturehome(f, game::focus->team) && !m_gsp3(game::gamemode, game::mutators) && !hasflags.empty())
                     {
                         fade += (1.f-fade)*diff;
                         tex = hud::arrowtex;
@@ -84,7 +84,7 @@ namespace capture
                 }
             }
             pushfont("super");
-            if(!hasflags.empty() && capturestyle <= 2) ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators)) ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             if(!takenflags.empty()) ty += draw_textx("\fzwaFlag has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             popfont();
@@ -141,7 +141,7 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 sy += int(hud::drawitem(hud::flagtex, pos[0], pos[1], s, false, r, g, b, fade, skew, "sub", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""))*rescale);
-                if((f.base&BASE_FLAG) && (f.droptime || (capturestyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
+                if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                     if(wait < 1) hud::drawprogress(pos[0], pos[1], wait, 1-wait, s, false, r, g, b, fade*0.25f, skew);
@@ -177,7 +177,7 @@ namespace capture
                 part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
                 above.z += 2.5f;
             }
-            if((f.base&BASE_FLAG) && ((capturestyle >= 1 && f.droptime) || (capturestyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
+            if((f.base&BASE_FLAG) && ((m_gsp(game::gamemode, game::mutators) && f.droptime) || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
             {
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                 part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
@@ -226,7 +226,7 @@ namespace capture
             defformatstring(info)("<super>%s flag", teamtype[f.team].name);
             part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, 1);
             above.z += 2.5f;
-            if((f.base&BASE_FLAG) && (f.droptime || (capturestyle >= 3 && f.taketime && f.owner && f.owner->team != f.team)))
+            if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
             {
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, teamtype[f.team].colour, (totalmillis%1000)/1000.f, 0.1f);
@@ -465,8 +465,8 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        affinityeffect(i, d->team, d->feetpos(), f.spawnloc, capturestyle ? 2 : 3, "RETURNED");
-        game::announce(S_V_FLAGRETURN, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s returned the \fs%s%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, hud::timetostr(lastmillis-(capturestyle%2 ? f.taketime : f.droptime)));
+        affinityeffect(i, d->team, d->feetpos(), f.spawnloc, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
+        game::announce(S_V_FLAGRETURN, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s returned the \fs%s%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) || m_gsp3(game::gamemode, game::mutators) ? f.taketime : f.droptime)));
         st.returnaffinity(i, lastmillis);
         st.interp(i, totalmillis);
     }
@@ -515,7 +515,7 @@ namespace capture
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || f.owner) continue;
             if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
-            if(f.team == d->team && capturestyle <= 2 && (capturestyle == 2 || !f.droptime)) continue;
+            if(f.team == d->team && !m_gsp3(game::gamemode, game::mutators) && (m_gsp2(game::gamemode, game::mutators) || !f.droptime)) continue;
             if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
             {
@@ -527,7 +527,7 @@ namespace capture
 
     bool aihomerun(gameent *d, ai::aistate &b)
     {
-        if(capturestyle <= 2)
+        if(!m_gsp3(game::gamemode, game::mutators))
         {
             vec pos = d->feetpos();
             loopk(2)
@@ -570,10 +570,10 @@ namespace capture
             {
                 capturestate::flag &g = st.flags[i];
                 if(g.owner == d) hasflags.add(i);
-                else if(iscaptureaffinity(g, ai::owner(d)) && (capturestyle >= 3 || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
+                else if(iscaptureaffinity(g, ai::owner(d)) && (m_gsp3(game::gamemode, game::mutators) || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
                     takenflags.add(i);
             }
-            if(!hasflags.empty() && capturestyle <= 2)
+            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
             {
                 aihomerun(d, b);
                 return true;
@@ -602,10 +602,10 @@ namespace capture
         {
             capturestate::flag &f = st.flags[j];
             bool home = iscapturehome(f, ai::owner(d));
-            if(d->aitype == AI_BOT && (!home || capturestyle >= 3) && !(f.base&BASE_FLAG)) continue; // don't bother with other bases
+            if(d->aitype == AI_BOT && (!home || m_gsp3(game::gamemode, game::mutators)) && !(f.base&BASE_FLAG)) continue; // don't bother with other bases
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || capturestyle >= 3 || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
+            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
             ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {
@@ -673,7 +673,7 @@ namespace capture
 
     bool aidefense(gameent *d, ai::aistate &b)
     {
-        if(capturestyle <= 2 && d->aitype == AI_BOT)
+        if(!m_gsp3(game::gamemode, game::mutators) && d->aitype == AI_BOT)
         {
             static vector<int> hasflags;
             hasflags.setsize(0);
@@ -746,7 +746,7 @@ namespace capture
         {
             capturestate::flag &f = st.flags[b.target];
             b.idle = -1;
-            if(iscapturehome(f, ai::owner(d)) && capturestyle <= 2)
+            if(iscapturehome(f, ai::owner(d)) && !m_gsp3(game::gamemode, game::mutators))
             {
                 static vector<int> hasflags; hasflags.setsize(0);
                 loopv(st.flags)
