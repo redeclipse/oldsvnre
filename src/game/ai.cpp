@@ -955,8 +955,8 @@ namespace ai
     void jumpto(gameent *d, aistate &b, const vec &pos)
     {
         vec off = vec(pos).sub(d->feetpos());
-        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder,
-            jumper = off.z >= JUMPMIN && (!offground || (d->timeinair > 250 && physics::canimpulse(d, 0, 1))),
+        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 500,
+            jumper = off.z >= JUMPMIN && (!offground || (air && physics::canimpulse(d, 0, 1))),
             jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;
         if(jump)
         {
@@ -981,11 +981,12 @@ namespace ai
             d->ai->jumpseed = lastmillis+seed+rnd(seed*2); seed *= b.idle ? 1000 : 500;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
+        if(d->aitype == AI_BOT && air) d->action[AC_SPECIAL] = true;
     }
 
-    bool lockon(gameent *d, gameent *e, float maxdist)
+    bool lockon(gameent *d, gameent *e, float maxdist, bool check)
     {
-        if(weaptype[d->weapselect].melee && !d->blocked && !d->timeinair)
+        if(check && !d->blocked)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1002,7 +1003,7 @@ namespace ai
         vec dp = d->headpos();
 
         bool wasdontmove = d->ai->dontmove, idle = b.idle == 1 || (stupify && stupify <= skmod) || !aistyle[d->aitype].canmove || d->ai->suspended;
-        d->ai->dontmove = false;
+        d->action[AC_SPECIAL] = d->ai->dontmove = false;
         if(idle)
         {
             d->ai->lasthunt = lastmillis;
@@ -1030,7 +1031,7 @@ namespace ai
         }
 
         gameent *e = game::getclient(d->ai->enemy);
-        bool enemyok = e && targetable(d, e);
+        bool enemyok = e && targetable(d, e), melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
         if(!enemyok || d->skill >= 50)
         {
             gameent *f = game::intersectclosest(dp, d->ai->target, d);
@@ -1060,12 +1061,13 @@ namespace ai
             if(idle || insight || hasseen || quick)
             {
                 float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
-                if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16))
+                if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16, melee))
                 {
                     d->ai->targyaw = yaw;
                     d->ai->targpitch = pitch;
-                    if(!idle) frame *= 2;
+                    frame *= 2;
                     d->ai->becareful = false;
+                    if(!weaptype[d->weapselect].melee) d->action[AC_SPECIAL] = true;
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick)
@@ -1174,7 +1176,7 @@ namespace ai
             d->strafe = ad.strafe;
             d->aimyaw -= ad.offset;
         }
-        if(!aistyle[d->aitype].canstrafe && d->move && enemyok && lockon(d, e, 8)) d->move = 0;
+        if(!aistyle[d->aitype].canstrafe && d->move && enemyok && lockon(d, e, 8, melee)) d->move = 0;
         game::fixrange(d->aimyaw, d->aimpitch);
         findorientation(dp, d->yaw, d->pitch, d->ai->target);
         return result;

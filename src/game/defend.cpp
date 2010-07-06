@@ -35,7 +35,7 @@ namespace defend
         {
             defendstate::flag &b = st.flags[i];
             if(!entities::ents.inrange(b.ent)) continue;
-            float occupy = b.occupied(defendstyle, defendoccupy);
+            float occupy = b.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
             entitylight *light = &entities::ents[b.ent]->light;
             if(light->millis != lastmillis) skewrgb(light->material.x, light->material.y, light->material.z, b.owner, b.enemy, occupy);
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
@@ -73,7 +73,7 @@ namespace defend
         {
             defendstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float occupy = f.occupied(defendstyle, defendoccupy), r = 1, g = 1, b = 1;
+            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), r = 1, g = 1, b = 1;
             skewrgb(r, g, b, f.owner, f.enemy, occupy);
             adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(r, g, b), 0, 0, DL_KEEP);
         }
@@ -85,7 +85,7 @@ namespace defend
         {
             defendstate::flag &f = st.flags[i];
             vec dir(f.o); dir.sub(camera1->o);
-            float occupy = f.occupied(defendstyle, defendoccupy), r = 1, g = 1, b = 1, fade = blend*hud::radaraffinityblend;
+            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), r = 1, g = 1, b = 1, fade = blend*hud::radaraffinityblend;
             skewrgb(r, g, b, f.owner, f.enemy, occupy);
             if(f.owner != game::focus->team && f.enemy != game::focus->team)
             {
@@ -114,7 +114,7 @@ namespace defend
             {
                 defendstate::flag &f = st.flags[i];
                 pushfont("super");
-                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!defendstyle && f.owner ? 2 : 1) * defendoccupy), 0.f, 1.f) : 1.f;
+                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1) * defendoccupy), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::player1->team;
                 ty += draw_textx("\fzwa%s \fs%s%d%%\fS complete", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
@@ -138,7 +138,7 @@ namespace defend
             {
                 int prevsy = sy; bool skewed = false;
                 float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend,
-                    occupy = f.enemy ? clamp(f.converted/float((!defendstyle && f.owner ? 2 : 1)*defendoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f),
+                    occupy = f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1)*defendoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f),
                     r = (teamtype[f.owner].colour>>16)/255.f, g = ((teamtype[f.owner].colour>>8)&0xFF)/255.f, b = (teamtype[f.owner].colour&0xFF)/255.f,
                         r1 = r, g1 = g, b1 = b;
                 if(f.enemy)

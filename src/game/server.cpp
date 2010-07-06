@@ -378,6 +378,7 @@ namespace server
         virtual void reset(bool empty) {}
         virtual void intermission() {}
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
+        virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
     };
 
@@ -2399,6 +2400,8 @@ namespace server
                 target->state.lastfireowner = actor->clientnum;
             }
         }
+        if(smode) smode->dodamage(target, actor, realdamage, weap, realflags, hitpush);
+        mutate(smuts, mut->dodamage(target, actor, realdamage, weap, realflags, hitpush));
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
         if(GAME(vampire) && actor->state.state == CS_ALIVE && realdamage > 0)
         {
