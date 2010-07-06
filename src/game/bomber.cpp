@@ -359,17 +359,14 @@ namespace bomber
         if(!st.flags.inrange(relay) || !st.flags.inrange(goal)) return;
         bomberstate::flag &f = st.flags[relay], &g = st.flags[goal];
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "EXPLODED");
-        if(m_duke(game::gamemode, game::mutators))
-        {
-            float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius/2);
-            part_create(PART_PLASMA_SOFT, 250, g.spawnloc, 0xAA4400, radius*0.5f);
-            part_explosion(g.spawnloc, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
-            part_explosion(g.spawnloc, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
-            part_create(PART_SMOKE_LERP_SOFT, 500, g.spawnloc, 0x333333, radius*0.75f, 0.5f, -15);
-            int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
-            loopi(amt) projs::create(g.spawnloc, g.spawnloc, true, d, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
-            playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), g.spawnloc, NULL, 0, 255);
-        }
+        float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius);
+        part_create(PART_PLASMA_SOFT, 250, g.spawnloc, 0xAA4400, radius*0.5f);
+        part_explosion(g.spawnloc, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
+        part_explosion(g.spawnloc, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
+        part_create(PART_SMOKE_LERP_SOFT, 500, g.spawnloc, 0x333333, radius*0.75f, 0.5f, -15);
+        int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
+        loopi(amt) projs::create(g.spawnloc, g.spawnloc, true, d, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
+        playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), g.spawnloc, NULL, 0, 255);
         (st.findscore(d->team)).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team == d->team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);

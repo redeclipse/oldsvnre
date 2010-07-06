@@ -12,7 +12,7 @@ struct bomberstate
         vec droploc, inertia, spawnloc;
         int team, droptime, taketime, inittime;
 #ifdef GAMESERVER
-        int owner;
+        int owner, lastowner;
         vector<int> votes;
 #else
         gameent *owner, *lastowner;
@@ -32,7 +32,7 @@ struct bomberstate
             inertia = vec(0, 0, 0);
             droploc = spawnloc = vec(-1, -1, -1);
 #ifdef GAMESERVER
-            owner = -1;
+            owner = lastowner = -1;
             votes.shrink(0);
 #else
             owner = lastowner = NULL;
@@ -91,6 +91,7 @@ struct bomberstate
         f.droptime = 0;
 #ifdef GAMESERVER
         f.votes.shrink(0);
+        f.lastowner = owner;
 #else
         f.pickuptime = 0;
         f.lastowner = owner;

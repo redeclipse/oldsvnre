@@ -44,6 +44,33 @@ struct bomberservmode : bomberstate, servmode
         return cs.total;
     }
 
+    void scorebomb(clientinfo *ci, int relay, int goal)
+    {
+        flag &f = flags[relay], g = flags[goal];
+        bomberstate::returnaffinity(relay, gamemillis, true);
+        givepoints(ci, 5);
+        ci->state.flags++;
+        int score = addscore(ci->team);
+        sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
+        loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
+        {
+            bool kamikaze = clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team;
+            if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
+        }
+        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
+        if(GAME(bomberlimit) && score >= GAME(bomberlimit))
+        {
+            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+            startintermission();
+        }
+    }
+
+    void scoreaffinity(clientinfo *ci, int relay, int goal)
+    {
+        if(!flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum) return;
+        scorebomb(ci, relay, goal);
+    }
+
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
@@ -52,25 +79,7 @@ struct bomberservmode : bomberstate, servmode
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2)
-                {
-                    bomberstate::returnaffinity(i, gamemillis, true);
-                    givepoints(ci, 5);
-                    ci->state.flags++;
-                    int score = addscore(ci->team);
-                    sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                    loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
-                    {
-                        bool kamikaze = clients[j]->state.state == CS_ALIVE && (clients[j]->team == f.team || (!m_duke(gamemode, mutators) && clients[j] == ci));
-                        if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
-                    }
-                    if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
-                    if(GAME(bomberlimit) && score >= GAME(bomberlimit))
-                    {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
-                        startintermission();
-                    }
-                }
+                if(isbombertarg(f, ci->team) && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius/2) scorebomb(ci, i, k);
             }
         }
     }
