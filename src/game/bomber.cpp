@@ -369,7 +369,7 @@ namespace bomber
         playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), g.spawnloc, NULL, 0, 255);
         (st.findscore(d->team)).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
-        int snd = e->team ? (e->team == d->team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
+        int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
         game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, true);
         st.interp(relay, totalmillis);
