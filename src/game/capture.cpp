@@ -84,9 +84,16 @@ namespace capture
                 }
             }
             pushfont("super");
-            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators)) ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             if(!takenflags.empty()) ty += draw_textx("\fzwaFlag has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-            if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+            else if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
+            {
+                ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+                SEARCHBINDCACHE(dropaffinitykey)("action 8", 3);
+                pushfont("sub");
+                ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
+                popfont();
+            }
             popfont();
         }
     }
