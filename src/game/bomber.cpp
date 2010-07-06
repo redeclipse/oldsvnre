@@ -67,6 +67,10 @@ namespace bomber
                         ty += draw_textx("Explodes in \fs\fy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
                         popfont();
                     }
+                    SEARCHBINDCACHE(dropaffinitykey)("action 8", 3);
+                    pushfont("sub");
+                    ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
+                    popfont();
                     break;
                 }
             }
