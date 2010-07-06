@@ -511,7 +511,7 @@ void guikeyfield(char *var, int *maxlength, char *onchange)
 
 void guibody(char *contents, char *action, char *altact)
 {
-    if(!cgui) return;
+    if(!cgui || !contents || !*contents) return;
     cgui->pushlist(action[0] ? true : false);
     execute(contents);
     int ret = cgui->poplist();
@@ -530,7 +530,7 @@ void guibody(char *contents, char *action, char *altact)
 
 void guilist(char *contents)
 {
-    if(!cgui) return;
+    if(!cgui || !contents || !*contents) return;
     cgui->pushlist();
     execute(contents);
     cgui->poplist();
