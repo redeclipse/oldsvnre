@@ -44,13 +44,30 @@ struct bomberservmode : bomberstate, servmode
         return cs.total;
     }
 
+    int subscore(int team)
+    {
+        score &cs = findscore(team);
+        cs.total--;
+        return cs.total;
+    }
+
     void scorebomb(clientinfo *ci, int relay, int goal)
     {
         flag &f = flags[relay], g = flags[goal];
         bomberstate::returnaffinity(relay, gamemillis, true);
-        givepoints(ci, 5);
-        ci->state.flags++;
-        int score = addscore(ci->team);
+        int score = 0;
+        if(g.team != ci->team)
+        {
+            givepoints(ci, 5);
+            ci->state.flags++;
+            score = addscore(ci->team);
+        }
+        else
+        {
+            givepoints(ci, -5);
+            ci->state.flags--;
+            score = subscore(ci->team);
+        }
         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
         loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
         {
