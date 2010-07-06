@@ -1,5 +1,5 @@
-FVAR(IDF_PERSIST, compasssize, 0, 0.15f, 1000);
-VAR(IDF_PERSIST, compassfade, 0, 250, INT_MAX-1);
+FVAR(IDF_PERSIST, compasssize, 0, 0.2f, 1000);
+VAR(IDF_PERSIST, compassfade, 0, 500, INT_MAX-1);
 FVAR(IDF_PERSIST, compassfadeamt, 0, 0.75f, 1);
 TVAR(IDF_PERSIST, compasstex, "textures/compass", 3);
 TVAR(IDF_PERSIST, compassringtex, "textures/progress", 3);
@@ -22,8 +22,9 @@ struct caction : cstate
 };
 struct cmenu : cstate
 {
+    Texture *icon;
     vector<caction> actions;
-    cmenu() {}
+    cmenu() : icon(NULL) {}
     ~cmenu() { reset(); }
     void reset()
     {
@@ -63,16 +64,21 @@ void resetcmenus()
 }
 ICOMMAND(0, resetcompass, "", (), resetcmenus());
 
-void addcmenu(const char *name, const char *contents)
+void addcmenu(const char *name, const char *a, const char *b)
 {
-    if(!name || !*name || !contents || !*contents) return;
+    if(!name || !*name || !a || !*a) return;
     if(curcompass) clearcmenu();
     loopvrev(cmenus) if(!strcmp(name, cmenus[i].name)) cmenus.remove(i);
     cmenu &c = cmenus.add();
     c.name = newstring(name);
-    c.contents = newstring(contents);
+    if(b && *b)
+    {
+        c.icon = textureload(a, 3);
+        c.contents = newstring(b);
+    }
+    else c.contents = newstring(a);
 }
-ICOMMAND(0, newcompass, "ss", (char *n, char *c), addcmenu(n, c));
+ICOMMAND(0, newcompass, "sss", (char *n, char *c, char *d), addcmenu(n, c, d));
 
 void addaction(const char *name, char code, const char *contents)
 {
@@ -157,17 +163,17 @@ int cmenuhit()
 void renderaction(int idx, int size, Texture *t, char code, const char *name, bool hit)
 {
     int x = hudwidth/2+(size*compassdir[idx].x), y = hudheight/2+(size*compassdir[idx].y),
-        r = 255, g = hit ? 0 : 255, b = hit ? 0 : 255, f = hit ? 255 : 128;
-    pushfont("default");
+        r = 255, g = hit && idx ? 0 : 255, b = hit && idx ? 0 : 255, f = hit || !idx ? 255 : 128;
+    pushfont(!idx || hit ? "super" : "default");
     if(!compassdir[idx].y) y -= compassdir[idx].x ? FONTH/2 : FONTH;
     else
     {
-        if(compassdir[idx].y < 0) y -= FONTH*2;
-        else if(compassdir[idx].y > 0) y += FONTH/3;
+        if(compassdir[idx].y < 0) y -= FONTH*2+FONTH/2;
+        else if(compassdir[idx].y > 0) y += FONTH/2;
         if(compassdir[idx].x) { x -= compassdir[idx].x*size/2; y -= compassdir[idx].y*size/2; }
         else y -= compassdir[idx].y*FONTH/2;
     }
-    if(t)
+    if(t && t != notexture)
     {
         glBindTexture(GL_TEXTURE_2D, t->id);
         glColor4f(r/255.f, g/255.f, b/255.f, f/255.f);
@@ -178,21 +184,25 @@ void renderaction(int idx, int size, Texture *t, char code, const char *name, bo
     {
         case -1:
         {
-            pushfont("sub");
+            pushfont(!idx || hit ? "emphasis" : "sub");
             y += draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
             popfont();
-            draw_textx("[%s]", x, y, r, g, b, 255, compassdir[idx].align, -1, -1, getkeyname(code));
+            if(code) draw_textx("[%s]", x, y, r, g, b, 255, compassdir[idx].align, -1, -1, getkeyname(code));
             break;
         }
         case 0:
         {
             if(compassdir[idx].x)
             {
-                defformatstring(s)("[%s]", getkeyname(code));
-                draw_textx("%s", x, y, r, g, b, 255, compassdir[idx].align, -1, -1, s);
-                x += (text_width(s)+FONTW/4)*compassdir[idx].x;
-                y += FONTH/2;
-                pushfont("sub");
+                if(code)
+                {
+                    defformatstring(s)("[%s]", getkeyname(code));
+                    draw_textx("%s", x, y, r, g, b, 255, compassdir[idx].align, -1, -1, s);
+                    x += (text_width(s)+FONTW/4)*compassdir[idx].x;
+                    y += FONTH/2;
+                }
+                else x += FONTW/4*compassdir[idx].x;
+                pushfont(!idx || hit ? "emphasis" : "sub");
                 y -= FONTH/2;
                 draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
                 popfont();
@@ -201,8 +211,8 @@ void renderaction(int idx, int size, Texture *t, char code, const char *name, bo
         }
         case 1: default:
         {
-            y += draw_textx("[%s]", x, y, r, g, b, idx ? 255 : f, compassdir[idx].align, -1, -1, getkeyname(code));
-            pushfont("sub");
+            if(code) y += draw_textx("[%s]", x, y, r, g, b, idx ? 255 : f, compassdir[idx].align, -1, -1, getkeyname(code));
+            pushfont(!idx || hit ? "emphasis" : "sub");
             draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
             popfont();
             break;
@@ -215,8 +225,11 @@ void rendercmenu()
 {
     if(compassmillis <= 0 || !curcompass) return;
     int size = int(compasssize*hudsize), hit = cmenuhit();
-    renderaction(0, size, *compassringtex ? textureload(compassringtex, 3) : NULL, '0', "cancel", hit < 0);
-    Texture *t = *compasstex ? textureload(compasstex, 3) : NULL;
+    Texture *t = NULL;
+    if(curcompass->icon && curcompass->icon != notexture) t = curcompass->icon;
+    else if(*compassringtex) t = textureload(compassringtex, 3);
+    renderaction(0, size, t, 0, curcompass->name, hit < 0);
+    t = *compasstex ? textureload(compasstex, 3) : NULL;
     loopi(min(curcompass->actions.length(), 8))
         renderaction(i+1, size, t, curcompass->actions[i].code, curcompass->actions[i].name, hit == i);
 }
