@@ -136,7 +136,7 @@ struct bomberservmode : bomberstate, servmode
                 if(ci && GAME(bomberholdtime) && gamemillis-f.taketime >= GAME(bomberholdtime))
                 {
                     ci->state.weapshots[WEAP_GRENADE][0].add(1);
-                    sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 3, WEAP_GRENADE, -1, -1);
+                    sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 1, WEAP_GRENADE, -1, -1);
                     dropaffinity(ci, ci->state.o);
                 }
                 continue;

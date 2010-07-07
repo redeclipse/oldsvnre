@@ -94,7 +94,6 @@ namespace projs
     {
         if(p->projtype == PRJ_SHOT && p->owner)
         {
-            conoutf("destroy projectile %d", p->id);
             if(game::player1 == p->owner || p->owner->ai) p->state = CS_DEAD;
             else
             {
