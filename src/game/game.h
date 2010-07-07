@@ -864,7 +864,7 @@ struct gameent : dynent, gamestate
 
     int getprojid()
     {
-        if(++projid <= 0) projid = 1;
+        if(++projid < 2) projid = 2;
         return projid;
     }
 
