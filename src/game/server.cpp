@@ -1718,7 +1718,7 @@ namespace server
             int sweap = m_weapon(gamemode, mutators);
             if(level == 3 || (level == 2 && GAME(kamikaze) && (GAME(kamikaze) > 2 || (ts.hasweap(WEAP_GRENADE, sweap) && (GAME(kamikaze) > 1 || ts.weapselect == WEAP_GRENADE)))))
             {
-                ci->state.weapshots[WEAP_GRENADE][0].add(-1);
+                ci->state.weapshots[WEAP_GRENADE][0].add(1);
                 droplist &d = drop.add();
                 d.weap = WEAP_GRENADE;
                 d.ent = d.value = -1;
@@ -2894,13 +2894,14 @@ namespace server
             }
             if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
         }
-        if(ci->state.state == CS_ALIVE || (!doteam && drop%2 == 1))
+        if(ci->state.state == CS_ALIVE)
         {
             dropitems(ci, drop);
             if(smode) smode->died(ci);
             mutate(smuts, mut->died(ci));
             ci->state.lastdeath = gamemillis;
         }
+        else if(!doteam && drop%2 == 1) ci->state.lastdeath = gamemillis;
         if(exclude) sendf(-1, 1, "ri2x", N_WAITING, ci->clientnum, ci->clientnum);
         else sendf(-1, 1, "ri2", N_WAITING, ci->clientnum);
         ci->state.state = CS_WAITING;

@@ -84,7 +84,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum) return;
+        if(!flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
         scorebomb(ci, relay, goal);
     }
 
@@ -135,7 +135,7 @@ struct bomberservmode : bomberstate, servmode
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
                 if(ci && GAME(bomberholdtime) && gamemillis-f.taketime >= GAME(bomberholdtime))
                 {
-                    ci->state.weapshots[WEAP_GRENADE][0].add(-1);
+                    ci->state.weapshots[WEAP_GRENADE][0].add(1);
                     sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 3, WEAP_GRENADE, -1, -1);
                     dropaffinity(ci, ci->state.o);
                 }
