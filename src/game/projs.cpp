@@ -587,7 +587,7 @@ namespace projs
         proj.local = local;
         proj.projtype = type;
         proj.addtime = lastmillis;
-        proj.lifetime = lifetime ? lifetime : lifetime;
+        proj.lifetime = lifetime;
         proj.lifemillis = lifemillis ? lifemillis : proj.lifetime;
         proj.waittime = waittime;
         proj.maxspeed = speed;
@@ -710,7 +710,7 @@ namespace projs
         }
 
         loopv(locs)
-            create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, 0, weap, flags, scale);
+            create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, lastmillis-game::maptime, weap, flags, scale);
         if(ejecaptureade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
             create(from, from, local, d, PRJ_EJECT, rnd(ejecaptureade)+ejecaptureade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
@@ -1060,10 +1060,7 @@ namespace projs
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
                 }
                 if(proj.local && proj.owner)
-                {
-                    int id = proj.id >= 0 ? proj.id-game::maptime : proj.id;
-                    client::addmsg(N_DESTROY, "ri8", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -id : id, 0, int(proj.scale*DNF), 0);
-                }
+                    client::addmsg(N_DESTROY, "ri8", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id, 0, int(proj.scale*DNF), 0);
                 break;
             }
             case PRJ_ENT:
@@ -1536,11 +1533,8 @@ namespace projs
                     }
                 }
                 if(!hits.empty())
-                {
-                    int id = proj.id >= 0 ? proj.id-game::maptime : proj.id;
-                    client::addmsg(N_DESTROY, "ri7iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -id : id,
+                    client::addmsg(N_DESTROY, "ri7iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
                             int(radius), int(proj.scale*DNF), hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-                }
             }
             if(proj.state == CS_DEAD)
             {
