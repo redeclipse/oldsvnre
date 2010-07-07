@@ -42,7 +42,7 @@ namespace server
     {
         int id, weap, flags, scale, num;
         ivec from;
-        vector<ivec> shots;
+        vector<shotmsg> shots;
         void process(clientinfo *ci);
     };
 
@@ -66,7 +66,7 @@ namespace server
 
     struct hitset
     {
-        int flags, target, id;
+        int flags, proj, target;
         union
         {
             int rays;
@@ -2580,19 +2580,34 @@ namespace server
                         loopi(r) gs.weapshots[w][f >= WEAP_MAX ? 1 : 0].add(-id);
                     }
                 }
+                sendf(-1, 1, "ri4", N_DESTROY, ci->clientnum, 1, id);
             }
             else loopv(hits)
             {
                 hitset &h = hits[i];
                 int hflags = flags|h.flags;
-                float skew = float(scale)/DNF;
-                if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, skew));
-                float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
                 clientinfo *target = (clientinfo *)getinfo(h.target);
-                if(!target || target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
-                    continue;
-                int damage = calcdamage(weap, hflags, radial, size, dist, skew);
-                dodamage(target, ci, damage, weap, hflags, h.dir);
+                if(h.proj)
+                {
+                    servstate &ts = target->state;
+                    loopj(WEAP_MAX) loopk(2) if(ts.weapshots[j][k].find(h.proj) >= 0)
+                    {
+                        ts.weapshots[j][k].remove(h.proj);
+                        sendf(target->clientnum, 1, "ri4", N_DESTROY, target->clientnum, 1, h.proj);
+                        break;
+                    }
+                }
+                else
+                {
+                    float skew = float(scale)/DNF;
+                    if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, skew));
+                    float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
+                    if(!target || target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
+                        continue;
+                    int damage = calcdamage(weap, hflags, radial, size, dist, skew);
+                    dodamage(target, ci, damage, weap, hflags, h.dir);
+                    break;
+                }
             }
         }
     }
@@ -2633,10 +2648,10 @@ namespace server
         }
         else takeammo(ci, weap, sub);
         gs.setweapstate(weap, flags&HIT_ALT ? WEAP_S_SECONDARY : WEAP_S_PRIMARY, WEAP2(weap, adelay, flags&HIT_ALT), millis);
-        sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from[0], from[1], from[2], shots.length(), shots.length()*sizeof(ivec)/sizeof(int), shots.getbuf(), ci->clientnum);
+        sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
         gs.shotdamage += WEAP2(weap, damage, flags&HIT_ALT)*shots.length();
-        loopv(shots) gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].add(id);
+        loopv(shots) gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].add(shots[i].id);
     }
 
     void switchevent::process(clientinfo *ci)
@@ -3624,8 +3639,9 @@ namespace server
                     {
                         if(p.overread()) break;
                         if(j >= 100) { loopk(3) getint(p); continue; }
-                        ivec &dest = ev->shots.add();
-                        loopk(3) dest[k] = getint(p);
+                        shotmsg &s = ev->shots.add();
+                        s.id = getint(p);
+                        loopk(3) s.pos[k] = getint(p);
                     }
                     if(havecn)
                     {
@@ -3689,8 +3705,8 @@ namespace server
                         }
                         hitset &hit = ev->hits.add();
                         hit.flags = getint(p);
+                        hit.proj = getint(p);
                         hit.target = getint(p);
-                        hit.id = getint(p);
                         hit.dist = getint(p);
                         loopk(3) hit.dir[k] = getint(p);
                     }

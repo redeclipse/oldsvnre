@@ -831,7 +831,7 @@ extern const char * const animnames[];
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
-    int team, clientnum, privilege, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
+    int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
@@ -840,7 +840,7 @@ struct gameent : dynent, gamestate
     vector<int> airnodes;
     vector<gameent *> dominating, dominated;
 
-    gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
+    gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
@@ -860,6 +860,12 @@ struct gameent : dynent, gamestate
         if(ai) delete ai;
         removetrackedparticles(this);
         removetrackedsounds(this);
+    }
+
+    int getprojid()
+    {
+        if(++projid <= 0) projid = 1;
+        return projid;
     }
 
     void removesounds()
@@ -1169,7 +1175,8 @@ namespace projs
     extern projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1, bool child = false);
     extern void preload();
     extern void remove(gameent *owner);
-    extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<vec> &locs, gameent *d, bool local);
+    extern void destruct(gameent *d, int id);
+    extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local);
     extern void drop(gameent *d, int g, int n, int v = -1, bool local = true, int c = 0);
     extern void adddynlights();
     extern void render();

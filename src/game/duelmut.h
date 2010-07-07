@@ -71,7 +71,19 @@ struct duelservmode : servmode
 
     void clearitems()
     {
-        loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i));
+        loopvj(clients) if(clients[j]->state.aitype < AI_START)
+        {
+            vector<int> shots;
+            loop(a, WEAP_MAX) loop(b, 2) loopvrev(clients[j]->state.weapshots[a][b].projs)
+            {
+                shots.add(clients[j]->state.weapshots[a][b].projs[i].id);
+                clients[j]->state.weapshots[a][b].remove(i);
+            }
+            if(!shots.empty()) sendf(-1, 1, "ri2iv", N_DESTROY, clients[j]->clientnum, shots.length(), shots.length(), shots.getbuf());
+
+        }
+        if(m_survivor(gamemode, mutators) || GAME(duelclear))
+            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i));
     }
 
     void cleanup()
@@ -112,6 +124,7 @@ struct duelservmode : servmode
                 allowed.shrink(0); playing.shrink(0);
                 if(!duelqueue.empty())
                 {
+                    clearitems();
                     loopv(clients) if(clients[i]->state.aitype < AI_START) position(clients[i], true);
                     loopv(duelqueue)
                     {
@@ -151,7 +164,6 @@ struct duelservmode : servmode
                         formatstring(fight)("\fwlast one left alive wins, round \fs\fr#%d\fS", duelround);
                     loopv(playing) if(allowbroadcast(playing[i]->clientnum))
                         sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, fight);
-                    if(m_survivor(gamemode, mutators) || GAME(duelclear)) clearitems();
                     dueltime = dueldeath = 0;
                     duelcheck = gamemillis;
                 }

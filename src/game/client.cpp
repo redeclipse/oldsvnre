@@ -1438,14 +1438,15 @@ namespace client
                     vec from;
                     loopk(3) from[k] = getint(p)/DMF;
                     int ls = getint(p);
-                    vector<vec> locs;
+                    vector<shotmsg> shots;
                     loopj(ls)
                     {
-                        vec &to = locs.add();
-                        loopk(3) to[k] = getint(p)/DMF;
+                        shotmsg &s = shots.add();
+                        s.id = getint(p);
+                        loopk(3) s.pos[k] = getint(p);
                     }
-                    gameent *s = game::getclient(scn);
-                    if(!s || !isweap(weap) || s == game::player1 || s->ai) break;
+                    gameent *t = game::getclient(scn);
+                    if(!t || !isweap(weap) || t == game::player1 || t->ai) break;
                     float scale = 1;
                     int sub = WEAP2(weap, sub, flags&HIT_ALT);
                     if(WEAP2(weap, power, flags&HIT_ALT))
@@ -1453,7 +1454,19 @@ namespace client
                         scale = len/float(WEAP2(weap, power, flags&HIT_ALT));
                         if(sub > 1) sub = int(ceilf(sub*scale));
                     }
-                    projs::shootv(weap, flags, sub, scale, from, locs, s, false);
+                    projs::shootv(weap, flags, sub, scale, from, shots, t, false);
+                    break;
+                }
+
+                case N_DESTROY:
+                {
+                    int scn = getint(p), num = getint(p);
+                    gameent *t = game::getclient(scn);
+                    loopi(num)
+                    {
+                        int id = getint(p);
+                        if(t) projs::destruct(t, id);
+                    }
                     break;
                 }
 
