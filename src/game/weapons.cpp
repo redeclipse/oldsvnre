@@ -229,9 +229,13 @@ namespace weapons
         else offset = sub;
 
         vec to, from;
-        vector<vec> vshots;
-        vector<ivec> shots;
-        #define addshot(p) { vshots.add(p); shots.add(ivec(int(p.x*DMF), int(p.y*DMF), int(p.z*DMF))); }
+        vector<shotmsg> shots;
+        #define addshot(p) \
+        { \
+            shotmsg &s = shots.add(); \
+            s.id = d->getprojid(); \
+            s.pos = ivec(int(p.x*DMF), int(p.y*DMF), int(p.z*DMF)); \
+        }
         if(weaptype[weap].traced)
         {
             from = d->originpos(weap == WEAP_MELEE, secondary);
@@ -300,8 +304,8 @@ namespace weapons
                 addshot(dest);
             }
         }
-        projs::shootv(weap, secondary ? HIT_ALT : 0, offset, scale, from, vshots, d, true);
-        client::addmsg(N_SHOOT, "ri8iv", d->clientnum, lastmillis-game::maptime, weap, secondary ? HIT_ALT : 0, cooked, int(from.x*DMF), int(from.y*DMF), int(from.z*DMF), shots.length(), shots.length()*sizeof(ivec)/sizeof(int), shots.getbuf());
+        projs::shootv(weap, secondary ? HIT_ALT : 0, offset, scale, from, shots, d, true);
+        client::addmsg(N_SHOOT, "ri8iv", d->clientnum, lastmillis-game::maptime, weap, secondary ? HIT_ALT : 0, cooked, int(from.x*DMF), int(from.y*DMF), int(from.z*DMF), shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf());
 
         return true;
     }

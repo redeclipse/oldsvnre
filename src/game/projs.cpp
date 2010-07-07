@@ -2,11 +2,6 @@
 extern int emitmillis;
 namespace projs
 {
-    struct hitmsg
-    {
-        int flags, target, id, dist;
-        ivec dir;
-    };
     vector<hitmsg> hits;
     vector<projent *> projs;
 
@@ -89,10 +84,28 @@ namespace projs
         hitmsg &h = hits.add();
         h.flags = flags;
         if(proj.flags&HIT_FLAK) h.flags |= HIT_FLAK;
+        h.proj = 0;
         h.target = d->clientnum;
-        h.id = lastmillis-game::maptime;
         h.dist = int(dist*DNF);
         h.dir = ivec(int(dir.x*DNF), int(dir.y*DNF), int(dir.z*DNF));
+    }
+
+    void projpush(projent *p)
+    {
+        if(p->projtype == PRJ_SHOT && p->owner)
+        {
+            conoutf("destroy projectile %d", p->id);
+            if(game::player1 == p->owner || p->owner->ai) p->state = CS_DEAD;
+            else
+            {
+                hitmsg &h = hits.add();
+                h.flags = HIT_PROJ|HIT_TORSO;
+                h.proj = p->id;
+                h.target = p->owner->clientnum;
+                h.dist = 0;
+                h.dir = ivec(0, 0, 0);
+            }
+        }
     }
 
     bool hiteffect(projent &proj, physent *d, int flags, const vec &norm)
@@ -102,13 +115,17 @@ namespace projs
             proj.hit = d;
             proj.hitflags = flags;
             float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
-            if(expl <= 0 && (d->type == ENT_PLAYER || d->type == ENT_AI))
+            if(proj.local && expl <= 0)
             {
-                int flags = 0;
-                if(proj.hitflags&HITFLAG_LEGS) flags |= HIT_LEGS;
-                if(proj.hitflags&HITFLAG_TORSO) flags |= HIT_TORSO;
-                if(proj.hitflags&HITFLAG_HEAD) flags |= HIT_HEAD;
-                if(flags) hitpush((gameent *)d, proj, flags|HIT_PROJ, 0, proj.lifesize, proj.scale);
+                if(d->type == ENT_PLAYER || d->type == ENT_AI)
+                {
+                    int flags = 0;
+                    if(proj.hitflags&HITFLAG_LEGS) flags |= HIT_LEGS;
+                    if(proj.hitflags&HITFLAG_TORSO) flags |= HIT_TORSO;
+                    if(proj.hitflags&HITFLAG_HEAD) flags |= HIT_HEAD;
+                    if(flags) hitpush((gameent *)d, proj, flags|HIT_PROJ, 0, proj.lifesize, proj.scale);
+                }
+                else if(d->type == ENT_PROJ) projpush((projent *)d);
             }
             switch(proj.weap)
             {
@@ -134,36 +151,53 @@ namespace projs
     {
         bool radiated = false;
         float maxdist = explode ? radius*WEAP(proj.weap, pusharea) : radius, dist = 1e16f;
-        int flags = 0;
-        if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(d->aitype) || aistyle[d->aitype].canmove)))
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
+            int flags = 0;
+            if(!isaitype(d->aitype) || aistyle[d->aitype].canmove)
             {
-                vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
-                float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
-                if(fdist/WEAP2(proj.weap, legsdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_LEGS; }
+                if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
+                {
+                    vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
+                    float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
+                    if(fdist/WEAP2(proj.weap, legsdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_LEGS; }
+                }
+                if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
+                {
+                    vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
+                    float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
+                    if(fdist/WEAP2(proj.weap, torsodam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_TORSO; }
+                }
+                if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
+                {
+                    vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
+                    float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
+                    if(fdist/WEAP2(proj.weap, headdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_HEAD; }
+                }
             }
-            if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
+            else
             {
-                vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
-                float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
-                if(fdist/WEAP2(proj.weap, torsodam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_TORSO; }
+                vec bottom(d->o), top(d->o); bottom.z -= d->height; top.z += d->aboveeye;
+                dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
+                flags = HIT_TORSO;
             }
-            if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
+            if(explode && dist <= radius*WEAP(proj.weap, pusharea))
             {
-                vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
-                float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
-                if(fdist/WEAP2(proj.weap, headdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_HEAD; }
+                hitpush(d, proj, flags|HIT_WAVE, radius, dist, proj.scale);
+                radiated = true;
+            }
+            if(dist <= radius)
+            {
+                hitpush(d, proj, flags|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.scale);
+                radiated = true;
             }
         }
-        else
+        else if(d->type == ENT_PROJ && explode)
         {
             vec bottom(d->o), top(d->o); bottom.z -= d->height; top.z += d->aboveeye;
-            dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
-            flags = HIT_TORSO;
+            float dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
+            if(dist <= radius) projpush((projent *)d);
         }
-        if(explode && dist <= radius*WEAP(proj.weap, pusharea)) { hitpush(d, proj, flags|HIT_WAVE, radius, dist, proj.scale); radiated = true; }
-        if(dist <= radius) { hitpush(d, proj, flags|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.scale); radiated = true; }
         return radiated;
     }
 
@@ -177,6 +211,15 @@ namespace projs
                 projs.removeunordered(i--);
             }
             else projs[i]->owner = NULL;
+        }
+    }
+
+    void destruct(gameent *d, int id)
+    {
+        loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
+        {
+            projs[i]->state = CS_DEAD;
+            break;
         }
     }
 
@@ -377,7 +420,7 @@ namespace projs
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
                 if(proj.child)
                 {
-                    proj.projcollide &= ~(IMPACT_GEOM|BOUNCE_PLAYER);
+                    proj.projcollide &= ~(IMPACT_GEOM|BOUNCE_PLAYER|IMPACT_SHOTS|COLLIDE_SHOTS);
                     proj.projcollide |= BOUNCE_GEOM|IMPACT_PLAYER;
                 }
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
@@ -642,7 +685,7 @@ namespace projs
         }
     }
 
-    void shootv(int weap, int flags, int offset, float scale, vec &from, vector<vec> &locs, gameent *d, bool local)
+    void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
         int delay = WEAP2(weap, pdelay, flags&HIT_ALT), millis = delay, adelay = WEAP2(weap, adelay, flags&HIT_ALT),
             life = WEAP2(weap, time, flags&HIT_ALT), speed = WEAP2(weap, speed, flags&HIT_ALT);
@@ -709,8 +752,8 @@ namespace projs
             adddynlight(from, 32, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(512.f), WEAP2(weap, adelay, flags&HIT_ALT)/4, 0, DL_FLASH);
         }
 
-        loopv(locs)
-            create(from, locs[i], local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, lastmillis-game::maptime, weap, flags, scale);
+        loopv(shots)
+            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, shots[i].id, weap, flags, scale);
         if(ejecaptureade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
             create(from, from, local, d, PRJ_EJECT, rnd(ejecaptureade)+ejecaptureade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
@@ -1114,7 +1157,16 @@ namespace projs
 
     int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
-        if(hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
+        if(d && d->type == ENT_PROJ)
+        {
+            if(proj.projcollide&IMPACT_SHOTS)
+            {
+                proj.norm = vec(d->o).sub(proj.o).normalize();
+                if(hiteffect(proj, d, flags, proj.norm)) return 0;
+            }
+            return 1;
+        }
+        if(d ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
         {
             if(d)
             {
@@ -1373,19 +1425,31 @@ namespace projs
             if(maxdist <= 0) return 1; // not moving anywhere, so assume still alive since it was already alive
             ray.mul(1/maxdist);
             float dist = tracecollide(&proj, proj.from, ray, maxdist, RAY_CLIPMAT | RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
-            if((dist >= 0 && (hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)))
+            if(dist >= 0)
             {
                 proj.o = vec(proj.from).add(vec(ray).mul(dist));
-                if(hitplayer)
+                if(hitplayer && hitplayer->type == ENT_PROJ)
                 {
-                    proj.lastbounce = lastmillis;
-                    proj.norm = vec(hitplayer->o).sub(proj.from).normalize();
-                    if(!hiteffect(proj, hitplayer, hitflags, proj.norm)) return true;
+                    if(proj.projcollide&IMPACT_SHOTS)
+                    {
+                        proj.norm = vec(hitplayer->o).sub(proj.o).normalize();
+                        if(hiteffect(proj, hitplayer, hitflags, proj.norm)) return false;
+                    }
+                    return true;
                 }
-                else proj.norm = hitsurface;
-                if(proj.projcollide&(hitplayer ? IMPACT_PLAYER : IMPACT_GEOM))
-                    return false; // die on impact
-                return true;
+                if(hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
+                {
+                    if(hitplayer)
+                    {
+                        proj.lastbounce = lastmillis;
+                        proj.norm = vec(hitplayer->o).sub(proj.from).normalize();
+                        if(!hiteffect(proj, hitplayer, hitflags, proj.norm)) return true;
+                    }
+                    else proj.norm = hitsurface;
+                    if(proj.projcollide&(hitplayer ? IMPACT_PLAYER : IMPACT_GEOM))
+                        return false; // die on impact
+                    return true;
+                }
             }
         }
         proj.o = proj.to;
@@ -1514,9 +1578,9 @@ namespace projs
                     if(radius)
                     {
                         if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                        if(!proj.limited && radius > 0) loopj(game::numdynents())
+                        if(!proj.limited && radius > 0) loopj(game::numdynents(true))
                         {
-                            gameent *f = (gameent *)game::iterdynents(j);
+                            gameent *f = (gameent *)game::iterdynents(j, true);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
                             radialeffect(f, proj, true, radius);
                         }

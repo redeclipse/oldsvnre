@@ -1112,13 +1112,23 @@ namespace game
         return best;
     }
 
-    int numdynents() { return 1+players.length(); }
-    dynent *iterdynents(int i)
+    int numdynents(bool all)
+    {
+        int i = 1+players.length();
+        if(all) loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS) i++;
+        return i;
+    }
+    dynent *iterdynents(int i, bool all)
     {
         if(!i) return player1;
         i--;
         if(i<players.length()) return players[i];
         i -= players.length();
+        if(all) loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS)
+        {
+            if(!i) return projs::projs[j];
+            i--;
+        }
         return NULL;
     }
     dynent *focusedent(bool force)

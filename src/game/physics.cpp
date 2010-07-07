@@ -156,25 +156,40 @@ namespace physics
             case ENT_PLAYER: case ENT_AI: if(((gameent *)e)->aitype >= 0) actor = true; break;
             case ENT_PROJ:
             {
-                projent *p = (projent *)e;
-                if(p->hit == d || !(p->projcollide&HIT_PLAYER)) return false;
-                if(p->owner == d && ((!returningfire && !(p->projcollide&COLLIDE_OWNER)) || (esc && !p->escaped))) return false;
                 projectile = true;
+                if(d->state != CS_ALIVE) return false;
+                projent *p = (projent *)e;
+                if(d->type == ENT_PLAYER || d->type == ENT_AI)
+                {
+                    if(p->hit == d || !(p->projcollide&HIT_PLAYER)) return false;
+                    if(p->owner == d && ((!returningfire && !(p->projcollide&COLLIDE_OWNER)) || (esc && !p->escaped))) return false;
+                }
+                else if(d->type == ENT_PROJ)
+                {
+                    projent *q = (projent *)d;
+                    if(p->projtype == PRJ_SHOT && q->projtype == PRJ_SHOT)
+                    {
+                        if(p->projcollide&IMPACT_SHOTS && q->projcollide&COLLIDE_SHOTS) return true;
+                    }
+                    return false;
+                }
+                else return false;
                 break;
             }
             default: break;
         }
-        if(d->state == CS_ALIVE)
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(d->type == ENT_PLAYER || d->type == ENT_AI)
+            if(d->state == CS_ALIVE)
             {
                 gameent *f = (gameent *)d;
                 if(!projectile && !actor && f->aitype >= AI_START && !f->move && !f->strafe && !f->action[AC_CROUCH]) return false;
                 if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
+                return true;
             }
-            return true;
+            return d->state == CS_DEAD || d->state == CS_WAITING;
         }
-        return d->state == CS_DEAD || d->state == CS_WAITING;
+        return false;
     }
 
     bool iscrouching(physent *d)
