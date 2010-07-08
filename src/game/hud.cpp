@@ -978,7 +978,7 @@ namespace hud
     {
         static vector<int> refs; refs.setsize(0);
         bool full = fullconsole || commandmillis > 0;
-        pushfont("sub");
+        pushfont("console");
         if(type >= 2)
         {
             int numl = chatconsize, numo = chatconsize+chatconoverflow;
@@ -1057,7 +1057,7 @@ namespace hud
             }
             if(commandmillis > 0)
             {
-                pushfont("emphasis");
+                pushfont("command");
                 Texture *t = textureload(commandicon ? commandicon : inputtex, 3);
                 float f = float(totalmillis%1000)/1000.f;
                 if(f < 0.5f) f = 1.f-f;
@@ -1869,7 +1869,7 @@ namespace hud
         glTexCoord2f(1, 1); glVertex2f(w-80, 128);
         glEnd();
 
-        pushfont("radar");
+        pushfont("console");
         int y = h-FONTH/2;
         if(progressing)
         {
@@ -1917,13 +1917,13 @@ namespace hud
                 vtris*100/max(wtris, 1), vverts*100/max(wverts, 1), xtraverts/1024, xtravertsva/1024, glde, gbatches, getnumqueries(), rplanes, curfps, bestfpsdiff, worstfpsdiff
             };
             loopi(NUMSTATS) if(prevstats[i] == curstats[i]) curstats[i] = nextstats[i];
+            pushfont("consub");
             if(showfps)
             {
-                pushfont("sub");
+                pushfont("console");
                 draw_textx("%d", w-br/2, by-FONTH*2, 255, 255, 255, bf, TEXT_CENTERED, -1, bs, curstats[8]);
                 draw_textx("fps", w-br/2, by-FONTH, 255, 255, 255, bf, TEXT_CENTERED, -1, -1);
                 popfont();
-                pushfont("radar");
                 switch(showfps)
                 {
                     case 3:
@@ -1935,7 +1935,6 @@ namespace hud
                     default: break;
                 }
             }
-            else pushfont("radar");
             if(showstats > (m_edit(game::gamemode) ? 0 : 1))
             {
                 by -= draw_textx("ond:%d va:%d gl:%d(%d) oq:%d", bx, by, 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, allocnodes*8, allocva, curstats[4], curstats[5], curstats[6]);
