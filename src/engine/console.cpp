@@ -96,6 +96,24 @@ const char *getkeyname(int code)
     return km ? km->name : NULL;
 }
 
+#define ADDSEP(comma, conj) do { \
+    if(pretty && *pretty) \
+    { \
+        names.put("\fs", 2); \
+        names.put(pretty, strlen(pretty)); \
+        if(comma) names.add(comma); \
+        names.add(' '); \
+        if((conj)[0]) \
+        { \
+            names.put(conj, strlen(conj)); \
+            names.add(' '); \
+        } \
+        names.put("\fS", 2); \
+    } \
+    else if(sep && *sep) names.put(sep, strlen(sep)); \
+    else names.add(' '); \
+} while(0)
+
 void searchbindlist(const char *action, int type, int limit, const char *sep, const char *pretty, vector<char> &names)
 {
     const char *name1 = NULL, *name2 = NULL, *lastname = NULL;
@@ -109,23 +127,6 @@ void searchbindlist(const char *action, int type, int limit, const char *sep, co
             else if(!name2) name2 = km.name;
             else
             {
-                #define ADDSEP(comma, conj) do { \
-                    if(pretty && *pretty) \
-                    { \
-                        names.put("\fs", 2); \
-                        names.put(pretty, strlen(pretty)); \
-                        if(comma) names.add(comma); \
-                        names.add(' '); \
-                        if((conj)[0]) \
-                        { \
-                            names.put(conj, strlen(conj)); \
-                            names.add(' '); \
-                        } \
-                        names.put("\fS", 2); \
-                    } \
-                    else if(sep && *sep) names.put(sep, strlen(sep)); \
-                    else names.add(' '); \
-                } while(0)
                 if(lastname)
                 {
                     ADDSEP(',', "");
@@ -168,6 +169,52 @@ const char *searchbind(const char *action, int type)
         if(!strcmp(act, action)) return km.name;
     });
     return NULL;
+}
+
+void getkeypressed(int limit, const char *sep, const char *pretty, vector<char> &names)
+{
+    const char *name1 = NULL, *name2 = NULL, *lastname = NULL;
+    int found = 0;
+    enumerate(keyms, keym, km,
+    {
+        if(km.pressed)
+        {
+            if(!name1) name1 = km.name;
+            else if(!name2) name2 = km.name;
+            else
+            {
+                if(lastname)
+                {
+                    ADDSEP(',', "");
+                    names.put(lastname, strlen(lastname));
+                }
+                else
+                {
+                    names.put(name1, strlen(name1));
+                    ADDSEP(',', "");
+                    names.put(name2, strlen(name2));
+                }
+                lastname = km.name;
+            }
+            ++found;
+            if(limit > 0 && found >= limit) break;
+        }
+    });
+    if(lastname)
+    {
+        ADDSEP(',', sep);
+        names.put(lastname, strlen(lastname));
+    }
+    else
+    {
+        if(name1) names.put(name1, strlen(name1));
+        if(name2)
+        {
+            ADDSEP('\0', sep);
+            names.put(name2, strlen(name2));
+        }
+    }
+    names.add('\0');
 }
 
 int findkeycode(char *key)
@@ -225,6 +272,8 @@ ICOMMAND(0, searchbinds,     "siss", (char *action, int *limit, char *sep, char 
 ICOMMAND(0, searchspecbinds, "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_SPECTATOR, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
 ICOMMAND(0, searcheditbinds, "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_EDITING, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
 ICOMMAND(0, searchwaitbinds, "siss", (char *action, int *limit, char *sep, char *pretty), { vector<char> list; searchbindlist(action, keym::ACTION_WAITING, max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
+
+ICOMMAND(0, keyspressed, "iss", (int *limit, char *sep, char *pretty), { vector<char> list; getkeypressed(max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
 
 void inputcommand(char *init, char *action = NULL, char *icon = NULL) // turns input to the command line on or off
 {
