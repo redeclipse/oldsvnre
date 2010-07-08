@@ -952,11 +952,11 @@ namespace ai
         return anynode(d, b);
     }
 
-    void jumpto(gameent *d, aistate &b, const vec &pos)
+    void jumpto(gameent *d, aistate &b, const vec &pos, bool locked)
     {
         vec off = vec(pos).sub(d->feetpos());
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 500 && !d->turnside,
-            jumper = off.z >= JUMPMIN && (!offground || (air && physics::canimpulse(d, 0, 1))),
+            jumper = (locked || off.z >= JUMPMIN) && (!offground || (air && physics::canimpulse(d, 0, 1))),
             jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;
         if(jump)
         {
@@ -977,11 +977,11 @@ namespace ai
         if(jump)
         {
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
-            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 2 : 8);
+            int seed = (111-d->skill)*(locked ? 1 : (d->onladder || d->inliquid ? 2 : 10));
             d->ai->jumpseed = lastmillis+seed+rnd(seed*2); seed *= b.idle ? 1000 : 500;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
-        if(d->aitype == AI_BOT && air) d->action[AC_SPECIAL] = true;
+        if(!m_jetpack(game::gamemode, game::mutators) && physics::canimpulse(d, -1, 3)) d->action[AC_SPECIAL] = true;
     }
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
@@ -1016,22 +1016,9 @@ namespace ai
         }
         else idle = d->ai->dontmove = true;
 
-        if(aistyle[d->aitype].canjump)
-        {
-            if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
-            if(idle)
-            {
-                bool wascrouching = lastmillis-d->actiontime[AC_CROUCH] <= PHYSMILLIS*2, wantscrouch = d->ai->dontmove && !wasdontmove && !d->action[AC_CROUCH];
-                if(wascrouching || wantscrouch)
-                {
-                    d->action[AC_CROUCH] = true;
-                    if(wantscrouch) d->actiontime[AC_CROUCH] = lastmillis;
-                }
-            }
-        }
-
         gameent *e = game::getclient(d->ai->enemy);
-        bool enemyok = e && targetable(d, e), melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
+        bool enemyok = e && targetable(d, e), locked = false,
+             melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
         if(!enemyok || d->skill >= 50)
         {
             gameent *f = game::intersectclosest(dp, d->ai->target, d);
@@ -1067,6 +1054,7 @@ namespace ai
                     d->ai->targpitch = pitch;
                     frame *= 2;
                     d->ai->becareful = false;
+                    if(d->aitype == AI_BOT) locked = true;
                     if(!weaptype[d->weapselect].melee) d->action[AC_SPECIAL] = true;
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
@@ -1115,8 +1103,19 @@ namespace ai
         d->aimyaw = d->ai->targyaw; d->aimpitch = d->ai->targpitch;
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame*0.25f, 1.f);
 
+        if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
         if(d->aitype == AI_BOT)
         {
+            if(idle)
+            {
+                bool wascrouching = lastmillis-d->actiontime[AC_CROUCH] <= PHYSMILLIS*2, wantscrouch = d->ai->dontmove && !wasdontmove && !d->action[AC_CROUCH];
+                if(wascrouching || wantscrouch)
+                {
+                    d->action[AC_CROUCH] = true;
+                    if(wantscrouch) d->actiontime[AC_CROUCH] = lastmillis;
+                }
+            }
+
             bool wantsimpulse = false;
             if(physics::allowimpulse(m_jetpack(game::gamemode, game::mutators) ? 0 : 2))
             {

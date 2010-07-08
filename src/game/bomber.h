@@ -1,6 +1,6 @@
-#define isbomberaffinity(a) (a.team == TEAM_NEUTRAL)
-#define isbomberhome(a,b)   (!isbomberaffinity(a) && a.team == b)
-#define isbombertarg(a,b)   (!isbomberaffinity(a) && a.team != b)
+#define isbomberaffinity(a) (a.enabled && a.team == TEAM_NEUTRAL)
+#define isbomberhome(a,b)   (a.enabled && !isbomberaffinity(a) && a.team == b)
+#define isbombertarg(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != b)
 
 #ifdef GAMESERVER
 #define bomberstate bomberservstate
@@ -11,6 +11,7 @@ struct bomberstate
     {
         vec droploc, inertia, spawnloc;
         int team, droptime, taketime, inittime;
+        bool enabled;
 #ifdef GAMESERVER
         int owner, lastowner;
         vector<int> votes;
@@ -41,6 +42,7 @@ struct bomberstate
 #endif
             team = TEAM_NEUTRAL;
             inittime = taketime = droptime = 0;
+            enabled = false;
         }
 
 #ifndef GAMESERVER
@@ -126,10 +128,11 @@ struct bomberstate
 #endif
     }
 
-    void returnaffinity(int i, int t, bool score)
+    void returnaffinity(int i, int t, bool score, bool enabled)
     {
         flag &f = flags[i];
         f.droptime = f.taketime = 0;
+        f.enabled = enabled;
         if(score) f.inittime = 0;
 #ifdef GAMESERVER
         f.owner = -1;
@@ -178,7 +181,7 @@ namespace bomber
     extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target = -1);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void takeaffinity(gameent *d, int i);
-    extern void resetaffinity(int i);
+    extern void resetaffinity(int i, bool enabled);
     extern void setupaffinity();
     extern void setscore(int team, int total);
     extern void checkaffinity(gameent *d);

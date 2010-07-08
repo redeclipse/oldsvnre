@@ -2,13 +2,15 @@
 struct bomberservmode : bomberstate, servmode
 {
     bool hasflaginfo;
+    int bombertime;
 
-    bomberservmode() : hasflaginfo(false) {}
+    bomberservmode() : hasflaginfo(false), bombertime(-1) {}
 
     void reset(bool empty)
     {
         bomberstate::reset();
         hasflaginfo = false;
+        bombertime = -1;
     }
 
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
@@ -30,6 +32,16 @@ struct bomberservmode : bomberstate, servmode
     void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush)
     {
         if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o);
+    }
+
+    void spawned(clientinfo *ci)
+    {
+        if(bombertime < 0)
+        {
+            int alive[TEAM_MAX] = {0};
+            loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
+            if(alive[TEAM_ALPHA] && alive[TEAM_BETA]) bombertime = gamemillis+GAME(bomberdelay);
+        }
     }
 
     void died(clientinfo *ci, clientinfo *actor)
@@ -54,7 +66,7 @@ struct bomberservmode : bomberstate, servmode
     void scorebomb(clientinfo *ci, int relay, int goal)
     {
         flag &f = flags[relay], g = flags[goal];
-        bomberstate::returnaffinity(relay, gamemillis, true);
+        bomberstate::returnaffinity(relay, gamemillis, true, false);
         int score = 0;
         if(g.team != ci->team)
         {
@@ -75,16 +87,17 @@ struct bomberservmode : bomberstate, servmode
             if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
         }
         if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
-        loopvj(flags) if(isbomberaffinity(flags[j]) && (g.droptime || g.owner >=0 ))
+        loopvj(flags) if(flags[j].enabled)
         {
-            bomberstate::returnaffinity(j, gamemillis, false);
-            sendf(-1, 1, "ri2", N_RESETAFFIN, j);
+            bomberstate::returnaffinity(j, gamemillis, true, false);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, j, 0);
         }
         if(GAME(bomberlimit) && score >= GAME(bomberlimit))
         {
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
             startintermission();
         }
+        bombertime = -1;
     }
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
@@ -124,14 +137,32 @@ struct bomberservmode : bomberstate, servmode
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
-            bomberstate::returnaffinity(i, gamemillis, false);
-            sendf(-1, 1, "ri2", N_RESETAFFIN, i);
+            bomberstate::returnaffinity(i, gamemillis, true, true);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
         }
     }
 
     void update()
     {
-        if(!hasflaginfo) return;
+        if(!hasflaginfo || bombertime < 0) return;
+        if(bombertime)
+        {
+            if(gamemillis < bombertime) return;
+            vector<int> candidates[TEAM_MAX];
+            loopv(flags) candidates[flags[i].team].add(i);
+            loopi(TEAM_COUNT)
+            {
+                int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
+                if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
+                {
+                    bomberstate::returnaffinity(candidates[i][r], gamemillis, true, true);
+                    sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
+                }
+                else return;
+            }
+            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, "\fwnew round starting");
+            bombertime = 0;
+        }
         loopv(flags) if(isbomberaffinity(flags[i]))
         {
             flag &f = flags[i];
@@ -148,8 +179,8 @@ struct bomberservmode : bomberstate, servmode
             }
             if(f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay))
             {
-                bomberstate::returnaffinity(i, gamemillis, false);
-                sendf(-1, 1, "ri2", N_RESETAFFIN, i);
+                bomberstate::returnaffinity(i, gamemillis, true, true);
+                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
             }
         }
     }
