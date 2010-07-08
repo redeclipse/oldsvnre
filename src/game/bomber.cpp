@@ -3,18 +3,55 @@ namespace bomber
 {
     bomberstate st;
 
+    int findtarget(gameent *d)
+    {
+        float bestdist = 1e16f;
+        int best = -1;
+        gameent *e = NULL;
+        vec targ;
+        loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE)
+        {
+            float dist = e->o.dist(d->o);
+            if(dist < bestdist)
+            {
+                float md = d->ai ? d->ai->views[2] : dist+1, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
+                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
+                {
+                    best = e->clientnum;
+                    bestdist = dist;
+                }
+            }
+        }
+        return best;
+    }
+
     bool dropaffinity(gameent *d)
     {
-        if(m_bomber(game::gamemode))
+        if(d->action[AC_AFFINITY] || d->actiontime[AC_AFFINITY] > 0)
         {
+            bool found = false;
             loopv(st.flags) if(st.flags[i].owner == d)
             {
-                vec inertia;
-                vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
-                inertia.normalize().mul(bomberspeed).add(d->vel);
-                client::addmsg(N_DROPAFFIN, "ri7", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
+                if(!d->action[AC_AFFINITY])
+                {
+                    vec inertia;
+                    vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
+                    bool guided = false;
+                    float speed = bomberspeed;
+                    if(bomberpowertime && lastmillis-d->actiontime[AC_AFFINITY] < bomberpowertime)
+                        speed *= (lastmillis-d->actiontime[AC_AFFINITY])/float(bomberpowertime);
+                    else if(!bomberpowertime || lastmillis-d->actiontime[AC_AFFINITY] >= bomberpowertime*2) guided = true;
+                    inertia.normalize().mul(speed).add(d->vel);
+                    client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
+                    found = true;
+                    break;
+                }
                 return true;
             }
+            if(!found && d == game::player1) playsound(S_ERROR, d->o, d);
+            d->action[AC_AFFINITY] = false;
+            d->actiontime[AC_AFFINITY] = 0;
+            return true;
         }
         return false;
     }
@@ -133,10 +170,59 @@ namespace bomber
                 }
                 else if(f.owner)
                 {
-                    if(bomberholdtime && f.owner == game::focus)
+                    if(f.owner == game::focus)
                     {
-                        int time = lastmillis-f.taketime, delay = bomberholdtime-time;
-                        hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fy%s", hud::timetostr(delay, -1));
+                        if(f.owner->action[AC_AFFINITY])
+                        {
+                            int px = pos[0]-int(s*skew);
+                            if(bomberpowertime && lastmillis-f.owner->actiontime[AC_AFFINITY] < bomberpowertime*2)
+                            {
+                                if(lastmillis-f.owner->actiontime[AC_AFFINITY] < bomberpowertime)
+                                {
+                                    float rp = 1, gp = 1, bp = 1, amt = (lastmillis-f.owner->actiontime[AC_AFFINITY])/float(bomberpowertime);
+                                    hud::colourskew(rp, gp, bp, 1.f-amt);
+                                    hud::drawprogress(px, pos[1], 0, amt, s, false, rp, gp, bp, fade, skew, "emphasis", "%s%d%%", amt > 0.75f ? "\fo" : (amt > 0.5f ? "\fg" : (amt > 0.25f ? "\fy" : "\fw")), int(amt*100.f));
+                                }
+                                else hud::drawitemsubtext(px, pos[1]-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzoyfull");
+                            }
+                            else
+                            {
+                                gameent *e = game::getclient(findtarget(f.owner));
+                                if(e)
+                                {
+                                    hud::drawitemsubtext(px, pos[1]-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzgy[%s\fzgy]", game::colorname(e));
+                                    vec pos = e->headpos();
+                                    int interval = lastmillis%500;
+                                    float cx = 0.5f, cy = 0.5f, cz = 1, rp = 1, gp = 1, bp = 1,
+                                          sp = interval >= 250 ? (500-interval)/250.f : interval/250.f,
+                                          sq = max(sp, 0.5f);
+                                    hud::colourskew(rp, gp, bp, sp);
+                                    vectocursor(pos, cx, cy, cz);
+                                    int sx = int(cx*hud::hudwidth-s*sq), sy = int(cy*hud::hudsize-s*sq), ss = int(s*2*sq);
+                                    Texture *t = textureload(hud::indicatortex, 3);
+                                    if(t && t != notexture)
+                                    {
+                                        glBindTexture(GL_TEXTURE_2D, t->id);
+                                        glColor4f(rp, gp, bp, sq);
+                                        hud::drawsized(sx, sy, ss);
+                                    }
+                                    t = textureload(hud::crosshairtex, 3);
+                                    if(t && t != notexture)
+                                    {
+                                        glBindTexture(GL_TEXTURE_2D, t->id);
+                                        glColor4f(rp, gp, bp, sq*0.5f);
+                                        hud::drawsized(sx+ss/4, sy+ss/4, ss/2);
+                                    }
+                                }
+                                else hud::drawitemsubtext(px, pos[1]-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzoyready");
+                            }
+                        }
+                        if(bomberholdtime)
+                        {
+                            int time = lastmillis-f.taketime, delay = bomberholdtime-time;
+                            hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzgy%s", hud::timetostr(delay, -1));
+                        }
+                        else hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "super", fade, "\fzaw[\fzgy!\fzaw]");
                     }
                     else hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
                 }
@@ -301,13 +387,13 @@ namespace bomber
         }
     }
 
-    void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia)
+    void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target)
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
         st.dropaffinity(i, droploc, inertia, lastmillis);
         st.interp(i, totalmillis);
-        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i);
+        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i, target);
     }
 
     void removeplayer(gameent *d)
@@ -397,30 +483,38 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                if(bomberholdtime && f.owner == d && d->ai && !d->action[AC_AFFINITY])
+                if(d->ai)
                 {
-                    int time = lastmillis-f.taketime, delay = bomberholdtime-time;
-                    if(delay <= bomberholdtime/3)
+                    if(f.owner == d)
                     {
-                        d->action[AC_AFFINITY] = true;
-                        break;
+                        if(!d->action[AC_AFFINITY])
+                        {
+                            if(lastmillis-f.taketime >= (bomberholdtime ? abs(bomberholdtime-bomberpowertime) : 1500))
+                            {
+                                d->action[AC_AFFINITY] = true;
+                                d->actiontime[AC_AFFINITY] = lastmillis;
+                            }
+                        }
+                        else if(!bomberpowertime || lastmillis-d->actiontime[AC_AFFINITY] >= bomberpowertime*2)
+                        {
+                            if(findtarget(d) < 0) continue;
+                        }
+                        else continue;
                     }
+                    d->action[AC_AFFINITY] = false;
                 }
                 continue;
             }
-            if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
-            if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
+            else if(f.droptime) f.droploc = f.pos();
+            if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
+            if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 1000) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
                 f.pickuptime = lastmillis;
             }
         }
-        if(d->action[AC_AFFINITY])
-        {
-            if(!dropaffinity(d) && d == game::player1) playsound(S_ERROR, d->o, d);
-            d->action[AC_AFFINITY] = false;
-        }
+        dropaffinity(d);
     }
 
     bool aihomerun(gameent *d, ai::aistate &b)

@@ -1100,8 +1100,8 @@ struct projent : dynent
 {
     vec from, to, norm, inertia;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
-    float movement, roll, lifespan, lifesize, scale;
-    bool local, limited, stuck, escaped, child, bouncexy;
+    float movement, roll, lifespan, lifesize, scale, minspeed;
+    bool local, limited, stuck, escaped, child;
     int projtype, projcollide;
     float elasticity, reflectivity, relativity, waterfric;
     int schan, id, weap, flags, hitflags;
@@ -1128,10 +1128,10 @@ struct projent : dynent
         inertia = vec(0, 0, 0);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = -1;
-        movement = roll = lifespan = lifesize = 0.f;
+        movement = roll = lifespan = lifesize = minspeed = 0.f;
         scale = 1.f;
         extinguish = 0;
-        limited = stuck = escaped = child = bouncexy = false;
+        limited = stuck = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
     }
 
@@ -1196,7 +1196,7 @@ namespace weapons
 
 namespace hud
 {
-    extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *cardtex, *flagtex, *bombtex, *arrowtex, *alerttex, *inventorytex;
+    extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *cardtex, *flagtex, *bombtex, *arrowtex, *alerttex, *inventorytex, *indicatortex, *crosshairtex, *hitcrosshairtex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radaraffinitynames, inventorygame, inventoryaffinity, teamkillnum;
     extern float noticescale, inventoryblend, inventoryskew, inventorygrow, radaraffinityblend, radarblipblend, radaraffinitysize;
     extern vector<int> teamkills;

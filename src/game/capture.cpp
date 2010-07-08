@@ -9,7 +9,7 @@ namespace capture
         {
             loopv(st.flags) if(st.flags[i].owner == d)
             {
-                client::addmsg(N_DROPAFFIN, "ri7", d->clientnum, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(d->vel.x*DMF), int(d->vel.y*DMF), int(d->vel.z*DMF));
+                client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(d->vel.x*DMF), int(d->vel.y*DMF), int(d->vel.z*DMF));
                 return true;
             }
         }
@@ -424,7 +424,7 @@ namespace capture
         }
     }
 
-    void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia)
+    void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target)
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
@@ -521,9 +521,10 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || f.owner) continue;
-            if(f.pickuptime && lastmillis-f.pickuptime <= 3000) continue;
+            if(f.droptime) f.droploc = f.pos();
+            if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
             if(f.team == d->team && !m_gsp3(game::gamemode, game::mutators) && (m_gsp2(game::gamemode, game::mutators) || !f.droptime)) continue;
-            if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 3000) continue;
+            if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 1000) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
