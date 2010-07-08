@@ -106,7 +106,7 @@ struct captureservmode : capturestate, servmode
         if(f.votes.length() >= numclients()/2)
         {
             capturestate::returnaffinity(i, gamemillis);
-            sendf(-1, 1, "ri2", N_RESETAFFIN, i);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
         }
     }
 

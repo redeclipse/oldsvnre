@@ -71,7 +71,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || hasflags.find(i) >= 0) continue;
+            if(!entities::ents.inrange(f.ent) || hasflags.find(i) >= 0 || !f.enabled) continue;
             vec dir = vec(f.pos()).sub(camera1->o);
             int colour = isbomberaffinity(f) ? 0x888888 : teamtype[f.team].colour;
             float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend, size = 1;
@@ -162,10 +162,10 @@ namespace bomber
                             else skew = 1; // override it
                         }
                     }
-                    else if(millis <= 1000) skew += ((1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f))*0.5f;
+                    else if(millis <= 1000) skew += ((1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f));
                     else skew = 0.5f;
                 }
-                else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)))*0.5f;
+                else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
                 sy += int(hud::drawitem(hud::bombtex, pos[0], pos[1], s, false, r, g, b, fade, skew)*rescale);
                 if(f.droptime)
                 {
@@ -240,7 +240,7 @@ namespace bomber
         loopv(st.flags) // flags/bases
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
+            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             vec above(f.spawnloc);
             float trans = 0.f;
             if(isbomberaffinity(f) && !f.owner && !f.droptime)
@@ -277,7 +277,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f) || (!f.owner && !f.droptime)) continue;
+            if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos(true));
             int interval = lastmillis%1000;
             float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
@@ -434,13 +434,16 @@ namespace bomber
         if(from.x >= 0 && to.x >= 0) part_trail(PART_FIREBALL, 500, from, to, teamtype[team].colour, 2, 1, -5);
     }
 
-    void resetaffinity(int i)
+    void resetaffinity(int i, bool enabled)
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
-        game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
-        st.returnaffinity(i, lastmillis, false);
+        if(f.enabled && enabled)
+        {
+            affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
+            game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
+        }
+        st.returnaffinity(i, lastmillis, true, enabled);
         st.interp(i, totalmillis);
     }
 
@@ -461,7 +464,7 @@ namespace bomber
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
         game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
-        st.returnaffinity(relay, lastmillis, true);
+        st.returnaffinity(relay, lastmillis, true, false);
         st.interp(relay, totalmillis);
     }
 
@@ -484,7 +487,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !isbomberaffinity(f)) continue;
+            if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
                 if(d->ai)

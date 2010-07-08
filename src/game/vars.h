@@ -54,7 +54,7 @@ GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = alwa
 GVAR(0, spawndelay, 0, 3000, INT_MAX-1); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 1500, INT_MAX-1); // .. in instagib/arena matches
 GVAR(0, trialdelay, 0, 500, INT_MAX-1); // .. in time trial matches
-GVAR(0, bomberdelay, 0, 7500, INT_MAX-1); // delay before spawning in bomber
+GVAR(0, bomberdelay, 0, 5000, INT_MAX-1); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, INT_MAX-1); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, INT_MAX-1); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
