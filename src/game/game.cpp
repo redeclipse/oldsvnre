@@ -2045,7 +2045,7 @@ namespace game
                         } polyweap[WEAP_MAX] = {
                             { 0.1f, 0.1f, 0.1f }, // melee
                             { 0.2f, 0.2f, 0.4f }, // pistol
-                            { 0.2f, 0.2f, 0.1f }, // sword
+                            { 0.2f, 0.2f, 1.f }, // sword
                             { 0.3f, 0.5f, 0.9f }, // shotgun
                             { 0.3f, 0.3f, 0.6f }, // smg
                             { 0.3f, 0.5f, 0.7f }, // flamer
@@ -2225,7 +2225,7 @@ namespace game
         if(!polymodels) d->checktags();
         if(rendernormally)
         {
-            if(d->weapselect == WEAP_SWORD || (d->weapstate[d->weapselect] == WEAP_S_POWER && lastmillis-d->weaplast[d->weapselect] > 0))
+            if(d->state == CS_ALIVE && (d->weapselect == WEAP_SWORD || (d->weapstate[d->weapselect] == WEAP_S_POWER && lastmillis-d->weaplast[d->weapselect] > 0)))
             {
                 static const struct powerfxs {
                     int type, parttype, colour;
