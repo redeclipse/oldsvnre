@@ -180,14 +180,14 @@ namespace projs
                 dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
                 flags = HIT_TORSO;
             }
-            if(explode && dist <= radius*WEAP(proj.weap, pusharea))
-            {
-                hitpush(d, proj, flags|HIT_WAVE, radius, dist, proj.scale);
-                radiated = true;
-            }
             if(dist <= radius)
             {
                 hitpush(d, proj, flags|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.scale);
+                radiated = true;
+            }
+            else if(explode && dist <= maxdist)
+            {
+                hitpush(d, proj, flags|HIT_WAVE, radius, dist, proj.scale);
                 radiated = true;
             }
         }

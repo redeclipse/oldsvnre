@@ -75,6 +75,11 @@ struct bomberservmode : bomberstate, servmode
             if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
         }
         if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
+        loopvj(flags) if(isbomberaffinity(flags[j]) && (g.droptime || g.owner >=0 ))
+        {
+            bomberstate::returnaffinity(j, gamemillis, false);
+            sendf(-1, 1, "ri2", N_RESETAFFIN, j);
+        }
         if(GAME(bomberlimit) && score >= GAME(bomberlimit))
         {
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
@@ -111,7 +116,7 @@ struct bomberservmode : bomberstate, servmode
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
 
-    void resetaffinity(clientinfo *ci, int i)
+    void resetaffinity(clientinfo *ci, int i, bool force = false)
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];

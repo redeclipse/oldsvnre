@@ -388,6 +388,26 @@ namespace server
     vector<servmode *> smuts;
     #define mutate(a,b) loopvk(a) { servmode *mut = a[k]; { b; } }
 
+    struct vampireservmode : servmode
+    {
+        vampireservmode() {}
+        void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0))
+        {
+            if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && damage > 0)
+            {
+                int total = m_health(gamemode, mutators), amt = 0, delay = 0, add = flags&HIT_KILL ? total : damage;
+                if(smode) smode->regen(actor, total, amt, delay);
+                if(total && actor->state.health < total)
+                {
+                    int rgn = actor->state.health, heal = clamp(actor->state.health+add, 0, total), eff = heal-rgn;
+                    actor->state.health = heal;
+                    actor->state.lastregen = gamemillis;
+                    sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
+                }
+            }
+        }
+    } vampiremutator;
+
     SVAR(0, serverpass, "");
     SVAR(0, adminpass, "");
 
@@ -1837,6 +1857,7 @@ namespace server
         else smode = NULL;
         smuts.shrink(0);
         if(m_duke(gamemode, mutators)) smuts.add(&duelmutator);
+        if(m_vampire(gamemode, mutators)) smuts.add(&vampiremutator);
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
 
@@ -2403,19 +2424,6 @@ namespace server
         if(smode) smode->dodamage(target, actor, realdamage, weap, realflags, hitpush);
         mutate(smuts, mut->dodamage(target, actor, realdamage, weap, realflags, hitpush));
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
-        if(GAME(vampire) && actor->state.state == CS_ALIVE && realdamage > 0)
-        {
-            int total = m_health(gamemode, mutators), amt = 0, delay = 0;
-            if(smode) smode->regen(actor, total, amt, delay);
-            if(total && actor->state.health < total)
-            {
-                int rgn = actor->state.health, heal = clamp(actor->state.health+realdamage, 0, total), eff = heal-rgn;
-                actor->state.health = heal;
-                actor->state.lastregen = gamemillis;
-                sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
-            }
-        }
-
         if(realflags&HIT_KILL)
         {
             bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode);
@@ -2567,7 +2575,11 @@ namespace server
         }
         else if(isweap(weap))
         {
-            if(gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id) < 0) return;
+            if(gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id) < 0)
+            {
+                if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - not found", weap, id);
+                return;
+            }
             if(hits.empty())
             {
                 gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].remove(id);
@@ -2585,9 +2597,12 @@ namespace server
             else loopv(hits)
             {
                 hitset &h = hits[i];
-                int hflags = flags|h.flags;
                 clientinfo *target = (clientinfo *)getinfo(h.target);
-                if(!target) continue;
+                if(!target)
+                {
+                    if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] not found", weap, id, i, h.target);
+                    continue;
+                }
                 if(h.proj)
                 {
                     servstate &ts = target->state;
@@ -2600,11 +2615,15 @@ namespace server
                 }
                 else
                 {
+                    int hflags = flags|h.flags;
                     float skew = float(scale)/DNF;
                     if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, skew));
                     float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
+                    {
+                        if(GAME(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] state disallows it", weap, id, i, h.target);
                         continue;
+                    }
                     int damage = calcdamage(weap, hflags, radial, size, dist, skew);
                     dodamage(target, ci, damage, weap, hflags, h.dir);
                     break;

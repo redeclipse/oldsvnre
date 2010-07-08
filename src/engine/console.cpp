@@ -12,7 +12,7 @@ void conline(int type, const char *sf, int n)
 {
     cline cl;
     cl.type = type;
-    cl.cref = conlines.length()>100 ? conlines.pop().cref : newstringbuf("");
+    cl.cref = conlines.length() > MAXSTRLEN ? conlines.pop().cref : newstringbuf("");
     cl.reftime = cl.outtime = totalmillis;
     conlines.insert(n, cl);
 
