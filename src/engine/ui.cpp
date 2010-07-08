@@ -346,12 +346,12 @@ struct gui : guient
 
     char *field(const char *name, int color, int length, int height, const char *initval, int initmode)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDEDIT, "sub");
+        return field_(name, color, length, height, initval, initmode, FIELDEDIT, "console");
     }
 
     char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDKEY, "sub");
+        return field_(name, color, length, height, initval, initmode, FIELDKEY, "console");
     }
 
     char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, const char *font = "")
