@@ -9,18 +9,22 @@ namespace bomber
         int best = -1;
         gameent *e = NULL;
         vec targ;
-        loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE)
+        loopk(2)
         {
-            float dist = e->o.dist(d->o);
-            if(dist < bestdist)
+            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k ? d->aitype == AI_BOT : d->aitype < 0))
             {
-                float md = d->ai ? d->ai->views[2] : dist+1, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
-                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
+                float dist = e->o.dist(d->o);
+                if(dist < bestdist)
                 {
-                    best = e->clientnum;
-                    bestdist = dist;
+                    float md = d->ai ? d->ai->views[2] : dist+1, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
+                    if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
+                    {
+                        best = e->clientnum;
+                        bestdist = dist;
+                    }
                 }
             }
+            if(best >= 0) break;
         }
         return best;
     }
