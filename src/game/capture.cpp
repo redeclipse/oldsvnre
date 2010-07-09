@@ -35,14 +35,16 @@ namespace capture
                 int colour = teamtype[f.team].colour;
                 const char *tex = hud::flagtex;
                 bool arrow = false;
-                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend;
+                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
+                int millis = totalmillis-f.interptime;
+                if(millis < 1000) size *= 1.f+(1-clamp(float(millis)/1000.f, 0.f, 1.f));
+                if(f.owner) size *= 0.75f;
                 if(k)
                 {
                     if(!(f.base&BASE_FLAG) || f.owner == game::focus || (!f.owner && !f.droptime)) break;
                     (dir = f.pos()).sub(camera1->o);
                     int interval = totalmillis%500;
                     if(interval >= 300 || interval <= 200) fade *= clamp(interval >= 300 ? 1.f-((interval-300)/200.f) : interval/200.f, 0.f, 1.f);
-                    if(f.owner) fade *= clamp(vec(f.owner->vel).add(f.owner->falling).magnitude()/movespeed, 0.f, 1.f);
                 }
                 else
                 {
@@ -51,6 +53,7 @@ namespace capture
                     if(iscapturehome(f, game::focus->team) && !m_gsp3(game::gamemode, game::mutators) && !hasflags.empty())
                     {
                         fade += (1.f-fade)*diff;
+                        size *= 2;
                         tex = hud::arrowtex;
                         arrow = true;
                     }
@@ -61,7 +64,7 @@ namespace capture
                     }
                 }
                 dir.rotate_around_z(-camera1->yaw*RAD).normalize();
-                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, dir, r, g, b, "radar", "%s%s", teamtype[f.team].chat, k ? "flag" : "base");
+                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, 3, w, h, size, fade, dir, r, g, b, "radar", "%s%s", teamtype[f.team].chat, k ? "flag" : "base");
                 else hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, dir, r, g, b);
             }
         }
