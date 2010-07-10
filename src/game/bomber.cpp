@@ -3,6 +3,12 @@ namespace bomber
 {
     bomberstate st;
 
+    bool carryaffinity(gameent *d)
+    {
+        loopv(st.flags) if(st.flags[i].owner == d) return true;
+        return false;
+    }
+
     int findtarget(gameent *d)
     {
         float bestdist = 1e16f;
@@ -31,30 +37,21 @@ namespace bomber
 
     bool dropaffinity(gameent *d)
     {
-        if(d->action[AC_AFFINITY] || d->actiontime[AC_AFFINITY] > 0)
+        if(d->action[AC_ALTERNATE] || d->actiontime[AC_ALTERNATE] > 0)
         {
-            bool found = false;
-            loopv(st.flags) if(st.flags[i].owner == d)
+            if(carryaffinity(d))
             {
-                if(!d->action[AC_AFFINITY])
-                {
-                    vec inertia;
-                    vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
-                    bool guided = false;
-                    float speed = bomberspeed;
-                    if(bomberpowertime && lastmillis-d->actiontime[AC_AFFINITY] < bomberpowertime)
-                        speed *= (lastmillis-d->actiontime[AC_AFFINITY])/float(bomberpowertime);
-                    else if(!bomberpowertime || lastmillis-d->actiontime[AC_AFFINITY] >= bomberpowertime*2) guided = true;
-                    inertia.normalize().mul(speed).add(d->vel);
-                    client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
-                    found = true;
-                    break;
-                }
-                return true;
+                if(d->action[AC_ALTERNATE]) return true;
+                vec inertia;
+                vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
+                bool guided = false;
+                if(bomberpowertime && lastmillis-d->actiontime[AC_ALTERNATE] >= bomberpowertime) guided = true;
+                inertia.normalize().mul(bomberspeed).add(d->vel);
+                client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             }
-            if(!found && d == game::player1) playsound(S_ERROR, d->o, d);
-            d->action[AC_AFFINITY] = false;
-            d->actiontime[AC_AFFINITY] = 0;
+            else if(d == game::player1) playsound(S_ERROR, d->o, d);
+            d->action[AC_ALTERNATE] = false;
+            d->actiontime[AC_ALTERNATE] = 0;
             return true;
         }
         return false;
@@ -115,7 +112,7 @@ namespace bomber
                         ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
                         popfont();
                     }
-                    SEARCHBINDCACHE(dropaffinitykey)("action 8", 3);
+                    SEARCHBINDCACHE(dropaffinitykey)("action 1", 3);
                     pushfont("sub");
                     ty += draw_textx("Press \fs\fc%s\fS to throw it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
                     popfont();
@@ -180,18 +177,14 @@ namespace bomber
             {
                 if(f.owner == game::focus)
                 {
-                    if(f.owner->action[AC_AFFINITY])
+                    if(bomberpowertime && f.owner->action[AC_ALTERNATE])
                     {
                         int px = pos[0]-int(s*skew);
-                        if(bomberpowertime && lastmillis-f.owner->actiontime[AC_AFFINITY] < bomberpowertime*2)
+                        if(lastmillis-f.owner->actiontime[AC_ALTERNATE] < bomberpowertime)
                         {
-                            if(lastmillis-f.owner->actiontime[AC_AFFINITY] < bomberpowertime)
-                            {
-                                float rp = 1, gp = 1, bp = 1, amt = (lastmillis-f.owner->actiontime[AC_AFFINITY])/float(bomberpowertime);
-                                hud::colourskew(rp, gp, bp, 1.f-amt);
-                                hud::drawprogress(px, pos[1], 0, amt, s, false, rp, gp, bp, fade, skew, "emphasis", "%s%d%%", amt > 0.75f ? "\fo" : (amt > 0.5f ? "\fg" : (amt > 0.25f ? "\fy" : "\fw")), int(amt*100.f));
-                            }
-                            else hud::drawitemsubtext(px, pos[1]-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzoyfull");
+                            float rp = 1, gp = 1, bp = 1, amt = (lastmillis-f.owner->actiontime[AC_ALTERNATE])/float(bomberpowertime);
+                            hud::colourskew(rp, gp, bp, 1.f-amt);
+                            hud::drawprogress(px, pos[1], 0, amt, s, false, rp, gp, bp, fade, skew, "emphasis", "%s%d%%", amt > 0.75f ? "\fo" : (amt > 0.5f ? "\fg" : (amt > 0.25f ? "\fy" : "\fw")), int(amt*100.f));
                         }
                         else
                         {
@@ -493,25 +486,10 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                if(d->ai)
+                if(d->ai && f.owner == d && !d->action[AC_ALTERNATE] && lastmillis-f.taketime >= (bomberholdtime ? abs(bomberholdtime-bomberpowertime) : 1500))
                 {
-                    if(f.owner == d)
-                    {
-                        if(!d->action[AC_AFFINITY])
-                        {
-                            if(lastmillis-f.taketime >= (bomberholdtime ? abs(bomberholdtime-bomberpowertime) : 1500))
-                            {
-                                d->action[AC_AFFINITY] = true;
-                                d->actiontime[AC_AFFINITY] = lastmillis;
-                            }
-                        }
-                        else if(!bomberpowertime || lastmillis-d->actiontime[AC_AFFINITY] >= bomberpowertime*2)
-                        {
-                            if(findtarget(d) < 0) continue;
-                        }
-                        else continue;
-                    }
-                    d->action[AC_AFFINITY] = false;
+                    d->action[AC_ALTERNATE] = true;
+                    d->actiontime[AC_ALTERNATE] = lastmillis;
                 }
                 continue;
             }

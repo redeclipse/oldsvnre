@@ -669,7 +669,7 @@ namespace hud
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
                 {
                     if(showclips) drawclip(game::focus->weapselect, nx, ny, clipsize*hudsize);
-                    if(showindicator) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), game::focus->action[AC_ALTERNATE]);
+                    if(showindicator) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
                 if(game::mousestyle() >= 1) // renders differently
                     drawpointerindex(POINTER_RELATIVE, game::mousestyle() != 1 ? nx : cx, game::mousestyle() != 1 ? ny : cy, int(crosshairsize*hudsize), 1, 1, 1, crosshairblend*hudblend);
