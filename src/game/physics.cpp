@@ -1382,6 +1382,7 @@ namespace physics
         {
             dropent()
             {
+                radius = xradius = yradius = height = aboveeye = 1;
                 type = ENT_DUMMY;
                 collidetype = COLLIDE_AABB;
                 vel = vec(0, 0, -1);

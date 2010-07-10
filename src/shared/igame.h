@@ -73,7 +73,7 @@ namespace physics
     extern void move(physent *d, int moveres = 10, bool local = true);
     extern bool entinmap(physent *d, bool avoidplayers);
     extern void updatephysstate(physent *d);
-    extern bool droptofloor(vec &o, float radius, float height);
+    extern bool droptofloor(vec &o, float radius = 1, float height = 1);
     extern bool iscrouching(physent *d);
     extern bool moveplayer(physent *pl, int moveres, bool local, int millis);
     extern void interppos(physent *d);

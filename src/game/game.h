@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         204
+#define GAMEVERSION         205
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -168,10 +168,10 @@ enttypes enttype[] = {
             false,              "camera",       { "type",   "mindist",  "maxdist" }
     },
     {
-        WAYPOINT,       0,          1,      16,     EU_NONE,    1,
+        WAYPOINT,       0,          1,      16,     EU_NONE,    2,
             (1<<WAYPOINT),
             0,
-            true,               "waypoint",     { "flags" }
+            true,               "waypoint",     { "flags",  "weight" }
     }
 };
 #else
