@@ -507,7 +507,7 @@ enum { CAMERA_NONE = 0, CAMERA_PLAYER, CAMERA_FOLLOW, CAMERA_ENTITY, CAMERA_MAX 
 enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_MODE, SINFO_MUTS, SINFO_MAP, SINFO_TIME, SINFO_NUMPLRS, SINFO_MAXPLRS, SINFO_PING, SINFO_MAX };
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
-enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
+enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
 enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_KICK };
 
@@ -1161,6 +1161,7 @@ namespace physics
 {
     extern float gravity, liquidspeed, liquidcurb, floorcurb, aircurb, slidecurb;
     extern int smoothmove, smoothdist;
+    extern bool carryaffinity(gameent *d);
     extern bool secondaryweap(gameent *d);
     extern bool allowimpulse(int level = 2);
     extern bool jetpack(physent *d);

@@ -3,16 +3,20 @@ namespace capture
 {
     capturestate st;
 
+    bool carryaffinity(gameent *d)
+    {
+        loopv(st.flags) if(st.flags[i].owner == d) return true;
+        return false;
+    }
+
     bool dropaffinity(gameent *d)
     {
-        if(m_capture(game::gamemode) && !m_gsp3(game::gamemode, game::mutators))
+        if(m_capture(game::gamemode) && !m_gsp3(game::gamemode, game::mutators) && carryaffinity(d))
         {
-            loopv(st.flags) if(st.flags[i].owner == d)
-            {
-                client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(d->vel.x*DMF), int(d->vel.y*DMF), int(d->vel.z*DMF));
-                return true;
-            }
+            client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(d->vel.x*DMF), int(d->vel.y*DMF), int(d->vel.z*DMF));
+            return true;
         }
+        else if(d == game::player1) playsound(S_ERROR, d->o, d);
         return false;
     }
 
@@ -92,7 +96,7 @@ namespace capture
             if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
             {
                 ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-                SEARCHBINDCACHE(dropaffinitykey)("action 8", 3);
+                SEARCHBINDCACHE(dropaffinitykey)("action 1", 3);
                 pushfont("sub");
                 ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
                 popfont();
@@ -534,11 +538,7 @@ namespace capture
                 f.pickuptime = lastmillis;
             }
         }
-        if(d->action[AC_AFFINITY])
-        {
-            if(!dropaffinity(d) && d == game::player1) playsound(S_ERROR, d->o, d);
-            d->action[AC_AFFINITY] = false;
-        }
+        dropaffinity(d);
     }
 
     bool aihomerun(gameent *d, ai::aistate &b)

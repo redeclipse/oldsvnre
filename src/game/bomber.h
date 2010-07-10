@@ -175,6 +175,7 @@ struct bomberstate
 namespace bomber
 {
     extern bomberstate st;
+    extern bool carryaffinity(gameent *d);
     extern bool dropaffinity(gameent *d);
     extern void sendaffinity(packetbuf &p);
     extern void parseaffinity(ucharbuf &p, bool commit);

@@ -150,8 +150,9 @@ namespace weapons
     {
         if(d == game::player1)
         {
-            bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT);
-            if((noammo || (!d->action[AC_ATTACK] && !d->action[AC_ALTERNATE])) && !d->action[AC_USE] && d->weapstate[d->weapselect] == WEAP_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
+            bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT),
+                 noattack = !d->action[AC_ATTACK] && (physics::carryaffinity(d) || !d->action[AC_ALTERNATE]);
+            if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == WEAP_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
                 return autoreloading >= (noammo ? 1 : (WEAP(d->weapselect, add) < WEAP(d->weapselect, max) ? 2 : (WEAP(d->weapselect, zooms) ? 4 : 3)));
         }
         return false;
@@ -313,9 +314,8 @@ namespace weapons
     void shoot(gameent *d, vec &targ, int force)
     {
         if(!game::allowmove(d)) return;
-        bool pressed = (d->action[AC_ATTACK] || (d->action[AC_ALTERNATE] && !WEAP(d->weapselect, zooms))),
-             secondary = physics::secondaryweap(d);
-        if(doshot(d, targ, d->weapselect, pressed, secondary, force))
+        bool secondary = physics::secondaryweap(d);
+        if(doshot(d, targ, d->weapselect, d->action[secondary ? AC_ALTERNATE : AC_ATTACK], secondary, force))
         {
             if(!WEAP2(d->weapselect, fullauto, secondary))
                 d->action[secondary && !WEAP(d->weapselect, zooms) ? AC_ALTERNATE : AC_ATTACK] = false;

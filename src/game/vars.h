@@ -105,9 +105,9 @@ GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and t
 GVAR(0, bomberlimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, bomberresetdelay, 0, 30000, INT_MAX-1);
 GVAR(0, bomberholdtime, 0, 15000, INT_MAX-1);
-GVAR(0, bomberpowertime, 0, 750, INT_MAX-1);
+GVAR(0, bomberpowertime, 0, 1000, INT_MAX-1);
 GFVAR(0, bomberspeed, 0, 350, 10000);
-GFVAR(0, bomberminvel, 0, 10, 10000);
+GFVAR(0, bomberminvel, 0, 5, 10000);
 GFVAR(0, bomberdelta, 0, 2, 10000);
 
 GVAR(0, skillmin, 1, 65, 101);
