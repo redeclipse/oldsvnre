@@ -15,48 +15,40 @@ namespace bomber
         gameent *e = NULL;
         int best = -1;
         vec targ;
-        loopk(4)
+        loopk(2)
         {
             loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype < 0))
             {
-                float md = d->ai ? d->ai->views[2] : hdr.worldsize, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy, dist = 1e16f;
-                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy)) switch(k)
+                float md = d->ai ? d->ai->views[2] : hdr.worldsize, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
+                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
                 {
-                    case 2: case 3: dist = e->o.dist(d->o); break;
-                    case 0: case 1: default:
+                    vec dir = vec(e->o).sub(d->o).normalize();
+                    float yaw, pitch; vectoyawpitch(dir, yaw, pitch);
+                    while(yaw < 0) yaw += 360; while(yaw >= 360) yaw -= 360;
+                    float dist = fabs(d->yaw-yaw);
+                    if(dist < bestdist)
                     {
-                        vec dir = vec(e->o).sub(d->o).normalize();
-                        float yaw, pitch; vectoyawpitch(dir, yaw, pitch);
-                        dist = fabs(yaw-d->yaw)+fabs(pitch-d->pitch)*4;
+                        best = e->clientnum;
+                        bestdist = dist;
                     }
-                }
-                if(dist < bestdist)
-                {
-                    best = e->clientnum;
-                    bestdist = dist;
                 }
             }
             if(best >= 0) break;
-            bestdist = 1e16f;
         }
         return best;
     }
 
     bool dropaffinity(gameent *d)
     {
-        if(d->action[AC_ALTERNATE] || d->actiontime[AC_ALTERNATE] > 0)
+        if(carryaffinity(d) && (d->action[AC_ALTERNATE] || d->actiontime[AC_ALTERNATE] > 0))
         {
-            if(carryaffinity(d))
-            {
-                if(d->action[AC_ALTERNATE]) return true;
-                vec inertia;
-                vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
-                bool guided = false;
-                if(bomberpowertime && lastmillis-d->actiontime[AC_ALTERNATE] >= bomberpowertime) guided = true;
-                inertia.normalize().mul(bomberspeed).add(d->vel);
-                client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
-            }
-            else if(d == game::player1) playsound(S_ERROR, d->o, d);
+            if(d->action[AC_ALTERNATE]) return true;
+            vec inertia;
+            vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
+            bool guided = false;
+            if(bomberpowertime && lastmillis-d->actiontime[AC_ALTERNATE] >= bomberpowertime) guided = true;
+            inertia.normalize().mul(bomberspeed).add(d->vel);
+            client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_ALTERNATE] = false;
             d->actiontime[AC_ALTERNATE] = 0;
             return true;
@@ -431,13 +423,26 @@ namespace bomber
         if(from.x >= 0 && to.x >= 0) part_trail(PART_FIREBALL, 500, from, to, teamtype[team].colour, 2, 1, -5);
     }
 
+    void destroyaffinity(const vec &o)
+    {
+        float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius);
+        part_create(PART_PLASMA_SOFT, 250, o, 0xAA4400, radius*0.5f);
+        part_explosion(o, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
+        part_explosion(o, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
+        part_create(PART_SMOKE_LERP_SOFT, 500, o, 0x333333, radius*0.75f, 0.5f, -15);
+        int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
+        loopi(amt) projs::create(o, o, true, NULL, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
+        playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), o, NULL, 0, 255);
+    }
+
     void resetaffinity(int i, bool enabled)
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
         if(f.enabled && enabled)
         {
-            affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
+            affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
+            destroyaffinity(f.pos());
             game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
         }
         st.returnaffinity(i, lastmillis, true, enabled);
@@ -449,14 +454,7 @@ namespace bomber
         if(!st.flags.inrange(relay) || !st.flags.inrange(goal)) return;
         bomberstate::flag &f = st.flags[relay], &g = st.flags[goal];
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "EXPLODED");
-        float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius);
-        part_create(PART_PLASMA_SOFT, 250, g.spawnloc, 0xAA4400, radius*0.5f);
-        part_explosion(g.spawnloc, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
-        part_explosion(g.spawnloc, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
-        part_create(PART_SMOKE_LERP_SOFT, 500, g.spawnloc, 0x333333, radius*0.75f, 0.5f, -15);
-        int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
-        loopi(amt) projs::create(g.spawnloc, g.spawnloc, true, d, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
-        playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), g.spawnloc, NULL, 0, 255);
+        destroyaffinity(g.spawnloc);
         (st.findscore(d->team)).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
@@ -469,6 +467,8 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
+        d->action[AC_ALTERNATE] = false;
+        d->actiontime[AC_ALTERNATE] = 0;
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");

@@ -16,7 +16,6 @@ namespace capture
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(d->vel.x*DMF), int(d->vel.y*DMF), int(d->vel.z*DMF));
             return true;
         }
-        else if(d == game::player1) playsound(S_ERROR, d->o, d);
         return false;
     }
 

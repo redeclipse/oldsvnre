@@ -558,16 +558,16 @@ namespace projs
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
-                proj.elasticity = 0.75f;
+                proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 100.f;
+                proj.weight = 175.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
                 proj.extinguish = 6;
-                proj.minspeed = m_bomber(game::gamemode) ? bomberminvel : 1.f;
+                proj.minspeed = m_bomber(game::gamemode) ? bomberminvel : 0.f;
                 break;
             }
             default: break;

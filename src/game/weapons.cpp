@@ -314,11 +314,10 @@ namespace weapons
     void shoot(gameent *d, vec &targ, int force)
     {
         if(!game::allowmove(d)) return;
-        bool secondary = physics::secondaryweap(d);
-        if(doshot(d, targ, d->weapselect, d->action[secondary ? AC_ALTERNATE : AC_ATTACK], secondary, force))
+        bool secondary = physics::secondaryweap(d), alt = secondary && !WEAP(d->weapselect, zooms);
+        if(doshot(d, targ, d->weapselect, d->action[alt ? AC_ALTERNATE : AC_ATTACK], secondary, force))
         {
-            if(!WEAP2(d->weapselect, fullauto, secondary))
-                d->action[secondary && !WEAP(d->weapselect, zooms) ? AC_ALTERNATE : AC_ATTACK] = false;
+            if(!WEAP2(d->weapselect, fullauto, secondary)) d->action[alt ? AC_ALTERNATE : AC_ATTACK] = false;
             d->action[AC_RELOAD] = false;
         }
     }
