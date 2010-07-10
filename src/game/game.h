@@ -126,10 +126,10 @@ enttypes enttype[] = {
             false,              "weapon",       { "type",   "flags",    "mode",     "id" }
     },
     {
-        TELEPORT,       1,          50,     12,     EU_AUTO,    5,
+        TELEPORT,       1,          50,     12,     EU_AUTO,    6,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,              "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour" }
+            false,              "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type" }
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    8,

@@ -265,6 +265,17 @@ namespace entities
                 }
                 break;
             }
+            case TELEPORT:
+            {
+                if(full) switch(attr[5])
+                {
+                    case 0: addentinfo("absolute"); break;
+                    case 1: addentinfo("relative"); break;
+                    case 2: addentinfo("keep"); break;
+                    default: break;
+                }
+                break;
+            }
             case WAYPOINT:
             {
                 if(full && attr[0]&WP_F_CROUCH) addentinfo("crouch");
@@ -834,8 +845,26 @@ namespace entities
                                 gameentity &f = *(gameentity *)ents[teleports[r]];
                                 d->resetair();
                                 d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
-                                d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
-                                d->pitch = f.attrs[1];
+                                switch(f.attrs[5])
+                                {
+                                    case 2: break; // keep
+                                    case 1:
+                                    {
+                                        if(e.attrs[0] >= 0) // relative
+                                        {
+                                            float offyaw = d->yaw-e.attrs[0], offpitch = d->pitch-e.attrs[1];
+                                            d->yaw = f.attrs[0]+offyaw;
+                                            d->pitch = f.attrs[1]+offpitch;
+                                        }
+                                         break;
+                                    }
+                                    case 0: default: // absolute
+                                    {
+                                        d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
+                                        d->pitch = f.attrs[1];
+                                        break;
+                                    }
+                                }
                                 if(physics::entinmap(d, true))
                                 {
                                     float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f);
@@ -1148,6 +1177,8 @@ namespace entities
                 while(e.attrs[0] >= 360) e.attrs[0] -= 360;
                 while(e.attrs[1] < -90) e.attrs[1] += 180;
                 while(e.attrs[1] > 90) e.attrs[1] -= 180;
+                while(e.attrs[5] < 0) e.attrs[5] += 3;
+                while(e.attrs[5] > 2) e.attrs[5] -= 3;
                 break;
             case WAYPOINT:
                 if(create)
