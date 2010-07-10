@@ -12,25 +12,32 @@ namespace bomber
     int findtarget(gameent *d)
     {
         float bestdist = 1e16f;
-        int best = -1;
         gameent *e = NULL;
+        int best = -1;
         vec targ;
-        loopk(2)
+        loopk(4)
         {
-            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k ? d->aitype == AI_BOT : d->aitype < 0))
+            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype < 0))
             {
-                float dist = e->o.dist(d->o);
+                float md = d->ai ? d->ai->views[2] : hdr.worldsize, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy, dist = 1e16f;
+                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy)) switch(k)
+                {
+                    case 2: case 3: dist = e->o.dist(d->o); break;
+                    case 0: case 1: default:
+                    {
+                        vec dir = vec(e->o).sub(d->o).normalize();
+                        float yaw, pitch; vectoyawpitch(dir, yaw, pitch);
+                        dist = fabs(yaw-d->yaw)+fabs(pitch-d->pitch)*4;
+                    }
+                }
                 if(dist < bestdist)
                 {
-                    float md = d->ai ? d->ai->views[2] : dist+1, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
-                    if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
-                    {
-                        best = e->clientnum;
-                        bestdist = dist;
-                    }
+                    best = e->clientnum;
+                    bestdist = dist;
                 }
             }
             if(best >= 0) break;
+            bestdist = 1e16f;
         }
         return best;
     }
@@ -180,13 +187,7 @@ namespace bomber
                     if(bomberpowertime && f.owner->action[AC_ALTERNATE])
                     {
                         int px = pos[0]-int(s*skew);
-                        if(lastmillis-f.owner->actiontime[AC_ALTERNATE] < bomberpowertime)
-                        {
-                            float rp = 1, gp = 1, bp = 1, amt = (lastmillis-f.owner->actiontime[AC_ALTERNATE])/float(bomberpowertime);
-                            hud::colourskew(rp, gp, bp, 1.f-amt);
-                            hud::drawprogress(px, pos[1], 0, amt, s, false, rp, gp, bp, fade, skew, "emphasis", "%s%d%%", amt > 0.75f ? "\fo" : (amt > 0.5f ? "\fg" : (amt > 0.25f ? "\fy" : "\fw")), int(amt*100.f));
-                        }
-                        else
+                        if(lastmillis-f.owner->actiontime[AC_ALTERNATE] >= bomberpowertime)
                         {
                             gameent *e = game::getclient(findtarget(f.owner));
                             if(e)

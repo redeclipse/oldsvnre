@@ -1277,7 +1277,7 @@ namespace projs
     bool move(projent &proj, int qtime)
     {
         float secs = float(qtime)/1000.f;
-        if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.weap >= 0 && proj.target)
+        if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.weap >= 0 && proj.target && !proj.lastbounce)
         {
             vec targ = vec(proj.target->o).sub(proj.o).normalize(), dir = vec(proj.vel).normalize();
             if(!targ.iszero())
