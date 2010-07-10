@@ -1422,17 +1422,25 @@ namespace ai
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT && WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->scale))
                 obs.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->scale)*p->lifesize)+2);
         }
-        loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
+        loopi(entities::lastenttype[WAYPOINT])
         {
-            mapmodelinfo &mmi = getmminfo(entities::ents[i]->attrs[0]);
-            if(!&mmi) continue;
-            vec center, radius;
-            mmi.m->collisionbox(0, center, radius);
-            if(entities::ents[i]->attrs[4]) { center.mul(entities::ents[i]->attrs[4]/100.f); radius.mul(entities::ents[i]->attrs[4]/100.f); }
-            if(!mmi.m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]));
-            float limit = enttype[WAYPOINT].radius+(max(radius.x, max(radius.y, radius.z))*mmi.m->height);
-            vec pos = entities::ents[i]->o; pos.z += limit*0.5f;
-            obs.avoidnear(NULL, pos, limit);
+            if(entities::ents[i]->type == WAYPOINT && entities::ents[i]->attrs[1] < 0)
+            {
+                float limit = enttype[WAYPOINT].radius;
+                obs.avoidnear(NULL, entities::ents[i]->o, limit);
+            }
+            else if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
+            {
+                mapmodelinfo &mmi = getmminfo(entities::ents[i]->attrs[0]);
+                if(!&mmi) continue;
+                vec center, radius;
+                mmi.m->collisionbox(0, center, radius);
+                if(entities::ents[i]->attrs[4]) { center.mul(entities::ents[i]->attrs[4]/100.f); radius.mul(entities::ents[i]->attrs[4]/100.f); }
+                if(!mmi.m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]));
+                float limit = enttype[WAYPOINT].radius+(max(radius.x, max(radius.y, radius.z))*mmi.m->height);
+                vec pos = entities::ents[i]->o; pos.z += limit*0.5f;
+                obs.avoidnear(NULL, pos, limit);
+            }
         }
     }
 

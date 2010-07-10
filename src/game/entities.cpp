@@ -21,6 +21,34 @@ namespace entities
         return dropwaypoints >= (hasai && !haswaypoints && numwaypoints < maxwaypoints ? 1 : 2);
     }
 
+    bool clipped(const vec &o, bool aiclip)
+    {
+        int material = lookupmaterial(o), clipmat = material&MATF_CLIP;
+        if(clipmat == MAT_CLIP || (aiclip && clipmat == MAT_AICLIP)) return true;
+        if(material&MAT_DEATH || (material&MATF_VOLUME) == MAT_LAVA) return true;
+        return false;
+    }
+
+    int getweight(const vec &o)
+    {
+        vec pos = o; pos.z += ai::JUMPMIN;
+        if(clipped(pos, true)) return -1;
+        if(!insideworld(pos))
+        {
+            if(pos.z < hdr.worldsize) return -2;
+            pos.z = hdr.worldsize - 1e-3f;
+            if(!insideworld(pos)) return -2;
+        }
+        float dist = raycube(pos, vec(0, 0, -1), pos.z+1, RAY_CLIPMAT);
+        if(dist >= 0)
+        {
+            int weight = int(dist/ai::JUMPMIN), material = lookupmaterial(pos);
+            if(material&MAT_DEATH || (material&MATF_VOLUME) == MAT_LAVA) weight *= 10;
+            return weight;
+        }
+        return -3;
+    }
+
     vector<extentity *> &getents() { return ents; }
     int lastent(int type) { return lastenttype[type]; }
 
@@ -1118,10 +1146,16 @@ namespace entities
             case TELEPORT:
                 while(e.attrs[0] < -1) e.attrs[0] += 361;
                 while(e.attrs[0] >= 360) e.attrs[0] -= 360;
-                while(e.attrs[2] < -90) e.attrs[2] += 180;
-                while(e.attrs[2] > 90) e.attrs[2] -= 180;
+                while(e.attrs[1] < -90) e.attrs[1] += 180;
+                while(e.attrs[1] > 90) e.attrs[1] -= 180;
                 break;
-            case WAYPOINT: if(create) numwaypoints++; break;
+            case WAYPOINT:
+                if(create)
+                {
+                    numwaypoints++;
+                    e.attrs[1] = getweight(e.o);
+                }
+                break;
             default: break;
         }
     }
@@ -1407,13 +1441,14 @@ namespace entities
                 if(ents.inrange(link) && ents[link]->type == ents[node]->type && (link == node || link == goal || !ents[link]->links.empty()))
                 {
                     linkq &n = nodes[link];
-                    float curscore = prevscore + ents[link]->o.dist(ent.o);
+                    int weight = max(ents[link]->type == WAYPOINT ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
+                    float curscore = prevscore + ents[link]->o.dist(ent.o)*weight;
                     if(n.id == routeid && curscore >= n.curscore) continue;
                     n.curscore = curscore;
                     n.prev = m;
                     if(n.id != routeid)
                     {
-                        n.estscore = ents[link]->o.dist(ents[goal]->o);
+                        n.estscore = ents[link]->o.dist(ents[goal]->o)*weight;
                         if(n.estscore <= float(enttype[ents[link]->type].radius*4) && (lowest < 0 || n.estscore < nodes[lowest].estscore))
                             lowest = link;
                         n.id = routeid;
@@ -1451,22 +1486,14 @@ namespace entities
         }
     }
 
-    bool clipped(const vec &o, bool aiclip)
-    {
-        int material = lookupmaterial(o), clipmat = material&MATF_CLIP;
-        if(clipmat == MAT_CLIP || (aiclip && clipmat == MAT_AICLIP)) return true;
-        if(material&MAT_DEATH) return true;
-        if((material&MATF_VOLUME) == MAT_LAVA) return true;
-        return false;
-    }
-
     void entitycheck(gameent *d, bool hasai)
     {
         int cleanairnodes = 0;
         if(d->state == CS_ALIVE)
         {
             vec v = d->feetpos();
-            bool clip = clipped(v, true), shoulddrop = !d->ai && !clip && waypointdrop(hasai);
+            int weight = getweight(v);
+            bool shoulddrop = !d->ai && weight >= 0 && waypointdrop(hasai);
             float dist = float(shoulddrop ? enttype[WAYPOINT].radius : (d->ai ? ai::JUMPMIN : ai::SIGHTMIN));
             int curnode = closestent(WAYPOINT, v, dist, false), prevnode = d->lastnode;
 
@@ -1475,9 +1502,8 @@ namespace entities
                 int cmds = WP_F_NONE;
                 if(physics::iscrouching(d)) cmds |= WP_F_CROUCH;
                 curnode = ents.length();
-                static vector<int> wpattrs;
-                wpattrs.setsize(0);
-                wpattrs.add(cmds);
+                static vector<int> wpattrs; wpattrs.setsize(0);
+                wpattrs.add(cmds); wpattrs.add(weight);
                 newentity(v, WAYPOINT, wpattrs);
                 if(d->physstate == PHYS_FALL) d->airnodes.add(curnode);
             }
@@ -1491,7 +1517,7 @@ namespace entities
             else if(!ents.inrange(d->lastnode) || ents[d->lastnode]->o.squaredist(v) > ai::CLOSEDIST*ai::CLOSEDIST)
                 d->lastnode = closestent(WAYPOINT, v, ai::SIGHTMAX, false);
 
-            if(clip) cleanairnodes = 2;
+            if(weight <= 0) cleanairnodes = 2;
             else if(d->physstate != PHYS_FALL) cleanairnodes = 1;
             if(d->ai && ents.inrange(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);
         }
@@ -1973,8 +1999,7 @@ namespace entities
                 }
                 case WAYPOINT:
                 {
-                    if(!m_edit(game::gamemode) && clipped(e.o, true)) e.type = NOTUSED;
-                    else if(mtype == MAP_MAPZ)
+                    if(mtype == MAP_MAPZ)
                     {
                         if(gver <= 90) e.attrs[0] = e.attrs[1] = e.attrs[2] = e.attrs[3] = e.attrs[4] = 0;
                         if(gver <= 165 && gver >= 160)
@@ -1983,6 +2008,7 @@ namespace entities
                             e.attrs[1] = e.attrs[2] = e.attrs[3] = e.attrs[4] = 0;
                         }
                     }
+                    if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver <= 204)) e.attrs[1] = getweight(e.o);
                     break;
                 }
                 case ACTOR: if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe AI_BOT from array
@@ -2032,7 +2058,7 @@ namespace entities
             e = newent();
             ents.add(e);
             loopk(5) e->attrs.add(0);
-            e->type = !m_edit(game::gamemode) && clipped(o, true) ? NOTUSED : WAYPOINT;
+            e->type = WAYPOINT;
             e->o = o;
             int numlinks = clamp(f->getchar(), 0, 6);
             loopi(numlinks) e->links.add(numents+f->getlil<ushort>());
@@ -2053,13 +2079,12 @@ namespace entities
             while(e.attrs.length() > num) e.attrs.pop();
         }
         if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver <= 49)) importentities(mtype, mver, gver);
-        if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver < GAMEVERSION)) updateoldentities(mtype, mver, gver);
         if(mtype == MAP_OCTA) importwaypoints(mtype, mver, gver);
+        if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver < GAMEVERSION)) updateoldentities(mtype, mver, gver);
         loopv(ents)
         {
             fixentity(i, false);
-            if(ents[i]->type == WAYPOINT) numwaypoints++;
-            if(numwaypoints) haswaypoints = true;
+            if(ents[i]->type == WAYPOINT && ++numwaypoints) haswaypoints = true;
         }
         memset(lastenttype, 0, sizeof(lastenttype));
         memset(lastusetype, 0, sizeof(lastusetype));
