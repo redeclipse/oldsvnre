@@ -19,7 +19,3 @@ zoom.png
 lava.jpg
     Created by RaZgRiZ Made with Filter Forge II Beta 3
     Licensed publicly for everyone to use and modify as long as the author is credited for the original work.
-
-guioverlay.png, guislider.png
-    (C) 2006-2007 Markus "makkE" Bekel
-    Licensed under Creative Commons Deed / Attribution Non-commercial Share-Alike (BY-NC-SA)
