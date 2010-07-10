@@ -1,3 +1,8 @@
+emblem.png, logo.png
+    Created by Luckystrike-Rx for Red Eclipse
+    Copyright (C) 2010 Red Eclipse Team
+    http://www.opensource.org/licenses/zlib-license.php
+
 wait.png
     Created from http://commons.wikimedia.org/wiki/File:Stop_hand_grey.svg
     Released under the Creative Commons Attribution ShareAlike 3.0 License
@@ -16,5 +21,5 @@ lava.jpg
     Licensed publicly for everyone to use and modify as long as the author is credited for the original work.
 
 guioverlay.png, guislider.png
-    (c) 2006-2007 Markus "makkE" Bekel
-    Licensed under "Creative Commons Deed / Attribution Non-commercial Share-Alike ( at-nc-sa )"
+    (C) 2006-2007 Markus "makkE" Bekel
+    Licensed under Creative Commons Deed / Attribution Non-commercial Share-Alike (BY-NC-SA)
