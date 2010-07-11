@@ -33,13 +33,8 @@ namespace entities
     {
         vec pos = o; pos.z += ai::JUMPMIN;
         if(clipped(pos, true)) return -1;
-        if(!insideworld(pos))
-        {
-            if(pos.z < hdr.worldsize) return -2;
-            pos.z = hdr.worldsize - 1e-3f;
-            if(!insideworld(pos)) return -2;
-        }
-        float dist = raycube(pos, vec(0, 0, -1), pos.z+1, RAY_CLIPMAT);
+        if(!insideworld(vec(pos.x, pos.y, min(pos.z, getworldsize() - 1e-3f)))) return -2;
+        float dist = raycube(pos, vec(0, 0, -1), 0, RAY_CLIPMAT);
         if(dist >= 0)
         {
             int weight = int(dist/ai::JUMPMIN), material = lookupmaterial(pos);
@@ -1434,23 +1429,23 @@ namespace entities
             if(d->ai) loopi(ai::NUMPREVNODES) if(d->ai->prevnodes[i] != node && nodes.inrange(d->ai->prevnodes[i]))
             {
                 nodes[d->ai->prevnodes[i]].id = routeid;
-                nodes[d->ai->prevnodes[i]].curscore = -1.f;
-                nodes[d->ai->prevnodes[i]].estscore = 0.f;
+                nodes[d->ai->prevnodes[i]].curscore = -1;
+                nodes[d->ai->prevnodes[i]].estscore = 0;
             }
             loopavoid(obstacles, d, { if(ents.inrange(ent) && ents[ent]->type == ents[node]->type)
             {
                 if(ent != node && ents[node]->links.find(ent) < 0)
                 {
                     nodes[ent].id = routeid;
-                    nodes[ent].curscore = -1.f;
-                    nodes[ent].estscore = 0.f;
+                    nodes[ent].curscore = -1;
+                    nodes[ent].estscore = 0;
                 }
             }});
         }
 
         nodes[node].id = routeid;
-        nodes[node].curscore = 0.f;
-        nodes[node].estscore = 0.f;
+        nodes[node].curscore = 0;
+        nodes[node].estscore = 0;
         nodes[node].prev = NULL;
         queue.setsize(0);
         queue.add(&nodes[node]);
