@@ -32,16 +32,19 @@ namespace entities
     int getweight(const vec &o)
     {
         vec pos = o; pos.z += ai::JUMPMIN;
-        if(clipped(pos, true)) return -1;
-        if(!insideworld(vec(pos.x, pos.y, min(pos.z, getworldsize() - 1e-3f)))) return -2;
+        if(clipped(pos, true) || !insideworld(vec(pos.x, pos.y, min(pos.z, getworldsize() - 1e-3f)))) return -1;
         float dist = raycube(pos, vec(0, 0, -1), 0, RAY_CLIPMAT);
+        int posmat = lookupmaterial(pos), weight = 1;
+        if(isliquid(posmat&MATF_VOLUME)) weight *= 2;
         if(dist >= 0)
         {
-            int weight = int(dist/ai::JUMPMIN), material = lookupmaterial(pos);
-            if(material&MAT_DEATH || (material&MATF_VOLUME) == MAT_LAVA) weight *= 10;
-            return weight;
+            weight = int(dist/ai::JUMPMIN);
+            pos.z -= min(dist, pos.z);
+            int trgmat = lookupmaterial(pos);
+            if(trgmat&MAT_DEATH || (trgmat&MATF_VOLUME) == MAT_LAVA) weight *= 10;
+            else if(isliquid(trgmat&MATF_VOLUME)) weight *= 5;
         }
-        return -3;
+        return weight;
     }
 
     vector<extentity *> &getents() { return ents; }
