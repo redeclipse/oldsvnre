@@ -111,9 +111,9 @@ namespace bomber
                         ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
                         popfont();
                     }
-                    SEARCHBINDCACHE(dropaffinitykey)("action 1", 3);
+                    SEARCHBINDCACHE(altkey)("action 1", 0);
                     pushfont("sub");
-                    ty += draw_textx("Press \fs\fc%s\fS to throw it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
+                    ty += draw_textx("Press \fs\fc%s\fS to throw it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                     popfont();
                     break;
                 }

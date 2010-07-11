@@ -95,9 +95,9 @@ namespace capture
             if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
             {
                 ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-                SEARCHBINDCACHE(dropaffinitykey)("action 1", 3);
+                SEARCHBINDCACHE(altkey)("action 1", 0);
                 pushfont("sub");
-                ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, dropaffinitykey)*hud::noticescale;
+                ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
             }
             popfont();
