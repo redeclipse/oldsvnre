@@ -1376,9 +1376,20 @@ namespace entities
 
         void add(dynent *ent, int entity)
         {
-            if(obstacles.empty() || ent!=obstacles.last().ent) add(ent);
+            if(obstacles.empty() || ent != obstacles.last().ent) add(ent);
             obstacles.last().numentities++;
             entities.add(entity);
+        }
+
+        void add(avoidset &avoid)
+        {
+            entities.put(avoid.entities.getbuf(), avoid.entities.length());
+            loopv(avoid.obstacles)
+            {
+                obstacle &o = avoid.obstacles[i];
+                if(obstacles.empty() || o.ent != obstacles.last().ent) add(o.ent, o.above);
+                obstacles.last().numentities += o.numentities;
+            }
         }
 
         void avoidnear(dynent *d, const vec &pos, float limit);

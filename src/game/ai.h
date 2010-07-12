@@ -214,7 +214,7 @@ namespace ai
         }
     };
 
-    extern entities::avoidset obs;
+    extern entities::avoidset obs, wps;
     extern vec aitarget;
     extern int aidebug, aideadfade, showaiinfo;
 
