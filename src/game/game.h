@@ -138,10 +138,10 @@ enttypes enttype[] = {
             false,              "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed" }
     },
     {
-        TRIGGER,        1,          58,     16,     EU_AUTO,    5,
+        TRIGGER,        1,          58,     16,     EU_AUTO,    6,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,              "trigger",      { "id",     "type",     "action",   "radius",   "state" }
+            false,              "trigger",      { "id",     "type",     "action",   "radius",   "state",    "mode" }
     },
     {
         PUSHER,         1,          58,     12,     EU_AUTO,    6,
