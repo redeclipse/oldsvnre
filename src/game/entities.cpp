@@ -248,6 +248,13 @@ namespace entities
                     addentinfo(actnames[attr[2] < 0 || attr[2] >= TA_MAX ? TA_MAX : attr[2]]);
                     if(attr[4] >= 2) addentinfo(attr[4] ? "routed" : "inert");
                     addentinfo(attr[4]%2 ? "on" : "off");
+                    if(attr[5] && attr[5] > -G_MAX && attr[5] < G_MAX)
+                    {
+                        string ds;
+                        if(attr[5]<0) formatstring(ds)("not %s", gametype[-attr[5]].name);
+                        else formatstring(ds)("%s", gametype[attr[5]].name);
+                        addentinfo(ds);
+                    }
                 }
                 break;
             }
@@ -763,7 +770,7 @@ namespace entities
     void runtrigger(int n, gameent *d, bool act = true)
     {
         gameentity &e = *(gameentity *)ents[n];
-        if(lastmillis-e.lastuse >= triggertime(e)/2)
+        if(m_check(e.attrs[5], game::gamemode) && lastmillis-e.lastuse >= triggertime(e)/2)
         {
             e.lastuse = lastmillis;
             switch(e.attrs[1])
@@ -1088,6 +1095,7 @@ namespace entities
                 {
                     e.lastemit = ents[e.links[i]]->lastemit;
                     e.spawned = TRIGSTATE(ents[e.links[i]]->spawned, ents[e.links[i]]->attrs[4]);
+                    break;
                 }
                 break;
             }
@@ -1117,6 +1125,8 @@ namespace entities
                     while(e.attrs[0] < 0) e.attrs[0] += TRIGGERIDS+1;
                     while(e.attrs[0] > TRIGGERIDS) e.attrs[0] -= TRIGGERIDS+1;
                 }
+                while(e.attrs[5] <= -G_MAX) e.attrs[5] += G_MAX*2;
+                while(e.attrs[5] >= G_MAX) e.attrs[5] -= G_MAX*2;
                 loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
                 {
                     ents[e.links[i]]->lastemit = e.lastemit;

@@ -953,7 +953,7 @@ namespace server
         loopi(TRIGGERIDS+1) triggers[i].reset(i);
         if(update)
         {
-            loopv(sents) if(sents[i].type == TRIGGER && sents[i].attrs[4] >= 2 && sents[i].attrs[0] >= 0 && sents[i].attrs[0] <= TRIGGERIDS+1)
+            loopv(sents) if(sents[i].type == TRIGGER && sents[i].attrs[4] >= 2 && sents[i].attrs[0] >= 0 && sents[i].attrs[0] <= TRIGGERIDS+1 && m_check(sents[i].attrs[5], gamemode))
                 triggers[sents[i].attrs[0]].ents.add(i);
         }
         else triggerid = 0;
