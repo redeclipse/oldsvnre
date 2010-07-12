@@ -39,7 +39,7 @@ namespace entities
         if(dist >= 0)
         {
             weight = int(dist/ai::JUMPMIN);
-            pos.z -= min(dist, pos.z);
+            pos.z -= clamp(dist-8.0f, 0.0f, pos.z);
             int trgmat = lookupmaterial(pos);
             if(trgmat&MAT_DEATH || (trgmat&MATF_VOLUME) == MAT_LAVA) weight *= 10;
             else if(isliquid(trgmat&MATF_VOLUME)) weight *= 2;
@@ -466,6 +466,7 @@ namespace entities
         entcachedepth = -1;
         entcachemin = vec(1e16f, 1e16f, 1e16f);
         entcachemax = vec(-1e16f, -1e16f, -1e16f);
+        ai::wps.clear();
     }
     ICOMMAND(0, clearentcache, "", (void), clearentcache());
 
@@ -487,6 +488,9 @@ namespace entities
             }
         }
         buildentcache(indices.getbuf(), indices.length(), entcachemin, entcachemax);
+        ai::wps.clear();
+        loopi(entities::lastenttype[WAYPOINT]) if(entities::ents[i]->type == WAYPOINT && entities::ents[i]->attrs[1] < 0)
+            ai::wps.avoidnear(NULL, entities::ents[i]->o, enttype[WAYPOINT].radius);
     }
 
     struct entcachestack
