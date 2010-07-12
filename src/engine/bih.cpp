@@ -103,7 +103,7 @@ inline bool BIH::traverse(const vec &o, const vec &ray, const vec &invray, float
                         save.tmin = max(tmin, farsplit);
                         save.tmax = tmax;
                     }
-                    else 
+                    else
                     {
                         if(traverse(o, ray, invray, maxdist, dist, mode, &nodes[curnode->childindex(nearidx)], tmin, min(tmax, nearsplit), hit)) return true;
                         curnode = &nodes[curnode->childindex(faridx)];
@@ -192,7 +192,7 @@ void BIH::build(vector<BIHNode> &buildnodes, ushort *indices, int numindices, co
         axis = (axis+1)%3;
     }
 
-    if(!left || right==numindices) 
+    if(!left || right==numindices)
     {
         leftmin = rightmin = vec(1e16f, 1e16f, 1e16f);
         leftmax = rightmax = vec(-1e16f, -1e16f, -1e16f);
@@ -202,13 +202,13 @@ void BIH::build(vector<BIHNode> &buildnodes, ushort *indices, int numindices, co
         loopi(numindices)
         {
             tri &tri = tris[indices[i]];
-            if(i < left) 
+            if(i < left)
             {
                 splitleft = max(splitleft, max(tri.a[axis], max(tri.b[axis], tri.c[axis])));
                 leftmin.min(tri.a).min(tri.b).min(tri.c);
                 leftmax.max(tri.a).max(tri.b).max(tri.c);
             }
-            else 
+            else
             {
                 splitright = min(splitright, min(tri.a[axis], min(tri.b[axis], tri.c[axis])));
                 rightmin.min(tri.a).min(tri.b).min(tri.c);
@@ -302,7 +302,7 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
     }
     if(mode&RAY_SHADOW)
     {
-        if(!m->shadow || e.lastemit || e.attrs[5]&MMT_NOSHADOW) return false;
+        if(!m->shadow || e.attrs[5]&MMT_NOSHADOW) return false;
     }
     else if((mode&RAY_ENTS)!=RAY_ENTS && !m->collide) return false;
     if(!m->bih && (lightmapping > 1 || !m->setBIH())) return false;

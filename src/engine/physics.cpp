@@ -198,7 +198,7 @@ static float shadowent(octaentities *oc, octaentities *last, const vec &o, const
     {
         extentity &e = *ents[oc->mapmodels[i]];
         if(!e.inoctanode || &e==t) continue;
-        if(e.lastemit || e.attrs[5]&MMT_NOSHADOW) continue;
+        if(e.attrs[5]&MMT_NOSHADOW) continue;
         if(!mmintersect(e, o, ray, radius, mode, f)) continue;
         if(f>0 && f<dist) dist = f;
     }
