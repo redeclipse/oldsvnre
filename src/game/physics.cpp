@@ -24,7 +24,8 @@ namespace physics
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     VAR(IDF_PERSIST, impulseaction, 0, 1, 2); // determines if impulse remains active when pushed, 0 = off, 1 = only if no gravity or impulsestyle requires no ground contact, 2 = always
-    FVAR(IDF_PERSIST, impulsekick, 0, 135, 179.9f);
+    FVAR(IDF_PERSIST, impulsekick, 0, 135, 179.9f); // determines the minimum angle to switch between wall kick and run
+    VAR(IDF_PERSIST, impulseturn, 0, 2, 2); // determines if parkour actions force turning, 0 = off, 1 = only wall run, 2 = wall run and kick
     VAR(IDF_PERSIST, dashaction, 0, 3, 3); // determines how dash action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
     VAR(IDF_PERSIST, crouchstyle, 0, 1, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
@@ -834,7 +835,7 @@ namespace physics
                             d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                             d->turnmillis = PHYSMILLIS;
                             d->turnside = 0; d->turnroll = 0;
-                            d->turnyaw = off;
+                            d->turnyaw = impulseturn >= 2 ? off : 0;
                             d->action[AC_SPECIAL] = false;
                             client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                             game::impulseeffect(d);
@@ -854,7 +855,7 @@ namespace physics
                             d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_SKATE, lastmillis);
                             d->action[AC_SPECIAL] = false;
                             d->turnmillis = PHYSMILLIS;
-                            d->turnside = side; d->turnyaw = off;
+                            d->turnside = side; d->turnyaw = impulseturn ? off : 0;
                             d->turnroll = (impulseroll*d->turnside)-d->roll;
                             client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
                             game::impulseeffect(d);
