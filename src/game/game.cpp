@@ -755,7 +755,7 @@ namespace game
                     "hit themself",
                     "ate a bullet",
                     "created too much torsional stress",
-                    "discovered buckshot hurts",
+                    "tested the effectiveness of their own shrapnel",
                     "got caught in their own crossfire",
                     "spontaneously combusted",
                     "tried to make out with plasma",

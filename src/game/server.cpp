@@ -2575,7 +2575,7 @@ namespace server
         }
         else if(isweap(weap))
         {
-            if(gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id) < 0)
+            if(!gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
             {
                 if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - not found", weap, id);
                 return;
@@ -2592,7 +2592,7 @@ namespace server
                         loopi(r) gs.weapshots[w][f >= WEAP_MAX ? 1 : 0].add(-id);
                     }
                 }
-                sendf(-1, 1, "ri4", N_DESTROY, ci->clientnum, 1, id);
+                sendf(-1, 1, "ri4x", N_DESTROY, ci->clientnum, 1, id, ci->clientnum);
             }
             else loopv(hits)
             {
@@ -2606,7 +2606,7 @@ namespace server
                 if(h.proj)
                 {
                     servstate &ts = target->state;
-                    loopj(WEAP_MAX) loopk(2) if(ts.weapshots[j][k].find(h.proj) >= 0)
+                    loopj(WEAP_MAX) loopk(2) if(ts.weapshots[j][k].find(h.proj))
                     {
                         ts.weapshots[j][k].remove(h.proj);
                         sendf(target->clientnum, 1, "ri4", N_DESTROY, target->clientnum, 1, h.proj);
