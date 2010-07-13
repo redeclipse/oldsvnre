@@ -330,7 +330,8 @@ namespace hud
     void damage(int n, const vec &loc, gameent *actor, int weap, int flags)
     {
         damageresidue = clamp(damageresidue+n, 0, 200);
-        vec colour = doesburn(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0));
+        vec colour = doesburn(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
+            dir = vec(loc).sub(camera1->o).normalize();
         loopv(damagelocs)
         {
             damageloc &d = damagelocs[i];
@@ -338,10 +339,10 @@ namespace hud
             if(lastmillis-d.outtime > radardamagemerge) continue;
             if(d.colour != colour) continue;
             d.damage += n;
-            d.dir = vec(loc).sub(camera1->o).normalize();
+            d.dir = dir;
             return; // accumulate
         }
-        damagelocs.add(damageloc(actor->clientnum, lastmillis, n, vec(loc).sub(camera1->o).normalize(), colour));
+        damagelocs.add(damageloc(actor->clientnum, lastmillis, n, dir, colour));
     }
 
     void drawquad(float x, float y, float w, float h, float tx1, float ty1, float tx2, float ty2)
@@ -1266,7 +1267,9 @@ namespace hud
                     range = clamp(max(d.damage, radardamagemin)/float(max(radardamagemax-radardamagemin, 1)), radardamagemin/100.f, 1.f),
                     fade = clamp(radardamageblend*blend, min(radardamageblend*radardamagemin/100.f, 1.f), radardamageblend)*amt,
                     size = clamp(range*radardamagesize, min(radardamagesize*radardamagemin/100.f, 1.f), radardamagesize)*amt;
-                vec dir = vec(d.dir).normalize().rotate_around_z(-camera1->yaw*RAD);
+                vec dir = d.dir;
+                if(dir.iszero()) vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, dir);
+                dir.normalize().rotate_around_z(-camera1->yaw*RAD);
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);

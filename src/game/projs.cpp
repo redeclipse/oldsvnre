@@ -83,7 +83,6 @@ namespace projs
         }
         hitmsg &h = hits.add();
         h.flags = flags;
-        if(proj.flags&HIT_FLAK) h.flags |= HIT_FLAK;
         h.proj = 0;
         h.target = d->clientnum;
         h.dist = int(dist*DNF);
