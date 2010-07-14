@@ -1221,7 +1221,7 @@ namespace entities
         if(ents.inrange(index) && maylink(ents[index]->type))
         {
             bool commit = false;
-                int numents = max(lastenttype[MAPMODEL], max(lastenttype[LIGHTFX], max(lastenttype[PARTICLES], lastenttype[MAPSOUND])));
+            int numents = max(lastenttype[MAPMODEL], max(lastenttype[LIGHTFX], max(lastenttype[PARTICLES], lastenttype[MAPSOUND])));
             loopi(numents) if(ents[i]->links.find(index) >= 0)
             {
                 if(ents.inrange(ignore) && ents[ignore]->links.find(index) >= 0) continue;
