@@ -820,16 +820,16 @@ namespace physics
                         break;
                     }
                     wall.normalize();
-                    bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3);
-                    if(d->turnside || (!onfloor && parkour))
+                    if(fabs(wall.z) <= impulseparkournorm)
                     {
+                        bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3);
                         float yaw = 0, pitch = 0;
                         vectoyawpitch(wall, yaw, pitch);
                         float off = yaw-d->aimyaw;
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
-                        if(parkour && impulsekick > 0 && fabs(off) >= impulsekick)
+                        if(!d->turnside && !onfloor && parkour && impulsekick > 0 && fabs(off) >= impulsekick)
                         {
-                            float mag = impulsevelocity(d, impulsejump);
+                            float mag = impulsevelocity(d, impulseparkour);
                             (d->vel = dir).reflect(wall).normalize().mul(mag);
                             d->vel.z += mag;
                             d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
@@ -841,32 +841,35 @@ namespace physics
                             game::impulseeffect(d);
                             break;
                         }
-                        int side = off < 0 ? -1 : 1;
-                        if(off < 0) yaw += 90; else yaw -= 90;
-                        while(yaw >= 360) yaw -= 360;
-                        while(yaw < 0) yaw += 360;
-                        vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
-                        if(!d->turnside)
+                        else if(d->turnside || (!onfloor && parkour))
                         {
-                            (d->vel = rft).normalize().mul(impulsevelocity(d, impulseparkour));
-                            off = yaw-d->aimyaw;
-                            if(off > 180) off -= 360;
-                            else if(off < -180) off += 360;
-                            d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_SKATE, lastmillis);
-                            d->action[AC_SPECIAL] = false;
-                            d->turnmillis = PHYSMILLIS;
-                            d->turnside = side; d->turnyaw = impulseturn ? off : 0;
-                            d->turnroll = (impulseroll*d->turnside)-d->roll;
-                            client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
-                            game::impulseeffect(d);
-                            found = true;
-                            break;
-                        }
-                        if(side == d->turnside)
-                        {
-                            (m = rft).normalize(); // re-project and override
-                            found = true;
-                            break;
+                            int side = off < 0 ? -1 : 1;
+                            if(off < 0) yaw += 90; else yaw -= 90;
+                            while(yaw >= 360) yaw -= 360;
+                            while(yaw < 0) yaw += 360;
+                            vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
+                            if(!d->turnside)
+                            {
+                                (d->vel = rft).normalize().mul(impulsevelocity(d, impulseparkour));
+                                off = yaw-d->aimyaw;
+                                if(off > 180) off -= 360;
+                                else if(off < -180) off += 360;
+                                d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_SKATE, lastmillis);
+                                d->action[AC_SPECIAL] = false;
+                                d->turnmillis = PHYSMILLIS;
+                                d->turnside = side; d->turnyaw = impulseturn ? off : 0;
+                                d->turnroll = (impulseroll*d->turnside)-d->roll;
+                                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
+                                game::impulseeffect(d);
+                                found = true;
+                                break;
+                            }
+                            if(side == d->turnside)
+                            {
+                                (m = rft).normalize(); // re-project and override
+                                found = true;
+                                break;
+                            }
                         }
                     }
                 }
