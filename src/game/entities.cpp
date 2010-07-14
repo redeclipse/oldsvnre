@@ -852,7 +852,6 @@ namespace entities
                             {
                                 int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
                                 gameentity &f = *(gameentity *)ents[teleports[r]];
-                                d->resetair();
                                 d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
                                 switch(f.attrs[5])
                                 {
@@ -882,7 +881,9 @@ namespace entities
                                     game::fixfullrange(d->yaw, d->pitch, d->roll, true);
                                     f.lastuse = f.lastemit = e.lastemit;
                                     if(d == game::focus) game::resetcamera();
-                                    execlink(d, n, true); execlink(d, teleports[r], true);
+                                    execlink(d, n, true);
+                                    execlink(d, teleports[r], true);
+                                    d->resetair();
                                     teleported = true;
                                     break;
                                 }
@@ -895,33 +896,36 @@ namespace entities
                 }
                 case PUSHER:
                 {
+                    e.lastuse = e.lastemit = lastmillis;
                     float mag = max(e.attrs[2], 1);
                     if(e.attrs[4] && e.attrs[4] < e.attrs[3])
                     {
-                        vec m = vec(d->o).sub(vec(0, 0, d->height*0.5f));
-                        float dist = m.dist(e.o);
-                        if(dist >= e.attrs[4]) mag *= 1.f-clamp((dist-e.attrs[4])/float(e.attrs[3]-e.attrs[4]), 0.f, 1.f);
+                        float dist = e.o.dist(d->headpos(-d->height*0.5f));
+                        if(dist > e.attrs[4] && dist < e.attrs[3])
+                            mag *= 1.f-clamp((dist-e.attrs[4])/float(e.attrs[3]-e.attrs[4]), 0.f, 0.99f);
                     }
-                    vec dir; vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir); dir.normalize().mul(mag);
-                    if(d->ai) d->ai->becareful = true;
-                    d->resetair();
+                    vec dir, rel;
+                    vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);
+                    (rel = dir.normalize()).mul(mag);
                     switch(e.attrs[5])
                     {
                         case 0:
                         {
                             loopk(3)
                             {
-                                if((d->vel.v[k] > 1e-1f && dir.v[k] < -1e-1f) || (d->vel.v[k] < -1e-1f && dir.v[k] > 1e-1f) || (fabs(dir.v[k]) > fabs(d->vel.v[k])))
-                                    d->vel.v[k] = dir.v[k];
+                                if((d->vel.v[k] > 1e-1f && rel.v[k] < -1e-1f) || (d->vel.v[k] < -1e-1f && rel.v[k] > 1e-1f) || (fabs(rel.v[k]) > fabs(d->vel.v[k])))
+                                    d->vel.v[k] = rel.v[k];
                             }
                             break;
                         }
-                        case 1: d->vel.add(dir); break;
-                        case 2: dir.add(vec(dir).normalize().mul(vec(d->vel).add(d->falling).magnitude())); // fall through
-                        case 3: d->vel = dir; break;
+                        case 1: d->vel.add(rel); break;
+                        case 2: rel.add(vec(dir).mul(vec(d->vel).add(d->falling).magnitude())); // fall through
+                        case 3: d->vel = rel; break;
                         default: break;
                     }
-                    e.lastuse = e.lastemit = lastmillis; execlink(d, n, true);
+                    if(d->ai) d->ai->becareful = true;
+                    execlink(d, n, true);
+                    d->resetair();
                     break;
                 }
                 case TRIGGER:
@@ -1103,13 +1107,13 @@ namespace entities
             {
                 while(e.attrs[0] < 0) e.attrs[0] += 360;
                 while(e.attrs[0] >= 360) e.attrs[0] -= 360;
-                while(e.attrs[1] < -90) e.attrs[1] += 180;
-                while(e.attrs[1] > 90) e.attrs[1] -= 180;
+                while(e.attrs[1] < -90) e.attrs[1] += 181;
+                while(e.attrs[1] > 90) e.attrs[1] -= 181;
                 if(e.attrs[2] < 1) e.attrs[2] = 1;
                 if(e.attrs[3] < 0) e.attrs[3] = 0;
                 if(e.attrs[4] < 0 || e.attrs[4] >= (e.attrs[3] ? e.attrs[3] : enttype[PUSHER].radius)) e.attrs[4] = 0;
-                if(e.attrs[5] < 0) e.attrs[5] += 3;
-                if(e.attrs[5] >= 3) e.attrs[5] -= 3;
+                if(e.attrs[5] < 0) e.attrs[5] += 4;
+                if(e.attrs[5] >= 4) e.attrs[5] -= 4;
                 break;
             }
             case TRIGGER:
