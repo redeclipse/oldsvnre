@@ -2,12 +2,9 @@
 * Optical effects (sprinting. etc)
 * Make 'tags' and/or 'theme' fields (or just mark modified gameplay)
 * Move things like mastermode, ban, etc to server side commands/variables
-* Remember ammo counts for dropped weapons?
 * Make checkpoints/triggers linkable for a determined order (add to kinship system)
 * Create "assisted secures" for stf (player1, player2, player3 secured flag N)
 * Create "assisted deaths" (make server aware of floor state too for assisted falling?)
-* Allow premature detonation by firing/exploding certain weapons at plasma/grenades?
-* Refine AI elements (campaign, fix "spinning", smarter "cooking")
 * Master server tracking and unlockable system
 
 = Models =
@@ -20,10 +17,7 @@
 * Current "widgets" need glow removed so they are not clipped by image dimensions
 
 = Sounds =
-* Pistol/Rifle
 * Double/Triple/Multi kill
 * Spree 5/6 (7/8/9/10?)
-* Team-alert and damage tones
-* Team change announcer
+* Team change announcer?
 * First blood (+points?)
-* (compass) voices
