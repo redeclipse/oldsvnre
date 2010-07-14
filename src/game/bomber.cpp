@@ -47,7 +47,7 @@ namespace bomber
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
             bool guided = false;
             if(bomberpowertime && lastmillis-d->actiontime[AC_ALTERNATE] >= bomberpowertime) guided = true;
-            inertia.normalize().mul(bomberspeed).add(d->vel);
+            inertia.normalize().mul(bomberspeed).add(d->vel).add(d->falling);
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_ALTERNATE] = false;
             d->actiontime[AC_ALTERNATE] = 0;
@@ -73,7 +73,7 @@ namespace bomber
             float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
-                int millis = totalmillis-f.interptime;
+                int millis = lastmillis-f.interptime;
                 if(millis < 1000) size *= 1.f+(1-clamp(float(millis)/1000.f, 0.f, 1.f));
                 if(f.owner) size *= 0.75f;
                 else if(!f.droptime) fade *= 0.75f;
@@ -128,7 +128,7 @@ namespace bomber
         {
             if(y-sy-s < m) break;
             bomberstate::flag &f = st.flags[i];
-            int millis = totalmillis-f.interptime, pos[2] = { x, y-sy };
+            int millis = lastmillis-f.interptime, pos[2] = { x, y-sy };
             float skew = hud::inventoryskew, fade = blend*hud::inventoryblend, r = 0.5f, g = 0.5f, b = 0.5f, rescale = 1.f;
             if(f.owner || f.droptime)
             {
@@ -234,7 +234,7 @@ namespace bomber
             float trans = 0.f;
             if(isbomberaffinity(f) && !f.owner && !f.droptime)
             {
-                int millis = totalmillis-f.interptime;
+                int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans += float(millis)/1000.f;
                 else trans = 1.f;
             }
@@ -284,7 +284,7 @@ namespace bomber
             float trans = 1.f;
             if(!f.owner)
             {
-                int millis = totalmillis-f.interptime;
+                int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
             adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius*trans, vec((teamtype[f.team].colour>>16), ((teamtype[f.team].colour>>8)&0xFF), (teamtype[f.team].colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
@@ -360,22 +360,13 @@ namespace bomber
                     loopk(3) droploc[k] = getint(p)/DMF;
                     loopk(3) inertia[k] = getint(p)/DMF;
                 }
-                if(dropped) loopk(3) droploc[k] = getint(p)/DMF;
             }
             if(commit && st.flags.inrange(i))
             {
                 bomberstate::flag &f = st.flags[i];
                 f.team = team;
-                f.owner = owner >= 0 ? game::newclient(owner) : NULL;
-                if(f.owner) { if(!f.taketime) f.inittime = f.taketime = lastmillis; }
-                else f.inittime = f.taketime = 0;
-                if(dropped)
-                {
-                    f.droploc = droploc;
-                    f.droploc = inertia;
-                    f.inittime = f.droptime = lastmillis;
-                    f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, i);
-                }
+                if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
+                else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
             }
         }
     }
@@ -383,10 +374,7 @@ namespace bomber
     void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target)
     {
         if(!st.flags.inrange(i)) return;
-        bomberstate::flag &f = st.flags[i];
         st.dropaffinity(i, droploc, inertia, lastmillis);
-        st.interp(i, totalmillis);
-        f.proj = projs::create(droploc, inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i, target);
     }
 
     void removeplayer(gameent *d)
@@ -395,8 +383,6 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             st.dropaffinity(i, f.owner->o, f.owner->vel, lastmillis);
-            st.interp(i, totalmillis);
-            f.proj = projs::create(f.owner->o, f.owner->vel, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, i);
         }
     }
 
@@ -446,7 +432,6 @@ namespace bomber
             game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
         }
         st.returnaffinity(i, lastmillis, true, enabled);
-        st.interp(i, totalmillis);
     }
 
     void scoreaffinity(gameent *d, int relay, int goal, int score)
@@ -460,7 +445,6 @@ namespace bomber
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
         game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, true, false);
-        st.interp(relay, totalmillis);
     }
 
     void takeaffinity(gameent *d, int i)
@@ -475,7 +459,6 @@ namespace bomber
             game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the bomb", game::colorname(d));
         }
         st.takeaffinity(i, d, lastmillis);
-        st.interp(i, totalmillis);
     }
 
     void checkaffinity(gameent *d)
