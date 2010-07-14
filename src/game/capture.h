@@ -78,7 +78,29 @@ struct capturestate
         f.base = base;
         return x;
     }
+#ifndef GAMESERVER
+    void interp(int i, int t)
+    {
+        flag &f = flags[i];
+        f.interptime = f.interptime ? t-max(1000-(t-f.interptime), 0) : t;
+    }
 
+    void destroy(int id)
+    {
+        flags[id].proj = NULL;
+        loopv(projs::projs) if(projs::projs[i]->projtype == PRJ_AFFINITY && projs::projs[i]->id == id)
+        {
+            projs::projs[i]->state = CS_DEAD;
+            projs::projs[i]->beenused = 2;
+        }
+    }
+
+    void create(int id)
+    {
+        flag &f = flags[id];
+        f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, id);
+    }
+#endif
 #ifdef GAMESERVER
     void takeaffinity(int i, int owner, int t)
 #else
@@ -99,7 +121,8 @@ struct capturestate
             f.proj->beenused = 2;
             f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
         }
-        f.proj = NULL;
+        destroy(i);
+        interp(i, t);
 #endif
     }
 
@@ -116,12 +139,9 @@ struct capturestate
 #else
         f.pickuptime = 0;
         f.owner = NULL;
-        if(f.proj)
-        {
-            f.proj->beenused = 2;
-            f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
-        }
-        f.proj = NULL;
+        destroy(i);
+        create(i);
+        interp(i, t);
 #endif
     }
 
@@ -135,12 +155,8 @@ struct capturestate
 #else
         f.pickuptime = 0;
         f.owner = NULL;
-        if(f.proj)
-        {
-            f.proj->beenused = 2;
-            f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
-        }
-        f.proj = NULL;
+        destroy(i);
+        interp(i, t);
 #endif
     }
 
@@ -156,14 +172,6 @@ struct capturestate
         cs.total = 0;
         return cs;
     }
-
-#ifndef GAMESERVER
-    void interp(int i, int t)
-    {
-        flag &f = flags[i];
-        f.interptime = f.interptime ? t-max(1000-(t-f.interptime), 0) : t;
-    }
-#endif
 };
 
 #ifndef GAMESERVER

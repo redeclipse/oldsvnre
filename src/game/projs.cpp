@@ -557,7 +557,7 @@ namespace projs
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
-                proj.elasticity = 0.35f;
+                proj.elasticity = 0.5f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
