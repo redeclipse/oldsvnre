@@ -447,13 +447,12 @@ namespace game
                 }
                 case 2:
                 {
-                    int ends = lastmillis+PHYSMILLIS;
                     if(issound(d->jschan))
                     {
-                        sounds[d->jschan].vol = 255;
-                        sounds[d->jschan].ends = ends;
+                        sounds[d->jschan].vol = min((lastmillis-sounds[d->jschan].millis)*2, 255);
+                        sounds[d->jschan].ends = lastmillis+250;
                     }
-                    else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, 255, -1, -1, &d->jschan, ends);
+                    else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
                     if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
@@ -566,7 +565,7 @@ namespace game
         if(issound(d->jschan) && !physics::jetpack(d))
         {
             if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
-            else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/float(PHYSMILLIS))));
+            else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/250.f)));
         }
     }
 
