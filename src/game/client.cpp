@@ -479,7 +479,7 @@ namespace client
             if(ret > 0) snd = ret;
         }
         conoutft(CON_CHAT, "%s", s);
-        if(snd >= 0 && !issound(d->cschan)) playsound(snd, d->o, d, d == game::focus ? SND_FORCED : SND_DIRECT, -1, -1, -1, &d->cschan);
+        if(snd >= 0 && !issound(d->cschan)) playsound(snd, d->o, d, d == game::focus ? SND_FORCED : (snd != S_CHAT ? 0 : SND_DIRECT), -1, -1, -1, &d->cschan);
     }
 
     void toserver(int flags, char *text)

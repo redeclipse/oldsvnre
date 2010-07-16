@@ -365,7 +365,7 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 s.maxrad = x;
                 s.minrad = y;
                 s.flags = flags;
-                if(!oldhook) s.millis = lastmillis;
+                s.millis = oldhook ? sounds[*oldhook].millis : lastmillis;
                 s.ends = ends;
                 s.slotnum = n;
                 s.owner = d;
