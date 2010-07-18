@@ -1,18 +1,12 @@
-* Commands to perform common geometry operations: slope, arch, stairs, circle, sphere
-* Optical effects (sprinting. etc)
-* Make 'tags' and/or 'theme' fields (or just mark modified gameplay)
-* Move things like mastermode, ban, etc to server side commands/variables
-* Make checkpoints/triggers linkable for a determined order (add to kinship system)
-* Create "assisted secures" for stf (player1, player2, player3 secured flag N)
-* Create "assisted deaths" (make server aware of floor state too for assisted falling?)
-* Master server tracking and unlockable system
-
 = Models =
-* New player model (tag_affinity, tag_weapon, tag_lfoot, tag_rfoot, tag_head, tag_torso)
+* Need to replace: projs/debris, projs/gibs, flag
+* New player model (tags: affinity (flag|bomb), weapon, lfoot, rfoot, head, torso, jet)
 * Enemy models
 * Weapons
 
 = Art =
+* Need to replace: blob.png, scorch.png
+* Better looking fixed-width fonts
 * Dead, Arrow, Dominated/Dominating
 * Current "widgets" need glow removed so they are not clipped by image dimensions
 
@@ -21,3 +15,13 @@
 * Spree 5/6 (7/8/9/10?)
 * Team change announcer?
 * First blood (+points?)
+
+= Wishlist/Other =
+* Commands to perform common geometry operations: slope, arch, stairs, circle, sphere?
+* Optical effects (sprinting. etc)?
+* Make 'tags' and/or 'theme' fields (or just mark modified gameplay)?
+* Move things like mastermode, ban, etc to server side commands/variables?
+* Make checkpoints/triggers linkable for a determined order (add to kinship system)?
+* Create "assisted secures" for stf (player1, player2, player3 secured flag N)
+* Create "assisted deaths" (make server aware of floor state too for assisted falling?)
+* Master server tracking and unlockable system
