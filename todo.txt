@@ -5,7 +5,6 @@
 * Weapons
 
 = Art =
-* Need to replace: blob.png, scorch.png
 * Better looking fixed-width fonts
 * Dead, Arrow, Dominated/Dominating
 * Current "widgets" need glow removed so they are not clipped by image dimensions
