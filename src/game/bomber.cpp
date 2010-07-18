@@ -287,7 +287,8 @@ namespace bomber
                 int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
-            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius*trans, vec((teamtype[f.team].colour>>16), ((teamtype[f.team].colour>>8)&0xFF), (teamtype[f.team].colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
+            int colour = isbomberaffinity(f) ? 0xAAAAAA : teamtype[f.team].colour;
+            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius*trans, vec((colour>>16), ((colour>>8)&0xFF), (colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
         }
     }
 
@@ -300,7 +301,8 @@ namespace bomber
             if(st.flags.inrange(index)) \
             { \
                 st.flags[index].ent = a; \
-                entities::ents[a]->light.material = st.flags[index].light.material = vec(teamtype[st.flags[index].team].colour>>16, (teamtype[st.flags[index].team].colour>>8)&0xFF, teamtype[st.flags[index].team].colour&0xFF).div(255.f); \
+                int colour = st.flags[index].team == TEAM_NEUTRAL ? 0x888888 : teamtype[st.flags[index].team].colour; \
+                entities::ents[a]->light.material = st.flags[index].light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f); \
             } \
             else continue; \
         }

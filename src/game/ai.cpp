@@ -372,7 +372,7 @@ namespace ai
     {
         if(e && targetable(d, e))
         {
-            if(pursue) d->ai->switchstate(b, AI_S_PURSUE, AI_T_PLAYER, e->clientnum);
+            if(pursue && entities::ents.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_PLAYER, e->clientnum);
             if(d->ai->enemy != e->clientnum)
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
@@ -1042,8 +1042,8 @@ namespace ai
             float yaw, pitch;
             game::getyawpitch(dp, ep, yaw, pitch);
             game::fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000,
-                quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (WEAP2(d->weapselect, fullauto, alt) ? skmod : skmod/10);
+            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
+                quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (WEAP2(d->weapselect, fullauto, alt) ? WEAP2(d->weapselect, adelay, alt)*3 : skmod)+30;
             if(insight) d->ai->enemyseen = lastmillis;
             if(idle || insight || hasseen || quick)
             {
@@ -1447,7 +1447,7 @@ namespace ai
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
         if(d->ai->state.empty()) setup(d, false, d->aientity);
-        bool cleannext = false;
+        bool cleannext = false, parse = run && entities::ents.inrange(d->lastnode);
         loopvrev(d->ai->state)
         {
             aistate &c = d->ai->state[i];
@@ -1470,7 +1470,7 @@ namespace ai
                     d->respawned = lastmillis;
                 }
             }
-            else if(d->state == CS_ALIVE && run)
+            else if(d->state == CS_ALIVE && parse)
             {
                 int result = 0;
                 c.idle = 0;
@@ -1497,7 +1497,7 @@ namespace ai
                 }
                 else if(d->ai->suspended) d->ai->unsuspend();
             }
-            logic(d, c, run);
+            logic(d, c, parse);
             break;
         }
         if(d->ai->trywipe) d->ai->wipe();
