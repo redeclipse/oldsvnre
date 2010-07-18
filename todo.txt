@@ -6,7 +6,7 @@
 
 = Art =
 * Better looking fixed-width fonts
-* Dead, Arrow, Dominated/Dominating
+* Dead
 * Current "widgets" need glow removed so they are not clipped by image dimensions
 
 = Sounds =
