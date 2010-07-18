@@ -837,7 +837,7 @@ namespace hud
                 }
                 else if(target->state == CS_ALIVE)
                 {
-                    if(target == game::player1)
+                    if(m_fight(game::gamemode) && target == game::player1)
                     {
                         if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
                             ty += draw_textx("\fzryDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
