@@ -402,8 +402,10 @@ void rendermapmodel(extentity &e)
         if(e.lastemit > 0 && lastmillis-e.lastemit < entities::triggertime(e)) basetime = e.lastemit;
         else anim |= ANIM_END;
     }
+#if 0
     if(!(e.attrs[5]&MMT_NOSHADOW)) flags |= MDL_SHADOW;
     else if(!(e.attrs[5]&MMT_NODYNSHADOW)) flags |= MDL_DYNSHADOW;
+#endif
     mapmodelinfo &mmi = getmminfo(e.attrs[0]);
     if(&mmi) rendermodel(&e.light, mmi.name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
 }
