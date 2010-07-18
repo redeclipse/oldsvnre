@@ -323,7 +323,7 @@ static void deletedome()
 FVAR(IDF_WORLD, fogdomeheight, -1, -0.5f, 1);
 FVAR(IDF_WORLD, fogdomemin, 0, 0, 1);
 FVAR(IDF_WORLD, fogdomemax, 0, 0, 1);
-VAR(IDF_WORLD, fogdomecap, 0, 0, 1);
+VAR(IDF_WORLD, fogdomecap, 0, 1, 1);
 FVAR(IDF_WORLD, fogdomeclip, 0, 1, 1);
 bvec fogdomecolor(0, 0, 0);
 VARF(IDF_HEX|IDF_WORLD, fogdomecolour, 0, 0, 0xFFFFFF,
