@@ -1670,7 +1670,7 @@ namespace hud
             if(inventoryhealth >= 3 && *state)
             {
                 sy -= x/2;
-                pushfont("super");
+                pushfont("emphasis");
                 sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255)/2, TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
