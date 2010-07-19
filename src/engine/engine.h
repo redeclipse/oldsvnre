@@ -576,6 +576,7 @@ extern int getmaprevision();
 
 
 // world
+extern void entcancel();
 extern void entitiesinoctanodes();
 extern void attachentities();
 extern void freeoctaentities(cube &c);
