@@ -136,7 +136,7 @@ namespace ai
             lastaction = lasthunt = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
-            weappref = targnode = targlast = -1;
+            weappref = targnode = targlast = enemy = -1;
         }
 
         void clear(bool prev = true)
@@ -155,11 +155,7 @@ namespace ai
 
         void clean(bool tryit = false)
         {
-            if(!tryit)
-            {
-                enemy = -1;
-                becareful = dontmove = false;
-            }
+            if(!tryit) becareful = dontmove = false;
             targyaw = rnd(360);
             targpitch = 0.f;
             tryreset = tryit;
