@@ -554,6 +554,12 @@ namespace capture
                 }
             }
         }
+	    if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
+		if(ai::randomnode(d, b, ai::SIGHTMIN, 1e16f))
+		{
+            d->ai->switchstate(b, ai::AI_S_INTEREST, ai::AI_T_NODE, d->ai->route[0]);
+            return true;
+		}
         return false;
     }
 
@@ -578,11 +584,7 @@ namespace capture
                 else if(iscaptureaffinity(g, ai::owner(d)) && (m_gsp3(game::gamemode, game::mutators) || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
                     takenflags.add(i);
             }
-            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
-            {
-                aihomerun(d, b);
-                return true;
-            }
+            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators)) return aihomerun(d, b);
             if(!ai::badhealth(d))
             {
                 while(!takenflags.empty())
@@ -687,11 +689,7 @@ namespace capture
                 capturestate::flag &g = st.flags[i];
                 if(g.owner == d) hasflags.add(i);
             }
-            if(!hasflags.empty())
-            {
-                aihomerun(d, b);
-                return true;
-            }
+            if(!hasflags.empty()) return aihomerun(d, b);
         }
         if(st.flags.inrange(b.target))
         {
