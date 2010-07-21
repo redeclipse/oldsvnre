@@ -21,7 +21,7 @@ static inline bool htcmp(GLuint x, GLuint y)
 hashtable<GLuint, vboinfo> vbos;
 
 VAR(0, printvbo, 0, 0, 1);
-VARFN(0, vbosize, maxvbosize, 0, 1<<15, 1<<16, allchanged());
+VARFN(0, vbosize, maxvbosize, 0, 1<<14, 1<<16, allchanged());
 
 enum
 {
