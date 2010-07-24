@@ -1643,7 +1643,7 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(m_arena(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap[0] < 0 && client::ready() && !menuactive())
+            if(m_arena(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap[0] < 0 && !client::waiting() && !menuactive())
                 showgui("loadout", -1);
         }
         else if(!menuactive()) showgui("main", -1);
@@ -1682,7 +1682,7 @@ namespace game
     {
         fixview(w, h);
         checkcamera();
-        if(client::ready())
+        if(!client::waiting())
         {
             if(!lastcamera)
             {

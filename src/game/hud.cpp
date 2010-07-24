@@ -683,7 +683,7 @@ namespace hud
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showcrosshair || game::focus->state == CS_DEAD || !client::ready()) index = POINTER_NONE;
+        else if(!showcrosshair || game::focus->state == CS_DEAD || client::waiting()) index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state == CS_SPECTATOR || game::focus->state == CS_WAITING) index = POINTER_SPEC;
         else if(game::inzoom() && WEAP(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
@@ -740,7 +740,7 @@ namespace hud
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(commandmillis <= 0 && curcompass) rendercmenu();
-            else if(client::ready() && shownotices && !hasinput(false) && !texpaneltimer)
+            else if(!client::waiting() && shownotices && !hasinput(false) && !texpaneltimer)
             {
                 pushfont("emphasis");
                 int ty = (hudheight/2)-FONTH+int(hudheight/2*noticeoffset), tx = hudwidth/2, tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
@@ -1988,9 +1988,9 @@ namespace hud
             }
             if(!noview)
             {
-                if(titlefade && (!client::ready() || game::maptime <= 0 || lastmillis-game::maptime <= titlefade))
+                if(titlefade && (client::waiting() || lastmillis-game::maptime <= titlefade))
                 {
-                    float a = client::ready() && game::maptime > 0 ? float(lastmillis-game::maptime)/float(titlefade) : 0.f;
+                    float a = !client::waiting() ? float(lastmillis-game::maptime)/float(titlefade) : 0.f;
                     loopi(3) if(a < colour[i]) colour[i] *= a;
                 }
                 if(tvmodefade && game::tvmode())
@@ -2034,7 +2034,7 @@ namespace hud
         glColor3f(1, 1, 1);
 
         if(noview) drawbackground(hudwidth, hudheight);
-        else if(showhud && client::ready() && fade > 0) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
+        else if(showhud && !client::waiting() && fade > 0) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
         if(UI::ready && showconsole)
         {
             drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
@@ -2062,5 +2062,22 @@ namespace hud
             hudheight = int(ceil(hudsize*(h/float(w))));
         }
         else hudwidth = hudheight = hudsize;
+
+        int wait = client::waiting();
+        static bool forceprogress = false;
+        if(wait > 1)
+        {
+            forceprogress = progressing = true;
+            setfvar("progressamt", 0);
+            switch(wait)
+            {
+                case 3: setsvar("progresstitle", "downloading map.."); break;
+                case 2: setsvar("progresstitle", "requesting map.."); break;
+                case 1: case 0: default: break;
+            }
+            setsvar("progresstext", "this could take some time..");
+            setfvar("progresspart", 0);
+        }
+        else if(forceprogress) forceprogress = progressing = false;
     }
 }

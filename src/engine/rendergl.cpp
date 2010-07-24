@@ -223,7 +223,7 @@ void gl_checkextensions()
 #ifdef __APPLE__
     /* VBOs over 256KB seem to destroy performance on 10.5, but not in 10.6 */
     extern int maxvbosize;
-    if(osversion < 0x1060) maxvbosize = min(maxvbosize, 8192);  
+    if(osversion < 0x1060) maxvbosize = min(maxvbosize, 8192);
 #endif
 
     if(strstr(exts, "GL_ARB_pixel_buffer_object"))
@@ -2120,7 +2120,7 @@ void drawview(int targtype)
 
 void gl_drawframe(int w, int h)
 {
-    if(client::ready())
+    if(!client::waiting())
     {
         fogmat = lookupmaterial(camera1->o)&MATF_VOLUME;
         causticspass = 0.f;

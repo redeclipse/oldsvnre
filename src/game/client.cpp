@@ -484,7 +484,7 @@ namespace client
 
     void toserver(int flags, char *text)
     {
-        if(ready())
+        if(!waiting(false))
         {
             saytext(game::player1, flags, text);
             addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, text);
@@ -552,7 +552,7 @@ namespace client
 
     bool sendcmd(int nargs, const char *cmd, const char *arg)
     {
-        if(ready())
+        if(!waiting(false))
         {
             addmsg(N_COMMAND, "ri2ss", game::player1->clientnum, nargs, cmd, arg);
             return true;
@@ -738,21 +738,28 @@ namespace client
             vecfromyawpitch(game::player1->yaw, game::player1->pitch, 1, 0, dir);
             game::player1->o.add(dir.mul(-32));
             game::player1->resetinterp();
+            game::resetcamera();
         }
     }
     ICOMMAND(0, goto, "s", (char *s), gotoplayer(s));
 
-    bool ready() { return connected(false) && isready && game::maptime > 0; }
-    ICOMMAND(0, ready, "", (), intret(ready()));
-
     int state() { return game::player1->state; }
     ICOMMAND(0, getstate, "", (), intret(state()));
+
     int otherclients()
     {
         int n = 0; // ai don't count
         loopv(game::players) if(game::players[i] && game::players[i]->aitype < 0) n++;
         return n;
     }
+
+    int waiting(bool state)
+    {
+        if(!connected(false) || !isready || game::maptime <= 0 || (state && needsmap && !otherclients()))
+            return needsmap ? (gettingmap ? 3 : 2) : 1;
+        return 0;
+    }
+    ICOMMAND(0, waiting, "i", (int *n), intret(waiting(!*n)));
 
     void editvar(ident *id, bool local)
     {

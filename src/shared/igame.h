@@ -37,7 +37,7 @@ namespace client
     extern void editvar(ident *id, bool local);
     extern void edittrigger(const selinfo &sel, int op, int arg1 = 0, int arg2 = 0, int arg3 = 0);
     extern void changemap(const char *name);
-    extern bool ready();
+    extern int waiting(bool state = true);
     extern void connectattempt(const char *name, int port, const char *password, const ENetAddress &address);
     extern void connectfail();
     extern int state();
