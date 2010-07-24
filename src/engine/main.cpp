@@ -409,7 +409,7 @@ void resetgl()
 {
     clearchanges(CHANGE_GFX);
 
-    progress(0, "resetting OpenGL");
+    progress(0, "resetting OpenGL..");
 
     extern void cleanupva();
     extern void cleanupparticles();
@@ -780,7 +780,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     interceptkey(SDLK_UNKNOWN); // keep the event queue awake to avoid 'beachball' cursor
     #endif
 
-    setsvar("progresstitle", text1 ? text1 : "please wait...");
+    setsvar("progresstitle", text1 ? text1 : "loading..");
     setfvar("progressamt", bar1);
     setsvar("progresstext", text2 ? text2 : "");
     setfvar("progresspart", bar2);

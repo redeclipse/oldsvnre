@@ -55,7 +55,7 @@ namespace hud
 
         void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false)
         {
-            if(client::ready())
+            if(!client::waiting())
             {
                 if(ispress)
                 {
