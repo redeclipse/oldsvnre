@@ -2199,6 +2199,17 @@ void patchlight(int *quality)
 
 COMMAND(0, patchlight, "i");
 
+void clearlightmaps()
+{
+    progress(0, "clearing lightmaps...");
+    resetlightmaps(false);
+    clearsurfaces(worldroot);
+    initlights();
+    allchanged();
+}
+
+COMMAND(0, clearlightmaps, "");
+
 void setfullbrightlevel(int fullbrightlevel)
 {
     if(lightmaptexs.length() > LMID_BRIGHT)
