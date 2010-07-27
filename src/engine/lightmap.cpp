@@ -2201,6 +2201,7 @@ COMMAND(0, patchlight, "i");
 
 void clearlightmaps()
 {
+    if(noedit(true)) return;
     progress(0, "clearing lightmaps...");
     resetlightmaps(false);
     clearsurfaces(worldroot);
