@@ -1657,7 +1657,7 @@ namespace game
             {
                 if(player1->ragdoll) moveragdoll(player1, true);
                 else if(lastmillis-player1->lastpain < 5000)
-                    physics::move(player1, 10, false);
+                    physics::move(player1, 10, true);
             }
             else
             {
