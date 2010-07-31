@@ -195,12 +195,10 @@ void purgemasterclient(int n)
 bool checkmasterclientinput(masterclient &c)
 {
     if(c.inputpos < 0) return false;
-    const int MAXWORDS = 25;
-    char *w[MAXWORDS];
-    int numargs = MAXWORDS;
     const char *p = c.input;
     for(char *end;; p = end)
     {
+        vector<char *> w;
         end = (char *)memchr(p, '\n', &c.input[c.inputpos] - p);
         if(!end) end = (char *)memchr(p, '\0', &c.input[c.inputpos] - p);
         if(!end) break;
@@ -208,35 +206,26 @@ bool checkmasterclientinput(masterclient &c)
         if(c.ishttp) continue; // eat up the rest of the bytes, we've done our bit
 
         //conoutf("{%s} %s", c.name, p);
-        loopi(MAXWORDS)
+        while(true)
         {
-            w[i] = (char *)"";
-            if(i > numargs) continue;
             char *s = parsetext(p);
-            if(s) w[i] = s;
-            else numargs = i;
+            if(!s) break;
+            w.add(s);
         }
+        while(w.length() < 3) //the stuff here generally depend on 2 or 3 arguments being given
+            w.add(newstring(""));
 
         p += strcspn(p, ";\n\0"); p++;
+        if(!w.length()) continue;
 
-        if(!strcmp(w[0], "GET") && w[1] && *w[1] == '/') // cheap server-to-http hack
+        if(!strcmp(w[0], "GET") && *w[1] == '/') // cheap server-to-http hack
         {
-            loopi(numargs)
-            {
-                if(i)
-                {
-                    if(i == 1)
-                    {
-                        char *q = newstring(&w[i][1]);
-                        delete[] w[i];
-                        w[i] = q;
-                    }
-                    w[i-1] = w[i];
-                }
-                else delete[] w[i];
-            }
-            w[numargs-1] = (char *)"";
-            numargs--;
+            delete[] w[0]; //remove GET; superfluous
+            w.remove(0);
+
+            char *q = newstring(w[0]+1); //remove the '/'
+            delete[] w[0]; w[0] = q;
+
             c.ishttp = true;
         }
         bool found = false;
@@ -291,7 +280,7 @@ bool checkmasterclientinput(masterclient &c)
             masteroutf(c, "error \"unknown command %s\"\n", w[0]);
             conoutf("master peer %s (client) sent unknown command: %s",  c.name, w[0]);
         }
-        loopj(numargs) if(w[j]) delete[] w[j];
+        w.deletearrays();
     }
     c.inputpos = &c.input[c.inputpos] - p;
     memmove(c.input, p, c.inputpos);
