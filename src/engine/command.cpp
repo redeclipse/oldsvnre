@@ -631,33 +631,27 @@ static inline bool isinteger(char *c)
 
 char *commandret = NULL;
 
-union nst
-{
-    int i;
-    float f;
-};
-
 char *executeret(const char *p, bool nonworld)            // all evaluation happens here, recursively
 {
     bool oldworld = worldidents;
     if(nonworld) worldidents = false;
+    const int MAXWORDS = 25;                    // limit, remove
+    char *w[MAXWORDS];
     char *retval = NULL;
     #define setretval(v) { char *rv = v; if(rv) retval = rv; }
     for(bool cont = true; cont;)                // for each ; seperated statement
     {
-        vector<char *> w;
-        int infix = 0;
-        while(1)                             // collect all argument values
+        int numargs = MAXWORDS, infix = 0;
+        loopi(MAXWORDS)                      // collect all argument values
         {
-            char *r = parseword(p, w.length(), infix); // parse and evaluate exps
-            if(!r) break;
-            w.add(r);
+            w[i] = parseword(p, i, infix);   // parse and evaluate exps
+            if(!w[i]) { numargs = i; break; }
         }
 
         p += strcspn(p, ";\n\0");
         cont = *p++!=0;                      // more statements if this isn't the end of the string
-        if(!w.length() || !*w[0]) continue;         // empty statement
         char *c = w[0];
+        if(!c || !*c) continue;                     // empty statement
 
         DELETEA(retval);
 
@@ -666,7 +660,7 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
             switch(infix)
             {
                 case '=':
-                    aliasa(c, w.length() > 2 ? w[2] : newstring(""));
+                    aliasa(c, numargs>2 ? w[2] : newstring(""));
                     w[2] = NULL;
                     break;
             }
@@ -680,10 +674,10 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                 {
                     bool found = false;
                     char *exargs = NULL;
-                    if(w.length() > 1) exargs = conc(w.getbuf()+1, w.length()-1, true);
-                    if(id && id->flags&IDF_SERVER && id->type!=ID_COMMAND && id->type!=ID_CCOMMAND) found = server::servcmd(w.length(), c, exargs ? exargs : "");
+                    if(numargs > 1) exargs = conc(w+1, numargs-1, true);
+                    if(id && id->flags&IDF_SERVER && id->type!=ID_COMMAND && id->type!=ID_CCOMMAND) found = server::servcmd(numargs, c, exargs ? exargs : "");
 #ifndef STANDALONE
-                    else if(!id || id->flags&IDF_CLIENT) found = client::sendcmd(w.length(), c, exargs ? exargs : "");
+                    else if(!id || id->flags&IDF_CLIENT) found = client::sendcmd(numargs, c, exargs ? exargs : "");
 #endif
                     if(exargs) delete[] exargs;
                     if(!found) conoutf("\frunknown command: %s", c);
@@ -695,29 +689,31 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                 case ID_CCOMMAND:
                 case ID_COMMAND:                     // game defined commands
                 {
-                    vector <void *> v;
-                    vector <nst> nstor;
-                    nstor.reserve(w.length());
-
-                    int wn = 0;
+                    void *v[MAXWORDS];
+                    union
+                    {
+                        int i;
+                        float f;
+                    } nstor[MAXWORDS];
+                    int n = 0, wn = 0;
                     char *cargs = NULL, *dargs = NULL;
                     const char *clast = "";
-                    if(id->type==ID_CCOMMAND) v.add(id->self);
-                    for(const char *a = id->narg; *a; clast = a, a++) switch(*a)
+                    if(id->type==ID_CCOMMAND) v[n++] = id->self;
+                    for(const char *a = id->narg; *a; clast = a, a++, n++) switch(*a)
                     {
-                        case 's': v.add(++wn < w.length() ? w[wn] : (char *)""); break;
-                        case 'i': nstor.advance(1); nstor.last().i = ++wn < w.length() ? parseint(w[wn]) : 0; v.add(&nstor.last().i); break;
-                        case 'f': nstor.advance(1); nstor.last().f = ++wn < w.length() ? parsefloat(w[wn]) : 0.0f; v.add(&nstor.last().f); break;
+                        case 's': v[n] = ++wn < numargs ? w[wn] : (char *)""; break;
+                        case 'i': nstor[n].i = ++wn < numargs ? parseint(w[wn]) : 0;  v[n] = &nstor[n].i; break;
+                        case 'f': nstor[n].f = ++wn < numargs ? parsefloat(w[wn]) : 0.0f; v[n] = &nstor[n].f; break;
 #ifndef STANDALONE
-                        case 'D': nstor.advance(1); nstor.last().i = addreleaseaction(id->name) ? 1 : 0; v.add(&nstor.last().i); break;
+                        case 'D': nstor[n].i = addreleaseaction(dargs = conc(w, numargs, true)) ? 1 : 0; v[n] = &nstor[n].i; break;
 #endif
-                        case 'V': v.add(w.getbuf() + 1); nstor.advance(1); nstor.last().i = w.length() - 1; v.add(&nstor.last().i); break;
-                        case 'C': if(!cargs) cargs = conc(w.getbuf() + 1, w.length() - 1, true); v.add(cargs); break;
+                        case 'V': v[n++] = w+1; nstor[n].i = numargs-1; v[n] = &nstor[n].i; break;
+                        case 'C': if(!cargs) cargs = conc(w+1, numargs-1, true); v[n] = cargs; break;
                         default: fatal("builtin declared with illegal type");
                     }
                     char *exargs = NULL;
-                    if(*clast == 's' && wn < w.length() - 1) { exargs = conc(w.getbuf() + wn, w.length() - wn, true); v.last() = exargs;}
-                    switch(v.length())
+                    if(*clast == 's' && wn < numargs-1) { exargs = conc(w+wn, numargs-wn, true); v[n-1] = exargs; }
+                    switch(n)
                     {
                         case 0: ((void (__cdecl *)())id->fun)(); break;
                         case 1: ((void (__cdecl *)(void *))id->fun)(v[0]); break;
@@ -739,31 +735,31 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                 }
 
                 case ID_VAR:                        // game defined variables
-                    if(w.length() <= 1) conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", c, *id->storage.i);      // var with no value just prints its current value
+                    if(numargs <= 1) conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", c, *id->storage.i);      // var with no value just prints its current value
                     else
                     {
                         int val = parseint(w[1]);
-                        if(id->flags&IDF_HEX && w.length() > 2)
+                        if(id->flags&IDF_HEX && numargs > 2)
                         {
                             val <<= 16;
                             val |= parseint(w[2])<<8;
-                            if(w.length() > 3) val |= parseint(w[3]);
+                            if(numargs > 3) val |= parseint(w[3]);
                         }
                         setvarchecked(id, val);
                     }
                     break;
 
                 case ID_FVAR:
-                    if(w.length() <= 1) conoutft(CON_MESG, "\fc%s = %s", c, floatstr(*id->storage.f));
+                    if(numargs <= 1) conoutft(CON_MESG, "\fc%s = %s", c, floatstr(*id->storage.f));
                     else setfvarchecked(id, parsefloat(w[1]));
                     break;
 
                 case ID_SVAR:
-                    if(w.length() <= 1) conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "%s = [%s]" : "%s = \"%s\"", c, *id->storage.s);
+                    if(numargs <= 1) conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "%s = [%s]" : "%s = \"%s\"", c, *id->storage.s);
                     else
                     {
                         char *exargs = NULL, *val = w[1];
-                        if(w.length() > 2) val = exargs = conc(w.getbuf()+1, w.length()-1, true);
+                        if(numargs > 2) val = exargs = conc(w+1, numargs-1, true);
                         setsvarchecked(id, val);
                         if(exargs) delete[] exargs;
                     }
@@ -773,7 +769,7 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                 {
                     delete[] w[0];
                     static vector<ident *> argids;
-                    for(int i = 1; i<w.length(); i++)
+                    for(int i = 1; i<numargs; i++)
                     {
                         if(i > argids.length())
                         {
@@ -782,7 +778,7 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                         }
                         pushident(*argids[i-1], w[i]); // set any arguments as (global) arg values so functions can access them
                     }
-                    _numargs = w.length()-1;
+                    _numargs = numargs-1;
                     bool wasoverriding = overrideidents;
                     if(id->flags&IDF_OVERRIDE && id->override!=NO_OVERRIDE) overrideidents = true;
                     char *wasexecuting = id->isexecuting;
@@ -791,12 +787,12 @@ char *executeret(const char *p, bool nonworld)            // all evaluation happ
                     if(id->isexecuting != id->action && id->isexecuting != wasexecuting) delete[] id->isexecuting;
                     id->isexecuting = wasexecuting;
                     overrideidents = wasoverriding;
-                    for(int i = 1; i<w.length(); i++) popident(*argids[i-1]);
+                    for(int i = 1; i<numargs; i++) popident(*argids[i-1]);
                     continue;
                 }
             }
         }
-        w.deletearrays();
+        loopj(numargs) if(w[j]) delete[] w[j];
     }
     if(nonworld) worldidents = oldworld;
     return retval;

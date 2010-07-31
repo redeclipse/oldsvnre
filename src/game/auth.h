@@ -210,21 +210,24 @@ namespace auth
     void processinput()
     {
         if(inputpos < 0) return;
+        const int MAXWORDS = 25;
+        char *w[MAXWORDS];
+        int numargs = MAXWORDS;
         const char *p = input;
         for(char *end;; p = end)
         {
-            vector<char *> w;
             end = (char *)memchr(p, '\n', &input[inputpos] - p);
             if(!end) end = (char *)memchr(p, '\0', &input[inputpos] - p);
             if(!end) break;
             *end++ = '\0';
-            while(true)
+            loopi(MAXWORDS)
             {
+                w[i] = (char *)"";
+                if(i > numargs) continue;
                 char *s = parsetext(p);
-                if(!s) break;
-                w.add(s);
+                if(s) w[i] = s;
+                else numargs = i;
             }
-            while(w.length() < 4) w.add(newstring("")); //minimum arguments is 4
             p += strcspn(p, ";\n\0"); p++;
             if(!strcmp(w[0], "error")) conoutf("authserv error: %s", w[1]);
             else if(!strcmp(w[0], "echo")) conoutf("authserv reply: %s", w[1]);
@@ -239,7 +242,7 @@ namespace auth
                 p.time = -2; // master info
             }
             //else if(w[0]) conoutf("authserv sent invalid command: %s", w[0]);
-            w.deletearrays();
+            loopj(numargs) if(w[j]) delete[] w[j];
         }
         inputpos = &input[inputpos] - p;
         memmove(input, p, inputpos);
