@@ -580,37 +580,39 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
 
 void ircparse(ircnet *n, char *reply)
 {
-    char *p = reply;
+    const int MAXWORDS = 25;
+    char *w[MAXWORDS], *p = reply;
+    loopi(MAXWORDS) w[i] = NULL;
     while(p && *p)
     {
-        vector<char *> w;
         while(p && (*p == '\n' || *p == '\r' || *p == ' ')) p++; // eat up all the crap
         const char *start = p;
         bool line = false;
-        int g = *p == ':' ? 1 : 0;
+        int numargs = 0, g = *p == ':' ? 1 : 0;
         if(g) p++;
         bool full = false;
-        while(true)
+        loopi(MAXWORDS)
         {
-            if(!*p) break;
+            if(!p || !*p) break;
             const char *word = p;
-            if(*p == ':') full = true;
-            p += strcspn(p, "\r\n");
+            if(*p == ':') full = true; // uses the rest of the input line then
+            p += strcspn(p, full ? "\r\n" : " \r\n");
 
-            char *s;
+            char *s = NULL;
             if(p-word > (full ? 1 : 0))
             {
                 if(full) s = newstring(word+1, p-word-1);
                 else s = newstring(word, p-word);
             }
             else s = newstring("");
+            w[numargs] = s;
+            numargs++;
 
-            w.add(s);
-            if(*p =='\n' || *p == '\r') line = true;
+            if(*p == '\n' || *p == '\r') line = true;
             if(*p) p++; else break;
             if(line) break;
         }
-        if(line && w.length())
+        if(line && numargs)
         {
             char *user[3] = { NULL, NULL, NULL };
             if(g)
@@ -635,10 +637,10 @@ void ircparse(ircnet *n, char *reply)
                 user[1] = newstring("*");
                 user[2] = newstring(n->serv);
             }
-            if(w.length() > g) ircprocess(n, user, g, w.length(), w.getbuf());
+            if(numargs > g) ircprocess(n, user, g, numargs, w);
             loopi(3) DELETEA(user[i]);
         }
-        w.deletearrays();
+        loopi(MAXWORDS) DELETEA(w[i]);
         if(!line)
         {
             char *s = newstring(start); // can't copy a buffer into itself so dupe it first
