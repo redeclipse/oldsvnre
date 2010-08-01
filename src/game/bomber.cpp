@@ -230,9 +230,9 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
-            vec above(f.spawnloc);
+            vec above(f.pos(true));
             float trans = 0.f;
-            if(isbomberaffinity(f) && !f.owner && !f.droptime)
+            if(isbomberaffinity(f))
             {
                 int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans += float(millis)/1000.f;
@@ -243,11 +243,10 @@ namespace bomber
             {
                 if(isbomberaffinity(f))
                 {
-                    above.z += enttype[AFFINITY].radius/4;
+                    rendermodel(&entities::ents[f.ent]->light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, 0, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc*trans);
-                    part_icon(above, textureload(hud::bombtex, 3), 3*trans, trans, 0, 0, 1, 0xAAAAAA);
+                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6+(2*fluc), fluc*trans);
                 }
                 else
                 {
@@ -258,20 +257,10 @@ namespace bomber
             above.z += (isbomberaffinity(f) ? 1 : enttype[AFFINITY].radius/2)+2.5f;
             if(!isbomberaffinity(f))
             {
-                defformatstring(info)("<super>%s flag", teamtype[f.team].name);
+                defformatstring(info)("<super>%s goal", teamtype[f.team].name);
                 part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
                 above.z += 2.5f;
             }
-        }
-        loopv(st.flags)
-        {
-            bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f) || (!f.owner && !f.droptime)) continue;
-            vec above(f.pos(true));
-            int interval = lastmillis%1000;
-            float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-            part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, 6, fluc);
-            part_icon(above, textureload(hud::bombtex, 3), 3, 1, 0, 0, 1, 0xAAAAAA);
         }
     }
 
