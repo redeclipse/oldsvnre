@@ -15,6 +15,7 @@
 * First blood (+points?)
 
 = Wishlist/Other =
+* Make parkour mechanics require a certain height off the ground
 * Commands to perform common geometry operations: slope, arch, stairs, circle, sphere?
 * Optical effects (sprinting. etc)?
 * Make 'tags' and/or 'theme' fields (or just mark modified gameplay)?
