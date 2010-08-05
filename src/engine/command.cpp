@@ -1080,6 +1080,7 @@ COMMAND(0, format, "V");
 COMMAND(0, at, "si");
 COMMAND(0, substr, "sis");
 ICOMMAND(0, listlen, "s", (char *s), intret(listlen(s)));
+ICOMMAND(0, indexof, "ss", (char *list, char *elem), intret(checklist(elem, strlen(elem), list)));
 ICOMMAND(0, shrinklist, "ssi", (char *s, char *t, int *n), commandret = shrinklist(s, t, *n));
 COMMANDN(0, getalias, getalias_, "s");
 
