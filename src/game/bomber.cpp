@@ -243,6 +243,7 @@ namespace bomber
             {
                 if(isbomberaffinity(f))
                 {
+                    if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4;
                     rendermodel(&entities::ents[f.ent]->light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, 0, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
