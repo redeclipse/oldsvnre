@@ -103,7 +103,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, name##burns1, 0, x6, 1);                    GVAR(0, name##burns2, 0, x7, 1); \
     GVAR(0, name##reloads, 0, x81, 1);                  GVAR(0, name##carried, 0, x82, 1);              GVAR(0, name##zooms, 0, x9, 1); \
     GVAR(0, name##fullauto1, 0, xa, 1);                 GVAR(0, name##fullauto2, 0, xb, 1);             GVAR(0, name##allowed, 0, xc, 3); \
-    GVAR(0, name##laser, 0, xe, 1);                     GVAR(0, name##critdash1, 0, xd, 10000);         GVAR(0, name##critdash2, 0, xf, 10000); \
+    GVAR(0, name##laser, 0, xd, 1);                     GVAR(0, name##critdash1, 0, xe, 10000);         GVAR(0, name##critdash2, 0, xf, 10000); \
     GFVAR(0, name##taper1, 0, t0, 1);                   GFVAR(0, name##taper2, 0, t1, 1); \
     GFVAR(0, name##taperspan1, 0, t2, 1);               GFVAR(0, name##taperspan2, 0, t3, 1); \
     GFVAR(0, name##elasticity1, -10000, y0, 10000);     GFVAR(0, name##elasticity2, -10000, y1, 10000); \

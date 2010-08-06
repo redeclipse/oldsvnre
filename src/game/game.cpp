@@ -679,7 +679,7 @@ namespace game
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 100, DECAL_BLOOD, int(d->radius*8));
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 200, DECAL_BLOOD, int(d->radius*8));
                         else part_splash(PART_HINT, int(clamp(damage/2, 2, 10)), bloodfade, p, 0xFFFF88, 1.5f, 1, 50, DECAL_STAIN, int(d->radius*4));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);

@@ -914,7 +914,7 @@ namespace projs
                 {
                     if(proj.movement > 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                     {
-                        part_create(PART_BLOOD, game::bloodfade, proj.o, 0x88FFFF, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*2, 1, 100, DECAL_BLOOD);
+                        part_create(PART_BLOOD, game::bloodfade, proj.o, 0x88FFFF, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*2, 1, 200, DECAL_BLOOD);
                         proj.lasteffect = lastmillis - (lastmillis%1000);
                     }
                 }
