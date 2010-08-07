@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         205
+#define GAMEVERSION         206
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -1305,7 +1305,7 @@ namespace game
     extern void resetstate();
     extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local = false);
     extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir);
-    extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, int style);
+    extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent*> &log, int style);
     extern void timeupdate(int timeremain);
 }
 

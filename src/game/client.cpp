@@ -1522,9 +1522,17 @@ namespace client
                 {
                     int vcn = getint(p), acn = getint(p), frags = getint(p), style = getint(p), weap = getint(p), flags = getint(p), damage = getint(p);
                     gameent *victim = game::getclient(vcn), *actor = game::getclient(acn);
+                    static vector<gameent *> assist; assist.setsize(0);
+                    int count = getint(p);
+                    loopi(count)
+                    {
+                        int lcn = getint(p);
+                        gameent *log = game::getclient(lcn);
+                        if(log) assist.add(log);
+                    }
                     if(!actor || !victim) break;
                     actor->frags = frags;
-                    game::killed(weap, flags, damage, victim, actor, style);
+                    game::killed(weap, flags, damage, victim, actor, assist, style);
                     victim->lastdeath = lastmillis;
                     victim->weapreset(true);
                     break;

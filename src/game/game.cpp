@@ -725,7 +725,7 @@ namespace game
         if(flags&HIT_CRIT) pushdamagemerge(d, actor, weap, damage, damagemerge::CRIT);
     }
 
-    void killed(int weap, int flags, int damage, gameent *d, gameent *actor, int style)
+    void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style)
     {
         if(d->type != ENT_PLAYER && d->type != ENT_AI) return;
         bool burning = fireburn(d, weap, flags);
@@ -936,6 +936,15 @@ namespace game
                 override = true;
             }
         }
+        if(!log.empty())
+        {
+            concatstring(d->obit, rnd(2) ? " with the assistance of" : " with a little help from");
+            loopv(log)
+            {
+                defformatstring(entry)(" %s%s%s", log.length() > 1 && i == log.length()-1 ? "and " : "", colorname(log[i]), log.length() > 1 && i < log.length()-1 ? "," : "");
+                concatstring(d->obit, entry);
+            }
+        }
         if(d != actor)
         {
             if(actor->state == CS_ALIVE && d->aitype < AI_START)
@@ -948,6 +957,7 @@ namespace game
         if(showobituaries && d->aitype < AI_START)
         {
             bool isme = (d == player1 || actor == player1), show = false;
+            if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
             if(((!m_fight(gamemode) && !isme) || actor->aitype >= AI_START) && anc >= 0) anc = -1;
             if(flags&HIT_LOST) show = true;
             else switch(showobituaries)
