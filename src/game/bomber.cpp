@@ -243,7 +243,7 @@ namespace bomber
             {
                 if(isbomberaffinity(f))
                 {
-                    if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4;
+                    if(!f.owner) above.z += enttype[AFFINITY].radius/(f.droptime ? 16 : 4);
                     int colour = f.lastowner && f.lastowner->team ? teamtype[f.lastowner->team].colour : 0xFFFFFF;
                     entitylight *light = &entities::ents[f.ent]->light;
                     if(light->millis != lastmillis)
@@ -252,7 +252,8 @@ namespace bomber
                         light->material.y = ((colour>>8)&0xFF)/255.f;
                         light->material.z = (colour&0xFF)/255.f;
                     }
-                    rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, 0, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/10)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
+                    rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     part_create(PART_HINT_SOFT, 1, above, colour, 6+(2*fluc), fluc*trans);
