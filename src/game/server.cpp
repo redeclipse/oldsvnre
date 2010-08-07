@@ -2376,7 +2376,7 @@ namespace server
         if(!found) target->state.damagelog.add(dmghist(actor->clientnum, millis));
     }
 
-    void gethistory(clientinfo *target, clientinfo *actor, int millis, vector<int> &log, int points = 0)
+    void gethistory(clientinfo *target, clientinfo *actor, int millis, vector<int> &log, bool clear = false, int points = 0)
     {
         loopv(target->state.damagelog) if(target->state.damagelog[i].clientnum != actor->clientnum && millis-target->state.damagelog[i].millis <= GAME(assistkilldelay))
         {
@@ -2387,6 +2387,7 @@ namespace server
                 if(points) givepoints(assist, points);
             }
         }
+        if(clear) target->state.damagelog.shrink(0);
     }
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0))
@@ -2546,7 +2547,7 @@ namespace server
             target->state.deaths++;
             dropitems(target);
             static vector<int> dmglog; dmglog.setsize(0);
-            gethistory(target, actor, gamemillis, dmglog, 1);
+            gethistory(target, actor, gamemillis, dmglog, true, 1);
             sendf(-1, 1, "ri8iv", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
             target->position.setsize(0);
             if(smode) smode->died(target, actor);
@@ -2581,7 +2582,7 @@ namespace server
             ci->state.lastfireowner = ci->clientnum;
         }
         static vector<int> dmglog; dmglog.setsize(0);
-        gethistory(ci, ci, gamemillis, dmglog, 1);
+        gethistory(ci, ci, gamemillis, dmglog, true, 1);
         sendf(-1, 1, "ri8iv", N_DIED, ci->clientnum, ci->clientnum, ci->state.frags, 0, -1, flags, ci->state.health, dmglog.length(), dmglog.length(), dmglog.getbuf());
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
