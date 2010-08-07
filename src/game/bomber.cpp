@@ -285,7 +285,7 @@ namespace bomber
                 int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
-            int colour = isbomberaffinity(f) ? 0xAAAAAA : teamtype[f.team].colour;
+            int colour = isbomberaffinity(f) ? (f.lastowner && f.lastowner->team ? teamtype[f.lastowner->team].colour : 0xAAAAAA) : teamtype[f.team].colour;
             adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius*trans, vec((colour>>16), ((colour>>8)&0xFF), (colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
         }
     }
