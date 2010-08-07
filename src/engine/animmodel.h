@@ -104,9 +104,10 @@ struct animmodel : model
             {
                 bool needenvmap = envmaptmu>=0 && envmapmax>0;
                 if(enableoverbright) disableoverbright();
-                if(!enableglow || enableenvmap!=needenvmap) setuptmu(0, "1 , C @ T", needenvmap ? "= Ta" : "= Ca");
+                if(!enableglow || enableenvmap!=needenvmap) setuptmu(0, "K , C @ T", needenvmap ? "= Ta" : "= Ca");
                 int glowscale = glow>2 ? 4 : (glow>1 || mincolor>1 ? 2 : 1);
                 matcolor.div(glowscale);
+                colortmu(0, matcolor.x*glow, matcolor.y*glow, matcolor.z*glow);
 
                 glActiveTexture_(GL_TEXTURE1_ARB);
                 if(!enableglow || enableenvmap!=needenvmap)
