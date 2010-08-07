@@ -103,10 +103,10 @@ GVAR(0, defendoccupy, 0, 100, INT_MAX-1); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
 GVAR(0, bomberlimit, 0, 15, INT_MAX-1); // finish when score is this or more
-GVAR(0, bomberresetdelay, 0, 30000, INT_MAX-1);
+GVAR(0, bomberresetdelay, 0, 15000, INT_MAX-1);
 GVAR(0, bomberholdtime, 0, 15000, INT_MAX-1);
 GVAR(0, bomberpowertime, 0, 1000, INT_MAX-1);
-GFVAR(0, bomberspeed, 0, 350, 10000);
+GFVAR(0, bomberspeed, 0, 250, 10000);
 GFVAR(0, bomberminvel, 0, 5, 10000);
 GFVAR(0, bomberdelta, 0, 5, 10000);
 

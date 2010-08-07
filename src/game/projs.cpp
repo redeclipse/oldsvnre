@@ -561,7 +561,7 @@ namespace projs
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 175.f;
+                proj.weight = 75.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
