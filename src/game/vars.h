@@ -184,6 +184,7 @@ GFVAR(0, kickpushcrouch, 0, 0.5f, 1000);
 GFVAR(0, kickpushsway, 0, 0.25f, 1000);
 GFVAR(0, kickpushzoom, 0, 0.125f, 1000);
 
+GVAR(0, assistkilldelay, 0, 5000, INT_MAX-1);
 GVAR(0, multikilldelay, 0, 5000, INT_MAX-1);
 GVAR(0, spreecount, 0, 5, INT_MAX-1);
 GVAR(0, dominatecount, 0, 5, INT_MAX-1);
