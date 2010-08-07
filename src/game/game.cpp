@@ -2244,7 +2244,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, weaptype[d->weapselect].colour, 0.25f, 0.25f);
+                    part_flare(origin, v, 1, PART_FLARE, teamtype[d->team].colour, 0.25f, 0.25f);
                 }
                 if(d->weapselect == WEAP_SWORD || (d->weapstate[d->weapselect] == WEAP_S_POWER && lastmillis-d->weaplast[d->weapselect] > 0))
                 {
