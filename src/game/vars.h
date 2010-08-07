@@ -27,17 +27,17 @@ GVAR(IDF_ADMIN, rotatemode, 0, 0, 1);
 GVAR(IDF_ADMIN, rotatemuts, 0, 0, 1);
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
-GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility warp wet venus");
+GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma forge futuresport futuresport2 ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility ubik venus warp wet");
+GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport futuresport2 ghost keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
-GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tower tranquility warp wet venus");
-GSVAR(IDF_ADMIN, bombermaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport ghost keystone mist nova panic smouldering stone tranquility warp wet venus");
+GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma forge futuresport futuresport2 ghost keystone mist nova panic smouldering stone tranquility ubik venus warp wet");
+GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge futuresport futuresport2 ghost keystone mist nova panic smouldering stone tower tranquility ubik venus warp wet");
+GSVAR(IDF_ADMIN, bombermaps, "bath deadsimple deli depot echo forge futuresport futuresport2 tranquility venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo longestyard mainframe panic venus");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge futuresport ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma forge futuresport futuresport2 ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility ubik venus warp");
 
 namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
@@ -80,7 +80,7 @@ GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random,
 GFVAR(0, itemthreshold, 0, 1, 1000); // if numitems/numclients/maxcarry is less than this, spawn one of this type
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 
-GVAR(0, timelimit, 0, 15, INT_MAX-1);
+GVAR(0, timelimit, 0, 30, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
 GVAR(0, intermlimit, 0, 10000, INT_MAX-1); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 30000, INT_MAX-1); // .. before vote passes by default
@@ -97,7 +97,7 @@ GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 
-GVAR(0, defendlimit, 0, 0, INT_MAX-1); // finish when score is this or more
+GVAR(0, defendlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
 GVAR(0, defendoccupy, 0, 100, INT_MAX-1); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
