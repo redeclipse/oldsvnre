@@ -32,7 +32,7 @@ Limited rights are granted to redistribute or recompress the entire distribution
 
 Game media included in the game (maps, textures, sounds, models etc.) are NOT
     covered by this license, and may have individual copyrights and 
-    istribution restrictions (see individual readmes), note that all content
+    distribution restrictions (see individual readmes), note that all content
     in Red Eclipse is "open source" friendly.
 
 In the absence of an explicit license, content is considered to be covered by
