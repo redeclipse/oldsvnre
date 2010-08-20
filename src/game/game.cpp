@@ -1788,9 +1788,6 @@ namespace game
     {
         int type = clamp(d->aitype, 0, AI_MAX-1);
         const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
-        bool burning = fireburning && fireburntime && lastmillis%100 < 50 && d->onfire(lastmillis, fireburntime);
-        int colour = burning ? firecols[rnd(FIRECOLOURS)] : (type >= AI_START ? 0xFFFFFF : teamtype[d->team].colour);
-        d->light.material = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
         float yaw = d->yaw, pitch = d->pitch, roll = d->calcroll(physics::iscrouching(d));
         vec o = vec(third ? d->feetpos() : d->headpos());
         if(!third)
@@ -1893,6 +1890,9 @@ namespace game
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
+        bool burning = fireburning && fireburntime && lastmillis%100 < 50 && d->onfire(lastmillis, fireburntime);
+        int colour = burning ? firecols[rnd(FIRECOLOURS)] : (type >= AI_START ? 0xFFFFFF : teamtype[d->team].colour);
+        e->light.material = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
