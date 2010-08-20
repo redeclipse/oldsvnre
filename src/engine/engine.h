@@ -674,7 +674,7 @@ extern void conline(int type, const char *sf, int n);
 extern char *gettime(char *format);
 
 // rendergl
-extern int dynentsize, watercolour, lavacolour, fog, fogcolour, polymodels;
+extern int dynentsize, watercolour, lavacolour, fog, fogcolour;
 extern bvec ambientcolor, skylightcolor;
 extern float curfov, fovy, aspect;
 

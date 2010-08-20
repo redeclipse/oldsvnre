@@ -21,23 +21,23 @@ aistyles aistyle[] = {
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,     40,                 3,          3,          14,         150,
-            true,       false,      true,       true,       true,                  "grunt",    "actors/grunt",      "actors/player/gamma/hwep"
+            true,       false,      true,       true,       true,                  "grunt",    "actors/grunt",      "actors/player/hwep"
     },
     {
         AI_GUARD,       WEAP_PISTOL,    50,     50,                 3,          3,          14,         165,
-            true,       true,       true,       true,       true,                  "guard",    "actors/guard",      "actors/guard/hwep"
+            true,       true,       true,       true,       true,                  "guard",    "actors/grunt",      "actors/player/hwep"
     },
     {
         AI_HEAVY,       WEAP_SHOTGUN,   200,    30,                 3,          3,          14,         200,
-            true,       true,       true,       true,       true,                  "heavy",    "actors/heavy",      "actors/heavy/hwep"
+            true,       true,       true,       true,       true,                  "heavy",    "actors/grunt",      "actors/player/hwep"
     },
     {
         AI_PYRO,        WEAP_FLAMER,    150,    40,                 3,          3,          14,         175,
-            true,       true,       true,       true,       true,                  "pyro",     "actors/puro",       "actors/puro/hwep"
+            true,       true,       true,       true,       true,                  "pyro",     "actors/grunt",      "actors/player/hwep"
     },
     {
         AI_SNIPER,      WEAP_RIFLE,     100,    40,                 3,          3,          14,         175,
-            true,       true,       true,       true,       true,                  "sniper",   "actors/sniper",      "actors/sniper/hwep"
+            true,       true,       true,       true,       true,                  "sniper",   "actors/grunt",      "actors/player/hwep"
     },
 };
 #else
