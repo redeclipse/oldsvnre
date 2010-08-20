@@ -419,7 +419,7 @@ namespace projs
                 }
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
-                if(!polymodels) proj.mdl = weaptype[proj.weap].proj;
+                proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
                 break;
@@ -466,7 +466,7 @@ namespace projs
             {
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
-                if(!polymodels) switch(rnd(4))
+                switch(rnd(4))
                 {
                     case 3: proj.mdl = "projs/debris/debris04"; break;
                     case 2: proj.mdl = "projs/debris/debris03"; break;
@@ -492,12 +492,12 @@ namespace projs
                 if(isweap(proj.weap))
                 {
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
-                    if(!polymodels) proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
+                    proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
                 }
                 else
                 {
-                    if(!polymodels) proj.mdl = "projs/catridge";
+                    proj.mdl = "projs/catridge";
                     proj.lifesize = 1;
                 }
                 proj.elasticity = 0.3f;
@@ -520,17 +520,8 @@ namespace projs
             }
             case PRJ_ENT:
             {
-                if(polymodels)
-                {
-                    if(entities::ents.inrange(proj.id))
-                        proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = enttype[entities::ents[proj.id]->type].radius*0.25f;
-                    else proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
-                }
-                else
-                {
-                    proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
-                    proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
-                }
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
+                proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 proj.lifesize = 1.f;
                 proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
@@ -1528,7 +1519,7 @@ namespace projs
             hits.setsize(0);
             if((proj.projtype != PRJ_SHOT || proj.owner) && proj.state != CS_DEAD)
             {
-                if(!polymodels && proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id)) // in case spawnweapon changes
+                if(proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id)) // in case spawnweapon changes
                     proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 if(proj.waittime > 0)
                 {
@@ -1636,85 +1627,48 @@ namespace projs
         loopv(projs) if(projs[i]->ready(false) && projs[i]->projtype != PRJ_AFFINITY)
         {
             projent &proj = *projs[i];
-            if(polymodels && (!projs[i]->mdl || !*projs[i]->mdl))
+            if((proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id)) || !projs[i]->mdl || !*projs[i]->mdl) continue;
+            float trans = 1, size = 1;
+            int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_DYNSHADOW|MDL_LIGHT|MDL_CULL_DIST;
+            entitylight *light = &proj.light;
+            switch(proj.projtype)
             {
-                if(proj.projtype == PRJ_ENT || (proj.projtype == PRJ_SHOT && proj.weap != WEAP_GRENADE && proj.weap != WEAP_ROCKET)) continue;
-                if(!glaring && !shadowmapping)
+                case PRJ_DEBRIS:
                 {
-                    int colour = 0xAAAAAA;
-                    switch(proj.projtype)
+                    if(light->millis != lastmillis && !proj.limited)
                     {
-                        case PRJ_SHOT: colour = weaptype[proj.weap].colour; break;
-                        case PRJ_GIBS: colour = 0x880000; break;
-                        case PRJ_EJECT: colour = 0xBBBB22; break;
-                        case PRJ_AFFINITY: colour = 0xAAAAAA; break;
-                        case PRJ_DEBRIS: default:
-                        {
-                            colour = !proj.limited && lastmillis%100 < 50 ? firecols[rnd(FIRECOLOURS)] : 0x888888;
-                            break;
-                        }
+                        int colour = firecols[rnd(FIRECOLOURS)];
+                        light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                     }
-                    glPushMatrix();
-                    foggednotextureshader->set();
-                    glDisable(GL_TEXTURE_2D);
-                    vec c((colour>>16)/512.f, ((colour>>8)&0xFF)/512.f, (colour&0xFF)/512.f);
-                    polyhue(&proj, c, true, true);
-                    glColor3f(c[0], c[1], c[2]);
-                    glTranslatef(proj.o.x, proj.o.y, proj.o.z);
-                    glRotatef(proj.yaw, 0, 0, 1);
-                    glRotatef(proj.roll, 0, -1, 0);
-                    glRotatef(proj.pitch, 1, 0, 0);
-                    polybox(vec(0, 0, 0), proj.height*proj.lifesize, proj.aboveeye*proj.lifesize, proj.xradius*proj.lifesize, proj.yradius*proj.lifesize);
-                    defaultshader->set();
-                    glEnable(GL_TEXTURE_2D);
-                    glPopMatrix();
                 }
-            }
-            else
-            {
-                if(!projs[i]->mdl || !*projs[i]->mdl || (proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id))) continue;
-                float trans = 1, size = 1;
-                int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_DYNSHADOW|MDL_LIGHT|MDL_CULL_DIST;
-                entitylight *light = &proj.light;
-                switch(proj.projtype)
+                case PRJ_GIBS: case PRJ_EJECT:
                 {
-                    case PRJ_DEBRIS:
+                    size = proj.lifesize;
+                    flags |= MDL_LIGHT_FAST;
+                }
+                case PRJ_ENT: case PRJ_AFFINITY:
+                    if(proj.fadetime && proj.lifemillis)
                     {
-                        if(light->millis != lastmillis && !proj.limited)
+                        int interval = min(proj.lifemillis, proj.fadetime);
+                        if(proj.lifetime < interval)
                         {
-                            int col = firecols[rnd(FIRECOLOURS)];
-                            light->material = vec(teamtype[col].colour>>16, (teamtype[col].colour>>8)&0xFF, teamtype[col].colour&0xFF).div(255.f);
+                            float amt = float(proj.lifetime)/float(interval);
+                            size *= amt; trans *= amt;
                         }
-                    }
-                    case PRJ_GIBS: case PRJ_EJECT:
-                    {
-                        size = proj.lifesize;
-                        flags |= MDL_LIGHT_FAST;
-                    }
-                    case PRJ_ENT: case PRJ_AFFINITY:
-                        if(proj.fadetime && proj.lifemillis)
+                        else if(proj.projtype != PRJ_EJECT && proj.lifemillis > interval)
                         {
-                            int interval = min(proj.lifemillis, proj.fadetime);
-                            if(proj.lifetime < interval)
+                            interval = min(proj.lifemillis-interval, proj.fadetime);
+                            if(proj.lifemillis-proj.lifetime < interval)
                             {
-                                float amt = float(proj.lifetime)/float(interval);
+                                float amt = float(proj.lifemillis-proj.lifetime)/float(interval);
                                 size *= amt; trans *= amt;
                             }
-                            else if(proj.projtype != PRJ_EJECT && proj.lifemillis > interval)
-                            {
-                                interval = min(proj.lifemillis-interval, proj.fadetime);
-                                if(proj.lifemillis-proj.lifetime < interval)
-                                {
-                                    float amt = float(proj.lifemillis-proj.lifetime)/float(interval);
-                                    size *= amt; trans *= amt;
-                                }
-                            }
                         }
-                        break;
-                    default: break;
-                }
-                rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
+                    }
+                    break;
+                default: break;
             }
+            rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
         }
     }
 

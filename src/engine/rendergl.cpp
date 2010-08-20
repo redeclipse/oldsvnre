@@ -2236,7 +2236,6 @@ void usetexturing(bool on)
     }
 }
 
-VAR(IDF_PERSIST, polymodels, 0, 1, 1);
 FVAR(IDF_PERSIST, polycolour, 0, 1, 1);
 FVAR(IDF_PERSIST, polylight, 0, 1, 1);
 FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
