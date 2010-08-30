@@ -290,55 +290,55 @@ weaptypes weaptype[] =
             "melee",        "\fa",  "",                         "", "",                        "",                     ""
     },
     {
-            ANIM_LIGHT,         0xDDDDDD,       S_PISTOL,   10,
+            ANIM_PISTOL,        0xDDDDDD,       S_PISTOL,   10,
             false,      false,      true,       true,
             { 0, 0 },               4,          0.35f,
             "pistol",       "\fw",  "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projs/cartridge"
     },
     {
-            ANIM_WIELD,          0x2222FF,      S_SWORD,    1,
+            ANIM_SWORD,         0x2222FF,      S_SWORD,    1,
             true,       true,       true,       false,
             { 0, 0 },               14,         0,
             "sword",     "\fb",     "weapons/sword/item",       "weapons/sword/vwep", "weapons/sword/hwep",    "",                     ""
     },
     {
-            ANIM_HEAVY,         0xFFFF22,       S_SHOTGUN,  10,
+            ANIM_SHOTGUN,       0xFFFF22,       S_SHOTGUN,  10,
             false,      false,      true,       true,
             { 0, 0 },               6,          0.45f,
             "shotgun",      "\fy",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projs/shell"
     },
     {
-            ANIM_LIGHT,         0xFF8822,       S_SMG,      20,
+            ANIM_SMG,           0xFF8822,       S_SMG,      20,
             false,      false,      true,       true,
             { 0, 0 },               5.5f,       0.35f,
             "smg",          "\fo",  "weapons/smg/item",         "weapons/smg/vwep", "weapons/smg/hwep",        "",                     "projs/cartridge"
     },
     {
-            ANIM_HEAVY,         0xFF2222,       S_FLAMER,   1,
+            ANIM_FLAMER,        0xFF2222,       S_FLAMER,   1,
             false,      false,      true,       false,
             { 0, 0 },               7,          0,
             "flamer",       "\fr",  "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
     },
     {
-            ANIM_LIGHT,         0x22FFFF,       S_PLASMA,   1,
+            ANIM_PLASMA,        0x22FFFF,       S_PLASMA,   1,
             false,      false,      true,       false,
             { 0, 0 },               5,          0,
             "plasma",       "\fc",  "weapons/plasma/item",      "weapons/plasma/vwep", "weapons/plasma/hwep",     "",                     ""
     },
     {
-            ANIM_HEAVY,         0xAA66FF,       S_RIFLE,    1,
+            ANIM_RIFLE,         0xAA66FF,       S_RIFLE,    1,
             false,      false,      true,       false,
             { 0, 0 },               7,          0,
             "rifle",        "\fv",  "weapons/rifle/item",       "weapons/rifle/vwep", "weapons/rifle/hwep",      "",                     ""
     },
     {
-            ANIM_GRASP,         0x22FF22,       S_GRENADE,  1,
+            ANIM_GRENADE,       0x22FF22,       S_GRENADE,  1,
             false,      false,      false,      false,
             { 0.0625f, 0.0625f },   3,          0,
             "grenade",      "\fg",  "weapons/grenade/item",     "weapons/grenade/vwep", "weapons/grenade/hwep",    "weapons/grenade/proj", ""
     },
     {
-            ANIM_HEAVY,         0x993311,       S_ROCKET,   1,
+            ANIM_ROCKET,        0x993311,       S_ROCKET,   1,
             false,      false,      true,      false,
             { 0, 0 },               8,          0,
             "rocket",      "\fn",  "weapons/rocket/item",       "weapons/rocket/vwep", "weapons/rocket/hwep",     "weapons/rocket/proj",  ""

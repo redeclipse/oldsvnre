@@ -1863,7 +1863,9 @@ namespace game
 
             if((anim>>ANIM_SECONDARY)&ANIM_INDEX) switch(anim&ANIM_INDEX)
             {
-                case ANIM_IDLE: case ANIM_MELEE: case ANIM_LIGHT: case ANIM_HEAVY: case ANIM_GRASP: case ANIM_WIELD:
+                case ANIM_IDLE: case ANIM_MELEE: case ANIM_PISTOL: case ANIM_SWORD:
+                case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA:
+                case ANIM_RIFLE: case ANIM_GRENADE: case ANIM_ROCKET:
                 {
                     anim = (anim>>ANIM_SECONDARY) | ((anim&((1<<ANIM_SECONDARY)-1))<<ANIM_SECONDARY);
                     swap(basetime, basetime2);
@@ -1941,7 +1943,8 @@ namespace game
                 trans = 1e-16f; // we need tag_muzzle/tag_waist
             else return; // screw it, don't render them
         }
-        int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL, weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, animdelay = 0;
+        int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL,
+            weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, animdelay = 0;
         bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
 
         if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -1990,13 +1993,13 @@ namespace game
                             else weap = d->lastweap;
                         }
                         else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        animflags = ANIM_SWITCH+(d->weapstate[weap]-WEAP_S_SWITCH);
+                        weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-WEAP_S_SWITCH);
                         break;
                     }
                     case WEAP_S_POWER:
                     {
-                        if(weaptype[weap].anim == ANIM_GRASP) animflags = weaptype[weap].anim+d->weapstate[weap];
-                        else animflags = weaptype[weap].anim|ANIM_LOOP;
+                        if(weaptype[weap].anim == ANIM_GRENADE) weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
+                        else weapflags = animflags = weaptype[weap].anim|ANIM_LOOP;
                         break;
                     }
                     case WEAP_S_PRIMARY:
@@ -2004,33 +2007,33 @@ namespace game
                     {
                         if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
                             showweap = false;
-                        animflags = weaptype[weap].anim+d->weapstate[weap];
+                        weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
                         break;
                     }
                     case WEAP_S_RELOAD:
                     {
-                        if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_WIELD)
+                        if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_SWORD)
                         {
                             if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
                                 showweap = false;
-                            animflags = weaptype[weap].anim+d->weapstate[weap];
+                            weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
                             break;
                         }
                     }
                     case WEAP_S_IDLE: case WEAP_S_WAIT: default:
                     {
                         if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        animflags = weaptype[weap].anim|ANIM_LOOP;
+                        weapflags = animflags = weaptype[weap].anim|ANIM_LOOP;
                         break;
                     }
                 }
             }
         }
         if(!early) renderabovehead(d, third, trans);
-        const char *wepmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
-        bool hasweapon = showweap && *wepmdl;
+        const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
+        bool hasweapon = showweap && *weapmdl;
         modelattach a[11]; int ai = 0;
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", wepmdl, ANIM_VWEP|ANIM_LOOP, 0); // we could probably animate this too now..
+        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, 0); // we could probably animate this too now..
         if(rendernormally && (early || d != focus))
         {
             const char *muzzle = "tag_weapon";

@@ -17,7 +17,7 @@ aistyles aistyle[] = {
     },
     {
         AI_TURRET,      WEAP_SMG,       100,    0,                  3,          3,          4,          0,
-            false,      false,      false,      true,       false,                 "turret",   "actors/turret",     "actors/turret/hwep"
+            false,      false,      false,      true,       false,                 "turret",   "actors/turret",     "actors/player/hwep"
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,     40,                 3,          3,          14,         150,
