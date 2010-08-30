@@ -1944,7 +1944,7 @@ namespace game
             else return; // screw it, don't render them
         }
         int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL,
-            weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, animdelay = 0;
+            weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
         bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
 
         if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -1980,7 +1980,7 @@ namespace game
             secondary = third;
             if(showweap)
             {
-                lastaction = d->weaplast[weap];
+                weapaction = lastaction = d->weaplast[weap];
                 animdelay = d->weapwait[weap];
                 switch(d->weapstate[weap])
                 {
@@ -2033,7 +2033,7 @@ namespace game
         const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         bool hasweapon = showweap && *weapmdl;
         modelattach a[11]; int ai = 0;
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, 0); // we could probably animate this too now..
+        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
         if(rendernormally && (early || d != focus))
         {
             const char *muzzle = "tag_weapon";
