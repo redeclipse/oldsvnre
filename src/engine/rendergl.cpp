@@ -1922,8 +1922,24 @@ void viewproject(float zscale)
     }
 }
 
-void drawnoview()
+void drawnoviewtype(int targtype)
 {
+    curview = targtype;
+    if(targtype == VP_LEFT || targtype == VP_RIGHT)
+    {
+        if(viewtype >= VW_STEREO)
+        {
+            switch(viewtype)
+            {
+                case VW_STEREO_BLEND: setcolormask(targtype == VP_LEFT, false, targtype == VP_RIGHT); break;
+                case VW_STEREO_AVG: setcolormask(targtype == VP_LEFT, true, targtype == VP_RIGHT); break;
+                case VW_STEREO_BLEND_REDCYAN:
+                case VW_STEREO_REDCYAN: setcolormask(targtype == VP_LEFT, targtype == VP_RIGHT, targtype == VP_RIGHT); break;
+            }
+            glColorMask(COLORMASK, GL_TRUE);
+        }
+    }
+
     xtravertsva = xtraverts = glde = gbatches = 0;
 
     glMatrixMode(GL_MODELVIEW);
@@ -1935,7 +1951,7 @@ void drawnoview()
     glOrtho(0, w, h, 0, -1, 1);
 
     glClearColor(0.f, 0.f, 0.f, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    if(clearview(viewtype, targtype)) glClear(GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_TEXTURE_2D);
     defaultshader->set();
@@ -1945,9 +1961,95 @@ void drawnoview()
     hud::drawlast();
 
     glDisable(GL_TEXTURE_2D);
+
+    if(targtype == VP_LEFT || targtype == VP_RIGHT)
+    {
+        if(viewtype >= VW_STEREO)
+        {
+            setcolormask();
+            glColorMask(COLORMASK, GL_TRUE);
+        }
+    }
 }
 
-void drawview(int targtype)
+void drawnoview()
+{
+    int copies = 0, oldcurtime = curtime;
+    loopi(VP_MAX) if(needsview(viewtype, i))
+    {
+        drawnoviewtype(i);
+        if(copyview(viewtype, i))
+        {
+            views[i].copy();
+            copies++;
+        }
+        curtime = 0;
+    }
+    if(needsview(viewtype, VP_CAMERA)) drawnoviewtype(VP_CAMERA);
+    curtime = oldcurtime;
+
+    if(!copies) return;
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, 1, 0, 1, -1, 1);
+    glDisable(GL_BLEND);
+    glEnable(GL_TEXTURE_2D);
+    defaultshader->set();
+    glColor3f(1.f, 1.f, 1.f);
+    switch(viewtype)
+    {
+        case VW_MAGIC:
+        {
+            views[VP_LEFT].draw(0, 0, 0.5f, 1);
+            views[VP_RIGHT].draw(0.5f, 0, 0.5f, 1);
+            break;
+        }
+        case VW_STEREO_BLEND:
+        case VW_STEREO_BLEND_REDCYAN:
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            if(viewtype == VW_STEREO_BLEND) glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);
+            glColor4f(1.f, 1.f, 1.f, stereoblend); views[VP_RIGHT].draw(0, 0, 1, 1);
+            if(viewtype == VW_STEREO_BLEND) glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glDisable(GL_BLEND);
+            break;
+        }
+        case VW_STEREO_AVG:
+        {
+            glEnable(GL_BLEND);
+            if(hasBC)
+            {
+                glBlendFunc(GL_ONE, GL_CONSTANT_COLOR_EXT);
+                glBlendColor_(0.f, 0.5f, 1.f, 1.f);
+            }
+            else
+            {
+                glDisable(GL_TEXTURE_2D);
+                glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+                glColor3f(0.f, 0.5f, 1.f);
+                glBegin(GL_TRIANGLE_STRIP);
+                glVertex2f(0, 0);
+                glVertex2f(1, 0);
+                glVertex2f(0, 1);
+                glVertex2f(1, 1);
+                glEnd();
+                glEnable(GL_TEXTURE_2D);
+                glBlendFunc(GL_ONE, GL_ONE);
+            }
+            glColor3f(1.f, 0.5f, 0.f);
+            views[VP_LEFT].draw(0, 0, 1, 1);
+            glDisable(GL_BLEND);
+            break;
+        }
+    }
+    glDisable(GL_TEXTURE_2D);
+}
+
+void drawviewtype(int targtype)
 {
     curview = targtype;
 
@@ -2148,7 +2250,7 @@ void gl_drawframe(int w, int h)
         int copies = 0, oldcurtime = curtime;
         loopi(VP_MAX) if(needsview(viewtype, i))
         {
-            drawview(i);
+            drawviewtype(i);
             if(copyview(viewtype, i))
             {
                 views[i].copy();
@@ -2156,7 +2258,7 @@ void gl_drawframe(int w, int h)
             }
             curtime = 0;
         }
-        if(needsview(viewtype, VP_CAMERA)) drawview(VP_CAMERA);
+        if(needsview(viewtype, VP_CAMERA)) drawviewtype(VP_CAMERA);
         curtime = oldcurtime;
 
         if(!copies) return;
