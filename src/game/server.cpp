@@ -4063,7 +4063,7 @@ namespace server
                         {
                             mastermode = mm;
                             loopv(allows) if(allows[i].time >= 0) allows.remove(i--);
-                            if(mm >= MM_PRIVATE)
+                            if(mastermode >= MM_PRIVATE)
                             {
                                 loopv(clients)
                                 {
@@ -4072,7 +4072,7 @@ namespace server
                                     allow.ip = getclientip(clients[i]->clientnum);
                                 }
                             }
-                            srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mm));
+                            srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mastermode));
                         }
                         else srvmsgf(sender, "\frmastermode %d (%s) is disabled on this server", mm, mastermodename(mm));
                     }
