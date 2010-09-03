@@ -158,19 +158,19 @@ namespace projs
                 {
                     vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
                     float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
-                    if(fdist/WEAP2(proj.weap, legsdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_LEGS; }
+                    if(fdist <= dist) { dist = fdist; flags = HIT_LEGS; }
                 }
                 if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
                 {
                     vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
                     float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
-                    if(fdist/WEAP2(proj.weap, torsodam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_TORSO; }
+                    if(fdist <= dist) { dist = fdist; flags = HIT_TORSO; }
                 }
                 if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
                 {
                     vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
                     float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
-                    if(fdist/WEAP2(proj.weap, headdam, proj.flags&HIT_ALT) <= dist) { dist = fdist; flags = HIT_HEAD; }
+                    if(fdist <= dist) { dist = fdist; flags = HIT_HEAD; }
                 }
             }
             else
