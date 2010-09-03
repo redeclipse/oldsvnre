@@ -82,7 +82,7 @@ namespace ai
 
     bool altfire(gameent *d, gameent *e)
     {
-        if(e && !WEAP(d->weapselect, zooms) && canshoot(d, e, true) && !physics::carryaffinity(d))
+        if(e && !WEAP(d->weapselect, zooms) && canshoot(d, e, true))
         {
             if(d->weapstate[d->weapselect] == WEAP_S_POWER)
             {
