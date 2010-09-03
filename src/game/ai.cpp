@@ -1097,11 +1097,7 @@ namespace ai
             enemyok = false;
             result = 0;
         }
-        if(result < 3)
-        {
-            d->action[AC_ATTACK] = false;
-            if(!physics::carryaffinity(d)) d->action[AC_ALTERNATE] = false;
-        }
+        if(result < 3) d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = false;
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         d->aimyaw = d->ai->targyaw; d->aimpitch = d->ai->targpitch;

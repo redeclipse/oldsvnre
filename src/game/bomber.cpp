@@ -40,17 +40,17 @@ namespace bomber
 
     bool dropaffinity(gameent *d)
     {
-        if(carryaffinity(d) && (d->action[AC_ALTERNATE] || d->actiontime[AC_ALTERNATE] > 0))
+        if(carryaffinity(d) && (d->action[AC_AFFINITY] || d->actiontime[AC_AFFINITY] > 0))
         {
-            if(d->action[AC_ALTERNATE]) return true;
+            if(d->action[AC_AFFINITY]) return true;
             vec inertia;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
             bool guided = false;
-            if(bomberpowertime && lastmillis-d->actiontime[AC_ALTERNATE] >= bomberpowertime) guided = true;
+            if(bomberpowertime && lastmillis-d->actiontime[AC_AFFINITY] >= bomberpowertime) guided = true;
             inertia.normalize().mul(bomberspeed).add(d->vel).add(d->falling);
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
-            d->action[AC_ALTERNATE] = false;
-            d->actiontime[AC_ALTERNATE] = 0;
+            d->action[AC_AFFINITY] = false;
+            d->actiontime[AC_AFFINITY] = 0;
             return true;
         }
         return false;
@@ -177,10 +177,10 @@ namespace bomber
             {
                 if(f.owner == game::focus)
                 {
-                    if(bomberpowertime && f.owner->action[AC_ALTERNATE])
+                    if(bomberpowertime && f.owner->action[AC_AFFINITY])
                     {
                         int px = pos[0]-int(s*skew);
-                        if(lastmillis-f.owner->actiontime[AC_ALTERNATE] >= bomberpowertime)
+                        if(lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberpowertime)
                         {
                             gameent *e = game::getclient(findtarget(f.owner));
                             if(e)
@@ -453,8 +453,8 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        d->action[AC_ALTERNATE] = false;
-        d->actiontime[AC_ALTERNATE] = 0;
+        d->action[AC_AFFINITY] = false;
+        d->actiontime[AC_AFFINITY] = 0;
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
@@ -472,10 +472,10 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                if(d->ai && f.owner == d && !d->action[AC_ALTERNATE] && lastmillis-f.taketime >= (bomberholdtime ? abs(bomberholdtime-bomberpowertime) : 1500))
+                if(d->ai && f.owner == d && !d->action[AC_AFFINITY] && lastmillis-f.taketime >= (bomberholdtime ? abs(bomberholdtime-bomberpowertime) : 1500))
                 {
-                    d->action[AC_ALTERNATE] = true;
-                    d->actiontime[AC_ALTERNATE] = lastmillis;
+                    d->action[AC_AFFINITY] = true;
+                    d->actiontime[AC_AFFINITY] = lastmillis;
                 }
                 continue;
             }
