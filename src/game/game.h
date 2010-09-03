@@ -671,7 +671,7 @@ struct gamestate
             case TRIGGER: break;
             case WEAPON:
             {
-                int prev = ammo[attr], value = amt >= 0 ? amt : WEAP(attr, add);
+                int prev = ammo[attr], value = amt >= 0 ? amt : WEAPUSE(attr);
                 weapswitch(attr, millis, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_USE);
                 ammo[attr] = clamp(max(ammo[attr], 0)+value, 1, WEAP(attr, max));
                 weapload[attr] = ammo[attr]-prev;
@@ -707,7 +707,7 @@ struct gamestate
         health = heal ? heal : m_health(gamemode, mutators);
         weapreset(true);
         if(!isweap(sweap)) sweap = aitype >= AI_START ? WEAP_MELEE : m_weapon(gamemode, mutators);
-        if(isweap(sweap)) ammo[sweap] = max(WEAP(sweap, reloads) ? WEAP(sweap, add) : WEAP(sweap, max), 1);
+        if(isweap(sweap)) ammo[sweap] = max(WEAPUSE(sweap), 1);
         if(aitype >= AI_START)
         {
             loopj(2) loadweap[j] = -1;
@@ -733,7 +733,7 @@ struct gamestate
                             if(++aweap[j] >= WEAP_ITEM) aweap[j] = WEAP_OFFSET;
                         }
                     }
-                    ammo[aweap[j]] = max(WEAP(aweap[j], reloads) ? WEAP(aweap[j], add) : WEAP(aweap[j], max), 1);
+                    ammo[aweap[j]] = max(WEAPUSE(aweap[j]), 1);
                 }
                 lastweap = weapselect = aweap[0];
             }
