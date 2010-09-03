@@ -1187,7 +1187,7 @@ namespace projs
 
     extern void reset();
     extern void update();
-    extern projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1, bool child = false);
+    extern projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id = 0, int weap = -1, int flags = 0, float scale = 1, bool child = false, projent *parent = NULL);
     extern void preload();
     extern void remove(gameent *owner);
     extern void destruct(gameent *d, int id);

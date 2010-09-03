@@ -58,6 +58,7 @@ namespace bomber
 
     void preload()
     {
+        loadmodel("ball", -1, true);
     }
 
     void drawblips(int w, int h, float blend)
