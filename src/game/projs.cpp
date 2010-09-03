@@ -5,6 +5,11 @@ namespace projs
     vector<hitmsg> hits;
     vector<projent *> projs;
 
+    VAR(IDF_PERSIST, shadowdebris, 0, 1, 1);
+    VAR(IDF_PERSIST, shadowgibs, 0, 1, 1);
+    VAR(IDF_PERSIST, shadoweject, 0, 1, 1);
+    VAR(IDF_PERSIST, shadowents, 0, 1, 1);
+
     VAR(IDF_PERSIST, maxprojectiles, 1, 128, INT_MAX-1);
 
     VAR(IDF_PERSIST, ejecaptureade, 0, 3500, INT_MAX-1);
@@ -1639,24 +1644,34 @@ namespace projs
             projent &proj = *projs[i];
             if((proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id)) || !projs[i]->mdl || !*projs[i]->mdl) continue;
             float trans = 1, size = 1;
-            int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_DYNSHADOW|MDL_LIGHT|MDL_CULL_DIST;
+            int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_CULL_DIST;
             entitylight *light = &proj.light;
             switch(proj.projtype)
             {
                 case PRJ_DEBRIS:
                 {
+                    if(shadowdebris) flags |= MDL_DYNSHADOW;
                     if(light->millis != lastmillis && !proj.limited)
                     {
                         int colour = firecols[rnd(FIRECOLOURS)];
                         light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                     }
                 }
-                case PRJ_GIBS: case PRJ_EJECT:
+                case PRJ_GIBS:
                 {
+                    if(shadowgibs) flags |= MDL_DYNSHADOW;
+                    size = proj.lifesize;
+                    flags |= MDL_LIGHT_FAST;
+                }
+                case PRJ_EJECT:
+                {
+                    if(shadoweject) flags |= MDL_DYNSHADOW;
                     size = proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
                 }
                 case PRJ_ENT: case PRJ_AFFINITY:
+                {
+                    if(shadowents) flags |= MDL_DYNSHADOW;
                     if(proj.fadetime && proj.lifemillis)
                     {
                         int interval = min(proj.lifemillis, proj.fadetime);
@@ -1676,6 +1691,7 @@ namespace projs
                         }
                     }
                     break;
+                }
                 default: break;
             }
             rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
