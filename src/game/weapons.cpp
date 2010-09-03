@@ -289,7 +289,7 @@ namespace weapons
 
             int rays = WEAP2(weap, rays, secondary);
             if(rays > 1 && WEAP2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
-            float accmod = d->physstate == PHYS_FALL && !d->onladder ? jumpspread : 0;
+            float accmod = d->physstate == PHYS_FALL && !d->onladder ? inairspread : 0;
             if(physics::jetpack(d)) accmod += impulsespread;
             if(physics::sprinting(d)) accmod += impulsespread;
             else if(d->move || d->strafe) accmod += movespread;
