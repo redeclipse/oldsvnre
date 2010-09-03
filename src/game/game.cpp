@@ -194,7 +194,7 @@ namespace game
 
     bool zoomallow()
     {
-        if(allowmove(player1) && WEAP(player1->weapselect, zooms) && !physics::carryaffinity(player1)) return true;
+        if(allowmove(player1) && WEAP(player1->weapselect, zooms)) return true;
         zoomset(false, 0);
         return false;
     }
@@ -1615,8 +1615,7 @@ namespace game
                             if(state == WEAP_S_PRIMARY || state == WEAP_S_SECONDARY || (state == WEAP_S_RELOAD && lastmillis-d->weaplast[d->weapselect] >= max(d->weapwait[d->weapselect]-zoomtime, 1)))
                                 state = WEAP_S_IDLE;
                         }
-                        if(zooming && (!WEAP(d->weapselect, zooms) || state != WEAP_S_IDLE || physics::carryaffinity(d)))
-                            zoomset(false, lastmillis);
+                        if(zooming && (!WEAP(d->weapselect, zooms) || state != WEAP_S_IDLE)) zoomset(false, lastmillis);
                         else if(WEAP(d->weapselect, zooms) && state == WEAP_S_IDLE && zooming != d->action[AC_ALTERNATE])
                             zoomset(d->action[AC_ALTERNATE], lastmillis);
                     }
