@@ -196,7 +196,7 @@ namespace aiman
             int numt = numteams(gamemode, mutators), people = numclients(-1, true, -1);
             switch(GAME(botbalance))
             {
-                case -2: if(people > 2) { balance = people; break; } // fall through
+                case -2: if(people > 1) { balance = people; break; } // fall through
                 case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : nplayers); break; // use distributed numplayers
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : GAME(botbalance)); break; // balance to at least this
