@@ -317,8 +317,9 @@ namespace physics
 
     float impulsevelocity(physent *d, float amt)
     {
-        float mag = vec(d->vel).add(d->falling).magnitude();
-        return min((impulsespeed+mag)*amt, max(mag, impulselimit));
+        float mag = vec(d->vel).add(d->falling).magnitude(), speed = (impulsespeed+mag)*amt;
+        if(impulselimit > 0 && speed > impulselimit) speed = impulselimit;
+        return speed;
     }
 
     bool movepitch(physent *d)
