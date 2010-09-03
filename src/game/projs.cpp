@@ -355,7 +355,15 @@ namespace projs
                 } // all falls through to ..
             default: return;
         }
-        if(proj.mdl && *proj.mdl) setbbfrommodel(&proj, proj.mdl, size*proj.scale);
+        if(proj.mdl && *proj.mdl)
+        {
+            model *m = loadmodel(proj.mdl);
+            if(!m) return;
+            vec center, radius;
+            m->boundbox(0, center, radius);
+            proj.xradius = proj.yradius = proj.radius = max(radius.x, radius.y)*size*proj.scale;
+            proj.height = proj.zradius = proj.aboveeye = radius.z*size*proj.scale;
+        }
         else switch(proj.projtype)
         {
             case PRJ_GIBS: case PRJ_DEBRIS: proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f*size*proj.scale; break;
@@ -525,14 +533,14 @@ namespace projs
             }
             case PRJ_ENT:
             {
-                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
                 proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 proj.lifesize = 1.f;
                 proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 175.f;
+                proj.weight = 150.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 float mag = proj.inertia.magnitude();
@@ -542,6 +550,7 @@ namespace projs
                     proj.inertia.normalize().mul(50);
                 }
                 proj.to.add(proj.inertia);
+                proj.to.z += 4;
                 if(proj.flags) proj.inertia.div(proj.flags+1);
                 proj.fadetime = 500;
                 proj.extinguish = 6;
@@ -557,7 +566,7 @@ namespace projs
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 75.f;
+                proj.weight = 100.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
