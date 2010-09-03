@@ -182,7 +182,7 @@ WEAPON(sword,
     1,      1,      1,      1,      1,      1,      1,      1,      0,      0
 );
 WEAPON(shotgun,
-    1,      8,      1,      2,      375,    750,    750,    20,     16,     1500,   500,    0,      0,      750,    250,
+    2,      8,      1,      2,      375,    750,    750,    20,     16,     1500,   500,    0,      0,      750,    250,
     0,      0,      0,      0,      200,    200,    0,      0,      10,     10,     15,     20,
     2,      1,      10,     10,     -1,             WALT(SHOTGUN),  5,      5,      250,    2000,   0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
@@ -192,12 +192,12 @@ WEAPON(shotgun,
     0.05f,  0,      0.05f,  0,      0.5f,   0.5f,   50,     50,     0.05f,  0.05f,  2,      2,      25,     25,     1,      1,
     15,     15,     25,     20,     0.4f,   0.3f,   150,    150,    1,      1,      50,     50,     1,      1.5f,
     2,      6,      10,     10,     1,      1,      1,      1,      0.65f,  0.65f,  0.375f, 0.375f,
-    1,      0.5f,   0.35f,  0.35f,  0.25f,  0.35f,  1,      1,      0,      0
+    1,      0.35f,  0.35f,  0.35f,  0.25f,  0.35f,  1,      1,      0,      0
 );
 WEAPON(smg,
-    40,     40,     1,      1,      75,     150,    1500,   12,     10,     5000,   250,    0,      0,      1000,   250,
+    40,     40,     1,      1,      75,     150,    1500,   10,     8,      5000,   350,    0,      0,      1000,   250,
     0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      8,      16,
-    2,      1,      20,     20,     -1,             WALT(SMG),      5,      5,      500,    750,    0,      0,
+    2,      1,      20,     20,     -1,             WALT(SMG),      5,      5,      500,    1000,   0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_CONT,
     2,      2,      0,      0,      0,      2,      0,      0,      0,      0,      1,      1,      0,      1,      1,
@@ -205,7 +205,7 @@ WEAPON(smg,
     0.05f,  0.1f,   0,      0,      0.65f,  0.45f,  30,     30,     0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
     0.5f,   3,      75,     60,     0.5f,   0.35f,  300,    300,    1,      0.5f,   40,     40,     1,      1.5f,
     3,      12,     10,     1000,   1,      1,      1,      1,      0.75f,  0.75f, 0.375f, 0.375f,
-    1,      0.5f,   0.35f,  0.35f,  0.25f,  0.25f,  1,      1,      0,      0
+    1,      0.35f,  0.35f,  0.35f,  0.25f,  0.25f,  1,      1,      0,      0
 );
 WEAPON(flamer,
     50,     50,     1,      10,     100,    750,    2000,   10,     12,      200,    200,    0,      750,    250,    500,
@@ -235,7 +235,7 @@ WEAPON(plasma,
 );
 WEAPON(rifle,
     5,      5,      1,      1,      750,    750,    1500,   40,     100,    5000,   25000,  0,      0,      5000,   5000,
-    0,      0,      0,      0,      200,    200,    24,     0,      1,      1,      1,      0,
+    0,      0,      0,      0,      200,    200,    28,     0,      1,      1,      1,      0,
     0,      0,      40,     40,     -1,             -1,             5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_CONT,
@@ -261,7 +261,7 @@ WEAPON(grenade,
 );
 WEAPON(rocket,
     1,      1,      1,      1,      1000,   1000,   1500,   400,     400,    1000,   250,    2500,   2500,  5000,   5000,
-    0,      0,      0,      0,      200,    200,    80,     80,      1,      1,      1,      1,
+    0,      0,      0,      0,      200,    200,    72,     72,      1,      1,      1,      1,
     0,      0,      10,     10,     WEAP_SMG,       WEAP_SMG,        50,     50,     1500,   1500,    350,    350,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_SHOTS,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_SHOTS,
@@ -368,6 +368,7 @@ extern weaptypes weaptype[];
 #define WEAPSND(a,b)            (weaptype[a].sound+b)
 #define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
 #define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
+#define WEAPUSE(a)              (WEAP(a, reloads) ? WEAP(a, max) : WEAP(a, add))
 
 WEAPDEF(int, add);
 WEAPDEF(int, max);
