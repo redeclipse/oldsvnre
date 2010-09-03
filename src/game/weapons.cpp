@@ -151,7 +151,7 @@ namespace weapons
         if(d == game::player1)
         {
             bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT),
-                 noattack = !d->action[AC_ATTACK] && (physics::carryaffinity(d) || !d->action[AC_ALTERNATE]);
+                 noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
             if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == WEAP_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
                 return autoreloading >= (noammo ? 1 : (WEAP(d->weapselect, add) < WEAP(d->weapselect, max) ? 2 : (WEAP(d->weapselect, zooms) ? 4 : 3)));
         }
