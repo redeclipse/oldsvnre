@@ -355,10 +355,9 @@ namespace projs
                 } // all falls through to ..
             default: return;
         }
-        if(proj.mdl && *proj.mdl)
+        model *m = NULL;
+        if(proj.mdl && *proj.mdl && ((m = loadmodel(proj.mdl)) != NULL))
         {
-            model *m = loadmodel(proj.mdl);
-            if(!m) return;
             vec center, radius;
             m->boundbox(0, center, radius);
             proj.xradius = proj.yradius = proj.radius = max(radius.x, radius.y)*size*proj.scale;
