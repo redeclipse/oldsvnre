@@ -727,15 +727,15 @@ namespace projs
             float partsize, flaresize, flarelen, sparksize;
         } weapfx[WEAP_MAX] = {
             { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
-            { 200, PART_MUZZLE_FLASH, 0xFFCC22, 200, 5, 4, 1.5f, 2, 4, 0.0625f },
+            { 200, PART_MUZZLE_FLASH, 0xFFCC22, 200, 5, 4, 1.5f, 2, 4, 0.0125f },
             { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
-            { 350, PART_MUZZLE_FLASH, 0xFFAA00, 500, 20, 8, 3, 5, 12, 0.25f },
-            { 50, PART_MUZZLE_FLASH, 0xFF8800, 350, 5, 6, 2.5f, 3, 8, 0.125f },
-            { 150, PART_MUZZLE_FLASH, 0, 250, 5, 8, 1.5f, 0, 0, 0.25f },
-            { 150, PART_PLASMA, 0x226688, 250, 10, 6, 1.5f, 0, 0, 0.125f },
-            { 150, PART_PLASMA, 0x6611FF, 250, 5, 6, 1.5f, 3, 8, 0.125f },
+            { 350, PART_MUZZLE_FLASH, 0xFFAA00, 500, 20, 8, 3, 5, 12, 0.025f },
+            { 50, PART_MUZZLE_FLASH, 0xFF8800, 350, 5, 6, 2.5f, 3, 8, 0.0125f },
+            { 150, PART_MUZZLE_FLASH, 0, 250, 5, 8, 1.5f, 0, 0, 0.025f },
+            { 150, PART_PLASMA, 0x226688, 250, 10, 6, 1.5f, 0, 0, 0.0125f },
+            { 150, PART_PLASMA, 0x6611FF, 250, 5, 6, 1.5f, 3, 8, 0.0125f },
             { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
-            { 150, PART_MUZZLE_FLASH, 0, 250, 10, 8, 1.5f, 3, 8, 0.125f },
+            { 150, PART_MUZZLE_FLASH, 0, 250, 10, 8, 1.5f, 3, 8, 0.0125f },
         };
         if(weapfx[weap].colour >= 0 && WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
         {
