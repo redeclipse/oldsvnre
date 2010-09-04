@@ -466,8 +466,8 @@ struct teamtypes
 #ifdef GAMESERVER
 teamtypes teamtype[] = {
     {
-        TEAM_NEUTRAL,   0x44FF44,           "neutral",
-        "team",             "\fg",      "green"
+        TEAM_NEUTRAL,   0xAAAAAA,           "neutral",
+        "team",             "\fa",      "grey"
     },
     {
         TEAM_ALPHA,     0x4444FF,           "alpha",
