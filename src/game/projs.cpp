@@ -565,7 +565,7 @@ namespace projs
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 100.f;
+                proj.weight = 65.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
@@ -950,9 +950,9 @@ namespace projs
             case PRJ_AFFINITY:
             {
                 bool moving = proj.movement > 0.f;
-                if(moving && lastmillis-proj.lasteffect >= 50)
+                if(moving && lastmillis-proj.lasteffect >= 25)
                 {
-                    part_create(PART_SMOKE, 150, proj.o, 0x888888, max(proj.xradius, proj.yradius)*1.5f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.5f, -1);
+                    part_create(PART_SMOKE, 150, proj.o, 0xFFFFFF, max(proj.xradius, proj.yradius)*1.5f, 0.75f, -10);
                     proj.lasteffect = lastmillis - (lastmillis%100);
                 }
             }
