@@ -240,7 +240,7 @@ namespace server
         string name, mapvote;
         int modevote, mutsvote, lastvote;
         int privilege;
-        bool connected, local, timesync, online, wantsmap, connectauth;
+        bool connected, local, timesync, online, wantsmap, failedmap, connectauth;
         int gameoffset, lastevent;
         servstate state;
         vector<gameevent *> events;
@@ -269,7 +269,7 @@ namespace server
             state.reset(change);
             events.deletecontents();
             overflow = 0;
-            timesync = wantsmap = false;
+            timesync = wantsmap = failedmap = false;
             lastevent = gameoffset = lastvote = 0;
             team = TEAM_NEUTRAL;
             clientmap[0] = '\0';
@@ -288,7 +288,7 @@ namespace server
             ping = 0;
             name[0] = 0;
             privilege = PRIV_NONE;
-            connected = local = online = wantsmap = connectauth = false;
+            connected = local = online = wantsmap = failedmap = connectauth = false;
             authreq = 0;
             authlevel = -1;
             position.setsize(0);
@@ -1789,7 +1789,7 @@ namespace server
             case 0: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
             case 1: // try spawn
             {
-                if(!isai && (ci->wantsmap || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR))) return false;
+                if(!isai && ((ci->wantsmap && !ci->failedmap) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR))) return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 break;
@@ -2247,6 +2247,15 @@ namespace server
                     srvmsgf(ci->clientnum, "map is being requested, please wait..");
                     sendf(best->clientnum, 1, "ri", N_GETMAP);
                     mapsending = true;
+                }
+                else
+                {
+                    sendf(-1, 1, "ri", N_FAILMAP);
+                    loopv(clients)
+                    {
+                        clientinfo *ci = clients[i];
+                        ci->failedmap = true;
+                    }
                 }
             }
             putint(p, 1); // already in progress
@@ -4288,7 +4297,15 @@ namespace server
                             sendf(best->clientnum, 1, "ri", N_GETMAP);
                             mapsending = true;
                         }
-                        else srvmsgf(ci->clientnum, "there doesn't seem to be anybody to get the map from!");
+                        else
+                        {
+                            sendf(-1, 1, "ri", N_FAILMAP);
+                            loopv(clients)
+                            {
+                                clientinfo *ci = clients[i];
+                                ci->failedmap = false;
+                            }
+                        }
                     }
                     else srvmsgf(ci->clientnum, "map is being uploaded, please be patient..");
                     break;
