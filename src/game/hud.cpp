@@ -6,6 +6,7 @@ namespace hud
 {
     const int NUMSTATS = 11;
     int damageresidue = 0, hudwidth = 0, hudheight = 0, lastteam = 0, lastnewgame = 0, laststats = 0, prevstats[NUMSTATS] = {0}, curstats[NUMSTATS] = {0};
+    bool forceprogress = false;
 
     #include "compass.h"
     vector<int> teamkills;
@@ -1871,19 +1872,21 @@ namespace hud
         glTexCoord2f(0, 1); glVertex2f(w-336, 128);
         glTexCoord2f(1, 1); glVertex2f(w-80, 128);
         glEnd();
-
-        pushfont("console");
-        int y = h-FONTH/2;
-        if(progressing)
+        if(!forceprogress)
         {
-            if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
-            else y -= draw_textx("%s", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
+            pushfont("console");
+            int y = h-FONTH/2;
+            if(progressing)
+            {
+                if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
+                else y -= draw_textx("%s", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
+            }
+            y = h-FONTH/2;
+            y -= draw_textx("v%.2f-%s (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE);
+            y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, ENG_URL);
+            if(loadbackinfo && *loadbackinfo) y -= draw_textx("%s",  w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, loadbackinfo);
+            popfont();
         }
-        y = h-FONTH/2;
-        y -= draw_textx("v%.2f-%s (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE);
-        y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, ENG_URL);
-        if(loadbackinfo && *loadbackinfo) y -= draw_textx("%s",  w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, loadbackinfo);
-        popfont();
     }
 
     void drawheadsup(int w, int h, float fade, int os, int is, int br, int bs, int bx, int by)
@@ -2038,7 +2041,7 @@ namespace hud
         if(UI::ready && showconsole)
         {
             drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
-            if(showconsole >= 2 && !noview && !progressing)
+            if(showconsole >= 2 && ((!noview && !progressing) || forceprogress))
                 drawconsole(2, hudwidth, hudheight, br+gap, by, showfps > 1 || showstats > (m_edit(game::gamemode) ? 0 : 1) ? bs-gap*2 : (bs-gap*2)*2, consolefade);
         }
 
@@ -2064,7 +2067,6 @@ namespace hud
         else hudwidth = hudheight = hudsize;
 
         int wait = client::waiting();
-        static bool forceprogress = false;
         if(wait > 1)
         {
             forceprogress = progressing = true;
