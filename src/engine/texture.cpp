@@ -867,6 +867,68 @@ void texnormal(ImageData &s, int emphasis)
     s.replace(d);
 }
 
+void texblur(ImageData &s, int n)
+{
+    ImageData d(s.w, s.h, 3);
+    uchar *src = s.data, *dst = d.data;
+    static const int matrix3x3[9] =
+    {
+        0x10, 0x20, 0x10,
+        0x20, 0x40, 0x20,
+        0x10, 0x20, 0x10
+    };
+    static const int matrix5x5[25] =
+    {
+        0x05, 0x05, 0x09, 0x05, 0x05,
+        0x05, 0x0A, 0x14, 0x0A, 0x05,
+        0x09, 0x14, 0x28, 0x14, 0x09,
+        0x05, 0x0A, 0x14, 0x0A, 0x05,
+        0x05, 0x05, 0x09, 0x05, 0x05
+    };
+    const int *mat = n > 1 ? matrix5x5 : matrix3x3;
+    int mstride = 2*n + 1,
+        mstartoffset = n*(mstride + 1),
+        stride = s.bpp*s.w,
+        startoffset = n*s.bpp,
+        nextoffset1 = stride + mstride*s.bpp,
+        nextoffset2 = stride - mstride*s.bpp;
+    loop(y, s.h) loop(x, s.w)
+    {
+        loopk(3)
+        {
+            int val = 0;
+            const uchar *p = src - startoffset;
+            const int *m = mat + mstartoffset;
+            for(int t = y; t >= y-n; t--, p -= nextoffset1, m -= mstride)
+            {
+                if(t < 0) p += stride;
+                int a = 0;
+                if(n > 1) { a += m[-2]; if(x >= 2) { val += *p * a; a = 0; } p += s.bpp; }
+                a += m[-1]; if(x >= 1) { val += *p * a; a = 0; } p += s.bpp;
+                int c = *p; val += c * (a + m[0]); p += s.bpp;
+                if(x+1 < s.w) c = *p; val += c * m[1]; p += s.bpp;
+                if(n > 1) { if(x+2 < s.w) c = *p; val += c * m[2]; p += s.bpp; }
+            }
+            p = src - startoffset + stride;
+            m = mat + mstartoffset + mstride;
+            for(int t = y+1; t <= y+n; t++, p += nextoffset2, m += mstride)
+            {
+                if(t >= s.h) p -= stride;
+                int a = 0;
+                if(n > 1) { a += m[-2]; if(x >= 2) { val += *p * a; a = 0; } p += s.bpp; }
+                a += m[-1]; if(x >= 1) { val += *p * a; a = 0; } p += s.bpp;
+                int c = *p; val += c * (a + m[0]); p += s.bpp;
+                if(x+1 < s.w) c = *p; val += c * m[1]; p += s.bpp;
+                if(n > 1) { if(x+2 < s.w) c = *p; val += c * m[2]; p += s.bpp; }
+            }
+            *dst++ = val>>8;
+            src++;
+        }
+        if(s.bpp > 3) *dst++ = *src++;
+    }
+    s.replace(d);
+}
+
 void scaleimage(ImageData &s, int w, int h)
 {
     ImageData d(w, h, s.bpp);
@@ -970,6 +1032,11 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         {
             int emphasis = atoi(arg[0]);
             texnormal(d, emphasis > 0 ? emphasis : 3);
+        }
+        else if(!strncmp(cmd, "blur", len))
+        {
+            int emphasis = atoi(arg[0]);
+            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 2);
         }
         else if(!strncmp(cmd, "dup", len)) texdup(d, atoi(arg[0]), atoi(arg[1]));
         else if(!strncmp(cmd, "decal", len)) texdecal(d);
@@ -1420,7 +1487,7 @@ VSlot *editvslot(const VSlot &src, const VSlot &delta)
 
 static void fixinsidefaces(cube *c, const ivec &o, int size, int tex)
 {
-    loopi(8) 
+    loopi(8)
     {
         ivec co(i, o.x, o.y, o.z, size);
         if(c[i].children) fixinsidefaces(c[i].children, co, size>>1, tex);
