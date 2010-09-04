@@ -723,24 +723,27 @@ namespace projs
         float muz = muzzleblend; if(d == game::focus) muz *= 0.5f;
         const struct weapfxs
         {
-            int smoke, parttype, colour;
-            float partsize, flaresize, flarelen;
+            int smoke, parttype, colour, sparktime, sparknum, sparkrad;
+            float partsize, flaresize, flarelen, sparksize;
         } weapfx[WEAP_MAX] = {
-            { 0, 0, 0, 0, 0, 0 },
-            { 200, PART_MUZZLE_FLASH, 0xFFCC22, 1.5f, 2, 4 },
-            { 0, 0, 0, 0, 0, 0 },
-            { 350, PART_MUZZLE_FLASH, 0xFFAA00, 3, 5, 16 },
-            { 50, PART_MUZZLE_FLASH, 0xFF8800, 2.5f, 4, 12 },
-            { 150, PART_MUZZLE_FLASH, 0, 1.5f, 0, 0 },
-            { 150, PART_PLASMA, 0x226688, 1.5f, 0, 0 },
-            { 150, PART_PLASMA, 0x6611FF, 1.5f, 3, 9 },
-            { 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0 },
+            { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
+            { 200, PART_MUZZLE_FLASH, 0xFFCC22, 200, 5, 4, 1.5f, 2, 4, 0.0625f },
+            { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
+            { 350, PART_MUZZLE_FLASH, 0xFFAA00, 500, 20, 8, 3, 5, 12, 0.25f },
+            { 50, PART_MUZZLE_FLASH, 0xFF8800, 350, 5, 6, 2.5f, 3, 8, 0.125f },
+            { 150, PART_MUZZLE_FLASH, 0, 250, 5, 8, 1.5f, 0, 0, 0.25f },
+            { 150, PART_PLASMA, 0x226688, 250, 10, 6, 1.5f, 0, 0, 0.125f },
+            { 150, PART_PLASMA, 0x6611FF, 250, 5, 6, 1.5f, 3, 8, 0.125f },
+            { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
+            { 150, PART_MUZZLE_FLASH, 0, 250, 10, 8, 1.5f, 3, 8, 0.125f },
         };
-        if(weapfx[weap].colour && WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
+        if(weapfx[weap].colour >= 0 && WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
         {
-            int colour = weapfx[weap].colour > 0 ? weapfx[weap].colour : firecols[rnd(FIRECOLOURS)];
+            bool isfire = weapfx[weap].colour > 0;
+            int colour = isfire ? weapfx[weap].colour : firecols[rnd(FIRECOLOURS)];
             if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0xAAAAAA, 1, 0.25f, -20);
+            if(weapfx[weap].sparktime && weapfx[weap].sparknum)
+                part_splash(isfire ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 5, 0, weapfx[weap].sparkrad);
             if(muzzlechk(muzzleflash, d) && weapfx[weap].partsize > 0)
                 part_create(weapfx[weap].parttype, WEAP2(weap, adelay, flags&HIT_ALT)/3, from, colour, weapfx[weap].partsize, muz, 0, 0, d);
             if(muzzlechk(muzzleflare, d) && weapfx[weap].flaresize > 0)
@@ -1308,7 +1311,7 @@ namespace projs
                     {
                         if(WEAP2(proj.weap, guided, proj.flags&HIT_ALT)%2 && proj.target && proj.target->state == CS_ALIVE)
                         {
-                            targ = proj.target->headpos();
+                            targ = proj.target->headpos(-proj.target->height/2);
                             break;
                         }
                         physent *t = NULL;
@@ -1334,7 +1337,7 @@ namespace projs
                         if(t && (!m_team(game::gamemode, game::mutators) || t->type != ENT_PLAYER || ((gameent *)t)->team != proj.owner->team))
                         {
                             proj.target = t;
-                            targ = proj.target->headpos();
+                            targ = proj.target->headpos(-proj.target->height/2);
                         }
                         break;
                     }
