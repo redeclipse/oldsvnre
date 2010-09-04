@@ -141,8 +141,8 @@ GFVAR(0, jumpspeed, 0, 100.f, 1000); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, 0, 100.f, 1000); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0.f, 10000); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1.1f, 1000); // thrust modifier
-GFVAR(0, impulsedash, 0, 1.2f, 1000); // dashing modifier
-GFVAR(0, impulsejump, 0, 1.f, 1000); // jump modifier
+GFVAR(0, impulsedash, 0, 1.3f, 1000); // dashing modifier
+GFVAR(0, impulsejump, 0, 1.1f, 1000); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, 1000); // melee modifier
 GFVAR(0, impulseparkour, 0, 1.1f, 1000); // parkour modifier
 GFVAR(0, impulseparkournorm, 0, 0.5f, 1000); // minimum parkour surface z normal

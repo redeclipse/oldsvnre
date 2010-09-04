@@ -101,7 +101,7 @@ namespace capture
             if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
             {
                 ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-                SEARCHBINDCACHE(altkey)("action 1", 0);
+                SEARCHBINDCACHE(altkey)("action 9", 0);
                 pushfont("sub");
                 ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
@@ -505,6 +505,8 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
+        d->action[AC_AFFINITY] = false;
+        d->actiontime[AC_AFFINITY] = 0;
         affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, f.team == d->team ? "SECURED" : "TAKEN");
         game::announce(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s %s the \fs%s%s\fS flag", game::colorname(d), f.droptime ? (f.team == d->team ? "secured" : "picked up") : "stole", teamtype[f.team].chat, teamtype[f.team].name);
         st.takeaffinity(i, d, lastmillis);

@@ -1664,7 +1664,7 @@ namespace game
                 {
                     physics::move(player1, 10, true);
                     entities::checkitems(player1);
-                    weapons::reload(player1);
+                    weapons::checkweapons(player1);
                 }
                 if(!intermission) addsway(focus);
             }

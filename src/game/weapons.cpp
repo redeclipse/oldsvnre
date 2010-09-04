@@ -51,7 +51,6 @@ namespace weapons
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
             d->weapswitch(weap, lastmillis);
-            d->action[AC_RELOAD] = false;
             return true;
         }
         return false;
@@ -128,9 +127,9 @@ namespace weapons
     }
     ICOMMAND(0, weapon, "ss", (char *a, char *b), weaponswitch(game::player1, *a ? parseint(a) : -1, *b ? parseint(b) : -1));
 
-    void drop(gameent *d, int a = -1)
+    void weapdrop(gameent *d, int w)
     {
-        int weap = isweap(a) ? a : d->weapselect;
+        int weap = isweap(w) ? w : d->weapselect;
         bool found = false;
         if(isweap(weap) && weap >= WEAP_OFFSET && weap != m_weapon(game::gamemode, game::mutators) && entities::ents.inrange(d->entid[weap]))
         {
@@ -138,13 +137,12 @@ namespace weapons
             {
                 client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
                 d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
-                d->action[AC_RELOAD] = false;
                 found = true;
             }
         }
+        d->action[AC_DROP] = false;
         if(!found && d == game::player1) playsound(S_ERROR, d->o, d);
     }
-    ICOMMAND(0, drop, "s", (char *n), drop(game::player1, *n ? parseint(n) : -1));
 
     bool autoreload(gameent *d, int flags = 0)
     {
@@ -158,11 +156,12 @@ namespace weapons
         return false;
     }
 
-    void reload(gameent *d)
+    void checkweapons(gameent *d)
     {
         int sweap = m_weapon(game::gamemode, game::mutators);
         if(!d->hasweap(d->weapselect, sweap)) weapselect(d, d->bestweap(sweap, true));
         else if(d->action[AC_RELOAD] || autoreload(d)) weapreload(d, d->weapselect);
+        else if(d->action[AC_DROP]) weapdrop(d, d->weapselect);
     }
 
     void offsetray(vec &from, vec &to, int spread, int z, vec &dest)
@@ -316,10 +315,7 @@ namespace weapons
         if(!game::allowmove(d)) return;
         bool secondary = physics::secondaryweap(d), alt = secondary && !WEAP(d->weapselect, zooms);
         if(doshot(d, targ, d->weapselect, d->action[alt ? AC_ALTERNATE : AC_ATTACK], secondary, force))
-        {
             if(!WEAP2(d->weapselect, fullauto, secondary)) d->action[alt ? AC_ALTERNATE : AC_ATTACK] = false;
-            d->action[AC_RELOAD] = false;
-        }
     }
 
     void preload()

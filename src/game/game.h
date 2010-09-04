@@ -376,8 +376,8 @@ extern gametypes gametype[], mutstype[];
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
 #define m_health(a,b)       (m_insta(a,b) ? 1 : GAME(maxhealth))
 
-#define w_reload(w1,w2)     (w1 != WEAP_MELEE && (w1 == (isweap(w2) ? w2 : WEAP_PISTOL) || (isweap(w1) && WEAP(w1, reloads))))
-#define w_carry(w1,w2)      (w1 > WEAP_MELEE && w1 != (isweap(w2) ? w2 : WEAP_PISTOL) && (isweap(w1) && WEAP(w1, carried)))
+#define w_reload(w1,w2)     (w1 != WEAP_MELEE && ((isweap(w2) ? w1 == w2 : w1 < WEAP_ITEM) || (isweap(w1) && WEAP(w1, reloads))))
+#define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= WEAP_ITEM) && (isweap(w1) && WEAP(w1, carried)))
 #define w_attr(a,w1,w2)     (m_edit(a) || (w1 >= WEAP_OFFSET && w1 != w2) ? w1 : (w2 == WEAP_GRENADE ? WEAP_ROCKET : WEAP_GRENADE))
 #define w_spawn(weap)       int(GAME(itemspawntime)*WEAP(weap, frequency))
 
@@ -511,7 +511,7 @@ enum { CAMERA_NONE = 0, CAMERA_PLAYER, CAMERA_FOLLOW, CAMERA_ENTITY, CAMERA_MAX 
 enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_MODE, SINFO_MUTS, SINFO_MAP, SINFO_TIME, SINFO_NUMPLRS, SINFO_MAXPLRS, SINFO_PING, SINFO_MAX };
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
-enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
+enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
 enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_COUNT, IM_COLLECT, IM_SLIDE, IM_JUMP, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_KICK };
 
@@ -1203,7 +1203,8 @@ namespace weapons
     extern int slot(gameent *d, int n, bool back = false);
     extern bool weapselect(gameent *d, int weap, bool local = true);
     extern bool weapreload(gameent *d, int weap, int load = -1, int ammo = -1, bool local = true);
-    extern void reload(gameent *d);
+    extern void weapdrop(gameent *d, int w = -1);
+    extern void checkweapons(gameent *d);
     extern bool doshot(gameent *d, vec &targ, int weap, bool pressed = false, bool secondary = false, int force = 0);
     extern void shoot(gameent *d, vec &targ, int force = 0);
     extern void preload();

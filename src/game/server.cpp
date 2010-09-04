@@ -2659,14 +2659,13 @@ namespace server
                     float skew = float(scale)/DNF;
                     if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, skew));
                     float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
-                    if(target->state.state != CS_ALIVE || (size>0 && (dist<0 || dist>size)) || target->state.protect(gamemillis, m_protect(gamemode, mutators)))
+                    if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
-                        if(GAME(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] state disallows it", weap, id, i, h.target);
-                        continue;
+                        int damage = calcdamage(weap, hflags, radial, size, dist, skew);
+                        dodamage(target, ci, damage, weap, hflags, h.dir);
                     }
-                    int damage = calcdamage(weap, hflags, radial, size, dist, skew);
-                    dodamage(target, ci, damage, weap, hflags, h.dir);
-                    break;
+                    else if(GAME(serverdebug) >= 2)
+                        srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] state disallows it", weap, id, i, h.target);
                 }
             }
         }
