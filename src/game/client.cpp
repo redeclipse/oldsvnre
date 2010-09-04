@@ -2034,6 +2034,13 @@ namespace client
                     break;
                 }
 
+                case N_FAILMAP:
+                {
+                    if(needsmap) conoutft(CON_MESG, "everybody failed to get the map..");
+                    needsmap = gettingmap = false;
+                    break;
+                }
+
                 case N_NEWMAP:
                 {
                     int size = getint(p);
