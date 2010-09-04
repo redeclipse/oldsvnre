@@ -260,6 +260,7 @@ namespace weapons
                 else if(physics::iscrouching(d)) kickmod = kickpushcrouch;
                 vec kick = vec(unitv).mul(-WEAP2(weap, kickpush, secondary)*kickmod);
                 if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
+                d->vel.add(kick);
             }
 
             // move along the eye ray towards the weap origin, stopping when something is hit
