@@ -7,8 +7,7 @@
 #endif
 
 VAR(0, version, 1, ENG_VERSION, -1); // for scripts
-int kidmode = 0;
-ICOMMAND(0, getkidmode, "", (void), intret(kidmode));
+VAR(0, kidmode, 0, 0, 1); // kid protections
 
 const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was banned", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
 
