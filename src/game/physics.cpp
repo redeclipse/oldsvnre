@@ -25,7 +25,7 @@ namespace physics
 
     VAR(IDF_PERSIST, impulseaction, 0, 1, 2); // determines if impulse remains active when pushed, 0 = off, 1 = only if no gravity or impulsestyle requires no ground contact, 2 = always
     FVAR(IDF_PERSIST, impulsekick, 0, 135, 179.9f); // determines the minimum angle to switch between wall kick and run
-    VAR(IDF_PERSIST, impulseturn, 0, 2, 2); // determines if parkour actions force turning, 0 = off, 1 = only wall run, 2 = wall run and kick
+    VAR(IDF_PERSIST, impulseturn, 0, 1, 2); // determines if parkour actions force turning, 0 = off, 1 = only wall run, 2 = wall run and kick
     VAR(IDF_PERSIST, dashaction, 0, 3, 3); // determines how dash action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
     VAR(IDF_PERSIST, crouchstyle, 0, 1, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
