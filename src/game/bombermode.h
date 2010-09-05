@@ -222,11 +222,11 @@ struct bomberservmode : bomberstate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(hasflaginfo && GAME(regenflag)) loopv(flags)
+        if(hasflaginfo && GAME(regenaffinity)) loopv(flags)
         {
             flag &f = flags[i];
             bool insidehome = (isbomberhome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius);
-            if(insidehome || (GAME(regenflag) == 2 && f.owner == ci->clientnum))
+            if(insidehome || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
             {
                 if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
                 if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
