@@ -878,7 +878,7 @@ namespace projs
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*1.5f);
+                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*3.f);
                         }
                         break;
                     }
@@ -892,7 +892,7 @@ namespace projs
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.125f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
+                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*2.f);
                         }
                         break;
                     }
@@ -914,7 +914,7 @@ namespace projs
                             part_flare(proj.to, proj.o, 1, PART_FLARE, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f);
                             if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                                part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
+                                part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*2.f);
                         }
                         break;
                     }
@@ -1023,7 +1023,7 @@ namespace projs
                                 quake(proj.o, proj.weap, proj.flags, proj.scale);
                                 int len = proj.weap != WEAP_ROCKET ? 500 : 1000;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, 0xAA4400, 1.f, 0.5f);
-                                part_splash(PART_SPARK, 20, len*2, proj.o, 0xAA4400, 0.25f, 1, 10, expl);
+                                part_splash(PART_SPARK, 30, len*2, proj.o, 0xAA4400, 0.25f, 1, 10, expl);
                                 if(WEAP(proj.weap, pusharea) >= 1)
                                     part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, 0xAA4400, 1.f, 0.1f);
                             }
