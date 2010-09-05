@@ -877,8 +877,8 @@ namespace projs
                             int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16)+1)|((int(144*max(1.f-proj.lifespan,0.15f))+1)<<8);
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
-                            if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*3.f);
+                            if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*4.f);
                         }
                         break;
                     }
@@ -891,7 +891,7 @@ namespace projs
                             int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16))|((int(80*max(1.f-proj.lifespan,0.1f)))<<8);
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.125f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
-                            if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                            if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                                 part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*2.f);
                         }
                         break;
@@ -913,7 +913,7 @@ namespace projs
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                             part_flare(proj.to, proj.o, 1, PART_FLARE, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f);
-                            if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                            if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                                 part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*2.f);
                         }
                         break;
@@ -1137,6 +1137,7 @@ namespace projs
                         {
                             int w = f%WEAP_MAX, r = WEAP2(proj.weap, flakrays, proj.flags&HIT_ALT), life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
                             float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.scale;
+                            vec pos = !proj.child && proj.hit ? vec(proj.o).sub(vec(proj.vel).normalize().mul(5)) : proj.o;
                             if(WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) life -= int(ceilf(life*WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
                             loopi(r)
                             {
@@ -1147,7 +1148,7 @@ namespace projs
                                     dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT)*mag));
                                 if(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0)
                                     dir.add(vec(proj.vel).normalize().mul(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
-                                create(proj.o, dir.add(proj.o), proj.local, proj.owner, PRJ_SHOT, max(life, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
+                                create(pos, dir.add(pos), proj.local, proj.owner, PRJ_SHOT, max(life, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
                             }
                         }
                     }
