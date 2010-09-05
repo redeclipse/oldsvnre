@@ -305,7 +305,7 @@ namespace projs
                 }
                 if(ricochet)
                 {
-                    int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.scale));
+                    int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.scale*(proj.child ? 0.25f : 1.f)));
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_BOUNCE), proj.o, NULL, 0, vol);
                 }
                 break;
@@ -657,7 +657,7 @@ namespace projs
             proj.pitch = d->pitch;
             proj.inertia = vec(d->vel).add(d->falling);
             if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan))
-                playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, sounds[d->pschan].vol, -1, -1, &proj.schan, 0, &d->pschan);
+                playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, int(ceilf(sounds[d->pschan].vol*(proj.child ? 0.25f : 1.f))), -1, -1, &proj.schan, 0, &d->pschan);
         }
         if(!proj.waittime) init(proj, false);
         projs.add(&proj);
@@ -797,11 +797,11 @@ namespace projs
         {
             case PRJ_SHOT:
             {
-                int vol = int(ceilf(255*proj.scale));
+                int vol = int(ceilf(255*proj.scale*(proj.child ? 0.25f : 1.f)));
                 if(WEAP2(proj.weap, power, proj.flags&HIT_ALT)) switch(WEAP2(proj.weap, cooked, proj.flags&HIT_ALT))
                 {
-                    case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.scale); break; // longer
-                    case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale); break; // shorter
+                    case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.scale*(proj.child ? 0.25f : 1.f)); break; // longer
+                    case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale*(proj.child ? 0.25f : 1.f)); break; // shorter
                 }
                 if(issound(proj.schan)) sounds[proj.schan].vol = vol;
                 else playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
@@ -833,7 +833,7 @@ namespace projs
                     case WEAP_FLAMER:
                     {
                         float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.85f)*(0.65f+(rnd(35)/100.f));
+                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.85f)*(0.65f+(rnd(35)/100.f))*(proj.owner == game::focus ? 0.5f : 1.f);
                         if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 1)) part_create(PART_HINT_SOFT, 1, proj.o, 0x120228, size*1.5f, blend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
                         {
@@ -877,6 +877,8 @@ namespace projs
                             int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16)+1)|((int(144*max(1.f-proj.lifespan,0.15f))+1)<<8);
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
+                            if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*1.5f);
                         }
                         break;
                     }
@@ -889,6 +891,8 @@ namespace projs
                             int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16))|((int(80*max(1.f-proj.lifespan,0.1f)))<<8);
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.125f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
+                            if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
                         }
                         break;
                     }
@@ -897,8 +901,8 @@ namespace projs
                         float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
                             expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize*scale);
                         if(expl > 0) part_explosion(proj.o, expl, PART_SHOCKBALL, 1, 0x55AAEE, 1.f, 0.25f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, 0x55AAEE, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.scale*scale, 0.75f);
-                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, 0x55AAEE, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.scale*scale, 0.75f);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, 0x55AAEE, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.scale*scale, proj.owner == game::focus ? 0.35f : 0.75f);
+                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, 0x55AAEE, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.scale*scale, proj.owner == game::focus ? 0.35f : 0.75f);
                         break;
                     }
                     case WEAP_RIFLE:
@@ -909,6 +913,8 @@ namespace projs
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                             part_flare(proj.to, proj.o, 1, PART_FLARE, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f);
+                            if(WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                                part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
                         }
                         break;
                     }
@@ -976,13 +982,13 @@ namespace projs
             case PRJ_SHOT:
             {
                 updatetargets(proj, 2);
-                int vol = int(255*proj.scale);
+                int vol = int(255*proj.scale*(proj.child ? 0.25f : 1.f));
                 if(proj.limited) vol = 0;
                 else switch(proj.weap)
                 {
                     case WEAP_PISTOL:
                     {
-                        vol = int(vol*(1.f-proj.lifespan));
+                        vol = int(vol*(1.f-proj.lifespan)*(proj.child ? 0.25f : 1.f));
                         part_create(PART_SMOKE_LERP, 200, proj.o, 0x999999, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, 0.25f, -20);
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                         if(expl > 0)
@@ -1043,7 +1049,7 @@ namespace projs
                     }
                     case WEAP_SHOTGUN: case WEAP_SMG:
                     {
-                        vol = int(vol*(1.f-proj.lifespan));
+                        vol = int(vol*(1.f-proj.lifespan)*(proj.child ? 0.25f : 1.f));
                         part_splash(PART_SPARK, proj.weap == WEAP_SHOTGUN ? 10 : 20, 500, proj.o, proj.weap == WEAP_SMG ? 0xFF8822 : 0xFFAA22, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f, 1, 20, 16);
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                         if(expl > 0)
@@ -1088,7 +1094,7 @@ namespace projs
                             expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                         vec dir = dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
                         proj.to = vec(proj.o).sub(vec(dir).mul(size));
-                        int len = proj.flags&HIT_ALT ? 750 : 500;
+                        int len = proj.flags&HIT_ALT ? 1000 : 500;
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.scale);
@@ -1171,12 +1177,12 @@ namespace projs
         {
             if(chk&1 && !proj.limited)
             {
-                int vol = int(ceilf(48*proj.scale)), snd = S_EXTINGUISH;
+                int vol = int(ceilf(48*proj.scale*(proj.child ? 0.25f : 1.f))), snd = S_EXTINGUISH;
                 float size = max(proj.radius, 1.f);
                 if(proj.projtype == PRJ_SHOT && isweap(proj.weap))
                 {
                     snd = WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_EXTINGUISH);
-                    vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale);
+                    vol = 10+int(245*proj.lifespan*proj.lifesize*proj.scale*(proj.child ? 0.25f : 1.f));
                     float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                     if(expl > 0) size *= expl*1.5f;
                     else size *= 2.5f;
