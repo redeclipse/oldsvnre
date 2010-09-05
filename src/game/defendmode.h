@@ -207,7 +207,7 @@ struct defendservmode : defendstate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(hasflaginfo && GAME(regenflag)) loopv(flags)
+        if(hasflaginfo && GAME(regenaffinity)) loopv(flags)
         {
             flag &b = flags[i];
             if(b.owner == ci->team && !b.enemy && insideaffinity(b, ci->state.o, 2.f))

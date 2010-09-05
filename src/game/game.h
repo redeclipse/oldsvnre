@@ -231,7 +231,6 @@ enum
     G_M_JETPACK = 1<<8, G_M_VAMPIRE = 1<<9,
     G_M_GSP1 = 1<<10, G_M_GSP2 = 1<<11, G_M_GSP3 = 1<<12,
     G_M_ALL = G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE,
-    G_M_POP = G_M_TEAM|G_M_INSTA|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
     G_M_GSN = 3, G_M_GSP = 10, G_M_NUM = 13
 };
 
@@ -280,7 +279,7 @@ gametypes gametype[] = {
         "team",                             { "", "", "" },
     },
     {
-        G_M_INSTA,      G_M_INSTA,          G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_INSTA,      G_M_INSTA,          G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "instagib",                         { "", "", "" },
     },
     {
@@ -304,27 +303,27 @@ gametypes gametype[] = {
         "arena",                            { "", "", "" },
     },
     {
-        G_M_ONSLAUGHT,  G_M_ONSLAUGHT,      G_M_ALL|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_ONSLAUGHT,  G_M_ONSLAUGHT,      G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "onslaught",                        { "", "", "" },
     },
     {
-        G_M_JETPACK,    G_M_JETPACK,        G_M_ALL|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_JETPACK,    G_M_JETPACK,        G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "jetpack",                          { "", "", "" },
     },
     {
-        G_M_VAMPIRE,    G_M_VAMPIRE,        G_M_ALL|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_VAMPIRE,    G_M_VAMPIRE,        G_M_TEAM|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "vampire",                          { "", "", "" },
     },
     {
-        G_M_GSP1,       G_M_GSP1,           G_M_ALL|G_M_GSP1,
+        G_M_GSP1,       G_M_GSP1,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1,
         "",                                 { "", "", "" },
     },
     {
-        G_M_GSP2,       G_M_GSP2,           G_M_ALL|G_M_GSP2,
+        G_M_GSP2,       G_M_GSP2,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP2,
         "",                                 { "", "", "" },
     },
     {
-        G_M_GSP3,       G_M_GSP3,           G_M_ALL|G_M_GSP3,
+        G_M_GSP3,       G_M_GSP3,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP3,
         "",                                 { "", "", "" },
     },
 };

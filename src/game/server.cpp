@@ -401,17 +401,11 @@ namespace server
         vampireservmode() {}
         void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0))
         {
-            if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && damage > 0)
+            if(m_regen(gamemode, mutators) && actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && damage > 0)
             {
-                int total = m_health(gamemode, mutators), amt = 0, delay = 0, add = flags&HIT_KILL ? total : damage;
-                if(smode) smode->regen(actor, total, amt, delay);
-                if(total && actor->state.health < total)
-                {
-                    int rgn = actor->state.health, heal = clamp(actor->state.health+add, 0, total), eff = heal-rgn;
-                    actor->state.health = heal;
-                    actor->state.lastregen = gamemillis;
-                    sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
-                }
+                actor->state.health += damage;
+                actor->state.lastregen = gamemillis;
+                sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, damage);
             }
         }
     } vampiremutator;

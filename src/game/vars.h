@@ -60,7 +60,7 @@ GVAR(0, duelprotect, 0, 5000, INT_MAX-1); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
 
 GVAR(0, maxhealth, 0, 100, INT_MAX-1);
-GVAR(0, extrahealth, 0, 100, INT_MAX-1);
+GVAR(0, extrahealth, 0, 150, INT_MAX-1);
 
 GVAR(0, fireburntime, 0, 5500, INT_MAX-1);
 GVAR(0, fireburndelay, 0, 1000, INT_MAX-1);
@@ -71,7 +71,7 @@ GVAR(0, regenguard, 0, 1000, INT_MAX-1);
 GVAR(0, regentime, 0, 1000, INT_MAX-1);
 GVAR(0, regenhealth, 0, 5, INT_MAX-1);
 GVAR(0, regenextra, 0, 10, INT_MAX-1);
-GVAR(0, regenflag, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
+GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
 
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 30000, INT_MAX-1); // when items respawn

@@ -646,7 +646,7 @@ namespace bomber
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->aitype == AI_BOT)
             {
-                int regen = !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
+                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
                 if(regen && lastmillis-b.millis >= (201-d->skill)*33)
                 {
                     static vector<int> targets; // build a list of others who are interested in this
