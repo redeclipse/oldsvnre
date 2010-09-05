@@ -317,7 +317,7 @@ namespace projs
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.scale));
                     playsound(S_SPLOSH+rnd(S_R_SPLOSH), proj.o, NULL, 0, vol);
-                    break;
+                    if(!game::bloodsparks) break;
                 } // otherwise fall through
             }
             case PRJ_DEBRIS:
@@ -931,8 +931,9 @@ namespace projs
                         part_create(PART_BLOOD, game::bloodfade, proj.o, 0x88FFFF, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*2, 1, 200, DECAL_BLOOD);
                         proj.lasteffect = lastmillis - (lastmillis%1000);
                     }
+                    if(!game::bloodsparks) break;
                 }
-                else if(!proj.limited)
+                if(!proj.limited)
                 {
                     bool effect = false;
                     float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
