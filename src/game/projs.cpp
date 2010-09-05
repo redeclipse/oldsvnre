@@ -317,7 +317,7 @@ namespace projs
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.scale));
                     playsound(S_SPLOSH+rnd(S_R_SPLOSH), proj.o, NULL, 0, vol);
-                    if(!game::bloodsparks) break;
+                    break;
                 } // otherwise fall through
             }
             case PRJ_DEBRIS:
