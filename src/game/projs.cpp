@@ -995,6 +995,7 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.scale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 150, 0x884411, 1.f, 0.5f);
+                            part_splash(PART_SPARK, 10, 250, proj.o, 0x884411, 0.125f, 1, 10, expl);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 75, 0x884411, 1.f, 0.1f);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 0))
@@ -1022,6 +1023,7 @@ namespace projs
                                 quake(proj.o, proj.weap, proj.flags, proj.scale);
                                 int len = proj.weap != WEAP_ROCKET ? 500 : 1000;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, 0xAA4400, 1.f, 0.5f);
+                                part_splash(PART_SPARK, 20, len*2, proj.o, 0xAA4400, 0.25f, 1, 10, expl);
                                 if(WEAP(proj.weap, pusharea) >= 1)
                                     part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, 0xAA4400, 1.f, 0.1f);
                             }
@@ -1056,6 +1058,7 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.scale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 150, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711, 1.f, 0.5f);
+                            part_splash(PART_SPARK, 20, 300, proj.o, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711, 0.25f, 1, 10, expl);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 75, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711, 1.f, 0.1f);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 0))
@@ -1074,6 +1077,7 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.scale);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, 0x55AAEE, 1.f, 0.25f);
+                            part_splash(PART_SPARK, 20, len*2, proj.o, 0x55AAEE, 0.25f, 1, 10, expl);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, 0x55AAEE, 1.f, 0.1f);
                         }
@@ -1099,6 +1103,7 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.scale);
                             part_create(PART_PLASMA_SOFT, len, proj.o, 0x6611FF, expl*0.5f); // corona
+                            part_splash(PART_SPARK, 20, len*2, proj.o, 0x6611FF, 0.25f, 1, 10, expl);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, 0x6611FF, 1.f, 0.25f);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, 0x6611FF, 1.f, 0.1f);
