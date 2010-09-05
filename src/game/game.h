@@ -1245,7 +1245,8 @@ namespace game
 {
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             zoomtime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
-                bloodfade, bloodsize, debrisfade, aboveheadfade, announcefilter, dynlighteffects, shownamesabovehead, thirdpersonfollow;
+            bloodfade, bloodsize, bloodsparks, debrisfade, aboveheadfade,
+            announcefilter, dynlighteffects, shownamesabovehead, thirdpersonfollow;
     extern float bloodscale, debrisscale;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
