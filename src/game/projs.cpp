@@ -341,6 +341,7 @@ namespace projs
         float size = 1;
         switch(proj.projtype)
         {
+            case PRJ_AFFINITY: break;
             case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_EJECT: size = proj.lifesize;
             case PRJ_ENT:
                 if(init) break;
@@ -557,15 +558,27 @@ namespace projs
             }
             case PRJ_AFFINITY:
             {
-                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 6;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
+                switch(game::gamemode)
+                {
+                    case G_CAPTURE:
+                        proj.mdl = "flag";
+                        proj.elasticity = captureelasticity;
+                        proj.weight = captureweight;
+                        break;
+                    case G_BOMBER:
+                        proj.mdl = "ball";
+                        proj.elasticity = bomberelasticity;
+                        proj.weight = bomberweight;
+                        break;
+                    default: break;
+                }
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
-                proj.elasticity = 0.5f;
                 proj.reflectivity = 0.f;
                 proj.relativity = 1.f;
                 proj.waterfric = 1.75f;
-                proj.weight = 65.f;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;

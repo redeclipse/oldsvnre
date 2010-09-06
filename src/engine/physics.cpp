@@ -1185,36 +1185,6 @@ void phystest()
 
 COMMAND(0, phystest, "");
 
-void vecfromyawpitch(float yaw, float pitch, int move, int strafe, vec &m)
-{
-    if(move)
-    {
-        m.x = move*-sinf(RAD*yaw);
-        m.y = move*cosf(RAD*yaw);
-    }
-    else m.x = m.y = 0;
-
-    if(pitch)
-    {
-        m.x *= cosf(RAD*pitch);
-        m.y *= cosf(RAD*pitch);
-        m.z = move*sinf(RAD*pitch);
-    }
-    else m.z = 0;
-
-    if(strafe)
-    {
-        m.x += strafe*cosf(RAD*yaw);
-        m.y += strafe*sinf(RAD*yaw);
-    }
-}
-
-void vectoyawpitch(const vec &v, float &yaw, float &pitch)
-{
-    yaw = -atan2(v.x, v.y)/RAD;
-    pitch = asin(v.z/v.magnitude())/RAD;
-}
-
 bool intersect(physent *d, const vec &from, const vec &to, float &dist)   // if lineseg hits entity bounding box
 {
     vec bottom(d->o), top(d->o);
