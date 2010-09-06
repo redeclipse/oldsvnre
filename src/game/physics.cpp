@@ -694,7 +694,7 @@ namespace physics
                     if(canimpulse(d, len, 0)) d->impulse[IM_METER] += len;
                     else jetting = d->action[AC_JUMP] = false;
                 }
-                if(d->impulse[IM_METER] > 0 && impulseregen > 0)
+                if(d->impulse[IM_METER] > 0 && impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_TIME] >= impulseregendelay))
                 {
                     bool collect = true; // collect time until it is able to act upon it
                     int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
@@ -757,7 +757,7 @@ namespace physics
                         }
                         vec dir(0, 0, 1);
                         if(!pulse || moving)
-                            vecfromyawpitch(d->aimyaw, max(d->aimpitch, impulsepitch), moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                            vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                         if(moving && impulseboostz != 0) dir.z += impulseboostz;
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
