@@ -146,8 +146,7 @@ GFVAR(0, jumpspeed, 0, 100, 1000); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, 0, 100, 1000); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, 10000); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, 1000); // thrust modifier
-GFVAR(0, impulseboostz, -1, 0.5f, 1); // thrust z modifier
-GFVAR(0, impulsepitch, -90, 0, 90); // thrust pitch limit
+GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
 GFVAR(0, impulsedash, 0, 1.2f, 1000); // dashing modifier
 GFVAR(0, impulsejump, 0, 1.1f, 1000); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, 1000); // melee modifier
@@ -171,6 +170,7 @@ GFVAR(0, impulseregensprint, 0, 0.75f, 1000); // impulse regen sprinting modifie
 GFVAR(0, impulseregenjetpack, 0, 2, 1000); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, 1000); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.1f, 1000); // impulse regen in-air modifier
+GVAR(0, impulseregendelay, 0, 1000, INT_MAX-1); // delay before impulse regens
 
 GFVAR(0, stillspread, 0, 2, 1000);
 GFVAR(0, movespread, 0, 4, 1000);
