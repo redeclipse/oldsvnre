@@ -758,7 +758,7 @@ namespace physics
                         vec dir(0, 0, 1);
                         if(!pulse || moving)
                             vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                        if(moving && impulseboostz != 0) dir.z += impulseboostz;
+                        if(!dash && moving && impulseboostz != 0) dir.z += impulseboostz;
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                         if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
