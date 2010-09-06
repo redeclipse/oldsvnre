@@ -24,7 +24,7 @@ namespace physics
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     VAR(IDF_PERSIST, impulseaction, 0, 1, 2); // determines if impulse remains active when pushed, 0 = off, 1 = only if no gravity or impulsestyle requires no ground contact, 2 = always
-    FVAR(IDF_PERSIST, impulsekick, 0, 135, 179.9f); // determines the minimum angle to switch between wall kick and run
+    FVAR(IDF_PERSIST, impulsekick, 0, 160, 180); // determines the minimum angle to switch between wall kick and run
     VAR(IDF_PERSIST, impulseturn, 0, 1, 2); // determines if parkour actions force turning, 0 = off, 1 = only wall run, 2 = wall run and kick
     VAR(IDF_PERSIST, dashaction, 0, 3, 3); // determines how dash action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
@@ -757,7 +757,8 @@ namespace physics
                         }
                         vec dir(0, 0, 1);
                         if(!pulse || moving)
-                            vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                            vecfromyawpitch(d->aimyaw, max(d->aimpitch, impulsepitch), moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                        if(moving && impulseboostz != 0) dir.z += impulseboostz;
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
                         d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
                         if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
