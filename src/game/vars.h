@@ -117,7 +117,7 @@ GFVAR(0, bomberweight, -10000, 100, 10000);
 
 GVAR(0, skillmin, 1, 65, 101);
 GVAR(0, skillmax, 1, 85, 101);
-GVAR(0, botbalance, -2, -2, INT_MAX-1); // -2 = numplayers only when alone -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
+GVAR(0, botbalance, -2, -2, INT_MAX-1); // -2 = 2 unless server is non-public, -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botlimit, 0, 16, INT_MAX-1);
 GVAR(0, enemybalance, 0, 1, 3);
 GVAR(0, enemyspawntime, 1, 60000, INT_MAX-1); // when enemies respawn
@@ -132,24 +132,26 @@ GFVAR(0, forcefloorcurb, -1, -1, 1000);
 GFVAR(0, forceaircurb, -1, -1, 1000);
 GFVAR(0, forceslidecurb, -1, -1, 1000);
 
-GFVAR(0, movespeed, 0, 100.f, 1000); // speed
+GFVAR(0, movespeed, 0, 100, 1000); // speed
 GFVAR(0, movecrawl, 0, 0.5f, 1000); // crawl modifier
 GFVAR(0, movesprint, 0, 1.6f, 1000); // sprinting modifier
 GFVAR(0, movejetpack, 0, 1.6f, 1000); // jetpack modifier
 GFVAR(0, movestraight, 0, 1.2f, 1000); // non-strafe modifier
-GFVAR(0, movestrafe, 0, 1.f, 1000); // strafe modifier
+GFVAR(0, movestrafe, 0, 1, 1000); // strafe modifier
 GFVAR(0, moveinair, 0, 0.9f, 1000); // in-air modifier
 GFVAR(0, movestepup, 0, 0.9f, 1000); // step-up modifier
 GFVAR(0, movestepdown, 0, 1.1f, 1000); // step-down modifier
 
-GFVAR(0, jumpspeed, 0, 100.f, 1000); // extra velocity to add when jumping
-GFVAR(0, impulsespeed, 0, 100.f, 1000); // extra velocity to add when impulsing
-GFVAR(0, impulselimit, 0, 0.f, 10000); // maximum impulse speed
-GFVAR(0, impulseboost, 0, 1.15f, 1000); // thrust modifier
-GFVAR(0, impulsedash, 0, 1.35f, 1000); // dashing modifier
-GFVAR(0, impulsejump, 0, 1.25f, 1000); // jump modifier
+GFVAR(0, jumpspeed, 0, 100, 1000); // extra velocity to add when jumping
+GFVAR(0, impulsespeed, 0, 100, 1000); // extra velocity to add when impulsing
+GFVAR(0, impulselimit, 0, 0, 10000); // maximum impulse speed
+GFVAR(0, impulseboost, 0, 1, 1000); // thrust modifier
+GFVAR(0, impulseboostz, -1, 0.5f, 1); // thrust z modifier
+GFVAR(0, impulsepitch, -90, 0, 90); // thrust pitch limit
+GFVAR(0, impulsedash, 0, 1.2f, 1000); // dashing modifier
+GFVAR(0, impulsejump, 0, 1.1f, 1000); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, 1000); // melee modifier
-GFVAR(0, impulseparkour, 0, 1.15f, 1000); // parkour modifier
+GFVAR(0, impulseparkour, 0, 1, 1000); // parkour modifier
 GFVAR(0, impulseparkournorm, 0, 0.5f, 1000); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
@@ -158,22 +160,22 @@ GVAR(0, impulsedelay, 0, 125, INT_MAX-1); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 1000, INT_MAX-1); // minimum time between dashes
 GVAR(0, impulsejetdelay, 0, 250, INT_MAX-1); // minimum time between jetpack
 GVAR(0, impulseslide, 0, 500, INT_MAX-1); // minimum time before floor friction kicks back in
-GVAR(0, impulsemeter, 0, 30000, INT_MAX-1); // impulse dash length; 0 = unlimited, anything else = timer
+GVAR(0, impulsemeter, 0, 20000, INT_MAX-1); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 1000, INT_MAX-1); // cost of impulse jump
-GVAR(0, impulseskate, 0, 2000, INT_MAX-1); // length of time a run along a wall can last
+GVAR(0, impulseskate, 0, 1000, INT_MAX-1); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, 1000); // sprinting impulse meter depletion
-GFVAR(0, impulsejetpack, 0, 2.f, 1000); // jetpack impulse meter depletion
+GFVAR(0, impulsejetpack, 0, 1, 1000); // jetpack impulse meter depletion
 GFVAR(0, impulseregen, 0, 1, 1000); // impulse regen multiplier
-GFVAR(0, impulseregencrouch, 0, 3, 1000); // impulse regen crouch modifier
-GFVAR(0, impulseregensprint, 0, 0.6f, 1000); // impulse regen sprinting modifier
-GFVAR(0, impulseregenjetpack, 0, 2.f, 1000); // impulse regen jetpack modifier
-GFVAR(0, impulseregenmove, 0, 0.9f, 1000); // impulse regen moving modifier
+GFVAR(0, impulseregencrouch, 0, 2, 1000); // impulse regen crouch modifier
+GFVAR(0, impulseregensprint, 0, 0.75f, 1000); // impulse regen sprinting modifier
+GFVAR(0, impulseregenjetpack, 0, 2, 1000); // impulse regen jetpack modifier
+GFVAR(0, impulseregenmove, 0, 1, 1000); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.1f, 1000); // impulse regen in-air modifier
 
-GFVAR(0, stillspread, 0, 2.f, 1000);
-GFVAR(0, movespread, 0, 4.f, 1000);
-GFVAR(0, inairspread, 0, 4.f, 1000);
-GFVAR(0, impulsespread, 0, 8.f, 1000);
+GFVAR(0, stillspread, 0, 2, 1000);
+GFVAR(0, movespread, 0, 4, 1000);
+GFVAR(0, inairspread, 0, 4, 1000);
+GFVAR(0, impulsespread, 0, 8, 1000);
 
 GFVAR(0, normalscale, 0, 1, 1000);
 GFVAR(0, limitedscale, 0, 0.75f, 1000);
