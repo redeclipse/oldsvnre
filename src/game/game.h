@@ -266,8 +266,8 @@ gametypes gametype[] = {
         "defend-the-flag",                  { "quick", "conquer", "" },
     },
     {
-        G_BOMBER,          G_M_TEAM,        G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE,
-        "bomber-ball",                      { "", "", "" },
+        G_BOMBER,          G_M_TEAM,        G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_GSP1,
+        "bomber-ball",                      { "multi", "", "" },
     },
     {
         G_TRIAL,        G_M_NONE,           G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE,

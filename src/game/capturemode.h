@@ -24,17 +24,17 @@ struct captureservmode : capturestate, servmode
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
-        dropaffinity(ci, ci->state.o);
+        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
     void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush)
     {
-        if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o);
+        //if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
     void died(clientinfo *ci, clientinfo *actor)
     {
-        dropaffinity(ci, ci->state.o);
+        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
     int addscore(int team)

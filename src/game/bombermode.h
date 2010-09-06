@@ -26,12 +26,12 @@ struct bomberservmode : bomberstate, servmode
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
-        dropaffinity(ci, ci->state.o);
+        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
     void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush)
     {
-        if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o);
+        //if(weaptype[weap].melee || flags&HIT_CRIT) dropaffinity(target, target->state.o);
     }
 
     void spawned(clientinfo *ci)
@@ -46,7 +46,7 @@ struct bomberservmode : bomberstate, servmode
 
     void died(clientinfo *ci, clientinfo *actor)
     {
-        dropaffinity(ci, ci->state.o);
+        dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
     int addscore(int team)
@@ -148,18 +148,27 @@ struct bomberservmode : bomberstate, servmode
         if(bombertime)
         {
             if(gamemillis < bombertime) return;
-            vector<int> candidates[TEAM_MAX];
-            loopv(flags) candidates[flags[i].team].add(i);
-            loopi(TEAM_COUNT)
+            if(!m_gsp1(gamemode, mutators))
             {
-                int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
-                if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
+                vector<int> candidates[TEAM_MAX];
+                loopv(flags) candidates[flags[i].team].add(i);
+                loopi(TEAM_COUNT)
                 {
-                    bomberstate::returnaffinity(candidates[i][r], gamemillis, true, true);
-                    sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
+                    int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
+                    if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
+                    {
+                        bomberstate::returnaffinity(candidates[i][r], gamemillis, true, true);
+                        sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
+                    }
+                    else return;
                 }
-                else return;
             }
+            else loopv(flags) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
+            { // multi-ball
+                bomberstate::returnaffinity(i, gamemillis, true, true);
+                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
+            }
+
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, "\fwnew round starting");
             bombertime = 0;
         }
@@ -173,7 +182,7 @@ struct bomberservmode : bomberstate, servmode
                 {
                     ci->state.weapshots[WEAP_GRENADE][0].add(1);
                     sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 1, WEAP_GRENADE, -1, -1);
-                    dropaffinity(ci, ci->state.o);
+                    dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
                 }
                 continue;
             }

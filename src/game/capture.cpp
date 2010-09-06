@@ -11,16 +11,13 @@ namespace capture
 
     bool dropaffinity(gameent *d)
     {
-        if(m_capture(game::gamemode) && !m_gsp3(game::gamemode, game::mutators) && carryaffinity(d))
+        if(m_capture(game::gamemode) && !m_gsp3(game::gamemode, game::mutators) && carryaffinity(d) && d->action[AC_AFFINITY])
         {
-            if(d->action[AC_AFFINITY])
-            {
-                vec inertia = vec(d->vel).add(d->falling);
-                client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
-                d->action[AC_AFFINITY] = false;
-                d->actiontime[AC_AFFINITY] = 0;
-                return true;
-            }
+            vec inertia = vec(d->vel).add(d->falling);
+            client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
+            d->action[AC_AFFINITY] = false;
+            d->actiontime[AC_AFFINITY] = 0;
+            return true;
         }
         return false;
     }

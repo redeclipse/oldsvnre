@@ -151,7 +151,8 @@ namespace server
     extern int gamemode, mutators;
     struct servstate : gamestate
     {
-        vec o;
+        vec o, vel, falling;
+        float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
         int score, spree, crits, rewards, flags, teamkills, shotdamage, damage;
@@ -184,6 +185,8 @@ namespace server
             lastfireowner = -1;
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
+            vel = falling = vec(0, 0, 0);
+            yaw = pitch = roll = 0;
         }
     };
 
@@ -3513,25 +3516,43 @@ namespace server
                     p.get();
                     getuint(p);
                     uint flags = getuint(p);
-                    vec pos;
+                    vec pos, vel, falling;
+                    float yaw, pitch, roll;
                     loopk(3)
                     {
                         int n = p.get(); n |= p.get()<<8; if(flags&(1<<k)) { n |= p.get()<<16; if(n&0x800000) n |= -1<<24; }
                         pos[k] = n/DMF;
                     }
-                    loopk(3) p.get();
-                    p.get(); if(flags&(1<<3)) p.get();
-                    loopk(2) p.get();
+                    int dir = p.get(); dir |= p.get()<<8;
+                    yaw = dir%360;
+                    pitch = clamp(dir/360, 0, 180)-90;
+                    roll = clamp(int(p.get()), 0, 180)-90;
+                    int mag = p.get(); if(flags&(1<<3)) mag |= p.get()<<8;
+                    dir = p.get(); dir |= p.get()<<8;
+                    vecfromyawpitch(dir%360, clamp(dir/360, 0, 180)-90, 1, 0, vel);
+                    vel.mul(mag/DVELF);
                     if(flags&(1<<4))
                     {
-                        p.get(); if(flags&(1<<5)) p.get();
-                        if(flags&(1<<6)) loopk(2) p.get();
+                        mag = p.get(); if(flags&(1<<5)) mag |= p.get()<<8;
+                        if(flags&(1<<6))
+                        {
+                            dir = p.get(); dir |= p.get()<<8;
+                            vecfromyawpitch(dir%360, clamp(dir/360, 0, 180)-90, 1, 0, falling);
+                        }
+                        else falling = vec(0, 0, -1);
+                        falling.mul(mag/DVELF);
                     }
+                    else falling = vec(0, 0, 0);
                     if(flags&(1<<7)) loopk(2) p.get();
                     if(havecn)
                     {
                         vec oldpos = cp->state.o;
                         cp->state.o = pos;
+                        cp->state.vel = vel;
+                        cp->state.falling = falling;
+                        cp->state.yaw = yaw;
+                        cp->state.pitch = pitch;
+                        cp->state.roll = roll;
                         if(cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING)
                         {
                             cp->position.setsize(0);
