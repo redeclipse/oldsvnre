@@ -1224,7 +1224,7 @@ namespace client
                             t->resetphys();
                             break;
                         }
-                        case SPHY_BOOST: case SPHY_KICK: case SPHY_SKATE:
+                        case SPHY_BOOST: case SPHY_KICK: case SPHY_SKATE: case SPHY_DASH:
                         {
                             t->impulse[IM_TYPE] = IM_T_BOOST+(st-SPHY_BOOST);
                             t->impulse[IM_TIME] = lastmillis;

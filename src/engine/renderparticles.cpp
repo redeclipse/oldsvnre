@@ -1250,9 +1250,10 @@ void regularcreate(int type, int color, int fade, const vec &p, float size, floa
     create(type, color, fade, p, size, blend, grav, collide, pl);
 }
 
-void splash(int type, int color, float radius, int num, int fade, const vec &p, float size, float blend, int grav, int collide)
+void splash(int type, int color, float radius, int num, int fade, const vec &p, float size, float blend, int grav, int collide, float vel)
 {
     if(camera1->o.dist(p) > maxparticledistance) return;
+#if 0
     float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + COLLIDEERROR : -1;
     int fmin = 1;
     int fmax = fade*3;
@@ -1262,12 +1263,14 @@ void splash(int type, int color, float radius, int num, int fade, const vec &p, 
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
         newparticle(p, tmp, f, type, color, size, blend, grav, collide)->val = collidez;
     }
+#endif
+    regularshape(type, radius, color, 21, num, fade, p, size, blend, grav, collide, vel);
 }
 
-void regularsplash(int type, int color, float radius, int num, int fade, const vec &p, float size, float blend, int grav, int collide, int delay)
+void regularsplash(int type, int color, float radius, int num, int fade, const vec &p, float size, float blend, int grav, int collide, float vel, int delay)
 {
     if(!emit_particles() || (delay > 0 && rnd(delay) != 0)) return;
-    splash(type, color, radius, num, fade, p, size, blend, grav, collide);
+    splash(type, color, radius, num, fade, p, size, blend, grav, collide, vel);
 }
 
 bool canaddparticles()
@@ -1287,16 +1290,16 @@ void part_create(int type, int fade, const vec &p, int color, float size, float 
     create(type, color, fade, p, size, blend, grav, collide, pl);
 }
 
-void regular_part_splash(int type, int num, int fade, const vec &p, int color, float size, float blend, int grav, int collide, float radius, int delay)
+void regular_part_splash(int type, int num, int fade, const vec &p, int color, float size, float blend, int grav, int collide, float radius, float vel, int delay)
 {
     if(!canaddparticles()) return;
-    regularsplash(type, color, radius, num, fade, p, size, blend, grav, collide, delay);
+    regularsplash(type, color, radius, num, fade, p, size, blend, grav, collide, vel, delay);
 }
 
-void part_splash(int type, int num, int fade, const vec &p, int color, float size, float blend, int grav, int collide, float radius)
+void part_splash(int type, int num, int fade, const vec &p, int color, float size, float blend, int grav, int collide, float radius, float vel)
 {
     if(!canaddparticles()) return;
-    splash(type, color, radius, num, fade, p, size, blend, grav, collide);
+    splash(type, color, radius, num, fade, p, size, blend, grav, collide, vel);
 }
 
 void part_trail(int ptype, int fade, const vec &s, const vec &e, int color, float size, float blend, int grav, int collide)
@@ -1359,7 +1362,7 @@ void part_spawn(const vec &o, const vec &v, float z, uchar type, int amt, int fa
     {
         vec w(rnd(int(v.x*2))-int(v.x), rnd(int(v.y*2))-int(v.y), rnd(int(v.z*2))-int(v.z)+z);
         w.add(o);
-        part_splash(type, 1, fade, w, color, size, blend, grav, collide, 1);
+        part_splash(type, 1, fade, w, color, size, blend, grav, collide, 1, 1);
     }
 }
 

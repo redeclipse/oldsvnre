@@ -4,7 +4,7 @@ namespace physics
     FVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
     FVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
     FVAR(IDF_WORLD, liquidcurb, 0, 10.f, 1000);
-    FVAR(IDF_WORLD, floorcurb, 0, 7.5f, 1000);
+    FVAR(IDF_WORLD, floorcurb, 0, 5.f, 1000);
     FVAR(IDF_WORLD, aircurb, 0, 25.f, 1000);
     FVAR(IDF_WORLD, slidecurb, 0, 40.f, 1000);
 
@@ -24,7 +24,7 @@ namespace physics
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     VAR(IDF_PERSIST, impulseaction, 0, 1, 2); // determines if impulse remains active when pushed, 0 = off, 1 = only if no gravity or impulsestyle requires no ground contact, 2 = always
-    FVAR(IDF_PERSIST, impulsekick, 0, 160, 180); // determines the minimum angle to switch between wall kick and run
+    FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum angle to switch between wall kick and run
     VAR(IDF_PERSIST, impulseturn, 0, 1, 2); // determines if parkour actions force turning, 0 = off, 1 = only wall run, 2 = wall run and kick
     VAR(IDF_PERSIST, dashaction, 0, 3, 3); // determines how dash action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
@@ -760,9 +760,9 @@ namespace physics
                             vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                         if(!dash && moving && impulseboostz != 0) dir.z += impulseboostz;
                         (d->vel = dir).normalize().mul(impulsevelocity(d, skew));
-                        d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, IM_T_BOOST, lastmillis);
+                        d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
                         if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_BOOST);
+                        client::addmsg(N_SPHY, "ri2", d->clientnum, dash ? SPHY_DASH : SPHY_BOOST);
                         game::impulseeffect(d);
                     }
                 }
@@ -884,9 +884,9 @@ namespace physics
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             gameent *d = (gameent *)pl;
+            if(!d->turnside && (d->physstate > PHYS_FALL || d->onladder)) d->resetjump();
             if(local) modifyinput(d, m, wantsmove, floating, millis);
             if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
-            else if(!d->turnside && (d->physstate > PHYS_FALL || d->onladder)) d->resetjump();
             else d->timeinair = 0;
         }
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;

@@ -3577,7 +3577,7 @@ namespace server
                         if(cp->state.onfire(gamemillis, GAME(fireburntime))) cp->state.lastfire = cp->state.lastfireburn = 0;
                         else break; // don't propogate
                     }
-                    else if(idx == SPHY_BOOST && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulsedelay)))
+                    else if((idx == SPHY_BOOST || idx == SPHY_DASH) && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulsedelay)))
                         cp->state.lastboost = gamemillis;
                     else if(idx == SPHY_POWER) getint(p);
                     QUEUE_MSG;
