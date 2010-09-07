@@ -286,14 +286,14 @@ namespace weapons
                 }
             }
 
-            int rays = WEAP2(weap, rays, secondary);
+            int rays = WEAP2(weap, rays, secondary), spmax = 0;
             if(rays > 1 && WEAP2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
             float accmod = d->physstate == PHYS_FALL && !d->onladder ? inairspread : 0;
-            if(physics::jetpack(d)) accmod += impulsespread;
-            if(physics::sprinting(d)) accmod += impulsespread;
-            else if(d->move || d->strafe) accmod += movespread;
+            if(physics::jetpack(d)) { accmod += impulsespread; spmax += 1; }
+            if(physics::sprinting(d)) { accmod += impulsespread; spmax += 2; }
+            else if(d->move || d->strafe) { accmod += movespread; spmax += 1; }
             else if(!physics::iscrouching(d) && (weap != WEAP_RIFLE || !secondary)) accmod += stillspread;
-            int spread = WEAPSP(weap, secondary, game::gamemode, game::mutators, accmod);
+            int spread = WEAPSP(weap, secondary, game::gamemode, game::mutators, accmod, spmax);
             loopi(rays)
             {
                 vec dest;
