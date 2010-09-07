@@ -190,8 +190,8 @@ WEAPON(shotgun,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,      0,      0,
     2,      0,      0,      0,
-    0,      0,      0,      0,      0.5f,   0.5f,   50,     50,     0.05f,  0.75f,  2,      2,      0,      200,    1,      1,
-    15,     15,     25,     20,     0.4f,   0.3f,   150,    150,    0.5f,   0.5f,   35,     15,     1,      1.5f,
+    0,      0,      0,      0,      0.5f,   0.5f,   50,     50,     0.05f,  0.75f,  2,      2,      0,      225,    1,      1,
+    15,     15,     25,     20,     0.4f,   0.3f,   150,    150,    0.5f,   0.75f,  35,     15,     1,      1.5f,
     2,      6,      10,     10,     1,      1,      1,      1,      0.65f,  0.65f,  0.375f, 0.375f,
     1,      1,      1,      1,      1,      1,      1,      1,      0,      0,      6,      6
 );
@@ -236,7 +236,7 @@ WEAPON(plasma,
 );
 WEAPON(rifle,
     5,      5,      1,      1,      750,    750,    1500,   50,     100,    5000,   25000,  0,      0,      5000,   5000,
-    0,      0,      0,      0,      200,    200,    28,     0,      1,      1,      1,      0,
+    0,      0,      0,      0,      200,    200,    28,     0,      1,      1,      2,      0,
     0,      0,      40,     40,     -1,             -1,             5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_CONT,
@@ -365,7 +365,7 @@ extern weaptypes weaptype[];
 #endif
 #define WEAPLM(a,b,c)           (a*(m_limited(b, c) || m_arena(b, c) ? GAME(limitedscale) : GAME(normalscale)))
 #define WEAPEX(a,b,c,d,e)       (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? int(ceilf(WEAPLM(WEAP2(a, explode, b)*e, c, d))) : 0)
-#define WEAPSP(a,b,c,d,e)       (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? WEAP2(a, spread, b)+(int(min(WEAP2(a, spread, b), 1)*e)) : 0)
+#define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? WEAP2(a, spread, b)+(int(ceilf(max(WEAP2(a, spread, b), f)*e))) : 0)
 #define WEAPSND(a,b)            (weaptype[a].sound+b)
 #define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
 #define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
