@@ -5,12 +5,12 @@ GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 GVAR(IDF_ADMIN, automaster, 0, 0, 1);
 
-GVAR(IDF_ADMIN, modelimit, 0, G_EDITMODE, G_MAX-1);
+GVAR(IDF_ADMIN, modelimit, 0, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, mutslimit, 0, G_M_ALL, G_M_ALL);
-GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
-GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
+GVAR(IDF_ADMIN, modelock, 0, 0, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
+GVAR(IDF_ADMIN, mapslock, 0, 0, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
 GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
-GVAR(IDF_ADMIN, votelock, 0, 1, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
+GVAR(IDF_ADMIN, votelock, 0, 0, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 3000, INT_MAX-1);
 
 GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when empty, 2: when matches end)
@@ -142,8 +142,8 @@ GFVAR(0, moveinair, 0, 0.9f, 1000); // in-air modifier
 GFVAR(0, movestepup, 0, 0.9f, 1000); // step-up modifier
 GFVAR(0, movestepdown, 0, 1.1f, 1000); // step-down modifier
 
-GFVAR(0, jumpspeed, 0, 100, 1000); // extra velocity to add when jumping
-GFVAR(0, impulsespeed, 0, 100, 1000); // extra velocity to add when impulsing
+GFVAR(0, jumpspeed, 0, 110, 1000); // extra velocity to add when jumping
+GFVAR(0, impulsespeed, 0, 80, 1000); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, 10000); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, 1000); // thrust modifier
 GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
