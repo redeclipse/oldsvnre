@@ -16,6 +16,20 @@ namespace projs
     VAR(IDF_PERSIST, ejectspin, 0, 1, 1);
     VAR(IDF_PERSIST, ejecthint, 0, 1, 1);
 
+    FVAR(IDF_PERSIST, gibselasticity, -10000, 0.35f, 10000);
+    FVAR(IDF_PERSIST, gibsrelativity, -10000, 0.95f, 10000);
+    FVAR(IDF_PERSIST, gibswaterfric, 0, 2, 10000);
+    FVAR(IDF_PERSIST, gibsweight, -10000, 150, 10000);
+
+    FVAR(IDF_PERSIST, debriselasticity, -10000, 0.6f, 10000);
+    FVAR(IDF_PERSIST, debriswaterfric, 0, 1.7f, 10000);
+    FVAR(IDF_PERSIST, debrisweight, -10000, 165, 10000);
+
+    FVAR(IDF_PERSIST, ejectelasticity, -10000, 0.35f, 10000);
+    FVAR(IDF_PERSIST, ejectrelativity, -10000, 1, 10000);
+    FVAR(IDF_PERSIST, ejectwaterfric, 0, 1.75f, 10000);
+    FVAR(IDF_PERSIST, ejectweight, -10000, 180, 10000);
+
     VAR(IDF_PERSIST, projtrails, 0, 1, 1);
     VAR(IDF_PERSIST, projtraildelay, 1, 25, INT_MAX-1);
     VAR(IDF_PERSIST, projtraillength, 1, 500, INT_MAX-1);
@@ -467,11 +481,11 @@ namespace projs
                         case 1: proj.mdl = "projs/gibs/gib02"; break;
                         case 0: default: proj.mdl = "projs/gibs/gib01"; break;
                     }
-                    proj.elasticity = 0.3f;
                     proj.reflectivity = 0.f;
-                    proj.relativity = 0.95f;
-                    proj.waterfric = 2.0f;
-                    proj.weight = 150.f*proj.lifesize;
+                    proj.elasticity = gibselasticity;
+                    proj.relativity = gibsrelativity;
+                    proj.waterfric = gibswaterfric;
+                    proj.weight = gibsweight*proj.lifesize;
                     proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(21)-10));
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                     proj.escaped = !proj.owner;
@@ -491,11 +505,10 @@ namespace projs
                     case 1: proj.mdl = "projs/debris/debris02"; break;
                     case 0: default: proj.mdl = "projs/debris/debris01"; break;
                 }
-                proj.elasticity = 0.6f;
-                proj.reflectivity = 0.f;
-                proj.relativity = 0.f;
-                proj.waterfric = 1.7f;
-                proj.weight = 150.f*proj.lifesize;
+                proj.relativity = proj.reflectivity = 0.f;
+                proj.elasticity = debriselasticity;
+                proj.waterfric = debriswaterfric;
+                proj.weight = debrisweight*proj.lifesize;
                 proj.vel.add(vec(rnd(101)-50, rnd(101)-50, rnd(151)-50)).mul(2);
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER;
                 proj.escaped = !proj.owner;
@@ -518,11 +531,11 @@ namespace projs
                     proj.mdl = "projs/catridge";
                     proj.lifesize = 1;
                 }
-                proj.elasticity = 0.3f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 1.f;
-                proj.waterfric = 1.75f;
-                proj.weight = (180+(proj.maxspeed*2))*proj.lifesize; // so they fall better in relation to their speed
+                proj.elasticity = ejectelasticity;
+                proj.relativity = ejectrelativity;
+                proj.waterfric = ejectwaterfric;
+                proj.weight = (ejectweight+(proj.maxspeed*2))*proj.lifesize; // so they fall better in relation to their speed
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = rnd(250)+250;
@@ -541,11 +554,11 @@ namespace projs
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
                 proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
                 proj.lifesize = 1.f;
-                proj.elasticity = 0.35f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 1.f;
-                proj.waterfric = 1.75f;
-                proj.weight = 150.f;
+                proj.elasticity = itemelasticity;
+                proj.relativity = itemrelativity;
+                proj.waterfric = itemwaterfric;
+                proj.weight = itemweight;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 float mag = proj.inertia.magnitude();
@@ -582,8 +595,8 @@ namespace projs
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 1.f;
-                proj.waterfric = 1.75f;
+                proj.relativity = 0;
+                proj.waterfric = itemwaterfric;
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
@@ -890,7 +903,7 @@ namespace projs
                     {
                         int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16)+1)|((int(144*max(1.f-proj.lifespan,0.15f))+1)<<8);
                         if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                            part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*4.f);
+                            part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*10.f);
                         else
                         {
                             float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.scale, proj.scale, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from)));
@@ -913,7 +926,7 @@ namespace projs
                             part_flare(proj.to, proj.o, 1, PART_FLARE, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.125f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*2.f);
+                                part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*5.f);
                         }
                         break;
                     }
@@ -935,7 +948,7 @@ namespace projs
                             part_flare(proj.to, proj.o, 1, PART_FLARE, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale);
                             part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.25f);
                             if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
-                                part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*2.f);
+                                part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*5.f);
                         }
                         break;
                     }
@@ -1156,7 +1169,7 @@ namespace projs
                     {
                         int w = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT)%WEAP_MAX, life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
                         float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.scale;
-                        vec pos = proj.hit ? vec(proj.o).sub(vec(proj.vel).normalize().mul(WEAP2(proj.weap, flakoff, proj.flags&HIT_ALT))) : proj.o;
+                        vec pos = vec(proj.o).sub(vec(proj.vel).normalize().mul(proj.hit ? WEAP2(proj.weap, flakoff, proj.flags&HIT_ALT) : 1));
                         if(WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) life -= int(ceilf(life*WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
                         loopi(WEAP2(proj.weap, flakrays, proj.flags&HIT_ALT))
                         {
