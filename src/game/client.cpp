@@ -102,6 +102,56 @@ namespace client
     }
     ICOMMAND(0, authkey, "ss", (char *name, char *key), setauthkey(name, key));
 
+    void writegamevars(const char *name, bool all = false, bool server = false)
+    {
+        if(!name || !*name) name = "vars.cfg";
+        stream *f = openfile(name, "w");
+        if(!f) return;
+        vector<ident *> ids;
+        enumerate(*idents, ident, id, ids.add(&id));
+        ids.sort(sortidents);
+        loopv(ids)
+        {
+            ident &id = *ids[i];
+            if(id.flags&IDF_CLIENT && !(id.flags&IDF_ADMIN)) switch(id.type)
+            {
+                case ID_VAR:
+                    if(*id.storage.i == id.def.i)
+                    {
+                        if(all) f->printf("// ");
+                        else break;
+                    }
+                    if(server) f->printf("sv_");
+                    f->printf((id.flags&IDF_HEX ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i);
+                    f->printf("\n");
+                    break;
+                case ID_FVAR:
+                    if(*id.storage.f == id.def.f)
+                    {
+                        if(all) f->printf("// ");
+                        else break;
+                    }
+                    if(server) f->printf("sv_");
+                    f->printf("%s %s", id.name, floatstr(*id.storage.f));
+                    f->printf("\n");
+                    break;
+                case ID_SVAR:
+                    if(!strcmp(*id.storage.s, id.def.s))
+                    {
+                        if(all) f->printf("// ");
+                        else break;
+                    }
+                    if(server) f->printf("sv_");
+                    f->printf("%s ", id.name);
+                    writeescapedstring(f, *id.storage.s);
+                    f->printf("\n");
+                    break;
+            }
+        }
+        delete f;
+    }
+    ICOMMAND(0, writevars, "sii", (char *name, int *all, int *sv), writegamevars(name, *all!=0, *sv!=0));
+
     // collect c2s messages conveniently
     vector<uchar> messages;
     bool messagereliable = false;

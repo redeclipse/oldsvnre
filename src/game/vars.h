@@ -73,12 +73,16 @@ GVAR(0, regenhealth, 0, 5, INT_MAX-1);
 GVAR(0, regenextra, 0, 10, INT_MAX-1);
 GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
 
+GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 30000, INT_MAX-1); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, INT_MAX-1); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GFVAR(0, itemthreshold, 0, 1, 1000); // if numitems/numclients/maxcarry is less than this, spawn one of this type
-GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
+GFVAR(0, itemelasticity, -10000, 0.35f, 10000);
+GFVAR(0, itemrelativity, -10000, 1, 10000);
+GFVAR(0, itemwaterfric, 0, 1.75f, 10000);
+GFVAR(0, itemweight, -10000, 150, 10000);
 
 GVAR(0, timelimit, 0, 30, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
