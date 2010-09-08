@@ -365,7 +365,7 @@ extern weaptypes weaptype[];
 #endif
 #define WEAPLM(a,b,c)           (a*(m_limited(b, c) || m_arena(b, c) ? GAME(limitedscale) : GAME(normalscale)))
 #define WEAPEX(a,b,c,d,e)       (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? int(ceilf(WEAPLM(WEAP2(a, explode, b)*e, c, d))) : 0)
-#define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? WEAP2(a, spread, b)+(int(ceilf(max(WEAP2(a, spread, b), f)*e))) : 0)
+#define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? int(ceilf(max(WEAP2(a, spread, b), f)*e)) : 0)
 #define WEAPSND(a,b)            (weaptype[a].sound+b)
 #define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
 #define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))

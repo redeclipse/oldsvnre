@@ -176,10 +176,10 @@ GFVAR(0, impulseregenmove, 0, 1, 1000); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.1f, 1000); // impulse regen in-air modifier
 GVAR(0, impulseregendelay, 0, 1000, INT_MAX-1); // delay before impulse regens
 
-GFVAR(0, stillspread, 0, 2, 1000);
-GFVAR(0, movespread, 0, 4, 1000);
-GFVAR(0, inairspread, 0, 4, 1000);
-GFVAR(0, impulsespread, 0, 8, 1000);
+GFVAR(0, stillspread, 0, 1.5f, 1000);
+GFVAR(0, movespread, 0, 3, 1000);
+GFVAR(0, inairspread, 0, 3, 1000);
+GFVAR(0, impulsespread, 0, 6, 1000);
 
 GFVAR(0, normalscale, 0, 1, 1000);
 GFVAR(0, limitedscale, 0, 0.75f, 1000);
