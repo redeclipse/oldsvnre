@@ -44,9 +44,7 @@ namespace projs
 
     int calcdamage(gameent *actor, gameent *target, int weap, int &flags, int radial, float size, float dist, float scale)
     {
-        int damage = int(ceilf(WEAP2(weap, damage, flags&HIT_ALT)*clamp(scale, 0.f, 1.f))), nodamage = 0; flags &= ~HIT_SFLAGS;
-        if(radial) damage = int(ceilf(damage*clamp(1.f-dist/size, 1e-6f, 1.f)));
-        else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) damage = int(ceilf(damage*clamp(dist, 0.f, 1.f)));
+        int nodamage = 0; flags &= ~HIT_SFLAGS;
         if(actor->aitype < AI_START)
         {
             if((actor == target && !selfdamage) || (m_trial(game::gamemode) && !trialdamage)) nodamage++;
@@ -66,13 +64,17 @@ namespace projs
             flags &= ~HIT_CLEAR;
             flags |= HIT_WAVE;
         }
-        if(flags&HIT_FLAK) damage = int(ceilf(damage*WEAP2(weap, flakdam, flags&HIT_ALT)));
-        if(flags&HIT_HEAD) damage = int(ceilf(damage*WEAP2(weap, headdam, flags&HIT_ALT)*damagescale));
-        else if(flags&HIT_TORSO) damage = int(ceilf(damage*WEAP2(weap, torsodam, flags&HIT_ALT)*damagescale));
-        else if(flags&HIT_LEGS) damage = int(ceilf(damage*WEAP2(weap, legsdam, flags&HIT_ALT)*damagescale));
-        else damage = 0;
 
-        return damage;
+        float skew = damagescale*clamp(scale, 0.f, 1.f);
+        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+        else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+        if(flags&HIT_FLAK) skew *= WEAP2(weap, flakdam, flags&HIT_ALT);
+        if(flags&HIT_HEAD) skew *= WEAP2(weap, headdam, flags&HIT_ALT);
+        else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodam, flags&HIT_ALT);
+        else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdam, flags&HIT_ALT);
+        else skew = 0;
+
+        return int(ceilf(WEAP2(weap, damage, flags&HIT_ALT)*skew));
     }
 
     void hitpush(gameent *d, projent &proj, int flags = 0, int radial = 0, float dist = 0, float scale = 1)
@@ -82,7 +84,7 @@ namespace projs
         float dmag = dir.magnitude();
         if(dmag > 1e-3f) dir.div(dmag);
         else dir = vec(0, 0, 1);
-        if(!weaptype[proj.weap].traced && WEAP2(proj.weap, speed, proj.flags&HIT_ALT))
+        if(proj.child || !weaptype[proj.weap].traced)
         {
             float speed = proj.vel.magnitude();
             if(speed > 1e-6f)
@@ -297,7 +299,7 @@ namespace projs
 
     void bounce(projent &proj, bool ricochet)
     {
-        if((proj.movement > 1 || (proj.projtype == PRJ_SHOT && weaptype[proj.weap].traced)) && (!proj.lastbounce || lastmillis-proj.lastbounce >= 250)) switch(proj.projtype)
+        if((proj.movement > 1 || (proj.projtype == PRJ_SHOT && !proj.child && weaptype[proj.weap].traced)) && (!proj.lastbounce || lastmillis-proj.lastbounce >= 250)) switch(proj.projtype)
         {
             case PRJ_SHOT:
             {
@@ -452,7 +454,7 @@ namespace projs
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
                 proj.mdl = weaptype[proj.weap].proj;
-                proj.escaped = !proj.owner || weaptype[proj.weap].traced;
+                proj.escaped = !proj.owner || proj.child || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
                 break;
             }
@@ -637,7 +639,7 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(proj.projtype == PRJ_SHOT && proj.owner && !weaptype[proj.weap].traced)
+        if(proj.projtype == PRJ_SHOT && !proj.child && proj.owner && !weaptype[proj.weap].traced)
         {
             vec eyedir = vec(proj.o).sub(proj.owner->o);
             float eyedist = eyedir.magnitude();
@@ -1269,7 +1271,7 @@ namespace projs
             bounce(proj, ricochet);
             if(ricochet)
             {
-                if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
+                if(proj.projtype != PRJ_SHOT || proj.child || !weaptype[proj.weap].traced)
                 {
                     reflect(proj, proj.norm);
                     proj.o.add(vec(proj.norm).mul(0.1f)); // offset from surface slightly to avoid initial collision
@@ -1587,7 +1589,7 @@ namespace projs
                 iter(proj);
                 if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)
                 {
-                    if(proj.projtype == PRJ_SHOT && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj)) switch(proj.projtype)
+                    if(proj.projtype == PRJ_SHOT && !proj.child && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj)) switch(proj.projtype)
                     {
                         case PRJ_ENT: case PRJ_AFFINITY:
                         {
@@ -1639,7 +1641,7 @@ namespace projs
             {
                 float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                 int radius = expl > 0 ? int(ceilf(expl)) : 0;
-                if(weaptype[proj.weap].traced) proj.o = proj.to;
+                if(!proj.child && weaptype[proj.weap].traced) proj.o = proj.to;
                 if(proj.state == CS_DEAD)
                 {
                     if(radius)
