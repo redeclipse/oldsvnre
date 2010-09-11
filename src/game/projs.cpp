@@ -150,7 +150,7 @@ namespace projs
             {
                 case WEAP_RIFLE:
                     part_splash(PART_SPARK, 25, 500, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.scale*0.125f, 1, 1, 0, 24, 20);
-                    part_create(PART_PLASMA, 250, proj.o, 0x6611FF, expl*0.5f, 1, 0, 0);
+                    part_create(PART_PLASMA, 500, proj.o, 0x6611FF, expl*0.5f, 1, 0, 0);
                     adddynlight(proj.o, expl*1.1f, vec(0.4f, 0.05f, 1.f), 250, 10);
                     break;
                 default:
@@ -1137,7 +1137,7 @@ namespace projs
                             expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.scale*proj.lifesize);
                         vec dir = dist >= size ? vec(proj.vel).normalize() : vec(proj.o).sub(proj.from).normalize();
                         proj.to = vec(proj.o).sub(vec(dir).mul(size));
-                        int len = proj.flags&HIT_ALT ? 1000 : 500;
+                        int len = proj.flags&HIT_ALT ? 2000 : 1000;
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.scale);

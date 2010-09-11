@@ -685,16 +685,24 @@ namespace physics
                 if(sprint && impulsesprint > 0)
                 {
                     int len = int(ceilf(millis*impulsesprint));
-                    if(canimpulse(d, len, 2)) d->impulse[IM_METER] += len;
+                    if(canimpulse(d, len, 2))
+                    {
+                        d->impulse[IM_METER] += len;
+                        d->impulse[IM_LAST] = lastmillis;
+                    }
                     else sprint = d->action[AC_SPRINT] = false;
                 }
                 if(jetting && impulsejetpack > 0)
                 {
                     int len = int(ceilf(millis*impulsejetpack));
-                    if(canimpulse(d, len, 0)) d->impulse[IM_METER] += len;
+                    if(canimpulse(d, len, 0))
+                    {
+                        d->impulse[IM_METER] += len;
+                        d->impulse[IM_LAST] = lastmillis;
+                    }
                     else jetting = d->action[AC_JUMP] = false;
                 }
-                if(d->impulse[IM_METER] > 0 && impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_TIME] >= impulseregendelay))
+                if(d->impulse[IM_METER] > 0 && impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_LAST] >= impulseregendelay))
                 {
                     bool collect = true; // collect time until it is able to act upon it
                     int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
