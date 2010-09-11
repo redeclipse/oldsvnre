@@ -1324,7 +1324,7 @@ namespace entities
         fixentity(i, true);
         if(m_edit(game::gamemode) && game::player1->state == CS_EDITING)
             client::addmsg(N_EDITENT, "ri5iv", i, (int)(e.o.x*DMF), (int)(e.o.y*DMF), (int)(e.o.z*DMF), e.type, e.attrs.length(), e.attrs.length(), e.attrs.getbuf()); // FIXME
-        if(e.type >= NOTUSED && e.type < MAXENTTYPES)
+        if(e.type < MAXENTTYPES)
         {
             lastenttype[e.type] = max(lastenttype[e.type], i+1);
             lastusetype[enttype[e.type].usetype] = max(lastusetype[enttype[e.type].usetype], i+1);
@@ -1730,7 +1730,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type >= NOTUSED && e.type < MAXENTTYPES) numents[e.type]++;
+            if(e.type < MAXENTTYPES) numents[e.type]++;
             else numinvalid++;
         }
         int offsets[MAXENTTYPES];
@@ -1754,7 +1754,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            idxs[e.type >= NOTUSED && e.type < MAXENTTYPES ? offsets[e.type]++ : offset++] = i;
+            idxs[e.type < MAXENTTYPES ? offsets[e.type]++ : offset++] = i;
         }
     }
 
@@ -2137,7 +2137,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type >= NOTUSED && e.type < MAXENTTYPES)
+            if(e.type < MAXENTTYPES)
             {
                 lastenttype[e.type] = max(lastenttype[e.type], i+1);
                 lastusetype[enttype[e.type].usetype] = max(lastusetype[enttype[e.type].usetype], i+1);
