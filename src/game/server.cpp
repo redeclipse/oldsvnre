@@ -2472,11 +2472,11 @@ namespace server
         {
             bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode);
             int fragvalue = 1;
-            if(target == actor || (m_team(gamemode, mutators) && target->team == actor->team)) fragvalue = -fragvalue;
+            if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
+            else fragvalue = -fragvalue;
             int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue)*(isai ? 1 : 3), style = FRAG_NONE;
             if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators) : m_health(gamemode, mutators)*3/2)))
                 style = FRAG_OBLITERATE;
-            actor->state.frags += fragvalue;
             target->state.spree = 0;
             if(pointvalue)
             {
@@ -2549,7 +2549,8 @@ namespace server
                         }
                     }
                 }
-                if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START) givepoints(target, -pointvalue);
+                if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START)
+                    givepoints(target, -pointvalue);
                 else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
             }
             target->state.deaths++;
@@ -2574,8 +2575,7 @@ namespace server
             if(smode && !smode->damage(ci, ci, ci->state.health, -1, flags)) { return; }
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags)) { return; });
         }
-        int fragvalue = -1, pointvalue = smode ? smode->points(ci, ci) : fragvalue;
-        ci->state.frags += fragvalue;
+        int pointvalue = smode ? smode->points(ci, ci) : -1;
         ci->state.spree = 0;
         if(!flags && m_trial(gamemode))
         {
@@ -2583,7 +2583,8 @@ namespace server
             ci->state.cpnodes.shrink(0);
         }
         ci->state.deaths++;
-        dropitems(ci); givepoints(ci, pointvalue);
+        dropitems(ci);
+        givepoints(ci, pointvalue);
         if(GAME(fireburntime) && (flags&HIT_MELT || flags&HIT_BURN))
         {
             ci->state.lastfire = ci->state.lastfireburn = gamemillis;
