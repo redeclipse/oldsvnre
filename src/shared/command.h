@@ -83,11 +83,7 @@ struct ident
     ident(int t, const char *n, const char *narg, void *f, void *s, int flags = IDF_COMPLETE)
         : type(t), name(n), override(NO_OVERRIDE), fun((void (__cdecl *)(void))f), narg(narg), self(s), flags(flags) {}
 
-    virtual ~ident() {}
-
-    ident &operator=(const ident &o) { memcpy(this, &o, sizeof(ident)); return *this; }        // force vtable copy, ugh
-    
-    virtual void changed() { if(fun) fun(); }
+    void changed() { if(fun) fun(); }
 };
 
 extern void addident(const char *name, ident *id);
@@ -198,7 +194,7 @@ extern void clearsleep(bool clearoverrides = true, bool clearworlds = false);
 #define CCOMMAND(f, n, g, proto, b) _COMMAND(ID_CCOMMAND, (this), n, n, g, proto, b, f)
 #define CCOMMANDN(f, n, name, g, proto, b) _COMMAND(ID_CCOMMAND, (this), n, name, g, proto, b, f)
 
-#define _IVAR(n, m, c, x, b, f) \
+#define IVAR(f, n, m, c, x) \
     struct var_##n : ident \
     { \
         var_##n() : ident(ID_VAR, #n, m, c, x, &val.i, (void *)NULL, f|IDF_COMPLETE) \
@@ -206,12 +202,9 @@ extern void clearsleep(bool clearoverrides = true, bool clearworlds = false);
             addident(name, this); \
         } \
         int operator()() { return val.i; } \
-        b \
     } n
-#define IVAR(f, n, m, c, x)  _IVAR(n, m, c, x, , f)
-#define IVARF(f, n, m, c, x, b) _IVAR(n, m, c, x, void changed() { b; }, f)
 
-#define _IFVAR(n, m, c, x, b, f) \
+#define IFVAR(f, n, m, c, x) \
     struct var_##n : ident \
     { \
         var_##n() : ident(ID_FVAR, #n, m, c, x, &val.f, (void *)NULL, f|IDF_COMPLETE) \
@@ -219,12 +212,9 @@ extern void clearsleep(bool clearoverrides = true, bool clearworlds = false);
             addident(name, this); \
         } \
         float operator()() { return val.f; } \
-        b \
     } n
-#define IFVAR(f, n, m, c, x)  _IFVAR(n, m, c, x, , f)
-#define IFVARF(f, n, m, c, x, b) _IFVAR(n, m, c, x, void changed() { b; }, f)
 
-#define _ISVAR(n, c, b, f) \
+#define ISVAR(f, n, c) \
     struct var_##n : ident \
     { \
         var_##n() : ident(ID_SVAR, #n, newstring(c), newstring(c), &val.s, (void *)NULL, f|IDF_COMPLETE) \
@@ -232,10 +222,7 @@ extern void clearsleep(bool clearoverrides = true, bool clearworlds = false);
             addident(name, this); \
         } \
         char *operator()() { return val.s; } \
-        b \
     } n
-#define ISVAR(f, n, c)  _ISVAR(n, c, , f)
-#define ISVARF(f, n, c, b) _ISVAR(n, c, void changed() { b; }, f)
 
 // game world controlling stuff
 #define RUNWORLD(n) { ident *wid = idents->access(n); if(wid && wid->action && wid->flags&IDF_WORLD) { bool _oldworldidents = worldidents; worldidents = true; execute(wid->action); worldidents = _oldworldidents; }; }
