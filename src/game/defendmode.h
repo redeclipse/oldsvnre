@@ -54,7 +54,7 @@ struct defendservmode : defendstate, servmode
         if(!n) return;
         flag &b = flags[i];
         loopvk(clients) if(clients[k]->state.aitype < AI_START && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], n);
-        score &cs = findscore(team);
+        score &cs = teamscore(team);
         cs.total += n;
         sendf(-1, 1, "ri3", N_SCORE, team, cs.total);
     }
@@ -102,16 +102,6 @@ struct defendservmode : defendstate, servmode
 
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)
     {
-        if(connecting)
-        {
-            loopv(scores)
-            {
-                score &cs = scores[i];
-                putint(p, N_SCORE);
-                putint(p, cs.team);
-                putint(p, cs.total);
-            }
-        }
         putint(p, N_AFFIN);
         putint(p, flags.length());
         loopv(flags)
@@ -136,9 +126,9 @@ struct defendservmode : defendstate, servmode
         loopi(numteams(gamemode, mutators))
         {
             int steam = i+TEAM_FIRST;
-            if(findscore(steam).total >= maxscore)
+            if(teamscore(steam).total >= maxscore)
             {
-                findscore(steam).total = maxscore;
+                teamscore(steam).total = maxscore;
                 sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                 winner(steam, maxscore);
                 return;
@@ -167,7 +157,7 @@ struct defendservmode : defendstate, servmode
             }
             if(steam)
             {
-                findscore(steam).total = INT_MAX-1;
+                teamscore(steam).total = INT_MAX-1;
                 sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyall flags have been secured");
                 winner(steam, INT_MAX-1);
                 return;

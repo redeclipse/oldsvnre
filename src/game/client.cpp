@@ -626,6 +626,7 @@ namespace client
         game::nextmode = game::gamemode; game::nextmuts = game::mutators;
         game::timeremaining = -1;
         game::maptime = 0;
+        hud::sb.scores.shrink(0);
         mapvotes.shrink(0);
         if(editmode) toggleedit();
         if(m_demo(gamemode)) return;
@@ -1285,7 +1286,7 @@ namespace client
                         case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis); break;
                         case SPHY_EXTINGUISH:
                         {
-                            t->resbomberire();
+                            t->resetfire();
                             playsound(S_EXTINGUISH, t->o, t);
                             part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->radius*4, 1, -10);
                             break;
@@ -1561,7 +1562,7 @@ namespace client
                     if(!amt)
                     {
                         f->impulse[IM_METER] = 0;
-                        f->resbomberire();
+                        f->resetfire();
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal; f->lastregen = lastmillis;
@@ -1992,9 +1993,11 @@ namespace client
                 case N_SCORE:
                 {
                     int team = getint(p), total = getint(p);
-                    if(m_capture(game::gamemode)) capture::setscore(team, total);
-                    else if(m_defend(game::gamemode)) defend::setscore(team, total);
-                    else if(m_bomber(game::gamemode)) bomber::setscore(team, total);
+                    if(m_team(game::gamemode, game::mutators))
+                    {
+                        score &ts = hud::sb.teamscore(team);
+                        ts.total = total;
+                    }
                     break;
                 }
 

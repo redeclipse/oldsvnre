@@ -96,7 +96,7 @@ namespace aiman
         if(smode) smode->leavegame(ci, true);
         mutate(smuts, mut->leavegame(ci, true));
         ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
-        distpoints(ci, true); savescore(ci);
+        savescore(ci);
         sendf(-1, 1, "ri3", N_DISCONNECT, cn, DISC_NONE);
         clients.removeobj(ci);
         delclient(cn);
@@ -205,17 +205,17 @@ namespace aiman
             { // skew this if teams are unbalanced
                 if(GAME(teambalance) != 3)
                 {
-                    int teamscores[TEAM_NUM] = {0}, highest = -1;
+                    int plrs[TEAM_NUM] = {0}, highest = -1;
                     loopv(clients) if(clients[i]->state.aitype < 0 && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
                     {
                         int team = clients[i]->team-TEAM_FIRST;
-                        teamscores[team]++;
-                        if(highest < 0 || teamscores[team] > teamscores[highest]) highest = team;
+                        plrs[team]++;
+                        if(highest < 0 || plrs[team] > plrs[highest]) highest = team;
                     }
                     if(highest >= 0)
                     {
                         int bots = balance-people;
-                        loopi(numt) if(i != highest && teamscores[i] < teamscores[highest]) loopj(teamscores[highest]-teamscores[i])
+                        loopi(numt) if(i != highest && plrs[i] < plrs[highest]) loopj(plrs[highest]-plrs[i])
                         {
                             if(bots > 0) bots--;
                             else balance++;

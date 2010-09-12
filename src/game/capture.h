@@ -54,17 +54,9 @@ struct capturestate
     };
     vector<flag> flags;
 
-    struct score
-    {
-        int team, total;
-    };
-
-    vector<score> scores;
-
     void reset()
     {
         flags.shrink(0);
-        scores.shrink(0);
     }
 
     int addaffinity(const vec &o, int team, int base = BASE_NONE, int i = -1)
@@ -158,19 +150,6 @@ struct capturestate
         destroy(i);
         interp(i, t);
 #endif
-    }
-
-    score &findscore(int team)
-    {
-        loopv(scores)
-        {
-            score &cs = scores[i];
-            if(cs.team == team) return cs;
-        }
-        score &cs = scores.add();
-        cs.team = team;
-        cs.total = 0;
-        return cs;
     }
 };
 
