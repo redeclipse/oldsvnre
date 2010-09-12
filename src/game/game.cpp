@@ -41,7 +41,7 @@ namespace game
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
-    FVAR(IDF_PERSIST, firstpersonswaystep, 1, 18.0f, 100);
+    FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.0f, 100);
     FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 1);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
