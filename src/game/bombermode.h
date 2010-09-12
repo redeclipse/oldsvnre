@@ -51,14 +51,14 @@ struct bomberservmode : bomberstate, servmode
 
     int addscore(int team)
     {
-        score &cs = findscore(team);
+        score &cs = teamscore(team);
         cs.total++;
         return cs.total;
     }
 
     int subscore(int team)
     {
-        score &cs = findscore(team);
+        score &cs = teamscore(team);
         cs.total--;
         return cs.total;
     }
@@ -196,16 +196,6 @@ struct bomberservmode : bomberstate, servmode
 
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)
     {
-        if(connecting)
-        {
-            loopv(scores)
-            {
-                score &cs = scores[i];
-                putint(p, N_SCORE);
-                putint(p, cs.team);
-                putint(p, cs.total);
-            }
-        }
         putint(p, N_INITAFFIN);
         putint(p, flags.length());
         loopv(flags)

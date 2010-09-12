@@ -5,14 +5,22 @@ namespace hud
         bool scoreson, scoresoff, shownscores;
         int menustart, menulastpress;
 
-        struct sline { string s; };
-        struct teamscore
+        vector<score> scores;
+        score &teamscore(int team)
         {
-            int team, score;
-            teamscore() {}
-            teamscore(int s, int n) : team(s), score(n) {}
-        };
-        struct scoregroup : teamscore
+            loopv(scores)
+            {
+                score &cs = scores[i];
+                if(cs.team == team) return cs;
+            }
+            score &cs = scores.add();
+            cs.team = team;
+            cs.total = 0;
+            return cs;
+        }
+
+        struct sline { string s; };
+        struct scoregroup : score
         {
             vector<gameent *> players;
         };
@@ -80,10 +88,10 @@ namespace hud
                         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                         {
                             int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
-                            if(m_defend(game::gamemode) && sg.score==INT_MAX)
+                            if(m_defend(game::gamemode) && sg.total==INT_MAX)
                                 game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team secured all flags", teamtype[sg.team].chat, teamtype[sg.team].name);
-                            else if(m_trial(game::gamemode)) game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.score ? timetostr(sg.score) : "dnf");
-                            else game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.score);
+                            else if(m_trial(game::gamemode)) game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total ? timetostr(sg.total) : "dnf");
+                            else game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total);
                         }
                         else
                         {
@@ -97,17 +105,17 @@ namespace hud
             else scoresoff = scoreson = false;
         }
 
-        static int teamscorecmp(const teamscore *x, const teamscore *y)
+        static int scorecmp(const score *x, const score *y)
         {
             if(m_trial(game::gamemode))
             {
-                if((x->score && !y->score) || (x->score && y->score && x->score < y->score)) return -1;
-                if((y->score && !x->score) || (x->score && y->score && y->score < x->score)) return 1;
+                if((x->total && !y->total) || (x->total && y->total && x->total < y->total)) return -1;
+                if((y->total && !x->total) || (x->total && y->total && y->total < x->total)) return 1;
             }
             else
             {
-                if(x->score > y->score) return -1;
-                if(x->score < y->score) return 1;
+                if(x->total > y->total) return -1;
+                if(x->total < y->total) return 1;
             }
             return x->team-y->team;
         }
@@ -132,38 +140,6 @@ namespace hud
             return strcmp((*a)->name, (*b)->name);
         }
 
-        void sortteams(vector<teamscore> &teamscores)
-        {
-            if(m_capture(game::gamemode))
-            {
-                loopv(capture::st.scores) teamscores.add(teamscore(capture::st.scores[i].team, capture::st.scores[i].total));
-            }
-            else if(m_defend(game::gamemode))
-            {
-                loopv(defend::st.scores) teamscores.add(teamscore(defend::st.scores[i].team, defend::st.scores[i].total));
-            }
-            else if(m_bomber(game::gamemode))
-            {
-                loopv(bomber::st.scores) teamscores.add(teamscore(bomber::st.scores[i].team, bomber::st.scores[i].total));
-            }
-            else loopi(game::numdynents())
-            {
-                gameent *o = (gameent *)game::iterdynents(i);
-                if(o && o->type==ENT_PLAYER)
-                {
-                    teamscore *ts = NULL;
-                    loopv(teamscores) if(teamscores[i].team == o->team) { ts = &teamscores[i]; break; }
-                    if(!ts) teamscores.add(teamscore(o->team, m_trial(game::gamemode) ? o->cptime : o->points));
-                    else if(m_trial(game::gamemode))
-                    {
-                        if(o->cptime && (!ts->score || o->cptime < ts->score)) ts->score = o->cptime;
-                    }
-                    else ts->score += o->points;
-                }
-            }
-            teamscores.sort(teamscorecmp);
-        }
-
         static int scoregroupcmp(const scoregroup **x, const scoregroup **y)
         {
             if(!(*x)->team)
@@ -171,8 +147,8 @@ namespace hud
                 if((*y)->team) return 1;
             }
             else if(!(*y)->team) return -1;
-            if((*x)->score > (*y)->score) return -1;
-            if((*x)->score < (*y)->score) return 1;
+            if((*x)->total > (*y)->total) return -1;
+            if((*x)->total < (*y)->total) return 1;
             if((*x)->players.length() > (*y)->players.length()) return -1;
             if((*x)->players.length() < (*y)->players.length()) return 1;
             return (*x)->team && (*y)->team ? (*x)->team-(*y)->team : 0;
@@ -193,7 +169,7 @@ namespace hud
                 {
                     scoregroup &g = *groups[j];
                     if(team != g.team) continue;
-                    if(team && !m_capture(game::gamemode) && !m_defend(game::gamemode) && !m_bomber(game::gamemode)) g.score += o->points;
+                    if(team) g.total = teamscore(team).total;
                     g.players.add(o);
                     found = true;
                 }
@@ -201,11 +177,9 @@ namespace hud
                 if(numgroups>=groups.length()) groups.add(new scoregroup);
                 scoregroup &g = *groups[numgroups++];
                 g.team = team;
-                if(!team) g.score = 0;
-                else if(m_capture(game::gamemode)) g.score = capture::st.findscore(o->team).total;
-                else if(m_defend(game::gamemode)) g.score = defend::st.findscore(o->team).total;
-                else if(m_bomber(game::gamemode)) g.score = bomber::st.findscore(o->team).total;
-                else g.score = o->points;
+                if(!team) g.total = 0;
+                else if(m_team(game::gamemode, game::mutators)) g.total = teamscore(o->team).total;
+                else g.total = o->points;
 
                 g.players.shrink(0);
                 g.players.add(o);
@@ -396,8 +370,8 @@ namespace hud
                 if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
                     g.pushlist(); // vertical
-                    if(m_defend(game::gamemode) && defendlimit && sg.score >= defendlimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
-                    else g.textf("%s: %d", fgcolor, NULL, teamtype[sg.team].name, sg.score);
+                    if(m_defend(game::gamemode) && defendlimit && sg.total >= defendlimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
+                    else g.textf("%s: %d", fgcolor, NULL, teamtype[sg.team].name, sg.total);
                     g.pushlist(); // horizontal
                 }
 
@@ -576,7 +550,7 @@ namespace hud
                 {
                     if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
                     if(!sy) sy += s/8;
-                    sy += drawinventoryitem(x, y-sy, s-s/4, 1.25f-clamp(numout,1,3)*0.25f*inventoryskew, blend*inventoryblend, k, sg.team, sg.score, teamtype[sg.team].name);
+                    sy += drawinventoryitem(x, y-sy, s-s/4, 1.25f-clamp(numout,1,3)*0.25f*inventoryskew, blend*inventoryblend, k, sg.team, sg.total, teamtype[sg.team].name);
                     if((numout += 1) > 3) return sy;
                 }
                 else
@@ -604,7 +578,7 @@ namespace hud
                 scoregroup &sg = *groups[0];
                 if(m_team(game::gamemode, game::mutators))
                 {
-                    if(sg.score) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timetostr(sg.score));
+                    if(sg.total) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timetostr(sg.total));
                 }
                 else if(!sg.players.empty())
                 {

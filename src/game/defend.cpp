@@ -265,7 +265,7 @@ namespace defend
 
     void setscore(int team, int total)
     {
-        st.findscore(team).total = total;
+        hud::sb.teamscore(team).total = total;
     }
 
     int aiowner(gameent *d)

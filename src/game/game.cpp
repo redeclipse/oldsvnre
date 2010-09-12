@@ -550,7 +550,7 @@ namespace game
         if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
         if(d->lastfire > 0 && lastmillis-d->lastfire >= fireburntime-500)
         {
-            if(lastmillis-d->lastfire >= fireburntime) d->resbomberire();
+            if(lastmillis-d->lastfire >= fireburntime) d->resetfire();
             else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastfire-(fireburntime-500))/500.f));
         }
         else if(issound(d->fschan)) removesound(d->fschan);

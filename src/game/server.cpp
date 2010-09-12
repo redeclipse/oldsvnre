@@ -394,10 +394,24 @@ namespace server
     };
 
     vector<srventity> sents;
-    vector<savedscore> scores;
+    vector<savedscore> savedscores;
     servmode *smode;
     vector<servmode *> smuts;
     #define mutate(a,b) loopvk(a) { servmode *mut = a[k]; { b; } }
+
+    vector<score> scores;
+    score &teamscore(int team)
+    {
+        loopv(scores)
+        {
+            score &cs = scores[i];
+            if(cs.team == team) return cs;
+        }
+        score &cs = scores.add();
+        cs.team = team;
+        cs.total = 0;
+        return cs;
+    }
 
     struct vampireservmode : servmode
     {
@@ -836,17 +850,14 @@ namespace server
                     }
                 }
             }
-            if(GAME(pointlimit) && !m_affinity(gamemode) && !m_trial(gamemode))
+            if(GAME(pointlimit) && m_scores(gamemode))
             {
                 if(m_team(gamemode, mutators))
                 {
-                    int teamscores[TEAM_NUM] = {0};
-                    loopv(clients) if(clients[i]->state.aitype < AI_START && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
-                        teamscores[clients[i]->team-TEAM_FIRST] += clients[i]->state.points;
                     int best = -1;
-                    loopi(TEAM_NUM) if(best < 0 || teamscores[i] > teamscores[best])
+                    loopv(scores) if(best < 0 || scores[i].total > scores[best].total)
                         best = i;
-                    if(best >= 0 && teamscores[best] >= GAME(pointlimit))
+                    if(best >= 0 && scores[best].total >= GAME(pointlimit))
                     {
                         sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                         startintermission();
@@ -1566,13 +1577,13 @@ namespace server
                 }
             }
         }
-        loopv(scores)
+        loopv(savedscores)
         {
-            savedscore &sc = scores[i];
+            savedscore &sc = savedscores[i];
             if(sc.ip == ip && !strcmp(sc.name, ci->name)) return sc;
         }
         if(!insert) return *(savedscore *)0;
-        savedscore &sc = scores.add();
+        savedscore &sc = savedscores.add();
         sc.ip = ip;
         copystring(sc.name, ci->name);
         return sc;
@@ -1580,31 +1591,14 @@ namespace server
 
     void givepoints(clientinfo *ci, int points)
     {
-        ci->state.score += points; ci->state.points += points;
+        ci->state.score += points;
+        ci->state.points += points;
         sendf(-1, 1, "ri4", N_POINTS, ci->clientnum, points, ci->state.points);
-    }
-
-    void distpoints(clientinfo *ci, bool discon = false)
-    {
-        if(m_team(gamemode, mutators) && !m_affinity(gamemode))
+        if(m_scores(gamemode) && m_team(gamemode, mutators))
         {
-            int friends = 0;
-            loopv(clients) if(ci != clients[i] && clients[i]->state.aitype < AI_START && clients[i]->team == ci->team) friends++;
-            if(friends)
-            {
-                int points = int(ci->state.points/float(friends)), offset = ci->state.points-abs(points);
-                if(points || offset) loopv(clients) if(ci != clients[i] && clients[i]->state.aitype < AI_START && clients[i]->team == ci->team)
-                {
-                    int total = points;
-                    if(offset > 0) { total++; offset--; }
-                    else if(offset < 0) { total--; offset++; }
-                    else if(!points) break;
-                    clients[i]->state.points += total;
-                    sendf(-1, 1, "ri4", N_POINTS, clients[i]->clientnum, total, clients[i]->state.points);
-                }
-            }
-            if(!discon) sendf(-1, 1, "ri4", N_POINTS, ci->clientnum, -ci->state.points, 0);
-            ci->state.points = 0;
+            score &ts = teamscore(ci->team);
+            ts.total += points;
+            sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
         }
     }
 
@@ -1619,7 +1613,6 @@ namespace server
         if(ci->team != team)
         {
             bool sm = false;
-            distpoints(ci);
             if(reset) waiting(ci, 0, 1);
             else if(ci->state.state == CS_ALIVE)
             {
@@ -1638,17 +1631,17 @@ namespace server
         if(info) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
 
-    struct teamscore
+    struct teamcheck
     {
         int team;
         float score;
         int clients;
 
-        teamscore(int n) : team(n), score(0.f), clients(0) {}
-        teamscore(int n, float r) : team(n), score(r), clients(0) {}
-        teamscore(int n, int s) : team(n), score(s), clients(0) {}
+        teamcheck(int n) : team(n), score(0.f), clients(0) {}
+        teamcheck(int n, float r) : team(n), score(r), clients(0) {}
+        teamcheck(int n, int s) : team(n), score(s), clients(0) {}
 
-        ~teamscore() {}
+        ~teamcheck() {}
     };
 
     int chooseteam(clientinfo *ci, int suggest = -1)
@@ -1660,7 +1653,7 @@ namespace server
             if(balance < 3 && ci->state.aitype >= 0) balance = 1;
             if(balance || team < 0)
             {
-                teamscore teamscores[TEAM_NUM] = { teamscore(TEAM_ALPHA), teamscore(TEAM_BETA) };
+                teamcheck teamchecks[TEAM_NUM] = { teamcheck(TEAM_ALPHA), teamcheck(TEAM_BETA) };
                 loopv(clients)
                 {
                     clientinfo *cp = clients[i];
@@ -1670,17 +1663,17 @@ namespace server
                     { // remember: ai just balance teams
                         cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
                         cp->state.lasttimeplayed = lastmillis;
-                        teamscore &ts = teamscores[cp->team-TEAM_FIRST];
+                        teamcheck &ts = teamchecks[cp->team-TEAM_FIRST];
                         ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
                         ts.clients++;
                     }
                 }
-                teamscore *worst = &teamscores[0];
+                teamcheck *worst = &teamchecks[0];
                 if(balance != 3 || ci->state.aitype >= 0)
                 {
                     loopi(numteams(gamemode, mutators))
                     {
-                        teamscore &ts = teamscores[i];
+                        teamcheck &ts = teamchecks[i];
                         switch(balance)
                         {
                             case 2:
@@ -1693,7 +1686,7 @@ namespace server
                             {
                                 if(!i)
                                 {
-                                    worst = &teamscores[1];
+                                    worst = &teamchecks[1];
                                     break; // don't use team alpha for bots in this case
                                 }
                             } // fall through
@@ -1826,7 +1819,8 @@ namespace server
         oldtimelimit = GAME(timelimit);
         timeremaining = GAME(timelimit) ? GAME(timelimit)*60 : -1;
         gamelimit = GAME(timelimit) ? timeremaining*1000 : 0;
-        sents.shrink(0); scores.shrink(0);
+        sents.shrink(0);
+        scores.shrink(0);
         setuptriggers(false);
         setupspawns(false);
 
@@ -2359,6 +2353,14 @@ namespace server
             putint(p, S_GUIACT);
             putint(p, CON_CHAT);
             sendstring(GAME(servermotd), p);
+        }
+
+        if(m_team(gamemode, mutators)) loopv(scores)
+        {
+            score &cs = scores[i];
+            putint(p, N_SCORE);
+            putint(p, cs.team);
+            putint(p, cs.total);
         }
 
         if(smode) smode->initclient(ci, p, true);
@@ -3200,7 +3202,7 @@ namespace server
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-                distpoints(ci, true); savescore(ci);
+                savescore(ci);
                 aiman::removeai(ci, complete);
                 if(!complete) aiman::dorefresh = true;
             }
@@ -3837,6 +3839,15 @@ namespace server
                                             if(sents[ent].attrs[5] == CP_FINISH) { cp->state.cpmillis = -gamemillis; waiting(cp, 0, 0); }
                                         }
                                         sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, laptime, cp->state.cptime);
+                                        if(m_team(gamemode, mutators))
+                                        {
+                                            score &ts = teamscore(cp->team);
+                                            if(!ts.total || ts.total > cp->state.cptime)
+                                            {
+                                                ts.total = cp->state.cptime;
+                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                            }
+                                        }
                                     }
                                     case CP_RESPAWN: if(sents[ent].attrs[5] == CP_RESPAWN && cp->state.cpmillis) break;
                                     case CP_START:
@@ -4147,7 +4158,6 @@ namespace server
                         }
                         if(smode) smode->leavegame(cp);
                         mutate(smuts, mut->leavegame(cp));
-                        distpoints(cp);
                         sendf(-1, 1, "ri3", N_SPECTATOR, spectator, val);
                         cp->state.cpnodes.shrink(0);
                         cp->state.cpmillis = 0;

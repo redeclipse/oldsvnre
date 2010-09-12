@@ -368,6 +368,7 @@ extern gametypes gametype[], mutstype[];
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
+#define m_scores(a)         (a >= G_EDITMODE && a <= G_DEATHMATCH)
 
 #define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_edit(a) || m_trial(a) ? GAME(limitedweapon) : GAME(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
@@ -484,6 +485,12 @@ teamtypes teamtype[] = {
 #else
 extern teamtypes teamtype[];
 #endif
+struct score
+{
+    int team, total;
+    score() {}
+    score(int s, int n) : team(s), total(n) {}
+};
 enum { BASE_NONE = 0, BASE_HOME = 1<<0, BASE_FLAG = 1<<1, BASE_BOTH = BASE_HOME|BASE_FLAG };
 
 #define numteams(a,b)   (m_fight(a) && m_team(a,b) ? TEAM_NUM : 1)
@@ -1100,7 +1107,7 @@ struct gameent : dynent, gamestate
         resetjump();
     }
 
-    void resbomberire()
+    void resetfire()
     {
         if(issound(fschan)) removesound(fschan);
         fschan = -1;

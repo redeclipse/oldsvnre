@@ -104,14 +104,6 @@ struct defendstate
     };
 
     vector<flag> flags;
-
-    struct score
-    {
-        int team, total;
-    };
-
-    vector<score> scores;
-
     int secured;
 
     defendstate() : secured(0) {}
@@ -119,21 +111,7 @@ struct defendstate
     void reset()
     {
         flags.shrink(0);
-        scores.shrink(0);
         secured = 0;
-    }
-
-    score &findscore(int team)
-    {
-        loopv(scores)
-        {
-            score &cs = scores[i];
-            if(cs.team == team) return cs;
-        }
-        score &cs = scores.add();
-        cs.team = team;
-        cs.total = 0;
-        return cs;
     }
 
     void addaffinity(const vec &o, int team)
