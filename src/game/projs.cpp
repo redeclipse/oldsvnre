@@ -454,7 +454,7 @@ namespace projs
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
                 proj.mdl = weaptype[proj.weap].proj;
-                proj.escaped = !proj.owner || proj.child || weaptype[proj.weap].traced;
+                proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
                 break;
             }
@@ -490,7 +490,7 @@ namespace projs
                     proj.weight = gibsweight*proj.lifesize;
                     proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(21)-10));
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
-                    proj.escaped = !proj.owner;
+                    proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                     proj.fadetime = rnd(250)+250;
                     proj.extinguish = 6;
                     break;
@@ -513,7 +513,7 @@ namespace projs
                 proj.weight = debrisweight*proj.lifesize;
                 proj.vel.add(vec(rnd(101)-50, rnd(101)-50, rnd(151)-50)).mul(2);
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER;
-                proj.escaped = !proj.owner;
+                proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                 proj.fadetime = rnd(250)+250;
                 proj.extinguish = 1;
                 break;
