@@ -955,6 +955,7 @@ namespace ai
     void jumpto(gameent *d, aistate &b, const vec &pos, bool locked)
     {
         vec off = vec(pos).sub(d->feetpos());
+        if(d->blocked) off.z += JUMPMIN; // it could help..
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 500 && !d->turnside,
             jumper = (locked || off.z >= JUMPMIN) && (!offground || (air && physics::canimpulse(d, 0, 1))),
             jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;

@@ -174,7 +174,7 @@ GFVAR(0, impulseregensprint, 0, 0.75f, 1000); // impulse regen sprinting modifie
 GFVAR(0, impulseregenjetpack, 0, 2, 1000); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, 1000); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0, 1000); // impulse regen in-air modifier
-GVAR(0, impulseregendelay, 0, 1500, INT_MAX-1); // delay before impulse regens
+GVAR(0, impulseregendelay, 0, 1000, INT_MAX-1); // delay before impulse regens
 
 GFVAR(0, stillspread, 0, 1.5f, 1000);
 GFVAR(0, movespread, 0, 3, 1000);
