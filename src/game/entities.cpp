@@ -854,8 +854,10 @@ namespace entities
                                 d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
                                 if(physics::entinmap(d, true))
                                 {
-                                    float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f);
-                                    vecfromyawpitch(f.attrs[0], f.attrs[1], 1, 0, d->vel);
+                                    float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
+                                        yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
+                                    game::fixrange(yaw, pitch);
+                                    vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
                                     d->vel.mul(mag);
                                     switch(f.attrs[5])
                                     {
@@ -865,15 +867,15 @@ namespace entities
                                             if(e.attrs[0] >= 0) // relative
                                             {
                                                 float offyaw = d->yaw-e.attrs[0], offpitch = d->pitch-e.attrs[1];
-                                                d->yaw = f.attrs[0]+offyaw;
-                                                d->pitch = f.attrs[1]+offpitch;
+                                                d->yaw = yaw+offyaw;
+                                                d->pitch = pitch+offpitch;
                                             }
                                              break;
                                         }
                                         case 0: default: // absolute
                                         {
-                                            d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
-                                            d->pitch = f.attrs[1];
+                                            d->yaw = yaw;
+                                            d->pitch = pitch;
                                             break;
                                         }
                                     }
