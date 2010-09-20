@@ -2,7 +2,7 @@
 struct bomberservmode : bomberstate, servmode
 {
     bool hasflaginfo;
-    int bombertime;
+    int bombertime, scoresec;
 
     bomberservmode() : hasflaginfo(false), bombertime(-1) {}
 
@@ -16,11 +16,12 @@ struct bomberservmode : bomberstate, servmode
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        vec n = inertia.iszero() ? vec(0, 0, GAME(bomberspeed)/10.f) : inertia;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(o).mul(DMF)), q((inertia.iszero() ? vec(0, 0, enttype[AFFINITY].radius/2) : vec(inertia)).mul(DMF));
+            ivec p(vec(o).mul(DMF)), q(vec(n).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, target, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            bomberstate::dropaffinity(i, o, inertia, gamemillis);
+            bomberstate::dropaffinity(i, o, n, gamemillis);
         }
     }
 
@@ -49,38 +50,32 @@ struct bomberservmode : bomberstate, servmode
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
-    int addscore(int team)
+    int addscore(int team, int points)
     {
         score &cs = teamscore(team);
-        cs.total++;
-        return cs.total;
-    }
-
-    int subscore(int team)
-    {
-        score &cs = teamscore(team);
-        cs.total--;
+        cs.total += points;
         return cs.total;
     }
 
     void scorebomb(clientinfo *ci, int relay, int goal)
     {
         flag &f = flags[relay], g = flags[goal];
+        if(!g.enabled) return;
         bomberstate::returnaffinity(relay, gamemillis, true, false);
         int score = 0;
         if(g.team != ci->team)
         {
             givepoints(ci, 5);
             ci->state.flags++;
-            score = addscore(ci->team);
+            score = addscore(ci->team, 1);
         }
         else
         {
             givepoints(ci, -5);
             ci->state.flags--;
-            score = subscore(ci->team);
+            score = addscore(ci->team, -1);
         }
-        sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
+        sendf(-1, 1, "ri4", N_SCOREAFFIN, ci->clientnum, relay, goal);
         loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
         {
             bool kamikaze = clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team;
@@ -108,7 +103,7 @@ struct bomberservmode : bomberstate, servmode
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(!hasflaginfo || ci->state.aitype >= AI_START || m_gsp2(gamemode, mutators)) return;
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
@@ -123,7 +118,7 @@ struct bomberservmode : bomberstate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
-        if(!isbomberaffinity(f) || f.owner >= 0) return;
+        if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
         givepoints(ci, 3);
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
@@ -133,7 +128,7 @@ struct bomberservmode : bomberstate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
-        if(!isbomberaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
+        if(!isbomberaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0 || !f.enabled) return;
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
@@ -152,7 +147,7 @@ struct bomberservmode : bomberstate, servmode
             {
                 vector<int> candidates[TEAM_MAX];
                 loopv(flags) candidates[flags[i].team].add(i);
-                loopi(TEAM_COUNT)
+                loopi(m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
                 {
                     int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
                     if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
@@ -165,6 +160,7 @@ struct bomberservmode : bomberstate, servmode
             }
             else loopv(flags) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
             { // multi-ball
+                if(m_gsp2(gamemode, mutators) && flags[i].team) continue;
                 bomberstate::returnaffinity(i, gamemillis, true, true);
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
             }
@@ -172,13 +168,31 @@ struct bomberservmode : bomberstate, servmode
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, "\fwnew round starting");
             bombertime = 0;
         }
+        int t = (gamemillis/GAME(bomberholdinterval))-((gamemillis-(curtime+scoresec))/GAME(bomberholdinterval));
+        if(t < 1) scoresec += curtime;
+        else scoresec = 0;
         loopv(flags) if(isbomberaffinity(flags[i]))
         {
             flag &f = flags[i];
             if(f.owner >= 0)
             {
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                if(ci && GAME(bomberholdtime) && gamemillis-f.taketime >= GAME(bomberholdtime))
+                if(m_gsp2(gamemode, mutators) && t > 0)
+                {
+                    int score = GAME(bomberholdpoints)*t;
+                    if(score)
+                    {
+                        int total = addscore(ci->team, score);
+                        sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
+                        givepoints(ci, score);
+                        if(GAME(bomberholdlimit) && score >= GAME(bomberholdlimit))
+                        {
+                            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+                            startintermission();
+                        }
+                    }
+                }
+                if(ci && GAME(bombercarrytime) && gamemillis-f.taketime >= GAME(bombercarrytime))
                 {
                     ci->state.weapshots[WEAP_GRENADE][0].add(1);
                     sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 1, WEAP_GRENADE, -1, -1);

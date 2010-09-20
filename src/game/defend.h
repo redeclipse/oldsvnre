@@ -3,8 +3,6 @@
 #endif
 struct defendstate
 {
-    static const int SCORESECS = 100;
-
     struct flag
     {
         vec o;

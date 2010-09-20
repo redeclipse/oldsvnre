@@ -99,21 +99,25 @@ GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
-GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
+GVAR(0, pointlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 GFVAR(0, captureelasticity, -10000, 0.25f, 10000);
 GFVAR(0, captureweight, -10000, 75, 10000);
 
-GVAR(0, defendlimit, 0, 200, INT_MAX-1); // finish when score is this or more
+GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
+GVAR(0, defendinterval, 0, 100, INT_MAX-1);
 GVAR(0, defendoccupy, 0, 100, INT_MAX-1); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
-GVAR(0, bomberlimit, 0, 15, INT_MAX-1); // finish when score is this or more
+GVAR(0, bomberlimit, 0, 15, INT_MAX-1); // finish when score is this or more (non-hold)
+GVAR(0, bomberholdlimit, 0, 300, INT_MAX-1); // finish when score is this or more (hold)
 GVAR(0, bomberresetdelay, 0, 15000, INT_MAX-1);
-GVAR(0, bomberholdtime, 0, 15000, INT_MAX-1);
+GVAR(0, bombercarrytime, 0, 15000, INT_MAX-1);
+GVAR(0, bomberholdpoints, 0, 1, INT_MAX-1); // points added to score
+GVAR(0, bomberholdinterval, 0, 1000, INT_MAX-1);
 GVAR(0, bomberlockondelay, 0, 1000, INT_MAX-1);
 GFVAR(0, bomberspeed, 0, 250, 10000);
 GFVAR(0, bomberminvel, 0, 10, 10000);
@@ -195,7 +199,7 @@ GFVAR(0, deadpushscale, 0, 2, 1000);
 GFVAR(0, wavepushscale, 0, 1, 1000);
 GFVAR(0, kickpushscale, 0, 1, 1000);
 GFVAR(0, kickpushcrouch, 0, 0.5f, 1000);
-GFVAR(0, kickpushsway, 0, 0.25f, 1000);
+GFVAR(0, kickpushsway, 0, 0.0125f, 1000);
 GFVAR(0, kickpushzoom, 0, 0.125f, 1000);
 
 GVAR(0, assistkilldelay, 0, 5000, INT_MAX-1);

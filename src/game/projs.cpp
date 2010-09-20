@@ -674,7 +674,7 @@ namespace projs
         proj.movement = 0;
         if(proj.projtype == PRJ_AFFINITY)
         {
-            proj.inertia = proj.to;
+            proj.vel = proj.inertia = proj.to;
             proj.to.add(proj.from);
             if(proj.weap >= 0) proj.target = game::getclient(proj.weap);
         }
