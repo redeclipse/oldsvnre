@@ -41,7 +41,7 @@ struct bomberservmode : bomberstate, servmode
         {
             int alive[TEAM_MAX] = {0};
             loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
-            if(alive[TEAM_ALPHA] && alive[TEAM_BETA]) bombertime = gamemillis+GAME(bomberdelay);
+            if(alive[TEAM_ALPHA] && alive[TEAM_OMEGA]) bombertime = gamemillis+GAME(bomberdelay);
         }
     }
 
