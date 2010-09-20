@@ -1654,7 +1654,7 @@ namespace server
             if(balance < 3 && ci->state.aitype >= 0) balance = 1;
             if(balance || team < 0)
             {
-                teamcheck teamchecks[TEAM_NUM] = { teamcheck(TEAM_ALPHA), teamcheck(TEAM_BETA) };
+                teamcheck teamchecks[TEAM_NUM] = { teamcheck(TEAM_ALPHA), teamcheck(TEAM_OMEGA) };
                 loopv(clients)
                 {
                     clientinfo *cp = clients[i];
