@@ -864,13 +864,10 @@ namespace entities
                                         case 2: break; // keep
                                         case 1:
                                         {
-                                            if(e.attrs[0] >= 0) // relative
-                                            {
-                                                float offyaw = d->yaw-e.attrs[0], offpitch = d->pitch-e.attrs[1];
-                                                d->yaw = yaw+offyaw;
-                                                d->pitch = pitch+offpitch;
-                                            }
-                                             break;
+                                            float offyaw = d->yaw-(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0]), offpitch = d->pitch-e.attrs[1];
+                                            d->yaw = yaw+offyaw;
+                                            d->pitch = pitch+offpitch;
+                                            break;
                                         }
                                         case 0: default: // absolute
                                         {
