@@ -1286,7 +1286,7 @@ namespace client
                         case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, getint(p), lastmillis); break;
                         case SPHY_EXTINGUISH:
                         {
-                            t->resetfire();
+                            t->resetburning();
                             playsound(S_EXTINGUISH, t->o, t);
                             part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->radius*4, 1, -10);
                             break;
@@ -1562,7 +1562,7 @@ namespace client
                     if(!amt)
                     {
                         f->impulse[IM_METER] = 0;
-                        f->resetfire();
+                        f->resetburning();
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal; f->lastregen = lastmillis;

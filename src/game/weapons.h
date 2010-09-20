@@ -54,18 +54,19 @@ enum
 enum
 {
     HIT_NONE = 0, HIT_ALT = 1<<0, HIT_LEGS = 1<<1, HIT_TORSO = 1<<2, HIT_HEAD = 1<<3,
-    HIT_WAVE = 1<<4, HIT_PROJ = 1<<5, HIT_EXPLODE = 1<<6, HIT_BURN = 1<<7,
-    HIT_MELT = 1<<8, HIT_DEATH = 1<<9, HIT_WATER = 1<<10, HIT_SPAWN = 1<<11,
-    HIT_LOST = 1<<12, HIT_KILL = 1<<13, HIT_CRIT = 1<<14, HIT_FLAK = 1<<15,
-    HIT_CLEAR = HIT_PROJ|HIT_EXPLODE|HIT_BURN|HIT_MELT|HIT_DEATH|HIT_WATER|HIT_SPAWN|HIT_LOST,
+    HIT_WAVE = 1<<4, HIT_PROJ = 1<<5, HIT_EXPLODE = 1<<6, HIT_BURN = 1<<7, HIT_BLEED = 1<<8,
+    HIT_MELT = 1<<9, HIT_DEATH = 1<<10, HIT_WATER = 1<<11, HIT_SPAWN = 1<<12,
+    HIT_LOST = 1<<13, HIT_KILL = 1<<14, HIT_CRIT = 1<<15, HIT_FLAK = 1<<16,
+    HIT_CLEAR = HIT_PROJ|HIT_EXPLODE|HIT_BURN|HIT_BLEED|HIT_MELT|HIT_DEATH|HIT_WATER|HIT_SPAWN|HIT_LOST,
     HIT_SFLAGS = HIT_KILL|HIT_CRIT
 };
 
 struct shotmsg { int id; ivec pos; };
 struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
-#define hithurts(x)     (x&HIT_BURN || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
-#define doesburn(x,y)   (isweap(x) && WEAP2(x, burns, y&HIT_ALT))
+#define hithurts(x)     (x&HIT_BURN || x&HIT_BLEED || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
+#define doesburn(x,y)   (isweap(x) && WEAP2(x, residual, y&HIT_ALT) == 1)
+#define doesbleed(x,y)  (isweap(x) && WEAP2(x, residual, y&HIT_ALT) == 2)
 #define WALT(x)         (WEAP_MAX+WEAP_##x)
 
 #define WEAPON(name, \
@@ -100,7 +101,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, name##cooked1, 0, x31, 5);                  GVAR(0, name##cooked2, 0, x32, 5); \
     GVAR(0, name##guided1, 0, x33, 5);                  GVAR(0, name##guided2, 0, x34, 5); \
     GVAR(0, name##radial1, 0, x4, 1);                   GVAR(0, name##radial2, 0, x5, 1); \
-    GVAR(0, name##burns1, 0, x6, 1);                    GVAR(0, name##burns2, 0, x7, 1); \
+    GVAR(0, name##residual1, 0, x6, 2);                 GVAR(0, name##residual2, 0, x7, 2); \
     GVAR(0, name##reloads, 0, x81, 1);                  GVAR(0, name##carried, 0, x82, 1);              GVAR(0, name##zooms, 0, x9, 1); \
     GVAR(0, name##fullauto1, 0, xa, 1);                 GVAR(0, name##fullauto2, 0, xb, 1);             GVAR(0, name##allowed, 0, xc, 3); \
     GVAR(0, name##laser, 0, xd, 1);                     GVAR(0, name##critdash1, 0, xe, 10000);         GVAR(0, name##critdash2, 0, xf, 10000); \
@@ -137,7 +138,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  zdiv1   zdiv2   aiskew1 aiskew2 fweap1          fweap2          frays1  frays2  ftime1  ftime2  fspd1   fspd2
 //  collide1
 //  collide2
-//  ext1    ext2    cook1   cook2   guide1  guide2  radl1   radl2   brn1    brn2    rlds    crd     zooms   fa1     fa2
+//  ext1    ext2    cook1   cook2   guide1  guide2  radl1   radl2   resid1  resid2  rlds    crd     zooms   fa1     fa2
 //  allw    laser   cdash1  cdash2
 //  tpr1    tpr2    tspan1  tspan2  elas1   elas2   rflt1   rflt2   relt1   relt2   wfrc1   wfrc2   wght1   wght2   rads1   rads2
 //  kpsh1   kpsh2   hpsh1   hpsh2   slow1   slow2   aidst1  aidst2  psz1    psz2    plen1   plen2   freq    push
@@ -152,12 +153,12 @@ WEAPON(melee,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
     2,      0,      500,    500,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
-    -1,     -1,     250,    250,    0.15f,  0.15f,  24,     24,     1,      2,      0,      0,      0,      1,
+    -1,     -1,     350,    350,    0.15f,  0.15f,  24,     24,     1,      2,      0,      0,      0,      1,
     2,      0,      10,     10,     2,      4,      1,      1,      0.5f,   0.5f,   0.3f,   0.3f,
     1,      1,      1,      1,      1,      1,      1,      1,      0,      0,      8,      8
 );
 WEAPON(pistol,
-    10,     10,     1,      1,      75,     150,    1000,   25,     25,     2000,   2000,   0,      0,      2000,   2000,
+    10,     10,     1,      1,      75,     150,    1000,   18,     24,     2000,   2000,   0,      0,      2000,   2000,
     0,      0,      0,      0,      200,    200,    0,      0,      1,      1,      4,      1,
     1,      0,      100,    100,    -1,             -1,             5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
@@ -165,25 +166,25 @@ WEAPON(pistol,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      1,      0,      0,      0,      1,
     2,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
-    2,      2,      150,    150,    0.05f,  0.05f,  300,    300,    1,      1,      10,     10,     1,      1,
-    4,      16,     10,     10,     1,      1,      1,      1,      0.75f,  0.75f,  0.375f, 0.375f,
+    5,      5,      35,     50,     0.05f,  0.05f,  300,    300,    1,      1,      10,     10,     1,      1,
+    4,      16,     10,     10,     1,      1,      1,      1,      0.65f,  0.65f,  0.325f, 0.325f,
     1,      1,      1,      1,      1,      1,      1,      1,      0,      0,      8,      8
 );
 WEAPON(sword,
-    1,      1,      0,      0,      500,    750,    50,     40,     80,     0,      0,      0,      0,      300,    300,
+    1,      1,      0,      0,      500,    750,    50,     30,     60,     0,      0,      0,      0,      300,    300,
     100,    100,    0,      0,      200,    200,    0,      0,      1,      1,      1,      1,
     1,      1,      1,      1,      -1,             -1,             5,      5,      500,    500,    0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|COLLIDE_CONT,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|COLLIDE_CONT,
-    2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      0,      1,      1,
+    2,      2,      0,      0,      0,      0,      0,      0,      2,      2,      0,      1,      0,      1,      1,
     2,      0,      500,    500,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
-    -1,     -1,     250,    500,    0.25f,  0.5f,   32,     32,     1,      1.25f,  0,      0,      1,      1,
+    0,      0,      500,    750,    0.25f,  0.5f,   32,     32,     1,      1.25f,  0,      0,      1,      1,
     2,      0,      10,     10,     6,      3,      1,      1,      0.65f,  0.65f,  0.25f,  0.25f,
     1,      1,      1,      1,      1,      1,      1,      1,      0,      0,      8,      8
 );
 WEAPON(shotgun,
-    2,      8,      1,      2,      375,    750,    750,    15,     10,     1250,   250,    0,      0,      750,    5000,
+    2,      8,      1,      2,      375,    750,    750,    16,     12,     1250,   250,    0,      0,      750,    5000,
     0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      10,     2,
     2,      4,      10,     10,     -1,             WALT(SHOTGUN),  5,      60,     250,    2500,   0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
@@ -191,7 +192,7 @@ WEAPON(shotgun,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,      0,      0,
     2,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   50,     0,      0.05f,  0.75f,  2,      2,      0,      225,    1,      1,
-    15,     15,     25,     20,     0.4f,   0.3f,   150,    150,    0.5f,   0.35f,  35,     15,     1,      1.5f,
+    35,     70,     100,    50,     0.4f,   0.3f,   150,    150,    0.5f,   0.35f,  35,     15,     1,      1.5f,
     2,      6,      10,     10,     1,      1,      1,      1,      0.65f,  0.65f,  0.375f, 0.375f,
     1,      0.5f,   1,      1,      1,      0.5f,   1,      1.5f,   0,      0,      8,      8
 );
@@ -204,7 +205,7 @@ WEAPON(smg,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,      1,      1,
     2,      0,      0,      0,
     0,      0,      0,      0,      0.65f,  0.45f,  30,     30,     0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
-    0.5f,   3,      75,     60,     0.5f,   0.35f,  300,    300,    0.25f,  0.5f,   35,     25,     1,      1.5f,
+    20,     40,     100,    50,     0.5f,   0.35f,  300,    300,    0.25f,  0.5f,   35,     25,     1,      1.5f,
     3,      12,     10,     1000,   1,      1,      1,      1,      0.75f,  0.75f,  0.375f, 0.375f,
     1,      1,      1,      0.5f,   0.125f, 0.125f, 1,      1,      0,      0,      8,      8
 );
@@ -217,7 +218,7 @@ WEAPON(flamer,
     3,      3,      0,      1,      0,      0,      1,      1,      1,      1,      1,      1,      0,      1,      0,
     2,      0,      0,      0,
     0,      0,      0,      0,      0.25f,  0.25f,  45,     0,      0.95f,  0.5f,   1,      1,      -300,   50,     1,      1,
-    0.25f,  1,      20,     40,     0,      0,      20,     60,     10,     20,     0,      5,      2,      1.5f,
+    0.25f,  1,      25,     50,     0,      0,      20,     60,     10,     20,     0,      5,      2,      1.5f,
     5,      12,     10,     10,     1,      1,      1,      1,      0.65f,  0.65f,  0.325f, 0.325f,
     1,      0.5f,   0.5f,   0.5f,   0.125f, 0.125f, 1,      1,      0.5f,   0.5f,   8,      8
 );
@@ -230,20 +231,20 @@ WEAPON(plasma,
     1,      0,      0,      1,      0,      0,      1,      1,      0,      0,      1,      1,      0,      1,      0,
     2,      0,      0,      0,
     0.25f,  0.75f,  0.06f,  0.25f,  0.5f,   0.5f,   0,      0,      0.125f, 0.175f, 1,      1,      0,      0,      4,      2,
-    3,      6,      40,     -80,    0.5f,   0.5f,   200,    50,     16,     50,     0,      0,      2,      1.5f,
+    10,     50,     50,     -500,   0.5f,   0.5f,   200,    50,     16,     50,     0,      0,      2,      1.5f,
     3,      12,     10,     10,     1,      1,      1,      1,      0.6f,   0.6f,   0.3f,   0.3f,
     1,      1,      1,      1,      1,      1,      1,      1,      0,      0,      8,      8
 );
 WEAPON(rifle,
-    5,      5,      1,      1,      750,    750,    1500,   50,     100,    7500,   30000,  0,      0,      5000,   5000,
-    0,      0,      0,      0,      200,    200,    28,     0,      1,      1,      2,      0,
+    5,      5,      1,      1,      750,    1000,   1750,   35,     100,    7500,   30000,  0,      0,      5000,   5000,
+    0,      0,      0,      0,      200,    200,    24,     0,      1,      1,      2,      0,
     0,      0,      40,     40,     -1,             -1,             5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_CONT,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      1,      0,      0,
     2,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      1,      0,      2,      2,      0,      0,      1,      1,
-    5,      0,      250,    125,    0.1f,   0.25f,  600,    0,      2,      2,      256,    512,    1,      1.5f,
+    20,     10,     250,    125,    0.1f,   0.25f,  600,    0,      2,      2,      256,    512,    1,      1.5f,
     2,      12,     10,     10,     1,      1,      1,      1,      0.8f,   0.6f,   0.4f,   0.6f,
     1,      1,      1,      1,      0.25f,  0.25f,  1,      1,      0,      0,      8,      8
 );
@@ -256,7 +257,7 @@ WEAPON(grenade,
     2,      2,      2,      2,      0,      0,      0,      0,      1,      1,      0,      0,      0,      0,      0,
     3,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      1,      1,      2,      2,      65,     65,     1,      1,
-    5,      5,      500,    500,    0.1f,   0.1f,   400,    400,    2,      2,      0,      0,      2,      2,
+    5,      5,      750,    750,    0.1f,   0.1f,   400,    400,    2,      2,      0,      0,      2,      2,
     2,      0,      10,     10,     1,      1,      1,      1,      0.6f,   0.6f,   0.3f,   0.3f,
     1,      1,      1,      1,      1,      1,      0,      0,      0,      0,      0,      0
 );
@@ -269,7 +270,7 @@ WEAPON(rocket,
     2,      2,      2,      2,      0,      1,      0,      0,      1,       1,      0,      1,      0,      0,      0,
     1,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      2,      2,      0,      0,      1,      1,
-    15,     15,     500,    500,    0.25f,  0.25f,  400,    400,    3,      3,      0,      0,      3,      3,
+    150,    150,    1000,   1000,   0.25f,  0.25f,  400,    400,    3,      3,      0,      0,      3,      3,
     2,      0,      10,     10,     1,      1,      1,      1,      0.75f,  0.75f,  0.5f,   0.5f,
     1,      1,      1,      1,      1,      1,      0,      0,      0,      0,      0,      0
 );
@@ -397,7 +398,7 @@ WEAPDEF2(int, extinguish);
 WEAPDEF2(int, cooked);
 WEAPDEF2(int, guided);
 WEAPDEF2(int, radial);
-WEAPDEF2(int, burns);
+WEAPDEF2(int, residual);
 WEAPDEF(int, reloads);
 WEAPDEF(int, carried);
 WEAPDEF(int, zooms);

@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         206
+#define GAMEVERSION         207
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -532,10 +532,10 @@ struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX];
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastfire;
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastbleed;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastfire(0),
+    gamestate() : weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastbleed(0),
         aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
@@ -690,7 +690,7 @@ struct gamestate
 
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastfire = 0;
+        lastdeath = lastpain = lastregen = lastburn = lastbleed = 0;
         lastrespawn = -1;
     }
 
@@ -776,7 +776,8 @@ struct gamestate
         return amt;
     }
 
-    bool onfire(int millis, int len) { return len && lastfire && millis-lastfire <= len; }
+    bool burning(int millis, int len) { return len && lastburn && millis-lastburn <= len; }
+    bool bleeding(int millis, int len) { return len && lastbleed && millis-lastbleed <= len; }
 };
 
 namespace server
@@ -1107,11 +1108,11 @@ struct gameent : dynent, gamestate
         resetjump();
     }
 
-    void resetfire()
+    void resetburning()
     {
         if(issound(fschan)) removesound(fschan);
         fschan = -1;
-        lastfire = 0;
+        lastburn = 0;
     }
 };
 
