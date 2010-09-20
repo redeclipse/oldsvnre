@@ -852,31 +852,31 @@ namespace entities
                                 int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
                                 gameentity &f = *(gameentity *)ents[teleports[r]];
                                 d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
-                                switch(f.attrs[5])
-                                {
-                                    case 2: break; // keep
-                                    case 1:
-                                    {
-                                        if(e.attrs[0] >= 0) // relative
-                                        {
-                                            float offyaw = d->yaw-e.attrs[0], offpitch = d->pitch-e.attrs[1];
-                                            d->yaw = f.attrs[0]+offyaw;
-                                            d->pitch = f.attrs[1]+offpitch;
-                                        }
-                                         break;
-                                    }
-                                    case 0: default: // absolute
-                                    {
-                                        d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
-                                        d->pitch = f.attrs[1];
-                                        break;
-                                    }
-                                }
                                 if(physics::entinmap(d, true))
                                 {
                                     float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f);
-                                    vecfromyawpitch(d->yaw, d->pitch, 1, 0, d->vel);
+                                    vecfromyawpitch(f.attrs[0], f.attrs[1], 1, 0, d->vel);
                                     d->vel.mul(mag);
+                                    switch(f.attrs[5])
+                                    {
+                                        case 2: break; // keep
+                                        case 1:
+                                        {
+                                            if(e.attrs[0] >= 0) // relative
+                                            {
+                                                float offyaw = d->yaw-e.attrs[0], offpitch = d->pitch-e.attrs[1];
+                                                d->yaw = f.attrs[0]+offyaw;
+                                                d->pitch = f.attrs[1]+offpitch;
+                                            }
+                                             break;
+                                        }
+                                        case 0: default: // absolute
+                                        {
+                                            d->yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0];
+                                            d->pitch = f.attrs[1];
+                                            break;
+                                        }
+                                    }
                                     game::fixfullrange(d->yaw, d->pitch, d->roll, true);
                                     f.lastuse = f.lastemit = e.lastemit;
                                     if(d == game::focus) game::resetcamera();
