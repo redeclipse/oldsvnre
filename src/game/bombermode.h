@@ -185,7 +185,7 @@ struct bomberservmode : bomberstate, servmode
                         int total = addscore(ci->team, score);
                         sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
                         givepoints(ci, score);
-                        if(GAME(bomberholdlimit) && score >= GAME(bomberholdlimit))
+                        if(GAME(bomberholdlimit) && total >= GAME(bomberholdlimit))
                         {
                             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
                             startintermission();
