@@ -1,6 +1,4 @@
 * Find out why points in DM modes are bugged (team scores show correctly, but individuals seem to multiply)
-* Bomber-ball game specified mutator: hold the ball instead of scoring it
-* Try to fix problems with pistol rate, rifle firesm and shotgun alt-fire
 
 = Models =
 * Need to replace: projs/debris, projs/gibs

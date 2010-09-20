@@ -37,10 +37,10 @@ struct captureservmode : capturestate, servmode
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
-    int addscore(int team)
+    int addscore(int team, int points = 1)
     {
         score &cs = teamscore(team);
-        cs.total++;
+        cs.total += points;
         return cs.total;
     }
 

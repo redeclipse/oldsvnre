@@ -633,9 +633,9 @@ namespace server
         }
         static string gname;
         gname[0] = 0;
-        if(gametype[mode].mutators && muts) loopi(G_M_NUM)
+        if(gametype[mode].mutators[0] && muts) loopi(G_M_NUM)
         {
-            if((gametype[mode].mutators&mutstype[i].type) && (muts&mutstype[i].type) && (!gametype[mode].implied || !(gametype[mode].implied&mutstype[i].type)))
+            if((gametype[mode].mutators[0]&mutstype[i].type) && (muts&mutstype[i].type) && (!gametype[mode].implied || !(gametype[mode].implied&mutstype[i].type)))
             {
                 const char *mut = i < G_M_GSP ? mutstype[i].name : gametype[mode].gsp[i-G_M_GSP];
                 if(mut && *mut)
@@ -664,16 +664,17 @@ namespace server
             mode = G_DEATHMATCH;
             muts = gametype[mode].implied;
         }
-        #define modecheckreset(a) { if(muts && ++count < G_M_NUM*4) { i = 0; a; } else { muts = 0; break; } }
-        if(!gametype[mode].mutators) muts = G_M_NONE;
+        #define modecheckreset(a) { if(muts && ++count < G_M_NUM*(G_M_GSN+5)) { i = k = 0; a; } else { muts = 0; i = G_M_NUM; k = G_M_GSP+1; break; } }
+        if(!gametype[mode].mutators[0]) muts = G_M_NONE;
         else
         {
             int count = 0;
             if(gametype[mode].implied) muts |= gametype[mode].implied;
-            if(muts) loopi(G_M_NUM)
+            if(muts) loopi(G_M_NUM) loopk(G_M_GSN+1)
             {
-                if(trying && !(gametype[mode].mutators&mutstype[i].type) && (trying&mutstype[i].type)) trying &= ~mutstype[i].type;
-                if(!(gametype[mode].mutators&mutstype[i].type) && (muts&mutstype[i].type))
+                if(k && !(muts&(1<<(k-1+G_M_GSP)))) continue;
+                if(trying && !(gametype[mode].mutators[k]&mutstype[i].type) && (trying&mutstype[i].type)) trying &= ~mutstype[i].type;
+                if(!(gametype[mode].mutators[k]&mutstype[i].type) && (muts&mutstype[i].type))
                 {
                     muts &= ~mutstype[i].type;
                     modecheckreset(continue);
@@ -703,7 +704,7 @@ namespace server
         return mt;
     }
     ICOMMAND(0, mutscheck, "iii", (int *g, int *m, int *t), intret(mutscheck(*g, *m, *t)));
-    ICOMMAND(0, mutsallowed, "i", (int *g), intret(*g >= 0 && *g < G_MAX ? gametype[*g].mutators : 0));
+    ICOMMAND(0, mutsallowed, "ii", (int *g, int *h), intret(*g >= 0 && *g < G_MAX ? gametype[*g].mutators[*h >= 0 && *h < G_M_GSP+1 ? *h : 0] : 0));
     ICOMMAND(0, mutsimplied, "i", (int *g), intret(*g >= 0 && *g < G_MAX ? gametype[*g].implied : 0));
     ICOMMAND(0, gspmutname, "ii", (int *g, int *n), result(*g >= 0 && *g < G_MAX && *n >= 0 && *n < G_M_GSN ? gametype[*g].gsp[*n] : ""));
 

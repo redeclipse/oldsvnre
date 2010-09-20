@@ -109,9 +109,9 @@ namespace bomber
                     pushfont("super");
                     ty += draw_textx("\fzwaYou have the bomb", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
                     popfont();
-                    if(bomberholdtime)
+                    if(bombercarrytime)
                     {
-                        int delay = bomberholdtime-(lastmillis-f.taketime);
+                        int delay = bombercarrytime-(lastmillis-f.taketime);
                         pushfont("emphasis");
                         ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
                         popfont();
@@ -133,6 +133,7 @@ namespace bomber
         {
             if(y-sy-s < m) break;
             bomberstate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             int millis = lastmillis-f.interptime, pos[2] = { x, y-sy };
             float skew = hud::inventoryskew, fade = blend*hud::inventoryblend, r = 1.f, g = 1.f, b = 1.f, rescale = 1.f;
             if(f.owner || f.droptime)
@@ -216,9 +217,9 @@ namespace bomber
                             else hud::drawitemsubtext(px, pos[1]-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzoyready");
                         }
                     }
-                    if(bomberholdtime)
+                    if(bombercarrytime)
                     {
-                        int time = lastmillis-f.taketime, delay = bomberholdtime-time;
+                        int time = lastmillis-f.taketime, delay = bombercarrytime-time;
                         hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzgy%s", hud::timetostr(delay, -1));
                     }
                     else hud::drawitemsubtext(pos[0], pos[1], s, TEXT_RIGHT_UP, skew, "super", fade, "\fzaw[\fzgy!\fzaw]");
@@ -284,7 +285,7 @@ namespace bomber
         loopv(st.flags)
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
+            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             float trans = 1.f;
             if(!f.owner)
             {
@@ -476,10 +477,18 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                if(d->ai && f.owner == d && !d->action[AC_AFFINITY] && lastmillis-f.taketime >= (bomberholdtime ? abs(bomberholdtime-bomberlockondelay) : 1500))
+                if(d->ai && f.owner == d && lastmillis-f.taketime >= (bombercarrytime ? bombercarrytime/2 : 1000))
                 {
-                    d->action[AC_AFFINITY] = true;
-                    d->actiontime[AC_AFFINITY] = lastmillis;
+                    if(d->action[AC_AFFINITY])
+                    {
+                        if(lastmillis-f.taketime >= bombercarrytime*3/4 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                            d->action[AC_AFFINITY] = false;
+                    }
+                    else
+                    {
+                        d->action[AC_AFFINITY] = true;
+                        d->actiontime[AC_AFFINITY] = lastmillis;
+                    }
                 }
                 continue;
             }
@@ -498,19 +507,20 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        int goal = -1;
-        loopv(st.flags)
+        if(!m_gsp2(game::gamemode, game::mutators))
         {
-            bomberstate::flag &g = st.flags[i];
-            if(isbombertarg(g, ai::owner(d)) && (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
+            int goal = -1;
+            loopv(st.flags)
             {
-                goal = i;
+                bomberstate::flag &g = st.flags[i];
+                if(isbombertarg(g, ai::owner(d)) && (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
+                    goal = i;
             }
-        }
-        if(st.flags.inrange(goal) && ai::makeroute(d, b, st.flags[goal].pos()))
-        {
-            d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
-            return true;
+            if(st.flags.inrange(goal) && ai::makeroute(d, b, st.flags[goal].pos()))
+            {
+                d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
+                return true;
+            }
         }
 	    if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
 		if(ai::randomnode(d, b, ai::SIGHTMIN, 1e16f))
@@ -565,6 +575,7 @@ namespace bomber
         loopvj(st.flags)
         {
             bomberstate::flag &f = st.flags[j];
+            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             bool home = isbomberhome(f, ai::owner(d));
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
@@ -704,6 +715,7 @@ namespace bomber
         if(st.flags.inrange(b.target) && d->aitype == AI_BOT)
         {
             bomberstate::flag &f = st.flags[b.target];
+            if(!entities::ents.inrange(f.ent) || !f.enabled) return false;
             b.idle = -1;
             if(isbomberaffinity(f)) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
             else return ai::makeroute(d, b, f.pos());

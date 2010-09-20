@@ -49,20 +49,20 @@ struct defendservmode : defendstate, servmode
         moveaffinity(team, vec(-1e10f, -1e10f, -1e10f), o);
     }
 
-    void addscore(int i, int team, int n)
+    void addscore(int i, int team, int points)
     {
-        if(!n) return;
+        if(!points) return;
         flag &b = flags[i];
-        loopvk(clients) if(clients[k]->state.aitype < AI_START && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], n);
+        loopvk(clients) if(clients[k]->state.aitype < AI_START && team == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], points);
         score &cs = teamscore(team);
-        cs.total += n;
+        cs.total += points;
         sendf(-1, 1, "ri3", N_SCORE, team, cs.total);
     }
 
     void update()
     {
         endcheck();
-        int t = (gamemillis/SCORESECS)-((gamemillis-(curtime+scoresec))/SCORESECS);
+        int t = (gamemillis/GAME(defendinterval))-((gamemillis-(curtime+scoresec))/GAME(defendinterval));
         if(t < 1) { scoresec += curtime; return; }
         else scoresec = 0;
         loopv(flags)
@@ -80,7 +80,7 @@ struct defendservmode : defendstate, servmode
             else if(b.owner)
             {
                 b.securetime += t;
-                int score = b.securetime/SCORESECS - (b.securetime-t)/SCORESECS;
+                int score = b.securetime/GAME(defendinterval) - (b.securetime-t)/GAME(defendinterval);
                 if(score) addscore(i, b.owner, score);
                 sendaffinity(i);
             }
