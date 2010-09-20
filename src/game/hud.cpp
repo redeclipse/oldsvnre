@@ -110,6 +110,7 @@ namespace hud
     VAR(IDF_PERSIST, damagefade, 0, 0, 1);
     TVAR(IDF_PERSIST, damagetex, "textures/damage", 3);
     FVAR(IDF_PERSIST, damageblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, damageskew, 0, 0.25f, 1);
     TVAR(IDF_PERSIST, burntex, "textures/burn", 3);
     FVAR(IDF_PERSIST, burnblend, 0, 0.5f, 1);
 
@@ -2016,7 +2017,7 @@ namespace hud
                 }
                 if(showdamage >= 2 && damageresidue > 0)
                 {
-                    float pc = min(damageresidue, 100)/200.f;
+                    float pc = min(damageresidue, 100)/100.f*damageskew;
                     loopi(2) if(colour[i+1] > 0) colour[i+1] -= colour[i+1]*pc;
                 }
             }
