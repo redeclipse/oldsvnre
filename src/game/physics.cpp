@@ -1012,9 +1012,9 @@ namespace physics
                 if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= 0.25f)
                 {
                     gameent *d = (gameent *)pl;
-                    if(d->onfire(lastmillis, fireburntime) && lastmillis-d->lastfire > PHYSMILLIS)
+                    if(d->burning(lastmillis, residualburntime) && lastmillis-d->lastburn > PHYSMILLIS)
                     {
-                        d->resetfire();
+                        d->resetburning();
                         playsound(S_EXTINGUISH, d->o, d);
                         part_create(PART_SMOKE, 500, d->feetpos(d->height/2), 0xAAAAAA, d->radius*4, 1, -10);
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);

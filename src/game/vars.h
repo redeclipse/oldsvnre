@@ -62,9 +62,12 @@ GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
 GVAR(0, maxhealth, 0, 100, INT_MAX-1);
 GVAR(0, extrahealth, 0, 150, INT_MAX-1);
 
-GVAR(0, fireburntime, 0, 5500, INT_MAX-1);
-GVAR(0, fireburndelay, 0, 1000, INT_MAX-1);
-GVAR(0, fireburndamage, 0, 5, INT_MAX-1);
+GVAR(0, residualburntime, 0, 5500, INT_MAX-1);
+GVAR(0, residualburndelay, 0, 1000, INT_MAX-1);
+GVAR(0, residualburndamage, 0, 5, INT_MAX-1);
+GVAR(0, residualbleedtime, 0, 5500, INT_MAX-1);
+GVAR(0, residualbleeddelay, 0, 1000, INT_MAX-1);
+GVAR(0, residualbleeddamage, 0, 5, INT_MAX-1);
 
 GVAR(0, regendelay, 0, 3000, INT_MAX-1);
 GVAR(0, regenguard, 0, 1000, INT_MAX-1);
