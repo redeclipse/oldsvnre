@@ -106,7 +106,7 @@ namespace hud
     VAR(IDF_PERSIST, overlaydisplay, 0, 0, 2); // 0 = only firstperson and alive, 1 = only when alive, 2 = always
     FVAR(IDF_PERSIST, overlayblend, 0, 0.5f, 1);
 
-    VAR(IDF_PERSIST, showdamage, 0, 1, 2); // 1 shows just damage texture, 2 blends as well
+    VAR(IDF_PERSIST, showdamage, 0, 2, 2); // 1 shows just damage texture, 2 blends as well
     VAR(IDF_PERSIST, damagefade, 0, 0, 1);
     TVAR(IDF_PERSIST, damagetex, "textures/damage", 3);
     FVAR(IDF_PERSIST, damageblend, 0, 0.75f, 1);
@@ -332,7 +332,7 @@ namespace hud
 
     void damage(int n, const vec &loc, gameent *actor, int weap, int flags)
     {
-        damageresidue = clamp(damageresidue+n, 0, 200);
+        damageresidue = clamp(damageresidue+(n*(flags*HIT_BLEED ? 5 : 1)), 0, 200);
         vec colour = doesburn(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
             dir = vec(loc).sub(camera1->o).normalize();
         loopv(damagelocs)
@@ -2016,7 +2016,7 @@ namespace hud
                 }
                 if(showdamage >= 2 && damageresidue > 0)
                 {
-                    float pc = min(damageresidue, 100)/100.f;
+                    float pc = min(damageresidue, 100)/200.f;
                     loopi(2) if(colour[i+1] > 0) colour[i+1] -= colour[i+1]*pc;
                 }
             }

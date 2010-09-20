@@ -681,14 +681,13 @@ namespace game
                 if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
-                    vec p = d->headpos();
-                    p.z += 0.6f*(d->height + d->aboveeye) - d->height;
+                    vec p = d->headpos(-d->height/3);
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 200, DECAL_BLOOD, int(d->radius));
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 200, DECAL_BLOOD, int(d->radius));
                         if(kidmode || bloodscale <= 0 || bloodsparks)
-                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10)), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
+                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2 : 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);
                     if(!burning && !bleeding) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
