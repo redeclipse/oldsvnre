@@ -1609,18 +1609,16 @@ namespace entities
 
                 // I_SHELLS         -   WEAPON      WEAP_SHOTGUN
                 // I_BULLETS        -   WEAPON      WEAP_SMG
-                // I_ROCKETS        -   WEAPON      WEAP_PLASMA
+                // I_ROCKETS        -   WEAPON      WEAP_FLAMER
                 // I_ROUNDS         -   WEAPON      WEAP_RIFLE
                 // I_GL             -   WEAPON      WEAP_GRENADE
-                // I_CARTRIDGES     -   WEAPON      WEAP_PISTOL
+                // I_CARTRIDGES     -   WEAPON      WEAP_PLASMA
                 case 9: case 10: case 11: case 12: case 13: case 14:
                 {
-                    int weap = f.type-8, weapmap[6] = {
-                        WEAP_SHOTGUN, WEAP_SMG, WEAP_PLASMA, WEAP_RIFLE, WEAP_GRENADE, WEAP_SWORD
-                    };
-
+                    int weap = f.type-8;
                     if(weap >= 0 && weap <= 5)
                     {
+                        const int weapmap[6] = { WEAP_SHOTGUN, WEAP_SMG, WEAP_FLAMER, WEAP_RIFLE, WEAP_GRENADE, WEAP_PLASMA };
                         f.type = WEAPON;
                         f.attrs[0] = weapmap[weap];
                         f.attrs[1] = 0;
@@ -1628,11 +1626,11 @@ namespace entities
                     else f.type = NOTUSED;
                     break;
                 }
-                // I_QUAD           -   WEAPON      WEAP_FLAMER
+                // I_QUAD           -   WEAPON      WEAP_ROCKET
                 case 19:
                 {
                     f.type = WEAPON;
-                    f.attrs[0] = WEAP_FLAMER;
+                    f.attrs[0] = WEAP_ROCKET;
                     f.attrs[1] = 0;
                     break;
                 }
@@ -1703,8 +1701,8 @@ namespace entities
                 // I_YELLOWARMOUR   -   NOTUSED
                 // BOX              -   NOTUSED
                 // BARREL           -   NOTUSED
-                // PLATFORM     -   NOTUSED
-                // ELEVATOR     -   NOTUSED
+                // PLATFORM         -   NOTUSED
+                // ELEVATOR         -   NOTUSED
                 default:
                 {
                     if(verbose) conoutf("\frWARNING: ignoring entity %d type %d", id, f.type);
