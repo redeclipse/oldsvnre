@@ -1195,11 +1195,8 @@ namespace entities
                 while(e.attrs[5] > 2) e.attrs[5] -= 3;
                 break;
             case WAYPOINT:
-                if(create)
-                {
-                    numwaypoints++;
-                    e.attrs[1] = getweight(e.o);
-                }
+                if(create) numwaypoints++;
+                e.attrs[1] = getweight(e.o);
                 break;
             default: break;
         }
