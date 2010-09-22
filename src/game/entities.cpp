@@ -1977,17 +1977,16 @@ namespace entities
                     if(mtype == MAP_MAPZ && gver <= 90)
                     { // move grenade to the end of the weapon array
                         if(e.attrs[0] >= 4) e.attrs[0]--;
-                        else if(e.attrs[0] == 3) e.attrs[0] = WEAP_GRENADE;
+                        else if(e.attrs[0] == 3) e.attrs[0] = 7;
                     }
-                    if(mtype == MAP_MAPZ && gver <= 97 && e.attrs[0] >= 4)
-                        e.attrs[0]++; // add in pistol
+                    if(mtype == MAP_MAPZ && gver <= 97) e.attrs[0]++; // add in pistol
                     if(mtype != MAP_MAPZ || gver <= 112) e.attrs[1] = 0;
                     if(mtype == MAP_MAPZ && gver <= 160)
                     {
                         e.attrs[0]++; // add in melee
-                        if(e.attrs[0] < WEAP_OFFSET) e.attrs[0] = WEAP_GRENADE; // cleanup for fixentity
+                        if(e.attrs[0] < WEAP_OFFSET) e.attrs[0] = 8; // cleanup for fixentity
                     }
-                    if(mtype == MAP_MAPZ && gver <= 163) e.attrs[0]++; // add in impulse
+                    if(mtype == MAP_MAPZ && gver <= 163) e.attrs[0]++; // add in sword
                     break;
                 }
                 case TRIGGER:

@@ -227,6 +227,11 @@ namespace server
             gs.damage = damage;
             gs.timeplayed = timeplayed;
         }
+
+        void mapchange()
+        {
+            points = frags = spree = crits = rewards = flags = deaths = teamkills = shotdamage = damage = 0;
+        }
     };
 
     struct votecount
@@ -1822,6 +1827,7 @@ namespace server
         gamelimit = GAME(timelimit) ? timeremaining*1000 : 0;
         sents.shrink(0);
         scores.shrink(0);
+        loopv(savedscores) savedscores[i].mapchange();
         setuptriggers(false);
         setupspawns(false);
 
