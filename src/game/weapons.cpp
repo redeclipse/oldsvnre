@@ -324,7 +324,7 @@ namespace weapons
         {
             if(*weaptype[i].item) loadmodel(weaptype[i].item, -1, true);
             if(*weaptype[i].vwep) loadmodel(weaptype[i].vwep, -1, true);
-            if(*weaptype[i].hwep) loadmodel(weaptype[i].vwep, -1, true);
+            if(*weaptype[i].hwep) loadmodel(weaptype[i].hwep, -1, true);
         }
     }
 }
