@@ -669,7 +669,6 @@ namespace projs
         proj.waittime = waittime;
         proj.maxspeed = speed;
         proj.id = id;
-        proj.weap = weap;
         proj.flags = flags;
         proj.scale = scale;
         proj.movement = 0;
@@ -677,23 +676,27 @@ namespace projs
         {
             proj.vel = proj.inertia = proj.to;
             proj.to.add(proj.from);
-            if(proj.weap >= 0) proj.target = game::getclient(proj.weap);
+            if(weap >= 0) proj.target = game::getclient(weap);
         }
-        else if(child)
+        else
         {
-            proj.child = true;
-            proj.owner = d;
-            proj.vel = vec(proj.to).sub(proj.from);
-            if(parent) proj.target = parent->target;
-        }
-        else if(d)
-        {
-            proj.owner = d;
-            proj.yaw = d->yaw;
-            proj.pitch = d->pitch;
-            proj.inertia = vec(d->vel).add(d->falling);
-            if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan))
-                playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, int(ceilf(sounds[d->pschan].vol*(proj.child ? 0.25f : 1.f))), -1, -1, &proj.schan, 0, &d->pschan);
+            proj.weap = weap;
+            if(child)
+            {
+                proj.child = true;
+                proj.owner = d;
+                proj.vel = vec(proj.to).sub(proj.from);
+                if(parent) proj.target = parent->target;
+            }
+            else if(d)
+            {
+                proj.owner = d;
+                proj.yaw = d->yaw;
+                proj.pitch = d->pitch;
+                proj.inertia = vec(d->vel).add(d->falling);
+                if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan))
+                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, int(ceilf(sounds[d->pschan].vol*(proj.child ? 0.25f : 1.f))), -1, -1, &proj.schan, 0, &d->pschan);
+            }
         }
         if(!proj.waittime) init(proj, false);
         projs.add(&proj);
@@ -1350,14 +1353,15 @@ namespace projs
     bool move(projent &proj, int qtime)
     {
         float secs = float(qtime)/1000.f;
-        if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.weap >= 0 && proj.target && !proj.lastbounce)
+        if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.target && !proj.lastbounce)
         {
-            vec targ = vec(proj.target->o).sub(proj.o).normalize(), dir = vec(proj.vel).normalize();
+            vec targ = vec(proj.target->o).sub(proj.o).normalize();
             if(!targ.iszero())
             {
+                vec dir = vec(proj.vel).normalize();
                 float amt = clamp(bomberdelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberminvel);
-                dir.mul(1.f-amt).add(targ.mul(amt));
-                if(!dir.iszero()) proj.vel = dir.mul(mag);
+                dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
+                if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }
         }
         else if(proj.projtype == PRJ_SHOT && proj.escaped && proj.owner)
@@ -1366,7 +1370,7 @@ namespace projs
             {
                 if(!proj.stuck) proj.stuck = false;
                 vec targ = vec(proj.owner->feetpos(proj.owner->height/2)).sub(proj.o).normalize();
-                if(!targ.iszero()) proj.vel = targ.mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
+                if(!targ.iszero()) (proj.vel = targ).mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
             }
             else if(proj.owner->state == CS_ALIVE && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
             {
@@ -1414,8 +1418,8 @@ namespace projs
                     float amt = clamp(WEAP2(proj.weap, delta, proj.flags&HIT_ALT)*secs, 1e-8f, 1.f),
                           mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
                     targ.sub(proj.o).normalize();
-                    dir.mul(1.f-amt).add(targ.mul(amt));
-                    if(!dir.iszero()) proj.vel = dir.mul(mag);
+                    dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
+                    if(!dir.iszero()) (proj.vel = dir).mul(mag);
                 }
             }
         }

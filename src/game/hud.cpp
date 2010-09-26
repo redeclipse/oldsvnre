@@ -151,7 +151,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventorythrob, 0, 0.125f, 1);
+    FVAR(IDF_PERSIST, inventorythrob, 0, 0.0625f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.07f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.6f, 1000);
     FVAR(IDF_PERSIST, inventorygrow, 1e-4f, 0.75f, 1);
@@ -1569,7 +1569,7 @@ namespace hud
                 } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
                 settexture(healthtex, 3);
                 glBegin(GL_TRIANGLE_STRIP);
-                int cx = x+offset, cy = y-size+offset, cw = width-offset*2, ch = size-offset*2;
+                int cx = x-offset, cy = y-size-offset, cw = width+offset*2, ch = size+offset*2;
                 float health = clamp(game::focus->health/float(heal), 0.0f, 1.0f);
                 const float margin = 0.1f;
                 loopi(4)
@@ -1603,7 +1603,7 @@ namespace hud
                     glColor4f(r, g, b, hfade); glTexCoord2f(1, off); glVertex2f(cx + cw, cy + off*ch);
                 }
                 glEnd();
-                if(!sy) sy += size;
+                sy += size;
             }
             if(hashealth)
             {
@@ -1617,14 +1617,14 @@ namespace hud
                     gb -= gb*skew;
                 }
                 pushfont("super");
-                int dt = draw_textx("%d", x+width/2, y-sy, int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
+                int dt = draw_textx("%d", x+width/2, y-sy+(inventoryhealth >= 2 ? size/3 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
                 if(!sy) sy += dt;
                 popfont();
             }
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
                 pushfont(!hashealth || m_trial(game::gamemode) ? "super" : "default");
-                int ty = draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), hashealth ? TEXT_CENTER_UP : TEXT_LEFT_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
+                int ty = draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
                 if(!hashealth) sy += ty;
                 popfont();
             }
