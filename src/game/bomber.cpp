@@ -381,7 +381,7 @@ namespace bomber
     void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target)
     {
         if(!st.flags.inrange(i)) return;
-        st.dropaffinity(i, droploc, inertia, lastmillis);
+        st.dropaffinity(i, droploc, inertia, lastmillis, target);
     }
 
     void removeplayer(gameent *d)

@@ -88,10 +88,10 @@ struct bomberstate
         }
     }
 
-    void create(int id)
+    void create(int id, int target)
     {
         flag &f = flags[id];
-        f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, id);
+        f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, id, target);
     }
 #endif
 #ifdef GAMESERVER
@@ -116,7 +116,7 @@ struct bomberstate
 #endif
     }
 
-    void dropaffinity(int i, const vec &o, const vec &p, int t)
+    void dropaffinity(int i, const vec &o, const vec &p, int t, int target = -1)
     {
         flag &f = flags[i];
         f.droploc = o;
@@ -131,7 +131,7 @@ struct bomberstate
         f.pickuptime = 0;
         f.owner = NULL;
         destroy(i);
-        create(i);
+        create(i, target);
         interp(i, t);
 #endif
     }
