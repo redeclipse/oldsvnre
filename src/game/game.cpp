@@ -1962,15 +1962,15 @@ namespace game
                     {
                         int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
                         float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
-                              size = aboveheadiconsize*skew, fade = blend*skew;
+                              size = aboveheadiconsize*skew, fade = blend*skew, nudge = size/2;
                         if(d->icons[i].type == eventicon::WEAPON)
                         {
                             colour = weaptype[d->icons[i].value].colour;
-                            pos.z += 0.125f;
+                            nudge *= 2;
                         }
-                        pos.z += size/2;
+                        pos.z += nudge+0.125f;
                         part_icon(pos, t, size, fade, 0, 0, 1, colour);
-                        pos.z += size/2;
+                        pos.z += nudge;
                     }
                 }
             }

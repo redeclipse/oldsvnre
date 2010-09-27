@@ -2046,7 +2046,7 @@ namespace hud
                         glBindTexture(GL_TEXTURE_2D, t->id);
                         glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, fade);
                         drawtex(tx-width/2, ty-size/2, width, size);
-                        ty -= int(size*eventscale/4);
+                        ty -= int(size*eventscale/(game::focus->icons[i].type == eventicon::WEAPON ? 2 : 4));
                     }
                 }
             }
