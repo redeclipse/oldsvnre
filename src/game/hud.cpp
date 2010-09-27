@@ -28,6 +28,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
+    VAR(IDF_PERSIST, showevents, 0, 1, 2);
 
     VAR(IDF_PERSIST, showfps, 0, 1, 3);
     VAR(IDF_PERSIST, showstats, 0, 1, 2);
@@ -72,7 +73,10 @@ namespace hud
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.4f, 1);
     FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1);
+    FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
+    FVAR(IDF_PERSIST, eventoffset, -1, 0.4f, 1);
+    FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
@@ -257,50 +261,17 @@ namespace hud
     TVAR(IDF_PERSIST, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST, badgetex, "textures/cube2badge", 3);
 
-    TVAR(IDF_PERSIST, spree1tex, "<anim:250,1,4>textures/carnage", 3);
-    TVAR(IDF_PERSIST, spree2tex, "<anim:250,1,4>textures/slaughter", 3);
-    TVAR(IDF_PERSIST, spree3tex, "<anim:250,1,4>textures/massacre", 3);
-    TVAR(IDF_PERSIST, spree4tex, "<anim:250,1,4>textures/bloodbath", 3);
-    TVAR(IDF_PERSIST, multi1tex, "<anim:250,1,4>textures/double", 3);
-    TVAR(IDF_PERSIST, multi2tex, "<anim:250,1,4>textures/triple", 3);
-    TVAR(IDF_PERSIST, multi3tex, "<anim:250,1,4>textures/multi", 3);
-    TVAR(IDF_PERSIST, headshottex, "<anim:250,1,4>textures/headshot", 3);
-    TVAR(IDF_PERSIST, criticaltex, "<anim:250,1,4>textures/critical", 3);
-    TVAR(IDF_PERSIST, dominatetex, "<anim:250,1,4>textures/dominate", 3);
-    TVAR(IDF_PERSIST, revengetex, "<anim:250,1,4>textures/revenge", 3);
-
-    const char *geticon(int type, int value)
-    {
-        switch(type)
-        {
-            case aboveicon::SPREE:
-            {
-                switch(value)
-                {
-                    case 0: return hud::spree1tex; break;
-                    case 1: return hud::spree2tex; break;
-                    case 2: return hud::spree3tex; break;
-                    case 3: default: return hud::spree4tex; break;
-                }
-                break;
-            }
-            case aboveicon::MULTIKILL:
-            {
-                switch(value)
-                {
-                    case 0: return hud::multi1tex; break;
-                    case 1: return hud::multi2tex; break;
-                    case 2: default: return hud::multi3tex; break;
-                }
-                break;
-            }
-            case aboveicon::HEADSHOT: return hud::headshottex; break;
-            case aboveicon::CRITICAL: return hud::criticaltex; break;
-            case aboveicon::DOMINATE: return hud::dominatetex; break;
-            case aboveicon::REVENGE: return hud::revengetex; break;
-        }
-        return "";
-    }
+    TVAR(IDF_PERSIST, spree1tex, "<anim:100,1,4>textures/carnage", 3);
+    TVAR(IDF_PERSIST, spree2tex, "<anim:100,1,4>textures/slaughter", 3);
+    TVAR(IDF_PERSIST, spree3tex, "<anim:100,1,4>textures/massacre", 3);
+    TVAR(IDF_PERSIST, spree4tex, "<anim:100,1,4>textures/bloodbath", 3);
+    TVAR(IDF_PERSIST, multi1tex, "<anim:100,1,4>textures/double", 3);
+    TVAR(IDF_PERSIST, multi2tex, "<anim:100,1,4>textures/triple", 3);
+    TVAR(IDF_PERSIST, multi3tex, "<anim:100,1,4>textures/multi", 3);
+    TVAR(IDF_PERSIST, headshottex, "<anim:100,1,4>textures/headshot", 3);
+    TVAR(IDF_PERSIST, criticaltex, "<anim:100,1,4>textures/critical", 3);
+    TVAR(IDF_PERSIST, dominatetex, "<anim:100,1,4>textures/dominate", 3);
+    TVAR(IDF_PERSIST, revengetex, "<anim:100,1,4>textures/revenge", 3);
 
     bool needminimap() { return false; }
 
@@ -772,10 +743,226 @@ namespace hud
     {
         if(game::focus != game::player1)
         {
-            if(game::thirdpersonview(true) && game::shownamesabovehead > 1) return false;
+            if(game::thirdpersonview(true) && game::aboveheadnames > 1) return false;
             return true;
         }
         return false;
+    }
+
+    void drawnotices()
+    {
+        pushfont("emphasis");
+        int ty = ((hudheight/2)-FONTH+int(hudheight/2*noticeoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
+            tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
+            tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
+        glPushMatrix();
+        glScalef(noticescale, noticescale, 1);
+        if(teamnotices) skewcolour(tr, tg, tb);
+        if(lastmillis-game::maptime <= titlefade*3)
+        {
+
+            ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname)*noticescale;
+            pushfont("default");
+            if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor)*noticescale;
+            popfont();
+            pushfont("sub");
+            defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
+            if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
+            ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname)*noticescale;
+            popfont();
+        }
+
+        if(game::player1->state == CS_SPECTATOR)
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"))*noticescale;
+        else if(game::player1->state == CS_WAITING && showname())
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colorname(game::focus))*noticescale;
+
+        gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
+        if(target->state == CS_DEAD || target->state == CS_WAITING)
+        {
+            int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
+            const char *msg = target->state == CS_WAITING && target == game::player1 ? "Please Wait" : "Fragged";
+            ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg)*noticescale;
+            if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
+            {
+                pushfont("sub");
+                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit)*noticescale;
+                popfont();
+            }
+            if(shownotices >= 2)
+            {
+                SEARCHBINDCACHE(attackkey)("action 0", 0);
+                if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators))
+                {
+                    pushfont("default");
+                    if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
+                    else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1))*noticescale;
+                    popfont();
+                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
+                    {
+                        pushfont("sub");
+                        ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*noticescale;
+                        popfont();
+                    }
+                }
+                else
+                {
+                    pushfont("default");
+                    ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
+                    popfont();
+                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
+                    {
+                        pushfont("sub");
+                        ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*noticescale;
+                        popfont();
+                    }
+                }
+                if(target == game::player1 && target->state == CS_WAITING && shownotices >= 3)
+                {
+                    SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
+                    pushfont("sub");
+                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV")*noticescale;
+                    popfont();
+                }
+                if(target == game::player1 && m_arena(game::gamemode, game::mutators))
+                {
+                    SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
+                    pushfont("sub");
+                    ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change")*noticescale;
+                    popfont();
+                }
+                if(target == game::player1 && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+                {
+                    SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                    pushfont("sub");
+                    ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey)*noticescale;
+                    popfont();
+                }
+            }
+        }
+        else if(target->state == CS_ALIVE)
+        {
+            if(m_fight(game::gamemode) && target == game::player1)
+            {
+                if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
+                    ty += draw_textx("\fzryDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
+                if(inventoryteams)
+                {
+                    if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
+                    if(totalmillis-lastteam <= inventoryteams)
+                    {
+                        if(m_campaign(game::gamemode)) ty += draw_textx("Campaign Mission", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
+                        else if(!m_team(game::gamemode, game::mutators))
+                        {
+                            if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
+                            else ty += draw_textx("\fzReFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
+                        }
+                        else ty += draw_textx("\fzReTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname)*noticescale;
+                    }
+                }
+            }
+            if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
+            {
+                pushfont("sub");
+                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit)*noticescale;
+                popfont();
+            }
+            if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
+            {
+                pushfont("sub");
+                static vector<actitem> actitems;
+                actitems.setsize(0);
+                if(entities::collateitems(target, actitems))
+                {
+                    SEARCHBINDCACHE(actionkey)("action 3", 0);
+                    while(!actitems.empty())
+                    {
+                        actitem &t = actitems.last();
+                        int ent = -1;
+                        switch(t.type)
+                        {
+                            case ITEM_ENT:
+                            {
+                                if(!entities::ents.inrange(t.target)) break;
+                                ent = t.target;
+                                break;
+                            }
+                            case ITEM_PROJ:
+                            {
+                                if(!projs::projs.inrange(t.target)) break;
+                                projent &proj = *projs::projs[t.target];
+                                ent = proj.id;
+                                break;
+                            }
+                            default: break;
+                        }
+                        if(entities::ents.inrange(ent))
+                        {
+                            extentity &e = *entities::ents[ent];
+                            if(enttype[e.type].usetype == EU_ITEM)
+                            {
+                                int drop = -1, sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
+                                if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
+                                {
+                                    if(e.type == WEAPON && w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
+                                        drop = target->drop(sweap);
+                                    if(isweap(drop))
+                                    {
+                                        static vector<int> attrs; attrs.setsize(0); loopk(5) attrs.add(k ? 0 : drop);
+                                        defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false));
+                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false))*noticescale;
+                                    }
+                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false))*noticescale;
+                                    break;
+                                }
+                            }
+                            else if(e.type == TRIGGER && e.attrs[2] == TA_ACTION)
+                            {
+                                ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey)*noticescale;
+                                break;
+                            }
+                        }
+                        actitems.pop();
+                    }
+                }
+                if(shownotices >= 4)
+                {
+                    if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
+                    {
+                        SEARCHBINDCACHE(attackkey)("action 0", 0);
+                        ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*noticescale;
+                        SEARCHBINDCACHE(altkey)("action 1", 0);
+                        ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack")*noticescale;
+                    }
+                    if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
+                    {
+                        SEARCHBINDCACHE(reloadkey)("action 2", 0);
+                        ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey)*noticescale;
+                    }
+                }
+                popfont();
+            }
+        }
+
+        if(game::player1->state == CS_SPECTATOR)
+        {
+            SEARCHBINDCACHE(speconkey)("spectator 0", 1);
+            pushfont("sub");
+            ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey)*noticescale;
+            if(shownotices >= 2)
+            {
+                SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
+                ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV")*noticescale;
+            }
+            popfont();
+        }
+
+        if(m_capture(game::gamemode)) capture::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
+        else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
+        else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
+
+        glPopMatrix();
+        popfont();
     }
 
     void drawlast()
@@ -788,225 +975,7 @@ namespace hud
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(commandmillis <= 0 && curcompass) rendercmenu();
-            else if(!client::waiting() && shownotices && !hasinput(false) && !texpaneltimer)
-            {
-                pushfont("emphasis");
-                int ty = (hudheight/2)-FONTH+int(hudheight/2*noticeoffset), tx = hudwidth/2, tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-                    tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
-                if(noticescale < 1)
-                {
-                    glPushMatrix();
-                    glScalef(noticescale, noticescale, 1);
-                    ty = int(ty*(1.f/noticescale));
-                    tx = int(tx*(1.f/noticescale));
-                }
-                if(teamnotices) skewcolour(tr, tg, tb);
-                if(lastmillis-game::maptime <= titlefade*3)
-                {
-
-                    ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname)*noticescale;
-                    pushfont("default");
-                    if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor)*noticescale;
-                    popfont();
-                    pushfont("sub");
-                    defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
-                    if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
-                    ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname)*noticescale;
-                    popfont();
-                }
-
-                if(game::player1->state == CS_SPECTATOR)
-                    ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"))*noticescale;
-                else if(game::player1->state == CS_WAITING && showname())
-                    ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colorname(game::focus))*noticescale;
-
-                gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
-                if(target->state == CS_DEAD || target->state == CS_WAITING)
-                {
-                    int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
-                    const char *msg = target->state == CS_WAITING && target == game::player1 ? "Please Wait" : "Fragged";
-                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg)*noticescale;
-                    if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
-                    {
-                        pushfont("sub");
-                        ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit)*noticescale;
-                        popfont();
-                    }
-                    if(shownotices >= 2)
-                    {
-                        SEARCHBINDCACHE(attackkey)("action 0", 0);
-                        if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators))
-                        {
-                            pushfont("default");
-                            if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
-                            else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1))*noticescale;
-                            popfont();
-                            if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
-                            {
-                                pushfont("sub");
-                                ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*noticescale;
-                                popfont();
-                            }
-                        }
-                        else
-                        {
-                            pushfont("default");
-                            ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
-                            popfont();
-                            if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
-                            {
-                                pushfont("sub");
-                                ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*noticescale;
-                                popfont();
-                            }
-                        }
-                        if(target == game::player1 && target->state == CS_WAITING && shownotices >= 3)
-                        {
-                            SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                            pushfont("sub");
-                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV")*noticescale;
-                            popfont();
-                        }
-                        if(target == game::player1 && m_arena(game::gamemode, game::mutators))
-                        {
-                            SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                            pushfont("sub");
-                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change")*noticescale;
-                            popfont();
-                        }
-                        if(target == game::player1 && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
-                        {
-                            SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                            pushfont("sub");
-                            ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey)*noticescale;
-                            popfont();
-                        }
-                    }
-                }
-                else if(target->state == CS_ALIVE)
-                {
-                    if(m_fight(game::gamemode) && target == game::player1)
-                    {
-                        if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
-                            ty += draw_textx("\fzryDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
-                        if(inventoryteams)
-                        {
-                            if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
-                            if(totalmillis-lastteam <= inventoryteams)
-                            {
-                                if(m_campaign(game::gamemode)) ty += draw_textx("Campaign Mission", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
-                                else if(!m_team(game::gamemode, game::mutators))
-                                {
-                                    if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
-                                    else ty += draw_textx("\fzReFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*noticescale;
-                                }
-                                else ty += draw_textx("\fzReTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname)*noticescale;
-                            }
-                        }
-                    }
-                    if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
-                    {
-                        pushfont("sub");
-                        ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit)*noticescale;
-                        popfont();
-                    }
-                    if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
-                    {
-                        pushfont("sub");
-                        static vector<actitem> actitems;
-                        actitems.setsize(0);
-                        if(entities::collateitems(target, actitems))
-                        {
-                            SEARCHBINDCACHE(actionkey)("action 3", 0);
-                            while(!actitems.empty())
-                            {
-                                actitem &t = actitems.last();
-                                int ent = -1;
-                                switch(t.type)
-                                {
-                                    case ITEM_ENT:
-                                    {
-                                        if(!entities::ents.inrange(t.target)) break;
-                                        ent = t.target;
-                                        break;
-                                    }
-                                    case ITEM_PROJ:
-                                    {
-                                        if(!projs::projs.inrange(t.target)) break;
-                                        projent &proj = *projs::projs[t.target];
-                                        ent = proj.id;
-                                        break;
-                                    }
-                                    default: break;
-                                }
-                                if(entities::ents.inrange(ent))
-                                {
-                                    extentity &e = *entities::ents[ent];
-                                    if(enttype[e.type].usetype == EU_ITEM)
-                                    {
-                                        int drop = -1, sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                                        if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
-                                        {
-                                            if(e.type == WEAPON && w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
-                                                drop = target->drop(sweap);
-                                            if(isweap(drop))
-                                            {
-                                                static vector<int> attrs; attrs.setsize(0); loopk(5) attrs.add(k ? 0 : drop);
-                                                defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false));
-                                                ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false))*noticescale;
-                                            }
-                                            else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false))*noticescale;
-                                            break;
-                                        }
-                                    }
-                                    else if(e.type == TRIGGER && e.attrs[2] == TA_ACTION)
-                                    {
-                                        ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey)*noticescale;
-                                        break;
-                                    }
-                                }
-                                actitems.pop();
-                            }
-                        }
-                        if(shownotices >= 4)
-                        {
-                            if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
-                            {
-                                SEARCHBINDCACHE(attackkey)("action 0", 0);
-                                ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*noticescale;
-                                SEARCHBINDCACHE(altkey)("action 1", 0);
-                                ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack")*noticescale;
-                            }
-                            if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
-                            {
-                                SEARCHBINDCACHE(reloadkey)("action 2", 0);
-                                ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey)*noticescale;
-                            }
-                        }
-                        popfont();
-                    }
-                }
-
-                if(game::player1->state == CS_SPECTATOR)
-                {
-                    SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-                    pushfont("sub");
-                    ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey)*noticescale;
-                    if(shownotices >= 2)
-                    {
-                        SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                        ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV")*noticescale;
-                    }
-                    popfont();
-                }
-
-                if(m_capture(game::gamemode)) capture::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
-                else if(m_defend(game::gamemode)) defend::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
-                else if(m_bomber(game::gamemode)) bomber::drawlast(hudwidth, hudheight, tx, ty, tf/255.f);
-
-                if(noticescale < 1) glPopMatrix();
-                popfont();
-            }
+            else if(shownotices && !client::waiting() && !hasinput(false) && !texpaneltimer) drawnotices();
             if(overlaydisplay >= 2 || (game::focus->state == CS_ALIVE && (overlaydisplay || !game::thirdpersonview(true))))
             {
                 Texture *t = *overlaytex ? textureload(overlaytex, 3) : notexture;
@@ -1478,6 +1447,40 @@ namespace hud
         return "";
     }
 
+    const char *icontex(int type, int value)
+    {
+        switch(type)
+        {
+            case eventicon::SPREE:
+            {
+                switch(value)
+                {
+                    case 0: return spree1tex; break;
+                    case 1: return spree2tex; break;
+                    case 2: return spree3tex; break;
+                    case 3: default: return spree4tex; break;
+                }
+                break;
+            }
+            case eventicon::MULTIKILL:
+            {
+                switch(value)
+                {
+                    case 0: return multi1tex; break;
+                    case 1: return multi2tex; break;
+                    case 2: default: return multi3tex; break;
+                }
+                break;
+            }
+            case eventicon::HEADSHOT: return headshottex; break;
+            case eventicon::CRITICAL: return criticaltex; break;
+            case eventicon::DOMINATE: return dominatetex; break;
+            case eventicon::REVENGE: return revengetex; break;
+            case eventicon::WEAPON: return itemtex(WEAPON, value);
+        }
+        return "";
+    }
+
     int drawentitem(int n, int x, int y, int s, float skew, float fade)
     {
         if(entities::ents.inrange(n))
@@ -1724,8 +1727,15 @@ namespace hud
             }
             if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, sw, true, 1.f, 1.f, 1.f, fade, 1.f);
         }
+        return sy;
+    }
+
+    int drawtimer(int x, int y, int s, float blend)
+    {
+        int sy = 0;
         if(inventorytrial && m_trial(game::gamemode) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
+            float fade = blend*inventoryblend;
             if((game::focus->cpmillis > 0 || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
                 pushfont("default");
@@ -1741,7 +1751,7 @@ namespace hud
                     popfont();
                 }
             }
-            sy += sb.trialinventory(x, y-sy, sw, fade);
+            sy += sb.trialinventory(x, y-sy, s, fade);
         }
         return sy;
     }
@@ -1754,6 +1764,7 @@ namespace hud
             case 0: default:
             {
                 if((cc = drawhealth(cx[i], cy[i], cs, blend)) > 0) cy[i] -= cc+cr;
+                if((cc = drawtimer(cx[i], cy[i], cs, blend)) > 0) cy[i] -= cc+cr;
                 break;
             }
             case 1:
@@ -2009,6 +2020,41 @@ namespace hud
         }
     }
 
+    void drawevents(float blend)
+    {
+        if(game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
+        {
+            pushfont("super");
+            int ty = ((hudheight/2)-FONTH-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
+            glPushMatrix();
+            glScalef(eventscale, eventscale, 1);
+            loopk(showevents) loopv(game::focus->icons)
+            {
+                if(k ? game::focus->icons[i].type != eventicon::WEAPON : game::focus->icons[i].type == eventicon::WEAPON) continue;
+                if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
+                int millis = lastmillis-game::focus->icons[i].millis;
+                if(millis <= game::focus->icons[i].fade)
+                {
+                    Texture *t = textureload(hud::icontex(game::focus->icons[i].type, game::focus->icons[i].value));
+                    if(t && t != notexture)
+                    {
+                        int olen = min(game::focus->icons[i].length/5, 1000), ilen = olen/2,
+                            colour = game::focus->icons[i].type == eventicon::WEAPON ? weaptype[game::focus->icons[i].value].colour : 0xFFFFFF;
+                        float skew = millis < ilen ? millis/float(ilen) : (millis > game::focus->icons[i].fade-olen ? (game::focus->icons[i].fade-millis)/float(olen) : 1.f),
+                              fade = blend*eventblend*skew;
+                        int size = int(FONTH*skew), width = int((t->w/float(t->h))*size);
+                        glBindTexture(GL_TEXTURE_2D, t->id);
+                        glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, fade);
+                        drawtex(tx-width/2, ty-size/2, width, size);
+                        ty -= int(size*eventscale/4);
+                    }
+                }
+            }
+            glPopMatrix();
+            popfont();
+        }
+    }
+
     void drawhud(bool noview)
     {
         float fade = hudblend, consolefade = hudblend;
@@ -2084,7 +2130,11 @@ namespace hud
         glColor3f(1, 1, 1);
 
         if(noview) drawbackground(hudwidth, hudheight);
-        else if(showhud && !client::waiting() && fade > 0) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
+        else if(!client::waiting() && fade > 0)
+        {
+            if(showevents && !hasinput(false)) drawevents(fade);
+            if(showhud) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
+        }
         if(UI::ready && showconsole)
         {
             drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
