@@ -81,19 +81,19 @@ namespace game
     VAR(IDF_PERSIST, zoomdefault, 0, 0, 10); // 0 = last used, else defines default level
     VAR(IDF_PERSIST, zoomscroll, 0, 0, 1); // 0 = stop at min/max, 1 = go to opposite end
 
-    VAR(IDF_PERSIST, shownamesabovehead, 0, 1, 2);
-    VAR(IDF_PERSIST, showstatusabovehead, 0, 1, 2);
-    VAR(IDF_PERSIST, showteamabovehead, 0, 1, 3);
-    VAR(IDF_PERSIST, showdamageabovehead, 0, 0, 2);
-    VAR(IDF_PERSIST, showiconsabovehead, 0, 1, 2);
+    VAR(IDF_PERSIST, aboveheadnames, 0, 1, 2);
+    VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 2);
+    VAR(IDF_PERSIST, aboveheadteam, 0, 1, 3);
+    VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 2);
+    VAR(IDF_PERSIST, aboveheadicons, 0, 1, 2);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 0.75f, 1.f);
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 6, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
-    VAR(IDF_PERSIST, aboveheadfade, 500, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, aboveheadcritfade, 500, 2000, INT_MAX-1);
+    VAR(IDF_PERSIST, eventiconfade, 500, 5000, INT_MAX-1);
+    VAR(IDF_PERSIST, eventiconcritfade, 500, 1000, INT_MAX-1);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 0, 1);
@@ -565,6 +565,7 @@ namespace game
             if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
             else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/250.f)));
         }
+        loopv(d->icons) if(lastmillis-d->icons[i].millis > d->icons[i].fade) d->icons.remove(i--);
     }
 
 
@@ -624,7 +625,6 @@ namespace game
             {
                 if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
                     playsound(S_CRITICAL, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
-                d->addicon(aboveicon::CRITICAL, lastmillis, aboveheadcritfade);
             }
             else
             {
@@ -636,10 +636,10 @@ namespace game
                     else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
                     if(snd >= 0) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 }
-                if(showdamageabovehead >= (d != focus ? 1 : 2))
+                if(aboveheaddamage >= (d != focus ? 1 : 2))
                 {
                     defformatstring(ds)("<sub>\fr+%d", damage);
-                    part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
+                    part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, eventiconfade, 0xFFFFFF, 4, 1, -10, 0, d);
                 }
             }
         }
@@ -731,7 +731,12 @@ namespace game
             if(actor->type == ENT_PLAYER || actor->type == ENT_AI) actor->totaldamage += damage;
         }
         hiteffect(weap, flags, damage, d, actor, dir, actor == player1 || actor->ai);
-        if(flags&HIT_CRIT) pushdamagemerge(d, actor, weap, damage, damagemerge::CRIT);
+        if(flags&HIT_CRIT)
+        {
+            pushdamagemerge(d, actor, weap, damage, damagemerge::CRIT);
+            d->addicon(eventicon::CRITICAL, lastmillis, eventiconcritfade, 0);
+            actor->addicon(eventicon::CRITICAL, lastmillis, eventiconcritfade, 1);
+        }
     }
 
     void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style)
@@ -868,7 +873,7 @@ namespace game
                 if(style&FRAG_REVENGE)
                 {
                     concatstring(d->obit, " \fs\fzoyvengeful\fS");
-                    actor->addicon(aboveicon::REVENGE, lastmillis, aboveheadfade); // revenge
+                    actor->addicon(eventicon::REVENGE, lastmillis, eventiconfade); // revenge
                     actor->dominating.removeobj(d);
                     d->dominated.removeobj(actor);
                     anc = S_V_REVENGE; override = true;
@@ -876,7 +881,7 @@ namespace game
                 else if(style&FRAG_DOMINATE)
                 {
                     concatstring(d->obit, " \fs\fzoydominating\fS");
-                    actor->addicon(aboveicon::DOMINATE, lastmillis, aboveheadfade); // dominating
+                    actor->addicon(eventicon::DOMINATE, lastmillis, eventiconfade); // dominating
                     if(actor->dominated.find(d) < 0) actor->dominated.add(d);
                     if(d->dominating.find(actor) < 0) d->dominating.add(actor);
                     anc = S_V_DOMINATE; override = true;
@@ -887,26 +892,26 @@ namespace game
                 if(style&FRAG_MKILL1)
                 {
                     concatstring(d->obit, " \fs\fzRedouble-killing\fS");
-                    actor->addicon(aboveicon::MULTIKILL, lastmillis, aboveheadfade, 0);
+                    actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
                     if(!override) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     concatstring(d->obit, " \fs\fzRetriple-killing\fS");
-                    actor->addicon(aboveicon::MULTIKILL, lastmillis, aboveheadfade, 1);
+                    actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
                     if(!override) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzRemulti-killing\fS");
-                    actor->addicon(aboveicon::MULTIKILL, lastmillis, aboveheadfade, 2);
+                    actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
                     if(!override) anc = S_V_MULTI;
                 }
             }
 
             if(style&FRAG_HEADSHOT)
             {
-                actor->addicon(aboveicon::HEADSHOT, lastmillis, aboveheadfade, 0);
+                actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
                 if(!override) anc = S_V_HEADSHOT;
             }
 
@@ -914,28 +919,28 @@ namespace game
             if(style&FRAG_SPREE1)
             {
                 concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
-                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 0);
+                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
                 if(!override) anc = S_V_SPREE;
                 override = true;
             }
             else if(style&FRAG_SPREE2)
             {
                 concatstring(d->obit, " on a \fs\fzcgslaughter\fS");
-                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 1);
+                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
                 if(!override) anc = S_V_SPREE2;
                 override = true;
             }
             else if(style&FRAG_SPREE3)
             {
                 concatstring(d->obit, " on a \fs\fzcgmassacre\fS");
-                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 2);
+                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
                 if(!override) anc = S_V_SPREE3;
                 override = true;
             }
             else if(style&FRAG_SPREE4)
             {
                 concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
-                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 3);
+                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
                 if(!override) anc = S_V_SPREE4;
                 override = true;
             }
@@ -1914,51 +1919,60 @@ namespace game
     {
         if(third && d->type == ENT_PLAYER && !shadowmapping && !envmapping && trans > 1e-16f && d->o.squaredist(camera1->o) <= maxparticledistance*maxparticledistance)
         {
-            vec pos = d->abovehead(2);
+            vec pos = d->abovehead();
             float blend = aboveheadblend*trans;
-            if(shownamesabovehead > (d != focus ? 0 : 1))
+            if(aboveheadnames > (d != focus ? 0 : 1))
             {
                 const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<default>");
                 if(name && *name)
                 {
+                    pos.z += aboveheadnamesize/2;
                     part_textcopy(pos, name, PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
-                    pos.z += aboveheadnamesize+1;
+                    pos.z += aboveheadnamesize/2+0.5f;
                 }
             }
-            if(showstatusabovehead > (d != focus ? 0 : 1))
+            if(aboveheadstatus > (d != focus ? 0 : 1))
             {
                 Texture *t = NULL;
                 if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
                 else if(d->state == CS_ALIVE)
                 {
                     if(d->conopen) t = textureload(hud::conopentex, 3);
-                    else if(m_team(gamemode, mutators) && showteamabovehead > (d != focus ? (d->team != focus->team ? 1 : 0) : 2))
+                    else if(m_team(gamemode, mutators) && aboveheadteam > (d != focus ? (d->team != focus->team ? 1 : 0) : 2))
                         t = textureload(hud::teamtex(d->team), 3);
                     else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
                 }
                 if(t && t != notexture)
                 {
+                    pos.z += aboveheadstatussize/2;
                     part_icon(pos, t, aboveheadstatussize, blend);
-                    pos.z += aboveheadstatussize+0.25f;
+                    pos.z += aboveheadstatussize/2+0.25f;
                 }
             }
-            if(showiconsabovehead > (d != focus ? 0 : 1)) loopv(d->icons)
+            if(aboveheadicons > (d != focus ? 0 : 1)) loopk(2) loopv(d->icons)
             {
+                if(k ? d->icons[i].type != eventicon::WEAPON : d->icons[i].type == eventicon::WEAPON) continue;
+                if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
                 int millis = lastmillis-d->icons[i].millis;
                 if(millis <= d->icons[i].fade)
                 {
-                    Texture *t = textureload(hud::geticon(d->icons[i].type, d->icons[i].value));
+                    Texture *t = textureload(hud::icontex(d->icons[i].type, d->icons[i].value));
                     if(t && t != notexture)
                     {
-                        int len = min(d->icons[i].fade/5, 500);
-                        float skew = millis < len ? millis/float(len) : (millis > d->icons[i].fade-len ? (d->icons[i].fade-millis)/float(len) : 1.f),
+                        int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
+                        float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
                               size = aboveheadiconsize*skew, fade = blend*skew;
-                        part_icon(pos, t, size, fade);
-                        pos.z += size;
+                        if(d->icons[i].type == eventicon::WEAPON)
+                        {
+                            colour = weaptype[d->icons[i].value].colour;
+                            pos.z += 0.125f;
+                        }
+                        pos.z += size/2;
+                        part_icon(pos, t, size, fade, 0, 0, 1, colour);
+                        pos.z += size/2;
                     }
                 }
-                else d->icons.remove(i--);
             }
         }
     }

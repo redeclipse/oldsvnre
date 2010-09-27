@@ -316,20 +316,7 @@ namespace entities
         gameentity &e = *(gameentity *)ents[n];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF;
-        if(showentdescs)
-        {
-            const char *texname = showentdescs >= 2 ? hud::itemtex(e.type, attr) : NULL;
-            if(texname && *texname) part_icon(d->abovehead(), textureload(texname, 3), 2, 1, -10, 0, game::aboveheadfade, colour, 0, 1, d);
-            else
-            {
-                const char *item = entinfo(e.type, e.attrs, false);
-                if(item && *item)
-                {
-                    defformatstring(ds)("<super>%s (%d)", item, e.type);
-                    part_textcopy(d->abovehead(), ds, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 2, 1, -10, 0, d);
-                }
-            }
-        }
+        if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconfade, attr);
         if(isweap(g))
         {
             d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);

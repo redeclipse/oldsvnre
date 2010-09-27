@@ -411,7 +411,8 @@ struct iconrenderer : listrenderer<icon>
         glTranslatef(p->o.x, p->o.y, p->o.z);
         glRotatef(camera1->yaw, 0, 0, 1);
         glRotatef(camera1->pitch, 1, 0, 0);
-        glScalef(size, size, size);
+        float aspect = p->tex->w/float(p->tex->h);
+        glScalef(size*aspect, size*aspect, size);
 
         glColor4ub(color[0], color[1], color[2], uchar(p->blend*blend));
         if(p->start > 0 || p->length < 1)

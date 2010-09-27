@@ -1650,14 +1650,14 @@ namespace client
                         {
                             vec pos = vec(e.o).add(vec(0, 0, 4));
                             const char *texname = entities::showentdescs >= 2 ? hud::itemtex(e.type, attr) : NULL;
-                            if(texname && *texname) part_icon(pos, textureload(texname, 3), 2, 1, -10, 0, game::aboveheadfade, colour);
+                            if(texname && *texname) part_icon(pos, textureload(texname, 3), 2, 1, -10, 0, game::eventiconfade, colour);
                             else
                             {
                                 const char *item = entities::entinfo(e.type, e.attrs, false);
                                 if(item && *item)
                                 {
                                     defformatstring(ds)("<emphasis>%s", item);
-                                    part_textcopy(pos, ds, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 2, 1, -10);
+                                    part_textcopy(pos, ds, PART_TEXT, game::eventiconfade, 0xFFFFFF, 2, 1, -10);
                                 }
                             }
                         }

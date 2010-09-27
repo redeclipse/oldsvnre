@@ -86,6 +86,7 @@ namespace physics
 namespace game
 {
     extern bool clientoption(char *arg);
+    extern void preload();
     extern void updateworld();
     extern void newmap(int size);
     extern void resetmap(bool empty);
