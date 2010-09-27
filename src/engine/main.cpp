@@ -971,7 +971,7 @@ int main(int argc, char **argv)
     localconnect(false);
     resetfps();
     UI::setup();
-    game::preload();
+    //game::preload();
 
     for(int frameloops = 0; ; frameloops = frameloops >= INT_MAX-1 ? MAXFPSHISTORY+1 : frameloops+1)
     {
