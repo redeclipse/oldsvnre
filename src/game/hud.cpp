@@ -257,6 +257,50 @@ namespace hud
     TVAR(IDF_PERSIST, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST, badgetex, "textures/cube2badge", 3);
 
+    TVAR(IDF_PERSIST, spree1tex, "<anim:250,1,4>textures/carnage", 3);
+    TVAR(IDF_PERSIST, spree2tex, "<anim:250,1,4>textures/slaughter", 3);
+    TVAR(IDF_PERSIST, spree3tex, "<anim:250,1,4>textures/massacre", 3);
+    TVAR(IDF_PERSIST, spree4tex, "<anim:250,1,4>textures/bloodbath", 3);
+    TVAR(IDF_PERSIST, multi1tex, "<anim:250,1,4>textures/double", 3);
+    TVAR(IDF_PERSIST, multi2tex, "<anim:250,1,4>textures/triple", 3);
+    TVAR(IDF_PERSIST, multi3tex, "<anim:250,1,4>textures/multi", 3);
+    TVAR(IDF_PERSIST, headshottex, "<anim:250,1,4>textures/headshot", 3);
+    TVAR(IDF_PERSIST, criticaltex, "<anim:250,1,4>textures/critical", 3);
+    TVAR(IDF_PERSIST, dominatetex, "<anim:250,1,4>textures/dominate", 3);
+    TVAR(IDF_PERSIST, revengetex, "<anim:250,1,4>textures/revenge", 3);
+
+    const char *geticon(int type, int value)
+    {
+        switch(type)
+        {
+            case aboveicon::SPREE:
+            {
+                switch(value)
+                {
+                    case 0: return hud::spree1tex; break;
+                    case 1: return hud::spree2tex; break;
+                    case 2: return hud::spree3tex; break;
+                    case 3: default: return hud::spree4tex; break;
+                }
+                break;
+            }
+            case aboveicon::MULTIKILL:
+            {
+                switch(value)
+                {
+                    case 0: return hud::multi1tex; break;
+                    case 1: return hud::multi2tex; break;
+                    case 2: default: return hud::multi3tex; break;
+                }
+                break;
+            }
+            case aboveicon::HEADSHOT: return hud::headshottex; break;
+            case aboveicon::CRITICAL: return hud::criticaltex; break;
+            case aboveicon::DOMINATE: return hud::dominatetex; break;
+            case aboveicon::REVENGE: return hud::revengetex; break;
+        }
+        return "";
+    }
 
     bool needminimap() { return false; }
 

@@ -893,6 +893,15 @@ const char * const animnames[] =
 extern const char * const animnames[];
 #endif
 
+struct aboveicon
+{
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE };
+    int type, millis, fade, value;
+
+    aboveicon(int type, int millis, int fade = 2500, int value = 0) : type(type), millis(millis), fade(fade), value(value) {}
+    ~aboveicon() {}
+};
+
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
@@ -904,6 +913,7 @@ struct gameent : dynent, gamestate
     string name, info, obit;
     vector<int> airnodes;
     vector<gameent *> dominating, dominated;
+    vector<aboveicon> icons;
 
     gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
@@ -914,6 +924,7 @@ struct gameent : dynent, gamestate
         maxspeed = 50; // ditto for movement
         dominating.shrink(0);
         dominated.shrink(0);
+        icons.shrink(0);
         cleartags();
         checktags();
         respawn(-1, 100);
@@ -1001,6 +1012,7 @@ struct gameent : dynent, gamestate
         checkpoint = -1;
         dominating.shrink(0);
         dominated.shrink(0);
+        icons.shrink(0);
         resetstate(millis, heal);
         gamestate::mapchange();
     }
@@ -1158,6 +1170,17 @@ struct gameent : dynent, gamestate
         fschan = -1;
         lastburn = 0;
     }
+
+    void addicon(int type, int millis, int fade, int value = 0)
+    {
+        loopv(icons) if(icons[i].type == type)
+        {
+            icons[i].fade += fade;
+            icons[i].value = value;
+            return;
+        }
+        icons.add(aboveicon(type, millis, fade, value));
+    }
 };
 
 enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ_MAX };
@@ -1264,10 +1287,12 @@ namespace weapons
 
 namespace hud
 {
-    extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *cardtex, *flagtex, *bombtex, *arrowtex, *alerttex, *inventorytex, *indicatortex, *crosshairtex, *hitcrosshairtex;
+    extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *cardtex, *flagtex, *bombtex, *arrowtex, *alerttex, *inventorytex, *indicatortex, *crosshairtex, *hitcrosshairtex,
+                *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radaraffinitynames, inventorygame, inventoryaffinity, teamkillnum;
     extern float noticescale, inventoryblend, inventoryskew, inventorygrow, radaraffinityblend, radarblipblend, radaraffinitysize;
     extern vector<int> teamkills;
+    extern const char *geticon(int type, int value);
     extern bool chkcond(int val, bool cond);
     extern char *timetostr(int dur, int style = 0);
     extern void drawquad(float x, float y, float w, float h, float tx1 = 0, float ty1 = 0, float tx2 = 1, float ty2 = 1);

@@ -1190,16 +1190,16 @@ namespace projs
                     if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                     {
                         int w = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT)%WEAP_MAX, life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
-                        float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.scale;
-                        vec pos = vec(proj.o).sub(vec(proj.vel).normalize().mul(proj.hit ? WEAP2(proj.weap, flakoff, proj.flags&HIT_ALT) : 1));
+                        float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.scale,
+                              skew = proj.hit ? WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT) : WEAP2(proj.weap, flakspread, proj.flags&HIT_ALT);
+                        vec pos = vec(proj.o).sub(vec(proj.vel).normalize().mul(proj.hit ? WEAP2(proj.weap, flakoffset, proj.flags&HIT_ALT) : 1));
                         if(WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) life -= int(ceilf(life*WEAP2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
                         loopi(WEAP2(proj.weap, flakrays, proj.flags&HIT_ALT))
                         {
                             vec dir(0, 0, 0);
                             if(WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT) > 0)
                                 mag = rnd(WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT))*0.5f+WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT)*0.5f;
-                            if(WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT) > 0)
-                                dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT)*mag));
+                            if(skew > 0) dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(skew*mag));
                             if(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0)
                                 dir.add(vec(proj.vel).normalize().mul(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
                             create(pos, dir.add(pos), proj.local, proj.owner, PRJ_SHOT, max(life, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);

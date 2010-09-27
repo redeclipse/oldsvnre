@@ -1065,13 +1065,11 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         {
             if(anim)
             {
-                anim->delay = arg[0] ? atoi(arg[0]) : 0;
-                anim->w = arg[1] ? atoi(arg[1]) : 0;
-                anim->h = arg[2] ? atoi(arg[2]) : 0;
-                if(!anim->w) anim->w = d.h < d.w ? d.h : d.w;
-                if(!anim->h) anim->h = d.h < d.w ? d.h : d.w;
-                anim->x = d.w/anim->w;
-                anim->y = d.h/anim->h;
+                anim->delay = arg[0] ? atoi(arg[0]) : 250;
+                anim->x = arg[1] ? atoi(arg[1]) : 1;
+                anim->y = arg[2] ? atoi(arg[2]) : 2;
+                anim->w = d.w/anim->x;
+                anim->h = d.h/anim->y;
                 anim->count = anim->x*anim->y;
             }
         }

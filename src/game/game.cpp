@@ -85,11 +85,15 @@ namespace game
     VAR(IDF_PERSIST, showstatusabovehead, 0, 1, 2);
     VAR(IDF_PERSIST, showteamabovehead, 0, 1, 3);
     VAR(IDF_PERSIST, showdamageabovehead, 0, 0, 2);
-    VAR(IDF_PERSIST, showcritabovehead, 0, 1, 2);
+    VAR(IDF_PERSIST, showiconsabovehead, 0, 1, 2);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 0.75f, 1.f);
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
+    FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 6, 1000);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
     VAR(IDF_PERSIST, aboveheadfade, 500, 5000, INT_MAX-1);
+    VAR(IDF_PERSIST, aboveheadcritfade, 500, 2000, INT_MAX-1);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 0, 1);
@@ -620,8 +624,7 @@ namespace game
             {
                 if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
                     playsound(S_CRITICAL, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
-                if(showcritabovehead >= (d != focus ? 1 : 2))
-                    part_text(d->abovehead(), "<super>\fzgrCRITICAL", d != focus ? PART_TEXT : PART_TEXT_ONTOP, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d);
+                d->addicon(aboveicon::CRITICAL, lastmillis, aboveheadcritfade);
             }
             else
             {
@@ -685,9 +688,9 @@ namespace game
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+1)/10.f, 1, 200, DECAL_BLOOD, int(d->radius));
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 5 : 1), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+2)/10.f, 1, 200, DECAL_BLOOD, int(d->radius));
                         if(kidmode || bloodscale <= 0 || bloodsparks)
-                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2 : 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
+                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 3 : 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);
                     if(!burning && !bleeding) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
@@ -849,7 +852,6 @@ namespace game
             }
             else concatstring(d->obit, "killed by");
             bool override = false;
-            vec az = actor->abovehead(), dz = d->abovehead();
             if(!m_fight(gamemode) || actor->aitype >= AI_START)
             {
                 concatstring(d->obit, actor->aitype >= AI_START ? " a " : " ");
@@ -866,19 +868,17 @@ namespace game
                 if(style&FRAG_REVENGE)
                 {
                     concatstring(d->obit, " \fs\fzoyvengeful\fS");
-                    part_text(az, "<super>\fzoyAVENGED", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                    part_text(dz, "<super>\fzoyREVENGE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4;
-                    d->dominated.removeobj(actor);
+                    actor->addicon(aboveicon::REVENGE, lastmillis, aboveheadfade); // revenge
                     actor->dominating.removeobj(d);
+                    d->dominated.removeobj(actor);
                     anc = S_V_REVENGE; override = true;
                 }
                 else if(style&FRAG_DOMINATE)
                 {
                     concatstring(d->obit, " \fs\fzoydominating\fS");
-                    part_text(az, "<super>\fzoyDOMINATING", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                    part_text(dz, "<super>\fzoyDOMINATED", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4;
-                    if(d->dominating.find(actor) < 0) d->dominating.add(actor);
+                    actor->addicon(aboveicon::DOMINATE, lastmillis, aboveheadfade); // dominating
                     if(actor->dominated.find(d) < 0) actor->dominated.add(d);
+                    if(d->dominating.find(actor) < 0) d->dominating.add(actor);
                     anc = S_V_DOMINATE; override = true;
                 }
                 concatstring(d->obit, " ");
@@ -887,29 +887,26 @@ namespace game
                 if(style&FRAG_MKILL1)
                 {
                     concatstring(d->obit, " \fs\fzRedouble-killing\fS");
-                    part_text(az, "<super>\fzvrDOUBLE-KILL", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                    if(actor == focus) { part_text(dz, "<super>\fzvrDOUBLE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4; }
+                    actor->addicon(aboveicon::MULTIKILL, lastmillis, aboveheadfade, 0);
                     if(!override) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     concatstring(d->obit, " \fs\fzRetriple-killing\fS");
-                    part_text(az, "<super>\fzvrTRIPLE-KILL", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                    if(actor == focus) { part_text(dz, "<super>\fzvrTRIPLE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4; }
+                    actor->addicon(aboveicon::MULTIKILL, lastmillis, aboveheadfade, 1);
                     if(!override) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzRemulti-killing\fS");
-                    part_text(az, "<super>\fzvrMULTI-KILL", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
-                    if(actor == focus) { part_text(dz, "<super>\fzvrMULTI", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, d); dz.z += 4; }
+                    actor->addicon(aboveicon::MULTIKILL, lastmillis, aboveheadfade, 2);
                     if(!override) anc = S_V_MULTI;
                 }
             }
 
             if(style&FRAG_HEADSHOT)
             {
-                part_text(az, "<super>\fzcwHEADSHOT", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
+                actor->addicon(aboveicon::HEADSHOT, lastmillis, aboveheadfade, 0);
                 if(!override) anc = S_V_HEADSHOT;
             }
 
@@ -917,28 +914,28 @@ namespace game
             if(style&FRAG_SPREE1)
             {
                 concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
-                part_text(az, "<super>\fzcgCARNAGE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
+                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 0);
                 if(!override) anc = S_V_SPREE;
                 override = true;
             }
             else if(style&FRAG_SPREE2)
             {
                 concatstring(d->obit, " on a \fs\fzcgslaughter\fS");
-                part_text(az, "<super>\fzcgSLAUGHTER", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
+                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 1);
                 if(!override) anc = S_V_SPREE2;
                 override = true;
             }
             else if(style&FRAG_SPREE3)
             {
                 concatstring(d->obit, " on a \fs\fzcgmassacre\fS");
-                part_text(az, "<super>\fzcgMASSACRE", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
+                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 2);
                 if(!override) anc = S_V_SPREE3;
                 override = true;
             }
             else if(style&FRAG_SPREE4)
             {
                 concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
-                part_text(az, "<super>\fzcgBLOODBATH", PART_TEXT, aboveheadfade, 0xFFFFFF, 4, 1, -10, 0, actor); az.z += 4;
+                actor->addicon(aboveicon::SPREE, lastmillis, aboveheadfade, 3);
                 if(!override) anc = S_V_SPREE4;
                 override = true;
             }
@@ -1924,8 +1921,8 @@ namespace game
                 const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<default>");
                 if(name && *name)
                 {
-                    part_textcopy(pos, name, PART_TEXT, 1, 0xFFFFFF, 2, blend);
-                    pos.z += 2;
+                    part_textcopy(pos, name, PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
+                    pos.z += aboveheadnamesize+1;
                 }
             }
             if(showstatusabovehead > (d != focus ? 0 : 1))
@@ -1940,11 +1937,28 @@ namespace game
                     else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
                 }
-                if(t)
+                if(t && t != notexture)
                 {
-                    part_icon(pos, t, 2, blend);
-                    pos.z += 2;
+                    part_icon(pos, t, aboveheadstatussize, blend);
+                    pos.z += aboveheadstatussize+0.25f;
                 }
+            }
+            if(showiconsabovehead > (d != focus ? 0 : 1)) loopv(d->icons)
+            {
+                int millis = lastmillis-d->icons[i].millis;
+                if(millis <= d->icons[i].fade)
+                {
+                    Texture *t = textureload(hud::geticon(d->icons[i].type, d->icons[i].value));
+                    if(t && t != notexture)
+                    {
+                        int len = min(d->icons[i].fade/5, 500);
+                        float skew = millis < len ? millis/float(len) : (millis > d->icons[i].fade-len ? (d->icons[i].fade-millis)/float(len) : 1.f),
+                              size = aboveheadiconsize*skew, fade = blend*skew;
+                        part_icon(pos, t, size, fade);
+                        pos.z += size;
+                    }
+                }
+                else d->icons.remove(i--);
             }
         }
     }
