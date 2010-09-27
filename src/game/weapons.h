@@ -75,7 +75,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     x21, x22, x31, x32, x33, x34, x4, x5, x6, x7, x81, x82, x9, xa, xb, xc, xd, xe, xf, \
     t0, t1, t2, t3, y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, ya, yb, yc, yd, ye1, ye2, yf1, yf2, yg, yh, \
     yi, yj, yk, yl, ym, yn, yo, yp, yq, yr, ys, yt, yw, yx, yy, yz, \
-    ya3, ya4, ya5, ya6, ya7, ya8, ya9, ya10, ya11, ya12 \
+    ya3, ya4, ya5, ya6, ya7, ya8, ya9, ya10, ya11, ya12, ya13, ya14 \
  ) \
     GVAR(0, name##add, 1, w0, 10000);                   GVAR(0, name##max, 1, w1, 10000); \
     GVAR(0, name##sub1, 0, w2, 10000);                  GVAR(0, name##sub2, 0, w3, 10000); \
@@ -127,10 +127,11 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GFVAR(0, name##torsodmg1, 1e-4f, yw, 1000);         GFVAR(0, name##torsodmg2, 1e-4f, yx, 1000); \
     GFVAR(0, name##legsdmg1, 1e-4f, yy, 1000);          GFVAR(0, name##legsdmg2, 1e-4f, yz, 1000); \
     GFVAR(0, name##flakscale1, 0, ya3, 1000);           GFVAR(0, name##flakscale2, 0, ya4, 1000); \
-    GFVAR(0, name##flakskew1, 0, ya5, 1000);            GFVAR(0, name##flakskew2, 0, ya6, 1000); \
+    GFVAR(0, name##flakspread1, 0, ya5, 1000);          GFVAR(0, name##flakspread2, 0, ya6, 1000); \
     GFVAR(0, name##flakrel1, 0, ya7, 1000);             GFVAR(0, name##flakrel2, 0, ya8, 1000); \
     GFVAR(0, name##flakffwd1, 0, ya9, 1);               GFVAR(0, name##flakffwd2, 0, ya10, 1); \
-    GFVAR(0, name##flakoff1, 0, ya11, 1000);            GFVAR(0, name##flakoff2, 0, ya12, 1000);
+    GFVAR(0, name##flakoffset1, 0, ya11, 1000);         GFVAR(0, name##flakoffset2, 0, ya12, 1000); \
+    GFVAR(0, name##flakskew1, 0, ya13, 1000);           GFVAR(0, name##flakskew2, 0, ya14, 1000);
 
 //  add     max     sub1    sub2    adly1   adly2   rdly    dam1    dam2    spd1    spd2    pow1    pow2    time1   time2
 //  pdly1   pdly2   gdly1   gdly2   edly1   edly2   expl1   expl2   rays1   rays2   sprd1   sprd2
@@ -142,7 +143,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  tpr1    tpr2    tspan1  tspan2  elas1   elas2   rflt1   rflt2   relt1   relt2   wfrc1   wfrc2   wght1   wght2   rads1   rads2
 //  kpsh1   kpsh2   hpsh1   hpsh2   slow1   slow2   aidst1  aidst2  psz1    psz2    plen1   plen2   freq    push
 //  cmult   cdist   dlta1   dlta2   tmult1  tmult2  tordm1  tordm2  legdm1  legdm2
-//  fscale1 fscale2 fskew1  fskew2  frel1   frel2   fffwd1  fffwd2  foff1   foff2
+//  fscale1 fscale2 fsprd1  fsprd2  frel1   frel2   fffwd1  fffwd2  foff1   foff2   fskew1  fskew2
 WEAPON(melee,
     1,      1,      0,      0,      500,    750,    50,     20,     40,     0,      0,      0,      0,      100,    80,
     20,     0,      0,      0,      200,    200,    0,      0,      1,      1,      1,      1,
@@ -154,12 +155,12 @@ WEAPON(melee,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
     -1,     -1,     150,    150,    0.15f,  0.15f,  24,     24,     1,      2,      0,      0,      0,      1,
     2,      0,      10,     10,     2,      4,      0.5f,   0.5f,   0.3f,   0.3f,
-    1,      1,      1,      1,      1,      1,      0,      0,      8,      8
+    1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(pistol,
     10,     10,     1,      1,      75,     150,    1000,   18,     24,     2000,   2000,   0,      0,      2000,   2000,
-    0,      0,      0,      0,      200,    200,    0,      0,      1,      1,      4,      1,
-    1,      0,      100,    100,    -1,             -1,             10,     12,     5,      5,      500,    500,    0,      0,
+    0,      0,      0,      0,      200,    200,    0,      0,      1,      1,      2,      1,
+    2,      0,      100,    100,    -1,             -1,             10,     12,     5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      1,      0,      0,      0,      1,
@@ -167,7 +168,7 @@ WEAPON(pistol,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
     5,      3,      35,     50,     0.05f,  0.05f,  300,    300,    1,      1,      10,     10,     1,      1,
     4,      16,     10,     10,     1,      1,      0.65f,  0.65f,  0.325f, 0.325f,
-    1,      1,      1,      1,      1,      1,      0,      0,      8,      8
+    1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(sword,
     1,      1,      0,      0,      500,    750,    50,     30,     60,     0,      0,      0,      0,      300,    300,
@@ -179,8 +180,8 @@ WEAPON(sword,
     2,      0,      500,    500,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
     0,      0,      250,    500,    0.25f,  0.5f,   32,     32,     1,      1.25f,  0,      0,      1,      1,
-    2,      0,      10,     10,     6,      3,      0.6f,   0.6f,   0.3f,   0.3f,
-    1,      1,      1,      1,      1,      1,      0,      0,      8,      8
+    2,      0,      10,     10,     2,      2,      0.6f,   0.6f,   0.3f,   0.3f,
+    1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(shotgun,
     2,      8,      1,      2,      375,    750,    750,    16,     8,      1250,   250,    0,      0,      750,    5000,
@@ -193,7 +194,7 @@ WEAPON(shotgun,
     0,      0,      0,      0,      0.5f,   0.5f,   50,     0,      0.05f,  0.75f,  2,      2,      0,      225,    1,      1,
     30,     60,     150,    75,     0.5f,   0.25f,  150,    150,    1,      0.75f,  35,     15,     1,      1.5f,
     2,      6,      10,     10,     1,      1,      0.65f,  0.5f,   0.35f,  0.3f,
-    1,      1,      1,      0.65f,  1,      1.5f,   0,      0,      8,      8
+    1,      1,      1,      0.65f,  1,      1.5f,   0,      0,      8,      8,      1,      1
 );
 WEAPON(smg,
     40,     40,     1,      2,      75,     150,    1500,   16,     8,      2500,   350,    0,     0,      750,    100,
@@ -206,7 +207,7 @@ WEAPON(smg,
     0,      0,      0,      0,      0.65f,  0.45f,  30,     30,     0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
     5,      10,     100,    50,     0.65f,  0.325f, 300,    300,    0.5f,   0.6f,   35,     25,     1,      1.5f,
     3,      12,     10,     1000,   1,      1,      0.65f,  0.5f,   0.35f,  0.3f,
-    1,      0.5f,   0.2f,   0.2f,   1,      1,      0,      0,      8,      8
+    1,      0.5f,   0.2f,   0.2f,   1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(flamer,
     50,     50,     1,      10,     100,    750,    2000,   12,     6,      250,    150,    0,      750,    300,    250,
@@ -219,7 +220,7 @@ WEAPON(flamer,
     0,      0,      0,      0,      0.25f,  0.25f,  45,     0,      0.95f,  0.5f,   1,      1,      -300,   50,     1,      1,
     0.25f,  1,      25,     50,     0,      0,      20,     60,     16,     24,     0,      5,      2,      1.5f,
     5,      12,     10,     10,     1,      1,      0.6f,   0.6f,   0.3f,   0.3f,
-    0.5f,   0.5f,   0.125f, 0.125f, 1,      1,      0.5f,   0.5f,   8,      8
+    0.5f,   0.5f,   0.125f, 0.125f, 1,      1,      0.5f,   0.5f,   8,      8,      1,      1
 );
 WEAPON(plasma,
     20,     20,     1,      20,     400,    1000,   2000,   20,     10,     500,    40,     0,      2000,   750,    5000,
@@ -232,7 +233,7 @@ WEAPON(plasma,
     0.25f,  0.75f,  0.06f,  0.25f,  0.5f,   0.5f,   0,      0,      0.125f, 0.175f, 1,      1,      0,      0,      4,      2,
     10,     50,     50,     -200,   0.5f,   0.75f,  200,    50,     20,     52,     0,      0,      2,      1.5f,
     3,      12,     10,     10,     1,      1,      0.6f,   0.6f,   0.3f,   0.3f,
-    1,      1,      1,      1,      1,      1,      0,      0,      8,      8
+    1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(rifle,
     5,      5,      1,      1,      750,    1000,   1750,   40,     100,    7500,   30000,  0,      0,      5000,   5000,
@@ -245,7 +246,7 @@ WEAPON(rifle,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      1,      0,      2,      2,      0,      0,      1,      1,
     20,     10,     200,    100,    0.1f,   0.25f,  600,    0,      2,      2,      256,    512,    1,      1.5f,
     2,      12,     10,     10,     1,      1,      0.5f,   0.5f,   0.3f,   0.3f,
-    1,      1,      0.25f,  0.25f,  1,      1,      0,      0,      8,      8
+    1,      1,      0.25f,  0.25f,  1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(grenade,
     1,      2,      1,      1,      1000,   1000,   1500,   150,    150,    250,    250,    3000,   3000,   3000,   3000,
@@ -258,7 +259,7 @@ WEAPON(grenade,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      1,      1,      2,      2,      65,     65,     1,      1,
     5,      5,      500,    500,    0.1f,   0.1f,   400,    400,    2,      2,      0,      0,      2,      2,
     2,      0,      10,     10,     1,      1,      0.5f,   0.5f,   0.3f,   0.3f,
-    1,      1,      1,      1,      0,      0,      0,      0,      0,      0
+    1,      1,      1,      1,      0,      0,      0,      0,      0,      0,      1,      1
 );
 WEAPON(rocket,
     1,      1,      1,      1,      1000,   1000,   1500,   300,     300,   1000,   250,    2500,   2500,   5000,   5000,
@@ -271,7 +272,7 @@ WEAPON(rocket,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      2,      2,      0,      0,      1,      1,
     150,    150,    750,    500,    0.25f,  0.25f,  400,    400,    3,      3,      0,      0,      3,      3,
     2,      0,      10,     10,     1,      1,      0.5f,   0.5f,   0.3f,   0.3f,
-    1,      1,      1,      1,      0,      0,      0,      0,      0,      0
+    1,      1,      1,      1,      0,      0,      0,      0,      0,      0,      1,      1
 );
 
 struct weaptypes
@@ -429,7 +430,8 @@ WEAPDEF2(float, tracemult);
 WEAPDEF2(float, torsodmg);
 WEAPDEF2(float, legsdmg);
 WEAPDEF2(float, flakscale);
-WEAPDEF2(float, flakskew);
+WEAPDEF2(float, flakspread);
 WEAPDEF2(float, flakrel);
 WEAPDEF2(float, flakffwd);
-WEAPDEF2(float, flakoff);
+WEAPDEF2(float, flakoffset);
+WEAPDEF2(float, flakskew);

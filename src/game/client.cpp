@@ -512,11 +512,6 @@ namespace client
         if(flags&SAY_ACTION) formatstring(s)("\fv* \fs%s\fS \fs\fv%s\fS", m, text);
         else formatstring(s)("\fa<\fs\fw%s\fS> \fs\fw%s\fS", m, text);
 
-        if(d->state != CS_SPECTATOR)
-        {
-            defformatstring(ds)("<sub>%s", s);
-            part_textcopy(d->abovehead(), ds, PART_TEXT, game::aboveheadfade, 0xFFFFFF, 2, 1, -10, 0, d);
-        }
         int snd = S_CHAT;
         ident *wid = idents->access(flags&SAY_ACTION ? "on_action" : "on_text");
         if(wid && wid->action)
