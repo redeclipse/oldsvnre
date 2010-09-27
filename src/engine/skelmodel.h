@@ -967,13 +967,14 @@ struct skelmodel : animmodel
 
         #define GENRAGDOLLBONES(outbody, relbody) \
             sc.nextversion(); \
+            vec trans = vec(d.center).div(p->model->scale).add(p->translate); \
             loopv(ragdoll->joints) \
             { \
                 const ragdollskel::joint &j = ragdoll->joints[i]; \
                 const boneinfo &b = bones[j.bone]; \
                 vec pos(0, 0, 0); \
                 loopk(3) if(j.vert[k]>=0) pos.add(d.verts[j.vert[k]].pos); \
-                pos.mul(j.weight/p->model->scale).sub(p->translate); \
+                pos.mul(j.weight/p->model->scale).sub(trans); \
                 outbody; \
             } \
             loopv(ragdoll->reljoints) \
