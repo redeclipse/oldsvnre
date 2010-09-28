@@ -107,7 +107,7 @@ struct capturestate
         f.votes.shrink(0);
 #else
         f.pickuptime = 0;
-        f.lastowner = owner;
+        (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
         if(f.proj)
         {
             f.proj->beenused = 2;

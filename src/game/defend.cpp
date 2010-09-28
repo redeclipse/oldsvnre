@@ -95,7 +95,7 @@ namespace defend
             }
             dir.rotate_around_z(-camera1->yaw*RAD); dir.normalize();
             const char *tex = f.hasflag ? hud::arrowtex : (f.owner == game::focus->team && f.enemy ? hud::alerttex : hud::flagtex);
-            float size = hud::radaraffinitysize*(f.hasflag ? 2 : 1);
+            float size = hud::radaraffinitysize*(f.hasflag ? 1.25f : 1);
             if(hud::radaraffinitynames >= (f.hasflag ? 1 : 2))
             {
                 bool overthrow = f.owner && f.enemy == game::focus->team;

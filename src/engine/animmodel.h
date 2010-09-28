@@ -2,7 +2,7 @@ VARF(IDF_PERSIST, lightmodels, 0, 1, 1, preloadmodelshaders());
 VARF(IDF_PERSIST, envmapmodels, 0, 1, 1, preloadmodelshaders());
 VARF(IDF_PERSIST, glowmodels, 0, 1, 1, preloadmodelshaders());
 VARF(IDF_PERSIST, bumpmodels, 0, 1, 1, preloadmodelshaders());
-VAR(IDF_PERSIST, fullbrightmodels, 0, 75, 200);
+VAR(IDF_PERSIST, fullbrightmodels, 0, 25, 200);
 
 struct animmodel : model
 {
@@ -213,7 +213,7 @@ struct animmodel : model
         {
             if(tex && tex->bpp==4 && !tex->alphamask) loadalphamask(tex);
         }
- 
+
         void preloadshader()
         {
             bool shouldenvmap = envmapped();
@@ -428,7 +428,7 @@ struct animmodel : model
             }
             loopi(numverts) verts[i].norm.normalize();
         }
-        
+
         template<class B, class V, class TC, class T> void calctangents(B *bumpverts, V *verts, TC *tcverts, int numverts, T *tris, int numtris, bool areaweight)
         {
             vec *tangent = new vec[2*numverts], *bitangent = tangent+numverts;
@@ -473,7 +473,7 @@ struct animmodel : model
             }
             delete[] tangent;
         }
-    
+
     };
 
     struct meshgroup

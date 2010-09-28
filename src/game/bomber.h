@@ -110,7 +110,7 @@ struct bomberstate
         f.lastowner = owner;
 #else
         f.pickuptime = 0;
-        f.lastowner = owner;
+        (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
         destroy(i);
         interp(i, t);
 #endif

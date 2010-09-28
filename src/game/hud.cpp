@@ -71,12 +71,12 @@ namespace hud
     FVAR(IDF_PERSIST, chatconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
-    FVAR(IDF_PERSIST, noticeoffset, -1, 0.4f, 1);
+    FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
-    FVAR(IDF_PERSIST, eventoffset, -1, 0.4f, 1);
+    FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, eventscale, 1e-4f, 3, 1000);
+    FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
@@ -149,7 +149,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 1, 2);
     VAR(IDF_PERSIST, inventoryteams, 0, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, inventoryaffinity, 0, 5000, INT_MAX-1);
+    VAR(IDF_PERSIST, inventoryaffinity, 0, 1000, INT_MAX-1);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
@@ -158,7 +158,6 @@ namespace hud
     FVAR(IDF_PERSIST, inventorythrob, 0, 0.0625f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.07f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.6f, 1000);
-    FVAR(IDF_PERSIST, inventorygrow, 1e-4f, 0.75f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.85f, 1);
@@ -223,8 +222,8 @@ namespace hud
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaritemsize, 0, 1, 1000);
-    FVAR(IDF_PERSIST, radarsize, 0, 0.035f, 1000);
-    FVAR(IDF_PERSIST, radaroffset, 0, 0.035f, 1000);
+    FVAR(IDF_PERSIST, radarsize, 0, 0.04f, 1000);
+    FVAR(IDF_PERSIST, radaroffset, 0, 0, 1000);
     VAR(IDF_PERSIST, radardist, 0, 0, INT_MAX-1); // 0 = use world size
     VAR(IDF_PERSIST, radarcard, 0, 0, 2);
     VAR(IDF_PERSIST, radaritems, 0, 2, 2);
@@ -232,7 +231,7 @@ namespace hud
     VAR(IDF_PERSIST, radaritemtime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, radaritemnames, 0, 0, 2);
     VAR(IDF_PERSIST, radarplayers, 0, 2, 2);
-    VAR(IDF_PERSIST, radarplayerfilter, 0, 1, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit/tv
+    VAR(IDF_PERSIST, radarplayerfilter, 0, 0, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit/tv
     VAR(IDF_PERSIST, radarplayernames, 0, 0, 2);
     VAR(IDF_PERSIST, radaraffinity, 0, 2, 2);
     VAR(IDF_PERSIST, radaraffinitynames, 0, 1, 2);
@@ -751,42 +750,42 @@ namespace hud
 
     void drawnotices()
     {
-        pushfont("emphasis");
-        int ty = ((hudheight/2)-FONTH+int(hudheight/2*noticeoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
-            tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-            tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
         glPushMatrix();
         glScalef(noticescale, noticescale, 1);
+        pushfont("emphasis");
+        int ty = ((hudheight/2)+int(hudheight/2*noticeoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
+            tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
+            tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
         if(teamnotices) skewcolour(tr, tg, tb);
         if(lastmillis-game::maptime <= titlefade*3)
         {
 
-            ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname)*(1.f/noticescale);
+            ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname);
             pushfont("default");
-            if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor)*(1.f/noticescale);
+            if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor);
             popfont();
             pushfont("sub");
             defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
             if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
-            ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname)*(1.f/noticescale);
+            ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname);
             popfont();
         }
 
         if(game::player1->state == CS_SPECTATOR)
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"))*(1.f/noticescale);
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
         else if(game::player1->state == CS_WAITING && showname())
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colorname(game::focus))*(1.f/noticescale);
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colorname(game::focus));
 
         gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         if(target->state == CS_DEAD || target->state == CS_WAITING)
         {
             int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
             const char *msg = target->state == CS_WAITING && target == game::player1 ? "Please Wait" : "Fragged";
-            ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg)*(1.f/noticescale);
+            ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
             if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
             {
                 pushfont("sub");
-                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit)*(1.f/noticescale);
+                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                 popfont();
             }
             if(shownotices >= 2)
@@ -795,25 +794,25 @@ namespace hud
                 if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators))
                 {
                     pushfont("default");
-                    if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*(1.f/noticescale);
-                    else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1))*(1.f/noticescale);
+                    if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
                     {
                         pushfont("sub");
-                        ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*(1.f/noticescale);
+                        ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         popfont();
                     }
                 }
                 else
                 {
                     pushfont("default");
-                    ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*(1.f/noticescale);
+                    ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
                     {
                         pushfont("sub");
-                        ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*(1.f/noticescale);
+                        ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         popfont();
                     }
                 }
@@ -821,21 +820,21 @@ namespace hud
                 {
                     SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
                     pushfont("sub");
-                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV")*(1.f/noticescale);
+                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
                     popfont();
                 }
                 if(target == game::player1 && m_arena(game::gamemode, game::mutators))
                 {
                     SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                     pushfont("sub");
-                    ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change")*(1.f/noticescale);
+                    ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change");
                     popfont();
                 }
                 if(target == game::player1 && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
                     SEARCHBINDCACHE(teamkey)("showgui team", 0);
                     pushfont("sub");
-                    ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey)*(1.f/noticescale);
+                    ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
                     popfont();
                 }
             }
@@ -845,26 +844,26 @@ namespace hud
             if(m_fight(game::gamemode) && target == game::player1)
             {
                 if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
-                    ty += draw_textx("\fzryDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*(1.f/noticescale);
+                    ty += draw_textx("\fzryDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                 if(inventoryteams)
                 {
                     if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
                     if(totalmillis-lastteam <= inventoryteams)
                     {
-                        if(m_campaign(game::gamemode)) ty += draw_textx("Campaign Mission", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*(1.f/noticescale);
+                        if(m_campaign(game::gamemode)) ty += draw_textx("Campaign Mission", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         else if(!m_team(game::gamemode, game::mutators))
                         {
-                            if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*(1.f/noticescale);
-                            else ty += draw_textx("\fzReFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1)*(1.f/noticescale);
+                            if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                            else ty += draw_textx("\fzReFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         }
-                        else ty += draw_textx("\fzReTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname)*(1.f/noticescale);
+                        else ty += draw_textx("\fzReTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname);
                     }
                 }
             }
             if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
             {
                 pushfont("sub");
-                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit)*(1.f/noticescale);
+                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                 popfont();
             }
             if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
@@ -910,15 +909,15 @@ namespace hud
                                     {
                                         static vector<int> attrs; attrs.setsize(0); loopk(5) attrs.add(k ? 0 : drop);
                                         defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false));
-                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false))*(1.f/noticescale);
+                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false));
                                     }
-                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false))*(1.f/noticescale);
+                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false));
                                     break;
                                 }
                             }
                             else if(e.type == TRIGGER && e.attrs[2] == TA_ACTION)
                             {
-                                ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey)*(1.f/noticescale);
+                                ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey);
                                 break;
                             }
                         }
@@ -930,14 +929,14 @@ namespace hud
                     if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
                     {
                         SEARCHBINDCACHE(attackkey)("action 0", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey)*(1.f/noticescale);
+                        ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         SEARCHBINDCACHE(altkey)("action 1", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack")*(1.f/noticescale);
+                        ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack");
                     }
                     if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
                     {
                         SEARCHBINDCACHE(reloadkey)("action 2", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey)*(1.f/noticescale);
+                        ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
                     }
                 }
                 popfont();
@@ -948,11 +947,11 @@ namespace hud
         {
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
             pushfont("sub");
-            ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey)*(1.f/noticescale);
+            ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
             if(shownotices >= 2)
             {
                 SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV")*(1.f/noticescale);
+                ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
             }
             popfont();
         }
@@ -961,8 +960,8 @@ namespace hud
         else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
         else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
 
-        glPopMatrix();
         popfont();
+        glPopMatrix();
     }
 
     void drawlast()
@@ -1091,7 +1090,7 @@ namespace hud
 
     float radarrange()
     {
-        float dist = radardist ? radardist : getworldsize()/2;
+        float dist = radardist ? radardist : getworldsize();
         if(game::focus->state == CS_EDITING && editradardist) dist = editradardist;
         return dist;
     }
@@ -1158,7 +1157,7 @@ namespace hud
                 else return;
                 tex = deadtex;
                 pos -= size;
-                size *= 2;
+                size *= 1.25f;
 
             }
             else if(d->state == CS_ALIVE)
@@ -1477,6 +1476,11 @@ namespace hud
             case eventicon::DOMINATE: return dominatetex; break;
             case eventicon::REVENGE: return revengetex; break;
             case eventicon::WEAPON: return itemtex(WEAPON, value);
+            case eventicon::AFFINITY:
+            {
+                if(m_bomber(game::gamemode)) return bombtex;
+                return flagtex;
+            }
         }
         return "";
     }
@@ -1778,15 +1782,15 @@ namespace hud
                         if(!game::intermission) lastnewgame = 0;
                         else
                         {
-                            int millis = votelimit-(totalmillis-lastnewgame), cg = int(cs*inventorygrow);
+                            int millis = votelimit-(totalmillis-lastnewgame);
                             float amt = float(millis)/float(votelimit);
                             const char *col = "\fw";
                             if(amt > 0.75f) col = "\fg";
                             else if(amt > 0.5f) col = "\fy";
                             else if(amt > 0.25f) col = "\fo";
                             else col = "\fr";
-                            drawprogress(cx[i], cm+cg, 0, 1, cg, false, 1, 1, 1, blend*inventoryblend*0.25f, 1);
-                            cm += drawprogress(cx[i], cm+cg, 1-amt, amt, cg, false, 1, 1, 1, blend*inventoryblend, 1, "default", "%s%d", col, int(millis/1000.f));
+                            drawprogress(cx[i], cm+cs, 0, 1, cs, false, 1, 1, 1, blend*inventoryblend*0.25f, 1);
+                            cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, blend*inventoryblend, 1, "default", "%s%d", col, int(millis/1000.f));
                         }
                     }
                     if(inventoryteams && game::focus == game::player1 && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
@@ -1795,35 +1799,24 @@ namespace hud
                         if(!lastnewgame && lastteam)
                         {
                             const char *pre = "";
-                            float skew = inventorygrow, fade = blend*inventoryblend, rescale = 1;
-                            int millis = totalmillis-lastteam, pos[2] = { cx[i], cm+int(cs*inventorygrow) };
+                            float skew = inventoryskew, fade = blend*inventoryblend;
+                            int millis = totalmillis-lastteam;
                             if(millis <= inventoryteams)
                             {
+                                float tweak = clamp(millis/float(inventoryteams), 0.f, 1.f);
+                                skew += (1.f-skew)*(1.f-tweak);
+                                blend += (1.f-blend)*(1.f-tweak);
                                 pre = "\fzRw";
-                                int off[2] = { hudwidth/2, hudheight/4 };
-                                if(millis <= inventoryteams*3/4)
-                                {
-                                    float tweak = millis <= inventoryteams/4 ? clamp(float(millis)/float(inventoryteams/4), 0.f, 1.f) : 1.f;
-                                    skew += tweak*inventorygrow;
-                                    loopk(2) pos[k] = off[k]+(cs/2*tweak*skew);
-                                    skew *= tweak; fade *= tweak; rescale = 0;
-                                }
-                                else
-                                {
-                                    float tweak = clamp(float(millis-(inventoryteams*3/4))/float(inventoryteams/4), 0.f, 1.f);
-                                    skew += (1.f-tweak)*inventorygrow;
-                                    loopk(2) pos[k] -= int((pos[k]-(off[k]+cs/2*skew))*(1.f-tweak));
-                                    rescale = tweak;
-                                }
                             }
-                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, pos[0], pos[1], cs, false, 1, 1, 1, fade, skew)*rescale);
-                            if(m_campaign(game::gamemode)) cm += int(drawitemsubtext(pos[0]-int(cs*skew/2), pos[1], cs, TEXT_CENTERED, skew, "sub", fade, "%s%scampaign", teamtype[game::focus->team].chat, pre)*rescale);
+                            int oldy = cm+int(cs*skew);
+                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, false, 1, 1, 1, fade, skew));
+                            if(m_campaign(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "sub", fade, "%s%scampaign", teamtype[game::focus->team].chat, pre));
                             else if(!m_team(game::gamemode, game::mutators))
                             {
-                                if(m_trial(game::gamemode)) cm += int(drawitemsubtext(pos[0]-int(cs*skew/2), pos[1], cs, TEXT_CENTERED, skew, "sub", fade, "%s%stime-trial", teamtype[game::focus->team].chat, pre)*rescale);
-                                else cm += int(drawitemsubtext(pos[0]-int(cs*skew/2), pos[1], cs, TEXT_CENTERED, skew, "default", fade, "%s%sffa", teamtype[game::focus->team].chat, pre)*rescale);
+                                if(m_trial(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "sub", fade, "%s%stime-trial", teamtype[game::focus->team].chat, pre));
+                                else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "%s%sffa", teamtype[game::focus->team].chat, pre));
                             }
-                            else cm += int(drawitemsubtext(pos[0]-int(cs*skew/2), pos[1], cs, TEXT_CENTERED, skew, "default", fade, "%s%s%s", teamtype[game::focus->team].chat, pre, teamtype[game::focus->team].name)*rescale);
+                            else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "%s%s%s", teamtype[game::focus->team].chat, pre, teamtype[game::focus->team].name));
                         }
                     }
                     if((cc = drawselection(cx[i], cy[i], cs, cm, blend)) > 0) cy[i] -= cc+cr;
@@ -2024,36 +2017,48 @@ namespace hud
     {
         if(game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
-            pushfont("super");
-            int ty = ((hudheight/2)-FONTH-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
             glPushMatrix();
             glScalef(eventscale, eventscale, 1);
-            loopk(showevents) loopv(game::focus->icons)
+            pushfont("super");
+            int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
+            loopk(showevents >= 2 ? 3 : 2) loopv(game::focus->icons)
             {
-                if(k ? game::focus->icons[i].type != eventicon::WEAPON : game::focus->icons[i].type == eventicon::WEAPON) continue;
-                if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
+                switch(k)
+                {
+                    case 2: if(game::focus->icons[i].type != eventicon::WEAPON) continue; break;
+                    case 1: if(game::focus->icons[i].type != eventicon::AFFINITY) continue; break;
+                    case 0: default:
+                    {
+                        if(game::focus->icons[i].type >= eventicon::WEAPON) continue;
+                        if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
+                        break;
+                    }
+                }
                 int millis = lastmillis-game::focus->icons[i].millis;
                 if(millis <= game::focus->icons[i].fade)
                 {
                     Texture *t = textureload(hud::icontex(game::focus->icons[i].type, game::focus->icons[i].value));
                     if(t && t != notexture)
                     {
-                        int olen = min(game::focus->icons[i].length/5, 1000), ilen = olen/2,
-                            colour = game::focus->icons[i].type == eventicon::WEAPON ? weaptype[game::focus->icons[i].value].colour : 0xFFFFFF;
+                        int olen = min(game::focus->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
                         float skew = millis < ilen ? millis/float(ilen) : (millis > game::focus->icons[i].fade-olen ? (game::focus->icons[i].fade-millis)/float(olen) : 1.f),
                               fade = blend*eventblend*skew;
                         int size = int(FONTH*skew), width = int((t->w/float(t->h))*size);
+                        switch(game::focus->icons[i].type)
+                        {
+                            case eventicon::WEAPON: colour = weaptype[game::focus->icons[i].value].colour; break;
+                            case eventicon::AFFINITY: if(!m_bomber(game::gamemode)) colour = teamtype[game::focus->icons[i].value].colour; break;
+                            default: break;
+                        }
                         glBindTexture(GL_TEXTURE_2D, t->id);
                         glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, fade);
-                        drawtex(tx-width/2, ty-size/2, width, size);
-                        int offset = int(size*(1.f/eventscale));
-                        if(game::focus->icons[i].type != eventicon::WEAPON) offset = offset*2/3;
-                        ty -= offset;
+                        drawtex(tx-width/2, ty-size, width, size);
+                        ty -= game::focus->icons[i].type < eventicon::WEAPON ? int(size/2) : int(size);
                     }
                 }
             }
-            glPopMatrix();
             popfont();
+            glPopMatrix();
         }
     }
 
@@ -2134,8 +2139,8 @@ namespace hud
         if(noview) drawbackground(hudwidth, hudheight);
         else if(!client::waiting() && fade > 0)
         {
-            if(showevents && !hasinput(false)) drawevents(fade);
             if(showhud) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
+            if(showevents && !hasinput(false)) drawevents(fade);
         }
         if(UI::ready && showconsole)
         {
