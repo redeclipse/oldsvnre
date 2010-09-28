@@ -93,7 +93,8 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
     VAR(IDF_PERSIST, eventiconfade, 500, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, eventiconcritfade, 500, 1000, INT_MAX-1);
+    VAR(IDF_PERSIST, eventiconshort, 500, 3000, INT_MAX-1);
+    VAR(IDF_PERSIST, eventiconcrit, 500, 2000, INT_MAX-1);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 0, 1);
@@ -734,8 +735,8 @@ namespace game
         if(flags&HIT_CRIT)
         {
             pushdamagemerge(d, actor, weap, damage, damagemerge::CRIT);
-            d->addicon(eventicon::CRITICAL, lastmillis, eventiconcritfade, 0);
-            actor->addicon(eventicon::CRITICAL, lastmillis, eventiconcritfade, 1);
+            d->addicon(eventicon::CRITICAL, lastmillis, eventiconcrit, 0);
+            actor->addicon(eventicon::CRITICAL, lastmillis, eventiconcrit, 1);
         }
     }
 
