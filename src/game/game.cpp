@@ -1951,10 +1951,19 @@ namespace game
                     pos.z += aboveheadstatussize/2+0.25f;
                 }
             }
-            if(aboveheadicons > (d != focus ? 0 : 1)) loopk(2) loopv(d->icons)
+            if(aboveheadicons > (d != focus ? 0 : 1) && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopk(3) loopv(d->icons)
             {
-                if(k ? d->icons[i].type != eventicon::WEAPON : d->icons[i].type == eventicon::WEAPON) continue;
-                if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
+                switch(k)
+                {
+                    case 2: if(d->icons[i].type != eventicon::WEAPON) continue; break;
+                    case 1: if(d->icons[i].type != eventicon::AFFINITY) continue; break;
+                    case 0: default:
+                    {
+                        if(d->icons[i].type >= eventicon::WEAPON) continue;
+                        if(d->icons[i].type == eventicon::CRITICAL && game::focus->icons[i].value) continue;
+                        break;
+                    }
+                }
                 int millis = lastmillis-d->icons[i].millis;
                 if(millis <= d->icons[i].fade)
                 {
@@ -1964,9 +1973,14 @@ namespace game
                         int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
                         float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
                               size = aboveheadiconsize*skew, fade = blend*skew, nudge = size/2;
-                        if(d->icons[i].type == eventicon::WEAPON)
+                        if(d->icons[i].type >= eventicon::WEAPON)
                         {
-                            colour = weaptype[d->icons[i].value].colour;
+                            switch(d->icons[i].type)
+                            {
+                                case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; break;
+                                case eventicon::AFFINITY: if(!m_bomber(gamemode)) colour = teamtype[d->icons[i].value].colour; break;
+                                default: break;
+                            }
                             nudge *= 2;
                         }
                         pos.z += nudge+0.125f;

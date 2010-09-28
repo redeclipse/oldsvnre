@@ -895,7 +895,7 @@ extern const char * const animnames[];
 
 struct eventicon
 {
-    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, WEAPON };
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, WEAPON, AFFINITY };
     int type, millis, fade, length, value;
 
     eventicon(int type, int millis, int fade = 2500, int value = 0) : type(type), millis(millis), fade(fade), length(fade), value(value) {}
@@ -974,6 +974,8 @@ struct gameent : dynent, gamestate
         lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
         obliterated = false;
+        airnodes.shrink(0);
+        icons.shrink(0);
     }
 
     void respawn(int millis, int heal)
@@ -983,7 +985,6 @@ struct gameent : dynent, gamestate
         clearstate();
         physent::reset();
         gamestate::respawn(millis, heal);
-        airnodes.setsize(0);
     }
 
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
@@ -998,7 +999,6 @@ struct gameent : dynent, gamestate
         floor = vec(0, 0, 1);
         resetinterp();
         gamestate::editspawn(gamemode, mutators, sweap, heal);
-        airnodes.setsize(0);
     }
 
     void resetstate(int millis, int heal)
@@ -1300,7 +1300,7 @@ namespace hud
     extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *cardtex, *flagtex, *bombtex, *arrowtex, *alerttex, *inventorytex, *indicatortex, *crosshairtex, *hitcrosshairtex,
                 *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radaraffinitynames, inventorygame, inventoryaffinity, teamkillnum;
-    extern float noticescale, inventoryblend, inventoryskew, inventorygrow, radaraffinityblend, radarblipblend, radaraffinitysize;
+    extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize;
     extern vector<int> teamkills;
     extern const char *icontex(int type, int value);
     extern bool chkcond(int val, bool cond);
