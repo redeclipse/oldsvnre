@@ -4,11 +4,11 @@
 * Need to replace: projs/debris, projs/gibs
 * New player model (tags: affinity (flag|bomb), weapon, lfoot, rfoot, head, torso, jet)
 * Enemy models
-* Weapons
+* Weapons (flamer, smg, grenades) (better rifle skin/norm, redo sword UVW/skin/norm and found a better idle, rework shotgun skin, adjust vweap)
+* Grunt (better punch anim, fix abdomen pitch, Sword attack anim, make less 'distord' hud arms)
 
 = Art =
 * Better looking fixed-width fonts
-* Current "widgets" need glow removed so they are not clipped by image dimensions
 
 = Sounds =
 * Double/Triple/Multi kill
