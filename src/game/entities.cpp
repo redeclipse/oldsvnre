@@ -316,7 +316,7 @@ namespace entities
         gameentity &e = *(gameentity *)ents[n];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF;
-        if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconfade, attr);
+        if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
         if(isweap(g))
         {
             d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
