@@ -506,7 +506,7 @@ struct guient
 struct guicb
 {
     virtual ~guicb() {}
-    int starttime() { extern int totalmillis; return totalmillis; }
+    static int starttime() { extern int totalmillis; return totalmillis; }
     virtual void gui(guient &g, bool firstpass) = 0;
 };
 

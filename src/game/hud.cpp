@@ -10,7 +10,6 @@ namespace hud
 
     #include "compass.h"
     vector<int> teamkills;
-    scoreboard sb;
 
     struct damageloc
     {
@@ -1757,7 +1756,7 @@ namespace hud
                     popfont();
                 }
             }
-            sy += sb.trialinventory(x, y-sy, s, fade);
+            sy += trialinventory(x, y-sy, s, fade);
         }
         return sy;
     }
@@ -1822,7 +1821,7 @@ namespace hud
                         }
                     }
                     if((cc = drawselection(cx[i], cy[i], cs, cm, blend)) > 0) cy[i] -= cc+cr;
-                    if(!m_edit(game::gamemode) && inventoryscore && ((cc = sb.drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
+                    if(!m_edit(game::gamemode) && inventoryscore && ((cc = drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
                     if(inventorygame)
                     {
                         if(m_capture(game::gamemode) && ((cc = capture::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
@@ -2144,8 +2143,6 @@ namespace hud
 
         glDisable(GL_BLEND);
     }
-
-    void gamemenus() { sb.show(); }
 
     void update(int w, int h)
     {

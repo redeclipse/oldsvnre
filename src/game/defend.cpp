@@ -265,7 +265,7 @@ namespace defend
 
     void setscore(int team, int total)
     {
-        hud::sb.teamscore(team).total = total;
+        hud::teamscore(team).total = total;
     }
 
     int aiowner(gameent *d)
