@@ -1960,7 +1960,7 @@ namespace game
                     case 0: default:
                     {
                         if(d->icons[i].type >= eventicon::WEAPON) continue;
-                        if(d->icons[i].type == eventicon::CRITICAL && game::focus->icons[i].value) continue;
+                        if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
                         break;
                     }
                 }
