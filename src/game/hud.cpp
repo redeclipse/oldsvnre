@@ -233,6 +233,7 @@ namespace hud
     VAR(IDF_PERSIST, radarplayers, 0, 2, 2);
     VAR(IDF_PERSIST, radarplayerfilter, 0, 0, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit/tv
     VAR(IDF_PERSIST, radarplayernames, 0, 0, 2);
+    VAR(IDF_PERSIST, radarplayereffects, 0, 1, 1);
     VAR(IDF_PERSIST, radaraffinity, 0, 2, 2);
     VAR(IDF_PERSIST, radaraffinitynames, 0, 1, 2);
 
@@ -331,10 +332,10 @@ namespace hud
                       healthscale = float(m_health(game::gamemode, game::mutators));
                 if(healthscale > 0) damage = max(damage, 1.f-max(game::focus->health, 0)/healthscale);
                 amt += damage*0.65f;
-                if(residualburntime && game::focus->burning(lastmillis, residualburntime))
-                    amt += 0.25f+(float((lastmillis-game::focus->lastburn)%residualburndelay)/float(residualburndelay))*0.35f;
-                if(residualbleedtime && game::focus->bleeding(lastmillis, residualbleedtime))
-                    amt += 0.25f+(float((lastmillis-game::focus->lastbleed)%residualbleeddelay)/float(residualbleeddelay))*0.35f;
+                if(burntime && game::focus->burning(lastmillis, burntime))
+                    amt += 0.25f+(float((lastmillis-game::focus->lastburn)%burndelay)/float(burndelay))*0.35f;
+                if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
+                    amt += 0.25f+(float((lastmillis-game::focus->lastbleed)%bleeddelay)/float(bleeddelay))*0.35f;
                 if(physics::sprinting(game::focus)) amt += game::focus->turnside ? 0.125f : 0.25f;
                 if(physics::jetpack(game::focus)) amt += 0.125f;
                 break;
@@ -1141,7 +1142,8 @@ namespace hud
         {
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
-            int colour = teamtype[d->team].colour;
+            bool burning = radarplayereffects && burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
+            int colour = burning ? firecols[rnd(FIRECOLOURS)] : teamtype[d->team].colour;
             const char *tex = bliptex;
             float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f), pos = 4, size = radarplayersize,
                 r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
@@ -1850,15 +1852,15 @@ namespace hud
 
     void drawfire(int w, int h, int s, float blend)
     {
-        if(game::focus->burning(lastmillis, residualburntime))
+        if(game::focus->burning(lastmillis, burntime))
         {
             int interval = lastmillis-game::focus->lastburn;
             Texture *t = *burntex ? textureload(burntex, 3) : notexture;
             if(t != notexture)
             {
-                float pc = interval >= residualburntime-500 ? 1.f+(interval-(residualburntime-500))/500.f : (interval%residualburndelay)/float(residualburndelay/2); if(pc > 1.f) pc = 2.f-pc;
+                float pc = interval >= burntime-500 ? 1.f+(interval-(burntime-500))/500.f : (interval%burndelay)/float(burndelay/2); if(pc > 1.f) pc = 2.f-pc;
                 glBindTexture(GL_TEXTURE_2D, t->id);
-                glColor4f(0.9f*max(pc,0.5f), 0.3f*pc, 0.0625f*max(pc,0.25f), blend*burnblend*(interval >= residualburntime-(residualburndelay/2) ? pc : min(pc+0.5f, 1.f)));
+                glColor4f(0.9f*max(pc,0.5f), 0.3f*pc, 0.0625f*max(pc,0.25f), blend*burnblend*(interval >= burntime-(burndelay/2) ? pc : min(pc+0.5f, 1.f)));
                 drawtex(0, 0, w, h);
             }
         }
@@ -1955,7 +1957,7 @@ namespace hud
         if(game::focus->state == CS_ALIVE && game::inzoom() && WEAP(game::focus->weapselect, zooms)) drawzoom(w, h);
         if(showdamage)
         {
-            if(residualburntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
+            if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
             if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
         }
         if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : chkcond(showradar, game::tvmode()))) drawradar(w, h, fade);

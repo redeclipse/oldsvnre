@@ -1012,7 +1012,7 @@ namespace physics
                 if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= 0.25f)
                 {
                     gameent *d = (gameent *)pl;
-                    if(d->burning(lastmillis, residualburntime) && lastmillis-d->lastburn > PHYSMILLIS)
+                    if(d->burning(lastmillis, burntime) && lastmillis-d->lastburn > PHYSMILLIS)
                     {
                         d->resetburning();
                         playsound(S_EXTINGUISH, d->o, d);

@@ -376,7 +376,8 @@ mutstypes mutstype[] = {
     },
 };
 #else
-extern gametypes gametype[], mutstype[];
+extern gametypes gametype[];
+extern mutstypes mutstype[];
 #endif
 
 #define m_game(a)           (a > -1 && a < G_MAX)
@@ -393,7 +394,6 @@ extern gametypes gametype[], mutstype[];
 
 #define m_play(a)           (a >= G_PLAY)
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
-#define m_affinhold(a)      (m_capture(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
 #define m_team(a,b)         ((b & G_M_TEAM) || (gametype[a].implied & G_M_TEAM))
@@ -419,7 +419,7 @@ extern gametypes gametype[], mutstype[];
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
 #define m_scores(a)         (a >= G_EDITMODE && a <= G_DEATHMATCH)
 
-#define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_edit(a) || m_trial(a) ? GAME(limitedweapon) : GAME(spawnweapon))))))
+#define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_trial(a) ? GAME(trialweapon) : GAME(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
