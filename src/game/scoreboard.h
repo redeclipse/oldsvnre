@@ -425,14 +425,7 @@ namespace hud
                     g.pushlist();
                     g.strut(5);
                     g.text("ping", fgcolor);
-                    loopscoregroup({
-                        if(o->aitype >= 0)
-                        {
-                            gameent *od = game::getclient(o->ownernum);
-                            g.textf("%d", 0xFFFFFF, NULL, od ? od->ping : -1);
-                        }
-                        else g.textf("%d", 0xFFFFFF, NULL, o->ping);
-                    });
+                    loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, o->ping));
                     g.poplist();
                 }
 
@@ -441,9 +434,7 @@ namespace hud
                     g.pushlist();
                     g.strut(4);
                     g.text("cn", fgcolor);
-                    loopscoregroup({
-                        g.textf("%d", 0xFFFFFF, NULL, o->clientnum);
-                    });
+                    loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, o->clientnum));
                     g.poplist();
                 }
 
