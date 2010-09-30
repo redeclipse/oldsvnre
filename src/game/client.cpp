@@ -1823,6 +1823,8 @@ namespace client
                 case N_CLIENTPING:
                     if(!d) return;
                     d->ping = getint(p);
+                    loopv(game::players) if(game::players[i] && game::players[i]->ownernum == d->clientnum)
+                        game::players[i]->ping = d->ping;
                     break;
 
                 case N_TICK:
