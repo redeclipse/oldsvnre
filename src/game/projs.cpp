@@ -59,6 +59,7 @@ namespace projs
                     case 0: nodamage++; break;
                 }
             }
+            if(m_expert(game::gamemode, game::mutators) && !(flags&HIT_HEAD)) nodamage++;
         }
 
         if(nodamage || !hithurts(flags))
