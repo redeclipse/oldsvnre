@@ -143,28 +143,33 @@ struct bomberservmode : bomberstate, servmode
         if(bombertime)
         {
             if(gamemillis < bombertime) return;
+            int hasaffinity = 0;
             if(!m_gsp1(gamemode, mutators))
             {
                 vector<int> candidates[TEAM_MAX];
                 loopv(flags) candidates[flags[i].team].add(i);
-                loopi(m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
+                int wants = m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
+                loopi(wants) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
                 {
                     int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
                     if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
                     {
                         bomberstate::returnaffinity(candidates[i][r], gamemillis, true, true);
                         sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
+                        hasaffinity++;
                     }
                     else return;
                 }
+                if(hasaffinity < wants) return;
             }
             else loopv(flags) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
             { // multi-ball
                 if(m_gsp2(gamemode, mutators) && flags[i].team) continue;
                 bomberstate::returnaffinity(i, gamemillis, true, true);
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
+                hasaffinity++;
             }
-
+            if(!hasaffinity) return;
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, "\fwnew round starting");
             bombertime = 0;
         }

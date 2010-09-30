@@ -129,7 +129,7 @@ GFVAR(0, bomberweight, -10000, 100, 10000);
 
 GVAR(0, skillmin, 1, 65, 101);
 GVAR(0, skillmax, 1, 85, 101);
-GVAR(0, botbalance, -2, -2, INT_MAX-1); // -2 = 2 unless server is non-public, -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
+GVAR(0, botbalance, -1, -1, INT_MAX-1); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botlimit, 0, 16, INT_MAX-1);
 GVAR(0, enemybalance, 0, 1, 3);
 GVAR(0, enemyspawntime, 1, 60000, INT_MAX-1); // when enemies respawn
