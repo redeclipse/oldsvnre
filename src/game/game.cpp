@@ -117,9 +117,8 @@ namespace game
     VAR(IDF_PERSIST, debrisfade, 1, 5000, INT_MAX-1);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, residualburning, 0, 2, 2);
-    VAR(IDF_PERSIST, residualburnfade, 100, 250, INT_MAX-1);
-    FVAR(IDF_PERSIST, residualburnblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, burnfade, 100, 250, INT_MAX-1);
+    FVAR(IDF_PERSIST, burnblend, 0.1f, 0.25f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
     VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
 
@@ -406,11 +405,11 @@ namespace game
             gameent *d = NULL;
             loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
             {
-                if(residualburning && residualburntime && d->burning(lastmillis, residualburntime))
+                if(burntime && d->burning(lastmillis, burntime))
                 {
                     int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f);
-                    if(residualburntime-millis < residualburndelay) pc = float(residualburntime-millis)/float(residualburndelay);
-                    else pc = 0.5f+(float(millis%residualburndelay)/float(residualburndelay*2));
+                    if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
+                    else pc = 0.5f+(float(millis%burndelay)/float(burndelay*2));
                     pc = deadscale(d, pc);
                     adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
                     continue;
@@ -554,13 +553,13 @@ namespace game
         else if(issound(d->pschan)) removesound(d->pschan);
         if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
         if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
-        if(d->lastburn > 0 && lastmillis-d->lastburn >= residualburntime-500)
+        if(d->lastburn > 0 && lastmillis-d->lastburn >= burntime-500)
         {
-            if(lastmillis-d->lastburn >= residualburntime) d->resetburning();
-            else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastburn-(residualburntime-500))/500.f));
+            if(lastmillis-d->lastburn >= burntime) d->resetburning();
+            else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastburn-(burntime-500))/500.f));
         }
         else if(issound(d->fschan)) removesound(d->fschan);
-        if(d->lastbleed > 0 && lastmillis-d->lastbleed >= residualbleedtime) d->lastbleed = 0;
+        if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->lastbleed = 0;
         if(issound(d->jschan) && !physics::jetpack(d))
         {
             if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
@@ -582,9 +581,9 @@ namespace game
         }
     }
 
-    bool residualburn(gameent *d, int weap, int flags)
+    bool burn(gameent *d, int weap, int flags)
     {
-        if(residualburntime && hithurts(flags) && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
+        if(burntime && hithurts(flags) && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
         {
             if(!issound(d->fschan)) playsound(S_BURNFIRE, d->o, d, SND_LOOP, d != focus ? 128 : 224, -1, -1, &d->fschan);
             if(isweap(weap)) d->lastburn = lastmillis;
@@ -593,9 +592,9 @@ namespace game
         return false;
     }
 
-    bool residualbleed(gameent *d, int weap, int flags)
+    bool bleed(gameent *d, int weap, int flags)
     {
-        if(residualbleedtime && hithurts(flags) && ((weap == -1 && flags&HIT_BLEED) || doesbleed(weap, flags)))
+        if(bleedtime && hithurts(flags) && ((weap == -1 && flags&HIT_BLEED) || doesbleed(weap, flags)))
         {
             if(isweap(weap)) d->lastbleed = lastmillis;
             else return true;
@@ -677,7 +676,7 @@ namespace game
     static int alarmchan = -1;
     void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local)
     {
-        bool burning = residualburn(d, weap, flags), bleeding = residualbleed(d, weap, flags);
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags);
         if(!local || burning || bleeding)
         {
             if(hithurts(flags))
@@ -743,7 +742,7 @@ namespace game
     void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style)
     {
         if(d->type != ENT_PLAYER && d->type != ENT_AI) return;
-        bool burning = residualburn(d, weap, flags), bleeding = residualbleed(d, weap, flags);
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags);
         d->lastregen = 0;
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
@@ -1179,7 +1178,7 @@ namespace game
     {
         if((d == player1 || d->ai) && d->state == CS_ALIVE && d->suicided < 0)
         {
-            residualburn(d, -1, flags);
+            burn(d, -1, flags);
             client::addmsg(N_SUICIDE, "ri2", d->clientnum, flags);
             d->suicided = lastmillis;
         }
@@ -1910,7 +1909,7 @@ namespace game
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
-        bool burning = residualburning && residualburntime && lastmillis%100 < 50 && d->burning(lastmillis, residualburntime);
+        bool burning = burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
         int colour = burning ? firecols[rnd(FIRECOLOURS)] : (type >= AI_START ? 0xFFFFFF : teamtype[d->team].colour);
         e->light.material = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
@@ -2165,13 +2164,13 @@ namespace game
                     }
                 }
             }
-            if(residualburning >= (d != focus || thirdpersonview() ? 1 : 2) && residualburntime && d->burning(lastmillis, residualburntime))
+            if(burntime && d->burning(lastmillis, burntime))
             {
                 int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-                if(residualburntime-millis < residualburndelay) pc = float(residualburntime-millis)/float(residualburndelay);
-                else pc = 0.75f+(float(millis%residualburndelay)/float(residualburndelay*4));
+                if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
+                else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL_SOFT, max(residualburnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*deadscale(d, intensity*pc), blend*pc*residualburnblend, -15, 0);
+                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*deadscale(d, intensity*pc), blend*pc*burnblend, -15, 0);
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);
