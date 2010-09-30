@@ -2460,6 +2460,7 @@ namespace server
                     case 0: nodamage++; break;
                 }
             }
+            if(m_expert(gamemode, mutators) && !(flags&HIT_HEAD)) nodamage++;
         }
         if(nodamage || !hithurts(realflags))
         {
