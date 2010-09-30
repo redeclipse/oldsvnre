@@ -2021,19 +2021,10 @@ namespace hud
             glScalef(eventscale, eventscale, 1);
             pushfont("super");
             int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
-            loopk(showevents >= 2 ? 3 : 2) loopv(game::focus->icons)
+            loopv(game::focus->icons)
             {
-                switch(k)
-                {
-                    case 2: if(game::focus->icons[i].type != eventicon::WEAPON) continue; break;
-                    case 1: if(game::focus->icons[i].type != eventicon::AFFINITY) continue; break;
-                    case 0: default:
-                    {
-                        if(game::focus->icons[i].type >= eventicon::WEAPON) continue;
-                        if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
-                        break;
-                    }
-                }
+                if(game::focus->icons[i].type >= eventicon::VERBOSE && showevents < 2) break;
+                if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
                 int millis = lastmillis-game::focus->icons[i].millis;
                 if(millis <= game::focus->icons[i].fade)
                 {

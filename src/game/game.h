@@ -895,11 +895,8 @@ extern const char * const animnames[];
 
 struct eventicon
 {
-    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, WEAPON, AFFINITY };
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, WEAPON, AFFINITY, TOTAL, VERBOSE = WEAPON };
     int type, millis, fade, length, value;
-
-    eventicon(int type, int millis, int fade = 2500, int value = 0) : type(type), millis(millis), fade(fade), length(fade), value(value) {}
-    ~eventicon() {}
 };
 
 struct gameent : dynent, gamestate
@@ -1173,23 +1170,39 @@ struct gameent : dynent, gamestate
 
     void addicon(int type, int millis, int fade, int value = 0)
     {
-        loopv(icons) if(icons[i].type == type)
+        int pos = -1;
+        loopv(icons)
         {
-            switch(icons[i].type)
+            if(icons[i].type == type)
             {
-                case eventicon::CRITICAL: case eventicon::WEAPON:
+                switch(icons[i].type)
                 {
-                    if(icons[i].value != value) continue;
-                    break;
+                    case eventicon::CRITICAL: case eventicon::WEAPON:
+                    {
+                        if(icons[i].value != value) continue;
+                        break;
+                    }
+                    default: break;
                 }
-                default: break;
+                icons[i].length = max(icons[i].fade, fade);
+                icons[i].fade += fade;
+                icons[i].value = value;
+                return;
             }
-            icons[i].length = max(icons[i].fade, fade);
-            icons[i].fade += fade;
-            icons[i].value = value;
-            return;
+            if(pos < 0) switch(type)
+            {
+                case eventicon::AFFINITY: break;
+                case eventicon::WEAPON: if(icons[i].type > eventicon::WEAPON) pos = i; break;
+                default: if(icons[i].type >= eventicon::WEAPON) pos = i; break;
+            }
         }
-        icons.add(eventicon(type, millis, fade, value));
+        eventicon e;
+        e.type = type;
+        e.millis = millis;
+        e.fade = e.length = fade;
+        e.value = value;
+        if(pos < 0) icons.add(e);
+        else icons.insert(pos, e);
     }
 };
 
