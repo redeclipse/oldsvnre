@@ -81,11 +81,11 @@ namespace game
     VAR(IDF_PERSIST, zoomdefault, 0, 0, 10); // 0 = last used, else defines default level
     VAR(IDF_PERSIST, zoomscroll, 0, 0, 1); // 0 = stop at min/max, 1 = go to opposite end
 
-    VAR(IDF_PERSIST, aboveheadnames, 0, 1, 2);
-    VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 2);
-    VAR(IDF_PERSIST, aboveheadteam, 0, 1, 3);
-    VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 2);
-    VAR(IDF_PERSIST, aboveheadicons, 0, 1, 2);
+    VAR(IDF_PERSIST, aboveheadnames, 0, 1, 1);
+    VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 1);
+    VAR(IDF_PERSIST, aboveheadteam, 0, 1, 2);
+    VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
+    VAR(IDF_PERSIST, aboveheadicons, 0, 2, 2);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 0.75f, 1.f);
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
@@ -637,7 +637,7 @@ namespace game
                     else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
                     if(snd >= 0) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 }
-                if(aboveheaddamage >= (d != focus ? 1 : 2))
+                if(aboveheaddamage)
                 {
                     defformatstring(ds)("<sub>\fr+%d", damage);
                     part_textcopy(d->abovehead(), ds, d != focus ? PART_TEXT : PART_TEXT_ONTOP, eventiconfade, 0xFFFFFF, 4, 1, -10, 0, d);
@@ -1922,7 +1922,7 @@ namespace game
         {
             vec pos = d->abovehead();
             float blend = aboveheadblend*trans;
-            if(aboveheadnames > (d != focus ? 0 : 1))
+            if(aboveheadnames && d != focus)
             {
                 const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<default>");
                 if(name && *name)
@@ -1932,14 +1932,14 @@ namespace game
                     pos.z += aboveheadnamesize/2+0.5f;
                 }
             }
-            if(aboveheadstatus > (d != focus ? 0 : 1))
+            if(aboveheadstatus)
             {
                 Texture *t = NULL;
                 if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
                 else if(d->state == CS_ALIVE)
                 {
                     if(d->conopen) t = textureload(hud::conopentex, 3);
-                    else if(m_team(gamemode, mutators) && aboveheadteam > (d != focus ? (d->team != focus->team ? 1 : 0) : 2))
+                    else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
                         t = textureload(hud::teamtex(d->team), 3);
                     else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
@@ -1951,19 +1951,10 @@ namespace game
                     pos.z += aboveheadstatussize/2+0.25f;
                 }
             }
-            if(aboveheadicons > (d != focus ? 0 : 1) && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopk(3) loopv(d->icons)
+            if(aboveheadicons && d != focus && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
             {
-                switch(k)
-                {
-                    case 2: if(d->icons[i].type != eventicon::WEAPON) continue; break;
-                    case 1: if(d->icons[i].type != eventicon::AFFINITY) continue; break;
-                    case 0: default:
-                    {
-                        if(d->icons[i].type >= eventicon::WEAPON) continue;
-                        if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
-                        break;
-                    }
-                }
+                if(d->icons[i].type >= eventicon::VERBOSE && aboveheadicons < 2) break;
+                if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
                 int millis = lastmillis-d->icons[i].millis;
                 if(millis <= d->icons[i].fade)
                 {
