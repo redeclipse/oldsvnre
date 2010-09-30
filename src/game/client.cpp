@@ -621,7 +621,7 @@ namespace client
         game::nextmode = game::gamemode; game::nextmuts = game::mutators;
         game::timeremaining = -1;
         game::maptime = 0;
-        hud::sb.scores.shrink(0);
+        hud::resetscores();
         mapvotes.shrink(0);
         if(editmode) toggleedit();
         if(m_demo(gamemode)) return;
@@ -1365,7 +1365,7 @@ namespace client
 
                 case N_NEWGAME: // server requests next game
                 {
-                    hud::sb.showscores(false);
+                    hud::showscores(false);
                     if(!menuactive()) showgui("maps", 1);
                     if(game::intermission) hud::lastnewgame = totalmillis;
                     break;
@@ -1450,7 +1450,7 @@ namespace client
 
                 case N_LOADWEAP:
                 {
-                    hud::sb.showscores(false);
+                    hud::showscores(false);
                     loopj(2) game::player1->loadweap[j] = -1;
                     if(!menuactive()) showgui("loadout", -1);
                     break;
@@ -1921,7 +1921,7 @@ namespace client
                     if(s == game::player1)
                     {
                         if(editmode) toggleedit();
-                        hud::sb.showscores(false);
+                        hud::showscores(false);
                         s->stopmoving(true);
                     }
                     else if(!s->ai) s->resetinterp();
@@ -1992,7 +1992,7 @@ namespace client
                     int team = getint(p), total = getint(p);
                     if(m_team(game::gamemode, game::mutators))
                     {
-                        score &ts = hud::sb.teamscore(team);
+                        score &ts = hud::teamscore(team);
                         ts.total = total;
                     }
                     break;

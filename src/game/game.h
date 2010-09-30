@@ -1345,6 +1345,12 @@ namespace hud
     extern void damage(int n, const vec &loc, gameent *actor, int weap, int flags);
     extern const char *teamtex(int team = TEAM_NEUTRAL);
     extern const char *itemtex(int type, int stype);
+    extern bool canshowscores();
+    extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false); 
+    extern score &teamscore(int team);
+    extern void resetscores();
+    extern int trialinventory(int x, int y, int s, float blend);
+    extern int drawinventory(int x, int y, int s, int m, float blend);
 }
 
 namespace game
@@ -1595,9 +1601,6 @@ namespace client
 #include "capture.h"
 #include "defend.h"
 #include "bomber.h"
-#ifndef GAMESERVER
-#include "scoreboard.h"
-#endif
 
 #endif
 

@@ -767,7 +767,7 @@
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\scoreboard.h">
+		<Unit filename="game\scoreboard.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />

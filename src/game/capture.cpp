@@ -386,7 +386,7 @@ namespace capture
 
     void setscore(int team, int total)
     {
-        hud::sb.teamscore(team).total = total;
+        hud::teamscore(team).total = total;
     }
 
     void parseaffinity(ucharbuf &p, bool commit)
@@ -484,7 +484,7 @@ namespace capture
             affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "CAPTURED");
         }
         else affinityeffect(goal, d->team, f.pos(), f.spawnloc, 3, "CAPTURED");
-        hud::sb.teamscore(d->team).total = score;
+        hud::teamscore(d->team).total = score;
         game::announce(S_V_FLAGSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s scored the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
     }

@@ -282,8 +282,8 @@ namespace game
         return false;
     }
 
-    ICOMMAND(0, specmodeswitch, "", (), specmode = specmode ? 0 : 1; hud::sb.showscores(false); follow = 0);
-    ICOMMAND(0, waitmodeswitch, "", (), waitmode = waitmode ? 0 : (m_duke(gamemode, mutators) ? 1 : 2); hud::sb.showscores(false); follow = 0);
+    ICOMMAND(0, specmodeswitch, "", (), specmode = specmode ? 0 : 1; hud::showscores(false); follow = 0);
+    ICOMMAND(0, waitmodeswitch, "", (), waitmode = waitmode ? 0 : (m_duke(gamemode, mutators) ? 1 : 2); hud::showscores(false); follow = 0);
 
     void followswitch(int n)
     {
@@ -1002,7 +1002,7 @@ namespace game
         if(!timeremain && !intermission)
         {
             player1->stopmoving(true);
-            hud::sb.showscores(true, true);
+            hud::showscores(true, true);
             intermission = true;
             smartmusic(true, false);
         }
@@ -1575,7 +1575,7 @@ namespace game
     void resetworld()
     {
         follow = 0; focus = player1;
-        hud::sb.showscores(false);
+        hud::showscores(false);
         cleargui();
     }
 
@@ -1687,7 +1687,7 @@ namespace game
                 if(!intermission) addsway(focus);
             }
             checkcamera();
-            if(hud::sb.canshowscores()) hud::sb.showscores(true);
+            if(hud::canshowscores()) hud::showscores(true);
         }
 
         if(player1->clientnum >= 0) client::c2sinfo();
