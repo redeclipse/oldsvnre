@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3E2522471255C29D003F3F5E /* scoreboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E2522461255C29D003F3F5E /* scoreboard.cpp */; };
 		3E469E9811E05C2B00873F83 /* bomber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E469E9511E05C2B00873F83 /* bomber.cpp */; };
 		3E469E9911E05C2B00873F83 /* bomber.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E469E9611E05C2B00873F83 /* bomber.h */; };
 		3E469E9A11E05C2B00873F83 /* bombermode.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E469E9711E05C2B00873F83 /* bombermode.h */; };
@@ -96,7 +97,6 @@
 		D16A83500F130E9500EABB1F /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833E0F130E9500EABB1F /* hud.cpp */; };
 		D16A83510F130E9500EABB1F /* physics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833F0F130E9500EABB1F /* physics.cpp */; };
 		D16A83520F130E9500EABB1F /* projs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83400F130E9500EABB1F /* projs.cpp */; };
-		D16A83530F130E9500EABB1F /* scoreboard.cpp in Headers */ = {isa = PBXBuildFile; fileRef = D16A83410F130E9500EABB1F /* scoreboard.cpp */; };
 		D16A83540F130E9500EABB1F /* server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83420F130E9500EABB1F /* server.cpp */; };
 		D16A83550F130E9500EABB1F /* defend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83430F130E9500EABB1F /* defend.cpp */; };
 		D16A83560F130E9500EABB1F /* defend.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83440F130E9500EABB1F /* defend.h */; };
@@ -131,9 +131,10 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		3E469E9511E05C2B00873F83 /* bomber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bomber.cpp; path = ../game/bomber.cpp; sourceTree = SOURCE_ROOT; };
-		3E469E9611E05C2B00873F83 /* bomber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bomber.h; path = ../game/bomber.h; sourceTree = SOURCE_ROOT; };
-		3E469E9711E05C2B00873F83 /* bombermode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bombermode.h; path = ../game/bombermode.h; sourceTree = SOURCE_ROOT; };
+		3E2522461255C29D003F3F5E /* scoreboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scoreboard.cpp; sourceTree = "<group>"; };
+		3E469E9511E05C2B00873F83 /* bomber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bomber.cpp; sourceTree = "<group>"; };
+		3E469E9611E05C2B00873F83 /* bomber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bomber.h; sourceTree = "<group>"; };
+		3E469E9711E05C2B00873F83 /* bombermode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bombermode.h; sourceTree = "<group>"; };
 		666E40EF0B67D87F005B491F /* macutils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = macutils.mm; sourceTree = "<group>"; };
 		B2F67ED704C74A3F00A80002 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		B90ADD0009B344D800A5B00B /* callbacks.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = callbacks.c; sourceTree = "<group>"; };
@@ -224,7 +225,6 @@
 		D16A833E0F130E9500EABB1F /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hud.cpp; sourceTree = "<group>"; };
 		D16A833F0F130E9500EABB1F /* physics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = physics.cpp; sourceTree = "<group>"; };
 		D16A83400F130E9500EABB1F /* projs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = projs.cpp; sourceTree = "<group>"; };
-		D16A83410F130E9500EABB1F /* scoreboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scoreboard.cpp; sourceTree = "<group>"; };
 		D16A83420F130E9500EABB1F /* server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = server.cpp; sourceTree = "<group>"; };
 		D16A83430F130E9500EABB1F /* defend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = defend.cpp; sourceTree = "<group>"; };
 		D16A83440F130E9500EABB1F /* defend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = defend.h; sourceTree = "<group>"; };
@@ -317,9 +317,6 @@
 		29B97314FDCFA39411CA2CEA /* redeclipse */ = {
 			isa = PBXGroup;
 			children = (
-				3E469E9511E05C2B00873F83 /* bomber.cpp */,
-				3E469E9611E05C2B00873F83 /* bomber.h */,
-				3E469E9711E05C2B00873F83 /* bombermode.h */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -470,6 +467,10 @@
 		D16A83350F130E9500EABB1F /* game */ = {
 			isa = PBXGroup;
 			children = (
+				3E2522461255C29D003F3F5E /* scoreboard.cpp */,
+				3E469E9711E05C2B00873F83 /* bombermode.h */,
+				3E469E9611E05C2B00873F83 /* bomber.h */,
+				3E469E9511E05C2B00873F83 /* bomber.cpp */,
 				D11B5A6310CBB4D8003F0098 /* ai.h */,
 				D11B5A6410CBB4D8003F0098 /* game.cpp */,
 				D1CEB4060F548C0B004FD11F /* aiman.h */,
@@ -487,7 +488,6 @@
 				D16A833E0F130E9500EABB1F /* hud.cpp */,
 				D16A833F0F130E9500EABB1F /* physics.cpp */,
 				D16A83400F130E9500EABB1F /* projs.cpp */,
-				D16A83410F130E9500EABB1F /* scoreboard.cpp */,
 				D16A83420F130E9500EABB1F /* server.cpp */,
 				D16A83430F130E9500EABB1F /* defend.cpp */,
 				D16A83440F130E9500EABB1F /* defend.h */,
@@ -537,7 +537,6 @@
 				D16A834B0F130E9500EABB1F /* capture.h in Headers */,
 				D16A834E0F130E9500EABB1F /* extinfo.h in Headers */,
 				D16A834F0F130E9500EABB1F /* game.h in Headers */,
-				D16A83530F130E9500EABB1F /* scoreboard.cpp in Headers */,
 				D16A83560F130E9500EABB1F /* defend.h in Headers */,
 				D16A83570F130E9500EABB1F /* vars.h in Headers */,
 				D16A83760F130EBC00EABB1F /* scale.h in Headers */,
@@ -674,6 +673,7 @@
 				D11B5A8310CBB637003F0098 /* stream.cpp in Sources */,
 				D11B5A8410CBB637003F0098 /* zip.cpp in Sources */,
 				3E469E9811E05C2B00873F83 /* bomber.cpp in Sources */,
+				3E2522471255C29D003F3F5E /* scoreboard.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
