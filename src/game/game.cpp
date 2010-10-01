@@ -14,7 +14,7 @@ namespace game
     vector<gameent *> players;
     vector<camstate> cameras;
 
-    VAR(IDF_WORLD, numplayers, 0, 8, MAXCLIENTS);
+    VAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS);
     FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
     VAR(IDF_WORLD, illumradius, 0, 0, INT_MAX-1);
     SVAR(IDF_WORLD, obitlava, "");

@@ -156,11 +156,11 @@ namespace server
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
         int score, spree, crits, rewards, flags, teamkills, shotdamage, damage;
-        int lasttimeplayed, timeplayed, aireinit, lastburn, lastburnowner, lastbleed, lastbleedowner, lastboost;
+        int lasttimeplayed, timeplayed, aireinit, lastburntime, lastburnowner, lastbleedtime, lastbleedowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes;
         vector<dmghist> damagelog;
 
-        servstate() : state(CS_SPECTATOR), aireinit(0), lastburn(0), lastburnowner(-1), lastbleed(0), lastbleedowner(-1) {}
+        servstate() : state(CS_SPECTATOR), aireinit(0), lastburntime(0), lastburnowner(-1), lastbleedtime(0), lastbleedowner(-1) {}
 
         bool isalive(int millis)
         {
@@ -181,7 +181,7 @@ namespace server
 
         void respawn(int millis, int heal)
         {
-            lastburn = lastbleed = lastboost = 0;
+            lastburntime = lastbleedtime = lastboost = 0;
             lastburnowner = lastbleedowner = -1;
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
@@ -2505,12 +2505,12 @@ namespace server
             if(target->state.health <= 0) realflags |= HIT_KILL;
             if(GAME(burntime) && doesburn(weap, flags))
             {
-                target->state.lastburn = target->state.lastburn = gamemillis;
+                target->state.lastburn = target->state.lastburntime = gamemillis;
                 target->state.lastburnowner = actor->clientnum;
             }
             else if(GAME(bleedtime) && doesbleed(weap, flags))
             {
-                target->state.lastbleed = target->state.lastbleed = gamemillis;
+                target->state.lastbleed = target->state.lastbleedtime = gamemillis;
                 target->state.lastbleedowner = actor->clientnum;
             }
         }
@@ -3114,26 +3114,26 @@ namespace server
                 bool allowregen = m_regen(gamemode, mutators) && ci->state.aitype < AI_START;
                 if(ci->state.burning(gamemillis, GAME(burntime)))
                 {
-                    if(gamemillis-ci->state.lastburn >= GAME(burndelay))
+                    if(gamemillis-ci->state.lastburntime >= GAME(burndelay))
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastburnowner);
                         dodamage(ci, co ? co : ci, GAME(burndamage), -1, HIT_BURN);
-                        ci->state.lastburn += GAME(burndelay);
+                        ci->state.lastburntime += GAME(burndelay);
                     }
                     allowregen = false;
                 }
-                else if(ci->state.lastburn) ci->state.lastburn = ci->state.lastburn = 0;
+                else if(ci->state.lastburn) ci->state.lastburn = ci->state.lastburntime = 0;
                 if(ci->state.bleeding(gamemillis, GAME(bleedtime)))
                 {
-                    if(gamemillis-ci->state.lastbleed >= GAME(bleeddelay))
+                    if(gamemillis-ci->state.lastbleedtime >= GAME(bleeddelay))
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastbleedowner);
                         dodamage(ci, co ? co : ci, GAME(bleeddamage), -1, HIT_BLEED);
-                        ci->state.lastbleed += GAME(bleeddelay);
+                        ci->state.lastbleedtime += GAME(bleeddelay);
                     }
                     allowregen = false;
                 }
-                else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleed = 0;
+                else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleedtime = 0;
                 if(allowregen)
                 {
                     int total = m_health(gamemode, mutators), amt = GAME(regenhealth), delay = ci->state.lastregen ? GAME(regentime) : GAME(regendelay);
