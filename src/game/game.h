@@ -900,7 +900,7 @@ extern const char * const animnames[];
 
 struct eventicon
 {
-    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, WEAPON, AFFINITY, TOTAL, VERBOSE = WEAPON };
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, AFFINITY, WEAPON, TOTAL, SORTED = AFFINITY, VERBOSE = WEAPON };
     int type, millis, fade, length, value;
 };
 
@@ -1194,12 +1194,7 @@ struct gameent : dynent, gamestate
                 icons[i].value = value;
                 return;
             }
-            if(pos < 0) switch(type)
-            {
-                case eventicon::AFFINITY: break;
-                case eventicon::WEAPON: if(icons[i].type > eventicon::WEAPON) pos = i; break;
-                default: if(icons[i].type >= eventicon::WEAPON) pos = i; break;
-            }
+            if(pos < 0 && type >= eventicon::SORTED && icons[i].type > type) pos = i;
         }
         eventicon e;
         e.type = type;
@@ -1346,7 +1341,7 @@ namespace hud
     extern const char *teamtex(int team = TEAM_NEUTRAL);
     extern const char *itemtex(int type, int stype);
     extern bool canshowscores();
-    extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false); 
+    extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
     extern score &teamscore(int team);
     extern void resetscores();
     extern int trialinventory(int x, int y, int s, float blend);

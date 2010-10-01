@@ -62,21 +62,6 @@ namespace hud
         return false;
     }
 
-    static int scorecmp(const score *x, const score *y)
-    {
-        if(m_trial(game::gamemode))
-        {
-            if((x->total && !y->total) || (x->total && y->total && x->total < y->total)) return -1;
-            if((y->total && !x->total) || (x->total && y->total && y->total < x->total)) return 1;
-        }
-        else
-        {
-            if(x->total > y->total) return -1;
-            if(x->total < y->total) return 1;
-        }
-        return x->team-y->team;
-    }
-
     static int playersort(const gameent **a, const gameent **b)
     {
         if((*a)->state==CS_SPECTATOR)
@@ -584,8 +569,8 @@ namespace hud
 
     ICOMMAND(0, showscores, "D", (int *down), showscores(*down!=0, false, false, true));
 
-    void gamemenus() 
-    { 
+    void gamemenus()
+    {
         if(scoreson) UI::addcb(&sb);
         if(game::player1->state == CS_DEAD) { if(scoreson) shownscores = true; }
         else shownscores = false;
