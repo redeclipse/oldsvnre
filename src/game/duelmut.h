@@ -145,7 +145,7 @@ struct duelservmode : servmode
                         {
                             ci->state.health = m_health(gamemode, mutators);
                             ci->state.lastregen = gamemillis;
-                            ci->state.lastburn = ci->state.lastburn = ci->state.lastbleed = ci->state.lastbleed = 0;
+                            ci->state.lastburn = ci->state.lastburntime = ci->state.lastbleed = ci->state.lastbleedtime = 0;
                             sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, 0); // amt = 0 regens impulse
                             dropitems(ci, 1);
                         }
