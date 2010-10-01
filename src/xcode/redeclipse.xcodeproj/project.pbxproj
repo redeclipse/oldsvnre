@@ -96,7 +96,7 @@
 		D16A83500F130E9500EABB1F /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833E0F130E9500EABB1F /* hud.cpp */; };
 		D16A83510F130E9500EABB1F /* physics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833F0F130E9500EABB1F /* physics.cpp */; };
 		D16A83520F130E9500EABB1F /* projs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83400F130E9500EABB1F /* projs.cpp */; };
-		D16A83530F130E9500EABB1F /* scoreboard.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83410F130E9500EABB1F /* scoreboard.h */; };
+		D16A83530F130E9500EABB1F /* scoreboard.cpp in Headers */ = {isa = PBXBuildFile; fileRef = D16A83410F130E9500EABB1F /* scoreboard.cpp */; };
 		D16A83540F130E9500EABB1F /* server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83420F130E9500EABB1F /* server.cpp */; };
 		D16A83550F130E9500EABB1F /* defend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83430F130E9500EABB1F /* defend.cpp */; };
 		D16A83560F130E9500EABB1F /* defend.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83440F130E9500EABB1F /* defend.h */; };
@@ -224,7 +224,7 @@
 		D16A833E0F130E9500EABB1F /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hud.cpp; sourceTree = "<group>"; };
 		D16A833F0F130E9500EABB1F /* physics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = physics.cpp; sourceTree = "<group>"; };
 		D16A83400F130E9500EABB1F /* projs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = projs.cpp; sourceTree = "<group>"; };
-		D16A83410F130E9500EABB1F /* scoreboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scoreboard.h; sourceTree = "<group>"; };
+		D16A83410F130E9500EABB1F /* scoreboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scoreboard.cpp; sourceTree = "<group>"; };
 		D16A83420F130E9500EABB1F /* server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = server.cpp; sourceTree = "<group>"; };
 		D16A83430F130E9500EABB1F /* defend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = defend.cpp; sourceTree = "<group>"; };
 		D16A83440F130E9500EABB1F /* defend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = defend.h; sourceTree = "<group>"; };
@@ -487,7 +487,7 @@
 				D16A833E0F130E9500EABB1F /* hud.cpp */,
 				D16A833F0F130E9500EABB1F /* physics.cpp */,
 				D16A83400F130E9500EABB1F /* projs.cpp */,
-				D16A83410F130E9500EABB1F /* scoreboard.h */,
+				D16A83410F130E9500EABB1F /* scoreboard.cpp */,
 				D16A83420F130E9500EABB1F /* server.cpp */,
 				D16A83430F130E9500EABB1F /* defend.cpp */,
 				D16A83440F130E9500EABB1F /* defend.h */,
@@ -537,7 +537,7 @@
 				D16A834B0F130E9500EABB1F /* capture.h in Headers */,
 				D16A834E0F130E9500EABB1F /* extinfo.h in Headers */,
 				D16A834F0F130E9500EABB1F /* game.h in Headers */,
-				D16A83530F130E9500EABB1F /* scoreboard.h in Headers */,
+				D16A83530F130E9500EABB1F /* scoreboard.cpp in Headers */,
 				D16A83560F130E9500EABB1F /* defend.h in Headers */,
 				D16A83570F130E9500EABB1F /* vars.h in Headers */,
 				D16A83760F130EBC00EABB1F /* scale.h in Headers */,
