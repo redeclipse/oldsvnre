@@ -931,12 +931,15 @@ void blurimage(int n, int bpp, int w, int h, uchar *dst, const uchar *src)
     }
 }
 
-void texblur(ImageData &s, int n)
+void texblur(ImageData &s, int n, int r)
 {
     if(s.bpp < 3) return;
-    ImageData d(s.w, s.h, s.bpp);
-    blurimage(n, s.bpp, s.w, s.h, d.data, s.data);
-    s.replace(d);
+    loopi(r)
+    {
+        ImageData d(s.w, s.h, s.bpp);
+        blurimage(n, s.bpp, s.w, s.h, d.data, s.data);
+        s.replace(d);
+    }
 }
 
 void scaleimage(ImageData &s, int w, int h)
@@ -1045,8 +1048,8 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         }
         else if(!strncmp(cmd, "blur", len))
         {
-            int emphasis = atoi(arg[0]);
-            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 2);
+            int emphasis = atoi(arg[0]), repeat = atoi(arg[1]);
+            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 1, repeat > 0 ? repeat : 5);
         }
         else if(!strncmp(cmd, "dup", len)) texdup(d, atoi(arg[0]), atoi(arg[1]));
         else if(!strncmp(cmd, "decal", len)) texdecal(d);
