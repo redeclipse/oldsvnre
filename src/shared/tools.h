@@ -86,7 +86,7 @@ static inline T min(T a, T b)
 #define M_LN2 0.693147180559945309417
 #endif
 
-#ifndef __GNUC__
+#ifdef _MSVC
 #pragma warning (3: 4189)       // local variable is initialized but not referenced
 #pragma warning (disable: 4244) // conversion from 'int' to 'float', possible loss of data
 #pragma warning (disable: 4267) // conversion from 'size_t' to 'int', possible loss of data
