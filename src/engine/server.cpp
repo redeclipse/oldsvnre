@@ -960,6 +960,11 @@ void trytofindocta(bool fallback)
     }
 }
 
+#ifndef chdir
+#include <direct.h>
+#define chdir _chdir
+#endif
+
 void setlocations(bool wanthome)
 {
     if(!fileexists(findfile("data/defaults.cfg", "r"), "r") && fileexists(findfile("../data/defaults.cfg", "r"), "r")) chdir("..");
