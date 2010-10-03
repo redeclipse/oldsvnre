@@ -872,10 +872,8 @@ void texnormal(ImageData &s, int emphasis)
     s.replace(d);
 }
 
-void texblur(ImageData &s, int n)
+void blurimage(int n, int bpp, int w, int h, uchar *dst, const uchar *src)
 {
-    ImageData d(s.w, s.h, 3);
-    uchar *src = s.data, *dst = d.data;
     static const int matrix3x3[9] =
     {
         0x10, 0x20, 0x10,
@@ -893,11 +891,11 @@ void texblur(ImageData &s, int n)
     const int *mat = n > 1 ? matrix5x5 : matrix3x3;
     int mstride = 2*n + 1,
         mstartoffset = n*(mstride + 1),
-        stride = s.bpp*s.w,
-        startoffset = n*s.bpp,
-        nextoffset1 = stride + mstride*s.bpp,
-        nextoffset2 = stride - mstride*s.bpp;
-    loop(y, s.h) loop(x, s.w)
+        stride = bpp*w,
+        startoffset = n*bpp,
+        nextoffset1 = stride + mstride*bpp,
+        nextoffset2 = stride - mstride*bpp;
+    loop(y, h) loop(x, w)
     {
         loopk(3)
         {
@@ -908,29 +906,36 @@ void texblur(ImageData &s, int n)
             {
                 if(t < 0) p += stride;
                 int a = 0;
-                if(n > 1) { a += m[-2]; if(x >= 2) { val += *p * a; a = 0; } p += s.bpp; }
-                a += m[-1]; if(x >= 1) { val += *p * a; a = 0; } p += s.bpp;
-                int c = *p; val += c * (a + m[0]); p += s.bpp;
-                if(x+1 < s.w) c = *p; val += c * m[1]; p += s.bpp;
-                if(n > 1) { if(x+2 < s.w) c = *p; val += c * m[2]; p += s.bpp; }
+                if(n > 1) { a += m[-2]; if(x >= 2) { val += *p * a; a = 0; } p += bpp; }
+                a += m[-1]; if(x >= 1) { val += *p * a; a = 0; } p += bpp;
+                int c = *p; val += c * (a + m[0]); p += bpp;
+                if(x+1 < w) c = *p; val += c * m[1]; p += bpp;
+                if(n > 1) { if(x+2 < w) c = *p; val += c * m[2]; p += bpp; }
             }
             p = src - startoffset + stride;
             m = mat + mstartoffset + mstride;
             for(int t = y+1; t <= y+n; t++, p += nextoffset2, m += mstride)
             {
-                if(t >= s.h) p -= stride;
+                if(t >= h) p -= stride;
                 int a = 0;
-                if(n > 1) { a += m[-2]; if(x >= 2) { val += *p * a; a = 0; } p += s.bpp; }
-                a += m[-1]; if(x >= 1) { val += *p * a; a = 0; } p += s.bpp;
-                int c = *p; val += c * (a + m[0]); p += s.bpp;
-                if(x+1 < s.w) c = *p; val += c * m[1]; p += s.bpp;
-                if(n > 1) { if(x+2 < s.w) c = *p; val += c * m[2]; p += s.bpp; }
+                if(n > 1) { a += m[-2]; if(x >= 2) { val += *p * a; a = 0; } p += bpp; }
+                a += m[-1]; if(x >= 1) { val += *p * a; a = 0; } p += bpp;
+                int c = *p; val += c * (a + m[0]); p += bpp;
+                if(x+1 < w) c = *p; val += c * m[1]; p += bpp;
+                if(n > 1) { if(x+2 < w) c = *p; val += c * m[2]; p += bpp; }
             }
             *dst++ = val>>8;
             src++;
         }
-        if(s.bpp > 3) *dst++ = *src++;
+        if(bpp > 3) *dst++ = *src++;
     }
+}
+
+void texblur(ImageData &s, int n)
+{
+    if(s.bpp < 3) return;
+    ImageData d(s.w, s.h, s.bpp);
+    blurimage(n, s.bpp, s.w, s.h, d.data, s.data);
     s.replace(d);
 }
 
