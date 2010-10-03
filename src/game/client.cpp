@@ -394,7 +394,7 @@ namespace client
     {
         addmsg(N_CLEARBANS, "r");
     }
-    ICOMMAND(0, clearbans, "", (char *s), clearbans());
+    ICOMMAND(0, clearbans, "", (), clearbans());
 
     void kick(const char *arg)
     {
