@@ -200,9 +200,9 @@ static inline void setalias(ident &id, tagval &v)
     if(id.valtype == VAL_STR) delete[] id.val.s;
     id.setval(v);
     freecode(id);
-    id.flags = (id.flags & (identflags|IDF_WORLD)) | (identflags&~IDF_OVERRIDE);
+    id.flags = (id.flags & (identflags|IDF_WORLD)) | identflags;
 #ifndef STANDALONE
-    if(id.flags&IDF_WORLD) client::editvar(&id, interactive && !(identflags&IDF_OVERRIDE));
+    if(id.flags&IDF_WORLD) client::editvar(&id, interactive && !(identflags&IDF_WORLD));
 #endif
 }
 
@@ -220,12 +220,12 @@ static void setalias(const char *name, tagval &v)
     }
     else
     {
-        ident def(ID_ALIAS, newstring(name), v, identflags&~IDF_OVERRIDE);
+        ident def(ID_ALIAS, newstring(name), v, identflags);
 #ifdef STANDALONE
         addident(def);
 #else
         id = addident(def);
-        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_OVERRIDE));
+        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
     }
 }
@@ -401,7 +401,7 @@ void setvarchecked(ident *id, int val)
         *id->storage.i = val;
         id->changed();                                             // call trigger function if available
 #ifndef STANDALONE
-        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_OVERRIDE));
+        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
     }
 }
@@ -422,7 +422,7 @@ void setfvarchecked(ident *id, float val)
         *id->storage.f = val;
         id->changed();
 #ifndef STANDALONE
-        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_OVERRIDE));
+        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
     }
 }
@@ -439,7 +439,7 @@ void setsvarchecked(ident *id, const char *val)
         *id->storage.s = newstring(val);
         id->changed();
 #ifndef STANDALONE
-        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_OVERRIDE));
+        if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
     }
 }
@@ -2194,20 +2194,19 @@ void checksleep(int millis)
     }
 }
 
-void clearsleep(bool clearoverrides, bool clearworlds)
+void clearsleep(bool clearworlds)
 {
     int len = 0;
     loopv(sleepcmds) if(sleepcmds[i].command)
     {
-        if((clearoverrides && sleepcmds[i].flags&IDF_OVERRIDE) ||
-            (clearworlds && sleepcmds[i].flags&IDF_WORLD))
-                delete[] sleepcmds[i].command;
+        if(!clearworlds || sleepcmds[i].flags&IDF_WORLD)
+            delete[] sleepcmds[i].command;
         else sleepcmds[len++] = sleepcmds[i];
     }
     sleepcmds.shrink(len);
 }
 
-ICOMMAND(0, clearsleep, "ii", (int *a, int *b), clearsleep(*a!=0 || identflags&IDF_OVERRIDE, *b!=0 || identflags&IDF_WORLD));
+ICOMMAND(0, clearsleep, "i", (int *worlds), clearsleep(*worlds!=0 || identflags&IDF_WORLD));
 ICOMMAND(0, exists, "ss", (char *a, char *b), intret(fileexists(a, *b ? b : "r")));
 ICOMMAND(0, getmillis, "i", (int *total), intret(*total ? totalmillis : lastmillis));
 
