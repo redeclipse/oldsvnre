@@ -149,6 +149,30 @@ static bool initidents()
 }
 static bool forceinitidents = initidents();
 
+static struct identlink
+{
+    ident *id;
+    identlink *next;
+} *aliasstack = NULL;
+
+VAR(0, dbgalias, 0, 4, 1000);
+
+static void debugcode(const char *fmt, ...)
+{
+    defvformatstring(msg, fmt, fmt);
+    conoutft(CON_MESG, "%s", msg);
+
+    if(!dbgalias) return;
+    int total = 0, depth = 0; 
+    for(identlink *l = aliasstack; l; l = l->next) total++;
+    for(identlink *l = aliasstack; l; l = l->next)
+    {
+        ident *id = l->id;
+        ++depth;
+        if(depth < dbgalias) conoutft(CON_MESG, "  %d) %s", total-depth+1, id->name);
+        else if(!l->next) conoutft(CON_MESG, depth == dbgalias ? "  %d) %s" : "  ..%d) %s", total-depth+1, id->name);
+    }
+}
 void addident(ident *id)
 {
     addident(*id);
@@ -214,7 +238,7 @@ static void setalias(const char *name, tagval &v)
         if(id->type == ID_ALIAS) setalias(*id, v);
         else
         {
-            conoutft(CON_MESG, "\frcannot redefine builtin %s with an alias", id->name);
+            debugcode("\frcannot redefine builtin %s with an alias", id->name);
             freearg(v);
         }
     }
@@ -376,14 +400,14 @@ const char *getalias(const char *name)
 #define WORLDVAR \
     if(!(identflags&IDF_WORLD) && !editmode && id->flags&IDF_WORLD) \
     { \
-        conoutft(CON_MESG, "\frcannot set world variable %s outside editmode", id->name); \
+        debugcode("\frcannot set world variable %s outside editmode", id->name); \
         return; \
     }
 #endif
 
 void setvarchecked(ident *id, int val)
 {
-    if(id->flags&IDF_READONLY) conoutft(CON_MESG, "\frvariable %s is read-only", id->name);
+    if(id->flags&IDF_READONLY) debugcode("\frvariable %s is read-only", id->name);
     else
     {
 #ifndef STANDALONE
@@ -392,7 +416,7 @@ void setvarchecked(ident *id, int val)
         if(val<id->minval || val>id->maxval)
         {
             val = val<id->minval ? id->minval : id->maxval;                // clamp to valid range
-            conoutft(CON_MESG,
+            debugcode(
                 id->flags&IDF_HEX ?
                     (id->minval <= 255 ? "\frvalid range for %s is %d..0x%X" : "\frvalid range for %s is 0x%X..0x%X") :
                     "\frvalid range for %s is %d..%d",
@@ -408,7 +432,7 @@ void setvarchecked(ident *id, int val)
 
 void setfvarchecked(ident *id, float val)
 {
-    if(id->flags&IDF_READONLY) conoutft(CON_MESG, "\frvariable %s is read-only", id->name);
+    if(id->flags&IDF_READONLY) debugcode("\frvariable %s is read-only", id->name);
     else
     {
 #ifndef STANDALONE
@@ -417,7 +441,7 @@ void setfvarchecked(ident *id, float val)
         if(val<id->minvalf || val>id->maxvalf)
         {
             val = val<id->minvalf ? id->minvalf : id->maxvalf;                // clamp to valid range
-            conoutft(CON_MESG, "\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
+            debugcode("\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
         }
         *id->storage.f = val;
         id->changed();
@@ -429,7 +453,7 @@ void setfvarchecked(ident *id, float val)
 
 void setsvarchecked(ident *id, const char *val)
 {
-    if(id->flags&IDF_READONLY) conoutft(CON_MESG, "\frvariable %s is read-only", id->name);
+    if(id->flags&IDF_READONLY) debugcode("\frvariable %s is read-only", id->name);
     else
     {
 #ifndef STANDALONE
@@ -857,7 +881,7 @@ static bool compileblock(vector<uint> &code, const char *&p, int wordtype)
         switch(c)
         {
             case '\0':
-                conoutft(CON_MESG, "\frmissing ]");
+                debugcode("\frmissing ]");
                 p--;
                 return false;
             case '\"':
@@ -1107,7 +1131,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
         if(c==brak) break;
         else if(c=='\0')
         {
-            conoutft(CON_MESG, "\frmissing \"%c\"", brak);
+            debugcode("\frmissing \"%c\"", brak);
             break;
         }
     }
@@ -1138,16 +1162,16 @@ static void printvar(ident *id)
         {
             int i = *id->storage.i;
             if(id->flags&IDF_HEX && id->maxval==0xFFFFFF)
-                conoutft(CON_MESG, "%s = 0x%.6X (%d, %d, %d)", id->name, i, (i>>16)&0xFF, (i>>8)&0xFF, i&0xFF);
+                debugcode("%s = 0x%.6X (%d, %d, %d)", id->name, i, (i>>16)&0xFF, (i>>8)&0xFF, i&0xFF);
             else
-                conoutft(CON_MESG, id->flags&IDF_HEX ? "%s = 0x%X" : "%s = %d", id->name, i);
+                debugcode(id->flags&IDF_HEX ? "%s = 0x%X" : "%s = %d", id->name, i);
             break;
         }
         case ID_FVAR:
-            conoutft(CON_MESG, "%s = %s", id->name, floatstr(*id->storage.f));
+            debugcode("%s = %s", id->name, floatstr(*id->storage.f));
             break;
         case ID_SVAR:
-            conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "%s = [%s]" : "%s = \"%s\"", id->name, *id->storage.s);
+            debugcode(strchr(*id->storage.s, '"') ? "%s = [%s]" : "%s = \"%s\"", id->name, *id->storage.s);
             break;
     }
 }
@@ -1293,7 +1317,7 @@ static const uint *runcode(const uint *code, tagval &result)
                         case ID_FVAR: freearg(arg); fval; continue; \
                     } \
                     if(arg.type == VAL_MACRO) arg.setstr(newstring(arg.s, arg.code[-1]>>8)); \
-                    conoutft(CON_MESG, "\frunknown alias lookup: %s", arg.s); \
+                    debugcode("\frunknown alias lookup: %s", arg.s); \
                     continue; \
                 }
                 LOOKUPU(arg.setstr(newstring(id->getstr())),
@@ -1303,7 +1327,7 @@ static const uint *runcode(const uint *code, tagval &result)
             case CODE_LOOKUP|RET_STR:
                 #define LOOKUP(aval) { \
                     id = identmap[op>>8]; \
-                    if(id->valtype == VAL_NULL) conoutft(CON_MESG, "\frunknown alias lookup: %s", id->name); \
+                    if(id->valtype == VAL_NULL) debugcode("\frunknown alias lookup: %s", id->name); \
                     aval; \
                     continue; \
                 }
@@ -1431,6 +1455,8 @@ static const uint *runcode(const uint *code, tagval &result)
                         pusharg(*argidents[i], args[i+offset], argstack[i]); \
                     int oldargs = _numargs; \
                     _numargs = numargs-offset; \
+                    identlink aliaslink = { id, aliasstack }; \
+                    aliasstack = &aliaslink; \
                     if(!id->code) \
                     { \
                         id->code = compilecode(id->getstr()); \
@@ -1441,6 +1467,7 @@ static const uint *runcode(const uint *code, tagval &result)
                     runcode(code+1, result); \
                     code[0] -= 0x100; \
                     if(!(code[0]>>8)) delete[] code; \
+                    aliasstack = aliaslink.next; \
                     for(int i = 0; i < numargs-offset; i++) \
                         poparg(*argidents[i]); \
                     forcearg(result, op&CODE_RET_MASK); \
@@ -1450,7 +1477,7 @@ static const uint *runcode(const uint *code, tagval &result)
                 id = identmap[op>>8];
                 if(id->valtype == VAL_NULL)
                 {
-                    conoutft(CON_MESG, "\frunknown command: %s", id->name);
+                    debugcode("\frunknown command: %s", id->name);
                     freearg(result);
                     freeargs(args, numargs, 0);
                     result.setstr(newstring(id->name));
@@ -1479,7 +1506,7 @@ static const uint *runcode(const uint *code, tagval &result)
                                 continue;
                             } 
                         }
-                        conoutft(CON_MESG, "\frunknown command: %s", args[0].s);
+                        debugcode("\frunknown command: %s", args[0].s);
                     }
                     goto litval;
                 }
