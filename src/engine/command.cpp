@@ -997,7 +997,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
                     delete[] idname;
                 }
                 if(!(more = compilearg(code, p, VAL_ANY))) compilestr(code);
-                code.add(id ? CODE_ALIAS|(id->index<<8) : CODE_ALIASU);
+                code.add(idname && id ? CODE_ALIAS|(id->index<<8) : CODE_ALIASU);
                 goto endstatement;
         }
         numargs = 0;
