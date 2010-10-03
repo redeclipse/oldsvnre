@@ -3279,7 +3279,7 @@ namespace server
                 aiman::removeai(ci, complete);
                 if(!complete) aiman::dorefresh = true;
             }
-            sendf(-1, 1, "ri2", N_DISCONNECT, n, reason);
+            sendf(-1, 1, "ri3", N_DISCONNECT, n, reason);
             ci->connected = false;
             if(ci->name[0])
             {
@@ -4205,12 +4205,19 @@ namespace server
                     int victim = getint(p);
                     if(haspriv(ci, PRIV_MASTER, "kick people") && victim >= 0 && ci->clientnum != victim)
                     {
+                        uint ip = getclientip(victim);
+                        if(!ip) break;
                         clientinfo *cp = (clientinfo *)getinfo(victim);
-                        if(!cp || !cmppriv(ci, cp, "kick")) break;
+                        if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, "kick")) break;
+                        if(checkipinfo(allows, ip))
+                        {
+                            if(!haspriv(ci, PRIV_ADMIN, "kick protected people")) break;
+                            else loopv(allows) if((ip & allows[i].mask) == allows[i].ip) allows.remove(i--);
+                        }
                         ipinfo &ban = bans.add();
                         ban.time = totalmillis;
-                        ban.ip = getclientip(victim);
-                        loopv(allows) if(allows[i].time >= 0 && allows[i].ip == ban.ip) allows.remove(i--);
+                        ban.ip = ip;
+                        ban.mask = 0xFFFFFFFF;
                         disconnect_client(victim, DISC_KICK);
                     }
                     break;
