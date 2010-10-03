@@ -135,7 +135,7 @@ namespace physics
             }
         }
     }
-    ICOMMAND(0, action, "Di", (int *n, int *i), { doaction(*i, *n!=0); });
+    ICOMMAND(0, action, "iD", (int *i, int *n), { doaction(*i, *n!=0); });
 
     bool carryaffinity(gameent *d)
     {

@@ -468,7 +468,7 @@ namespace server
     void resetgamevars(bool flush)
     {
         string val;
-        enumerate(*idents, ident, id, {
+        enumerate(idents, ident, id, {
             if(id.flags&IDF_SERVER) // reset vars
             {
                 val[0] = 0;
@@ -1989,13 +1989,12 @@ namespace server
 
     bool servcmd(int nargs, const char *cmd, const char *arg)
     { // incoming command from scripts
-        ident *id = idents->access(cmd);
+        ident *id = idents.access(cmd);
         if(id && id->flags&IDF_SERVER)
         {
             static string scmdval; scmdval[0] = 0;
             switch(id->type)
             {
-                case ID_CCOMMAND:
                 case ID_COMMAND:
                 {
                     string s;
@@ -2078,14 +2077,13 @@ namespace server
     void parsecommand(clientinfo *ci, int nargs, const char *cmd, const char *arg)
     { // incoming commands from clients
         defformatstring(cmdname)("sv_%s", cmd);
-        ident *id = idents->access(cmdname);
+        ident *id = idents.access(cmdname);
         if(id && id->flags&IDF_SERVER)
         {
             mkstring(val);
             int locked = max(id->flags&IDF_ADMIN ? 2 : 0, GAME(varslock));
             switch(id->type)
             {
-                case ID_CCOMMAND:
                 case ID_COMMAND:
                 {
                     if(locked && !haspriv(ci, locked >= 3 ? PRIV_MAX : (locked >= 2 ? PRIV_ADMIN : PRIV_MASTER), "execute commands")) return;
@@ -2179,6 +2177,18 @@ namespace server
             relayf(3, "\fc%s set %s to %s", colorname(ci), &id->name[3], val);
         }
         else srvmsgf(ci->clientnum, "\frunknown command: %s", cmd);
+    }
+
+    bool rewritecommand(ident *id, tagval *args, int numargs)
+    {
+        bool found = false;
+        const char *argstr = numargs > 2 ? conc(&args[1], numargs-1, true) : (numargs > 1 ? args[1].getstr() : "");
+        if(id && id->flags&IDF_SERVER && id->type!=ID_COMMAND) found = servcmd(numargs, args[0].s, argstr);
+#ifndef STANDALONE
+        else if(!id || id->flags&IDF_CLIENT) found = client::sendcmd(numargs, args[0].s, argstr);
+#endif
+        if(numargs > 2) delete[] (char *)argstr;
+        return found;
     }
 
     clientinfo *choosebestclient()
@@ -2305,7 +2315,7 @@ namespace server
         putint(p, gamemode);
         putint(p, mutators);
 
-        enumerate(*idents, ident, id, {
+        enumerate(idents, ident, id, {
             if(id.flags&IDF_SERVER) // reset vars
             {
                 mkstring(val);

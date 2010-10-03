@@ -108,7 +108,7 @@ namespace client
         stream *f = openfile(name, "w");
         if(!f) return;
         vector<ident *> ids;
-        enumerate(*idents, ident, id, ids.add(&id));
+        enumerate(idents, ident, id, ids.add(&id));
         ids.sort(sortidents);
         loopv(ids)
         {
@@ -268,7 +268,7 @@ namespace client
         loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
         emptymap(0, true, NULL, true);
         smartmusic(true, false);
-        enumerate(*idents, ident, id, {
+        enumerate(idents, ident, id, {
             if(id.flags&IDF_CLIENT) switch(id.type)
             {
                 case ID_VAR: setvar(id.name, id.def.i, true); break;
@@ -513,8 +513,8 @@ namespace client
         else formatstring(s)("\fa<\fs\fw%s\fS> \fs\fw%s\fS", m, text);
 
         int snd = S_CHAT;
-        ident *wid = idents->access(flags&SAY_ACTION ? "on_action" : "on_text");
-        if(wid && wid->action)
+        ident *wid = idents.access(flags&SAY_ACTION ? "on_action" : "on_text");
+        if(wid && wid->type == ID_ALIAS && wid->getstr()[0])
         {
             defformatstring(fn)("%s", escapetext(game::colorname(d)));
             defformatstring(ft)("%s", escapetext(text));
@@ -542,14 +542,14 @@ namespace client
 
     void parsecommand(gameent *d, const char *cmd, const char *arg)
     {
-        ident *id = idents->access(cmd);
+        ident *id = idents.access(cmd);
         if(id && id->flags&IDF_CLIENT)
         {
             string val;
             val[0] = 0;
             switch(id->type)
             {
-                case ID_COMMAND: case ID_CCOMMAND:
+                case ID_COMMAND:
                 {
 #if 0 // these shouldn't get here
                     string s;
@@ -823,7 +823,7 @@ namespace client
                     addmsg(N_EDITVAR, "riss", id->type, id->name, *id->storage.s);
                     break;
                 case ID_ALIAS:
-                    addmsg(N_EDITVAR, "riss", id->type, id->name, id->action);
+                    addmsg(N_EDITVAR, "riss", id->type, id->name, id->getstr());
                     break;
                 default: break;
             }
@@ -1690,7 +1690,7 @@ namespace client
                     int t = getint(p);
                     bool commit = true;
                     getstring(text, p);
-                    ident *id = idents->access(text);
+                    ident *id = idents.access(text);
                     if(!d || !id || !(id->flags&IDF_WORLD) || id->type != t) commit = false;
                     switch(t)
                     {

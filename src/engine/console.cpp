@@ -78,7 +78,7 @@ hashtable<int, keym> keyms(128);
 
 void keymap(int *code, char *key)
 {
-    if(overrideidents) { conoutf("\frcannot override keymap"); return; }
+    if(identflags&IDF_OVERRIDE) { conoutf("\frcannot override keymap"); return; }
     keym &km = keyms[*code];
     km.code = *code;
     DELETEA(km.name);
@@ -245,7 +245,7 @@ int changedkeys = 0;
 
 void bindkey(char *key, char *action, int state, const char *cmd)
 {
-    if(overrideidents) { conoutf("\frcannot override %s \"%s\"", cmd, key); return; }
+    if(identflags&IDF_OVERRIDE) { conoutf("\frcannot override %s \"%s\"", cmd, key); return; }
     keym *km = findbind(key);
     if(!km) { conoutf("\frunknown key \"%s\"", key); return; }
     char *&binding = km->actions[state];
@@ -406,18 +406,18 @@ struct releaseaction
 };
 vector<releaseaction> releaseactions;
 
-const char *addreleaseaction(const char *s)
+const char *addreleaseaction(char *s)
 {
     if(!keypressed) return NULL;
     releaseaction &ra = releaseactions.add();
     ra.key = keypressed;
-    ra.action = newstring(s);
+    ra.action = s;
     return keypressed->name;
 }
 
-void onrelease(char *s)
+void onrelease(const char *s)
 {
-    addreleaseaction(s);
+    addreleaseaction(newstring(s));
 }
 
 COMMAND(0, onrelease, "s");
@@ -696,7 +696,7 @@ void resetcomplete() { completesize = 0; }
 
 void addcomplete(char *command, int type, char *dir, char *ext)
 {
-    if(overrideidents)
+    if(identflags&IDF_OVERRIDE)
     {
         conoutf("\frcannot override complete %s", command);
         return;
@@ -787,7 +787,7 @@ void complete(char *s)
     }
     else // complete using command names
     {
-        enumerate(*idents, ident, id,
+        enumerate(idents, ident, id,
             if(id.flags&IDF_COMPLETE && strncmp(id.name, s+1, completesize)==0 &&
                strcmp(id.name, lastcomplete) > 0 && (!nextcomplete || strcmp(id.name, nextcomplete) < 0))
                 nextcomplete = id.name;
@@ -804,7 +804,7 @@ void complete(char *s)
 
 void setcompletion(const char *s, bool on)
 {
-    ident *id = idents->access(s);
+    ident *id = idents.access(s);
     if(!id) conoutf("\frcompletion of %s failed as it does not exist", s);
     else
     {

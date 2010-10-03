@@ -363,7 +363,7 @@ mapmodelinfo &getmminfo(int i) { return mapmodels.inrange(i) ? mapmodels[i] : *(
 
 COMMAND(0, mmodel, "s");
 COMMANDN(0, mapmodel, mapmodelcompat, "iiiss");
-ICOMMAND(0, mapmodelreset, "", (void), if(editmode || worldidents) resetmapmodels(););
+ICOMMAND(0, mapmodelreset, "", (void), if(editmode || identflags&IDF_WORLD) resetmapmodels(););
 ICOMMAND(0, mapmodelindex, "s", (char *a), {
     if(!*a) intret(mapmodels.length());
     else

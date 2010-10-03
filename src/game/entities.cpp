@@ -786,7 +786,7 @@ namespace entities
     {
         loopi(lastenttype[TRIGGER]) if(ents[i]->type == TRIGGER && ents[i]->attrs[0] == n && ents[i]->attrs[2] == TA_MANUAL) runtrigger(i, d, false);
     }
-    ICOMMAND(0, exectrigger, "i", (int *n), if(worldidents) runtriggers(*n, trigger ? trigger : game::player1));
+    ICOMMAND(0, exectrigger, "i", (int *n), if(identflags&IDF_WORLD) runtriggers(*n, trigger ? trigger : game::player1));
 
     void execitem(int n, gameent *d, bool &tried)
     {

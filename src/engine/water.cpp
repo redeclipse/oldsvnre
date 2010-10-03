@@ -290,7 +290,7 @@ void renderflatwater(int x, int y, int z, uint rsize, uint csize, uchar mat = MA
     }
 }
 
-VARF(IDF_WORLD, vertwater, 0, 1, 1, if(!worldidents) allchanged());
+VARF(IDF_WORLD, vertwater, 0, 1, 1, if(!(identflags&IDF_WORLD)) allchanged());
 
 void renderlava(const materialsurface &m, Texture *tex, float scale)
 {
