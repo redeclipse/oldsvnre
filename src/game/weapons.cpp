@@ -28,7 +28,7 @@ namespace weapons
         return n;
     }
 
-    ICOMMAND(0, weapslot, "i", (int *o), intret(slot(game::player1, *o >= 0 ? : game::player1->weapselect))); // -1 = weapselect slot
+    ICOMMAND(0, weapslot, "i", (int *o), intret(slot(game::player1, *o >= 0 ? *o : game::player1->weapselect))); // -1 = weapselect slot
     ICOMMAND(0, weapselect, "", (), intret(game::player1->weapselect));
     ICOMMAND(0, ammo, "i", (int *n), intret(isweap(*n) ? game::player1->ammo[*n] : -1));
     ICOMMAND(0, hasweap, "ii", (int *n, int *o), intret(isweap(*n) && game::player1->hasweap(*n, *o) ? 1 : 0));

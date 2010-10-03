@@ -3326,6 +3326,7 @@ namespace server
         sendqueryreply(p);
     }
 
+    const char *tempmapfile[3] = { "mapdata", "mapshot", "mapconf" };
     bool receivefile(int sender, uchar *data, int len)
     {
         clientinfo *ci = (clientinfo *)getinfo(sender);
@@ -3354,7 +3355,7 @@ namespace server
             srvmsgf(sender, "you sent a zero length packet for map data");
             return false;
         }
-        mapdata[n] = opentempfile(((const char *[3]){ "mapdata", "mapshot", "mapconf" })[n], "w+b");
+        mapdata[n] = opentempfile(tempmapfile[n], "w+b");
         if(!mapdata[n])
         {
             srvmsgf(sender, "failed to open temporary file for map");
