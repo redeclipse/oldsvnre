@@ -339,7 +339,7 @@ extern void clearsleep(bool clearworlds = true);
 #define SVARF(flags, name, cur, body) _SVARF(name, name, cur, body, flags)
 
 // game world controlling stuff
-#define WITHWORLD(body) { bool _oldflags = identflags; identflags |= IDF_WORLD; body; identflags = _oldflags; }
+#define WITHWORLD(body) { int _oldflags = identflags; identflags |= IDF_WORLD; body; identflags = _oldflags; }
 #define RUNWORLD(n) { ident *wid = idents.access(n); if(wid && wid->type==ID_ALIAS && wid->flags&IDF_WORLD) { WITHWORLD(execute(wid->getstr())); } }
 
 #if defined(GAMEWORLD)
