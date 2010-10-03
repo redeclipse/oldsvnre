@@ -1095,29 +1095,54 @@ struct gameent : dynent, gamestate
 
     void checkhitboxes()
     {
-        float hsize = max(xradius*0.4f, yradius*0.4f); if(head == vec(-1, -1, -1)) { torso = head; head = o; head.z -= hsize; }
-        vec dir; vecfromyawpitch(yaw, pitch+90, 1, 0, dir); dir.mul(hsize); head.add(dir); hrad = vec(xradius*0.4f, yradius*0.4f, hsize);
-        if(torso == vec(-1, -1, -1)) { torso = o; torso.z -= height*0.4f; } torso.z += hsize*0.4f;
-        float tsize = (head.z-hrad.z)-torso.z; trad = vec(xradius, yradius, tsize);
-        float lsize = ((torso.z-trad.z)-(o.z-height))*0.5f; legs = torso; legs.z -= trad.z+lsize; lrad = vec(xradius*0.8f, yradius*0.8f, lsize);
+        float hsize = max(xradius*0.45f, yradius*0.45f);
+        if(head == vec(-1, -1, -1))
+        {
+            torso = head;
+            head = o;
+            head.z -= hsize*0.35f;
+        }
+        else head.z += hsize*0.45f;
+        hrad = vec(xradius*0.45f, yradius*0.45f, hsize);
+        if(torso == vec(-1, -1, -1))
+        {
+            torso = o;
+            torso.z -= height*0.4f;
+        }
+        torso.z += hsize*0.75f;
+        float tsize = (head.z-hrad.z)-torso.z;
+        trad = vec(xradius, yradius, tsize);
+        float lsize = ((torso.z-trad.z)-(o.z-height))*0.5f;
+        legs = torso;
+        legs.z -= trad.z+lsize;
+        lrad = vec(xradius*0.75f, yradius*0.75f, lsize);
         if(waist == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.5f); dir.z -= height*0.5f;
+            vec dir; vecfromyawpitch(yaw, 0, -1, 0, dir);
+            dir.mul(radius*1.5f);
+            dir.z -= height*0.5f;
             waist = vec(o).add(dir);
         }
         if(jet[0] == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, -1, -1, dir); dir.mul(radius); dir.z -= height;
+            vec dir; vecfromyawpitch(yaw, 0, -1, -1, dir);
+            dir.mul(radius);
+            dir.z -= height;
             jet[0] = vec(o).add(dir);
         }
         if(jet[1] == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, -1, 1, dir); dir.mul(radius); dir.z -= height;
+            vec dir;
+            vecfromyawpitch(yaw, 0, -1, 1, dir);
+            dir.mul(radius);
+            dir.z -= height;
             jet[1] = vec(o).add(dir);
         }
         if(jet[2] == vec(-1, -1, -1))
         {
-            vecfromyawpitch(yaw, 0, -1, 0, dir); dir.mul(radius*1.25f); dir.z -= height*0.35f;
+            vec dir; vecfromyawpitch(yaw, 0, -1, 0, dir);
+            dir.mul(radius*1.25f);
+            dir.z -= height*0.35f;
             jet[2] = vec(o).add(dir);
         }
     }
