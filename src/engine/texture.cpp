@@ -1049,7 +1049,7 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         else if(!strncmp(cmd, "blur", len))
         {
             int emphasis = atoi(arg[0]), repeat = atoi(arg[1]);
-            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 1, repeat > 0 ? repeat : 5);
+            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 1, repeat > 0 ? repeat : 1);
         }
         else if(!strncmp(cmd, "dup", len)) texdup(d, atoi(arg[0]), atoi(arg[1]));
         else if(!strncmp(cmd, "decal", len)) texdecal(d);
