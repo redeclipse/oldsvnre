@@ -8,7 +8,7 @@ bool interactive = false;
 hashset<ident> idents; // contains ALL vars/commands/aliases
 vector<ident *> identmap;
 
-int identflags = IDF_PERSIST;
+int identflags = 0;
 
 static const int MAXARGS = 25;
 
