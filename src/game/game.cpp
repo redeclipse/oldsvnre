@@ -265,7 +265,7 @@ namespace game
         if(idx >= 0)
         {
             physent *t = !d || d == focus ? camera1 : d;
-            playsound(idx, t->o, t, t == camera1 ? SND_FORCED : SND_DIRECT, -1, -1, -1, d ? &d->aschan : NULL);
+            playsound(idx, t->o, t, (t == camera1 ? SND_FORCED : SND_DIRECT)|SND_NOCULL, -1, -1, -1, d ? &d->aschan : NULL);
         }
     }
     ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announce(*idx, *targ, NULL, "\fw%s", s));
