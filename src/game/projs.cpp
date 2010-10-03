@@ -12,7 +12,7 @@ namespace projs
 
     VAR(IDF_PERSIST, maxprojectiles, 1, 128, INT_MAX-1);
 
-    VAR(IDF_PERSIST, ejecaptureade, 0, 3500, INT_MAX-1);
+    VAR(IDF_PERSIST, ejectfade, 0, 3500, INT_MAX-1);
     VAR(IDF_PERSIST, ejectspin, 0, 1, 1);
     VAR(IDF_PERSIST, ejecthint, 0, 1, 1);
 
@@ -182,19 +182,19 @@ namespace projs
                 if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
                 {
                     vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
-                    float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o));
+                    float fdist = closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o);
                     if(fdist <= dist) { dist = fdist; flags = HIT_LEGS; }
                 }
                 if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
                 {
                     vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
-                    float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o));
+                    float fdist = closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o);
                     if(fdist <= dist) { dist = fdist; flags = HIT_TORSO; }
                 }
                 if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
                 {
                     vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
-                    float fdist = min(dist, closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o));
+                    float fdist = closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o);
                     if(fdist <= dist) { dist = fdist; flags = HIT_HEAD; }
                 }
             }
@@ -202,7 +202,7 @@ namespace projs
             {
                 vec bottom(d->o), top(d->o); bottom.z -= d->height; top.z += d->aboveeye;
                 dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
-                flags = HIT_TORSO;
+                flags = m_expert(game::gamemode, game::mutators) ? HIT_HEAD : HIT_TORSO;
             }
             if(dist <= radius)
             {
@@ -797,8 +797,8 @@ namespace projs
 
         loopv(shots)
             create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, shots[i].id, weap, flags, scale);
-        if(ejecaptureade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
-            create(from, from, local, d, PRJ_EJECT, rnd(ejecaptureade)+ejecaptureade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
+        if(ejectfade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
+            create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
         if(d->aitype >= AI_BOT && d->skill <= 100 && (!WEAP2(weap, fullauto, flags&HIT_ALT) || adelay >= PHYSMILLIS))
             adelay += int(ceilf(adelay*(10.f/d->skill)));
