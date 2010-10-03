@@ -896,7 +896,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 if(hdr.version >= 25 || (hdr.version == 24 && hdr.gamever >= 44))
                 {
                     int numvars = hdr.version >= 25 ? f->getlil<int>() : f->getchar(), vars = 0;
-                    identflags |= IDF_OVERRIDE|IDF_WORLD;
+                    identflags |= IDF_WORLD;
                     progress(0, "loading variables...");
                     loopi(numvars)
                     {
@@ -968,7 +968,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                             else vars++;
                         }
                     }
-                    identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
+                    identflags &= ~IDF_WORLD;
                     if(verbose) conoutf("\faloaded %d variables", vars);
                 }
                 sanevars();
@@ -1314,7 +1314,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             game::loadworld(f, maptype);
             entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
 
-            identflags |= IDF_OVERRIDE|IDF_WORLD;
+            identflags |= IDF_WORLD;
             defformatstring(cfgname)("%s.cfg", mapname);
             if(maptype == MAP_OCTA)
             {
@@ -1327,7 +1327,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 extern float cloudblend;
                 setfvar("cloudlayerblend", cloudblend, true);
             }
-            identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
+            identflags &= ~IDF_WORLD;
 
             loopv(ents)
             {

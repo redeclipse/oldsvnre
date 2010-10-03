@@ -78,7 +78,7 @@ hashtable<int, keym> keyms(128);
 
 void keymap(int *code, char *key)
 {
-    if(identflags&IDF_OVERRIDE) { conoutf("\frcannot override keymap"); return; }
+    if(identflags&IDF_WORLD) { conoutf("\frcannot override keymap"); return; }
     keym &km = keyms[*code];
     km.code = *code;
     DELETEA(km.name);
@@ -245,7 +245,7 @@ int changedkeys = 0;
 
 void bindkey(char *key, char *action, int state, const char *cmd)
 {
-    if(identflags&IDF_OVERRIDE) { conoutf("\frcannot override %s \"%s\"", cmd, key); return; }
+    if(identflags&IDF_WORLD) { conoutf("\frcannot override %s \"%s\"", cmd, key); return; }
     keym *km = findbind(key);
     if(!km) { conoutf("\frunknown key \"%s\"", key); return; }
     char *&binding = km->actions[state];
@@ -696,7 +696,7 @@ void resetcomplete() { completesize = 0; }
 
 void addcomplete(char *command, int type, char *dir, char *ext)
 {
-    if(identflags&IDF_OVERRIDE)
+    if(identflags&IDF_WORLD)
     {
         conoutf("\frcannot override complete %s", command);
         return;

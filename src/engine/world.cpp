@@ -759,7 +759,7 @@ void splitocta(cube *c, int size)
 
 void clearworldvars(bool msg)
 {
-    identflags |= IDF_OVERRIDE|IDF_WORLD;
+    identflags |= IDF_WORLD;
     enumerate(idents, ident, id, {
         if(id.flags&IDF_WORLD) // reset world vars
         {
@@ -774,7 +774,7 @@ void clearworldvars(bool msg)
         }
     });
     if(msg) conoutf("world variables reset");
-    identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
+    identflags &= ~IDF_WORLD;
 }
 
 ICOMMAND(0, resetworldvars, "", (), if(editmode || identflags&IDF_WORLD) clearworldvars(true));
@@ -833,9 +833,9 @@ bool emptymap(int scale, bool force, char *mname, bool nocfg)   // main empty wo
 
     if(!nocfg)
     {
-        identflags |= IDF_OVERRIDE|IDF_WORLD;
+        identflags |= IDF_WORLD;
         execfile("map.cfg");
-        identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
+        identflags &= ~IDF_WORLD;
     }
 
     clearlights();

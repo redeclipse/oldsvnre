@@ -37,7 +37,7 @@ enum
 
 enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS };
 
-enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_OVERRIDE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9, IDF_REWRITE = 1<<10 };
+enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_REWRITE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9 };
 
 struct ident;
 
@@ -303,7 +303,7 @@ extern int sortidents(ident **x, ident **y);
 extern void writeescapedstring(stream *f, const char *s);
 
 extern void checksleep(int millis);
-extern void clearsleep(bool clearoverrides = true, bool clearworlds = false);
+extern void clearsleep(bool clearworlds = true);
 
 // nasty macros for registering script functions, abuses globals to avoid excessive infrastructure
 #define COMMANDN(flags, name, fun, nargs) static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs, flags|IDF_COMPLETE)
