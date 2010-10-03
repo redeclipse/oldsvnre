@@ -960,11 +960,6 @@ void trytofindocta(bool fallback)
     }
 }
 
-#ifndef chdir
-#include <direct.h>
-#define chdir _chdir
-#endif
-
 void setlocations(bool wanthome)
 {
     if(!fileexists(findfile("data/defaults.cfg", "r"), "r") && fileexists(findfile("../data/defaults.cfg", "r"), "r")) chdir("..");
@@ -972,33 +967,6 @@ void setlocations(bool wanthome)
     if(wanthome)
     {
 #if defined(WIN32)
-        #ifndef __GNUC__ // not supported by mingw
-        OSVERSIONINFO ver;
-        if(GetVersionEx((OSVERSIONINFO *)&ver))
-        {
-            if(ver.dwMajorVersion >= 6)
-            {
-                char *dir = NULL;
-                if(SHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, dir) == S_OK)
-                {
-                    defformatstring(s)("%s\\Red Eclipse", dir);
-                    sethomedir(s);
-                    DELETEP(dir);
-                    return;
-                }
-            }
-            else
-            {
-                mkstring(dir);
-                if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, dir) == S_OK)
-                {
-                    defformatstring(s)("%s\\My Games\\Red Eclipse", dir);
-                    sethomedir(s);
-                    return;
-                }
-            }
-        }
-        #else
         mkstring(dir);
         if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, dir) == S_OK)
         {
@@ -1006,7 +974,6 @@ void setlocations(bool wanthome)
             sethomedir(s);
             return;
         }
-        #endif
 #elif defined(__APPLE__)
         extern const char *mac_personaldir();
         const char *dir = mac_personaldir(); // typically  /Users/<name>/Application Support/
