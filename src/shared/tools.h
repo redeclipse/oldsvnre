@@ -93,9 +93,11 @@ static inline T min(T a, T b)
 #pragma warning (disable: 4355) // 'this' : used in base member initializer list
 #pragma warning (disable: 4996) // 'strncpy' was declared deprecated
 #pragma warning (disable: 4800) // forcing value to bool 'true' or 'false' (performance warning)
-#endif
-
+#include <direct.h>
+#define chdir _chdir
 #define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
 #define PATHDIV '\\'
 #else
 #define __cdecl
