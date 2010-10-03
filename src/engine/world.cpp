@@ -696,8 +696,8 @@ void entset(char *what, char *attr)
 }
 
 ICOMMAND(0, enthavesel,"", (), addimplicit(intret(entgroup.length())));
-ICOMMAND(0, entselect, "s", (char *body), if(!noentedit()) addgroup(e.type != ET_EMPTY && entgroup.find(n)<0 && execute(body)>0));
-ICOMMAND(0, entloop, "s", (char *body), if(!noentedit()) addimplicit(groupeditloop(((void)e, execute(body)))));
+ICOMMAND(0, entselect, "e", (uint *body), if(!noentedit()) addgroup(e.type != ET_EMPTY && entgroup.find(n)<0 && execute(body)>0));
+ICOMMAND(0, entloop, "e", (uint *body), if(!noentedit()) addimplicit(groupeditloop(((void)e, execute(body)))));
 ICOMMAND(0, enttype, "s", (char *s), entfocus(efocus, intret((!*s || !strcmp(s, entities::findname(e.type))))));
 ICOMMAND(0, insel, "", (), entfocus(efocus, intret(pointinsel(sel, e.o))));
 ICOMMAND(0, entget, "", (), entfocus(efocus, {
@@ -759,8 +759,8 @@ void splitocta(cube *c, int size)
 
 void clearworldvars(bool msg)
 {
-    overrideidents = worldidents = true;
-    enumerate(*idents, ident, id, {
+    identflags |= IDF_OVERRIDE|IDF_WORLD;
+    enumerate(idents, ident, id, {
         if(id.flags&IDF_WORLD) // reset world vars
         {
             switch (id.type)
@@ -774,17 +774,16 @@ void clearworldvars(bool msg)
         }
     });
     if(msg) conoutf("world variables reset");
-    overrideidents = worldidents = false;
+    identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
 }
 
-ICOMMAND(0, resetworldvars, "", (), if(editmode || worldidents) clearworldvars(true));
+ICOMMAND(0, resetworldvars, "", (), if(editmode || identflags&IDF_WORLD) clearworldvars(true));
 
 void resetmap(bool empty)
 {
     progress(0, "resetting map...");
     resetmaterials();
     resetmapmodels();
-    clearoverrides();
     clearsound();
     cleanreflections();
     resetblendmap();
@@ -834,9 +833,9 @@ bool emptymap(int scale, bool force, char *mname, bool nocfg)   // main empty wo
 
     if(!nocfg)
     {
-        overrideidents = worldidents = true;
+        identflags |= IDF_OVERRIDE|IDF_WORLD;
         execfile("map.cfg");
-        overrideidents = worldidents = false;
+        identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
     }
 
     clearlights();

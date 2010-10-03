@@ -12,7 +12,8 @@ static menu *cmenu = NULL;
 
 struct menu : guicb
 {
-    char *name, *header, *contents, *initscript;
+    char *name, *header;
+    uint *contents, *initscript;
     int passes, menutab, menustart;
     bool world, useinput, usetitle;
 
@@ -23,17 +24,17 @@ struct menu : guicb
         cgui = &g;
         cmenu = this;
         guipasses = passes;
-        if(!passes) world = worldidents;
-        if(initscript && *initscript)
+        if(!passes) world = (identflags&IDF_WORLD)!=0;
+        if(initscript)
         {
-            if(world && passes) { RUNWORLD(initscript); }
+            if(world && passes) { WITHWORLD(execute(initscript)); }
             else execute(initscript);
         }
         cgui->start(menustart, menuscale, &menutab, useinput, usetitle);
         cgui->tab(header ? header : name);
-        if(contents && *contents)
+        if(contents)
         {
-            if(world && passes) { RUNWORLD(contents); }
+            if(world && passes) { WITHWORLD(execute(contents)); }
             else execute(contents);
         }
         cgui->end();
@@ -198,7 +199,7 @@ void guishowtitle(int *n)
     cmenu->usetitle = *n ? true : false;
 }
 
-void guistayopen(char *contents)
+void guistayopen(uint *contents)
 {
     bool oldclearmenu = shouldclearmenu;
     shouldclearmenu = false;
@@ -206,7 +207,7 @@ void guistayopen(char *contents)
     shouldclearmenu = oldclearmenu;
 }
 
-void guinoautotab(char *contents)
+void guinoautotab(uint *contents)
 {
     if(!cgui) return;
     cgui->allowautotab(false);
@@ -329,20 +330,13 @@ void guistrut(float *strut, int *alt)
     }
 }
 
-void guifont(char *font, char *body)
+void guifont(char *font, uint *body)
 {
     if(cgui)
     {
-        if(font[0])
-        {
-            cgui->pushfont(font);
-            if(body[0])
-            {
-                execute(body);
-                cgui->popfont();
-            }
-        }
-        else cgui->popfont();
+        cgui->pushfont(font);
+        execute(body);
+        cgui->popfont();
     }
 }
 
@@ -362,7 +356,7 @@ static int getval(char *var)
         case ID_VAR: return *id->storage.i;
         case ID_FVAR: return int(*id->storage.f);
         case ID_SVAR: return parseint(*id->storage.s);
-        case ID_ALIAS: return parseint(id->action);
+        case ID_ALIAS: return id->getint();
         default: return 0;
     }
 }
@@ -376,7 +370,7 @@ static float getfval(char *var)
         case ID_VAR: return *id->storage.i;
         case ID_FVAR: return *id->storage.f;
         case ID_SVAR: return parsefloat(*id->storage.s);
-        case ID_ALIAS: return parsefloat(id->action);
+        case ID_ALIAS: return id->getfloat();
         default: return 0;
     }
 }
@@ -390,7 +384,7 @@ static const char *getsval(char *var)
         case ID_VAR: return intstr(*id->storage.i);
         case ID_FVAR: return floatstr(*id->storage.f);
         case ID_SVAR: return *id->storage.s;
-        case ID_ALIAS: return id->action;
+        case ID_ALIAS: return id->getstr();
         default: return "";
     }
 }
@@ -509,9 +503,9 @@ void guikeyfield(char *var, int *maxlength, char *onchange)
 
 //use text<action> to do more...
 
-void guibody(char *contents, char *action, char *altact)
+void guibody(uint *contents, char *action, char *altact)
 {
-    if(!cgui || !contents || !*contents) return;
+    if(!cgui || !contents) return;
     cgui->pushlist(action[0] ? true : false);
     execute(contents);
     int ret = cgui->poplist();
@@ -528,9 +522,9 @@ void guibody(char *contents, char *action, char *altact)
     }
 }
 
-void guilist(char *contents)
+void guilist(uint *contents)
 {
-    if(!cgui || !contents || !*contents) return;
+    if(!cgui || !contents) return;
     cgui->pushlist();
     execute(contents);
     cgui->poplist();
@@ -551,8 +545,8 @@ void newgui(char *name, char *contents, char *initscript)
         DELETEA(m->contents);
         DELETEA(m->initscript);
     }
-    m->contents = contents && contents[0] ? newstring(contents) : NULL;
-    m->initscript = initscript && initscript[0] ? newstring(initscript) : NULL;
+    m->contents = contents && contents[0] ? compilecode(contents) : NULL;
+    m->initscript = initscript && initscript[0] ? compilecode(initscript) : NULL;
 }
 
 void guiheader(char *name)
@@ -567,7 +561,7 @@ void guimodify(char *name, char *contents)
     menu *m = menus.access(name);
     if(!m) return;
     if(m->contents) delete[] m->contents;
-    m->contents = contents && contents[0] ? newstring(contents) : NULL;
+    m->contents = contents && contents[0] ? compilecode(contents) : NULL;
 }
 
 COMMAND(0, newgui, "sss");
@@ -576,19 +570,19 @@ COMMAND(0, guimodify, "ss");
 COMMAND(0, guibutton, "ssss");
 COMMAND(0, guitext, "ss");
 COMMANDN(0, cleargui, cleargui_, "i");
-ICOMMAND(0, showgui, "ss", (const char *s, const char *n), showgui(s, n[0] ? parseint(n) : 0));
+ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");
-COMMAND(0, guistayopen, "s");
-COMMAND(0, guinoautotab, "s");
+COMMAND(0, guistayopen, "e");
+COMMAND(0, guinoautotab, "e");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
 
-COMMAND(0, guilist, "s");
-COMMAND(0, guibody, "sss");
+COMMAND(0, guilist, "e");
+COMMAND(0, guibody, "ess");
 COMMAND(0, guititle, "s");
 COMMAND(0, guibar,"");
 COMMAND(0, guistrut,"fi");
-COMMAND(0, guifont,"ss");
+COMMAND(0, guifont,"se");
 COMMAND(0, guiimage,"ssfiss");
 COMMAND(0, guislice,"ssfffsss");
 COMMAND(0, guiprogress,"ff");

@@ -1030,7 +1030,7 @@ void writecfg()
     if(!f) return;
     client::writeclientinfo(f);
     vector<ident *> ids;
-    enumerate(*idents, ident, id, ids.add(&id));
+    enumerate(idents, ident, id, ids.add(&id));
     ids.sort(sortidents);
     bool found = false;
     loopv(ids)
@@ -1057,10 +1057,14 @@ void writecfg()
         bool saved = false;
         if(id.flags&IDF_PERSIST) switch(id.type)
         {
-            case ID_ALIAS: if(id.override==NO_OVERRIDE && id.action[0])
+            case ID_ALIAS:
             {
-                found = saved = true;
-                f->printf("\"%s\" = [%s]", id.name, id.action);
+                const char *str = id.getstr();
+                if(str[0])
+                {
+                    found = saved = true;
+                    f->printf("\"%s\" = [%s]", id.name, str);
+                }
             }
             break;
         }

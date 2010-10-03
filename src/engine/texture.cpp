@@ -652,7 +652,7 @@ void updatetextures()
 
 void preloadtextures()
 {
-    enumerate(*idents, ident, id, {
+    enumerate(idents, ident, id, {
         if(id.type == ID_SVAR && (id.flags & IDF_TEXTURE))
             id.changed();
     });
@@ -1146,14 +1146,14 @@ void resettextures()
     slots.shrink(0);
 }
 
-ICOMMAND(0, texturereset, "", (void), if(editmode || worldidents) resettextures(););
+ICOMMAND(0, texturereset, "", (void), if(editmode || identflags&IDF_WORLD) resettextures(););
 
 void resetmaterials()
 {
     loopi(MATF_VOLUME+1) materialslots[i].reset();
 }
 
-ICOMMAND(0, materialreset, "", (void), if(editmode || worldidents) resetmaterials(););
+ICOMMAND(0, materialreset, "", (void), if(editmode || identflags&IDF_WORLD) resetmaterials(););
 
 static int compactedvslots = 0, compactvslotsprogress = 0, clonedvslots = 0;
 static bool markingvslots = false;

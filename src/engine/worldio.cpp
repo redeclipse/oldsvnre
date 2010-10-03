@@ -473,7 +473,7 @@ void save_config(char *mname)
     int vars = 0;
     h->printf("// Variables stored in map file, may be uncommented here, or changed from editmode.\n");
     vector<ident *> ids;
-    enumerate(*idents, ident, id, ids.add(&id));
+    enumerate(idents, ident, id, ids.add(&id));
     ids.sort(sortidents);
     loopv(ids)
     {
@@ -493,10 +493,14 @@ void save_config(char *mname)
     loopv(ids)
     {
         ident &id = *ids[i];
-        if(id.type == ID_ALIAS && id.flags&IDF_WORLD && strlen(id.name) && strlen(id.action))
+        if(id.type == ID_ALIAS && id.flags&IDF_WORLD && strlen(id.name))
         {
-            aliases++;
-            h->printf("\"%s\" = [%s]\n", id.name, id.action);
+            const char *str = id.getstr();
+            if(str[0])
+            {
+                aliases++;
+                h->printf("\"%s\" = [%s]\n", id.name, str);
+            }
         }
     }
     if(aliases) h->printf("\n");
@@ -623,11 +627,11 @@ void save_world(const char *mname, bool nodata, bool forcesave)
 
     // world variables
     int numvars = 0, vars = 0;
-    enumerate(*idents, ident, id, {
+    enumerate(idents, ident, id, {
         if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && strlen(id.name)) numvars++;
     });
     f->putlil<int>(numvars);
-    enumerate(*idents, ident, id, {
+    enumerate(idents, ident, id, {
         if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && strlen(id.name))
         {
             vars++;
@@ -892,7 +896,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 if(hdr.version >= 25 || (hdr.version == 24 && hdr.gamever >= 44))
                 {
                     int numvars = hdr.version >= 25 ? f->getlil<int>() : f->getchar(), vars = 0;
-                    overrideidents = worldidents = true;
+                    identflags |= IDF_OVERRIDE|IDF_WORLD;
                     progress(0, "loading variables...");
                     loopi(numvars)
                     {
@@ -903,7 +907,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                             string name;
                             f->read(name, len+1);
                             if(hdr.version <= 34 && !strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
-                            ident *id = idents->access(name);
+                            ident *id = idents.access(name);
                             bool proceed = true;
                             int type = hdr.version >= 28 ? f->getlil<int>()+(hdr.version >= 29 ? 0 : 1) : (id ? id->type : ID_VAR);
                             if(!id || type != id->type)
@@ -964,7 +968,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                             else vars++;
                         }
                     }
-                    overrideidents = worldidents = false;
+                    identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
                     if(verbose) conoutf("\faloaded %d variables", vars);
                 }
                 sanevars();
@@ -1310,7 +1314,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             game::loadworld(f, maptype);
             entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
 
-            overrideidents = worldidents = true;
+            identflags |= IDF_OVERRIDE|IDF_WORLD;
             defformatstring(cfgname)("%s.cfg", mapname);
             if(maptype == MAP_OCTA)
             {
@@ -1323,7 +1327,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 extern float cloudblend;
                 setfvar("cloudlayerblend", cloudblend, true);
             }
-            overrideidents = worldidents = false;
+            identflags &= ~(IDF_OVERRIDE|IDF_WORLD);
 
             loopv(ents)
             {

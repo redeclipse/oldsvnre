@@ -513,7 +513,7 @@ extern ENetPeer *curpeer, *connpeer;
 
 extern void writebinds(stream *f);
 extern void writecompletions(stream *f);
-extern const char *addreleaseaction(const char *s);
+extern const char *addreleaseaction(char *s);
 extern const char *getkeyname(int code);
 extern int findkeycode(char *key);
 

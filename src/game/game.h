@@ -833,6 +833,7 @@ namespace server
 {
     extern void stopdemo();
     extern void hashpassword(int cn, int sessionid, const char *pwd, char *result, int maxlen = MAXSTRLEN);
+    extern bool servcmd(int nargs, const char *cmd, const char *arg);
 }
 
 #if !defined(GAMESERVER) && !defined(STANDALONE)
@@ -1591,6 +1592,7 @@ namespace entities
 namespace client
 {
     extern const char *getname();
+    extern bool sendcmd(int nargs, const char *cmd, const char *arg);
 }
 #endif
 #include "capture.h"
