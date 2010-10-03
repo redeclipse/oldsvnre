@@ -977,7 +977,8 @@ void setlocations(bool wanthome)
 #elif defined(__APPLE__)
         extern const char *mac_personaldir();
         const char *dir = mac_personaldir(); // typically  /Users/<name>/Application Support/
-        if(dir) {
+        if(dir && *dir)
+        {
             defformatstring(s)("%s/redeclipse", dir);
             sethomedir(s);
             return;
