@@ -117,8 +117,8 @@ namespace game
     VAR(IDF_PERSIST, debrisfade, 1, 5000, INT_MAX-1);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, burnfade, 100, 250, INT_MAX-1);
-    FVAR(IDF_PERSIST, burnblend, 0.1f, 0.25f, 1);
+    VAR(IDF_PERSIST, burnfade, 100, 200, INT_MAX-1);
+    FVAR(IDF_PERSIST, burnblend, 0.125f, 0.125f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
     VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
 
