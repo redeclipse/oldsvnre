@@ -62,16 +62,16 @@ namespace hud
     VAR(IDF_PERSIST, conoverflow, 0, 5, INT_MAX-1);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
-    FVAR(IDF_PERSIST, conblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, conblend, 0, 0.75f, 1);
     VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, INT_MAX-1);
     VAR(IDF_PERSIST, chatconfade, 0, 2000, INT_MAX-1);
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, INT_MAX-1);
-    FVAR(IDF_PERSIST, chatconblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, chatconblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
-    FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, noticeblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
@@ -119,14 +119,14 @@ namespace hud
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
-    FVAR(IDF_PERSIST, indicatorblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, indicatorblend, 0, 0.75f, 1);
     TVAR(IDF_PERSIST, indicatortex, "textures/progress", 3);
     TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
 
-    VAR(IDF_PERSIST, showcrosshair, 0, 1, 1);
+    VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, INT_MAX-1);
-    FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, crosshairblend, 0, 0.9f, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairthrob, 1e-4f, 0.3f, 1000);
     TVAR(IDF_PERSIST, relativecursortex, "textures/relative", 3);
@@ -157,12 +157,12 @@ namespace hud
     FVAR(IDF_PERSIST, inventorythrob, 0, 0.0625f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.07f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.6f, 1000);
-    FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
-    FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.75f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryeditblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.65f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
@@ -184,7 +184,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showclips, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
-    FVAR(IDF_PERSIST, clipblend, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, clipblend, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
     TVAR(IDF_PERSIST, pistolcliptex, "textures/pistolclip", 3);
     TVAR(IDF_PERSIST, shotguncliptex, "textures/shotgunclip", 3);
@@ -210,9 +210,9 @@ namespace hud
     TVAR(IDF_PERSIST, bombtex, "textures/bomb", 3);
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
-    FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, radarblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, radarcardblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, radarcardblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayersize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
@@ -222,7 +222,7 @@ namespace hud
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaritemsize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radarsize, 0, 0.04f, 1000);
-    FVAR(IDF_PERSIST, radaroffset, 0, 0, 1000);
+    FVAR(IDF_PERSIST, radaroffset, 0, 0.025f, 1000);
     VAR(IDF_PERSIST, radardist, 0, 0, INT_MAX-1); // 0 = use world size
     VAR(IDF_PERSIST, radarcard, 0, 0, 2);
     VAR(IDF_PERSIST, radaritems, 0, 2, 2);
@@ -238,12 +238,12 @@ namespace hud
 
     VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
     VAR(IDF_PERSIST, radardamagemerge, 1, 250, INT_MAX-1);
-    VAR(IDF_PERSIST, radardamagetime, 1, 500, INT_MAX-1);
+    VAR(IDF_PERSIST, radardamagetime, 1, 250, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagefade, 1, 2500, INT_MAX-1);
     FVAR(IDF_PERSIST, radardamagesize, 0, 8, 1000);
-    FVAR(IDF_PERSIST, radardamageblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, radardamageblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
-    VAR(IDF_PERSIST, radardamagemin, 1, 10, INT_MAX-1);
+    VAR(IDF_PERSIST, radardamagemin, 1, 25, INT_MAX-1);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, INT_MAX-1);
 
     VAR(IDF_PERSIST, showeditradar, 0, 0, 1);
@@ -677,6 +677,7 @@ namespace hud
                 fade *= 1.f-skew;
                 cs += int(cs*crosshairthrob*skew);
             }
+            if(showcrosshair >= 2) fade /= weapons::accmod(game::focus, physics::secondaryweap(game::focus, true));
         }
         int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory);
         if(index != POINTER_GUI)
@@ -1144,7 +1145,7 @@ namespace hud
             bool burning = radarplayereffects && burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
             int colour = burning ? firecols[rnd(FIRECOLOURS)] : teamtype[d->team].colour;
             const char *tex = bliptex;
-            float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f), pos = 4, size = radarplayersize,
+            float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize,
                 r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
@@ -1157,7 +1158,6 @@ namespace hud
                 }
                 else return;
                 tex = deadtex;
-                pos -= size;
                 size *= 1.25f;
 
             }
@@ -1169,7 +1169,7 @@ namespace hud
             }
             else if(d->state != CS_EDITING) return;
             if(chkcond(radarplayernames, game::tvmode()))
-                drawblip(tex, pos, w, h, size, fade*blend*radarplayerblend, dir, r, g, b, "radar", "%s", game::colorname(d, NULL, "", false));
+                drawblip(tex, pos, w, h, size, fade, dir, r, g, b, "radar", "%s", game::colorname(d, NULL, "", false));
             else drawblip(tex, pos, w, h, size, fade, dir, r, g, b);
         }
     }
@@ -1233,9 +1233,9 @@ namespace hud
             else fade *= radarblipblend;
             if(game::focus->state != CS_EDITING && !insel && inspawn > 0.f)
                 fade = radaritemspawn ? 1.f-inspawn : fade+((1.f-fade)*(1.f-inspawn));
-            if(insel) drawblip(tex, 2, w, h, size, fade*blend, dir, r, g, b, "radar", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
-            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 2, w, h, size, fade*blend, dir, r, g, b, "radar", "%s", entities::entinfo(type, attr, false));
-            else drawblip(tex, 2, w, h, size, fade*blend, dir, r, g, b);
+            if(insel) drawblip(tex, 1, w, h, size, fade*blend, dir, r, g, b, "radar", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
+            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 1, w, h, size, fade*blend, dir, r, g, b, "radar", "%s", entities::entinfo(type, attr, false));
+            else drawblip(tex, 1, w, h, size, fade*blend, dir, r, g, b);
         }
     }
 
@@ -1290,9 +1290,9 @@ namespace hud
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(arrowtex, 5+size, w, h, size, fade, dir, d.colour.x, d.colour.y, d.colour.z, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour.x, d.colour.y, d.colour.z, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
                 }
-                else drawblip(arrowtex, 5+size, w, h, size, fade, dir, d.colour.x, d.colour.y, d.colour.z);
+                else drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour.x, d.colour.y, d.colour.z);
             }
         }
         if(radardamage >= 2)
@@ -1302,7 +1302,7 @@ namespace hud
             {
                 vec dir = vec(game::focus->o).sub(camera1->o).normalize().rotate_around_z(-camera1->yaw*RAD);
                 float r = (teamtype[game::focus->team].colour>>16)/255.f, g = ((teamtype[game::focus->team].colour>>8)&0xFF)/255.f, b = (teamtype[game::focus->team].colour&0xFF)/255.f;
-                drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "you");
+                drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "you");
             }
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
@@ -1312,7 +1312,7 @@ namespace hud
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
                     if(a->state == CS_ALIVE) drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "%s (%d)", game::colorname(a), a->health);
-                    else drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "%s", game::colorname(a));
+                    else drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "%s", game::colorname(a));
                 }
             }
         }

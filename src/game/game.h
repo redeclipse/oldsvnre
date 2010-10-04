@@ -1294,7 +1294,7 @@ namespace physics
     extern float gravity, liquidspeed, liquidcurb, floorcurb, aircurb, slidecurb;
     extern int smoothmove, smoothdist;
     extern bool carryaffinity(gameent *d);
-    extern bool secondaryweap(gameent *d);
+    extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowimpulse(int level = 2);
     extern bool jetpack(physent *d);
     extern bool sprinting(physent *d, bool turn = true);
@@ -1329,6 +1329,7 @@ namespace weapons
     extern bool weapreload(gameent *d, int weap, int load = -1, int ammo = -1, bool local = true);
     extern void weapdrop(gameent *d, int w = -1);
     extern void checkweapons(gameent *d);
+    extern float accmod(gameent *d, bool zooming, int *x = NULL);
     extern bool doshot(gameent *d, vec &targ, int weap, bool pressed = false, bool secondary = false, int force = 0);
     extern void shoot(gameent *d, vec &targ, int force = 0);
     extern void preload();

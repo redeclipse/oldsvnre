@@ -182,6 +182,18 @@ namespace weapons
         }
     }
 
+    float accmod(gameent *d, bool zooming, int *x)
+    {
+        float r = 1;
+        int y = 0;
+        if((physics::jetpack(d) || d->physstate == PHYS_FALL) && !d->onladder) { r += inairspread; y++; }
+        if(physics::sprinting(d)) { r += impulsespread; y++; }
+        else if(d->move || d->strafe) { r += movespread; y++; }
+        else if(!physics::iscrouching(d) && !zooming) r += stillspread;
+        if(x) *x = y;
+        return r;
+    }
+
     bool doshot(gameent *d, vec &targ, int weap, bool pressed, bool secondary, int force)
     {
         int offset = WEAP2(weap, sub, secondary), sweap = m_weapon(game::gamemode, game::mutators);
@@ -286,14 +298,10 @@ namespace weapons
                 }
             }
 
-            int rays = WEAP2(weap, rays, secondary), spmax = 0;
-            float accmod = 1;
+            int rays = WEAP2(weap, rays, secondary), x = 0;
             if(rays > 1 && WEAP2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
-            if((physics::jetpack(d) || d->physstate == PHYS_FALL) && !d->onladder) { accmod += inairspread; spmax++; }
-            if(physics::sprinting(d)) { accmod += impulsespread; spmax++; }
-            else if(d->move || d->strafe) { accmod += movespread; spmax++; }
-            else if(!physics::iscrouching(d) && (weap != WEAP_RIFLE || !secondary)) accmod += stillspread;
-            int spread = WEAPSP(weap, secondary, game::gamemode, game::mutators, accmod, spmax);
+            float m = accmod(d, WEAP(d->weapselect, zooms) && secondary, &x);
+            int spread = WEAPSP(weap, secondary, game::gamemode, game::mutators, m, x);
             loopi(rays)
             {
                 vec dest;
