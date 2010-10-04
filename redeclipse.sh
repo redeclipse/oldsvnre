@@ -29,7 +29,7 @@ esac
 
 case ${MACHINE_NAME} in
 i486|i586|i686)
-    MACHINE_SUFFIX=
+    MACHINE_SUFFIX=_32
     ;;
 x86_64)
     MACHINE_SUFFIX=_64
@@ -40,12 +40,11 @@ x86_64)
     ;;
 esac
 
-if [ -x ${RE_BIN}/reclient ]
-then
-    SYSTEM_SUFFIX=
-    MACHINE_SUFFIX=
-fi
-
+#if [ -x ${RE_BIN}/reclient ]
+#then
+#    SYSTEM_SUFFIX=
+#    MACHINE_SUFFIX=
+#fi
 
 if [ -x ${RE_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]; 
 then
