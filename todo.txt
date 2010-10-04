@@ -5,6 +5,7 @@
 * New player model (tags: affinity (flag|bomb), weapon, lfoot, rfoot, head, torso, jet)
 * Enemy models
 * Weapons (flamer, smg, grenades) (better rifle skin/norm, redo sword UVW/skin/norm and found a better idle, rework shotgun skin, adjust vweap)
+* Make lower poly weapon for vweap/item
 * Grunt (better punch anim, fix abdomen pitch, Sword attack anim, make less 'distord' hud arms)
 
 = Art =
