@@ -42,11 +42,11 @@ static inline float forcefloat(tagval &v)
         case VAL_STR: f = parsefloat(v.s); break;
         case VAL_MACRO: f = parsefloat(v.s); break;
         case VAL_FLOAT: return v.f;
-    } 
+    }
     freearg(v);
     v.setfloat(f);
     return f;
-}   
+}
 
 static inline int forceint(tagval &v)
 {
@@ -113,7 +113,7 @@ void clear_command()
     enumerate(idents, ident, i,
     {
         if(i.type==ID_ALIAS)
-        { 
+        {
             DELETEA(i.name);
             i.nullval();
             DELETEA(i.code);
@@ -164,7 +164,7 @@ static const char *debugline(const char *p, const char *fmt)
         {
             static string buf;
             char color[] = { '\0', '\0', '\0' };
-            if(fmt[0] == '\f') { strncpy(color, fmt, 2); fmt += strlen(color); } 
+            if(fmt[0] == '\f') { strncpy(color, fmt, 2); fmt += strlen(color); }
             if(sourcefile) formatstring(buf)("%s%s:%d: %s", color, sourcefile, num, fmt);
             else formatstring(buf)("%s%d: %s", color, num, fmt);
             return buf;
@@ -190,7 +190,7 @@ static void debugcode(const char *fmt, ...)
     conoutft(CON_MESG, "%s", msg);
 
     if(!dbgalias) return;
-    int total = 0, depth = 0; 
+    int total = 0, depth = 0;
     for(identlink *l = aliasstack; l; l = l->next) total++;
     for(identlink *l = aliasstack; l; l = l->next)
     {
@@ -634,7 +634,7 @@ static inline char *cutstring(const char *&p, int &len)
 char *parsetext(const char *&p)
 {
     p += strspn(p, " \t\r");
-    if(*p == '"') 
+    if(*p == '"')
     {
         int len;
         return cutstring(p, len);
@@ -1531,7 +1531,7 @@ static const uint *runcode(const uint *code, tagval &result)
                 if(!id || id->flags&IDF_REWRITE)
                 {
                 noid:
-                    if(!isinteger(args[0].s)) 
+                    if(!isinteger(args[0].s))
                     {
                         forcenull(result);
                         if(!id || id->flags&IDF_REWRITE)
@@ -1542,7 +1542,7 @@ static const uint *runcode(const uint *code, tagval &result)
                                 forcearg(result, op&CODE_RET_MASK);
                                 freeargs(args, numargs, 0);
                                 continue;
-                            } 
+                            }
                         }
                         debugcode("\frunknown command: %s", args[0].s);
                     }
@@ -2023,12 +2023,12 @@ void looplist(ident *id, const char *list, const uint *body, bool search)
         const char *end = s;
         if(*start=='"') { start++; if(end[-1]=='"') --end; }
         char *val = newstring(start, end-start);
-        if(n++) 
+        if(n++)
         {
             delete[] id->val.s;
             id->val.s = val;
         }
-        else 
+        else
         {
             tagval t;
             t.setstr(val);
@@ -2175,6 +2175,12 @@ ICOMMAND(0, maxf, "V", (tagval *args, int numargs),
     float val = numargs > 0 ? args[numargs - 1].getfloat() : 0.0f;
     loopi(numargs - 1) val = max(val, args[i].getfloat());
     floatret(val);
+});
+ICOMMAND(0, round, "fi", (float *a, int *b),
+{
+    defformatstring(format)("%%.%df", max(*b, 0));
+    defformatstring(retval)(format, *a);
+    result(retval);
 });
 
 ICOMMAND(0, cond, "ee2V", (tagval *args, int numargs),

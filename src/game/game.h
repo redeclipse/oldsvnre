@@ -1216,7 +1216,7 @@ struct gameent : dynent, gamestate
                     default: break;
                 }
                 icons[i].length = max(icons[i].fade, fade);
-                icons[i].fade += fade;
+                icons[i].fade = millis-icons[i].millis+fade;
                 icons[i].value = value;
                 return;
             }
@@ -1231,7 +1231,10 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    int colour() { return aitype >= AI_START && isweap(weapselect) ? weaptype[weapselect].colour : teamtype[team].colour; }
+    int colour()
+    {
+        return aitype >= AI_START && isweap(weapselect) ? weaptype[weapselect].colour : teamtype[team].colour;
+    }
 };
 
 enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ_MAX };

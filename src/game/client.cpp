@@ -2323,10 +2323,18 @@ namespace client
                     defformatstring(sd)("%s", escapetext(si->sdesc));
                     defformatstring(sm)("%s", escapetext(si->map));
                     formatstring(text)("%d \"%s\" %d \"%s\" \"%s\" %d %d", serverstat(si), sn, si->port, sd, sm, si->numplayers, si->ping);
-                    loopv(si->attr) { defformatstring(s)(" %d", si->attr[i]); concatstring(text, s); }
                     break;
                 }
                 case 1:
+                {
+                    loopv(si->attr)
+                    {
+                        defformatstring(s)("%s%d", *text ? " " : "", si->attr[i]);
+                        concatstring(text, s);
+                    }
+                    break;
+                }
+                case 2:
                 {
                     loopv(si->players)
                     {
