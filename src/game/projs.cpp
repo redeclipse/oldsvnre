@@ -317,7 +317,7 @@ namespace projs
                     case WEAP_SHOTGUN: case WEAP_SMG:
                     {
                         part_splash(PART_SPARK, 10, 500, proj.o, 0xFFAA22, 0.25f, 1, 1, 0, 16, 10);
-                        if(notrayspam(proj.weap, proj.flags&HIT_ALT, 5)) adddecal(DECAL_BULLET, proj.o, proj.norm, proj.weap == WEAP_SHOTGUN ? 3.f : 1.5f);
+                        if(notrayspam(proj.weap, proj.flags&HIT_ALT, 5)) adddecal(DECAL_BULLET, proj.o, proj.norm, (proj.weap == WEAP_SHOTGUN ? 3.f : 1.5f)*proj.scale);
                         break;
                     }
                     case WEAP_FLAMER:
