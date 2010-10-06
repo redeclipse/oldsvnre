@@ -465,13 +465,16 @@ namespace server
     #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2ss", N_COMMAND, -1, &((const char *)#a)[3], #b); } }
     #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2ss", N_COMMAND, -1, &((const char *)#a)[3], #b); } }
 
+    int numgamevars = 0, numgamemods = 0;
     void resetgamevars(bool flush)
     {
         string val;
+        numgamevars = numgamemods = 0;
         enumerate(idents, ident, id, {
             if(id.flags&IDF_SERVER) // reset vars
             {
                 val[0] = 0;
+                numgamevars++;
                 switch(id.type)
                 {
                     case ID_VAR:
@@ -498,10 +501,10 @@ namespace server
             }
         });
         execfile("servexec.cfg", false);
-        if(eastereggs())
-        {
-            if(returningfiremod) setmod(sv_returningfire, 1);
-        }
+        //if(eastereggs())
+        //{
+        //    if(returningfiremod) setmod(sv_returningfire, 1);
+        //}
     }
 
     const char *pickmap(const char *suggest, int mode, int muts)
@@ -1987,6 +1990,34 @@ namespace server
         }
     }
 
+    void checkvar(ident *id, const char *arg)
+    {
+        if(id && id->flags&IDF_SERVER) switch(id->type)
+        {
+            case ID_VAR:
+            {
+                int ret = parseint(arg);
+                if(*id->storage.i == id->def.i) { if(ret != id->def.i) numgamemods++; }
+                else if(ret == id->def.i) numgamemods--;
+                break;
+            }
+            case ID_FVAR:
+            {
+                int ret = parsefloat(arg);
+                if(*id->storage.f == id->def.f) { if(ret != id->def.f) numgamemods++; }
+                else if(ret == id->def.f) numgamemods--;
+                break;
+            }
+            case ID_SVAR:
+            {
+                if(!strcmp(*id->storage.s, id->def.s)) { if(strcmp(arg, id->def.s)) numgamemods++; }
+                else if(!strcmp(arg, id->def.s)) numgamemods--;
+                break;
+            }
+            default: break;
+        }
+    }
+
     bool servcmd(int nargs, const char *cmd, const char *arg)
     { // incoming command from scripts
         ident *id = idents.access(cmd);
@@ -2029,6 +2060,7 @@ namespace server
                                     "\frvalid range for %s is %d..%d", cmd, id->minval, id->maxval);
                         return true;
                     }
+                    checkvar(id, arg);
                     *id->storage.i = ret;
                     id->changed();
                     formatstring(scmdval)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
@@ -2047,6 +2079,7 @@ namespace server
                         conoutft(CON_MESG, "\frvalid range for %s is %s..%s", cmd, floatstr(id->minvalf), floatstr(id->maxvalf));
                         return true;
                     }
+                    checkvar(id, arg);
                     *id->storage.f = ret;
                     id->changed();
                     formatstring(scmdval)("%s", floatstr(*id->storage.f));
@@ -2059,6 +2092,7 @@ namespace server
                         conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", cmd, *id->storage.s);
                         return true;
                     }
+                    checkvar(id, arg);
                     delete[] *id->storage.s;
                     *id->storage.s = newstring(arg);
                     id->changed();
@@ -2123,6 +2157,7 @@ namespace server
                                 "\frvalid range for %s is %d..%d", cmd, id->minval, id->maxval);
                         return;
                     }
+                    checkvar(id, arg);
                     *id->storage.i = ret;
                     id->changed();
                     formatstring(val)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
@@ -2147,6 +2182,7 @@ namespace server
                         srvmsgf(ci->clientnum, "\frvalid range for %s is %s..%s", cmd, floatstr(id->minvalf), floatstr(id->maxvalf));
                         return;
                     }
+                    checkvar(id, arg);
                     *id->storage.f = ret;
                     id->changed();
                     formatstring(val)("%s", floatstr(*id->storage.f));
@@ -2165,6 +2201,7 @@ namespace server
                         sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, &id->name[3], val);
                         return;
                     }
+                    checkvar(id, arg);
                     delete[] *id->storage.s;
                     *id->storage.s = newstring(arg);
                     id->changed();
@@ -3301,14 +3338,16 @@ namespace server
             extqueryreply(req, p);
             return;
         }
-        putint(p, numclients(-1, true));
-        putint(p, 6);                   // number of attrs following
+        putint(p, numclients());
+        putint(p, 8);                   // number of attrs following
         putint(p, GAMEVERSION);         // 1
         putint(p, gamemode);            // 2
         putint(p, mutators);            // 3
         putint(p, timeremaining);       // 4
         putint(p, GAME(serverclients)); // 5
         putint(p, serverpass[0] ? MM_PASSWORD : (m_demo(gamemode) ? MM_PRIVATE : mastermode)); // 6
+        putint(p, numgamevars); // 7
+        putint(p, numgamemods); // 8
         sendstring(smapname, p);
         if(*GAME(serverdesc)) sendstring(GAME(serverdesc), p);
         else
@@ -3321,7 +3360,7 @@ namespace server
             sendstring(cname, p);
             #endif
         }
-        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype < 0 && clients[i]->state.state != CS_SPECTATOR)
+        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype < 0)
             sendstring(colorname(clients[i]), p);
         sendqueryreply(p);
     }
