@@ -909,7 +909,8 @@ namespace hud
                                         drop = target->drop(sweap);
                                     if(isweap(drop))
                                     {
-                                        static vector<int> attrs; attrs.setsize(0); loopk(5) attrs.add(k ? 0 : drop);
+                                        static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
+                                        attrs[0] = drop;
                                         defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false));
                                         ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false));
                                     }
@@ -1202,7 +1203,7 @@ namespace hud
         }
     }
 
-    void drawentblip(int w, int h, float blend, int n, vec &o, int type, vector<int> &attr, bool spawned, int lastspawn, bool insel)
+    void drawentblip(int w, int h, float blend, int n, vec &o, int type, attrvector &attr, bool spawned, int lastspawn, bool insel)
     {
         if(type > NOTUSED && type < MAXENTTYPES && ((enttype[type].usetype == EU_ITEM && spawned) || game::focus->state == CS_EDITING))
         {

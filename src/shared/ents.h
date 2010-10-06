@@ -31,16 +31,20 @@ enum
     MMT_NODYNSHADOW = 1<<3, // doesn't cast a shadow map (trigger)
 };
 
+typedef smallvector<int> attrvector;
+typedef smallvector<int> linkvector;
+
 struct entity : entbase
 {
-    vector<int> attrs, links;
+    attrvector attrs;
+    linkvector links;
 
     entity() { reset(); }
 
     void reset()
     {
-        attrs.shrink(0);
-        links.shrink(0);
+        attrs.setsize(0);
+        links.setsize(0);
     }
 };
 

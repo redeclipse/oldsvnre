@@ -1181,19 +1181,16 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     lilswap(ec.attr, 5);
                     e.o = ec.o;
                     e.type = ec.type;
-                    loopk(5) e.attrs.add(ec.attr[k]);
+                    e.attrs.add(0, 5);
+                    loopk(5) e.attrs[0] = ec.attr[k];
                 }
                 else
                 {
                     f->read(&e, sizeof(entbase));
                     lilswap(&e.o.x, 3);
                     int numattr = f->getlil<int>();
-                    loopk(numattr)
-                    {
-                        int an = f->getlil<int>();
-                        e.attrs.add(an);
-                    }
-                    if(numattr < 5) loopk(5-numattr) e.attrs.add(0);
+                    e.attrs.add(0, max(5, numattr));
+                    loopk(numattr) e.attrs[k] = f->getlil<int>();
                 }
                 if((maptype == MAP_OCTA && hdr.version <= 27) || (maptype == MAP_MAPZ && hdr.version <= 31)) e.attrs[4] = 0; // init ever-present attr5
                 if(maptype == MAP_OCTA) loopj(eif) f->getchar();
@@ -1217,11 +1214,8 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 if(maptype == MAP_MAPZ && entities::maylink(hdr.gamever <= 49 && e.type >= 10 ? e.type-1 : e.type, hdr.gamever))
                 {
                     int links = f->getlil<int>();
-                    loopk(links)
-                    {
-                        int ln = f->getlil<int>();
-                        e.links.add(ln);
-                    }
+                    e.links.add(0, links);
+                    loopk(links) e.links[k] = f->getlil<int>();
                     if(verbose >= 2) conoutf("\faentity %s (%d) loaded %d link(s)", entities::findname(e.type), i, links);
                 }
 

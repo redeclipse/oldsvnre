@@ -8,7 +8,7 @@ namespace server
         int type;
         bool spawned;
         int millis;
-        vector<int> attrs, kin;
+        attrvector attrs, kin;
 
         srventity() : type(NOTUSED), spawned(false), millis(0) { reset(); }
         ~srventity() { reset(); }
@@ -4108,9 +4108,10 @@ namespace server
                             sents[n].type = type;
                             sents[n].spawned = false; // wait a bit then load 'em up
                             sents[n].millis = gamemillis;
-                            loopk(numattr) sents[n].attrs.add(getint(p));
-                            if(numattr < 5) loopk(5-numattr) sents[n].attrs.add(0);
-                            loopk(numkin) sents[n].kin.add(getint(p));
+                            sents[n].attrs.add(0, max(5, numattr));
+                            loopk(numattr) sents[n].attrs[k] = getint(p);
+                            sents[n].kin.add(0, numkin);
+                            loopk(numkin) sents[n].kin[k] = getint(p);
                         }
                         else
                         {
