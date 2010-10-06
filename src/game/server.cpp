@@ -1992,7 +1992,7 @@ namespace server
 
     void checkvar(ident *id, const char *arg)
     {
-        if(id && id->flags&IDF_SERVER) switch(id->type)
+        if(id && id->flags&IDF_SERVER && !(id->flags&IDF_ADMIN)) switch(id->type)
         {
             case ID_VAR:
             {
