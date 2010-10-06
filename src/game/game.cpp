@@ -416,7 +416,8 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col((teamtype[d->team].colour>>16)/255.f, ((teamtype[d->team].colour>>8)&0xFF)/255.f, (teamtype[d->team].colour&0xFF)/255.f);
+                    int colour = d->colour();
+                    vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col.mul(illumlevel), 0, 0, DL_KEEP);
                 }
             }
@@ -1910,7 +1911,7 @@ namespace game
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         bool burning = burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
-        int colour = burning ? firecols[rnd(FIRECOLOURS)] : (type >= AI_START ? 0xFFFFFF : teamtype[d->team].colour);
+        int colour = burning ? firecols[rnd(FIRECOLOURS)] : d->colour();
         e->light.material = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
@@ -2118,7 +2119,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, teamtype[d->team].colour, 0.25f, 0.25f);
+                    part_flare(origin, v, 1, PART_FLARE, d->colour(), 0.25f, 0.25f);
                 }
                 if(d->weapselect == WEAP_SWORD || (d->weapstate[d->weapselect] == WEAP_S_POWER && lastmillis-d->weaplast[d->weapselect] > 0))
                 {

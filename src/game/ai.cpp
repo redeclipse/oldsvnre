@@ -1532,7 +1532,7 @@ namespace ai
 
     void drawroute(gameent *d, aistate &b, float amt)
     {
-        int colour = teamtype[owner(d)].colour, last = -1;
+        int colour = d->colour(), last = -1;
         loopvrev(d->ai->route)
         {
             if(d->ai->route.inrange(last))

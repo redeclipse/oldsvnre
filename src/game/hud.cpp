@@ -415,9 +415,10 @@ namespace hud
 
     void skewcolour(float &r, float &g, float &b, bool t)
     {
-        r *= (teamtype[game::focus->team].colour>>16)/255.f;
-        g *= ((teamtype[game::focus->team].colour>>8)&0xFF)/255.f;
-        b *= (teamtype[game::focus->team].colour&0xFF)/255.f;
+        int colour = game::focus->colour();
+        r *= (colour>>16)/255.f;
+        g *= ((colour>>8)&0xFF)/255.f;
+        b *= (colour&0xFF)/255.f;
         if(!game::focus->team && t)
         {
             float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
@@ -429,11 +430,11 @@ namespace hud
 
     void skewcolour(int &r, int &g, int &b, bool t)
     {
-        int team = game::focus->team;
-        r = int(r*((teamtype[team].colour>>16)/255.f));
-        g = int(g*(((teamtype[team].colour>>8)&0xFF)/255.f));
-        b = int(b*((teamtype[team].colour&0xFF)/255.f));
-        if(!team && t)
+        int colour = game::focus->colour();
+        r = int(r*((colour>>16)/255.f));
+        g = int(g*(((colour>>8)&0xFF)/255.f));
+        b = int(b*((colour&0xFF)/255.f));
+        if(!game::focus->team && t)
         {
             float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
             r = int(r*f);
@@ -1143,7 +1144,7 @@ namespace hud
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
             bool burning = radarplayereffects && burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
-            int colour = burning ? firecols[rnd(FIRECOLOURS)] : teamtype[d->team].colour;
+            int colour = burning ? firecols[rnd(FIRECOLOURS)] : d->colour();
             const char *tex = bliptex;
             float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize,
                 r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
@@ -1301,14 +1302,16 @@ namespace hud
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
             {
                 vec dir = vec(game::focus->o).sub(camera1->o).normalize().rotate_around_z(-camera1->yaw*RAD);
-                float r = (teamtype[game::focus->team].colour>>16)/255.f, g = ((teamtype[game::focus->team].colour>>8)&0xFF)/255.f, b = (teamtype[game::focus->team].colour&0xFF)/255.f;
+                int colour = game::focus->colour();
+                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
                 drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "you");
             }
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
                 vec pos = vec(a->o).sub(camera1->o).normalize(), dir = vec(pos).rotate_around_z(-camera1->yaw*RAD);
-                float r = (teamtype[a->team].colour>>16)/255.f, g = ((teamtype[a->team].colour>>8)&0xFF)/255.f, b = (teamtype[a->team].colour&0xFF)/255.f;
+                int colour = a->colour();
+                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
                     if(a->state == CS_ALIVE) drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "%s (%d)", game::colorname(a), a->health);

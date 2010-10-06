@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         207
+#define GAMEVERSION         208
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -1230,6 +1230,8 @@ struct gameent : dynent, gamestate
         if(pos < 0) icons.add(e);
         else icons.insert(pos, e);
     }
+
+    int colour() { return aitype >= AI_START && isweap(weapselect) ? weaptype[weapselect].colour : teamtype[team].colour; }
 };
 
 enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ_MAX };
