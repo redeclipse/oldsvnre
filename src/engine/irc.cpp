@@ -627,9 +627,20 @@ void ircparse(ircnet *n, char *reply)
                     {
                         user[1] = newstring(t, u-t);
                         if(*u++) user[2] = newstring(u);
+                        else user[2] = newstring("*");
+                    }
+                    else
+                    {
+                        user[1] = newstring("*");
+                        user[2] = newstring("*");
                     }
                 }
-                else user[0] = newstring(t);
+                else
+                {
+                    user[0] = newstring(t);
+                    user[1] = newstring("*");
+                    user[2] = newstring("*");
+                }
             }
             else
             {
