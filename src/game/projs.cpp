@@ -177,7 +177,7 @@ namespace projs
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             int flags = 0;
-            if(!isaitype(d->aitype) || aistyle[d->aitype].canmove)
+            if(!isaitype(d->aitype) || aistyle[d->aitype].hitbox)
             {
                 if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
                 {

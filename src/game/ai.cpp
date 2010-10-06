@@ -202,6 +202,7 @@ namespace ai
             d->weight = aistyle[d->aitype].weight;
             d->xradius = aistyle[d->aitype].xradius;
             d->yradius = aistyle[d->aitype].yradius;
+            d->radius = max(d->xradius, d->yradius);
             d->zradius = d->height = aistyle[d->aitype].height;
         }
         d->ownernum = on;
@@ -1003,12 +1004,12 @@ namespace ai
         if(!aistyle[d->aitype].canstrafe && d->skill <= 100) frame *= 2;
         vec dp = d->headpos();
 
-        bool wasdontmove = d->ai->dontmove, idle = b.idle == 1 || (stupify && stupify <= skmod) || !aistyle[d->aitype].canmove || d->ai->suspended;
+        bool wasdontmove = d->ai->dontmove, idle = b.idle == 1 || (stupify && stupify <= skmod) || d->ai->suspended;
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
-        if(idle)
+        if(idle || !aistyle[d->aitype].canmove)
         {
             d->ai->lasthunt = lastmillis;
-            d->ai->dontmove = true;
+            if(aistyle[d->aitype].canmove) d->ai->dontmove = true;
         }
         else if(hunt(d, b))
         {
@@ -1101,7 +1102,8 @@ namespace ai
         if(result < 3) d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = false;
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
-        d->aimyaw = d->ai->targyaw; d->aimpitch = d->ai->targpitch;
+        d->aimyaw = d->ai->targyaw;
+        d->aimpitch = d->ai->targpitch;
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame*0.25f, 1.f);
 
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
@@ -1148,11 +1150,11 @@ namespace ai
         }
 
         if(d->ai->dontmove || (d->aitype >= AI_START && lastmillis-d->lastpain <= PHYSMILLIS/3)) d->move = d->strafe = 0;
-        else if(!aistyle[d->aitype].canstrafe)
+        else if(!aistyle[d->aitype].canmove || !aistyle[d->aitype].canstrafe)
         {
             d->aimyaw = d->yaw;
             d->aimpitch = d->pitch;
-            d->move = 1;
+            d->move = aistyle[d->aitype].canmove ? 1 : 0;
             d->strafe = 0;
         }
         else

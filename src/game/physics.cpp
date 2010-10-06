@@ -193,7 +193,7 @@ namespace physics
             if(d->state == CS_ALIVE)
             {
                 gameent *f = (gameent *)d;
-                if(!projectile && !actor && f->aitype >= AI_START && !f->move && !f->strafe && !f->action[AC_CROUCH]) return false;
+                if(!projectile && !actor && f->aitype >= AI_START && f->ai->suspended) return false;
                 if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
                 return true;
             }
@@ -1355,7 +1355,7 @@ namespace physics
                 d->o = orig; \
             } \
         }
-        if(d->type == ENT_PLAYER || (d->type == ENT_AI && (!isaitype(((gameent *)d)->aitype) || aistyle[((gameent *)d)->aitype].canmove)))
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             vec dir; vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
             inmapchk(100, d->o.add(vec(dir).mul(i/10.f)));

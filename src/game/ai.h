@@ -6,22 +6,30 @@ enum { AI_F_NONE = 0, AI_F_RANDWEAP = 1<<0 };
 
 struct aistyles
 {
-    int type,           weap,           health, maxspeed;  float   xradius,    yradius,    height,     weight;
-    bool    canmove,    canstrafe,  canjump,    useweap,    living;    const char  *name,      *tpmdl,              *fpmdl;
+    int type,           weap,           health, maxspeed;
+    float   xradius,    yradius,    height,     weight;
+    bool    canmove,    canstrafe,  canjump,    useweap,    living,     hitbox;
+    const char  *name,      *tpmdl,              *fpmdl;
 };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
     {
-        AI_BOT,         -1,             0,      50,                 0,          0,          0,          200,
-            true,       true,       true,       true,       true,                  "bot",      "actors/player",     "actors/player/hwep"
+        AI_BOT,         -1,             0,      50,
+            0,          0,          0,          200,
+            true,       true,       true,       true,       true,       true,
+                "bot",      "actors/player",     "actors/player/hwep"
     },
     {
-        AI_TURRET,      WEAP_SMG,       100,    0,                  4,          6,          8,          0,
-            false,      false,      false,      false,      false,                 "turret",   "actors/turret",     "actors/player/hwep"
+        AI_TURRET,      WEAP_SMG,       100,    0,
+            4.75,       4.75,       8.75,       150,
+            false,      false,      false,      false,      false,      false,
+                "turret",   "actors/turret",     "actors/player/hwep"
     },
     {
-        AI_GRUNT,       WEAP_MELEE,     50,     40,                 3,          3,          14,         150,
-            true,       false,      true,       true,       true,                  "grunt",    "actors/grunt",      "actors/player/hwep"
+        AI_GRUNT,       WEAP_MELEE,     50,     40,
+            3,          3,          14,         150,
+            true,       false,      true,       true,       true,       true,
+                "grunt",    "actors/grunt",      "actors/player/hwep"
     },
 };
 #else
