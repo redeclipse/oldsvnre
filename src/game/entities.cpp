@@ -1880,6 +1880,25 @@ namespace entities
         }
     }
 
+    void checkyawmode(gameentity &e, int mtype, int mver, int gver, int y, int m)
+    {
+        if((y >= 0) && ((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39)))
+            e.attrs[y] = (e.attrs[y] + 180)%360;
+        if(m >= 0 && mtype == MAP_MAPZ && gver <= 201)
+        {
+            if(e.attrs[m] > 3)
+            {
+                if(e.attrs[m] != 5) e.attrs[m]++;
+                else e.attrs[m]--;
+            }
+            else if(e.attrs[m] < -3)
+            {
+                if(e.attrs[m] != -5) e.attrs[m]--;
+                else e.attrs[m]++;
+            }
+        }
+    }
+
     void updateoldentities(int mtype, int mver, int gver)
     {
         loopvj(ents)
@@ -1956,7 +1975,7 @@ namespace entities
                         }
                         e.mark = 0;
                     }
-                    if(e.attrs[0] >= 0 && ((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39))) e.attrs[0] = (e.attrs[0] + 180)%360;
+                    if(e.attrs[0] >= 0) checkyawmode(e, mtype, mver, gver, 0, -1);
                     break;
                 }
                 case WEAPON:
@@ -1994,7 +2013,7 @@ namespace entities
                         e.attrs[2] = int(dir.magnitude());
                         e.attrs[5] = 0;
                     }
-                    else if(mtype == MAP_MAPZ && mver <= 39) e.attrs[0] = (e.attrs[0] + 180)%360;
+                    else checkyawmode(e, mtype, mver, gver, 0, -1);
                     break;
                 }
                 case AFFINITY:
@@ -2007,20 +2026,7 @@ namespace entities
                         e.attrs[3] = e.attrs[4] = 0;
                     }
                     if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_LAST) e.attrs[0] = TEAM_NEUTRAL;
-                    if((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39)) e.attrs[1] = (e.attrs[1] + 180)%360;
-                    if(mtype == MAP_MAPZ && gver <= 201)
-                    {
-                        if(e.attrs[3] > 3)
-                        {
-                            if(e.attrs[3] != 5) e.attrs[3]++;
-                            else e.attrs[3]--;
-                        }
-                        else if(e.attrs[3] < -3)
-                        {
-                            if(e.attrs[3] != -5) e.attrs[3]--;
-                            else e.attrs[3]++;
-                        }
-                    }
+                    checkyawmode(e, mtype, mver, gver, 1, 3);
                     break;
                 }
                 case WAYPOINT:
@@ -2037,23 +2043,23 @@ namespace entities
                     if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver <= 204)) e.attrs[1] = getweight(e.o);
                     break;
                 }
-                case ACTOR: if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe AI_BOT from array
-                case CHECKPOINT:
-                    if((mtype == MAP_OCTA && mver <= 30) || (mtype == MAP_MAPZ && mver <= 39)) e.attrs[1] = (e.attrs[1] + 180)%360;
-                    if(mtype == MAP_MAPZ && gver <= 201)
+                case ACTOR:
+                {
+                    if(mtype == MAP_MAPZ && gver <= 200) e.attrs[0] -= 1; // remoe AI_BOT from array
+                    if(mtype == MAP_MAPZ && gver <= 207 && e.attrs[0] > 1) // combine into one type
                     {
-                        if(e.attrs[3] > 3)
+                        switch(e.attrs[0])
                         {
-                            if(e.attrs[3] != 5) e.attrs[3]++;
-                            else e.attrs[3]--;
-                        }
-                        else if(e.attrs[3] < -3)
-                        {
-                            if(e.attrs[3] != -5) e.attrs[3]--;
-                            else e.attrs[3]++;
+                            case 5: default: e.attrs[5] = 8; e.attrs[6] = 100; e.attrs[7] = 40; break;
+                            case 4: e.attrs[5] = 6; e.attrs[6] = 150; e.attrs[7] = 40; break;
+                            case 3: e.attrs[5] = 4; e.attrs[6] = 200; e.attrs[7] = 35; break;
+                            case 2: e.attrs[5] = 2; e.attrs[6] = 50; e.attrs[7] = 50; break;
                         }
                     }
+                    checkyawmode(e, mtype, mver, gver, 1, 3);
                     break;
+                }
+                case CHECKPOINT: checkyawmode(e, mtype, mver, gver, 1, 3); break;
                 default: break;
             }
         }

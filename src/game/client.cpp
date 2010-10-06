@@ -1437,11 +1437,11 @@ namespace client
                     {
                         f->respawn(lastmillis, m_health(game::gamemode, game::mutators));
                         parsestate(f, p);
-                        if(f->aitype < AI_START)
+                        if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
+                        if(game::dynlighteffects)
                         {
-                            playsound(S_RESPAWN, f->o, f);
-                            if(game::dynlighteffects)
-                                adddynlight(f->headpos(), f->height*2, vec(teamtype[f->team].colour>>16, (teamtype[f->team].colour>>8)&0xFF, teamtype[f->team].colour&0xFF).mul(2.f/0xFF), 250, 250);
+                            int colour = f->colour();
+                            adddynlight(f->headpos(), f->height*2, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).mul(2.f/0xFF), 250, 250);
                         }
                     }
                     else parsestate(NULL, p);
@@ -1473,11 +1473,11 @@ namespace client
                     {
                         addmsg(N_SPAWN, "ri", f->clientnum);
                         entities::spawnplayer(f, ent, true);
-                        if(f->aitype < AI_START)
+                        if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
+                        if(game::dynlighteffects)
                         {
-                            playsound(S_RESPAWN, f->o, f);
-                            if(game::dynlighteffects)
-                                adddynlight(f->headpos(), f->height*2, vec(teamtype[f->team].colour>>16, (teamtype[f->team].colour>>8)&0xFF, teamtype[f->team].colour&0xFF).mul(2.f/0xFF), 250, 250);
+                            int colour = f->colour();
+                            adddynlight(f->headpos(), f->height*2, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).mul(2.f/0xFF), 250, 250);
                         }
                     }
                     ai::spawned(f, ent);
