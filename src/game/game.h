@@ -1147,7 +1147,7 @@ struct gameent : dynent, gamestate
         }
     }
 
-    bool wantshitbox() { return type == ENT_PLAYER || (type == ENT_AI && (!isaitype(aitype) || aistyle[aitype].canmove)); }
+    bool wantshitbox() { return type == ENT_PLAYER || (type == ENT_AI && (!isaitype(aitype) || aistyle[aitype].hitbox)); }
 
     void checktags()
     {
