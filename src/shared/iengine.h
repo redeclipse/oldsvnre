@@ -109,7 +109,7 @@ extern void showgui(const char *name, int tab = 0);
 extern bool emptymap(int factor, bool force = false, char *mname = NULL, bool nocfg = false);
 extern bool enlargemap(bool force);
 extern int findentity(int type, int index, vector<int> &attr);
-extern void mpeditent(int i, const vec &o, int type, vector<int> &attr, bool local = true);
+extern void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local = true);
 extern int getworldsize();
 extern int getmapversion();
 

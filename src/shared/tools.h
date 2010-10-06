@@ -314,6 +314,13 @@ template <class T> struct vector
         return buf[ulen++];
     }
 
+    void add(const T &x, int n)
+    {
+        if(n <= 0) return;
+        growbuf(ulen+n);
+        loopi(n) new (&buf[ulen++]) T(x);
+    }
+
     T &dup()
     {
         if(ulen==alen) growbuf(ulen+1);
@@ -533,6 +540,136 @@ template <class T> struct vector
         T e = removeunordered(0);
         if(ulen) downheap(0);
         return e;
+    }
+};
+
+template <class T> struct smallvector
+{
+    T *buf;
+    int len;
+
+    smallvector() : buf(NULL), len(0)
+    {
+    }
+
+    smallvector(const smallvector &v) : buf(NULL), len(0)
+    {
+        *this = v;
+    }
+
+    ~smallvector() { shrink(0); }
+
+    smallvector<T> &operator=(const smallvector<T> &v)
+    {
+        shrink(0);
+        growbuf(v.length());
+        loopv(v) buf[i] = v[i]; 
+        return *this;
+    }
+
+    void growbuf(int sz)
+    {
+        int olen = len;
+        len = max(sz, 0);
+        uchar *newbuf = len > 0 ? new uchar[len*sizeof(T)] : NULL;
+        if(olen > 0)
+        {
+            if(len > 0) memcpy(newbuf, buf, min(len, olen)*sizeof(T));
+            delete[] (uchar *)buf;
+        }
+        buf = (T *)newbuf;
+    }
+
+    T &add(const T &x)
+    {
+        growbuf(len+1);
+        new (&buf[len-1]) T(x);
+        return buf[len-1];
+    }
+
+    T &add()
+    {
+        growbuf(len+1);
+        new (&buf[len-1]) T;
+        return buf[len-1];
+    }
+
+    void add(const T &x, int n)
+    {
+        if(n <= 0) return;
+        growbuf(len+n);
+        while(n > 0) new (&buf[len-n--]) T(x);
+    }
+
+    void put(const T &v) { add(v); }
+
+    void put(const T *v, int n)
+    {
+        if(n <= 0) return;
+        growbuf(len + n);
+        memcpy(&buf[len-n], v, n*sizeof(T));
+    }
+
+    void shrink(int i)         
+    { 
+        ASSERT(i<=len); 
+        if(i >= len) return;
+        for(int j = i; j < len; j++) buf[j].~T();
+        growbuf(i);
+    }
+
+    void setsize(int i) 
+    { 
+        ASSERT(i<=len); 
+        if(i >= len) return;
+        growbuf(i);
+    }
+
+    void deletecontents() 
+    { 
+        for(int i = 0; i < len; i++) delete buf[i];
+        setsize(0);
+    }
+
+    void deletearrays() 
+    { 
+        for(int i = 0; i < len; i++) delete[] buf[i];
+        setsize(0);
+    }
+
+    T remove(int i)
+    {
+        T e = buf[i];
+        for(int p = i+1; p<len; p++) buf[p-1] = buf[p];
+        growbuf(len-1);
+        return e;
+    }
+
+    T removeunordered(int i)
+    {
+        T e = buf[i];
+        if(len>1) buf[i] = buf[len-1];
+        growbuf(len-1);
+        return e;
+    }
+
+    bool inrange(size_t i) const { return i<size_t(len); }
+    bool inrange(int i) const { return i>=0 && i<len; }
+
+    T &last() { return buf[len-1]; }
+    bool empty() const { return len==0; }
+    int length() const { return len; }
+    T &operator[](int i) { ASSERT(i>=0 && i<len); return buf[i]; }
+    const T &operator[](int i) const { ASSERT(i >= 0 && i<len); return buf[i]; }
+    T *getbuf() { return buf; }
+    const T *getbuf() const { return buf; }
+    bool inbuf(const T *e) const { return e >= buf && e < &buf[len]; }
+
+    template<class U>
+    int find(const U &o)
+    {
+        loopi(len) if(buf[i]==o) return i;
+        return -1;
     }
 };
 

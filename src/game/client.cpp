@@ -1801,8 +1801,9 @@ namespace client
                     int i = getint(p);
                     float x = getint(p)/DMF, y = getint(p)/DMF, z = getint(p)/DMF;
                     int type = getint(p), numattrs = getint(p);
-                    static vector<int> attrs; attrs.setsize(0);
-                    loopk(numattrs) attrs.add(getint(p));
+                    attrvector attrs;
+                    attrs.add(0, numattrs);
+                    loopk(numattrs) attrs[k] = getint(p);
                     mpeditent(i, vec(x, y, z), type, attrs, false);
                     entities::setspawn(i, 0);
                     entities::clearentcache();

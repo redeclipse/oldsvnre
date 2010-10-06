@@ -60,7 +60,7 @@ namespace entities
         return 0;
     }
 
-    const char *entinfo(int type, vector<int> &attr, bool full)
+    const char *entinfo(int type, attrvector &attr, bool full)
     {
         static string entinfostr; entinfostr[0] = 0;
         #define addentinfo(s) if(*(s)) { \
@@ -291,7 +291,7 @@ namespace entities
         return entinfostr[0] ? entinfostr : "";
     }
 
-    const char *entmdlname(int type, vector<int> &attr)
+    const char *entmdlname(int type, attrvector &attr)
     {
         switch(type)
         {
@@ -1041,8 +1041,8 @@ namespace entities
     {
         gameentity &e = *(gameentity *)ents[n];
         int num = max(5, enttype[e.type].numattrs);
-        while(e.attrs.length() < num) e.attrs.add(0);
-        while(e.attrs.length() > num) e.attrs.pop();
+        if(e.attrs.length() < num) e.attrs.add(0, num - e.attrs.length());
+        else if(e.attrs.length() > num) e.attrs.setsize(num);
         loopvrev(e.links)
         {
             int ent = e.links[i];
@@ -1463,7 +1463,7 @@ namespace entities
             int current = int(m-&nodes[0]);
             if(!ents.inrange(current)) continue;
             extentity &ent = *ents[current];
-            vector<int> &links = ent.links;
+            linkvector &links = ent.links;
             loopv(links)
             {
                 int link = links[i];
@@ -1531,8 +1531,10 @@ namespace entities
                 int cmds = WP_F_NONE;
                 if(physics::iscrouching(d)) cmds |= WP_F_CROUCH;
                 curnode = ents.length();
-                static vector<int> wpattrs; wpattrs.setsize(0);
-                wpattrs.add(cmds); wpattrs.add(weight);
+                attrvector wpattrs;
+                wpattrs.add(0, 2);
+                wpattrs[0] = cmds;
+                wpattrs[1] = weight;
                 newentity(v, WAYPOINT, wpattrs);
                 if(d->physstate == PHYS_FALL) d->airnodes.add(curnode);
             }
@@ -2107,8 +2109,8 @@ namespace entities
         {
             gameentity &e = *(gameentity *)ents[i];
             int num = max(5, enttype[e.type].numattrs);
-            while(e.attrs.length() < num) e.attrs.add(0);
-            while(e.attrs.length() > num) e.attrs.pop();
+            if(e.attrs.length() < num) e.attrs.add(0, num - e.attrs.length());
+            else if(e.attrs.length() > num) e.attrs.setsize(num);
         }
         if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver <= 49)) importentities(mtype, mver, gver);
         if(mtype == MAP_OCTA) importwaypoints(mtype, mver, gver);

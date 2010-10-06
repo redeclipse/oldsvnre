@@ -604,7 +604,7 @@ extern void preloadusedmapmodels(bool msg = false, bool bih = false);
 // renderparticles
 extern void particleinit();
 extern void clearparticles();
-extern void makeparticle(const vec &o, vector<int> &attr);
+extern void makeparticle(const vec &o, attrvector &attr);
 extern void makeparticles(extentity &e);
 extern void updateparticles();
 extern void renderparticles(bool mainpass = false);
@@ -660,8 +660,8 @@ extern int getmatvec(vec v);
 extern int fullbright, fullbrightlevel;
 extern vector<int> entgroup;
 
-extern void newentity(int type, vector<int> &attrs);
-extern void newentity(vec &v, int type, vector<int> &attrs);
+extern void newentity(int type, attrvector &attrs);
+extern void newentity(vec &v, int type, attrvector &attrs);
 
 // menu
 enum { MN_BACK = 0, MN_INPUT, MN_MAX };

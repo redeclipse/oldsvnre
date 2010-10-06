@@ -1608,7 +1608,7 @@ void defaultparticles()
 }
 #endif
 
-void makeparticle(const vec &o, vector<int> &attr)
+void makeparticle(const vec &o, attrvector &attr)
 {
     switch(attr[0])
     {

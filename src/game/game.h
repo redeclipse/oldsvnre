@@ -701,7 +701,7 @@ struct gamestate
         return false;
     }
 
-    bool canuse(int type, int attr, vector<int> &attrs, int sweap, int millis, int skip = 0)
+    bool canuse(int type, int attr, attrvector &attrs, int sweap, int millis, int skip = 0)
     {
         //if((type != TRIGGER || attrs[2] == TA_AUTO) && enttype[type].usetype == EU_AUTO) return true;
         //if(weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip)))
@@ -842,14 +842,13 @@ struct gameentity : extentity
     int schan;
     int lastuse, lastspawn;
     int mark;
-    vector<int> kin;
+    linkvector kin;
 
-    gameentity() : schan(-1), lastuse(0), lastspawn(0), mark(0) { kin.shrink(0); }
+    gameentity() : schan(-1), lastuse(0), lastspawn(0), mark(0) {}
     ~gameentity()
     {
         if(issound(schan)) removesound(schan);
         schan = -1;
-        kin.shrink(0);
     }
 };
 
@@ -1471,9 +1470,9 @@ namespace entities
     extern void setspawn(int n, int m);
     extern bool tryspawn(dynent *d, const vec &o, short yaw = 0, short pitch = 0);
     extern void spawnplayer(gameent *d, int ent = -1, bool suicide = false);
-    extern const char *entinfo(int type, vector<int> &attr, bool full = false);
+    extern const char *entinfo(int type, attrvector &attr, bool full = false);
     extern void useeffects(gameent *d, int n, int c, bool s, int g, int r, int v = -1);
-    extern const char *entmdlname(int type, vector<int> &attr);
+    extern const char *entmdlname(int type, attrvector &attr);
     extern bool clipped(const vec &o, bool aiclip = false);
     extern void edittoggled(bool edit);
     extern const char *findname(int type);
