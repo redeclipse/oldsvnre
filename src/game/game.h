@@ -90,10 +90,10 @@ enttypes enttype[] = {
             false,              "playerstart",  { "team",   "yaw",      "pitch",    "mode",     "id" }
     },
     {
-        ENVMAP,         1,          0,      0,      EU_NONE,    1,
+        ENVMAP,         1,          0,      0,      EU_NONE,    2,
             0,
             0,
-            false,              "envmap",       { "radius" }
+            false,              "envmap",       { "radius", "size" }
     },
     {
         PARTICLES,      1,          59,     0,      EU_NONE,    9,
