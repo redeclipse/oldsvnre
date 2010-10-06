@@ -872,7 +872,7 @@ void texnormal(ImageData &s, int emphasis)
     s.replace(d);
 }
 
-void blurimage(int n, int bpp, int w, int h, uchar *dst, const uchar *src)
+void blurtexture(int n, int bpp, int w, int h, uchar *dst, const uchar *src)
 {
     static const int matrix3x3[9] =
     {
@@ -937,7 +937,7 @@ void texblur(ImageData &s, int n, int r)
     loopi(r)
     {
         ImageData d(s.w, s.h, s.bpp);
-        blurimage(n, s.bpp, s.w, s.h, d.data, s.data);
+        blurtexture(n, s.bpp, s.w, s.h, d.data, s.data);
         s.replace(d);
     }
 }
@@ -2237,7 +2237,7 @@ VAR(IDF_WORLD, envmapradius, 0, 128, 10000);
 
 struct envmap
 {
-    int radius, size;
+    int radius, size, blur;
     vec o;
     GLuint tex;
 };
@@ -2258,7 +2258,7 @@ void clearenvmaps()
 
 VAR(0, aaenvmap, 0, 2, 4);
 
-GLuint genenvmap(const vec &o, int envmapsize)
+GLuint genenvmap(const vec &o, int envmapsize, int blur)
 {
     int rendersize = 1<<(envmapsize+aaenvmap), sizelimit = min(hwcubetexsize, min(screen->w, screen->h));
     if(maxtexsize) sizelimit = min(sizelimit, maxtexsize);
@@ -2269,7 +2269,7 @@ GLuint genenvmap(const vec &o, int envmapsize)
     glGenTextures(1, &tex);
     glViewport(0, 0, rendersize, rendersize);
     float yaw = 0, pitch = 0;
-    uchar *pixels = new uchar[3*rendersize*rendersize];
+    uchar *pixels = new uchar[3*rendersize*rendersize], *blurbuf = blur > 0 ? new uchar[3*rendersize*rendersize] : NULL;
     glPixelStorei(GL_PACK_ALIGNMENT, texalign(pixels, rendersize, 3));
     loopi(6)
     {
@@ -2292,10 +2292,16 @@ GLuint genenvmap(const vec &o, int envmapsize)
         glFrontFace((side.flipx==side.flipy)!=side.swapxy ? GL_CW : GL_CCW);
         drawcubemap(rendersize, 0, o, yaw, pitch, !side.flipx, !side.flipy, side.swapxy);
         glReadPixels(0, 0, rendersize, rendersize, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        if(blurbuf)
+        {
+            blurtexture(blur, 3, rendersize, rendersize, blurbuf, pixels);
+            swap(blurbuf, pixels);
+        }
         createtexture(tex, texsize, texsize, pixels, 3, 2, GL_RGB5, side.target, rendersize, rendersize);
     }
     glFrontFace(GL_CW);
     delete[] pixels;
+    if(blurbuf) delete[] blurbuf;
     glViewport(0, 0, screen->w, screen->h);
     forcecubemapload(tex);
     return tex;
@@ -2313,8 +2319,9 @@ void initenvmaps()
         const extentity &ent = *ents[i];
         if(ent.type != ET_ENVMAP) continue;
         envmap &em = envmaps.add();
-        em.radius = ent.attrs[0] ? max(0, min(10000, int(ent.attrs[0]))) : envmapradius;
-        em.size = ent.attrs[1] ? max(4, min(9, int(ent.attrs[1]))) : 0;
+        em.radius = ent.attrs[0] ? clamp(int(ent.attrs[0]), 0, 10000) : envmapradius;
+        em.size = ent.attrs[1] ? clamp(int(ent.attrs[1]), 4, 9) : 0;
+        em.blur = ent.attrs[2] ? clamp(int(ent.attrs[2]), 1, 2) : 0;
         em.o = ent.o;
         em.tex = 0;
     }
@@ -2328,7 +2335,7 @@ void genenvmaps()
     loopv(envmaps)
     {
         envmap &em = envmaps[i];
-        em.tex = genenvmap(em.o, em.size ? em.size : envmapsize);
+        em.tex = genenvmap(em.o, em.size ? em.size : envmapsize, em.blur);
         if(renderedframe) continue;
         int millis = SDL_GetTicks();
         if(millis - lastprogress >= 250)
