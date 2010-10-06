@@ -757,7 +757,7 @@ static int finishlightmap(lightmapworker *w)
 {
     if((hasskylight() || sunlights.length()) && blurskylight && (w->w>1 || w->h>1))
     {
-        blurimage(blurskylight, w->bpp, w->w, w->h, w->blur, w->ambient);
+        blurtexture(blurskylight, w->bpp, w->w, w->h, w->blur, w->ambient);
         swap(w->blur, w->ambient);
     }
     vec *sample = w->colordata;
@@ -864,7 +864,7 @@ static int finishlightmap(lightmapworker *w)
     }
     if(blurlms && (w->w>1 || w->h>1))
     {
-        blurimage(blurlms, w->bpp, w->w, w->h, w->blur, w->colorbuf);
+        blurtexture(blurlms, w->bpp, w->w, w->h, w->blur, w->colorbuf);
         memcpy(w->colorbuf, w->blur, w->bpp*w->w*w->h);
     }
     if(mincolor[3]==255) return SURFACE_LIGHTMAP_TOP;
