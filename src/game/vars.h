@@ -189,6 +189,10 @@ GFVAR(0, movespread, 0, 3, 1000);
 GFVAR(0, inairspread, 0, 3, 1000);
 GFVAR(0, impulsespread, 0, 6, 1000);
 
+GVAR(0, zoomlock, 0, 1, 2); // 0 = free, 1 = must be on floor, 2 = also must not be moving/sloping
+GVAR(0, zoomlimit, 1, 10, 150);
+GVAR(0, zoomtime, 1, 100, 10000);
+
 GFVAR(0, normalscale, 0, 1, 1000);
 GFVAR(0, limitedscale, 0, 0.75f, 1000);
 GFVAR(0, damagescale, 0, 1, 1000);
