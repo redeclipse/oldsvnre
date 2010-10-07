@@ -704,7 +704,7 @@ namespace hud
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showcrosshair || game::focus->state == CS_DEAD || client::waiting() || game::thirdpersonview(true))
+        else if(!showcrosshair || game::focus->state == CS_DEAD || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
@@ -1960,9 +1960,9 @@ namespace hud
                 drawtex(0, 0, w, h);
             }
         }
-        bool third = game::thirdpersonview(true);
+        bool third = game::thirdpersonview(true) && game::focus != game::player1;
         if(game::focus->state == CS_ALIVE && game::inzoom() && WEAP(game::focus->weapselect, zooms)) drawzoom(w, h);
-        if(showdamage && (!third || game::focus == game::player1))
+        if(showdamage && !third)
         {
             if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
             if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
