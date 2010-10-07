@@ -973,7 +973,7 @@ namespace server
         int sweap = m_weapon(gamemode, mutators);
         loopv(sents)
         {
-            if(!m_campaign(gamemode) && sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
+            if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
             {
                 sents[i].millis += GAME(enemyspawndelay);
                 switch(GAME(enemyspawnstyle) == 3 ? rnd(2)+1 : GAME(enemyspawnstyle))
@@ -1140,7 +1140,7 @@ namespace server
         if(ci->state.aitype >= AI_START) return ci->state.aientity;
         else
         {
-            if((m_campaign(gamemode) || m_trial(gamemode)) && !ci->state.cpnodes.empty())
+            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty())
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -3209,12 +3209,7 @@ namespace server
             {
                 if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) continue;
                 if(m_trial(gamemode) && ci->state.cpmillis < 0) continue;
-                int delay = m_delay(gamemode, mutators);
-                if(ci->state.aitype >= AI_START && ci->state.lastdeath)
-                {
-                    if(m_campaign(gamemode)) continue;
-                    else delay = GAME(enemyspawntime);
-                }
+                int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) continue;
                 int nospawn = 0;
                 if(smode && !smode->canspawn(ci, false)) { nospawn++; }

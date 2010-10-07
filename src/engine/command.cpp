@@ -491,7 +491,7 @@ void setsvarchecked(ident *id, const char *val)
         delete[] *id->storage.s;
         *id->storage.s = newstring(val);
         id->changed();
-        if(!(id->flags&IDF_WORLD) && (!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive))) conoutf("\fc%s set to %s", id->name, *id->storage.s);
+        if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
 #ifndef STANDALONE
         if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
