@@ -18,16 +18,9 @@ namespace client
     };
     vector<mapvote> mapvotes;
 
-    extern int votecmp(mapvote *a, mapvote *b);
-    VARF(IDF_PERSIST, sortvotes, 0, 0, 1, {
-        mapvotes.sort(votecmp);
-    });
-    VARF(IDF_PERSIST, cleanvotes, 0, 0, 1, {
-        if(cleanvotes && !mapvotes.empty()) loopvrev(mapvotes) if(mapvotes[i].players.empty()) mapvotes.remove(i);
-    });
-
-    int votecmp(mapvote *a, mapvote *b)
+    static int votecmp(mapvote *a, mapvote *b)
     {
+        extern int sortvotes;
         if(sortvotes)
         {
             if(a->players.length() > b->players.length()) return -1;
@@ -38,18 +31,24 @@ namespace client
         return 0;
     }
 
+    VARF(IDF_PERSIST, sortvotes, 0, 0, 1, mapvotes.sort(votecmp));
+    VARF(IDF_PERSIST, cleanvotes, 0, 0, 1, {
+        if(cleanvotes && !mapvotes.empty()) loopvrev(mapvotes) if(mapvotes[i].players.empty()) mapvotes.remove(i);
+    });
+
     void clearvotes(gameent *d, bool msg)
     {
         int found = 0;
         loopvrev(mapvotes) if(mapvotes[i].players.find(d) >= 0)
         {
-            mapvotes[i].players.removeobj(d); found++;
+            found++;
+            mapvotes[i].players.removeobj(d);
             if(cleanvotes && mapvotes[i].players.empty()) mapvotes.remove(i);
         }
         if(found)
         {
             if(!mapvotes.empty()) mapvotes.sort(votecmp);
-            if(msg) conoutft(CON_EVENT, "%s cleared their previous vote");
+            if(msg) conoutft(CON_EVENT, "%s cleared their previous vote", game::colorname(d));
         }
     }
 
@@ -394,18 +393,13 @@ namespace client
     }
     ICOMMAND(0, listclients, "i", (int *local), listclients(*local!=0));
 
-    void clearbans()
-    {
-        addmsg(N_CLEARBANS, "r");
-    }
-    ICOMMAND(0, clearbans, "", (), clearbans());
-
     void kick(const char *arg)
     {
         int i = parseplayer(arg);
         if(i>=0 && i!=game::player1->clientnum) addmsg(N_KICK, "ri", i);
     }
     ICOMMAND(0, kick, "s", (char *s), kick(s));
+    ICOMMAND(0, clearbans, "", (), addmsg(N_CLEARBANS, "r"));
 
     void setteam(const char *arg1, const char *arg2)
     {

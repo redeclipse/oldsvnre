@@ -50,9 +50,9 @@ struct identval
         char *s;    // ID_SVAR, VAL_STR
         const uint *code; // VAL_CODE
         ident *id;  // VAL_IDENT
-    }; 
-};  
-    
+    };
+};
+
 struct tagval : identval
 {
     int type;
@@ -310,7 +310,7 @@ extern void clearsleep(bool clearworlds = true);
 #define COMMAND(flags, name, nargs) COMMANDN(flags, name, name, nargs)
 
 // anonymous inline commands, uses nasty template trick with line numbers to keep names unique
-#define _ICOMMAND(flags, cmdname, name, nargs, proto, b) template<int N> struct cmdname; template<> struct cmdname<__LINE__> { static bool init; static void run proto; }; bool cmdname<__LINE__>::init = addcommand(name, (identfun)cmdname<__LINE__>::run, nargs, flags); void cmdname<__LINE__>::run proto \
+#define _ICOMMAND(flags, cmdname, name, nargs, proto, b) template<int N> struct cmdname; template<> struct cmdname<__LINE__> { static bool init; static void run proto; }; bool cmdname<__LINE__>::init = addcommand(name, (identfun)cmdname<__LINE__>::run, nargs, flags|IDF_COMPLETE); void cmdname<__LINE__>::run proto \
     { b; }
 #define ICOMMANDNAME(name) _icmd_##name
 #define ICOMMAND(flags, name, nargs, proto, b) _ICOMMAND(flags, ICOMMANDNAME(name), #name, nargs, proto, b)
