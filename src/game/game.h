@@ -1382,7 +1382,7 @@ namespace hud
 namespace game
 {
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
-            zoomtime, lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
+            lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow;
     extern float bloodscale, debrisscale;

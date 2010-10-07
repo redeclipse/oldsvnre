@@ -29,14 +29,17 @@ namespace game
     VAR(IDF_PERSIST, mousepanspeed, 1, 50, INT_MAX-1);
 
     VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
-    VAR(IDF_PERSIST, thirdpersonfollow, 0, 0, 1);
+    VAR(IDF_PERSIST, thirdpersonfollow, 0, 1, 1);
+    VAR(IDF_PERSIST, thirdpersonaiming, 0, 1, 1);
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 0.45f, 1);
-    FVAR(IDF_PERSIST, thirdpersondist, -1000, 20, 1000);
+    FVAR(IDF_PERSIST, thirdpersondist, -1000, 25, 1000);
+    FVAR(IDF_PERSIST, followblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, followdist, -1000, 25, 1000);
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
@@ -64,17 +67,17 @@ namespace game
     VAR(IDF_PERSIST, deathcamstyle, 0, 1, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
 
-    FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10.0f, 1000);
-    FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 10.0f, 1000);
+    FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10, 1000);
+    FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 10, 1000);
     FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 7.5f, 1000);
-    FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1.0f, 1000);
-    FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 1000);
+    FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
     VAR(IDF_PERSIST, zoommousetype, 0, 0, 2);
     VAR(IDF_PERSIST, zoommousedeadzone, 0, 25, 100);
     VAR(IDF_PERSIST, zoommousepanspeed, 1, 10, INT_MAX-1);
     VAR(IDF_PERSIST, zoomfov, 1, 10, 150);
-    VAR(IDF_PERSIST, zoomtime, 1, 100, 10000);
 
     VARF(IDF_PERSIST, zoomlevel, 1, 4, 10, checkzoom());
     VAR(IDF_PERSIST, zoomlevels, 1, 5, 10);
@@ -136,7 +139,7 @@ namespace game
         if(!viewonly && (focus->state == CS_DEAD || focus->state == CS_WAITING)) return true;
         if(!(focus != player1 ? thirdpersonfollow : thirdperson)) return false;
         if(player1->state == CS_EDITING) return false;
-        if(player1->state == CS_SPECTATOR && focus == player1) return false;
+        if(player1->state >= CS_SPECTATOR && focus == player1) return false;
         if(inzoom()) return false;
         return true;
     }
@@ -200,7 +203,12 @@ namespace game
 
     bool zoomallow()
     {
-        if(allowmove(player1) && WEAP(player1->weapselect, zooms)) return true;
+        if(allowmove(player1) && WEAP(player1->weapselect, zooms)) switch(zoomlock)
+        {
+            case 2: if(player1->move || player1->strafe || player1->physstate == PHYS_SLOPE) break;
+            case 1: if(player1->physstate == PHYS_FALL && !player1->onladder) break;
+            case 0: default: return true; break;
+        }
         zoomset(false, 0);
         return false;
     }
@@ -314,7 +322,7 @@ namespace game
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(d->state == CS_DEAD || d->state == CS_WAITING || d->state == CS_SPECTATOR || intermission)
+            if(d->state == CS_DEAD || d->state >= CS_SPECTATOR || intermission)
                 return false;
         }
         return true;
@@ -374,7 +382,7 @@ namespace game
 
     float transscale(gameent *d, bool third = true)
     {
-        float total = d == focus ? (third ? thirdpersonblend : firstpersonblend) : playerblend;
+        float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
         if(d->state == CS_ALIVE)
         {
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
@@ -1255,9 +1263,9 @@ namespace game
     {
         if(inzoom())
         {
-            int frame = lastmillis-lastzoom, f = zoomfov, t = zoomtime;
+            int frame = lastmillis-lastzoom, m = max(zoomfov, zoomlimit), f = m, t = zoomtime;
             checkzoom();
-            if(zoomlevels > 1 && zoomlevel < zoomlevels) f = fov()-(((fov()-zoomfov)/zoomlevels)*zoomlevel);
+            if(zoomlevels > 1 && zoomlevel < zoomlevels) f = fov()-(((fov()-m)/zoomlevels)*zoomlevel);
             float diff = float(fov()-f), amt = frame < t ? clamp(float(frame)/float(t), 0.f, 1.f) : 1.f;
             if(!zooming) amt = 1.f-amt;
             curfov = fov()-(amt*diff);
@@ -1269,7 +1277,7 @@ namespace game
     {
         bool hasinput = hud::hasinput(true);
         #define mousesens(a,b,c) ((float(a)/float(b))*c)
-        if(hasinput || (mousestyle() >= 1 && player1->state != CS_WAITING && player1->state != CS_SPECTATOR))
+        if(hasinput || mousestyle() >= 1)
         {
             if(mouseabsolute) // absolute positions, unaccelerated
             {
@@ -1286,10 +1294,11 @@ namespace game
         }
         else if(!tvmode())
         {
-            physent *target = player1->state == CS_WAITING || player1->state == CS_SPECTATOR ? camera1 : (allowmove(player1) ? player1 : NULL);
+            bool self = player1->state >= CS_SPECTATOR && focus != player1 && thirdpersonview(true) && thirdpersonaiming;
+            physent *target = player1->state >= CS_SPECTATOR ? (self ? player1 : camera1) : (allowmove(player1) ? player1 : NULL);
             if(target)
             {
-                float scale = (inzoom() && zoomsensitivity > 0 && zoomsensitivity < 1 ? 1.f-(zoomlevel/float(zoomlevels+1)*zoomsensitivity) : 1.f)*sensitivity;
+                float scale = (inzoom() && zoomsensitivity > 0 && zoomsensitivity < 1 ? 1.f-(zoomlevel/float(zoomlevels+1)*zoomsensitivity) : (self ? followsensitivity : 1.f))*sensitivity;
                 target->yaw += mousesens(dx, w, yawsensitivity*scale);
                 target->pitch -= mousesens(dy, h, pitchsensitivity*scale*(!hasinput && mouseinvert ? -1.f : 1.f));
                 fixfullrange(target->yaw, target->pitch, target->roll, false);
@@ -1545,7 +1554,7 @@ namespace game
             camera1->aimyaw = camera1->yaw;
             camera1->aimpitch = camera1->pitch;
         }
-        else if(focus->state == CS_WAITING || focus->state == CS_SPECTATOR)
+        else if(focus->state >= CS_SPECTATOR)
         {
             camera1->move = player1->move;
             camera1->strafe = player1->strafe;
@@ -1610,7 +1619,8 @@ namespace game
             if(allowmove(player1)) cameraplayer();
             else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
 
-            gameent *d = NULL; bool allow = player1->state == CS_SPECTATOR || player1->state == CS_WAITING, found = false;
+            gameent *d = NULL;
+            bool allow = player1->state >= CS_SPECTATOR, found = false;
             loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
             {
                 if(d->state != CS_SPECTATOR && allow && i == follow)
@@ -1710,7 +1720,8 @@ namespace game
                 }
             }
 
-            if(focus->state == CS_DEAD || focus->state == CS_WAITING || focus->state == CS_SPECTATOR)
+            bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1;
+            if(!self && (focus->state == CS_DEAD || focus->state >= CS_SPECTATOR))
             {
                 camera1->aimyaw = camera1->yaw;
                 camera1->aimpitch = camera1->pitch;
@@ -1719,15 +1730,15 @@ namespace game
             {
                 camera1->o = focus->headpos();
                 if(mousestyle() <= 1)
-                    findorientation(camera1->o, focus->yaw, focus->pitch, worldpos);
-
-                camera1->aimyaw = mousestyle() <= 1 ? focus->yaw : focus->aimyaw;
-                camera1->aimpitch = mousestyle() <= 1 ? focus->pitch : focus->aimpitch;
-                if(thirdpersonview(true) && thirdpersondist)
+                    findorientation(camera1->o, (self ? player1 : focus)->yaw, (self ? player1 : focus)->pitch, worldpos);
+                camera1->aimyaw = self ? player1->yaw : (mousestyle() <= 1 ? focus->yaw : focus->aimyaw);
+                camera1->aimpitch = self ? player1->pitch : (mousestyle() <= 1 ? focus->pitch : focus->aimpitch);
+                float dist = self ? followdist : thirdpersondist;
+                if(thirdpersonview(true) && dist)
                 {
                     vec dir;
-                    vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, thirdpersondist > 0 ? -1 : 1, 0, dir);
-                    physics::movecamera(camera1, dir, fabs(thirdpersondist), 1.0f);
+                    vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, dist > 0 ? -1 : 1, 0, dir);
+                    physics::movecamera(camera1, dir, fabs(dist), 1.0f);
                 }
                 camera1->resetinterp();
 
@@ -1736,8 +1747,8 @@ namespace game
                     case 0:
                     case 1:
                     {
-                        camera1->yaw = focus->yaw;
-                        camera1->pitch = focus->pitch;
+                        camera1->yaw = (self ? player1 : focus)->yaw;
+                        camera1->pitch = (self ? player1 : focus)->pitch;
                         if(mousestyle())
                         {
                             camera1->aimyaw = camera1->yaw;
@@ -1916,67 +1927,64 @@ namespace game
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
-    void renderabovehead(gameent *d, bool third, float trans)
+    void renderabovehead(gameent *d, float trans)
     {
-        if(third && d->type == ENT_PLAYER && !shadowmapping && !envmapping && trans > 1e-16f && d->o.squaredist(camera1->o) <= maxparticledistance*maxparticledistance)
+        vec pos = d->abovehead();
+        float blend = aboveheadblend*trans;
+        if(aboveheadnames && d != player1)
         {
-            vec pos = d->abovehead();
-            float blend = aboveheadblend*trans;
-            if(aboveheadnames && d != focus)
+            const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<default>");
+            if(name && *name)
             {
-                const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<default>");
-                if(name && *name)
-                {
-                    pos.z += aboveheadnamesize/2;
-                    part_textcopy(pos, name, PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
-                    pos.z += aboveheadnamesize/2+0.5f;
-                }
+                pos.z += aboveheadnamesize/2;
+                part_textcopy(pos, name, PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
+                pos.z += aboveheadnamesize/2+0.5f;
             }
-            if(aboveheadstatus)
+        }
+        if(aboveheadstatus)
+        {
+            Texture *t = NULL;
+            if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
+            else if(d->state == CS_ALIVE)
             {
-                Texture *t = NULL;
-                if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
-                else if(d->state == CS_ALIVE)
-                {
-                    if(d->conopen) t = textureload(hud::conopentex, 3);
-                    else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
-                        t = textureload(hud::teamtex(d->team), 3);
-                    else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
-                    else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                }
+                if(d->conopen) t = textureload(hud::conopentex, 3);
+                else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
+                    t = textureload(hud::teamtex(d->team), 3);
+                else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
+                else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
+            }
+            if(t && t != notexture)
+            {
+                pos.z += aboveheadstatussize/2;
+                part_icon(pos, t, aboveheadstatussize, blend);
+                pos.z += aboveheadstatussize/2+0.25f;
+            }
+        }
+        if(aboveheadicons && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
+        {
+            if(d->icons[i].type >= eventicon::SORTED && 2+(d->icons[i].type-eventicon::SORTED) > aboveheadicons) break;
+            if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
+            int millis = lastmillis-d->icons[i].millis;
+            if(millis <= d->icons[i].fade)
+            {
+                Texture *t = textureload(hud::icontex(d->icons[i].type, d->icons[i].value));
                 if(t && t != notexture)
                 {
-                    pos.z += aboveheadstatussize/2;
-                    part_icon(pos, t, aboveheadstatussize, blend);
-                    pos.z += aboveheadstatussize/2+0.25f;
-                }
-            }
-            if(aboveheadicons && d != focus && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
-            {
-                if(d->icons[i].type >= eventicon::SORTED && 2+(d->icons[i].type-eventicon::SORTED) > aboveheadicons) break;
-                if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
-                int millis = lastmillis-d->icons[i].millis;
-                if(millis <= d->icons[i].fade)
-                {
-                    Texture *t = textureload(hud::icontex(d->icons[i].type, d->icons[i].value));
-                    if(t && t != notexture)
+                    int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
+                    float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
+                          size = aboveheadiconsize*skew, fade = blend*skew, nudge = size/2;
+                    if(d->icons[i].type >= eventicon::SORTED)
                     {
-                        int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
-                        float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
-                              size = aboveheadiconsize*skew, fade = blend*skew, nudge = size/2;
-                        if(d->icons[i].type >= eventicon::SORTED)
+                        switch(d->icons[i].type)
                         {
-                            switch(d->icons[i].type)
-                            {
-                                case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
-                                case eventicon::AFFINITY: if(!m_bomber(gamemode)) colour = teamtype[d->icons[i].value].colour; // fall-through
-                                default: nudge *= 2; break;
-                            }
+                            case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
+                            case eventicon::AFFINITY: if(!m_bomber(gamemode)) colour = teamtype[d->icons[i].value].colour; // fall-through
+                            default: nudge *= 2; break;
                         }
-                        pos.z += nudge+0.125f;
-                        part_icon(pos, t, size, fade, 0, 0, 1, colour);
-                        pos.z += nudge;
                     }
+                    pos.z += nudge+0.125f;
+                    part_icon(pos, t, size, fade, 0, 0, 1, colour);
+                    pos.z += nudge;
                 }
             }
         }
@@ -2077,7 +2085,7 @@ namespace game
                 }
             }
         }
-        if(!early) renderabovehead(d, third, trans);
+        if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
         const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         bool hasweapon = showweap && *weapmdl;
         modelattach a[11]; int ai = 0;

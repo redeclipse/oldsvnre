@@ -326,7 +326,7 @@ namespace hud
         {
             case 1:
             {
-                if(game::focus->state == CS_WAITING || game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING) break;
+                if(game::focus->state >= CS_SPECTATOR || game::focus->state == CS_EDITING) break;
                 float damage = game::focus->state == CS_ALIVE ? min(damageresidue, 100)/100.f : 1.f,
                       healthscale = float(m_health(game::gamemode, game::mutators));
                 if(healthscale > 0) damage = max(damage, 1.f-max(game::focus->health, 0)/healthscale);
@@ -656,7 +656,7 @@ namespace hud
             if(index == POINTER_ZOOM && *zoomcrosshairtex && game::inzoom() && WEAP(game::focus->weapselect, zooms))
             {
                 int frame = lastmillis-game::lastzoom, off = int(zoomcrosshairsize*hudsize)-cs;
-                float amt = frame <= game::zoomtime ? clamp(float(frame)/float(game::zoomtime), 0.f, 1.f) : 1.f;
+                float amt = frame <= zoomtime ? clamp(float(frame)/float(zoomtime), 0.f, 1.f) : 1.f;
                 if(!game::zooming) amt = 1.f-amt;
                 cs += int(off*amt);
             }
@@ -703,9 +703,10 @@ namespace hud
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showcrosshair || game::focus->state == CS_DEAD || client::waiting()) index = POINTER_NONE;
+        else if(!showcrosshair || game::focus->state == CS_DEAD || client::waiting() || game::thirdpersonview(true))
+            index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
-        else if(game::focus->state == CS_SPECTATOR || game::focus->state == CS_WAITING) index = POINTER_SPEC;
+        else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
         else if(game::inzoom() && WEAP(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
         else if(totalmillis-game::focus->lasthit <= crosshairhitspeed) index = POINTER_HIT;
         else if(m_team(game::gamemode, game::mutators))
@@ -1873,7 +1874,7 @@ namespace hud
     {
         Texture *t = textureload(zoomtex, 3);
         int frame = lastmillis-game::lastzoom;
-        float pc = frame <= game::zoomtime ? float(frame)/float(game::zoomtime) : 1.f;
+        float pc = frame <= zoomtime ? float(frame)/float(zoomtime) : 1.f;
         if(!game::zooming) pc = 1.f-pc;
         int x = 0, y = 0, c = 0;
         if(w > h)
@@ -1957,13 +1958,15 @@ namespace hud
                 drawtex(0, 0, w, h);
             }
         }
+        bool third = game::thirdpersonview(true);
         if(game::focus->state == CS_ALIVE && game::inzoom() && WEAP(game::focus->weapselect, zooms)) drawzoom(w, h);
-        if(showdamage)
+        if(showdamage && (!third || game::focus == game::player1))
         {
             if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
             if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
         }
-        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : chkcond(showradar, game::tvmode()))) drawradar(w, h, fade);
+        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : !third && chkcond(showradar, game::tvmode())))
+            drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
 
         if(!texpaneltimer)
@@ -2097,21 +2100,24 @@ namespace hud
                     float a = game::lasttvchg ? (lastmillis-game::lasttvchg <= tvmodefade ? float(lastmillis-game::lasttvchg)/float(tvmodefade) : 1.f) : 0.f;
                     loopi(3) if(a < colour[i]) colour[i] *= a;
                 }
-                if(spawnfade && game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= spawnfade)
+                if(game::focus == game::player1 || !game::thirdpersonview(true))
                 {
-                    float a = (lastmillis-game::focus->lastspawn)/float(spawnfade/3);
-                    if(a < 3.f)
+                    if(spawnfade && game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= spawnfade)
                     {
-                        vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, true);
-                        if(a < 1.f) { loopi(3) col[i] *= a; }
-                        else { a = (a-1.f)*0.5f; loopi(3) col[i] += (1.f-col[i])*a; }
-                        loopi(3) if(col[i] < colour[i]) colour[i] *= col[i];
+                        float a = (lastmillis-game::focus->lastspawn)/float(spawnfade/3);
+                        if(a < 3.f)
+                        {
+                            vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, true);
+                            if(a < 1.f) { loopi(3) col[i] *= a; }
+                            else { a = (a-1.f)*0.5f; loopi(3) col[i] += (1.f-col[i])*a; }
+                            loopi(3) if(col[i] < colour[i]) colour[i] *= col[i];
+                        }
                     }
-                }
-                if(showdamage >= 2 && damageresidue > 0)
-                {
-                    float pc = min(damageresidue, 100)/100.f*damageskew;
-                    loopi(2) if(colour[i+1] > 0) colour[i+1] -= colour[i+1]*pc;
+                    if(showdamage >= 2 && damageresidue > 0)
+                    {
+                        float pc = min(damageresidue, 100)/100.f*damageskew;
+                        loopi(2) if(colour[i+1] > 0) colour[i+1] -= colour[i+1]*pc;
+                    }
                 }
             }
             if(colour.x < 1 || colour.y < 1 || colour.z < 1)
