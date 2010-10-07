@@ -734,6 +734,7 @@ namespace client
         }
     }
     ICOMMAND(0, map, "s", (char *s), changemap(s));
+    ICOMMAND(0, clearvote, "", (), addmsg(N_CLEARVOTE, "r"));
 
     void sendmap()
     {
@@ -1970,6 +1971,15 @@ namespace client
                     int reqmode = getint(p), reqmuts = getint(p);
                     if(!v) break;
                     vote(v, text, reqmode, reqmuts);
+                    break;
+                }
+
+                case N_CLEARVOTE:
+                {
+                    int vn = getint(p);
+                    gameent *v = game::getclient(vn);
+                    if(!v) break;
+                    clearvotes(v);
                     break;
                 }
 

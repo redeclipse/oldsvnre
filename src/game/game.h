@@ -59,119 +59,125 @@ enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
 struct enttypes
 {
     int type,           priority, links,    radius, usetype,    numattrs,
-            canlink,
-            reclink;
-    bool    noisy;  const char *name,           *attrs[9];
+            canlink, reclink;
+    bool    noisy,  syncs,  resyncs;
+    const char *name,           *attrs[9];
 };
 #ifdef GAMESERVER
 enttypes enttype[] = {
     {
         NOTUSED,        -1,         0,      0,      EU_NONE,    0,
-            0,
-            0,
-            true,               "none",         { "" }
+            0, 0,
+            true,   false,  false,
+                "none",         { "" }
     },
     {
         LIGHT,          1,          59,     0,      EU_NONE,    4,
-            (1<<LIGHTFX),
-            (1<<LIGHTFX),
-            false,              "light",        { "radius", "red",      "green",    "blue"  }
+            (1<<LIGHTFX), (1<<LIGHTFX),
+            false,  false,  false,
+                "light",        { "radius", "red",      "green",    "blue"  }
     },
     {
         MAPMODEL,       1,          58,     0,      EU_NONE,    7,
-            (1<<TRIGGER),
-            (1<<TRIGGER),
-            false,              "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour" }
+            (1<<TRIGGER), (1<<TRIGGER),
+            false,  false,  false,
+                "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour" }
     },
     {
         PLAYERSTART,    1,          59,     0,      EU_NONE,    5,
-            0,
-            0,
-            false,              "playerstart",  { "team",   "yaw",      "pitch",    "mode",     "id" }
+            0, 0,
+            false,  true,  false,
+                "playerstart",  { "team",   "yaw",      "pitch",    "mode",     "id" }
     },
     {
         ENVMAP,         1,          0,      0,      EU_NONE,    3,
-            0,
-            0,
-            false,              "envmap",       { "radius", "size", "blur" }
+            0, 0,
+            false,  false,  false,
+                "envmap",       { "radius", "size", "blur" }
     },
     {
         PARTICLES,      1,          59,     0,      EU_NONE,    9,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<TRIGGER)|(1<<PUSHER),
-            false,              "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i" }
+            false,  false,  false,
+                "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i" }
     },
     {
         MAPSOUND,       1,          58,     0,      EU_NONE,    5,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<TRIGGER)|(1<<PUSHER),
-            false,              "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
+            false,  false,  false,
+                "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
     },
     {
         LIGHTFX,        1,          1,      0,      EU_NONE,    5,
             (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER),
-            false,              "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
+            false,  false,  false,
+                "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
     {
         SUNLIGHT,       1,          160,    0,      EU_NONE,    6,
-            0,
-            0,
-            false,              "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
+            0, 0,
+            false,  false,  false,
+                "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
     },
     {
         WEAPON,         2,          59,     16,     EU_ITEM,    4,
-            0,
-            0,
-            false,              "weapon",       { "type",   "flags",    "mode",     "id" }
+            0, 0,
+            false,  true,   true,
+                "weapon",       { "type",   "flags",    "mode",     "id" }
     },
     {
         TELEPORT,       1,          50,     12,     EU_AUTO,    6,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,              "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type" }
+            false,  false,  false,
+                "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type" }
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    8,
-            (1<<AFFINITY)|(1<<WAYPOINT),
-            0,
-            false,              "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed" }
+            (1<<AFFINITY)|(1<<WAYPOINT), 0,
+            false,  true,   false,
+                "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed" }
     },
     {
         TRIGGER,        1,          58,     16,     EU_AUTO,    6,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,              "trigger",      { "id",     "type",     "action",   "radius",   "state",    "mode" }
+            false,  true,   true,
+                "trigger",      { "id",     "type",     "action",   "radius",   "state",    "mode" }
     },
     {
         PUSHER,         1,          58,     12,     EU_AUTO,    6,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,              "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
+            false,  false,  false,
+                "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
         AFFINITY,       1,          48,     36,     EU_NONE,    5,
-            (1<<AFFINITY),
-            0,
-            false,              "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
+            (1<<AFFINITY), 0,
+            false,  false,  false,
+                "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
     },
     {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    6,
-            0,
-            0,
-            false,              "checkpoint",   { "radius", "yaw",      "pitch",    "mode",     "id",       "type" }
+            0, 0,
+            false,  true,   false,
+                "checkpoint",   { "radius", "yaw",      "pitch",    "mode",     "id",       "type" }
     },
     {
         CAMERA,         1,          48,     0,      EU_NONE,    3,
-            (1<<CAMERA),
-            0,
-            false,              "camera",       { "type",   "mindist",  "maxdist" }
+            (1<<CAMERA), 0,
+            false,  false,  false,
+                "camera",       { "type",   "mindist",  "maxdist" }
     },
     {
         WAYPOINT,       0,          1,      16,     EU_NONE,    2,
-            (1<<WAYPOINT),
-            0,
-            true,               "waypoint",     { "flags",  "weight" }
+            (1<<WAYPOINT), 0,
+            true,   false,  false,
+                "waypoint",     { "flags",  "weight" }
     }
 };
 #else
@@ -436,7 +442,7 @@ enum
     N_CONNECT = 0, N_SERVERINIT, N_WELCOME, N_CLIENTINIT, N_POS, N_SPHY, N_TEXT, N_COMMAND, N_ANNOUNCE, N_DISCONNECT,
     N_SHOOT, N_DESTROY, N_SUICIDE, N_DIED, N_POINTS, N_DAMAGE, N_SHOTFX,
     N_LOADWEAP, N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_DROP, N_WEAPSELECT,
-    N_MAPCHANGE, N_MAPVOTE, N_CHECKPOINT, N_ITEMSPAWN, N_ITEMUSE, N_TRIGGER, N_EXECLINK,
+    N_MAPCHANGE, N_MAPVOTE, N_CLEARVOTE, N_CHECKPOINT, N_ITEMSPAWN, N_ITEMUSE, N_TRIGGER, N_EXECLINK,
     N_PING, N_PONG, N_CLIENTPING, N_TICK, N_NEWGAME, N_ITEMACC, N_SERVMSG, N_GAMEINFO, N_RESUME,
     N_EDITMODE, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_REMIP, N_CLIPBOARD, N_NEWMAP,
     N_GETMAP, N_SENDMAP, N_FAILMAP, N_SENDMAPFILE, N_SENDMAPSHOT, N_SENDMAPCONFIG,
@@ -463,7 +469,7 @@ char msgsizelookup(int msg)
         N_SHOOT, 0, N_DESTROY, 0, N_SUICIDE, 3, N_DIED, 8, N_POINTS, 4, N_DAMAGE, 10, N_SHOTFX, 0,
         N_LOADWEAP, 0, N_TRYSPAWN, 2, N_SPAWNSTATE, 0, N_SPAWN, 0,
         N_DROP, 0, N_WEAPSELECT, 0,
-        N_MAPCHANGE, 0, N_MAPVOTE, 0, N_CHECKPOINT, 0, N_ITEMSPAWN, 3, N_ITEMUSE, 0, N_TRIGGER, 0, N_EXECLINK, 3,
+        N_MAPCHANGE, 0, N_MAPVOTE, 0, N_CLEARVOTE, 0, N_CHECKPOINT, 0, N_ITEMSPAWN, 3, N_ITEMUSE, 0, N_TRIGGER, 0, N_EXECLINK, 3,
         N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
         N_TICK, 2, N_NEWGAME, 1, N_ITEMACC, 0,
         N_SERVMSG, 0, N_GAMEINFO, 0, N_RESUME, 0,
