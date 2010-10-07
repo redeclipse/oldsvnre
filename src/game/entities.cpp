@@ -975,7 +975,7 @@ namespace entities
 
     void putitems(packetbuf &p)
     {
-        loopv(ents) if(enttype[ents[i]->type].usetype == EU_ITEM || ents[i]->type == PLAYERSTART || ents[i]->type == CHECKPOINT || ents[i]->type == ACTOR || ents[i]->type == TRIGGER)
+        loopv(ents) if(enttype[ents[i]->type].syncs)
         {
             gameentity &e = *(gameentity *)ents[i];
             putint(p, i);

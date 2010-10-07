@@ -2392,7 +2392,7 @@ namespace server
         if(hasgameinfo)
         {
             putint(p, N_GAMEINFO);
-            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM || sents[i].type == TRIGGER)
+            loopv(sents) if(enttype[sents[i].type].resyncs)
             {
                 putint(p, i);
                 if(enttype[sents[i].type].usetype == EU_ITEM) putint(p, finditem(i) ? 1 : 0);
@@ -4102,13 +4102,24 @@ namespace server
                     break;
                 }
 
+                case N_CLEARVOTE:
+                {
+                    if(ci->mapvote[0])
+                    {
+                        ci->mapvote[0] = 0;
+                        ci->modevote = ci->mutsvote = 0;
+                        QUEUE_MSG;
+                    }
+                    break;
+                }
+
                 case N_GAMEINFO:
                 {
                     int n, np = getint(p);
                     while((n = getint(p)) != -1)
                     {
                         int type = getint(p), numattr = getint(p), numkin = getint(p);
-                        if(!hasgameinfo && (enttype[type].usetype == EU_ITEM || type == PLAYERSTART || type == CHECKPOINT || type == ACTOR || type == TRIGGER))
+                        if(!hasgameinfo && enttype[type].syncs)
                         {
                             while(sents.length() <= n) sents.add();
                             sents[n].reset();
