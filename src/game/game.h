@@ -424,6 +424,7 @@ extern mutstypes mutstype[];
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
 #define m_scores(a)         (a >= G_EDITMODE && a <= G_DEATHMATCH)
+#define m_checkpoint(a)     (m_campaign(a) || m_trial(a))
 
 #define m_weapon(a,b)       (m_arena(a,b) ? -1 : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_trial(a) ? GAME(trialweapon) : GAME(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)

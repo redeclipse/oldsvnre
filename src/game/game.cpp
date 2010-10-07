@@ -369,7 +369,7 @@ namespace game
         float total = amt;
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
-            int len = d->aitype >= AI_START ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
+            int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
             if(len > 0 && (!timechk || len > 1000))
             {
                 int interval = min(len/3, 1000), over = max(len-interval, 500), millis = lastmillis-d->lastdeath;
@@ -714,7 +714,7 @@ namespace game
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
-            if(isweap(weap) && !burning && !bleeding && (d == player1 || !isaitype(d->aitype) || aistyle[d->aitype].canmove))
+            if(isweap(weap) && !burning && !bleeding && (d == player1 || !isaitype(d->aitype) || (aistyle[d->aitype].canmove && d->health > 0)))
             {
                 if(WEAP2(weap, slow, flags&HIT_ALT) != 0 && !(flags&HIT_WAVE) && hithurts(flags))
                     d->vel.mul(1.f-((float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT)))*WEAP2(weap, slow, flags&HIT_ALT))*slowscale);

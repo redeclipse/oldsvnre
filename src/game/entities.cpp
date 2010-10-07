@@ -761,9 +761,9 @@ namespace entities
             e.lastuse = lastmillis;
             switch(e.attrs[1])
             {
-                case TR_TOGGLE: case TR_LINK: case TR_ONCE: case TR_EXIT:
+                case TR_EXIT: if(d->aitype >= AI_BOT) break;
+                case TR_TOGGLE: case TR_LINK: case TR_ONCE:
                 { // wait for ack
-                    if(e.attrs[1] == TR_EXIT && (d->aitype >= AI_BOT || !m_campaign(game::gamemode))) break;
                     client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
                     break;
                 }
@@ -920,7 +920,7 @@ namespace entities
                 }
                 case CHECKPOINT:
                 {
-                    if(!m_check(e.attrs[3], game::gamemode) || (!m_campaign(game::gamemode) && !m_trial(game::gamemode))) break;
+                    if(!m_check(e.attrs[3], game::gamemode) || !m_checkpoint(game::gamemode)) break;
                     if(d->checkpoint != n)
                     {
                         client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);

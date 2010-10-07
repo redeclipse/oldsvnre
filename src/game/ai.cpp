@@ -1461,9 +1461,9 @@ namespace ai
             }
             if(d->state == CS_DEAD)
             {
-                if((d->aitype == AI_BOT || !m_campaign(game::gamemode)) && d->respawned < 0 && (!d->lastdeath || lastmillis-d->lastdeath > (d->aitype == AI_BOT || m_duke(game::gamemode, game::mutators) ? 500 : enemyspawntime)))
+                if(d->respawned < 0 && (!d->lastdeath || lastmillis-d->lastdeath > (d->aitype == AI_BOT ? 500 : enemyspawntime)))
                 {
-                    if(m_arena(game::gamemode, game::mutators))
+                    if(d->aitype == AI_BOT && m_arena(game::gamemode, game::mutators))
                     {
                         d->loadweap[0] = d->ai->weappref; d->loadweap[1] = WEAP_PISTOL;
                         client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
