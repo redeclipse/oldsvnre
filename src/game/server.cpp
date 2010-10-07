@@ -4107,7 +4107,7 @@ namespace server
                     if(ci->mapvote[0])
                     {
                         ci->mapvote[0] = 0;
-                        ci->modevote = ci->mutsvote = 0;
+                        ci->modevote = ci->mutsvote = -1;
                         QUEUE_MSG;
                     }
                     break;

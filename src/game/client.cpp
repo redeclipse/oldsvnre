@@ -38,7 +38,7 @@ namespace client
         return 0;
     }
 
-    void clearvotes(gameent *d)
+    void clearvotes(gameent *d, bool msg)
     {
         int found = 0;
         loopvrev(mapvotes) if(mapvotes[i].players.find(d) >= 0)
@@ -46,7 +46,11 @@ namespace client
             mapvotes[i].players.removeobj(d); found++;
             if(cleanvotes && mapvotes[i].players.empty()) mapvotes.remove(i);
         }
-        if(found && !mapvotes.empty()) mapvotes.sort(votecmp);
+        if(found)
+        {
+            if(!mapvotes.empty()) mapvotes.sort(votecmp);
+            if(msg) conoutft(CON_EVENT, "%s cleared their previous vote");
+        }
     }
 
     void vote(gameent *d, const char *text, int mode, int muts)
@@ -1976,10 +1980,8 @@ namespace client
 
                 case N_CLEARVOTE:
                 {
-                    int vn = getint(p);
-                    gameent *v = game::getclient(vn);
-                    if(!v) break;
-                    clearvotes(v);
+                    if(!d) break;
+                    clearvotes(d, true);
                     break;
                 }
 
