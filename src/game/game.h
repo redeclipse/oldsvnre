@@ -168,10 +168,10 @@ enttypes enttype[] = {
                 "checkpoint",   { "radius", "yaw",      "pitch",    "mode",     "id",       "type" }
     },
     {
-        CAMERA,         1,          48,     0,      EU_NONE,    3,
-            (1<<CAMERA), 0,
+        CAMERA,         1,          48,     0,      EU_NONE,    4,
+            0, 0,
             false,  false,  false,
-                "camera",       { "type",   "mindist",  "maxdist" }
+                "camera",       { "yaw",   "pitch",     "mindist",  "maxdist" }
     },
     {
         WAYPOINT,       0,          1,      16,     EU_NONE,    2,

@@ -968,8 +968,8 @@ namespace game
             concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
             loopv(log)
             {
-                defformatstring(entry)(" %s%s%s", log.length() > 1 && i == log.length()-1 ? "and " : "", colorname(log[i]), log.length() > 1 && i < log.length()-1 ? "," : "");
-                concatstring(d->obit, entry);
+                concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
+                concatstring(d->obit, colorname(log[i]));
             }
         }
         if(d != actor)
@@ -1418,9 +1418,9 @@ namespace game
                         c.pos = d.o; c.ent = i;
                         if(!k)
                         {
-                            c.idx = e.attrs[0];
-                            if(e.attrs[1]) c.mindist = e.attrs[1];
-                            if(e.attrs[2]) c.maxdist = e.attrs[2];
+                            vecfromyawpitch(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0], e.attrs[1], 1, 0, c.dir);
+                            if(e.attrs[2]) c.mindist = e.attrs[2];
+                            if(e.attrs[3]) c.maxdist = e.attrs[3];
                         }
                     }
                 }

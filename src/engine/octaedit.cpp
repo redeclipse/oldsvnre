@@ -2092,7 +2092,7 @@ struct texturegui : guicb
                 {
                     if(totalmillis-lastthumbnail<thumbtime)
                     {
-                        g.texture(dummyvslot, thumbsize, false); //create an empty space
+                        g.texture(dummyvslot, thumbheight*thumbsize, false); //create an empty space
                         continue;
                     }
                     loadthumbnail(*v.slot);
