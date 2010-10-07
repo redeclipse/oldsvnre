@@ -430,8 +430,8 @@ struct ImageData
 struct TextureAnim
 {
     int count, delay, x, y, w, h;
-
-    TextureAnim() : count(0), delay(0) {}
+    bool throb;
+    TextureAnim() : count(0), delay(0), throb(false) {}
 };
 
 
@@ -451,13 +451,13 @@ struct Texture
 
     char *name;
     int type, w, h, xs, ys, bpp, clamp, frame, delay, last;
-    bool mipmap, canreduce;
+    bool mipmap, canreduce, throb;
     vector<GLuint> frames;
     GLuint id;
     uchar *alphamask;
 
 
-    Texture() : frame(0), delay(0), last(0), alphamask(NULL)
+    Texture() : frame(0), delay(0), last(0), throb(false), alphamask(NULL)
     {
         frames.shrink(0);
     }

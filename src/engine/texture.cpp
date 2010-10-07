@@ -630,11 +630,12 @@ void updatetexture(Texture *t)
             while(lastmillis-t->last >= t->delay)
             {
                 t->frame++;
-                if(t->frame >= t->frames.length()) t->frame = 0;
+                int frames = t->throb ? (t->frames.length()-1)*2 : t->frames.length();
+                if(t->frame >= frames) t->frame = 0;
                 t->last += t->delay;
             }
-
-            if(t->frames.inrange(t->frame)) t->id = t->frames[t->frame];
+            int frame = t->throb && t->frame >= t->frames.length() ? (t->frames.length()-1)*2-t->frame : t->frame;
+            if(t->frames.inrange(frame)) t->id = t->frames[frame];
             else t->id = t->frames[0];
 
             if(t->id <= 0)
@@ -705,6 +706,7 @@ static Texture *newtexture(Texture *t, const char *rname, ImageData &s, int clam
     bool hasanim = anim && anim->count;
     t->bpp = s.compressed ? formatsize(uncompressedformat(s.compressed)) : s.bpp;
     t->delay = hasanim ? anim->delay : 0;
+    t->throb = hasanim ? anim->throb : false;
 
     t->w = t->xs = hasanim ? anim->w : s.w;
     t->h = t->ys = hasanim ? anim->h : s.h;
@@ -1085,9 +1087,10 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         {
             if(anim)
             {
-                anim->delay = arg[0] ? atoi(arg[0]) : 250;
+                anim->delay = arg[0] ? atoi(arg[0]) : 50;
                 anim->x = arg[1] ? atoi(arg[1]) : 1;
                 anim->y = arg[2] ? atoi(arg[2]) : 2;
+                anim->throb = arg[3] && atoi(arg[3]);
                 anim->w = d.w/anim->x;
                 anim->h = d.h/anim->y;
                 anim->count = anim->x*anim->y;

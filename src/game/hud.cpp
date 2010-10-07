@@ -260,17 +260,18 @@ namespace hud
     TVAR(IDF_PERSIST, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST, badgetex, "textures/cube2badge", 3);
 
-    TVAR(IDF_PERSIST, spree1tex, "<anim:100,1,4>textures/carnage", 3);
-    TVAR(IDF_PERSIST, spree2tex, "<anim:100,1,4>textures/slaughter", 3);
-    TVAR(IDF_PERSIST, spree3tex, "<anim:100,1,4>textures/massacre", 3);
-    TVAR(IDF_PERSIST, spree4tex, "<anim:100,1,4>textures/bloodbath", 3);
-    TVAR(IDF_PERSIST, multi1tex, "<anim:100,1,4>textures/double", 3);
-    TVAR(IDF_PERSIST, multi2tex, "<anim:100,1,4>textures/triple", 3);
-    TVAR(IDF_PERSIST, multi3tex, "<anim:100,1,4>textures/multi", 3);
-    TVAR(IDF_PERSIST, headshottex, "<anim:100,1,4>textures/headshot", 3);
-    TVAR(IDF_PERSIST, criticaltex, "<anim:100,1,4>textures/critical", 3);
-    TVAR(IDF_PERSIST, dominatetex, "<anim:100,1,4>textures/dominate", 3);
-    TVAR(IDF_PERSIST, revengetex, "<anim:100,1,4>textures/revenge", 3);
+    TVAR(IDF_PERSIST, spree1tex, "<anim:50,1,4,1>textures/carnage", 3);
+    TVAR(IDF_PERSIST, spree2tex, "<anim:50,1,4,1>textures/slaughter", 3);
+    TVAR(IDF_PERSIST, spree3tex, "<anim:50,1,4,1>textures/massacre", 3);
+    TVAR(IDF_PERSIST, spree4tex, "<anim:50,1,4,1>textures/bloodbath", 3);
+    TVAR(IDF_PERSIST, multi1tex, "<anim:50,1,4,1>textures/double", 3);
+    TVAR(IDF_PERSIST, multi2tex, "<anim:50,1,4,1>textures/triple", 3);
+    TVAR(IDF_PERSIST, multi3tex, "<anim:50,1,4,1>textures/multi", 3);
+    TVAR(IDF_PERSIST, headshottex, "<anim:50,1,4,1>textures/headshot", 3);
+    TVAR(IDF_PERSIST, criticaltex, "<anim:50,1,4,1>textures/critical", 3);
+    TVAR(IDF_PERSIST, dominatetex, "<anim:50,1,4,1>textures/dominate", 3);
+    TVAR(IDF_PERSIST, revengetex, "<anim:50,1,4,1>textures/revenge", 3);
+    TVAR(IDF_PERSIST, firstbloodtex, "textures/firstblood", 3);
 
     bool needminimap() { return false; }
 
@@ -1481,6 +1482,7 @@ namespace hud
             case eventicon::CRITICAL: return criticaltex; break;
             case eventicon::DOMINATE: return dominatetex; break;
             case eventicon::REVENGE: return revengetex; break;
+            case eventicon::FIRSTBLOOD: return firstbloodtex; break;
             case eventicon::WEAPON: return itemtex(WEAPON, value);
             case eventicon::AFFINITY:
             {
