@@ -4108,7 +4108,7 @@ namespace server
                     {
                         ci->mapvote[0] = 0;
                         ci->modevote = ci->mutsvote = -1;
-                        QUEUE_MSG;
+                        sendf(-1, 1, "ri2", N_CLEARVOTE, ci->clientnum);
                     }
                     break;
                 }

@@ -1974,8 +1974,10 @@ namespace client
 
                 case N_CLEARVOTE:
                 {
-                    if(!d) break;
-                    clearvotes(d, true);
+                    int vn = getint(p);
+                    gameent *v = game::getclient(vn);
+                    if(!v) break;
+                    clearvotes(v, true);
                     break;
                 }
 
