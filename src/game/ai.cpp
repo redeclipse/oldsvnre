@@ -1056,8 +1056,11 @@ namespace ai
                     d->ai->targpitch = pitch;
                     frame *= 2;
                     d->ai->becareful = false;
-                    if(d->aitype == AI_BOT) locked = true;
-                    if(!weaptype[d->weapselect].melee) d->action[AC_SPECIAL] = true;
+                    if(d->aitype == AI_BOT)
+                    {
+                        locked = true;
+                        if(!weaptype[d->weapselect].melee) d->action[AC_SPECIAL] = true;
+                    }
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick)
