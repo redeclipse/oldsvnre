@@ -885,7 +885,8 @@ namespace game
                     actor->addicon(eventicon::REVENGE, lastmillis, eventiconfade); // revenge
                     actor->dominating.removeobj(d);
                     d->dominated.removeobj(actor);
-                    anc = S_V_REVENGE; override = true;
+                    anc = S_V_REVENGE;
+                    override = true;
                 }
                 else if(style&FRAG_DOMINATE)
                 {
@@ -893,7 +894,8 @@ namespace game
                     actor->addicon(eventicon::DOMINATE, lastmillis, eventiconfade); // dominating
                     if(actor->dominated.find(d) < 0) actor->dominated.add(d);
                     if(d->dominating.find(actor) < 0) d->dominating.add(actor);
-                    anc = S_V_DOMINATE; override = true;
+                    anc = S_V_DOMINATE;
+                    override = true;
                 }
                 concatstring(d->obit, " ");
                 concatstring(d->obit, colorname(actor));
@@ -923,8 +925,14 @@ namespace game
                 actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
                 if(!override) anc = S_V_HEADSHOT;
             }
+            if(style&FRAG_FIRSTBLOOD)
+            {
+                concatstring(d->obit, " for \fs\fzrwfirst blood\fS");
+                actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
+                if(!override) anc = S_V_FIRSTBLOOD;
+                override = true;
+            }
 
-            if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzgrcritical\fS hit");
             if(style&FRAG_SPREE1)
             {
                 concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
@@ -953,6 +961,7 @@ namespace game
                 if(!override) anc = S_V_SPREE4;
                 override = true;
             }
+            if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzgrcritical\fS hit");
         }
         if(!log.empty())
         {

@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         208
+#define GAMEVERSION         209
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -32,7 +32,7 @@ enum
     S_V_FIGHT, S_V_CHECKPOINT, S_V_ONEMINUTE, S_V_HEADSHOT,
     S_V_SPREE, S_V_SPREE2, S_V_SPREE3, S_V_SPREE4,
     S_V_MULTI, S_V_MULTI2, S_V_MULTI3,
-    S_V_REVENGE, S_V_DOMINATE,
+    S_V_REVENGE, S_V_DOMINATE, S_V_FIRSTBLOOD,
     S_V_YOUWIN, S_V_YOULOSE, S_V_MCOMPLETE,
     S_V_FRAGGED, S_V_OWNED,
     S_GAME
@@ -212,7 +212,7 @@ enum
     FRAG_NONE = 0, FRAG_HEADSHOT = 1<<1, FRAG_OBLITERATE = 1<<2,
     FRAG_SPREE1 = 1<<3, FRAG_SPREE2 = 1<<4, FRAG_SPREE3 = 1<<5, FRAG_SPREE4 = 1<<6,
     FRAG_MKILL1 = 1<<7, FRAG_MKILL2 = 1<<8, FRAG_MKILL3 = 1<<9,
-    FRAG_REVENGE = 1<<10, FRAG_DOMINATE = 1<<11,
+    FRAG_REVENGE = 1<<10, FRAG_DOMINATE = 1<<11, FRAG_FIRSTBLOOD = 1<<12,
     FRAG_SPREES = 4, FRAG_SPREE = 3, FRAG_MKILL = 7,
     FRAG_CHECK = FRAG_SPREE1|FRAG_SPREE2|FRAG_SPREE3|FRAG_SPREE4,
     FRAG_MULTI = FRAG_MKILL1|FRAG_MKILL2|FRAG_MKILL3,
@@ -900,7 +900,7 @@ extern const char * const animnames[];
 
 struct eventicon
 {
-    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, AFFINITY, WEAPON, TOTAL, SORTED = AFFINITY, VERBOSE = WEAPON };
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, FIRSTBLOOD, AFFINITY, WEAPON, TOTAL, SORTED = AFFINITY, VERBOSE = WEAPON };
     int type, millis, fade, length, value;
 };
 
@@ -1342,7 +1342,7 @@ namespace weapons
 namespace hud
 {
     extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *cardtex, *flagtex, *bombtex, *arrowtex, *alerttex, *inventorytex, *indicatortex, *crosshairtex, *hitcrosshairtex,
-                *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex;
+                *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex, *firstbloodtex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radaraffinitynames, inventorygame, inventoryaffinity, teamkillnum;
     extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize;
     extern vector<int> teamkills;

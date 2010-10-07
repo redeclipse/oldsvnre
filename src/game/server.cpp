@@ -1855,9 +1855,10 @@ namespace server
     #include "duelmut.h"
     #include "aiman.h"
 
+    bool firstblood = false;
     void changemap(const char *name, int mode, int muts)
     {
-        hasgameinfo = maprequest = mapsending = shouldcheckvotes = false;
+        hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
         aiman::clearai();
         aiman::dorefresh = true;
         stopdemo();
@@ -2589,6 +2590,12 @@ namespace server
                 }
                 else if(actor != target && actor->state.aitype < AI_START)
                 {
+                    if(!firstblood && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
+                    {
+                        firstblood = true;
+                        style |= FRAG_FIRSTBLOOD;
+                        pointvalue *= 2;
+                    }
                     if((flags&HIT_PROJ) && (flags&HIT_HEAD))
                     {
                         style |= FRAG_HEADSHOT;

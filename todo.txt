@@ -10,12 +10,10 @@
 
 = Art =
 * Better looking fixed-width fonts
+* "First Blood" event icon (see: textures/firstblood.png)
 
 = Sounds =
-* Double/Triple/Multi kill
-* Spree 5/6 (7/8/9/10?)
 * Team change announcer?
-* First blood (+points?)
 
 = Wishlist/Other =
 * Make parkour mechanics require a certain height off the ground?
