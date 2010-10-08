@@ -127,6 +127,7 @@ namespace hud
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, INT_MAX-1);
     FVAR(IDF_PERSIST, crosshairblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, crosshairaccamt, 0, 0.75f, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairthrob, 1e-4f, 0.3f, 1000);
     TVAR(IDF_PERSIST, relativecursortex, "textures/relative", 3);
@@ -447,7 +448,7 @@ namespace hud
     enum
     {
         POINTER_NONE = 0, POINTER_RELATIVE, POINTER_GUI, POINTER_EDIT, POINTER_SPEC,
-        POINTER_HAIR, POINTER_TEAM, POINTER_HIT, POINTER_ZOOM, POINTER_MAX
+        POINTER_HAIR, POINTER_TEAM, POINTER_ZOOM, POINTER_MAX
     };
 
     const char *getpointer(int index)
@@ -460,7 +461,6 @@ namespace hud
             case POINTER_SPEC: return speccursortex;
             case POINTER_HAIR: return crosshairtex;
             case POINTER_TEAM: return teamcrosshairtex;
-            case POINTER_HIT: return *hitcrosshairtex ? hitcrosshairtex : crosshairtex;
             case POINTER_ZOOM: return *zoomcrosshairtex ? zoomcrosshairtex : crosshairtex;
             default: break;
         }
@@ -634,9 +634,8 @@ namespace hud
         }
     }
 
-    void drawpointerindex(int index, int x, int y, int s, float r, float g, float b, float fade)
+    void drawpointertex(const char *tex, int x, int y, int s, float r, float g, float b, float fade)
     {
-        const char *tex = getpointer(index);
         Texture *t = tex && *tex ? textureload(tex, 3) : NULL;
         if(t && t != notexture)
         {
@@ -644,7 +643,7 @@ namespace hud
             else glBlendFunc(GL_ONE, GL_ONE);
             glColor4f(r, g, b, fade);
             glBindTexture(GL_TEXTURE_2D, t->id);
-            drawsized(index == POINTER_GUI && !cursorstyle ? x : x-s/2, index == POINTER_GUI && !cursorstyle ? y : y-s/2, s);
+            drawsized(x, y, s);
         }
     }
 
@@ -679,13 +678,15 @@ namespace hud
                 fade *= 1.f-skew;
                 cs += int(cs*crosshairthrob*skew);
             }
-            if(showcrosshair >= 2) fade /= weapons::accmod(game::focus, physics::secondaryweap(game::focus, true));
+            if(showcrosshair >= 2) fade /= weapons::accmod(game::focus, physics::secondaryweap(game::focus, true))*crosshairaccamt;
         }
         int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory);
         if(index != POINTER_GUI)
         {
-            int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f);
-            drawpointerindex(index, game::mousestyle() != 1 ? cx : nx, game::mousestyle() != 1 ? cy : ny, cs, r, g, b, fade);
+            int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f), ss = int(crosshairsize*hudsize),
+                sx = game::mousestyle() != 1 ? cx : nx, sy = game::mousestyle() != 1 ? cy : ny;
+            #define POINTER(a,b,c) (a == POINTER_GUI && !cursorstyle ? b : b-c/2)
+            drawpointertex(getpointer(index), sx-cs/2, sy-cs/2, cs, r, g, b, fade);
             if(index > POINTER_GUI)
             {
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
@@ -694,22 +695,23 @@ namespace hud
                     if(showindicator) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
                 if(game::mousestyle() >= 1) // renders differently
-                    drawpointerindex(POINTER_RELATIVE, game::mousestyle() != 1 ? nx : cx, game::mousestyle() != 1 ? ny : cy, int(crosshairsize*hudsize), 1, 1, 1, crosshairblend*hudblend);
+                    drawpointertex(getpointer(POINTER_RELATIVE), (game::mousestyle() != 1 ? nx : cx)-ss/2, (game::mousestyle() != 1 ? ny : cy)-ss/2, ss, 1, 1, 1, crosshairblend*hudblend);
+                if(crosshairhitspeed && *hitcrosshairtex && totalmillis-game::focus->lasthit <= crosshairhitspeed)
+                    drawpointertex(hitcrosshairtex, sx-ss/2, sy-ss/2, ss, 1, 1, 1, crosshairblend*hudblend);
             }
         }
-        else drawpointerindex(index, cx, cy, cs, r, g, b, fade);
+        else drawpointertex(getpointer(index), cx, cy, cs, r, g, b, fade);
     }
 
     void drawpointers(int w, int h)
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showcrosshair || game::focus->state == CS_DEAD || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
+        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
         else if(game::inzoom() && WEAP(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
-        else if(totalmillis-game::focus->lasthit <= crosshairhitspeed) index = POINTER_HIT;
         else if(m_team(game::gamemode, game::mutators))
         {
             vec pos = game::focus->headpos();
@@ -719,7 +721,7 @@ namespace hud
             else index = POINTER_HAIR;
         }
         else index = POINTER_HAIR;
-        if(index > POINTER_NONE && (showhud || index < POINTER_HIT))
+        if(index > POINTER_NONE)
         {
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
