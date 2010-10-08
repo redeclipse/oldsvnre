@@ -430,7 +430,7 @@ extern mutstypes mutstype[];
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
-#define m_health(a,b)       (m_insta(a,b) ? 1 : GAME(maxhealth))
+#define m_health(a,b)       (m_insta(a,b) ? 1 : GAME(spawnhealth))
 
 #define w_reload(w1,w2)     (w1 != WEAP_MELEE && ((isweap(w2) ? w1 == w2 : w1 < WEAP_ITEM) || (isweap(w1) && WEAP(w1, reloads))))
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= WEAP_ITEM) && (isweap(w1) && WEAP(w1, carried)))
@@ -816,13 +816,6 @@ struct gamestate
     int respawnwait(int millis, int delay)
     {
         return lastdeath ? max(0, delay-(millis-lastdeath)) : 0;
-    }
-
-    // just subtract damage here, can set death, etc. later in code calling this
-    void dodamage(int heal)
-    {
-        lastregen = 0;
-        health = heal;
     }
 
     int protect(int millis, int delay)

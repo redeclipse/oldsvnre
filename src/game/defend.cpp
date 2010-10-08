@@ -292,7 +292,7 @@ namespace defend
                 targets.setsize(0);
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
                 gameent *e = NULL;
-                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
+                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= max(spawnhealth, extrahealth);
                 loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
                     vec ep = e->feetpos();
@@ -317,7 +317,7 @@ namespace defend
         if(st.flags.inrange(b.target))
         {
             defendstate::flag &f = st.flags[b.target];
-            bool regen = d->aitype != AI_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= max(maxhealth, extrahealth);
+            bool regen = d->aitype != AI_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= max(spawnhealth, extrahealth);
             int walk = f.enemy && f.enemy != ai::owner(d) ? 1 : 0;
             if(regen && (!f.enemy && ai::owner(d) == f.owner))
             {

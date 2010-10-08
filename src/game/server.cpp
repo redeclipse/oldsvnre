@@ -394,7 +394,7 @@ namespace server
         virtual void reset(bool empty) {}
         virtual void intermission() {}
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
-        virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0)) { }
+        virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
     };
 
@@ -421,13 +421,17 @@ namespace server
     struct vampireservmode : servmode
     {
         vampireservmode() {}
-        void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0))
+        void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0))
         {
-            if(m_regen(gamemode, mutators) && actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && damage > 0)
+            if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
-                actor->state.health += damage;
-                actor->state.lastregen = gamemillis;
-                sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, damage);
+                int rgn = actor->state.health, heal = min(actor->state.health+hurt, GAME(maxhealth)), eff = heal-rgn;
+                if(eff)
+                {
+                    actor->state.health = heal;
+                    actor->state.lastregen = gamemillis;
+                    sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
+                }
             }
         }
     } vampiremutator;
@@ -2494,7 +2498,7 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0))
     {
-        int realdamage = damage, realflags = flags, nodamage = 0; realflags &= ~HIT_SFLAGS;
+        int realdamage = damage, realflags = flags, nodamage = 0, hurt = 0; realflags &= ~HIT_SFLAGS;
         if(smode && !smode->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; }
         mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; });
         if(actor->state.aitype < AI_START)
@@ -2548,7 +2552,9 @@ namespace server
                     realdamage = int(realdamage*WEAP(weap, critmult));
                 }
             }
-            target->state.dodamage(target->state.health -= realdamage);
+            hurt = min(target->state.health, realdamage);
+            target->state.health -= realdamage;
+            if(target->state.health <= m_health(gamemode, mutators)) target->state.lastregen = 0;
             target->state.lastpain = gamemillis;
             actor->state.damage += realdamage;
             if(target->state.health <= 0) realflags |= HIT_KILL;
@@ -2563,8 +2569,8 @@ namespace server
                 target->state.lastbleedowner = actor->clientnum;
             }
         }
-        if(smode) smode->dodamage(target, actor, realdamage, weap, realflags, hitpush);
-        mutate(smuts, mut->dodamage(target, actor, realdamage, weap, realflags, hitpush));
+        if(smode) smode->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush);
+        mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush));
         if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team))
             addhistory(target, actor, gamemillis);
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
@@ -3166,7 +3172,6 @@ namespace server
             clientinfo *ci = clients[i];
             if(ci->state.state == CS_ALIVE)
             {
-                bool allowregen = m_regen(gamemode, mutators) && ci->state.aitype < AI_START;
                 if(ci->state.burning(gamemillis, GAME(burntime)))
                 {
                     if(gamemillis-ci->state.lastburntime >= GAME(burndelay))
@@ -3175,7 +3180,6 @@ namespace server
                         dodamage(ci, co ? co : ci, GAME(burndamage), -1, HIT_BURN);
                         ci->state.lastburntime += GAME(burndelay);
                     }
-                    allowregen = false;
                 }
                 else if(ci->state.lastburn) ci->state.lastburn = ci->state.lastburntime = 0;
                 if(ci->state.bleeding(gamemillis, GAME(bleedtime)))
@@ -3186,22 +3190,32 @@ namespace server
                         dodamage(ci, co ? co : ci, GAME(bleeddamage), -1, HIT_BLEED);
                         ci->state.lastbleedtime += GAME(bleeddelay);
                     }
-                    allowregen = false;
                 }
                 else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleedtime = 0;
-                if(allowregen)
+                if(m_regen(gamemode, mutators) && ci->state.aitype < AI_START)
                 {
-                    int total = m_health(gamemode, mutators), amt = GAME(regenhealth), delay = ci->state.lastregen ? GAME(regentime) : GAME(regendelay);
+                    int total = m_health(gamemode, mutators), amt = GAME(regenhealth),
+                        delay = ci->state.lastregen ? GAME(regentime) : GAME(regendelay);
                     if(smode) smode->regen(ci, total, amt, delay);
-                    if(delay && (ci->state.health < total || ci->state.health > total) && gamemillis-(ci->state.lastregen ? ci->state.lastregen : ci->state.lastpain) >= delay)
+                    if(delay && ci->state.health != total)
                     {
-                        int low = 0;
-                        if(ci->state.health > total) { amt = -GAME(regenhealth); total = ci->state.health; low = m_health(gamemode, mutators); }
-                        int rgn = ci->state.health, heal = clamp(ci->state.health+amt, low, total), eff = heal-rgn;
-                        if(eff)
+                        int millis = gamemillis-(ci->state.lastregen ? ci->state.lastregen : ci->state.lastpain);
+                        if(millis >= delay)
                         {
-                            ci->state.health = heal; ci->state.lastregen = gamemillis;
-                            sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, eff);
+                            int low = 0;
+                            if(ci->state.health > total)
+                            {
+                                amt = -GAME(regenhealth);
+                                total = ci->state.health;
+                                low = m_health(gamemode, mutators);
+                            }
+                            int rgn = ci->state.health, heal = clamp(ci->state.health+amt, low, total), eff = heal-rgn;
+                            if(eff)
+                            {
+                                ci->state.health = heal;
+                                ci->state.lastregen = gamemillis;
+                                sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, eff);
+                            }
                         }
                     }
                 }
