@@ -182,6 +182,10 @@ depend:
 	makedepend -a -o.h.gch -Y -Ishared -Iengine -Igame $(subst .h.gch,.h,$(CLIENT_PCH))
 
 all: client server
+
+engine/engine.h.gch: shared/cube.h.gch
+game/game.h.gch: shared/cube.h.gch engine/engine.h.gch
+
 # DO NOT DELETE
 
 shared/crypto.o: shared/cube.h shared/tools.h shared/command.h shared/geom.h
