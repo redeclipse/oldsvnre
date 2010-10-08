@@ -517,7 +517,7 @@ namespace ai
             bool proceed = true;
             static vector<int> targets;
             targets.setsize(0);
-            if(m_fight(game::gamemode) && !m_campaign(game::gamemode) && d->aitype == AI_BOT) switch(n.state)
+            if(m_fight(game::gamemode) && d->aitype == AI_BOT) switch(n.state)
             {
                 case AI_S_DEFEND: // don't get into herds
                     proceed = !checkothers(targets, d, n.state, n.targtype, n.target, true);
@@ -1630,8 +1630,8 @@ namespace ai
     {
         loopi(AI_TOTAL)
         {
-            loadmodel(aistyle[i].tpmdl, -1, true);
-            loadmodel(aistyle[i].fpmdl, -1, true);
+            loadmodel(aistyle[i+AI_START].tpmdl, -1, true);
+            loadmodel(aistyle[i+AI_START].fpmdl, -1, true);
         }
     }
 }

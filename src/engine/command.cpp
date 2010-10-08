@@ -337,14 +337,14 @@ void setvar(const char *name, int i, bool dofunc)
     GETVAR(id, name, );
     *id->storage.i = clamp(i, id->minval, id->maxval);
     if(dofunc) id->changed();
-    if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %d", id->name, *id->storage.i);
+    //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %d", id->name, *id->storage.i);
 }
 void setfvar(const char *name, float f, bool dofunc)
 {
     _GETVAR(id, ID_FVAR, name, );
     *id->storage.f = clamp(f, id->minvalf, id->maxvalf);
     if(dofunc) id->changed();
-    if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, floatstr(*id->storage.f));
+    //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, floatstr(*id->storage.f));
 }
 void setsvar(const char *name, const char *str, bool dofunc)
 {
@@ -352,7 +352,7 @@ void setsvar(const char *name, const char *str, bool dofunc)
     delete[] *id->storage.s;
     *id->storage.s = newstring(str);
     if(dofunc) id->changed();
-    if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
+    //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
 }
 int getvar(const char *name)
 {
@@ -451,7 +451,7 @@ void setvarchecked(ident *id, int val)
         }
         *id->storage.i = val;
         id->changed();                                             // call trigger function if available
-        if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %d", id->name, *id->storage.i);
+        //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %d", id->name, *id->storage.i);
 #ifndef STANDALONE
         if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
@@ -473,7 +473,7 @@ void setfvarchecked(ident *id, float val)
         }
         *id->storage.f = val;
         id->changed();
-        if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, floatstr(*id->storage.f));
+        //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, floatstr(*id->storage.f));
 #ifndef STANDALONE
         if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
@@ -491,7 +491,7 @@ void setsvarchecked(ident *id, const char *val)
         delete[] *id->storage.s;
         *id->storage.s = newstring(val);
         id->changed();
-        if(!(id->flags&IDF_WORLD) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
+        //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
 #ifndef STANDALONE
         if(id->flags&IDF_WORLD) client::editvar(id, interactive && !(identflags&IDF_WORLD));
 #endif
