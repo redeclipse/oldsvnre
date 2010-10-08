@@ -184,12 +184,11 @@ namespace weapons
 
     float accmod(gameent *d, bool zooming, int *x)
     {
-        float r = 1;
-        int y = 0;
+        float r = 1; int y = 0;
         if((physics::jetpack(d) || d->physstate == PHYS_FALL) && !d->onladder) { r += inairspread; y++; }
         if(physics::sprinting(d)) { r += impulsespread; y++; }
         else if(d->move || d->strafe) { r += movespread; y++; }
-        else if(!physics::iscrouching(d) && !zooming) r += stillspread;
+        else if(!physics::iscrouching(d) && !zooming) { r += stillspread; y++; }
         if(x) *x = y;
         return r;
     }

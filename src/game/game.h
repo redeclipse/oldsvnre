@@ -1364,7 +1364,7 @@ namespace hud
     extern void skewcolour(int &r, int &g, int &b, bool t = false);
     extern void drawindicator(int weap, int x, int y, int s);
     extern void drawclip(int weap, int x, int y, float s);
-    extern void drawpointerindex(int index, int x, int y, int s, float r = 1.f, float g = 1.f, float b = 1.f, float fade = 1.f);
+    extern void drawpointertex(const char *tex, int x, int y, int s, float r = 1.f, float g = 1.f, float b = 1.f, float fade = 1.f);
     extern void drawpointer(int w, int h, int index);
     extern int numteamkills();
     extern float radarrange();

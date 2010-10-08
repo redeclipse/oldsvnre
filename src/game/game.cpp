@@ -716,14 +716,14 @@ namespace game
             }
             if(isweap(weap) && !burning && !bleeding && (d == player1 || !isaitype(d->aitype) || (aistyle[d->aitype].canmove && d->health > 0)))
             {
-                if(WEAP2(weap, slow, flags&HIT_ALT) != 0 && !(flags&HIT_WAVE) && hithurts(flags))
-                    d->vel.mul(1.f-((float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT)))*WEAP2(weap, slow, flags&HIT_ALT))*slowscale);
+                if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
+                {
+                    float force = flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale;
+                    d->vel.mul(1.f-((float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT)))*WEAP2(weap, slow, flags&HIT_ALT))*force);
+                }
                 if(WEAP2(weap, hitpush, flags&HIT_ALT) != 0)
                 {
-                    float force = 1.f;
-                    if(flags&HIT_WAVE || !hithurts(flags)) force = wavepushscale;
-                    else if(d->health <= 0) force = deadpushscale;
-                    else force = hitpushscale;
+                    float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
                     d->vel.add(vec(dir).mul((float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT)))*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators)));
                 }
             }
@@ -737,7 +737,7 @@ namespace game
         if(hithurts(flags))
         {
             d->dodamage(health);
-            if(actor->type == ENT_PLAYER || actor->type == ENT_AI) actor->totaldamage += damage;
+            actor->totaldamage += damage;
         }
         hiteffect(weap, flags, damage, d, actor, dir, actor == player1 || actor->ai);
         if(flags&HIT_CRIT)

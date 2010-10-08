@@ -767,15 +767,15 @@ namespace projs
             float partsize, flaresize, flarelen, sparksize;
         } weapfx[WEAP_MAX] = {
             { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
-            { 200, PART_MUZZLE_FLASH, 0xFFCC22, 200, 5, 4, 1.5f, 1, 2, 0.0125f },
+            { 200, PART_MUZZLE_FLASH, 0xFFCC22, 200, 5, 4, 1, 1, 2, 0.0125f },
             { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
             { 350, PART_MUZZLE_FLASH, 0xFFAA00, 500, 20, 8, 3, 3, 6, 0.025f },
-            { 50, PART_MUZZLE_FLASH, 0xFF8800, 350, 5, 6, 2.5f, 2, 4, 0.0125f },
+            { 50, PART_MUZZLE_FLASH, 0xFF8800, 350, 5, 6, 1.5f, 2, 4, 0.0125f },
             { 150, PART_MUZZLE_FLASH, 0, 250, 5, 8, 1.5f, 0, 0, 0.025f },
             { 150, PART_PLASMA, 0x226688, 250, 10, 6, 1.5f, 0, 0, 0.0125f },
-            { 150, PART_PLASMA, 0x6611FF, 250, 5, 6, 1.5f, 3, 6, 0.0125f },
+            { 150, PART_PLASMA, 0x6611FF, 250, 5, 6, 2, 3, 6, 0.0125f },
             { 0, 0, -1, 0, 0, 0, 0, 0, 0, 0 },
-            { 150, PART_MUZZLE_FLASH, 0, 250, 10, 8, 1.5f, 3, 6, 0.0125f },
+            { 150, PART_MUZZLE_FLASH, 0, 250, 10, 8, 3, 3, 6, 0.0125f },
         };
         if(weapfx[weap].colour >= 0 && WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
         {
@@ -874,7 +874,7 @@ namespace projs
                     case WEAP_FLAMER:
                     {
                         float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.85f)*(0.65f+(rnd(35)/100.f))*(proj.owner == game::focus ? 0.5f : 1.f);
+                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.scale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.75f)*(0.6f+(rnd(40)/100.f))*(proj.owner == game::focus ? 0.35f : 0.75f);
                         if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             part_create(PART_HINT_SOFT, 1, proj.o, teamhint(proj.owner, 0x120228), size*1.5f, blend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
