@@ -736,7 +736,9 @@ namespace game
         if(d->state != CS_ALIVE || intermission) return;
         if(hithurts(flags))
         {
-            d->dodamage(health);
+            d->health = health;
+            if(d->health <= m_health(gamemode, mutators)) d->lastregen = 0;
+            d->lastpain = lastmillis;
             actor->totaldamage += damage;
         }
         hiteffect(weap, flags, damage, d, actor, dir, actor == player1 || actor->ai);

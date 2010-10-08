@@ -60,8 +60,9 @@ GVAR(0, spawnprotect, 0, 3000, INT_MAX-1); // delay before damage can be dealt t
 GVAR(0, duelprotect, 0, 5000, INT_MAX-1); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
 
-GVAR(0, maxhealth, 0, 100, INT_MAX-1);
+GVAR(0, spawnhealth, 0, 100, INT_MAX-1);
 GVAR(0, extrahealth, 0, 150, INT_MAX-1);
+GVAR(0, maxhealth, 0, 200, INT_MAX-1);
 
 GVAR(0, burntime, 0, 5500, INT_MAX-1);
 GVAR(0, burndelay, 0, 1000, INT_MAX-1);
@@ -74,7 +75,7 @@ GVAR(0, regendelay, 0, 3000, INT_MAX-1);
 GVAR(0, regenguard, 0, 1000, INT_MAX-1);
 GVAR(0, regentime, 0, 1000, INT_MAX-1);
 GVAR(0, regenhealth, 0, 5, INT_MAX-1);
-GVAR(0, regenextra, 0, 10, INT_MAX-1);
+GVAR(0, regenextra, 0, 5, INT_MAX-1);
 GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
 
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
