@@ -281,7 +281,7 @@ namespace ai
 
     bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed, bool retry)
     {
-        int node = entities::closestent(WAYPOINT, pos, SIGHTMIN, true);
+        int node = entities::closestent(WAYPOINT, pos, CLOSEDIST, true);
         return makeroute(d, b, node, changed, retry);
     }
 
@@ -373,7 +373,7 @@ namespace ai
     {
         if(e && targetable(d, e))
         {
-            if(pursue && entities::ents.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_PLAYER, e->clientnum);
+            if(pursue && entities::ents.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
             if(d->ai->enemy != e->clientnum)
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
@@ -411,7 +411,7 @@ namespace ai
             n.state = AI_S_DEFEND;
             n.node = e->lastnode;
             n.target = e->clientnum;
-            n.targtype = AI_T_PLAYER;
+            n.targtype = AI_T_ACTOR;
             n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->ai->weappref) ? 1e4f : 1e2f));
         }
     }
@@ -433,7 +433,7 @@ namespace ai
                     { // go get a weapon upgrade
                         interest &n = interests.add();
                         n.state = AI_S_INTEREST;
-                        n.node = entities::closestent(WAYPOINT, e.o, SIGHTMIN, true);
+                        n.node = entities::closestent(WAYPOINT, e.o, CLOSEDIST, true);
                         n.target = j;
                         n.targtype = AI_T_ENTITY;
                         n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
@@ -459,7 +459,7 @@ namespace ai
                         if(proj.owner == d) break;
                         interest &n = interests.add();
                         n.state = AI_S_INTEREST;
-                        n.node = entities::closestent(WAYPOINT, proj.o, SIGHTMIN, true);
+                        n.node = entities::closestent(WAYPOINT, proj.o, CLOSEDIST, true);
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
                         n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
@@ -492,22 +492,19 @@ namespace ai
                     interest &n = interests.add();
                     n.state = AI_S_PURSUE;
                     n.target = i;
-                    n.node = entities::closestent(WAYPOINT, entities::ents[i]->o, SIGHTMIN, true);
+                    n.node = entities::closestent(WAYPOINT, entities::ents[i]->o, CLOSEDIST, true);
                     n.targtype = AI_T_AFFINITY;
                     n.score = -1;
                 }
             }
         }
-        if(entities::ents.inrange(d->aientity))
+        else if(entities::ents.inrange(d->aientity)) loopv(entities::ents[d->aientity]->links)
         {
-            loopv(entities::ents[d->aientity]->links)
-            {
-                interest &n = interests.add();
-                n.state = AI_S_DEFEND;
-                n.target = n.node = entities::ents[d->aientity]->links[i];
-                n.targtype = AI_T_NODE;
-                n.score = -1;
-            }
+            interest &n = interests.add();
+            n.state = AI_S_DEFEND;
+            n.target = n.node = entities::ents[d->aientity]->links[i];
+            n.targtype = AI_T_NODE;
+            n.score = -1;
         }
         while(!interests.empty())
         {
@@ -562,7 +559,7 @@ namespace ai
             {
                 static vector<int> targets; // check if one of our ai is defending them
                 targets.setsize(0);
-                if(checkothers(targets, d, AI_S_DEFEND, AI_T_PLAYER, d->clientnum, true))
+                if(checkothers(targets, d, AI_S_DEFEND, AI_T_ACTOR, d->clientnum, true))
                 {
                     gameent *t;
                     loopv(targets) if((t = game::getclient(targets[i])) && t->ai && t->aitype == AI_BOT && (hithurts(flags) || !game::getclient(t->ai->enemy)) && !t->ai->suspended)
@@ -665,7 +662,7 @@ namespace ai
             else
             {
                 gameent *t = NULL;
-                loopi(game::numdynents()) if((t = (gameent *)game::iterdynents(i)) && t != d && t->aitype <= AI_BOT)
+                loopi(game::numdynents()) if((t = (gameent *)game::iterdynents(i)) && t != d && t->aitype < AI_START)
                 {
                     if(d->aitype == AI_BOT ? (t->state != CS_SPECTATOR && t->aitype < 0) : (t->state == CS_ALIVE && d->o.squaredist(t->o) <= maxdist))
                     {
@@ -681,7 +678,7 @@ namespace ai
         if(!d->ai->suspended)
         {
             if(target(d, b, true, true)) return 1;
-            if(aistyle[d->aitype].canmove && randomnode(d, b, SIGHTMIN, 1e16f))
+            if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
             {
                 d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
                 return 1;
@@ -720,7 +717,7 @@ namespace ai
                     else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b) ? 1 : 0;
                     break;
                 }
-                case AI_T_PLAYER:
+                case AI_T_ACTOR:
                 {
                     if(check(d, b)) return 1;
                     gameent *e = game::getclient(b.target);
@@ -822,7 +819,7 @@ namespace ai
                     break;
                 }
 
-                case AI_T_PLAYER:
+                case AI_T_ACTOR:
                 {
                     //if(check(d, b)) return 1;
                     gameent *e = game::getclient(b.target);
@@ -832,7 +829,7 @@ namespace ai
                         if(aistyle[d->aitype].canmove)
                         {
                             float mindist = weapmindist(d->weapselect, alt);
-                            return patrol(d, b, e->feetpos(), mindist, SIGHTMAX) ? 1 : 0;
+                            return patrol(d, b, e->feetpos(), mindist, ALERTMAX) ? 1 : 0;
                         }
                         else
                         {
@@ -857,7 +854,7 @@ namespace ai
     {
         vec pos = d->feetpos();
         int node = -1;
-        float mindist = SIGHTMAX*SIGHTMAX;
+        float mindist = ALERTMAX*ALERTMAX;
         loopvrev(d->ai->route) if(entities::ents.inrange(d->ai->route[i]))
         {
             gameentity &e = *(gameentity *)entities::ents[d->ai->route[i]];
@@ -1034,7 +1031,7 @@ namespace ai
                 }
                 else enemyok = false;
             }
-            else if(!enemyok && target(d, b, weaptype[d->weapselect].melee, false, SIGHTMIN))
+            else if(!enemyok && target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN))
                 enemyok = (e = game::getclient(d->ai->enemy)) != NULL;
         }
         if(enemyok)
@@ -1377,7 +1374,7 @@ namespace ai
             if(d->state != CS_ALIVE || !allowmove) d->stopmoving(true);
             if(d->state == CS_ALIVE && allowmove)
             {
-                if(!request(d, b)) target(d, b, weaptype[d->weapselect].melee, false, SIGHTMIN);
+                if(!request(d, b)) target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN);
                 weapons::shoot(d, d->ai->target);
             }
         }
@@ -1511,7 +1508,7 @@ namespace ai
         const char *bnames[AI_S_MAX] = {
             "wait", "defend", "pursue", "interest"
         }, *btypes[AI_T_MAX+1] = {
-            "none", "node", "player", "affinity", "entity", "drop"
+            "none", "node", "actor", "affinity", "entity", "drop"
         };
         mkstring(s);
         if(top)

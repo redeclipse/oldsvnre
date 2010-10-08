@@ -4,6 +4,7 @@ GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 GVAR(IDF_ADMIN, automaster, 0, 0, 1);
+GVAR(IDF_ADMIN, airefreshdelay, 0, 1000, INT_MAX-1);
 
 GVAR(IDF_ADMIN, modelimit, 0, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, mutslimit, 0, G_M_ALL, G_M_ALL);
