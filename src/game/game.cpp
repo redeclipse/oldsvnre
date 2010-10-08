@@ -1731,7 +1731,7 @@ namespace game
                 }
             }
 
-            bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1;
+            bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1 && !tvmode();
             if(!self && (focus->state == CS_DEAD || focus->state >= CS_SPECTATOR))
             {
                 camera1->aimyaw = camera1->yaw;
