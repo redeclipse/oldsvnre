@@ -983,7 +983,7 @@ namespace server
                     default: break;
                 }
             }
-            else if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
+            else if(m_fight(gamemode) && enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
             {
                 sents[i].millis += GAME(itemspawndelay);
                 switch(GAME(itemspawnstyle) == 3 ? rnd(2)+1 : GAME(itemspawnstyle))
@@ -1189,7 +1189,7 @@ namespace server
     void setupgameinfo(int np)
     {
         setuptriggers(true);
-        if(m_fight(gamemode)) setupitems(true);
+        setupitems(true);
         setupspawns(true, m_trial(gamemode) ? 0 : np);
         hasgameinfo = aiman::dorefresh = true;
     }
@@ -3207,8 +3207,11 @@ namespace server
             }
             else if(ci->state.state == CS_WAITING)
             {
-                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) continue;
-                if(m_trial(gamemode) && ci->state.cpmillis < 0) continue;
+                if(ci->state.aitype < AI_START)
+                {
+                    if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) continue;
+                    if(m_trial(gamemode) && ci->state.cpmillis < 0) continue;
+                }
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) continue;
                 int nospawn = 0;
