@@ -48,9 +48,9 @@ namespace ai
     const float CLOSEDIST       = 16.f;    // is close
     const float JUMPMIN         = 4.f;     // decides to jump
     const float JUMPMAX         = 24.f;    // max jump
-    const float SIGHTMIN        = 64.f;    // minimum line of sight
+    const float SIGHTMIN        = 32.f;    // minimum line of sight
     const float SIGHTMAX        = 1024.f;  // maximum line of sight
-    const float ALERTMIN        = 128.f;   // minimum alert distance
+    const float ALERTMIN        = 64.f;    // minimum alert distance
     const float ALERTMAX        = 512.f;   // maximum alert distance
     const float VIEWMIN         = 90.f;    // minimum field of view
     const float VIEWMAX         = 180.f;   // maximum field of view
@@ -68,7 +68,7 @@ namespace ai
     enum
     {
         AI_T_NODE,
-        AI_T_PLAYER,
+        AI_T_ACTOR,
         AI_T_AFFINITY,
         AI_T_ENTITY,
         AI_T_DROP,
@@ -221,11 +221,11 @@ namespace ai
     extern bool checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false);
     extern bool makeroute(gameent *d, aistate &b, int node, bool changed = true, bool retry = false);
     extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, bool retry = false);
-    extern bool randomnode(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX);
-    extern bool randomnode(gameent *d, aistate &b, float guard = SIGHTMIN, float wander = SIGHTMAX);
+    extern bool randomnode(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX);
+    extern bool randomnode(gameent *d, aistate &b, float guard = ALERTMIN, float wander = ALERTMAX);
     extern bool violence(gameent *d, aistate &b, gameent *e, bool pursue = false);
-    extern bool patrol(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 1, bool retry = false);
-    extern bool defense(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 0);
+    extern bool patrol(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX, int walk = 1, bool retry = false);
+    extern bool defense(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX, int walk = 0);
 
     extern void spawned(gameent *d, int ent);
     extern void damaged(gameent *d, gameent *e, int weap, int flags, int damage);

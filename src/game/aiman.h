@@ -100,7 +100,7 @@ namespace aiman
         sendf(-1, 1, "ri3", N_DISCONNECT, cn, DISC_NONE);
         clients.removeobj(ci);
         delclient(cn);
-        dorefresh = true;
+        dorefresh = max(totalmillis, dorefresh);
     }
 
     bool delai(int type)
@@ -277,7 +277,7 @@ namespace aiman
     { // clear and remove all ai immediately
         loopvrev(clients) if(type ? (type == 2 ? clients[i]->state.aitype >= AI_START : clients[i]->state.aitype == AI_BOT) : true)
             deleteai(clients[i]);
-        dorefresh = false;
+        dorefresh = 0;
     }
 
     void checkai()
@@ -286,13 +286,13 @@ namespace aiman
         {
             if(hasgameinfo && !interm)
             {
-                #define checkold(n) if(old##n != GAME(n)) { dorefresh = true; old##n = GAME(n); }
+                #define checkold(n) if(old##n != GAME(n)) { dorefresh = max(totalmillis, dorefresh); old##n = GAME(n); }
                 checkold(teambalance);
                 checkold(skillmin);
                 checkold(skillmax);
                 checkold(botbalance);
                 checkold(botlimit);
-                if(dorefresh) { checksetup(); dorefresh = false; }
+                if(totalmillis >= dorefresh) { dorefresh = 0; checksetup(); }
                 checkenemies();
                 loopvrev(clients) if(clients[i]->state.aitype >= 0) reinitai(clients[i]);
                 while(true) if(!reassignai()) break;

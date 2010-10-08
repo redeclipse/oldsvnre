@@ -303,7 +303,7 @@ namespace defend
                 {
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.o, ai::SIGHTMIN, false);
+                    n.node = entities::closestent(WAYPOINT, f.o, ai::CLOSEDIST, false);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.o)/(!regen ? 100.f : 1.f);
@@ -345,7 +345,7 @@ namespace defend
                 }
                 else walk = 1;
             }
-            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
+            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*(1+walk)), walk);
         }
         return false;
     }

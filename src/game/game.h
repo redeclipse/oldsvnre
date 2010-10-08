@@ -1591,7 +1591,7 @@ namespace entities
                             vec above(pos.x, pos.y, ob.above);
                             if(above.z-d->o.z >= ai::JUMPMAX)
                                 return retry ? n : -1; // too much scotty
-                            int node = closestent(WAYPOINT, above, ai::SIGHTMIN, true);
+                            int node = closestent(WAYPOINT, above, ai::CLOSEDIST, true);
                             if(ents.inrange(node) && node != n)
                             { // try to reroute above their head?
                                 if(!find(node, d))

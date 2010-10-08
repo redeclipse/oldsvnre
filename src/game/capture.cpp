@@ -545,7 +545,7 @@ namespace capture
             }
         }
 	    if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
-		if(ai::randomnode(d, b, ai::SIGHTMIN, 1e16f))
+		if(ai::randomnode(d, b, ai::ALERTMIN, 1e16f))
 		{
             d->ai->switchstate(b, ai::AI_S_INTEREST, ai::AI_T_NODE, d->ai->route[0]);
             return true;
@@ -634,7 +634,7 @@ namespace capture
                 { // defend the flag
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::SIGHTMIN, true);
+                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
@@ -646,7 +646,7 @@ namespace capture
                 { // attack the flag
                     ai::interest &n = interests.add();
                     n.state = d->aitype == AI_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::SIGHTMIN, true);
+                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos());
@@ -660,7 +660,7 @@ namespace capture
                         n.state = ai::owner(d) == ai::owner(t) ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
                         n.node = t->lastnode;
                         n.target = t->clientnum;
-                        n.targtype = ai::AI_T_PLAYER;
+                        n.targtype = ai::AI_T_ACTOR;
                         n.score = d->o.squaredist(t->o);
                     }
                 }
@@ -728,7 +728,7 @@ namespace capture
                     }
                 }
             }
-            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::SIGHTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
+            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::ALERTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
         }
         return false;
     }
