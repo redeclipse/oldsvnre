@@ -946,14 +946,17 @@ struct gameent : dynent, gamestate
 
     void setscale(float scale = 1)
     {
-        int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
-        maxspeed = int(aistyle[type].maxspeed*scale);
-        xradius = aistyle[type].xradius*scale;
-        yradius = aistyle[type].yradius*scale;
-        zradius = height = aistyle[type].height*scale;
-        weight = aistyle[type].weight*scale;
-        radius = max(xradius, yradius);
-        curscale = aboveeye = scale;
+        if(scale != curscale)
+        {
+            int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
+            maxspeed = int(aistyle[type].maxspeed*scale);
+            xradius = aistyle[type].xradius*scale;
+            yradius = aistyle[type].yradius*scale;
+            zradius = height = aistyle[type].height*scale;
+            weight = aistyle[type].weight*scale;
+            radius = max(xradius, yradius);
+            curscale = aboveeye = scale;
+        }
     }
 
     int getprojid()
