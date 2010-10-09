@@ -501,40 +501,45 @@ namespace game
     {
         d->o.z -= d->height;
         d->setscale(rescale(d));
-        if(d->aitype < AI_START && d->state == CS_ALIVE)
+        if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
         {
+            bool crouching = d->action[AC_CROUCH];
+            float crouchoff = 1.f-CROUCHHEIGHT;
+            if(!crouching) loopk(2)
+            {
+                vec old = d->o;
+                float zoff = d->zradius*crouchoff, zrad = d->zradius-zoff, frac = zoff/10.f;
+                d->o.z += zrad;
+                if(k)
+                {
+                    vec dir;
+                    vecfromyawpitch(d->yaw, 0, d->move, d->strafe, dir);
+                    d->o.add(dir);
+                }
+                loopi(10)
+                {
+                    d->o.z += frac;
+                    if(!collide(d, vec(0, 0, 1), 0.f, false))
+                    {
+                        crouching = true;
+                        break;
+                    }
+                }
+                d->o = old;
+                if(crouching)
+                {
+                    if(d->actiontime[AC_CROUCH] >= 0) d->actiontime[AC_CROUCH] = max(PHYSMILLIS-(lastmillis-d->actiontime[AC_CROUCH]), 0)-lastmillis;
+                    break;
+                }
+                else if(k && d->actiontime[AC_CROUCH] < 0)
+                    d->actiontime[AC_CROUCH] = lastmillis-max(PHYSMILLIS-(lastmillis+d->actiontime[AC_CROUCH]), 0);
+            }
             if(physics::iscrouching(d))
             {
-                bool crouching = d->action[AC_CROUCH];
-                float crouchoff = 1.f-CROUCHHEIGHT;
-                if(!crouching)
-                {
-                    float z = d->o.z, zoff = d->zradius*crouchoff, zrad = d->zradius-zoff, frac = zoff/10.f;
-                    d->o.z += zrad;
-                    loopi(10)
-                    {
-                        d->o.z += frac;
-                        if(!collide(d, vec(0, 0, 1), 0.f, false))
-                        {
-                            crouching = true;
-                            break;
-                        }
-                    }
-                    if(crouching)
-                    {
-                        if(d->actiontime[AC_CROUCH] >= 0) d->actiontime[AC_CROUCH] = max(PHYSMILLIS-(lastmillis-d->actiontime[AC_CROUCH]), 0)-lastmillis;
-                    }
-                    else if(d->actiontime[AC_CROUCH] < 0)
-                        d->actiontime[AC_CROUCH] = lastmillis-max(PHYSMILLIS-(lastmillis+d->actiontime[AC_CROUCH]), 0);
-                    d->o.z = z;
-                }
-                if(d->type == ENT_PLAYER || d->type == ENT_AI)
-                {
-                    int crouchtime = abs(d->actiontime[AC_CROUCH]);
-                    float amt = lastmillis-crouchtime <= PHYSMILLIS ? clamp(float(lastmillis-crouchtime)/PHYSMILLIS, 0.f, 1.f) : 1.f;
-                    if(!crouching) amt = 1.f-amt;
-                    crouchoff *= amt;
-                }
+                int crouchtime = abs(d->actiontime[AC_CROUCH]);
+                float amt = lastmillis-crouchtime <= PHYSMILLIS ? clamp(float(lastmillis-crouchtime)/PHYSMILLIS, 0.f, 1.f) : 1.f;
+                if(!crouching) amt = 1.f-amt;
+                crouchoff *= amt;
                 d->height = d->zradius-(d->zradius*crouchoff);
             }
             else d->height = d->zradius;

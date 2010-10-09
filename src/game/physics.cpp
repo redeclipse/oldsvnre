@@ -204,7 +204,7 @@ namespace physics
 
     bool iscrouching(physent *d)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(d->state == CS_ALIVE && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
             return e->action[AC_CROUCH] || e->actiontime[AC_CROUCH] < 0 || lastmillis-e->actiontime[AC_CROUCH] <= PHYSMILLIS;
