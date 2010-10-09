@@ -37,7 +37,7 @@ enum
 
 enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS };
 
-enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_REWRITE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9 };
+enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_REWRITE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9, IDF_UNKNOWN = 1<<10 };
 
 struct ident;
 
@@ -271,7 +271,7 @@ extern int getvarmax(const char *name);
 extern int getvardef(const char *name);
 extern bool identexists(const char *name);
 extern ident *getident(const char *name);
-extern ident *newident(const char *name);
+extern ident *newident(const char *name, int flags = 0);
 extern bool addcommand(const char *name, identfun fun, const char *narg, int flags = IDF_COMPLETE);
 
 extern uint *compilecode(const char *p);
