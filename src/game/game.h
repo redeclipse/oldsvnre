@@ -123,7 +123,7 @@ enttypes enttype[] = {
                 "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
     },
     {
-        WEAPON,         2,          59,     16,     EU_ITEM,    4,
+        WEAPON,         2,          59,     24,     EU_ITEM,    4,
             0, 0,
             false,  true,   true,
                 "weapon",       { "type",   "flags",    "mode",     "id" }
@@ -944,18 +944,24 @@ struct gameent : dynent, gamestate
         removetrackedsounds(this);
     }
 
-    void setscale(float scale = 1)
+    void setscale(float scale = 1, int millis = 0)
     {
         if(scale != curscale)
         {
+            float s = scale;
+            if(millis > 0)
+            {
+                float m = millis/5000.f;
+                s = scale > curscale ? min(curscale+m, scale) : max(curscale-m, scale);
+            }
             int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
-            maxspeed = int(aistyle[type].maxspeed*scale);
-            xradius = aistyle[type].xradius*scale;
-            yradius = aistyle[type].yradius*scale;
-            zradius = height = aistyle[type].height*scale;
-            weight = aistyle[type].weight*scale;
+            maxspeed = int(aistyle[type].maxspeed*s);
+            xradius = aistyle[type].xradius*s;
+            yradius = aistyle[type].yradius*s;
+            zradius = height = aistyle[type].height*s;
+            weight = aistyle[type].weight*s;
             radius = max(xradius, yradius);
-            curscale = aboveeye = scale;
+            curscale = aboveeye = s;
         }
     }
 

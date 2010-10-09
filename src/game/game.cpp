@@ -172,8 +172,9 @@ namespace game
         else if(focus == player1 && player1->state == CS_SPECTATOR) r = specfov;
         else if(thirdpersonview(true)) r = thirdpersonfov;
         else r = firstpersonfov;
-        if(player1->state != CS_ALIVE) return r;
-        return clamp(int(r*player1->curscale), max(r/2, min(r, 45)), min(r+r/4, max(r, 135)));
+        return r;
+        //if(player1->state != CS_ALIVE) return r;
+        //return clamp(int(r*player1->curscale), max(r/2, min(r, 45)), min(r+r/4, max(r, 135)));
     }
 
     void checkzoom()
@@ -500,7 +501,7 @@ namespace game
     void heightoffset(gameent *d)
     {
         d->o.z -= d->height;
-        d->setscale(rescale(d));
+        d->setscale(rescale(d), curtime);
         if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
