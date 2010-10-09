@@ -1205,19 +1205,14 @@ namespace server
         int weap = -1, health = 0;
         if(ci->state.aitype >= AI_START)
         {
-            weap = aistyle[ci->state.aitype].weap;
+            bool hasent = sents.inrange(ci->state.aientity) && sents[ci->state.aientity].type == ACTOR;
+            weap = hasent && sents[ci->state.aientity].attrs[5] > 0 ? sents[ci->state.aientity].attrs[5]-1 : aistyle[ci->state.aitype].weap;
             if(!m_insta(gamemode, mutators))
             {
-                health = aistyle[ci->state.aitype].health;
-                if(sents.inrange(ci->state.aientity) && sents[ci->state.aientity].type == ACTOR)
-                {
-                    if(sents[ci->state.aientity].attrs[6] > 0) health = sents[ci->state.aientity].attrs[6];
-                    if(sents[ci->state.aientity].attrs[5] > 0) weap = sents[ci->state.aientity].attrs[5]-1;
-                }
-                health = max(health+rnd(health), max(health/5, 10));
-                if(GAME(enemystrength) != 1) health = max(int(health*GAME(enemystrength)), 1);
+                int heal = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6] : aistyle[ci->state.aitype].health;
+                if(GAME(enemystrength) != 1) health = max(int((heal+rnd(heal))*GAME(enemystrength)), 1);
+                else health = heal+rnd(heal);
             }
-            else if(ci->state.aitype == AI_GRUNT) weap = aistyle[ci->state.aitype].weap;
             if(!isweap(weap)) weap = rnd(WEAP_MAX-1)+1;
         }
         gs.spawnstate(gamemode, mutators, weap, health);

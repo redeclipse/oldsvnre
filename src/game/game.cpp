@@ -38,6 +38,8 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, thirdpersondist, -1000, 25, 1000);
+
+    VAR(0, follow, 0, 0, INT_MAX-1);
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
     FVAR(IDF_PERSIST, followdist, -1000, 25, 1000);
 
@@ -55,7 +57,6 @@ namespace game
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
 
-    VAR(IDF_PERSIST, follow, 0, 0, INT_MAX-1);
     VARF(IDF_PERSIST, specmode, 0, 1, 1, follow = 0); // 0 = float, 1 = tv
     VARF(IDF_PERSIST, waitmode, 0, 1, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
 
@@ -166,10 +167,10 @@ namespace game
 
     int fov()
     {
-        if(player1->state == CS_EDITING) return editfov;
-        if(focus == player1 && player1->state == CS_SPECTATOR) return specfov;
-        if(thirdpersonview(true)) return thirdpersonfov;
-        return firstpersonfov;
+        if(player1->state == CS_EDITING) return int(editfov*player1->curscale);
+        if(focus == player1 && player1->state == CS_SPECTATOR) return int(specfov*player1->curscale);
+        if(thirdpersonview(true)) return int(thirdpersonfov*focus->curscale);
+        return int(firstpersonfov*focus->curscale);
     }
 
     void checkzoom()
@@ -364,40 +365,6 @@ namespace game
         }
     }
 
-    float deadscale(gameent *d, float amt = 1, bool timechk = false)
-    {
-        float total = amt;
-        if(d->state == CS_DEAD || d->state == CS_WAITING)
-        {
-            int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
-            if(len > 0 && (!timechk || len > 1000))
-            {
-                int interval = min(len/3, 1000), over = max(len-interval, 500), millis = lastmillis-d->lastdeath;
-                if(millis <= len) { if(millis >= over) total *= 1.f-((millis-over)/float(interval)); }
-                else total = 0;
-            }
-        }
-        return total;
-    }
-
-    float transscale(gameent *d, bool third = true)
-    {
-        float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
-        if(d->state == CS_ALIVE)
-        {
-            int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
-            if(millis > 0) total *= 1.f-(float(millis)/float(prot));
-            if(d == player1 && inzoom())
-            {
-                int frame = lastmillis-lastzoom;
-                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
-                total *= zooming ? 1.f-pc : pc;
-            }
-        }
-        else total = deadscale(d, total);
-        return total;
-    }
-
     void adddynlights()
     {
         if(dynlighteffects)
@@ -415,10 +382,9 @@ namespace game
             {
                 if(burntime && d->burning(lastmillis, burntime))
                 {
-                    int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f);
-                    if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
-                    else pc = 0.5f+(float(millis%burndelay)/float(burndelay*2));
-                    pc = deadscale(d, pc);
+                    int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.25f+(rnd(75)/100.f);
+                    if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
+                    else pc *= 0.5f+(float(millis%burndelay)/float(burndelay*2));
                     adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
                     continue;
                 }
@@ -526,8 +492,56 @@ namespace game
         d->o.z += d->height;
     }
 
+    float rescale(gameent *d)
+    {
+        float total = actorscale;
+        if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
+        {
+            if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
+            {
+                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health : m_health(gamemode, mutators));
+                if(m_resize(gamemode, mutators))
+                {
+                    minscale = minresizescale;
+                    if(amtscale < 1) amtscale = (amtscale*(1-minscale))+minscale;
+                }
+                total *= clamp(amtscale, minscale, maxresizescale);
+            }
+            if(d->state == CS_DEAD || d->state == CS_WAITING)
+            {
+                int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
+                if(len > 0)
+                {
+                    int interval = min(len/3, 1000), over = max(len-interval, 500), millis = lastmillis-d->lastdeath;
+                    if(millis <= len) { if(millis >= over) total *= 1.f-((millis-over)/float(interval)); }
+                    else total = 0;
+                }
+            }
+        }
+        return total;
+    }
+
+    float opacity(gameent *d, bool third = true)
+    {
+        float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
+        if(d->state == CS_DEAD || d->state == CS_WAITING) total *= d->curscale;
+        else if(d->state == CS_ALIVE)
+        {
+            int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
+            if(millis > 0) total *= 1.f-(float(millis)/float(prot));
+            if(d == player1 && inzoom())
+            {
+                int frame = lastmillis-lastzoom;
+                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
+                total *= zooming ? 1.f-pc : pc;
+            }
+        }
+        return total;
+    }
+
     void checkoften(gameent *d, bool local)
     {
+        d->setscale(rescale(d));
         d->checktags();
         adjustscaled(int, d->quake, quakefade);
         if(d->aitype < AI_START) heightoffset(d, local);
@@ -1626,9 +1640,6 @@ namespace game
         if(connected())
         {
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
-            // do shooting/projectile update here before network update for greater accuracy with what the player sees
-            if(allowmove(player1)) cameraplayer();
-            else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
 
             gameent *d = NULL;
             bool allow = player1->state >= CS_SPECTATOR, found = false;
@@ -1670,6 +1681,8 @@ namespace game
                 }
                 follow = 0;
             }
+            if(allowmove(player1)) cameraplayer();
+            else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
 
             physics::update();
             projs::update();
@@ -2189,7 +2202,7 @@ namespace game
                 if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
                 else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*deadscale(d, intensity*pc), blend*pc*burnblend, -15, 0);
+                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -15, 0);
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);
@@ -2200,7 +2213,7 @@ namespace game
     {
         startmodelbatches();
         gameent *d;
-        loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, transscale(d, true), deadscale(d, 1, true));
+        loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, opacity(d, true), d->curscale);
         entities::render();
         projs::render();
         if(m_capture(gamemode)) capture::render();
@@ -2216,9 +2229,9 @@ namespace game
     {
         if(rendernormally && early) focus->cleartags();
         if(thirdpersonview() || !rendernormally)
-            renderplayer(focus, true, transscale(focus, thirdpersonview(true)), deadscale(focus, 1, true), early);
+            renderplayer(focus, true, opacity(focus, thirdpersonview(true)), focus->curscale, early);
         else if(!thirdpersonview() && focus->state == CS_ALIVE)
-            renderplayer(focus, false, transscale(focus, false), deadscale(focus, 1, true), early);
+            renderplayer(focus, false, opacity(focus, false), focus->curscale, early);
         if(rendernormally && early) rendercheck(focus);
     }
 

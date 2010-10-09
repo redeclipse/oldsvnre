@@ -15,7 +15,7 @@ struct aistyles
 aistyles aistyle[] = {
     {
         AI_BOT,         -1,             0,      50,
-            0,          0,          0,          200,
+            3,          3,          14,         200,
             true,       true,       true,       true,       true,       true,
                 "bot",      "actors/player",     "actors/player/hwep"
     },
