@@ -910,8 +910,8 @@ bool serveroption(char *opt)
 bool findoctadir(const char *name, bool fallback)
 {
     mkstring(s); copystring(s, name); path(s);
-    defformatstring(octalogo)("%s/data/default_map_settings.cfg", s);
-    if(fileexists(findfile(octalogo, "r"), "r"))
+    defformatstring(octadefs)("%s/data/default_map_settings.cfg", s);
+    if(fileexists(findfile(octadefs, "r"), "r"))
     {
         conoutf("\fwfound octa directory: %s", s);
         defformatstring(octadata)("%s/data", s);

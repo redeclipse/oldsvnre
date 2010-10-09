@@ -1182,7 +1182,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     e.o = ec.o;
                     e.type = ec.type;
                     e.attrs.add(0, 5);
-                    loopk(5) e.attrs[0] = ec.attr[k];
+                    loopk(5) e.attrs[k] = ec.attr[k];
                 }
                 else
                 {
@@ -1224,22 +1224,22 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     if(e.attrs[0] <= 12) e.attrs[0] += 3;
                     else e.attrs[0] = 0; // bork it up
                 }
-                if(hdr.version <= 14 && e.type == ET_MAPMODEL)
-                {
-                    e.o.z += e.attrs[2];
-                    if(e.attrs[3] && verbose) conoutf("\frWARNING: mapmodel ent (index %d) uses texture slot %d", i, e.attrs[3]);
-                    e.attrs[2] = e.attrs[3] = 0;
-                }
                 if(e.type == ET_MAPMODEL)
                 {
+                    if(hdr.version <= 14)
+                    {
+                        e.o.z += e.attrs[2];
+                        if(e.attrs[3] && verbose) conoutf("\frWARNING: mapmodel ent (index %d) uses texture slot %d", i, e.attrs[3]);
+                        e.attrs[2] = e.attrs[3] = 0;
+                    }
                     if(maptype == MAP_OCTA || hdr.version <= 31)
                     {
                         int angle = e.attrs[0];
                         e.attrs[0] = e.attrs[1];
                         e.attrs[1] = angle;
-                        e.attrs[2] = e.attrs[3] = e.attrs[4] = 0;
+                        loopi(e.attrs.length()-2) e.attrs[i+2] = 0;
                     }
-                    if(maptype == MAP_OCTA || hdr.version <= 37)
+                    if(maptype == MAP_MAPZ && hdr.version <= 37)
                     {
                         e.attrs[2] = e.attrs[3];
                         e.attrs[5] = e.attrs[4];

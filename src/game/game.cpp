@@ -168,12 +168,12 @@ namespace game
     int fov()
     {
         int r = curfov;
-        float s = actorscale;
-        if(player1->state == CS_EDITING) { r = editfov; s = player1->curscale; }
-        else if(focus == player1 && player1->state == CS_SPECTATOR) { r = specfov; s = player1->curscale; }
-        else if(thirdpersonview(true)) { r = thirdpersonfov; if(player1->state != CS_DEAD && player1->state != CS_WAITING) { s = focus->curscale; } }
-        else { r = firstpersonfov; s = focus->curscale; }
-        return clamp(int(r*s), max(r/2, min(r, 45)), min(r+r/4, max(r, 135)));
+        if(player1->state == CS_EDITING) r = editfov;
+        else if(focus == player1 && player1->state == CS_SPECTATOR) r = specfov;
+        else if(thirdpersonview(true)) r = thirdpersonfov;
+        else r = firstpersonfov;
+        if(player1->state != CS_ALIVE) return r;
+        return clamp(int(r*player1->curscale), max(r/2, min(r, 45)), min(r+r/4, max(r, 135)));
     }
 
     void checkzoom()
@@ -502,7 +502,7 @@ namespace game
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
             {
-                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health : m_health(gamemode, mutators));
+                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators));
                 if(m_resize(gamemode, mutators))
                 {
                     minscale = minresizescale;
