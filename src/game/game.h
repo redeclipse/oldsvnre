@@ -234,10 +234,10 @@ enum
     G_M_NONE = 0,
     G_M_TEAM = 1<<0, G_M_INSTA = 1<<1, G_M_MEDIEVAL = 1<<2, G_M_BALLISTIC = 1<<3,
     G_M_DUEL = 1<<4, G_M_SURVIVOR = 1<<5, G_M_ARENA = 1<<6, G_M_ONSLAUGHT = 1<<7,
-    G_M_JETPACK = 1<<8, G_M_VAMPIRE = 1<<9, G_M_EXPERT = 1<<10,
-    G_M_GSP1 = 1<<11, G_M_GSP2 = 1<<12, G_M_GSP3 = 1<<13,
-    G_M_ALL = G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT,
-    G_M_GSN = 3, G_M_GSP = 11, G_M_NUM = 14
+    G_M_JETPACK = 1<<8, G_M_VAMPIRE = 1<<9, G_M_EXPERT = 1<<10, G_M_RESIZE = 1<<11,
+    G_M_GSP1 = 1<<12, G_M_GSP2 = 1<<13, G_M_GSP3 = 1<<14,
+    G_M_ALL = G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
+    G_M_GSN = 3, G_M_GSP = 12, G_M_NUM = 15
 };
 
 struct gametypes
@@ -263,7 +263,7 @@ gametypes gametype[] = {
     {
         G_EDITMODE,     G_M_NONE,
         {
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
             G_M_NONE, G_M_NONE, G_M_NONE
         },
         "editing",                          { "", "", "" },
@@ -271,7 +271,7 @@ gametypes gametype[] = {
     {
         G_CAMPAIGN,     G_M_TEAM,
         {
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
             G_M_NONE, G_M_NONE, G_M_NONE
         },
         "campaign",                         { "", "", "" },
@@ -279,7 +279,7 @@ gametypes gametype[] = {
     {
         G_DEATHMATCH,   G_M_NONE,
         {
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
             G_M_NONE, G_M_NONE, G_M_NONE
         },
         "deathmatch",                       { "", "", "" },
@@ -287,19 +287,19 @@ gametypes gametype[] = {
     {
         G_CAPTURE,      G_M_TEAM,
         {
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1,
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP2,
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP3
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP3
         },
         "capture-the-flag",                 { "return", "defend", "protect" },
     },
     {
         G_DEFEND,       G_M_TEAM,
         {
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2,
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1,
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP2,
             G_M_NONE
         },
         "defend-the-flag",                  { "quick", "conquer", "" },
@@ -307,9 +307,9 @@ gametypes gametype[] = {
     {
         G_BOMBER,       G_M_TEAM,
         {
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2,
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2,
-            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
             G_M_NONE
         },
         "bomber-ball",                      { "multi", "hold", "" },
@@ -317,7 +317,7 @@ gametypes gametype[] = {
     {
         G_TRIAL,        G_M_NONE,
         {
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
             G_M_NONE, G_M_NONE, G_M_NONE
         },
         "time-trial",                       { "", "", "" },
@@ -325,59 +325,63 @@ gametypes gametype[] = {
 };
 mutstypes mutstype[] = {
     {
-        G_M_TEAM,       G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_TEAM,       G_M_TEAM,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "team"
     },
     {
-        G_M_INSTA,      G_M_INSTA,          G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_INSTA,      G_M_INSTA,          G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "instagib"
     },
     {
-        G_M_MEDIEVAL,   G_M_MEDIEVAL,       G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_MEDIEVAL,   G_M_MEDIEVAL,       G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "medieval"
     },
     {
-        G_M_BALLISTIC,  G_M_BALLISTIC,      G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_BALLISTIC,  G_M_BALLISTIC,      G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "ballistic"
     },
     {
-        G_M_DUEL,       G_M_DUEL,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_DUEL,       G_M_DUEL,           G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "duel"
     },
     {
-        G_M_SURVIVOR,   G_M_SURVIVOR,       G_M_TEAM|G_M_INSTA|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_SURVIVOR,   G_M_SURVIVOR,       G_M_TEAM|G_M_INSTA|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "survivor",
     },
     {
-        G_M_ARENA,      G_M_ARENA,          G_M_TEAM|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_ARENA,      G_M_ARENA,          G_M_TEAM|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "arena",
     },
     {
-        G_M_ONSLAUGHT,  G_M_ONSLAUGHT,      G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_ONSLAUGHT,  G_M_ONSLAUGHT,      G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "onslaught",
     },
     {
-        G_M_JETPACK,    G_M_JETPACK,        G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_JETPACK,    G_M_JETPACK,        G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "jetpack",
     },
     {
-        G_M_VAMPIRE,    G_M_VAMPIRE,        G_M_TEAM|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_VAMPIRE,    G_M_VAMPIRE,        G_M_TEAM|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "vampire",
     },
     {
-        G_M_EXPERT,     G_M_EXPERT,         G_M_TEAM|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
-        "vampire",
+        G_M_EXPERT,     G_M_EXPERT,         G_M_TEAM|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        "expert",
     },
     {
-        G_M_GSP1,       G_M_GSP1,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_RESIZE,     G_M_RESIZE,         G_M_TEAM|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        "resize",
+    },
+    {
+        G_M_GSP1,       G_M_GSP1,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "",
     },
     {
-        G_M_GSP2,       G_M_GSP2,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_GSP2,       G_M_GSP2,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "",
     },
     {
-        G_M_GSP3,       G_M_GSP3,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_GSP3,       G_M_GSP3,           G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "",
     },
 };
@@ -413,6 +417,7 @@ extern mutstypes mutstype[];
 #define m_jetpack(a,b)      ((b & G_M_JETPACK) || (gametype[a].implied & G_M_JETPACK))
 #define m_vampire(a,b)      ((b & G_M_VAMPIRE) || (gametype[a].implied & G_M_VAMPIRE))
 #define m_expert(a,b)       ((b & G_M_EXPERT) || (gametype[a].implied & G_M_EXPERT))
+#define m_resize(a,b)       ((b & G_M_RESIZE) || (gametype[a].implied & G_M_RESIZE))
 
 #define m_gsp1(a,b)         ((b & G_M_GSP1) || (gametype[a].implied & G_M_GSP1))
 #define m_gsp2(a,b)         ((b & G_M_GSP2) || (gametype[a].implied & G_M_GSP2))
@@ -909,7 +914,7 @@ struct gameent : dynent, gamestate
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
-    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
+    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll, curscale;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string name, info, obit;
@@ -922,11 +927,10 @@ struct gameent : dynent, gamestate
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
         name[0] = info[0] = obit[0] = 0;
-        weight = 200; // so we can control the 'gravity' feel
-        maxspeed = 50; // ditto for movement
         dominating.shrink(0);
         dominated.shrink(0);
         icons.shrink(0);
+        setscale();
         cleartags();
         checktags();
         respawn(-1, 100);
@@ -938,6 +942,18 @@ struct gameent : dynent, gamestate
         if(ai) delete ai;
         removetrackedparticles(this);
         removetrackedsounds(this);
+    }
+
+    void setscale(float scale = 1)
+    {
+        int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
+        maxspeed = int(aistyle[type].maxspeed*scale);
+        xradius = aistyle[type].xradius*scale;
+        yradius = aistyle[type].yradius*scale;
+        zradius = height = aistyle[type].height*scale;
+        weight = aistyle[type].weight*scale;
+        radius = max(xradius, yradius);
+        curscale = aboveeye = scale;
     }
 
     int getprojid()
@@ -976,6 +992,7 @@ struct gameent : dynent, gamestate
         lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
         obliterated = false;
+        setscale();
         airnodes.shrink(0);
         icons.shrink(0);
     }

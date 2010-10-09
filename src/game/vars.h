@@ -64,6 +64,10 @@ GVAR(0, spawnhealth, 0, 100, INT_MAX-1);
 GVAR(0, extrahealth, 0, 150, INT_MAX-1);
 GVAR(0, maxhealth, 0, 200, INT_MAX-1);
 
+GFVAR(0, actorscale, 1e-6f, 1, 1000);
+GFVAR(0, maxresizescale, 1, 2, 1000);
+GFVAR(0, minresizescale, 1e-6f, 0.5f, 1);
+
 GVAR(0, burntime, 0, 5500, INT_MAX-1);
 GVAR(0, burndelay, 0, 1000, INT_MAX-1);
 GVAR(0, burndamage, 0, 5, INT_MAX-1);
