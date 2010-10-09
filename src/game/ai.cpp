@@ -621,7 +621,7 @@ namespace ai
 
     void itemspawned(int ent, int spawned)
     {
-        if(entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned)
+        if(m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned)
         {
             int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, entities::ents[ent]->attrs[0], sweap);
             loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT)
