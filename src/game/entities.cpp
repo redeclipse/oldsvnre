@@ -2,7 +2,7 @@
 namespace entities
 {
     vector<extentity *> ents;
-    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numwaypoints = 0;
+    int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numwaypoints = 0, numactors = 0;
     bool haswaypoints = false;
 
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
@@ -13,12 +13,12 @@ namespace entities
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(0, maxwaypoints, 128, 8192, INT_MAX-1); // max waypoints to drop unless forced
-    VAR(0, dropwaypoints, 0, 1, 2); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = forced
+    VAR(0, dropwaypoints, 0, 2, 3); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = only until max, 3 = forced
     VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (hasai && !haswaypoints && numwaypoints < maxwaypoints ? 1 : 2);
+        return dropwaypoints >= (hasai && !haswaypoints ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
     }
 
     bool clipped(const vec &o, bool aiclip)
@@ -1147,6 +1147,7 @@ namespace entities
                 }
                 break;
             case ACTOR:
+                if(create) numactors++;
                 while(e.attrs[0] < 0) e.attrs[0] += AI_TOTAL;
                 while(e.attrs[0] >= AI_TOTAL) e.attrs[0] -= AI_TOTAL;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
@@ -1591,10 +1592,7 @@ namespace entities
                 // MAPSOUND         -   MAPSOUND
                 // SPOTLIGHT        -   LIGHTFX
                 //                  -   SUNLIGHT
-                case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
-                {
-                    break;
-                }
+                case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: break;
 
                 // I_SHELLS         -   WEAPON      WEAP_SHOTGUN
                 // I_BULLETS        -   WEAPON      WEAP_SMG
@@ -2104,7 +2102,7 @@ namespace entities
     void initents(stream *g, int mtype, int mver, char *gid, int gver)
     {
         haswaypoints = false;
-        numwaypoints = 0;
+        numwaypoints = numactors = 0;
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
@@ -2118,10 +2116,39 @@ namespace entities
         loopv(ents)
         {
             fixentity(i, false);
-            if(ents[i]->type == WAYPOINT && ++numwaypoints) haswaypoints = true;
+            switch(ents[i]->type)
+            {
+                case WAYPOINT: numwaypoints++; haswaypoints = true; break;
+                case ACTOR: numactors++; break;
+                default: break;
+            }
         }
         memset(lastenttype, 0, sizeof(lastenttype));
         memset(lastusetype, 0, sizeof(lastusetype));
+        if(m_enemies(game::gamemode, game::mutators) && !numactors)
+        {
+            loopv(ents) if(ents[i]->type == PLAYERSTART || ents[i]->type == WEAPON)
+            {
+                extentity &e = *newent(); ents.add(&e);
+                e.type = ACTOR;
+                e.o = ents[i]->o;
+                e.attrs.add(0, max(5, enttype[ACTOR].numattrs));
+                e.attrs[0] = (i%5 != 4 ? AI_GRUNT : AI_TURRET)-1;
+                e.attrs[5] = (i/5)%(WEAP_MAX+1);
+                switch(ents[i]->type)
+                {
+                    case PLAYERSTART:
+                        loopj(4) e.attrs[j+1] = ents[i]->attrs[j+1]; // yaw, pitch, mode, id
+                        break;
+                    case WEAPON:
+                        loopj(2) e.attrs[j+3] = ents[i]->attrs[j+2]; // mode, id
+                    default:
+                        e.attrs[1] = (i%8)*45;
+                        break;
+                }
+                numactors++;
+            }
+        }
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];

@@ -1209,9 +1209,9 @@ namespace server
             weap = hasent && sents[ci->state.aientity].attrs[5] > 0 ? sents[ci->state.aientity].attrs[5]-1 : aistyle[ci->state.aitype].weap;
             if(!m_insta(gamemode, mutators))
             {
-                int heal = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6] : aistyle[ci->state.aitype].health;
-                if(GAME(enemystrength) != 1) health = max(int((heal+rnd(heal))*GAME(enemystrength)), 1);
-                else health = heal+rnd(heal);
+                int heal = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6] : aistyle[ci->state.aitype].health,
+                    amt = heal/2+rnd(heal);
+                health = GAME(enemystrength) != 1 ? max(int(amt*GAME(enemystrength)), 1) : amt;
             }
             if(!isweap(weap)) weap = rnd(WEAP_MAX-1)+1;
         }
