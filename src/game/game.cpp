@@ -168,11 +168,12 @@ namespace game
     int fov()
     {
         int r = curfov;
-        if(player1->state == CS_EDITING) r = int(editfov*player1->curscale);
-        else if(focus == player1 && player1->state == CS_SPECTATOR) r = int(specfov*player1->curscale);
-        else if(thirdpersonview(true)) r = int(thirdpersonfov*focus->curscale);
-        else r = int(firstpersonfov*focus->curscale);
-        return clamp(r, 35, 175);
+        float s = actorscale;
+        if(player1->state == CS_EDITING) { r = editfov; s = player1->curscale; }
+        else if(focus == player1 && player1->state == CS_SPECTATOR) { r = specfov; s = player1->curscale; }
+        else if(thirdpersonview(true)) { r = thirdpersonfov; if(player1->state != CS_DEAD && player1->state != CS_WAITING) { s = focus->curscale; } }
+        else { r = firstpersonfov; s = focus->curscale; }
+        return clamp(int(r*s), max(r/2, min(r, 45)), min(r+r/4, max(r, 135)));
     }
 
     void checkzoom()
