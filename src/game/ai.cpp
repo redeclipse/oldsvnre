@@ -58,8 +58,9 @@ namespace ai
         return false;
     }
 
-    bool cansee(gameent *d, vec &x, vec &y, vec &targ)
+    bool cansee(gameent *d, vec &x, vec &y, bool force, vec &targ)
     {
+        if(force) return raycubelos(x, y, targ);
         return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
     }
 
@@ -317,7 +318,7 @@ namespace ai
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
-            if(dist < bestdist && (cansee(d, dp, ep) || dist <= mindist))
+            if(dist < bestdist && (cansee(d, dp, ep, d->aitype >= AI_START) || dist <= mindist))
             {
                 t = e;
                 bestdist = dist;
@@ -396,7 +397,7 @@ namespace ai
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
-            if((!t || dist < tp.squaredist(dp)) && ((mindist > 0 && dist <= mindist) || force || cansee(d, dp, ep)))
+            if((!t || dist < tp.squaredist(dp)) && ((mindist > 0 && dist <= mindist) || force || cansee(d, dp, ep, d->aitype >= AI_START)))
             {
                 t = e;
                 tp = ep;
@@ -548,11 +549,11 @@ namespace ai
             {
                 gameent *t = NULL;
                 vec dp = d->headpos();
-                float maxdist = m_fight(game::gamemode) ? ALERTMAX*ALERTMAX : ALERTMIN*ALERTMIN;
+                float maxdist = ALERTMAX*ALERTMAX;
                 loopi(game::numdynents()) if((t = (gameent *)game::iterdynents(i)) && t != d && t->ai && t->state == CS_ALIVE && t->aitype >= AI_START && t->ai->suspended && targetable(t, e))
                 {
                     vec tp = t->headpos();
-                    if(cansee(t, tp, dp) || tp.squaredist(dp) <= maxdist)
+                    if(cansee(t, tp, dp, d->aitype >= AI_START) || tp.squaredist(dp) <= maxdist)
                     {
                         aistate &c = t->ai->getstate();
                         if(violence(t, c, e, true)) return;
@@ -659,7 +660,7 @@ namespace ai
 
     int dowait(gameent *d, aistate &b)
     {
-        float maxdist = m_fight(game::gamemode) ? ALERTMAX*ALERTMAX : ALERTMIN*ALERTMIN;
+        float maxdist = ALERTMAX*ALERTMAX;
         if(d->ai->suspended)
         { // bots idle until a human is around
             if(!m_campaign(game::gamemode) && d->aitype == AI_BOT) d->ai->unsuspend();
@@ -838,7 +839,7 @@ namespace ai
                         else
                         {
                             vec dp = d->headpos(), ep = getaimpos(d, e, alt);
-                            if(cansee(d, dp, ep) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
+                            if(cansee(d, dp, ep, d->aitype >= AI_START) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
                             {
                                 b.idle = -1;
                                 return 1;
