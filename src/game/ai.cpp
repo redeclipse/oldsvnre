@@ -885,7 +885,7 @@ namespace ai
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;
                 d->ai->targnode = n;
-                if(((e.attrs[0] & WP_F_CROUCH && !d->action[AC_CROUCH]) || d->action[AC_CROUCH]) && (lastmillis-d->actiontime[AC_CROUCH] >= PHYSMILLIS*3))
+                if(aistyle[d->aitype].cancrouch && ((e.attrs[0] & WP_F_CROUCH && !d->action[AC_CROUCH]) || d->action[AC_CROUCH]) && (lastmillis-d->actiontime[AC_CROUCH] >= PHYSMILLIS*3))
                 {
                     d->action[AC_CROUCH] = !d->action[AC_CROUCH];
                     d->actiontime[AC_CROUCH] = lastmillis;
@@ -1232,8 +1232,6 @@ namespace ai
                                 if(!entities::ents.inrange(t.target)) break;
                                 extentity &e = *entities::ents[t.target];
                                 if(enttype[e.type].usetype != EU_ITEM) break;
-                                if(!busy || (b.type == AI_S_INTEREST && b.targtype == AI_T_ENTITY && b.target == t.target))
-                                    ent = t.target;
                                 break;
                             }
                             case ITEM_PROJ:
@@ -1243,8 +1241,6 @@ namespace ai
                                 if(!entities::ents.inrange(proj.id)) break;
                                 extentity &e = *entities::ents[proj.id];
                                 if(enttype[e.type].usetype != EU_ITEM || proj.owner == d) break;
-                                if(!busy || (b.type == AI_S_INTEREST && b.targtype == AI_T_DROP && b.target == proj.id))
-                                    ent = proj.id;
                                 break;
                             }
                             default: break;
