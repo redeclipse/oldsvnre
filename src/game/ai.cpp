@@ -2,7 +2,7 @@
 namespace ai
 {
     entities::avoidset obs, wps;
-    int updatemillis = 0, updateiteration = 0;
+    int updatemillis = 0, iteration = 0, itermillis = 0;
     vec aitarget(0, 0, 0);
 
     VAR(0, aidebug, 0, 0, 6);
@@ -228,16 +228,20 @@ namespace ai
         if(game::intermission) { loopv(game::players) if(game::players[i] && game::players[i]->ai) game::players[i]->stopmoving(true); }
         else // fixed rate logic done out-of-sequence at 1 frame per second for each ai
         {
-            if(!updateiteration && lastmillis-updatemillis > 1000)
+            if(totalmillis-updatemillis > 1000)
             {
                 avoid();
                 if(multiplayer(false)) { aiforcegun = -1; aisuspend = 0; aicampaign = 0; }
-                updateiteration = 1;
-                updatemillis = lastmillis;
+                updatemillis = totalmillis;
+            }
+            if(!iteration && totalmillis-itermillis > 1000)
+            {
+                iteration = 1;
+                itermillis = totalmillis;
             }
             int count = 0;
-            loopv(game::players) if(game::players[i] && game::players[i]->ai) think(game::players[i], ++count == updateiteration ? true : false);
-            if(++updateiteration > count) updateiteration = 0;
+            loopv(game::players) if(game::players[i] && game::players[i]->ai) think(game::players[i], ++count == iteration ? true : false);
+            if(++iteration > count) iteration = 0;
         }
     }
 
