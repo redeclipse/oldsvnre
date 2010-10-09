@@ -765,7 +765,8 @@ namespace ai
                             {
                                 if(!e.spawned || !wantsweap(d, attr)) return 0;
                                 float guard = enttype[e.type].radius;
-                                if(d->feetpos().squaredist(e.o) <= guard*guard) b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee, false) ? 2 : 1;
+                                if(d->feetpos().squaredist(e.o) <= guard*guard)
+                                    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee, false) ? 2 : 1;
                                 else b.idle = -1;
                                 break;
                             }
@@ -1237,6 +1238,7 @@ namespace ai
                                 if(!entities::ents.inrange(t.target)) break;
                                 extentity &e = *entities::ents[t.target];
                                 if(enttype[e.type].usetype != EU_ITEM) break;
+                                ent = t.target;
                                 break;
                             }
                             case ITEM_PROJ:
@@ -1246,6 +1248,7 @@ namespace ai
                                 if(!entities::ents.inrange(proj.id)) break;
                                 extentity &e = *entities::ents[proj.id];
                                 if(enttype[e.type].usetype != EU_ITEM || proj.owner == d) break;
+                                ent = proj.id;
                                 break;
                             }
                             default: break;
@@ -1371,9 +1374,8 @@ namespace ai
         if(!aisuspend && !d->ai->suspended)
         {
             vec dp = d->headpos();
-            bool allowmove = game::allowmove(d);
-            if(d->state != CS_ALIVE || !allowmove) d->stopmoving(true);
-            if(d->state == CS_ALIVE && allowmove)
+            if(d->state != CS_ALIVE || !game::allowmove(d)) d->stopmoving(true);
+            else
             {
                 if(!request(d, b)) target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN);
                 weapons::shoot(d, d->ai->target);
