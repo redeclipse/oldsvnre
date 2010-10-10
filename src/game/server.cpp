@@ -1589,7 +1589,10 @@ namespace server
                 DELETEA(list);
             }
         }
-        copystring(ci->mapvote, reqmap); ci->modevote = reqmode; ci->mutsvote = reqmuts;
+        copystring(ci->mapvote, reqmap);
+        ci->modevote = reqmode;
+        ci->mutsvote = reqmuts;
+        ci->lastvote = totalmillis;
         if(hasveto)
         {
             endmatch();
