@@ -501,7 +501,7 @@ namespace game
     void heightoffset(gameent *d)
     {
         d->o.z -= d->height;
-        d->setscale(rescale(d), curtime);
+        d->setscale(rescale(d), d->state == CS_ALIVE ? curtime : 0);
         if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];

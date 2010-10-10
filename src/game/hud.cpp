@@ -272,7 +272,7 @@ namespace hud
     TVAR(IDF_PERSIST, criticaltex, "<anim:50,1,4,1>textures/critical", 3);
     TVAR(IDF_PERSIST, dominatetex, "<anim:50,1,4,1>textures/dominate", 3);
     TVAR(IDF_PERSIST, revengetex, "<anim:50,1,4,1>textures/revenge", 3);
-    TVAR(IDF_PERSIST, firstbloodtex, "textures/firstblood", 3);
+    TVAR(IDF_PERSIST, firstbloodtex, "<anim:50,2,8,1>textures/firstblood", 3);
 
     bool needminimap() { return false; }
 
