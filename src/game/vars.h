@@ -12,7 +12,7 @@ GVAR(IDF_ADMIN, modelock, 0, 0, 5); // 0 = off, 1 = master only (+1 admin only),
 GVAR(IDF_ADMIN, mapslock, 0, 0, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
 GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
 GVAR(IDF_ADMIN, votelock, 0, 0, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
-GVAR(IDF_ADMIN, votewait, 0, 3000, INT_MAX-1);
+GVAR(IDF_ADMIN, votewait, 0, 2500, INT_MAX-1);
 
 GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
