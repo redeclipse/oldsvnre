@@ -875,7 +875,7 @@ struct actitem
     int type, target;
     float score;
 
-    actitem() : type(ITEM_ENT), target(-1), score(0.f) {}
+    actitem() : type(ITEM_ENT), target(-1), score(0) {}
     ~actitem() {}
 };
 #ifdef GAMEWORLD
@@ -914,7 +914,7 @@ struct gameent : dynent, gamestate
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
-    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll, curscale;
+    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string name, info, obit;
@@ -929,8 +929,6 @@ struct gameent : dynent, gamestate
         name[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);
-        icons.shrink(0);
-        setscale();
         cleartags();
         checktags();
         respawn(-1, 100);
@@ -944,25 +942,29 @@ struct gameent : dynent, gamestate
         removetrackedsounds(this);
     }
 
-    void setscale(float scale = 1, int millis = 0)
+    void setparams(bool reset = false)
+    {
+        int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
+        if(reset) bspeed = aistyle[type].speed;
+        speed = bspeed*curscale;
+        xradius = aistyle[type].xradius*curscale;
+        yradius = aistyle[type].yradius*curscale;
+        zradius = height = aistyle[type].height*curscale;
+        weight = aistyle[type].weight*curscale;
+        radius = max(xradius, yradius);
+        aboveeye = curscale;
+    }
+
+    void setscale(float scale = 1, int millis = 0, bool reset = false)
     {
         if(scale != curscale)
         {
-            float s = scale;
-            if(millis > 0)
-            {
-                float m = millis/5000.f;
-                s = scale > curscale ? min(curscale+m, scale) : max(curscale-m, scale);
-            }
-            int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
-            maxspeed = int(aistyle[type].maxspeed*s);
-            xradius = aistyle[type].xradius*s;
-            yradius = aistyle[type].yradius*s;
-            zradius = height = aistyle[type].height*s;
-            weight = aistyle[type].weight*s;
-            radius = max(xradius, yradius);
-            curscale = aboveeye = s;
+            if(state == CS_ALIVE && millis > 0)
+                curscale = scale > curscale ? min(curscale+millis/2000.f, scale) : max(curscale-millis/2000.f, scale);
+            else curscale = scale;
+            setparams(reset);
         }
+        else if(reset) setparams(reset);
     }
 
     int getprojid()
@@ -1001,7 +1003,7 @@ struct gameent : dynent, gamestate
         lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
         obliterated = false;
-        setscale();
+        setscale(1, 0, true);
         airnodes.shrink(0);
         icons.shrink(0);
     }
@@ -1268,7 +1270,7 @@ struct projent : dynent
 {
     vec from, to, norm, inertia;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
-    float movement, roll, lifespan, lifesize, scale, minspeed;
+    float movement, roll, lifespan, lifesize, minspeed;
     bool local, limited, stuck, escaped, child;
     int projtype, projcollide;
     float elasticity, reflectivity, relativity, waterfric;
@@ -1296,8 +1298,8 @@ struct projent : dynent
         inertia = vec(0, 0, 0);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = -1;
-        movement = roll = lifespan = lifesize = minspeed = 0.f;
-        scale = 1.f;
+        movement = roll = lifespan = lifesize = minspeed = 0;
+        curscale = 1;
         extinguish = 0;
         limited = stuck = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
@@ -1378,22 +1380,22 @@ namespace hud
     extern void drawquad(float x, float y, float w, float h, float tx1 = 0, float ty1 = 0, float tx2 = 1, float ty2 = 1);
     extern void drawtex(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
     extern void drawsized(float x, float y, float s);
-    extern void colourskew(float &r, float &g, float &b, float skew = 1.f);
+    extern void colourskew(float &r, float &g, float &b, float skew = 1);
     extern void skewcolour(float &r, float &g, float &b, bool t = false);
     extern void skewcolour(int &r, int &g, int &b, bool t = false);
     extern void drawindicator(int weap, int x, int y, int s);
     extern void drawclip(int weap, int x, int y, float s);
-    extern void drawpointertex(const char *tex, int x, int y, int s, float r = 1.f, float g = 1.f, float b = 1.f, float fade = 1.f);
+    extern void drawpointertex(const char *tex, int x, int y, int s, float r = 1, float g = 1, float b = 1, float fade = 1);
     extern void drawpointer(int w, int h, int index);
     extern int numteamkills();
     extern float radarrange();
-    extern void drawblip(const char *tex, float area, int w, int h, float s, float blend, vec &dir, float r = 1.f, float g = 1.f, float b = 1.f, const char *font = "sub", const char *text = NULL, ...);
-    extern int drawprogress(int x, int y, float start, float length, float size, bool left, float r = 1.f, float g = 1.f, float b = 1.f, float fade = 1.f, float skew = 1.f, const char *font = NULL, const char *text = NULL, ...);
-    extern int drawitem(const char *tex, int x, int y, float size, bool left = false, float r = 1.f, float g = 1.f, float b = 1.f, float fade = 1.f, float skew = 1.f, const char *font = NULL, const char *text = NULL, ...);
-    extern int drawitemsubtext(int x, int y, float size, int align = TEXT_RIGHT_UP, float skew = 1.f, const char *font = NULL, float blend = 1.f, const char *text = NULL, ...);
-    extern int drawweapons(int x, int y, int s, float blend = 1.f);
-    extern int drawhealth(int x, int y, int s, float blend = 1.f);
-    extern void drawinventory(int w, int h, int edge, float blend = 1.f);
+    extern void drawblip(const char *tex, float area, int w, int h, float s, float blend, vec &dir, float r = 1, float g = 1, float b = 1, const char *font = "sub", const char *text = NULL, ...);
+    extern int drawprogress(int x, int y, float start, float length, float size, bool left, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, const char *font = NULL, const char *text = NULL, ...);
+    extern int drawitem(const char *tex, int x, int y, float size, bool left = false, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, const char *font = NULL, const char *text = NULL, ...);
+    extern int drawitemsubtext(int x, int y, float size, int align = TEXT_RIGHT_UP, float skew = 1, const char *font = NULL, float blend = 1, const char *text = NULL, ...);
+    extern int drawweapons(int x, int y, int s, float blend = 1);
+    extern int drawhealth(int x, int y, int s, float blend = 1);
+    extern void drawinventory(int w, int h, int edge, float blend = 1);
     extern void damage(int n, const vec &loc, gameent *actor, int weap, int flags);
     extern const char *teamtex(int team = TEAM_NEUTRAL);
     extern const char *itemtex(int type, int stype);
@@ -1463,7 +1465,7 @@ namespace game
     extern void fixrange(float &yaw, float &pitch);
     extern void fixfullrange(float &yaw, float &pitch, float &roll, bool full);
     extern void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch);
-    extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float frame = 1.f, float scale = 1.f);
+    extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float frame = 1, float scale = 1);
     extern bool allowmove(physent *d);
     extern int mousestyle();
     extern int deadzone();

@@ -198,13 +198,9 @@ namespace ai
         {
             d->type = ENT_AI;
             if(entities::ents.inrange(d->aientity = et) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[7] > 0)
-                d->maxspeed = entities::ents[d->aientity]->attrs[7];
-            else d->maxspeed = aistyle[d->aitype].maxspeed;
-            d->weight = aistyle[d->aitype].weight;
-            d->xradius = aistyle[d->aitype].xradius;
-            d->yradius = aistyle[d->aitype].yradius;
-            d->radius = max(d->xradius, d->yradius);
-            d->zradius = d->height = aistyle[d->aitype].height;
+                d->bspeed = d->speed = entities::ents[d->aientity]->attrs[7];
+            else d->bspeed = d->speed = aistyle[d->aitype].speed;
+            d->setparams();
         }
         d->ownernum = on;
         d->skill = sk;
@@ -1426,8 +1422,8 @@ namespace ai
         loopv(projs::projs)
         {
             projent *p = projs::projs[i];
-            if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT && WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->scale))
-                obs.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->scale)*p->lifesize)+2);
+            if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT && WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale))
+                obs.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale)*p->lifesize)+2);
         }
         loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
         {

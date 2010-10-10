@@ -78,7 +78,7 @@ struct physent                                  // base entity type, can be affe
     vec deltapos, newpos;
     float yaw, pitch, roll;
     float aimyaw, aimpitch;
-    float maxspeed, weight;                     // cubes per second, 100 for player
+    float speed, bspeed, weight;
     int timeinair;
     float radius, height, aboveeye;             // bounding box size
     float xradius, yradius, zradius, zmargin;
@@ -86,7 +86,7 @@ struct physent                                  // base entity type, can be affe
 
     int inmaterial;
     bool blocked, inliquid, onladder;
-    float submerged;
+    float submerged, curscale;
     char move, strafe;
 
     uchar physstate;                            // one of PHYS_* above
@@ -94,12 +94,14 @@ struct physent                                  // base entity type, can be affe
     uchar type;                                 // one of ENT_* above
     uchar collidetype;                          // one of COLLIDE_* above
 
-    physent() : maxspeed(100), weight(100.f), radius(3.f), height(14.f), aboveeye(1.f),
-        xradius(3.f), yradius(3.f), zradius(14.f), zmargin(0),
+    physent() : bspeed(100), weight(100), radius(3), aboveeye(1),
+        xradius(3), yradius(3), zradius(14), zmargin(0), curscale(1),
         state(CS_ALIVE), type(ENT_PLAYER),
         collidetype(COLLIDE_ELLIPSE)
     {
         reset();
+        height = zradius;
+        speed = bspeed;
     }
 
     void resetinterp()

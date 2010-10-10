@@ -979,7 +979,7 @@ namespace server
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
             {
-                sents[i].millis += GAME(enemyspawndelay);
+                sents[i].millis += m_campaign(gamemode) ? 50 : GAME(enemyspawndelay);
                 switch(GAME(enemyspawnstyle) == 3 ? rnd(2)+1 : GAME(enemyspawnstyle))
                 {
                     case 1: actors.add(i); break;
@@ -1011,7 +1011,7 @@ namespace server
         if(!actors.empty())
         {
             actors.sort(sortrandomly);
-            loopv(actors) sents[actors[i]].millis += GAME(enemyspawndelay)*i;
+            loopv(actors) sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : GAME(enemyspawndelay))*i;
         }
     }
 

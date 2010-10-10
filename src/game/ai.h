@@ -6,28 +6,28 @@ enum { AI_F_NONE = 0, AI_F_RANDWEAP = 1<<0 };
 
 struct aistyles
 {
-    int type,           weap,           health, maxspeed;
-    float   xradius,    yradius,    height,     weight;
+    int type,           weap,           health;
+    float   xradius,    yradius,    height,     weight,     speed;
     bool    canmove,    canstrafe,  canjump,    cancrouch,  useweap,    living,     hitbox;
     const char  *name,      *tpmdl,              *fpmdl;
 };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
     {
-        AI_BOT,         -1,             0,      50,
-            3,          3,          14,         200,
+        AI_BOT,         -1,             0,
+            3,          3,          14,         200,        50,
             true,       true,       true,       true,       true,       true,       true,
                 "bot",      "actors/player",     "actors/player/hwep"
     },
     {
-        AI_TURRET,      WEAP_SMG,       100,    0,
-            4.75,       4.75,       8.75,       150,
+        AI_TURRET,      WEAP_SMG,       100,
+            4.75,       4.75,       8.75,       150,        1,
             false,      false,      false,      false,      false,      false,      false,
                 "turret",   "actors/turret",     "actors/player/hwep"
     },
     {
-        AI_GRUNT,       WEAP_MELEE,     50,     40,
-            3,          3,          14,         150,
+        AI_GRUNT,       WEAP_MELEE,     50,
+            3,          3,          14,         150,        40,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    "actors/grunt",      "actors/player/hwep"
     },
