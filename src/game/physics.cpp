@@ -255,7 +255,7 @@ namespace physics
         return from;
     }
 
-    float jumpforce(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f); }
+    float jumpforce(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->curscale; }
     float gravityforce(physent *d) { return PHYS(gravity)*(d->weight/100.f); }
 
     float stepforce(physent *d, bool up)
@@ -294,7 +294,7 @@ namespace physics
     float movevelocity(physent *d, bool floating)
     {
         physent *pl = d->type == ENT_CAMERA ? game::player1 : d;
-        float vel = max(pl->maxspeed, 1.f);
+        float vel = max(pl->speed, 1.f);
         if(floating) vel *= floatspeed/100.0f;
         else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
@@ -316,9 +316,9 @@ namespace physics
 
     float impulsevelocity(physent *d, float amt)
     {
-        float mag = vec(d->vel).add(d->falling).magnitude(), speed = (impulsespeed+mag)*amt;
-        if(impulselimit > 0 && speed > impulselimit) speed = impulselimit;
-        return speed;
+        float mag = vec(d->vel).add(d->falling).magnitude(),
+              speed = (impulsespeed+mag)*amt*d->curscale, limit = impulselimit*d->curscale;
+        return limit > 0 && speed > limit ? limit : speed;
     }
 
     bool movepitch(physent *d)

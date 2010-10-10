@@ -139,7 +139,7 @@ GVAR(0, botbalance, -1, -1, INT_MAX-1); // -1 = always use numplayers, 0 = don't
 GVAR(0, botlimit, 0, 16, INT_MAX-1);
 GVAR(0, enemybalance, 0, 1, 3);
 GVAR(0, enemyspawntime, 1, 60000, INT_MAX-1); // when enemies respawn
-GVAR(0, enemyspawndelay, 0, 500, INT_MAX-1); // after map start enemies first spawn
+GVAR(0, enemyspawndelay, 0, 1000, INT_MAX-1); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GFVAR(0, enemystrength, 1e-4f, 1, 1000); // scale enemy health values by this much
 

@@ -243,10 +243,10 @@ namespace game
     {
         if(firstpersonsway)
         {
-            float maxspeed = physics::movevelocity(d);
+            float speed = physics::movevelocity(d);
             if(d->physstate >= PHYS_SLOPE)
             {
-                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), maxspeed);
+                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
                 swaydist += swayspeed*curtime/1000.0f;
                 swaydist = fmod(swaydist, 2*firstpersonswaystep);
                 swayfade = 1;
@@ -255,13 +255,13 @@ namespace game
             {
                 swaydist += swayspeed*swayfade*curtime/1000.0f;
                 swaydist = fmod(swaydist, 2*firstpersonswaystep);
-                swayfade -= 0.5f*(curtime*maxspeed)/(firstpersonswaystep*1000.0f);
+                swayfade -= 0.5f*(curtime*speed)/(firstpersonswaystep*1000.0f);
             }
 
             float k = pow(0.7f, curtime/25.0f);
             swaydir.mul(k);
             vec vel = vec(d->vel).add(d->falling);
-            float speedscale = max(vel.magnitude(), maxspeed);
+            float speedscale = max(vel.magnitude(), speed);
             if(speedscale > 0) swaydir.add(vec(vel).mul((1-k)/(15*speedscale)));
             swaypush.mul(pow(0.5f, curtime/25.0f));
         }
@@ -501,7 +501,7 @@ namespace game
     void heightoffset(gameent *d)
     {
         d->o.z -= d->height;
-        d->setscale(rescale(d), d->state == CS_ALIVE ? curtime : 0);
+        d->setscale(rescale(d), curtime);
         if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
