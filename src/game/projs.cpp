@@ -38,7 +38,7 @@ namespace projs
     #define teamhint(a,b) (projteamhint ? (a)->colour() : b)
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
-    VAR(IDF_PERSIST, muzzleflare, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
+    VAR(IDF_PERSIST, muzzleflare, 0, 2, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     FVAR(IDF_PERSIST, muzzleblend, 0, 1, 1);
 
     #define muzzlechk(a,b) (a == 3 || (a == 2 && game::thirdpersonview(true)) || (a == 1 && b != game::focus))
