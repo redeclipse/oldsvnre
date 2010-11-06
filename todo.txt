@@ -18,3 +18,6 @@
 * Move things like mastermode, ban, etc to server side commands/variables?
 * Create "assisted secures" for stf (player1, player2, player3 secured flag N)
 * Master server tracking and unlockable system
+* event scripting (?)
+* 2d-hud based damage numbers (?)
+* shooting range inanimates (?)
