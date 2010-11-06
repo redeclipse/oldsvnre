@@ -3,10 +3,10 @@ namespace ai
 {
     entities::avoidset obs, wps;
     int updatemillis = 0, iteration = 0, itermillis = 0;
+    float oldenemyspeed = -1, oldbotspeed = -1;
     vec aitarget(0, 0, 0);
 
     VAR(0, aidebug, 0, 0, 6);
-    VAR(0, aisuspend, 0, 0, 1);
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
     VAR(0, aicampaign, 0, 0, 1);
     VAR(IDF_PERSIST, aideadfade, 0, 10000, INT_MAX-1);
@@ -164,6 +164,14 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
+    void setspeed(gameent *d)
+    {
+        if(d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[7] > 0)
+            d->bspeed = d->speed = entities::ents[d->aientity]->attrs[7]*enemyspeed;
+        else d->bspeed = d->speed = aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].speed*(d->aitype >= AI_START ? enemyspeed : botspeed);
+        d->setparams();
+    }
+
     void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm)
     {
         gameent *o = game::newclient(on);
@@ -194,17 +202,12 @@ namespace ai
         }
 
         copystring(d->name, name, MAXNAMELEN);
-        if((d->aitype = at) >= AI_START)
-        {
-            d->type = ENT_AI;
-            if(entities::ents.inrange(d->aientity = et) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[7] > 0)
-                d->bspeed = d->speed = entities::ents[d->aientity]->attrs[7];
-            else d->bspeed = d->speed = aistyle[d->aitype].speed;
-            d->setparams();
-        }
+        if((d->aitype = at) >= AI_START) d->type = ENT_AI;
+        d->aientity = et;
         d->ownernum = on;
         d->skill = sk;
         d->team = tm;
+        setspeed(d);
 
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)
@@ -228,7 +231,7 @@ namespace ai
             if(totalmillis-updatemillis > 1000)
             {
                 avoid();
-                if(multiplayer(false)) { aiforcegun = -1; aisuspend = 0; aicampaign = 0; }
+                if(multiplayer(false)) { aiforcegun = -1; aicampaign = 0; }
                 updatemillis = totalmillis;
             }
             if(!iteration && totalmillis-itermillis > 1000)
@@ -237,7 +240,14 @@ namespace ai
                 itermillis = totalmillis;
             }
             int count = 0;
-            loopv(game::players) if(game::players[i] && game::players[i]->ai) think(game::players[i], ++count == iteration ? true : false);
+            bool ues = oldenemyspeed != enemyspeed, ubs = oldbotspeed != botspeed;
+            loopv(game::players) if(game::players[i] && game::players[i]->ai)
+            {
+                if(game::players[i]->aitype >= AI_START ? ues : ubs) setspeed(game::players[i]);
+                think(game::players[i], ++count == iteration ? true : false);
+            }
+            if(ues) oldenemyspeed = enemyspeed;
+            if(ubs) oldbotspeed = botspeed;
             if(++iteration > count) iteration = 0;
         }
     }
@@ -1365,9 +1375,11 @@ namespace ai
         }
     }
 
+    #define issuspended(a) (a->ai->suspended || (a->aitype >= AI_START ? enemyspeed == 0 : botspeed == 0))
+
     void logic(gameent *d, aistate &b, bool run)
     {
-        if(!aisuspend && !d->ai->suspended)
+        if(!issuspended(d))
         {
             vec dp = d->headpos();
             if(d->state != CS_ALIVE || !game::allowmove(d)) d->stopmoving(true);
@@ -1388,7 +1400,7 @@ namespace ai
             if(d->ragdoll) cleanragdoll(d);
             if(d->state == CS_ALIVE && !game::intermission)
             {
-                if(!aisuspend && !d->ai->suspended)
+                if(!issuspended(d))
                 {
                     bool ladder = d->onladder;
                     physics::move(d, 1, true);
