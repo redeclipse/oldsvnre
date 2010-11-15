@@ -808,6 +808,8 @@ int main(int argc, char **argv)
     #endif
     #endif
 
+    setvbuf(stdout, NULL, _IOLBF, 0);
+
     setlocations(true);
 
     char *initscript = NULL;
