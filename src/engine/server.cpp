@@ -1120,7 +1120,7 @@ void reloadsignal(int signum)
 
 int main(int argc, char* argv[])
 {
-    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
     setlocations(false);
     char *initscript = NULL;
     for(int i = 1; i<argc; i++)
