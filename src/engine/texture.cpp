@@ -2520,7 +2520,9 @@ enum
     DDSCAPS2_CUBEMAP_NEGATIVEZ = 0x00008000,
     DDSCAPS2_VOLUME            = 0x00200000,
     FOURCC_DXT1                = 0x31545844,
+    FOURCC_DXT2                = 0x32545844,
     FOURCC_DXT3                = 0x33545844,
+    FOURCC_DXT4                = 0x34545844,
     FOURCC_DXT5                = 0x35545844
 
 };
@@ -2569,7 +2571,9 @@ bool loaddds(const char *filename, ImageData &image)
         switch(d.ddpfPixelFormat.dwFourCC)
         {
             case FOURCC_DXT1: format = d.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT; break;
+            case FOURCC_DXT2:
             case FOURCC_DXT3: format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT; break;
+            case FOURCC_DXT4:
             case FOURCC_DXT5: format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT; break;
         }
     }
