@@ -169,9 +169,9 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
               tc1 = tc.dot(p1) + offset, tc2 = tc.dot(p2) + offset,
               lm1u = g.tcu.dot(p1), lm1v = g.tcv.dot(p1),
               lm2u = g.tcu.dot(p2), lm2v = g.tcv.dot(p2),
-              fade = dist > taperdist ? (grassdist - dist)*taperscale*blend : blend,
+              fade = dist > taperdist ? (grassdist - dist)*taperscale : 1,
               height = gh * fade;
-        uchar color[4] = { gcol.x, gcol.y, gcol.z, uchar(fade*255) };
+        uchar color[4] = { gcol.x, gcol.y, gcol.z, uchar(fade*blend*255) };
 
         #define GRASSVERT(n, tcv, modify) { \
             grassvert &gv = grassverts.add(); \
