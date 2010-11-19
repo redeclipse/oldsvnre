@@ -349,6 +349,26 @@ void texgrey(ImageData &s)
     s.replace(d);
 }
 
+void texpremul(ImageData &s)
+{
+    switch(s.bpp)
+    {
+        case 2:
+            writetex(s,
+                dst[0] = uchar((uint(dst[0])*uint(dst[1]))/255);
+            );
+            break;
+        case 4:
+            writetex(s,
+                uint alpha = dst[3];
+                dst[0] = uchar((uint(dst[0])*alpha)/255);
+                dst[1] = uchar((uint(dst[1])*alpha)/255);
+                dst[2] = uchar((uint(dst[2])*alpha)/255);
+            );
+            break;
+    }
+}
+
 VAR(0, hwtexsize, 1, 0, 0);
 VAR(0, hwcubetexsize, 1, 0, 0);
 VAR(0, hwmaxaniso, 1, 0, 0);
@@ -1053,7 +1073,7 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         else if(!strncmp(cmd, "ffmask", len))
         {
             texffmask(d, atof(arg[0]), atof(arg[1]));
-            if(!d.data) return true;
+            if(!d.data) break;
         }
         else if(!strncmp(cmd, "normal", len))
         {
@@ -1073,6 +1093,7 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         else if(!strncmp(cmd, "crop", len)) texcrop(d, atoi(arg[0]), atoi(arg[1]), atoi(arg[2]), atoi(arg[3]));
         else if(!strncmp(cmd, "mix", len)) texmix(d, *arg[0] ? atoi(arg[0]) : -1, *arg[1] ? atoi(arg[1]) : -1, *arg[2] ? atoi(arg[2]) : -1, *arg[3] ? atoi(arg[3]) : -1);
         else if(!strncmp(cmd, "grey", len)) texgrey(d);
+        else if(!strncmp(cmd, "premul", len)) texpremul(d);
         else if(!strncmp(cmd, "compress", len) || !strncmp(cmd, "dds", len))
         {
             int scale = atoi(arg[0]);
@@ -1095,6 +1116,10 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
                 anim->h = d.h/anim->y;
                 anim->count = anim->x*anim->y;
             }
+        }
+        else if(!strncmp(cmd, "ffskip", len))
+        {
+            if(renderpath==R_FIXEDFUNCTION) break;
         }
     }
     if((anim && anim->count ? max(anim->w, anim->h) : max(d.w, d.h)) > (1<<12))

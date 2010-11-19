@@ -102,7 +102,7 @@ VARF(IDF_HEX|IDF_WORLD, grasscolour, 0, 0xFFFFFF, 0xFFFFFF,
 });
 FVAR(IDF_WORLD, grassblend, 0, 1, 1);
 
-static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstri &g, Texture *tex, vec &col, float blend, int scale, int height)
+static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstri &g, Texture *tex, const vec &col, float blend, int scale, int height)
 {
     float t = camera1->o.dot(w.dir);
     int tstep = int(ceil(t/grassstep));
@@ -136,6 +136,8 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
 
     float taperdist = grassdist*grasstaper,
           taperscale = 1.0f / (grassdist - taperdist);
+    bvec gcol = col.iszero() ? grasscolor : bvec(uchar(col.x*255), uchar(col.y*255), uchar(col.z*255));
+    if(blend <= 0) blend = grassblend;
 
     for(int i = maxstep; i >= minstep; i--, color--)
     {
@@ -167,11 +169,9 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
               tc1 = tc.dot(p1) + offset, tc2 = tc.dot(p2) + offset,
               lm1u = g.tcu.dot(p1), lm1v = g.tcv.dot(p1),
               lm2u = g.tcu.dot(p2), lm2v = g.tcv.dot(p2),
-              fade = dist > taperdist ? (grassdist - dist)*taperscale : 1,
+              fade = dist > taperdist ? (grassdist - dist)*taperscale*blend : blend,
               height = gh * fade;
-        uchar color[4] = { grasscolor.x, grasscolor.y, grasscolor.z, uchar(fade*grassblend*255) };
-        if(col != vec(0, 0, 0)) loopj(3) color[j] = uchar(col[j]*255);
-        if(blend > 0) color[3] = uchar(fade*blend*255);
+        uchar color[4] = { gcol.x, gcol.y, gcol.z, uchar(fade*255) };
 
         #define GRASSVERT(n, tcv, modify) { \
             grassvert &gv = grassverts.add(); \
@@ -202,7 +202,7 @@ static void gengrassquads(vtxarray *va)
         if(!s.grasstex)
         {
             if(!s.texgrass) continue;
-            s.grasstex = textureload(s.texgrass, 2);
+            s.grasstex = textureload(makerelpath(NULL, s.texgrass, NULL, "<ffskip><premul>"), 2);
         }
 
         grassgroup *group = NULL;
@@ -257,7 +257,7 @@ void rendergrass()
 
     glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(renderpath==R_FIXEDFUNCTION ? GL_SRC_ALPHA : GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE);
 
     SETSHADER(grass);
