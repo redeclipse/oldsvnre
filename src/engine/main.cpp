@@ -808,7 +808,7 @@ int main(int argc, char **argv)
     #endif
     #endif
 
-    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 
     setlocations(true);
 
