@@ -454,6 +454,7 @@ namespace game
     float rescale(gameent *d)
     {
         float total = actorscale;
+        if(d->ai) total *= d->ai->scale;
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)

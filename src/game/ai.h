@@ -7,7 +7,7 @@ enum { AI_F_NONE = 0, AI_F_RANDWEAP = 1<<0 };
 struct aistyles
 {
     int type,           weap,           health;
-    float   xradius,    yradius,    height,     weight,     speed;
+    float   xradius,    yradius,    height,     weight,     speed,      scale;
     bool    canmove,    canstrafe,  canjump,    cancrouch,  useweap,    living,     hitbox;
     const char  *name,      *tpmdl,              *fpmdl;
 };
@@ -15,19 +15,19 @@ struct aistyles
 aistyles aistyle[] = {
     {
         AI_BOT,         -1,             0,
-            3,          3,          14,         200,        50,
+            3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
                 "bot",      "actors/player",     "actors/player/hwep"
     },
     {
         AI_TURRET,      WEAP_SMG,       100,
-            4.75,       4.75,       8.75,       150,        1,
+            4.75,       4.75,       8.75,       150,        1,          1,
             false,      false,      false,      false,      false,      false,      false,
                 "turret",   "actors/turret",     "actors/player/hwep"
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,
-            3,          3,          14,         150,        40,
+            3,          3,          14,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    "actors/grunt",      "actors/player/hwep"
     },
@@ -110,13 +110,14 @@ namespace ai
         vec target, spot;
         int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lasthunt, lastaction, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd;
-        float targyaw, targpitch, views[3], aimrnd[3];
+        float scale, targyaw, targpitch, views[3], aimrnd[3];
         bool suspended, dontmove, becareful, tryreset, trywipe;
 
         aiinfo()
         {
             clearsetup();
             reset();
+            scale = 1;
             loopk(3) views[k] = aimrnd[k] = 0.f;
             suspended = true;
         }
