@@ -136,10 +136,10 @@ enttypes enttype[] = {
                 "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type" }
     },
     {
-        ACTOR,          1,          59,     0,      EU_NONE,    8,
+        ACTOR,          1,          59,     0,      EU_NONE,    9,
             (1<<AFFINITY)|(1<<WAYPOINT), 0,
             false,  true,   false,
-                "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed" }
+                "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed",    "scale" }
     },
     {
         TRIGGER,        1,          58,     16,     EU_AUTO,    6,

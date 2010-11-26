@@ -1162,6 +1162,7 @@ namespace entities
                 while(e.attrs[5] > WEAP_MAX) e.attrs[5] -= WEAP_MAX+1;
                 if(e.attrs[6] < 0) e.attrs[6] = 0;
                 if(e.attrs[7] < 0) e.attrs[7] = 0;
+                if(e.attrs[8] < 0) e.attrs[8] = 0;
                 break;
             case AFFINITY:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_COUNT;
@@ -2414,13 +2415,24 @@ namespace entities
                     vec pos = e.o;
                     if(mdlname && *mdlname)
                     {
-                        int flags = MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED;
+                        int flags = MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, colour = -1;
                         float fade = 1, yaw = 0, pitch = 0, size = 1;
                         if(!active)
                         {
                             fade = 0.5f;
-                            if(e.type == AFFINITY || e.type == PLAYERSTART) { yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0); pitch = e.attrs[2]; }
-                            else if(e.type == ACTOR) { yaw = e.attrs[1]+90; pitch = e.attrs[2]; }
+                            if(e.type == AFFINITY || e.type == PLAYERSTART)
+                            {
+                                yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0);
+                                colour = teamtype[e.attrs[0]].colour;
+                                pitch = e.attrs[2];
+                            }
+                            else if(e.type == ACTOR)
+                            {
+                                yaw = e.attrs[1]+90;
+                                pitch = e.attrs[2];
+                                colour = weaptype[e.attrs[5] > 0 ? e.attrs[5]-1 : aistyle[e.attrs[0]].weap].colour;
+                                size = e.attrs[8] > 0 ? e.attrs[8]/100.f : aistyle[e.attrs[0]].scale;
+                            }
                         }
                         else if(e.spawned)
                         {
@@ -2432,6 +2444,8 @@ namespace entities
                             int millis = lastmillis-e.lastuse;
                             if(millis < 500) size = fade = 1.f-(float(millis)/500.f);
                         }
+                        if(colour >= 0 && lastmillis != e.light.millis)
+                            e.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                         rendermodel(&e.light, mdlname, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0.f, flags, NULL, NULL, 0, 0, fade, size);
                     }
                 }
