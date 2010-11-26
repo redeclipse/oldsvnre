@@ -166,6 +166,7 @@ namespace ai
 
     void setparams(gameent *d)
     {
+        if(!d->ai) return;
         bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
         if(hasent && entities::ents[d->aientity]->attrs[7] > 0) d->bspeed = d->speed = entities::ents[d->aientity]->attrs[7]*enemyspeed;
         else d->bspeed = d->speed = aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].speed*(d->aitype >= AI_START ? enemyspeed : botspeed);
