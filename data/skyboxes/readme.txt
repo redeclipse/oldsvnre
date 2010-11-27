@@ -13,5 +13,7 @@
     * This notice may not be removed or altered from any source distribution. 
 
 "dusk01" by Pieter Verhoeven
+    CC-BY-SA 3.0 license.
 
 "skyhigh" by Pieter Verhoeven
+    CC-BY-SA 3.0 license.
