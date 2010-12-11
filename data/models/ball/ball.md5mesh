@@ -9,18 +9,6 @@ joints {
 }
 
 mesh {
-	// meshes: Sphere
-
-	shader ""
-
-	numverts 0
-
-	numtris 0
-
-	numweights 0
-}
-
-mesh {
 	// meshes: Sphere.001
 
 	shader "C:\Users\Remi\Desktop\models\ball\oclu.tga"
