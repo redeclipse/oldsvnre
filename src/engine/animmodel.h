@@ -677,11 +677,11 @@ struct animmodel : model
                 if(anims[animpart])
                 {
                     vector<animspec> &primary = anims[animpart][anim&ANIM_INDEX];
-                    if(primary.length()) spec = &primary[uint(varseed + basetime)%primary.length()];
+                    if(&primary < &anims[animpart][game::numanims()] && primary.length()) spec = &primary[uint(varseed + basetime)%primary.length()];
                     if((anim>>ANIM_SECONDARY)&(ANIM_INDEX|ANIM_DIR))
                     {
                         vector<animspec> &secondary = anims[animpart][(anim>>ANIM_SECONDARY)&ANIM_INDEX];
-                        if(secondary.length())
+                        if(&secondary < &anims[animpart][game::numanims()] && secondary.length())
                         {
                             animspec &spec2 = secondary[uint(varseed + basetime2)%secondary.length()];
                             if(!spec || spec2.priority > spec->priority)
