@@ -196,7 +196,7 @@ struct obj : vertmodel, vertloader<obj>
         defformatstring(cfgname)("models/%s/obj.cfg", loadname);
 
         loading = this;
-        if(execfile(cfgname) && parts.length()) // configured obj, will call the obj* commands below
+        if(execfile(cfgname, false) && parts.length()) // configured obj, will call the obj* commands below
         {
             loading = NULL;
             loopv(parts) if(!parts[i]->meshes) return false;
