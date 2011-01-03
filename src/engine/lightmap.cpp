@@ -1413,9 +1413,11 @@ static lightmapinfo *setupsurfaces(lightmapworker *w, lightmaptask &task)
     {
         int usefaces = usefacemask&0xF;
         usefacemask >>= 4;
-        if(!usefaces || c.texture[i] == DEFAULT_SKY)
+        if(!usefaces) continue;
+
+        if(c.texture[i] == DEFAULT_SKY)
         {
-            if(c.ext->mergeorigin&(1<<i)) mergeindex++;
+            if(c.ext && c.ext->merged&(1<<i) && c.ext->mergeorigin&(1<<i)) mergeindex++;
             continue;
         }
 
