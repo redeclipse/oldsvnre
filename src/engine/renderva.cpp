@@ -392,6 +392,8 @@ VAR(0, oqmm, 0, 4, 8);
 
 extern bool getentboundingbox(extentity &e, ivec &o, ivec &r);
 
+VAR(0, mmanimoverride, -1, 0, ANIM_ALL);
+
 void rendermapmodel(extentity &e)
 {
     int anim = ANIM_MAPMODEL|ANIM_LOOP, basetime = 0, flags = MDL_CULL_VFC|MDL_CULL_DIST|MDL_DYNLIGHT;
@@ -403,6 +405,11 @@ void rendermapmodel(extentity &e)
         else anim |= ANIM_END;
     }
     if(e.attrs[5]&MMT_NOSHADOW && !(e.attrs[5]&MMT_NODYNSHADOW)) flags |= e.lastemit ? MDL_DYNSHADOW : MDL_SHADOW;
+    if(mmanimoverride)
+    {
+        anim = (mmanimoverride<0 ? ANIM_ALL : mmanimoverride)|ANIM_LOOP;
+        basetime = 0;
+    }
     mapmodelinfo &mmi = getmminfo(e.attrs[0]);
     if(&mmi) rendermodel(&e.light, mmi.name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
 }
