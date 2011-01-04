@@ -982,6 +982,22 @@ bool matchanim(const char *name, const char *pattern)
     return false;
 }
 
+ICOMMAND(0, findanims, "s", (char *name),
+{
+    vector<int> anims;
+    game::findanims(name, anims);
+    vector<char> buf;
+    string num;
+    loopv(anims)
+    {
+        formatstring(num)("%d", anims[i]);
+        if(i > 0) buf.add(' ');
+        buf.put(num, strlen(num));
+    }
+    buf.add('\0');
+    result(buf.getbuf());
+});
+
 void loadskin(const char *dir, const char *altdir, Texture *&skin, Texture *&masks) // model skin sharing
 {
     string dirs[3];
