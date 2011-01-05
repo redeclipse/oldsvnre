@@ -187,7 +187,8 @@ extern enttypes enttype[];
 enum
 {
     ANIM_PAIN = ANIM_GAMESPECIFIC, ANIM_JUMP,
-    ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT, ANIM_IMPULSE_DASH,
+    ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT,
+    ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
     ANIM_JETPACK_FORWARD, ANIM_JETPACK_BACKWARD, ANIM_JETPACK_LEFT, ANIM_JETPACK_RIGHT, ANIM_JETPACK_UP,
     ANIM_SINK, ANIM_EDIT, ANIM_SWITCH, ANIM_USE, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
@@ -883,7 +884,8 @@ const char * const animnames[] =
 {
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
     "mapmodel", "trigger on", "trigger off", "pain", "jump",
-    "impulse forward", "impulse backward", "impulse left", "impulse right", "impulse dash",
+    "impulse forward", "impulse backward", "impulse left", "impulse right", 
+    "dash forward", "dash backward", "dash left", "dash right", "dash up",
     "jetpack forward", "jetpack backward", "jetpack left", "jetpack right", "jetpack up",
     "sink", "edit", "switch", "use", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
