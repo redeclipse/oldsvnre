@@ -186,7 +186,8 @@ extern enttypes enttype[];
 
 enum
 {
-    ANIM_PAIN = ANIM_GAMESPECIFIC, ANIM_JUMP,
+    ANIM_PAIN = ANIM_GAMESPECIFIC, 
+    ANIM_JUMP_FORWARD, ANIM_JUMP_BACKWARD, ANIM_JUMP_LEFT, ANIM_JUMP_RIGHT, ANIM_JUMP,
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT,
     ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
     ANIM_JETPACK_FORWARD, ANIM_JETPACK_BACKWARD, ANIM_JETPACK_LEFT, ANIM_JETPACK_RIGHT, ANIM_JETPACK_UP,
@@ -883,7 +884,8 @@ struct actitem
 const char * const animnames[] =
 {
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
-    "mapmodel", "trigger on", "trigger off", "pain", "jump",
+    "mapmodel", "trigger on", "trigger off", "pain", 
+    "jump forward", "jump backward", "jump left", "jump right", "jump",
     "impulse forward", "impulse backward", "impulse left", "impulse right", 
     "dash forward", "dash backward", "dash left", "dash right", "dash up",
     "jetpack forward", "jetpack backward", "jetpack left", "jetpack right", "jetpack up",

@@ -1905,14 +1905,21 @@ namespace game
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000) 
                 { 
-                    if(d->move>0) anim |= (ANIM_DASH_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= (ANIM_DASH_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else anim |= (ANIM_DASH_UP|ANIM_LOOP)<<ANIM_SECONDARY;
+                    if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
+                    else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
                     basetime2 = d->impulse[IM_TIME]; 
                 }
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) { anim |= ANIM_JUMP<<ANIM_SECONDARY; basetime2 = d->impulse[IM_JUMP]; }
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->timeinair >= 1000) anim |= (ANIM_JUMP|ANIM_END)<<ANIM_SECONDARY;
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && ((d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) || d->timeinair >= 1000)) 
+                { 
+                    if(d->move>0) anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
+                    else anim |= ANIM_JUMP<<ANIM_SECONDARY;
+                    if(d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) basetime2 = d->impulse[IM_JUMP]; 
+                    else anim |= ANIM_END<<ANIM_SECONDARY;
+                }
                 else if(physics::sprinting(d) || d->turnside)
                 {
                     if(d->move>0 || d->turnside) anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
