@@ -1021,17 +1021,8 @@ struct animmodel : model
             lightcolor = color;
             lightmaterial = material;
 
-            rdir = dir;
-            campos = camera1->o;
-            if(!d || !d->ragdoll || anim&ANIM_RAGDOLL)
-            {
-                matrixstack[0].transposedtransformnormal(vec(rdir), rdir);
-                matrixstack[0].transposedtransform(vec(campos), campos);
-            }
-            else
-            {
-                campos.sub(d->ragdoll->center);
-            }
+            matrixstack[0].transposedtransformnormal(dir, rdir);
+            matrixstack[0].transposedtransform(camera1->o, campos);
 
             if(envmapped()) envmaptmu = 2;
             else if(a) for(int i = 0; a[i].tag; i++) if(a[i].m && a[i].m->envmapped())
