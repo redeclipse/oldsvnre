@@ -1905,7 +1905,8 @@ namespace game
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000) 
                 { 
-                    if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
+                    if(d->impulse[IM_TYPE] == IM_T_KICK) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
+                    else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
                     else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
