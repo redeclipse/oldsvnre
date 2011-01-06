@@ -977,18 +977,22 @@ struct animmodel : model
 
         vec rdir, campos;
 
-        yaw += offsetyaw + spin*lastmillis/1000.0f;
+        yaw += spin*lastmillis/1000.0f;
         pitch += offsetpitch;
-        roll += offsetroll;
-        vec axis = vec(0, -1, 0).rotate_around_z(-offsetyaw*RAD);
+
+        vec axis(0, -1, 0);
+        if(offsetroll) axis.rotate_around_x(offsetroll*RAD);
+        if(offsetyaw) axis.rotate_around_z(-offsetyaw*RAD);
 
         matrixpos = 0;
         matrixstack[0].identity();
         if(!d || !d->ragdoll || anim&ANIM_RAGDOLL)
         {
             matrixstack[0].translate(o);
-            matrixstack[0].rotate_around_z(yaw*RAD);
+            if(yaw) matrixstack[0].rotate_around_z(yaw*RAD);
             if(roll) matrixstack[0].rotate_around_x(-roll*RAD);
+            if(offsetyaw) matrixstack[0].rotate_around_z(offsetyaw*RAD);
+            if(offsetroll) matrixstack[0].rotate_around_x(-offsetroll*RAD);
         }
         else
         {
@@ -1021,11 +1025,8 @@ struct animmodel : model
             campos = camera1->o;
             if(!d || !d->ragdoll || anim&ANIM_RAGDOLL)
             {
-                rdir.rotate_around_z(-yaw*RAD);
-                rdir.rotate_around_x(roll*RAD);
-                campos.sub(o);
-                campos.rotate_around_z(-yaw*RAD);
-                campos.rotate_around_x(roll*RAD);
+                matrixstack[0].transposedtransformnormal(vec(rdir), rdir);
+                matrixstack[0].transposedtransform(vec(campos), campos);
             }
             else
             {
