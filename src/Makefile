@@ -477,6 +477,9 @@ game/weapons.o: game/vars.h game/capture.h game/defend.h game/bomber.h
 shared/crypto-standalone.o: shared/cube.h shared/tools.h shared/command.h
 shared/crypto-standalone.o: shared/geom.h shared/ents.h shared/iengine.h
 shared/crypto-standalone.o: shared/igame.h
+shared/geom-standalone.o: shared/cube.h shared/tools.h shared/command.h
+shared/geom-standalone.o: shared/geom.h shared/ents.h shared/iengine.h
+shared/geom-standalone.o: shared/igame.h
 shared/stream-standalone.o: shared/cube.h shared/tools.h shared/command.h
 shared/stream-standalone.o: shared/geom.h shared/ents.h shared/iengine.h
 shared/stream-standalone.o: shared/igame.h

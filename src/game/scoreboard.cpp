@@ -211,7 +211,7 @@ namespace hud
         }
         g.popfont();
         g.poplist();
-        if(*serveraddress)
+        if(*connectname)
         {
             g.pushlist();
             g.space(2);
@@ -225,7 +225,7 @@ namespace hud
                 g.popfont();
             }
             g.pushfont("radar");
-            g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, serveraddress, serverconport);
+            g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, connectname, connectport);
             g.popfont();
             g.poplist();
         }

@@ -400,6 +400,11 @@ extern void kicknonlocalclients(int reason);
 extern void sendqueryreply(ucharbuf &p);
 extern bool resolverwait(const char *name, ENetAddress *address);
 extern int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &address);
+extern bool connectedmaster();
+extern ENetSocket connectmaster(bool reuse = true);
+extern void disconnectmaster();
+extern bool requestmaster(const char *req);
+extern bool requestmasterf(const char *fmt, ...);
 
 extern bool findoctadir(const char *name, bool fallback = false);
 extern void trytofindocta(bool fallback = true);

@@ -548,6 +548,26 @@ namespace server
     void deleteinfo(void *ci) { delete (clientinfo *)ci; }
 
     int numchannels() { return 3; }
+    int reserveclients() { return GAME(serverclients)+4; }
+    
+    bool hasclient(clientinfo *ci, clientinfo *cp = NULL)
+    {
+        if(!ci || (ci != cp && ci->clientnum != cp->clientnum && ci->state.ownernum != cp->clientnum)) return false;
+        return true;
+    }
+
+    int peerowner(int n)
+    {
+        clientinfo *ci = (clientinfo *)getinfo(n);
+        if(ci && ci->state.aitype >= 0) return ci->state.ownernum;
+        return n;
+    }
+
+    bool allowbroadcast(int n)
+    {
+        clientinfo *ci = (clientinfo *)getinfo(n);
+        return ci && ci->connected && ci->state.aitype < 0;
+    }
 
     const char *mastermodename(int type)
     {
