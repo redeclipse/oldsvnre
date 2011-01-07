@@ -11,6 +11,7 @@
 
 = Sounds =
 * Team change announcer?
+* Multiple sample support
 
 = Wishlist/Other =
 * Make parkour mechanics require a certain height off the ground?
