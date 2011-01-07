@@ -50,9 +50,9 @@ struct masterclient
     masterclient() : inputpos(0), outputpos(0), port(ENG_SERVER_PORT), lastactivity(0), isserver(false), ishttp(false) {}
 };
 
-vector<masterclient *> masterclients;
-ENetSocket mastersocket = ENET_SOCKET_NULL;
-time_t starttime;
+static vector<masterclient *> masterclients;
+static ENetSocket mastersocket = ENET_SOCKET_NULL;
+static time_t starttime;
 
 void setupmaster()
 {
@@ -89,7 +89,7 @@ void masteroutf(masterclient &c, const char *fmt, ...)
     masterout(c, msg);
 }
 
-hashtable<char *, authuser> authusers;
+static hashtable<char *, authuser> authusers;
 
 void addauth(char *name, char *flags, char *pubkey)
 {
@@ -297,8 +297,6 @@ bool checkmasterclientinput(masterclient &c)
     memmove(c.input, p, c.inputpos);
     return c.inputpos < (int)sizeof(c.input);
 }
-
-fd_set readset, writeset;
 
 void checkmaster()
 {

@@ -17,6 +17,7 @@
 #define ENG_DEVEL           true
 
 #define ENG_SERVER_PORT     (ENG_DEVEL ? 28803 : 28801)
+#define ENG_LAN_PORT        28799
 #define ENG_MASTER_PORT     28800
 #define ENG_MASTER_HOST     "play.redeclipse.net"
 
@@ -493,8 +494,8 @@ extern void localdisconnect();
 extern void addserver(const char *name, int port);
 
 // client
-extern char *serveraddress;
-extern int serverconport;
+extern char *connectname;
+extern int connectport;
 extern void localservertoclient(int chan, ENetPacket *packet);
 extern bool connected(bool attempt = true);
 extern void connectserv(const char *name = NULL, int port = ENG_SERVER_PORT, const char *password = NULL);

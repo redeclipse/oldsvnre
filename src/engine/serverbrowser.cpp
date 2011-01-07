@@ -323,7 +323,7 @@ void pingservers()
     {
         ENetAddress address;
         address.host = ENET_HOST_BROADCAST;
-        address.port = serverport+1;
+        address.port = ENG_LAN_PORT;
         buf.data = ping;
         buf.dataLength = p.length();
         enet_socket_send(pingsock, &address, &buf, 1);
@@ -433,6 +433,61 @@ void clearservers()
 }
 
 COMMAND(0, clearservers, "");
+
+#define RETRIEVELIMIT 20000
+
+void retrieveservers(vector<char> &data)
+{
+    ENetSocket sock = connectmaster(false);
+    if(sock == ENET_SOCKET_NULL) return;
+
+    defformatstring(text)("retrieving servers from %s:[%d]", servermaster, servermasterport);
+    progress(0, text);
+
+    int starttime = SDL_GetTicks(), timeout = 0;
+    const char *req = "update\n";
+    int reqlen = strlen(req);
+    ENetBuffer buf;
+    while(reqlen > 0)
+    {
+        enet_uint32 events = ENET_SOCKET_WAIT_SEND;
+        if(enet_socket_wait(sock, &events, 250) >= 0 && events)
+        {
+            buf.data = (void *)req;
+            buf.dataLength = reqlen;
+            int sent = enet_socket_send(sock, NULL, &buf, 1);
+            if(sent < 0) break;
+            req += sent;
+            reqlen -= sent;
+            if(reqlen <= 0) break;
+        }
+        timeout = SDL_GetTicks() - starttime;
+        progress(min(float(timeout)/RETRIEVELIMIT, 1.0f), text);
+        if(interceptkey(SDLK_ESCAPE)) timeout = RETRIEVELIMIT + 1;
+        if(timeout > RETRIEVELIMIT) break;
+    }
+
+    if(reqlen <= 0) for(;;)
+    {
+        enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
+        if(enet_socket_wait(sock, &events, 250) >= 0 && events)
+        {
+            if(data.length() >= data.capacity()) data.reserve(4096);
+            buf.data = data.getbuf() + data.length();
+            buf.dataLength = data.capacity() - data.length();
+            int recv = enet_socket_receive(sock, NULL, &buf, 1);
+            if(recv <= 0) break;
+            data.advance(recv);
+        }
+        timeout = SDL_GetTicks() - starttime;
+        progress(min(float(timeout)/RETRIEVELIMIT, 1.0f), text);
+        if(interceptkey(SDLK_ESCAPE)) timeout = RETRIEVELIMIT + 1;
+        if(timeout > RETRIEVELIMIT) break;
+    }
+
+    if(data.length()) data.add('\0');
+    enet_socket_destroy(sock);
+}
 
 void updatefrommaster()
 {

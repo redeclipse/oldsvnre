@@ -1,24 +1,3 @@
-bool allowbroadcast(int n)
-{
-    clientinfo *ci = (clientinfo *)getinfo(n);
-    return ci && ci->connected && ci->state.aitype < 0;
-}
-
-bool hasclient(clientinfo *ci, clientinfo *cp = NULL)
-{
-    if(!ci || (ci != cp && ci->clientnum != cp->clientnum && ci->state.ownernum != cp->clientnum)) return false;
-    return true;
-}
-
-int peerowner(int n)
-{
-    clientinfo *ci = (clientinfo *)getinfo(n);
-    if(ci && ci->state.aitype >= 0) return ci->state.ownernum;
-    return n;
-}
-
-int reserveclients() { return GAME(serverclients)+4; }
-
 void hashpassword(int cn, int sessionid, const char *pwd, char *result, int maxlen)
 {
     char buf[2*sizeof(string)];
@@ -36,24 +15,8 @@ bool checkpassword(clientinfo *ci, const char *wanted, const char *given)
 
 namespace auth
 {
-    ENetSocket socket = ENET_SOCKET_NULL;
-    char input[4096];
-    vector<char> output;
-    int inputpos = 0, outputpos = 0;
     int lastconnect = 0, lastactivity = 0;
     uint nextauthreq = 1;
-
-    extern void connect();
-    extern void disconnect();
-
-    bool isconnected() { return socket != ENET_SOCKET_NULL; }
-
-    void addoutput(const char *str)
-    {
-        int len = strlen(str);
-        if(len + output.length() > 64*1024) return;
-        output.put(str, len);
-    }
 
     clientinfo *findauth(uint id)
     {
@@ -66,15 +29,15 @@ namespace auth
         if(!nextauthreq) nextauthreq = 1;
         ci->authreq = nextauthreq++;
         ci->authlevel = -1;
-        defformatstring(buf)("reqauth %u %s\n", ci->authreq, ci->authname);
-        addoutput(buf);
+        requestmasterf("reqauth %u %s\n", ci->authreq, ci->authname);
+        lastactivity = totalmillis;
         sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_MESG, "please wait, requesting credential match");
     }
 
     bool tryauth(clientinfo *ci, const char *user)
     {
         if(!ci) return false;
-        else if(!isconnected())
+        else if(!connectedmaster())
         {
             sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_MESG, "not connected to authentication server");
             return false;
@@ -203,50 +166,37 @@ namespace auth
         {
             if(!isxdigit(*s)) { *s = '\0'; break; }
         }
-        defformatstring(buf)("confauth %u %s\n", id, val);
-        addoutput(buf);
+        requestmasterf("confauth %u %s\n", id, val);
+        lastactivity = totalmillis;
     }
 
-    void processinput()
+    void processinput(const char *p)
     {
-        if(inputpos < 0) return;
         const int MAXWORDS = 25;
         char *w[MAXWORDS];
         int numargs = MAXWORDS;
-        const char *p = input;
-        for(char *end;; p = end)
+        loopi(MAXWORDS)
         {
-            end = (char *)memchr(p, '\n', &input[inputpos] - p);
-            if(!end) end = (char *)memchr(p, '\0', &input[inputpos] - p);
-            if(!end) break;
-            *end++ = '\0';
-            loopi(MAXWORDS)
-            {
-                w[i] = (char *)"";
-                if(i > numargs) continue;
-                char *s = parsetext(p);
-                if(s) w[i] = s;
-                else numargs = i;
-            }
-            p += strcspn(p, ";\n\0"); p++;
-            if(!strcmp(w[0], "error")) conoutf("authserv error: %s", w[1]);
-            else if(!strcmp(w[0], "echo")) conoutf("authserv reply: %s", w[1]);
-            else if(!strcmp(w[0], "failauth")) authfailed((uint)(atoi(w[1])));
-            else if(!strcmp(w[0], "succauth")) authsucceeded((uint)(atoi(w[1])), w[2], w[3]);
-            else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
-            else if(!strcmp(w[0], "ban") || !strcmp(w[0], "allow"))
-            {
-                ipinfo &p = (strcmp(w[0], "ban") ? allows : bans).add();
-                p.ip = (uint)(atoi(w[1]));
-                p.mask = (uint)(atoi(w[2]));
-                p.time = -2; // master info
-            }
-            //else if(w[0]) conoutf("authserv sent invalid command: %s", w[0]);
-            loopj(numargs) if(w[j]) delete[] w[j];
+            w[i] = (char *)"";
+            if(i > numargs) continue;
+            char *s = parsetext(p);
+            if(s) w[i] = s;
+            else numargs = i;
         }
-        inputpos = &input[inputpos] - p;
-        memmove(input, p, inputpos);
-        if(inputpos >= (int)sizeof(input)) disconnect();
+        if(!strcmp(w[0], "error")) conoutf("authserv error: %s", w[1]);
+        else if(!strcmp(w[0], "echo")) conoutf("authserv reply: %s", w[1]);
+        else if(!strcmp(w[0], "failauth")) authfailed((uint)(atoi(w[1])));
+        else if(!strcmp(w[0], "succauth")) authsucceeded((uint)(atoi(w[1])), w[2], w[3]);
+        else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
+        else if(!strcmp(w[0], "ban") || !strcmp(w[0], "allow"))
+        {
+            ipinfo &p = (strcmp(w[0], "ban") ? allows : bans).add();
+            p.ip = (uint)(atoi(w[1]));
+            p.mask = (uint)(atoi(w[2]));
+            p.time = -2; // master info
+        }
+        //else if(w[0]) conoutf("authserv sent invalid command: %s", w[0]);
+        loopj(numargs) if(w[j]) delete[] w[j];
     }
 
     void regserver()
@@ -254,108 +204,40 @@ namespace auth
         loopv(bans) if(bans[i].time == -2) bans.remove(i--);
         loopv(allows) if(allows[i].time == -2) allows.remove(i--);
         conoutf("updating authentication server");
-        defformatstring(msg)("server %d %d\n", serverport, serverport+1);
-        addoutput(msg);
+        requestmasterf("server %d %d\n", serverport, serverport+1);
         lastactivity = totalmillis;
-    }
-
-    void connect()
-    {
-        if(socket != ENET_SOCKET_NULL) return;
-
-        lastconnect = totalmillis;
-        conoutf("connecting to authentication server %s:[%d]...", servermaster, servermasterport);
-        ENetAddress authserver = { ENET_HOST_ANY, servermasterport };
-        if(enet_address_set_host(&authserver, servermaster) < 0) conoutf("could not set authentication host");
-        else
-        {
-            socket = enet_socket_create(ENET_SOCKET_TYPE_STREAM);
-            if(socket != ENET_SOCKET_NULL)
-            {
-                if(enet_socket_connect(socket, &authserver) < 0)
-                {
-                    enet_socket_destroy(socket);
-                    socket = ENET_SOCKET_NULL;
-                }
-                else enet_socket_set_option(socket, ENET_SOCKOPT_NONBLOCK, 1);
-            }
-            if(socket == ENET_SOCKET_NULL) conoutf("couldn't connect to authentication server");
-            else
-            {
-                output.setsize(0);
-                outputpos = inputpos = 0;
-                regserver();
-                loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
-            }
-        }
-    }
-
-    void disconnect()
-    {
-        if(socket == ENET_SOCKET_NULL) return;
-
-        enet_socket_destroy(socket);
-        socket = ENET_SOCKET_NULL;
-
-        output.setsize(0);
-        outputpos = inputpos = 0;
-        conoutf("disconnected from authentication server");
-    }
-
-    void flushoutput()
-    {
-        if(output.empty()) return;
-
-        ENetBuffer buf;
-        buf.data = &output[outputpos];
-        buf.dataLength = output.length() - outputpos;
-        int sent = enet_socket_send(socket, NULL, &buf, 1);
-        if(sent > 0)
-        {
-            lastactivity = totalmillis;
-            outputpos += sent;
-            if(outputpos >= output.length())
-            {
-                output.setsize(0);
-                outputpos = 0;
-            }
-        }
-        else if(sent < 0) disconnect();
-    }
-
-    void flushinput()
-    {
-        enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
-        if(enet_socket_wait(socket, &events, 0) < 0 || !events) return;
-
-        ENetBuffer buf;
-        buf.data = &input[inputpos];
-        buf.dataLength = sizeof(input) - inputpos;
-        int recv = enet_socket_receive(socket, NULL, &buf, 1);
-
-        if(recv > 0)
-        {
-            inputpos += recv;
-            processinput();
-        }
-        else if(recv < 0) disconnect();
     }
 
     void update()
     {
-        if(!isconnected())
+        if(!connectedmaster())
         {
-            if(servertype >= 2 && (!lastconnect || totalmillis-lastconnect > 60*1000)) connect();
-            if(!isconnected()) return;
+            if(servertype >= 2 && (!lastconnect || totalmillis-lastconnect > 60*1000)) 
+            {
+                lastconnect = totalmillis;
+                if(connectmaster() == ENET_SOCKET_NULL) return;
+                regserver();
+                loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
+            }
         }
         else if(servertype < 2)
         {
-            disconnect();
+            disconnectmaster();
             return;
         }
 
         if(totalmillis-lastactivity > 10*60*1000) regserver();
-        flushoutput();
-        flushinput();
     }
 }
+
+void disconnectedmaster()
+{
+}
+
+void processmasterinput(const char *cmd, int cmdlen, const char *args)
+{
+    auth::processinput(cmd);
+}
+
+
+

@@ -111,8 +111,6 @@ VAR(0, servertype, 0, 1, 3); // 0: local only, 1: private, 2: public, 3: dedicat
 #endif
 VAR(0, serveruprate, 0, 0, INT_MAX-1);
 VAR(0, serverport, 1, ENG_SERVER_PORT, INT_MAX-1);
-VAR(0, servermasterport, 1, ENG_MASTER_PORT, INT_MAX-1);
-SVAR(0, servermaster, ENG_MASTER_HOST);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
@@ -273,13 +271,16 @@ vector<clientdata *> clients;
 
 ENetHost *serverhost = NULL;
 int laststatus = 0;
-ENetSocket pongsock = ENET_SOCKET_NULL;
+ENetSocket pongsock = ENET_SOCKET_NULL, lansock = ENET_SOCKET_NULL;
 
 void cleanupserver()
 {
     server::shutdown();
     if(serverhost) enet_host_destroy(serverhost);
     serverhost = NULL;
+    if(pongsock != ENET_SOCKET_NULL) enet_socket_destroy(pongsock);
+    if(lansock != ENET_SOCKET_NULL) enet_socket_destroy(lansock);
+    pongsock = lansock = ENET_SOCKET_NULL;
 #ifdef IRC
     irccleanup();
 #endif
@@ -488,8 +489,8 @@ void localconnect(bool force)
 {
     if((!connected() || !connectedlocally) && (force || autoconnect))
     {
-        setsvar("serveraddress", "");
-        setvar("serverconport", 0);
+        setsvar("connectname", "");
+        setvar("connectport", 0);
         int cn = addclient(ST_LOCAL);
         clientdata &c = *clients[cn];
         c.peer = NULL;
@@ -515,34 +516,6 @@ void localdisconnect()
 }
 #endif
 
-static ENetAddress pongaddr;
-
-void sendqueryreply(ucharbuf &p)
-{
-    ENetBuffer buf;
-    buf.data = p.buf;
-    buf.dataLength = p.length();
-    enet_socket_send(pongsock, &pongaddr, &buf, 1);
-}
-
-void sendpongs()        // reply all server info requests
-{
-    ENetBuffer buf;
-    uchar pong[MAXTRANS];
-    int len;
-    enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
-    buf.data = pong;
-    while(enet_socket_wait(pongsock, &events, 0) >= 0 && events)
-    {
-        buf.dataLength = sizeof(pong);
-        len = enet_socket_receive(pongsock, &pongaddr, &buf, 1);
-        if(len < 0) return;
-        ucharbuf req(pong, len), p(pong, sizeof(pong));
-        p.len += len;
-        server::queryreply(req, p);
-    }
-}
-
 #ifdef STANDALONE
 bool resolverwait(const char *name, ENetAddress *address)
 {
@@ -557,69 +530,195 @@ int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &remot
 }
 #endif
 
-#ifndef STANDALONE
-ENetSocket mastersend(ENetAddress &remoteaddress, const char *hostname, const char *req, ENetAddress *localaddress = NULL)
+static ENetSocket mastersock = ENET_SOCKET_NULL;
+static ENetAddress masteraddress = { ENET_HOST_ANY, ENET_PORT_ANY }, serveraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
+static vector<char> masterout, masterin;
+static int masteroutpos = 0, masterinpos = 0;
+
+void disconnectmaster()
 {
-    if(remoteaddress.host==ENET_HOST_ANY)
+    if(mastersock != ENET_SOCKET_NULL)
     {
-        conoutf("\falooking up %s:[%d]...", hostname, remoteaddress.port);
-        if(!resolverwait(hostname, &remoteaddress)) return ENET_SOCKET_NULL;
+        server::disconnectedmaster();
+        enet_socket_destroy(mastersock);
+        mastersock = ENET_SOCKET_NULL;
+        conoutf("disconnected from master server");
+    }
+
+    masterout.setsize(0);
+    masterin.setsize(0);
+    masteroutpos = masterinpos = 0;
+
+    masteraddress.host = ENET_HOST_ANY;
+    masteraddress.port = ENET_PORT_ANY;
+}
+
+VARF(0, servermasterport, 1, ENG_MASTER_PORT, INT_MAX-1, disconnectmaster());
+SVARF(0, servermaster, ENG_MASTER_HOST, disconnectmaster());
+
+ENetSocket connectmaster(bool reuse)
+{
+    if(reuse && mastersock != ENET_SOCKET_NULL) return mastersock;
+    if(!servermaster[0]) return ENET_SOCKET_NULL;
+
+    if(masteraddress.host == ENET_HOST_ANY)
+    {
+        conoutf("\falooking up %s:[%d]...", servermaster, servermasterport);
+        masteraddress.port = servermasterport;
+        if(!resolverwait(servermaster, &masteraddress)) 
+        {
+            conoutf("\frfailed resolving %s:[%d]", servermaster, servermasterport);
+            return ENET_SOCKET_NULL;
+        }
     }
     ENetSocket sock = enet_socket_create(ENET_SOCKET_TYPE_STREAM);
-    if(sock!=ENET_SOCKET_NULL && localaddress && enet_socket_bind(sock, localaddress) < 0)
+    if(sock != ENET_SOCKET_NULL && serveraddress.host != ENET_HOST_ANY && enet_socket_bind(sock, &serveraddress) < 0)
     {
         enet_socket_destroy(sock);
         sock = ENET_SOCKET_NULL;
     }
-    if(sock==ENET_SOCKET_NULL || connectwithtimeout(sock, hostname, remoteaddress)<0)
+    if(sock == ENET_SOCKET_NULL || connectwithtimeout(sock, servermaster, masteraddress) < 0)
     {
-        conoutf(sock==ENET_SOCKET_NULL ? "could not open socket to %s:[%d]" : "could not connect to %s:[%d]", hostname, remoteaddress.port);
+        conoutf(sock==ENET_SOCKET_NULL ? "\frcould not open socket to connect to master server" : "\frcould not connect to master server");
         return ENET_SOCKET_NULL;
     }
-    ENetBuffer buf;
-    defformatstring(mget)("%s\n", req);
-    buf.data = mget;
-    buf.dataLength = strlen((char *)buf.data);
-    conoutf("\fasending request to %s:[%d]", hostname, remoteaddress.port);
-    enet_socket_send(sock, NULL, &buf, 1);
+
+    enet_socket_set_option(sock, ENET_SOCKOPT_NONBLOCK, 1);
+    if(reuse) mastersock = sock;
     return sock;
 }
 
-#define RETRIEVELIMIT 20000
-void retrieveservers(vector<char> &data)
-{
-    ENetAddress address = { ENET_HOST_ANY, servermasterport };
-    ENetSocket sock = mastersend(address, servermaster, "update");
-    if(sock==ENET_SOCKET_NULL) return;
-    /* only cache this if connection succeeds */
-    defformatstring(text)("retrieving servers from %s:[%d]", servermaster, address.port);
-    progress(0, text);
+bool connectedmaster() { return mastersock != ENET_SOCKET_NULL; }
 
-    int starttime = SDL_GetTicks(), timeout = 0;
-    ENetBuffer buf;
-    for(;;)
+bool requestmaster(const char *req)
+{
+    if(mastersock == ENET_SOCKET_NULL)
     {
-        enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
-        if(enet_socket_wait(sock, &events, 250) >= 0 && events)
-        {
-            if(data.length() >= data.capacity()) data.reserve(4096);
-            buf.data = data.getbuf() + data.length();
-            buf.dataLength = data.capacity() - data.length();
-            int recv = enet_socket_receive(sock, NULL, &buf, 1);
-            if(recv <= 0) break;
-            data.advance(recv);
-        }
-        timeout = SDL_GetTicks() - starttime;
-        progress(min(float(timeout)/RETRIEVELIMIT, 1.0f), text);
-        if(interceptkey(SDLK_ESCAPE)) timeout = RETRIEVELIMIT + 1;
-        if(timeout > RETRIEVELIMIT) break;
+        mastersock = connectmaster();
+        if(mastersock == ENET_SOCKET_NULL) return false;
     }
 
-    if(data.length()) data.add('\0');
-
-    enet_socket_destroy(sock);
+    masterout.put(req, strlen(req));
+    return true;
 }
-#endif
+
+bool requestmasterf(const char *fmt, ...)
+{
+    defvformatstring(req, fmt, fmt);
+    return requestmaster(req);
+}
+
+void processmasterinput()
+{
+    if(masterinpos >= masterin.length()) return;
+
+    char *input = &masterin[masterinpos], *end = (char *)memchr(input, '\n', masterin.length() - masterinpos);
+    while(end)
+    {
+        *end++ = '\0';
+
+        const char *args = input;
+        while(args < end && !isspace(*args)) args++;
+        int cmdlen = args - input;
+        while(args < end && isspace(*args)) args++;
+
+        server::processmasterinput(input, cmdlen, args);
+
+        masterinpos = end - masterin.getbuf();
+        input = end;
+        end = (char *)memchr(input, '\n', masterin.length() - masterinpos);
+    }
+
+    if(masterinpos >= masterin.length())
+    {
+        masterin.setsize(0);
+        masterinpos = 0;
+    }
+}
+
+void flushmasteroutput()
+{
+    if(masterout.empty()) return;
+
+    ENetBuffer buf;
+    buf.data = &masterout[masteroutpos];
+    buf.dataLength = masterout.length() - masteroutpos;
+    int sent = enet_socket_send(mastersock, NULL, &buf, 1);
+    if(sent >= 0)
+    {
+        masteroutpos += sent;
+        if(masteroutpos >= masterout.length())
+        {
+            masterout.setsize(0);
+            masteroutpos = 0;
+        }
+    }
+    else disconnectmaster();
+}
+
+void flushmasterinput()
+{
+    if(masterin.length() >= masterin.capacity())
+        masterin.reserve(4096);
+
+    ENetBuffer buf;
+    buf.data = &masterin[masterin.length()];
+    buf.dataLength = masterin.capacity() - masterin.length();
+    int recv = enet_socket_receive(mastersock, NULL, &buf, 1);
+    if(recv > 0)
+    {
+        masterin.advance(recv);
+        processmasterinput();
+    }
+    else disconnectmaster();
+}
+
+static ENetAddress pongaddr;
+
+void sendqueryreply(ucharbuf &p)
+{
+    ENetBuffer buf;
+    buf.data = p.buf;
+    buf.dataLength = p.length();
+    enet_socket_send(pongsock, &pongaddr, &buf, 1);
+}
+
+void checkserversockets()        // reply all server info requests
+{
+    static ENetSocketSet sockset;
+    ENET_SOCKETSET_EMPTY(sockset);
+    ENetSocket maxsock = pongsock;
+    ENET_SOCKETSET_ADD(sockset, pongsock);
+    if(mastersock != ENET_SOCKET_NULL)
+    {
+        maxsock = max(maxsock, mastersock);
+        ENET_SOCKETSET_ADD(sockset, mastersock);
+    }
+    if(lansock != ENET_SOCKET_NULL)
+    {
+        maxsock = max(maxsock, lansock);
+        ENET_SOCKETSET_ADD(sockset, lansock);
+    }
+    if(enet_socketset_select(maxsock, &sockset, NULL, 0) <= 0) return;
+
+    ENetBuffer buf;
+    uchar pong[MAXTRANS];
+    loopi(2)
+    {
+        ENetSocket sock = i ? lansock : pongsock;
+        if(sock == ENET_SOCKET_NULL || !ENET_SOCKETSET_CHECK(sockset, sock)) continue;
+
+        buf.data = pong;
+        buf.dataLength = sizeof(pong);
+        int len = enet_socket_receive(sock, &pongaddr, &buf, 1);
+        if(len < 0) return;
+        ucharbuf req(pong, len), p(pong, sizeof(pong));
+        p.len += len;
+        server::queryreply(req, p);
+    }
+
+    if(mastersock != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(sockset, mastersock)) flushmasterinput();
+}
 
 void serverslice()  // main server update, called from main loop in sp, or from below in dedicated server
 {
@@ -627,7 +726,7 @@ void serverslice()  // main server update, called from main loop in sp, or from 
 
     if(!serverhost) return;
 
-    sendpongs();
+    checkserversockets();
 
     if(servertype >= 2 && totalmillis-laststatus >= 60000)  // display bandwidth stats, useful for server ops
     {
@@ -776,6 +875,7 @@ void setupserver()
     if(*serverip)
     {
         if(enet_address_set_host(&address, serverip) < 0) conoutf("\frWARNING: server address not resolved");
+        else serveraddress.host = address.host;
     }
     serverhost = enet_host_create(&address, server::reserveclients(), server::numchannels(), 0, serveruprate);
     if(!serverhost)
@@ -801,10 +901,20 @@ void setupserver()
 #ifndef STANDALONE
         setvar("servertype", 1);
 #endif
-        }
-    else
+    }
+    else 
     {
         enet_socket_set_option(pongsock, ENET_SOCKOPT_NONBLOCK, 1);
+
+        address.port = ENG_LAN_PORT;
+        lansock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
+        if(lansock != ENET_SOCKET_NULL && (enet_socket_set_option(lansock, ENET_SOCKOPT_REUSEADDR, 1) < 0 || enet_socket_bind(lansock, &address) < 0))
+        {
+            enet_socket_destroy(lansock);
+            lansock = ENET_SOCKET_NULL;
+        }
+        if(lansock == ENET_SOCKET_NULL) conoutf("\frcould not create LAN server info socket");
+        else enet_socket_set_option(lansock, ENET_SOCKOPT_NONBLOCK, 1);
     }
 
     if(verbose) conoutf("\fggame server started");
