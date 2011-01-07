@@ -96,6 +96,7 @@ SERVER_LIBS= -Lenet/.libs -lenet -lz
 endif
 SERVER_OBJS= \
 	shared/crypto-standalone.o \
+	shared/geom-standalone.o \
 	shared/stream-standalone.o \
 	shared/tools-standalone.o \
 	engine/command-standalone.o \
