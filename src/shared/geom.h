@@ -1357,6 +1357,8 @@ struct glmatrixf
     bool invert(const glmatrixf &m, float mindet = 1.0e-10f);
 };
 
+extern void vecfromyawpitch(float yaw, float pitch, int move, int strafe, vec &m);
+extern void vectoyawpitch(const vec &v, float &yaw, float &pitch);
 extern bool raysphereintersect(const vec &center, float radius, const vec &o, const vec &ray, float &dist);
 extern bool rayrectintersect(const vec &b, const vec &s, const vec &o, const vec &ray, float &dist, int &orient);
 extern bool linecylinderintersect(const vec &from, const vec &to, const vec &start, const vec &end, float radius, float &dist);

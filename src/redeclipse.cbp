@@ -1069,8 +1069,10 @@
 		<Unit filename="shared\geom.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
+			<Option target="server" />
 			<Option target="data" />
 			<Option target="client-prof" />
+			<Option target="server-dbg" />
 		</Unit>
 		<Unit filename="shared\geom.h">
 			<Option target="data" />
