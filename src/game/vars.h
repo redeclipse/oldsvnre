@@ -27,11 +27,11 @@ GVAR(IDF_ADMIN, rotatemode, 0, 0, 1);
 GVAR(IDF_ADMIN, rotatemuts, 0, 0, 1);
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma forge foundation futuresport futuresport2 ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility ubik venus warp wet");
-GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma forge foundation futuresport futuresport2 ghost keystone longestyard mainframe mist nova panic smouldering spacetech stone tower tranquility ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost hinder keystone lab longestyard mainframe mist nova panic processing smouldering spacetech stone testchamber tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost keystone lab longestyard mainframe mist nova panic processing smouldering spacetech stone tower tranquility tribal ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma forge foundation futuresport futuresport2 ghost keystone mist nova panic smouldering stone tranquility ubik venus warp wet");
-GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma forge foundation futuresport futuresport2 ghost keystone mist nova panic smouldering stone tower tranquility ubik venus warp wet");
+GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost keystone lab mist nova panic processing smouldering stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost keystone lab mist nova panic processing smouldering stone tower tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "bath deadsimple deli depot echo forge foundation futuresport futuresport2 tranquility venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
@@ -92,7 +92,7 @@ GFVAR(0, itemrelativity, -10000, 1, 10000);
 GFVAR(0, itemwaterfric, 0, 1.75f, 10000);
 GFVAR(0, itemweight, -10000, 150, 10000);
 
-GVAR(0, timelimit, 0, 30, INT_MAX-1);
+GVAR(0, timelimit, 0, 15, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
 GVAR(0, intermlimit, 0, 10000, INT_MAX-1); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 30000, INT_MAX-1); // .. before vote passes by default
@@ -104,7 +104,7 @@ GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
-GVAR(0, pointlimit, 0, 300, INT_MAX-1); // finish when score is this or more
+GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
@@ -182,17 +182,17 @@ GVAR(0, impulsedashdelay, 0, 1000, INT_MAX-1); // minimum time between dashes
 GVAR(0, impulsejetdelay, 0, 250, INT_MAX-1); // minimum time between jetpack
 GVAR(0, impulseslide, 0, 500, INT_MAX-1); // minimum time before floor friction kicks back in
 GVAR(0, impulsemeter, 0, 20000, INT_MAX-1); // impulse dash length; 0 = unlimited, anything else = timer
-GVAR(0, impulsecost, 0, 1000, INT_MAX-1); // cost of impulse jump
+GVAR(0, impulsecost, 0, 4000, INT_MAX-1); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, INT_MAX-1); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, 1000); // sprinting impulse meter depletion
 GFVAR(0, impulsejetpack, 0, 1.5f, 1000); // jetpack impulse meter depletion
-GFVAR(0, impulseregen, 0, 1, 1000); // impulse regen multiplier
+GFVAR(0, impulseregen, 0, 4.0, 1000); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, 1000); // impulse regen crouch modifier
 GFVAR(0, impulseregensprint, 0, 0.75f, 1000); // impulse regen sprinting modifier
 GFVAR(0, impulseregenjetpack, 0, 2, 1000); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, 1000); // impulse regen moving modifier
-GFVAR(0, impulseregeninair, 0, 0, 1000); // impulse regen in-air modifier
-GVAR(0, impulseregendelay, 0, 1000, INT_MAX-1); // delay before impulse regens
+GFVAR(0, impulseregeninair, 0, 0.75, 1000); // impulse regen in-air modifier
+GVAR(0, impulseregendelay, 0, 250, INT_MAX-1); // delay before impulse regens
 
 GFVAR(0, stillspread, 0, 1.5f, 1000);
 GFVAR(0, movespread, 0, 3, 1000);
