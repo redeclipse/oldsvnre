@@ -551,8 +551,7 @@ void calcsunlight(lightmapworker *w, const vec &o, const vec &normal, float tole
             (w ? shadowray(w->shadowraycache, vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f :
                  shadowray(vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f))
             hit++;
-        matrix3x3 rot;
-        rot.rotate(90*RAD, dir);
+        matrix3x3 rot(90*RAD, dir);
         vec spoke(yaw*RAD, (pitch + offset)*RAD);
         spoke.rotate(21*RAD, dir);
         loopk(4)
