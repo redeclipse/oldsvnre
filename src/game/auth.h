@@ -210,20 +210,17 @@ namespace auth
 
     void update()
     {
-        if(!connectedmaster())
+        if(servertype < 2)
         {
-            if(servertype >= 2 && (!lastconnect || totalmillis-lastconnect > 60*1000)) 
-            {
-                lastconnect = totalmillis;
-                if(connectmaster() == ENET_SOCKET_NULL) return;
-                regserver();
-                loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
-            }
-        }
-        else if(servertype < 2)
-        {
-            disconnectmaster();
+            if(connectedmaster()) disconnectmaster();
             return;
+        }
+        else if(!connectedmaster() && (!lastconnect || totalmillis-lastconnect > 60*1000)) 
+        {
+            lastconnect = totalmillis;
+            if(connectmaster() == ENET_SOCKET_NULL) return;
+            regserver();
+            loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
         }
 
         if(totalmillis-lastactivity > 10*60*1000) regserver();
