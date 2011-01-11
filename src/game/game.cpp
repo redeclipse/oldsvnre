@@ -1851,7 +1851,7 @@ namespace game
     {
         int type = clamp(d->aitype, 0, AI_MAX-1);
         const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
-        float yaw = d->yaw, pitch = d->pitch, roll = d->calcroll(physics::iscrouching(d));
+        float yaw = d->yaw, pitch = d->pitch, roll = d->calcroll(physics::iscrouching(d), true);
         vec o = vec(third ? d->feetpos() : d->headpos());
         if(!third)
         {
@@ -1921,7 +1921,7 @@ namespace game
                     if(d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) basetime2 = d->impulse[IM_JUMP]; 
                     else anim |= ANIM_END<<ANIM_SECONDARY;
                 }
-                else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_LEFT : ANIM_WALL_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
+                else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(physics::sprinting(d))
                 {
                     if(d->move>0) anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;

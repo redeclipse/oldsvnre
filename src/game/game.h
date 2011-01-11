@@ -191,7 +191,7 @@ enum
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT,
     ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
     ANIM_JETPACK_FORWARD, ANIM_JETPACK_BACKWARD, ANIM_JETPACK_LEFT, ANIM_JETPACK_RIGHT, ANIM_JETPACK_UP,
-    ANIM_WALL_LEFT, ANIM_WALL_RIGHT, ANIM_WALL_JUMP,
+    ANIM_WALL_RUN_LEFT, ANIM_WALL_RUN_RIGHT, ANIM_WALL_JUMP,
     ANIM_SINK, ANIM_EDIT, ANIM_SWITCH, ANIM_USE, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
     ANIM_MELEE, ANIM_MELEE_PRIMARY, ANIM_MELEE_SECONDARY,
@@ -890,7 +890,7 @@ const char * const animnames[] =
     "impulse forward", "impulse backward", "impulse left", "impulse right", 
     "dash forward", "dash backward", "dash left", "dash right", "dash up",
     "jetpack forward", "jetpack backward", "jetpack left", "jetpack right", "jetpack up",
-    "wall left", "wall right", "wall jump",
+    "wall run left", "wall run right", "wall jump",
     "sink", "edit", "switch", "use", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
     "melee", "melee primary", "melee secondary",
@@ -1190,13 +1190,13 @@ struct gameent : dynent, gamestate
         if(wantshitbox()) checkhitboxes();
     }
 
-    float calcroll(bool crouch)
+    float calcroll(bool crouch, bool thirdperson = false)
     {
-        float r = roll, wobble = float(rnd(15)-7)*(float(min(quake, 100))/100.f);
+        float r = thirdperson ? 0 : roll, wobble = float(rnd(15)-7)*(float(min(quake, 100))/100.f);
         switch(state)
         {
             case CS_SPECTATOR: case CS_WAITING: r = wobble*0.5f; break;
-            case CS_ALIVE: if(crouch) wobble *= 0.5f;
+            case CS_ALIVE: if(crouch) wobble *= 0.5f; r += wobble; break;
             case CS_DEAD: r += wobble; break;
             default: break;
         }
