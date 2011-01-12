@@ -515,7 +515,7 @@ struct animmodel : model
         int clipframes(int i, int n) const { return min(n, totalframes() - i); }
 
         virtual void cleanup() {}
-        virtual void render(const animstate *as, float pitch, const vec &axis, dynent *d, part *p) {}
+        virtual void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p) {}
     };
 
     virtual meshgroup *loadmeshes(char *name, va_list args) { return NULL; }
@@ -746,13 +746,13 @@ struct animmodel : model
             return true;
         }
 
-        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, dynent *d)
+        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d)
         {
             animstate as[MAXANIMPARTS];
-            render(anim, basetime, basetime2, pitch, axis, d, as);
+            render(anim, basetime, basetime2, pitch, axis, forward, d, as);
         }
 
-        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, dynent *d, animstate *as)
+        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d, animstate *as)
         {
             if(!(anim&ANIM_REUSE)) loopi(numanimparts)
             {
@@ -775,7 +775,7 @@ struct animmodel : model
                 }
             }
 
-            vec oaxis;
+            vec oaxis, oforward;
             matrixstack[matrixpos].transposedtransformnormal(axis, oaxis);
             float pitchamount = pitchscale*pitch + pitchoffset;
             if(pitchmin || pitchmax) pitchamount = clamp(pitchamount, pitchmin, pitchmax);
@@ -785,6 +785,7 @@ struct animmodel : model
                 matrixstack[matrixpos] = matrixstack[matrixpos-1];
                 matrixstack[matrixpos].rotate(pitchamount*RAD, oaxis);
             }
+            matrixstack[matrixpos].transposedtransformnormal(forward, oforward);
 
             float resize = model->scale*sizescale;
             if(!(anim&ANIM_NORENDER))
@@ -815,7 +816,7 @@ struct animmodel : model
                 }
             }
 
-            meshes->render(as, pitch, oaxis, d, this);
+            meshes->render(as, pitch, oaxis, oforward, d, this);
 
             if(!(anim&ANIM_NORENDER))
             {
@@ -847,7 +848,7 @@ struct animmodel : model
                         nbasetime = link.basetime;
                         nbasetime2 = 0;
                     }
-                    link.p->render(nanim, nbasetime, nbasetime2, pitch, axis, d);
+                    link.p->render(nanim, nbasetime, nbasetime2, pitch, axis, forward, d);
 
                     matrixpos--;
                 }
@@ -882,7 +883,7 @@ struct animmodel : model
 
     virtual int linktype(animmodel *m) const { return LINK_TAG; }
 
-    void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, dynent *d, modelattach *a)
+    void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d, modelattach *a)
     {
         if(!loaded) return;
 
@@ -919,7 +920,7 @@ struct animmodel : model
         }
 
         animstate as[MAXANIMPARTS];
-        parts[0]->render(anim, basetime, basetime2, pitch, axis, d, as);
+        parts[0]->render(anim, basetime, basetime2, pitch, axis, forward, d, as);
 
         if(a) for(int i = numtags-1; i >= 0; i--)
         {
@@ -938,12 +939,12 @@ struct animmodel : model
                     break;
 
                 case LINK_COOP:
-                    p->render(anim, basetime, basetime2, pitch, axis, d);
+                    p->render(anim, basetime, basetime2, pitch, axis, forward, d);
                     p->index = 0;
                     break;
 
                 case LINK_REUSE:
-                    p->render(anim | ANIM_REUSE, basetime, basetime2, pitch, axis, d, as);
+                    p->render(anim | ANIM_REUSE, basetime, basetime2, pitch, axis, forward, d, as);
                     break;
             }
         }
@@ -956,7 +957,7 @@ struct animmodel : model
         yaw += spin*lastmillis/1000.0f;
         pitch += offsetpitch;
 
-        vec axis(0, -1, 0);
+        vec axis(0, -1, 0), forward(1, 0, 0);
 
         matrixpos = 0;
         matrixstack[0].identity();
@@ -966,6 +967,7 @@ struct animmodel : model
             if(yaw) matrixstack[0].rotate_around_z(yaw*RAD);
             if(roll) matrixstack[0].rotate_around_x(-roll*RAD);
             matrixstack[0].transformnormal(vec(axis), axis);
+            matrixstack[0].transformnormal(vec(forward), forward);
             if(offsetyaw) matrixstack[0].rotate_around_z(offsetyaw*RAD);
             if(offsetroll) matrixstack[0].rotate_around_x(-offsetroll*RAD);
         }
@@ -979,7 +981,7 @@ struct animmodel : model
 
         if(anim&ANIM_NORENDER)
         {
-            render(anim, basetime, basetime2, pitch, axis, d, a);
+            render(anim, basetime, basetime2, pitch, axis, forward, d, a);
             if(d) d->lastrendered = lastmillis;
             return;
         }
@@ -1035,7 +1037,7 @@ struct animmodel : model
             if(alphadepth)
             {
                 glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-                render(anim|ANIM_NOSKIN, basetime, basetime2, pitch, axis, d, a);
+                render(anim|ANIM_NOSKIN, basetime, basetime2, pitch, axis, forward, d, a);
                 glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, fading ? GL_FALSE : GL_TRUE);
 
                 glDepthFunc(GL_LEQUAL);
@@ -1049,7 +1051,7 @@ struct animmodel : model
             }
         }
 
-        render(anim, basetime, basetime2, pitch, axis, d, a);
+        render(anim, basetime, basetime2, pitch, axis, forward, d, a);
 
         if(envmaptmu>=0)
         {
