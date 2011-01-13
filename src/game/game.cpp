@@ -1963,9 +1963,8 @@ namespace game
         }
 
         if(third && testanims && d == focus) yaw = 0; else yaw += 90;
-        if(anim == ANIM_DYING) pitch *= max(1.f-(lastmillis-basetime)/500.f, 0.f);
 
-        if(d->ragdoll && (!ragdolls || anim!=ANIM_DYING)) cleanragdoll(d);
+        if(d->ragdoll && (!ragdolls || (anim&ANIM_INDEX)!=ANIM_DYING)) cleanragdoll(d);
 
         if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
@@ -2064,7 +2063,7 @@ namespace game
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
             showweap = false;
-            animflags = ANIM_DYING;
+            animflags = ANIM_DYING|ANIM_NOPITCH;
             lastaction = d->lastpain;
             if(ragdolls)
             {
@@ -2074,7 +2073,7 @@ namespace game
             {
                 int t = lastmillis-lastaction;
                 if(t < 0) return;
-                if(t > 1000) animflags = ANIM_DEAD|ANIM_LOOP;
+                if(t > 1000) animflags = ANIM_DEAD|ANIM_LOOP|ANIM_NOPITCH;
             }
         }
         else if(d->state == CS_EDITING)

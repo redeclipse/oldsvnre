@@ -15,11 +15,12 @@ struct animmodel : model
 
     struct animpos
     {
-        int fr1, fr2;
+        int anim, fr1, fr2;
         float t;
 
         void setframes(const animinfo &info)
         {
+            anim = info.anim;
             if(info.range<=1)
             {
                 fr1 = 0;
@@ -58,7 +59,6 @@ struct animmodel : model
     struct animstate
     {
         part *owner;
-        int anim;
         animpos cur, prev;
         float interp;
 
@@ -98,7 +98,7 @@ struct animmodel : model
                 if(!enablerescale) { glEnable(hasRN ? GL_RESCALE_NORMAL_EXT : GL_NORMALIZE); enablerescale = true; }
             }
             if(masked!=enableglow) lasttex = lastmasks = NULL;
-            float mincolor = as->anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f;
+            float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f;
             vec color = vec(lightcolor).max(mincolor), matcolor = material ? lightmaterial : vec(1, 1, 1);
             if(masked)
             {
@@ -162,7 +162,7 @@ struct animmodel : model
             }
             else
             {
-                float mincolor = as->anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f, minshade = max(ambient, mincolor);
+                float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f, minshade = max(ambient, mincolor);
                 vec color = vec(lightcolor).max(mincolor);
                 glColor4f(color.x, color.y, color.z, transparent);
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec, minshade, glow);
@@ -237,7 +237,7 @@ struct animmodel : model
             if(!cullface && enablecullface) { glDisable(GL_CULL_FACE); enablecullface = false; }
             else if(cullface && !enablecullface) { glEnable(GL_CULL_FACE); enablecullface = true; }
 
-            if(as->anim&ANIM_NOSKIN)
+            if(as->cur.anim&ANIM_NOSKIN)
             {
                 if(enablealphatest) { glDisable(GL_ALPHA_TEST); enablealphatest = false; }
                 if(enablealphablend) { glDisable(GL_BLEND); enablealphablend = false; }
@@ -246,7 +246,7 @@ struct animmodel : model
                 if(enablelighting) { glDisable(GL_LIGHTING); enablelighting = false; }
                 if(enablerescale) { glDisable(hasRN ? GL_RESCALE_NORMAL_EXT : GL_NORMALIZE); enablerescale = false; }
                 if(shadowmapping) SETMODELSHADER(b, shadowmapcaster);
-                else /*if(as->anim&ANIM_SHADOW)*/ SETMODELSHADER(b, notexturemodel); // this shader also gets used with color mask disabled
+                else /*if(as->cur.anim&ANIM_SHADOW)*/ SETMODELSHADER(b, notexturemodel); // this shader also gets used with color mask disabled
                 return;
             }
             Texture *s = bumpmapped() && unlittex ? unlittex : tex,
@@ -761,7 +761,6 @@ struct animmodel : model
                 if(!calcanim(i, anim, basetime, basetime2, d, interp, info)) return;
                 animstate &p = as[i];
                 p.owner = this;
-                p.anim = info.anim;
                 p.cur.setframes(info);
                 p.interp = 1;
                 if(interp>=0 && d->animinterp[interp].prev.range>0)
@@ -779,6 +778,8 @@ struct animmodel : model
             matrixstack[matrixpos].transposedtransformnormal(axis, oaxis);
             float pitchamount = pitchscale*pitch + pitchoffset;
             if(pitchmin || pitchmax) pitchamount = clamp(pitchamount, pitchmin, pitchmax);
+            if(as->cur.anim&ANIM_NOPITCH || (as->interp < 1 && as->prev.anim&ANIM_NOPITCH))
+                pitchamount *= (as->cur.anim&ANIM_NOPITCH ? 0 : as->interp) + (as->interp < 1 && as->prev.anim&ANIM_NOPITCH ? 0 : 1-as->interp);
             if(pitchamount)
             {
                 ++matrixpos;
