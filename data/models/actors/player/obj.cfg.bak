@@ -1,0 +1,5 @@
+objload "RE_Player.obj"
+objskin * "RE_Player_cavity.tga"
+objbumpmap * "RE_Player_norm.tga"
+mdlscale 400
+mdlspec 0.3
