@@ -1514,6 +1514,11 @@ template<class MDL, class MESH> struct modelcommands
         loopmeshes(meshname, m, m.noclip = *noclip!=0);
     }
 
+    static void setmaterial(char *meshname, int *material)
+    {
+        loopskins(meshname, s, s.material = *material!=0);
+    }
+
     static void setlink(int *parent, int *child, char *tagname, float *x, float *y, float *z)
     {
         if(!MDL::loading) { conoutf("\frnot loading an %s", MDL::formatname()); return; }
@@ -1546,6 +1551,7 @@ template<class MDL, class MESH> struct modelcommands
             modelcommand(setshader, "shader", "ss");
             modelcommand(setscroll, "scroll", "sff");
             modelcommand(setnoclip, "noclip", "si");
+            modelcommand(setmaterial, "material", "si");
         }
         if(MDL::multiparted()) modelcommand(setlink, "link", "iisfff");
     }
