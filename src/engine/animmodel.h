@@ -958,7 +958,7 @@ struct animmodel : model
         yaw += spin*lastmillis/1000.0f;
         pitch += offsetpitch;
 
-        vec axis(0, -1, 0), forward(1, 0, 0);
+        vec axis(0, -1, 0), forward(-1, 0, 0);
 
         matrixpos = 0;
         matrixstack[0].identity();
