@@ -2086,7 +2086,7 @@ struct texturegui : guicb
             g.pushlist();
             if(texmru.inrange(menutex))
             {
-                VSlot &v = lookupvslot(texmru[menutex]);
+                VSlot &v = lookupvslot(texmru[menutex], false);
                 if(v.slot->sts.empty()) continue;
                 else if(!v.slot->loaded && !v.slot->thumbnail)
                 {
@@ -2115,7 +2115,7 @@ struct texturegui : guicb
                     int ti = (i*thumbheight+h)*thumbwidth+w;
                     if(ti<texmru.length())
                     {
-                        VSlot &v = lookupvslot(texmru[ti]);
+                        VSlot &v = lookupvslot(texmru[ti], false);
                         if(v.slot->sts.empty()) continue;
                         else if(!v.slot->loaded && !v.slot->thumbnail)
                         {
