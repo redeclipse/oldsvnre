@@ -3568,9 +3568,9 @@ namespace server
     {
         if(clients.empty()) return false;
         enet_uint32 millis = enet_time_get()-lastsend;
-        if(millis<33 && !force) return false;
+        if(millis<40 && !force) return false;
         bool flush = buildworldstate();
-        lastsend += millis - (millis%33);
+        lastsend += millis - (millis%40);
         return flush;
     }
 
