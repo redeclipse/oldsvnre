@@ -298,7 +298,8 @@ float raycube(const vec &o, const vec &ray, float radius, int mode, int size, ex
             ((mode&RAY_EDITMAT) && c.ext && c.ext->material != MAT_AIR) ||
             (!(mode&RAY_PASS) && lsize==size && !isempty(c)) ||
             isentirelysolid(c) ||
-            dent < dist))
+            dent < dist) &&
+            (!(mode&RAY_CLIPMAT) || !c.ext || (c.ext->material&MATF_CLIP)!=MAT_NOCLIP))
         {
             if(dist < dent)
             {
@@ -321,7 +322,7 @@ float raycube(const vec &o, const vec &ray, float radius, int mode, int size, ex
         {
             setcubeclip(c, lo, lsize);
             float f = 0;
-            if(raycubeintersect(c, v, ray, invray, dent-dist, f) && (dist+f>0 || !(mode&RAY_SKIPFIRST)))
+            if(raycubeintersect(c, v, ray, invray, dent-dist, f) && (dist+f>0 || !(mode&RAY_SKIPFIRST)) && (!(mode&RAY_CLIPMAT) || !c.ext || (c.ext->material&MATF_CLIP)!=MAT_NOCLIP))
                 return min(dent, dist+f);
         }
 
