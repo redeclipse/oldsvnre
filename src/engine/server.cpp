@@ -726,6 +726,7 @@ void serverslice()  // main server update, called from main loop in sp, or from 
 
     if(!serverhost) return;
 
+    flushmasteroutput();
     checkserversockets();
 
     if(servertype >= 2 && totalmillis-laststatus >= 60000)  // display bandwidth stats, useful for server ops
