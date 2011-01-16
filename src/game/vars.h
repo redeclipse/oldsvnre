@@ -194,10 +194,10 @@ GFVAR(0, impulseregenmove, 0, 1, 1000); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75, 1000); // impulse regen in-air modifier
 GVAR(0, impulseregendelay, 0, 250, INT_MAX-1); // delay before impulse regens
 
-GFVAR(0, stillspread, 0, 1.5f, 1000);
-GFVAR(0, movespread, 0, 3, 1000);
-GFVAR(0, inairspread, 0, 3, 1000);
-GFVAR(0, impulsespread, 0, 6, 1000);
+GFVAR(0, stillspread, 0, 1, 1000);
+GFVAR(0, movespread, 0, 2, 1000);
+GFVAR(0, inairspread, 0, 2, 1000);
+GFVAR(0, impulsespread, 0, 4, 1000);
 
 GVAR(0, zoomlock, 0, 1, 2); // 0 = free, 1 = must be on floor, 2 = also must not be moving/sloping
 GVAR(0, zoomlimit, 1, 10, 150);
