@@ -842,12 +842,12 @@ namespace physics
                     wall.normalize();
                     if(fabs(wall.z) <= impulseparkournorm)
                     {
-                        bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3);
+                        bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3) && (!onfloor || d->onladder);
                         float yaw = 0, pitch = 0;
                         vectoyawpitch(wall, yaw, pitch);
                         float off = yaw-d->aimyaw;
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
-                        if(!d->turnside && !onfloor && parkour && impulsekick > 0 && fabs(off) >= impulsekick)
+                        if(!d->turnside && parkour && impulsekick > 0 && fabs(off) >= impulsekick)
                         {
                             float mag = impulsevelocity(d, impulseparkour);
                             if(mag > 0)
@@ -864,7 +864,7 @@ namespace physics
                             }
                             break;
                         }
-                        else if(d->turnside || (!onfloor && parkour))
+                        else if(d->turnside || parkour)
                         {
                             int side = off < 0 ? -1 : 1;
                             if(off < 0) yaw += 90; else yaw -= 90;
@@ -919,7 +919,11 @@ namespace physics
         }
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
         else pl->timeinair = 0;
-        if(pl->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
+        if(pl->onladder && !m.iszero()) 
+        {
+            if((pl->type != ENT_PLAYER && pl->type != ENT_AI) || !((gameent *)pl)->turnside)
+                m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
+        }
         else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
     }
 
@@ -992,7 +996,7 @@ namespace physics
                 mattrig(bottom, watercol, 0.5f, int(radius), PHYSMILLIS, 0.25f, PART_SPARK, curmat != MAT_WATER ? S_SPLASH2 : S_SPLASH);
             if(curmat == MAT_LAVA) mattrig(vec(bottom).add(vec(0, 0, radius)), lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNING);
         }
-        if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->state == CS_ALIVE && flagmat == MAT_DEATH)
+        if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->state == CS_ALIVE && flagmat&MAT_DEATH)
             game::suicide((gameent *)pl, curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH));
         pl->inmaterial = matid;
         if((pl->inliquid = !floating && isliquid(curmat)) != false)
@@ -1028,7 +1032,7 @@ namespace physics
             }
         }
         else pl->submerged = 0;
-        pl->onladder = !floating && flagmat == MAT_LADDER;
+        pl->onladder = !floating && flagmat&MAT_LADDER;
         if(pl->onladder && pl->physstate < PHYS_SLIDE) pl->floor = vec(0, 0, 1);
     }
 
