@@ -185,7 +185,7 @@ WEAPON(sword,
 );
 WEAPON(shotgun,
     2,      8,      1,      2,      600,    900,    750,    14,     6,      1000,   250,    0,      0,      400,    5000,
-    0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      5,      2,
+    0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      4,      2,
     1,      4,      10,     10,     -1,             WALT(SHOTGUN),  16,     4,      5,      40,     250,    2000,   0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
