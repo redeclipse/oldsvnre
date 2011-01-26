@@ -40,11 +40,11 @@ x86_64)
     ;;
 esac
 
-if [ -x ${RE_BIN}/reserver ]
-then
-    SYSTEM_SUFFIX=
-    MACHINE_SUFFIX=
-fi
+#if [ -x ${RE_BIN}/reserver ]
+#then
+#    SYSTEM_SUFFIX=
+#    MACHINE_SUFFIX=
+#fi
 
 
 if [ -x ${RE_BIN}/reserver${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]; 
