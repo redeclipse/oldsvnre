@@ -939,7 +939,7 @@ namespace client
         }
         if((int)d->aimyaw!=(int)d->yaw || (int)d->aimpitch!=(int)d->pitch) flags |= 1<<7;
         if(d->action[AC_JUMP]) flags |= 1<<8;
-        if(d->action[AC_SPRINT]) flags |= 1<<9;
+        if(d->action[AC_SPRINT] == (d!=game::player1 || physics::sprintstyle < 3)) flags |= 1<<9;
         if(d->action[AC_CROUCH]) flags |= 1<<10;
         if(d->conopen) flags |= 1<<11;
         putuint(q, flags);

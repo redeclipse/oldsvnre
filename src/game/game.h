@@ -1332,7 +1332,7 @@ namespace client
 namespace physics
 {
     extern float gravity, liquidspeed, liquidcurb, floorcurb, aircurb, slidecurb;
-    extern int smoothmove, smoothdist;
+    extern int smoothmove, smoothdist, sprintstyle;
     extern bool carryaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowimpulse(int level = 2);
