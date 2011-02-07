@@ -333,25 +333,32 @@ char *svariable(const char *name, const char *cur, char **storage, identfun fun,
     ident *id = idents.access(name); \
     if(!id || id->type!=vartype) return retval;
 #define GETVAR(id, name, retval) _GETVAR(id, ID_VAR, name, retval)
-void setvar(const char *name, int i, bool dofunc)
+void setvar(const char *name, int i, bool dofunc, bool def)
 {
     GETVAR(id, name, );
     *id->storage.i = clamp(i, id->minval, id->maxval);
+    if(def) id->def.i = i;
     if(dofunc) id->changed();
     //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %d", id->name, *id->storage.i);
 }
-void setfvar(const char *name, float f, bool dofunc)
+void setfvar(const char *name, float f, bool dofunc, bool def)
 {
     _GETVAR(id, ID_FVAR, name, );
     *id->storage.f = clamp(f, id->minvalf, id->maxvalf);
+    if(def) id->def.f = f;
     if(dofunc) id->changed();
     //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, floatstr(*id->storage.f));
 }
-void setsvar(const char *name, const char *str, bool dofunc)
+void setsvar(const char *name, const char *str, bool dofunc, bool def)
 {
     _GETVAR(id, ID_SVAR, name, );
     delete[] *id->storage.s;
     *id->storage.s = newstring(str);
+    if(def)
+    {
+        delete[] id->def.s;
+        id->def.s = newstring(str);
+    }
     if(dofunc) id->changed();
     //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
 }
