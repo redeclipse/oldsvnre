@@ -267,9 +267,8 @@ void gl_checkextensions()
     {
         hasTF = true;
         if(dbgexts) conoutf("\frUsing GL_ARB_texture_float extension");
-        shadowmap = 1;
-        extern int smoothshadowmappeel;
-        smoothshadowmappeel = 1;
+        setvar("shadowmap", 1, false, true);
+        setvar("smoothshadowmappeel", 1, false, true);
     }
 
     if(strstr(exts, "GL_NV_float_buffer"))
@@ -327,12 +326,11 @@ void gl_checkextensions()
     if(!hasOQ)
     {
         conoutf("\frWARNING: No occlusion query support! (large maps may be SLOW)");
-        extern int vacubesize;
-        vacubesize = 64;
-        waterreflect = 0;
+        setvar("vacubesize", 64, false, true);
+        setvar("waterreflect", 0, false, true);
     }
 
-    extern int reservedynlighttc, reserveshadowmaptc, maxtexsize, batchlightmaps, ffdynlights;
+    extern int reservedynlighttc, reserveshadowmaptc, batchlightmaps;
     if(strstr(vendor, "ATI"))
     {
         //conoutf("\frWARNING: ATI cards may show garbage in skybox. (use \"/ati_skybox_bug 1\" to fix)");
@@ -341,32 +339,29 @@ void gl_checkextensions()
         reserveshadowmaptc = 3;
         minimizetcusage = 1;
         emulatefog = 1;
-        extern int depthfxprecision;
-        if(hasTF) depthfxprecision = 1;
+        if(hasTF) setvar("depthfxprecision", 1, false, true);
 
     }
     else if(strstr(vendor, "NVIDIA"))
     {
         reservevpparams = 10;
         rtsharefb = 0; // work-around for strange driver stalls involving when using many FBOs
-        extern int filltjoints;
-        if(!strstr(exts, "GL_EXT_gpu_shader4")) filltjoints = 0; // DX9 or less NV cards seem to not cause many sparklies
+        if(!strstr(exts, "GL_EXT_gpu_shader4")) setvar("filltjoints", 0, false, true); // DX9 or less NV cards seem to not cause many sparklies
 
         if(hasFBO && !hasTF) nvidia_scissor_bug = 1; // 5200 bug, clearing with scissor on an FBO messes up on reflections, may affect lesser cards too
-        extern int fpdepthfx;
         if(hasTF && (!strstr(renderer, "GeForce") || !checkseries(renderer, 6000, 6600)))
-            fpdepthfx = 1; // FP filtering causes software fallback on 6200?
+            setvar("fpdepthfx", 1, false, true); // FP filtering causes software fallback on 6200?
     }
     else if(strstr(vendor, "Intel"))
     {
         avoidshaders = 1;
         intel_quadric_bug = 1;
-        maxtexsize = 256;
         reservevpparams = 20;
         batchlightmaps = 0;
-        ffdynlights = 0;
+        setvar("maxtexsize", 256, false, true);
+        setvar("ffdynlights", 0, false, true);
 
-        if(!hasOQ) waterrefract = 0;
+        if(!hasOQ) setvar("waterrefract", 0, false, true);
 
 #ifdef __APPLE__
         apple_vp_bug = 1;
@@ -375,12 +370,12 @@ void gl_checkextensions()
     else if(strstr(vendor, "Tungsten") || strstr(vendor, "Mesa") || strstr(vendor, "DRI") || strstr(vendor, "Microsoft") || strstr(vendor, "S3 Graphics"))
     {
         avoidshaders = 1;
-        maxtexsize = 256;
         reservevpparams = 20;
         batchlightmaps = 0;
-        ffdynlights = 0;
+        setvar("maxtexsize", 256, false, true);
+        setvar("ffdynlights", 0, false, true);
 
-        if(!hasOQ) waterrefract = 0;
+        if(!hasOQ) setvar("waterrefract", 0, false, true);
     }
 
     if(strstr(exts, "GL_ARB_vertex_program") && strstr(exts, "GL_ARB_fragment_program"))
@@ -408,8 +403,7 @@ void gl_checkextensions()
         }
 #endif
 
-        extern int matskel;
-        if(!avoidshaders) matskel = 0;
+        if(!avoidshaders) setvar("matskel", 0, false, true);
     }
 
     if(strstr(exts, "GL_ARB_shading_language_100") && strstr(exts, "GL_ARB_shader_objects") && strstr(exts, "GL_ARB_vertex_shader") && strstr(exts, "GL_ARB_fragment_shader"))
@@ -459,8 +453,7 @@ void gl_checkextensions()
     bool hasshaders = (hasVP && hasFP) || hasGLSL;
     if(hasshaders)
     {
-        extern int matskel;
-        if(!avoidshaders) matskel = 0;
+        if(!avoidshaders) setvar("matskel", 0, false, true);
     }
 
     if(strstr(exts, "GL_NV_vertex_program2_option")) { usevp2 = 1; hasVP2 = true; }
@@ -615,25 +608,24 @@ void gl_checkextensions()
         if(dbgexts) conoutf("\frUsing GL_EXT_rescale_normal extension.");
     }
 
-    if(!hasSGIDT && !hasSGISH) shadowmap = 0;
+    if(!hasSGIDT && !hasSGISH) setvar("shadowmap", 0, false, true);
 
     if(strstr(exts, "GL_EXT_gpu_shader4") && !avoidshaders)
     {
         // on DX10 or above class cards (i.e. GF8 or RadeonHD) enable expensive features
-        extern int grass, motionblur, glare, maxdynlights, depthfxsize, depthfxrect, depthfxfilter, blurdepthfx;
-        grass = 1;
-        motionblur = 1;
+        setvar("grass", 1, false, true);
+        setvar("motionblur", 1, false, true);
         if(hasOQ)
         {
-            waterfallrefract = 1;
-            glare = 1;
-            maxdynlights = MAXDYNLIGHTS;
+            setvar("waterfallrefract", 1, false, true);
+            setvar("glare", 1, false, true);
+            setvar("maxdynlights", MAXDYNLIGHTS, false, true);
             if(hasTR)
             {
-                depthfxsize = 10;
-                depthfxrect = 1;
-                depthfxfilter = 0;
-                blurdepthfx = 0;
+                setvar("depthfxsize", 10, false, true);
+                setvar("depthfxrect", 1, false, true);
+                setvar("depthfxfilter", 0, false, true);
+                setvar("blurdepthfx", 0, false, true);
             }
         }
     }
