@@ -638,37 +638,27 @@ void createcompressedtexture(int tnum, int w, int h, uchar *data, int align, int
 }
 
 hashtable<char *, Texture> textures;
+vector<Texture *> animtextures;
 
 Texture *notexture = NULL, *blanktexture = NULL; // used as default, ensured to be loaded
 
-void updatetexture(Texture *t)
+static void updatetexture(Texture *t)
 {
-    if(t->frames.length())
-    {
-        if(t->delay)
-        {
-            while(lastmillis-t->last >= t->delay)
-            {
-                t->frame++;
-                int frames = t->throb ? (t->frames.length()-1)*2 : t->frames.length();
-                if(t->frame >= frames) t->frame = 0;
-                t->last += t->delay;
-            }
-            int frame = t->throb && t->frame >= t->frames.length() ? (t->frames.length()-1)*2-t->frame : t->frame;
-            if(t->frames.inrange(frame)) t->id = t->frames[frame];
-            else t->id = t->frames[0];
-
-            if(t->id <= 0)
-                t->id = t != notexture ? notexture->id : 0;
-        }
-        else t->id = t->frames[0];
-    }
-    else t->id = 0;
+    if(t->frames.length() <= 1 || t->delay <= 0) return;
+    int elapsed = lastmillis - t->last;
+    if(elapsed < t->delay) return;
+    int animlen = t->throb ? (t->frames.length()-1)*2 : t->frames.length();
+    t->frame += elapsed/t->delay;
+    t->frame %= animlen;
+    t->last = lastmillis - lastmillis%t->delay;
+    t->id = t->frames[t->throb && t->frame >= t->frames.length() ? animlen - t->frame : t->frame];
+    if(t->id <= 0)
+         t->id = t != notexture ? notexture->id : 0;
 }
 
 void updatetextures()
 {
-    enumerate(textures, Texture, tex, updatetexture(&tex));
+    loopv(animtextures) updatetexture(animtextures[i]);
 }
 
 void preloadtextures()
@@ -782,7 +772,8 @@ static Texture *newtexture(Texture *t, const char *rname, ImageData &s, int clam
                 conoutf("\faadding frame: %s (%d) [%d,%d:%d,%d]", t->name, i+1, t->w, t->h, t->xs, t->ys);
         }
     }
-    updatetexture(t);
+    t->id = t->frames.length() ? t->frames[0] : 0;
+    if(t->frames.length() > 1 && t->delay > 0) animtextures.add(t);
     return t;
 }
 
@@ -2254,7 +2245,7 @@ Texture *cubemaploadwildcard(Texture *t, const char *name, bool mipit, bool msg,
             createtexture(!i ? t->frames[0] : 0, t->w, t->h, s.data, 3, mipit ? 2 : 1, component, side.target, s.w, s.h, s.pitch, false, format);
         }
     }
-    updatetexture(t);
+    t->id = t->frames.length() ? t->frames[0] : 0;
     forcecubemapload(t->frames[0]);
     return t;
 }
@@ -2429,9 +2420,11 @@ GLuint lookupenvmap(ushort emid)
 
 void cleanuptexture(Texture *t)
 {
+    if(t->frames.length() > 1 && t->delay > 0) animtextures.removeobj(t);
+
     DELETEA(t->alphamask);
 
-    loopvk(t->frames)
+    loopvk(t->frames) if(t->frames[k])
     {
         if(t->frames[k])
         {
