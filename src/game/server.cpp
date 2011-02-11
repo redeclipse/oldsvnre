@@ -530,8 +530,8 @@ namespace server
     void cleanup(bool init = false)
     {
         setpause(false);
-        if(GAME(resetmmonend)) mastermode = MM_OPEN;
-        if(GAME(resetbansonend)) loopv(bans) if(bans[i].time >= 0) bans.remove(i--);
+        if(GAME(resetmmonend)) { mastermode = MM_OPEN; allows.shrink(0); }
+        if(GAME(resetbansonend)) bans.shrink(0);
         if(GAME(resetvarsonend) || init) resetgamevars(true);
         changemap();
     }
@@ -877,6 +877,7 @@ namespace server
         mutate(smuts, mut->intermission());
         maprequest = false;
         interm = totalmillis+GAME(intermlimit);
+        if(!interm) interm = 1;
         sendf(-1, 1, "ri2", N_TICK, 0);
     }
 
@@ -1473,9 +1474,9 @@ namespace server
     {
         setpause(false);
         if(demorecord) enddemorecord();
-        if(GAME(resetmmonend) >= 2) mastermode = MM_OPEN;
+        if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; allows.shrink(0); }
         if(GAME(resetvarsonend) >= 2) resetgamevars(true);
-        if(GAME(resetbansonend) >= 2) loopv(bans) if(bans[i].time >= 0) bans.remove(i--);
+        if(GAME(resetbansonend) >= 2) bans.shrink(0);
     }
 
     bool checkvotes(bool force = false)
@@ -3277,7 +3278,7 @@ namespace server
                 if(smode) smode->update();
                 mutate(smuts, mut->update());
             }
-            loopv(bans) if(bans[i].time >= 0 && totalmillis-bans[i].time > 4*60*60000) bans.remove(i--);
+            loopvrev(bans) if(totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
             loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
 
             if(masterupdate)
@@ -3286,7 +3287,7 @@ namespace server
                 masterupdate = false;
             }
 
-            if(interm && totalmillis >= interm) // wait then call for next map
+            if(interm && totalmillis - interm >= 0) // wait then call for next map
             {
                 if(GAME(votelimit) && !maprequest && GAME(votelock) != 5 && (GAME(modelock) != 5 || GAME(mapslock) != 5))
                 { // if they can't vote, no point in waiting for them to do so
@@ -3294,6 +3295,7 @@ namespace server
                     sendf(-1, 1, "ri", N_NEWGAME);
                     maprequest = true;
                     interm = totalmillis+GAME(votelimit);
+                    if(!interm) interm = 1;
                 }
                 else
                 {
@@ -3305,7 +3307,7 @@ namespace server
         }
         else if(!GAME(resetbansonend))
         {
-            loopv(bans) if(bans[i].time >= 0 && totalmillis-bans[i].time > 4*60*60000) bans.remove(i--);
+            loopvrev(bans) if(totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
         }
         aiman::checkai();
         auth::update();
@@ -3581,7 +3583,7 @@ namespace server
         loopv(clients)
         {
             clientinfo &e = *clients[i];
-            if(e.clientnum != ci->clientnum && e.needclipboard >= ci->lastclipboard)
+            if(e.clientnum != ci->clientnum && e.needclipboard - ci->lastclipboard >= 0)
             {
                 if(!flushed) { flushserver(true); flushed = true; }
                 sendpacket(e.clientnum, 1, ci->clipboard);
@@ -3620,7 +3622,7 @@ namespace server
                 clients.add(ci);
 
                 ci->connected = true;
-                ci->needclipboard = totalmillis;
+                ci->needclipboard = totalmillis ? totalmillis : 1;
                 masterupdate = true;
                 ci->state.lasttimeplayed = lastmillis;
 
@@ -4262,7 +4264,7 @@ namespace server
                         if(haspriv(ci, PRIV_ADMIN) || (mastermask()&(1<<mm)))
                         {
                             mastermode = mm;
-                            loopv(allows) if(allows[i].time >= 0) allows.remove(i--);
+                            allows.shrink(0);
                             if(mastermode >= MM_PRIVATE)
                             {
                                 loopv(clients)
@@ -4283,7 +4285,7 @@ namespace server
                 {
                     if(haspriv(ci, PRIV_MASTER, "clear bans"))
                     {
-                        loopv(bans) if(bans[i].time >= 0) bans.remove(i--);
+                        bans.shrink(0);
                         srvoutf(3, "cleared existing bans");
                     }
                     break;
@@ -4486,7 +4488,7 @@ namespace server
                             srvmsgf(ci->clientnum, "sending map, please wait..");
                             loopk(3) if(mapdata[k]) sendfile(sender, 2, mapdata[k], "ri", N_SENDMAPFILE+k);
                             sendwelcome(ci);
-                            ci->needclipboard = totalmillis;
+                            ci->needclipboard = totalmillis ? totalmillis : 1;
                         }
                         else if(best)
                         {
@@ -4580,7 +4582,7 @@ namespace server
 
                 case N_COPY:
                     ci->cleanclipboard();
-                    ci->lastclipboard = totalmillis;
+                    ci->lastclipboard = totalmillis ? totalmillis : 1;
                     goto genericmsg;
 
                 case N_PASTE:
