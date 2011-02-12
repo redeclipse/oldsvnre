@@ -1,7 +1,6 @@
 @ECHO OFF
 
 rem set SDL_VIDEO_WINDOW_POS=0,0
-set SDL_STDIO_REDIRECT=0
 set RE_DIR=.
 set RE_OPTIONS=-glog.txt -r
 
