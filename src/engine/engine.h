@@ -481,7 +481,7 @@ extern void drawdepthfxtex();
 extern vector<char *> gameargs;
 extern void initgame();
 extern void cleanupserver();
-extern void serverslice();
+extern void serverslice(uint timeout = 0);
 
 extern void retrieveservers(vector<char> &data);
 extern void localclienttoserver(int chan, ENetPacket *);

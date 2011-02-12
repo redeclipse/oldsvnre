@@ -144,7 +144,8 @@ client: $(CLIENT_OBJS)
 	$(CXX) $(CXXFLAGS) -o ../bin/reclient.exe redeclipse.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bin/reserver.exe $(SERVER_OBJS) $(SERVER_LIBS)
+	$(WINDRES) -i redeclipse.rc -J rc -o redeclipse.res -O coff 
+	$(CXX) $(CXXFLAGS) -o ../bin/reserver.exe redeclipse.res $(SERVER_OBJS) $(SERVER_LIBS)
 
 install-client: client
 ifneq (,$(STRIP))
