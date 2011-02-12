@@ -754,7 +754,7 @@ void checkserversockets()        // reply all server info requests
     if(mastersock != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(sockset, mastersock)) flushmasterinput();
 }
 
-void serverslice()  // main server update, called from main loop in sp, or from below in dedicated server
+void serverslice(uint timeout)  // main server update, called from main loop in sp, or from below in dedicated server
 {
     server::serverupdate();
 
@@ -777,7 +777,7 @@ void serverslice()  // main server update, called from main loop in sp, or from 
     {
         if(enet_host_check_events(serverhost, &event) <= 0)
         {
-            if(enet_host_service(serverhost, &event, 0) <= 0) break;
+            if(enet_host_service(serverhost, &event, timeout) <= 0) break;
             serviced = true;
         }
         switch(event.type)
@@ -861,36 +861,179 @@ void updatetimer()
     totalmillis = millis;
 }
 
+#ifdef WIN32
+#include "shellapi.h"
+
+#define IDI_ICON1 1
+
+static string apptip = "";
+static HINSTANCE appinstance = NULL;
+static ATOM wndclass = 0;
+static HWND appwindow = NULL;
+static HICON appicon = NULL;
+static HMENU appmenu = NULL;
+
+static bool setupsystemtray(HWND hWnd, UINT uID, UINT uCallbackMessage)
+{
+    NOTIFYICONDATA nid;
+    memset(&nid, 0, sizeof(nid));
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = hWnd;
+    nid.uID = uID;
+    nid.uCallbackMessage = uCallbackMessage;
+    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+    nid.hIcon = appicon;
+    strcpy(nid.szTip, apptip);
+    if(Shell_NotifyIcon(NIM_ADD, &nid) != TRUE)
+        return false;
+    ShowWindow(hWnd, SW_HIDE);
+    return true;
+}
+
+static bool modifysystemtray(HWND hWnd, UINT uID)
+{
+    NOTIFYICONDATA nid;
+    memset(&nid, 0, sizeof(nid));
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = hWnd;
+    nid.uID = uID;
+    nid.uFlags = NIF_TIP;
+    strcpy(nid.szTip, apptip);
+    return Shell_NotifyIcon(NIM_MODIFY, &nid) == TRUE;
+}
+
+static void cleanupsystemtray(HWND hWnd, UINT uID)
+{
+    NOTIFYICONDATA nid;
+    memset(&nid, 0, sizeof(nid));
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = hWnd;
+    nid.uID = uID;
+    Shell_NotifyIcon(NIM_DELETE, &nid);
+}
+
+static void cleanupwindow()
+{
+    if(!appinstance) return;
+    if(appmenu)
+    {
+        DestroyMenu(appmenu);
+        appmenu = NULL;
+    }
+    if(wndclass)
+    {
+        UnregisterClass(MAKEINTATOM(wndclass), appinstance);
+        wndclass = 0;
+    }
+}
+
+static LRESULT CALLBACK handlemessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch(uMsg)
+    {
+        case WM_CREATE:
+            setupsystemtray(hWnd, IDI_ICON1, WM_APP);
+            return 0;
+        case WM_APP:
+            SetForegroundWindow(hWnd);
+            switch(lParam)
+            {
+                //case WM_MOUSEMOVE:
+                //  break;
+                case WM_LBUTTONUP:
+                case WM_RBUTTONUP:
+                {
+                    POINT pos;
+                    GetCursorPos(&pos);
+                    TrackPopupMenu(appmenu, TPM_CENTERALIGN|TPM_BOTTOMALIGN|TPM_RIGHTBUTTON, pos.x, pos.y, 0, hWnd, NULL);
+                    PostMessage(hWnd, WM_NULL, 0, 0);
+                    break;
+                }
+            }
+            return 0;
+        case WM_COMMAND:
+            switch(LOWORD(wParam))
+            {
+                case 0:
+                    PostMessage(hWnd, WM_CLOSE, 0, 0);
+                    break;
+            }
+            return 0;
+        case WM_DESTROY:
+            cleanupsystemtray(hWnd, IDI_ICON1);
+            PostQuitMessage(0);
+            break;
+            break;
+    }
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+static void setupwindow(const char *title)
+{
+    copystring(apptip, title);
+    appinstance = GetModuleHandle(NULL);
+    if(!appinstance) fatal("failed getting application instance");
+    appicon = LoadIcon(appinstance, MAKEINTRESOURCE(IDI_ICON1));//(HICON)LoadImage(appinstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
+    if(!appicon) fatal("failed loading icon");
+
+    appmenu = CreatePopupMenu();
+    if(!appmenu) fatal("failed creating popup menu");
+    AppendMenu(appmenu, MF_STRING, 0, "Exit");
+    SetMenuDefaultItem(appmenu, 0, FALSE);
+
+    WNDCLASS wc;
+    memset(&wc, 0, sizeof(wc));
+    wc.hCursor = NULL; //LoadCursor(NULL, IDC_ARROW);
+    wc.hIcon = appicon;
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = title;
+    wc.style = 0;
+    wc.hInstance = appinstance;
+    wc.lpfnWndProc = handlemessages;
+    wc.cbWndExtra = 0;
+    wc.cbClsExtra = 0;
+    wndclass = RegisterClass(&wc);
+    if(!wndclass) fatal("failed registering window class");
+
+    appwindow = CreateWindow(MAKEINTATOM(wndclass), title, 0, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, appinstance, NULL);
+    if(!appwindow) fatal("failed creating window");
+
+    atexit(cleanupwindow);
+}
+
+#endif
+
 void serverloop()
 {
+    conoutf("\fgdedicated server started, waiting for clients...");
     #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+    setupwindow("Red Eclipse server");
     #endif
-    conoutf("\fgdedicated server started, waiting for clients... [Ctrl-C to exit]");
     for(;;)
     {
         //int _lastmillis = lastmillis;
         //lastmillis = totalmillis = (int)enet_time_get();
         //curtime = lastmillis-_lastmillis;
-        int prevmillis = (int)enet_time_get();
         updatetimer();
 
 #ifdef MASTERSERVER
         checkmaster();
 #endif
-        serverslice();
+        serverslice(5);
 #ifdef IRC
         ircslice();
 #endif
 
-        if((int)enet_time_get()-prevmillis <= 0)
+#ifdef WIN32
+        MSG msg;
+        while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            #ifdef WIN32
-            Sleep(1);
-            #else
-            usleep(1000);
-            #endif
+            if(msg.message == WM_QUIT) exit(EXIT_SUCCESS);
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
+#endif
     }
     exit(EXIT_SUCCESS);
 }
@@ -1215,6 +1358,9 @@ void fatal(const char *s, ...)    // failure exit
             cleanupmaster();
 #endif
             enet_deinitialize();
+#ifdef WIN32
+            MessageBox(NULL, msg, "Red Eclipse: Error", MB_OK|MB_SYSTEMMODAL);
+#endif
         }
     }
     exit(EXIT_FAILURE);
