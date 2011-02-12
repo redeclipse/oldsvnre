@@ -13,9 +13,8 @@
 				<Option working_dir="..\" />
 				<Option object_output=".objs\client" />
 				<Option deps_output=".deps\client" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -54,9 +53,8 @@
 				<Option working_dir="..\" />
 				<Option object_output=".objs\client-dbg" />
 				<Option deps_output=".deps\debug" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -94,9 +92,8 @@
 				<Option working_dir="..\" />
 				<Option object_output=".objs\client-prof" />
 				<Option deps_output=".deps\debug" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option parameters="-hhome -rinit.cfg -du0 -df0 -dw640 -dh600" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -135,9 +132,8 @@
 				<Option working_dir="..\" />
 				<Option object_output=".objs\server" />
 				<Option deps_output=".deps\server" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -163,6 +159,7 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
+					<Add library="SDL" />
 					<Add directory="lib" />
 				</Linker>
 			</Target>
@@ -171,9 +168,8 @@
 				<Option working_dir="..\" />
 				<Option object_output=".objs\server" />
 				<Option deps_output=".deps\server" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -198,6 +194,7 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
+					<Add library="SDL" />
 					<Add directory="lib" />
 				</Linker>
 			</Target>
@@ -665,15 +662,24 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\client.cpp">
+		<Unit filename="game\bomber.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\compass.h">
+		<Unit filename="game\bomber.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
+			<Option target="server" />
 			<Option target="client-prof" />
+			<Option target="server-dbg" />
+		</Unit>
+		<Unit filename="game\bombermode.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
 		</Unit>
 		<Unit filename="game\capture.cpp">
 			<Option target="client" />
@@ -694,19 +700,29 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\bomber.cpp">
+		<Unit filename="game\client.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="game\bomber.h">
+		<Unit filename="game\compass.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+		</Unit>
+		<Unit filename="game\defend.cpp">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+		</Unit>
+		<Unit filename="game\defend.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="game\bombermode.h">
+		<Unit filename="game\defendmode.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
@@ -767,25 +783,6 @@
 			<Option target="client-prof" />
 		</Unit>
 		<Unit filename="game\server.cpp">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="server" />
-			<Option target="client-prof" />
-			<Option target="server-dbg" />
-		</Unit>
-		<Unit filename="game\defend.cpp">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="client-prof" />
-		</Unit>
-		<Unit filename="game\defend.h">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="server" />
-			<Option target="client-prof" />
-			<Option target="server-dbg" />
-		</Unit>
-		<Unit filename="game\defendmode.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
@@ -1030,6 +1027,14 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
+		<Unit filename="shared\SDL_win32_main.c">
+			<Option compilerVar="CC" />
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
+		</Unit>
 		<Unit filename="shared\command.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
@@ -1107,13 +1112,6 @@
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
-		</Unit>
-		<Unit filename="shared\SDL_win32_main.c">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="server" />
-			<Option target="client-prof" />
-			<Option target="server-dbg" />
 		</Unit>
 		<Extensions>
 			<code_completion />
