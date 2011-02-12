@@ -104,6 +104,7 @@ void fatal(const char *s, ...)    // failure exit
     if(++errors <= 2) // print up to one extra recursive error
     {
         defvformatstring(msg, s, s);
+        if(logfile) logoutf("%s", msg);
         fprintf(stderr, "%s\n", msg);
         if(errors <= 1) // avoid recursion
         {
@@ -808,8 +809,8 @@ int main(int argc, char **argv)
     #endif
     #endif
 
-    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 
+    setlogfile(NULL);
     setlocations(true);
 
     char *initscript = NULL;
