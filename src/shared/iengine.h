@@ -9,6 +9,12 @@ extern void conoutft(int type, const char *s, ...);
 extern void conoutf(const char *s, ...);
 extern void updatetimer();
 
+extern FILE *logfile;
+extern void setlogfile(const char *fname);
+extern void closelogfile();
+extern void logoutfv(const char *fmt, va_list args);
+extern void logoutf(const char *fmt, ...);
+
 #ifdef __GNUC__
 #define _dbg_ fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 #else

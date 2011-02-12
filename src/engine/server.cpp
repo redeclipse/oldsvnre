@@ -72,15 +72,49 @@ bool checkipinfo(vector<ipinfo> &info, enet_uint32 ip)
     return false;
 }
 
+FILE *logfile = NULL;
+
+void closelogfile()
+{
+    if(logfile)
+    {
+        fclose(logfile);
+        logfile = NULL;
+    }
+}
+
+void setlogfile(const char *fname)
+{
+    closelogfile();
+    if(fname && fname[0])
+    {
+        fname = findfile(fname, "w");
+        if(fname) logfile = fopen(fname, "w");
+    }
+    setvbuf(logfile ? logfile : stdout, NULL, _IOLBF, BUFSIZ);
+}
+
+void logoutfv(const char *fmt, va_list args)
+{
+    vfprintf(logfile ? logfile : stdout, fmt, args);
+    fputc('\n', logfile ? logfile : stdout);
+}
+
+void logoutf(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    logoutfv(fmt, args);
+    va_end(args);
+}
+
 void console(int type, const char *s, ...)
 {
     defvformatstring(sf, s, s);
-    string osf, psf, fmt;
+    string osf, fmt;
     formatstring(fmt)(consoletimefmt);
     filtertext(osf, sf);
-    formatstring(psf)("%s %s", gettime(fmt), osf);
-    printf("%s\n", osf);
-    fflush(stdout);
+    logoutf("%s", osf);
 #ifndef STANDALONE
     conline(type, sf, 0);
 #endif
@@ -953,9 +987,10 @@ bool serveroption(char *opt)
     switch(opt[1])
     {
         case 'k': kidmode = atoi(opt+2); return true;
-        case 'h': printf("set home directory: %s\n", &opt[2]); sethomedir(&opt[2]); return true;
+        case 'h': logoutf("set home directory: %s", &opt[2]); sethomedir(&opt[2]); return true;
         case 'o': setsvar("octadir", &opt[2]); return true;
-        case 'p': printf("add package directory: %s\n", &opt[2]); addpackagedir(&opt[2]); return true;
+        case 'p': logoutf("add package directory: %s", &opt[2]); addpackagedir(&opt[2]); return true;
+        case 'g': logoutf("setting log file: %s", &opt[2]); setlogfile(&opt[2]); return true;
         case 'v': setvar("verbose", atoi(opt+2)); return true;
         case 's':
         {
@@ -1171,6 +1206,7 @@ void fatal(const char *s, ...)    // failure exit
     if(++errors <= 2) // print up to one extra recursive error
     {
         defvformatstring(msg, s, s);
+        if(logfile) logoutf(msg);
         fprintf(stderr, "Exiting: %s\n", msg);
         if(errors <= 1) // avoid recursion
         {
@@ -1201,7 +1237,7 @@ void reloadsignal(int signum)
 
 int main(int argc, char* argv[])
 {
-    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+    setlogfile(NULL);
     setlocations(false);
     char *initscript = NULL;
     for(int i = 1; i<argc; i++)

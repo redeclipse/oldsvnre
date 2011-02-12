@@ -1261,9 +1261,9 @@ namespace server
         ircoutf(r, "%s", str);
 #endif
 #ifdef STANDALONE
-        string st;
-        filtertext(st, str);
-        printf("%s\n", st);
+        string ft;
+        filtertext(ft, str);
+        logoutf("%s", ft);
 #endif
     }
 
