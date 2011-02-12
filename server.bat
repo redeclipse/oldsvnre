@@ -1,6 +1,5 @@
 @ECHO OFF
 
-set SDL_STDIO_REDIRECT=0
 set RE_DIR=.
 set RE_OPTIONS=-gservlog.txt
 
