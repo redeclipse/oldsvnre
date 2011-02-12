@@ -890,6 +890,7 @@ static bool setupsystemtray(HWND hWnd, UINT uID, UINT uCallbackMessage)
     return true;
 }
 
+#if 0
 static bool modifysystemtray(HWND hWnd, UINT uID)
 {
     NOTIFYICONDATA nid;
@@ -901,6 +902,7 @@ static bool modifysystemtray(HWND hWnd, UINT uID)
     strcpy(nid.szTip, apptip);
     return Shell_NotifyIcon(NIM_MODIFY, &nid) == TRUE;
 }
+#endif
 
 static void cleanupsystemtray(HWND hWnd, UINT uID)
 {
@@ -999,6 +1001,49 @@ static void setupwindow(const char *title)
     if(!appwindow) fatal("failed creating window");
 
     atexit(cleanupwindow);
+}
+
+static char *parsecommandline(const char *src, vector<char *> &args)
+{
+    char *buf = new char[strlen(src) + 1], *dst = buf;
+    for(;;)
+    {
+        while(isspace(*src)) src++;
+        if(!*src) break;
+        args.add(dst);
+        do
+        {
+            while(*src && *src != '"' && !isspace(*src)) *dst++ = *src++;
+            if(*src == '"') for(;;)
+            {
+                for(++src; *src && *src != '"';) *dst++ = *src++;
+                if(!*src) break;
+                if(src[-1] != '\\') { src++; break; }
+                dst[-1] = '"';
+            }
+        } while(*src);
+        *dst++ = '\0';
+    }
+    args.add(NULL);
+    return buf;
+}
+
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
+{
+    vector<char *> args;
+    char *buf = parsecommandline(GetCommandLine(), args);
+#ifdef STANDALONE
+    int standalonemain(int argc, char **argv);
+    int status = standalonemain(args.length()-1, args.getbuf());
+    #define main standalonemain
+#else
+    SDL_SetModuleHandle(hInst);
+    int status = SDL_main(args.length()-1, args.getbuf());
+#endif
+    delete[] buf;
+    exit(status);
+    return 0;
 }
 
 #endif
@@ -1381,7 +1426,7 @@ void reloadsignal(int signum)
     rehash(true);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char **argv)
 {
     setlogfile(NULL);
     setlocations(false);

@@ -159,7 +159,6 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add library="SDL" />
 					<Add directory="lib" />
 				</Linker>
 			</Target>
@@ -194,7 +193,6 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add library="SDL" />
 					<Add directory="lib" />
 				</Linker>
 			</Target>
@@ -1024,14 +1022,6 @@
 			<Option target="client-dbg" />
 			<Option target="server" />
 			<Option target="genkey" />
-			<Option target="client-prof" />
-			<Option target="server-dbg" />
-		</Unit>
-		<Unit filename="shared\SDL_win32_main.c">
-			<Option compilerVar="CC" />
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="server" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
