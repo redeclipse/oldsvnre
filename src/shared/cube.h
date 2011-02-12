@@ -40,7 +40,9 @@
     #include <dbghelp.h>
   #endif
   #define ZLIB_DLL
-  #include <SDL.h>
+  #ifndef NO_SDL
+    #include <SDL.h>
+  #endif
 #endif
 
 
