@@ -38,8 +38,6 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="-mwindows" />
-					<Add library="mingw32" />
-					<Add library="SDLmain" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -80,8 +78,6 @@
 				</Compiler>
 				<Linker>
 					<Add option="-mwindows" />
-					<Add library="mingw32" />
-					<Add library="SDLmain" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -123,8 +119,6 @@
 				<Linker>
 					<Add option="-pg -lgmon" />
 					<Add option="-mwindows" />
-					<Add library="mingw32" />
-					<Add library="SDLmain" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -1113,6 +1107,13 @@
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
+		</Unit>
+		<Unit filename="shared\SDL_win32_main.c">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="server" />
+			<Option target="client-prof" />
+			<Option target="server-dbg" />
 		</Unit>
 		<Extensions>
 			<code_completion />
