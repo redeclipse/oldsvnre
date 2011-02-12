@@ -1429,7 +1429,11 @@ void reloadsignal(int signum)
 int main(int argc, char **argv)
 {
     setlogfile(NULL);
+#ifdef WIN32
+    setlocations(true);
+#else
     setlocations(false);
+#endif
     char *initscript = NULL;
     for(int i = 1; i<argc; i++)
     {
