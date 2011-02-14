@@ -960,9 +960,6 @@ static LRESULT CALLBACK handlemessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 {
     switch(uMsg)
     {
-        case WM_CREATE:
-            setupsystemtray(hWnd, IDI_ICON1, WM_APP);
-            return 0;
         case WM_APP:
             SetForegroundWindow(hWnd);
             switch(lParam)
