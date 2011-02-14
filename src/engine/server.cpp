@@ -1004,7 +1004,6 @@ static LRESULT CALLBACK handlemessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
             cleanupsystemtray(hWnd, IDI_ICON1);
             PostQuitMessage(0);
             break;
-            break;
     }
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
