@@ -295,7 +295,7 @@ void updatesounds()
     loopv(sounds) if(sounds[i].chan >= 0)
     {
         sound &s = sounds[i];
-        if((!s.ends || lastmillis < s.ends) && Mix_Playing(i))
+        if((!s.ends || lastmillis < s.ends) && Mix_Playing(sounds[i].chan))
         {
             if(s.owner) s.pos = s.owner->o;
             calcvol(s.flags, s.vol, s.slot->vol, s.maxrad, s.minrad, s.pos, &s.curvol, &s.curpan);
