@@ -81,7 +81,7 @@ extern hashtable<const char *, soundsample> soundsamples;
 extern vector<soundslot> gamesounds, mapsounds;
 extern vector<sound> sounds;
 
-#define issound(c) (sounds.inrange(c) && sounds[c].chan >= 0 && Mix_Playing(c))
+#define issound(c) (sounds.inrange(c) && sounds[c].chan >= 0 && Mix_Playing(sounds[c].chan))
 
 extern void initsound();
 extern void stopsound();
