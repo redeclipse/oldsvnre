@@ -193,7 +193,7 @@ namespace physics
             if(d->state == CS_ALIVE)
             {
                 gameent *f = (gameent *)d;
-                if(!projectile && !actor && f->aitype >= AI_START && (!f->ai || f->ai->suspended)) return false;
+                if(!projectile && !actor && f->aitype >= AI_START && f->ai && f->ai->suspended) return false;
                 if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
                 return true;
             }
