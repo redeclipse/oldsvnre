@@ -27,17 +27,17 @@ GVAR(IDF_ADMIN, rotatemode, 0, 0, 1);
 GVAR(IDF_ADMIN, rotatemuts, 0, 0, 1);
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost hinder keystone lab longestyard mainframe mist nova panic processing smouldering spacetech stone testchamber tower tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost keystone lab longestyard mainframe mist nova panic processing smouldering spacetech stone tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma facility forge foundation futuresport dropzone ghost hinder keystone lab longestyard mainframe mist nova panic processing smouldering spacetech stone testchamber tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, mainmaps, "bath bloodgrounds darkness deadsimple deathtrap deli depot dutility echo enigma facility forge foundation futuresport dropzone ghost keystone lab longestyard mainframe mist nova panic processing smouldering spacetech stone tower tranquility tribal ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost keystone lab mist nova panic processing smouldering stone tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma facility forge foundation futuresport futuresport2 ghost keystone lab mist nova panic processing smouldering stone tower tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, bombermaps, "bath deadsimple deli depot echo forge foundation futuresport futuresport2 tranquility venus");
+GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dutility echo enigma facility forge foundation futuresport dropzone ghost keystone lab mist nova panic processing smouldering stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, defendmaps, "bath bloodgrounds darkness deadsimple deli depot dutility echo enigma facility forge foundation futuresport dropzone ghost keystone lab mist nova panic processing smouldering stone tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, bombermaps, "bath deadsimple deli depot echo forge foundation futuresport dropzone tranquility venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo foundation longestyard mainframe panic venus");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma forge foundation futuresport futuresport2 ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath bloodgrounds darkness dawn deadsimple deathtrap deli depot dutility echo enigma forge foundation futuresport dropzone ghost hinder keystone longestyard mainframe mist nova panic smouldering spacetech stone testchamber tower tranquility ubik venus warp");
 
 namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
