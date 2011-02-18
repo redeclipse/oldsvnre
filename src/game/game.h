@@ -532,7 +532,7 @@ struct teamtypes
 teamtypes teamtype[] = {
     {
 //        TEAM_NEUTRAL,   0xAAAAAA,           "neutral",
-        TEAM_NEUTRAL,   0xAAFF44,           "neutral",
+        TEAM_NEUTRAL,   0x88CC44,           "neutral",
         "team",             "\fa",      "grey"
     },
     {
