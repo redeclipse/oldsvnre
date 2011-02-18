@@ -226,7 +226,7 @@ WEAPON(flamer,
 );
 WEAPON(plasma,
     20,     20,     1,      20,     300,    1000,   2000,   24,     10,     750,    40,     0,      2000,   750,    5000,
-    0,      100,    0,      0,      200,    200,    8,      36,     1,      1,      2,      1,      0,      0,      0,      0,
+    0,      100,    0,      0,      200,    200,    10,     36,     1,      1,      2,      1,      0,      0,      0,      0,
     2,      1,      50,     10,     -1,             -1,             10,     5,      5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_RADIAL|COLLIDE_OWNER|COLLIDE_STICK,
