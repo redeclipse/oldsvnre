@@ -717,11 +717,11 @@ namespace game
                 if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
-                    vec p = d->headpos(-d->height/3);
+                    vec p = d->headpos(-d->height/4);
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 5 : 1), bloodfade, p, 0x88FFFF, (rnd(bloodsize)+2)/10.f, 1, 200, DECAL_BLOOD, int(d->radius));
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 5 : 1), bloodfade, p, 0x66CCCC, (rnd(bloodsize)+2)/10.f, 1, 50, DECAL_BLOOD, int(d->radius), 2);
                         if(kidmode || bloodscale <= 0 || bloodsparks)
                             part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 3 : 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
                     }
