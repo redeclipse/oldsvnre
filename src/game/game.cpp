@@ -1903,18 +1903,18 @@ namespace game
                 }
                 else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000) 
-                { 
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
+                {
                     if(d->impulse[IM_TYPE] == IM_T_KICK) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
                     else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
                     else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
-                    basetime2 = d->impulse[IM_TIME]; 
+                    basetime2 = d->impulse[IM_TIME];
                 }
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && 
-                        ((d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) || d->timeinair >= 1000 || d->impulse[IM_TYPE] == IM_T_SKATE)) 
-                { 
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder &&
+                        ((d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) || d->timeinair >= 1000 || d->impulse[IM_TYPE] == IM_T_SKATE))
+                {
                     if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
                     {
                         if(d->move>0) anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
@@ -1926,7 +1926,7 @@ namespace game
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
                     else anim |= ANIM_JUMP<<ANIM_SECONDARY;
-                    if(d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) basetime2 = d->impulse[IM_JUMP]; 
+                    if(d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) basetime2 = d->impulse[IM_JUMP];
                     else anim |= ANIM_END<<ANIM_SECONDARY;
                 }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -1978,9 +1978,9 @@ namespace game
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
-        bool burning = burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
+        bool burning = burntime && lastmillis%150 < 75 && d->burning(lastmillis, burntime);
         int colour = burning ? firecols[rnd(FIRECOLOURS)] : d->colour();
-        e->light.material = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
+        e->light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 128.f : 224.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
@@ -2001,19 +2001,25 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
+            int colour = 0xFFFFFF;
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::conopentex, 3);
                 else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
                     t = textureload(hud::teamtex(d->team), 3);
-                else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
-                else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
+                else
+                {
+                    if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
+                    else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
+                    int len = lastmillis%512; if(len > 255) len = 512-len;
+                    colour = (len<<16)|((len/2)<<8);
+                }
             }
             if(t && t != notexture)
             {
                 pos.z += aboveheadstatussize/2;
-                part_icon(pos, t, aboveheadstatussize, blend);
+                part_icon(pos, t, aboveheadstatussize, blend, 0, 0, 1, colour);
                 pos.z += aboveheadstatussize/2+0.25f;
             }
         }

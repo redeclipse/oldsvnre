@@ -218,7 +218,10 @@ namespace physics
         {
             gameent *e = (gameent *)d;
             if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsejetdelay) && e->aitype < AI_START)
+            {
+                e->impulse[IM_JETPACK] = lastmillis;
                 return true;
+            }
         }
         return false;
     }
@@ -672,6 +675,17 @@ namespace physics
         return !collided;
     }
 
+    bool canregenimpulse(gameent *d)
+    {
+        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_LAST] >= impulseregendelay))
+        {
+            if((impulseregenjetdelay && d->impulse[IM_JETPACK]) && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_JETPACK] < impulseregenjetdelay))
+                return false;
+            return true;
+        }
+        return false;
+    }
+
     void modifyinput(gameent *d, vec &m, bool wantsmove, bool floating, int millis)
     {
         if(floating)
@@ -704,7 +718,7 @@ namespace physics
                     }
                     else jetting = d->action[AC_JUMP] = false;
                 }
-                if(d->impulse[IM_METER] > 0 && impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_LAST] >= impulseregendelay))
+                if(d->impulse[IM_METER] > 0 && canregenimpulse(d))
                 {
                     bool collect = true; // collect time until it is able to act upon it
                     int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
@@ -919,7 +933,7 @@ namespace physics
         }
         else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
         else pl->timeinair = 0;
-        if(pl->onladder && !m.iszero()) 
+        if(pl->onladder && !m.iszero())
         {
             if((pl->type != ENT_PLAYER && pl->type != ENT_AI) || !((gameent *)pl)->turnside)
                 m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
