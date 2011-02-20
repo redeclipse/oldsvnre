@@ -2143,12 +2143,12 @@ namespace hud
         glColor3f(1, 1, 1);
 
         if(noview) drawbackground(hudwidth, hudheight);
-        else if(!client::waiting() && fade > 0)
+        else if(!client::waiting() && showhud && fade > 0)
         {
-            if(showhud) drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
+            drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
             if(showevents && !hasinput(false)) drawevents(fade);
         }
-        if(UI::ready && showconsole)
+        if(UI::ready && showconsole && showhud)
         {
             drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
             if(showconsole >= 2 && ((!noview && !progressing) || forceprogress))
