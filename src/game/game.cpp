@@ -2001,25 +2001,19 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = 0xFFFFFF;
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::conopentex, 3);
                 else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
                     t = textureload(hud::teamtex(d->team), 3);
-                else
-                {
-                    if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
-                    else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    int len = lastmillis%512; if(len > 255) len = 512-len;
-                    colour = (len<<16)|((len/2)<<8);
-                }
+                else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
+                else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
             }
             if(t && t != notexture)
             {
                 pos.z += aboveheadstatussize/2;
-                part_icon(pos, t, aboveheadstatussize, blend, 0, 0, 1, colour);
+                part_icon(pos, t, aboveheadstatussize, blend);
                 pos.z += aboveheadstatussize/2+0.25f;
             }
         }
