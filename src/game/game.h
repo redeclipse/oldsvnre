@@ -186,7 +186,7 @@ extern enttypes enttype[];
 
 enum
 {
-    ANIM_PAIN = ANIM_GAMESPECIFIC, 
+    ANIM_PAIN = ANIM_GAMESPECIFIC,
     ANIM_JUMP_FORWARD, ANIM_JUMP_BACKWARD, ANIM_JUMP_LEFT, ANIM_JUMP_RIGHT, ANIM_JUMP,
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT,
     ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
@@ -531,20 +531,19 @@ struct teamtypes
 #ifdef GAMESERVER
 teamtypes teamtype[] = {
     {
-//        TEAM_NEUTRAL,   0xAAAAAA,           "neutral",
-        TEAM_NEUTRAL,   0x88CC44,           "neutral",
-        "team",             "\fa",      "grey"
+        TEAM_NEUTRAL,   0x66BB33,           "neutral",
+        "team",             "\fa",      "green"
     },
     {
-        TEAM_ALPHA,     0x4444FF,           "alpha",
+        TEAM_ALPHA,     0x6666FF,           "alpha",
         "teamalpha",        "\fb",      "blue"
     },
     {
-        TEAM_OMEGA,     0xFF4444,           "omega",
+        TEAM_OMEGA,     0xFF6666,           "omega",
         "teamomega",         "\fr",      "red"
     },
     {
-        TEAM_ENEMY,     0xFFFF44,           "enemy",
+        TEAM_ENEMY,     0xFFFF66,           "enemy",
         "team",             "\fy",      "yellow"
     }
 };
@@ -584,7 +583,7 @@ enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_LAST, IM_COUNT, IM_COLLECT, IM_SLIDE, IM_JUMP, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_LAST, IM_COUNT, IM_COLLECT, IM_SLIDE, IM_JUMP, IM_JETPACK, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_DASH, IM_T_MAX, IM_T_WALL = IM_T_KICK };
 
 #define CROUCHHEIGHT 0.7f
@@ -887,9 +886,9 @@ struct actitem
 const char * const animnames[] =
 {
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
-    "mapmodel", "trigger on", "trigger off", "pain", 
+    "mapmodel", "trigger on", "trigger off", "pain",
     "jump forward", "jump backward", "jump left", "jump right", "jump",
-    "impulse forward", "impulse backward", "impulse left", "impulse right", 
+    "impulse forward", "impulse backward", "impulse left", "impulse right",
     "dash forward", "dash backward", "dash left", "dash right", "dash up",
     "jetpack forward", "jetpack backward", "jetpack left", "jetpack right", "jetpack up",
     "wall run left", "wall run right", "wall jump",
@@ -1219,7 +1218,7 @@ struct gameent : dynent, gamestate
 
     void resetjump()
     {
-        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = 0;
+        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = impulse[IM_JETPACK] = 0;
     }
 
     void resetair()
