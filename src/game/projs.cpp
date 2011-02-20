@@ -874,7 +874,7 @@ namespace projs
                     case WEAP_FLAMER:
                     {
                         float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.curscale*scale, blend = clamp(1.25f-proj.lifespan, 0.25f, 0.75f)*(0.6f+(rnd(40)/100.f))*(proj.owner == game::focus ? 0.35f : 0.75f);
+                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.curscale*scale, blend = clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*(0.6f+(rnd(40)/100.f))*(proj.owner == game::focus ? 0.65f : 0.85f);
                         if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             part_create(PART_HINT_SOFT, 1, proj.o, teamhint(proj.owner, 0x120228), size*1.5f, blend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
