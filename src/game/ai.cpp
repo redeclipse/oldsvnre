@@ -1077,7 +1077,6 @@ namespace ai
                     d->ai->targyaw = yaw;
                     d->ai->targpitch = pitch;
                     frame *= 2;
-                    d->ai->becareful = false;
                     if(d->aitype == AI_BOT)
                     {
                         locked = true;
@@ -1152,7 +1151,7 @@ namespace ai
                     wantsimpulse = (d->action[AC_SPRINT] || !d->actiontime[AC_SPRINT] || lastmillis-d->actiontime[AC_SPRINT] > PHYSMILLIS*2);
             }
 
-            if(d->ai->becareful && d->physstate == PHYS_FALL)
+            if(d->ai->lastpusher >= 0 && d->physstate == PHYS_FALL && lastmillis-d->ai->lastpushtime < (skmod/10)*250)
             {
                 float offyaw, offpitch;
                 vec v = vec(d->vel).normalize();
@@ -1161,14 +1160,23 @@ namespace ai
                 if(offyaw > 180) offyaw -= 360;
                 else if(offyaw < -180) offyaw += 360;
                 offpitch -= d->aimpitch;
-                if(fabs(offyaw)+fabs(offpitch) >= 135) wantsimpulse = d->ai->becareful = false;
-                else if(d->ai->becareful)
+                if(fabs(offyaw)+fabs(offpitch) >= 135)
+                {
+                    wantsimpulse = false;
+                    d->ai->lastpusher = -1;
+                    d->ai->lastpushtime = 0;
+                }
+                else
                 {
                     d->ai->dontmove = true;
                     wantsimpulse = false;
                 }
             }
-            else d->ai->becareful = false;
+            else
+            {
+                d->ai->lastpusher = -1;
+                d->ai->lastpushtime = 0;
+            }
 
             if(d->action[AC_SPRINT] != wantsimpulse)
                 if((d->action[AC_SPRINT] = !d->action[AC_SPRINT]) == true) d->actiontime[AC_SPRINT] = lastmillis;
