@@ -115,14 +115,14 @@ namespace game
     VAR(IDF_PERSIST, ragdolls, 0, 1, 1);
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
     VAR(IDF_PERSIST, bloodfade, 1, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, bloodsize, 1, 20, 1000);
+    VAR(IDF_PERSIST, bloodsize, 1, 40, 1000);
     VAR(IDF_PERSIST, bloodsparks, 0, 0, 1);
     FVAR(IDF_PERSIST, debrisscale, 0, 1, 1000);
     VAR(IDF_PERSIST, debrisfade, 1, 5000, INT_MAX-1);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, burnfade, 100, 200, INT_MAX-1);
-    FVAR(IDF_PERSIST, burnblend, 0.125f, 0.125f, 1);
+    FVAR(IDF_PERSIST, burnblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
     VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
 
@@ -405,7 +405,7 @@ namespace game
     void boosteffect(gameent *d, const vec &pos, int num, int len)
     {
         float intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-        regularshape(PART_FIREBALL, int(d->radius)*2, firecols[rnd(FIRECOLOURS)], 21, num, len, pos, intensity, blend, -1, 0, 5);
+        regularshape(PART_FIREBALL, int(d->radius)*2, firecols[0][rnd(FIRECOLOURS)], 21, num, len, pos, intensity, blend, -1, 0, 5);
     }
 
     void impulseeffect(gameent *d, int effect)
@@ -721,7 +721,7 @@ namespace game
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 5 : 1), bloodfade, p, 0x66CCCC, (rnd(bloodsize)+2)/10.f, 1, 50, DECAL_BLOOD, int(d->radius), 2);
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 5 : 1), bloodfade, p, 0x66CCCC, (rnd(game::bloodsize)+1)/10.f, 1, 150, DECAL_BLOOD, int(d->radius), 3);
                         if(kidmode || bloodscale <= 0 || bloodsparks)
                             part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 3 : 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
                     }
@@ -1979,8 +1979,8 @@ namespace game
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         bool burning = burntime && totalmillis%150 < 65 && d->burning(lastmillis, burntime);
-        int colour = burning ? firecols[rnd(FIRECOLOURS)] : d->colour();
-        e->light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 128.f : 224.f);
+        int colour = burning ? firecols[rnd(2)][rnd(FIRECOLOURS)] : d->colour();
+        e->light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
@@ -2001,19 +2001,25 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
+            int colour = 0xFFFFFF;
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::conopentex, 3);
                 else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
-                    t = textureload(hud::teamtex(d->team), 3);
-                else if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
-                else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
+                    t = textureload(hud::teamtex(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
+                else
+                {
+                    if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
+                    else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
+                    const int colourstep[6] = { 0xFF8888, 0xFF88FF, 0x88FF88, 0x8888FF, 0xFF88FF, 0xFFFF88 };
+                    colour = colourstep[rnd(7)];
+                }
             }
             if(t && t != notexture)
             {
                 pos.z += aboveheadstatussize/2;
-                part_icon(pos, t, aboveheadstatussize, blend);
+                part_icon(pos, t, aboveheadstatussize, blend, 0, 0, 1, colour);
                 pos.z += aboveheadstatussize/2+0.25f;
             }
         }
@@ -2208,7 +2214,7 @@ namespace game
                     {
                         case 1: case 2:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[rnd(FIRECOLOURS)];
+                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[0][rnd(FIRECOLOURS)];
                             regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
                             break;
                         }
@@ -2221,7 +2227,7 @@ namespace game
                         }
                         case 4:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[rnd(FIRECOLOURS)];
+                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[0][rnd(FIRECOLOURS)];
                             part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, powerfx[d->weapselect].size, max(amt, 0.1f));
                             break;
                         }
@@ -2231,11 +2237,11 @@ namespace game
             }
             if(burntime && d->burning(lastmillis, burntime))
             {
-                int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
+                int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
                 else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[rnd(FIRECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -15, 0);
+                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[0][rnd(FIRECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -15, 0);
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);
