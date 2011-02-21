@@ -908,7 +908,11 @@ namespace entities
                         case 3: d->vel = rel; break;
                         default: break;
                     }
-                    if(d->ai) d->ai->becareful = true;
+                    if(d->ai && d->ai->lastpusher != n)
+                    {
+                        d->ai->lastpusher = n;
+                        d->ai->lastpushtime = lastmillis;
+                    }
                     execlink(d, n, true);
                     d->resetair();
                     break;

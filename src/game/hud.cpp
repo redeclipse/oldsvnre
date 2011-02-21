@@ -1148,8 +1148,8 @@ namespace hud
         {
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
-            bool burning = radarplayereffects && burntime && lastmillis%100 < 50 && d->burning(lastmillis, burntime);
-            int colour = burning ? firecols[0][rnd(FIRECOLOURS)] : d->colour();
+            bool burning = radarplayereffects && burntime && totalmillis%150 < 65 && d->burning(lastmillis, burntime);
+            int colour = burning ? firecols[rnd(2)][rnd(FIRECOLOURS)] : d->colour();
             const char *tex = bliptex;
             float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize,
                 r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;

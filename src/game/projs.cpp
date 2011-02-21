@@ -291,11 +291,22 @@ namespace projs
                 }
                 vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
             }
+            float minspeed = proj.minspeed;
+            if(proj.projtype == PRJ_ENT && !minspeed)
+            {
+                loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && overlapsbox(proj.o, proj.radius, proj.radius, projs[i]->o, projs[i]->radius, projs[i]->radius))
+                {
+                    vec nrm = vec(proj.o).sub(projs[i]->o).normalize();
+                    dir[1].add(nrm).normalize();
+                    minspeed = 10.f;
+                    break;
+                }
+            }
             if(!dir[1].iszero())
             {
                 proj.vel = vec(dir[1]).mul(mag);
-                if(proj.minspeed) while(proj.vel.magnitude() < proj.minspeed)
-                    proj.vel.add(vec(dir[1]).mul(proj.minspeed));
+                if(minspeed) while(proj.vel.magnitude() < minspeed)
+                    proj.vel.add(vec(dir[1]).mul(minspeed));
             }
         }
         else proj.vel = vec(0, 0, 0);
@@ -1718,8 +1729,9 @@ namespace projs
                     if(shadowdebris) flags |= MDL_DYNSHADOW;
                     if(light->millis != lastmillis && !proj.limited)
                     {
-                        int colour = firecols[0][rnd(FIRECOLOURS)];
-                        light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
+                        bool burning = totalmillis%150 < 65;
+                        int colour = burning ? firecols[rnd(2)][rnd(FIRECOLOURS)] : 0xFFFFFF;
+                        light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
                     }
                 }
                 case PRJ_GIBS:
