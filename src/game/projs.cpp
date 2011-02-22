@@ -350,7 +350,7 @@ namespace projs
             {
                 if(!kidmode && game::bloodscale > 0)
                 {
-                    adddecal(DECAL_BLOOD, proj.o, proj.norm, ((rnd(game::bloodsize)+1)/10.f)*proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
+                    adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
                     playsound(S_SPLOSH+rnd(S_R_SPLOSH), proj.o, NULL, 0, vol);
                     break;
@@ -1001,7 +1001,7 @@ namespace projs
                 {
                     if(proj.movement > 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                     {
-                        part_splash(PART_BLOOD, 1, game::bloodfade, proj.o, 0x66CCCC, (rnd(game::bloodsize)+1)/10.f, 1, 150, DECAL_BLOOD, int(proj.radius), 3);
+                        part_splash(PART_BLOOD, 1, game::bloodfade, proj.o, 0x229999, (rnd(game::bloodsize/2)+(game::bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(proj.radius), 10);
                         proj.lasteffect = lastmillis - (lastmillis%1000);
                     }
                     if(!game::bloodsparks) break;
