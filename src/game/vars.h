@@ -30,8 +30,8 @@ GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath darkness dawn deadsimple deathtrap deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, mainmaps, "bath darkness deadsimple deathtrap deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, defendmaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, defendmaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "bath deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
