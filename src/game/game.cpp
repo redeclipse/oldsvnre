@@ -210,8 +210,9 @@ namespace game
     {
         if(allowmove(player1) && WEAP(player1->weapselect, zooms)) switch(zoomlock)
         {
-            case 2: if(player1->move || player1->strafe || player1->physstate == PHYS_SLOPE) break;
-            case 1: if(player1->physstate == PHYS_FALL && !player1->onladder) break;
+            case 3: if(player1->physstate != PHYS_FLOOR) break;
+            case 2: if(player1->move || player1->strafe) break;
+            case 1: if(player1->physstate == PHYS_FALL && player1->timeinair >= zoomlocktime) break;
             case 0: default: return true; break;
         }
         zoomset(false, 0);

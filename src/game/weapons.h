@@ -147,7 +147,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  cmult   cdist   dlta1   dlta2   tmult1  tmult2  tordm1  tordm2  legdm1  legdm2
 //  fscale1 fscale2 fsprd1  fsprd2  frel1   frel2   fffwd1  fffwd2  foff1   foff2   fskew1  fskew2
 WEAPON(melee,
-    1,      1,      0,      0,      500,    750,    50,     20,     40,     0,      0,      0,      0,      100,    80,
+    1,      1,      0,      0,      500,    750,    50,     3,     40,     0,      0,      0,      0,      100,    80,
     20,     0,      0,      0,      200,    200,    0,      0,      1,      1,      1,      1,      0,      0,      0,      0,
     1,      1,      1,      1,      -1,             -1,             25,     10,     5,      5,      500,    500,    0,      0,
     IMPACT_PLAYER|COLLIDE_TRACE,
@@ -160,7 +160,7 @@ WEAPON(melee,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1
 );
 WEAPON(pistol,
-    10,     10,     1,      1,      75,     150,    1000,   20,     20,     2000,   2000,   0,      0,      2000,   2000,
+    10,     10,     1,      1,      150,    200,    1000,   35,     35,     2000,   2000,   0,      0,      2000,   2000,
     0,      0,      0,      0,      200,    200,    0,      0,      1,      1,      1,      2,      0,      0,      0,      0,
     2,      0,      100,    100,    -1,             -1,             10,     12,     5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
