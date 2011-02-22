@@ -708,8 +708,9 @@ struct gamestate
 
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
-        if((hasweap(weap, sweap) && ammo[weap] >= (WEAP2(weap, power, flags&HIT_ALT) ? 1 : WEAP2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
-            return true;
+        if(weap == weapselect || (weap == WEAP_MELEE && weapwaited(weap, millis, skipwait(weapselect, flags, millis, skip))))
+            if((hasweap(weap, sweap) && ammo[weap] >= (WEAP2(weap, power, flags&HIT_ALT) ? 1 : WEAP2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
+                return true;
         return false;
     }
 
