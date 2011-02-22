@@ -114,8 +114,8 @@ namespace game
     VAR(IDF_PERSIST, quakefade, 0, 100, INT_MAX-1);
     VAR(IDF_PERSIST, ragdolls, 0, 1, 1);
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
-    VAR(IDF_PERSIST, bloodfade, 1, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, bloodsize, 1, 40, 1000);
+    VAR(IDF_PERSIST, bloodfade, 1, 3000, INT_MAX-1);
+    VAR(IDF_PERSIST, bloodsize, 1, 50, 1000);
     VAR(IDF_PERSIST, bloodsparks, 0, 0, 1);
     FVAR(IDF_PERSIST, debrisscale, 0, 1, 1000);
     VAR(IDF_PERSIST, debrisfade, 1, 5000, INT_MAX-1);
@@ -358,7 +358,7 @@ namespace game
         else conoutft(CON_MESG, "\foweapon selection is only available in arena");
     }
     ICOMMAND(0, loadweap, "ss", (char *a, char *b), chooseloadweap(player1, a, b));
-    ICOMMAND(0, getloadweap, "i", (int *n), intret(game::player1->loadweap[*n!=0 ? 1 : 0]));
+    ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap[*n!=0 ? 1 : 0]));
     ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && WEAP(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
 
     void respawn(gameent *d)
@@ -429,7 +429,7 @@ namespace game
                         sounds[d->jschan].vol = min((lastmillis-sounds[d->jschan].millis)*2, 255);
                         sounds[d->jschan].ends = lastmillis+250;
                     }
-                    else playsound(S_JETPACK, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
+                    else playsound(S_JETPACK, d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
                     if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
@@ -581,7 +581,7 @@ namespace game
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
                 }
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
-                else playsound(WEAPSND2(d->weapselect, secondary, S_W_POWER), d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
+                else playsound(WEAPSND2(d->weapselect, secondary, S_W_POWER), d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);
@@ -722,9 +722,9 @@ namespace game
                     if(!isaitype(d->aitype) || aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 5 : 1), bloodfade, p, 0x66CCCC, (rnd(game::bloodsize)+1)/10.f, 1, 150, DECAL_BLOOD, int(d->radius), 3);
+                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
                         if(kidmode || bloodscale <= 0 || bloodsparks)
-                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 3 : 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
+                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);
                     if(!burning && !bleeding) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
