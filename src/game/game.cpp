@@ -125,6 +125,7 @@ namespace game
     FVAR(IDF_PERSIST, burnblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
     VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
+    VAR(IDF_PERSIST, ragdolleffect, 2, 500, INT_MAX-1);
 
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
     ICOMMAND(0, mutators, "", (), intret(mutators));
@@ -468,16 +469,18 @@ namespace game
                 }
                 total *= clamp(amtscale, minscale, maxresizescale);
             }
+            #if 0
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
                 if(len > 0)
                 {
-                    int interval = min(len/3, 1000), over = max(len-interval, 500), millis = lastmillis-d->lastdeath;
+                    int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
                     if(millis <= len) { if(millis >= over) total *= 1.f-((millis-over)/float(interval)); }
                     else total = 0;
                 }
             }
+            #endif
         }
         return total;
     }
@@ -485,7 +488,20 @@ namespace game
     float opacity(gameent *d, bool third = true)
     {
         float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
+        #if 0
         if(d->state == CS_DEAD || d->state == CS_WAITING) total *= d->curscale;
+        #else
+        if(d->state == CS_DEAD || d->state == CS_WAITING)
+        {
+            int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
+            if(len > 0)
+            {
+                int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
+                if(millis <= len) { if(millis >= over) total *= 1.f-((millis-over)/float(interval)); }
+                else total = 0;
+            }
+        }
+        #endif
         else if(d->state == CS_ALIVE)
         {
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left

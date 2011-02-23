@@ -42,11 +42,11 @@ namespace hud
     VAR(IDF_PERSIST, tvmodefade, 0, 1000, INT_MAX-1);
     VAR(IDF_PERSIST, spawnfade, 0, 2000, INT_MAX-1);
 
-    VAR(IDF_PERSIST, commandfade, 0, 250, INT_MAX-1);
-    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.75f, 1);
+    VAR(IDF_PERSIST, commandfade, 0, 200, INT_MAX-1);
+    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, commandfadeskew, 0, 0.25f, 1);
-    VAR(IDF_PERSIST, uifade, 0, 250, INT_MAX-1);
-    FVAR(IDF_PERSIST, uifadeamt, 0, 0.75f, 1);
+    VAR(IDF_PERSIST, uifade, 0, 200, INT_MAX-1);
+    FVAR(IDF_PERSIST, uifadeamt, 0, 0.5f, 1);
 
     int conskip = 0;
     void setconskip(int *n)
@@ -147,9 +147,9 @@ namespace hud
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorygame, 0, 1, 2);
+    VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryteams, 0, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, inventoryaffinity, 0, 1000, INT_MAX-1);
+    VAR(IDF_PERSIST, inventoryaffinity, 0, 500, INT_MAX-1);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
@@ -169,7 +169,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
     FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
-    VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
+    VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
 
     TVAR(IDF_PERSIST, meleetex, "textures/melee", 3);
