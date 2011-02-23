@@ -269,6 +269,7 @@ bool listdir(const char *dir, const char *ext, vector<char *> &files)
     }
     #else
     defformatstring(pathname)("./%s", dirname);
+    DIR *d = opendir(pathname);
     if(d)
     {
         struct dirent *de;
