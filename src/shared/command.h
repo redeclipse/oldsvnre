@@ -293,6 +293,7 @@ extern bool interactive;
 
 extern char *parsetext(const char *&p);
 extern void writeescapedstring(stream *f, const char *s);
+extern bool validatealias(const char *s);
 extern void explodelist(const char *s, vector<char *> &elems);
 extern int listlen(const char *s);
 extern char *indexlist(const char *s, int pos);
