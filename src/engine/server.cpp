@@ -1414,7 +1414,8 @@ void writecfg()
                 if(str[0])
                 {
                     found = saved = true;
-                    f->printf("\"%s\" = [%s]", id.name, str);
+                    if(validatealias(str)) f->printf("\"%s\" = [%s]", id.name, str);
+                    else { f->printf("\"%s\" = ", id.name); writeescapedstring(f, str); }
                 }
             }
             break;

@@ -1739,6 +1739,22 @@ void writeescapedstring(stream *f, const char *s)
     f->putchar('"');
 }
 
+bool validatealias(const char *s)
+{
+    int parens = 0, braks = 0;
+    for(; *s; s++) switch(*s)
+    {
+        case '(': parens++; break;
+        case ')': parens--; break;
+        case '[': braks++; break;
+        case ']': braks--; break;
+        case '"': s = parsestring(s + 1); if(!*s++) return false; break;
+        case '/': if(s[1] == '/') return false; break;
+    }
+    if(braks || parens) return false;
+    return true;
+}
+
 // below the commands that implement a small imperative language. thanks to the semantics of
 // () and [] expressions, any control construct can be defined trivially.
 
