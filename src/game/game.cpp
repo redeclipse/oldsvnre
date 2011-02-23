@@ -68,10 +68,11 @@ namespace game
     VAR(IDF_PERSIST, deathcamstyle, 0, 1, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
 
-    FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10, 1000);
-    FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 10, 1000);
-    FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 7.5f, 1000);
-    FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 1000);
+    FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10, 10000);
+    FVAR(IDF_PERSIST, sensitivityscale, 1e-4f, 100, 10000);
+    FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 1, 10000);
+    FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 1, 10000);
+    FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.75f, 1000);
     FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
@@ -1351,8 +1352,8 @@ namespace game
             if(target)
             {
                 float scale = (inzoom() && zoomsensitivity > 0 && zoomsensitivity < 1 ? 1.f-(zoomlevel/float(zoomlevels+1)*zoomsensitivity) : (self ? followsensitivity : 1.f))*sensitivity;
-                target->yaw += mousesens(dx, w, yawsensitivity*scale);
-                target->pitch -= mousesens(dy, h, pitchsensitivity*scale*(!hasinput && mouseinvert ? -1.f : 1.f));
+                target->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
+                target->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(!hasinput && mouseinvert ? -1.f : 1.f));
                 fixfullrange(target->yaw, target->pitch, target->roll, false);
             }
             return true;
