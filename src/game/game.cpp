@@ -1434,7 +1434,7 @@ namespace game
                 physent d = *player1;
                 d.radius = d.height = 4.f;
                 d.state = CS_ALIVE;
-                loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (k && !enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL))
+                loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (k && !enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL && insideworld(entities::ents[i]->o)))
                 {
                     gameentity &e = *(gameentity *)entities::ents[i];
                     d.o = e.o;
