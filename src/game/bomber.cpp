@@ -70,7 +70,7 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
             vec dir = vec(f.pos()).sub(camera1->o);
-            int colour = isbomberaffinity(f) ? 0xFFFFFF : teamtype[f.team].colour, area = 3;
+            int colour = isbomberaffinity(f) ? teamtype[TEAM_NEUTRAL].colour : teamtype[f.team].colour, area = 3;
             float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -243,16 +243,16 @@ namespace bomber
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
                     int interval = lastmillis%1000;
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, 0xFFFFFF, enttype[AFFINITY].radius/4+(2*fluc), fluc*trans);
+                    part_create(PART_HINT_SOFT, 1, above, teamtype[TEAM_NEUTRAL].colour, enttype[AFFINITY].radius/4+(2*fluc), fluc*trans);
                     if(f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/4+2.5f;
                         float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
-                        part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, 0xFFFFFF, (lastmillis%1000)/1000.f, 0.1f);
-                        part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, 0xFFFFFF);
-                        part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, 0xFFFFFF, 0, wait);
+                        part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, teamtype[TEAM_NEUTRAL].colour, (lastmillis%1000)/1000.f, 0.1f);
+                        part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, teamtype[TEAM_NEUTRAL].colour);
+                        part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, teamtype[TEAM_NEUTRAL].colour, 0, wait);
                         above.z += 0.5f;
-                        defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f)*0.5f);
+                        defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, teamtype[TEAM_NEUTRAL].colour, 2, max(trans, 0.5f)*0.5f);
                     }
                 }
                 else
@@ -279,7 +279,7 @@ namespace bomber
                 int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
-            int colour = isbomberaffinity(f) ? 0xFFFFFF : teamtype[f.team].colour;
+            int colour = isbomberaffinity(f) ? teamtype[TEAM_NEUTRAL].colour : teamtype[f.team].colour;
             adddynlight(f.pos(true), enttype[AFFINITY].radius*2*trans, vec((colour>>16), ((colour>>8)&0xFF), (colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
         }
     }
@@ -293,7 +293,7 @@ namespace bomber
             if(st.flags.inrange(index)) \
             { \
                 st.flags[index].ent = a; \
-                int colour = st.flags[index].team == TEAM_NEUTRAL ? 0xFFFFFF : teamtype[st.flags[index].team].colour; \
+                int colour = st.flags[index].team == TEAM_NEUTRAL ? teamtype[TEAM_NEUTRAL].colour : teamtype[st.flags[index].team].colour; \
                 entities::ents[a]->light.material = st.flags[index].light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f); \
             } \
             else continue; \
@@ -387,7 +387,7 @@ namespace bomber
             if(effect&1)
             {
                 defformatstring(text)("<super>%s\fzRe%s", teamtype[team].chat, str);
-                part_textcopy(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, 0xFFFFFF, 3, 1, -10);
+                part_textcopy(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, teamtype[TEAM_NEUTRAL].colour, 3, 1, -10);
             }
             if(game::dynlighteffects) adddynlight(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[team].colour>>16, (teamtype[team].colour>>8)&0xFF, teamtype[team].colour&0xFF).mul(2.f/0xFF), 500, 250);
         }
@@ -396,7 +396,7 @@ namespace bomber
             if(effect&2)
             {
                 defformatstring(text)("<super>%s\fzRe%s", teamtype[team].chat, str);
-                part_textcopy(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, 0xFFFFFF, 3, 1, -10);
+                part_textcopy(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, teamtype[TEAM_NEUTRAL].colour, 3, 1, -10);
             }
             if(game::dynlighteffects) adddynlight(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[team].colour>>16, (teamtype[team].colour>>8)&0xFF, teamtype[team].colour&0xFF).mul(2.f/0xFF), 500, 250);
         }

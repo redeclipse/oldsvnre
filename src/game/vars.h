@@ -13,6 +13,9 @@ GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = 
 GVAR(IDF_ADMIN, votelock, 0, 0, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, INT_MAX-1);
 
+GVAR(IDF_ADMIN, autospectate, 0, 2, 2); // auto spectate if idle, 1 = only when dead, 2 = no interaction at all
+GVAR(IDF_ADMIN, autospecdelay, 0, 60000, INT_MAX-1);
+
 GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
@@ -30,7 +33,7 @@ GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath darkness dawn deadsimple deathtrap deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, mainmaps, "bath darkness deadsimple deathtrap deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, capturemaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "bath darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "bath deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
 GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
@@ -104,6 +107,7 @@ GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
+GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more

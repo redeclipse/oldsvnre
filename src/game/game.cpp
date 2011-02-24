@@ -102,7 +102,7 @@ namespace game
     VAR(IDF_PERSIST, eventiconcrit, 500, 2000, INT_MAX-1);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
-    VAR(IDF_PERSIST, showobitdists, 0, 0, 1);
+    VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
     VAR(IDF_PERSIST, showplayerinfo, 0, 1, 1); // 0 = none, 1 = show events
 
     VAR(IDF_PERSIST, damagemergedelay, 0, 75, INT_MAX-1);
@@ -214,7 +214,11 @@ namespace game
         {
             case 3: if(player1->physstate != PHYS_FLOOR) break;
             case 2: if(player1->move || player1->strafe) break;
-            case 1: if(player1->physstate == PHYS_FALL && player1->timeinair >= zoomlocktime) break;
+            case 1: if(player1->physstate == PHYS_FALL)
+            {
+                if(!zooming || !lastzoom || player1->timeinair >= zoomlocktime) break;
+                if(player1->impulse[IM_JUMP] && player1->impulse[IM_JUMP] >= lastzoom) break;
+            }
             case 0: default: return true; break;
         }
         zoomset(false, 0);
@@ -408,7 +412,7 @@ namespace game
     void boosteffect(gameent *d, const vec &pos, int num, int len)
     {
         float intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-        regularshape(PART_FIREBALL, int(d->radius)*2, firecols[0][rnd(FIRECOLOURS)], 21, num, len, pos, intensity, blend, -1, 0, 5);
+        regularshape(PART_FIREBALL, int(d->radius)*2, firecols[0][rnd(FIRECOLOURS)], 21, num, len, pos, intensity, blend, -5, 0, 5);
     }
 
     void impulseeffect(gameent *d, int effect)
@@ -535,6 +539,7 @@ namespace game
                     vec dir;
                     vecfromyawpitch(d->yaw, 0, d->move, d->strafe, dir);
                     d->o.add(dir);
+                    if(!collide(d, vec(0, 0, 1), 0.f, false)) break;
                 }
                 loopi(10)
                 {
@@ -552,7 +557,10 @@ namespace game
                     break;
                 }
                 else if(k && d->actiontime[AC_CROUCH] < 0)
+                {
                     d->actiontime[AC_CROUCH] = lastmillis-max(PHYSMILLIS-(lastmillis+d->actiontime[AC_CROUCH]), 0);
+                    break;
+                }
             }
             if(physics::iscrouching(d))
             {
@@ -1040,7 +1048,7 @@ namespace game
                 case 5: default: show = true; break;
             }
             int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-            if(showobitdists) announce(anc, target, d, "\fs\fw%s\fS (@\fs\fc%.2f\fSm)", d->obit, actor->o.dist(d->o)/8.f);
+            if(showobitdists) announce(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
             else announce(anc, target, d, "\fw%s", d->obit);
         }
         if(gibscale > 0)
@@ -2030,8 +2038,8 @@ namespace game
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    const int colourstep[6] = { 0xFF8888, 0xFF88FF, 0x88FF88, 0x8888FF, 0xFF88FF, 0xFFFF88 };
-                    colour = colourstep[rnd(7)];
+                    const int colourstep[6] = { 0xFFAAAA, 0xFFCCAA, 0xAAFFAA, 0xAAAAFF, 0xFFAAFF, 0xFFFFAA };
+                    colour = colourstep[clamp((totalmillis/100)%6, 0, 5)];
                 }
             }
             if(t && t != notexture)
@@ -2259,7 +2267,7 @@ namespace game
                 if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
                 else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[0][rnd(FIRECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -15, 0);
+                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[0][rnd(FIRECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);

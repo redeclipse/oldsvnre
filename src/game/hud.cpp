@@ -126,7 +126,7 @@ namespace hud
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, INT_MAX-1);
-    FVAR(IDF_PERSIST, crosshairblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairaccamt, 0, 0.75f, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairthrob, 1e-4f, 0.3f, 1000);
