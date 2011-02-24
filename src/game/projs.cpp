@@ -885,15 +885,15 @@ namespace projs
                     case WEAP_FLAMER:
                     {
                         float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.curscale*scale, blend = clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*(0.6f+(rnd(40)/100.f))*(proj.owner == game::focus ? 0.65f : 0.85f);
+                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.curscale*scale, blend = clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*(0.6f+(rnd(40)/100.f))*(proj.owner == game::focus ? 0.5f : 0.75f);
                         if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             part_create(PART_HINT_SOFT, 1, proj.o, teamhint(proj.owner, 0x120228), size*1.5f, blend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, firecols[0][rnd(FIRECOLOURS)], size, blend, -10);
+                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, firecols[0][rnd(FIRECOLOURS)], size, blend, -5);
                             proj.lasteffect = lastmillis - (lastmillis%(projtraildelay*2));
                         }
-                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, firecols[0][rnd(FIRECOLOURS)], size, blend, -10);
+                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, firecols[0][rnd(FIRECOLOURS)], size, blend);
                         break;
                     }
                     case WEAP_GRENADE:
@@ -1012,7 +1012,7 @@ namespace projs
                     float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
                     if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
                     int len = effect ? max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
-                    part_create(PART_FIREBALL_SOFT, len, proj.o, firecols[0][rnd(FIRECOLOURS)], radius, blend, -10);
+                    part_create(PART_FIREBALL_SOFT, len, proj.o, firecols[0][rnd(FIRECOLOURS)], radius, blend, -5);
                 }
                 break;
             }
@@ -1087,7 +1087,7 @@ namespace projs
                         if(proj.weap == WEAP_FLAMER)
                         {
                             if(expl <= 0) expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
-                            part_create(PART_SMOKE_LERP_SOFT, projtraillength, proj.o, 0x666666, expl*0.75f, 0.25f+(rnd(50)/100.f), -15);
+                            part_create(PART_SMOKE_LERP_SOFT, projtraillength, proj.o, 0x666666, expl*0.75f, 0.25f+(rnd(50)/100.f), -5);
                         }
                         else
                         {
@@ -1118,7 +1118,7 @@ namespace projs
                                 loopi(proj.weap != WEAP_ROCKET ? 3 : 6)
                                 {
                                     vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
-                                    part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 2 : 3), to, firecols[0][rnd(FIRECOLOURS)], expl, 0.25f+(rnd(25)/100.f), -4);
+                                    part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 2 : 3), to, firecols[0][rnd(FIRECOLOURS)], expl, 0.25f+(rnd(25)/100.f), -5);
                                 }
                             }
                             adddecal(proj.weap == WEAP_FLAMER ? DECAL_SCORCH_SHORT : DECAL_SCORCH, proj.o, proj.norm, expl*0.5f);

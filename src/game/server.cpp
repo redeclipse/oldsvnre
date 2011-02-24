@@ -244,7 +244,7 @@ namespace server
 
     struct clientinfo
     {
-        int clientnum, connectmillis, sessionid, overflow, ping, team;
+        int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam;
         string name, mapvote;
         int modevote, mutsvote, lastvote;
         int privilege;
@@ -279,7 +279,7 @@ namespace server
             overflow = 0;
             timesync = wantsmap = failedmap = false;
             lastevent = gameoffset = lastvote = 0;
-            team = TEAM_NEUTRAL;
+            team = lastteam = TEAM_NEUTRAL;
             clientmap[0] = '\0';
             mapcrc = 0;
             warned = false;
@@ -549,7 +549,7 @@ namespace server
 
     int numchannels() { return 3; }
     int reserveclients() { return GAME(serverclients)+4; }
-    
+
     bool hasclient(clientinfo *ci, clientinfo *cp = NULL)
     {
         if(!ci || (ci != cp && ci->clientnum != cp->clientnum && ci->state.ownernum != cp->clientnum)) return false;
@@ -1691,6 +1691,7 @@ namespace server
                 mutate(smuts, mut->leavegame(ci));
                 sm = true;
             }
+            ci->lastteam = ci->team;
             ci->team = team;
             if(sm)
             {
@@ -1720,7 +1721,17 @@ namespace server
         if(ci->state.aitype >= AI_START) return TEAM_ENEMY;
         else if(m_fight(gamemode) && m_team(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
-            int team = isteam(gamemode, mutators, suggest, TEAM_FIRST) ? suggest : -1, balance = GAME(teambalance);
+            int team = -1, balance = GAME(teambalance), teams[3][3] = {
+                { suggest, ci->team, -1 },
+                { suggest, ci->team, ci->lastteam },
+                { suggest, ci->lastteam, ci->team }
+            };
+            loopi(3) if(!isteam(gamemode, mutators, teams[GAME(teampersist)][i], TEAM_FIRST))
+            {
+                team = teams[GAME(teampersist)][i];
+                if(GAME(teampersist) == 2) return team;
+                break;
+            }
             if(balance < 3 && ci->state.aitype >= 0) balance = 1;
             if(balance || team < 0)
             {
@@ -3111,7 +3122,7 @@ namespace server
         ci->state.weapreset(false);
         if(m_arena(gamemode, mutators)) chkloadweap(ci);
         if(doteam && (doteam == 2 || !isteam(gamemode, mutators, ci->team, TEAM_FIRST)))
-            setteam(ci, chooseteam(ci, ci->team), false, true);
+            setteam(ci, chooseteam(ci), false, true);
     }
 
     int triggertime(int i)
@@ -3181,6 +3192,40 @@ namespace server
                 }
                 break;
             }
+        }
+    }
+
+    void spectate(clientinfo *ci, bool val)
+    {
+        if(ci->state.state != CS_SPECTATOR && val)
+        {
+            if(ci->state.state == CS_ALIVE)
+            {
+                suicideevent ev;
+                ev.flags = 0;
+                ev.process(ci);
+            }
+            if(smode) smode->leavegame(ci);
+            mutate(smuts, mut->leavegame(ci));
+            sendf(-1, 1, "ri3", N_SPECTATOR, spectator, val);
+            ci->state.cpnodes.shrink(0);
+            ci->state.cpmillis = 0;
+            ci->state.state = CS_SPECTATOR;
+            ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
+            setteam(ci, TEAM_NEUTRAL, false, true);
+            aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+        }
+        else if(ci->state.state == CS_SPECTATOR && !val)
+        {
+            ci->state.cpnodes.shrink(0);
+            ci->state.cpmillis = 0;
+            ci->state.state = CS_DEAD;
+            ci->state.lasttimeplayed = lastmillis;
+            waiting(ci, 2, 1);
+            if(smode) smode->entergame(ci);
+            mutate(smuts, mut->entergame(ci));
+            aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+            if(ci->clientmap[0] || ci->mapcrc) checkmaps();
         }
     }
 
@@ -3260,6 +3305,8 @@ namespace server
                     sendspawn(ci);
                 }
             }
+            if(GAME(autospectate) && ci->state.state == CS_DEAD && ci->state.ownernum < 0 && gamemillis-ci->state.lastdeath >= GAME(autospecdelay))
+                spectate(ci, true);
         }
     }
 
@@ -4320,36 +4367,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(spectator);
                     if(!cp || cp->state.aitype >= 0) break;
                     if((spectator != sender || !allowstate(cp, val ? 3 : 1)) && !haspriv(ci, PRIV_MASTER, spectator != sender ? "spectate others" : "unspectate")) break;
-                    if(cp->state.state != CS_SPECTATOR && val)
-                    {
-                        if(cp->state.state == CS_ALIVE)
-                        {
-                            suicideevent ev;
-                            ev.flags = 0;
-                            ev.process(cp);
-                        }
-                        if(smode) smode->leavegame(cp);
-                        mutate(smuts, mut->leavegame(cp));
-                        sendf(-1, 1, "ri3", N_SPECTATOR, spectator, val);
-                        cp->state.cpnodes.shrink(0);
-                        cp->state.cpmillis = 0;
-                        cp->state.state = CS_SPECTATOR;
-                        cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
-                        setteam(cp, TEAM_NEUTRAL, false, true);
-                        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
-                    }
-                    else if(cp->state.state == CS_SPECTATOR && !val)
-                    {
-                        cp->state.cpnodes.shrink(0);
-                        cp->state.cpmillis = 0;
-                        cp->state.state = CS_DEAD;
-                        cp->state.lasttimeplayed = lastmillis;
-                        waiting(cp, 2, 1);
-                        if(smode) smode->entergame(cp);
-                        mutate(smuts, mut->entergame(cp));
-                        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
-                        if(cp->clientmap[0] || cp->mapcrc) checkmaps();
-                    }
+                    spectate(cp, val);
                     break;
                 }
 

@@ -181,7 +181,7 @@ VARF(0, colorbits, 0, 0, 32, initwarning("color depth"));
 VARF(0, depthbits, 0, 0, 32, initwarning("depth-buffer precision"));
 VARF(0, stencilbits, 0, 0, 32, initwarning("stencil-buffer precision"));
 VARF(0, fsaa, -1, -1, 16, initwarning("anti-aliasing"));
-int actualvsync = -1, lastoutofloop = 0;
+int actualvsync = -1;
 VARF(0, vsync, -1, -1, 1, initwarning("vertical sync"));
 
 void writeinitcfg()
@@ -771,10 +771,13 @@ SVAR(0, progresstext, "");
 FVAR(0, progressamt, 0, 0, 1);
 FVAR(0, progresspart, 0, 0, 1);
 
+int lastprogress = 0;
+
 void progress(float bar1, const char *text1, float bar2, const char *text2)
 {
-    if(progressing || !inbetweenframes)// || ((actualvsync > 0 || verbose) && lastoutofloop && SDL_GetTicks()-lastoutofloop < 20))
-        return;
+    if(progressing || !inbetweenframes) return;
+    if(!lastprogress) { lastprogress = totalmillis; return; }
+    else if(totalmillis-lastprogress > 0) return;
     clientkeepalive();
 
     #ifdef __APPLE__
@@ -795,7 +798,6 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     progressing = true;
     loopi(2) { drawnoview(); swapbuffers(); }
     progressing = false;
-    lastoutofloop = SDL_GetTicks();
 }
 
 int main(int argc, char **argv)
@@ -1006,6 +1008,7 @@ int main(int argc, char **argv)
             if(!minimized)
             {
                 inbetweenframes = renderedframe = false;
+                lastprogress = 0;
                 gl_drawframe(screen->w, screen->h);
                 renderedframe = true;
                 swapbuffers();

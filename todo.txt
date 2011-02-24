@@ -23,3 +23,4 @@
 * 2d-hud based damage numbers (?)
 * shooting range inanimates (?)
 * pathfinding and ai in campaign should schedule route generation and herd decision making to reduce overhead (?)
+* allow vote for bots and random mode/mutator
