@@ -3207,7 +3207,7 @@ namespace server
             }
             if(smode) smode->leavegame(ci);
             mutate(smuts, mut->leavegame(ci));
-            sendf(-1, 1, "ri3", N_SPECTATOR, spectator, val);
+            sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, val);
             ci->state.cpnodes.shrink(0);
             ci->state.cpmillis = 0;
             ci->state.state = CS_SPECTATOR;
@@ -3305,7 +3305,7 @@ namespace server
                     sendspawn(ci);
                 }
             }
-            if(GAME(autospectate) && ci->state.state == CS_DEAD && ci->state.ownernum < 0 && gamemillis-ci->state.lastdeath >= GAME(autospecdelay))
+            if(GAME(autospectate) && ci->state.state == CS_DEAD && ci->state.lastdeath && gamemillis-ci->state.lastdeath >= GAME(autospecdelay))
                 spectate(ci, true);
         }
     }
@@ -4363,10 +4363,10 @@ namespace server
 
                 case N_SPECTATOR:
                 {
-                    int spectator = getint(p), val = getint(p);
-                    clientinfo *cp = (clientinfo *)getinfo(spectator);
+                    int sn = getint(p), val = getint(p);
+                    clientinfo *cp = (clientinfo *)getinfo(sn);
                     if(!cp || cp->state.aitype >= 0) break;
-                    if((spectator != sender || !allowstate(cp, val ? 3 : 1)) && !haspriv(ci, PRIV_MASTER, spectator != sender ? "spectate others" : "unspectate")) break;
+                    if((sn != sender || !allowstate(cp, val ? 3 : 1)) && !haspriv(ci, PRIV_MASTER, sn != sender ? "spectate others" : "unspectate")) break;
                     spectate(cp, val);
                     break;
                 }
