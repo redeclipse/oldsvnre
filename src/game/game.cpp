@@ -1048,7 +1048,7 @@ namespace game
                 case 5: default: show = true; break;
             }
             int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-            if(showobitdists) announce(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
+            if(showobitdists && d != actor) announce(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
             else announce(anc, target, d, "\fw%s", d->obit);
         }
         if(gibscale > 0)
