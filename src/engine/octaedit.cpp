@@ -617,7 +617,13 @@ void pasteundo(undoblock *u)
 
 static inline int undosize(undoblock *u)
 {
-    if(u->numents) return u->numents*sizeof(undoent);
+    if(u->numents)
+    {
+        undoent *e = u->ents();
+        int numattrs = 0;
+        loopi(u->numents) numattrs += e[i].numattrs;
+        return u->numents*sizeof(undoent) + numattrs*sizeof(int);
+    }
     else
     {
         block3 *b = u->block();
