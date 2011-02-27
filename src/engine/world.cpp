@@ -227,15 +227,21 @@ undoblock *newundoent()
 {
     int numents = entgroup.length();
     if(numents <= 0) return NULL;
-    undoblock *u = (undoblock *)new uchar[sizeof(undoblock) + numents*sizeof(undoent)];
+	vector<extentity *> &ents = entities::getents();
+	int numattrs = 0;
+	loopv(entgroup) numattrs += ents[entgroup[i]]->attrs.length();
+    undoblock *u = (undoblock *)new uchar[sizeof(undoblock) + numents*sizeof(undoent) + numattrs*sizeof(int)];
     u->numents = numents;
     undoent *e = (undoent *)(u + 1);
+	int *attr = (int *)(e + numents);
     loopv(entgroup)
     {
+		extentity *g = ents[entgroup[i]];
         e->i = entgroup[i];
-        e->type = entities::getents()[entgroup[i]]->type;
-        e->o = entities::getents()[entgroup[i]]->o;
-        loopj(UNDOATTRS) e->attrs[j] = entities::getents()[entgroup[i]]->attrs.inrange(j) ? entities::getents()[entgroup[i]]->attrs[j] : 0;
+        e->type = g->type;
+        e->o = g->o;
+		e->numattrs = g->attrs.length();
+		loopvj(g->attrs) *attr++ = g->attrs[j];
         e++;
     }
     return u;
@@ -285,8 +291,16 @@ undoblock *copyundoents(undoblock *u)
 void pasteundoents(undoblock *u)
 {
     undoent *ue = u->ents();
+	int *attrs = u->attrs();
     loopi(u->numents)
-        entedit(ue[i].i, { e.type = ue[i].type; e.o = ue[i].o; e.attrs.add(0, UNDOATTRS-e.attrs.length()); loopj(UNDOATTRS) e.attrs[j] = ue[i].attrs[j]; });
+        entedit(ue[i].i, 
+		{ 
+			e.type = ue[i].type; 
+			e.o = ue[i].o; 
+			e.attrs.setsize(max(5, ue[i].numattrs)); 
+			loopk(ue[i].numattrs) e.attrs[k] = *attrs++; 
+			for(int k = ue[i].numattrs; k < 5; k++) e.attrs[k] = 0;
+		});
 }
 
 void entflip()
