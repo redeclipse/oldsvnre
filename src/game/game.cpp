@@ -214,11 +214,7 @@ namespace game
         {
             case 3: if(player1->physstate != PHYS_FLOOR) break;
             case 2: if(player1->move || player1->strafe) break;
-            case 1: if(player1->physstate == PHYS_FALL)
-            {
-                if(!zooming || !lastzoom || player1->timeinair >= zoomlocktime) break;
-                if(player1->impulse[IM_JUMP] && player1->impulse[IM_JUMP] >= lastzoom) break;
-            }
+            case 1: if(player1->timeinair && (!zooming || !lastzoom || player1->timeinair >= zoomlocktime || player1->impulse[IM_JUMP])) break;
             case 0: default: return true; break;
         }
         zoomset(false, 0);
