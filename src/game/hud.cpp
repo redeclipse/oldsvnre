@@ -211,9 +211,9 @@ namespace hud
     TVAR(IDF_PERSIST, bombtex, "textures/bomb", 3);
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
-    FVAR(IDF_PERSIST, radarblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, radarcardblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radarcardblend, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayersize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
@@ -2050,7 +2050,7 @@ namespace hud
                         switch(game::focus->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = weaptype[game::focus->icons[i].value].colour; break;
-                            case eventicon::AFFINITY: if(!m_bomber(game::gamemode)) colour = teamtype[game::focus->icons[i].value].colour; break;
+                            case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[game::focus->icons[i].value].colour; break;
                             default: break;
                         }
                         glBindTexture(GL_TEXTURE_2D, t->id);

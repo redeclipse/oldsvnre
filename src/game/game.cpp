@@ -2034,8 +2034,7 @@ namespace game
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    const int colourstep[6] = { 0xFFAAAA, 0xFFCCAA, 0xAAFFAA, 0xAAAAFF, 0xFFAAFF, 0xFFFFAA };
-                    colour = colourstep[clamp((totalmillis/100)%6, 0, 5)];
+                    colour = pulsecols[clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
                 }
             }
             if(t && t != notexture)
@@ -2063,8 +2062,8 @@ namespace game
                         switch(d->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
-                            case eventicon::AFFINITY: if(!m_bomber(gamemode)) colour = teamtype[d->icons[i].value].colour; // fall-through
-                            default: nudge *= 2; break;
+                            case eventicon::AFFINITY: colour = m_bomber(gamemode) ? pulsecols[clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[d->icons[i].value].colour; // fall-through
+                            default: nudge *= 1.5f; break;
                         }
                     }
                     pos.z += nudge+0.125f;
