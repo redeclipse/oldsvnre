@@ -199,10 +199,10 @@ GFVAR(0, impulseregeninair, 0, 0.75f, 1000); // impulse regen in-air modifier
 GVAR(0, impulseregendelay, 0, 250, INT_MAX-1); // delay before impulse regens
 GVAR(0, impulseregenjetdelay, -1, -1, INT_MAX-1); // delay before impulse regens after jetting, -1 = must touch ground
 
-GFVAR(0, stillspread, 0, 1, 1000);
-GFVAR(0, movespread, 0, 2, 1000);
-GFVAR(0, inairspread, 0, 2, 1000);
-GFVAR(0, impulsespread, 0, 4, 1000);
+GFVAR(0, stillspread, 0, 0, 1000);
+GFVAR(0, movespread, 0, 1, 1000);
+GFVAR(0, inairspread, 0, 1, 1000);
+GFVAR(0, impulsespread, 0, 1, 1000);
 
 GVAR(0, zoomlock, 0, 1, 3); // 0 = free, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor
 GVAR(0, zoomlocktime, 0, 500, INT_MAX-1); // time before zoomlock kicks in when in the air
