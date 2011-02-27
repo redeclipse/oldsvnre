@@ -222,7 +222,7 @@ struct editinfo
     editinfo() : copy(NULL) {}
 };
 
-#define UNDOATTRS 6
+#define UNDOATTRS 16
 struct undoent  { int i; uchar type; vec o; int attrs[UNDOATTRS]; };
 struct undoblock // undo header, all data sits in payload
 {
