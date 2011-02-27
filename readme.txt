@@ -66,47 +66,44 @@ Developers
  Quinton "Quin" Reeves - Lead Developer
     Gameplay and AI Code/Design, Community Management
 
- Lee "Eihrul" Salzman - Lead Advisor
+ Lee "Eihrul" Salzman - Lead Programmer / Advisor
     Cube 2 Backports, Support, Speed Improvements, Encouragement
 
  Kevin "Hirato" Meyer - Timmy
-    Testing and Development Assistance, Collaboration
-
- Robert "Baby-Rabbit" Pointon - Support
-    Mac OSX Porting and Packaging
+    Development Assistance, Design and Testing
 
  Joshua L. "Verbalshadow" Blocher - Artist
-    GUI and HUD artwork, Collaboration
-
- Mike "MitaMan" Poeschl - Artist
-    Sound Bytes, Theme Song Opposing Force
+    Some source artwork, Design and Testing
 
  Kurt "Kurtis84" Kessler - Artist
-    Maps, Collaboration
-
- Alex "Blackshoe" Anguix - Artist
-    Sound Effects Design
+    Textures, Design and Testing
 
  "LuckystrikeRx" - Artist
-    Maps, Collaboration, Website Design
+    Maps, Textures, Models, Weapons, Design and Testing, Website
 
  Jonathan "W!ck3d" Roels - Artist
-    Maps, Textures, Collaboration
+    Maps, Textures, Design and Testing
 
  Derek "Favorito" Ponicki - Artist
-    Maps, Textures, Collaboration
+    Maps, Textures, Design and Testing
+ 
+ Jeroen "appleflap" Boukens - Collaborator
+    Textures, Design and Testing
 
- John "Geartrooper" Siar - Artist
-    Modelling
+ Mike "mikeplus64" Ledger - Artist
+    Maps, Models, Weapons, Textures, HUD, Design and Testing
+
+ Derek "JoJo" Stegall - Artist
+    Maps, Models, Textures, HUD, Sound FX, Design and Testing
+
+ Jeff "Architect" Cope - Collaborator
+    Design and Testing
 
  Slawek "Q009" Blauciak - Artist
     Ambient Sounds
 
  "SkiingPenguins" - Artist
     Skyboxes
- 
- Jeroen "appleflap" Boukens - Collaborator
-    Textures, Collaboration
 
  Stefan Norman and Peter McInerney - Hosting
     Master and Game server hosting
