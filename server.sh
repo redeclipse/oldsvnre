@@ -20,23 +20,26 @@ MACHINE_NAME=`uname -m`
 
 case ${SYSTEM_NAME} in
 Linux)
-    SYSTEM_SUFFIX=_linux
+    SYSTEM_SUFFIX="_linux"
+    ;;
+FreeBSD)
+    SYSTEM_SUFFIX="_freebsd"
     ;;
 *)
-    SYSTEM_SUFFIX=_unknown
+    SYSTEM_SUFFIX="_unknown"
     ;;
 esac
 
 case ${MACHINE_NAME} in
 i486|i586|i686)
-    MACHINE_SUFFIX=
+    MACHINE_SUFFIX="_32"
     ;;
-x86_64)
-    MACHINE_SUFFIX=_64
+x86_64|amd64)
+    MACHINE_SUFFIX="_64"
     ;;
 *)
-    SYSTEM_SUFFIX=
-    MACHINE_SUFFIX=
+    SYSTEM_SUFFIX=""
+    MACHINE_SUFFIX=""
     ;;
 esac
 
@@ -46,8 +49,13 @@ esac
 #    MACHINE_SUFFIX=
 #fi
 
+if [ -x ${RE_BIN}/reserver_native ]
+then
+    SYSTEM_SUFFIX="_native"
+    MACHINE_SUFFIX=""
+fi
 
-if [ -x ${RE_BIN}/reserver${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]; 
+if [ -x ${RE_BIN}/reserver${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]
 then
     cd ${RE_DATA}
     exec ${RE_BIN}/reserver${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ${RE_OPTIONS} "$@"

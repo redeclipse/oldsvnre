@@ -3,7 +3,7 @@ CXXFLAGS= -O3 -fomit-frame-pointer
 override CXXFLAGS+= -Wall -fsigned-char
 
 PLATFORM= $(shell uname -s)
-PLATFORM_SUFFIX= 
+PLATFORM_SUFFIX=_native
 
 INCLUDES= -Ishared -Iengine -Igame -Ienet/include
 
