@@ -2627,7 +2627,7 @@ namespace server
                 }
                 else if(actor != target && actor->state.aitype < AI_START)
                 {
-                    if(!firstblood && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
+                    if(!firstblood && actor->state.aitype < 0 && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
                     {
                         firstblood = true;
                         style |= FRAG_FIRSTBLOOD;
