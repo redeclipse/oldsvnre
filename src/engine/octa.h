@@ -222,8 +222,7 @@ struct editinfo
     editinfo() : copy(NULL) {}
 };
 
-#define UNDOATTRS 16
-struct undoent  { int i; uchar type; vec o; int attrs[UNDOATTRS]; };
+struct undoent  { int i; uchar type; vec o; int numattrs; };
 struct undoblock // undo header, all data sits in payload
 {
     undoblock *prev, *next;
@@ -236,6 +235,7 @@ struct undoblock // undo header, all data sits in payload
         return (int *)(ub->c() + ub->size());
     }
     undoent *ents() { return (undoent *)(this + 1); }
+    int *attrs() { return (int *)(ents() + numents); }
 };
 
 extern cube *worldroot;          // the world data. only a ptr to 8 cubes (ie: like cube.children above)
