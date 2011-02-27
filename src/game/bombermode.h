@@ -75,7 +75,7 @@ struct bomberservmode : bomberstate, servmode
             ci->state.flags--;
             score = addscore(ci->team, -1);
         }
-        sendf(-1, 1, "ri4", N_SCOREAFFIN, ci->clientnum, relay, goal);
+        sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
         loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
         {
             bool kamikaze = clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team;
@@ -204,9 +204,9 @@ struct bomberservmode : bomberstate, servmode
                     dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
                     if(m_gsp2(gamemode, mutators) && GAME(bomberholdpenalty))
                     {
-                        int total = addscore(ci->team, GAME(bomberholdpenalty));
+                        int total = addscore(ci->team, 0-GAME(bomberholdpenalty));
                         sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
-                        givepoints(ci, GAME(bomberholdpenalty));
+                        givepoints(ci, 0-GAME(bomberholdpenalty));
                     }
                 }
                 continue;
