@@ -155,7 +155,7 @@ namespace server
         float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
-        int score, spree, crits, rewards, flags, teamkills, shotdamage, damage;
+        int score, spree, crits, rewards, gscore, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed, aireinit, lastburntime, lastburnowner, lastbleedtime, lastbleedowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes;
         vector<dmghist> damagelog;
@@ -174,7 +174,7 @@ namespace server
             loopi(WEAP_MAX) loopj(2) weapshots[i][j].reset();
             if(!change) score = timeplayed = 0;
             else gamestate::mapchange();
-            frags = spree = crits = rewards = flags = deaths = teamkills = shotdamage = damage = 0;
+            frags = spree = crits = rewards = gscore = deaths = teamkills = shotdamage = damage = 0;
             fraglog.shrink(0); fragmillis.shrink(0); cpnodes.shrink(0); damagelog.shrink(0);
             respawn(0, m_health(server::gamemode, server::mutators));
         }
@@ -194,7 +194,7 @@ namespace server
     {
         uint ip;
         string name;
-        int points, score, frags, spree, crits, rewards, flags, timeplayed, deaths, teamkills, shotdamage, damage;
+        int points, score, frags, spree, crits, rewards, gscore, timeplayed, deaths, teamkills, shotdamage, damage;
 
         void save(servstate &gs)
         {
@@ -204,7 +204,7 @@ namespace server
             spree = gs.spree;
             crits = gs.crits;
             rewards = gs.rewards;
-            flags = gs.flags;
+            gscore = gs.gscore;
             deaths = gs.deaths;
             teamkills = gs.teamkills;
             shotdamage = gs.shotdamage;
@@ -220,7 +220,7 @@ namespace server
             gs.spree = spree;
             gs.crits = crits;
             gs.rewards = rewards;
-            gs.flags = flags;
+            gs.gscore = gscore;
             gs.deaths = deaths;
             gs.teamkills = teamkills;
             gs.shotdamage = shotdamage;
@@ -230,7 +230,7 @@ namespace server
 
         void mapchange()
         {
-            points = frags = spree = crits = rewards = flags = deaths = teamkills = shotdamage = damage = 0;
+            points = frags = spree = crits = rewards = gscore = deaths = teamkills = shotdamage = damage = 0;
         }
     };
 

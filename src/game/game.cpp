@@ -470,7 +470,6 @@ namespace game
                 }
                 total *= clamp(amtscale, minscale, maxresizescale);
             }
-            #if 0
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
@@ -481,7 +480,6 @@ namespace game
                     else total = 0;
                 }
             }
-            #endif
         }
         return total;
     }
@@ -489,20 +487,7 @@ namespace game
     float opacity(gameent *d, bool third = true)
     {
         float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
-        #if 0
         if(d->state == CS_DEAD || d->state == CS_WAITING) total *= d->curscale;
-        #else
-        if(d->state == CS_DEAD || d->state == CS_WAITING)
-        {
-            int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
-            if(len > 0)
-            {
-                int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
-                if(millis <= len) { if(millis >= over) total *= 1.f-((millis-over)/float(interval)); }
-                else total = 0;
-            }
-        }
-        #endif
         else if(d->state == CS_ALIVE)
         {
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left

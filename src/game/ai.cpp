@@ -907,9 +907,10 @@ namespace ai
             int entid = obs.remap(d, n, epos, retry);
             if(entities::ents.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
             {
+                if(entities::ents[entid]->attrs[0]&WP_F_JETPACK && !physics::canjetpack(d)) return false;
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;
-                d->ai->targnode = n;
+                d->ai->targnode = entid;
                 if(aistyle[d->aitype].cancrouch && ((e.attrs[0] & WP_F_CROUCH && !d->action[AC_CROUCH]) || d->action[AC_CROUCH]) && (lastmillis-d->actiontime[AC_CROUCH] >= PHYSMILLIS*3))
                 {
                     d->action[AC_CROUCH] = !d->action[AC_CROUCH];
@@ -980,7 +981,8 @@ namespace ai
         vec off = vec(pos).sub(d->feetpos());
         if(d->blocked) off.z += JUMPMIN; // it could help..
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 500 && !d->turnside,
-            jumper = (locked || off.z >= JUMPMIN) && (!offground || (air && physics::canimpulse(d, 0, 1))),
+            impulse = air && physics::canimpulse(d, 0, 1), jet = air && physics::canjetpack(d),
+            jumper = (locked || off.z >= JUMPMIN) && (!offground || impulse),
             jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;
         if(jump)
         {
@@ -1001,11 +1003,12 @@ namespace ai
         if(jump)
         {
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
-            int seed = (111-d->skill)*(locked ? 1 : (d->onladder || d->inliquid ? 2 : 10));
-            d->ai->jumpseed = lastmillis+seed+rnd(seed*2); seed *= b.idle ? 1000 : 500;
+            int seed = (111-d->skill)*(locked || jet ? 1 : (d->onladder || d->inliquid ? 2 : 10));
+            d->ai->jumpseed = lastmillis+seed+rnd(seed*2);
+            seed *= b.idle ? 1000 : 500;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
-        if(!m_jetpack(game::gamemode, game::mutators) && air && physics::canimpulse(d, -1, 3)) d->action[AC_SPECIAL] = true;
+        if(!jump && air && physics::canimpulse(d, -1, 3)) d->action[AC_SPECIAL] = true;
     }
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)

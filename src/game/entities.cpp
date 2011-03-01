@@ -3,7 +3,7 @@ namespace entities
 {
     vector<extentity *> ents;
     int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numwaypoints = 0, numactors = 0;
-    bool haswaypoints = false;
+    bool haswaypoints = false, hasjetpoints = false;
 
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
     VAR(IDF_PERSIST, showentinfo, 0, 2, 5);
@@ -18,7 +18,7 @@ namespace entities
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (hasai && !haswaypoints ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
+        return dropwaypoints >= (hasai && (!haswaypoints || (m_jetpack(game::gamemode, game::mutators) && !hasjetpoints)) ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
     }
 
     bool clipped(const vec &o, bool aiclip)
@@ -283,7 +283,11 @@ namespace entities
             }
             case WAYPOINT:
             {
-                if(full && attr[0]&WP_F_CROUCH) addentinfo("crouch");
+                if(full)
+                {
+                    if(attr[0]&WP_F_CROUCH) addentinfo("crouch");
+                    if(attr[0]&WP_F_JETPACK) addentinfo("jetpack");
+                }
                 break;
             }
             default: break;
@@ -1475,8 +1479,10 @@ namespace entities
                 int link = links[i];
                 if(ents.inrange(link) && ents[link]->type == ents[node]->type && (link == node || link == goal || !ents[link]->links.empty()))
                 {
+                    bool wp = ents[link]->type == WAYPOINT;
+                    if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !m_jetpack(game::gamemode, game::mutators)) continue;
                     linkq &n = nodes[link];
-                    int weight = max(ents[link]->type == WAYPOINT ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
+                    int weight = max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
                     float curscore = prevscore + ents[link]->o.dist(ent.o)*weight;
                     if(n.id == routeid && curscore >= n.curscore) continue;
                     n.curscore = curscore;
@@ -1535,7 +1541,8 @@ namespace entities
             if(!ents.inrange(curnode) && shoulddrop)
             {
                 int cmds = WP_F_NONE;
-                if(physics::iscrouching(d)) cmds |= WP_F_CROUCH;
+                if(physics::jetpack(d)) cmds |= WP_F_JETPACK;
+                else if(physics::iscrouching(d)) cmds |= WP_F_CROUCH;
                 curnode = ents.length();
                 attrvector wpattrs;
                 wpattrs.add(0, 2);
@@ -2106,7 +2113,7 @@ namespace entities
 
     void initents(stream *g, int mtype, int mver, char *gid, int gver)
     {
-        haswaypoints = false;
+        haswaypoints = hasjetpoints = false;
         numwaypoints = numactors = 0;
         loopv(ents)
         {
@@ -2123,7 +2130,11 @@ namespace entities
             fixentity(i, false);
             switch(ents[i]->type)
             {
-                case WAYPOINT: numwaypoints++; haswaypoints = true; break;
+                case WAYPOINT:
+                    numwaypoints++;
+                    haswaypoints = true;
+                    if(ents[i]->attrs[0]&WP_F_JETPACK) hasjetpoints = true;
+                    break;
                 case ACTOR: numactors++; break;
                 default: break;
             }
