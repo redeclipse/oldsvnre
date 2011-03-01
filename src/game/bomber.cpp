@@ -416,17 +416,20 @@ namespace bomber
         playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), o, NULL, 0, 255);
     }
 
-    void resetaffinity(int i, bool enabled)
+    void resetaffinity(int i, int value)
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
-        if(f.enabled && enabled)
+        if(f.enabled && value)
         {
-            affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
             destroyaffinity(f.pos());
-            game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
+            if(value > 0)
+            {
+                affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
+                game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
+            }
         }
-        st.returnaffinity(i, lastmillis, true, enabled);
+        st.returnaffinity(i, lastmillis, true, value!=0);
     }
 
     void scoreaffinity(gameent *d, int relay, int goal, int score)

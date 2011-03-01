@@ -136,12 +136,12 @@ struct bomberstate
 #endif
     }
 
-    void returnaffinity(int i, int t, bool score, bool enabled)
+    void returnaffinity(int i, int t, bool enabled = false, bool init = true)
     {
         flag &f = flags[i];
         f.droptime = f.taketime = 0;
         f.enabled = enabled;
-        if(score) f.inittime = 0;
+        if(init) f.inittime = 0;
 #ifdef GAMESERVER
         f.owner = -1;
         f.votes.shrink(0);
@@ -165,7 +165,7 @@ namespace bomber
     extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target = -1);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void takeaffinity(gameent *d, int i);
-    extern void resetaffinity(int i, bool enabled);
+    extern void resetaffinity(int i, int value);
     extern void setupaffinity();
     extern void setscore(int team, int total);
     extern void checkaffinity(gameent *d);

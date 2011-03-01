@@ -165,7 +165,7 @@ namespace capture
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void returnaffinity(gameent *d, int i);
     extern void takeaffinity(gameent *d, int i);
-    extern void resetaffinity(int i);
+    extern void resetaffinity(int i, int value);
     extern void setupaffinity();
     extern void setscore(int team, int total);
     extern void checkaffinity(gameent *d);

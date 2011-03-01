@@ -2063,9 +2063,9 @@ namespace client
 
                 case N_RESETAFFIN:
                 {
-                    int flag = getint(p), enabled = getint(p);
-                    if(m_capture(game::gamemode)) capture::resetaffinity(flag);
-                    else if(m_bomber(game::gamemode)) bomber::resetaffinity(flag, enabled!=0);
+                    int flag = getint(p), value = getint(p);
+                    if(m_capture(game::gamemode)) capture::resetaffinity(flag, value);
+                    else if(m_bomber(game::gamemode)) bomber::resetaffinity(flag, value);
                     break;
                 }
 
