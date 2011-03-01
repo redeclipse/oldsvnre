@@ -79,7 +79,7 @@ struct bomberservmode : bomberstate, servmode
         loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
         {
             bool kamikaze = clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team;
-            if(kamikaze || m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
+            if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
         }
         if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
         loopvj(flags) if(flags[j].enabled)
