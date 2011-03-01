@@ -408,7 +408,7 @@ namespace game
     void boosteffect(gameent *d, const vec &pos, int num, int len)
     {
         float intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-        regularshape(PART_FIREBALL, int(d->radius)*2, firecols[0][rnd(FIRECOLOURS)], 21, num, len, pos, intensity, blend, -5, 0, 5);
+        regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[0][rnd(PULSECOLOURS)], 21, num, len, pos, intensity, blend, -5, 0, 5);
     }
 
     void impulseeffect(gameent *d, int effect)
@@ -1986,7 +1986,7 @@ namespace game
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         bool burning = burntime && totalmillis%150 < 65 && d->burning(lastmillis, burntime);
-        int colour = burning ? firecols[rnd(2)][rnd(FIRECOLOURS)] : d->colour();
+        int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : d->colour();
         e->light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
@@ -2019,7 +2019,7 @@ namespace game
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    colour = pulsecols[clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
+                    colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
                 }
             }
             if(t && t != notexture)
@@ -2047,7 +2047,7 @@ namespace game
                         switch(d->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
-                            case eventicon::AFFINITY: colour = m_bomber(gamemode) ? pulsecols[clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[d->icons[i].value].colour; // fall-through
+                            case eventicon::AFFINITY: colour = m_bomber(gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[d->icons[i].value].colour; // fall-through
                             default: nudge *= 1.5f; break;
                         }
                     }
@@ -2220,7 +2220,7 @@ namespace game
                     {
                         case 1: case 2:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[0][rnd(FIRECOLOURS)];
+                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : pulsecols[0][rnd(PULSECOLOURS)];
                             regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
                             break;
                         }
@@ -2233,7 +2233,7 @@ namespace game
                         }
                         case 4:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : firecols[0][rnd(FIRECOLOURS)];
+                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : pulsecols[0][rnd(PULSECOLOURS)];
                             part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, powerfx[d->weapselect].size, max(amt, 0.1f));
                             break;
                         }
@@ -2247,7 +2247,7 @@ namespace game
                 if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
                 else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, firecols[0][rnd(FIRECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
+                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);
