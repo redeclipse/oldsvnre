@@ -429,7 +429,7 @@ namespace bomber
                 game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
             }
         }
-        st.returnaffinity(i, lastmillis, true, value!=0);
+        st.returnaffinity(i, lastmillis, value!=0, value==0);
     }
 
     void scoreaffinity(gameent *d, int relay, int goal, int score)
@@ -442,7 +442,7 @@ namespace bomber
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
         game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
-        st.returnaffinity(relay, lastmillis, true, false);
+        st.returnaffinity(relay, lastmillis);
     }
 
     void takeaffinity(gameent *d, int i)
