@@ -181,7 +181,7 @@ struct bomberservmode : bomberstate, servmode
                 hasaffinity++;
             }
             if(!hasaffinity) return;
-            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, "\fwnew round starting");
+            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_BOMBSTART, CON_MESG, "\fathe \fs\fwbomb\fS has been spawned");
             bombertime = 0;
         }
         int t = (gamemillis/GAME(bomberholdinterval))-((gamemillis-(curtime+scoresec))/GAME(bomberholdinterval));
