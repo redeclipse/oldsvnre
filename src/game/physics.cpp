@@ -52,6 +52,16 @@ namespace physics
         }
         return false;
     }
+    bool canjetpack(physent *d)
+    {
+        if(m_jetpack(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && movejetpack > 0)
+        {
+            gameent *e = (gameent *)d;
+            if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsejetdelay) && e->aitype < AI_START)
+                return true;
+        }
+        return false;
+    }
 
     #define imov(name,v,u,d,s,os) \
         void do##name(bool down) \
@@ -214,10 +224,10 @@ namespace physics
 
     bool jetpack(physent *d)
     {
-        if(m_jetpack(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && movejetpack > 0)
+        if(canjetpack(d))
         {
             gameent *e = (gameent *)d;
-            if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && e->action[AC_JUMP] && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsejetdelay) && e->aitype < AI_START)
+            if(e->action[AC_JUMP])
             {
                 e->impulse[IM_JETPACK] = lastmillis;
                 return true;

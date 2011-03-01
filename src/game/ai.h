@@ -40,6 +40,7 @@ enum
 {
     WP_F_NONE = 0,
     WP_F_CROUCH = 1<<0,
+    WP_F_JETPACK = 1<<1
 };
 namespace entities { struct avoidset; };
 
@@ -47,7 +48,7 @@ namespace ai
 {
     const float CLOSEDIST       = 32.f;    // is close
     const float JUMPMIN         = 4.f;     // decides to jump
-    const float JUMPMAX         = 24.f;    // max jump
+    const float JUMPMAX         = 32.f;    // max jump
     const float SIGHTMIN        = 32.f;    // minimum line of sight
     const float SIGHTMAX        = 1024.f;  // maximum line of sight
     const float ALERTMIN        = 64.f;    // minimum alert distance

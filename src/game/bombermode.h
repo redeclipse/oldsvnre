@@ -66,13 +66,13 @@ struct bomberservmode : bomberstate, servmode
         if(g.team != ci->team)
         {
             givepoints(ci, 5);
-            ci->state.flags++;
+            ci->state.gscore++;
             score = addscore(ci->team, 1);
         }
         else
         {
             givepoints(ci, -5);
-            ci->state.flags--;
+            ci->state.gscore--;
             score = addscore(ci->team, -1);
         }
         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
