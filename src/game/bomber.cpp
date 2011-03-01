@@ -426,7 +426,7 @@ namespace bomber
             if(value > 0)
             {
                 affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
-                game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe bomb has been reset");
+                game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
             }
         }
         st.returnaffinity(i, lastmillis, true, value!=0);
@@ -454,7 +454,7 @@ namespace bomber
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
-            game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the bomb", game::colorname(d));
+            game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
         }
         st.takeaffinity(i, d, lastmillis);
     }

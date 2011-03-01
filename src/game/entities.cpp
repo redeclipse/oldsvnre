@@ -1534,14 +1534,14 @@ namespace entities
         {
             vec v = d->feetpos();
             int weight = getweight(v);
-            bool shoulddrop = !d->ai && weight >= 0 && waypointdrop(hasai);
+            bool shoulddrop = !d->ai && weight >= 0 && waypointdrop(hasai), jetting = physics::jetpack(d), create = false;
             float dist = float(shoulddrop ? enttype[WAYPOINT].radius : ai::CLOSEDIST);
             int curnode = closestent(WAYPOINT, v, dist, false), prevnode = d->lastnode;
 
             if(!ents.inrange(curnode) && shoulddrop)
             {
                 int cmds = WP_F_NONE;
-                if(physics::jetpack(d)) cmds |= WP_F_JETPACK;
+                if(jetting) cmds |= WP_F_JETPACK;
                 else if(physics::iscrouching(d)) cmds |= WP_F_CROUCH;
                 curnode = ents.length();
                 attrvector wpattrs;
@@ -1549,13 +1549,14 @@ namespace entities
                 wpattrs[0] = cmds;
                 wpattrs[1] = weight;
                 newentity(v, WAYPOINT, wpattrs);
-                if(d->physstate == PHYS_FALL) d->airnodes.add(curnode);
+                if(d->physstate == PHYS_FALL && !jetting) d->airnodes.add(curnode);
+                create = true;
             }
 
             if(ents.inrange(curnode))
             {
                 if(shoulddrop && ents.inrange(d->lastnode) && d->lastnode != curnode)
-                    entitylink(d->lastnode, curnode, d->physstate != PHYS_FALL && !d->onladder);
+                    entitylink(d->lastnode, curnode, d->physstate != PHYS_FALL || d->onladder || (jetting && create));
                 d->lastnode = curnode;
             }
             else if(!ents.inrange(d->lastnode) || ents[d->lastnode]->o.squaredist(v) > ai::CLOSEDIST*ai::CLOSEDIST)
