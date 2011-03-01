@@ -465,12 +465,15 @@ namespace capture
         st.returnaffinity(i, lastmillis);
     }
 
-    void resetaffinity(int i)
+    void resetaffinity(int i, int value)
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
-        game::announce(S_V_FLAGRESET, CON_INFO, NULL, "\fathe \fs%s%s\fS flag has been reset", teamtype[f.team].chat, teamtype[f.team].name);
+        if(value > 0)
+        {
+            affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
+            game::announce(S_V_FLAGRESET, CON_INFO, NULL, "\fathe \fs%s%s\fS flag has been reset", teamtype[f.team].chat, teamtype[f.team].name);
+        }
         st.returnaffinity(i, lastmillis);
     }
 
