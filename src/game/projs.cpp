@@ -791,7 +791,7 @@ namespace projs
         if(weapfx[weap].colour >= 0 && WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
         {
             bool isfire = weapfx[weap].colour > 0;
-            int colour = isfire ? weapfx[weap].colour : firecols[0][rnd(FIRECOLOURS)];
+            int colour = isfire ? weapfx[weap].colour : pulsecols[0][rnd(PULSECOLOURS)];
             if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0xAAAAAA, 1, 0.25f, -20);
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
                 part_splash(isfire ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 10);
@@ -890,10 +890,10 @@ namespace projs
                             part_create(PART_HINT_SOFT, 1, proj.o, teamhint(proj.owner, 0x120228), size*1.5f, blend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, firecols[0][rnd(FIRECOLOURS)], size, blend, -5);
+                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, pulsecols[0][rnd(PULSECOLOURS)], size, blend, -5);
                             proj.lasteffect = lastmillis - (lastmillis%(projtraildelay*2));
                         }
-                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, firecols[0][rnd(FIRECOLOURS)], size, blend);
+                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, pulsecols[0][rnd(PULSECOLOURS)], size, blend);
                         break;
                     }
                     case WEAP_GRENADE:
@@ -917,7 +917,7 @@ namespace projs
                         part_create(PART_HINT_SOFT, 1, proj.o, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.125f*fluc, 0.5f);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, firecols[0][rnd(FIRECOLOURS)], WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.5f, -5);
+                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, pulsecols[0][rnd(PULSECOLOURS)], WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.5f, -5);
                             part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x222222, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), 1.f, -10);
                             proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                         }
@@ -1012,7 +1012,7 @@ namespace projs
                     float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
                     if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
                     int len = effect ? max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
-                    part_create(PART_FIREBALL_SOFT, len, proj.o, firecols[0][rnd(FIRECOLOURS)], radius, blend, -5);
+                    part_create(PART_FIREBALL_SOFT, len, proj.o, pulsecols[0][rnd(PULSECOLOURS)], radius, blend, -5);
                 }
                 break;
             }
@@ -1118,7 +1118,7 @@ namespace projs
                                 loopi(proj.weap != WEAP_ROCKET ? 3 : 6)
                                 {
                                     vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
-                                    part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 2 : 3), to, firecols[0][rnd(FIRECOLOURS)], expl, 0.25f+(rnd(25)/100.f), -5);
+                                    part_create(PART_FIREBALL_SOFT, projtraillength*(proj.weap != WEAP_ROCKET ? 2 : 3), to, pulsecols[0][rnd(PULSECOLOURS)], expl, 0.25f+(rnd(25)/100.f), -5);
                                 }
                             }
                             adddecal(proj.weap == WEAP_FLAMER ? DECAL_SCORCH_SHORT : DECAL_SCORCH, proj.o, proj.norm, expl*0.5f);
@@ -1730,7 +1730,7 @@ namespace projs
                     if(light->millis != lastmillis && !proj.limited)
                     {
                         bool burning = totalmillis%150 < 65;
-                        int colour = burning ? firecols[rnd(2)][rnd(FIRECOLOURS)] : 0xFFFFFF;
+                        int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : 0xFFFFFF;
                         light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
                     }
                 }
