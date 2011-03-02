@@ -19,7 +19,7 @@
 #define ENG_SERVER_PORT     (ENG_DEVEL ? 28803 : 28801)
 #define ENG_LAN_PORT        28799
 #define ENG_MASTER_PORT     28800
-#define ENG_MASTER_HOST     "play.redeclipse.net"
+#define ENG_MASTER_HOST     "74.82.3.216"
 
 #ifdef IRC
 #include "irc.h"
