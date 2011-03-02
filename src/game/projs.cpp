@@ -738,7 +738,7 @@ namespace projs
 
     void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
-        int delay = WEAP2(weap, pdelay, flags&HIT_ALT), millis = delay, adelay = WEAP2(weap, adelay, flags&HIT_ALT),
+        int delay = WEAP2(weap, pdelay, flags&HIT_ALT), adelay = WEAP2(weap, adelay, flags&HIT_ALT),
             life = WEAP2(weap, time, flags&HIT_ALT), speed = WEAP2(weap, speed, flags&HIT_ALT);
 
         if(WEAP2(weap, power, flags&HIT_ALT)) switch(WEAP2(weap, cooked, flags&HIT_ALT))
@@ -807,9 +807,9 @@ namespace projs
         }
 
         loopv(shots)
-            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), 0, speed, shots[i].id, weap, flags, scale);
+            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), delay, speed, shots[i].id, weap, flags, scale);
         if(ejectfade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
-            create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, millis, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
+            create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
         if(d->aitype >= AI_BOT && d->skill <= 100 && (!WEAP2(weap, fullauto, flags&HIT_ALT) || adelay >= PHYSMILLIS))
             adelay += int(ceilf(adelay*(10.f/d->skill)));
@@ -1505,18 +1505,21 @@ namespace projs
             }
             case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_EJECT: case PRJ_AFFINITY:
             {
-                vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
-                vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
-                if(proj.vel.dot2(axis) >= 0) { proj.roll -= diff; if(proj.roll < -180) proj.roll = 180 - fmod(180 - proj.roll, 360); }
-                else { proj.roll += diff; if(proj.roll > 180) proj.roll = fmod(proj.roll + 180, 360) - 180; }
+                if(!proj.lastbounce || proj.movement >= 1)
+                {
+                    vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
+                    vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
+                    if(proj.vel.dot2(axis) >= 0) { proj.roll -= diff; if(proj.roll < -180) proj.roll = 180 - fmod(180 - proj.roll, 360); }
+                    else { proj.roll += diff; if(proj.roll > 180) proj.roll = fmod(proj.roll + 180, 360) - 180; }
+                }
                 break;
             }
             case PRJ_ENT:
             {
                 if(proj.pitch != 0)
                 {
-                    if(proj.pitch < 0) { proj.pitch += max(diff, !proj.lastbounce || diff > 0 ? 1.f : 5.f); if(proj.pitch > 0) proj.pitch = 0; }
-                    else if(proj.pitch > 0) { proj.pitch -= max(diff, !proj.lastbounce || diff > 0 ? 1.f : 5.f); if(proj.pitch < 0) proj.pitch = 0; }
+                    if(proj.pitch < 0) { proj.pitch += max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch > 0) proj.pitch = 0; }
+                    else if(proj.pitch > 0) { proj.pitch -= max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch < 0) proj.pitch = 0; }
                 }
                 break;
             }
