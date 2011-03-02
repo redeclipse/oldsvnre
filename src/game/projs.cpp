@@ -292,22 +292,24 @@ namespace projs
                 vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
             }
             float minspeed = proj.minspeed;
-            if(proj.projtype == PRJ_ENT && !minspeed)
+            if(proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id) && enttype[entities::ents[proj.id]->type].usetype == EU_ITEM)
             {
-                loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && overlapsbox(proj.o, proj.radius, proj.radius, projs[i]->o, projs[i]->radius, projs[i]->radius))
-                {
-                    vec nrm = vec(proj.o).sub(projs[i]->o).normalize();
-                    dir[1].add(nrm).normalize();
-                    minspeed = 10.f;
-                    break;
+                #define entbump(x,y) \
+                { \
+                    if(overlapsbox(proj.o, enttype[entities::ents[proj.id]->type].radius/2, enttype[entities::ents[proj.id]->type].radius/2, x, y, y)) \
+                    { \
+                        vec nrm = vec(proj.o).sub(x).normalize(); \
+                        dir[1].add(nrm).normalize(); \
+                        minspeed = 25.f; \
+                        break; \
+                    } \
                 }
+                loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
+                    entbump(projs[i]->o, enttype[entities::ents[projs[i]->id]->type].radius/2);
+                if(!minspeed) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
+                    entbump(entities::ents[i]->o, enttype[entities::ents[i]->type].radius/2);
             }
-            if(!dir[1].iszero())
-            {
-                proj.vel = vec(dir[1]).mul(mag);
-                if(minspeed) while(proj.vel.magnitude() < minspeed)
-                    proj.vel.add(vec(dir[1]).mul(minspeed));
-            }
+            if(!dir[1].iszero()) proj.vel = vec(dir[1]).mul(max(mag, minspeed));
         }
         else proj.vel = vec(0, 0, 0);
     }
