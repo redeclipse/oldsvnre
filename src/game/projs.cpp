@@ -32,7 +32,7 @@ namespace projs
 
     VAR(IDF_PERSIST, projtrails, 0, 1, 1);
     VAR(IDF_PERSIST, projtraildelay, 1, 25, INT_MAX-1);
-    VAR(IDF_PERSIST, projtraillength, 1, 350, INT_MAX-1);
+    VAR(IDF_PERSIST, projtraillength, 1, 500, INT_MAX-1);
     VAR(IDF_PERSIST, projfirehint, 0, 0, 1);
     VAR(IDF_PERSIST, projteamhint, 0, 0, 1);
     #define teamhint(a,b) (projteamhint ? (a)->colour() : b)
@@ -1387,7 +1387,7 @@ namespace projs
             {
                 if(!proj.stuck) proj.stuck = false;
                 vec targ = vec(proj.owner->feetpos(proj.owner->height/2)).sub(proj.o).normalize();
-                if(!targ.iszero()) (proj.vel = targ).mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
+                if(!targ.iszero()) proj.vel = vec(targ).mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
             }
             else if(proj.owner->state == CS_ALIVE && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
             {
@@ -1501,24 +1501,22 @@ namespace projs
                     vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
                     break;
                 }
+                if(proj.weap != WEAP_GRENADE) break;
             }
             case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_EJECT: case PRJ_AFFINITY:
             {
-                if(!proj.lastbounce || proj.movement >= 1)
-                {
-                    vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
-                    if(proj.vel.dot2(axis) >= 0) { proj.pitch -= diff; if(proj.pitch < -180) proj.pitch = 180 - fmod(180 - proj.pitch, 360); }
-                    else { proj.pitch += diff; if(proj.pitch > 180) proj.pitch = fmod(proj.pitch + 180, 360) - 180; }
-                    break;
-                }
-                if(proj.projtype == PRJ_GIBS) break;
+                vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
+                vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
+                if(proj.vel.dot2(axis) >= 0) { proj.roll -= diff; if(proj.roll < -180) proj.roll = 180 - fmod(180 - proj.roll, 360); }
+                else { proj.roll += diff; if(proj.roll > 180) proj.roll = fmod(proj.roll + 180, 360) - 180; }
+                break;
             }
             case PRJ_ENT:
             {
                 if(proj.pitch != 0)
                 {
-                    if(proj.pitch < 0) { proj.pitch += max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch > 0) proj.pitch = 0; }
-                    else if(proj.pitch > 0) { proj.pitch -= max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch < 0) proj.pitch = 0; }
+                    if(proj.pitch < 0) { proj.pitch += max(diff, !proj.lastbounce || diff > 0 ? 1.f : 5.f); if(proj.pitch > 0) proj.pitch = 0; }
+                    else if(proj.pitch > 0) { proj.pitch -= max(diff, !proj.lastbounce || diff > 0 ? 1.f : 5.f); if(proj.pitch < 0) proj.pitch = 0; }
                 }
                 break;
             }
@@ -1733,20 +1731,28 @@ namespace projs
                         int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : 0xFFFFFF;
                         light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
                     }
+                    break;
                 }
                 case PRJ_GIBS:
                 {
                     if(shadowgibs) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
+                    break;
                 }
                 case PRJ_EJECT:
                 {
                     if(shadoweject) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
+                    break;
                 }
-                case PRJ_ENT: case PRJ_AFFINITY:
+                case PRJ_SHOT:
+                {
+                    if(shadowents) flags |= MDL_DYNSHADOW;
+                    break;
+                }
+                case PRJ_ENT:
                 {
                     if(shadowents) flags |= MDL_DYNSHADOW;
                     if(proj.fadetime && proj.lifemillis)
@@ -1773,7 +1779,7 @@ namespace projs
                 }
                 default: break;
             }
-            rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw+90, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
+            rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
         }
     }
 

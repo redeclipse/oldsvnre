@@ -224,43 +224,37 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             vec above(f.pos(true));
-            float trans = 0.f;
-            if(isbomberaffinity(f))
-            {
-                int millis = lastmillis-f.interptime;
-                if(millis <= 1000) trans += float(millis)/1000.f;
-                else trans = 1.f;
-            }
-            else if(!isbomberaffinity(f)) trans = 0.5f;
+            float trans = isbomberaffinity(f) ? 1.f : 0.5f;
+            int millis = lastmillis-f.interptime;
+            if(millis <= 1000) trans *= float(millis)/1000.f;
             if(trans > 0)
             {
                 if(isbomberaffinity(f))
                 {
-                    if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4;
+                    if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
                     entitylight *light = &entities::ents[f.ent]->light;
-                    if(light->millis != lastmillis) light->material = vec(1, 1, 1);
                     float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/10)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
                     int interval = lastmillis%1000, colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
-                    entities::ents[f.ent]->light.material = f.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f); \
-                    rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+                    if(light->millis != lastmillis) light->material =  f.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f); \
+                    rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, colour, enttype[AFFINITY].radius/4+(2*fluc), fluc*trans);
+                    part_create(PART_HINT_SOFT, 1, above, colour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
                     if(f.droptime)
                     {
-                        above.z += enttype[AFFINITY].radius/4+2.5f;
+                        above.z += enttype[AFFINITY].radius/4*trans+2.5f;
                         float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
-                        part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
-                        part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, colour);
-                        part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, colour, 0, wait);
+                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
+                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, colour);
+                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, colour, 0, wait);
                         above.z += 0.5f;
                         defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, colour, 2, max(trans, 0.5f)*0.5f);
                     }
                 }
                 else
                 {
-                    part_explosion(above, enttype[AFFINITY].radius/2, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, trans*0.125f);
-                    part_explosion(above, enttype[AFFINITY].radius/4, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, trans*0.5f);
-                    above.z += enttype[AFFINITY].radius/2+2.5f;
+                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, trans*0.125f);
+                    part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, trans*0.5f);
+                    above.z += enttype[AFFINITY].radius/2*trans+2.5f;
                     defformatstring(info)("<super>%s goal", teamtype[f.team].name);
                     part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
                 }
@@ -423,13 +417,13 @@ namespace bomber
         if(f.enabled && value)
         {
             destroyaffinity(f.pos());
-            if(value > 0)
+            if(value > 1 && isbomberaffinity(f))
             {
                 affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
                 game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
             }
         }
-        st.returnaffinity(i, lastmillis, value!=0, value==0);
+        st.returnaffinity(i, lastmillis, value!=0);
     }
 
     void scoreaffinity(gameent *d, int relay, int goal, int score)
@@ -442,7 +436,7 @@ namespace bomber
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
         game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
-        st.returnaffinity(relay, lastmillis);
+        st.returnaffinity(relay, lastmillis, false);
     }
 
     void takeaffinity(gameent *d, int i)

@@ -61,7 +61,7 @@ struct bomberservmode : bomberstate, servmode
     {
         flag &f = flags[relay], g = flags[goal];
         if(!g.enabled) return;
-        bomberstate::returnaffinity(relay, gamemillis);
+        bomberstate::returnaffinity(relay, gamemillis, false);
         int score = 0;
         if(g.team != ci->team)
         {
@@ -84,8 +84,8 @@ struct bomberservmode : bomberstate, servmode
         if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
         loopvj(flags) if(flags[j].enabled)
         {
-            bomberstate::returnaffinity(j, gamemillis);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, j, flags[j].enabled ? -1 : 0);
+            bomberstate::returnaffinity(j, gamemillis, false);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, j, 0);
         }
         if(GAME(bomberlimit) && score >= GAME(bomberlimit))
         {
@@ -132,8 +132,8 @@ struct bomberservmode : bomberstate, servmode
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
-            bomberstate::returnaffinity(i, gamemillis, true, false);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, i, f.enabled ? 1 : 0);
+            bomberstate::returnaffinity(i, gamemillis, true);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
         }
     }
 
@@ -142,8 +142,8 @@ struct bomberservmode : bomberstate, servmode
         if(!hasflaginfo) return;
         loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime)
         {
-            bomberstate::returnaffinity(i, gamemillis);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? -1 : 0);
+            bomberstate::returnaffinity(i, gamemillis, false);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 0);
         }
         bombertime = -1;
     }
@@ -166,7 +166,7 @@ struct bomberservmode : bomberstate, servmode
                     if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
                     {
                         bomberstate::returnaffinity(candidates[i][r], gamemillis, true);
-                        sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], flags[i].enabled ? -1 : 0);
+                        sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
                         hasaffinity++;
                     }
                     else return;
@@ -177,7 +177,7 @@ struct bomberservmode : bomberstate, servmode
             { // multi-ball
                 if(m_gsp2(gamemode, mutators) && flags[i].team) continue;
                 bomberstate::returnaffinity(i, gamemillis, true);
-                sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? -1 : 0);
+                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
                 hasaffinity++;
             }
             if(!hasaffinity) return;
@@ -225,7 +225,7 @@ struct bomberservmode : bomberstate, servmode
             if(f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay))
             {
                 bomberstate::returnaffinity(i, gamemillis, true);
-                sendf(-1, 1, "ri3", N_RESETAFFIN, i, f.enabled ? 1 : 0);
+                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
             }
         }
     }
