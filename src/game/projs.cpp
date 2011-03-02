@@ -1732,7 +1732,7 @@ namespace projs
                     if(shadowdebris) flags |= MDL_DYNSHADOW;
                     if(light->millis != lastmillis && !proj.limited)
                     {
-                        bool burning = totalmillis%150 < 65;
+                        bool burning = totalmillis%150 < 50;
                         int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : 0xFFFFFF;
                         light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
                     }
