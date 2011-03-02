@@ -2031,7 +2031,7 @@ namespace hud
         {
             glPushMatrix();
             glScalef(eventscale, eventscale, 1);
-            pushfont("super");
+            pushfont("emphasis");
             int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
             loopv(game::focus->icons)
             {

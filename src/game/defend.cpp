@@ -38,7 +38,7 @@ namespace defend
             float occupy = b.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
             entitylight *light = &entities::ents[b.ent]->light;
             if(light->millis != lastmillis) skewrgb(light->material.x, light->material.y, light->material.z, b.owner, b.enemy, occupy);
-            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
+            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
                 formatstring(b.info)("<super>\fs%s%s\fS vs. \fs%s%s\fS", teamtype[b.owner].chat, teamtype[b.owner].name, teamtype[b.enemy].chat, teamtype[b.enemy].name);
             else

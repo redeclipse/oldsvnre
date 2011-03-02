@@ -172,7 +172,7 @@ namespace capture
                 else trans = 1.f;
             }
             else if(f.base&BASE_HOME) trans = 0.25f;
-            if(trans > 0) rendermodel(&entities::ents[f.ent]->light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+            if(trans > 0) rendermodel(&entities::ents[f.ent]->light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             above.z += enttype[AFFINITY].radius/2+2.5f;
             if((f.base&BASE_HOME) || (!f.owner && !f.droptime))
             {
@@ -227,7 +227,7 @@ namespace capture
                 yaw += (f.interptime+(360/st.flags.length()*i))%360;
                 if(f.proj) above.z -= f.proj->height;
             }
-            rendermodel(&f.light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
+            rendermodel(&f.light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
             above.z += enttype[AFFINITY].radius*2/3;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
             defformatstring(info)("<super>%s flag", teamtype[f.team].name);

@@ -106,7 +106,7 @@ struct captureservmode : capturestate, servmode
         if(f.votes.length() >= numclients()/2)
         {
             capturestate::returnaffinity(i, gamemillis);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
         }
     }
 
@@ -116,7 +116,7 @@ struct captureservmode : capturestate, servmode
         loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime)
         {
             capturestate::returnaffinity(i, gamemillis);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, i, -1);
+            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
         }
     }
 
@@ -147,7 +147,7 @@ struct captureservmode : capturestate, servmode
             {
                 capturestate::returnaffinity(i, gamemillis);
                 loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -5);
-                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
+                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
             }
         }
     }

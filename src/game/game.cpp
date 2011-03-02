@@ -65,7 +65,7 @@ namespace game
     FVAR(IDF_PERSIST, spectvpitch, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, spectvbias, 0, 2.5f, 1000);
 
-    VAR(IDF_PERSIST, deathcamstyle, 0, 1, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
+    VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
 
     FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10, 10000);
@@ -95,7 +95,7 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 3, 1000);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
     VAR(IDF_PERSIST, eventiconfade, 500, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, eventiconshort, 500, 3000, INT_MAX-1);
@@ -103,6 +103,7 @@ namespace game
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
+    VAR(IDF_PERSIST, obitannounce, 0, 1, 2); // 0 = off, 1 = only focus, 2 = everyone
     VAR(IDF_PERSIST, showplayerinfo, 0, 1, 1); // 0 = none, 1 = show events
 
     VAR(IDF_PERSIST, damagemergedelay, 0, 75, INT_MAX-1);
@@ -784,15 +785,17 @@ namespace game
     void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style)
     {
         if(d->type != ENT_PLAYER && d->type != ENT_AI) return;
-        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags);
         d->lastregen = 0;
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
         d->deaths++;
         d->obliterated = (style&FRAG_OBLITERATE) != 0;
-        int anc = -1, dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH+rnd(S_R_SPLOSH) : S_PAIN+rnd(S_R_DIE);
-        if(d == focus) anc = !m_duke(gamemode, mutators) && !m_trial(gamemode) ? S_V_FRAGGED : -1;
-        else d->resetinterp();
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), isfocus = d == focus || actor == focus,
+             isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce > 1 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
+        int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
+            dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH+rnd(S_R_SPLOSH) : S_DEATH+rnd(S_R_DIE);
+        if(d != player1) d->resetinterp();
+        if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
         formatstring(d->obit)("%s ", colorname(d));
         if(d != actor && actor->lastattacker == d->clientnum) actor->lastattacker = -1;
         d->lastattacker = actor->clientnum;
@@ -918,8 +921,11 @@ namespace game
                     actor->addicon(eventicon::REVENGE, lastmillis, eventiconfade); // revenge
                     actor->dominating.removeobj(d);
                     d->dominated.removeobj(actor);
-                    anc = S_V_REVENGE;
-                    override = true;
+                    if(allowanc)
+                    {
+                        anc = S_V_REVENGE;
+                        override = true;
+                    }
                 }
                 else if(style&FRAG_DOMINATE)
                 {
@@ -927,8 +933,11 @@ namespace game
                     actor->addicon(eventicon::DOMINATE, lastmillis, eventiconfade); // dominating
                     if(actor->dominated.find(d) < 0) actor->dominated.add(d);
                     if(d->dominating.find(actor) < 0) d->dominating.add(actor);
-                    anc = S_V_DOMINATE;
-                    override = true;
+                    if(allowanc)
+                    {
+                        anc = S_V_DOMINATE;
+                        override = true;
+                    }
                 }
                 concatstring(d->obit, " ");
                 concatstring(d->obit, colorname(actor));
@@ -937,62 +946,77 @@ namespace game
                 {
                     concatstring(d->obit, " \fs\fzRedouble-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
-                    if(!override) anc = S_V_MULTI;
+                    if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     concatstring(d->obit, " \fs\fzRetriple-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
-                    if(!override) anc = S_V_MULTI;
+                    if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzRemulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
-                    if(!override) anc = S_V_MULTI;
+                    if(!override && allowanc) anc = S_V_MULTI;
                 }
             }
 
             if(style&FRAG_HEADSHOT)
             {
                 actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
-                if(!override) anc = S_V_HEADSHOT;
+                if(!override && allowanc) anc = S_V_HEADSHOT;
             }
             if(style&FRAG_FIRSTBLOOD)
             {
                 concatstring(d->obit, " for \fs\fzrwfirst blood\fS");
                 actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
-                if(!override) anc = S_V_FIRSTBLOOD;
-                override = true;
+                if(!override && allowanc)
+                {
+                    anc = S_V_FIRSTBLOOD;
+                    override = true;
+                }
             }
 
             if(style&FRAG_SPREE1)
             {
                 concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
                 actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
-                if(!override) anc = S_V_SPREE;
-                override = true;
+                if(!override && allowanc)
+                {
+                    anc = S_V_SPREE;
+                    override = true;
+                }
             }
             else if(style&FRAG_SPREE2)
             {
                 concatstring(d->obit, " on a \fs\fzcgslaughter\fS");
                 actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
-                if(!override) anc = S_V_SPREE2;
-                override = true;
+                if(!override && allowanc)
+                {
+                    anc = S_V_SPREE2;
+                    override = true;
+                }
             }
             else if(style&FRAG_SPREE3)
             {
                 concatstring(d->obit, " on a \fs\fzcgmassacre\fS");
                 actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
-                if(!override) anc = S_V_SPREE3;
-                override = true;
+                if(!override && allowanc)
+                {
+                    anc = S_V_SPREE3;
+                    override = true;
+                }
             }
             else if(style&FRAG_SPREE4)
             {
                 concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
                 actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
-                if(!override) anc = S_V_SPREE4;
-                override = true;
+                if(!override && allowanc)
+                {
+                    anc = S_V_SPREE4;
+                    override = true;
+                }
             }
             if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzgrcritical\fS hit");
         }
@@ -1016,9 +1040,7 @@ namespace game
         if(dth >= 0) playsound(dth, d->o, d, 0, -1, -1, -1, &d->vschan);
         if(showobituaries && d->aitype < AI_START)
         {
-            bool isme = (d == player1 || actor == player1), show = false;
-            if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
-            if(((!m_fight(gamemode) && !isme) || actor->aitype >= AI_START) && anc >= 0) anc = -1;
+            bool show = false;
             if(flags&HIT_LOST) show = true;
             else switch(showobituaries)
             {

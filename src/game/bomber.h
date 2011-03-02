@@ -10,7 +10,7 @@ struct bomberstate
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, droptime, taketime, inittime;
+        int team, droptime, taketime;
         bool enabled;
 #ifdef GAMESERVER
         int owner, lastowner;
@@ -19,7 +19,7 @@ struct bomberstate
         gameent *owner, *lastowner;
         projent *proj;
         entitylight light;
-        int ent, interptime, pickuptime;
+        int ent, interptime, pickuptime, inittime;
 #endif
 
         flag()
@@ -38,10 +38,10 @@ struct bomberstate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            interptime = pickuptime = 0;
+            interptime = pickuptime = inittime = 0;
 #endif
             team = TEAM_NEUTRAL;
-            inittime = taketime = droptime = 0;
+            taketime = droptime = 0;
             enabled = false;
         }
 
@@ -103,13 +103,13 @@ struct bomberstate
         flag &f = flags[i];
         f.owner = owner;
         f.taketime = t;
-        if(!f.inittime) f.inittime = t;
         f.droptime = 0;
 #ifdef GAMESERVER
         f.votes.shrink(0);
         f.lastowner = owner;
 #else
         f.pickuptime = 0;
+        if(!f.inittime) f.inittime = t;
         (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
         destroy(i);
         interp(i, t);
@@ -122,13 +122,13 @@ struct bomberstate
         f.droploc = o;
         f.inertia = p;
         f.droptime = t;
-        if(!f.inittime) f.inittime = t;
         f.taketime = 0;
 #ifdef GAMESERVER
         f.owner = -1;
         f.votes.shrink(0);
 #else
         f.pickuptime = 0;
+        if(!f.inittime) f.inittime = t;
         f.owner = NULL;
         destroy(i);
         create(i, target);
@@ -136,17 +136,16 @@ struct bomberstate
 #endif
     }
 
-    void returnaffinity(int i, int t, bool enabled = false, bool init = true)
+    void returnaffinity(int i, int t, bool enabled)
     {
         flag &f = flags[i];
         f.droptime = f.taketime = 0;
         f.enabled = enabled;
-        if(init) f.inittime = 0;
 #ifdef GAMESERVER
         f.owner = -1;
         f.votes.shrink(0);
 #else
-        f.pickuptime = 0;
+        f.pickuptime = f.inittime = 0;
         f.owner = NULL;
         destroy(i);
         interp(i, t);
