@@ -113,7 +113,7 @@ GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 GFVAR(0, captureelasticity, -10000, 0.25f, 10000);
-GFVAR(0, captureweight, -10000, 75, 10000);
+GFVAR(0, captureweight, -10000, 100, 10000);
 
 GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
@@ -128,13 +128,13 @@ GVAR(0, bombercarrytime, 0, 15000, INT_MAX-1);
 GVAR(0, bomberholdpoints, 0, 1, INT_MAX-1); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, INT_MAX-1); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, INT_MAX-1);
-GVAR(0, bomberlockondelay, 0, 1000, INT_MAX-1);
-GFVAR(0, bomberspeed, 0, 200, 10000);
+GVAR(0, bomberlockondelay, 0, 250, INT_MAX-1);
+GFVAR(0, bomberspeed, 0, 250, 10000);
 GFVAR(0, bomberminvel, 0, 50, 10000);
 GFVAR(0, bomberdelta, 0, 1000, 10000);
 GFVAR(0, bomberrelativity, 0, 0.25f, 10000);
-GFVAR(0, bomberelasticity, -10000, 0.5f, 10000);
-GFVAR(0, bomberweight, -10000, 100, 10000);
+GFVAR(0, bomberelasticity, -10000, 0.65f, 10000);
+GFVAR(0, bomberweight, -10000, 150, 10000);
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, INT_MAX-1);
 GVAR(0, skillmin, 1, 50, 101);
