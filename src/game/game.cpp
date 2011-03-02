@@ -2007,7 +2007,7 @@ namespace game
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
-        bool burning = burntime && totalmillis%150 < 65 && d->burning(lastmillis, burntime);
+        bool burning = burntime && totalmillis%150 < 50 && d->burning(lastmillis, burntime);
         int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : d->colour();
         e->light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
