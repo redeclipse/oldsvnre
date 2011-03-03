@@ -11,7 +11,7 @@ struct capturestate
         vec droploc, inertia, spawnloc;
         int team, droptime, taketime, base;
 #ifdef GAMESERVER
-        int owner;
+        int owner, lastowner;
         vector<int> votes;
 #else
         gameent *owner, *lastowner;
@@ -32,7 +32,7 @@ struct capturestate
             droploc = spawnloc = vec(-1, -1, -1);
             base = BASE_NONE;
 #ifdef GAMESERVER
-            owner = -1;
+            owner = lastowner = -1;
             votes.shrink(0);
 #else
             owner = lastowner = NULL;
@@ -105,6 +105,7 @@ struct capturestate
         f.droptime = 0;
 #ifdef GAMESERVER
         f.votes.shrink(0);
+        f.lastowner = owner;
 #else
         f.pickuptime = 0;
         (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);

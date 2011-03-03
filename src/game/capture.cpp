@@ -513,7 +513,8 @@ namespace capture
             if(f.droptime) f.droploc = f.pos();
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
             if(f.team == d->team && !m_gsp3(game::gamemode, game::mutators) && (m_gsp2(game::gamemode, game::mutators) || !f.droptime)) continue;
-            if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 1000) continue;
+            if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= capturepickupdelay))
+                continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius*2/3)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);

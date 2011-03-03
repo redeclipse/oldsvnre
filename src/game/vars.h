@@ -112,6 +112,7 @@ GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
+GVAR(0, capturepickupdelay, -1, 5000, INT_MAX-1);
 GFVAR(0, captureelasticity, -10000, 0.25f, 10000);
 GFVAR(0, captureweight, -10000, 100, 10000);
 
@@ -124,6 +125,7 @@ GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and t
 GVAR(0, bomberlimit, 0, 15, INT_MAX-1); // finish when score is this or more (non-hold)
 GVAR(0, bomberholdlimit, 0, 300, INT_MAX-1); // finish when score is this or more (hold)
 GVAR(0, bomberresetdelay, 0, 15000, INT_MAX-1);
+GVAR(0, bomberpickupdelay, -1, 5000, INT_MAX-1);
 GVAR(0, bombercarrytime, 0, 15000, INT_MAX-1);
 GVAR(0, bomberholdpoints, 0, 1, INT_MAX-1); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, INT_MAX-1); // penalty for holding too long
