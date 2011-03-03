@@ -952,13 +952,13 @@ namespace game
                 {
                     concatstring(d->obit, " \fs\fzRetriple-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
-                    if(!override && allowanc) anc = S_V_MULTI;
+                    if(!override && allowanc) anc = S_V_MULTI2;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzRemulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
-                    if(!override && allowanc) anc = S_V_MULTI;
+                    if(!override && allowanc) anc = S_V_MULTI3;
                 }
             }
 
