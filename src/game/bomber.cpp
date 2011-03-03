@@ -235,7 +235,7 @@ namespace bomber
                     entitylight *light = &entities::ents[f.ent]->light;
                     float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/10)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
                     int interval = lastmillis%1000, colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
-                    if(light->millis != lastmillis) light->material =  f.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f); \
+                    if(light->millis != lastmillis) light->material = f.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     part_create(PART_HINT_SOFT, 1, above, colour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
@@ -252,8 +252,8 @@ namespace bomber
                 }
                 else
                 {
-                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, trans*0.125f);
-                    part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, trans*0.5f);
+                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, trans*0.25f);
+                    part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, trans*0.65f);
                     above.z += enttype[AFFINITY].radius/2*trans+2.5f;
                     defformatstring(info)("<super>%s goal", teamtype[f.team].name);
                     part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
@@ -462,11 +462,12 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled || !isbomberaffinity(f)) continue;
             if(f.owner)
             {
-                if(d->ai && f.owner == d && lastmillis-f.taketime >= (bombercarrytime ? bombercarrytime/2 : 1000))
+                int takemillis = lastmillis-f.taketime;
+                if(d->ai && f.owner == d && takemillis >= (bombercarrytime ? bombercarrytime/2 : 1000))
                 {
                     if(d->action[AC_AFFINITY])
                     {
-                        if(lastmillis-f.taketime >= bombercarrytime*3/4 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                        if(takemillis >= bombercarrytime*3/4 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
                             d->action[AC_AFFINITY] = false;
                     }
                     else
@@ -479,7 +480,8 @@ namespace bomber
             }
             else if(f.droptime) f.droploc = f.pos();
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
-            if(f.lastowner == d && f.droptime && lastmillis-f.droptime <= 1000) continue;
+            if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= bomberpickupdelay))
+                continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)
             {
                 client::addmsg(N_TAKEAFFIN, "ri2", d->clientnum, i);
