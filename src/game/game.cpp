@@ -126,7 +126,7 @@ namespace game
     VAR(IDF_PERSIST, burnfade, 100, 200, INT_MAX-1);
     FVAR(IDF_PERSIST, burnblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
-    VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
+    VAR(IDF_PERSIST, impulsefade, 0, 100, INT_MAX-1);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, INT_MAX-1);
 
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
@@ -2211,6 +2211,11 @@ namespace game
         {
             if(d->state == CS_ALIVE)
             {
+                if(d->weapselect == WEAP_FLAMER)
+                {
+                    part_create(PART_HINT_SOFT, 1, d->ejectpos(d->weapselect), 0x2222AA, 0.75f, 0.5f, 0, 0);
+                    part_create(PART_FIREBALL_SOFT, 1, d->ejectpos(d->weapselect), 0xFF6622, 0.5f, 0.75f, 0, 0);
+                }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && d->weapstate[d->weapselect] != WEAP_S_RELOAD)
                 {
                     vec v, origin = d->originpos(), muzzle = d->muzzlepos(d->weapselect);

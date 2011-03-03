@@ -810,7 +810,7 @@ namespace projs
 
         loopv(shots)
             create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), delay, speed, shots[i].id, weap, flags, scale);
-        if(ejectfade && weaptype[weap].eject) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
+        if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
         if(d->aitype >= AI_BOT && d->skill <= 100 && (!WEAP2(weap, fullauto, flags&HIT_ALT) || adelay >= PHYSMILLIS))
