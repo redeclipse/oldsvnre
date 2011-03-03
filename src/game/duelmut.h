@@ -204,10 +204,12 @@ struct duelservmode : servmode
                                 {
                                     if(playing[i]->team == alive[0]->team)
                                     {
-                                        if(m_dm(gamemode)) sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOUWIN, -1, "");
+                                        if(m_dm(gamemode) && allowbroadcast(playing[i]->clientnum))
+                                            sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOUWIN, -1, "");
                                         givepoints(playing[i], playing.length());
                                     }
-                                    else if(m_dm(gamemode)) sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
+                                    else if(m_dm(gamemode) && allowbroadcast(playing[i]->clientnum))
+                                        sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
                                 }
                             }
                             clear();
@@ -239,10 +241,12 @@ struct duelservmode : servmode
                                 {
                                     if(playing[i] == alive[0])
                                     {
-                                        if(m_dm(gamemode)) sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOUWIN, -1, "");
+                                        if(m_dm(gamemode) && allowbroadcast(playing[i]->clientnum))
+                                            sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOUWIN, -1, "");
                                         givepoints(playing[i], playing.length());
                                     }
-                                    else if(m_dm(gamemode)) sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
+                                    else if(m_dm(gamemode) && allowbroadcast(playing[i]->clientnum))
+                                        sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
                                 }
                             }
                             clear();
