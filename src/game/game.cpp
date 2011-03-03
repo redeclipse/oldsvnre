@@ -2213,8 +2213,8 @@ namespace game
             {
                 if(d->weapselect == WEAP_FLAMER)
                 {
-                    part_create(PART_HINT_SOFT, 1, d->ejectpos(d->weapselect), 0x2222AA, 0.75f, 0.5f, 0, 0);
-                    part_create(PART_FIREBALL_SOFT, 1, d->ejectpos(d->weapselect), 0xFF6622, 0.5f, 0.75f, 0, 0);
+                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x2222AA, 0.75f, 0.5f, 0, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), 0xFF6622, 0.5f, 0.75f, 0, 0);
                 }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && d->weapstate[d->weapselect] != WEAP_S_RELOAD)
                 {
