@@ -319,7 +319,7 @@ weaptypes weaptype[] =
     },
     {
             ANIM_FLAMER,        0xFF2222,       S_FLAMER,   1,
-            false,      false,      true,       false,
+            false,      false,      true,       true,
             { 0, 0 },               6,          0,
             "flamer",       "\fr",  "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
     },
