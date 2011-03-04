@@ -213,7 +213,7 @@ namespace bomber
         loopv(st.flags) // flags/bases
         {
             bomberstate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
+            if(!entities::ents.inrange(f.ent) || !f.enabled || (f.owner == game::focus && !game::thirdpersonview(true))) continue;
             vec above(f.pos(true));
             float trans = isbomberaffinity(f) ? 1.f : 0.5f;
             int millis = lastmillis-f.interptime;
@@ -224,7 +224,7 @@ namespace bomber
                 {
                     if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
                     entitylight *light = &entities::ents[f.ent]->light;
-                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/10)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
+                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/5)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
                     int interval = lastmillis%1000, colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
                     if(light->millis != lastmillis) light->material = f.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans, trans);
