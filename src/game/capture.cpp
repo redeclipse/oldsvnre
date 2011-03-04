@@ -249,7 +249,7 @@ namespace capture
                 int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
-            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2*trans, vec((teamtype[f.team].colour>>16), ((teamtype[f.team].colour>>8)&0xFF), (teamtype[f.team].colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
+            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2*trans)), enttype[AFFINITY].radius*trans, vec((teamtype[f.team].colour>>16), ((teamtype[f.team].colour>>8)&0xFF), (teamtype[f.team].colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
         }
     }
 
