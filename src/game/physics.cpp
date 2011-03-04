@@ -25,7 +25,7 @@ namespace physics
 
     FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum angle to switch between wall kick and run
     VAR(IDF_PERSIST, impulseturn, 0, 1, 2); // determines if parkour actions force turning, 0 = off, 1 = only wall run, 2 = wall run and kick
-    VAR(IDF_PERSIST, dashaction, 0, 3, 3); // determines how dash action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
+    VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = double jump, 2 = double tap, 3 = both
 
     VAR(IDF_PERSIST, crouchstyle, 0, 1, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
     VAR(IDF_PERSIST, sprintstyle, 0, 4, 5); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle, 3-5 = inverted
@@ -71,7 +71,7 @@ namespace physics
             game::player1->v = dir; \
             if(down) \
             { \
-                if(allowimpulse(1) && dashaction >= 2 && last##v && lastdir##v && dir == lastdir##v && lastmillis-last##v < PHYSMILLIS) \
+                if(allowimpulse(1) && impulseaction >= 2 && last##v && lastdir##v && dir == lastdir##v && lastmillis-last##v < PHYSMILLIS) \
                 { \
                     game::player1->action[AC_DASH] = true; \
                     game::player1->actiontime[AC_DASH] = lastmillis; \
@@ -778,11 +778,11 @@ namespace physics
             }
             else
             {
-                if((d->ai || dashaction) && canimpulse(d, 0, 1) && !iscrouching(d))
+                if((d->ai || impulseaction) && canimpulse(d, 0, 1) && !iscrouching(d))
                 {
                     bool dash = false, pulse = false;
-                    if(onfloor) dash = dashaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
-                    else pulse = dashaction != 2 && d->action[AC_JUMP];
+                    if(!d->ai && onfloor) dash = impulseaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
+                    else pulse = (impulseaction%2 == 1 && d->action[AC_JUMP]) || (impulseaction >= 2 && d->action[AC_DASH]);
                     if(dash || pulse)
                     {
                         bool moving = d->move || d->strafe;

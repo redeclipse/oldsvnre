@@ -980,7 +980,7 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         if(d->blocked) off.z += JUMPMIN; // it could help..
-        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 500 && !d->turnside,
+        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 250 && !d->turnside,
             impulse = air && physics::canimpulse(d, 0, 1), jet = air && physics::canjetpack(d),
             jumper = (locked || off.z >= JUMPMIN) && (!offground || impulse),
             jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;
