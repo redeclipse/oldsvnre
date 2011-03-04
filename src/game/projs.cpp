@@ -557,7 +557,7 @@ namespace projs
                 proj.weight = (ejectweight+(proj.speed*2))*proj.lifesize; // so they fall better in relation to their speed
                 proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
-                proj.fadetime = rnd(250)+250;
+                proj.fadetime = rnd(300)+300;
                 proj.extinguish = 6;
                 if(proj.owner)
                 {
@@ -1022,7 +1022,7 @@ namespace projs
             {
                 if(isweap(proj.weap) && ejecthint)
                     part_create(PART_HINT, 1, proj.o, weaptype[proj.weap].colour, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.2f);
-                bool moving = proj.movement > 0.f;
+                bool moving = proj.movement > 1;
                 if(moving && lastmillis-proj.lasteffect >= 100)
                 {
                     part_create(PART_SMOKE, 150, proj.o, 0x222222, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.5f, -3);
@@ -1031,7 +1031,7 @@ namespace projs
             }
             case PRJ_AFFINITY:
             {
-                bool moving = proj.movement > 0.f;
+                bool moving = proj.movement > 1;
                 if(moving && lastmillis-proj.lasteffect >= 25)
                 {
                     part_create(PART_SMOKE, 150, proj.o, 0xFFFFFF, max(proj.xradius, proj.yradius)*1.5f, 0.75f, -10);
@@ -1505,7 +1505,7 @@ namespace projs
                 }
                 if(proj.weap != WEAP_GRENADE) break;
             }
-            case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_EJECT: case PRJ_AFFINITY:
+            case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_AFFINITY:
             {
                 if(!proj.lastbounce || proj.movement >= 1)
                 {
@@ -1518,6 +1518,14 @@ namespace projs
                 }
                 break;
             }
+            case PRJ_EJECT:
+                if(!proj.lastbounce || proj.movement >= 1)
+                {
+                    vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
+                    if(proj.vel.dot2(axis) >= 0) { proj.pitch -= diff; if(proj.pitch < -180) proj.pitch = 180 - fmod(180 - proj.pitch, 360); }
+                    else { proj.pitch += diff; if(proj.pitch > 180) proj.pitch = fmod(proj.pitch + 180, 360) - 180; }
+                    break;
+                }
             case PRJ_ENT:
             {
                 if(proj.pitch != 0)
