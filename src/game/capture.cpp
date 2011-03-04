@@ -153,7 +153,7 @@ namespace capture
         loopv(st.flags) // flags/bases
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent)) continue;
+            if(!entities::ents.inrange(f.ent) || (f.owner == game::focus && !game::thirdpersonview(true))) continue;
             vec above(f.spawnloc);
             float trans = 0.f;
             if((f.base&BASE_FLAG) && !f.owner && !f.droptime)

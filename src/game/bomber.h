@@ -20,6 +20,7 @@ struct bomberstate
         projent *proj;
         entitylight light;
         int ent, interptime, pickuptime, inittime;
+        vec interppos;
 #endif
 
         flag()
@@ -39,6 +40,7 @@ struct bomberstate
             owner = lastowner = NULL;
             proj = NULL;
             interptime = pickuptime = inittime = 0;
+            interppos = vec(-1, -1, -1);
 #endif
             team = TEAM_NEUTRAL;
             taketime = droptime = 0;
@@ -48,7 +50,18 @@ struct bomberstate
 #ifndef GAMESERVER
         vec &pos(bool render = false)
         {
-            if(owner) return render ? owner->waist : owner->o;
+            if(owner)
+            {
+                if(render)
+                {
+                    float yaw = 360-((lastmillis/3)%360), off = (lastmillis%1000)/500.f;
+                    vecfromyawpitch(yaw, 0, 1, 0, interppos);
+                    interppos.normalize().mul(owner->radius+4).add(owner->headpos(-owner->height/2));
+                    interppos.z += owner->height*(off > 1 ?  2-off : off);
+                    return interppos;
+                }
+                return owner->o;
+            }
             if(droptime) return proj ? proj->o : droploc;
             return spawnloc;
         }
