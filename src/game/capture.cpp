@@ -206,7 +206,7 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
-            vec above(f.pos(true));
+            vec above(f.pos());
             float yaw = 0;
             if(f.owner)
             {

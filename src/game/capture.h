@@ -44,9 +44,9 @@ struct capturestate
         }
 
 #ifndef GAMESERVER
-        vec &pos(bool render = false)
+        vec &pos()
         {
-            if(owner) return render ? owner->waist : owner->o;
+            if(owner) return owner->waist;
             if(droptime) return proj ? proj->o : droploc;
             return spawnloc;
         }
