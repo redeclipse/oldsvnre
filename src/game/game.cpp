@@ -2211,10 +2211,14 @@ namespace game
         {
             if(d->state == CS_ALIVE)
             {
+                bool last = lastmillis-d->weaplast[d->weapselect] > 0, powering = d->weapstate[d->weapselect] == WEAP_S_POWER && last;
+                float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
                 if(d->weapselect == WEAP_FLAMER)
                 {
-                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x2222AA, 0.75f, 0.5f, 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), 0xFF6622, 0.5f, 0.75f, 0, 0);
+                    float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : amt);
+                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.75f*scale, min(0.5f*scale, 0.75f), 0, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), 0xFF6818, 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
+                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 25 : 75, d->ejectpos(d->weapselect), pulsecols[0][rnd(PULSECOLOURS)], 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -20 : -10, 0);
                 }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && d->weapstate[d->weapselect] != WEAP_S_RELOAD)
                 {
@@ -2225,7 +2229,7 @@ namespace game
                     findorientation(d->o, d->yaw, d->pitch, v);
                     part_flare(origin, v, 1, PART_FLARE, d->colour(), 0.25f, 0.25f);
                 }
-                if(d->weapselect == WEAP_SWORD || (d->weapstate[d->weapselect] == WEAP_S_POWER && lastmillis-d->weaplast[d->weapselect] > 0))
+                if(d->weapselect == WEAP_SWORD || powering)
                 {
                     static const struct powerfxs {
                         int type, parttype, colour;
@@ -2236,13 +2240,12 @@ namespace game
                         { 4, PART_LIGHTNING_FLARE, 0x1111CC, 1, 1 },
                         { 2, PART_SPARK, 0xFFAA00, 0.15f, 2 },
                         { 2, PART_SPARK, 0xFF8800, 0.1f, 2 },
-                        { 2, PART_FIREBALL_SOFT, 0, 0.25f, 3 },
+                        { 2, PART_FIREBALL_SOFT, 0, 0.5f, 6 },
                         { 1, PART_PLASMA_SOFT, 0x226688, 0.15f, 2 },
                         { 2, PART_PLASMA_SOFT, 0x6611FF, 0.1f, 2.5f },
                         { 3, PART_PLASMA_SOFT, 0, 0.5f, 0.125f },
                         { 0, 0, 0, 0 },
                     };
-                    float amt = (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]);
                     switch(powerfx[d->weapselect].type)
                     {
                         case 1: case 2:
