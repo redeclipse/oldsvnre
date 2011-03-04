@@ -316,7 +316,7 @@ namespace projs
 
     void bounce(projent &proj, bool ricochet)
     {
-        if((proj.movement > 1 || (proj.projtype == PRJ_SHOT && !proj.child && weaptype[proj.weap].traced)) && (!proj.lastbounce || lastmillis-proj.lastbounce >= 250)) switch(proj.projtype)
+        if((proj.movement >= 1 || (proj.projtype == PRJ_SHOT && !proj.child && weaptype[proj.weap].traced)) && (!proj.lastbounce || lastmillis-proj.lastbounce >= 250)) switch(proj.projtype)
         {
             case PRJ_SHOT:
             {
@@ -1001,7 +1001,7 @@ namespace projs
             {
                 if(proj.projtype == PRJ_GIBS && !kidmode && game::bloodscale > 0)
                 {
-                    if(proj.movement > 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
+                    if(proj.movement >= 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                     {
                         part_splash(PART_BLOOD, 1, game::bloodfade, proj.o, 0x229999, (rnd(game::bloodsize/2)+(game::bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(proj.radius), 10);
                         proj.lasteffect = lastmillis - (lastmillis%1000);
@@ -1022,7 +1022,7 @@ namespace projs
             {
                 if(isweap(proj.weap) && ejecthint)
                     part_create(PART_HINT, 1, proj.o, weaptype[proj.weap].colour, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.2f);
-                bool moving = proj.movement > 1;
+                bool moving = proj.movement >= 1;
                 if(moving && lastmillis-proj.lasteffect >= 100)
                 {
                     part_create(PART_SMOKE, 150, proj.o, 0x222222, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.5f, -3);
@@ -1031,7 +1031,7 @@ namespace projs
             }
             case PRJ_AFFINITY:
             {
-                bool moving = proj.movement > 1;
+                bool moving = proj.movement >= 1;
                 if(moving && lastmillis-proj.lasteffect >= 25)
                 {
                     part_create(PART_SMOKE, 150, proj.o, 0xFFFFFF, max(proj.xradius, proj.yradius)*1.5f, 0.75f, -10);
@@ -1806,8 +1806,8 @@ namespace projs
             switch(proj.weap)
             {
                 case WEAP_SWORD: adddynlight(proj.o, 16, vec(0.1f, 0.1f, 0.95f)); break;
-                case WEAP_SHOTGUN: adddynlight(proj.o, 16, vec(0.5f, 0.35f, 0.1f)); break;
-                case WEAP_SMG: adddynlight(proj.o, 8, vec(0.5f, 0.25f, 0.05f)); break;
+                case WEAP_SHOTGUN: if(proj.movement >= 1) adddynlight(proj.o, 16*proj.curscale, vec(0.5f, 0.35f, 0.1f)); break;
+                case WEAP_SMG: if(proj.movement >= 1) adddynlight(proj.o, 8*proj.curscale, vec(0.5f, 0.25f, 0.05f)); break;
                 case WEAP_FLAMER:
                 {
                     vec col(1.1f*max(1.f-proj.lifespan,0.3f)*proj.curscale, 0.2f*max(1.f-proj.lifespan,0.15f)*proj.curscale, 0.00f);

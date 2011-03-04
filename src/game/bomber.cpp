@@ -140,22 +140,13 @@ namespace bomber
             {
                 if(f.owner == game::focus)
                 {
-                    if(hud::inventoryaffinity && millis <= hud::inventoryaffinity)
-                    {
-                        float tweak = clamp(millis/float(hud::inventoryaffinity), 0.f, 1.f);
-                        skew += (1.f-skew)*tweak;
-                    }
-                    else
-                    {
-                        float pc = (millis%1000)/500.f, amt = pc > 1 ? 2.f-pc : pc;
-                        fade += (1.f-fade)*amt;
-                        if(!hud::inventoryaffinity && millis <= 1000)
-                            skew += (1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f);
-                        else skew = 1; // override it
-                    }
+                    float pc = (millis%1000)/500.f, amt = pc > 1 ? 2.f-pc : pc;
+                    fade += (1.f-fade)*amt;
+                    if(millis <= 1000) skew += (1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f);
+                    else skew = 1; // override it
                 }
                 else if(millis <= 1000) skew += ((1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f));
-                else skew = 0.5f;
+                else skew = 1;
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
