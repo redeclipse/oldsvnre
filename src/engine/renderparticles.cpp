@@ -1566,10 +1566,11 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
 
     float s = size*min(radius, height);
     vec v(0, 0, min(1.0f, height)*vel);
+    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + COLLIDEERROR : -1;
     loopi(density)
     {
         vec q = vec(p).add(vec(rndscale(radius*2.f)-radius, rndscale(radius*2.f)-radius, 0));
-        newparticle(q, v, rnd(max(int(fade*height), 1))+1, type, color, s, blend, grav, collide);
+        newparticle(q, v, rnd(max(int(fade*height), 1))+1, type, color, s, blend, grav, collide)->val = collidez;
     }
 }
 
@@ -1675,8 +1676,9 @@ void makeparticle(const vec &o, attrvector &attr)
         case 5:
         {
             float length = clamp(attr[1], 0, 100)/100.f;
-            part_icon(o, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, attr[2], 0, length);
-            part_icon(o, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, attr[2], (totalmillis%1000)/1000.f, 0.1f);
+            Texture *t = textureload(hud::progresstex, 3);
+            part_icon(o, t, 2, 1, 0, 0, 1, attr[2], 0, length);
+            part_icon(o, t, 3, 1, 0, 0, 1, attr[2], (totalmillis%1000)/1000.f, 0.1f);
             break;
         }
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
