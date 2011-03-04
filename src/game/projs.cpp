@@ -544,6 +544,7 @@ namespace projs
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
                     proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
+                    proj.light.material = vec(weaptype[proj.weap].colour>>16, (weaptype[proj.weap].colour>>8)&0xFF, weaptype[proj.weap].colour&0xFF).div(255.f);
                 }
                 else
                 {
@@ -559,13 +560,11 @@ namespace projs
                 proj.escaped = true;
                 proj.fadetime = rnd(300)+300;
                 proj.extinguish = 6;
-                if(proj.owner)
-                {
-                    if(proj.owner == game::focus && !game::thirdpersonview())
-                        proj.o = proj.from.add(vec(proj.from).sub(camera1->o).normalize().mul(5));
-                    vecfromyawpitch(proj.yaw+40+rnd(41), proj.pitch+50-proj.speed+rnd(41), 1, 0, proj.to);
-                    proj.to.add(proj.from);
-                }
+                if(proj.owner == game::focus && !game::thirdpersonview())
+                    proj.o = proj.from.add(vec(proj.from).sub(camera1->o).normalize().mul(4));
+                vecfromyawpitch(proj.yaw+40+rnd(41), proj.pitch+50-proj.speed+rnd(41), 1, 0, proj.to);
+                proj.to.add(proj.from);
+                proj.yaw += 90;
                 break;
             }
             case PRJ_ENT:
@@ -1021,11 +1020,11 @@ namespace projs
             case PRJ_EJECT:
             {
                 if(isweap(proj.weap) && ejecthint)
-                    part_create(PART_HINT, 1, proj.o, weaptype[proj.weap].colour, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.2f);
+                    part_create(PART_HINT, 1, proj.o, weaptype[proj.weap].colour, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f);
                 bool moving = proj.movement >= 1;
                 if(moving && lastmillis-proj.lasteffect >= 100)
                 {
-                    part_create(PART_SMOKE, 150, proj.o, 0x222222, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.5f, -3);
+                    part_create(PART_SMOKE, 75, proj.o, 0x222222, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f, -3);
                     proj.lasteffect = lastmillis - (lastmillis%100);
                 }
             }
