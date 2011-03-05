@@ -1112,14 +1112,16 @@ namespace physics
         {
             const float f = 1.0f/moveres, mag = vec(pl->vel).add(pl->falling).magnitude();
             int collisions = 0, timeinair = pl->timeinair;
-            vec vel(pl->vel);
-            d.mul(f);
+            vec vel(pl->vel); d.mul(f);
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
                 if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
-                if(!pl->timeinair && timeinair > PHYSMILLIS*2 && mag >= 8)
-                    playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, clamp(int(mag*4), 32, 255));
+                if(!pl->timeinair && timeinair >= PHYSMILLIS*2 && mag >= 20)
+                {
+                    int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
+                    playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
+                }
             }
         }
 
