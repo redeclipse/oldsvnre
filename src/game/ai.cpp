@@ -980,10 +980,10 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         if(d->blocked) off.z += JUMPMIN; // it could help..
-        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 250 && !d->turnside,
-            impulse = air && physics::canimpulse(d, 0, 1), jet = air && physics::canjetpack(d),
-            jumper = (locked || off.z >= JUMPMIN) && (!offground || impulse),
-            jump = (jumper || d->onladder || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && lastmillis >= d->ai->jumpseed;
+        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 100 && !d->turnside,
+            impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 500 || d->vel.z < 1), jet = air && physics::canjetpack(d),
+            jumper = (locked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
+            jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
             vec old = d->o;
@@ -1003,9 +1003,9 @@ namespace ai
         if(jump)
         {
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
-            int seed = (111-d->skill)*(locked || jet ? 1 : (d->onladder || d->inliquid ? 2 : 10));
+            int seed = (111-d->skill)*(locked || impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
             d->ai->jumpseed = lastmillis+seed+rnd(seed*2);
-            seed *= b.idle ? 1000 : 500;
+            seed *= 50; if(b.idle) seed *= 2;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
         if(!jump && air && physics::canimpulse(d, -1, 3)) d->action[AC_SPECIAL] = true;
