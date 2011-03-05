@@ -1710,6 +1710,30 @@ namespace projs
         }
     }
 
+    void fadeproj(projent &proj, float &trans, float &size)
+    {
+        if(proj.fadetime && proj.lifemillis)
+        {
+            int interval = min(proj.lifemillis, proj.fadetime);
+            if(proj.lifetime < interval)
+            {
+                float amt = float(proj.lifetime)/float(interval);
+                size *= amt;
+                trans *= amt;
+            }
+            else if(proj.projtype != PRJ_EJECT && proj.lifemillis > interval)
+            {
+                interval = min(proj.lifemillis-interval, proj.fadetime);
+                if(proj.lifemillis-proj.lifetime < interval)
+                {
+                    float amt = float(proj.lifemillis-proj.lifetime)/float(interval);
+                    size *= amt;
+                    trans *= amt;
+                }
+            }
+        }
+    }
+
     void render()
     {
         loopv(projs) if(projs[i]->ready(false) && projs[i]->projtype != PRJ_AFFINITY)
@@ -1724,12 +1748,14 @@ namespace projs
                 case PRJ_DEBRIS:
                 {
                     if(shadowdebris) flags |= MDL_DYNSHADOW;
+                    size *= proj.lifesize;
                     if(light->millis != lastmillis && !proj.limited)
                     {
                         bool burning = totalmillis%150 < 50;
                         int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : 0xFFFFFF;
                         light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
                     }
+                    fadeproj(proj, trans, size);
                     break;
                 }
                 case PRJ_GIBS:
@@ -1737,6 +1763,7 @@ namespace projs
                     if(shadowgibs) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
+                    fadeproj(proj, trans, size);
                     break;
                 }
                 case PRJ_EJECT:
@@ -1744,6 +1771,7 @@ namespace projs
                     if(shadoweject) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
+                    fadeproj(proj, trans, size);
                     break;
                 }
                 case PRJ_SHOT:
@@ -1754,26 +1782,7 @@ namespace projs
                 case PRJ_ENT:
                 {
                     if(shadowents) flags |= MDL_DYNSHADOW;
-                    if(proj.fadetime && proj.lifemillis)
-                    {
-                        int interval = min(proj.lifemillis, proj.fadetime);
-                        if(proj.lifetime < interval)
-                        {
-                            float amt = float(proj.lifetime)/float(interval);
-                            size *= amt;
-                            trans *= amt;
-                        }
-                        else if(proj.projtype != PRJ_EJECT && proj.lifemillis > interval)
-                        {
-                            interval = min(proj.lifemillis-interval, proj.fadetime);
-                            if(proj.lifemillis-proj.lifetime < interval)
-                            {
-                                float amt = float(proj.lifemillis-proj.lifetime)/float(interval);
-                                size *= amt;
-                                trans *= amt;
-                            }
-                        }
-                    }
+                    fadeproj(proj, trans, size);
                     break;
                 }
                 default: break;

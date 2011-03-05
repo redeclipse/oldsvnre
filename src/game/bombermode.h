@@ -41,7 +41,11 @@ struct bomberservmode : bomberstate, servmode
         {
             int alive[TEAM_MAX] = {0};
             loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
-            if(alive[TEAM_ALPHA] && alive[TEAM_OMEGA]) bombertime = gamemillis+GAME(bomberdelay);
+            if(alive[TEAM_ALPHA] && alive[TEAM_OMEGA])
+            {
+                bombertime = gamemillis+GAME(bomberdelay);
+                if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
+            }
         }
     }
 
@@ -81,7 +85,6 @@ struct bomberservmode : bomberstate, servmode
             bool kamikaze = clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team;
             if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
         }
-        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
         loopvj(flags) if(flags[j].enabled)
         {
             bomberstate::returnaffinity(j, gamemillis, false);

@@ -227,7 +227,7 @@ namespace bomber
                 {
                     if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
                     entitylight *light = &entities::ents[f.ent]->light;
-                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/5)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
+                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/3)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
                     int interval = lastmillis%1000, colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
                     if(light->millis != lastmillis) light->material = f.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans, trans);
@@ -696,7 +696,17 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled) return false;
             b.idle = -1;
             if(isbomberaffinity(f)) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
-            else return ai::makeroute(d, b, f.pos());
+            else if(isbombertarg(f, ai::owner(d)))
+            {
+                static vector<int> hasbombs;
+                hasbombs.setsize(0);
+                loopv(st.flags)
+                {
+                    bomberstate::flag &g = st.flags[i];
+                    if(g.owner == d) hasbombs.add(i);
+                }
+                if(!hasbombs.empty()) return ai::makeroute(d, b, f.pos());
+            }
         }
         return false;
     }
