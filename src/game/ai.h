@@ -47,7 +47,7 @@ namespace entities { struct avoidset; };
 namespace ai
 {
     const float CLOSEDIST       = 32.f;    // is close
-    const float JUMPMIN         = 4.f;     // decides to jump
+    const float JUMPMIN         = 3.9f;    // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
     const float SIGHTMIN        = 32.f;    // minimum line of sight
     const float SIGHTMAX        = 1024.f;  // maximum line of sight
