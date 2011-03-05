@@ -2211,23 +2211,25 @@ namespace game
         {
             if(d->state == CS_ALIVE)
             {
-                bool last = lastmillis-d->weaplast[d->weapselect] > 0, powering = d->weapstate[d->weapselect] == WEAP_S_POWER && last;
+                bool last = lastmillis-d->weaplast[d->weapselect] > 0,
+                     powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
+                     reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD;
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
-                if(d->weapselect == WEAP_FLAMER)
+                if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                 {
-                    float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : amt);
+                    float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                     part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.8f*scale, min(0.65f*scale, 0.8f), 0, 0);
                     part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), 0xFF6818, 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
                     regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), pulsecols[0][rnd(PULSECOLOURS)], 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
-                if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && d->weapstate[d->weapselect] != WEAP_S_RELOAD)
+                if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && !reloading)
                 {
                     vec v, origin = d->originpos(), muzzle = d->muzzlepos(d->weapselect);
                     origin.z += 0.25f; muzzle.z += 0.25f;
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, d->colour(), 0.25f, 0.25f);
+                    part_flare(origin, v, 1, PART_FLARE, d->colour(), 0.5f*amt, amt);
                 }
                 if(d->weapselect == WEAP_SWORD || powering)
                 {
