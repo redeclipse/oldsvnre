@@ -1344,9 +1344,8 @@ namespace ai
                 {
                     case 1: case 2: case 3:
                         if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
-                        d->ai->clear(false);
                         break;
-                    case 4: d->ai->reset(true); break;
+                    case 4: d->ai->clear(false); break;
                     case 5: d->ai->reset(false); break;
                     case 6: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                     case 0: default: break;
@@ -1365,9 +1364,8 @@ namespace ai
                 {
                     case 1: case 2: case 3:
                         if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
-                        d->ai->clear(false);
                         break;
-                    case 4: d->ai->reset(true); break;
+                    case 4: d->ai->clear(false); break;
                     case 5: d->ai->reset(false); break;
                     case 6: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                     case 0: default: break;
@@ -1389,7 +1387,7 @@ namespace ai
             {
                 switch(d->ai->huntseq)
                 {
-                    case 0: d->ai->reset(true); break;
+                    case 0: d->ai->clear(false); break;
                     case 1: d->ai->reset(false); break;
                     case 2: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                     default: break;
