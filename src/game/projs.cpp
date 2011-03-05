@@ -172,48 +172,33 @@ namespace projs
 
     bool radialeffect(gameent *d, projent &proj, bool explode, int radius)
     {
-        bool radiated = false, push = WEAP(proj.weap, pusharea) > 1;
-        float maxdist = push ? radius*WEAP(proj.weap, pusharea) : radius, dist = 1e16f;
+        bool push = WEAP(proj.weap, pusharea) > 1, radiated = false;
+        float maxdist = push ? radius*WEAP(proj.weap, pusharea) : radius;
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            int flags = 0;
+            #define radialpush(xx,yx,yy,yz1,yz2,zz) \
+                if(!proj.o.reject(xx, maxdist+max(yx, yy))) \
+                { \
+                    vec bottom(xx), top(xx); bottom.z -= yz1; top.z += yz2; \
+                    float dist = closestpointcylinder(proj.o, bottom, top, max(yx, yy)).dist(proj.o); \
+                    if(dist <= radius) \
+                    { \
+                        hitpush(d, proj, zz|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale); \
+                        radiated = true; \
+                    } \
+                    else if(WEAP(proj.weap, pusharea) > 1 && dist <= maxdist) \
+                    { \
+                        hitpush(d, proj, zz|HIT_WAVE, radius, dist, proj.curscale); \
+                        radiated = true; \
+                    } \
+                }
             if(!isaitype(d->aitype) || aistyle[d->aitype].hitbox)
             {
-                if(!proj.o.reject(d->legs, maxdist+max(d->lrad.x, d->lrad.y)))
-                {
-                    vec bottom(d->legs), top(d->legs); bottom.z -= d->lrad.z; top.z += d->lrad.z;
-                    float fdist = closestpointcylinder(proj.o, bottom, top, max(d->lrad.x, d->lrad.y)).dist(proj.o);
-                    if(fdist <= dist) { dist = fdist; flags = HIT_LEGS; }
-                }
-                if(!proj.o.reject(d->torso, maxdist+max(d->trad.x, d->trad.y)))
-                {
-                    vec bottom(d->torso), top(d->torso); bottom.z -= d->trad.z; top.z += d->trad.z;
-                    float fdist = closestpointcylinder(proj.o, bottom, top, max(d->trad.x, d->trad.y)).dist(proj.o);
-                    if(fdist <= dist) { dist = fdist; flags = HIT_TORSO; }
-                }
-                if(!proj.o.reject(d->head, maxdist+max(d->hrad.x, d->hrad.y)))
-                {
-                    vec bottom(d->head), top(d->head); bottom.z -= d->hrad.z; top.z += d->hrad.z;
-                    float fdist = closestpointcylinder(proj.o, bottom, top, max(d->hrad.x, d->hrad.y)).dist(proj.o);
-                    if(fdist <= dist) { dist = fdist; flags = HIT_HEAD; }
-                }
+                radialpush(d->legs, d->lrad.x, d->lrad.y, d->lrad.z, d->lrad.z, HIT_LEGS);
+                radialpush(d->torso, d->trad.x, d->trad.y, d->trad.z, d->trad.z, HIT_TORSO);
+                radialpush(d->head, d->hrad.x, d->hrad.y, d->hrad.z, d->hrad.z, HIT_HEAD);
             }
-            else
-            {
-                vec bottom(d->o), top(d->o); bottom.z -= d->height; top.z += d->aboveeye;
-                dist = closestpointcylinder(proj.o, bottom, top, d->radius).dist(proj.o);
-                flags = m_expert(game::gamemode, game::mutators) ? HIT_HEAD : HIT_TORSO;
-            }
-            if(dist <= radius)
-            {
-                hitpush(d, proj, flags|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale);
-                radiated = true;
-            }
-            else if(push && dist <= maxdist)
-            {
-                hitpush(d, proj, flags|HIT_WAVE, radius, dist, proj.curscale);
-                radiated = true;
-            }
+            else radialpush(d->o, d->xradius, d->yradius, d->height, d->aboveeye, m_expert(game::gamemode, game::mutators) ? HIT_HEAD : HIT_TORSO);
         }
         else if(d->type == ENT_PROJ && explode)
         {
