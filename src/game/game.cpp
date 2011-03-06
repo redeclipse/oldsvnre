@@ -388,6 +388,57 @@ namespace game
             gameent *d = NULL;
             loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
             {
+                if(d->state == CS_ALIVE)
+                {
+                    bool last = lastmillis-d->weaplast[d->weapselect] > 0,
+                         powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
+                         reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD;
+                    float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
+                    if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
+                    {
+                        float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
+                        int colour = pulsecols[0][rnd(PULSECOLOURS)];
+                        vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
+                        adddynlight(d->ejectpos(d->weapselect), 16*scale, col, 0, 0, DL_KEEP);
+                    }
+                    if(d->weapselect == WEAP_SWORD || powering)
+                    {
+                        static const struct powerdls {
+                            int type, colour;
+                            float radius;
+                        } powerdl[WEAP_MAX] = {
+                            { 0, 0, 0 }, // melee
+                            { 1, 0xFFCC22, 16 }, // pistol
+                            { 1, 0x1111CC, 18 }, // sword
+                            { 1, 0xFFAA00, 20 }, // shotgun
+                            { 2, 0xFF8800, 18 }, // smg
+                            { 2, 0xFF2222, 22 }, // flamer
+                            { 2, 0x226688, 22 }, // plasma
+                            { 1, 0x6611FF, 18 }, // rifle
+                            { 2, 0, 18 }, // grenades
+                            { 2, 0, 18 }, // rocket
+                        };
+                        switch(powerdl[d->weapselect].type)
+                        {
+                            case 1:
+                            {
+                                int colour = powerdl[d->weapselect].colour > 0 ? powerdl[d->weapselect].colour : pulsecols[0][rnd(PULSECOLOURS)];
+                                vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
+                                adddynlight(d->muzzlepos(d->weapselect), 16+(amt*powerdl[d->weapselect].radius), col, 0, 0, DL_KEEP);
+                                break;
+                            }
+                            case 2:
+                            {
+                                int colour = powerdl[d->weapselect].colour > 0 ? powerdl[d->weapselect].colour : ((int(254*max(1.f-amt,0.5f))<<16)+1)|((int(128*max(1.f-amt,0.f))+1)<<8), interval = lastmillis%1000;
+                                float fluc = 8*(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
+                                vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
+                                adddynlight(d->muzzlepos(d->weapselect), 16+((powerdl[d->weapselect].radius*max(amt, 0.25f))+fluc), col, 0, 0, DL_KEEP);
+                                break;
+                            }
+                            case 0: default: break;
+                        }
+                    }
+                }
                 if(burntime && d->burning(lastmillis, burntime))
                 {
                     int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.25f+(rnd(75)/100.f);
@@ -399,8 +450,8 @@ namespace game
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
                     int colour = d->colour();
-                    vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
-                    adddynlight(d->headpos(-d->height*0.5f), illumradius, col.mul(illumlevel), 0, 0, DL_KEEP);
+                    vec col = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f).mul(illumlevel);
+                    adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
         }
@@ -2278,7 +2329,7 @@ namespace game
                 int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
                 else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
-                vec pos = vec(d->headpos(-d->height*0.35f)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
+                vec pos = vec(d->headpos(-d->height/2)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
                 regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
             if(physics::sprinting(d)) impulseeffect(d, 1);
