@@ -1,6 +1,6 @@
 #define isbomberaffinity(a) (a.enabled && a.team == TEAM_NEUTRAL)
-#define isbomberhome(a,b)   (a.enabled && !isbomberaffinity(a) && a.team == b)
-#define isbombertarg(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != b)
+#define isbomberhome(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != TEAM_NEUTRAL && a.team == b)
+#define isbombertarg(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != TEAM_NEUTRAL && a.team != b)
 
 #ifdef GAMESERVER
 #define bomberstate bomberservstate
