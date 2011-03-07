@@ -37,16 +37,21 @@ struct bomberservmode : bomberstate, servmode
 
     void spawned(clientinfo *ci)
     {
-        if(bombertime < 0)
+        if(bombertime >= 0) return;
+        if(m_team(gamemode, mutators))
         {
             int alive[TEAM_MAX] = {0};
             loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
-            if(alive[TEAM_ALPHA] && alive[TEAM_OMEGA])
-            {
-                bombertime = gamemillis+GAME(bomberdelay);
-                if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
-            }
+            if(!alive[TEAM_ALPHA] || !alive[TEAM_OMEGA]) return;
         }
+        else
+        {
+            int alive = 0;
+            loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive++;
+            if(alive <= 1) return;
+        }
+        bombertime = gamemillis+GAME(bomberdelay);
+        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
     }
 
     void died(clientinfo *ci, clientinfo *actor)
@@ -100,13 +105,13 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(!m_team(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
         scorebomb(ci, relay, goal);
     }
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START || m_gsp2(gamemode, mutators)) return;
+        if(!hasflaginfo || ci->state.aitype >= AI_START || !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) return;
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
@@ -119,7 +124,7 @@ struct bomberservmode : bomberstate, servmode
 
     void takeaffinity(clientinfo *ci, int i)
     {
-        if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
+        if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         if(f.lastowner == ci->clientnum && f.droptime && (GAME(bomberpickupdelay) < 0 || lastmillis-f.droptime <= GAME(bomberpickupdelay))) return;
@@ -163,7 +168,7 @@ struct bomberservmode : bomberstate, servmode
             {
                 vector<int> candidates[TEAM_MAX];
                 loopv(flags) candidates[flags[i].team].add(i);
-                int wants = m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
+                int wants = !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
                 loopi(wants) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
                 {
                     int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
@@ -179,7 +184,7 @@ struct bomberservmode : bomberstate, servmode
             }
             else loopv(flags) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
             { // multi-ball
-                if(m_gsp2(gamemode, mutators) && flags[i].team) continue;
+                if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && flags[i].team) continue;
                 bomberstate::returnaffinity(i, gamemillis, true);
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
                 hasaffinity++;
@@ -197,14 +202,19 @@ struct bomberservmode : bomberstate, servmode
             if(f.owner >= 0)
             {
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                if(m_gsp2(gamemode, mutators) && t > 0)
+                if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && t > 0)
                 {
                     int score = GAME(bomberholdpoints)*t;
                     if(score)
                     {
-                        int total = addscore(ci->team, score);
-                        sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
+                        int total = 0;
                         givepoints(ci, score);
+                        if(m_team(gamemode, mutators))
+                        {
+                            total = addscore(ci->team, score);
+                            sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
+                        }
+                        else total = ci->state.points;
                         if(GAME(bomberholdlimit) && total >= GAME(bomberholdlimit))
                         {
                             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
@@ -217,11 +227,16 @@ struct bomberservmode : bomberstate, servmode
                     ci->state.weapshots[WEAP_GRENADE][0].add(1);
                     sendf(-1, 1, "ri7", N_DROP, ci->clientnum, -1, 1, WEAP_GRENADE, -1, -1);
                     dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
-                    if(m_gsp2(gamemode, mutators) && GAME(bomberholdpenalty))
+                    if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && GAME(bomberholdpenalty))
                     {
-                        int total = addscore(ci->team, 0-GAME(bomberholdpenalty));
-                        sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
+                        int total = 0;
                         givepoints(ci, 0-GAME(bomberholdpenalty));
+                        if(m_team(gamemode, mutators))
+                        {
+                            total = addscore(ci->team, 0-GAME(bomberholdpenalty));
+                            sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
+                        }
+                        else total = ci->state.points;
                     }
                 }
                 continue;

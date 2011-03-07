@@ -45,9 +45,8 @@ namespace bomber
             if(d->action[AC_AFFINITY]) return true;
             vec inertia;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
-            bool guided = false;
-            if(bomberlockondelay && lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay) guided = true;
             inertia.normalize().mul(bomberspeed).add(vec(d->vel).add(d->falling).mul(bomberrelativity));
+            bool guided = m_team(game::gamemode, game::mutators) && bomberlockondelay && lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay;
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_AFFINITY] = false;
             d->actiontime[AC_AFFINITY] = 0;
@@ -82,7 +81,7 @@ namespace bomber
                     if(millis < 1000) size *= 1.f+(1-clamp(float(millis)/1000.f, 0.f, 1.f));
                 }
             }
-            else
+            else if(!m_gsp2(game::gamemode, game::mutators))
             {
                 float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
                 area = 4;
@@ -244,7 +243,7 @@ namespace bomber
                         defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, colour, 2, max(trans, 0.5f)*0.5f);
                     }
                 }
-                else
+                else if(!m_gsp2(game::gamemode, game::mutators))
                 {
                     part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, trans*0.25f);
                     part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, trans*0.65f);
@@ -485,7 +484,7 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        if(!m_gsp2(game::gamemode, game::mutators))
+        if(m_team(game::gamemode, game::mutators) && !m_gsp2(game::gamemode, game::mutators))
         {
             int goal = -1;
             loopv(st.flags)

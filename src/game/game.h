@@ -313,7 +313,7 @@ gametypes gametype[] = {
         "defend-the-flag",                  { "quick", "conquer", "" },
     },
     {
-        G_BOMBER,       G_M_TEAM,
+        G_BOMBER,       G_M_NONE,
         {
             G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
             G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
@@ -414,22 +414,25 @@ extern mutstypes mutstype[];
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
-#define m_team(a,b)         ((b & G_M_TEAM) || (gametype[a].implied & G_M_TEAM))
-#define m_insta(a,b)        ((b & G_M_INSTA) || (gametype[a].implied & G_M_INSTA))
-#define m_medieval(a,b)     ((b & G_M_MEDIEVAL) || (gametype[a].implied & G_M_MEDIEVAL))
-#define m_ballistic(a,b)    ((b & G_M_BALLISTIC) || (gametype[a].implied & G_M_BALLISTIC))
-#define m_duel(a,b)         ((b & G_M_DUEL) || (gametype[a].implied & G_M_DUEL))
-#define m_survivor(a,b)     ((b & G_M_SURVIVOR) || (gametype[a].implied & G_M_SURVIVOR))
-#define m_arena(a,b)        ((b & G_M_ARENA) || (gametype[a].implied & G_M_ARENA))
-#define m_onslaught(a,b)    ((b & G_M_ONSLAUGHT) || (gametype[a].implied & G_M_ONSLAUGHT))
-#define m_jetpack(a,b)      ((b & G_M_JETPACK) || (gametype[a].implied & G_M_JETPACK))
-#define m_vampire(a,b)      ((b & G_M_VAMPIRE) || (gametype[a].implied & G_M_VAMPIRE))
-#define m_expert(a,b)       ((b & G_M_EXPERT) || (gametype[a].implied & G_M_EXPERT))
-#define m_resize(a,b)       ((b & G_M_RESIZE) || (gametype[a].implied & G_M_RESIZE))
+#define m_implied(a,b)      (gametype[a].implied|(a == G_BOMBER && !((b|gametype[a].implied) & G_M_GSP2) ? G_M_TEAM : G_M_NONE))
+#define m_doimply(a,b,c)    (gametype[a].implied|mutstype[c].implied|(a == G_BOMBER && !((b|gametype[a].implied|mutstype[c].implied) & G_M_GSP2) ? G_M_TEAM : G_M_NONE))
 
-#define m_gsp1(a,b)         ((b & G_M_GSP1) || (gametype[a].implied & G_M_GSP1))
-#define m_gsp2(a,b)         ((b & G_M_GSP2) || (gametype[a].implied & G_M_GSP2))
-#define m_gsp3(a,b)         ((b & G_M_GSP3) || (gametype[a].implied & G_M_GSP3))
+#define m_team(a,b)         ((b & G_M_TEAM) || (m_implied(a,b) & G_M_TEAM))
+#define m_insta(a,b)        ((b & G_M_INSTA) || (m_implied(a,b) & G_M_INSTA))
+#define m_medieval(a,b)     ((b & G_M_MEDIEVAL) || (m_implied(a,b) & G_M_MEDIEVAL))
+#define m_ballistic(a,b)    ((b & G_M_BALLISTIC) || (m_implied(a,b) & G_M_BALLISTIC))
+#define m_duel(a,b)         ((b & G_M_DUEL) || (m_implied(a,b) & G_M_DUEL))
+#define m_survivor(a,b)     ((b & G_M_SURVIVOR) || (m_implied(a,b) & G_M_SURVIVOR))
+#define m_arena(a,b)        ((b & G_M_ARENA) || (m_implied(a,b) & G_M_ARENA))
+#define m_onslaught(a,b)    ((b & G_M_ONSLAUGHT) || (m_implied(a,b) & G_M_ONSLAUGHT))
+#define m_jetpack(a,b)      ((b & G_M_JETPACK) || (m_implied(a,b) & G_M_JETPACK))
+#define m_vampire(a,b)      ((b & G_M_VAMPIRE) || (m_implied(a,b) & G_M_VAMPIRE))
+#define m_expert(a,b)       ((b & G_M_EXPERT) || (m_implied(a,b) & G_M_EXPERT))
+#define m_resize(a,b)       ((b & G_M_RESIZE) || (m_implied(a,b) & G_M_RESIZE))
+
+#define m_gsp1(a,b)         ((b & G_M_GSP1) || (m_implied(a,b) & G_M_GSP1))
+#define m_gsp2(a,b)         ((b & G_M_GSP2) || (m_implied(a,b) & G_M_GSP2))
+#define m_gsp3(a,b)         ((b & G_M_GSP3) || (m_implied(a,b) & G_M_GSP3))
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b) || m_ballistic(a, b))
