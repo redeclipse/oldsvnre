@@ -817,7 +817,7 @@ namespace server
         if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
         else if(m_capture(b)) a = newstring(GAME(capturemaps)); \
         else if(m_defend(b)) a = newstring(GAME(defendmaps)); \
-        else if(m_bomber(b)) a = newstring(GAME(bombermaps)); \
+        else if(m_bomber(b)) a = newstring(m_gsp2(gamemode, mutators) ? GAME(holdmaps) : GAME(bombermaps)); \
         else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
         else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
         else a = newstring(GAME(allowmaps)); \
