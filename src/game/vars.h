@@ -3,17 +3,17 @@ GVAR(IDF_ADMIN, serverclients, 1, 16, MAXCLIENTS);
 GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
-GVAR(IDF_ADMIN, automaster, 0, 0, 1);
+GVAR(IDF_ADMIN, automaster, 0, 1, 1);
 
 GVAR(IDF_ADMIN, modelimit, 0, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, mutslimit, 0, G_M_ALL, G_M_ALL);
-GVAR(IDF_ADMIN, modelock, 0, 0, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
-GVAR(IDF_ADMIN, mapslock, 0, 0, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
+GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
+GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
 GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
 GVAR(IDF_ADMIN, votelock, 0, 0, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, INT_MAX-1);
 
-GVAR(IDF_ADMIN, autospectate, 0, 2, 2); // auto spectate if idle, 1 = only when dead, 2 = no interaction at all
+GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, INT_MAX-1);
 
 GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when empty, 2: when matches end)
@@ -25,7 +25,7 @@ GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepause
 
 GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
-GVAR(IDF_ADMIN, defaultmuts, 0, G_M_TEAM, G_M_ALL);
+GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
 GVAR(IDF_ADMIN, rotatemode, 0, 0, 1);
 GVAR(IDF_ADMIN, rotatemuts, 0, 0, 1);
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
@@ -36,11 +36,12 @@ GSVAR(IDF_ADMIN, mainmaps, "bath center darkness deadsimple deathtrap deli depot
 GSVAR(IDF_ADMIN, capturemaps, "bath center darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "bath center darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "bath center deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
-GSVAR(IDF_ADMIN, trialmaps, "hinder testchamber");
+GSVAR(IDF_ADMIN, holdmaps, "bath center darkness deadsimple deli depot dropzone dutility echo enigma facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath center darkness deadsimple dropzone dutility echo foundation linear longestyard panic venus");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo enigma forge foundation futuresport ghost hinder keystone linear longestyard mist nova panic spacetech stone testchamber tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo enigma forge foundation futuresport ghost keystone linear longestyard mist nova panic spacetech stone testchamber tranquility tribal ubik venus warp");
 
 namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
