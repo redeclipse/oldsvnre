@@ -457,10 +457,13 @@ namespace game
         }
     }
 
-    void boosteffect(gameent *d, const vec &pos, int num, int len)
+    void boosteffect(gameent *d, const vec &pos, int num, int len, bool shape = false)
     {
-        float intensity = 0.25f+(rnd(75)/100.f), blend = 0.5f+(rnd(50)/100.f);
-        regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[0][rnd(PULSECOLOURS)], 21, num, len, pos, intensity, blend, -5, 0, 5);
+        float scale = 0.5f+(rnd(75)/100.f);
+        part_create(PART_HINT, shape ? 10 : 1, pos, 0x1818A8, scale, min(0.65f*scale, 0.8f), 0, 0);
+        part_create(PART_FIREBALL, shape ? 10 : 1, pos, 0xFF6818, 0.8f*scale, min(0.75f*scale, 0.95f), 0, 0);
+        if(shape) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[0][rnd(PULSECOLOURS)], 21, num, len, pos, scale, 0.75f, -5, 0, 10);
+        else regular_part_create(PART_FIREBALL, len, pos, pulsecols[0][rnd(PULSECOLOURS)], 0.6f*scale, min(0.75f*scale, 0.95f), -10, 0);
     }
 
     void impulseeffect(gameent *d, int effect)
@@ -473,7 +476,7 @@ namespace game
                 case 0: playsound(S_IMPULSE, d->o, d); // faill through
                 case 1:
                 {
-                    if(num > 0 && len > 0) loopi(2) boosteffect(d, d->jet[i], num, len);
+                    if(num > 0 && len > 0) loopi(2) boosteffect(d, d->jet[i], num, len, effect==0);
                     break;
                 }
                 case 2:
@@ -2323,6 +2326,8 @@ namespace game
                         case 0: default: break;
                     }
                 }
+                if(d->turnside || d->impulse[IM_JUMP]) impulseeffect(d, 1);
+                if(physics::jetpack(d)) impulseeffect(d, 2);
             }
             if(burntime && d->burning(lastmillis, burntime))
             {
@@ -2332,8 +2337,6 @@ namespace game
                 vec pos = vec(d->headpos(-d->height/2)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
                 regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
-            if(d->turnside || d->impulse[IM_JUMP]) impulseeffect(d, 1);
-            if(physics::jetpack(d)) impulseeffect(d, 2);
         }
     }
 
