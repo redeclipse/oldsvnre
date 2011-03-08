@@ -1263,9 +1263,10 @@ namespace client
                     {
                         case SPHY_JUMP:
                         {
-                            playsound(S_JUMP, t->o, t); regularshape(PART_SMOKE, int(t->radius), 0x111111, 21, 20, 150, t->feetpos(), 1, 1, -10, 0, 10.f);
                             t->impulse[IM_JUMP] = lastmillis;
                             t->resetphys();
+                            playsound(S_JUMP, t->o, t);
+                            regularshape(PART_SMOKE, int(t->radius), 0x222222, 21, 20, 250, t->feetpos(), 1, 1, -10, 0, 10.f);
                             break;
                         }
                         case SPHY_BOOST: case SPHY_KICK: case SPHY_SKATE: case SPHY_DASH:
