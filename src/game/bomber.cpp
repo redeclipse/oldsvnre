@@ -159,7 +159,7 @@ namespace bomber
             {
                 if(f.owner == game::focus)
                 {
-                    if(bomberlockondelay && f.owner->action[AC_AFFINITY])
+                    if(m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY])
                     {
                         int px = x-int(s*skew);
                         if(lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
