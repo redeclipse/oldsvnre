@@ -2066,7 +2066,7 @@ namespace game
 
     void renderabovehead(gameent *d, float trans)
     {
-        vec pos = d->abovehead();
+        vec pos = d->abovehead(d->state != CS_DEAD ? 1 : -1);
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
@@ -2114,7 +2114,7 @@ namespace game
                 {
                     int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
                     float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
-                          size = aboveheadiconsize*skew, fade = blend*skew, nudge = size/2;
+                          size = aboveheadiconsize*skew, fade = blend*skew, nudge = size*2/3;
                     if(d->icons[i].type >= eventicon::SORTED)
                     {
                         switch(d->icons[i].type)
@@ -2124,7 +2124,7 @@ namespace game
                             default: nudge *= 1.5f; break;
                         }
                     }
-                    pos.z += nudge+0.125f;
+                    pos.z += nudge;
                     part_icon(pos, t, size, fade, 0, 0, 1, colour);
                     pos.z += nudge;
                 }
@@ -2165,13 +2165,6 @@ namespace game
         {
             animflags = ANIM_EDIT|ANIM_LOOP;
             showweap = false;
-        }
-        else if(third && lastmillis-d->lastpain <= 300)
-        {
-            secondary = third;
-            lastaction = d->lastpain;
-            animflags = ANIM_PAIN;
-            animdelay = 300;
         }
         else
         {
@@ -2225,6 +2218,13 @@ namespace game
                         break;
                     }
                 }
+            }
+            if(third && (animflags&ANIM_IDLE) && lastmillis-d->lastpain <= 300)
+            {
+                secondary = third;
+                lastaction = d->lastpain;
+                animflags = ANIM_PAIN;
+                animdelay = 300;
             }
         }
         if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
@@ -2332,7 +2332,7 @@ namespace game
                 vec pos = vec(d->headpos(-d->height/2)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
                 regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
-            if(physics::sprinting(d)) impulseeffect(d, 1);
+            if(d->turnside || d->impulse[IM_JUMP]) impulseeffect(d, 1);
             if(physics::jetpack(d)) impulseeffect(d, 2);
         }
     }

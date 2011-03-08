@@ -75,7 +75,7 @@ namespace hud
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
+    FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
@@ -336,7 +336,8 @@ namespace hud
                     amt += 0.25f+(float((lastmillis-game::focus->lastburn)%burndelay)/float(burndelay))*0.35f;
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
                     amt += 0.25f+(float((lastmillis-game::focus->lastbleed)%bleeddelay)/float(bleeddelay))*0.35f;
-                if(physics::sprinting(game::focus)) amt += game::focus->turnside ? 0.125f : 0.25f;
+                if(game::focus->turnside || game::focus->impulse[IM_JUMP])
+                    amt += game::focus->turnside ? 0.125f : 0.25f;
                 if(physics::jetpack(game::focus)) amt += 0.125f;
                 break;
             }
@@ -2055,7 +2056,7 @@ namespace hud
                         glBindTexture(GL_TEXTURE_2D, t->id);
                         glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, fade);
                         drawtex(tx-width/2, ty-size, width, size);
-                        ty -= game::focus->icons[i].type < eventicon::WEAPON ? int(size/2) : int(size);
+                        ty -= game::focus->icons[i].type < eventicon::AFFINITY ? int(size*2/3) : int(size);
                     }
                 }
             }
