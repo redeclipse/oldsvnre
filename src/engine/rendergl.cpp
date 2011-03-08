@@ -320,7 +320,7 @@ void gl_checkextensions()
 #if defined(__APPLE__) && SDL_BYTEORDER == SDL_BIG_ENDIAN
             if(strstr(vendor, "ATI") && (osversion<0x1050)) ati_oq_bug = 1;
 #endif
-            if(ati_oq_bug) conoutf("\frWARNING: Using ATI occlusion query bug workaround. (use \"/ati_oq_bug 0\" to disable if unnecessary)");
+            //if(ati_oq_bug) conoutf("\frWARNING: Using ATI occlusion query bug workaround. (use \"/ati_oq_bug 0\" to disable if unnecessary)");
         }
     }
     if(!hasOQ)
@@ -399,7 +399,7 @@ void gl_checkextensions()
         if(osversion>=0x1050) // fixed in 1055 for some hardware.. but not all.
         {
             apple_ff_bug = 1;
-            conoutf("\frWARNING: Using Leopard ARB_position_invariant bug workaround. (use \"/apple_ff_bug 0\" to disable if unnecessary)");
+            //conoutf("\frWARNING: Using Leopard ARB_position_invariant bug workaround. (use \"/apple_ff_bug 0\" to disable if unnecessary)");
         }
 #endif
 
@@ -446,7 +446,7 @@ void gl_checkextensions()
             //if(osversion<0x1050) ??
             if(hasVP && hasFP) apple_glsldepth_bug = 1;
 #endif
-            if(apple_glsldepth_bug) conoutf("\frWARNING: Using Apple GLSL depth bug workaround. (use \"/apple_glsldepth_bug 0\" to disable if unnecessary");
+            //if(apple_glsldepth_bug) conoutf("\frWARNING: Using Apple GLSL depth bug workaround. (use \"/apple_glsldepth_bug 0\" to disable if unnecessary");
         }
     }
 
