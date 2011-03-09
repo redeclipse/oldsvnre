@@ -60,6 +60,12 @@ namespace bomber
         loadmodel("ball", -1, true);
     }
 
+    vec pulsecolour()
+    {
+        uint n = lastmillis/100;
+        return vec().lerp(bvec(pulsecols[2][n%PULSECOLOURS]).tocolor(), bvec(pulsecols[2][(n+1)%PULSECOLOURS]).tocolor(), (lastmillis%100)/100.0f);
+    }
+
     void drawblips(int w, int h, float blend)
     {
         static vector<int> hasbombs; hasbombs.setsize(0);
@@ -68,7 +74,7 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec dir = vec(f.pos()).sub(camera1->o), colour = bvec(isbomberaffinity(f) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[f.team].colour).tocolor();
+            vec dir = vec(f.pos()).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : bvec(teamtype[f.team].colour).tocolor();
             float area = 3, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -132,8 +138,9 @@ namespace bomber
             if(y-sy-s < m) break;
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
-            int millis = lastmillis-f.interptime, colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
-            float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, skew = hud::inventoryskew, fade = blend*hud::inventoryblend;
+            int millis = lastmillis-f.interptime;
+            vec colour = pulsecolour();
+            float skew = hud::inventoryskew, fade = blend*hud::inventoryblend;
             if(f.owner || f.droptime)
             {
                 if(f.owner == game::focus)
@@ -148,7 +155,7 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            sy += hud::drawitem(hud::bombtex, x, oldy, s, false, r, g, b, fade, skew);
+            sy += hud::drawitem(hud::bombtex, x, oldy, s, false, colour.x, colour.y, colour.z, fade, skew);
             if(f.droptime)
             {
                 int time = lastmillis-f.droptime, delay = bomberresetdelay-time;
@@ -226,20 +233,22 @@ namespace bomber
                     if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
                     entitylight *light = &entities::ents[f.ent]->light;
                     float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/3)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
-                    int interval = lastmillis%1000, colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
-                    if(light->millis != lastmillis) light->material[0] = f.light.material[0] = bvec(colour);
+                    int interval = lastmillis%1000;
+                    bvec colour = bvec::fromcolor(pulsecolour());
+                    if(light->millis != lastmillis) f.light.material[0] = light->material[0] = colour;
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    part_create(PART_HINT_SOFT, 1, above, colour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
+                    int pcolour = (int(colour.x)<<16)|(int(colour.y)<<8)|int(colour.z);
+                    part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
                     if(f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/4*trans+2.5f;
                         float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
-                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, colour, (lastmillis%1000)/1000.f, 0.1f);
-                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, colour);
-                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, colour, 0, wait);
+                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
+                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);
                         above.z += 0.5f;
-                        defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, colour, 2, max(trans, 0.5f)*0.5f);
+                        defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, max(trans, 0.5f)*0.5f);
                     }
                 }
                 else if(!m_gsp2(game::gamemode, game::mutators))
@@ -263,8 +272,8 @@ namespace bomber
             float trans = 1.f;
             int millis = lastmillis-f.interptime;
             if(millis <= 1000) trans = float(millis)/1000.f;
-            int colour = isbomberaffinity(f) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[f.team].colour;
-            adddynlight(f.pos(), enttype[AFFINITY].radius*trans, vec((colour>>16), ((colour>>8)&0xFF), (colour&0xFF)).div(255.f), 0, 0, DL_KEEP);
+            vec colour = isbomberaffinity(f) ? pulsecolour() : bvec(teamtype[f.team].colour).tocolor();
+            adddynlight(f.pos(), enttype[AFFINITY].radius*trans, colour, 0, 0, DL_KEEP);
         }
     }
 

@@ -373,6 +373,13 @@ namespace game
         }
     }
 
+    vec weappulsecolour(dynent *d)
+    {
+        size_t seed = size_t(d) + (lastmillis/50);
+        int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS);
+        return bvec(pulsecols[0][n]).tocolor().lerp(bvec(pulsecols[0][n2]).tocolor(), (lastmillis%50)/50.0f);
+    }
+
     void adddynlights()
     {
         if(dynlighteffects)
@@ -397,9 +404,7 @@ namespace game
                     if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                     {
                         float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                        int colour = pulsecols[0][rnd(PULSECOLOURS)];
-                        vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
-                        adddynlight(d->ejectpos(d->weapselect), 16*scale, col, 0, 0, DL_KEEP);
+                        adddynlight(d->ejectpos(d->weapselect), 16*scale, weappulsecolour(d), 0, 0, DL_KEEP);
                     }
                     if(d->weapselect == WEAP_SWORD || powering)
                     {
@@ -422,16 +427,22 @@ namespace game
                         {
                             case 1:
                             {
-                                int colour = powerdl[d->weapselect].colour > 0 ? powerdl[d->weapselect].colour : pulsecols[0][rnd(PULSECOLOURS)];
-                                vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
+                                vec col = powerdl[d->weapselect].colour > 0 ? bvec(powerdl[d->weapselect].colour).tocolor() : weappulsecolour(d);
                                 adddynlight(d->muzzlepos(d->weapselect), 16+(amt*powerdl[d->weapselect].radius), col, 0, 0, DL_KEEP);
                                 break;
                             }
                             case 2:
                             {
-                                int colour = powerdl[d->weapselect].colour > 0 ? powerdl[d->weapselect].colour : ((int(254*max(1.f-amt,0.5f))<<16)+1)|((int(128*max(1.f-amt,0.f))+1)<<8), interval = lastmillis%1000;
+                                vec col;
+                                if(powerdl[d->weapselect].colour > 0) col = bvec(powerdl[d->weapselect].colour).tocolor();
+                                else
+                                {
+                                    col.x = max(1.f-amt,0.5f);
+                                    col.y = 0.5f*max(1.f-amt,0.f);
+                                    col.z = 0;
+                                }
+                                int interval = lastmillis%1000;
                                 float fluc = 8*(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                                vec col((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f);
                                 adddynlight(d->muzzlepos(d->weapselect), 16+((powerdl[d->weapselect].radius*max(amt, 0.25f))+fluc), col, 0, 0, DL_KEEP);
                                 break;
                             }
@@ -449,8 +460,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    int colour = d->colour();
-                    vec col = vec((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f).mul(illumlevel);
+                    vec col = bvec(d->colour()).tocolor().mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -1312,6 +1322,13 @@ namespace game
     }
     ICOMMAND(0, kill, "",  (), { suicide(player1, 0); });
 
+    vec burncolour(dynent *d)
+    {
+        size_t seed = size_t(d) + (lastmillis/50);
+        int n = detrnd(seed, 2*PULSECOLOURS), n2 = detrnd(seed + 1, 2*PULSECOLOURS);
+        return bvec(pulsecols[n/PULSECOLOURS][n%PULSECOLOURS]).tocolor().lerp(bvec(pulsecols[n2/PULSECOLOURS][n2%PULSECOLOURS]).tocolor(), (lastmillis%50)/50.0f);
+    }
+    
     void lighteffects(dynent *d, vec &color, vec &dir) 
     { 
         if(d == (dynent *)&avatarmodel)
@@ -1319,15 +1336,15 @@ namespace game
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;        
-            if(!burntime || lastmillis%150 >= 50 || !e->burning(lastmillis, burntime)) return;
-            vec burncol = bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).tocolor();
+            if(!burntime || !e->burning(lastmillis, burntime)) return;
+            vec burncol = burncolour(d);
             color.max(burncol).lerp(burncol, 0.6f);
         }
         else if(d->type == ENT_PROJ)
         {
             projent *e = (projent *)d;
-            if(e->projtype != PRJ_DEBRIS || e->limited || lastmillis%150 >= 50) return;
-            vec burncol = bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).tocolor();
+            if(e->projtype != PRJ_DEBRIS || e->limited) return;
+            vec burncol = burncolour(d);
             color.max(burncol).lerp(burncol, 0.6f);
         }
     }
@@ -2117,7 +2134,7 @@ namespace game
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    colour = pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
+                    colour = pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
                 }
             }
             if(t && t != notexture)
@@ -2145,7 +2162,14 @@ namespace game
                         switch(d->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
-                            case eventicon::AFFINITY: colour = m_bomber(gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[d->icons[i].value].colour; // fall-through
+                            case eventicon::AFFINITY: 
+                                if(m_bomber(gamemode))
+                                {
+                                    bvec pcol = bvec::fromcolor(bomber::pulsecolour());
+                                    colour = (pcol.x<<16)|(pcol.y<<8)|pcol.z;
+                                }
+                                else colour = teamtype[d->icons[i].value].colour;
+                                // fall-through
                             default: nudge *= 1.5f; break;
                         }
                     }
