@@ -2,7 +2,11 @@
     $app['releasever'] = "Pre-Beta";
     $app['releasedate'] = "NOT YET";
     $app['background'] = "/bits/background_01.jpg";
+    $app['youtubevid'] = "in6lzvywk7U";
     $app['screenshots'] = 16;
+
+    $app['banner'] = "Help us raise <b>AU$294</b> to pay for our new player model, we have <b>AU$124</b> already!";
+    $app['bannerurl'] = "/donate";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
@@ -12,7 +16,7 @@
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'alturl' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
+    // $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
@@ -89,23 +93,22 @@
     </head>
     <body style="background: #111111 url(<?php echo $app['background']; ?>) no-repeat center top">
         <div id="container">
+            <div id="banner"><a href="<?php echo $app['bannerurl']; ?>"><?php echo $app['banner']; ?></a></div>
             <div id="links"><?php echo $app['navbar']; ?></div>
             <div id="header">
                 <a href="/home"><img src="/bits/lightbox-blank.gif" alt="Red Eclipse" width="450" height="143" border="0" align="left" title="Red Eclipse" /></a><a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
             </div>
             <div id="video">
                 <div id="main">
-                    <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
+                    <h1>Red Eclipse - Coming Soon</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
                     <h3>Available for Windows, Linux/BSD and Mac OSX</h3>
                     <h3>Agile gameplay: sprint, wall run/kick, and impulse dash</h3>
                     <h3>Builtin Editor: create your own maps cooperatively online</h3>
-                    <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br />
-                    released <i><?php echo $app['releasedate']; ?></i></em></a>
-                    <p id="svn">or <a href="/devel">get the SVN version</a> and live on the bleeding edge</p>
+                    <p id="svn">This game is not released yet,<br/><a href="/devel">get the SVN version</a><br/>and help us beta test today!</p>
                 </div>
                 <div id="player">
-                    <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/TF5wKzBDMD8&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
-                        <param name="movie" value="http://www.youtube.com/v/TF5wKzBDMD8&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18" />
+                    <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/<?php echo $app['youtubevid']; ?>&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
+                        <param name="movie" value="http://www.youtube.com/v/<?php echo $app['youtubevid']; ?>&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18" />
                         <param name="allowscriptaccess" value="always" />
                         <param name="allowFullScreen" value="true" />
                     </object>
@@ -137,7 +140,7 @@
             </div>
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
-                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
+                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; <!--you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or -->grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
                 <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a variety of environments. For more information, please see our <a href="/chat">Chat</a>.</p>
             </div>
             <div class="vbar">&nbsp;</div>
