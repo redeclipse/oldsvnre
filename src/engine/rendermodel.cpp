@@ -520,7 +520,7 @@ void renderellipse(vec &o, float xradius, float yradius, float yaw)
 struct batchedmodel
 {
     vec pos, color, dir;
-    const vec *material;
+    const bvec *material;
     int anim;
     float yaw, pitch, roll, transparent, sizescale;
     int basetime, basetime2, flags;
@@ -841,7 +841,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
     }
 
     vec lightcolor(1, 1, 1), lightdir(0, 0, 1);
-    const vec *lightmaterial = NULL;
+    const bvec *lightmaterial = NULL;
     if(!shadowmapping)
     {
         vec pos = o;

@@ -13,20 +13,17 @@ namespace defend
         loadmodel("flag", -1, true);
     }
 
-    void skewrgb(float &r, float &g, float &b, int owner, int enemy, float occupy)
+    static bvec skewcolour(int owner, int enemy, float occupy)
     {
-        r = (teamtype[owner].colour>>16)/255.f;
-        g = ((teamtype[owner].colour>>8)&0xFF)/255.f;
-        b = (teamtype[owner].colour&0xFF)/255.f;
+        bvec colour(teamtype[owner].colour);
         if(enemy)
         {
             int timestep = totalmillis%1000;
-            float r2 = (teamtype[enemy].colour>>16)/255.f, g2 = ((teamtype[enemy].colour>>8)&0xFF)/255.f, b2 = (teamtype[enemy].colour&0xFF)/255.f,
-                  amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*occupy, 0.f, 1.f);
-            r += (r2-r)*amt;
-            g += (g2-g)*amt;
-            b += (b2-b)*amt;
+            bvec colour2(teamtype[enemy].colour);
+            float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*occupy, 0.f, 1.f);
+            colour.lerp(colour, colour2, amt);
         }
+        return colour;
     }
 
     void render()
@@ -37,7 +34,7 @@ namespace defend
             if(!entities::ents.inrange(b.ent)) continue;
             float occupy = b.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
             entitylight *light = &entities::ents[b.ent]->light;
-            if(light->millis != lastmillis) skewrgb(light->material[0].x, light->material[0].y, light->material[0].z, b.owner, b.enemy, occupy);
+            if(light->millis != lastmillis) light->material[0] = skewcolour(b.owner, b.enemy, occupy);
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
                 formatstring(b.info)("<super>\fs%s%s\fS vs. \fs%s%s\fS", teamtype[b.owner].chat, teamtype[b.owner].name, teamtype[b.enemy].chat, teamtype[b.enemy].name);
@@ -73,9 +70,9 @@ namespace defend
         {
             defendstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), r = 1, g = 1, b = 1;
-            skewrgb(r, g, b, f.owner, f.enemy, occupy);
-            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(r, g, b), 0, 0, DL_KEEP);
+            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
+            bvec colour = skewcolour(f.owner, f.enemy, occupy);
+            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, colour.tocolor(), 0, 0, DL_KEEP);
         }
     }
 
@@ -85,8 +82,8 @@ namespace defend
         {
             defendstate::flag &f = st.flags[i];
             vec dir(f.o); dir.sub(camera1->o);
-            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), r = 1, g = 1, b = 1, fade = blend*hud::radaraffinityblend;
-            skewrgb(r, g, b, f.owner, f.enemy, occupy);
+            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), fade = blend*hud::radaraffinityblend;
+            vec colour = skewcolour(f.owner, f.enemy, occupy).tocolor();
             if(f.owner != game::focus->team && f.enemy != game::focus->team)
             {
                 float dist = dir.magnitude(),
@@ -99,10 +96,10 @@ namespace defend
             if(hud::radaraffinitynames >= (f.hasflag ? 1 : 2))
             {
                 bool overthrow = f.owner && f.enemy == game::focus->team;
-                if(occupy < 1.f) hud::drawblip(tex, 3, w, h, size, fade, dir, r, g, b, "radar", "%s%d%%", f.hasflag ? (overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : teamtype[f.owner].chat, int(occupy*100.f));
-                else hud::drawblip(tex, 3, w, h, size, fade, dir, r, g, b, "radar", "%s%s", f.hasflag ? (overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : teamtype[f.owner].chat, teamtype[f.owner].name);
+                if(occupy < 1.f) hud::drawblip(tex, 3, w, h, size, fade, dir, colour, "radar", "%s%d%%", f.hasflag ? (overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : teamtype[f.owner].chat, int(occupy*100.f));
+                else hud::drawblip(tex, 3, w, h, size, fade, dir, colour, "radar", "%s%s", f.hasflag ? (overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : teamtype[f.owner].chat, teamtype[f.owner].name);
             }
-            else hud::drawblip(tex, 3, w, h, size, fade, dir, r, g, b);
+            else hud::drawblip(tex, 3, w, h, size, fade, dir, colour);
         }
     }
 

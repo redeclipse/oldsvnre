@@ -18,10 +18,11 @@ enum { MAXLIGHTMATERIALS = 2 };
 
 struct entitylight
 {
-    vec color, dir, material[MAXLIGHTMATERIALS];
+    vec color, dir;
     int millis;
+    bvec material[MAXLIGHTMATERIALS];
 
-    entitylight() : color(1, 1, 1), dir(0, 0, 1), millis(-1) { loopi(MAXLIGHTMATERIALS) material[i] = vec(1, 1, 1); }
+    entitylight() : color(1, 1, 1), dir(0, 0, 1), millis(-1) { loopi(MAXLIGHTMATERIALS) material[i] = bvec(255, 255, 255); }
 };
 
 enum
