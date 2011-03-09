@@ -1083,7 +1083,7 @@ namespace entities
                 while(e.attrs[3] < 0) e.attrs[3] += 101;
                 while(e.attrs[3] >= 101) e.attrs[3] -= 101;
                 if(e.attrs[4] < 0) e.attrs[4] = 0;
-                e.light.material = e.attrs[6] ? vec(e.attrs[6]>>16, (e.attrs[6]>>8)&0xFF, e.attrs[6]&0xFF).div(255.f) : vec(1, 1, 1);
+                e.light.material[0] = e.attrs[6] ? vec(e.attrs[6]>>16, (e.attrs[6]>>8)&0xFF, e.attrs[6]&0xFF).div(255.f) : vec(1, 1, 1);
             case PARTICLES:
             case MAPSOUND:
             case LIGHTFX:
@@ -1181,7 +1181,7 @@ namespace entities
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
                 while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
                 while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
-                e.light.material = vec(teamtype[e.attrs[0]].colour>>16, (teamtype[e.attrs[0]].colour>>8)&0xFF, teamtype[e.attrs[0]].colour&0xFF).div(255.f);
+                e.light.material[0] = vec(teamtype[e.attrs[0]].colour>>16, (teamtype[e.attrs[0]].colour>>8)&0xFF, teamtype[e.attrs[0]].colour&0xFF).div(255.f);
                 break;
             case TELEPORT:
                 while(e.attrs[0] < -1) e.attrs[0] += 361;
@@ -2461,7 +2461,7 @@ namespace entities
                             if(millis < 500) size = fade = 1.f-(float(millis)/500.f);
                         }
                         if(colour >= 0 && lastmillis != e.light.millis)
-                            e.light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
+                            e.light.material[0] = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(255.f);
                         rendermodel(&e.light, mdlname, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0.f, flags, NULL, NULL, 0, 0, fade, size);
                     }
                 }

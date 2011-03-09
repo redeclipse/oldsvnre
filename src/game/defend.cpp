@@ -37,7 +37,7 @@ namespace defend
             if(!entities::ents.inrange(b.ent)) continue;
             float occupy = b.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
             entitylight *light = &entities::ents[b.ent]->light;
-            if(light->millis != lastmillis) skewrgb(light->material.x, light->material.y, light->material.z, b.owner, b.enemy, occupy);
+            if(light->millis != lastmillis) skewrgb(light->material[0].x, light->material[0].y, light->material[0].z, b.owner, b.enemy, occupy);
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
                 formatstring(b.info)("<super>\fs%s%s\fS vs. \fs%s%s\fS", teamtype[b.owner].chat, teamtype[b.owner].name, teamtype[b.enemy].chat, teamtype[b.enemy].name);
@@ -52,7 +52,7 @@ namespace defend
             above.z += 2.5f;
             if(b.enemy)
             {
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, (int(light->material.x*255)<<16)|(int(light->material.y*255)<<8)|int(light->material.z*255), (totalmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, (int(light->material[0].x*255)<<16)|(int(light->material[0].y*255)<<8)|int(light->material[0].z*255), (totalmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[b.enemy].colour, 0, occupy);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, teamtype[b.owner].colour, occupy, 1-occupy);
             }

@@ -529,7 +529,7 @@ namespace projs
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
                     proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
-                    proj.light.material = vec(weaptype[proj.weap].colour>>16, (weaptype[proj.weap].colour>>8)&0xFF, weaptype[proj.weap].colour&0xFF).div(255.f);
+                    proj.light.material[0] = vec(weaptype[proj.weap].colour>>16, (weaptype[proj.weap].colour>>8)&0xFF, weaptype[proj.weap].colour&0xFF).div(255.f);
                 }
                 else
                 {
@@ -1255,7 +1255,7 @@ namespace projs
                 playsound(snd, proj.o, NULL, 0, vol);
                 part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, max(size, 1.5f), 1, -10);
                 proj.limited = true;
-                if(proj.projtype == PRJ_DEBRIS) proj.light.material = vec(1, 1, 1);
+                if(proj.projtype == PRJ_DEBRIS) proj.light.material[0] = vec(1, 1, 1);
             }
             proj.norm = dir;
             if(proj.extinguish&4) return 0;
@@ -1754,7 +1754,7 @@ namespace projs
                     {
                         bool burning = totalmillis%150 < 50;
                         int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : 0xFFFFFF;
-                        light->material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
+                        light->material[0] = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
                     }
                     fadeproj(proj, trans, size);
                     break;
