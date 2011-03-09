@@ -2063,7 +2063,10 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         bool burning = burntime && totalmillis%150 < 50 && d->burning(lastmillis, burntime);
         int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : d->colour();
-        e->light.material = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
+        e->light.material[0] = vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(burning ? 127.5f : 255.f);
+        if(isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
+            e->light.material[1].x = e->light.material[1].y = e->light.material[1].z = (2/float(WEAP(d->weapselect, max)+2))+(d->ammo[d->weapselect]/float(WEAP(d->weapselect, max)+2));
+        else e->light.material[1].x = e->light.material[1].y = e->light.material[1].z = 1.f;
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 

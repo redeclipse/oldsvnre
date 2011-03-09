@@ -16,10 +16,10 @@ struct entbase                                   // persistent map entity
 
 struct entitylight
 {
-    vec color, dir, material;
+    vec color, dir, material[2];
     int millis;
 
-    entitylight() : color(1, 1, 1), dir(0, 0, 1), material(1, 1, 1), millis(-1) {}
+    entitylight() : color(1, 1, 1), dir(0, 0, 1), millis(-1) { material[0] = material[1] = vec(1, 1, 1); }
 };
 
 enum

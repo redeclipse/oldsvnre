@@ -262,7 +262,7 @@ namespace capture
             if(st.flags.inrange(index)) \
             { \
                 st.flags[index].ent = a; \
-                entities::ents[a]->light.material = st.flags[index].light.material = vec(teamtype[st.flags[index].team].colour>>16, (teamtype[st.flags[index].team].colour>>8)&0xFF, teamtype[st.flags[index].team].colour&0xFF).div(255.f); \
+                entities::ents[a]->light.material[0] = st.flags[index].light.material[0] = vec(teamtype[st.flags[index].team].colour>>16, (teamtype[st.flags[index].team].colour>>8)&0xFF, teamtype[st.flags[index].team].colour&0xFF).div(255.f); \
             } \
             else continue; \
         }
