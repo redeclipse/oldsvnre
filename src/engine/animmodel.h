@@ -100,7 +100,7 @@ struct animmodel : model
             }
             if(masked!=enableglow) lasttex = lastmasks = NULL;
             float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f;
-            vec color = vec(lightcolor).max(mincolor), matcolor = material ? lightmaterial[clamp(material-1, 0, 1)] : vec(1, 1, 1);
+            vec color = vec(lightcolor).max(mincolor), matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1] : vec(1, 1, 1);
             if(masked)
             {
                 bool needenvmap = envmaptmu>=0 && envmapmax>0;
@@ -169,7 +169,7 @@ struct animmodel : model
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec, minshade, glow);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, spec, minshade, glow);
             }
-            vec matcolor = material ? lightmaterial[clamp(material-1, 0, 1)] : vec(1, 1, 1);
+            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1] : vec(1, 1, 1);
             setenvparamf("lightmaterial", SHPARAM_PIXEL, 6, matcolor.x, matcolor.y, matcolor.z, 1);
             setenvparamf("texscroll", SHPARAM_VERTEX, 5, lastmillis/1000.0f, scrollu*lastmillis/1000.0f, scrollv*lastmillis/1000.0f);
             if(envmaptmu>=0 && envmapmax>0) setenvparamf("envmapscale", bumpmapped() ? SHPARAM_PIXEL : SHPARAM_VERTEX, 3, envmapmin-envmapmax, envmapmax);
@@ -952,7 +952,7 @@ struct animmodel : model
         }
     }
 
-    void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a, const vec &color, const vec &dir, const vec &material1, const vec &material2, float trans, float size)
+    void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a, const vec &color, const vec &dir, const vec *material, float trans, float size)
     {
         if(!loaded) return;
 
@@ -999,8 +999,7 @@ struct animmodel : model
             transparent = trans;
             lightdir = dir;
             lightcolor = color;
-            lightmaterial[0] = material1;
-            lightmaterial[1] = material2;
+            lightmaterial = material;
 
             if(envmapped()) envmaptmu = 2;
             else if(a) for(int i = 0; a[i].tag; i++) if(a[i].m && a[i].m->envmapped())
@@ -1247,7 +1246,8 @@ struct animmodel : model
     }
 
     static bool enabletc, enablemtc, enablealphatest, enablealphablend, enableenvmap, enableglow, enableoverbright, enablelighting, enablelight0, enablecullface, enablenormals, enabletangents, enablebones, enablerescale, enabledepthoffset;
-    static vec lightdir, lightcolor, lightmaterial[2];
+    static vec lightdir, lightcolor;
+    static const vec *lightmaterial;
     static float transparent, lastalphatest, sizescale;
     static void *lastvbuf, *lasttcbuf, *lastmtcbuf, *lastnbuf, *lastxbuf, *lastbbuf, *lastsdata, *lastbdata;
     static GLuint lastebuf, lastenvmaptex, closestenvmaptex;
@@ -1378,7 +1378,8 @@ struct animmodel : model
 bool animmodel::enabletc = false, animmodel::enablemtc = false, animmodel::enablealphatest = false, animmodel::enablealphablend = false,
      animmodel::enableenvmap = false, animmodel::enableglow = false, animmodel::enableoverbright = false, animmodel::enablelighting = false, animmodel::enablelight0 = false, animmodel::enablecullface = true,
      animmodel::enablenormals = false, animmodel::enabletangents = false, animmodel::enablebones = false, animmodel::enablerescale = false, animmodel::enabledepthoffset = false;
-vec animmodel::lightdir(0, 0, 1), animmodel::lightcolor(1, 1, 1), animmodel::lightmaterial[2] = { vec(1, 1, 1), vec(1, 1, 1) };
+vec animmodel::lightdir(0, 0, 1), animmodel::lightcolor(1, 1, 1);
+const vec *animmodel::lightmaterial = NULL;
 float animmodel::transparent = 1, animmodel::lastalphatest = -1, animmodel::sizescale = 1;
 void *animmodel::lastvbuf = NULL, *animmodel::lasttcbuf = NULL, *animmodel::lastmtcbuf = NULL, *animmodel::lastnbuf = NULL, *animmodel::lastxbuf = NULL, *animmodel::lastbbuf = NULL, *animmodel::lastsdata = NULL, *animmodel::lastbdata = NULL;
 GLuint animmodel::lastebuf = 0, animmodel::lastenvmaptex = 0, animmodel::closestenvmaptex = 0;
@@ -1518,7 +1519,7 @@ template<class MDL, class MESH> struct modelcommands
 
     static void setmaterial(char *meshname, int *material)
     {
-        loopskins(meshname, s, s.material = clamp(*material, 0, 2));
+        loopskins(meshname, s, s.material = clamp(*material, 0, int(MAXLIGHTMATERIALS)));
     }
 
     static void setlink(int *parent, int *child, char *tagname, float *x, float *y, float *z)

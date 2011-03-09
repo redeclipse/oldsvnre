@@ -44,7 +44,7 @@ MODELTYPE(MDL_IQM, iqm);
 void mdlmaterial(int *material)
 {
     checkmdl;
-    loadingmodel->setmaterial(clamp(*material, 0, 2));
+    loadingmodel->setmaterial(clamp(*material, 0, int(MAXLIGHTMATERIALS)));
 }
 
 COMMAND(0, mdlmaterial, "i");
@@ -519,7 +519,8 @@ void renderellipse(vec &o, float xradius, float yradius, float yaw)
 
 struct batchedmodel
 {
-    vec pos, color, dir, material[2];
+    vec pos, color, dir;
+    const vec *material;
     int anim;
     float yaw, pitch, roll, transparent, sizescale;
     int basetime, basetime2, flags;
@@ -579,7 +580,7 @@ void renderbatchedmodel(model *m, batchedmodel &b)
         if(b.flags&MDL_FULLBRIGHT) anim |= ANIM_FULLBRIGHT;
     }
 
-    m->render(anim, b.basetime, b.basetime2, b.pos, b.yaw, b.pitch, b.roll, b.d, a, b.color, b.dir, b.material[0], b.material[1], b.transparent, b.sizescale);
+    m->render(anim, b.basetime, b.basetime2, b.pos, b.yaw, b.pitch, b.roll, b.d, a, b.color, b.dir, b.material, b.transparent, b.sizescale);
 }
 
 struct transparentmodel
@@ -839,7 +840,8 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         glPopMatrix();
     }
 
-    vec lightcolor(1, 1, 1), lightdir(0, 0, 1), lightmaterial[2] = { vec(1, 1, 1), vec(1, 1, 1) };
+    vec lightcolor(1, 1, 1), lightdir(0, 0, 1);
+    const vec *lightmaterial = NULL;
     if(!shadowmapping)
     {
         vec pos = o;
@@ -875,7 +877,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
                 light->millis = lastmillis;
             }
         }
-        if(light) { lightcolor = light->color; lightdir = light->dir; lightmaterial[0] = light->material[0]; lightmaterial[1] = light->material[1]; }
+        if(light) { lightcolor = light->color; lightdir = light->dir; lightmaterial = light->material; }
         if(flags&MDL_DYNLIGHT) dynlightreaching(pos, lightcolor, lightdir);
     }
 
@@ -895,8 +897,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         b.pos = o;
         b.color = lightcolor;
         b.dir = lightdir;
-        b.material[0] = lightmaterial[0];
-        b.material[1] = lightmaterial[1];
+        b.material = lightmaterial;
         b.anim = anim;
         b.yaw = yaw;
         b.pitch = pitch;
@@ -944,7 +945,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         if(d->query) startquery(d->query);
     }
 
-    m->render(anim, basetime, basetime2, o, yaw, pitch, roll, d, a, lightcolor, lightdir, lightmaterial[0], lightmaterial[1], trans, size);
+    m->render(anim, basetime, basetime2, o, yaw, pitch, roll, d, a, lightcolor, lightdir, lightmaterial, trans, size);
 
     if(doOQ && d->query) endquery(d->query);
 

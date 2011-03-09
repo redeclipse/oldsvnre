@@ -14,12 +14,14 @@ struct entbase                                   // persistent map entity
     uchar reserved[3];                          // left-over space due to struct alignment
 };
 
+enum { MAXLIGHTMATERIALS = 2 };
+
 struct entitylight
 {
-    vec color, dir, material[2];
+    vec color, dir, material[MAXLIGHTMATERIALS];
     int millis;
 
-    entitylight() : color(1, 1, 1), dir(0, 0, 1), millis(-1) { material[0] = material[1] = vec(1, 1, 1); }
+    entitylight() : color(1, 1, 1), dir(0, 0, 1), millis(-1) { loopi(MAXLIGHTMATERIALS) material[i] = vec(1, 1, 1); }
 };
 
 enum
