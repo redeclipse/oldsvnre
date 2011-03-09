@@ -2062,7 +2062,7 @@ namespace game
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         bool burning = burntime && totalmillis%150 < 50 && d->burning(lastmillis, burntime);
-        e->light.material[0] = burning ? bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).div(2) : bvec(d->colour());
+        e->light.material[0] = burning ? bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).mulsat(2) : bvec(d->colour());
         if(isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
         {
             uchar wepmat = uchar(255*(d->ammo[d->weapselect]+2)/float(WEAP(d->weapselect, max)+2));

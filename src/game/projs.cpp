@@ -1753,7 +1753,7 @@ namespace projs
                     if(light->millis != lastmillis && !proj.limited)
                     {
                         bool burning = totalmillis%150 < 50;
-                        light->material[0] = burning ? bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).div(2) : bvec(255, 255, 255);
+                        light->material[0] = burning ? bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).mulsat(2) : bvec(255, 255, 255);
                     }
                     fadeproj(proj, trans, size);
                     break;

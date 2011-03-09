@@ -1034,6 +1034,7 @@ struct bvec
     bvec &shl(int n) { x<<= n; y<<= n; z<<= n; return *this; }
     bvec &shr(int n) { x>>= n; y>>= n; z>>= n; return *this; }
     bvec &mul(int n) { x *= n; y *= n; z *= n; return *this; }
+    bvec &mulsat(int n) { x = min(x*n, 255); y = min(y*n, 255); z = min(z*n, 255); return *this; }
     bvec &div(int n) { x /= n; y /= n; z /= n; return *this; }
     bvec &add(int n) { x += n; y += n; z += n; return *this; }
     bvec &sub(int n) { x -= n; y -= n; z -= n; return *this; }
