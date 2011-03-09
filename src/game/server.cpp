@@ -1573,9 +1573,9 @@ namespace server
             if(ci->lastvote && totalmillis-ci->lastvote <= GAME(votewait)) return;
             if(ci->modevote == reqmode && ci->mutsvote == reqmuts && !strcmp(ci->mapvote, reqmap)) return;
         }
-        if(reqmode < G_START && !ci->local)
+        if(m_local(reqmode) && !ci->local)
         {
-            srvmsgf(ci->clientnum, "\fraccess denied, you must be a local client");
+            srvmsgf(ci->clientnum, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
             return;
         }
         switch(GAME(modelock))
@@ -1948,7 +1948,7 @@ namespace server
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
 
-        if(m_demo(gamemode)) kicknonlocalclients(DISC_PRIVATE);
+        if(m_local(gamemode)) kicknonlocalclients(DISC_PRIVATE);
         loopv(clients) clients[i]->mapchange(true);
         loopv(clients)
         {
@@ -3374,7 +3374,7 @@ namespace server
         connects.add(ci);
         if(!local)
         {
-            if(m_demo(gamemode) || servertype <= 0) return DISC_PRIVATE;
+            if(m_local(gamemode) || servertype <= 0) return DISC_PRIVATE;
 #ifndef STANDALONE
             bool haslocal = false;
             loopv(clients) if(clients[i]->local) { haslocal = true; break; }
@@ -3436,7 +3436,7 @@ namespace server
         putint(p, mutators);            // 3
         putint(p, timeremaining);       // 4
         putint(p, GAME(serverclients)); // 5
-        putint(p, serverpass[0] ? MM_PASSWORD : (m_demo(gamemode) ? MM_PRIVATE : mastermode)); // 6
+        putint(p, serverpass[0] ? MM_PASSWORD : (m_local(gamemode) ? MM_PRIVATE : mastermode)); // 6
         putint(p, numgamevars); // 7
         putint(p, numgamemods); // 8
         sendstring(smapname, p);

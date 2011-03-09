@@ -81,7 +81,7 @@ namespace auth
     int allowconnect(clientinfo *ci, const char *pwd = "", const char *authname = "")
     {
         if(ci->local) return DISC_NONE;
-        if(m_demo(gamemode)) return DISC_PRIVATE;
+        if(m_local(gamemode)) return DISC_PRIVATE;
         if(ci->privilege >= PRIV_ADMIN) return DISC_NONE;
         if(*authname)
         {
@@ -215,7 +215,7 @@ namespace auth
             if(connectedmaster()) disconnectmaster();
             return;
         }
-        else if(!connectedmaster() && (!lastconnect || totalmillis-lastconnect > 60*1000)) 
+        else if(!connectedmaster() && (!lastconnect || totalmillis-lastconnect > 60*1000))
         {
             lastconnect = totalmillis;
             if(connectmaster() == ENET_SOCKET_NULL) return;

@@ -164,6 +164,8 @@ COMMANDN(0, disconnect, trydisconnect, "");
 ICOMMAND(0, lanconnect, "", (), connectserv());
 ICOMMAND(0, localconnect, "i", (int *n), localconnect(*n ? false : true));
 
+ICOMMAND(0, isonline, "", (), intret(curpeer ? 1 : 0));
+
 void reconnect()
 {
     int port = 0;
