@@ -133,28 +133,31 @@ struct bomberservmode : bomberstate, servmode
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
 
+    void returnaffinity(int i, int v)
+    {
+        bomberstate::returnaffinity(i, gamemillis, v != 0 && m_gsp1(gamemode, mutators));
+        sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? v : 0);
+        if(v && !flags[i].enabled)
+        {
+            loopvj(flags) if(flags[j].enabled) returnaffinity(j, 0);
+            bombertime = gamemillis+GAME(bomberdelay);
+        }
+    }
+
     void resetaffinity(clientinfo *ci, int i, bool force = false)
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0 || !f.enabled) return;
         f.votes.add(ci->clientnum);
-        if(f.votes.length() >= numclients()/2)
-        {
-            bomberstate::returnaffinity(i, gamemillis, true);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
-        }
+        if(f.votes.length() >= numclients()/2) returnaffinity(i, 2);
     }
 
     void layout()
     {
         if(!hasflaginfo) return;
-        loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime)
-        {
-            bomberstate::returnaffinity(i, gamemillis, false);
-            sendf(-1, 1, "ri3", N_RESETAFFIN, i, 0);
-        }
-        bombertime = -1;
+        loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime) returnaffinity(i, 0);
+        bombertime = gamemillis+GAME(bomberdelay);
     }
 
     void update()
@@ -241,11 +244,7 @@ struct bomberservmode : bomberstate, servmode
                 }
                 continue;
             }
-            if(f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay))
-            {
-                bomberstate::returnaffinity(i, gamemillis, true);
-                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
-            }
+            if(f.droptime && gamemillis-f.droptime >= GAME(bomberresetdelay)) returnaffinity(i, 2);
         }
     }
 
@@ -308,9 +307,9 @@ struct bomberservmode : bomberstate, servmode
 
     int points(clientinfo *victim, clientinfo *actor)
     {
-        bool isteam = victim==actor || victim->team == actor->team;
-        int p = isteam ? -1 : 1, v = p;
-        loopv(flags) if(flags[i].owner == victim->clientnum) p += v;
+        bool isteam = victim==actor || (m_team(gamemode, mutators) && victim->team == actor->team);
+        int p = isteam ? -1 : (m_team(gamemode, mutators) ? 1 : 0), v = p;
+        if(p) { loopv(flags) if(flags[i].owner == victim->clientnum) p += v; }
         return p;
     }
 } bombermode;
