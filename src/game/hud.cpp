@@ -1149,7 +1149,7 @@ namespace hud
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime);
-            vec colour = bvec(burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : d->colour()).tocolor();
+            vec colour = burning ? game::burncolour(d) : bvec(d->colour()).tocolor();
             const char *tex = bliptex;
             float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize;
             if(d->state == CS_DEAD || d->state == CS_WAITING)

@@ -71,8 +71,7 @@ namespace defend
             defendstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
-            bvec colour = skewcolour(f.owner, f.enemy, occupy);
-            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, colour.tocolor(), 0, 0, DL_KEEP);
+            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, skewcolour(f.owner, f.enemy, occupy).tocolor(), 0, 0, DL_KEEP);
         }
     }
 

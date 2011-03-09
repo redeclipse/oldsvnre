@@ -193,5 +193,6 @@ namespace bomber
     extern bool aidefense(gameent *d, ai::aistate &b);
     extern bool aipursue(gameent *d, ai::aistate &b);
     extern void removeplayer(gameent *d);
+    extern vec pulsecolour();
 }
 #endif
