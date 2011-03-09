@@ -100,7 +100,7 @@ struct animmodel : model
             }
             if(masked!=enableglow) lasttex = lastmasks = NULL;
             float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f;
-            vec color = vec(lightcolor).max(mincolor), matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1] : vec(1, 1, 1);
+            vec color = vec(lightcolor).max(mincolor), matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1);
             if(masked)
             {
                 bool needenvmap = envmaptmu>=0 && envmapmax>0;
@@ -169,7 +169,7 @@ struct animmodel : model
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec, minshade, glow);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, spec, minshade, glow);
             }
-            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1] : vec(1, 1, 1);
+            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1);
             setenvparamf("lightmaterial", SHPARAM_PIXEL, 6, matcolor.x, matcolor.y, matcolor.z, 1);
             setenvparamf("texscroll", SHPARAM_VERTEX, 5, lastmillis/1000.0f, scrollu*lastmillis/1000.0f, scrollv*lastmillis/1000.0f);
             if(envmaptmu>=0 && envmapmax>0) setenvparamf("envmapscale", bumpmapped() ? SHPARAM_PIXEL : SHPARAM_VERTEX, 3, envmapmin-envmapmax, envmapmax);
@@ -952,7 +952,7 @@ struct animmodel : model
         }
     }
 
-    void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a, const vec &color, const vec &dir, const vec *material, float trans, float size)
+    void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a, const vec &color, const vec &dir, const bvec *material, float trans, float size)
     {
         if(!loaded) return;
 
@@ -1247,7 +1247,7 @@ struct animmodel : model
 
     static bool enabletc, enablemtc, enablealphatest, enablealphablend, enableenvmap, enableglow, enableoverbright, enablelighting, enablelight0, enablecullface, enablenormals, enabletangents, enablebones, enablerescale, enabledepthoffset;
     static vec lightdir, lightcolor;
-    static const vec *lightmaterial;
+    static const bvec *lightmaterial;
     static float transparent, lastalphatest, sizescale;
     static void *lastvbuf, *lasttcbuf, *lastmtcbuf, *lastnbuf, *lastxbuf, *lastbbuf, *lastsdata, *lastbdata;
     static GLuint lastebuf, lastenvmaptex, closestenvmaptex;
@@ -1379,7 +1379,7 @@ bool animmodel::enabletc = false, animmodel::enablemtc = false, animmodel::enabl
      animmodel::enableenvmap = false, animmodel::enableglow = false, animmodel::enableoverbright = false, animmodel::enablelighting = false, animmodel::enablelight0 = false, animmodel::enablecullface = true,
      animmodel::enablenormals = false, animmodel::enabletangents = false, animmodel::enablebones = false, animmodel::enablerescale = false, animmodel::enabledepthoffset = false;
 vec animmodel::lightdir(0, 0, 1), animmodel::lightcolor(1, 1, 1);
-const vec *animmodel::lightmaterial = NULL;
+const bvec *animmodel::lightmaterial = NULL;
 float animmodel::transparent = 1, animmodel::lastalphatest = -1, animmodel::sizescale = 1;
 void *animmodel::lastvbuf = NULL, *animmodel::lasttcbuf = NULL, *animmodel::lastmtcbuf = NULL, *animmodel::lastnbuf = NULL, *animmodel::lastxbuf = NULL, *animmodel::lastbbuf = NULL, *animmodel::lastsdata = NULL, *animmodel::lastbdata = NULL;
 GLuint animmodel::lastebuf = 0, animmodel::lastenvmaptex = 0, animmodel::closestenvmaptex = 0;

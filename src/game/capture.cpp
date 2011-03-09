@@ -38,10 +38,10 @@ namespace capture
             loopk(2)
             {
                 vec dir;
-                int colour = teamtype[f.team].colour;
+                vec colour = bvec(teamtype[f.team].colour).tocolor();
                 const char *tex = hud::flagtex;
                 bool arrow = false;
-                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
+                float fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
                 int millis = lastmillis-f.interptime;
                 if(millis < 1000) size *= 1.f+(1-clamp(float(millis)/1000.f, 0.f, 1.f));
                 if(f.owner) size *= 0.75f;
@@ -70,8 +70,8 @@ namespace capture
                     }
                 }
                 dir.rotate_around_z(-camera1->yaw*RAD).normalize();
-                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, 3, w, h, size, fade, dir, r, g, b, "radar", "%s%s", teamtype[f.team].chat, k ? "flag" : "base");
-                else hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, dir, r, g, b);
+                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, 3, w, h, size, fade, dir, colour, "radar", "%s%s", teamtype[f.team].chat, k ? "flag" : "base");
+                else hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, dir, colour);
             }
         }
     }
@@ -262,7 +262,7 @@ namespace capture
             if(st.flags.inrange(index)) \
             { \
                 st.flags[index].ent = a; \
-                entities::ents[a]->light.material[0] = st.flags[index].light.material[0] = vec(teamtype[st.flags[index].team].colour>>16, (teamtype[st.flags[index].team].colour>>8)&0xFF, teamtype[st.flags[index].team].colour&0xFF).div(255.f); \
+                entities::ents[a]->light.material[0] = st.flags[index].light.material[0] = bvec(teamtype[st.flags[index].team].colour); \
             } \
             else continue; \
         }

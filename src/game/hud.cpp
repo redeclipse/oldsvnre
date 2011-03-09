@@ -1102,13 +1102,13 @@ namespace hud
         return dist;
     }
 
-    void drawblip(const char *tex, float area, int w, int h, float s, float blend, vec &dir, float r, float g, float b, const char *font, const char *text, ...)
+    void drawblip(const char *tex, float area, int w, int h, float s, float blend, vec &dir, const vec &colour, const char *font, const char *text, ...)
     {
         float yaw = -atan2(dir.x, dir.y)/RAD, x = sinf(RAD*yaw), y = -cosf(RAD*yaw),
             size = max(w, h)/2, tx = w/2, ty = h/2, ts = size*radarsize, tp = ts*s, tq = tp/2, tr = (size*radaroffset)+(ts*area);
         vec pos = vec(tx+(tr*x), ty+(tr*y), 0);
         settexture(tex, 3);
-        glColor4f(r, g, b, blend);
+        glColor4f(colour.x, colour.y, colour.z, blend);
         glBegin(GL_TRIANGLE_STRIP);
         loopk(4)
         {
@@ -1149,10 +1149,9 @@ namespace hud
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
             bool burning = radarplayereffects && burntime && totalmillis%150 < 50 && d->burning(lastmillis, burntime);
-            int colour = burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : d->colour();
+            vec colour = bvec(burning ? pulsecols[rnd(2)][rnd(PULSECOLOURS)] : d->colour()).tocolor();
             const char *tex = bliptex;
-            float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize,
-                r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
+            float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
@@ -1175,8 +1174,8 @@ namespace hud
             }
             else if(d->state != CS_EDITING) return;
             if(chkcond(radarplayernames, game::tvmode()))
-                drawblip(tex, pos, w, h, size, fade, dir, r, g, b, "radar", "%s", game::colorname(d, NULL, "", false));
-            else drawblip(tex, pos, w, h, size, fade, dir, r, g, b);
+                drawblip(tex, pos, w, h, size, fade, dir, colour, "radar", "%s", game::colorname(d, NULL, "", false));
+            else drawblip(tex, pos, w, h, size, fade, dir, colour);
         }
     }
 
@@ -1225,23 +1224,22 @@ namespace hud
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
             const char *tex = bliptex;
-            float r = 1.f, g = 1.f, b = 1.f, fade = insel ? 1.f : clamp(1.f-(dist/radarrange()), 0.1f, 1.f), size = radarblipsize;
+            vec colour(1, 1, 1);
+            float fade = insel ? 1.f : clamp(1.f-(dist/radarrange()), 0.1f, 1.f), size = radarblipsize;
             if(type == WEAPON)
             {
                 int attr1 = w_attr(game::gamemode, attr[0], m_weapon(game::gamemode, game::mutators));
                 tex = itemtex(WEAPON, attr1);
-                r = (weaptype[attr1].colour>>16)/255.f;
-                g = ((weaptype[attr1].colour>>8)&0xFF)/255.f;
-                b = (weaptype[attr1].colour&0xFF)/255.f;
+                colour = bvec(weaptype[attr1].colour).tocolor();
                 fade *= radaritemblend;
                 size = radaritemsize;
             }
             else fade *= radarblipblend;
             if(game::focus->state != CS_EDITING && !insel && inspawn > 0.f)
                 fade = radaritemspawn ? 1.f-inspawn : fade+((1.f-fade)*(1.f-inspawn));
-            if(insel) drawblip(tex, 1, w, h, size, fade*blend, dir, r, g, b, "radar", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
-            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 1, w, h, size, fade*blend, dir, r, g, b, "radar", "%s", entities::entinfo(type, attr, false));
-            else drawblip(tex, 1, w, h, size, fade*blend, dir, r, g, b);
+            if(insel) drawblip(tex, 1, w, h, size, fade*blend, dir, colour, "radar", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
+            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 1, w, h, size, fade*blend, dir, colour, "radar", "%s", entities::entinfo(type, attr, false));
+            else drawblip(tex, 1, w, h, size, fade*blend, dir, colour);
         }
     }
 
@@ -1296,9 +1294,9 @@ namespace hud
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour.x, d.colour.y, d.colour.z, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
                 }
-                else drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour.x, d.colour.y, d.colour.z);
+                else drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour);
             }
         }
         if(radardamage >= 2)
@@ -1307,20 +1305,17 @@ namespace hud
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
             {
                 vec dir = vec(game::focus->o).sub(camera1->o).normalize().rotate_around_z(-camera1->yaw*RAD);
-                int colour = game::focus->colour();
-                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
-                drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "you");
+                drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, bvec(game::focus->colour()).tocolor(), "radar", "you");
             }
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
                 vec pos = vec(a->o).sub(camera1->o).normalize(), dir = vec(pos).rotate_around_z(-camera1->yaw*RAD);
-                int colour = a->colour();
-                float r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
+                vec colour = bvec(a->colour()).tocolor();
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
-                    if(a->state == CS_ALIVE) drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "%s (%d)", game::colorname(a), a->health);
-                    else drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, r, g, b, "radar", "%s", game::colorname(a));
+                    if(a->state == CS_ALIVE) drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, colour, "radar", "%s (%d)", game::colorname(a), a->health);
+                    else drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, colour, "radar", "%s", game::colorname(a));
                 }
             }
         }

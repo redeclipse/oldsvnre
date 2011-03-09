@@ -1021,6 +1021,7 @@ struct bvec
     bvec() {}
     bvec(uchar x, uchar y, uchar z) : x(x), y(y), z(z) {}
     bvec(const vec &v) : x((uchar)((v.x+1)*255/2)), y((uchar)((v.y+1)*255/2)), z((uchar)((v.z+1)*255/2)) {}
+    explicit bvec(int colour) : x((colour>>16)&0xFF), y((colour>>8)&0xFF), z(colour&0xFF) {}
 
     uchar &operator[](int i)       { return v[i]; }
     uchar  operator[](int i) const { return v[i]; }
@@ -1030,11 +1031,23 @@ struct bvec
 
     bool iszero() const { return x==0 && y==0 && z==0; }
 
+    bvec &shl(int n) { x<<= n; y<<= n; z<<= n; return *this; }
+    bvec &shr(int n) { x>>= n; y>>= n; z>>= n; return *this; }
+    bvec &mul(int n) { x *= n; y *= n; z *= n; return *this; }
+    bvec &div(int n) { x /= n; y /= n; z /= n; return *this; }
+    bvec &add(int n) { x += n; y += n; z += n; return *this; }
+    bvec &sub(int n) { x -= n; y -= n; z -= n; return *this; }
+    bvec &add(const bvec &v) { x += v.x; y += v.y; z += v.z; return *this; }
+    bvec &sub(const bvec &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+
     vec tovec() const { return vec(x*(2.0f/255.0f)-1.0f, y*(2.0f/255.0f)-1.0f, z*(2.0f/255.0f)-1.0f); }
 
     void lerp(const bvec &a, const bvec &b, float t) { x = uchar(a.x + (b.x-a.x)*t); y = uchar(a.y + (b.y-a.y)*t); z = uchar(a.z + (b.z-a.z)*t); }
 
     void flip() { x -= 128; y -= 128; z -= 128; }
+
+    static bvec fromcolor(const vec &v) { return bvec(uchar(v.x*255.0f), uchar(v.y*255.0f), uchar(v.z*255.0f)); }
+    vec tocolor() const { return vec(x*(1.0f/255.0f), y*(1.0f/255.0f), z*(1.0f/255.0f)); }
 };
 
 struct glmatrixf
