@@ -1,5 +1,4 @@
 #include "game.h"
-extern int emitmillis;
 namespace projs
 {
     vector<hitmsg> hits;
@@ -1743,18 +1742,12 @@ namespace projs
             if((proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id)) || !projs[i]->mdl || !*projs[i]->mdl) continue;
             float trans = 1, size = projs[i]->curscale;
             int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_CULL_DIST;
-            entitylight *light = &proj.light;
             switch(proj.projtype)
             {
                 case PRJ_DEBRIS:
                 {
                     if(shadowdebris) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
-                    if(light->millis != lastmillis && !proj.limited)
-                    {
-                        bool burning = totalmillis%150 < 50;
-                        light->material[0] = burning ? bvec(pulsecols[rnd(2)][rnd(PULSECOLOURS)]).mulsat(2) : bvec(255, 255, 255);
-                    }
                     fadeproj(proj, trans, size);
                     break;
                 }
@@ -1787,7 +1780,7 @@ namespace projs
                 }
                 default: break;
             }
-            rendermodel(light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw, proj.pitch, proj.roll, flags, NULL, NULL, 0, 0, trans, size);
+            rendermodel(NULL, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw, proj.pitch, proj.roll, flags, &proj, NULL, 0, 0, trans, size);
         }
     }
 
