@@ -1005,10 +1005,11 @@ namespace ai
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
             int seed = (111-d->skill)*(locked || impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
             d->ai->jumpseed = lastmillis+seed+rnd(seed*2);
-            seed *= 50; if(b.idle) seed *= 2;
+            seed *= 50; if(b.idle) seed *= 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
-        if(!jump && air && physics::canimpulse(d, -1, 3)) d->action[AC_SPECIAL] = true;
+        if((!weaptype[d->weapselect].melee && locked) || (air && physics::canimpulse(d, -1, 3) && (d->skill >= 100 || !rnd(101-d->skill))))
+            d->action[AC_SPECIAL] = true;
     }
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
@@ -1080,11 +1081,7 @@ namespace ai
                     d->ai->targyaw = yaw;
                     d->ai->targpitch = pitch;
                     frame *= 2;
-                    if(d->aitype == AI_BOT)
-                    {
-                        locked = true;
-                        if(!weaptype[d->weapselect].melee) d->action[AC_SPECIAL] = true;
-                    }
+                    if(d->aitype == AI_BOT) locked = true;
                 }
                 game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick)
