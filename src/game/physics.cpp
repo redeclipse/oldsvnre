@@ -277,9 +277,11 @@ namespace physics
         return 1.f;
     }
 
-    bool sliding(gameent *d)
+    bool sliding(physent *d)
     {
-        return d->impulse[IM_SLIDE] && lastmillis-d->impulse[IM_SLIDE] <= impulseslide;
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+            return ((gameent *)d)->impulse[IM_SLIDE] && lastmillis-((gameent *)d)->impulse[IM_SLIDE] <= impulseslide;
+        return false;
     }
 
     bool sticktofloor(physent *d)
