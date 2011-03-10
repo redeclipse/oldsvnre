@@ -452,9 +452,9 @@ namespace game
                 }
                 if(burntime && d->burning(lastmillis, burntime))
                 {
-                    int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.25f+(rnd(75)/100.f);
+                    int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.75f+(rnd(25)/100.f);
                     if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
-                    else pc *= 0.5f+(float(millis%burndelay)/float(burndelay*2));
+                    else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                     adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
                     continue;
                 }
@@ -469,7 +469,7 @@ namespace game
 
     void boosteffect(gameent *d, const vec &pos, int num, int len, bool shape = false)
     {
-        float scale = 0.5f+(rnd(75)/100.f);
+        float scale = 0.75f+(rnd(25)/100.f);
         part_create(PART_HINT, shape ? 10 : 1, pos, 0x1818A8, scale, min(0.65f*scale, 0.8f), 0, 0);
         part_create(PART_FIREBALL, shape ? 10 : 1, pos, 0xFF6818, 0.8f*scale, min(0.75f*scale, 0.95f), 0, 0);
         if(shape) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[0][rnd(PULSECOLOURS)], 21, num, len, pos, scale, 0.75f, -5, 0, 10);
@@ -2387,9 +2387,9 @@ namespace game
             }
             if(burntime && d->burning(lastmillis, burntime))
             {
-                int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
-                if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
-                else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
+                int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.5f+(rnd(50)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
+                if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
+                else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));
                 regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
