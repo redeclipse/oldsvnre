@@ -458,8 +458,8 @@ namespace game
                     if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                     else 
                     {
-                        float fluc = float(millis%burndelay)*(0.25f+0.02f)/burndelay;
-                        if(fluc >= 0.25f) fluc = (0.25f+0.02f-fluc)*(0.25f/0.02f);
+                        float fluc = float(millis%burndelay)*(0.25f+0.03f)/burndelay;
+                        if(fluc >= 0.25f) fluc = (0.25f+0.03f-fluc)*(0.25f/0.03f);
                         pc *= 0.75f+fluc;
                     }
                     adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
