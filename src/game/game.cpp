@@ -1349,7 +1349,7 @@ namespace game
             }
             if(bleedtime && e->bleeding(lastmillis, bleedtime))
             {
-                const vec bleedcol(255, 64, 64);
+                const vec bleedcol(1, 0.25f, 0.25f);
                 color.max(bleedcol).lerp(bleedcol, 0.6f);
             }
         }
