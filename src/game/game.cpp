@@ -73,7 +73,7 @@ namespace game
     FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 10000);
-    FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.65f, 1000);
     FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
     VAR(IDF_PERSIST, zoommousetype, 0, 0, 2);
@@ -126,7 +126,7 @@ namespace game
     VAR(IDF_PERSIST, burnfade, 100, 200, INT_MAX-1);
     FVAR(IDF_PERSIST, burnblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
-    VAR(IDF_PERSIST, impulsefade, 0, 100, INT_MAX-1);
+    VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, INT_MAX-1);
 
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
@@ -2382,7 +2382,7 @@ namespace game
                         case 0: default: break;
                     }
                 }
-                if(d->turnside || d->impulse[IM_JUMP]) impulseeffect(d, 1);
+                if(d->turnside || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
                 if(physics::jetpack(d)) impulseeffect(d, 2);
             }
             if(burntime && d->burning(lastmillis, burntime))
@@ -2390,7 +2390,7 @@ namespace game
                 int millis = lastmillis-d->lastburn; float pc = 1, intensity = 0.25f+(rnd(75)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc = float(burntime-millis)/float(burndelay);
                 else pc = 0.75f+(float(millis%burndelay)/float(burndelay*4));
-                vec pos = vec(d->headpos(-d->height/2)).add(vec(rnd(9)-4, rnd(9)-4, rnd(5)-2).mul(pc));
+                vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));
                 regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
         }
