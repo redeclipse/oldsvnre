@@ -73,7 +73,7 @@ namespace game
     FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 10000);
-    FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
     VAR(IDF_PERSIST, zoommousetype, 0, 0, 2);
@@ -1450,7 +1450,7 @@ namespace game
             physent *target = player1->state >= CS_SPECTATOR ? (self ? player1 : camera1) : (allowmove(player1) ? player1 : NULL);
             if(target)
             {
-                float scale = (inzoom() && zoomsensitivity > 0 && zoomsensitivity < 1 ? 1.f-(zoomlevel/float(zoomlevels+1)*zoomsensitivity) : (self ? followsensitivity : 1.f))*sensitivity;
+                float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : (self ? followsensitivity : 1.f))*sensitivity;
                 target->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
                 target->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(!hasinput && mouseinvert ? -1.f : 1.f));
                 fixfullrange(target->yaw, target->pitch, target->roll, false);
