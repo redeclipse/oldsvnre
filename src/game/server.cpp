@@ -156,11 +156,11 @@ namespace server
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
         int score, spree, crits, rewards, gscore, teamkills, shotdamage, damage;
-        int lasttimeplayed, timeplayed, aireinit, lastburntime, lastburnowner, lastbleedtime, lastbleedowner, lastboost;
+        int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes;
         vector<dmghist> damagelog;
 
-        servstate() : state(CS_SPECTATOR), aireinit(0), lastburntime(0), lastburnowner(-1), lastbleedtime(0), lastbleedowner(-1) {}
+        servstate() : state(CS_SPECTATOR), aireinit(0), lastburnowner(-1), lastbleedowner(-1) {}
 
         bool isalive(int millis)
         {
@@ -181,7 +181,7 @@ namespace server
 
         void respawn(int millis, int heal)
         {
-            lastburntime = lastbleedtime = lastboost = 0;
+            lastboost = 0;
             lastburnowner = lastbleedowner = -1;
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
