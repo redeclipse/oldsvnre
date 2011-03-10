@@ -671,7 +671,7 @@ namespace game
             else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastburn-(burntime-500))/500.f));
         }
         else if(issound(d->fschan)) removesound(d->fschan);
-        if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->lastbleed = 0;
+        if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->resetbleeding();
         if(issound(d->jschan) && !physics::jetpack(d))
         {
             if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
@@ -697,6 +697,7 @@ namespace game
     {
         if(burntime && hithurts(flags) && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
         {
+            d->lastburntime = lastmillis;
             if(!issound(d->fschan)) playsound(S_BURNFIRE, d->o, d, SND_LOOP, d != focus ? 128 : 224, -1, -1, &d->fschan);
             if(isweap(weap)) d->lastburn = lastmillis;
             else return true;
@@ -708,6 +709,7 @@ namespace game
     {
         if(bleedtime && hithurts(flags) && ((weap == -1 && flags&HIT_BLEED) || doesbleed(weap, flags)))
         {
+            d->lastbleedtime = lastmillis;
             if(isweap(weap)) d->lastbleed = lastmillis;
             else return true;
         }
@@ -1349,8 +1351,14 @@ namespace game
             }
             if(bleedtime && e->bleeding(lastmillis, bleedtime))
             {
-                const vec bleedcol(1, 0.25f, 0.25f);
-                color.max(bleedcol).lerp(bleedcol, 0.6f);
+                int millis = lastmillis-e->lastbleedtime, delay = min(bleeddelay, 500);
+                if(millis <= delay)
+                {
+                    delay /= 2;
+                    float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
+                    vec bleedcol = vec(1, 0.25f, 0.25f).mul(amt);
+                    color.max(bleedcol).lerp(bleedcol, 0.6f);
+                }
             }
         }
         else if(d->type == ENT_PROJ)

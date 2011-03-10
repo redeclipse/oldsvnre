@@ -605,10 +605,10 @@ struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX];
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastbleed;
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastbleed(0),
+    gamestate() : weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0),
         aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
@@ -764,7 +764,7 @@ struct gamestate
 
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastburn = lastbleed = 0;
+        lastdeath = lastpain = lastregen = lastburn = lastburntime = lastbleed = lastbleedtime = 0;
         lastrespawn = -1;
     }
 
@@ -1240,7 +1240,12 @@ struct gameent : dynent, gamestate
     {
         if(issound(fschan)) removesound(fschan);
         fschan = -1;
-        lastburn = 0;
+        lastburn = lastburntime = 0;
+    }
+
+    void resetbleeding()
+    {
+        lastbleed = lastbleedtime = 0;
     }
 
     void addicon(int type, int millis, int fade, int value = 0)
