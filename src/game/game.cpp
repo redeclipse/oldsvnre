@@ -1356,7 +1356,8 @@ namespace game
                 {
                     delay /= 2;
                     float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                    vec bleedcol = vec(1, 0.25f, 0.25f).mul(amt);
+                    vec bleedcol;
+                    bleedcol.lerp(color, vec(1, 0.25f, 0.25f), amt);
                     color.max(bleedcol).lerp(bleedcol, 0.6f);
                 }
             }
