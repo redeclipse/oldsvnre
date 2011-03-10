@@ -63,7 +63,7 @@ namespace bomber
     vec pulsecolour()
     {
         uint n = lastmillis/100;
-        return vec().lerp(bvec(pulsecols[2][n%PULSECOLOURS]).tocolor(), bvec(pulsecols[2][(n+1)%PULSECOLOURS]).tocolor(), (lastmillis%100)/100.0f);
+        return vec::hexcolor(pulsecols[2][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[2][(n+1)%PULSECOLOURS]), (lastmillis%100)/100.0f);
     }
 
     void drawblips(int w, int h, float blend)
@@ -74,7 +74,7 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec dir = vec(f.pos()).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : bvec(teamtype[f.team].colour).tocolor();
+            vec dir = vec(f.pos()).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(teamtype[f.team].colour);
             float area = 3, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -272,7 +272,7 @@ namespace bomber
             float trans = 1.f;
             int millis = lastmillis-f.interptime;
             if(millis <= 1000) trans = float(millis)/1000.f;
-            vec colour = isbomberaffinity(f) ? pulsecolour() : bvec(teamtype[f.team].colour).tocolor();
+            vec colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(teamtype[f.team].colour);
             adddynlight(f.pos(), enttype[AFFINITY].radius*trans, colour, 0, 0, DL_KEEP);
         }
     }

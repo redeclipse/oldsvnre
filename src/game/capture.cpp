@@ -37,8 +37,7 @@ namespace capture
             if(!entities::ents.inrange(f.ent)) continue;
             loopk(2)
             {
-                vec dir;
-                vec colour = bvec(teamtype[f.team].colour).tocolor();
+                vec dir, colour = vec::hexcolor(teamtype[f.team].colour);
                 const char *tex = hud::flagtex;
                 bool arrow = false;
                 float fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;

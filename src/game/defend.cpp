@@ -13,15 +13,14 @@ namespace defend
         loadmodel("flag", -1, true);
     }
 
-    static bvec skewcolour(int owner, int enemy, float occupy)
+    static vec skewcolour(int owner, int enemy, float occupy)
     {
-        bvec colour(teamtype[owner].colour);
+        vec colour = vec::hexcolor(teamtype[owner].colour);
         if(enemy)
         {
             int timestep = totalmillis%1000;
-            bvec colour2(teamtype[enemy].colour);
             float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*occupy, 0.f, 1.f);
-            colour.lerp(colour, colour2, amt);
+            colour.lerp(vec::hexcolor(teamtype[enemy].colour), amt);
         }
         return colour;
     }
@@ -34,7 +33,7 @@ namespace defend
             if(!entities::ents.inrange(b.ent)) continue;
             float occupy = b.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
             entitylight *light = &entities::ents[b.ent]->light;
-            if(light->millis != lastmillis) light->material[0] = skewcolour(b.owner, b.enemy, occupy);
+            if(light->millis != lastmillis) light->material[0] = bvec::fromcolor(skewcolour(b.owner, b.enemy, occupy));
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
                 formatstring(b.info)("<super>\fs%s%s\fS vs. \fs%s%s\fS", teamtype[b.owner].chat, teamtype[b.owner].name, teamtype[b.enemy].chat, teamtype[b.enemy].name);
@@ -71,7 +70,7 @@ namespace defend
             defendstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
-            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, skewcolour(f.owner, f.enemy, occupy).tocolor(), 0, 0, DL_KEEP);
+            adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, skewcolour(f.owner, f.enemy, occupy), 0, 0, DL_KEEP);
         }
     }
 
@@ -82,7 +81,7 @@ namespace defend
             defendstate::flag &f = st.flags[i];
             vec dir(f.o); dir.sub(camera1->o);
             float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), fade = blend*hud::radaraffinityblend;
-            vec colour = skewcolour(f.owner, f.enemy, occupy).tocolor();
+            vec colour = skewcolour(f.owner, f.enemy, occupy);
             if(f.owner != game::focus->team && f.enemy != game::focus->team)
             {
                 float dist = dir.magnitude(),
