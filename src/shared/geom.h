@@ -134,6 +134,11 @@ struct vec
     {
         return dist_to_bb(o, T(o).add(size));
     }
+
+    static vec hexcolor(int color)
+    {
+        return vec(((color>>16)&0xFF)*(1.0f/255.0f), ((color>>8)&0xFF)*(1.0f/255.0f), (color&0xFF)*(1.0f/255.0f));
+    }
 };
 
 static inline bool htcmp(const vec &x, const vec &y)
@@ -1021,7 +1026,7 @@ struct bvec
     bvec() {}
     bvec(uchar x, uchar y, uchar z) : x(x), y(y), z(z) {}
     bvec(const vec &v) : x((uchar)((v.x+1)*255/2)), y((uchar)((v.y+1)*255/2)), z((uchar)((v.z+1)*255/2)) {}
-    explicit bvec(int colour) : x((colour>>16)&0xFF), y((colour>>8)&0xFF), z(colour&0xFF) {}
+    explicit bvec(int color) : x((color>>16)&0xFF), y((color>>8)&0xFF), z(color&0xFF) {}
 
     uchar &operator[](int i)       { return v[i]; }
     uchar  operator[](int i) const { return v[i]; }
@@ -1034,7 +1039,6 @@ struct bvec
     bvec &shl(int n) { x<<= n; y<<= n; z<<= n; return *this; }
     bvec &shr(int n) { x>>= n; y>>= n; z>>= n; return *this; }
     bvec &mul(int n) { x *= n; y *= n; z *= n; return *this; }
-    bvec &mulsat(int n) { x = min(x*n, 255); y = min(y*n, 255); z = min(z*n, 255); return *this; }
     bvec &div(int n) { x /= n; y /= n; z /= n; return *this; }
     bvec &add(int n) { x += n; y += n; z += n; return *this; }
     bvec &sub(int n) { x -= n; y -= n; z -= n; return *this; }

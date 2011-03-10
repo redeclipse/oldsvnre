@@ -377,7 +377,7 @@ namespace game
     {
         size_t seed = size_t(d) + (lastmillis/50);
         int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS);
-        return bvec(pulsecols[0][n]).tocolor().lerp(bvec(pulsecols[0][n2]).tocolor(), (lastmillis%50)/50.0f);
+        return vec::hexcolor(pulsecols[0][n]).lerp(vec::hexcolor(pulsecols[0][n2]), (lastmillis%50)/50.0f);
     }
 
     void adddynlights()
@@ -427,14 +427,14 @@ namespace game
                         {
                             case 1:
                             {
-                                vec col = powerdl[d->weapselect].colour > 0 ? bvec(powerdl[d->weapselect].colour).tocolor() : weappulsecolour(d);
+                                vec col = powerdl[d->weapselect].colour > 0 ? vec::hexcolor(powerdl[d->weapselect].colour) : weappulsecolour(d);
                                 adddynlight(d->muzzlepos(d->weapselect), 16+(amt*powerdl[d->weapselect].radius), col, 0, 0, DL_KEEP);
                                 break;
                             }
                             case 2:
                             {
                                 vec col;
-                                if(powerdl[d->weapselect].colour > 0) col = bvec(powerdl[d->weapselect].colour).tocolor();
+                                if(powerdl[d->weapselect].colour > 0) col = vec::hexcolor(powerdl[d->weapselect].colour);
                                 else
                                 {
                                     col.x = max(1.f-amt,0.5f);
@@ -460,7 +460,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col = bvec(d->colour()).tocolor().mul(illumlevel);
+                    vec col = vec::hexcolor(d->colour()).mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -1326,7 +1326,7 @@ namespace game
     {
         size_t seed = size_t(d) + (lastmillis/50);
         int n = detrnd(seed, 2*PULSECOLOURS), n2 = detrnd(seed + 1, 2*PULSECOLOURS);
-        return bvec(pulsecols[n/PULSECOLOURS][n%PULSECOLOURS]).tocolor().lerp(bvec(pulsecols[n2/PULSECOLOURS][n2%PULSECOLOURS]).tocolor(), (lastmillis%50)/50.0f);
+        return vec::hexcolor(pulsecols[n/PULSECOLOURS][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[n2/PULSECOLOURS][n2%PULSECOLOURS]), (lastmillis%50)/50.0f);
     }
 
     void lighteffects(dynent *d, vec &color, vec &dir)
