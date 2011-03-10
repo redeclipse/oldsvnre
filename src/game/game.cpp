@@ -2096,9 +2096,20 @@ namespace game
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         e->light.material[0] = bvec(d->colour());
-        if(isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
+        if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
         {
-            uchar wepmat = uchar(255*(d->ammo[d->weapselect]+2)/float(WEAP(d->weapselect, max)+2));
+            float scale = 1;
+            switch(d->weapstate[d->weapselect])
+            {
+                case WEAP_S_RELOAD:
+                {
+                    int millis = lastmillis-d->weaplast[d->weapselect], check = d->weapwait[d->weapselect]/2;
+                    scale = millis >= check ? (millis-check)/float(check) : 0.f;
+                    break;
+                }
+                default: scale = d->ammo[d->weapselect]/float(WEAP(d->weapselect, max)); break;
+            }
+            uchar wepmat = uchar(255*scale);
             e->light.material[1] = bvec(wepmat, wepmat, wepmat);
         }
         else e->light.material[1] = bvec(255, 255, 255);
