@@ -1328,14 +1328,13 @@ namespace game
         int n = detrnd(seed, 2*PULSECOLOURS), n2 = detrnd(seed + 1, 2*PULSECOLOURS);
         return bvec(pulsecols[n/PULSECOLOURS][n%PULSECOLOURS]).tocolor().lerp(bvec(pulsecols[n2/PULSECOLOURS][n2%PULSECOLOURS]).tocolor(), (lastmillis%50)/50.0f);
     }
-    
-    void lighteffects(dynent *d, vec &color, vec &dir) 
-    { 
-        if(d == (dynent *)&avatarmodel)
-            d = player1;
+
+    void lighteffects(dynent *d, vec &color, vec &dir)
+    {
+        if(d == (dynent *)&avatarmodel) d = focus;
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            gameent *e = (gameent *)d;        
+            gameent *e = (gameent *)d;
             if(!burntime || !e->burning(lastmillis, burntime)) return;
             vec burncol = burncolour(d);
             color.max(burncol).lerp(burncol, 0.6f);
@@ -2162,7 +2161,7 @@ namespace game
                         switch(d->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
-                            case eventicon::AFFINITY: 
+                            case eventicon::AFFINITY:
                                 if(m_bomber(gamemode))
                                 {
                                     bvec pcol = bvec::fromcolor(bomber::pulsecolour());
