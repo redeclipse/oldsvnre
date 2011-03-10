@@ -452,11 +452,11 @@ namespace game
                 }
                 if(burntime && d->burning(lastmillis, burntime))
                 {
-                    int millis = lastmillis-d->lastburn; 
-                    size_t seed = size_t(d) + (millis/50); 
+                    int millis = lastmillis-d->lastburn;
+                    size_t seed = size_t(d) + (millis/50);
                     float pc = d->curscale, amt = (millis%50)/50.0f, intensity = 0.75f+(detrnd(seed, 25)*(1-amt) + detrnd(seed + 1, 25)*amt)/100.f;
                     if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
-                    else 
+                    else
                     {
                         float fluc = float(millis%burndelay)*(0.25f+0.03f)/burndelay;
                         if(fluc >= 0.25f) fluc = (0.25f+0.03f-fluc)*(0.25f/0.03f);
@@ -1342,16 +1342,25 @@ namespace game
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;
-            if(!burntime || !e->burning(lastmillis, burntime)) return;
-            vec burncol = burncolour(d);
-            color.max(burncol).lerp(burncol, 0.6f);
+            if(burntime && e->burning(lastmillis, burntime))
+            {
+                vec burncol = burncolour(d);
+                color.max(burncol).lerp(burncol, 0.6f);
+            }
+            if(bleedtime && e->bleeding(lastmillis, bleedtime))
+            {
+                const vec bleedcol(255, 64, 64);
+                color.max(bleedcol).lerp(bleedcol, 0.6f);
+            }
         }
         else if(d->type == ENT_PROJ)
         {
             projent *e = (projent *)d;
-            if(e->projtype != PRJ_DEBRIS || e->limited) return;
-            vec burncol = burncolour(d);
-            color.max(burncol).lerp(burncol, 0.6f);
+            if(e->projtype == PRJ_DEBRIS && !e->limited)
+            {
+                vec burncol = burncolour(d);
+                color.max(burncol).lerp(burncol, 0.6f);
+            }
         }
     }
 
