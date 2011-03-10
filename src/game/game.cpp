@@ -452,7 +452,9 @@ namespace game
                 }
                 if(burntime && d->burning(lastmillis, burntime))
                 {
-                    int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.75f+(rnd(25)/100.f);
+                    int millis = lastmillis-d->lastburn; 
+                    size_t seed = size_t(d) + (millis/50); 
+                    float pc = d->curscale, amt = (millis%50)/50.0f, intensity = 0.75f+(detrnd(seed, 25)*(1-amt) + detrnd(seed + 1, 25)*amt)/100.f;
                     if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                     else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                     adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
