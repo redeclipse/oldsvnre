@@ -5,7 +5,7 @@
 
 #define ENG_VERSION         90
 #define ENG_NAME            "Red Eclipse"
-#define ENG_RELEASE         "Beta Devel"
+#define ENG_RELEASE         "Testing Only"
 #define ENG_URL             "www.redeclipse.net"
 #ifdef WIN32
 #define ENG_PLATFORM        "win"
@@ -19,7 +19,7 @@
 #define ENG_SERVER_PORT     (ENG_DEVEL ? 28803 : 28801)
 #define ENG_LAN_PORT        28799
 #define ENG_MASTER_PORT     28800
-#define ENG_MASTER_HOST     "74.82.3.216"
+#define ENG_MASTER_HOST     "play.redeclipse.net"
 
 #ifdef IRC
 #include "irc.h"
