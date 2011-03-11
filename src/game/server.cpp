@@ -2547,7 +2547,7 @@ namespace server
                     case 0: nodamage++; break;
                 }
             }
-            if(m_expert(gamemode, mutators) && !(flags&HIT_HEAD)) nodamage++;
+            if(m_expert(gamemode, mutators) && !hithead(flags)) nodamage++;
         }
         if(nodamage || !hithurts(realflags))
         {
@@ -2637,7 +2637,7 @@ namespace server
                         style |= FRAG_FIRSTBLOOD;
                         pointvalue *= 2;
                     }
-                    if((flags&HIT_PROJ) && (flags&HIT_HEAD))
+                    if(flags&HIT_HEAD) // NOT HZONE
                     {
                         style |= FRAG_HEADSHOT;
                         pointvalue *= 2;
@@ -2754,7 +2754,7 @@ namespace server
         float skew = GAME(damagescale)*clamp(scale, 0.f, 1.f);
         if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
-        if(!(flags&HIT_HEAD))
+        if(!hithead(flags))
         {
             if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
             else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);

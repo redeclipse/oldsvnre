@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         209
+#define GAMEVERSION         210
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
