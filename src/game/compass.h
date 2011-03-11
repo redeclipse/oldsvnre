@@ -162,17 +162,10 @@ int cmenuhit()
 
 void renderaction(int idx, int size, Texture *t, char code, const char *name, bool hit)
 {
-    int x = hudwidth/2+(size*compassdir[idx].x), y = hudheight/2+(size*compassdir[idx].y),
-        r = 255, g = hit && idx ? 0 : 255, b = hit && idx ? 0 : 255, f = hit || !idx ? 255 : 128;
     pushfont(!idx || hit ? "super" : "default");
-    if(!compassdir[idx].y) y -= compassdir[idx].x ? FONTH/2 : FONTH;
-    else
-    {
-        if(compassdir[idx].y < 0) y -= FONTH*2+FONTH/2;
-        else if(compassdir[idx].y > 0) y += FONTH/2;
-        if(compassdir[idx].x) { x -= compassdir[idx].x*size/2; y -= compassdir[idx].y*size/2; }
-        else y -= compassdir[idx].y*FONTH/2;
-    }
+    int s = compassdir[idx].x && compassdir[idx].y ? size*2/3 : size,
+        x = hudwidth/2+(s*compassdir[idx].x), y = hudheight/2+(s*compassdir[idx].y)-(((0-compassdir[idx].y)+1)*FONTH),
+        r = 255, g = hit && idx ? 0 : 255, b = hit && idx ? 0 : 255, f = hit || !idx ? 255 : 128;
     if(t && t != notexture)
     {
         glBindTexture(GL_TEXTURE_2D, t->id);
@@ -180,44 +173,10 @@ void renderaction(int idx, int size, Texture *t, char code, const char *name, bo
         if(idx) drawslice(0.5f/8+(idx-2)/float(8), 1/float(8), hudwidth/2, hudheight/2, size);
         else drawsized(hudwidth/2-size*3/8, hudheight/2-size*3/8, size*3/4);
     }
-    switch(compassdir[idx].y)
-    {
-        case -1:
-        {
-            pushfont(!idx || hit ? "emphasis" : "sub");
-            y += draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
-            popfont();
-            if(code) draw_textx("[%s]", x, y, r, g, b, 255, compassdir[idx].align, -1, -1, getkeyname(code));
-            break;
-        }
-        case 0:
-        {
-            if(compassdir[idx].x)
-            {
-                if(code)
-                {
-                    defformatstring(s)("[%s]", getkeyname(code));
-                    draw_textx("%s", x, y, r, g, b, 255, compassdir[idx].align, -1, -1, s);
-                    x += (text_width(s)+FONTW/4)*compassdir[idx].x;
-                    y += FONTH/2;
-                }
-                else x += FONTW/4*compassdir[idx].x;
-                pushfont(!idx || hit ? "emphasis" : "sub");
-                y -= FONTH/2;
-                draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
-                popfont();
-                break;
-            } // center uses default case
-        }
-        case 1: default:
-        {
-            if(code) y += draw_textx("[%s]", x, y, r, g, b, idx ? 255 : f, compassdir[idx].align, -1, -1, getkeyname(code));
-            pushfont(!idx || hit ? "emphasis" : "sub");
-            draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
-            popfont();
-            break;
-        }
-    }
+    if(code) y += draw_textx("[%s]", x, y, r, g, b, idx ? 255 : f, compassdir[idx].align, -1, -1, getkeyname(code));
+    popfont();
+    pushfont(!idx || hit ? "emphasis" : "sub");
+    draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
     popfont();
 }
 
