@@ -75,7 +75,7 @@ namespace hud
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.f, 1000);
+    FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
