@@ -2754,9 +2754,10 @@ namespace server
         float skew = GAME(damagescale)*clamp(scale, 0.f, 1.f);
         if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
-        if(!hithead(flags))
+        if(!(flags&HIT_HEAD))
         {
-            if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
+            if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
+            else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
             else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
             else skew = 0;
         }
