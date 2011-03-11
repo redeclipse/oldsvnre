@@ -195,7 +195,7 @@ namespace projs
                     int flag = 0;
                     switch(i)
                     {
-                        case 2: flag = closest != i ? HIT_WHIPLASH : HIT_HEAD; break;
+                        case 2: flag = closest != i || rdist[i] > WEAP2(proj.weap, headmin, proj.flags&HIT_ALT) ? HIT_WHIPLASH : HIT_HEAD; break;
                         case 1: flag = HIT_TORSO; break;
                         case 0: default: flag = HIT_LEGS; break;
                     }
