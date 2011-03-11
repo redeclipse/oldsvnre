@@ -488,6 +488,7 @@ namespace projs
                 proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
+                proj.yaw += 90;
                 break;
             }
             case PRJ_GIBS:
@@ -1516,6 +1517,7 @@ namespace projs
                 if(proj.weap == WEAP_ROCKET)
                 {
                     vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
+                    proj.yaw += 90;
                     break;
                 }
                 if(proj.weap != WEAP_GRENADE) break;
