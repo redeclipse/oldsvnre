@@ -161,7 +161,7 @@ namespace projs
                     if(weaptype[proj.weap].melee)
                     {
                         part_flare(proj.o, proj.from, 500, proj.weap == WEAP_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, proj.weap == WEAP_SWORD ? 0x1111CC : 0xAA8811, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
-                        part_create(PART_PLASMA_SOFT, 500, proj.o, proj.weap == WEAP_SWORD ? 0x1111CC : 0xAA8811, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
+                        part_create(PART_PLASMA, 500, proj.o, proj.weap == WEAP_SWORD ? 0x1111CC : 0xAA8811, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
                     }
                     break;
             }
@@ -1029,7 +1029,7 @@ namespace projs
                     float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
                     if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
                     int len = effect ? max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
-                    part_create(PART_FIREBALL_SOFT, len, proj.o, pulsecols[0][rnd(PULSECOLOURS)], radius, blend, -5);
+                    part_create(PART_FIREBALL, len, proj.o, pulsecols[0][rnd(PULSECOLOURS)], radius, blend, -5);
                 }
                 break;
             }

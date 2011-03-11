@@ -2378,10 +2378,10 @@ namespace game
                         { 4, PART_LIGHTNING_FLARE, 0x1111CC, 1, 1 },
                         { 2, PART_SPARK, 0xFFAA00, 0.15f, 2 },
                         { 2, PART_SPARK, 0xFF8800, 0.1f, 2 },
-                        { 2, PART_FIREBALL_SOFT, 0, 0.5f, 6 },
-                        { 1, PART_PLASMA_SOFT, 0x226688, 0.15f, 2 },
-                        { 2, PART_PLASMA_SOFT, 0x6611FF, 0.1f, 2.5f },
-                        { 3, PART_PLASMA_SOFT, 0, 0.5f, 0.125f },
+                        { 2, PART_FIREBALL, 0, 0.5f, 6 },
+                        { 1, PART_PLASMA, 0x226688, 0.15f, 2 },
+                        { 2, PART_PLASMA, 0x6611FF, 0.1f, 2.5f },
+                        { 3, PART_PLASMA, 0, 0.5f, 0.125f },
                         { 0, 0, 0, 0 },
                     };
                     switch(powerfx[d->weapselect].type)
@@ -2417,7 +2417,7 @@ namespace game
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL_SOFT, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
+                regular_part_create(PART_FIREBALL, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
             }
         }
     }
