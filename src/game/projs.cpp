@@ -70,9 +70,10 @@ namespace projs
         float skew = damagescale*clamp(scale, 0.f, 1.f);
         if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
-        if(!hithead(flags))
+        if(!(flags&HIT_HEAD))
         {
-            if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
+            if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
+            else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
             else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
             else skew = 0;
         }
@@ -194,7 +195,7 @@ namespace projs
                     int flag = 0;
                     switch(i)
                     {
-                        case 2: flag = closest != i ? HIT_HZONE : HIT_HEAD; break;
+                        case 2: flag = closest != i ? HIT_WHIPLASH : HIT_HEAD; break;
                         case 1: flag = HIT_TORSO; break;
                         case 0: default: flag = HIT_LEGS; break;
                     }
@@ -218,12 +219,12 @@ namespace projs
                 {
                     if(dist <= radius)
                     {
-                        hitpush(d, proj, (m_expert(game::gamemode, game::mutators) ? HIT_HZONE : HIT_TORSO)|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale);
+                        hitpush(d, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale);
                         radiated = true;
                     }
                     else if(WEAP(proj.weap, pusharea) > 1 && dist <= maxdist)
                     {
-                        hitpush(d, proj, (m_expert(game::gamemode, game::mutators) ? HIT_HZONE : HIT_TORSO)|HIT_WAVE, radius, dist, proj.curscale);
+                        hitpush(d, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, radius, dist, proj.curscale);
                         radiated = true;
                     }
                 }
@@ -1592,7 +1593,7 @@ namespace projs
             if(proj.lifetime < 0) proj.lifetime = 0;
             return false;
         }
-        vec to(proj.to), ray = vec(proj.to).sub(proj.from).mul(WEAP2(proj.weap, tracemult, proj.flags&HIT_ALT));
+        vec to(proj.to), ray = vec(proj.to).sub(proj.from).mul(WEAP2(proj.weap, trace, proj.flags&HIT_ALT));
         float maxdist = ray.magnitude();
         if(maxdist <= 0) return 1; // not moving anywhere, so assume still alive since it was already alive
         ray.mul(1/maxdist);
