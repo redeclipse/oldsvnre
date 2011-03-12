@@ -413,40 +413,28 @@ namespace game
                             float radius;
                         } powerdl[WEAP_MAX] = {
                             { 0, 0, 0 }, // melee
-                            { 1, 0xFFCC22, 16 }, // pistol
-                            { 1, 0x1111CC, 18 }, // sword
-                            { 1, 0xFFAA00, 20 }, // shotgun
-                            { 2, 0xFF8800, 18 }, // smg
-                            { 2, 0xFF2222, 22 }, // flamer
-                            { 2, 0x226688, 22 }, // plasma
-                            { 1, 0x6611FF, 18 }, // rifle
+                            { 1, 0x997711, 16 }, // pistol
+                            { 1, 0x111177, 18 }, // sword
+                            { 1, 0x997700, 20 }, // shotgun
+                            { 2, 0xAA6600, 18 }, // smg
+                            { 2, 0x991111, 20 }, // flamer
+                            { 2, 0x116699, 24 }, // plasma
+                            { 1, 0x5511CC, 18 }, // rifle
                             { 2, 0, 18 }, // grenades
                             { 2, 0, 18 }, // rocket
                         };
-                        switch(powerdl[d->weapselect].type)
+                        if(powerdl[d->weapselect].type)
                         {
-                            case 1:
-                            {
-                                vec col = powerdl[d->weapselect].colour > 0 ? vec::hexcolor(powerdl[d->weapselect].colour) : weappulsecolour(d);
-                                adddynlight(d->muzzlepos(d->weapselect), 16+(amt*powerdl[d->weapselect].radius), col, 0, 0, DL_KEEP);
-                                break;
-                            }
-                            case 2:
-                            {
-                                vec col;
-                                if(powerdl[d->weapselect].colour > 0) col = vec::hexcolor(powerdl[d->weapselect].colour);
-                                else
-                                {
-                                    col.x = max(1.f-amt,0.5f);
-                                    col.y = 0.5f*max(1.f-amt,0.f);
-                                    col.z = 0;
-                                }
-                                int interval = lastmillis%1000;
-                                float fluc = 8*(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                                adddynlight(d->muzzlepos(d->weapselect), 16+((powerdl[d->weapselect].radius*max(amt, 0.25f))+fluc), col, 0, 0, DL_KEEP);
-                                break;
-                            }
-                            case 0: default: break;
+                            float thresh = max(amt, 0.25f), size = 4+powerdl[d->weapselect].radius*thresh;
+                            int span = max(WEAP2(d->weapselect, power, physics::secondaryweap(d))/4, 500),
+                                interval = lastmillis%span, part = span/2;
+                            if(interval)
+                                size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
+                            vec col;
+                            if(powerdl[d->weapselect].colour > 0) col = vec::hexcolor(powerdl[d->weapselect].colour).mul(thresh);
+                            else if(powerdl[d->weapselect].type != 2) col = vec(weappulsecolour(d)).mul(thresh);
+                            else col = vec(max(1.f-amt,0.5f), 0.5f*max(1.f-amt,0.f), 0);
+                            adddynlight(d->muzzlepos(d->weapselect), size, col, 0, 0, DL_KEEP);
                         }
                     }
                 }
