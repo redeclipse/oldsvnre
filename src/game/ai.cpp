@@ -295,7 +295,7 @@ namespace ai
         if(changed && !d->ai->route.empty() && d->ai->route[0] == node)
         {
             bool found = false;
-            loopi(NUMPREVNODES) if(d->ai->route.find(d->ai->prevnodes[i])) { found = true; break; }
+            loopi(NUMPREVNODES) if(d->ai->route.find(d->ai->prevnodes[i]) >= 0) { found = true; break; }
             if(!found) return true;
         }
         if(entities::route(d->lastnode, node, d->ai->route, obs, d, retry) > 0)
