@@ -132,7 +132,7 @@ namespace auth
         if(!ci) return;
         ci->authreq = 0;
         int n = -1;
-        for(const char *c = flags; *c; *c++) switch(*c)
+        for(const char *c = flags; *c; c++) switch(*c)
         {
             case 'a': n = PRIV_ADMIN; break;
             case 'm': n = PRIV_MASTER; break;
