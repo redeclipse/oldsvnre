@@ -2735,7 +2735,7 @@ namespace server
         givepoints(ci, pointvalue);
         if(GAME(burntime) && (flags&HIT_MELT || flags&HIT_BURN))
         {
-            ci->state.lastburn = ci->state.lastburn = gamemillis;
+            ci->state.lastburn = ci->state.lastburntime = gamemillis;
             ci->state.lastburnowner = ci->clientnum;
         }
         static vector<int> dmglog; dmglog.setsize(0);
@@ -3786,7 +3786,7 @@ namespace server
                     if(!hasclient(cp, ci)) break;
                     if(idx == SPHY_EXTINGUISH)
                     {
-                        if(cp->state.burning(gamemillis, GAME(burntime))) cp->state.lastburn = cp->state.lastburn = 0;
+                        if(cp->state.burning(gamemillis, GAME(burntime))) cp->state.lastburn = cp->state.lastburntime = 0;
                         else break; // don't propogate
                     }
                     else if((idx == SPHY_BOOST || idx == SPHY_DASH) && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulsedelay)))
