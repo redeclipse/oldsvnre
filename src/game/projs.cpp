@@ -488,7 +488,6 @@ namespace projs
                 proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
-                proj.yaw += 90;
                 break;
             }
             case PRJ_GIBS:
@@ -580,7 +579,6 @@ namespace projs
                     proj.o = proj.from.add(vec(proj.from).sub(camera1->o).normalize().mul(4));
                 vecfromyawpitch(proj.yaw+40+rnd(41), proj.pitch+50-proj.speed+rnd(41), 1, 0, proj.to);
                 proj.to.add(proj.from);
-                proj.yaw += 90;
                 break;
             }
             case PRJ_ENT:
@@ -1518,7 +1516,6 @@ namespace projs
                 if(proj.weap == WEAP_ROCKET)
                 {
                     vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
-                    proj.yaw += 90;
                     break;
                 }
                 if(proj.weap != WEAP_GRENADE) break;
@@ -1774,7 +1771,7 @@ namespace projs
         {
             projent &proj = *projs[i];
             if((proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id)) || !projs[i]->mdl || !*projs[i]->mdl) continue;
-            float trans = 1, size = projs[i]->curscale;
+            float trans = 1, size = projs[i]->curscale, yaw = proj.yaw;
             int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_CULL_DIST;
             switch(proj.projtype)
             {
@@ -1799,11 +1796,13 @@ namespace projs
                     size *= proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
                     fadeproj(proj, trans, size);
+                    yaw += 90;
                     break;
                 }
                 case PRJ_SHOT:
                 {
                     if(shadowents) flags |= MDL_DYNSHADOW;
+                    yaw += 90;
                     break;
                 }
                 case PRJ_ENT:
@@ -1814,7 +1813,7 @@ namespace projs
                 }
                 default: break;
             }
-            rendermodel(NULL, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, proj.yaw, proj.pitch, proj.roll, flags, &proj, NULL, 0, 0, trans, size);
+            rendermodel(NULL, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, yaw, proj.pitch, proj.roll, flags, &proj, NULL, 0, 0, trans, size);
         }
     }
 
