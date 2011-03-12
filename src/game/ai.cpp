@@ -292,12 +292,7 @@ namespace ai
     bool makeroute(gameent *d, aistate &b, int node, bool changed, bool retry)
     {
         if(d->lastnode < 0) return false;
-        if(changed && !d->ai->route.empty() && d->ai->route[0] == node)
-        {
-            bool found = false;
-            loopi(NUMPREVNODES) if(d->ai->route.find(d->ai->prevnodes[i]) >= 0) { found = true; break; }
-            if(!found) return true;
-        }
+        if(changed && !d->ai->route.empty() && d->ai->route[0] == node) return true;
         if(entities::route(d->lastnode, node, d->ai->route, obs, d, retry) > 0)
         {
             b.override = false;
@@ -1047,12 +1042,20 @@ namespace ai
             d->ai->lasthunt = lastmillis;
             if(aistyle[d->aitype].canmove) d->ai->dontmove = true;
         }
-        else if(hunt(d, b))
+        else
         {
-            game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
-            d->ai->lasthunt = lastmillis;
+            loopj(NUMPREVNODES) if(d->ai->route.find(d->ai->prevnodes[j]) >= 0)
+            {
+                d->ai->route.setsize(0);
+                break;
+            }
+            if(hunt(d, b))
+            {
+                game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
+                d->ai->lasthunt = lastmillis;
+            }
+            else idle = d->ai->dontmove = true;
         }
-        else idle = d->ai->dontmove = true;
 
         gameent *e = game::getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e), locked = false,
