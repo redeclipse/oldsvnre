@@ -1042,20 +1042,12 @@ namespace ai
             d->ai->lasthunt = lastmillis;
             if(aistyle[d->aitype].canmove) d->ai->dontmove = true;
         }
-        else
+        else if(hunt(d, b))
         {
-            loopj(NUMPREVNODES) if(d->ai->route.find(d->ai->prevnodes[j]) >= 0)
-            {
-                d->ai->route.setsize(0);
-                break;
-            }
-            if(hunt(d, b))
-            {
-                game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
-                d->ai->lasthunt = lastmillis;
-            }
-            else idle = d->ai->dontmove = true;
+            game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
+            d->ai->lasthunt = lastmillis;
         }
+        else idle = d->ai->dontmove = true;
 
         gameent *e = game::getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e), locked = false,
@@ -1515,6 +1507,15 @@ namespace ai
             else if(d->state == CS_ALIVE && parse)
             {
                 int result = 0;
+                loopj(NUMPREVNODES)
+                {
+                    int node = d->ai->prevnodes[j];
+                    if(node != d->lastnode && node != d->ai->targnode && d->ai->route.find(node) >= 0)
+                    {
+                        d->ai->route.setsize(0);
+                        break;
+                    }
+                }
                 c.idle = 0;
                 switch(c.type)
                 {
