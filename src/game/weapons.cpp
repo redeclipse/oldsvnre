@@ -266,12 +266,15 @@ namespace weapons
             else vecfromyawpitch(d->yaw, d->pitch, 1, 0, unitv);
             if(d->aitype < AI_START || aistyle[d->aitype].canmove)
             {
-                float kickmod = kickpushscale;
-                if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod = kickpushzoom;
-                else if(physics::iscrouching(d)) kickmod = kickpushcrouch;
-                vec kick = vec(unitv).mul(-WEAP2(weap, kickpush, secondary)*kickmod);
-                if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
-                d->vel.add(kick);
+                vec kick = vec(unitv).mul(-WEAP2(weap, kickpush, secondary));
+                if(!kick.iszero())
+                {
+                    if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
+                    float kickmod = kickpushscale;
+                    if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod *= kickpushzoom;
+                    if(physics::iscrouching(d)) kickmod *= kickpushcrouch;
+                    d->vel.add(vec(kick).mul(kickmod));
+                }
             }
 
             // move along the eye ray towards the weap origin, stopping when something is hit
