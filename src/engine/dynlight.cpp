@@ -19,7 +19,7 @@ struct dynlight
             int remaining = expire - lastmillis;
             if(flags&DL_EXPAND)
                 curradius = initradius + (radius - initradius) * (1.0f - remaining/float(fade + peak));
-            else if(remaining > fade)
+            else if(!(flags&DL_FLASH) && remaining > fade)
                 curradius = initradius + (radius - initradius) * (1.0f - float(remaining - fade)/peak);
             else if(flags&DL_SHRINK)
                 curradius = (radius*remaining)/fade;
@@ -39,7 +39,7 @@ struct dynlight
         }
 
         float intensity = 1.0f;
-        if(!(flags&DL_FLASH) && fade > 0)
+        if(fade > 0)
         {
             int fading = expire - lastmillis;
             if(fading < fade) intensity = float(fading)/fade;
