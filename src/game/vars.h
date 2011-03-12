@@ -215,7 +215,7 @@ GVAR(0, zoomtime, 1, 100, 10000);
 GFVAR(0, normalscale, 0, 1, 1000);
 GFVAR(0, limitedscale, 0, 0.75f, 1000);
 GFVAR(0, damagescale, 0, 1, 1000);
-GVAR(0, damagecritchance, 0, 100, INT_MAX-1);
+GVAR(0, criticalchance, 0, 100, INT_MAX-1);
 
 GFVAR(0, hitpushscale, 0, 1, 1000);
 GFVAR(0, hitslowscale, 0, 1, 1000);
@@ -223,7 +223,7 @@ GFVAR(0, deadpushscale, 0, 2, 1000);
 GFVAR(0, wavepushscale, 0, 1, 1000);
 GFVAR(0, waveslowscale, 0, 0.5f, 1000);
 GFVAR(0, kickpushscale, 0, 1, 1000);
-GFVAR(0, kickpushcrouch, 0, 0.5f, 1000);
+GFVAR(0, kickpushcrouch, 0, 0, 1000);
 GFVAR(0, kickpushsway, 0, 0.0125f, 1000);
 GFVAR(0, kickpushzoom, 0, 0.125f, 1000);
 

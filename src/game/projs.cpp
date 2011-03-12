@@ -30,9 +30,9 @@ namespace projs
     FVAR(IDF_PERSIST, ejectweight, -10000, 180, 10000);
 
     VAR(IDF_PERSIST, projtrails, 0, 1, 1);
-    VAR(IDF_PERSIST, projtraildelay, 1, 25, INT_MAX-1);
-    VAR(IDF_PERSIST, projtraillength, 1, 500, INT_MAX-1);
-    VAR(IDF_PERSIST, projfirehint, 0, 0, 1);
+    VAR(IDF_PERSIST, projtraildelay, 1, 15, INT_MAX-1);
+    VAR(IDF_PERSIST, projtraillength, 1, 350, INT_MAX-1);
+    VAR(IDF_PERSIST, projfirehint, 0, 1, 1);
     VAR(IDF_PERSIST, projteamhint, 0, 0, 1);
     #define teamhint(a,b) (projteamhint ? (a)->colour() : b)
 

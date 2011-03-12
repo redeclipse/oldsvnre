@@ -2561,17 +2561,19 @@ namespace server
                 bool docrit = false;
                 if(WEAP2(weap, critdash, flags&HIT_ALT) && actor->state.lastboost && gamemillis-actor->state.lastboost <= WEAP2(weap, critdash, flags&HIT_ALT))
                     docrit = true;
-                else if(GAME(damagecritchance) > 0)
+                else if(GAME(criticalchance) > 0)
                 {
                     actor->state.crits++;
                     if(WEAP(weap, critmult) > 0)
                     {
-                        int offset = GAME(damagecritchance)-actor->state.crits;
-                        if(target != actor && WEAP(weap, critdist) > 0)
+                        int offset = GAME(criticalchance)-actor->state.crits;
+                        if(target != actor && WEAP(weap, critdist) != 0)
                         {
                             float dist = actor->state.o.dist(target->state.o);
-                            if(dist <= WEAP(weap, critdist))
-                                offset = int(offset*clamp(dist, 1.f, WEAP(weap, critdist))/WEAP(weap, critdist));
+                            if(WEAP(weap, critdist) < 0 && dist < 0-WEAP(weap, critdist))
+                                offset = int(offset*clamp(dist, 1.f, 0-WEAP(weap, critdist))/(0-WEAP(weap, critdist)));
+                            else if(WEAP(weap, critdist) > 0 && dist > WEAP(weap, critdist))
+                                offset = int(offset*WEAP(weap, critdist)/clamp(dist, WEAP(weap, critdist), 1e16f));
                         }
                         if(offset <= 0 || !rnd(offset))
                         {
