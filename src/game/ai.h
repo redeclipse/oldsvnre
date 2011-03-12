@@ -111,7 +111,7 @@ namespace ai
         vec target, spot;
         int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lasthunt, lastaction, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd,
-            lastpusher, lastpushtime;
+            lastpusher, lastpushtime, lastmelee;
         float scale, targyaw, targpitch, views[3], aimrnd[3];
         bool suspended, dontmove, tryreset, trywipe;
 
@@ -128,7 +128,7 @@ namespace ai
         void clearsetup()
         {
             spot = target = vec(0, 0, 0);
-            lastaction = lasthunt = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = lastpushtime = 0;
+            lastaction = lasthunt = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = lastpushtime = lastmelee = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
             weappref = targnode = targlast = enemy = lastpusher = -1;

@@ -982,7 +982,7 @@ namespace ai
         if(d->blocked) off.z += JUMPMIN; // it could help..
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 100 && !d->turnside,
             impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 500 || d->vel.z < 1), jet = air && physics::canjetpack(d),
-            jumper = (locked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
+            jumper = (locked || d->blocked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
             jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
@@ -1008,8 +1008,13 @@ namespace ai
             seed *= 50; if(b.idle) seed *= 100;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
-        if((!weaptype[d->weapselect].melee && locked) || (air && physics::canimpulse(d, -1, 3) && (d->skill >= 100 || !rnd(101-d->skill))))
+        if(air && physics::canimpulse(d, -1, 3) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
             d->action[AC_SPECIAL] = true;
+        else if(!weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (101-d->skill)*5)
+        {
+            d->action[AC_SPECIAL] = true;
+            d->ai->lastmelee = lastmillis;
+        }
     }
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
