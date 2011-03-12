@@ -1482,7 +1482,7 @@ namespace entities
                     bool wp = ents[link]->type == WAYPOINT;
                     if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !m_jetpack(game::gamemode, game::mutators)) continue;
                     linkq &n = nodes[link];
-                    int weight = max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
+                    int weight = m_jetpack(game::gamemode, game::mutators) ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
                     float curscore = prevscore + ents[link]->o.dist(ent.o)*weight;
                     if(n.id == routeid && curscore >= n.curscore) continue;
                     n.curscore = curscore;

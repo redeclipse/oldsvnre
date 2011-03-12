@@ -1142,18 +1142,17 @@ struct gameent : dynent, gamestate
         float hsize = max(xradius*0.45f, yradius*0.45f);
         if(head == vec(-1, -1, -1))
         {
-            torso = head;
             head = o;
-            head.z -= hsize*0.35f;
+            head.z -= hsize*0.375f;
         }
-        else head.z += hsize*0.45f;
+        else head.z += hsize*0.375f;
         hrad = vec(xradius*0.45f, yradius*0.45f, hsize);
         if(torso == vec(-1, -1, -1))
         {
             torso = o;
-            torso.z -= height*0.4f;
+            torso.z -= height*0.375f;
         }
-        torso.z += hsize*0.75f;
+        torso.z += hsize*0.625f;
         float tsize = (head.z-hrad.z)-torso.z;
         trad = vec(xradius, yradius, tsize);
         float lsize = ((torso.z-trad.z)-(o.z-height))*0.5f;
