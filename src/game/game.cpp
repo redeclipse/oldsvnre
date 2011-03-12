@@ -1357,6 +1357,7 @@ namespace game
             if(e->projtype == PRJ_DEBRIS && !e->limited)
             {
                 vec burncol = burncolour(d);
+                burncol.lerp(color, clamp((e->lifespan - 0.3f)/0.5f, 0.0f, 1.0f));
                 color.max(burncol).lerp(burncol, 0.6f);
             }
         }
