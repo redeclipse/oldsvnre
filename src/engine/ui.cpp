@@ -162,6 +162,12 @@ struct gui : guient
         else
         {
             curlist = nextlist++;
+            if(curlist >= lists.length()) // should never get here unless script code doesn't use same amount of lists in layout and render passes
+            {
+                list &l = lists.add();
+                l.parent = curlist;
+                l.w = l.h = l.mouse[0] = l.mouse[1] = 0;
+            } 
             xsize = lists[curlist].w;
             ysize = lists[curlist].h;
         }
