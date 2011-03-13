@@ -380,7 +380,7 @@ void checkpings()
         if(len <= 0) return;
         serverinfo *si = NULL;
         loopv(servers) if(addr.host == servers[i]->address.host && addr.port == servers[i]->address.port) { si = servers[i]; break; }
-        if(!si && searchlan) si = newserver(NULL, ENG_SERVER_PORT, addr.host);
+        if(!si && searchlan) si = newserver(NULL, addr.port-1, addr.host);
         if(si) si->reset();
         else continue;
         ucharbuf p(ping, len);
