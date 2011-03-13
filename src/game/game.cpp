@@ -465,8 +465,8 @@ namespace game
     void boosteffect(gameent *d, const vec &pos, int num, int len, bool shape = false)
     {
         float scale = 0.75f+(rnd(25)/100.f);
-        part_create(PART_HINT, shape ? 10 : 1, pos, 0x1818A8, scale, min(0.65f*scale, 0.8f), 0, 0);
-        part_create(PART_FIREBALL, shape ? 10 : 1, pos, 0xFF6818, 0.8f*scale, min(0.75f*scale, 0.95f), 0, 0);
+        part_create(PART_HINT, shape ? 10 : 1, pos, 0x1818A8, scale, min(0.75f*scale, 0.95f), 0, 0);
+        part_create(PART_FIREBALL, shape ? 10 : 1, pos, 0xFF6818, scale*0.75f, min(0.75f*scale, 0.95f), 0, 0);
         if(shape) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[0][rnd(PULSECOLOURS)], 21, num, len, pos, scale, 0.75f, -5, 0, 10);
         else regular_part_create(PART_FIREBALL, len, pos, pulsecols[0][rnd(PULSECOLOURS)], 0.6f*scale, min(0.75f*scale, 0.95f), -10, 0);
     }
