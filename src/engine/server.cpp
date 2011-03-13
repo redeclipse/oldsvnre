@@ -825,7 +825,7 @@ VARF(IDF_PERSIST, clockerror, 990000, 1000000, 1010000, clockreset());
 VARF(IDF_PERSIST, clockfix, 0, 0, 1, clockreset());
 #endif
 
-void updatetimer()
+int updatetimer()
 {
 #ifdef STANDALONE
     int millis = (int)enet_time_get();
@@ -853,6 +853,7 @@ void updatetimer()
     }
     lastmillis += curtime;
     totalmillis = millis;
+    return elapsed;
 }
 
 #ifdef WIN32
