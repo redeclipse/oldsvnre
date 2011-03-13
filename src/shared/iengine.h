@@ -7,7 +7,7 @@ extern void fatal(const char *s, ...);
 extern void console(int type, const char *s, ...);
 extern void conoutft(int type, const char *s, ...);
 extern void conoutf(const char *s, ...);
-extern void updatetimer();
+extern int updatetimer();
 
 extern FILE *logfile;
 extern void setlogfile(const char *fname);

@@ -980,8 +980,8 @@ int main(int argc, char **argv)
 
     for(int frameloops = 0; ; frameloops = frameloops >= INT_MAX-1 ? MAXFPSHISTORY+1 : frameloops+1)
     {
-        updatetimer();
-        updatefps(frameloops, curtime);
+        int elapsed = updatetimer();
+        updatefps(frameloops, elapsed);
         checkinput();
         menuprocess();
 
