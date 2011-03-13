@@ -791,10 +791,16 @@ namespace server
             if(GAME(rotatemuts))
             {
                 int num = rnd(G_M_NUM+1);
-                if(num) loopi(num)
+                if(num) loopi(num) if(GAME(rotatemuts) == 1 || !rnd(GAME(rotatemuts)))
                 {
                     int rmut = rnd(G_M_NUM+1);
-                    if(rmut) muts |= 1<<(rmut-1);
+                    if(rmut)
+                    {
+                        int smut = 1<<(rmut-1);
+                        if(GAME(rotatefilter) && !(GAME(rotatefilter)&smut)) continue;
+                        muts |= smut;
+                        modecheck(mode, muts, smut);
+                    }
                 }
             }
         }
