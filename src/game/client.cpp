@@ -613,15 +613,20 @@ namespace client
 
     void changemapserv(char *name, int gamemode, int mutators, bool temp)
     {
-        game::gamemode = gamemode; game::mutators = mutators;
+        game::gamemode = gamemode;
+        game::mutators = mutators;
         server::modecheck(game::gamemode, game::mutators);
-        game::nextmode = game::gamemode; game::nextmuts = game::mutators;
+        game::nextmode = game::gamemode;
+        game::nextmuts = game::mutators;
         game::timeremaining = -1;
         game::maptime = 0;
         hud::resetscores();
         mapvotes.shrink(0);
         if(editmode) toggleedit();
         if(m_demo(gamemode)) return;
+        if(m_capture(game::gamemode)) capture::reset();
+        else if(m_defend(game::gamemode)) defend::reset();
+        else if(m_bomber(game::gamemode)) bomber::reset();
         needsmap = false;
         if(!name || !*name || !load_world(name, temp))
         {
@@ -629,9 +634,9 @@ namespace client
             setnames(name, MAP_MAPZ);
             needsmap = true;
         }
-        if(m_capture(gamemode)) capture::setupaffinity();
-        else if(m_defend(gamemode)) defend::setupaffinity();
-        else if(m_bomber(gamemode)) bomber::setupaffinity();
+        if(m_capture(game::gamemode)) capture::setup();
+        else if(m_defend(game::gamemode)) defend::setup();
+        else if(m_bomber(game::gamemode)) bomber::setup();
     }
 
     void receivefile(uchar *data, int len)

@@ -277,9 +277,13 @@ namespace bomber
         }
     }
 
-    void setupaffinity()
+    void reset()
     {
         st.reset();
+    }
+
+    void setup()
+    {
         #define setupaddaffinity(a,b) \
         { \
             index = st.addaffinity(entities::ents[a]->o, entities::ents[a]->attrs[0]); \
@@ -685,12 +689,12 @@ namespace bomber
                     bomberstate::flag &g = st.flags[i];
                     if(pos.squaredist(g.pos()) <= mindist)
                     {
-                        if(g.owner && ai::owner(g.owner) == ai::owner(d)) walk = 1;
+                        if(g.owner && ai::owner(g.owner) == ai::owner(d) && !walk) walk = 1;
                         if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
                     }
                 }
             }
-            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::ALERTMIN : float(enttype[AFFINITY].radius*(1+walk)), walk);
+            return ai::defense(d, b, f.pos(), f.owner ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), f.owner ? ai::ALERTMIN : float(enttype[AFFINITY].radius*walk*16), walk);
         }
         return false;
     }

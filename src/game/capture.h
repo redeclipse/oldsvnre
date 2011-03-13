@@ -167,7 +167,8 @@ namespace capture
     extern void returnaffinity(gameent *d, int i);
     extern void takeaffinity(gameent *d, int i);
     extern void resetaffinity(int i, int value);
-    extern void setupaffinity();
+    extern void reset();
+    extern void setup();
     extern void setscore(int team, int total);
     extern void checkaffinity(gameent *d);
     extern void drawnotices(int w, int h, int &tx, int &ty, float blend);

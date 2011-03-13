@@ -173,9 +173,13 @@ namespace defend
         return sy;
     }
 
-    void setupaffinity()
+    void reset()
     {
         st.reset();
+    }
+
+    void setup()
+    {
         loopv(entities::ents)
         {
             extentity *e = entities::ents[i];
@@ -340,7 +344,7 @@ namespace defend
                 }
                 else walk = 1;
             }
-            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*(1+walk)), walk);
+            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*16), walk);
         }
         return false;
     }

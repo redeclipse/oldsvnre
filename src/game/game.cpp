@@ -827,7 +827,6 @@ namespace game
     void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir)
     {
         if(d->state != CS_ALIVE || intermission) return;
-        if(isweap(weap) && actor == player1) conoutf("damage: \fs%s%s\fS (%d) [\fs\fy%d\fS dam %d hp] %s (%s shot %s)", weaptype[weap].text, weaptype[weap].name, flags, damage, health, colorname(d), (hithead(flags) ? (flags&HIT_WHIPLASH ? "whiplash" : "head") : (flags&HIT_TORSO ? "torso" : (flags&HIT_LEGS ? "leg" : "dunno"))), (hithurts(flags) ? "hurts" : "pushes"));
         if(hithurts(flags))
         {
             d->health = health;
