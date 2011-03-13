@@ -1898,8 +1898,6 @@ namespace server
     void changemap(const char *name, int mode, int muts)
     {
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
-        aiman::clearai();
-        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
         nplayers = gamemillis = interm = 0;
@@ -1911,6 +1909,10 @@ namespace server
         loopv(savedscores) savedscores[i].mapchange();
         setuptriggers(false);
         setupspawns(false);
+        if(smode) smode->reset(false);
+        mutate(smuts, mut->reset(false));
+        aiman::clearai();
+        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
 
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request

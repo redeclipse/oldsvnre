@@ -1010,7 +1010,7 @@ namespace ai
         }
         if(air && physics::canimpulse(d, -1, 3) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
             d->action[AC_SPECIAL] = true;
-        else if(!weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (101-d->skill)*5)
+        else if(!weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
         {
             d->action[AC_SPECIAL] = true;
             d->ai->lastmelee = lastmillis;
