@@ -26,8 +26,9 @@ GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepause
 GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
-GVAR(IDF_ADMIN, rotatemode, 0, 0, 1);
-GVAR(IDF_ADMIN, rotatemuts, 0, 0, 1);
+GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
+GVAR(IDF_ADMIN, rotatemuts, 0, 3, INT_MAX-1); // any more than one decreases the chances of it picking
+GVAR(IDF_ADMIN, rotatefilter, 0, G_M_FILTER, G_M_ALL); // modes not in this array are filtered out
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
