@@ -1149,10 +1149,11 @@ namespace hud
             dir.rotate_around_z(-camera1->yaw*RAD);
             dir.normalize();
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
-                 dominated = radarplayereffects && d->dominating.find(game::focus) >= 0;
+                 dominated = radarplayereffects && d->dominated.find(game::focus) >= 0;
             vec colour = burning ? game::burncolour(d) : (dominated ? vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]) : vec::hexcolor(d->colour()));
-            const char *tex = dominated ? dominatingtex : bliptex;
-            float fade = clamp(1.f-(dist/radarrange()), 0.f, 1.f)*blend*radarplayerblend, pos = 2, size = radarplayersize;
+            const char *tex = dominated ? dominatedtex : bliptex;
+            float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend*radarplayerblend,
+                  pos = 2, size = radarplayersize*(dominated ? 1.5f : 1.f);
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
