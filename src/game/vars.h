@@ -59,7 +59,7 @@ GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = alwa
 GVAR(0, spawndelay, 0, 5000, INT_MAX-1); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, INT_MAX-1); // .. in instagib/arena matches
 GVAR(0, trialdelay, 0, 500, INT_MAX-1); // .. in time trial matches
-GVAR(0, bomberdelay, 0, 5000, INT_MAX-1); // delay before spawning in bomber
+GVAR(0, bomberdelay, 0, 3000, INT_MAX-1); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, INT_MAX-1); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, INT_MAX-1); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
@@ -79,11 +79,11 @@ GVAR(0, bleedtime, 0, 5500, INT_MAX-1);
 GVAR(0, bleeddelay, 0, 1000, INT_MAX-1);
 GVAR(0, bleeddamage, 0, 5, INT_MAX-1);
 
-GVAR(0, regendelay, 0, 3000, INT_MAX-1);
-GVAR(0, regenguard, 0, 1000, INT_MAX-1);
-GVAR(0, regentime, 0, 1000, INT_MAX-1);
-GVAR(0, regenhealth, 0, 5, INT_MAX-1);
-GVAR(0, regenextra, 0, 5, INT_MAX-1);
+GVAR(0, regendelay, 0, 3000, INT_MAX-1); // regen after no damage for this long
+GVAR(0, regenguard, 0, 1000, INT_MAX-1); // regen this often when guarding an affinity
+GVAR(0, regentime, 0, 1000, INT_MAX-1); // regen this often when regenerating normally
+GVAR(0, regenhealth, 0, 5, INT_MAX-1); // regen this amount each regen
+GVAR(0, regenextra, 0, 2, INT_MAX-1); // add this to regen when influenced by affinity
 GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
 
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
@@ -91,13 +91,18 @@ GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 30000, INT_MAX-1); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, INT_MAX-1); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
-GFVAR(0, itemthreshold, 0, 1, 1000); // if numitems/numclients/maxcarry is less than this, spawn one of this type
-GFVAR(0, itemelasticity, -10000, 0.35f, 10000);
+GFVAR(0, itemthreshold, 0, 2, 1000); // if numitems/numclients/maxcarry is less than this, spawn one of this type
+GVAR(0, itemcollide, 0, BOUNCE_GEOM, INT_MAX-1);
+GVAR(0, itemextinguish, 0, 6, 7);
+GFVAR(0, itemelasticity, -10000, 0.4f, 10000);
 GFVAR(0, itemrelativity, -10000, 1, 10000);
 GFVAR(0, itemwaterfric, 0, 1.75f, 10000);
 GFVAR(0, itemweight, -10000, 150, 10000);
+GFVAR(0, itemminspeed, 0, 0, 10000);
+GFVAR(0, itemrepulsion, 0, 16, 10000);
+GFVAR(0, itemrepelspeed, 0, 25, 10000);
 
-GVAR(0, timelimit, 0, 15, INT_MAX-1);
+GVAR(0, timelimit, 0, 10, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
 GVAR(0, intermlimit, 0, 10000, INT_MAX-1); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 30000, INT_MAX-1); // .. before vote passes by default
@@ -115,8 +120,13 @@ GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 GVAR(0, capturepickupdelay, -1, 5000, INT_MAX-1);
-GFVAR(0, captureelasticity, -10000, 0.25f, 10000);
+GVAR(0, capturecollide, 0, BOUNCE_GEOM, INT_MAX-1);
+GVAR(0, captureextinguish, 0, 6, 7);
+GFVAR(0, capturerelativity, 0, 0.25f, 10000);
+GFVAR(0, captureelasticity, -10000, 0.35f, 10000);
+GFVAR(0, capturewaterfric, -10000, 1.75f, 10000);
 GFVAR(0, captureweight, -10000, 100, 10000);
+GFVAR(0, captureminspeed, 0, 0, 10000);
 
 GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
@@ -134,11 +144,14 @@ GVAR(0, bomberholdpenalty, 0, 10, INT_MAX-1); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, INT_MAX-1);
 GVAR(0, bomberlockondelay, 0, 250, INT_MAX-1);
 GFVAR(0, bomberspeed, 0, 250, 10000);
-GFVAR(0, bomberminvel, 0, 50, 10000);
 GFVAR(0, bomberdelta, 0, 1000, 10000);
+GVAR(0, bombercollide, 0, BOUNCE_GEOM, INT_MAX-1);
+GVAR(0, bomberextinguish, 0, 6, 7);
 GFVAR(0, bomberrelativity, 0, 0.25f, 10000);
 GFVAR(0, bomberelasticity, -10000, 0.65f, 10000);
+GFVAR(0, bomberwaterfric, -10000, 1.75f, 10000);
 GFVAR(0, bomberweight, -10000, 150, 10000);
+GFVAR(0, bomberminspeed, 0, 50, 10000);
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, INT_MAX-1);
 GVAR(0, skillmin, 1, 50, 101);
