@@ -787,7 +787,7 @@ namespace physics
                     else pulse = (impulseaction%2 == 1 && d->action[AC_JUMP]) || (impulseaction >= 2 && d->action[AC_DASH]);
                     if(dash || pulse)
                     {
-                        bool moving = d->move || d->strafe;
+                        bool moving = impulseaction != 1 && (d->move || d->strafe);
                         float skew = moving ? impulseboost : impulsejump;
                         if(onfloor)
                         {
