@@ -1,11 +1,11 @@
 <?php
-    $app['releasever'] = "Pre-Beta";
-    $app['releasedate'] = "NOT YET";
+    $app['releasever'] = "v1.0 (Ides Edition)";
+    $app['releasedate'] = "15th March 2011";
     $app['background'] = "/bits/background_01.jpg";
     $app['youtubevid'] = "in6lzvywk7U";
     $app['screenshots'] = 16;
 
-    $app['banner'] = "Help us raise <b>AU$294</b> to pay for our new player model, we have <b>AU$124</b> already!";
+    $app['banner'] = "Please help us raise <b>AU$294</b> for our new freely licensed player model!";
     $app['bannerurl'] = "/donate";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
@@ -16,7 +16,7 @@
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'alturl' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    // $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
@@ -83,7 +83,7 @@
                     lastText: 		"Last",
                     lastShow:		false,				
                     vertical:		false,
-                    speed: 			5000,
+                    speed: 			500,
                     pause:			10000,
                     numeric: 		false,
                     numericId: 		"controls"
@@ -91,7 +91,7 @@
             }); 
         </script>
     </head>
-    <body style="background: #111111 url(<?php echo $app['background']; ?>) no-repeat center top">
+    <body style="background: url(/bits/bg2.jpg) no-repeat center top, #282828 url(/bits/bg1.jpg) repeat-x">
         <div id="container">
             <div id="banner"><a href="<?php echo $app['bannerurl']; ?>"><?php echo $app['banner']; ?></a></div>
             <div id="links"><?php echo $app['navbar']; ?></div>
@@ -100,11 +100,12 @@
             </div>
             <div id="video">
                 <div id="main">
-                    <h1>Red Eclipse - Coming Soon</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
+                    <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
                     <h3>Available for Windows, Linux/BSD and Mac OSX</h3>
-                    <h3>Agile gameplay: sprint, wall run/kick, and impulse dash</h3>
+                    <h3>Agile gameplay: wall run/kick, impulse dash, and jetpack</h3>
                     <h3>Builtin Editor: create your own maps cooperatively online</h3>
-                    <p id="svn">This game is not released yet,<br/><a href="/devel">get the SVN version</a><br/>and help us beta test today!</p>
+                    <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
+                    <p id="svn">or <a href="/devel">get the SVN version</a> and live on the bleeding edge</p>
                 </div>
                 <div id="player">
                     <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/<?php echo $app['youtubevid']; ?>&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
