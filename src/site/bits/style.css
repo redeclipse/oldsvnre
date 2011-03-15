@@ -5,8 +5,8 @@ h3 { font: 14px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; ba
 h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF; margin: 0px 0px 10px; padding: 0px; text-shadow: 0px 0px 15px #ff3333;}
 #container { margin: 0px auto; width: 980px; padding: 0px; }
 #main { margin: 5px 0px 0px 30px; width: 410px; float: left; }
-#button { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1126px; margin: 0px 0px 0px 65px; padding: 12px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #773a00; display: none;}
-#rel, #svn { font: bold 16px Arial, Helvetica, sans-serif; color: #c0bfb7; margin: 0px; padding: 18px 0px 0px; float: left; width: 402px; text-align: center; }
+#button { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1126px; margin: 0px 0px 0px 65px; padding: 12px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #773a00; }
+#rel, #svn { font: 14px Arial, Helvetica, sans-serif; color: #c0bfb7; margin: 0px; padding: 10px 0px 0px; float: left; width: 402px; text-align: center; }
 #rel a, #svn a { color: #FFFFFF; border-bottom: 1px dotted #FFFFFF; text-decoration: none; }
 #rel a:hover, #svn a:hover { color: #FFFFFF; text-decoration: none; border-bottom: 1px solid #FFFFFF; }
 #button:hover { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1217px; margin: 0px 0px 0px 65px; padding: 12px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #ff4444; }
@@ -15,7 +15,7 @@ h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF;
 #header img { margin: 0px; padding: 0px; border-style: none; }
 #links { display: inline; font-size: 16px; font-weight: bold; color: #FFFFFF; margin: 0px; padding: 0px; float: right; height: 50px; }
 #banner { display: inline; font-size: 16px; color: #FFFFFF; margin: 0px; padding: 0px; float: left; height: 50px; }
-#links a, #banner a { color: #FFFFFF; text-decoration: none; display: block; float: right; text-align: center; height: 24px; margin: 0px; padding: 15px; text-shadow: -1px -1px 1px #000; }
+#links a, #banner a { color: #FFFFFF; text-decoration: none; display: block; float: right; text-align: center; height: 24px; margin: 0px; padding: 10px; padding-top: 15px; text-shadow: -1px -1px 1px #000; }
 #links a:visited, #banner a:visited { background: none; color: #FFFFFF; text-shadow: -1px -1px 1px #000; }
 #links a:hover { color: #ffffff; background: #A34B14 url(/bits/sprite.png) no-repeat center -1246px; text-shadow: -1px -1px 1px #773a00; }
 #banner a:hover { color: #ffffff; text-shadow: -2px -2px 4px #773a00; }
@@ -30,7 +30,7 @@ h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF;
 #video object { margin: 0px; padding: 0px; }
 #player { margin: 0px 20px 0px 0px; padding: 0px; float: right; height: 308px; width: 500px; }
 .sliderblock{ background: url(/bits/sprite.png) no-repeat scroll left -204px; float: left; width: 935px; margin: 0px; padding: 20px 0px 5px 45px; }
-.vbar { background: url(/bits/sprite.png) no-repeat -260px -774px; margin: 0px 5px; padding: 0px; float: left; height: 459px; width: 2px; }
+.vbar { background: url(/bits/sprite.png) no-repeat -260px -774px; margin: 0px 5px; padding: 0px; float: left; height: 238px; width: 2px; }
 .endblock { background: url(/bits/sprite.png) no-repeat center -752px; float: left; height: 10px; width: 980px; margin: 0px 0px 0px; }
 .rightblock { background: url(/bits/sprite.png) 0px -767px; margin: 0px; padding: 14px 20px 0px; float: right; width: 210px; font-size: 14px; color: #a5a5a5; clear: right; font-weight: normal; text-align: center; }
 .rightblock ul { margin: 0px 0px 10px; padding: 0px; float: left; list-style: none; display: block; }
