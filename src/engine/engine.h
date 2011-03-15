@@ -3,9 +3,9 @@
 
 #include "cube.h"
 
-#define ENG_VERSION         90
+#define ENG_VERSION         100
 #define ENG_NAME            "Red Eclipse"
-#define ENG_RELEASE         "Testing Only"
+#define ENG_RELEASE         "Ides Edition"
 #define ENG_URL             "www.redeclipse.net"
 #ifdef WIN32
 #define ENG_PLATFORM        "win"
@@ -14,7 +14,7 @@
 #else
 #define ENG_PLATFORM        "nix"
 #endif
-#define ENG_DEVEL           true
+#define ENG_DEVEL           false
 
 #define ENG_SERVER_PORT     (ENG_DEVEL ? 28803 : 28801)
 #define ENG_LAN_PORT        28799
