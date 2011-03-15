@@ -1,6 +1,6 @@
 Name "RedEclipse"
 
-OutFile "redeclipse-B2-setup.exe"
+OutFile "redeclipse_1.0_win32.exe"
 
 InstallDir $PROGRAMFILES\RedEclipse
 
@@ -40,8 +40,8 @@ Section "Start Menu Shortcuts"
   
   SetOutPath "$INSTDIR"
   
-  CreateShortCut "$INSTDIR\RedEclipse.lnk"                "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\bfclient.exe" 0
-  CreateShortCut "$SMPROGRAMS\RedEclipse\RedEclipse.lnk" "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\bfclient.exe" 0
+  CreateShortCut "$INSTDIR\RedEclipse.lnk"                "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\reclient.exe" 0
+  CreateShortCut "$SMPROGRAMS\RedEclipse\RedEclipse.lnk" "$INSTDIR\redeclipse.bat" "" "$INSTDIR\bin\reclient.exe" 0
   CreateShortCut "$SMPROGRAMS\RedEclipse\Uninstall.lnk"   "$INSTDIR\uninstall.exe"   "" "$INSTDIR\uninstall.exe" 0
   
 SectionEnd
