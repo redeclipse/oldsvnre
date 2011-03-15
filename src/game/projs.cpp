@@ -307,22 +307,22 @@ namespace projs
                 vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
             }
             float minspeed = proj.minspeed;
-            if(proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id) && enttype[entities::ents[proj.id]->type].usetype == EU_ITEM)
+            if(itemrepulsion > 0 && proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id) && enttype[entities::ents[proj.id]->type].usetype == EU_ITEM)
             {
-                #define entbump(x,y) \
+                #define entbump(x) \
                 { \
-                    if(overlapsbox(proj.o, enttype[entities::ents[proj.id]->type].radius/2, enttype[entities::ents[proj.id]->type].radius/2, x, y, y)) \
+                    if(overlapsbox(proj.o, itemrepulsion, itemrepulsion, x, itemrepulsion, itemrepulsion)) \
                     { \
                         vec nrm = vec(proj.o).sub(x).normalize(); \
                         dir[1].add(nrm).normalize(); \
-                        minspeed = 25.f; \
+                        minspeed = max(minspeed, itemrepelspeed); \
                         break; \
                     } \
                 }
                 loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
-                    entbump(projs[i]->o, enttype[entities::ents[projs[i]->id]->type].radius/2);
+                    entbump(projs[i]->o);
                 if(!minspeed) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
-                    entbump(entities::ents[i]->o, enttype[entities::ents[i]->type].radius/2);
+                    entbump(entities::ents[i]->o);
             }
             if(!dir[1].iszero()) proj.vel = vec(dir[1]).mul(max(mag, minspeed));
         }
@@ -591,7 +591,8 @@ namespace projs
                 proj.relativity = itemrelativity;
                 proj.waterfric = itemwaterfric;
                 proj.weight = itemweight;
-                proj.projcollide = BOUNCE_GEOM;
+                proj.projcollide = itemcollide;
+                proj.minspeed = itemminspeed;
                 proj.escaped = true;
                 float mag = proj.inertia.magnitude();
                 if(mag <= 50)
@@ -603,37 +604,41 @@ namespace projs
                 proj.to.z += 4;
                 if(proj.flags) proj.inertia.div(proj.flags+1);
                 proj.fadetime = 500;
-                proj.extinguish = 6;
+                proj.extinguish = itemextinguish;
                 break;
             }
             case PRJ_AFFINITY:
             {
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
-                switch(game::gamemode)
-                {
-                    case G_CAPTURE:
-                        proj.mdl = "flag";
-                        proj.elasticity = captureelasticity;
-                        proj.weight = captureweight;
-                        break;
-                    case G_BOMBER:
-                        proj.mdl = "ball";
-                        proj.elasticity = bomberelasticity;
-                        proj.weight = bomberweight;
-                        break;
-                    default: break;
-                }
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
                 proj.lifesize = 1.f;
                 proj.reflectivity = 0.f;
-                proj.relativity = 0;
-                proj.waterfric = itemwaterfric;
-                proj.projcollide = BOUNCE_GEOM;
                 proj.escaped = true;
                 proj.fadetime = 500;
-                proj.extinguish = 6;
-                proj.minspeed = m_bomber(game::gamemode) ? bomberminvel : 0.f;
+                switch(game::gamemode)
+                {
+                    case G_BOMBER:
+                        proj.mdl = "ball";
+                        proj.projcollide = bombercollide;
+                        proj.extinguish = bomberextinguish;
+                        proj.elasticity = bomberelasticity;
+                        proj.weight = bomberweight;
+                        proj.relativity = bomberrelativity;
+                        proj.waterfric = bomberwaterfric;
+                        proj.minspeed = bomberminspeed;
+                        break;
+                    case G_CAPTURE: default:
+                        proj.mdl = "flag";
+                        proj.projcollide = capturecollide;
+                        proj.extinguish = captureextinguish;
+                        proj.elasticity = captureelasticity;
+                        proj.weight = captureweight;
+                        proj.relativity = capturerelativity;
+                        proj.waterfric = capturewaterfric;
+                        proj.minspeed = captureminspeed;
+                        break;
+                }
                 break;
             }
             default: break;
@@ -1393,7 +1398,7 @@ namespace projs
             if(!targ.iszero())
             {
                 vec dir = vec(proj.vel).normalize();
-                float amt = clamp(bomberdelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberminvel);
+                float amt = clamp(bomberdelta*secs, 1e-8f, 1.f), mag = max(proj.vel.magnitude(), bomberminspeed);
                 dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }

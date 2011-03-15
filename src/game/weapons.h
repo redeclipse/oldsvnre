@@ -101,7 +101,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, name##flaktime1, 1, wo7, 10000);            GVAR(0, name##flaktime2, 1, wo8, 10000); \
     GVAR(0, name##flakspeed1, 0, wo9, 10000);           GVAR(0, name##flakspeed2, 0, wo10, 10000); \
     GVAR(0, name##collide1, 0, wp, INT_MAX-1);          GVAR(0, name##collide2, 0, wq, INT_MAX-1); \
-    GVAR(0, name##extinguish1, 0, x21, 3);              GVAR(0, name##extinguish2, 0, x22, 3); \
+    GVAR(0, name##extinguish1, 0, x21, 7);              GVAR(0, name##extinguish2, 0, x22, 7); \
     GVAR(0, name##cooked1, 0, x31, 5);                  GVAR(0, name##cooked2, 0, x32, 5); \
     GVAR(0, name##guided1, 0, x33, 5);                  GVAR(0, name##guided2, 0, x34, 5); \
     GVAR(0, name##radial1, 0, x4, 1);                   GVAR(0, name##radial2, 0, x5, 1); \
@@ -202,7 +202,7 @@ WEAPON(shotgun,
     1,      1,      1,      0.2f,   1,      1.5f,   0,      0,      8,      8,      1,      1
 );
 WEAPON(smg,
-    40,     40,     1,      2,      100,    200,    1500,   20,     8,      2000,   350,    0,      0,      800,    100,
+    40,     40,     1,      2,      100,    200,    1500,   20,     10,     2000,   350,    0,      0,      800,    150,
     0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      3,      6,      0,      0,      0,      0,
     2,      2,      20,     20,     -1,             WALT(SMG),      16,     4,      5,      20,     500,    500,    0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,

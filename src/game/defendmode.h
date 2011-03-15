@@ -204,7 +204,7 @@ struct defendservmode : defendstate, servmode
             {
                 if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
                 if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
-                if(GAME(regenextra)) amt = GAME(regenextra);
+                if(GAME(regenextra)) amt += GAME(regenextra);
                 return;
             }
         }
