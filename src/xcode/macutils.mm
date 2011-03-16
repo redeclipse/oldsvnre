@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <CoreFoundation/CFBundle.h>
 
 // -- copied from tools.h -- including the full file introduces too many problems
 #define MAXSTRLEN 512
@@ -34,7 +35,7 @@ const char *mac_personaldir() {
     static string dir;
     NSString *path = nil;
     FSRef folder;
-    if (FSFindFolder(kUserDomain, kApplicationSupportFolderType, NO, &folder) == noErr) 
+    if(FSFindFolder(kUserDomain, kApplicationSupportFolderType, NO, &folder) == noErr) 
     {
         CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &folder);
         path = [(NSURL *)url path];
@@ -48,4 +49,16 @@ const char *mac_sauerbratendir() {
     NSString *path = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"sauerbraten"];
     if(path) path = [path stringByAppendingPathComponent:@"Contents/gamedata"];
     return path ? copystring(dir, [path fileSystemRepresentation]) : NULL;
+}
+
+const char *mac_resourcedir()
+{
+    CFBundleRef mainbundle;
+    mainBundle = CFBundleGetMainBundle();
+    if(!mainBundle) return NULL;
+    CFURLRef resource = CFBundleCopyResourceURL(mainbundle, CFStringCreateWithCString(NULL, "Contents/Resources", kCFStringEncodingASCII), NULL, NULL);
+    if(!resource) return NULL;
+    static string dir;
+    if(!CFURLGetFileSystemRepresentation(resource, true, (UInt8*)dir, MAXSTRLEN)) return NULL;
+    return dir;
 }
