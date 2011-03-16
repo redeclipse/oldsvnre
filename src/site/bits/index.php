@@ -2,7 +2,7 @@
     $app['releasever'] = "v1.0 (Ides Edition)";
     $app['releasedate'] = "15th March 2011";
     $app['background'] = "/bits/background_01.jpg";
-    $app['youtubevid'] = "in6lzvywk7U";
+    $app['youtubevid'] = "RYXDg35dobc";
     $app['screenshots'] = 16;
 
     $app['banner'] = "Please help us raise <b>AU$294</b> for our new freely licensed player model!";
@@ -16,7 +16,7 @@
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'alturl' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    $app['targets']['download'] = array('name' => 'Download', 'url' => 'https://sourceforge.net/projects/redeclipse/files/', 'alturl' => 'https://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/redeclipse_1.0/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/redeclipse_1.0/', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
@@ -91,7 +91,7 @@
             }); 
         </script>
     </head>
-    <body style="background: url(/bits/bg2.jpg) no-repeat center top, #282828 url(/bits/bg1.jpg) repeat-x">
+    <body style="background: url(/bits/bg2.jpg) no-repeat center top, #282828 url(/bits/bg1.jpg) repeat-x" bgcolor="#333">
         <div id="container">
             <div id="banner"><a href="<?php echo $app['bannerurl']; ?>"><?php echo $app['banner']; ?></a></div>
             <div id="links"><?php echo $app['navbar']; ?></div>
@@ -172,14 +172,14 @@
             <div id="footer">
                 <div id="sflogo">
                     <a href="/project">
-                        <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=326559&amp;type=11" alt="Get Red Eclipse at SourceForge" title="Get Red Eclipse at SourceForge" width="120" height="30" border="0" />
+                        <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=326559&amp;type=8" alt="Get Red Eclipse at SourceForge" title="Get Red Eclipse at SourceForge" width="80" height="15" border="0" />
                     </a>
                 </div>
                 <a href="/download">Download</a>, or <a href="/chat">Talk to Us</a> today.
             </div>
             <div id="copyright" align="center">
-                <p>Red Eclipse, Copyright (C) 2010 Quinton Reeves, Lee Salzman</p>
-                <p>Cube Engine 2, Copyright (C) 2001-2010 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
+                <p>Red Eclipse, Copyright (C) 2011 Quinton Reeves, Lee Salzman</p>
+                <p>Cube Engine 2, Copyright (C) 2001-2011 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
             </div>
         </div>
     </body>
