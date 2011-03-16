@@ -2920,11 +2920,6 @@ namespace server
             if(GAME(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - unexpected message", weap);
             return;
         }
-        if(!sents.inrange(gs.entid[weap]))
-        {
-            if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - not droppable entity", weap);
-            return;
-        }
         int sweap = m_weapon(gamemode, mutators);
         if(!gs.hasweap(weap, sweap))
         {
