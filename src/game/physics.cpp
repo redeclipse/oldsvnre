@@ -784,7 +784,7 @@ namespace physics
                 {
                     bool dash = false, pulse = false;
                     if(!d->ai && onfloor) dash = impulseaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
-                    else pulse = (impulseaction%2 == 1 && d->action[AC_JUMP]) || (impulseaction >= 2 && d->action[AC_DASH]);
+                    else pulse = ((d->ai || impulseaction >= 2) && d->action[AC_JUMP]) || ((d->ai || impulseaction >= 2) && d->action[AC_DASH]);
                     if(dash || pulse)
                     {
                         bool moving = impulseaction != 1 && (d->move || d->strafe);

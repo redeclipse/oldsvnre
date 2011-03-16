@@ -38,17 +38,20 @@ struct bomberservmode : bomberstate, servmode
     void spawned(clientinfo *ci)
     {
         if(bombertime >= 0) return;
-        if(m_team(gamemode, mutators))
+        if(GAME(bomberreset))
         {
-            int alive[TEAM_MAX] = {0};
-            loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
-            if(!alive[TEAM_ALPHA] || !alive[TEAM_OMEGA]) return;
-        }
-        else
-        {
-            int alive = 0;
-            loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive++;
-            if(alive <= 1) return;
+            if(m_team(gamemode, mutators))
+            {
+                int alive[TEAM_MAX] = {0};
+                loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
+                if(!alive[TEAM_ALPHA] || !alive[TEAM_OMEGA]) return;
+            }
+            else
+            {
+                int alive = 0;
+                loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive++;
+                if(alive <= 1) return;
+            }
         }
         bombertime = gamemillis+GAME(bomberdelay);
         if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
@@ -68,7 +71,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scorebomb(clientinfo *ci, int relay, int goal)
     {
-        flag &f = flags[relay], g = flags[goal];
+        flag g = flags[goal];
         if(!g.enabled) return;
         bomberstate::returnaffinity(relay, gamemillis, false);
         int score = 0;
@@ -85,10 +88,13 @@ struct bomberservmode : bomberstate, servmode
             score = addscore(ci->team, -1);
         }
         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
-        loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
+        if(GAME(bomberreset))
         {
-            bool kamikaze = clients[j]->state.state == CS_ALIVE && clients[j]->team == f.team;
-            if(kamikaze || !m_duke(gamemode, mutators)) waiting(clients[j], 0, kamikaze ? 3 : 1);
+            loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
+            {
+                if((GAME(bomberreset) >= 2 || clients[j]->team == ci->team) && (clients[j]->state.state == CS_ALIVE || !m_duke(gamemode, mutators)))
+                    waiting(clients[j], 0, 3);
+            }
         }
         loopvj(flags) if(flags[j].enabled)
         {
@@ -140,7 +146,7 @@ struct bomberservmode : bomberstate, servmode
         if(v && !flags[i].enabled)
         {
             loopvj(flags) if(flags[j].enabled) returnaffinity(j, 0);
-            bombertime = gamemillis+GAME(bomberdelay);
+            bombertime = gamemillis;
         }
     }
 
