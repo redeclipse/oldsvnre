@@ -312,8 +312,32 @@ namespace entities
         return "";
     }
 
-    // these two functions are called when the server acknowledges that you really
-    // picked up the item (in multiplayer someone may grab it before you).
+
+    void checkspawns(int n)
+    {
+        gameentity &e = *(gameentity *)ents[n];
+        if(enttype[e.type].usetype == EU_ITEM)
+        {
+            if(e.type == WEAPON)
+            {
+                int attr = w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators));
+                if(isweap(attr))
+                {
+                    if(game::player1->state == CS_ALIVE && game::player1->entid[attr] == n)
+                        game::player1->entid[attr] = -1;
+                    loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && game::players[i]->entid[attr] == n)
+                        game::players[i]->entid[attr] = -1;
+                }
+            }
+            loopv(projs::projs)
+            {
+                projent &proj = *projs::projs[i];
+                if(proj.projtype != PRJ_ENT || proj.id != n) continue;
+                proj.beenused = 2;
+                proj.lifetime = min(proj.lifetime, proj.fadetime);
+            }
+        }
+    }
 
     void useeffects(gameent *d, int n, int c, bool s, int g, int r, int v)
     {
@@ -345,13 +369,7 @@ namespace entities
             e.spawned = s;
             e.lastuse = lastmillis;
         }
-        loopv(projs::projs)
-        {
-            projent &proj = *projs::projs[i];
-            if(proj.projtype != PRJ_ENT || proj.id != n) continue;
-            proj.beenused = 2;
-            proj.lifetime = min(proj.lifetime, proj.fadetime);
-        }
+        checkspawns(n);
     }
 
     struct entcachenode
@@ -807,17 +825,6 @@ namespace entities
                         client::addmsg(N_ITEMUSE, "ri3", d->clientnum, lastmillis-game::maptime, n);
                         d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
                         d->action[AC_USE] = false;
-#if 0
-                        e.spawned = false;
-                        e.lastuse = lastmillis;
-                        loopv(projs::projs)
-                        {
-                            projent &proj = *projs::projs[i];
-                            if(proj.projtype != PRJ_ENT || proj.id != n || !proj.ready()) continue;
-                            proj.beenused = 2;
-                            proj.lifetime = min(proj.lifetime, proj.fadetime);
-                        }
-#endif
                     }
                     else tried = true;
                 }
@@ -1016,16 +1023,7 @@ namespace entities
                     }
                 }
             }
-            else if(enttype[e.type].usetype == EU_ITEM)
-            {
-                loopv(projs::projs)
-                {
-                    projent &proj = *projs::projs[i];
-                    if(proj.projtype != PRJ_ENT || proj.id != n) continue;
-                    proj.beenused = 2;
-                    proj.lifetime = min(proj.lifetime, proj.fadetime);
-                }
-            }
+            checkspawns(n);
         }
     }
 
