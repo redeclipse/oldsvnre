@@ -1,12 +1,10 @@
 = Models =
-* New player model (tags: affinity (flag|bomb), weapon, lfoot, rfoot, head, torso, jet)
-* Weapons (flamer, smg, grenades) (better rifle skin/norm, redo sword UVW/skin/norm and find a better idle, rework shotgun skin, adjust vwep)
+* Weapons (better rifle skin/norm, redo sword UVW/skin/norm and find a better idle, rework shotgun skin, adjust vwep)
 * Make lower poly weapon for vwep/item
 * Grunt (better punch anim, fix abdomen pitch, Sword attack anim, make less 'distorted' hud arms)
 
 = Art =
-* Better looking fixed-width fonts
-* "First Blood" event icon (see: textures/firstblood.png)
+* Better looking fixed-width fonts?
 
 = Sounds =
 * Team change announcer?
