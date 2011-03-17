@@ -1808,7 +1808,14 @@ namespace server
     {
         if(sents.inrange(ent))
         {
-            loopvk(clients) clients[k]->state.dropped.removeall(ent);
+            loopvk(clients)
+            {
+                if(sents[ent].type == WEAPON) loopj(WEAP_MAX)
+                {
+                    if(clients[k]->state.entid[j] == ent) clients[k]->state.entid[j] = -1;
+                }
+                clients[k]->state.dropped.removeall(ent);
+            }
             sents[ent].spawned = spawned;
             sents[ent].millis = gamemillis+(sents[ent].type != WEAPON || sents[ent].attrs[1]&WEAP_F_FORCED ? GAME(itemspawndelay) : w_spawn(w_attr(gamemode, sents[ent].attrs[0], m_weapon(gamemode, mutators))));
             sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
