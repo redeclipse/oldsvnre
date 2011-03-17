@@ -540,20 +540,20 @@ struct teamtypes
 #ifdef GAMESERVER
 teamtypes teamtype[] = {
     {
-        TEAM_NEUTRAL,   0x66BB33,           "neutral",
-        "team",             "\fg",      "green"
+        TEAM_NEUTRAL,   0x669911,           "neutral",
+        "team",             "\fG",      "green"
     },
     {
-        TEAM_ALPHA,     0x6666FF,           "alpha",
+        TEAM_ALPHA,     0x8888FF,           "alpha",
         "teamalpha",        "\fb",      "blue"
     },
     {
-        TEAM_OMEGA,     0xFF6666,           "omega",
-        "teamomega",         "\fr",      "red"
+        TEAM_OMEGA,     0xFF4444,           "omega",
+        "teamomega",        "\fr",      "red"
     },
     {
-        TEAM_ENEMY,     0xFFFF66,           "enemy",
-        "team",             "\fy",      "yellow"
+        TEAM_ENEMY,     0x999999,           "enemy",
+        "team",             "\fa",      "grey"
     }
 };
 #else

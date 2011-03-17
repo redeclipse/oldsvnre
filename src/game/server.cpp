@@ -2021,7 +2021,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0 || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
-            srvmsgf(req, "\fy\fzRe%s has modified map \"%s\"", colorname(ci), smapname);
+            srvmsgf(req, "\fy\fzZe%s has modified map \"%s\"", colorname(ci), smapname);
             if(req < 0) ci->warned = true;
         }
         if(crcs.empty() || crcs.length() < 2) return;
@@ -2032,7 +2032,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0 || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                srvmsgf(req, "\fy\fzRe%s has modified map \"%s\"", colorname(ci), smapname);
+                srvmsgf(req, "\fy\fzZe%s has modified map \"%s\"", colorname(ci), smapname);
                 if(req < 0) ci->warned = true;
             }
         }

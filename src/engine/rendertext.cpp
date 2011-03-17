@@ -117,22 +117,29 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         switch(d)
         {
             case 'g': case '0': color = bvec( 64, 255,  64); break; // green
-            case 'b': case '1': color = bvec( 64,  64, 255); break; // blue
+            case 'b': case '1': color = bvec(128, 128, 255); break; // blue
             case 'y': case '2': color = bvec(255, 255,   0); break; // yellow
             case 'r': case '3': color = bvec(255,  64,  64); break; // red
             case 'a': case '4': color = bvec(192, 192, 192); break; // grey
-            case 'm': case '5': color = bvec(255, 164, 255); break; // magenta
-            case 'o': case '6': color = bvec(255,  96,   0); break; // orange
+            case 'm': case '5': color = bvec(255, 186, 255); break; // magenta
+            case 'o': case '6': color = bvec(255,  64,   0); break; // orange
             case 'w': case '7': color = bvec(255, 255, 255); break; // white
             case 'k': case '8': color = bvec(0,     0,   0); break; // black
             case 'c': case '9': color = bvec(64,  255, 255); break; // cyan
-            case 'v': case 'A': color = bvec(192,  96, 255); break; // violet
-            case 'p': case 'B': color = bvec(224,  64, 224); break; // purple
-            case 'n': case 'C': color = bvec(156,  64,  32); break; // brown
-            case 'd': case 'D': color = bvec(102, 102, 102); break; // dark grey
+            case 'v': color = bvec(192,  96, 255); break; // violet
+            case 'p': color = bvec(224,  64, 224); break; // purple
+            case 'n': color = bvec(164,  72,  56); break; // brown
+            case 'G': color = bvec( 72, 186,  56); break; // dark green
+            case 'B': color = bvec( 56,  56, 172); break; // dark blue
+            case 'Y': color = bvec(172, 172,   0); break; // dark yellow
+            case 'R': color = bvec(172,  56,  56); break; // dark red
+            case 'M': color = bvec(172,  72, 172); break; // dark magenta
+            case 'O': color = bvec(172,  56,   0); break; // dark orange
+            case 'C': color = bvec(48,  172, 172); break; // dark cyan
+            case 'A': case 'd': color = bvec(102, 102, 102); break; // dark grey
             case 'e': case 'E': f -= d!='E' ? f/2 : f/4; break;
             case 'u': color = bvec(r, g, b); break; // user colour
-            case 'R': default: break; // everything else
+            case 'Z': default: break; // everything else
         }
         glColor4ub(color.x, color.y, color.z, f);
     }

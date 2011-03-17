@@ -433,7 +433,7 @@ namespace capture
         {
             if(effect&1)
             {
-                defformatstring(text)("<super>%s\fzRe%s", teamtype[team].chat, str);
+                defformatstring(text)("<super>%s\fzZe%s", teamtype[team].chat, str);
                 part_textcopy(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, 0xFFFFFF, 3, 1, -10);
             }
             if(game::dynlighteffects) adddynlight(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[team].colour>>16, (teamtype[team].colour>>8)&0xFF, teamtype[team].colour&0xFF).mul(2.f/0xFF), 500, 250);
@@ -442,7 +442,7 @@ namespace capture
         {
             if(effect&2)
             {
-                defformatstring(text)("<super>%s\fzRe%s", teamtype[team].chat, str);
+                defformatstring(text)("<super>%s\fzZe%s", teamtype[team].chat, str);
                 part_textcopy(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, 0xFFFFFF, 3, 1, -10);
             }
             if(game::dynlighteffects) adddynlight(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[team].colour>>16, (teamtype[team].colour>>8)&0xFF, teamtype[team].colour&0xFF).mul(2.f/0xFF), 500, 250);
