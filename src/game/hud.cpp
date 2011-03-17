@@ -1813,7 +1813,7 @@ namespace hud
                                 float tweak = clamp(millis/float(inventoryteams), 0.f, 1.f);
                                 skew += (1.f-skew)*(1.f-tweak);
                                 blend += (1.f-blend)*(1.f-tweak);
-                                pre = "\fzZw";
+                                pre = "\fzwR";
                             }
                             int oldy = cm+int(cs*skew);
                             cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, false, 1, 1, 1, fade, skew));

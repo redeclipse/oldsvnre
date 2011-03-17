@@ -1033,7 +1033,7 @@ namespace game
             }
             if(style&FRAG_FIRSTBLOOD)
             {
-                concatstring(d->obit, " for \fs\fzZwfirst blood\fS");
+                concatstring(d->obit, " for \fs\fzwRfirst blood\fS");
                 actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
                 if(!override && allowanc)
                 {
