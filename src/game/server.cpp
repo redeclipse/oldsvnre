@@ -3014,18 +3014,23 @@ namespace server
         int weap = -1, amt = -1, dropped = -1, value = -1;
         if(sents[ent].type == WEAPON)
         {
-            if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= GAME(maxcarry)) weap = gs.drop(sweap);
-            loopvk(clients) if(clients[k]->state.dropped.find(ent)) { amt = clients[k]->state.dropped.value(ent); break; }
+            if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= GAME(maxcarry))
+                weap = gs.drop(sweap);
+            loopvk(clients) if(clients[k]->state.dropped.find(ent))
+            {
+                amt = clients[k]->state.dropped.value(ent);
+                break;
+            }
+            if(isweap(weap) && sents.inrange(dropped = gs.entid[weap]))
+            {
+                value = gs.ammo[weap];
+                gs.setweapstate(weap, WEAP_S_SWITCH, WEAPSWITCHDELAY, millis);
+                gs.ammo[weap] = gs.entid[weap] = -1;
+                setspawn(dropped, false);
+                gs.dropped.add(dropped, value);
+            }
+            else dropped = value = -1;
         }
-        if(isweap(weap) && sents.inrange(dropped = gs.entid[weap]))
-        {
-            value = gs.ammo[weap];
-            gs.setweapstate(weap, WEAP_S_SWITCH, WEAPSWITCHDELAY, millis);
-            gs.ammo[weap] = gs.entid[weap] = -1;
-            setspawn(dropped, false);
-            gs.dropped.add(dropped, value);
-        }
-        else weap = dropped = value = -1;
         gs.useitem(ent, sents[ent].type, attr, amt, sweap, millis);
         setspawn(ent, false);
         sendf(-1, 1, "ri8", N_ITEMACC, ci->clientnum, ent, amt, sents[ent].spawned ? 1 : 0, weap, dropped, value);
