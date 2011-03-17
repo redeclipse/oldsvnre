@@ -318,16 +318,11 @@ namespace entities
         gameentity &e = *(gameentity *)ents[n];
         if(enttype[e.type].usetype == EU_ITEM)
         {
-            if(e.type == WEAPON)
+            if(e.type == WEAPON) loopi(WEAP_MAX)
             {
-                int attr = w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators));
-                if(isweap(attr))
-                {
-                    if(game::player1->state == CS_ALIVE && game::player1->entid[attr] == n)
-                        game::player1->entid[attr] = -1;
-                    loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && game::players[i]->entid[attr] == n)
-                        game::players[i]->entid[attr] = -1;
-                }
+                if(game::player1->entid[i] == n) game::player1->entid[i] = -1;
+                loopv(game::players) if(game::players[i] && game::players[i]->entid[i] == n)
+                    game::players[i]->entid[i] = -1;
             }
             loopv(projs::projs)
             {
