@@ -291,43 +291,43 @@ struct weaptypes
 weaptypes weaptype[] =
 {
     {
-            ANIM_MELEE,         0x888888,       S_MELEE,    1,
+            ANIM_MELEE,         0xEEEEEE,       S_MELEE,    1,
             true,       true,       false,      false,
             { 0, 0 },               1,          0,
-            "melee",        "\fa",  "",                         "", "",                        "",                     ""
+            "melee",        "\fw",  "",                         "", "",                        "",                     ""
     },
     {
-            ANIM_PISTOL,        0xDDDDDD,       S_PISTOL,   10,
+            ANIM_PISTOL,        0x888888,       S_PISTOL,   10,
             false,      false,      true,       true,
             { 0, 0 },               5,          0.35f,
-            "pistol",       "\fw",  "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projs/cartridge"
+            "pistol",       "\fa",  "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projs/cartridge"
     },
     {
-            ANIM_SWORD,         0x2222FF,      S_SWORD,    1,
+            ANIM_SWORD,         0x2222AA,      S_SWORD,    1,
             true,       true,       true,       false,
             { 0, 0 },               15,         0,
-            "sword",     "\fb",     "weapons/sword/item",       "weapons/sword/vwep", "weapons/sword/hwep",    "",                     ""
+            "sword",     "\fB",     "weapons/sword/item",       "weapons/sword/vwep", "weapons/sword/hwep",    "",                     ""
     },
     {
-            ANIM_SHOTGUN,       0xFFFF22,       S_SHOTGUN,  10,
+            ANIM_SHOTGUN,       0xFFFF44,       S_SHOTGUN,  10,
             false,      false,      true,       true,
             { 0, 0 },               9,          0.45f,
             "shotgun",      "\fy",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projs/shell"
     },
     {
-            ANIM_SMG,           0xFF8822,       S_SMG,      20,
+            ANIM_SMG,           0xFF8844,       S_SMG,      20,
             false,      false,      true,       true,
             { 0, 0 },               7,          0.35f,
             "smg",          "\fo",  "weapons/smg/item",         "weapons/smg/vwep", "weapons/smg/hwep",        "",                     "projs/cartridge"
     },
     {
-            ANIM_FLAMER,        0xFF2222,       S_FLAMER,   1,
+            ANIM_FLAMER,        0xAA2222,       S_FLAMER,   1,
             false,      false,      true,       true,
             { 0, 0 },               9,          0,
-            "flamer",       "\fr",  "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
+            "flamer",       "\fR",  "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
     },
     {
-            ANIM_PLASMA,        0x22FFFF,       S_PLASMA,   1,
+            ANIM_PLASMA,        0x44FFFF,       S_PLASMA,   1,
             false,      false,      true,       false,
             { 0, 0 },               8,          0,
             "plasma",       "\fc",  "weapons/plasma/item",      "weapons/plasma/vwep", "weapons/plasma/hwep",     "",                     ""
@@ -339,7 +339,7 @@ weaptypes weaptype[] =
             "rifle",        "\fv",  "weapons/rifle/item",       "weapons/rifle/vwep", "weapons/rifle/hwep",      "",                     ""
     },
     {
-            ANIM_GRENADE,       0x22FF22,       S_GRENADE,  1,
+            ANIM_GRENADE,       0x44FF44,       S_GRENADE,  1,
             false,      false,      false,      false,
             { 0.0625f, 0.0625f },   5,          0,
             "grenade",      "\fg",  "weapons/grenade/item",     "weapons/grenade/vwep", "weapons/grenade/hwep",    "weapons/grenade/proj", ""

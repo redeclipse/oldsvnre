@@ -1008,19 +1008,19 @@ namespace game
 
                 if(style&FRAG_MKILL1)
                 {
-                    concatstring(d->obit, " \fs\fzRedouble-killing\fS");
+                    concatstring(d->obit, " \fs\fzZedouble-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
                     if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
-                    concatstring(d->obit, " \fs\fzRetriple-killing\fS");
+                    concatstring(d->obit, " \fs\fzZetriple-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
                     if(!override && allowanc) anc = S_V_MULTI2;
                 }
                 else if(style&FRAG_MKILL3)
                 {
-                    concatstring(d->obit, " \fs\fzRemulti-killing\fS");
+                    concatstring(d->obit, " \fs\fzZemulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
                     if(!override && allowanc) anc = S_V_MULTI3;
                 }
@@ -1033,7 +1033,7 @@ namespace game
             }
             if(style&FRAG_FIRSTBLOOD)
             {
-                concatstring(d->obit, " for \fs\fzrwfirst blood\fS");
+                concatstring(d->obit, " for \fs\fzZwfirst blood\fS");
                 actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
                 if(!override && allowanc)
                 {
@@ -1337,7 +1337,7 @@ namespace game
             gameent *e = (gameent *)d;
             if(burntime && e->burning(lastmillis, burntime))
             {
-                vec burncol = burncolour(d);
+                vec burncol = vec(burncolour(d)).max(vec::hexcolor(teamtype[e->team].colour));
                 color.max(burncol).lerp(burncol, 0.6f);
             }
             if(bleedtime && e->bleeding(lastmillis, bleedtime))
@@ -1347,8 +1347,7 @@ namespace game
                 {
                     delay /= 2;
                     float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                    vec bleedcol;
-                    bleedcol.lerp(color, vec(1, 0.25f, 0.25f), amt);
+                    vec bleedcol = vec(1, 0.2f, 0.2f).max(vec::hexcolor(teamtype[e->team].colour)).mul(amt);
                     color.max(bleedcol).lerp(bleedcol, 0.6f);
                 }
             }

@@ -850,7 +850,7 @@ namespace hud
             if(m_fight(game::gamemode) && target == game::player1)
             {
                 if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
-                    ty += draw_textx("\fzryDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    ty += draw_textx("\fzZyDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                 if(inventoryteams)
                 {
                     if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
@@ -860,9 +860,9 @@ namespace hud
                         else if(!m_team(game::gamemode, game::mutators))
                         {
                             if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                            else ty += draw_textx("\fzReFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                            else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         }
-                        else ty += draw_textx("\fzReTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname);
+                        else ty += draw_textx("\fzZeTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname);
                     }
                 }
             }
@@ -1813,7 +1813,7 @@ namespace hud
                                 float tweak = clamp(millis/float(inventoryteams), 0.f, 1.f);
                                 skew += (1.f-skew)*(1.f-tweak);
                                 blend += (1.f-blend)*(1.f-tweak);
-                                pre = "\fzRw";
+                                pre = "\fzZw";
                             }
                             int oldy = cm+int(cs*skew);
                             cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, false, 1, 1, 1, fade, skew));
