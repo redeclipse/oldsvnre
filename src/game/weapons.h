@@ -126,11 +126,11 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GFVAR(0, name##frequency, 0, ym, 10000);            GFVAR(0, name##pusharea, 0, yn, 10000); \
     GFVAR(0, name##critmult, 0, yo, 10000);             GFVAR(0, name##critdist, -10000, yp, 10000); \
     GFVAR(0, name##delta1, 1, yq, 10000);               GFVAR(0, name##delta2, 1, yr, 10000); \
-    GFVAR(0, name##trace1, 1e-4f, ys1, 10000);          GFVAR(0, name##trace2, 1e-4f, ys2, 10000); \
-    GFVAR(0, name##headmin1, 1e-4f, yt1, 1000);         GFVAR(0, name##headmin2, 1e-4f, yt2, 1000); \
-    GFVAR(0, name##whipdmg1, 1e-4f, yw1, 1000);         GFVAR(0, name##whipdmg2, 1e-4f, yw2, 1000); \
-    GFVAR(0, name##torsodmg1, 1e-4f, yx1, 1000);        GFVAR(0, name##torsodmg2, 1e-4f, yx2, 1000); \
-    GFVAR(0, name##legsdmg1, 1e-4f, yy, 1000);          GFVAR(0, name##legsdmg2, 1e-4f, yz, 1000); \
+    GFVAR(0, name##trace1, 0, ys1, 10000);              GFVAR(0, name##trace2, 0, ys2, 10000); \
+    GFVAR(0, name##headmin1, 0, yt1, 1000);             GFVAR(0, name##headmin2, 0, yt2, 1000); \
+    GFVAR(0, name##whipdmg1, 0, yw1, 1000);             GFVAR(0, name##whipdmg2, 0, yw2, 1000); \
+    GFVAR(0, name##torsodmg1, 0, yx1, 1000);            GFVAR(0, name##torsodmg2, 0, yx2, 1000); \
+    GFVAR(0, name##legsdmg1, 0, yy, 1000);              GFVAR(0, name##legsdmg2, 0, yz, 1000); \
     GFVAR(0, name##flakscale1, 0, ya3, 1000);           GFVAR(0, name##flakscale2, 0, ya4, 1000); \
     GFVAR(0, name##flakspread1, 0, ya5, 1000);          GFVAR(0, name##flakspread2, 0, ya6, 1000); \
     GFVAR(0, name##flakrel1, 0, ya7, 1000);             GFVAR(0, name##flakrel2, 0, ya8, 1000); \
