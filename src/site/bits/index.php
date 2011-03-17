@@ -2,7 +2,7 @@
     $app['releasever'] = "v1.0 (Ides Edition)";
     $app['releasedate'] = "15th March 2011";
     $app['background'] = "/bits/background_01.jpg";
-    $app['youtubevid'] = "RYXDg35dobc";
+    $app['youtubevid'] = "T--u7hzwNVY";
     $app['screenshots'] = 16;
 
     $app['banner'] = "Please help us raise <b>AU$294</b> for our new freely licensed player model!";
