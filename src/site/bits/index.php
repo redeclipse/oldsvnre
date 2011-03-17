@@ -2,10 +2,10 @@
     $app['releasever'] = "v1.0 (Ides Edition)";
     $app['releasedate'] = "15th March 2011";
     $app['background'] = "/bits/background_01.jpg";
-    $app['youtubevid'] = "T--u7hzwNVY";
+    $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
 
-    $app['banner'] = "Please help us raise <b>AU$294</b> for our new freely licensed player model!";
+    $app['banner'] = "<b>Player model fully paid for!</b> Future donations help us create more freely licensed assets.";
     $app['bannerurl'] = "/donate";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
