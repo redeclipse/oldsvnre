@@ -739,19 +739,15 @@ namespace projs
     {
         if(g >= WEAP_OFFSET && isweap(g))
         {
-            if(entities::ents.inrange(n))
+            if(v >= 0)
             {
-                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(g), w_spawn(g), 1, 1, n, v, c);
+                if(entities::ents.inrange(n))
+                    create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(g), w_spawn(g), 1, 1, n, v, c);
                 d->ammo[g] = -1;
                 d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
             }
             else if(g == WEAP_GRENADE)
                 create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 1, WEAP2(g, time, false), 1, 1, 1, g);
-            else
-            {
-                d->ammo[g] = -1;
-                d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
-            }
             d->entid[g] = -1;
         }
     }

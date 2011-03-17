@@ -356,6 +356,7 @@ namespace entities
         if(ents.inrange(r) && ents[r]->type == WEAPON)
         {
             gameentity &f = *(gameentity *)ents[r];
+            checkspawns(r);
             attr = w_attr(game::gamemode, f.attrs[0], sweap);
             if(isweap(attr)) projs::drop(d, attr, r, v, d == game::player1 || d->ai);
         }

@@ -1804,7 +1804,7 @@ namespace server
         else enddemorecord();
     }
 
-    void setspawn(int ent, bool spawned)
+    void setspawn(int ent, bool spawned, bool msg = false)
     {
         if(sents.inrange(ent))
         {
@@ -1818,7 +1818,7 @@ namespace server
             }
             sents[ent].spawned = spawned;
             sents[ent].millis = gamemillis+(sents[ent].type != WEAPON || sents[ent].attrs[1]&WEAP_F_FORCED ? GAME(itemspawndelay) : w_spawn(w_attr(gamemode, sents[ent].attrs[0], m_weapon(gamemode, mutators))));
-            sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
+            if(msg) sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
         }
     }
 
@@ -2947,15 +2947,15 @@ namespace server
             }
             else return;
         }
-        int dropped = gs.entid[weap], value = gs.ammo[weap];
-        gs.ammo[weap] = gs.entid[weap] = -1;
-        int nweap = gs.bestweap(sweap, true); // switch to best weapon
-        if(sents.inrange(dropped))
+        int dropped = -1, value = -1, nweap = gs.bestweap(sweap, true); // switch to best weapon
+        if(sents.inrange(gs.entid[weap]))
         {
+            dropped = gs.entid[weap];
+            value = gs.ammo[weap] ? gs.ammo[weap] : WEAP(weap, max);
             setspawn(dropped, false);
             gs.dropped.add(dropped, value);
         }
-        else weap = dropped = value = -1;
+        gs.ammo[weap] = gs.entid[weap] = -1;
         gs.weapswitch(nweap, millis);
         sendf(-1, 1, "ri7", N_DROP, ci->clientnum, nweap, 1, weap, dropped, value);
     }
@@ -3021,18 +3021,21 @@ namespace server
                 amt = clients[k]->state.dropped.value(ent);
                 break;
             }
-            if(isweap(weap) && sents.inrange(dropped = gs.entid[weap]))
+            if(isweap(weap))
             {
-                value = gs.ammo[weap];
-                gs.setweapstate(weap, WEAP_S_SWITCH, WEAPSWITCHDELAY, millis);
+                if(sents.inrange(gs.entid[weap]))
+                {
+                    dropped = gs.entid[weap];
+                    value = gs.ammo[weap] ? gs.ammo[weap] : WEAP(weap, max);
+                    setspawn(dropped, false);
+                    gs.setweapstate(weap, WEAP_S_SWITCH, WEAPSWITCHDELAY, millis);
+                    gs.dropped.add(dropped, value);
+                }
                 gs.ammo[weap] = gs.entid[weap] = -1;
-                setspawn(dropped, false);
-                gs.dropped.add(dropped, value);
             }
-            else dropped = value = -1;
         }
-        gs.useitem(ent, sents[ent].type, attr, amt, sweap, millis);
         setspawn(ent, false);
+        gs.useitem(ent, sents[ent].type, attr, amt, sweap, millis);
         sendf(-1, 1, "ri8", N_ITEMACC, ci->clientnum, ent, amt, sents[ent].spawned ? 1 : 0, weap, dropped, value);
     }
 
@@ -3208,7 +3211,7 @@ namespace server
                     }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))
                     {
-                        setspawn(i, allowed);
+                        setspawn(i, allowed, true);
                         items[sents[i].type]++;
                     }
                 }
