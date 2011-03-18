@@ -305,9 +305,10 @@ namespace game
     void followswitch(int n)
     {
         follow += n;
+        int numdyns = numdynents();
         #define checkfollow \
-            if(follow >= numdynents()) follow = 0; \
-            else if(follow < 0) follow = numdynents()-1;
+            if(follow >= numdyns) follow = 0; \
+            else if(follow < 0) follow = numdyns-1;
         checkfollow;
         while(true)
         {
@@ -393,7 +394,8 @@ namespace game
                 else if(m_bomber(gamemode)) bomber::adddynlights();
             }
             gameent *d = NULL;
-            loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
+            int numdyns = numdynents();
+            loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL)
             {
                 if(d->state == CS_ALIVE && isweap(d->weapselect))
                 {
@@ -1183,7 +1185,8 @@ namespace game
         if(d->name[0] && showplayerinfo && (d->aitype < 0 || ai::showaiinfo))
             conoutft(CON_EVENT, "\fo%s left the game (%s)", colorname(d), reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
-        loopi(numdynents()) if((e = (gameent *)iterdynents(i)))
+        int numdyns = numdynents();
+        loopi(numdyns) if((e = (gameent *)iterdynents(i)))
         {
             e->dominating.removeobj(d);
             e->dominated.removeobj(d);
@@ -1238,7 +1241,8 @@ namespace game
         }
         // reset perma-state
         gameent *d;
-        loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        int numdyns = numdynents();
+        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
             d->mapchange(lastmillis, m_health(gamemode, mutators));
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
@@ -1251,7 +1255,8 @@ namespace game
     {
         gameent *best = NULL, *o;
         float bestdist = 1e16f;
-        loopi(numdynents()) if((o = (gameent *)iterdynents(i)))
+        int numdyns = numdynents();
+        loopi(numdyns) if((o = (gameent *)iterdynents(i)))
         {
             if(!o || o==at || o->state!=CS_ALIVE || !physics::issolid(o, at)) continue;
             float dist;
@@ -1267,19 +1272,24 @@ namespace game
     int numdynents(bool all)
     {
         int i = 1+players.length();
-        if(all) loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS) i++;
+        if(all) i += projs::projs.length();
         return i;
     }
-    dynent *iterdynents(int i, bool all)
+    dynent *iterdynents(int &n, bool all)
     {
+        int i = n;
         if(!i) return player1;
         i--;
         if(i<players.length()) return players[i];
         i -= players.length();
-        if(all) loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS)
+        if(all) 
         {
-            if(!i) return projs::projs[j];
-            i--;
+            for(int j = i; j < projs::projs.length(); j++) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS)
+            {
+                n += j-i;
+                return projs::projs[j];
+            }
+            n += projs::projs.length()-i;
         }
         return NULL;
     }
@@ -1559,6 +1569,7 @@ namespace game
     void cameratv()
     {
         bool isspec = player1->state == CS_SPECTATOR;
+        int numdyns = numdynents();
         if(cameras.empty())
         {
             loopk(2)
@@ -1586,7 +1597,7 @@ namespace game
                 if(!cameras.empty()) break;
             }
             gameent *d = NULL;
-            loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
+            loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
                 camstate &c = cameras.add();
                 c.pos = d->headpos();
@@ -1595,7 +1606,7 @@ namespace game
                 vecfromyawpitch(d->yaw, d->pitch, 1, 0, c.dir);
             }
         }
-        else loopv(cameras) if(cameras[i].ent < 0 && cameras[i].idx >= 0 && cameras[i].idx < numdynents())
+        else loopv(cameras) if(cameras[i].ent < 0 && cameras[i].idx >= 0 && cameras[i].idx < numdyns)
         {
             gameent *d = (gameent *)iterdynents(cameras[i].idx);
             if(!d) { cameras.remove(i--); continue; }
@@ -1616,7 +1627,7 @@ namespace game
                 {
                     camstate &c = cameras[j]; c.reset();
                     gameent *d, *t = c.ent < 0 && c.idx >= 0 ? (gameent *)iterdynents(c.idx) : NULL;
-                    loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != t && (d->state == CS_ALIVE || d->state == CS_DEAD) && d->aitype < AI_START)
+                    loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != t && (d->state == CS_ALIVE || d->state == CS_DEAD) && d->aitype < AI_START)
                     {
                         vec trg, pos = d->feetpos();
                         float dist = c.pos.dist(d->feetpos());
@@ -1786,7 +1797,8 @@ namespace game
 
             gameent *d = NULL;
             bool allow = player1->state >= CS_SPECTATOR, found = false;
-            loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
+            int numdyns = numdynents();
+            loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL)
             {
                 if(d->state != CS_SPECTATOR && allow && i == follow)
                 {
@@ -2416,16 +2428,17 @@ namespace game
     {
         startmodelbatches();
         gameent *d;
-        loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, opacity(d, true), d->curscale);
+        int numdyns = numdynents();
+        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, opacity(d, true), d->curscale);
         entities::render();
         projs::render();
         if(m_capture(gamemode)) capture::render();
         else if(m_defend(gamemode)) defend::render();
         else if(m_bomber(gamemode)) bomber::render();
         ai::render();
-        if(rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
+        if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags(); 
         endmodelbatches();
-        if(rendernormally) loopi(numdynents()) if((d = (gameent *)iterdynents(i)) && d != focus) rendercheck(d);
+        if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) rendercheck(d);
     }
 
     void renderavatar(bool early)

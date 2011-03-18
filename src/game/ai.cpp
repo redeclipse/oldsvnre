@@ -269,7 +269,8 @@ namespace ai
     { // checks the states of other ai for a match
         targets.shrink(0);
         gameent *e = NULL;
-        loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e != d && e->ai && e->state == CS_ALIVE && e->aitype == d->aitype)
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && e->ai && e->state == CS_ALIVE && e->aitype == d->aitype)
         {
             if(targets.find(e->clientnum) >= 0) continue;
             if(teams)
@@ -333,7 +334,8 @@ namespace ai
         gameent *t = NULL, *e = NULL;
         vec dp = d->headpos();
         float mindist = guard*guard, bestdist = 1e16f;
-        loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e != d && targetable(d, e))
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && targetable(d, e))
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
@@ -412,7 +414,8 @@ namespace ai
     {
         gameent *t = NULL, *e = NULL;
         vec dp = d->headpos(), tp(0, 0, 0);
-        loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e != d && targetable(d, e))
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && targetable(d, e))
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
@@ -429,7 +432,8 @@ namespace ai
     void assist(gameent *d, aistate &b, vector<interest> &interests, bool all = false, bool force = false)
     {
         gameent *e = NULL;
-        loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->aitype < 0) && owner(d) == owner(e))
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->aitype < 0) && owner(d) == owner(e))
         {
             interest &n = interests.add();
             n.state = AI_S_DEFEND;
@@ -569,7 +573,8 @@ namespace ai
                 gameent *t = NULL;
                 vec dp = d->headpos();
                 float maxdist = ALERTMAX*ALERTMAX;
-                loopi(game::numdynents()) if((t = (gameent *)game::iterdynents(i)) && t != d && t->ai && t->state == CS_ALIVE && t->aitype >= AI_START && t->ai->suspended && targetable(t, e))
+                int numdyns = game::numdynents();
+                loopi(numdyns) if((t = (gameent *)game::iterdynents(i)) && t != d && t->ai && t->state == CS_ALIVE && t->aitype >= AI_START && t->ai->suspended && targetable(t, e))
                 {
                     vec tp = t->headpos();
                     if(cansee(t, tp, dp, d->aitype >= AI_START) || tp.squaredist(dp) <= maxdist)
@@ -686,7 +691,8 @@ namespace ai
             else
             {
                 gameent *t = NULL;
-                loopi(game::numdynents()) if((t = (gameent *)game::iterdynents(i)) && t != d && t->aitype < AI_START)
+                int numdyns = game::numdynents();
+                loopi(numdyns) if((t = (gameent *)game::iterdynents(i)) && t != d && t->aitype < AI_START)
                 {
                     if(d->aitype == AI_BOT ? (t->state != CS_SPECTATOR && t->aitype < 0) : (t->state == CS_ALIVE && d->o.squaredist(t->o) <= maxdist))
                     {
@@ -1444,7 +1450,8 @@ namespace ai
     void avoid()
     {
         obs.clear();
-        loopi(game::numdynents())
+        int numdyns = game::numdynents();
+        loopi(numdyns)
         {
             gameent *d = (gameent *)game::iterdynents(i);
             if(!d) continue; // || d->aitype >= AI_START) continue;
