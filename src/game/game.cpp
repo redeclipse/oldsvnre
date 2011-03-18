@@ -395,7 +395,7 @@ namespace game
             gameent *d = NULL;
             loopi(numdynents()) if((d = (gameent *)iterdynents(i)) != NULL)
             {
-                if(d->state == CS_ALIVE)
+                if(d->state == CS_ALIVE && isweap(d->weapselect))
                 {
                     bool last = lastmillis-d->weaplast[d->weapselect] > 0,
                          powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
