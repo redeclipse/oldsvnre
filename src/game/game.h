@@ -784,7 +784,7 @@ struct gamestate
     {
         health = heal ? heal : m_health(gamemode, mutators);
         weapreset(true);
-        if(!isweap(sweap)) sweap = aitype >= AI_START ? WEAP_MELEE : m_weapon(gamemode, mutators);
+        if(!isweap(sweap)) sweap = aitype >= AI_START || !isweap(m_weapon(gamemode, mutators)) ? WEAP_MELEE : m_weapon(gamemode, mutators);
         if(isweap(sweap)) ammo[sweap] = max(WEAPUSE(sweap), 1);
         if(aitype >= AI_START)
         {
