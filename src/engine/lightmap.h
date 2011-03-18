@@ -110,6 +110,7 @@ struct lerpbounds
     const lerpvert *max;
     float u, ustep;
     vec normal, nstep;
+    int winding;
 };
 
 extern void calcnormals();
