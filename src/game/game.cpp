@@ -628,7 +628,7 @@ namespace game
         loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE)
         {
             bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS);
-            if(i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
+            if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
             {
                 if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
                     playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, d == focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
@@ -636,7 +636,7 @@ namespace game
             if(d->state != CS_ALIVE || timeexpired)
                 d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
         }
-        if(d->weapstate[d->weapselect] == WEAP_S_POWER)
+        if(d->state == CS_ALIVE && isweap(d->weapselect) && d->weapstate[d->weapselect] == WEAP_S_POWER)
         {
             int millis = lastmillis-d->weaplast[d->weapselect];
             if(millis > 0)

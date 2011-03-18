@@ -156,6 +156,7 @@ namespace physics
 
     bool secondaryweap(gameent *d, bool zoom)
     {
+        if(!isweap(d->weapselect)) return false;
         if(WEAP(d->weapselect, zooms)) { if(d == game::player1 && game::zooming && game::inzoomswitch()) return true; }
         else if(!zoom)
         {
