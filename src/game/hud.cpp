@@ -1335,7 +1335,8 @@ namespace hud
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode) || game::tvmode())) // 4
         {
             gameent *d = NULL;
-            loopi(game::numdynents()) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
+            int numdyns = game::numdynents();
+            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
             {
                 switch(radarplayerfilter)
                 {

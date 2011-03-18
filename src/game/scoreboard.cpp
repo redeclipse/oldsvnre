@@ -100,7 +100,8 @@ namespace hud
     {
         int numgroups = 0;
         spectators.shrink(0);
-        loopi(game::numdynents())
+        int numdyns = game::numdynents();
+        loopi(numdyns)
         {
             gameent *o = (gameent *)game::iterdynents(i);
             if(!o || o->type!=ENT_PLAYER || (!showconnecting && !o->name[0])) continue;

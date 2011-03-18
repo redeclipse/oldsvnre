@@ -239,7 +239,8 @@ namespace defend
             if(b.owner != owner)
             {
                 gameent *d = NULL, *e = NULL;
-                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
+                int numdyns = game::numdynents();
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
                 game::announce(S_V_FLAGSECURED, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS secured %s", teamtype[owner].chat, teamtype[owner].name, b.name);
                 defformatstring(text)("<super>%s\fzZeSECURED", teamtype[owner].chat);
@@ -250,7 +251,8 @@ namespace defend
         else if(b.owner)
         {
             gameent *d = NULL, *e = NULL;
-            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
+            int numdyns = game::numdynents();
+            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                 if((d = e) == game::focus) break;
             game::announce(S_V_FLAGOVERTHROWN, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS overthrew %s", teamtype[enemy].chat, teamtype[enemy].name, b.name);
             defformatstring(text)("<super>%s\fzZeOVERTHROWN", teamtype[enemy].chat);
@@ -292,7 +294,8 @@ namespace defend
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
                 gameent *e = NULL;
                 bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= max(spawnhealth, extrahealth);
-                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                int numdyns = game::numdynents();
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
                     vec ep = e->feetpos();
                     if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius))
@@ -326,7 +329,8 @@ namespace defend
                 if(d->aitype == AI_BOT)
                 {
                     gameent *e = NULL;
-                    loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    int numdyns = game::numdynents();
+                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
                         vec ep = e->feetpos();
                         if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4)))

@@ -1062,7 +1062,8 @@ namespace projs
     {
         int q = int(WEAP2(weap, damage, flags&HIT_ALT)/float(WEAP2(weap, rays, flags&HIT_ALT))), r = int(WEAP2(weap, radius, flags&HIT_ALT)*WEAP(weap, pusharea)*scale);
         gameent *d;
-        loopi(game::numdynents()) if((d = (gameent *)game::iterdynents(i)))
+        int numdyns = game::numdynents();
+        loopi(numdyns) if((d = (gameent *)game::iterdynents(i)))
             d->quake = clamp(d->quake+max(int(q*max(1.f-d->o.dist(o)/r, 1e-3f)), 1), 0, 1000);
     }
 
@@ -1712,21 +1713,29 @@ namespace projs
                 if(proj.state == CS_DEAD)
                 {
                     if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                    if(!proj.limited && radius > 0) loopj(game::numdynents(true))
+                    if(!proj.limited && radius > 0) 
                     {
-                        gameent *f = (gameent *)game::iterdynents(j, true);
-                        if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
-                        radialeffect(f, proj, true, radius);
+                        int numdyns = game::numdynents(true);
+                        loopj(numdyns)
+                        {
+                            gameent *f = (gameent *)game::iterdynents(j, true);
+                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
+                            radialeffect(f, proj, true, radius);
+                        }
                     }
                 }
                 else if(WEAP2(proj.weap, radial, proj.flags&HIT_ALT))
                 {
                     if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                    if(!proj.limited && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= 40)) loopj(game::numdynents())
+                    if(!proj.limited && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= 40)) 
                     {
-                        gameent *f = (gameent *)game::iterdynents(j);
-                        if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true)) continue;
-                        if(radialeffect(f, proj, false, radius)) proj.lastradial = lastmillis;
+                        int numdyns = game::numdynents();
+                        loopj(numdyns)
+                        {
+                            gameent *f = (gameent *)game::iterdynents(j);
+                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true)) continue;
+                            if(radialeffect(f, proj, false, radius)) proj.lastradial = lastmillis;
+                        }
                     }
                 }
                 if(!hits.empty())

@@ -15,9 +15,10 @@ namespace bomber
         gameent *e = NULL;
         int best = -1;
         vec targ;
+        int numdyns = game::numdynents();
         loopk(2)
         {
-            loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype < 0))
+            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype < 0))
             {
                 float md = d->ai ? d->ai->views[2] : hdr.worldsize, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
                 if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
@@ -573,7 +574,8 @@ namespace bomber
             if(d->aitype == AI_BOT)
             {
                 gameent *e = NULL;
-                loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                int numdyns = game::numdynents();
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
                     vec ep = e->feetpos();
                     if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4) || f.owner == e))
@@ -665,7 +667,8 @@ namespace bomber
                     targets.setsize(0);
                     ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
                     gameent *e = NULL;
-                    loopi(game::numdynents()) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                    int numdyns = game::numdynents();
+                    loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
                         vec ep = e->feetpos();
                         if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4) || f.owner == e))
