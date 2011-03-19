@@ -3,9 +3,9 @@
 
 #include "cube.h"
 
-#define ENG_VERSION         100
+#define ENG_VERSION         101
 #define ENG_NAME            "Red Eclipse"
-#define ENG_RELEASE         "Ides Edition"
+#define ENG_RELEASE         "Ides Patch #1"
 #define ENG_URL             "www.redeclipse.net"
 #ifdef WIN32
 #define ENG_PLATFORM        "win"

@@ -315,6 +315,7 @@ void pingservers()
         serverinfo &si = *servers[lastping];
         if(++lastping >= servers.length()) lastping = 0;
         if(si.address.host == ENET_HOST_ANY) continue;
+        si.lastping = totalmillis;
         buf.data = ping;
         buf.dataLength = p.length();
         enet_socket_send(pingsock, &si.address, &buf, 1);
@@ -384,7 +385,9 @@ void checkpings()
         if(si) si->reset();
         else continue;
         ucharbuf p(ping, len);
-        si->ping = totalmillis - getint(p);
+        int millis = getint(p);
+        if(si->lastping && millis != si->lastping) si->ping = serverinfo::WAITING;
+        else si->ping = totalmillis - millis;
         si->numplayers = getint(p);
         int numattr = getint(p);
         si->attr.shrink(0);
@@ -411,7 +414,7 @@ void refreshservers()
 {
     static int lastrefresh = 0;
     if(lastrefresh == totalmillis) return;
-    if(totalmillis - lastrefresh > 1000) 
+    if(totalmillis - lastrefresh > 1000)
     {
         loopv(servers) servers[i]->reset();
         sortedservers = false;
