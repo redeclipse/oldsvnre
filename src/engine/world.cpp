@@ -23,6 +23,7 @@ bool getentboundingbox(extentity &e, ivec &o, ivec &r)
                 m->boundbox(0, center, radius);
                 if(e.attrs[4]) { center.mul(e.attrs[4]/100.f); radius.mul(e.attrs[4]/100.f); }
                 rotatebb(center, radius, e.attrs[1]);
+                if(e.attrs[2]) radius.x = radius.y = radius.z = max(max(radius.x, radius.y), radius.z);
                 o = e.o;
                 o.add(center);
                 r = radius;
