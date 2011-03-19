@@ -4461,7 +4461,7 @@ namespace server
                     QUEUE_MSG;
                     if(tweaked)
                     {
-                        setspawn(n, false);
+                        setspawn(n, true, true);
                         if(sents[n].type == TRIGGER) setuptriggers(true);
                     }
                     break;

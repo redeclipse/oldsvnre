@@ -83,7 +83,7 @@ struct duelservmode : servmode
 
         }
         if(m_survivor(gamemode, mutators) || GAME(duelclear))
-            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i));
+            loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i), true);
     }
 
     void cleanup()

@@ -38,23 +38,20 @@ struct bomberservmode : bomberstate, servmode
     void spawned(clientinfo *ci)
     {
         if(bombertime >= 0) return;
-        if(GAME(bomberreset))
+        if(m_team(gamemode, mutators))
         {
-            if(m_team(gamemode, mutators))
-            {
-                int alive[TEAM_MAX] = {0};
-                loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
-                if(!alive[TEAM_ALPHA] || !alive[TEAM_OMEGA]) return;
-            }
-            else
-            {
-                int alive = 0;
-                loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive++;
-                if(alive <= 1) return;
-            }
+            int alive[TEAM_MAX] = {0};
+            loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
+            if(!alive[TEAM_ALPHA] || !alive[TEAM_OMEGA]) return;
+        }
+        else
+        {
+            int alive = 0;
+            loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive++;
+            if(alive <= 1) return;
         }
         bombertime = gamemillis+GAME(bomberdelay);
-        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j));
+        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j), true);
     }
 
     void died(clientinfo *ci, clientinfo *actor)
@@ -95,7 +92,9 @@ struct bomberservmode : bomberstate, servmode
                 if((GAME(bomberreset) >= 2 || clients[j]->team == ci->team) && (clients[j]->state.state == CS_ALIVE || !m_duke(gamemode, mutators)))
                     waiting(clients[j], 0, 3);
             }
+            bombertime = -1;
         }
+        else bombertime = gamemillis+GAME(bomberdelay);
         loopvj(flags) if(flags[j].enabled)
         {
             bomberstate::returnaffinity(j, gamemillis, false);
@@ -106,7 +105,6 @@ struct bomberservmode : bomberstate, servmode
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
             startintermission();
         }
-        bombertime = -1;
     }
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
@@ -146,7 +144,7 @@ struct bomberservmode : bomberstate, servmode
         if(v && !flags[i].enabled)
         {
             loopvj(flags) if(flags[j].enabled) returnaffinity(j, 0);
-            bombertime = gamemillis;
+            if(bombertime >= 0) bombertime = gamemillis+GAME(bomberdelay);
         }
     }
 
@@ -162,6 +160,7 @@ struct bomberservmode : bomberstate, servmode
     void layout()
     {
         if(!hasflaginfo) return;
+        bombertime = -1;
         loopv(flags) if(flags[i].owner >= 0 || flags[i].droptime) returnaffinity(i, 0);
         bombertime = gamemillis+GAME(bomberdelay);
     }
