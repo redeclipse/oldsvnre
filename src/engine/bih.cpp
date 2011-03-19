@@ -324,8 +324,8 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
     mo.sub(e.o).mul(scale);
     int yaw = e.attrs[1], roll = e.attrs[2];
     vec mray(ray);
-    if(roll != 0) rollray(mo, mray, roll);
     if(yaw != 0) yawray(mo, mray, -yaw);
+    if(roll != 0) rollray(mo, mray, roll);
     if(m->bih->traverse(mo, mray, maxdist*scale, dist, mode))
     {
         dist /= scale;
