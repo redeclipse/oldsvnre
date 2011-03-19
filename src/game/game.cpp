@@ -1193,10 +1193,11 @@ namespace game
             if(d == e && follow >= i)
             {
                 followswitch(-1);
-                focus = (gameent *)iterdynents(follow);
+                if(!(focus = (gameent *)iterdynents(follow))) focus = player1;
                 resetcamera();
             }
         }
+        if(game::focus == d) { game::focus = game::player1; follow = 0; } // just in case
         cameras.shrink(0);
         client::clearvotes(d);
         projs::remove(d);
@@ -1282,7 +1283,7 @@ namespace game
         i--;
         if(i<players.length()) return players[i];
         i -= players.length();
-        if(all) 
+        if(all)
         {
             for(int j = i; j < projs::projs.length(); j++) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS)
             {
@@ -2436,7 +2437,7 @@ namespace game
         else if(m_defend(gamemode)) defend::render();
         else if(m_bomber(gamemode)) bomber::render();
         ai::render();
-        if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags(); 
+        if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) d->cleartags();
         endmodelbatches();
         if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) rendercheck(d);
     }
