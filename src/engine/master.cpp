@@ -21,6 +21,8 @@
 VAR(0, masterserver, 0, 0, 1);
 VAR(0, masterport, 1, ENG_MASTER_PORT, INT_MAX-1);
 SVAR(0, masterip, "");
+SVAR(0, masterscriptclient, "");
+SVAR(0, masterscriptserver, "");
 
 struct authuser
 {
@@ -252,6 +254,7 @@ bool checkmasterclientinput(masterclient &c)
             }
             else
             {
+                if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
                 masteroutf(c, "echo \"server initiated\"\n");
                 conoutf("master peer %s registered as a server",  c.name);
                 c.isserver = true;
@@ -263,6 +266,7 @@ bool checkmasterclientinput(masterclient &c)
         if(!strcmp(w[0], "version") || !strcmp(w[0], "update"))
         {
             masteroutf(c, "setversion %d %d\n", server::getver(0), server::getver(1));
+            if(*masterscriptclient) masteroutf(c, "%s\n", masterscriptclient);
             conoutf("master peer %s was sent the version",  c.name);
             found = true;
         }
@@ -278,7 +282,7 @@ bool checkmasterclientinput(masterclient &c)
                 servs++;
             }
             if(haslocal) masteroutf(c, "searchlan 1\n");
-            conoutf("master peer %s was sent %d server(s)",  c.name, servs);
+            conoutf("master peer %s was sent %d server(s)", c.name, servs);
             found = true;
         }
         if(c.isserver)

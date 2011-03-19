@@ -425,13 +425,13 @@ struct serverinfo
     string name;
     string map;
     string sdesc;
-    int numplayers, ping, resolved, port;
+    int numplayers, lastping, ping, resolved, port;
     vector<int> attr;
     vector<char *> players;
     ENetAddress address;
 
     serverinfo(uint ip, int port)
-     : numplayers(0), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port)
+     : numplayers(0), lastping(0), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port)
     {
         name[0] = map[0] = sdesc[0] = '\0';
         address.host = ip;
