@@ -290,6 +290,18 @@ static inline void yawray(vec &o, vec &ray, float angle)
     ray.y = ry*c + rx*s;
 }
 
+static inline void rollray(vec &o, vec &ray, float angle)
+{
+    angle *= RAD;
+    float c = cosf(angle), s = sinf(angle),
+          oy = o.y, oz = o.z,
+          ry = ray.y, rz = ray.z;
+    o.y = oy*c - oz*s;
+    o.z = oz*c + oy*s;
+    ray.y = ry*c - rz*s;
+    ray.z = rz*c + ry*s;
+}
+
 bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist, int mode, float &dist)
 {
     extern vector<mapmodelinfo> mapmodels;
@@ -308,15 +320,20 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
     if(!m->bih && (lightmapping > 1 || !m->setBIH())) return false;
     if(!maxdist) maxdist = 1e16f;
     float scale = e.attrs[4] ? 100.0f/e.attrs[4] : 1.0f;
-    vec yo(o);
-    yo.sub(e.o).mul(scale);
-    float yaw = -(float)(e.attrs[1]%360);
-    vec yray(ray);
-    if(yaw != 0) yawray(yo, yray, yaw);
-    if(m->bih->traverse(yo, yray, maxdist*scale, dist, mode))
+    vec mo(o);
+    mo.sub(e.o).mul(scale);
+    int yaw = e.attrs[1], roll = e.attrs[2];
+    vec mray(ray);
+    if(roll != 0) rollray(mo, mray, roll);
+    if(yaw != 0) yawray(mo, mray, -yaw);
+    if(m->bih->traverse(mo, mray, maxdist*scale, dist, mode))
     {
         dist /= scale;
-        if(!(mode&RAY_SHADOW) && yaw != 0) hitsurface.rotate_around_z(-yaw*RAD);
+        if(!(mode&RAY_SHADOW))
+        {
+            if(roll != 0) hitsurface.rotate_around_x(-roll*RAD);
+            if(yaw != 0) hitsurface.rotate_around_z(yaw*RAD);
+        }
         return true;
     }
     return false;
