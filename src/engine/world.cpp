@@ -27,18 +27,7 @@ bool getentboundingbox(extentity &e, ivec &o, ivec &r)
                     center.mul(scale);
                     radius.mul(scale);
                 }
-                if(e.attrs[2])
-                {
-                    float c = cosf(e.attrs[2]*-RAD), s = sinf(e.attrs[2]*-RAD);
-                    center = vec(center.x, center.y*c - center.z*s, center.z*c + center.y*s);
-                    radius = vec(radius.x, fabs(radius.y*c) + fabs(radius.z*s), fabs(radius.z*c) + fabs(radius.y*s));
-                }
-                if(e.attrs[1])
-                {
-                    float c = cosf(e.attrs[1]*RAD), s = sinf(e.attrs[1]*RAD);
-                    center = vec(center.x*c - center.y*s, center.y*c + center.x*s, center.z);
-                    radius = vec(fabs(radius.x*c) + fabs(radius.y*s), fabs(radius.y*c) + fabs(radius.x*s), radius.z);
-                }
+                rotatebb(center, radius, e.attrs[1], e.attrs[2]);
                 o = vec(center).add(e.o);
                 r = vec(radius).add(1);
                 o.sub(r);
@@ -346,8 +335,8 @@ void entselectionbox(const extentity &e, vec &eo, vec &es)
     if(e.type == ET_MAPMODEL && (m = loadmodel(NULL, e.attrs[0])))
     {
         m->collisionbox(0, eo, es);
-        if(e.attrs[4]) { eo.mul(e.attrs[4]/100.f); es.mul(e.attrs[4]/100.f); }
-        rotatebb(eo, es, e.attrs[1]);
+        if(e.attrs[4]) { float scale = max(e.attrs[4]/100.f, 1e-3f); eo.mul(scale); es.mul(scale); }
+        rotatebb(eo, es, e.attrs[1], e.attrs[2]);
         if(m->collide)
             eo.z -= camera1->aboveeye; // wacky but true. see physics collide
         else
@@ -548,8 +537,8 @@ bool dropentity(extentity &e, int drop = -1)
         {
             vec center;
             m->boundbox(0, center, radius);
-            if(e.attrs[4]) { center.mul(e.attrs[4]/100.f); radius.mul(e.attrs[4]/100.f); }
-            rotatebb(center, radius, e.attrs[1]);
+            if(e.attrs[4]) { float scale = max(e.attrs[4]/100.f, 1e-3f); center.mul(scale); radius.mul(scale); }
+            rotatebb(center, radius, e.attrs[1], e.attrs[2]);
             radius.x += fabs(center.x);
             radius.y += fabs(center.y);
         }
