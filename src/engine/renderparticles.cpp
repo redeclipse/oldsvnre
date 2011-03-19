@@ -1034,6 +1034,8 @@ void finddepthfxranges()
     depthfxmin = vec(1e16f, 1e16f, 1e16f);
     depthfxmax = vec(0, 0, 0);
     numdepthfxranges = explosions.finddepthfxranges(depthfxowners, depthfxranges, 0, MAXDFXRANGES, depthfxmin, depthfxmax);
+    numdepthfxranges = shockwaves.finddepthfxranges(depthfxowners, depthfxranges, numdepthfxranges, MAXDFXRANGES, depthfxmin, depthfxmax);
+    numdepthfxranges = shockballs.finddepthfxranges(depthfxowners, depthfxranges, numdepthfxranges, MAXDFXRANGES, depthfxmin, depthfxmax);
     loopk(3)
     {
         depthfxmin[k] -= depthfxmargin;
