@@ -49,7 +49,7 @@
 				</Linker>
 			</Target>
 			<Target title="client-dbg">
-				<Option output="..\bin\reclient.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\reclient-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\client-dbg" />
 				<Option deps_output=".deps\debug" />
