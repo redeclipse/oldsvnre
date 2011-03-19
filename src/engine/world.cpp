@@ -21,13 +21,26 @@ bool getentboundingbox(extentity &e, ivec &o, ivec &r)
             {
                 vec center, radius;
                 m->boundbox(0, center, radius);
-                if(e.attrs[4]) { center.mul(e.attrs[4]/100.f); radius.mul(e.attrs[4]/100.f); }
-                rotatebb(center, radius, e.attrs[1]);
-                if(e.attrs[2]) radius.x = radius.y = radius.z = max(max(radius.x, radius.y), radius.z);
-                o = e.o;
-                o.add(center);
-                r = radius;
-                r.add(1);
+                if(e.attrs[4])
+                {
+                    float scale = max(e.attrs[4]/100.0f, 1e-3f);
+                    center.mul(scale);
+                    radius.mul(scale);
+                }
+                if(e.attrs[2])
+                {
+                    float c = cosf(e.attrs[2]*-RAD), s = sinf(e.attrs[2]*-RAD);
+                    center = vec(center.x, center.y*c - center.z*s, center.z*c + center.y*s);
+                    radius = vec(radius.x, fabs(radius.y*c) + fabs(radius.z*s), fabs(radius.z*c) + fabs(radius.y*s));
+                }
+                if(e.attrs[1])
+                {
+                    float c = cosf(e.attrs[1]*RAD), s = sinf(e.attrs[1]*RAD);
+                    center = vec(center.x*c - center.y*s, center.y*c + center.x*s, center.z);
+                    radius = vec(fabs(radius.x*c) + fabs(radius.y*s), fabs(radius.y*c) + fabs(radius.x*s), radius.z);
+                }
+                o = vec(center).add(e.o);
+                r = vec(radius).add(1);
                 o.sub(r);
                 r.mul(2);
                 break;
