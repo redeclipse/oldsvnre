@@ -758,7 +758,8 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         else
         {
             center.mul(size);
-            center.rotate_around_z(-yaw*RAD);
+            center.rotate_around_x(-roll*RAD);
+            center.rotate_around_z(yaw*RAD);
             center.add(o);
         }
         radius *= size;
@@ -828,8 +829,9 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
             else m->boundbox(0, center, radius);
             center.mul(size);
             radius.mul(size);
-            rotatebb(center, radius, int(yaw));
-            center.add(o);
+            glTranslatef(o.x, o.y, o.z);
+            glRotatef(yaw*RAD, 0, 0, 1);
+            glRotatef(-roll*RAD, 1, 0, 0);
             render3dbox(center, radius.z, radius.z, radius.x, radius.y);
         }
 
