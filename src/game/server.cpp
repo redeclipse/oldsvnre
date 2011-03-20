@@ -437,7 +437,7 @@ namespace server
             {
                 if(request)
                 {
-                    if(isweap(aweap)) srvmsgf(ci->clientnum, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
+                    if(isweap(aweap)) srvmsgft(ci->clientnum, CON_EVENT, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
                     sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
                 }
                 return false;
@@ -470,9 +470,14 @@ namespace server
 
         spawnservmode() {}
 
+        bool spawnqueue(bool all = false)
+        {
+            return m_fight(gamemode) && !m_duke(gamemode, mutators) && GAME(maxalive) > 0 && hasgameinfo && (!all || GAME(maxalivequeue));
+        }
+
         void queue(clientinfo *ci, bool top = false, bool wait = true)
         {
-            if(GAME(maxalive) > 0 && hasgameinfo && GAME(maxalivequeue))
+            if(spawnqueue(true))
             {
                 if(ci->online && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.aitype < AI_START && playing.find(ci) < 0)
                 {
@@ -484,6 +489,7 @@ namespace server
                     }
                     else if(n < 0) spawnq.add(ci);
                     if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, 1);
+                    if(n < 0) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are in the \fs\fgspawn queue\fS, please wait for the next available slot..");
                 }
                 else spawnq.removeobj(ci);
             }
@@ -491,12 +497,12 @@ namespace server
 
         void entergame(clientinfo *ci)
         {
-            if(m_fight(gamemode) && GAME(maxalive) > 0) queue(ci);
+            queue(ci);
         }
 
         void leavegame(clientinfo *ci, bool disconnecting = false)
         {
-            if(m_fight(gamemode) && GAME(maxalive) > 0)
+            if(spawnqueue())
             {
                 spawnq.removeobj(ci);
                 playing.removeobj(ci);
@@ -513,11 +519,10 @@ namespace server
                 if(m_trial(gamemode) && ci->state.cpmillis < 0) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
-                if(m_fight(gamemode) && GAME(maxalive) > 0)
+                if(spawnqueue())
                 {
                     if(!hasgameinfo) return false;
-                    int maxplayers = int(GAME(maxalive)*nplayers);
-                    if(GAME(maxalivethreshold) && maxplayers < GAME(maxalivethreshold)) maxplayers = GAME(maxalivethreshold);
+                    int maxplayers = max(int(GAME(maxalive)*nplayers), GAME(maxalivethreshold));
                     if(m_team(gamemode, mutators) && (maxplayers%2)) maxplayers++;
                     if(playing.length() >= maxplayers) return false;
                     if(m_team(gamemode, mutators))
@@ -553,7 +558,7 @@ namespace server
 
         void spawned(clientinfo *ci)
         {
-            if(m_fight(gamemode))
+            if(m_fight(gamemode) && !m_duke(gamemode, mutators))
             {
                 spawnq.removeobj(ci);
                 if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
@@ -562,7 +567,7 @@ namespace server
 
         void died(clientinfo *ci, clientinfo *at)
         {
-            if(m_fight(gamemode))
+            if(m_fight(gamemode) && !m_duke(gamemode, mutators))
             {
                 spawnq.removeobj(ci);
                 if(GAME(maxalivequeue) || GAME(maxalive) == 0) playing.removeobj(ci);
@@ -679,7 +684,7 @@ namespace server
     void start() { cleanup(true); }
     void shutdown()
     {
-        srvmsgf(-1, "\fyserver shutdown in progress..");
+        srvmsgft(-1, CON_EVENT, "\fyserver shutdown in progress..");
         aiman::clearai();
         loopv(clients) if(getinfo(i)) disconnect_client(i, DISC_SHUTDOWN);
     }
@@ -772,7 +777,7 @@ namespace server
         if(ci->local || ci->privilege >= flag) return true;
         else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_MASTER && !numclients(ci->clientnum)) return true;
         else if(msg && *msg)
-            srvmsgf(ci->clientnum, "\fraccess denied, you need to be %s to %s", privname(flag), msg);
+            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need to be %s to %s", privname(flag), msg);
         return false;
     }
 
@@ -1415,6 +1420,15 @@ namespace server
 #endif
     }
 
+    void srvmsgft(int cn, int conlevel, const char *s, ...)
+    {
+        if(cn < 0 || allowbroadcast(cn))
+        {
+            defvformatstring(str, s, s);
+            sendf(cn, 1, "ri2s", N_SERVMSG, conlevel, str);
+        }
+    }
+
     void srvmsgf(int cn, const char *s, ...)
     {
         if(cn < 0 || allowbroadcast(cn))
@@ -1719,7 +1733,7 @@ namespace server
         }
         if(m_local(reqmode) && !ci->local)
         {
-            srvmsgf(ci->clientnum, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
+            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
             return;
         }
         switch(GAME(modelock))
@@ -2165,7 +2179,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0 || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
-            srvmsgf(req, "\fy\fzZe%s has modified map \"%s\"", colorname(ci), smapname);
+            srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
             if(req < 0) ci->warned = true;
         }
         if(crcs.empty() || crcs.length() < 2) return;
@@ -2176,7 +2190,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0 || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                srvmsgf(req, "\fy\fzZe%s has modified map \"%s\"", colorname(ci), smapname);
+                srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
                 if(req < 0) ci->warned = true;
             }
         }
@@ -2519,7 +2533,7 @@ namespace server
                 clientinfo *best = choosebestclient();
                 if(best)
                 {
-                    srvmsgf(ci->clientnum, "map is being requested, please wait..");
+                    srvmsgft(ci->clientnum, CON_EVENT, "map is being requested, please wait..");
                     sendf(best->clientnum, 1, "ri", N_GETMAP);
                     mapsending = true;
                 }
@@ -4456,7 +4470,7 @@ namespace server
                             }
                             srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mastermode));
                         }
-                        else srvmsgf(sender, "\frmastermode %d (%s) is disabled on this server", mm, mastermodename(mm));
+                        else srvmsgft(sender, CON_EVENT, "\frmastermode %d (%s) is disabled on this server", mm, mastermodename(mm));
                     }
                     break;
                 }
@@ -4636,7 +4650,7 @@ namespace server
                     {
                         if(mapdata[0] && mapdata[1] && mapdata[2])
                         {
-                            srvmsgf(ci->clientnum, "sending map, please wait..");
+                            srvmsgft(ci->clientnum, CON_EVENT, "sending map, please wait..");
                             loopk(3) if(mapdata[k]) sendfile(sender, 2, mapdata[k], "ri", N_SENDMAPFILE+k);
                             sendwelcome(ci);
                             ci->needclipboard = totalmillis ? totalmillis : 1;
@@ -4644,7 +4658,7 @@ namespace server
                         else if(best)
                         {
                             loopk(3) if(mapdata[k]) DELETEP(mapdata[k]);
-                            srvmsgf(ci->clientnum, "map is being requested, please wait..");
+                            srvmsgft(ci->clientnum, CON_EVENT, "map is being requested, please wait..");
                             sendf(best->clientnum, 1, "ri", N_GETMAP);
                             mapsending = true;
                         }
@@ -4658,7 +4672,7 @@ namespace server
                             }
                         }
                     }
-                    else srvmsgf(ci->clientnum, "map is being uploaded, please be patient..");
+                    else srvmsgft(ci->clientnum, CON_EVENT, "map is being uploaded, please be patient..");
                     break;
                 }
 
@@ -4693,14 +4707,14 @@ namespace server
                             {
                                 if(!(mastermask()&MM_AUTOAPPROVE) && !ci->privilege)
                                 {
-                                    srvmsgf(ci->clientnum, "\fraccess denied, you need auth/admin access to gain master");
+                                    srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need auth/admin access to gain master");
                                     fail = true;
                                 }
                                 else
                                 {
                                     loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_MASTER)
                                     {
-                                        srvmsgf(ci->clientnum, "\fraccess denied, there is already another master");
+                                        srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another master");
                                         fail = true;
                                         break;
                                     }

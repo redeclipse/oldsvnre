@@ -241,10 +241,11 @@ namespace hud
             g.space(2);
             SEARCHBINDCACHE(attackkey)("action 0", 0);
             g.pushfont("sub");
-            if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators))
+            if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
             {
                 if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL);
                 else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, hud::timetostr(delay, -1));
+                else if(m_fight(game::gamemode) && maxalive > 0) g.textf("Waiting for next available slot", 0xFFFFFF, NULL);
                 g.poplist();
                 if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
                     g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, attackkey);

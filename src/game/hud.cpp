@@ -797,11 +797,12 @@ namespace hud
             if(shownotices >= 2)
             {
                 SEARCHBINDCACHE(attackkey)("action 0", 0);
-                if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators))
+                if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
                     pushfont("default");
-                    if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
+                    else if(m_fight(game::gamemode) && maxalive > 0) ty += draw_textx("Waiting for next available slot", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
                     {
