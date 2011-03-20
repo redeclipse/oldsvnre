@@ -48,6 +48,10 @@ namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
+GFVAR(IDF_ADMIN, maxalive, 0, 2, 1000); // only allow this*numplayers to be alive at once
+GVAR(IDF_ADMIN, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
+GVAR(IDF_ADMIN, maxalivethreshold, 0, 8, INT_MAX-1); // kicks in if numplayers >= this
+
 GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 
 GVAR(0, maxcarry, 1, 2, WEAP_CARRY);

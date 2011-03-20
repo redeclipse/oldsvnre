@@ -404,6 +404,7 @@ namespace server
     servmode *smode;
     vector<servmode *> smuts;
     #define mutate(a,b) loopvk(a) { servmode *mut = a[k]; { b; } }
+    int nplayers, totalspawns;
 
     vector<score> scores;
     score &teamscore(int team)
@@ -417,6 +418,32 @@ namespace server
         cs.team = team;
         cs.total = 0;
         return cs;
+    }
+
+    extern void waiting(clientinfo *ci, int doteam = 0, int drop = 2, bool exclude = false);
+    bool chkloadweap(clientinfo *ci, bool request = true)
+    {
+        loopj(2)
+        {
+            int aweap = ci->state.loadweap[j];
+            if(ci->state.loadweap[j] >= WEAP_ITEM) ci->state.loadweap[j] = -1;
+            else if(ci->state.loadweap[j] >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap[j], allowed))
+            {
+                case 0: ci->state.loadweap[j] = -1; break;
+                case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
+                case 2: case 3: default: break;
+            }
+            if(ci->state.loadweap[j] < 0 && ci->state.aitype < 0)
+            {
+                if(request)
+                {
+                    if(isweap(aweap)) srvmsgf(ci->clientnum, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
+                    sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     struct vampireservmode : servmode
@@ -436,6 +463,118 @@ namespace server
             }
         }
     } vampiremutator;
+
+    struct spawnservmode : servmode // pseudo-mutator to regulate spawning clients
+    {
+        vector<clientinfo *> spawnq, playing;
+
+        spawnservmode() {}
+
+        void queue(clientinfo *ci, bool top = false, bool wait = true)
+        {
+            if(GAME(maxalive) > 0 && hasgameinfo && GAME(maxalivequeue))
+            {
+                if(ci->online && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.aitype < AI_START && playing.find(ci) < 0)
+                {
+                    int n = spawnq.find(ci);
+                    if(top)
+                    {
+                        if(n >= 0) spawnq.remove(n);
+                        spawnq.insert(0, ci);
+                    }
+                    else if(n < 0) spawnq.add(ci);
+                    if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, 1);
+                }
+                else spawnq.removeobj(ci);
+            }
+        }
+
+        void entergame(clientinfo *ci)
+        {
+            if(m_fight(gamemode) && GAME(maxalive) > 0) queue(ci);
+        }
+
+        void leavegame(clientinfo *ci, bool disconnecting = false)
+        {
+            if(m_fight(gamemode) && GAME(maxalive) > 0)
+            {
+                spawnq.removeobj(ci);
+                playing.removeobj(ci);
+            }
+        }
+
+        bool canspawn(clientinfo *ci, bool tryspawn = false)
+        {
+            if(playing.find(ci) >= 0 || ci->state.aitype >= AI_START) return true;
+            if(tryspawn) queue(ci);
+            else
+            {
+                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(m_trial(gamemode) && ci->state.cpmillis < 0) return false;
+                int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
+                if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
+                if(m_fight(gamemode) && GAME(maxalive) > 0)
+                {
+                    if(!hasgameinfo) return false;
+                    int maxplayers = int(GAME(maxalive)*nplayers);
+                    if(GAME(maxalivethreshold) && maxplayers < GAME(maxalivethreshold)) maxplayers = GAME(maxalivethreshold);
+                    if(m_team(gamemode, mutators) && (maxplayers%2)) maxplayers++;
+                    if(playing.length() >= maxplayers) return false;
+                    if(m_team(gamemode, mutators))
+                    {
+                        int alive[TEAM_MAX] = {0}, half = maxplayers/2;
+                        loopv(playing) if(playing[i] && isteam(gamemode, mutators, playing[i]->team, TEAM_NEUTRAL)) alive[playing[i]->team]++;
+                        if(alive[ci->team] >= half) return false;
+                        if(GAME(maxalivequeue))
+                        {
+                            if(spawnq.find(ci) < 0) queue(ci);
+                            loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
+                            {
+                                if(spawnq[i] != ci && (ci->state.state == AI_BOT || spawnq[i]->state.aitype != AI_BOT)) return false;
+                                break;
+                            }
+                        }
+                    }
+                    else if(GAME(maxalivequeue))
+                    {
+                        if(spawnq.find(ci) < 0) queue(ci);
+                        loopv(spawnq) if(spawnq[i])
+                        {
+                            if(spawnq[i] != ci && (ci->state.state == AI_BOT || spawnq[i]->state.aitype != AI_BOT)) return false;
+                            break;
+                        }
+                    }
+                    spawnq.removeobj(ci);
+                    if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
+                }
+            }
+            return true;
+        }
+
+        void spawned(clientinfo *ci)
+        {
+            if(m_fight(gamemode))
+            {
+                spawnq.removeobj(ci);
+                if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
+            }
+        }
+
+        void died(clientinfo *ci, clientinfo *at)
+        {
+            if(m_fight(gamemode))
+            {
+                spawnq.removeobj(ci);
+                if(GAME(maxalivequeue) || GAME(maxalive) == 0) playing.removeobj(ci);
+            }
+        }
+
+        void reset(bool empty)
+        {
+            spawnq.shrink(0);
+            playing.shrink(0);
+        }
+    } spawnmutator;
 
     SVAR(0, serverpass, "");
     SVAR(0, adminpass, "");
@@ -1101,7 +1240,6 @@ namespace server
             cycle.add(0);
         }
     } spawns[TEAM_COUNT];
-    int nplayers, totalspawns;
 
     void setupspawns(bool update, int players = 0)
     {
@@ -1637,8 +1775,6 @@ namespace server
         checkvotes();
     }
 
-    extern void waiting(clientinfo *ci, int doteam = 0, int drop = 2, bool exclude = false);
-
     savedscore &findscore(clientinfo *ci, bool insert)
     {
         uint ip = getclientip(ci->clientnum);
@@ -1958,6 +2094,7 @@ namespace server
         else if(m_bomber(gamemode)) smode = &bombermode;
         else smode = NULL;
         smuts.shrink(0);
+        smuts.add(&spawnmutator);
         if(m_duke(gamemode, mutators)) smuts.add(&duelmutator);
         if(m_vampire(gamemode, mutators)) smuts.add(&vampiremutator);
         if(smode) smode->reset(false);
@@ -3095,31 +3232,6 @@ namespace server
         while(ci->events.length() > keep) delete ci->events.pop();
     }
 
-    bool chkloadweap(clientinfo *ci, bool request = true)
-    {
-        loopj(2)
-        {
-            int aweap = ci->state.loadweap[j];
-            if(ci->state.loadweap[j] >= WEAP_ITEM) ci->state.loadweap[j] = -1;
-            else if(ci->state.loadweap[j] >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap[j], allowed))
-            {
-                case 0: ci->state.loadweap[j] = -1; break;
-                case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
-                case 2: case 3: default: break;
-            }
-            if(ci->state.loadweap[j] < 0 && ci->state.aitype < 0)
-            {
-                if(request)
-                {
-                    if(isweap(aweap)) srvmsgf(ci->clientnum, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
-                    sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
-                }
-                return false;
-            }
-        }
-        return true;
-    }
-
     void waiting(clientinfo *ci, int doteam, int drop, bool exclude)
     {
         if(m_campaign(gamemode) && ci->state.cpnodes.empty())
@@ -3311,13 +3423,6 @@ namespace server
             }
             else if(ci->state.state == CS_WAITING)
             {
-                if(ci->state.aitype < AI_START)
-                {
-                    if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) continue;
-                    if(m_trial(gamemode) && ci->state.cpmillis < 0) continue;
-                }
-                int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
-                if(delay && ci->state.respawnwait(gamemillis, delay)) continue;
                 int nospawn = 0;
                 if(smode && !smode->canspawn(ci, false)) { nospawn++; }
                 mutate(smuts, if(!mut->canspawn(ci, false)) { nospawn++; });
