@@ -50,7 +50,7 @@ GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
 GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 
-GFVAR(0, maxalive, 0, 3, 1000); // only allow this*numplayers to be alive at once
+GFVAR(0, maxalive, 0, 0, 1000); // only allow this*numplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
 GVAR(0, maxalivethreshold, 2, 8, INT_MAX-1); // kicks in if numplayers >= this
 
