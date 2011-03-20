@@ -5,7 +5,7 @@
     $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
 
-    $app['banner'] = "<b>Player model fully paid for!</b> Future donations help us create more freely licensed assets.";
+    $app['banner'] = "<b>Player model fully paid for!</b> Donations help fund more open source efforts.";
     $app['bannerurl'] = "/donate";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
@@ -13,7 +13,8 @@
     // nav items should be in reverse order for the top navbar
     $app['targets']['donate'] = array('name' => 'Donate', 'url' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'alturl' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&', 'nav' => 1, 'redir' => 1);
+    $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
+    $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Main_Page', 'alturl' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=', 'nav' => 1, 'redir' => 1);
     $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/redeclipse_1.0/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/redeclipse_1.0/', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
