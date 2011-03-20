@@ -127,6 +127,7 @@ GFVAR(0, captureelasticity, -10000, 0.35f, 10000);
 GFVAR(0, capturewaterfric, -10000, 1.75f, 10000);
 GFVAR(0, captureweight, -10000, 100, 10000);
 GFVAR(0, captureminspeed, 0, 0, 10000);
+GFVAR(0, capturethreshold, 0, 64, 10000); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
@@ -153,6 +154,7 @@ GFVAR(0, bomberelasticity, -10000, 0.65f, 10000);
 GFVAR(0, bomberwaterfric, -10000, 1.75f, 10000);
 GFVAR(0, bomberweight, -10000, 150, 10000);
 GFVAR(0, bomberminspeed, 0, 50, 10000);
+GFVAR(0, bomberthreshold, 0, 64, 10000); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, INT_MAX-1);
 GVAR(0, skillmin, 1, 50, 101);
