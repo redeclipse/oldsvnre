@@ -179,18 +179,22 @@ struct bomberservmode : bomberstate, servmode
                 vector<int> candidates[TEAM_MAX];
                 loopv(flags) candidates[flags[i].team].add(i);
                 int wants = !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
-                loopi(wants) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
+                loopi(wants)
                 {
                     int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
-                    if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]))
+                    if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, TEAM_NEUTRAL))
                     {
                         bomberstate::returnaffinity(candidates[i][r], gamemillis, true);
                         sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
                         hasaffinity++;
                     }
-                    else return;
                 }
-                if(hasaffinity < wants) return;
+                if(hasaffinity < wants)
+                {
+                    if(hasaffinity && !m_gsp2(gamemode, mutators)) changemap(smapname, gamemode, mutators|G_M_GSP2);
+                    else hasflaginfo = false;
+                    return;
+                }
             }
             else loopv(flags) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
             { // multi-ball
@@ -199,7 +203,7 @@ struct bomberservmode : bomberstate, servmode
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
                 hasaffinity++;
             }
-            if(!hasaffinity) return;
+            if(!hasaffinity) { hasflaginfo = false; return; }
             sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_BOMBSTART, CON_MESG, "\fathe \fs\fwbomb\fS has been spawned");
             bombertime = 0;
         }
