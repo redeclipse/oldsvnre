@@ -1126,14 +1126,14 @@ namespace server
         return true;
     }
 
-    bool finditem(int i, bool spawned = false)
+    bool finditem(int i, bool spawned = false, bool carry = true)
     {
         if(sents[i].spawned) return true;
         if(sents[i].type == WEAPON) loopvk(clients)
         {
             clientinfo *ci = clients[k];
             if(ci->state.dropped.find(i) && (!spawned || gamemillis < sents[i].millis)) return true;
-            else loopj(WEAP_MAX) if(ci->state.entid[j] == i) return spawned;
+            else if(carry) loopj(WEAP_MAX) if(ci->state.entid[j] == i) return spawned;
         }
         if(spawned && gamemillis < sents[i].millis) return true;
         return false;
@@ -3275,12 +3275,15 @@ namespace server
     void checkents()
     {
         bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_limited(gamemode, mutators);
-        int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators);
+        int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators), players = 0;
         memset(items, 0, sizeof(items)); memset(lowest, -1, sizeof(lowest));
         if(thresh)
         {
-            loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype < AI_START)
+            loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.aitype < AI_START)
+            {
                 items[WEAPON] += clients[i]->state.carry(sweap);
+                players++;
+            }
             loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
             {
                 if(sents[i].type == WEAPON)
@@ -3288,7 +3291,7 @@ namespace server
                     int attr = w_attr(gamemode, sents[i].attrs[0], sweap);
                     if(attr < WEAP_OFFSET || attr >= WEAP_ITEM) continue;
                 }
-                if(finditem(i, true)) items[sents[i].type]++;
+                if(finditem(i, true, false)) items[sents[i].type]++;
                 else if(!sents.inrange(lowest[sents[i].type]) || sents[i].millis < sents[lowest[sents[i].type]].millis)
                     lowest[sents[i].type] = i;
             }
@@ -3318,7 +3321,7 @@ namespace server
                     bool found = finditem(i, true);
                     if(allowed && thresh && i == lowest[sents[i].type])
                     {
-                        float dist = items[sents[i].type]/float(numclients(-1, true, AI_BOT)*GAME(maxcarry));
+                        float dist = items[sents[i].type]/float(players*GAME(maxcarry));
                         if(dist < GAME(itemthreshold)) found = false;
                     }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))

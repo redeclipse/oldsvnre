@@ -48,11 +48,11 @@ namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
-GFVAR(IDF_ADMIN, maxalive, 0, 2, 1000); // only allow this*numplayers to be alive at once
-GVAR(IDF_ADMIN, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
-GVAR(IDF_ADMIN, maxalivethreshold, 0, 8, INT_MAX-1); // kicks in if numplayers >= this
-
 GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
+
+GFVAR(0, maxalive, 0, 2, 1000); // only allow this*numplayers to be alive at once
+GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
+GVAR(0, maxalivethreshold, 0, 8, INT_MAX-1); // kicks in if numplayers >= this
 
 GVAR(0, maxcarry, 1, 2, WEAP_CARRY);
 GVAR(0, spawnrotate, 0, 4, INT_MAX-1); // 0 = let client decide, 1 = sequence, 2+ = random
@@ -95,7 +95,7 @@ GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 30000, INT_MAX-1); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, INT_MAX-1); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
-GFVAR(0, itemthreshold, 0, 2, 1000); // if numitems/numclients/maxcarry is less than this, spawn one of this type
+GFVAR(0, itemthreshold, 0, 2, 1000); // if numitems/(players*maxcarry) is less than this, spawn one of this type
 GVAR(0, itemcollide, 0, BOUNCE_GEOM, INT_MAX-1);
 GVAR(0, itemextinguish, 0, 6, 7);
 GFVAR(0, itemelasticity, -10000, 0.4f, 10000);
