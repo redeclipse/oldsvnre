@@ -2063,6 +2063,9 @@ void editmat(char *name)
 
 COMMAND(0, editmat, "s");
 
+VAR(IDF_PERSIST, autoapplytexgui, 0, 1, 1);
+VAR(IDF_PERSIST, autoclosetexgui, 0, 1, 2);
+
 VAR(IDF_PERSIST, thumbwidth, 0, 8, 1000);
 VAR(IDF_PERSIST, thumbheight, 0, 6, 1000);
 VAR(IDF_PERSIST, thumbtime, 0, 25, 1000);
@@ -2089,6 +2092,13 @@ struct texturegui : guicb
             if(i+1 != origtab) continue; //don't load textures on non-visible tabs!
             g.pushlist();
             g.pushlist();
+            if(g.button("\fgauto apply", 0xFFFFFF, autoapplytexgui ? "checkboxon" : "checkbox", autoapplytexgui ? false : true)&GUI_UP)
+                autoapplytexgui = autoapplytexgui ? 0 : 1;
+            g.space(2);
+            if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", autoclosetexgui ? false : true)&GUI_UP)
+                autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
+            g.poplist();
+            g.pushlist();
             g.pushlist();
             if(texmru.inrange(menutex))
             {
@@ -2107,7 +2117,7 @@ struct texturegui : guicb
                 if(g.texture(v, thumbheight*thumbsize, true)&GUI_UP)
                 {
                     edittex(texmru[menutex]);
-                    menuon = false;
+                    if(autoclosetexgui) menuon = false;
                 }
             }
             else g.image(textureload("textures/nothumb", 3), thumbheight*thumbsize, true);
@@ -2134,7 +2144,14 @@ struct texturegui : guicb
                             lastthumbnail = totalmillis;
                         }
                         if(g.texture(v, thumbsize, true)&GUI_UP && (v.slot->loaded || v.slot->thumbnail!=notexture))
+                        {
                             nextslot = ti;
+                            if(autoapplytexgui)
+                            {
+                                edittex(texmru[ti]);
+                                if(autoclosetexgui > 1) menuon = false;
+                            }
+                        }
                     }
                     else g.texture(dummyvslot, thumbsize, false); //create an empty space
                 }

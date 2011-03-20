@@ -116,6 +116,8 @@ struct bomberservmode : bomberstate, servmode
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START || !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) return;
+        if(GAME(bomberthreshold) > 0 && oldpos.dist(newpos) >= GAME(bomberthreshold))
+            dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)

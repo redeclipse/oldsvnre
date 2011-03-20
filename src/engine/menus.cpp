@@ -449,10 +449,10 @@ void guinameslider(char *var, char *names, char *list, char *onchange, int *reve
 
 void guicheckbox(char *name, char *var, float *on, int *off, char *onchange)
 {
-    bool enabled = getfval(var)!=*off;
-    if(cgui && cgui->button(name, 0xFFFFFF, enabled ? "checkboxon" : "checkbox", enabled ? false : true)&GUI_UP)
+    bool enabled = getfval(var) != *off, two = getvarmax(var) == 2, next = two && getfval(var) == 1.0f;
+    if(cgui && cgui->button(name, 0xFFFFFF, enabled ? (two && !next ? "checkboxtwo" : "checkboxon") : "checkbox", enabled ? false : true)&GUI_UP)
     {
-        updateval(var, enabled ? *off : (*on || *off ? *on : 1.0f), onchange);
+        updateval(var, enabled ? (two && next ? 2.0f : *off) : (*on || *off ? *on : 1.0f), onchange);
     }
 }
 

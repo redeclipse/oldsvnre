@@ -47,6 +47,8 @@ struct captureservmode : capturestate, servmode
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        if(GAME(capturethreshold) > 0 && oldpos.dist(newpos) >= GAME(capturethreshold))
+            dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
