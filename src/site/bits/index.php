@@ -23,7 +23,7 @@
 
     $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=redeclipse', 'alturl' => 'http://www.youtube.com/results?search_query=redeclipse+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
-    //$app['targets']['playdeb'] = array('name' => 'playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
+    $app['targets']['playdeb'] = array('name' => 'playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
@@ -108,6 +108,7 @@
                     <h3>Agile gameplay: wall run/kick, impulse dash, and jetpack</h3>
                     <h3>Builtin Editor: create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
+                    <p id="mirror">find packages on <a href="/playdeb">PlayDeb</a></p>
                     <p id="svn">or <a href="/devel">get the SVN version</a> and live on the bleeding edge</p>
                 </div>
                 <div id="player">
