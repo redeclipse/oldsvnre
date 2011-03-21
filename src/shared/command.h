@@ -211,7 +211,7 @@ static inline const char *getstr(const identval &v, int type)
 {
     switch(type)
     {
-        case VAL_STR: return v.s;
+        case VAL_STR: case VAL_MACRO: return v.s;
         case VAL_INT: return intstr(v.i);
         case VAL_FLOAT: return floatstr(v.f);
         default: return "";
@@ -226,7 +226,7 @@ static inline int getint(const identval &v, int type)
     {
         case VAL_INT: return v.i;
         case VAL_FLOAT: return int(v.f);
-        case VAL_STR: return parseint(v.s);
+        case VAL_STR: case VAL_MACRO: return parseint(v.s);
         default: return 0;
     }
 }
@@ -239,7 +239,7 @@ static inline float getfloat(const identval &v, int type)
     {
         case VAL_FLOAT: return v.f;
         case VAL_INT: return float(v.i);
-        case VAL_STR: return parsefloat(v.s);
+        case VAL_STR: case VAL_MACRO: return parsefloat(v.s);
         default: return 0.0f;
     }
 }
@@ -250,7 +250,7 @@ inline void ident::getval(tagval &v) const
 {
     switch(valtype)
     {
-        case VAL_STR: v.setstr(newstring(val.s)); break;
+        case VAL_STR: case VAL_MACRO: v.setstr(newstring(val.s)); break;
         case VAL_INT: v.setint(val.i); break;
         case VAL_FLOAT: v.setfloat(val.f); break;
         default: v.setnull(); break;
