@@ -51,7 +51,7 @@ struct bomberservmode : bomberstate, servmode
             if(alive <= 1) return;
         }
         bombertime = gamemillis+GAME(bomberdelay);
-        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j), true);
+        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j), true, true);
     }
 
     void died(clientinfo *ci, clientinfo *actor)
