@@ -1808,7 +1808,11 @@ ICOMMAND(0, loop, "rie", (ident *id, int *n, uint *body),
     identstack stack;
     loopi(*n)
     {
-        if(i) id->val.i = i;
+        if(i)
+        {
+            if(id->valtype != VAL_INT) { if(id->valtype == VAL_STR) delete[] id->val.s; freecode(*id); id->valtype = VAL_INT; }
+            id->val.i = i;
+        }
         else
         {
             tagval zero;
@@ -1826,7 +1830,11 @@ ICOMMAND(0, loopwhile, "riee", (ident *id, int *n, uint *cond, uint *body),
     identstack stack;
     loopi(*n)
     {
-        if(i) id->val.i = i;
+        if(i)
+        {
+            if(id->valtype != VAL_INT) { if(id->valtype == VAL_STR) delete[] id->val.s; freecode(*id); id->valtype = VAL_INT; }
+            id->val.i = i;
+        }
         else
         {
             tagval zero;
@@ -2058,7 +2066,9 @@ void looplist(ident *id, const char *list, const uint *body, bool search)
         char *val = newstring(start, end-start);
         if(n++)
         {
-            delete[] id->val.s;
+            if(id->type == VAL_STR) delete[] id->val.s;
+            else id->valtype = VAL_STR;
+            freecode(*id);
             id->val.s = val;
         }
         else
@@ -2115,7 +2125,8 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
 //        if(redundant) { delete[] file; continue; }
         if(i)
         {
-            if(id->valtype == VAL_STR) delete[] id->val.s;
+            if(id->type == VAL_STR) delete[] id->val.s;
+            else id->valtype = VAL_STR;
             id->val.s = file;
         }
         else
