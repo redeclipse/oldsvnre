@@ -1954,18 +1954,11 @@ namespace server
         else enddemorecord();
     }
 
-    void setspawn(int ent, bool spawned, bool msg = false)
+    void setspawn(int ent, bool spawned, bool clear = false, bool msg = false)
     {
         if(sents.inrange(ent))
         {
-            loopvk(clients)
-            {
-                if(sents[ent].type == WEAPON) loopj(WEAP_MAX)
-                {
-                    if(clients[k]->state.entid[j] == ent) clients[k]->state.entid[j] = -1;
-                }
-                clients[k]->state.dropped.removeall(ent);
-            }
+            if(clear) loopvk(clients) clients[k]->state.dropped.removeall(ent);
             sents[ent].spawned = spawned;
             sents[ent].millis = gamemillis+(sents[ent].type != WEAPON || sents[ent].attrs[1]&WEAP_F_FORCED ? GAME(itemspawndelay) : w_spawn(w_attr(gamemode, sents[ent].attrs[0], m_weapon(gamemode, mutators))));
             if(msg) sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
@@ -3185,7 +3178,7 @@ namespace server
                 gs.ammo[weap] = gs.entid[weap] = -1;
             }
         }
-        setspawn(ent, false);
+        setspawn(ent, false, true);
         gs.useitem(ent, sents[ent].type, attr, amt, sweap, millis);
         sendf(-1, 1, "ri8", N_ITEMACC, ci->clientnum, ent, amt, sents[ent].spawned ? 1 : 0, weap, dropped, value);
     }
@@ -3340,7 +3333,7 @@ namespace server
                     }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))
                     {
-                        setspawn(i, allowed, true);
+                        setspawn(i, allowed, true, true);
                         items[sents[i].type]++;
                     }
                 }
@@ -4583,7 +4576,7 @@ namespace server
                     QUEUE_MSG;
                     if(tweaked)
                     {
-                        setspawn(n, true, true);
+                        setspawn(n, true, true, true);
                         if(sents[n].type == TRIGGER) setuptriggers(true);
                     }
                     break;

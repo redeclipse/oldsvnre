@@ -316,21 +316,12 @@ namespace entities
     void checkspawns(int n)
     {
         gameentity &e = *(gameentity *)ents[n];
-        if(enttype[e.type].usetype == EU_ITEM)
+        if(enttype[e.type].usetype == EU_ITEM) loopv(projs::projs)
         {
-            if(e.type == WEAPON) loopi(WEAP_MAX)
-            {
-                if(game::player1->entid[i] == n) game::player1->entid[i] = -1;
-                loopv(game::players) if(game::players[i] && game::players[i]->entid[i] == n)
-                    game::players[i]->entid[i] = -1;
-            }
-            loopv(projs::projs)
-            {
-                projent &proj = *projs::projs[i];
-                if(proj.projtype != PRJ_ENT || proj.id != n) continue;
-                proj.beenused = 2;
-                proj.lifetime = min(proj.lifetime, proj.fadetime);
-            }
+            projent &proj = *projs::projs[i];
+            if(proj.projtype != PRJ_ENT || proj.id != n) continue;
+            proj.beenused = 2;
+            proj.lifetime = min(proj.lifetime, proj.fadetime);
         }
     }
 
@@ -356,7 +347,6 @@ namespace entities
         if(ents.inrange(r) && ents[r]->type == WEAPON)
         {
             gameentity &f = *(gameentity *)ents[r];
-            checkspawns(r);
             attr = w_attr(game::gamemode, f.attrs[0], sweap);
             if(isweap(attr)) projs::drop(d, attr, r, v, d == game::player1 || d->ai);
         }
