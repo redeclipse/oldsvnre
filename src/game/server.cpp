@@ -1131,7 +1131,7 @@ namespace server
         return true;
     }
 
-    bool finditem(int i, bool spawned = false, bool carry = true)
+    bool finditem(int i, bool spawned = false, bool carry = false)
     {
         if(sents[i].spawned) return true;
         if(sents[i].type == WEAPON) loopvk(clients)
@@ -3298,7 +3298,7 @@ namespace server
                     int attr = w_attr(gamemode, sents[i].attrs[0], sweap);
                     if(attr < WEAP_OFFSET || attr >= WEAP_ITEM) continue;
                 }
-                if(finditem(i, true, false)) items[sents[i].type]++;
+                if(finditem(i, true)) items[sents[i].type]++;
                 else if(!sents.inrange(lowest[sents[i].type]) || sents[i].millis < sents[lowest[sents[i].type]].millis)
                     lowest[sents[i].type] = i;
             }
@@ -3325,7 +3325,7 @@ namespace server
                 bool allowed = hasitem(i);
                 if(enttype[sents[i].type].usetype == EU_ITEM && (allowed || sents[i].spawned))
                 {
-                    bool found = finditem(i, true);
+                    bool found = finditem(i, true, true);
                     if(allowed && thresh && i == lowest[sents[i].type])
                     {
                         float dist = items[sents[i].type]/float(players*GAME(maxcarry));
