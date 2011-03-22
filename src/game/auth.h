@@ -31,7 +31,7 @@ namespace auth
         ci->authlevel = -1;
         requestmasterf("reqauth %u %s\n", ci->authreq, ci->authname);
         lastactivity = totalmillis;
-        sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_MESG, "please wait, requesting credential match");
+        srvmsgft(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
     }
 
     bool tryauth(clientinfo *ci, const char *user)
@@ -39,12 +39,12 @@ namespace auth
         if(!ci) return false;
         else if(!connectedmaster())
         {
-            sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_MESG, "not connected to authentication server");
+            srvmsgft(ci->clientnum, CON_EVENT, "\fYnot connected to authentication server");
             return false;
         }
         else if(ci->authreq)
         {
-            sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_MESG, "waiting for previous attempt..");
+            srvmsgft(ci->clientnum, CON_EVENT, "\fYwaiting for previous attempt..");
             return true;
         }
         filtertext(ci->authname, user, true, true, false, 100);
@@ -117,7 +117,7 @@ namespace auth
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
         ci->authlevel = -1;
-        sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, CON_MESG, "authority request failed, please check your credentials");
+        srvmsgft(ci->clientnum, CON_EVENT, "\fYauthority request failed, please check your credentials");
         if(ci->connectauth)
         {
             ci->connectauth = false;
