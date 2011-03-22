@@ -1,9 +1,5 @@
-bullet.png, energy.png
+bullet.png, energy.png, scorch.png, blob.png
     Public domain sources
-
-blob.png, scorch.png
-    (C) 2007-2008 Marcus "makkE" Biel, Sauerbraten Engine
-    http://www.cubeengine.com/
 
 smoke.png, and explosion.png
     Created by RaZgRiZ Made with Filter Forge II Beta 3
