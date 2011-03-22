@@ -184,8 +184,12 @@ static struct identlink
 
 VAR(0, dbgalias, 0, 4, 1000);
 
+static int nodebug = 0;
+
 static void debugcode(const char *fmt, ...)
 {
+    if(nodebug) return;
+
     defvformatstring(msg, fmt, fmt);
     conoutft(CON_MESG, "%s", msg);
 
@@ -200,6 +204,9 @@ static void debugcode(const char *fmt, ...)
         else if(!l->next) conoutft(CON_MESG, depth == dbgalias ? "  %d) %s" : "  ..%d) %s", total-depth+1, id->name);
     }
 }
+
+ICOMMAND(0, nodebug, "e", (uint *body), { nodebug++; execute(body); nodebug--; });
+
 void addident(ident *id)
 {
     addident(*id);
@@ -387,6 +394,16 @@ int getvarmax(const char *name)
     GETVAR(id, name, 0);
     return id->maxval;
 }
+float getfvarmin(const char *name)
+{
+    _GETVAR(id, ID_FVAR, name, 0);
+    return id->minvalf;
+}
+float getfvarmax(const char *name)
+{
+    _GETVAR(id, ID_FVAR, name, 0);
+    return id->maxvalf;
+}
 int getvardef(const char *name)
 {
     ident *id = getident(name);
@@ -407,6 +424,8 @@ ICOMMAND(0, getvartype, "s", (char *n), intret(getvartype(n)));
 ICOMMAND(0, getvarflags, "s", (char *n), intret(getvarflags(n)));
 ICOMMAND(0, getvarmin, "s", (char *n), intret(getvarmin(n)));
 ICOMMAND(0, getvarmax, "s", (char *n), intret(getvarmax(n)));
+ICOMMAND(0, getfvarmin, "s", (char *s), floatret(getfvarmin(s)));
+ICOMMAND(0, getfvarmax, "s", (char *s), floatret(getfvarmax(s)));
 ICOMMAND(0, getvardef, "s", (char *n), intret(getvardef(n)));
 
 bool identexists(const char *name) { return idents.access(name)!=NULL; }
@@ -1210,16 +1229,16 @@ static void printvar(ident *id)
         {
             int i = *id->storage.i;
             if(id->flags&IDF_HEX && id->maxval==0xFFFFFF)
-                debugcode("%s = 0x%.6X (%d, %d, %d)", id->name, i, (i>>16)&0xFF, (i>>8)&0xFF, i&0xFF);
+                conoutft(CON_MESG, "%s = 0x%.6X (%d, %d, %d)", id->name, i, (i>>16)&0xFF, (i>>8)&0xFF, i&0xFF);
             else
-                debugcode(id->flags&IDF_HEX ? "%s = 0x%X" : "%s = %d", id->name, i);
+                conoutft(CON_MESG, id->flags&IDF_HEX ? "%s = 0x%X" : "%s = %d", id->name, i);
             break;
         }
         case ID_FVAR:
-            debugcode("%s = %s", id->name, floatstr(*id->storage.f));
+            conoutft(CON_MESG, "%s = %s", id->name, floatstr(*id->storage.f));
             break;
         case ID_SVAR:
-            debugcode(strchr(*id->storage.s, '"') ? "%s = [%s]" : "%s = \"%s\"", id->name, *id->storage.s);
+            conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "%s = [%s]" : "%s = \"%s\"", id->name, *id->storage.s);
             break;
     }
 }
