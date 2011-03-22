@@ -103,6 +103,7 @@ namespace client
         copystring(authkey, key);
     }
     ICOMMAND(0, authkey, "ss", (char *name, char *key), setauthkey(name, key));
+    ICOMMAND(0, hasauthkey, "", (), intret(authname[0] && authkey[0] ? 1 : 0));
 
     void writegamevars(const char *name, bool all = false, bool server = false)
     {
