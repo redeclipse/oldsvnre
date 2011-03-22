@@ -3,7 +3,7 @@ GVAR(IDF_ADMIN, serverclients, 1, 16, MAXCLIENTS);
 GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
-GVAR(IDF_ADMIN, automaster, 0, 1, 1);
+GVAR(IDF_ADMIN, automaster, 0, 0, 1);
 
 GVAR(IDF_ADMIN, modelimit, 0, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, mutslimit, 0, G_M_ALL, G_M_ALL);
@@ -58,7 +58,7 @@ GVAR(0, maxcarry, 1, 2, WEAP_CARRY);
 GVAR(0, spawnrotate, 0, 4, INT_MAX-1); // 0 = let client decide, 1 = sequence, 2+ = random
 GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
 GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);
-GVAR(0, trialweapon, 0, WEAP_MELEE, WEAP_MAX-1);
+GVAR(0, trialweapon, 0, WEAP_SWORD, WEAP_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, INT_MAX-1); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, INT_MAX-1); // .. in instagib/arena matches
@@ -66,7 +66,7 @@ GVAR(0, trialdelay, 0, 500, INT_MAX-1); // .. in time trial matches
 GVAR(0, bomberdelay, 0, 3000, INT_MAX-1); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, INT_MAX-1); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, INT_MAX-1); // .. in duel/survivor matches
-GVAR(0, instaprotect, 0, 1500, INT_MAX-1); // .. in instagib matches
+GVAR(0, instaprotect, 0, 3000, INT_MAX-1); // .. in instagib matches
 
 GVAR(0, spawnhealth, 0, 100, INT_MAX-1);
 GVAR(0, extrahealth, 0, 150, INT_MAX-1);
@@ -103,13 +103,13 @@ GFVAR(0, itemrelativity, -10000, 1, 10000);
 GFVAR(0, itemwaterfric, 0, 1.75f, 10000);
 GFVAR(0, itemweight, -10000, 150, 10000);
 GFVAR(0, itemminspeed, 0, 0, 10000);
-GFVAR(0, itemrepulsion, 0, 16, 10000);
+GFVAR(0, itemrepulsion, 0, 8, 10000);
 GFVAR(0, itemrepelspeed, 0, 25, 10000);
 
 GVAR(0, timelimit, 0, 10, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
-GVAR(0, intermlimit, 0, 10000, INT_MAX-1); // .. before vote menu comes up
-GVAR(0, votelimit, 0, 30000, INT_MAX-1); // .. before vote passes by default
+GVAR(0, intermlimit, 0, 15000, INT_MAX-1); // .. before vote menu comes up
+GVAR(0, votelimit, 0, 4000, INT_MAX-1); // .. before vote passes by default
 GVAR(0, duelreset, 0, 1, 1); // reset winner in duel
 GVAR(0, duelclear, 0, 1, 1); // clear items in duel
 GVAR(0, duellimit, 0, 7500, INT_MAX-1); // .. before duel goes to next round
@@ -119,7 +119,7 @@ GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
-GVAR(0, pointlimit, 0, 200, INT_MAX-1); // finish when score is this or more
+GVAR(0, pointlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 
 GVAR(0, capturelimit, 0, 15, INT_MAX-1); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
@@ -131,7 +131,7 @@ GFVAR(0, captureelasticity, -10000, 0.35f, 10000);
 GFVAR(0, capturewaterfric, -10000, 1.75f, 10000);
 GFVAR(0, captureweight, -10000, 100, 10000);
 GFVAR(0, captureminspeed, 0, 0, 10000);
-GFVAR(0, capturethreshold, 0, 64, 10000); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, capturethreshold, 0, 96, 10000); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
@@ -139,7 +139,7 @@ GVAR(0, defendinterval, 0, 100, INT_MAX-1);
 GVAR(0, defendoccupy, 0, 100, INT_MAX-1); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
-GVAR(0, bomberlimit, 0, 15, INT_MAX-1); // finish when score is this or more (non-hold)
+GVAR(0, bomberlimit, 0, 30, INT_MAX-1); // finish when score is this or more (non-hold)
 GVAR(0, bomberholdlimit, 0, 300, INT_MAX-1); // finish when score is this or more (hold)
 GVAR(0, bomberresetdelay, 0, 15000, INT_MAX-1);
 GVAR(0, bomberpickupdelay, -1, 5000, INT_MAX-1);
@@ -158,7 +158,7 @@ GFVAR(0, bomberelasticity, -10000, 0.65f, 10000);
 GFVAR(0, bomberwaterfric, -10000, 1.75f, 10000);
 GFVAR(0, bomberweight, -10000, 150, 10000);
 GFVAR(0, bomberminspeed, 0, 50, 10000);
-GFVAR(0, bomberthreshold, 0, 64, 10000); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, bomberthreshold, 0, 96, 10000); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, INT_MAX-1);
 GVAR(0, skillmin, 1, 50, 101);
@@ -168,7 +168,7 @@ GVAR(0, botlimit, 0, 16, INT_MAX-1);
 GFVAR(0, botspeed, 0, 1, 1000);
 GFVAR(0, botscale, 1e-6f, 1, 1000);
 GVAR(0, enemybalance, 0, 1, 3);
-GVAR(0, enemyspawntime, 1, 60000, INT_MAX-1); // when enemies respawn
+GVAR(0, enemyspawntime, 1, 30000, INT_MAX-1); // when enemies respawn
 GVAR(0, enemyspawndelay, 0, 1000, INT_MAX-1); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GFVAR(0, enemyspeed, 0, 1, 1000);
