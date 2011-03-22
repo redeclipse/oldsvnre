@@ -369,6 +369,37 @@ void texpremul(ImageData &s)
     }
 }
 
+void texagrad(ImageData &s, float x2, float y2, float x1, float y1)
+{
+    if(s.bpp != 2 && s.bpp != 4) return;
+    y1 = 1 - y1;
+    y2 = 1 - y2;
+    float minx = 1, miny = 1, maxx = 1, maxy = 1;
+    if(x1 != x2) 
+    {
+        minx = (0 - x1) / (x2 - x1);
+        maxx = (1 - x1) / (x2 - x1);
+    }
+    if(y1 != y2)
+    {
+        miny = (0 - y1) / (y2 - y1);
+        maxy = (1 - y1) / (y2 - y1);
+    }
+    float dx = (maxx - minx)/max(s.w-1, 1), 
+          dy = (maxy - miny)/max(s.h-1, 1), 
+          cury = miny;
+    for(uchar *dstrow = s.data + s.bpp - 1, *endrow = dstrow + s.h*s.pitch; dstrow < endrow; dstrow += s.pitch)
+    {
+        float curx = minx;
+        for(uchar *dst = dstrow, *end = &dstrow[s.w*s.bpp]; dst < end; dst += s.bpp)
+        {
+            dst[0] = uchar(dst[0]*clamp(curx, 0.0f, 1.0f)*clamp(cury, 0.0f, 1.0f));
+            curx += dx;
+        }
+        cury += dy;
+    }
+}
+
 VAR(0, hwtexsize, 1, 0, 0);
 VAR(0, hwcubetexsize, 1, 0, 0);
 VAR(0, hwmaxaniso, 1, 0, 0);
@@ -1085,6 +1116,7 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         else if(!strncmp(cmd, "mix", len)) texmix(d, *arg[0] ? atoi(arg[0]) : -1, *arg[1] ? atoi(arg[1]) : -1, *arg[2] ? atoi(arg[2]) : -1, *arg[3] ? atoi(arg[3]) : -1);
         else if(!strncmp(cmd, "grey", len)) texgrey(d);
         else if(!strncmp(cmd, "premul", len)) texpremul(d);
+        else if(!strncmp(cmd, "agrad", len)) texagrad(d, atof(arg[0]), atof(arg[1]), atof(arg[2]), atof(arg[3]));
         else if(!strncmp(cmd, "compress", len) || !strncmp(cmd, "dds", len))
         {
             int scale = atoi(arg[0]);

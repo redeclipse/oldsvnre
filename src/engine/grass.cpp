@@ -1,7 +1,7 @@
 #include "engine.h"
 
 VAR(IDF_PERSIST, grass, 0, 0, 1);
-FVAR(IDF_PERSIST, grassstep, 0.5, 1, 8);
+FVAR(IDF_PERSIST, grassstep, 0.5, 2, 8);
 FVAR(IDF_PERSIST, grasstaper, 0, 0.1, 1);
 
 VAR(0, dbggrass, 0, 0, 1);
