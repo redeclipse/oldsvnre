@@ -1922,11 +1922,8 @@ namespace client
                         s->state = CS_WAITING;
                         s->checkpoint = -1;
                         s->cpmillis = 0;
-                        if(s != game::player1 && !s->ai) 
-                        {
-                            s->resetinterp();
-                            game::waiting.removeobj(s);
-                        }
+                        if(s != game::player1 && !s->ai) s->resetinterp();
+                        game::waiting.removeobj(s);
                     }
                     break;
                 }
@@ -1943,15 +1940,12 @@ namespace client
                         s->stopmoving(true);
                         game::waiting.setsize(0);
                         gameent *d;
-                        loopv(game::players) if((d = game::players[i]) && !d->ai && d->state == CS_WAITING)
+                        loopv(game::players) if((d = game::players[i]) && d->aitype < 0 && d->state == CS_WAITING)
                             game::waiting.add(d);
                             
                     }
-                    else if(!s->ai) 
-                    {
-                        s->resetinterp();
-                        game::waiting.removeobj(s);
-                    }
+                    else if(!s->ai) s->resetinterp();
+                    game::waiting.removeobj(s);
                     if(s->state == CS_ALIVE || m_bomber(game::gamemode)) s->lastdeath = lastmillis; // so spawndelay shows properly
                     s->state = CS_WAITING;
                     s->weapreset(true);
