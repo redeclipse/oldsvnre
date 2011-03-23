@@ -109,10 +109,10 @@ GFVAR(0, itemrepelspeed, 0, 25, 10000);
 GVAR(0, timelimit, 0, 10, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
 GVAR(0, intermlimit, 0, 15000, INT_MAX-1); // .. before vote menu comes up
-GVAR(0, votelimit, 0, 4000, INT_MAX-1); // .. before vote passes by default
+GVAR(0, votelimit, 0, 45000, INT_MAX-1); // .. before vote passes by default
 GVAR(0, duelreset, 0, 1, 1); // reset winner in duel
 GVAR(0, duelclear, 0, 1, 1); // clear items in duel
-GVAR(0, duellimit, 0, 7500, INT_MAX-1); // .. before duel goes to next round
+GVAR(0, duellimit, 0, 5000, INT_MAX-1); // .. before duel goes to next round
 
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
@@ -131,7 +131,7 @@ GFVAR(0, captureelasticity, -10000, 0.35f, 10000);
 GFVAR(0, capturewaterfric, -10000, 1.75f, 10000);
 GFVAR(0, captureweight, -10000, 100, 10000);
 GFVAR(0, captureminspeed, 0, 0, 10000);
-GFVAR(0, capturethreshold, 0, 96, 10000); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, capturethreshold, 0, 112, 10000); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
@@ -158,11 +158,11 @@ GFVAR(0, bomberelasticity, -10000, 0.65f, 10000);
 GFVAR(0, bomberwaterfric, -10000, 1.75f, 10000);
 GFVAR(0, bomberweight, -10000, 150, 10000);
 GFVAR(0, bomberminspeed, 0, 50, 10000);
-GFVAR(0, bomberthreshold, 0, 96, 10000); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, bomberthreshold, 0, 112, 10000); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, INT_MAX-1);
 GVAR(0, skillmin, 1, 50, 101);
-GVAR(0, skillmax, 1, 70, 101);
+GVAR(0, skillmax, 1, 75, 101);
 GVAR(0, botbalance, -1, -1, INT_MAX-1); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botlimit, 0, 16, INT_MAX-1);
 GFVAR(0, botspeed, 0, 1, 1000);
@@ -183,21 +183,21 @@ GFVAR(0, forceaircurb, -1, -1, 1000);
 GFVAR(0, forceslidecurb, -1, -1, 1000);
 
 GFVAR(0, movespeed, 0, 100, 1000); // speed
-GFVAR(0, movecrawl, 0, 0.5f, 1000); // crawl modifier
+GFVAR(0, movecrawl, 0, 0.6f, 1000); // crawl modifier
 GFVAR(0, movesprint, 0, 1.6f, 1000); // sprinting modifier
 GFVAR(0, movejetpack, 0, 1.6f, 1000); // jetpack modifier
 GFVAR(0, movestraight, 0, 1.2f, 1000); // non-strafe modifier
 GFVAR(0, movestrafe, 0, 1, 1000); // strafe modifier
 GFVAR(0, moveinair, 0, 0.9f, 1000); // in-air modifier
-GFVAR(0, movestepup, 0, 0.9f, 1000); // step-up modifier
-GFVAR(0, movestepdown, 0, 1.1f, 1000); // step-down modifier
+GFVAR(0, movestepup, 0, 0.95f, 1000); // step-up modifier
+GFVAR(0, movestepdown, 0, 1.15f, 1000); // step-down modifier
 
 GFVAR(0, jumpspeed, 0, 110, 1000); // extra velocity to add when jumping
-GFVAR(0, impulsespeed, 0, 80, 1000); // extra velocity to add when impulsing
+GFVAR(0, impulsespeed, 0, 90, 1000); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, 10000); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, 1000); // thrust modifier
 GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
-GFVAR(0, impulsedash, 0, 1.2f, 1000); // dashing modifier
+GFVAR(0, impulsedash, 0, 1.1f, 1000); // dashing modifier
 GFVAR(0, impulsejump, 0, 1.1f, 1000); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, 1000); // melee modifier
 GFVAR(0, impulseparkour, 0, 1.1f, 1000); // parkour modifier
