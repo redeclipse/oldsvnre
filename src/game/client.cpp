@@ -269,6 +269,7 @@ namespace client
         game::gamemode = G_EDITMODE;
         game::mutators = 0;
         loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
+        game::waiting.setsize(0);
         emptymap(0, true, NULL, true);
         smartmusic(true, false);
         enumerate(idents, ident, id, {
@@ -1921,7 +1922,11 @@ namespace client
                         s->state = CS_WAITING;
                         s->checkpoint = -1;
                         s->cpmillis = 0;
-                        if(s != game::player1 && !s->ai) s->resetinterp();
+                        if(s != game::player1 && !s->ai) 
+                        {
+                            s->resetinterp();
+                            game::waiting.removeobj(s);
+                        }
                     }
                     break;
                 }
@@ -1936,8 +1941,17 @@ namespace client
                         if(editmode) toggleedit();
                         hud::showscores(false);
                         s->stopmoving(true);
+                        game::waiting.setsize(0);
+                        gameent *d;
+                        loopv(game::players) if((d = game::players[i]) && !d->ai && d->state == CS_WAITING)
+                            game::waiting.add(d);
+                            
                     }
-                    else if(!s->ai) s->resetinterp();
+                    else if(!s->ai) 
+                    {
+                        s->resetinterp();
+                        game::waiting.removeobj(s);
+                    }
                     if(s->state == CS_ALIVE || m_bomber(game::gamemode)) s->lastdeath = lastmillis; // so spawndelay shows properly
                     s->state = CS_WAITING;
                     s->weapreset(true);

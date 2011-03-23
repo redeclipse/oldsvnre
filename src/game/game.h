@@ -1440,7 +1440,7 @@ namespace game
     extern string clientmap;
 
     extern gameent *player1, *focus;
-    extern vector<gameent *> players;
+    extern vector<gameent *> players, waiting;
 
     struct avatarent : dynent
     {

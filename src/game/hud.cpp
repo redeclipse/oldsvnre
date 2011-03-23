@@ -802,7 +802,12 @@ namespace hud
                     pushfont("default");
                     if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
-                    else if(m_fight(game::gamemode) && maxalive > 0) ty += draw_textx("Waiting for next available slot", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    else if(m_fight(game::gamemode) && maxalive > 0 && maxalivequeue) 
+                    {
+                        int numwaiting = 0;
+                        loopv(game::waiting) if(game::waiting[i]->state == CS_WAITING) numwaiting++;
+                        ty += draw_textx("Waiting for next available slot (\fs\fy%d\fS)", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, numwaiting);
+                    }
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
                     {

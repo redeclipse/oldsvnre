@@ -11,7 +11,7 @@ namespace game
 
     gameent *player1 = new gameent(), *focus = player1;
     avatarent avatarmodel;
-    vector<gameent *> players;
+    vector<gameent *> players, waiting;
     vector<camstate> cameras;
 
     VAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS);
@@ -1198,6 +1198,7 @@ namespace game
             }
         }
         if(game::focus == d) { game::focus = game::player1; follow = 0; } // just in case
+        waiting.removeobj(d);
         cameras.shrink(0);
         client::clearvotes(d);
         projs::remove(d);
