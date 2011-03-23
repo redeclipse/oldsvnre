@@ -10,7 +10,7 @@
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
-    // nav items should be in reverse order for the top navbar
+    // nav items should be in reverse order for the top navbar 
     $app['targets']['donate'] = array('name' => 'Donate', 'url' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'alturl' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
     $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
@@ -21,9 +21,10 @@
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'alturl' => 'http://sourceforge.net/scm/?type=svn&group_id=326559', 'nav' => -1, 'redir' => 1);
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://redeclipse.svn.sourceforge.net/redeclipse/', 'alturl' => 'http://redeclipse.svn.sourceforge.net/viewvc/redeclipse/?view=rev&rev=', 'nav' => -1, 'redir' => 1);
 
-    $app['targets']['youtube'] = array('name' => 'youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
-    $app['targets']['google'] = array('name' => 'google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
-    $app['targets']['playdeb'] = array('name' => 'playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
+    $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
+    $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
+    $app['targets']['playdeb'] = array('name' => 'Playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
+    $app['targets']['aur'] = array('name' => 'AUR', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
@@ -109,7 +110,7 @@
                     <h3>Builtin Editor: create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
                     <p id="svn">get the <a href="/devel">development version</a> and live on the bleeding edge</p>
-                    <p id="mirror">or find packages on <a href="/playdeb">PlayDeb</a></p>
+                    <p id="mirror">or find Linux packages on <a href="/playdeb">PlayDeb</a> and <a href="/aur">AUR</a></p>
                 </div>
                 <div id="player">
                     <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/<?php echo $app['youtubevid']; ?>&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
@@ -167,7 +168,7 @@
                 <ul>
 <?php               foreach ($app['targets'] as $key => $targ) {
                         if ($key != "" && $targ['name'] != "" && $targ['nav'] == 0) {
-                            echo "<li><a href=\"/". $key ."\" class='info'><span id=\"". $targ['name'] ."\">&nbsp;</span><span class=\"bubble\">on ". $targ['name'] ."</span></a></li>";
+                            echo "<li><a href=\"/". $key ."\" class='info'><span id=\"". $key ."\">&nbsp;</span><span class=\"bubble\">on ". $targ['name'] ."</span></a></li>";
                         }
                     } ?>
                 </ul>
