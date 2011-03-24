@@ -1811,7 +1811,6 @@ namespace game
                         focus = d;
                         resetcamera();
                     }
-                    follow = i;
                     found = true;
                 }
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
@@ -1831,14 +1830,10 @@ namespace game
                     }
                 }
             }
-            if(!found || !allow)
+            if((!found || !allow) && focus != player1)
             {
-                if(focus != player1)
-                {
-                    focus = player1;
-                    resetcamera();
-                }
-                follow = 0;
+                focus = player1;
+                resetcamera();
             }
             if(allowmove(player1)) cameraplayer();
             else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
