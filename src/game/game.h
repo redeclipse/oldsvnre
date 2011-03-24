@@ -219,6 +219,12 @@ const int pulsecols[3][PULSECOLOURS] = {
 };
 #endif
 
+#define VAR_MIN INT_MIN+1
+#define VAR_MAX INT_MAX-1
+#define FVAR_MIN -1e6f
+#define FVAR_MAX 1e6f
+#define FVAR_NONZERO 1e-6f
+
 #include "weapons.h"
 
 enum
