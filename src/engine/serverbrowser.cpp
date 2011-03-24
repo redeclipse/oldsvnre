@@ -265,7 +265,7 @@ int lastinfo = 0;
 
 static serverinfo *newserver(const char *name, int port = ENG_SERVER_PORT, uint ip = ENET_HOST_ANY)
 {
-    serverinfo *si = new serverinfo(ip, port, port+1);
+    serverinfo *si = new serverinfo(ip, port);
 
     if(name) copystring(si->name, name);
     else if(ip==ENET_HOST_ANY || enet_address_get_host_ip(&si->address, si->name, sizeof(si->name)) < 0)
