@@ -39,7 +39,7 @@ namespace auth
         if(!ci) return false;
         else if(!connectedmaster())
         {
-            srvmsgft(ci->clientnum, CON_EVENT, "\fYnot connected to authentication server");
+            srvmsgft(ci->clientnum, CON_EVENT, "\fYnot connected to master server");
             return false;
         }
         else if(ci->authreq)
@@ -172,7 +172,7 @@ namespace auth
 
     void processinput(const char *p)
     {
-        const int MAXWORDS = 25;
+        const int MAXWORDS = 8;
         char *w[MAXWORDS];
         int numargs = MAXWORDS;
         loopi(MAXWORDS)
@@ -183,8 +183,8 @@ namespace auth
             if(s) w[i] = s;
             else numargs = i;
         }
-        if(!strcmp(w[0], "error")) conoutf("authserv error: %s", w[1]);
-        else if(!strcmp(w[0], "echo")) conoutf("authserv reply: %s", w[1]);
+        if(!strcmp(w[0], "error")) conoutf("master server error: %s", w[1]);
+        else if(!strcmp(w[0], "echo")) conoutf("master server reply: %s", w[1]);
         else if(!strcmp(w[0], "failauth")) authfailed((uint)(atoi(w[1])));
         else if(!strcmp(w[0], "succauth")) authsucceeded((uint)(atoi(w[1])), w[2], w[3]);
         else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
@@ -203,8 +203,8 @@ namespace auth
     {
         loopv(bans) if(bans[i].time == -2) bans.remove(i--);
         loopv(allows) if(allows[i].time == -2) allows.remove(i--);
-        conoutf("updating authentication server");
-        requestmasterf("server %d %d\n", serverport, serverport+1);
+        conoutf("updating master server");
+        requestmasterf("server %d\n", serverport);
         lastactivity = totalmillis;
     }
 
@@ -223,7 +223,7 @@ namespace auth
             loopv(clients) if(clients[i]->authreq) reqauth(clients[i]);
         }
 
-        if(totalmillis-lastactivity > 10*60*1000) regserver();
+        if(totalmillis-lastactivity > 30*60*1000) regserver();
     }
 }
 

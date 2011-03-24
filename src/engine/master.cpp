@@ -14,9 +14,11 @@
 
 #define MASTER_LIMIT 4096
 #define CLIENT_TIME (60*1000)
-#define SERVER_TIME (11*60*1000)
+#define SERVER_TIME (35*60*1000)
 #define AUTH_TIME (60*1000)
 #define DUP_LIMIT 16
+#define PING_TIME 3000
+#define PING_RETRY 5
 
 VAR(0, masterserver, 0, 0, 1);
 VAR(0, masterport, 1, ENG_MASTER_PORT, INT_MAX-1);
@@ -45,16 +47,27 @@ struct masterclient
     string name;
     char input[4096];
     vector<char> output;
-    int inputpos, outputpos, port, lastactivity;
+    int inputpos, outputpos, port, numpings;
+    enet_uint32 lastping, lastpong, lastactivity;
     vector<authreq> authreqs;
-    bool isserver, ishttp;
+    bool isserver, ishttp, listserver, shouldping, shouldpurge;
 
-    masterclient() : inputpos(0), outputpos(0), port(ENG_SERVER_PORT), lastactivity(0), isserver(false), ishttp(false) {}
+    masterclient() : inputpos(0), outputpos(0), port(ENG_SERVER_PORT), numpings(0), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
-static ENetSocket mastersocket = ENET_SOCKET_NULL;
+static ENetSocket mastersocket = ENET_SOCKET_NULL, pingsocket = ENET_SOCKET_NULL;
 static time_t starttime;
+
+bool setuppingsocket(ENetAddress *address)
+{
+    if(pingsocket != ENET_SOCKET_NULL) return true;
+    pingsocket = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
+    if(pingsocket == ENET_SOCKET_NULL) return false;
+    if(address && enet_socket_bind(pingsocket, address) < 0) return false;
+    enet_socket_set_option(pingsocket, ENET_SOCKOPT_NONBLOCK, 1);
+    return true;
+}
 
 void setupmaster()
 {
@@ -68,6 +81,7 @@ void setupmaster()
         if(enet_socket_bind(mastersocket, &address) < 0) fatal("failed to bind master server socket");
         if(enet_socket_listen(mastersocket, -1) < 0) fatal("failed to listen on master server socket");
         if(enet_socket_set_option(mastersocket, ENET_SOCKOPT_NONBLOCK, 1) < 0) fatal("failed to make master server socket non-blocking");
+        if(!setuppingsocket(&address)) fatal("failed to create ping socket");
         starttime = time(NULL);
         char *ct = ctime(&starttime);
         if(strchr(ct, '\n')) *strchr(ct, '\n') = '\0';
@@ -194,10 +208,35 @@ void purgemasterclient(int n)
     masterclients.remove(n);
 }
 
+void checkmasterpongs()
+{
+    ENetBuffer buf;
+    ENetAddress addr;
+    static uchar pong[MAXTRANS];
+    for(;;)
+    {
+        buf.data = pong;
+        buf.dataLength = sizeof(pong);
+        int len = enet_socket_receive(pingsocket, &addr, &buf, 1);
+        if(len <= 0) break;
+        loopv(masterclients)
+        {
+            masterclient &c = *masterclients[i];
+            if(c.address.host == addr.host && c.port+1 == addr.port)
+            {
+                c.lastpong = totalmillis ? totalmillis : 1;
+                c.listserver = true;
+                c.shouldping = false;
+                break;
+            }
+        }
+    }
+}
+    
 bool checkmasterclientinput(masterclient &c)
 {
     if(c.inputpos < 0) return false;
-    const int MAXWORDS = 25;
+    const int MAXWORDS = 8;
     char *w[MAXWORDS];
     int numargs = MAXWORDS;
     const char *p = c.input;
@@ -246,7 +285,9 @@ bool checkmasterclientinput(masterclient &c)
         {
             c.port = ENG_SERVER_PORT;
             if(w[1]) c.port = clamp(atoi(w[1]), 1, INT_MAX-1);
-            c.lastactivity = totalmillis;
+            c.shouldping = true;
+            c.numpings = 0;
+            c.lastactivity = totalmillis ? totalmillis : 1;
             if(c.isserver)
             {
                 masteroutf(c, "echo \"server updated\"\n");
@@ -273,16 +314,15 @@ bool checkmasterclientinput(masterclient &c)
         if(!strcmp(w[0], "list") || !strcmp(w[0], "update"))
         {
             int servs = 0;
-            bool haslocal = false;
-            loopvj(masterclients) if(masterclients[j]->isserver)
+            loopvj(masterclients)
             {
                 masterclient &s = *masterclients[j];
-                if(s.address.host == c.address.host) haslocal = true;
-                else masteroutf(c, "addserver %s %d %d\n", s.name, s.port, s.port+1);
+                if(!s.listserver) continue;
+                masteroutf(c, "addserver %s %d\n", s.name, s.port);
                 servs++;
             }
-            if(haslocal) masteroutf(c, "searchlan 1\n");
             conoutf("master peer %s was sent %d server(s)", c.name, servs);
+            c.shouldpurge = true;
             found = true;
         }
         if(c.isserver)
@@ -304,96 +344,111 @@ bool checkmasterclientinput(masterclient &c)
 
 void checkmaster()
 {
-    if(mastersocket != ENET_SOCKET_NULL)
+    if(mastersocket == ENET_SOCKET_NULL || pingsocket == ENET_SOCKET_NULL) return; 
+
+    ENetSocketSet readset, writeset;
+    ENetSocket maxsock = max(mastersocket, pingsocket);
+    ENET_SOCKETSET_EMPTY(readset);
+    ENET_SOCKETSET_EMPTY(writeset);
+    ENET_SOCKETSET_ADD(readset, mastersocket);
+    ENET_SOCKETSET_ADD(readset, pingsocket);
+    loopv(masterclients)
     {
-        fd_set readset, writeset;
-        int nfds = mastersocket;
-        FD_ZERO(&readset);
-        FD_ZERO(&writeset);
-        FD_SET(mastersocket, &readset);
-        loopv(masterclients)
+        masterclient &c = *masterclients[i];
+        if(c.shouldping && (!c.lastping || ((!c.lastpong || ENET_TIME_GREATER(c.lastping, c.lastpong)) && ENET_TIME_DIFFERENCE(totalmillis, c.lastping) > PING_TIME)))
         {
-            masterclient &c = *masterclients[i];
-            if(c.outputpos < c.output.length()) FD_SET(c.socket, &writeset);
-            else FD_SET(c.socket, &readset);
-            nfds = max(nfds, (int)c.socket);
-        }
-        timeval tv;
-        tv.tv_sec = 0;
-        tv.tv_usec = 0;
-        if(select(nfds+1, &readset, &writeset, NULL, &tv)<=0) return;
-
-        if(FD_ISSET(mastersocket, &readset))
-        {
-            ENetAddress address;
-            ENetSocket masterclientsocket = enet_socket_accept(mastersocket, &address);
-            if(masterclients.length() >= MASTER_LIMIT || (checkipinfo(bans, address.host) && !checkipinfo(allows, address.host)))
-                enet_socket_destroy(masterclientsocket);
-            else if(masterclientsocket!=ENET_SOCKET_NULL)
+            if(c.numpings < PING_RETRY)
             {
-                int dups = 0, oldest = -1;
-                loopv(masterclients) if(masterclients[i]->address.host == address.host)
-                {
-                    dups++;
-                    if(oldest<0 || masterclients[i]->lastactivity < masterclients[oldest]->lastactivity) oldest = i;
-                }
-                if(dups >= DUP_LIMIT) purgemasterclient(oldest);
-                masterclient *c = new masterclient;
-                c->address = address;
-                c->socket = masterclientsocket;
-                c->lastactivity = totalmillis;
-                masterclients.add(c);
-                enet_address_get_host_ip(&c->address, c->name, sizeof(c->name));
-                conoutf("master peer %s connected", c->name);
-            }
-        }
-
-        loopv(masterclients)
-        {
-            masterclient &c = *masterclients[i];
-            if(c.outputpos < c.output.length() && FD_ISSET(c.socket, &writeset))
-            {
+                static const uchar ping[] = { 1 };
                 ENetBuffer buf;
-                buf.data = (void *)&c.output[c.outputpos];
-                buf.dataLength = c.output.length()-c.outputpos;
-                int res = enet_socket_send(c.socket, NULL, &buf, 1);
-                if(res>=0)
-                {
-                    c.outputpos += res;
-                    if(c.outputpos>=c.output.length())
-                    {
-                        c.output.setsize(0);
-                        c.outputpos = 0;
-                        if(!c.isserver) { purgemasterclient(i--); continue; }
-                    }
-                }
-                else { purgemasterclient(i--); continue; }
+                buf.data = (void *)ping;
+                buf.dataLength = sizeof(ping);
+                ENetAddress addr = { c.address.host, c.port+1 };
+                c.numpings++;
+                c.lastping = totalmillis ? totalmillis : 1;
+                enet_socket_send(pingsocket, &addr, &buf, 1);
             }
-            if(FD_ISSET(c.socket, &readset))
+            else
             {
-                ENetBuffer buf;
-                buf.data = &c.input[c.inputpos];
-                buf.dataLength = sizeof(c.input) - c.inputpos;
-                int res = enet_socket_receive(c.socket, NULL, &buf, 1);
-                if(res>0)
-                {
-                    c.inputpos += res;
-                    c.input[min(c.inputpos, (int)sizeof(c.input)-1)] = '\0';
-                    if(!checkmasterclientinput(c)) { purgemasterclient(i--); continue; }
-                }
-                else { purgemasterclient(i--); continue; }
+                c.listserver = false;
+                c.shouldping = false;
+                masteroutf(c, "echo \"failed pinging server\n");
             }
-            /* if(c.output.length() > OUTPUT_LIMIT) { purgemasterclient(i--); continue; } */
-            if(totalmillis-c.lastactivity >= (c.isserver ? SERVER_TIME : CLIENT_TIME))
+        }   
+        if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);
+        else ENET_SOCKETSET_ADD(readset, c.socket);
+        maxsock = max(maxsock, c.socket);
+    }
+    if(enet_socketset_select(maxsock, &readset, &writeset, 0)<=0) return;
+
+    if(ENET_SOCKETSET_CHECK(readset, pingsocket)) checkmasterpongs();
+
+    if(ENET_SOCKETSET_CHECK(readset, mastersocket))
+    {
+        ENetAddress address;
+        ENetSocket masterclientsocket = enet_socket_accept(mastersocket, &address);
+        if(masterclients.length() >= MASTER_LIMIT || (checkipinfo(bans, address.host) && !checkipinfo(allows, address.host)))
+            enet_socket_destroy(masterclientsocket);
+        else if(masterclientsocket!=ENET_SOCKET_NULL)
+        {
+            int dups = 0, oldest = -1;
+            loopv(masterclients) if(masterclients[i]->address.host == address.host)
             {
-                purgemasterclient(i--);
-                continue;
+                dups++;
+                if(oldest<0 || ENET_TIME_LESS(masterclients[i]->lastactivity, masterclients[oldest]->lastactivity)) oldest = i;
             }
+            if(dups >= DUP_LIMIT) purgemasterclient(oldest);
+            masterclient *c = new masterclient;
+            c->address = address;
+            c->socket = masterclientsocket;
+            c->lastactivity = totalmillis ? totalmillis : 1;
+            masterclients.add(c);
+            enet_address_get_host_ip(&c->address, c->name, sizeof(c->name));
+            conoutf("master peer %s connected", c->name);
         }
     }
-    else if(!masterclients.empty())
+
+    loopv(masterclients)
     {
-        loopv(masterclients) purgemasterclient(i--);
+        masterclient &c = *masterclients[i];
+        if(c.outputpos < c.output.length() && ENET_SOCKETSET_CHECK(writeset, c.socket))
+        {
+            ENetBuffer buf;
+            buf.data = (void *)&c.output[c.outputpos];
+            buf.dataLength = c.output.length()-c.outputpos;
+            int res = enet_socket_send(c.socket, NULL, &buf, 1);
+            if(res>=0)
+            {
+                c.outputpos += res;
+                if(c.outputpos>=c.output.length())
+                {
+                    c.output.setsize(0);
+                    c.outputpos = 0;
+                    if(c.shouldpurge) { purgemasterclient(i--); continue; }
+                }
+            }
+            else { purgemasterclient(i--); continue; }
+        }
+        if(ENET_SOCKETSET_CHECK(readset, c.socket))
+        {
+            ENetBuffer buf;
+            buf.data = &c.input[c.inputpos];
+            buf.dataLength = sizeof(c.input) - c.inputpos;
+            int res = enet_socket_receive(c.socket, NULL, &buf, 1);
+            if(res>0)
+            {
+                c.inputpos += res;
+                c.input[min(c.inputpos, (int)sizeof(c.input)-1)] = '\0';
+                if(!checkmasterclientinput(c)) { purgemasterclient(i--); continue; }
+            }
+            else { purgemasterclient(i--); continue; }
+        }
+        /* if(c.output.length() > OUTPUT_LIMIT) { purgemasterclient(i--); continue; } */
+        if(ENET_TIME_DIFFERENCE(totalmillis, c.lastactivity) >= (c.isserver ? SERVER_TIME : CLIENT_TIME))
+        {
+            purgemasterclient(i--);
+            continue;
+        }
     }
 }
 
@@ -406,3 +461,4 @@ void reloadmaster()
 {
     clearauth();
 }
+

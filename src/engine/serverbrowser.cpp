@@ -265,7 +265,7 @@ int lastinfo = 0;
 
 static serverinfo *newserver(const char *name, int port = ENG_SERVER_PORT, uint ip = ENET_HOST_ANY)
 {
-    serverinfo *si = new serverinfo(ip, port);
+    serverinfo *si = new serverinfo(ip, port, port+1);
 
     if(name) copystring(si->name, name);
     else if(ip==ENET_HOST_ANY || enet_address_get_host_ip(&si->address, si->name, sizeof(si->name)) < 0)
@@ -286,7 +286,7 @@ void addserver(const char *name, int port)
     if(newserver(name, port) && verbose >= 2)
         conoutf("added server %s (%d)", name, port);
 }
-ICOMMAND(0, addserver, "si", (char *n, int *a), addserver(n, a ? *a : ENG_SERVER_PORT));
+ICOMMAND(0, addserver, "si", (char *n, int *p), addserver(n, *p > 0 ? *p : ENG_SERVER_PORT));
 VAR(0, searchlan, 0, 0, 1);
 VAR(IDF_PERSIST, maxservpings, 0, 10, 1000);
 
