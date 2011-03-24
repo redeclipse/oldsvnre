@@ -263,7 +263,7 @@ bool sortedservers = true;
 ENetSocket pingsock = ENET_SOCKET_NULL;
 int lastinfo = 0;
 
-static serverinfo *newserver(const char *name, int port = ENG_SERVER_PORT, uint ip = ENET_HOST_ANY)
+static serverinfo *newserver(const char *name, int port = ENG_SERVER_PORT, int priority = 0, uint ip = ENET_HOST_ANY)
 {
     serverinfo *si = new serverinfo(ip, port);
 
@@ -381,7 +381,7 @@ void checkpings()
         if(len <= 0) return;
         serverinfo *si = NULL;
         loopv(servers) if(addr.host == servers[i]->address.host && addr.port == servers[i]->address.port) { si = servers[i]; break; }
-        if(!si && searchlan) si = newserver(NULL, addr.port-1, addr.host);
+        if(!si && searchlan) si = newserver(NULL, addr.port-1, 1, addr.host);
         if(si) si->reset();
         else continue;
         ucharbuf p(ping, len);
