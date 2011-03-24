@@ -26,8 +26,8 @@ The license covers the source code, the included enet network library is
     covered by an MIT-style license, which is however compatible with the above
     license for all practical purposes.
 
-Limited rights are granted to redistribute or recompress the entire distribution
-    using different archival formats suitable for your OS (zip/tgz/deb/dmg), 
+Limited rights are granted to redistribute and/or recompress the entire distribution
+    using different archival/binary formats suitable for your OS (zip/tgz/deb/dmg), 
     any changes beyond that require explicit permission from the developers.
 
 Game media included in the game (maps, textures, sounds, models etc.) are NOT
