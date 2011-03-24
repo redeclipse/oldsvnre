@@ -3,6 +3,7 @@
 extern int kidmode, verbose, curtime, lastmillis, totalmillis, timescale, paused;
 extern int servertype, serverport, servermasterport;
 extern char *servermaster, *serverip;
+extern ENetAddress masteraddress;
 extern void fatal(const char *s, ...);
 extern void console(int type, const char *s, ...);
 extern void conoutft(int type, const char *s, ...);
@@ -425,13 +426,13 @@ struct serverinfo
     string name;
     string map;
     string sdesc;
-    int numplayers, lastping, ping, resolved, port;
+    int numplayers, lastping, ping, resolved, port, priority;
     vector<int> attr;
     vector<char *> players;
     ENetAddress address;
 
-    serverinfo(uint ip, int port)
-     : numplayers(0), lastping(0), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port)
+    serverinfo(uint ip, int port, int priority = 0)
+     : numplayers(0), lastping(0), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port), priority(priority)
     {
         name[0] = map[0] = sdesc[0] = '\0';
         address.host = ip;

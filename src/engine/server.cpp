@@ -559,7 +559,8 @@ int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &remot
 #endif
 
 static ENetSocket mastersock = ENET_SOCKET_NULL;
-static ENetAddress masteraddress = { ENET_HOST_ANY, ENET_PORT_ANY }, serveraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
+ENetAddress masteraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
+static ENetAddress serveraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
 static vector<char> masterout, masterin;
 static int masteroutpos = 0, masterinpos = 0;
 

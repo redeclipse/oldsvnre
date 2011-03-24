@@ -2205,21 +2205,14 @@ namespace client
     int servercompare(serverinfo *a, serverinfo *b)
     {
         if(!serversort || !*serversort) resetserversort();
-        int ac = a->address.host == ENET_HOST_ANY || a->ping >= serverinfo::WAITING || a->attr.empty() || a->attr[0] != GAMEVERSION ? -1 : 0,
-            bc = b->address.host == ENET_HOST_ANY || b->ping >= serverinfo::WAITING || b->attr.empty() || b->attr[0] != GAMEVERSION ? -1 : 0;
-        if(!ac)
-        {
-            if(!strcmp(a->sdesc, servermaster)) ac = 3;
-            else if(!strcmp(a->name, "localhost")) ac = 2;
-            else ac = 1;
-        }
 
-        if(!bc)
-        {
-            if(!strcmp(b->sdesc, servermaster)) bc = 3;
-            else if(!strcmp(b->name, "localhost")) bc = 2;
-            else bc = 1;
-        }
+        int ac = 0, bc = 0;
+        if(a->address.host == ENET_HOST_ANY || a->ping >= serverinfo::WAITING || a->attr.empty() || a->attr[0] != GAMEVERSION) ac = -1;
+        else if(a->address.host == masteraddress.host) ac = INT_MAX;
+        else ac = 1 + a->priority;
+        if(b->address.host == ENET_HOST_ANY || b->ping >= serverinfo::WAITING || b->attr.empty() || b->attr[0] != GAMEVERSION) bc = -1; 
+        else if(b->address.host == masteraddress.host) bc = INT_MAX; 
+        else bc = 1 + b->priority; 
         if(ac > bc) return -1;
         if(ac < bc) return 1;
 
