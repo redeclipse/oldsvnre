@@ -1165,14 +1165,6 @@ namespace game
             gameent *d = new gameent();
             d->clientnum = cn;
             players[cn] = d;
-            gameent *e = NULL;
-            int numdyns = numdynents();
-            loopi(numdyns) if((e = (gameent *)iterdynents(i)) && d == e && follow >= i)
-            {
-                followswitch(1);
-                if(!(focus = (gameent *)iterdynents(follow))) focus = player1;
-                resetcamera();
-            }
         }
 
         return players[cn];
@@ -1205,12 +1197,6 @@ namespace game
         {
             e->dominating.removeobj(d);
             e->dominated.removeobj(d);
-            if(d == e && follow <= i)
-            {
-                followswitch(-1);
-                if(!(focus = (gameent *)iterdynents(follow))) focus = player1;
-                resetcamera();
-            }
         }
         if(focus == d) { focus = player1; follow = 0; } // just in case
         waiting.removeobj(d);
@@ -1770,6 +1756,7 @@ namespace game
         lastcamera = 0;
         zoomset(false, 0);
         checkcamera();
+        if(!focus) focus = player1;
         camera1->o = focus->o;
         camera1->yaw = focus->yaw;
         camera1->pitch = focus->pitch;
