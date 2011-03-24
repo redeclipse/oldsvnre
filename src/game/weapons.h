@@ -81,8 +81,8 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, name##add, 1, w0, INT_MAX-1);               GVAR(0, name##max, 1, w1, INT_MAX-1); \
     GVAR(0, name##sub1, 0, w2, INT_MAX-1);              GVAR(0, name##sub2, 0, w3, INT_MAX-1); \
     GVAR(0, name##adelay1, 20, w4, INT_MAX-1);          GVAR(0, name##adelay2, 20, w5, INT_MAX-1);              GVAR(0, name##rdelay, 50, w6, INT_MAX-1); \
-    GVAR(0, name##damage1, -INT_MAX+1, w7, INT_MAX-1);  GVAR(0, name##damage2, -INT_MAX+1, w8, INT_MAX-1); \
-    GVAR(0, name##speed1, -INT_MAX+1, w9, INT_MAX-1);   GVAR(0, name##speed2, -INT_MAX+1, wa, INT_MAX-1); \
+    GVAR(0, name##damage1, INT_MIN+1, w7, INT_MAX-1);  GVAR(0, name##damage2, INT_MIN+1, w8, INT_MAX-1); \
+    GVAR(0, name##speed1, INT_MIN+1, w9, INT_MAX-1);   GVAR(0, name##speed2, INT_MIN+1, wa, INT_MAX-1); \
     GVAR(0, name##power1, 0, wb1, INT_MAX-1);           GVAR(0, name##power2, 0, wb2, INT_MAX-1); \
     GVAR(0, name##time1, 0, wc, INT_MAX-1);             GVAR(0, name##time2, 0, wd, INT_MAX-1); \
     GVAR(0, name##pdelay1, 0, we1, INT_MAX-1);          GVAR(0, name##pdelay2, 0, we2, INT_MAX-1); \
@@ -96,7 +96,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, name##zdiv1, 0, wl, INT_MAX-1);             GVAR(0, name##zdiv2, 0, wm, INT_MAX-1); \
     GVAR(0, name##aiskew1, 0, wn1, INT_MAX-1);          GVAR(0, name##aiskew2, 0, wn2, INT_MAX-1); \
     GVAR(0, name##flakweap1, -1, wo1, WEAP_MAX*2-1);    GVAR(0, name##flakweap2, -1, wo2, WEAP_MAX*2-1); \
-    GVAR(0, name##flakdmg1, -INT_MAX+1, wo3, INT_MAX-1);GVAR(0, name##flakdmg2, -INT_MAX+1, wo4, INT_MAX-1); \
+    GVAR(0, name##flakdmg1, INT_MIN+1, wo3, INT_MAX-1);GVAR(0, name##flakdmg2, INT_MIN+1, wo4, INT_MAX-1); \
     GVAR(0, name##flakrays1, 1, wo5, INT_MAX-1);        GVAR(0, name##flakrays2, 1, wo6, INT_MAX-1); \
     GVAR(0, name##flaktime1, 1, wo7, INT_MAX-1);        GVAR(0, name##flaktime2, 1, wo8, INT_MAX-1); \
     GVAR(0, name##flakspeed1, 0, wo9, INT_MAX-1);       GVAR(0, name##flakspeed2, 0, wo10, INT_MAX-1); \
@@ -111,32 +111,32 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, name##laser, 0, xd, 1);                     GVAR(0, name##critdash1, 0, xe, INT_MAX-1);             GVAR(0, name##critdash2, 0, xf, INT_MAX-1); \
     GFVAR(0, name##taper1, 0, t0, 1);                   GFVAR(0, name##taper2, 0, t1, 1); \
     GFVAR(0, name##taperspan1, 0, t2, 1);               GFVAR(0, name##taperspan2, 0, t3, 1); \
-    GFVAR(0, name##elasticity1, -1e16f, y0, 1e16f);     GFVAR(0, name##elasticity2, -1e16f, y1, 1e16f); \
+    GFVAR(0, name##elasticity1, -1e6f, y0, 1e6f);     GFVAR(0, name##elasticity2, -1e6f, y1, 1e6f); \
     GFVAR(0, name##reflectivity1, 0, y2, 360);          GFVAR(0, name##reflectivity2, 0, y3, 360); \
-    GFVAR(0, name##relativity1, -1e16f, y4, 1e16f);     GFVAR(0, name##relativity2, -1e16f, y5, 1e16f); \
-    GFVAR(0, name##waterfric1, 0, y6, 1e16f);           GFVAR(0, name##waterfric2, 0, y7, 1e16f); \
-    GFVAR(0, name##weight1, -1e16f, y8, 1e16f);         GFVAR(0, name##weight2, -1e16f, y9, 1e16f); \
-    GFVAR(0, name##radius1, 1e-16f, ya, 1e16f);         GFVAR(0, name##radius2, 1e-16f, yb, 1e16f); \
-    GFVAR(0, name##kickpush1, -1e16f, yc, 1e16f);       GFVAR(0, name##kickpush2, -1e16f, yd, 1e16f); \
-    GFVAR(0, name##hitpush1, -1e16f, ye1, 1e16f);       GFVAR(0, name##hitpush2, -1e16f, ye2, 1e16f); \
-    GFVAR(0, name##slow1, 0, yf1, 1e16f);               GFVAR(0, name##slow2, 0, yf2, 1e16f); \
-    GFVAR(0, name##aidist1, 0, yg, 1e16f);              GFVAR(0, name##aidist2, 0, yh, 1e16f); \
-    GFVAR(0, name##partsize1, 0, yi, 1e16f);            GFVAR(0, name##partsize2, 0, yj, 1e16f); \
-    GFVAR(0, name##partlen1, 0, yk, 1e16f);             GFVAR(0, name##partlen2, 0, yl, 1e16f); \
-    GFVAR(0, name##frequency, 0, ym, 1e16f);            GFVAR(0, name##pusharea, 0, yn, 1e16f); \
-    GFVAR(0, name##critmult, 0, yo, 1e16f);             GFVAR(0, name##critdist, -1e16f, yp, 1e16f); \
-    GFVAR(0, name##delta1, 1e-16f, yq, 1e16f);          GFVAR(0, name##delta2, 1e-16f, yr, 1e16f); \
-    GFVAR(0, name##trace1, 0, ys1, 1e16f);              GFVAR(0, name##trace2, 0, ys2, 1e16f); \
-    GFVAR(0, name##headmin1, 0, yt1, 1e16f);            GFVAR(0, name##headmin2, 0, yt2, 1e16f); \
-    GFVAR(0, name##whipdmg1, 0, yw1, 1e16f);            GFVAR(0, name##whipdmg2, 0, yw2, 1e16f); \
-    GFVAR(0, name##torsodmg1, 0, yx1, 1e16f);           GFVAR(0, name##torsodmg2, 0, yx2, 1e16f); \
-    GFVAR(0, name##legsdmg1, 0, yy, 1e16f);             GFVAR(0, name##legsdmg2, 0, yz, 1e16f); \
-    GFVAR(0, name##flakscale1, 0, ya3, 1e16f);          GFVAR(0, name##flakscale2, 0, ya4, 1e16f); \
-    GFVAR(0, name##flakspread1, 0, ya5, 1e16f);         GFVAR(0, name##flakspread2, 0, ya6, 1e16f); \
-    GFVAR(0, name##flakrel1, 0, ya7, 1e16f);            GFVAR(0, name##flakrel2, 0, ya8, 1e16f); \
+    GFVAR(0, name##relativity1, -1e6f, y4, 1e6f);     GFVAR(0, name##relativity2, -1e6f, y5, 1e6f); \
+    GFVAR(0, name##waterfric1, 0, y6, 1e6f);           GFVAR(0, name##waterfric2, 0, y7, 1e6f); \
+    GFVAR(0, name##weight1, -1e6f, y8, 1e6f);         GFVAR(0, name##weight2, -1e6f, y9, 1e6f); \
+    GFVAR(0, name##radius1, 1e-16f, ya, 1e6f);         GFVAR(0, name##radius2, 1e-16f, yb, 1e6f); \
+    GFVAR(0, name##kickpush1, -1e6f, yc, 1e6f);       GFVAR(0, name##kickpush2, -1e6f, yd, 1e6f); \
+    GFVAR(0, name##hitpush1, -1e6f, ye1, 1e6f);       GFVAR(0, name##hitpush2, -1e6f, ye2, 1e6f); \
+    GFVAR(0, name##slow1, 0, yf1, 1e6f);               GFVAR(0, name##slow2, 0, yf2, 1e6f); \
+    GFVAR(0, name##aidist1, 0, yg, 1e6f);              GFVAR(0, name##aidist2, 0, yh, 1e6f); \
+    GFVAR(0, name##partsize1, 0, yi, 1e6f);            GFVAR(0, name##partsize2, 0, yj, 1e6f); \
+    GFVAR(0, name##partlen1, 0, yk, 1e6f);             GFVAR(0, name##partlen2, 0, yl, 1e6f); \
+    GFVAR(0, name##frequency, 0, ym, 1e6f);            GFVAR(0, name##pusharea, 0, yn, 1e6f); \
+    GFVAR(0, name##critmult, 0, yo, 1e6f);             GFVAR(0, name##critdist, -1e6f, yp, 1e6f); \
+    GFVAR(0, name##delta1, 1e-16f, yq, 1e6f);          GFVAR(0, name##delta2, 1e-16f, yr, 1e6f); \
+    GFVAR(0, name##trace1, 0, ys1, 1e6f);              GFVAR(0, name##trace2, 0, ys2, 1e6f); \
+    GFVAR(0, name##headmin1, 0, yt1, 1e6f);            GFVAR(0, name##headmin2, 0, yt2, 1e6f); \
+    GFVAR(0, name##whipdmg1, 0, yw1, 1e6f);            GFVAR(0, name##whipdmg2, 0, yw2, 1e6f); \
+    GFVAR(0, name##torsodmg1, 0, yx1, 1e6f);           GFVAR(0, name##torsodmg2, 0, yx2, 1e6f); \
+    GFVAR(0, name##legsdmg1, 0, yy, 1e6f);             GFVAR(0, name##legsdmg2, 0, yz, 1e6f); \
+    GFVAR(0, name##flakscale1, 0, ya3, 1e6f);          GFVAR(0, name##flakscale2, 0, ya4, 1e6f); \
+    GFVAR(0, name##flakspread1, 0, ya5, 1e6f);         GFVAR(0, name##flakspread2, 0, ya6, 1e6f); \
+    GFVAR(0, name##flakrel1, 0, ya7, 1e6f);            GFVAR(0, name##flakrel2, 0, ya8, 1e6f); \
     GFVAR(0, name##flakffwd1, 0, ya9, 1);               GFVAR(0, name##flakffwd2, 0, ya10, 1); \
-    GFVAR(0, name##flakoffset1, 0, ya11, 1e16f);        GFVAR(0, name##flakoffset2, 0, ya12, 1e16f); \
-    GFVAR(0, name##flakskew1, 0, ya13, 1e16f);          GFVAR(0, name##flakskew2, 0, ya14, 1e16f);
+    GFVAR(0, name##flakoffset1, 0, ya11, 1e6f);        GFVAR(0, name##flakoffset2, 0, ya12, 1e6f); \
+    GFVAR(0, name##flakskew1, 0, ya13, 1e6f);          GFVAR(0, name##flakskew2, 0, ya14, 1e6f);
 
 //  add     max     sub1    sub2    adly1   adly2   rdly    dam1    dam2    spd1    spd2    pow1    pow2    time1   time2
 //  pdly1   pdly2   gdly1   gdly2   edly1   edly2   expl1   expl2   rays1   rays2   sprd1   sprd2   msprd1  msprd2  xsprd1  xsprd2

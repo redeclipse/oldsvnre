@@ -50,7 +50,7 @@ GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
 GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 
-GFVAR(0, maxalive, 0, 0, 1e16f); // only allow this*numplayers to be alive at once
+GFVAR(0, maxalive, 0, 0, 1e6f); // only allow this*numplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
 GVAR(0, maxalivethreshold, 2, 8, INT_MAX-1); // kicks in if numplayers >= this
 
@@ -72,8 +72,8 @@ GVAR(0, spawnhealth, 0, 100, INT_MAX-1);
 GVAR(0, extrahealth, 0, 150, INT_MAX-1);
 GVAR(0, maxhealth, 0, 200, INT_MAX-1);
 
-GFVAR(0, actorscale, 1e-6f, 1, 1e16f);
-GFVAR(0, maxresizescale, 1, 2, 1e16f);
+GFVAR(0, actorscale, 1e-6f, 1, 1e6f);
+GFVAR(0, maxresizescale, 1, 2, 1e6f);
 GFVAR(0, minresizescale, 1e-6f, 0.5f, 1);
 
 GVAR(0, burntime, 0, 5500, INT_MAX-1);
@@ -95,16 +95,16 @@ GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 30000, INT_MAX-1); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, INT_MAX-1); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
-GFVAR(0, itemthreshold, 0, 2, 1e16f); // if numitems/(players*maxcarry) is less than this, spawn one of this type
+GFVAR(0, itemthreshold, 0, 2, 1e6f); // if numitems/(players*maxcarry) is less than this, spawn one of this type
 GVAR(0, itemcollide, 0, BOUNCE_GEOM, INT_MAX-1);
 GVAR(0, itemextinguish, 0, 6, 7);
-GFVAR(0, itemelasticity, -1e16f, 0.4f, 1e16f);
-GFVAR(0, itemrelativity, -1e16f, 1, 1e16f);
-GFVAR(0, itemwaterfric, 0, 1.75f, 1e16f);
-GFVAR(0, itemweight, -1e16f, 150, 1e16f);
-GFVAR(0, itemminspeed, 0, 0, 1e16f);
-GFVAR(0, itemrepulsion, 0, 8, 1e16f);
-GFVAR(0, itemrepelspeed, 0, 25, 1e16f);
+GFVAR(0, itemelasticity, -1e6f, 0.4f, 1e6f);
+GFVAR(0, itemrelativity, -1e6f, 1, 1e6f);
+GFVAR(0, itemwaterfric, 0, 1.75f, 1e6f);
+GFVAR(0, itemweight, -1e6f, 150, 1e6f);
+GFVAR(0, itemminspeed, 0, 0, 1e6f);
+GFVAR(0, itemrepulsion, 0, 8, 1e6f);
+GFVAR(0, itemrepelspeed, 0, 25, 1e6f);
 
 GVAR(0, timelimit, 0, 10, INT_MAX-1);
 GVAR(0, triallimit, 0, 60000, INT_MAX-1);
@@ -126,12 +126,12 @@ GVAR(0, captureresetdelay, 0, 30000, INT_MAX-1);
 GVAR(0, capturepickupdelay, -1, 5000, INT_MAX-1);
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, INT_MAX-1);
 GVAR(0, captureextinguish, 0, 6, 7);
-GFVAR(0, capturerelativity, 0, 0.25f, 1e16f);
-GFVAR(0, captureelasticity, -1e16f, 0.35f, 1e16f);
-GFVAR(0, capturewaterfric, -1e16f, 1.75f, 1e16f);
-GFVAR(0, captureweight, -1e16f, 100, 1e16f);
-GFVAR(0, captureminspeed, 0, 0, 1e16f);
-GFVAR(0, capturethreshold, 0, 112, 1e16f); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, capturerelativity, 0, 0.25f, 1e6f);
+GFVAR(0, captureelasticity, -1e6f, 0.35f, 1e6f);
+GFVAR(0, capturewaterfric, -1e6f, 1.75f, 1e6f);
+GFVAR(0, captureweight, -1e6f, 100, 1e6f);
+GFVAR(0, captureminspeed, 0, 0, 1e6f);
+GFVAR(0, capturethreshold, 0, 112, 1e6f); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(0, defendlimit, 0, 300, INT_MAX-1); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, INT_MAX-1); // points added to score
@@ -149,59 +149,59 @@ GVAR(0, bomberholdpenalty, 0, 10, INT_MAX-1); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, INT_MAX-1);
 GVAR(0, bomberlockondelay, 0, 250, INT_MAX-1);
 GVAR(0, bomberreset, 0, 0, 2); // 0 = off, 1 = kill winners, 2 = kill everyone
-GFVAR(0, bomberspeed, 0, 250, 1e16f);
-GFVAR(0, bomberdelta, 0, 1000, 1e16f);
+GFVAR(0, bomberspeed, 0, 250, 1e6f);
+GFVAR(0, bomberdelta, 0, 1000, 1e6f);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, INT_MAX-1);
 GVAR(0, bomberextinguish, 0, 6, 7);
-GFVAR(0, bomberrelativity, 0, 0.25f, 1e16f);
-GFVAR(0, bomberelasticity, -1e16f, 0.65f, 1e16f);
-GFVAR(0, bomberwaterfric, -1e16f, 1.75f, 1e16f);
-GFVAR(0, bomberweight, -1e16f, 150, 1e16f);
-GFVAR(0, bomberminspeed, 0, 50, 1e16f);
-GFVAR(0, bomberthreshold, 0, 112, 1e16f); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, bomberrelativity, 0, 0.25f, 1e6f);
+GFVAR(0, bomberelasticity, -1e6f, 0.65f, 1e6f);
+GFVAR(0, bomberwaterfric, -1e6f, 1.75f, 1e6f);
+GFVAR(0, bomberweight, -1e6f, 150, 1e6f);
+GFVAR(0, bomberminspeed, 0, 50, 1e6f);
+GFVAR(0, bomberthreshold, 0, 112, 1e6f); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, INT_MAX-1);
 GVAR(0, skillmin, 1, 50, 101);
 GVAR(0, skillmax, 1, 75, 101);
 GVAR(0, botbalance, -1, -1, INT_MAX-1); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botlimit, 0, 16, INT_MAX-1);
-GFVAR(0, botspeed, 0, 1, 1e16f);
-GFVAR(0, botscale, 1e-6f, 1, 1e16f);
+GFVAR(0, botspeed, 0, 1, 1e6f);
+GFVAR(0, botscale, 1e-6f, 1, 1e6f);
 GVAR(0, enemybalance, 0, 1, 3);
 GVAR(0, enemyspawntime, 1, 30000, INT_MAX-1); // when enemies respawn
 GVAR(0, enemyspawndelay, 0, 1000, INT_MAX-1); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
-GFVAR(0, enemyspeed, 0, 1, 1e16f);
-GFVAR(0, enemyscale, 1e-6f, 1, 1e16f);
-GFVAR(0, enemystrength, 1e-6f, 1, 1e16f); // scale enemy health values by this much
+GFVAR(0, enemyspeed, 0, 1, 1e6f);
+GFVAR(0, enemyscale, 1e-6f, 1, 1e6f);
+GFVAR(0, enemystrength, 1e-6f, 1, 1e6f); // scale enemy health values by this much
 
-GFVAR(0, forcegravity, -1, -1, 1e16f);
+GFVAR(0, forcegravity, -1, -1, 1e6f);
 GFVAR(0, forceliquidspeed, -1, -1, 1);
-GFVAR(0, forceliquidcurb, -1, -1, 1e16f);
-GFVAR(0, forcefloorcurb, -1, -1, 1e16f);
-GFVAR(0, forceaircurb, -1, -1, 1e16f);
-GFVAR(0, forceslidecurb, -1, -1, 1e16f);
+GFVAR(0, forceliquidcurb, -1, -1, 1e6f);
+GFVAR(0, forcefloorcurb, -1, -1, 1e6f);
+GFVAR(0, forceaircurb, -1, -1, 1e6f);
+GFVAR(0, forceslidecurb, -1, -1, 1e6f);
 
-GFVAR(0, movespeed, 0, 100, 1e16f); // speed
-GFVAR(0, movecrawl, 0, 0.6f, 1e16f); // crawl modifier
-GFVAR(0, movesprint, 0, 1.6f, 1e16f); // sprinting modifier
-GFVAR(0, movejetpack, 0, 1.6f, 1e16f); // jetpack modifier
-GFVAR(0, movestraight, 0, 1.2f, 1e16f); // non-strafe modifier
-GFVAR(0, movestrafe, 0, 1, 1e16f); // strafe modifier
-GFVAR(0, moveinair, 0, 0.9f, 1e16f); // in-air modifier
-GFVAR(0, movestepup, 0, 0.95f, 1e16f); // step-up modifier
-GFVAR(0, movestepdown, 0, 1.15f, 1e16f); // step-down modifier
+GFVAR(0, movespeed, 0, 100, 1e6f); // speed
+GFVAR(0, movecrawl, 0, 0.6f, 1e6f); // crawl modifier
+GFVAR(0, movesprint, 0, 1.6f, 1e6f); // sprinting modifier
+GFVAR(0, movejetpack, 0, 1.6f, 1e6f); // jetpack modifier
+GFVAR(0, movestraight, 0, 1.2f, 1e6f); // non-strafe modifier
+GFVAR(0, movestrafe, 0, 1, 1e6f); // strafe modifier
+GFVAR(0, moveinair, 0, 0.9f, 1e6f); // in-air modifier
+GFVAR(0, movestepup, 0, 0.95f, 1e6f); // step-up modifier
+GFVAR(0, movestepdown, 0, 1.15f, 1e6f); // step-down modifier
 
-GFVAR(0, jumpspeed, 0, 110, 1e16f); // extra velocity to add when jumping
-GFVAR(0, impulsespeed, 0, 90, 1e16f); // extra velocity to add when impulsing
-GFVAR(0, impulselimit, 0, 0, 1e16f); // maximum impulse speed
-GFVAR(0, impulseboost, 0, 1, 1e16f); // thrust modifier
+GFVAR(0, jumpspeed, 0, 110, 1e6f); // extra velocity to add when jumping
+GFVAR(0, impulsespeed, 0, 90, 1e6f); // extra velocity to add when impulsing
+GFVAR(0, impulselimit, 0, 0, 1e6f); // maximum impulse speed
+GFVAR(0, impulseboost, 0, 1, 1e6f); // thrust modifier
 GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
-GFVAR(0, impulsedash, 0, 1.1f, 1e16f); // dashing modifier
-GFVAR(0, impulsejump, 0, 1.1f, 1e16f); // jump modifier
-GFVAR(0, impulsemelee, 0, 0.5f, 1e16f); // melee modifier
-GFVAR(0, impulseparkour, 0, 1.1f, 1e16f); // parkour modifier
-GFVAR(0, impulseparkournorm, 0, 0.5f, 1e16f); // minimum parkour surface z normal
+GFVAR(0, impulsedash, 0, 1.1f, 1e6f); // dashing modifier
+GFVAR(0, impulsejump, 0, 1.1f, 1e6f); // jump modifier
+GFVAR(0, impulsemelee, 0, 0.5f, 1e6f); // melee modifier
+GFVAR(0, impulseparkour, 0, 1.1f, 1e6f); // parkour modifier
+GFVAR(0, impulseparkournorm, 0, 0.5f, 1e6f); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 5, INT_MAX-1); // number of impulse actions per air transit
@@ -212,41 +212,41 @@ GVAR(0, impulseslide, 0, 500, INT_MAX-1); // minimum time before floor friction 
 GVAR(0, impulsemeter, 0, 20000, INT_MAX-1); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, INT_MAX-1); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, INT_MAX-1); // length of time a run along a wall can last
-GFVAR(0, impulsesprint, 0, 0, 1e16f); // sprinting impulse meter depletion
-GFVAR(0, impulsejetpack, 0, 1.5f, 1e16f); // jetpack impulse meter depletion
-GFVAR(0, impulseregen, 0, 4.0, 1e16f); // impulse regen multiplier
-GFVAR(0, impulseregencrouch, 0, 2, 1e16f); // impulse regen crouch modifier
-GFVAR(0, impulseregensprint, 0, 0.75f, 1e16f); // impulse regen sprinting modifier
-GFVAR(0, impulseregenjetpack, 0, 1.5f, 1e16f); // impulse regen jetpack modifier
-GFVAR(0, impulseregenmove, 0, 1, 1e16f); // impulse regen moving modifier
-GFVAR(0, impulseregeninair, 0, 0.75f, 1e16f); // impulse regen in-air modifier
+GFVAR(0, impulsesprint, 0, 0, 1e6f); // sprinting impulse meter depletion
+GFVAR(0, impulsejetpack, 0, 1.5f, 1e6f); // jetpack impulse meter depletion
+GFVAR(0, impulseregen, 0, 4.0, 1e6f); // impulse regen multiplier
+GFVAR(0, impulseregencrouch, 0, 2, 1e6f); // impulse regen crouch modifier
+GFVAR(0, impulseregensprint, 0, 0.75f, 1e6f); // impulse regen sprinting modifier
+GFVAR(0, impulseregenjetpack, 0, 1.5f, 1e6f); // impulse regen jetpack modifier
+GFVAR(0, impulseregenmove, 0, 1, 1e6f); // impulse regen moving modifier
+GFVAR(0, impulseregeninair, 0, 0.75f, 1e6f); // impulse regen in-air modifier
 GVAR(0, impulseregendelay, 0, 250, INT_MAX-1); // delay before impulse regens
 GVAR(0, impulseregenjetdelay, -1, -1, INT_MAX-1); // delay before impulse regens after jetting, -1 = must touch ground
 
-GFVAR(0, stillspread, 0, 0, 1e16f);
-GFVAR(0, movespread, 0, 1, 1e16f);
-GFVAR(0, inairspread, 0, 1, 1e16f);
-GFVAR(0, impulsespread, 0, 1, 1e16f);
+GFVAR(0, stillspread, 0, 0, 1e6f);
+GFVAR(0, movespread, 0, 1, 1e6f);
+GFVAR(0, inairspread, 0, 1, 1e6f);
+GFVAR(0, impulsespread, 0, 1, 1e6f);
 
 GVAR(0, zoomlock, 0, 1, 3); // 0 = free, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor
 GVAR(0, zoomlocktime, 0, 500, INT_MAX-1); // time before zoomlock kicks in when in the air
 GVAR(0, zoomlimit, 1, 10, 150);
 GVAR(0, zoomtime, 1, 100, INT_MAX-1);
 
-GFVAR(0, normalscale, 0, 1, 1e16f);
-GFVAR(0, limitedscale, 0, 0.75f, 1e16f);
-GFVAR(0, damagescale, 0, 1, 1e16f);
+GFVAR(0, normalscale, 0, 1, 1e6f);
+GFVAR(0, limitedscale, 0, 0.75f, 1e6f);
+GFVAR(0, damagescale, 0, 1, 1e6f);
 GVAR(0, criticalchance, 0, 100, INT_MAX-1);
 
-GFVAR(0, hitpushscale, 0, 1, 1e16f);
-GFVAR(0, hitslowscale, 0, 1, 1e16f);
-GFVAR(0, deadpushscale, 0, 2, 1e16f);
-GFVAR(0, wavepushscale, 0, 1, 1e16f);
-GFVAR(0, waveslowscale, 0, 0.5f, 1e16f);
-GFVAR(0, kickpushscale, 0, 1, 1e16f);
-GFVAR(0, kickpushcrouch, 0, 0, 1e16f);
-GFVAR(0, kickpushsway, 0, 0.0125f, 1e16f);
-GFVAR(0, kickpushzoom, 0, 0.125f, 1e16f);
+GFVAR(0, hitpushscale, 0, 1, 1e6f);
+GFVAR(0, hitslowscale, 0, 1, 1e6f);
+GFVAR(0, deadpushscale, 0, 2, 1e6f);
+GFVAR(0, wavepushscale, 0, 1, 1e6f);
+GFVAR(0, waveslowscale, 0, 0.5f, 1e6f);
+GFVAR(0, kickpushscale, 0, 1, 1e6f);
+GFVAR(0, kickpushcrouch, 0, 0, 1e6f);
+GFVAR(0, kickpushsway, 0, 0.0125f, 1e6f);
+GFVAR(0, kickpushzoom, 0, 0.125f, 1e6f);
 
 GVAR(0, assistkilldelay, 0, 5000, INT_MAX-1);
 GVAR(0, multikilldelay, 0, 5000, INT_MAX-1);
