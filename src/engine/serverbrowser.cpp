@@ -408,7 +408,7 @@ void checkpings()
 
 int serverinfocompare(serverinfo **a, serverinfo **b) { return client::servercompare(*a, *b); }
 
-VAR(IDF_PERSIST, serverupdateinterval, 0, 5, INT_MAX-1);
+VAR(IDF_PERSIST, serverupdateinterval, 0, 10, INT_MAX-1);
 
 void refreshservers()
 {

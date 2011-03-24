@@ -1942,7 +1942,6 @@ namespace client
                         gameent *d;
                         loopv(game::players) if((d = game::players[i]) && d->aitype < 0 && d->state == CS_WAITING)
                             game::waiting.add(d);
-                            
                     }
                     else if(!s->ai) s->resetinterp();
                     game::waiting.removeobj(s);

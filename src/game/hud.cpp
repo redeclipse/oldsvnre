@@ -802,11 +802,11 @@ namespace hud
                     pushfont("default");
                     if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
-                    else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue) 
+                    else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                     {
-                        int numwaiting = 0;
-                        loopv(game::waiting) if(game::waiting[i]->state == CS_WAITING) numwaiting++;
-                        ty += draw_textx("Waiting for next available slot (\fs\fy%d\fS)", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, numwaiting);
+                        int n = game::numwaiting();
+                        if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
+                        else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     }
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
