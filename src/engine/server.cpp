@@ -714,20 +714,22 @@ void sendqueryreply(ucharbuf &p)
 void checkserversockets()        // reply all server info requests
 {
     static ENetSocketSet sockset;
-    ENET_SOCKETSET_EMPTY(sockset);
-    ENetSocket maxsock = pongsock;
-    ENET_SOCKETSET_ADD(sockset, pongsock);
-    if(mastersock != ENET_SOCKET_NULL)
-    {
-        maxsock = max(maxsock, mastersock);
-        ENET_SOCKETSET_ADD(sockset, mastersock);
+    ENetSocket maxsock = ENET_SOCKET_NULL;
+#define CHECKSOCKET(sock) \
+    if(sock != ENET_SOCKET_NULL) \
+    { \
+        if(maxsock == ENET_SOCKET_NULL) \
+        { \
+            ENET_SOCKETSET_EMPTY(sockset); \
+            maxsock = sock; \
+        }  \
+        else maxsock = max(maxsock, sock); \
+        ENET_SOCKETSET_ADD(sockset, sock); \
     }
-    if(lansock != ENET_SOCKET_NULL)
-    {
-        maxsock = max(maxsock, lansock);
-        ENET_SOCKETSET_ADD(sockset, lansock);
-    }
-    if(enet_socketset_select(maxsock, &sockset, NULL, 0) <= 0) return;
+    CHECKSOCKET(pongsock);
+    CHECKSOCKET(mastersock);
+    CHECKSOCKET(lansock);
+    if(maxsock == ENET_SOCKET_NULL || enet_socketset_select(maxsock, &sockset, NULL, 0) <= 0) return;
 
     ENetBuffer buf;
     uchar pong[MAXTRANS];
