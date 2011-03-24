@@ -245,7 +245,12 @@ namespace hud
             {
                 if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL);
                 else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, hud::timetostr(delay, -1));
-                else if(m_fight(game::gamemode) && maxalive > 0) g.textf("Waiting for next available slot", 0xFFFFFF, NULL);
+                else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                {
+                    int n = game::numwaiting();
+                    if(n) g.textf("Respawn queued, waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, n, n != 1 ? "players" : "player");
+                    else g.textf("Prepare to respawn, you are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL);
+                }
                 g.poplist();
                 if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
                     g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, attackkey);

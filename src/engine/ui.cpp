@@ -127,7 +127,7 @@ struct gui : guient
 
     void uibuttons()
     {
-        int x = curx+xsize-guibound[0]/2, y = -ysize-guibound[1]*2;
+        int x = curx+xsize-guibound[1]*2/3, y = -ysize-guibound[1]*2;
         #define uibtn(a,b) \
         { \
             bool hit = false; \
@@ -167,7 +167,7 @@ struct gui : guient
                 list &l = lists.add();
                 l.parent = curlist;
                 l.w = l.h = l.mouse[0] = l.mouse[1] = 0;
-            } 
+            }
             xsize = lists[curlist].w;
             ysize = lists[curlist].h;
         }
@@ -846,7 +846,7 @@ struct gui : guient
         }
         else
         {
-            //if(needsinput && hastitle) uibuttons();
+            if(needsinput && hastitle) uibuttons();
             glPopMatrix();
         }
         poplist();

@@ -1473,7 +1473,7 @@ namespace game
         }
     };
     extern vector<camstate> cameras;
-
+    extern int numwaiting();
     extern gameent *newclient(int cn);
     extern gameent *getclient(int cn);
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);

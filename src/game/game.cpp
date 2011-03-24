@@ -1165,6 +1165,14 @@ namespace game
             gameent *d = new gameent();
             d->clientnum = cn;
             players[cn] = d;
+            gameent *e = NULL;
+            int numdyns = numdynents();
+            loopi(numdyns) if((e = (gameent *)iterdynents(i)) && d == e && follow >= i)
+            {
+                followswitch(1);
+                if(!(focus = (gameent *)iterdynents(follow))) focus = player1;
+                resetcamera();
+            }
         }
 
         return players[cn];
@@ -1175,6 +1183,13 @@ namespace game
         if(cn == player1->clientnum) return player1;
         if(players.inrange(cn)) return players[cn];
         return NULL;
+    }
+
+    int numwaiting()
+    {
+        int n = 0;
+        loopv(waiting) if(waiting[i]->state == CS_WAITING && (!m_team(gamemode, mutators) || waiting[i]->team == player1->team)) n++;
+        return n;
     }
 
     void clientdisconnected(int cn, int reason)
@@ -1190,14 +1205,14 @@ namespace game
         {
             e->dominating.removeobj(d);
             e->dominated.removeobj(d);
-            if(d == e && follow >= i)
+            if(d == e && follow <= i)
             {
                 followswitch(-1);
                 if(!(focus = (gameent *)iterdynents(follow))) focus = player1;
                 resetcamera();
             }
         }
-        if(game::focus == d) { game::focus = game::player1; follow = 0; } // just in case
+        if(focus == d) { focus = player1; follow = 0; } // just in case
         waiting.removeobj(d);
         cameras.shrink(0);
         client::clearvotes(d);
