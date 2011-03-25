@@ -158,10 +158,10 @@ void disconnect(int onlyclean, int async)
     if(!onlyclean) localconnect(false);
 }
 
-ICOMMAND(0, connect, "sis", (char *n, int *a, char *pwd), connectserv(n && *n ? n : servermaster, a ? *a : serverport, pwd));
+ICOMMAND(0, connect, "sis", (char *n, int *a, char *pwd), connectserv(*n ? n : servermaster, *n || *a ? *a : servermasterport, pwd));
 COMMANDN(0, disconnect, trydisconnect, "");
 
-ICOMMAND(0, lanconnect, "", (), connectserv());
+ICOMMAND(0, lanconnect, "is", (int *a, char *pwd), connectserv(NULL, *a, pwd));
 ICOMMAND(0, localconnect, "i", (int *n), localconnect(*n ? false : true));
 
 ICOMMAND(0, isonline, "", (), intret(curpeer ? 1 : 0));
