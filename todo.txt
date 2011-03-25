@@ -13,7 +13,7 @@
 * Team change announcer?
 * Multiple sample support
 
-= Wishlist/Other =
+= Code/Wishlist/Other =
 * Make parkour mechanics require a certain height off the ground?
 * Commands to perform common geometry operations: slope, arch, stairs, circle, sphere?
 * Move things like mastermode, ban, etc to server side commands/variables?
@@ -26,6 +26,7 @@
 * allow vote for bots and random mode/mutator
 * add mutator for unlimited impulse (?)
 * rename normalscale to explodescale
+* pid file (and daemon state (?)) for servers
 
 = Licensing Issues =
 Files: data/sounds/ambience/wind.ogg
