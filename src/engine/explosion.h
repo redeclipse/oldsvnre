@@ -513,7 +513,8 @@ struct explosionrenderer : sharedlistrenderer
 
         if(renderpath!=R_FIXEDFUNCTION)
         {
-            setlocalparamf("center", SHPARAM_VERTEX, 0, p->o.x, p->o.y, p->o.z);
+            vec center = vec(p->o).mul(0.015f);
+            setlocalparamf("center", SHPARAM_VERTEX, 0, center.x, center.y, center.z);
             setlocalparamf("animstate", SHPARAM_VERTEX, 1, fsize, psize, pmax, float(lastmillis));
             binddepthfxparams(depthfxblend, inside ? pblend/512.f : 0, 2*(size + pmax)*WOBBLE >= depthfxblend, p);
         }
