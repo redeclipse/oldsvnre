@@ -7,27 +7,24 @@
 #include "mpr.h"
 
 const int MAXCLIPPLANES = 1024;
-clipplanes clipcache[MAXCLIPPLANES], *nextclip = clipcache;
 
-void gencubeclip(cube &c, const ivec &o, int size)
-{
-    if(nextclip >= &clipcache[MAXCLIPPLANES]) nextclip = clipcache;
-    ext(c).clip = nextclip;
-    nextclip->owner = &c;
-    genclipplanes(c, o.x, o.y, o.z, size, *nextclip);
-    nextclip++;
-}
+clipplanes clipcache[MAXCLIPPLANES];
 
-static inline void setcubeclip(cube &c, const ivec &o, int size)
+static inline clipplanes &getclipplanes(cube &c, const ivec &o, int size)
 {
-    if(!c.ext || !c.ext->clip || c.ext->clip->owner!=&c) gencubeclip(c, o, size);
+    clipplanes &p = clipcache[int(&c - worldroot)&(MAXCLIPPLANES-1)];
+    if(p.owner != &c)
+    {
+        p.owner = &c;
+        genclipplanes(c, o.x, o.y, o.z, size, p);
+    }
+    return p;
 }
 
 void freeclipplanes(cube &c)
 {
-    if(!c.ext || !c.ext->clip) return;
-    if(c.ext->clip->owner==&c) c.ext->clip->owner = NULL;
-    c.ext->clip = NULL;
+    clipplanes &p = clipcache[int(&c - worldroot)&(MAXCLIPPLANES-1)];
+    if(p.owner == &c) p.owner = NULL;
 }
 
 /////////////////////////  ray - cube collision ///////////////////////////////////////////////
@@ -99,10 +96,9 @@ bool pointincube(const clipplanes &p, const vec &v)
 
 vec hitsurface;
 
-static inline bool raycubeintersect(const cube &c, const vec &v, const vec &ray, const vec &invray, float maxdist, float &dist)
+static inline bool raycubeintersect(clipplanes &p, const cube &c, const vec &v, const vec &ray, const vec &invray, float maxdist, float &dist)
 {
     int entry = -1, bbentry = -1;
-    clipplanes &p = *c.ext->clip;
     INTERSECTPLANES(entry = i, return false);
     INTERSECTBOX(bbentry = i, return false);
     if(exitdist < 0) return false;
@@ -320,9 +316,9 @@ float raycube(const vec &o, const vec &ray, float radius, int mode, int size, ex
 
         if(!isempty(c))
         {
-            setcubeclip(c, lo, lsize);
+            clipplanes &p = getclipplanes(c, lo, lsize);
             float f = 0;
-            if(raycubeintersect(c, v, ray, invray, dent-dist, f) && (dist+f>0 || !(mode&RAY_SKIPFIRST)) && (!(mode&RAY_CLIPMAT) || !c.ext || (c.ext->material&MATF_CLIP)!=MAT_NOCLIP))
+            if(raycubeintersect(p, c, v, ray, invray, dent-dist, f) && (dist+f>0 || !(mode&RAY_SKIPFIRST)) && (!(mode&RAY_CLIPMAT) || !c.ext || (c.ext->material&MATF_CLIP)!=MAT_NOCLIP))
                 return min(dent, dist+f);
         }
 
@@ -351,8 +347,7 @@ float shadowray(const vec &o, const vec &ray, float radius, int mode, extentity 
         if(!isempty(c) && !(c.ext && c.ext->material&MAT_ALPHA))
         {
             if(isentirelysolid(c)) return c.texture[side]==DEFAULT_SKY && mode&RAY_SKIPSKY ? radius : dist;
-            setcubeclip(c, lo, 1<<lshift);
-            clipplanes &p = *c.ext->clip;
+            clipplanes &p = getclipplanes(c, lo, 1<<lshift);
             INTERSECTPLANES(side = p.side[i], goto nextcube);
             INTERSECTBOX(side = (i<<1) + 1 - lsizemask[i], goto nextcube);
             if(exitdist >= 0) return c.texture[side]==DEFAULT_SKY && mode&RAY_SKIPSKY ? radius : dist+max(enterdist+0.1f, 0.0f);
@@ -905,8 +900,7 @@ static bool fuzzycollidesolid(physent *d, const vec &dir, float cutoff, cube &c,
 template<class E>
 static bool fuzzycollideplanes(physent *d, const vec &dir, float cutoff, cube &c, const ivec &co, int size) // collide with deformed cube geometry
 {
-    setcubeclip(c, co, size);
-    clipplanes &p = *c.ext->clip;
+    clipplanes &p = getclipplanes(c, co, size);
 
     if(fabs(d->o.x - p.o.x) > p.r.x + d->radius || fabs(d->o.y - p.o.y) > p.r.y + d->radius ||
        d->o.z + d->aboveeye < p.o.z - p.r.z || d->o.z - d->height > p.o.z + p.r.z)
@@ -1011,8 +1005,7 @@ static bool cubecollidesolid(physent *d, const vec &dir, float cutoff, cube &c, 
 template<class E>
 static bool cubecollideplanes(physent *d, const vec &dir, float cutoff, cube &c, const ivec &co, int size) // collide with deformed cube geometry
 {
-    setcubeclip(c, co, size);
-    clipplanes &p = *c.ext->clip;
+    clipplanes &p = getclipplanes(c, co, size);
 
     if(fabs(d->o.x - p.o.x) > p.r.x + d->radius || fabs(d->o.y - p.o.y) > p.r.y + d->radius ||
        d->o.z + d->aboveeye < p.o.z - p.r.z || d->o.z - d->height > p.o.z + p.r.z)
@@ -1096,8 +1089,7 @@ static inline bool cubecollide(physent *d, const vec &dir, float cutoff, cube &c
 #if 0
             if(cutoff <= 0)
             {
-                setcubeclip(c, co, size);
-                clipplanes &p = *c.ext->clip;
+                clipplanes &p = getclipplanes(c, co, size);
                 if(!p.size) return rectcollide(d, dir, p.o, p.r.x, p.r.y, p.r.z, p.r.z, p.visible);
             }
             return cubecollideplanes<mpr::EntAABB>(d, dir, cutoff, c, co, size);
