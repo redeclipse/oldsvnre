@@ -255,6 +255,10 @@ BIH::BIH(vector<tri> *t)
         bbmax.max(tri.a).max(tri.b).max(tri.c);
     }
 
+    radius = max(max(max(fabs(bbmin.x), fabs(bbmin.y)), fabs(bbmin.z)),
+                 max(max(fabs(bbmax.x), fabs(bbmax.y)), fabs(bbmax.z)));
+    radius *= radius;
+
     vector<BIHNode> buildnodes;
     ushort *indices = new ushort[numtris];
     loopi(numtris) indices[i] = i;
@@ -278,30 +282,6 @@ BIH::BIH(vector<tri> *t)
     }
 }
 
-static inline void yawray(vec &o, vec &ray, float angle)
-{
-    angle *= RAD;
-    float c = cosf(angle), s = sinf(angle),
-          ox = o.x, oy = o.y,
-          rx = ray.x, ry = ray.y;
-    o.x = ox*c - oy*s;
-    o.y = oy*c + ox*s;
-    ray.x = rx*c - ry*s;
-    ray.y = ry*c + rx*s;
-}
-
-static inline void rollray(vec &o, vec &ray, float angle)
-{
-    angle *= RAD;
-    float c = cosf(angle), s = sinf(angle),
-          oy = o.y, oz = o.z,
-          ry = ray.y, rz = ray.z;
-    o.y = oy*c - oz*s;
-    o.z = oz*c + oy*s;
-    ray.y = ry*c - rz*s;
-    ray.z = rz*c + ry*s;
-}
-
 bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist, int mode, float &dist)
 {
     extern vector<mapmodelinfo> mapmodels;
@@ -320,12 +300,26 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
     if(!m->bih && (lightmapping > 1 || !m->setBIH())) return false;
     if(!maxdist) maxdist = 1e16f;
     float scale = e.attrs[4] ? 100.0f/e.attrs[4] : 1.0f;
-    vec mo(o);
-    mo.sub(e.o).mul(scale);
     int yaw = e.attrs[1], roll = e.attrs[2];
-    vec mray(ray);
-    if(yaw != 0) yawray(mo, mray, -yaw);
-    if(roll != 0) rollray(mo, mray, roll);
+    vec mo = vec(o).sub(e.o).mul(scale), mray(ray);
+    float v = mo.dot(mray), inside = m->bih->radius - mo.squaredlen();
+    if((inside < 0 && v > 0) || inside + v*v < 0) return false;
+    if(yaw != 0) 
+    {
+        if(yaw < 0) yaw = 360 + yaw%360;
+        else if(yaw >= 360) yaw %= 360;
+        const vec2 &rot = mmrots[yaw];
+        mo.rotate_around_z(rot.x, -rot.y);
+        mray.rotate_around_z(rot.x, -rot.y);
+    }
+    if(roll != 0) 
+    {
+        if(roll < 0) roll = 360 + roll%360;
+        else if(roll >= 360) roll %= 360;
+        const vec2 &rot = mmrots[roll];
+        mo.rotate_around_x(rot.x, rot.y);
+        mray.rotate_around_x(rot.x, rot.y);
+    }
     if(m->bih->traverse(mo, mray, maxdist*scale, dist, mode))
     {
         dist /= scale;
