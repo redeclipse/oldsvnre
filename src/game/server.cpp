@@ -1780,7 +1780,7 @@ namespace server
         switch(GAME(modelock))
         {
             case 1: case 2: if(!haspriv(ci, GAME(modelock) == 1 ? PRIV_MASTER : PRIV_ADMIN, "change game modes")) return; break;
-            case 3: case 4: if((!((1<<reqmode)&GAME(modelimit)) || !mutscmp(reqmuts, GAME(mutslimit))) && !haspriv(ci, GAME(modelock) == 3 ? PRIV_MASTER : PRIV_ADMIN, "change to a locked game mode")) return; break;
+            case 3: case 4: if((!((1<<reqmode)&GAME(modelockfilter)) || !mutscmp(reqmuts, GAME(mutslockfilter))) && !haspriv(ci, GAME(modelock) == 3 ? PRIV_MASTER : PRIV_ADMIN, "change to a locked game mode")) return; break;
             case 5: if(!haspriv(ci, PRIV_MAX, "change game modes")) return; break;
             case 0: default: break;
         }
