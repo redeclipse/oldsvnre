@@ -499,6 +499,8 @@ namespace server
             if(allowbroadcast(ci->clientnum) && spawnqueue(false, false))
                 srvmsgft(ci->clientnum, CON_EVENT, "\fy\fs\fzcgIMPORTANT\fS the \fs\fzcgspawn queue\fS is in effect, %s",
                             GAME(maxalivequeue) ? "combatants must \fs\fgtake turns\fS in the arena" : "combatants \fs\fgcannot spawn\fS until a slot is free");
+            spawnq.removeobj(ci);
+            playing.removeobj(ci);
             queue(ci);
         }
 
@@ -510,15 +512,15 @@ namespace server
 
         bool canspawn(clientinfo *ci, bool tryspawn = false)
         {
-            if(playing.find(ci) >= 0 || ci->state.aitype >= AI_START) return true;
-            if(tryspawn) queue(ci);
+            if(ci->state.aitype >= AI_START) return true;
+            else if(tryspawn) queue(ci);
             else
             {
                 if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 if(m_trial(gamemode) && ci->state.cpmillis < 0) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
-                if(spawnqueue())
+                if(spawnqueue() && playing.find(ci) < 0)
                 {
                     if(!hasgameinfo) return false;
                     int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients(-1, true, AI_BOT)*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
@@ -528,7 +530,11 @@ namespace server
                         maxplayers = maxplayers/2;
                     }
                     int alive = 0;
-                    loopv(playing) if(playing[i] && ci->team == playing[i]->team) alive++;
+                    loopv(playing) if(playing[i])
+                    {
+                        if(spawnq.find(playing[i]) >= 0) spawnq.removeobj(playing[i]);
+                        if(ci->team == playing[i]->team) alive++;
+                    }
                     if(alive >= maxplayers) return false;
                     if(GAME(maxalivequeue))
                     {
@@ -540,14 +546,15 @@ namespace server
                         }
                     }
                 }
+                return true;
             }
-            return true;
+            return false;
         }
 
         void spawned(clientinfo *ci)
         {
             spawnq.removeobj(ci);
-            if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
+            if(playing.find(ci) < 0) playing.add(ci);
             if(spawnqueue(true))
             {
                 int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients(-1, true, AI_BOT)*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
@@ -571,11 +578,8 @@ namespace server
 
         void died(clientinfo *ci, clientinfo *at)
         {
-            if(m_fight(gamemode) && !m_duke(gamemode, mutators))
-            {
-                spawnq.removeobj(ci);
-                if(GAME(maxalivequeue) || GAME(maxalive) == 0) playing.removeobj(ci);
-            }
+            spawnq.removeobj(ci);
+            if(GAME(maxalivequeue)) playing.removeobj(ci);
         }
 
         void reset(bool empty)
