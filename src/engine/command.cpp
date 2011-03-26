@@ -1777,7 +1777,7 @@ bool validatealias(const char *s)
         case ')': parens--; break;
         case '[': braks++; break;
         case ']': braks--; break;
-        case '"': s = parsestring(s + 1); if(!*s++) return false; break;
+        case '"': s = parsestring(s + 1); if(*s != '"') return false; s++; break;
         case '/': if(s[1] == '/') return false; break;
     }
     if(braks || parens) return false;
