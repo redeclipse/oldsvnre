@@ -53,7 +53,8 @@ GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 
 GFVAR(0, maxalive, 0, 3, FVAR_MAX); // only allow this*numplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
-GVAR(0, maxalivethreshold, 2, 8, VAR_MAX); // kicks in if numplayers >= this
+GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if numplayers >= this
+GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
 
 GVAR(0, maxcarry, 1, 2, WEAP_CARRY);
 GVAR(0, spawnrotate, 0, 4, VAR_MAX); // 0 = let client decide, 1 = sequence, 2+ = random

@@ -521,35 +521,24 @@ namespace server
                 if(spawnqueue())
                 {
                     if(!hasgameinfo) return false;
-                    int maxplayers = max(int(GAME(maxalive)*nplayers), GAME(maxalivethreshold));
-                    if(m_team(gamemode, mutators) && (maxplayers%2)) maxplayers++;
-                    if(playing.length() >= maxplayers) return false;
+                    int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients(-1, true, AI_BOT)*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
                     if(m_team(gamemode, mutators))
                     {
-                        int alive[TEAM_MAX] = {0}, half = maxplayers/2;
-                        loopv(playing) if(playing[i] && isteam(gamemode, mutators, playing[i]->team, TEAM_NEUTRAL)) alive[playing[i]->team]++;
-                        if(alive[ci->team] >= half) return false;
-                        if(GAME(maxalivequeue))
-                        {
-                            if(spawnq.find(ci) < 0) queue(ci);
-                            loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
-                            {
-                                if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype < 0)) return false;
-                                break;
-                            }
-                        }
+                        if(maxplayers%2) maxplayers++;
+                        maxplayers = maxplayers/2;
                     }
-                    else if(GAME(maxalivequeue))
+                    int alive = 0;
+                    loopv(playing) if(playing[i] && ci->team == playing[i]->team) alive++;
+                    if(alive >= maxplayers) return false;
+                    if(GAME(maxalivequeue))
                     {
                         if(spawnq.find(ci) < 0) queue(ci);
-                        loopv(spawnq) if(spawnq[i])
+                        loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
                         {
-                            if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype != AI_BOT)) return false;
+                            if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype < 0)) return false;
                             break;
                         }
                     }
-                    spawnq.removeobj(ci);
-                    if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
                 }
             }
             return true;
@@ -557,29 +546,24 @@ namespace server
 
         void spawned(clientinfo *ci)
         {
-            if(m_fight(gamemode) && !m_duke(gamemode, mutators))
+            spawnq.removeobj(ci);
+            if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
+            if(spawnqueue(true))
             {
-                spawnq.removeobj(ci);
-                if(GAME(maxalive) > 0 && playing.find(ci) < 0) playing.add(ci);
-                if(spawnqueue(true))
+                int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients(-1, true, AI_BOT)*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
+                if(m_team(gamemode, mutators))
                 {
-                    int maxplayers = max(int(GAME(maxalive)*nplayers), GAME(maxalivethreshold)),
-                        alive[TEAM_MAX] = {0}, wait[TEAM_MAX] = {0};
-                    if(m_team(gamemode, mutators))
+                    if(maxplayers%2) maxplayers++;
+                    maxplayers = maxplayers/2;
+                }
+                int wait = 0;
+                loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype < 0 && isteam(gamemode, mutators, spawnq[i]->team, TEAM_NEUTRAL))
+                {
+                    wait++;
+                    if(allowbroadcast(spawnq[i]->clientnum))
                     {
-                        if(maxplayers%2) maxplayers++;
-                        maxplayers = maxplayers/2;
-                    }
-                    loopv(playing) if(playing[i] && isteam(gamemode, mutators, playing[i]->team, TEAM_NEUTRAL)) alive[playing[i]->team]++;
-                    loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->state.aitype < 0 && isteam(gamemode, mutators, spawnq[i]->team, TEAM_NEUTRAL))
-                    {
-                        wait[spawnq[i]->team]++;
-                        if(allowbroadcast(spawnq[i]->clientnum))
-                        {
-                            if(wait[spawnq[i]->team] > 1)
-                                srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgspawn queue\fS", wait[spawnq[i]->team]);
-                            else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgspawn queue\fS");
-                        }
+                        if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgspawn queue\fS", wait);
+                        else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgspawn queue\fS");
                     }
                 }
             }
