@@ -199,7 +199,7 @@ GFVAR(0, impulsespeed, 0, 90, FVAR_MAX); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
 GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
-GFVAR(0, impulsedash, 0, 1.1f, FVAR_MAX); // dashing modifier
+GFVAR(0, impulsedash, 0, 1.15f, FVAR_MAX); // dashing modifier
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, FVAR_MAX); // melee modifier
 GFVAR(0, impulseparkour, 0, 1.1f, FVAR_MAX); // parkour modifier
@@ -210,7 +210,7 @@ GVAR(0, impulsecount, 0, 5, VAR_MAX); // number of impulse actions per air trans
 GVAR(0, impulsedelay, 0, 125, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 1000, VAR_MAX); // minimum time between dashes
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
-GVAR(0, impulseslide, 0, 500, VAR_MAX); // minimum time before floor friction kicks back in
+GVAR(0, impulseslide, 0, 750, VAR_MAX); // minimum time before floor friction kicks back in
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last

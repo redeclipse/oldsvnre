@@ -315,7 +315,8 @@ namespace physics
         else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             vel *= movespeed/100.f;
-            if(iscrouching(d) || (d == game::player1 && game::inzoom())) vel *= movecrawl;
+            if(!d->timeinair && !sliding(d) && (iscrouching(d) || (d == game::player1 && game::inzoom())))
+                vel *= movecrawl;
             if(pl->move >= 0) vel *= pl->strafe ? movestrafe : movestraight;
             switch(pl->physstate)
             {
@@ -781,7 +782,7 @@ namespace physics
             }
             else
             {
-                if((d->ai || impulseaction) && canimpulse(d, 0, 1) && !iscrouching(d))
+                if((d->ai || impulseaction) && canimpulse(d, 0, 1))
                 {
                     bool dash = false, pulse = false;
                     if(!d->ai && onfloor) dash = impulseaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
@@ -836,8 +837,8 @@ namespace physics
                     }
                 }
             }
-            bool found = false;
-            if(d->turnside || d->action[AC_SPECIAL])
+            bool found = false, slide = sliding(d) && iscrouching(d);
+            if(d->turnside || d->action[AC_SPECIAL] || slide)
             {
                 const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
                 loopi(d->turnside ? 6 : 4)
@@ -851,13 +852,13 @@ namespace physics
                     d->o.add(dir.normalize());
                     bool collided = collide(d, dir);
                     d->o = oldpos;
-                    if(collided || (hitplayer ? !d->action[AC_SPECIAL] && !d->turnside : wall.iszero())) continue;
-                    if(d->action[AC_SPECIAL] && hitplayer)
+                    if(collided || (hitplayer ? !d->action[AC_SPECIAL] && !slide : wall.iszero())) continue;
+                    if((d->action[AC_SPECIAL] || slide) && hitplayer)
                     {
-                        if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor))
+                        if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor || slide))
                         {
                             d->action[AC_SPECIAL] = false;
-                            if(!onfloor) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
+                            if(!onfloor && !slide) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
                             if(d->turnside)
                             {
                                 d->turnmillis = PHYSMILLIS;
@@ -866,6 +867,7 @@ namespace physics
                         }
                         break;
                     }
+                    else if(!d->turnside && !d->action[AC_SPECIAL]) continue;
                     wall.normalize();
                     if(fabs(wall.z) <= impulseparkournorm)
                     {
@@ -1120,10 +1122,18 @@ namespace physics
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
                 if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
-                if(!pl->timeinair && timeinair >= PHYSMILLIS*2 && mag >= 20)
+                if(!pl->timeinair && timeinair)
                 {
-                    int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
-                    playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
+                    if(local && allowimpulse(1) && ((gameent *)pl)->action[AC_CROUCH])
+                    {
+                        ((gameent *)pl)->action[AC_DASH] = true;
+                        ((gameent *)pl)->actiontime[AC_DASH] = lastmillis;
+                    }
+                    if(timeinair >= PHYSMILLIS*2 && mag >= 20)
+                    {
+                        int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
+                        playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
+                    }
                 }
             }
         }
