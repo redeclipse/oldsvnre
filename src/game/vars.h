@@ -5,12 +5,12 @@ GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 GVAR(IDF_ADMIN, automaster, 0, 0, 1);
 
-GVAR(IDF_ADMIN, modelimit, 0, G_DEATHMATCH, G_MAX-1);
+GVAR(IDF_ADMIN, modelimit, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslimit, 0, G_M_ALL, G_M_ALL);
 GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
 GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
 GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
-GVAR(IDF_ADMIN, votelock, 0, 0, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
+GVAR(IDF_ADMIN, votelock, 0, 2, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
@@ -27,8 +27,9 @@ GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
 GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
+GVAR(IDF_ADMIN, rotatemodefilter, G_NEVER, G_LIMIT, G_ALL); // modes not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
-GVAR(IDF_ADMIN, rotatefilter, 0, G_M_FILTER, G_M_ALL); // modes not in this array are filtered out
+GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
@@ -41,7 +42,7 @@ GSVAR(IDF_ADMIN, holdmaps, "bath center darkness deadsimple deli depot dropzone 
 GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
-GSVAR(IDF_ADMIN, duelmaps, "bath center darkness deadsimple dropzone dutility echo foundation linear longestyard panic venus");
+GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
 GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo forge foundation futuresport ghost keystone linear longestyard mist nova panic spacetech stone testchamber tranquility tribal ubik venus warp");
 
 namespace server { extern void resetgamevars(bool flush); }
@@ -131,7 +132,7 @@ GFVAR(0, captureelasticity, FVAR_MIN, 0.35f, FVAR_MAX);
 GFVAR(0, capturewaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, captureweight, FVAR_MIN, 100, FVAR_MAX);
 GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
-GFVAR(0, capturethreshold, 0, 112, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(0, defendlimit, 0, 300, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
@@ -158,7 +159,7 @@ GFVAR(0, bomberelasticity, FVAR_MIN, 0.65f, FVAR_MAX);
 GFVAR(0, bomberwaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, bomberweight, FVAR_MIN, 150, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 50, FVAR_MAX);
-GFVAR(0, bomberthreshold, 0, 112, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
+GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
 GVAR(0, skillmin, 1, 50, 101);
