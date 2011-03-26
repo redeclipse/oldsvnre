@@ -1693,7 +1693,7 @@ namespace hud
                 if(!hashealth) sy += ty;
                 popfont();
             }
-            if(game::focus->aitype < AI_START && physics::allowimpulse(m_jetpack(game::gamemode, game::mutators) ? 0 : 2) && impulsemeter && impulsecost && inventoryimpulse)
+            if(game::focus->aitype < AI_START && physics::allowimpulse(physics::allowjetpack() ? 0 : 2) && impulsemeter && impulsecost && inventoryimpulse)
             {
                 float len = clamp(game::focus->impulse[IM_METER]/float(impulsemeter), 0.f, 1.f);
                 settexture(progresstex, 3);
