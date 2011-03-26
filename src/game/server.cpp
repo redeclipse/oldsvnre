@@ -497,7 +497,7 @@ namespace server
         void entergame(clientinfo *ci)
         {
             if(allowbroadcast(ci->clientnum) && spawnqueue(false, false))
-                srvmsgft(ci->clientnum, CON_EVENT, "\fy\fs\fzcyIMPORTANT\fS the \fs\fzcyspawn queue\fS is in effect, %s",
+                srvmsgft(ci->clientnum, CON_EVENT, "\fy\fs\fzcgIMPORTANT\fS the \fs\fzcgspawn queue\fS is in effect, %s",
                             GAME(maxalivequeue) ? "combatants must \fs\fgtake turns\fS in the arena" : "combatants \fs\fgcannot spawn\fS until a slot is free");
             queue(ci);
         }
@@ -574,12 +574,10 @@ namespace server
                     loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->state.aitype < 0 && isteam(gamemode, mutators, spawnq[i]->team, TEAM_NEUTRAL))
                     {
                         wait[spawnq[i]->team]++;
-                        int position = wait[spawnq[i]->team];
-                        if(alive[spawnq[i]->team] < maxplayers) position -= maxplayers-alive[spawnq[i]->team];
-                        if(allowbroadcast(spawnq[i]->clientnum) && position >= 0)
+                        if(allowbroadcast(spawnq[i]->clientnum))
                         {
-                            if(position)
-                                srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcy#%d\fS in the \fs\fgspawn queue\fS", position);
+                            if(wait[spawnq[i]->team] > 1)
+                                srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgspawn queue\fS", wait[spawnq[i]->team]);
                             else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgspawn queue\fS");
                         }
                     }
