@@ -1275,24 +1275,18 @@ namespace game
     int numdynents(bool all)
     {
         int i = 1+players.length();
-        if(all) i += projs::projs.length();
+        if(all) i += projs::collideprojs.length();
         return i;
     }
-    dynent *iterdynents(int &n, bool all)
+    dynent *iterdynents(int i, bool all)
     {
-        int i = n;
         if(!i) return player1;
         i--;
         if(i<players.length()) return players[i];
         i -= players.length();
         if(all)
         {
-            for(int j = i; j < projs::projs.length(); j++) if(projs::projs[j]->projtype == PRJ_SHOT && projs::projs[j]->projcollide&COLLIDE_SHOTS)
-            {
-                n += j-i;
-                return projs::projs[j];
-            }
-            n += projs::projs.length()-i;
+            if(i<projs::collideprojs.length()) return projs::collideprojs[i];
         }
         return NULL;
     }
