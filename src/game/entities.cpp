@@ -18,7 +18,7 @@ namespace entities
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (hasai && (!haswaypoints || (m_jetpack(game::gamemode, game::mutators) && !hasjetpoints)) ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
+        return dropwaypoints >= (hasai && (!haswaypoints || (physics::allowjetpack() && !hasjetpoints)) ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
     }
 
     bool clipped(const vec &o, bool aiclip)
@@ -1464,9 +1464,9 @@ namespace entities
                 if(ents.inrange(link) && ents[link]->type == ents[node]->type && (link == node || link == goal || !ents[link]->links.empty()))
                 {
                     bool wp = ents[link]->type == WAYPOINT;
-                    if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !m_jetpack(game::gamemode, game::mutators)) continue;
+                    if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !physics::allowjetpack()) continue;
                     linkq &n = nodes[link];
-                    int weight = m_jetpack(game::gamemode, game::mutators) ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
+                    int weight = physics::allowjetpack() ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
                     float curscore = prevscore + ents[link]->o.dist(ent.o)*weight;
                     if(n.id == routeid && curscore >= n.curscore) continue;
                     n.curscore = curscore;

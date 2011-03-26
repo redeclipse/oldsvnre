@@ -32,7 +32,9 @@ namespace physics
 
     int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastsprint = 0;
 
-    bool allowimpulse(int level) { return impulseallowed >= level && (impulsestyle || m_jetpack(game::gamemode, game::mutators)); }
+    bool allowjetpack() { return PHYS(gravity) == 0 || m_jetpack(game::gamemode, game::mutators); }
+    bool allowimpulse(int level) { return impulseallowed >= level && (impulsestyle || allowjetpack()); }
+
     bool canimpulse(physent *d, int cost, int level)
     {
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
@@ -52,9 +54,10 @@ namespace physics
         }
         return false;
     }
+
     bool canjetpack(physent *d)
     {
-        if(m_jetpack(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && movejetpack > 0)
+        if(allowjetpack() && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && movejetpack > 0)
         {
             gameent *e = (gameent *)d;
             if(canimpulse(e, 1, 0) && e->physstate == PHYS_FALL && (!impulseallowed || e->impulse[IM_TYPE] > IM_T_NONE) && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > impulsejetdelay) && e->aitype < AI_START)
@@ -341,7 +344,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d)) return true;
+        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
         return false;
     }
 
@@ -742,7 +745,7 @@ namespace physics
                             if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
-                    impulsemod(m_jetpack(game::gamemode, game::mutators), impulseregenjetpack);
+                    impulsemod(allowjetpack(), impulseregenjetpack);
                     impulsemod(sprint, impulseregensprint);
                     impulsemod(d->move || d->strafe, impulseregenmove);
                     impulsemod(!onfloor && PHYS(gravity) > 0, impulseregeninair);
@@ -789,7 +792,7 @@ namespace physics
                     else pulse = ((d->ai || impulseaction >= 2) && d->action[AC_JUMP]) || ((d->ai || impulseaction >= 2) && d->action[AC_DASH]);
                     if(dash || pulse)
                     {
-                        bool moving = impulseaction != 1 && (d->move || d->strafe);
+                        bool moving = (d->ai || impulseaction != 1) && (d->move || d->strafe);
                         float skew = moving ? impulseboost : impulsejump;
                         if(onfloor)
                         {
@@ -805,7 +808,7 @@ namespace physics
                             if(!dash && moving && impulseboostz != 0) dir.z += impulseboostz;
                             (d->vel = dir).normalize().mul(force);
                             d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
-                            if(!m_jetpack(game::gamemode, game::mutators)) d->action[AC_JUMP] = false;
+                            if(!allowjetpack()) d->action[AC_JUMP] = false;
                             client::addmsg(N_SPHY, "ri2", d->clientnum, dash ? SPHY_DASH : SPHY_BOOST);
                             game::impulseeffect(d);
                         }
@@ -813,7 +816,7 @@ namespace physics
                 }
                 if(onfloor && d->action[AC_JUMP])
                 {
-                    if(m_jetpack(game::gamemode, game::mutators) && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
+                    if(allowjetpack() && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
                         d->action[AC_JUMP] = false;
                     else
                     {

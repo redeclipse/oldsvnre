@@ -1155,7 +1155,7 @@ namespace ai
             }
 
             bool wantsimpulse = false;
-            if(physics::allowimpulse(m_jetpack(game::gamemode, game::mutators) ? 0 : 2))
+            if(physics::allowimpulse(physics::allowjetpack() ? 0 : 2))
             {
                 if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsimpulse = true;
                 else if(b.idle == -1 && !d->ai->dontmove)
