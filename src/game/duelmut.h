@@ -19,11 +19,11 @@ struct duelservmode : servmode
                     if(n < 0) return;
                 }
                 if(m_survivor(gamemode, mutators))
-                    srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fgqueued\fS for the next round");
+                    srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are now \fs\fzgyqueued\fS for your \fs\fgnext match\fS");
                 else
                 {
-                    if(n) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fg#%d\fS in the queue", n+1);
-                    else srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzgrNEXT\fS in the queue");
+                    if(n) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcy#%d\fS in the \fs\fgduel queue\fS", n+1);
+                    else srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgduel queue\fS");
                 }
             }
         }
