@@ -228,7 +228,7 @@ int addsound(const char *name, int vol, int maxrad, int minrad, bool unique, vec
 ICOMMAND(0, registersound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? parseint(w) : -1, *x ? parseint(x) : -1, *u > 0, gamesounds)));
 ICOMMAND(0, mapsound, "sissi", (char *n, int *v, char *w, char *x, int *u), intret(addsound(n, *v, *w ? parseint(w) : -1, *x ? parseint(x) : -1, *u > 0, mapsounds)));
 
-void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan)
+void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec &pos, int *curvol, int *curpan, bool liquid)
 {
     int svol = flags&SND_CLAMPED ? 255 : clamp(vol, 0, 255), span = 127; vec v; float dist = pos.dist(camera1->o, v);
     if(!(flags&SND_NOATTEN) && dist > 0)
@@ -248,8 +248,7 @@ void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec 
             }
         }
     }
-    if(!(flags&SND_NOQUIET) && svol > 0 && (isliquid(lookupmaterial(pos)&MATF_VOLUME) || isliquid(lookupmaterial(camera1->o)&MATF_VOLUME)))
-        svol = int(svol*0.75f);
+    if(!(flags&SND_NOQUIET) && svol > 0 && liquid) svol = int(svol*0.65f);
     if(flags&SND_CLAMPED) svol = max(svol, clamp(vol, 0, 255));
     *curvol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(slotvol/255.f)*(svol/255.f)*MIX_MAX_VOLUME), 0, MIX_MAX_VOLUME);
     *curpan = span;
@@ -291,14 +290,16 @@ void updatesounds()
 {
     updatemumble();
     if(nosound) return;
-
+    bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
     loopv(sounds) if(sounds[i].chan >= 0)
     {
         sound &s = sounds[i];
         if((!s.ends || lastmillis < s.ends) && Mix_Playing(sounds[i].chan))
         {
             if(s.owner) s.pos = s.owner->o;
-            calcvol(s.flags, s.vol, s.slot->vol, s.maxrad, s.minrad, s.pos, &s.curvol, &s.curpan);
+            if(s.pos != s.oldpos) s.material = lookupmaterial(s.pos);
+            calcvol(s.flags, s.vol, s.slot->vol, s.maxrad, s.minrad, s.pos, &s.curvol, &s.curpan, liquid || isliquid(s.material&MATF_VOLUME));
+            s.oldpos = s.pos;
             updatesound(i);
         }
         else removesound(i);
@@ -329,8 +330,11 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
 
         int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : (flags&SND_CLAMPED ? 64 : 255),
             x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : 256)),
-            y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : 0));
-        calcvol(flags, v, slot->vol, x, y, pos, &cvol, &cpan);
+            y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : 0)),
+            mat = lookupmaterial(pos);
+
+        bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
+        calcvol(flags, v, slot->vol, x, y, pos, &cvol, &cpan, liquid || isliquid(mat&MATF_VOLUME));
 
         if((flags&SND_NOCULL) || cvol > 0)
         {
@@ -364,12 +368,13 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 s.vol = v;
                 s.maxrad = x;
                 s.minrad = y;
+                s.material = mat;
                 s.flags = flags;
                 s.millis = oldhook ? sounds[*oldhook].millis : lastmillis;
                 s.ends = ends;
                 s.slotnum = n;
                 s.owner = d;
-                s.pos = pos;
+                s.pos = s.oldpos = pos;
                 s.curvol = cvol;
                 s.curpan = cpan;
                 s.chan = chan;
