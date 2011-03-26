@@ -27,6 +27,7 @@
 * add mutator for unlimited impulse (?)
 * rename normalscale to explodescale
 * pid file (and daemon state (?)) for servers
+* don't assume flak bounces all the time
 
 = Licensing Issues =
 Files: data/sounds/ambience/wind.ogg

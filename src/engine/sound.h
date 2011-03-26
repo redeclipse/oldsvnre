@@ -55,10 +55,10 @@ struct soundslot
 struct sound
 {
     soundslot *slot;
-    vec pos;
+    vec pos, oldpos;
     physent *owner;
     int vol, curvol, curpan;
-    int flags, maxrad, minrad;
+    int flags, maxrad, minrad, material;
     int millis, ends, slotnum, chan, *hook;
 
     sound() : hook(NULL) { reset(); }
@@ -66,10 +66,12 @@ struct sound
 
     void reset()
     {
+        pos = oldpos = vec(-1, -1, -1);
         slot = NULL;
         owner = NULL;
         vol = curvol = 255;
         curpan = 127;
+        material = MAT_AIR;
         flags = maxrad = minrad = millis = ends = 0;
         slotnum = chan = -1;
         if(hook) *hook = -1;

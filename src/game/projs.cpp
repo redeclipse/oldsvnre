@@ -333,7 +333,7 @@ namespace projs
 
     void bounce(projent &proj, bool ricochet)
     {
-        if((proj.movement >= 1 || (proj.projtype == PRJ_SHOT && !proj.child && weaptype[proj.weap].traced)) && (!proj.lastbounce || lastmillis-proj.lastbounce >= 250)) switch(proj.projtype)
+        if(!proj.limited && !proj.child && (proj.movement >= 1 || (proj.projtype == PRJ_SHOT && weaptype[proj.weap].traced)) && (!proj.lastbounce || lastmillis-proj.lastbounce >= 250)) switch(proj.projtype)
         {
             case PRJ_SHOT:
             {
@@ -341,18 +341,18 @@ namespace projs
                 {
                     case WEAP_SWORD:
                     {
-                        part_splash(PART_SPARK, 25, 500, proj.o, 0x1111CC, 0.25f, 1, 1, 0, 16, 10);
+                        part_splash(PART_SPARK, 25, 350, proj.o, 0x1111CC, 0.35f, 1, 1, 0, 16, 15);
                         break;
                     }
                     case WEAP_SHOTGUN: case WEAP_SMG:
                     {
-                        part_splash(PART_SPARK, 10, 500, proj.o, 0xFFAA22, 0.25f, 1, 1, 0, 16, 10);
-                        if(notrayspam(proj.weap, proj.flags&HIT_ALT, 5)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
+                        part_splash(PART_SPARK, 10, 350, proj.o, 0xFFAA22, 0.35f, 1, 1, 0, 16, 15);
+                        if(notrayspam(proj.weap, proj.flags&HIT_ALT, 20)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
                         break;
                     }
                     case WEAP_FLAMER:
                     {
-                        if(notrayspam(proj.weap, proj.flags&HIT_ALT, 0))
+                        if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize));
                         break;
                     }
@@ -360,7 +360,7 @@ namespace projs
                 }
                 if(ricochet)
                 {
-                    int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale*(proj.child ? 0.25f : 1.f)));
+                    int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_BOUNCE), proj.o, NULL, 0, vol);
                 }
                 break;
@@ -445,7 +445,7 @@ namespace projs
 
     void updatetargets(projent &proj, int style = 0)
     {
-        if(proj.projtype == PRJ_SHOT && proj.weap != WEAP_MELEE && !proj.child && proj.owner && proj.owner->state == CS_ALIVE)
+        if(!proj.child && proj.projtype == PRJ_SHOT && proj.weap != WEAP_MELEE && proj.owner && proj.owner->state == CS_ALIVE)
         {
             if(weaptype[proj.weap].traced)
             {
@@ -677,7 +677,7 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(proj.projtype == PRJ_SHOT && !proj.child && proj.owner && !weaptype[proj.weap].traced)
+        if(!proj.child && proj.projtype == PRJ_SHOT && proj.owner && !weaptype[proj.weap].traced)
         {
             vec eyedir = vec(proj.o).sub(proj.owner->o);
             float eyedist = eyedir.magnitude();
@@ -730,7 +730,7 @@ namespace projs
                 proj.pitch = d->pitch;
                 proj.inertia = vec(d->vel).add(d->falling);
                 if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan))
-                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, int(ceilf(sounds[d->pschan].vol*(proj.child ? 0.25f : 1.f))), -1, -1, &proj.schan, 0, &d->pschan);
+                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, int(ceilf(sounds[d->pschan].vol)), -1, -1, &proj.schan, 0, &d->pschan);
             }
         }
         if(!proj.waittime) init(proj, false);
@@ -813,7 +813,7 @@ namespace projs
             int colour = isfire ? weapfx[weap].colour : pulsecols[0][rnd(PULSECOLOURS)];
             if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0xAAAAAA, 1, 0.25f, -20);
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
-                part_splash(isfire ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 10);
+                part_splash(isfire ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 15);
             if(muzzlechk(muzzleflash, d) && weapfx[weap].partsize > 0)
                 part_create(weapfx[weap].parttype, WEAP2(weap, adelay, flags&HIT_ALT)/3, from, colour, weapfx[weap].partsize, muz, 0, 0, d);
             if(muzzlechk(muzzleflare, d) && weapfx[weap].flaresize > 0)
@@ -869,14 +869,17 @@ namespace projs
         {
             case PRJ_SHOT:
             {
-                int vol = int(ceilf(255*proj.curscale*(proj.child ? 0.25f : 1.f)));
-                if(WEAP2(proj.weap, power, proj.flags&HIT_ALT)) switch(WEAP2(proj.weap, cooked, proj.flags&HIT_ALT))
+                if(!proj.child && !proj.limited)
                 {
-                    case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.curscale*(proj.child ? 0.25f : 1.f)); break; // longer
-                    case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.curscale*(proj.child ? 0.25f : 1.f)); break; // shorter
+                    int vol = int(ceilf(255*proj.curscale));
+                    if(WEAP2(proj.weap, power, proj.flags&HIT_ALT)) switch(WEAP2(proj.weap, cooked, proj.flags&HIT_ALT))
+                    {
+                        case 4: case 5: vol = 10+int(245*(1.f-proj.lifespan)*proj.lifesize*proj.curscale); break; // longer
+                        case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.curscale); break; // shorter
+                    }
+                    if(issound(proj.schan)) sounds[proj.schan].vol = vol;
+                    else playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
                 }
-                if(issound(proj.schan)) sounds[proj.schan].vol = vol;
-                else playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
                 switch(proj.weap)
                 {
                     case WEAP_SWORD:
@@ -1022,7 +1025,7 @@ namespace projs
                 {
                     if(proj.movement >= 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                     {
-                        part_splash(PART_BLOOD, 1, game::bloodfade, proj.o, 0x229999, (rnd(game::bloodsize/2)+(game::bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(proj.radius), 10);
+                        part_splash(PART_BLOOD, 1, game::bloodfade, proj.o, 0x229999, (rnd(game::bloodsize/2)+(game::bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(proj.radius), 15);
                         proj.lasteffect = lastmillis - (lastmillis%1000);
                     }
                     if(!game::bloodsparks) break;
@@ -1079,29 +1082,28 @@ namespace projs
             {
                 updatetargets(proj, 2);
                 if(proj.projcollide&COLLIDE_SHOTS) collideprojs.removeobj(&proj);
-                int vol = int(255*proj.curscale*(proj.child ? 0.25f : 1.f));
-                if(proj.limited) vol = 0;
-                else switch(proj.weap)
+                int vol = int(255*proj.curscale);
+                if(!proj.limited) switch(proj.weap)
                 {
                     case WEAP_PISTOL:
                     {
-                        vol = int(vol*(1.f-proj.lifespan)*(proj.child ? 0.25f : 1.f));
+                        vol = int(vol*(1.f-proj.lifespan));
                         part_create(PART_SMOKE_LERP, 200, proj.o, 0x999999, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.25f, -20);
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 150, 0x884411, 1.f, 0.5f);
-                            part_splash(PART_SPARK, 10, 500, proj.o, 0x884411, 0.125f, 1, 1, 0, expl, 10);
+                            part_splash(PART_SPARK, 10, 350, proj.o, 0x884411, 0.125f, 1, 1, 0, expl, 15);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 75, teamhint(proj.owner, 0x884411), 1.f, 0.2f);
-                            if(notrayspam(proj.weap, proj.flags&HIT_ALT, 0))
+                            if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
                                 adddynlight(proj.o, expl, vec(0.5f, 0.25f, 0.05f), 150, 10);
                             }
                         }
-                        else if(notrayspam(proj.weap, proj.flags&HIT_ALT, 5)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
+                        else if(notrayspam(proj.weap, proj.flags&HIT_ALT, 20)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
                         break;
                     }
                     case WEAP_FLAMER: case WEAP_GRENADE: case WEAP_ROCKET:
@@ -1151,8 +1153,8 @@ namespace projs
                     }
                     case WEAP_SHOTGUN: case WEAP_SMG:
                     {
-                        vol = int(vol*(1.f-proj.lifespan)*(proj.child ? 0.25f : 1.f));
-                        part_splash(PART_SPARK, proj.weap == WEAP_SHOTGUN ? 10 : 20, 500, proj.o, proj.weap == WEAP_SMG ? 0xFF8822 : 0xFFAA22, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, 1, 1, 0, 16, 10);
+                        vol = int(vol*(1.f-proj.lifespan));
+                        part_splash(PART_SPARK, proj.weap == WEAP_SHOTGUN ? 10 : 20, 350, proj.o, proj.weap == WEAP_SMG ? 0xFF8822 : 0xFFAA22, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, 1, 1, 0, 16, 15);
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
@@ -1160,7 +1162,7 @@ namespace projs
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 150, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711, 1.f, 0.5f);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 75, teamhint(proj.owner, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711), 1.f, 0.2f);
-                            if(notrayspam(proj.weap, proj.flags&HIT_ALT, 0))
+                            if(notrayspam(proj.weap, proj.flags&HIT_ALT, 10))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
                                 adddynlight(proj.o, expl, vec(0.7f, proj.weap == WEAP_SMG ? 0.2f : 0.4f, 0.f), proj.flags&HIT_ALT ? 300 : 100, 10);
@@ -1220,7 +1222,7 @@ namespace projs
                     }
                     default: break;
                 }
-                if(vol > 0)
+                if(!proj.limited && !proj.child && vol > 0)
                 {
                     int slot = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize) > 0 ? S_W_EXPLODE : S_W_DESTROY;
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
@@ -1275,14 +1277,14 @@ namespace projs
         if(proj.extinguish&2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH)) chk |= 2;
         if(chk)
         {
-            if(chk&1 && !proj.limited)
+            if(chk&1 && !proj.limited && !proj.child)
             {
-                int vol = int(ceilf(48*proj.curscale*(proj.child ? 0.25f : 1.f))), snd = S_EXTINGUISH;
+                int vol = int(ceilf(48*proj.curscale)), snd = S_EXTINGUISH;
                 float size = max(proj.radius, 1.f);
                 if(proj.projtype == PRJ_SHOT && isweap(proj.weap))
                 {
                     snd = WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_EXTINGUISH);
-                    vol = 10+int(245*proj.lifespan*proj.lifesize*proj.curscale*(proj.child ? 0.25f : 1.f));
+                    vol = 10+int(245*proj.lifespan*proj.lifesize*proj.curscale);
                     float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                     if(expl > 0) size *= expl*1.5f;
                     else size *= 2.5f;
@@ -1717,7 +1719,7 @@ namespace projs
                 if(proj.state == CS_DEAD)
                 {
                     if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                    if(!proj.limited && radius > 0) 
+                    if(!proj.limited && radius > 0)
                     {
                         int numdyns = game::numdynents(true);
                         loopj(numdyns)
@@ -1731,7 +1733,7 @@ namespace projs
                 else if(WEAP2(proj.weap, radial, proj.flags&HIT_ALT))
                 {
                     if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                    if(!proj.limited && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= 40)) 
+                    if(!proj.limited && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= 40))
                     {
                         int numdyns = game::numdynents();
                         loopj(numdyns)
@@ -1833,7 +1835,7 @@ namespace projs
 
     void adddynlights()
     {
-        loopv(projs) if(projs[i]->ready() && projs[i]->projtype == PRJ_SHOT)
+        loopv(projs) if(projs[i]->ready() && projs[i]->projtype == PRJ_SHOT && !projs[i]->limited && !projs[i]->child)
         {
             projent &proj = *projs[i];
             switch(proj.weap)
