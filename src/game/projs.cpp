@@ -2,7 +2,7 @@
 namespace projs
 {
     vector<hitmsg> hits;
-    vector<projent *> projs;
+    vector<projent *> projs, collideprojs;
 
     VAR(IDF_PERSIST, shadowdebris, 0, 1, 1);
     VAR(IDF_PERSIST, shadowgibs, 0, 1, 1);
@@ -245,6 +245,7 @@ namespace projs
         {
             if(projs[i]->projtype == PRJ_SHOT)
             {
+                if(projs[i]->projcollide&COLLIDE_SHOTS) collideprojs.removeobj(projs[i]);
                 delete projs[i];
                 projs.removeunordered(i--);
             }
@@ -263,9 +264,10 @@ namespace projs
 
     void reset()
     {
+        collideprojs.setsize(0);
         projs.deletecontents();
         projs.shrink(0);
-    };
+    }
 
     void preload()
     {
@@ -488,6 +490,7 @@ namespace projs
                 proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
+                if(proj.projcollide&COLLIDE_SHOTS) collideprojs.add(&proj);
                 break;
             }
             case PRJ_GIBS:
@@ -1075,6 +1078,7 @@ namespace projs
             case PRJ_SHOT:
             {
                 updatetargets(proj, 2);
+                if(proj.projcollide&COLLIDE_SHOTS) collideprojs.removeobj(&proj);
                 int vol = int(255*proj.curscale*(proj.child ? 0.25f : 1.f));
                 if(proj.limited) vol = 0;
                 else switch(proj.weap)

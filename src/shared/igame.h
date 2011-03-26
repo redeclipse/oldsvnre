@@ -91,7 +91,7 @@ namespace game
     extern void resetmap(bool empty);
     extern void startmap(const char *name, const char *reqname, bool empty = false);
     extern bool allowmove(physent *d);
-    extern dynent *iterdynents(int &i, bool all = false);
+    extern dynent *iterdynents(int i, bool all = false);
     extern dynent *focusedent(bool force = false);
     extern int numdynents(bool all = false);
     extern void lighteffects(dynent *d, vec &color, vec &dir);

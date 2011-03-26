@@ -1366,7 +1366,7 @@ namespace physics
 
 namespace projs
 {
-    extern vector<projent *> projs;
+    extern vector<projent *> projs, collideprojs;
 
     extern void reset();
     extern void update();
