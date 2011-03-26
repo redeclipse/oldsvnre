@@ -928,7 +928,26 @@ namespace server
 
     void changemode(int &mode, int &muts)
     {
-        if(mode < 0) mode = GAME(rotatemode) ? rnd(G_RAND)+G_FIGHT : GAME(defaultmode);
+        if(mode < 0)
+        {
+            mode = GAME(defaultmode);
+            if(GAME(rotatemode))
+            {
+                int num = 0;
+                loopi(G_MAX) if((1<<i)&GAME(rotatemodefilter)) num++;
+                if(!num) mode = rnd(G_RAND)+G_FIGHT;
+                else
+                {
+                    int r = num > 1 ? rnd(num) : 0, n = 0;
+                    loopi(G_MAX) if((1<<i)&GAME(rotatemodefilter))
+                    {
+                        if(n != r) n++;
+                        else { mode = i; break; }
+                    }
+                }
+                if(!mode || !((1<<mode)&GAME(rotatemodefilter))) mode = rnd(G_RAND)+G_FIGHT;
+            }
+        }
         if(muts < 0)
         {
             muts = GAME(defaultmuts);
@@ -941,7 +960,7 @@ namespace server
                     if(rmut)
                     {
                         int smut = 1<<(rmut-1);
-                        if(GAME(rotatefilter) && !(GAME(rotatefilter)&smut)) continue;
+                        if(GAME(rotatemutsfilter) && !(GAME(rotatemutsfilter)&smut)) continue;
                         muts |= smut;
                         modecheck(mode, muts, smut);
                     }
@@ -1704,12 +1723,12 @@ namespace server
         return false;
     }
 
-    bool mutscmp(int reqmuts, int limited)
+    bool mutscmp(int req, int limit)
     {
-        if(reqmuts)
+        if(req)
         {
-            if(!limited) return false;
-            loopi(G_M_NUM) if(reqmuts&(1<<i) && !(limited&(1<<i))) return false;
+            if(!limit) return false;
+            loopi(G_M_NUM) if(req&(1<<i) && !(limit&(1<<i))) return false;
         }
         return true;
     }
@@ -1739,7 +1758,7 @@ namespace server
         switch(GAME(modelock))
         {
             case 1: case 2: if(!haspriv(ci, GAME(modelock) == 1 ? PRIV_MASTER : PRIV_ADMIN, "change game modes")) return; break;
-            case 3: case 4: if((reqmode < GAME(modelimit) || !mutscmp(reqmuts, GAME(mutslimit))) && !haspriv(ci, GAME(modelock) == 3 ? PRIV_MASTER : PRIV_ADMIN, "change to a locked game mode")) return; break;
+            case 3: case 4: if((!((1<<reqmode)&GAME(modelimit)) || !mutscmp(reqmuts, GAME(mutslimit))) && !haspriv(ci, GAME(modelock) == 3 ? PRIV_MASTER : PRIV_ADMIN, "change to a locked game mode")) return; break;
             case 5: if(!haspriv(ci, PRIV_MAX, "change game modes")) return; break;
             case 0: default: break;
         }
