@@ -129,7 +129,7 @@ struct defendservmode : defendstate, servmode
             if(teamscore(steam).total >= maxscore)
             {
                 teamscore(steam).total = maxscore;
-                sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+                ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
                 winner(steam, maxscore);
                 return;
             }
@@ -158,7 +158,7 @@ struct defendservmode : defendstate, servmode
             if(steam)
             {
                 teamscore(steam).total = INT_MAX-1;
-                sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyall flags have been secured");
+                ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyall flags have been secured");
                 winner(steam, INT_MAX-1);
                 return;
             }

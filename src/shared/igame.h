@@ -118,6 +118,7 @@ namespace server
 {
     extern void start();
     extern void shutdown();
+    extern void ancmsgft(int cn, int snd, int conlevel, const char *s, ...);
     extern void srvmsgft(int cn, int conlevel, const char *s, ...);
     extern void srvmsgf(int cn, const char *s, ...);
     extern void srvoutf(const char *s, ...);
