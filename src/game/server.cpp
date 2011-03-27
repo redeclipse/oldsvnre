@@ -472,7 +472,7 @@ namespace server
 
         bool spawnqueue(bool all = false, bool needinfo = true)
         {
-            return m_fight(gamemode) && !m_duke(gamemode, mutators) && GAME(maxalive) > 0 && (!needinfo || hasgameinfo) && (!all || GAME(maxalivequeue));
+            return m_fight(gamemode) && !m_duke(gamemode, mutators) && GAME(maxalive) > 0 && (!needinfo || hasgameinfo) && (!all || GAME(maxalivequeue)) && numclients() > 1;
         }
 
         void queue(clientinfo *ci, bool top = false, bool wait = true, bool msg = true)
@@ -518,9 +518,6 @@ namespace server
 
         void entergame(clientinfo *ci)
         {
-            if(allowbroadcast(ci->clientnum) && spawnqueue(false, false))
-                srvmsgft(ci->clientnum, CON_EVENT, "\fy\fs\fzcgIMPORTANT\fS the \fs\fzcgspawn queue\fS is in effect, %s",
-                            GAME(maxalivequeue) ? "combatants must \fs\fgtake turns\fS in the arena" : "combatants \fs\fgcannot spawn\fS until a slot is free");
             spawnq.removeobj(ci);
             playing.removeobj(ci);
             queue(ci);
@@ -1094,7 +1091,7 @@ namespace server
             {
                 loopv(clients) if(clients[i]->state.cpmillis < 0 && gamemillis+clients[i]->state.cpmillis >= GAME(triallimit))
                 {
-                    sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fytime trial wait period has timed out");
+                    ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fytime trial wait period has timed out");
                     startintermission();
                     return;
                 }
@@ -1116,14 +1113,14 @@ namespace server
                     else timeremaining = -1;
                     if(!timeremaining)
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fytime limit has been reached");
+                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fytime limit has been reached");
                         startintermission();
                         return; // bail
                     }
                     else
                     {
                         sendf(-1, 1, "ri2", N_TICK, timeremaining);
-                        if(timeremaining == 60) sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_ONEMINUTE, CON_MESG, "\fzygone minute remains");
+                        if(timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
                     }
                 }
             }
@@ -1136,7 +1133,7 @@ namespace server
                         best = i;
                     if(best >= 0 && scores[best].total >= GAME(pointlimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -1148,7 +1145,7 @@ namespace server
                         best = i;
                     if(best >= 0 && clients[best]->state.points >= GAME(pointlimit))
                     {
-                        sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -1469,6 +1466,15 @@ namespace server
         filtertext(ft, str);
         logoutf("%s", ft);
 #endif
+    }
+
+    void ancmsgft(int cn, int snd, int conlevel, const char *s, ...)
+    {
+        if(cn < 0 || allowbroadcast(cn))
+        {
+            defvformatstring(str, s, s);
+            sendf(cn, 1, "ri3s", N_ANNOUNCE, snd, conlevel, str);
+        }
     }
 
     void srvmsgft(int cn, int conlevel, const char *s, ...)

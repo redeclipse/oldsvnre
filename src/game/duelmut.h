@@ -165,7 +165,7 @@ struct duelservmode : servmode
                     else if(m_survivor(gamemode, mutators))
                         formatstring(fight)("\fwsurvivor, round \fs\fr#%d\fS", duelround);
                     loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                        sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_FIGHT, CON_MESG, fight);
+                        ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
                     dueltime = dueldeath = 0;
                     duelcheck = gamemillis;
                 }
@@ -203,11 +203,11 @@ struct duelservmode : servmode
                                     if(playing[i]->team == alive[0]->team)
                                     {
                                         if(allowbroadcast(playing[i]->clientnum))
-                                            sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOUWIN, -1, "");
+                                            ancmsgft(playing[i]->clientnum, S_V_YOUWIN, -1, "");
                                         givepoints(playing[i], playing.length());
                                     }
                                     else if(allowbroadcast(playing[i]->clientnum))
-                                        sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
+                                        ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
                                 }
                             }
                             clear();
@@ -222,7 +222,7 @@ struct duelservmode : servmode
                         {
                             srvmsgf(-1, "\fyeveryone died, \fzoyepic fail");
                             loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                                sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
+                                ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
                         }
                         clear();
                         break;
@@ -240,11 +240,11 @@ struct duelservmode : servmode
                                     if(playing[i] == alive[0])
                                     {
                                         if(allowbroadcast(playing[i]->clientnum))
-                                            sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOUWIN, -1, "");
+                                            ancmsgft(playing[i]->clientnum, S_V_YOUWIN, -1, "");
                                         givepoints(playing[i], playing.length());
                                     }
                                     else if(allowbroadcast(playing[i]->clientnum))
-                                        sendf(playing[i]->clientnum, 1, "ri3s", N_ANNOUNCE, S_V_YOULOSE, -1, "");
+                                        ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
                                 }
                             }
                             clear();

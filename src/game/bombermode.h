@@ -102,7 +102,7 @@ struct bomberservmode : bomberstate, servmode
         }
         if(GAME(bomberlimit) && score >= GAME(bomberlimit))
         {
-            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+            ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
             startintermission();
         }
     }
@@ -204,7 +204,7 @@ struct bomberservmode : bomberstate, servmode
                 hasaffinity++;
             }
             if(!hasaffinity) { hasflaginfo = false; return; }
-            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_V_BOMBSTART, CON_MESG, "\fathe \fs\fwbomb\fS has been spawned");
+            ancmsgft(-1, S_V_BOMBSTART, CON_EVENT, "\fathe \fs\fwbomb\fS has been spawned");
             bombertime = 0;
         }
         int t = (gamemillis/GAME(bomberholdinterval))-((gamemillis-(curtime+scoresec))/GAME(bomberholdinterval));
@@ -231,7 +231,7 @@ struct bomberservmode : bomberstate, servmode
                         else total = ci->state.points;
                         if(GAME(bomberholdlimit) && total >= GAME(bomberholdlimit))
                         {
-                            sendf(-1, 1, "ri3s", N_ANNOUNCE, S_GUIBACK, CON_MESG, "\fyscore limit has been reached");
+                            ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
                             startintermission();
                         }
                     }
