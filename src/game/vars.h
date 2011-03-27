@@ -206,9 +206,9 @@ GFVAR(0, impulseparkour, 0, 1.1f, FVAR_MAX); // parkour modifier
 GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
-GVAR(0, impulsecount, 0, 5, VAR_MAX); // number of impulse actions per air transit
+GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
 GVAR(0, impulsedelay, 0, 125, VAR_MAX); // minimum time between boosts
-GVAR(0, impulsedashdelay, 0, 1000, VAR_MAX); // minimum time between dashes
+GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
 GVAR(0, impulseslide, 0, 750, VAR_MAX); // minimum time before floor friction kicks back in
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
@@ -230,7 +230,7 @@ GFVAR(0, movespread, 0, 1, FVAR_MAX);
 GFVAR(0, inairspread, 0, 1, FVAR_MAX);
 GFVAR(0, impulsespread, 0, 1, FVAR_MAX);
 
-GVAR(0, zoomlock, 0, 1, 3); // 0 = free, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor
+GVAR(0, zoomlock, 0, 1, 4); // 0 = free, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor, 4 = must also be crouched
 GVAR(0, zoomlocktime, 0, 500, VAR_MAX); // time before zoomlock kicks in when in the air
 GVAR(0, zoomlimit, 1, 10, 150);
 GVAR(0, zoomtime, 1, 100, VAR_MAX);

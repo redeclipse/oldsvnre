@@ -1281,7 +1281,7 @@ namespace client
                         case SPHY_BOOST: case SPHY_KICK: case SPHY_SKATE: case SPHY_DASH:
                         {
                             t->impulse[IM_TYPE] = IM_T_BOOST+(st-SPHY_BOOST);
-                            t->impulse[IM_TIME] = t->impulse[IM_LAST] = lastmillis;
+                            t->impulse[IM_TIME] = t->impulse[IM_REGEN] = lastmillis;
                             t->resetphys();
                             game::impulseeffect(t);
                             break;
@@ -2210,9 +2210,9 @@ namespace client
         if(a->address.host == ENET_HOST_ANY || a->ping >= serverinfo::WAITING || a->attr.empty() || a->attr[0] != GAMEVERSION) ac = -1;
         else if(a->address.host == masteraddress.host) ac = INT_MAX;
         else ac = 1 + a->priority;
-        if(b->address.host == ENET_HOST_ANY || b->ping >= serverinfo::WAITING || b->attr.empty() || b->attr[0] != GAMEVERSION) bc = -1; 
-        else if(b->address.host == masteraddress.host) bc = INT_MAX; 
-        else bc = 1 + b->priority; 
+        if(b->address.host == ENET_HOST_ANY || b->ping >= serverinfo::WAITING || b->attr.empty() || b->attr[0] != GAMEVERSION) bc = -1;
+        else if(b->address.host == masteraddress.host) bc = INT_MAX;
+        else bc = 1 + b->priority;
         if(ac > bc) return -1;
         if(ac < bc) return 1;
 

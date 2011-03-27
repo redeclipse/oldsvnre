@@ -1526,7 +1526,8 @@ namespace entities
             {
                 int cmds = WP_F_NONE;
                 if(jetting) cmds |= WP_F_JETPACK;
-                else if(physics::iscrouching(d)) cmds |= WP_F_CROUCH;
+                else if(physics::iscrouching(d) && !physics::sliding(d))
+                    cmds |= WP_F_CROUCH;
                 curnode = ents.length();
                 attrvector wpattrs;
                 wpattrs.add(0, 2);
