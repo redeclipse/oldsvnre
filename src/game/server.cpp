@@ -475,7 +475,7 @@ namespace server
             return m_fight(gamemode) && !m_duke(gamemode, mutators) && GAME(maxalive) > 0 && (!needinfo || hasgameinfo) && (!all || GAME(maxalivequeue)) && numclients() > 1;
         }
 
-        void queue(clientinfo *ci, bool top = false, bool wait = true, bool msg = true)
+        void queue(clientinfo *ci, bool msg = true, bool wait = true, bool top = false)
         {
             if(spawnqueue(true) && ci->online && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING && ci->state.aitype < AI_START)
             {
@@ -506,8 +506,8 @@ namespace server
                             wait++;
                             if(spawnq[i] == ci)
                             {
-                                if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgspawn queue\fS", wait);
-                                else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgspawn queue\fS");
+                                if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", wait);
+                                else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgrespawn queue\fS");
                                 break;
                             }
                         }
@@ -532,7 +532,12 @@ namespace server
         bool canspawn(clientinfo *ci, bool tryspawn = false)
         {
             if(ci->state.aitype >= AI_START) return true;
-            else if(tryspawn) queue(ci);
+            else if(tryspawn)
+            {
+                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
+                return true;
+            }
             else
             {
                 if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
@@ -542,6 +547,7 @@ namespace server
                 if(spawnqueue() && playing.find(ci) < 0)
                 {
                     if(!hasgameinfo) return false;
+                    if(GAME(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
                     int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients()*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
                     if(m_team(gamemode, mutators))
                     {
@@ -553,8 +559,11 @@ namespace server
                     {
                         if(playing[i]->state.state != CS_DEAD && playing[i]->state.state != CS_ALIVE)
                         {
-                            playing.removeobj(playing[i--]);
-                            continue;
+                            if(playing[i]->state.state != CS_WAITING || !GAME(maxalivequeue))
+                            {
+                                playing.removeobj(playing[i--]);
+                                continue;
+                            }
                         }
                         if(spawnq.find(playing[i]) >= 0) spawnq.removeobj(playing[i]);
                         if(ci->team == playing[i]->team) alive++;
@@ -562,7 +571,6 @@ namespace server
                     if(alive >= maxplayers) return false;
                     if(GAME(maxalivequeue))
                     {
-                        if(spawnq.find(ci) < 0) queue(ci);
                         loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
                         {
                             if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype < 0)) return false;
@@ -577,8 +585,8 @@ namespace server
                                 wait++;
                                 if(allowbroadcast(spawnq[i]->clientnum))
                                 {
-                                    if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgspawn queue\fS", wait);
-                                    else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgspawn queue\fS");
+                                    if(wait > 1) srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcg#%d\fS in the \fs\fgrespawn queue\fS", wait);
+                                    else srvmsgft(spawnq[i]->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgrespawn queue\fS");
                                 }
                             }
                         }
