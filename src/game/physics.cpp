@@ -318,7 +318,7 @@ namespace physics
         else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             vel *= movespeed/100.f;
-            if(!d->timeinair && !sliding(d) && (iscrouching(d) || (d == game::player1 && game::inzoom())))
+            if((!d->timeinair && !sliding(d) && iscrouching(d)) || (d == game::player1 && game::inzoom()))
                 vel *= movecrawl;
             if(pl->move >= 0) vel *= pl->strafe ? movestrafe : movestraight;
             switch(pl->physstate)
@@ -694,9 +694,9 @@ namespace physics
 
     bool canregenimpulse(gameent *d)
     {
-        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_LAST] >= impulseregendelay))
+        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
         {
-            if((impulseregenjetdelay && d->impulse[IM_JETPACK]) && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_JETPACK] < impulseregenjetdelay))
+            if(impulseregenjetdelay && d->impulse[IM_JETPACK] && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_JETPACK] < impulseregenjetdelay))
                 return false;
             return true;
         }
@@ -721,7 +721,7 @@ namespace physics
                     if(canimpulse(d, len, 2))
                     {
                         d->impulse[IM_METER] += len;
-                        d->impulse[IM_LAST] = lastmillis;
+                        d->impulse[IM_REGEN] = lastmillis;
                     }
                     else sprint = d->action[AC_SPRINT] = false;
                 }
@@ -731,7 +731,7 @@ namespace physics
                     if(canimpulse(d, len, 0))
                     {
                         d->impulse[IM_METER] += len;
-                        d->impulse[IM_LAST] = lastmillis;
+                        d->impulse[IM_REGEN] = lastmillis;
                     }
                     else jetting = d->action[AC_JUMP] = false;
                 }
@@ -748,8 +748,8 @@ namespace physics
                     impulsemod(allowjetpack(), impulseregenjetpack);
                     impulsemod(sprint, impulseregensprint);
                     impulsemod(d->move || d->strafe, impulseregenmove);
-                    impulsemod(!onfloor && PHYS(gravity) > 0, impulseregeninair);
-                    impulsemod(iscrouching(d), impulseregencrouch);
+                    impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
+                    impulsemod(iscrouching(d) && !sliding(d), impulseregencrouch);
                     if(collect)
                     {
                         if(timeslice > 0)
@@ -796,7 +796,7 @@ namespace physics
                         float skew = moving ? impulseboost : impulsejump;
                         if(onfloor)
                         {
-                            if(moving && ((d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
+                            if(moving && (iscrouching(d) || (d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
                             d->impulse[IM_JUMP] = lastmillis;
                         }
                         float force = impulsevelocity(d, skew);
@@ -805,7 +805,7 @@ namespace physics
                             vec dir(0, 0, 1);
                             if(!pulse || moving)
                                 vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                            if(!dash && moving && impulseboostz != 0) dir.z += impulseboostz;
+                            if(!onfloor && moving && impulseboostz != 0) dir.z += impulseboostz;
                             (d->vel = dir).normalize().mul(force);
                             d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
                             if(!allowjetpack()) d->action[AC_JUMP] = false;

@@ -188,7 +188,7 @@ namespace weapons
         if(inairspread && (physics::jetpack(d) || d->timeinair) && !d->onladder) { r += inairspread; y++; }
         if(impulsespread > 0 && physics::sprinting(d)) { r += impulsespread; y++; }
         else if(movespread > 0 && (d->move || d->strafe)) { r += movespread; y++; }
-        else if(stillspread > 0 && !physics::iscrouching(d) && !zooming) { r += stillspread; y++; }
+        else if(stillspread > 0 && !physics::sliding(d) && !physics::iscrouching(d) && !zooming) { r += stillspread; y++; }
         if(x) *x = y;
         return r;
     }
@@ -272,7 +272,7 @@ namespace weapons
                     if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
                     float kickmod = kickpushscale;
                     if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod *= kickpushzoom;
-                    if(physics::iscrouching(d)) kickmod *= kickpushcrouch;
+                    if(physics::iscrouching(d) && !physics::sliding(d)) kickmod *= kickpushcrouch;
                     d->vel.add(vec(kick).mul(kickmod));
                 }
             }

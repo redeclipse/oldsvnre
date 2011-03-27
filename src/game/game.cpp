@@ -213,9 +213,10 @@ namespace game
     {
         if(allowmove(player1) && WEAP(player1->weapselect, zooms)) switch(zoomlock)
         {
+            case 4: if(!physics::iscrouching(player1)) break;
             case 3: if(player1->physstate != PHYS_FLOOR) break;
             case 2: if(player1->move || player1->strafe) break;
-            case 1: if(player1->timeinair && (!zooming || !lastzoom || player1->timeinair >= zoomlocktime || player1->impulse[IM_JUMP])) break;
+            case 1: if(physics::sliding(player1) || (player1->timeinair && (!zooming || !lastzoom || player1->timeinair >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
             case 0: default: return true; break;
         }
         zoomset(false, 0);
@@ -569,8 +570,9 @@ namespace game
 
     void heightoffset(gameent *d)
     {
-        d->o.z -= d->height;
         d->setscale(rescale(d), curtime);
+        float offset = d->height;
+        d->o.z -= d->height;
         if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
@@ -619,7 +621,7 @@ namespace game
             else d->height = d->zradius;
         }
         else d->height = d->zradius;
-        d->o.z += d->height;
+        d->o.z += d->timeinair ? offset+(d->height-offset) : d->height;
     }
 
     void checkoften(gameent *d, bool local)
