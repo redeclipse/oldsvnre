@@ -248,8 +248,8 @@ namespace hud
                 else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                 {
                     int n = game::numwaiting();
-                    if(n) g.textf("Respawn queued, waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, n, n != 1 ? "players" : "player");
-                    else g.textf("Prepare to respawn, you are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL);
+                    if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, n, n != 1 ? "players" : "player");
+                    else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL);
                 }
                 g.poplist();
                 if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
