@@ -27,7 +27,7 @@ GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
 GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
-GVAR(IDF_ADMIN, rotatemodefilter, G_NEVER, G_LIMIT, G_ALL); // modes not in this array are filtered out
+GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_NEVER, rotatemodefilter &= ~G_NEVER); // modes not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
