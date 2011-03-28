@@ -2052,8 +2052,7 @@ namespace game
                     else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
                     basetime2 = d->impulse[IM_TIME];
                 }
-                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder &&
-                        ((d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) || d->timeinair >= 1000 || d->impulse[IM_TYPE] == IM_T_SKATE))
+                else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && ((d->impulse[IM_JUMP] && d->timeinair) || d->timeinair >= PHYSMILLIS))
                 {
                     if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
                     {
@@ -2066,7 +2065,8 @@ namespace game
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
                     else anim |= ANIM_JUMP<<ANIM_SECONDARY;
-                    if(d->impulse[IM_JUMP] && lastmillis-d->impulse[IM_JUMP] <= 1000) basetime2 = d->impulse[IM_JUMP];
+                    if(d->impulse[IM_JUMP] && d->timeinair) basetime2 = d->impulse[IM_JUMP];
+                    else if(d->timeinair) basetime2 = lastmillis-d->timeinair;
                     else anim |= ANIM_END<<ANIM_SECONDARY;
                 }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
