@@ -1945,7 +1945,7 @@ namespace client
                     }
                     else if(!s->ai) s->resetinterp();
                     game::waiting.removeobj(s);
-                    if(s->state == CS_ALIVE || m_bomber(game::gamemode)) s->lastdeath = lastmillis; // so spawndelay shows properly
+                    if(s->state == CS_ALIVE) s->lastdeath = lastmillis; // so spawndelay shows properly
                     s->state = CS_WAITING;
                     s->weapreset(true);
                     break;
