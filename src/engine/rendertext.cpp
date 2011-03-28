@@ -117,7 +117,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         switch(d)
         {
             case 'g': case '0': color = bvec( 64, 255,  64); break; // green
-            case 'b': case '1': color = bvec(128, 128, 255); break; // blue
+            case 'b': case '1': color = bvec(86,  86,  255); break; // blue
             case 'y': case '2': color = bvec(255, 255,   0); break; // yellow
             case 'r': case '3': color = bvec(255,  64,  64); break; // red
             case 'a': case '4': color = bvec(192, 192, 192); break; // grey
@@ -129,7 +129,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
             case 'v': color = bvec(192,  96, 255); break; // violet
             case 'p': color = bvec(224,  64, 224); break; // purple
             case 'n': color = bvec(164,  72,  56); break; // brown
-            case 'G': color = bvec( 72, 186,  56); break; // dark green
+            case 'G': color = bvec( 72, 164,  56); break; // dark green
             case 'B': color = bvec( 56,  56, 172); break; // dark blue
             case 'Y': color = bvec(172, 172,   0); break; // dark yellow
             case 'R': color = bvec(172,  56,  56); break; // dark red

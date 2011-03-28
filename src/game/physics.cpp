@@ -283,7 +283,7 @@ namespace physics
 
     bool sliding(physent *d)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(impulseslide && (d->type == ENT_PLAYER || d->type == ENT_AI))
             return ((gameent *)d)->impulse[IM_SLIDE] && lastmillis-((gameent *)d)->impulse[IM_SLIDE] <= impulseslide;
         return false;
     }
@@ -803,8 +803,8 @@ namespace physics
                         if(force > 0)
                         {
                             vec dir(0, 0, 1);
-                            if(!pulse || moving)
-                                vecfromyawpitch(d->aimyaw, d->aimpitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                            if(!pulse || moving || onfloor)
+                                vecfromyawpitch(d->aimyaw, !onfloor || movepitch(d) ? d->aimpitch : 0.f, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                             if(!onfloor && moving && impulseboostz != 0) dir.z += impulseboostz;
                             (d->vel = dir).normalize().mul(force);
                             d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
@@ -1127,7 +1127,7 @@ namespace physics
                 if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
                 if(!pl->timeinair && timeinair)
                 {
-                    if(local && allowimpulse(1) && ((gameent *)pl)->action[AC_CROUCH])
+                    if(local && timeinair >= impulseslidedelay && allowimpulse(1) && ((gameent *)pl)->action[AC_CROUCH])
                     {
                         ((gameent *)pl)->action[AC_DASH] = true;
                         ((gameent *)pl)->actiontime[AC_DASH] = lastmillis;
