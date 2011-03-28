@@ -1272,17 +1272,16 @@ namespace client
                     {
                         case SPHY_JUMP:
                         {
-                            t->impulse[IM_JUMP] = lastmillis;
                             t->resetphys();
+                            t->impulse[IM_JUMP] = lastmillis;
                             playsound(S_JUMP, t->o, t);
                             regularshape(PART_SMOKE, int(t->radius), 0x222222, 21, 20, 250, t->feetpos(), 1, 1, -10, 0, 10.f);
                             break;
                         }
                         case SPHY_BOOST: case SPHY_KICK: case SPHY_SKATE: case SPHY_DASH:
                         {
-                            t->impulse[IM_TYPE] = IM_T_BOOST+(st-SPHY_BOOST);
-                            t->impulse[IM_TIME] = t->impulse[IM_REGEN] = lastmillis;
                             t->resetphys();
+                            t->doimpulse(0, IM_T_BOOST+(st-SPHY_BOOST), lastmillis);
                             game::impulseeffect(t);
                             break;
                         }
