@@ -20,7 +20,7 @@ GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when emp
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
 
-GVARF(IDF_ADMIN, gamespeed, 1, 100, 1000, timescale = sv_gamespeed, timescale = gamespeed);
+GVARF(IDF_ADMIN, gamespeed, 1, 100, 10000, timescale = sv_gamespeed, timescale = gamespeed);
 GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepaused);
 
 GSVAR(IDF_ADMIN, defaultmap, "");
@@ -51,7 +51,7 @@ GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
 GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 
-GFVAR(0, maxalive, 0, 3, FVAR_MAX); // only allow this*numplayers to be alive at once
+GFVAR(0, maxalive, 0, 0, FVAR_MAX); // only allow this*numplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
 GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if numplayers >= this
 GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
@@ -121,9 +121,9 @@ GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
-GVAR(0, pointlimit, 0, 300, VAR_MAX); // finish when score is this or more
+GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 
-GVAR(0, capturelimit, 0, 15, VAR_MAX); // finish when score is this or more
+GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
 GVAR(0, capturepickupdelay, -1, 5000, VAR_MAX);
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
@@ -141,8 +141,8 @@ GVAR(0, defendinterval, 0, 100, VAR_MAX);
 GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
-GVAR(0, bomberlimit, 0, 30, VAR_MAX); // finish when score is this or more (non-hold)
-GVAR(0, bomberholdlimit, 0, 300, VAR_MAX); // finish when score is this or more (hold)
+GVAR(0, bomberlimit, 0, 0, VAR_MAX); // finish when score is this or more (non-hold)
+GVAR(0, bomberholdlimit, 0, 0, VAR_MAX); // finish when score is this or more (hold)
 GVAR(0, bomberresetdelay, 0, 15000, VAR_MAX);
 GVAR(0, bomberpickupdelay, -1, 5000, VAR_MAX);
 GVAR(0, bombercarrytime, 0, 15000, VAR_MAX);
