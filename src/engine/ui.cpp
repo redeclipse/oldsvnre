@@ -425,10 +425,12 @@ struct gui : guient
 
             lineshader->set();
             glDisable(GL_TEXTURE_2D);
+            glDisable(GL_BLEND);
             if(editing) glColor3f(0.75f, 0.25f, 0.25f);
             else glColor3ub(color>>16, (color>>8)&0xFF, color&0xFF);
             rect_(curx, cury, w, h, -1, true);
             glEnable(GL_TEXTURE_2D);
+            glEnable(GL_BLEND);
             defaultshader->set();
         }
         layout(w, h);
