@@ -1269,12 +1269,16 @@ namespace projs
         }
     }
 
-    int check(projent &proj, const vec &dir)
+    int check(projent &proj, const vec &dir, int mat = -1)
     {
         if(proj.o.z < 0) return 0; // remove, always..
-        int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2)), chk = 0;
-        if(proj.extinguish&1 && int(mat&MATF_VOLUME) == MAT_WATER) chk |= 1;
-        if(proj.extinguish&2 && (int(mat&MATF_VOLUME) == MAT_LAVA || int(mat&MATF_FLAGS) == MAT_DEATH)) chk |= 2;
+        int chk = 0;
+        if(proj.extinguish&(1|2))
+        {
+            if(mat < 0) mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));
+            if(proj.extinguish&1 && (mat&MATF_VOLUME) == MAT_WATER) chk |= 1;
+            if(proj.extinguish&2 && ((mat&MATF_VOLUME) == MAT_LAVA || mat&MAT_DEATH)) chk |= 2;
+        }
         if(chk)
         {
             if(chk&1 && !proj.limited && !proj.child)
@@ -1356,9 +1360,9 @@ namespace projs
         return ret;
     }
 
-    int trace(projent &proj, const vec &dir)
+    int trace(projent &proj, const vec &dir, int mat = -1)
     {
-        int ret = check(proj, dir);
+        int ret = check(proj, dir, mat);
         if(ret == 1)
         {
             vec to(proj.o), ray = dir;
@@ -1477,7 +1481,7 @@ namespace projs
         bool blocked = false;
         if(proj.projcollide&COLLIDE_TRACE)
         {
-            switch(trace(proj, dir))
+            switch(trace(proj, dir, mat))
             {
                 case 2: blocked = true; break;
                 case 1: break;
