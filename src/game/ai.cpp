@@ -9,6 +9,7 @@ namespace ai
     VAR(0, aidebug, 0, 0, 6);
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
     VAR(0, aicampaign, 0, 0, 1);
+    VAR(0, aipassive, 0, 0, 1);
     VAR(IDF_PERSIST, aideadfade, 0, 10000, INT_MAX-1);
     VAR(IDF_PERSIST, showaiinfo, 0, 0, 2); // 0/1 = shows/hides bot join/parts, 2 = show more verbose info
 
@@ -234,7 +235,7 @@ namespace ai
             if(totalmillis-updatemillis > 1000)
             {
                 avoid();
-                if(multiplayer(false)) { aiforcegun = -1; aicampaign = 0; }
+                if(multiplayer(false)) { aiforcegun = -1; aicampaign = aipassive = 0; }
                 updatemillis = totalmillis;
             }
             if(!iteration && totalmillis-itermillis > 1000)
@@ -397,7 +398,7 @@ namespace ai
 
     bool violence(gameent *d, aistate &b, gameent *e, bool pursue)
     {
-        if(e && targetable(d, e))
+        if(e && !aipassive && targetable(d, e))
         {
             if(pursue && entities::ents.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
             if(d->ai->enemy != e->clientnum)
@@ -412,6 +413,7 @@ namespace ai
 
     bool target(gameent *d, aistate &b, bool pursue = false, bool force = false, float mindist = 0.f)
     {
+        if(aipassive) return false;
         gameent *t = NULL, *e = NULL;
         vec dp = d->headpos(), tp(0, 0, 0);
         int numdyns = game::numdynents();
@@ -504,15 +506,18 @@ namespace ai
         static vector<interest> interests; interests.setsize(0);
         if(d->aitype == AI_BOT)
         {
-            int sweap = m_weapon(game::gamemode, game::mutators);
-            if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
+            if(!aipassive)
+            {
+                int sweap = m_weapon(game::gamemode, game::mutators);
+                if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
+                if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, m_campaign(game::gamemode));
+            }
             if(m_fight(game::gamemode))
             {
                 if(m_capture(game::gamemode)) capture::aifind(d, b, interests);
                 else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
                 else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
             }
-            if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, m_campaign(game::gamemode));
             if(m_campaign(game::gamemode) && aicampaign)
             {
                 loopi(entities::lastent(TRIGGER)) if(entities::ents[i]->type == TRIGGER && entities::ents[i]->attrs[1] == TR_EXIT)
@@ -580,7 +585,7 @@ namespace ai
                     if(cansee(t, tp, dp, d->aitype >= AI_START) || tp.squaredist(dp) <= maxdist)
                     {
                         aistate &c = t->ai->getstate();
-                        if(violence(t, c, e, true)) return;
+                        violence(t, c, e, true);
                     }
                 }
             }
@@ -645,7 +650,7 @@ namespace ai
 
     void itemspawned(int ent, int spawned)
     {
-        if(m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned)
+        if(!aipassive && m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned)
         {
             int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, entities::ents[ent]->attrs[0], sweap);
             loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT)
@@ -852,6 +857,7 @@ namespace ai
 
                 case AI_T_ACTOR:
                 {
+                    if(aipassive) return 0;
                     //if(check(d, b)) return 1;
                     gameent *e = game::getclient(b.target);
                     if(e && e->state == CS_ALIVE)
@@ -1016,7 +1022,7 @@ namespace ai
         }
         if(air && physics::canimpulse(d, -1, 3) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
             d->action[AC_SPECIAL] = true;
-        else if(!weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
+        else if(!aipassive && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
         {
             d->action[AC_SPECIAL] = true;
             d->ai->lastmelee = lastmillis;
@@ -1025,7 +1031,7 @@ namespace ai
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
     {
-        if(check && !d->blocked)
+        if(!aipassive && check && !d->blocked)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1055,67 +1061,79 @@ namespace ai
         }
         else idle = d->ai->dontmove = true;
 
+        bool enemyok = false, locked = false, melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
         gameent *e = game::getclient(d->ai->enemy);
-        bool enemyok = e && targetable(d, e), locked = false,
-             melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
-        if(!enemyok || d->skill >= 50)
+        if(!aipassive)
         {
-            gameent *f = game::intersectclosest(dp, d->ai->target, d);
-            if(f)
+            if(!(enemyok = e && targetable(d, e)) || d->skill >= 50)
             {
-                if(targetable(d, f))
+                gameent *f = game::intersectclosest(dp, d->ai->target, d);
+                if(f)
                 {
-                    if(!enemyok) violence(d, b, f, weaptype[d->weapselect].melee);
-                    enemyok = true;
-                    e = f;
+                    if(targetable(d, f))
+                    {
+                        if(!enemyok) violence(d, b, f, weaptype[d->weapselect].melee);
+                        enemyok = true;
+                        e = f;
+                    }
+                    else enemyok = false;
                 }
-                else enemyok = false;
+                else if(!enemyok && target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN))
+                    enemyok = (e = game::getclient(d->ai->enemy)) != NULL;
             }
-            else if(!enemyok && target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN))
-                enemyok = (e = game::getclient(d->ai->enemy)) != NULL;
-        }
-        if(enemyok)
-        {
-            bool alt = altfire(d, e);
-            vec ep = getaimpos(d, e, alt);
-            float yaw, pitch;
-            game::getyawpitch(dp, ep, yaw, pitch);
-            game::fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
-                quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (WEAP2(d->weapselect, fullauto, alt) ? WEAP2(d->weapselect, adelay, alt)*3 : skmod)+30;
-            if(insight) d->ai->enemyseen = lastmillis;
-            if(idle || insight || hasseen || quick)
+            if(enemyok)
             {
-                float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
-                if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16, melee))
+                bool alt = altfire(d, e);
+                vec ep = getaimpos(d, e, alt);
+                float yaw, pitch;
+                game::getyawpitch(dp, ep, yaw, pitch);
+                game::fixrange(yaw, pitch);
+                bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
+                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (WEAP2(d->weapselect, fullauto, alt) ? WEAP2(d->weapselect, adelay, alt)*3 : skmod)+30;
+                if(insight) d->ai->enemyseen = lastmillis;
+                if(idle || insight || hasseen || quick)
                 {
-                    d->ai->targyaw = yaw;
-                    d->ai->targpitch = pitch;
-                    frame *= 2;
-                    if(d->aitype == AI_BOT) locked = true;
+                    float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
+                    if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16, melee))
+                    {
+                        d->ai->targyaw = yaw;
+                        d->ai->targpitch = pitch;
+                        frame *= 2;
+                        if(d->aitype == AI_BOT) locked = true;
+                    }
+                    game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
+                    if(insight || quick)
+                    {
+                        bool shoot = canshoot(d, e, alt);
+                        if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && WEAP2(d->weapselect, power, alt)) switch(WEAP2(d->weapselect, cooked, alt))
+                        {
+                            case 2: case 3: shoot = false; break; // shorter
+                            case 1: case 4: case 5: default: break;
+                        }
+                        if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
+                        {
+                            d->action[alt ? AC_ALTERNATE : AC_ATTACK] = true;
+                            d->actiontime[alt ? AC_ALTERNATE : AC_ATTACK] = lastmillis;
+                            result = 3;
+                        }
+                        else result = 2;
+                    }
+                    else result = 1;
                 }
-                game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick)
+                else
                 {
-                    bool shoot = canshoot(d, e, alt);
-                    if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && WEAP2(d->weapselect, power, alt)) switch(WEAP2(d->weapselect, cooked, alt))
+                    if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50)+3000)
                     {
-                        case 2: case 3: shoot = false; break; // shorter
-                        case 1: case 4: case 5: default: break;
+                        d->ai->enemy = -1;
+                        d->ai->enemyseen = d->ai->enemymillis = 0;
                     }
-                    if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
-                    {
-                        d->action[alt ? AC_ALTERNATE : AC_ATTACK] = true;
-                        d->actiontime[alt ? AC_ALTERNATE : AC_ATTACK] = lastmillis;
-                        result = 3;
-                    }
-                    else result = 2;
+                    enemyok = false;
+                    result = 0;
                 }
-                else result = 1;
             }
             else
             {
-                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50)+3000)
+                if(!enemyok)
                 {
                     d->ai->enemy = -1;
                     d->ai->enemyseen = d->ai->enemymillis = 0;
@@ -1126,12 +1144,8 @@ namespace ai
         }
         else
         {
-            if(!enemyok)
-            {
-                d->ai->enemy = -1;
-                d->ai->enemyseen = d->ai->enemymillis = 0;
-            }
-            enemyok = false;
+            d->ai->enemy = -1;
+            d->ai->enemyseen = d->ai->enemymillis = 0;
             result = 0;
         }
         if(result < 3) d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = false;
