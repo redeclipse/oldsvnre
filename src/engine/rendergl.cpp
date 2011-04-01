@@ -2342,7 +2342,7 @@ void polyhue(dynent *d, vec &colour, bool light, bool fast)
         vec lightpos = d->type == ENT_PLAYER || d->type == ENT_AI ? d->feetpos(0.75f*(d->height + d->aboveeye)) : d->o;
         lightreaching(lightpos, d->light.color, d->light.dir, fast);
         dynlightreaching(lightpos, d->light.color, d->light.dir);
-        game::lighteffects(d, d->light.color, d->light.dir);
+        if(!d->light.effect.iszero()) d->light.color.max(d->light.effect).lerp(d->light.effect, 0.6f);
         d->light.millis = lastmillis;
     }
     vec c = vec(colour).mul(polycolour).mul(vec(d->light.color).mul(polylight));

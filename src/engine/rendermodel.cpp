@@ -861,7 +861,6 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
                 else if(d->type < ENT_CAMERA) pos.z += 0.75f*(d->height + d->aboveeye);
                 lightreaching(pos, light->color, light->dir, (flags&MDL_LIGHT_FAST)!=0);
                 dynlightreaching(pos, light->color, light->dir);
-                game::lighteffects(d, light->color, light->dir);
                 light->millis = lastmillis;
             }
         }
@@ -881,6 +880,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         }
         if(light) { lightcolor = light->color; lightdir = light->dir; lightmaterial = light->material; }
         if(flags&MDL_DYNLIGHT) dynlightreaching(pos, lightcolor, lightdir);
+        if(light && !light->effect.iszero()) lightcolor.max(light->effect).lerp(light->effect, 0.6f);
     }
 
     if(a) for(int i = 0; a[i].tag; i++)

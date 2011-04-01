@@ -94,7 +94,6 @@ namespace game
     extern dynent *iterdynents(int i, bool all = false);
     extern dynent *focusedent(bool force = false);
     extern int numdynents(bool all = false);
-    extern void lighteffects(dynent *d, vec &color, vec &dir);
     extern void adddynlights();
     extern void particletrack(particle *p, uint type, int &ts, bool lastpass);
     extern void dynlighttrack(physent *owner, vec &o);

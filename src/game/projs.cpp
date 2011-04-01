@@ -1800,6 +1800,16 @@ namespace projs
                     if(shadowdebris) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
                     fadeproj(proj, trans, size);
+                    if(proj.light.millis != lastmillis)
+                    {
+                        if(!proj.limited)
+                        {
+                            vec burncol = game::burncolour(&proj);
+                            burncol.lerp(proj.light.effect, clamp((proj.lifespan - 0.3f)/0.5f, 0.0f, 1.0f));
+                            proj.light.effect.max(burncol);
+                        }
+                        else proj.light.effect = vec(0, 0, 0);
+                    }
                     break;
                 }
                 case PRJ_GIBS:
@@ -1829,6 +1839,15 @@ namespace projs
                 {
                     if(shadowents) flags |= MDL_DYNSHADOW;
                     fadeproj(proj, trans, size);
+                    if(proj.light.millis != lastmillis && entities::ents.inrange(proj.id))
+                    {
+                        gameentity &e = *(gameentity *)entities::ents[proj.id];
+                        if(e.type == WEAPON)
+                        {
+                            int col = weaptype[w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators))].colour, interval = lastmillis%1000;
+                            proj.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
+                        }
+                    }
                     break;
                 }
                 default: break;
