@@ -43,7 +43,7 @@ GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo forge foundation futuresport ghost keystone linear longestyard mist nova panic spacetech stone testchamber tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
 namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
@@ -199,7 +199,7 @@ GFVAR(0, impulsespeed, 0, 90, FVAR_MAX); // extra velocity to add when impulsing
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
 GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
-GFVAR(0, impulsedash, 0, 1.15f, FVAR_MAX); // dashing modifier
+GFVAR(0, impulsedash, 0, 1.15f, FVAR_MAX); // dashing/powerslide modifier
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, FVAR_MAX); // melee modifier
 GFVAR(0, impulseparkour, 0, 1.15f, FVAR_MAX); // parkour modifier
@@ -207,9 +207,10 @@ GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z no
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
-GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before floor friction kicks back in and powerslides end
+GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before powerslides end
+GVAR(0, impulseslip, 0, 250, VAR_MAX); // time before floor friction kicks back in
 GVAR(0, impulsedelay, 0, 125, VAR_MAX); // minimum time between boosts
-GVAR(0, impulsedashdelay, 0, 500, VAR_MAX); // minimum time between dashes
+GVAR(0, impulsedashdelay, 0, 500, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
 GVAR(0, impulseslidedelay, 0, 250, VAR_MAX); // minimum air time before allowing a power slide
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer

@@ -281,10 +281,16 @@ namespace physics
         return 1.f;
     }
 
-    bool sliding(physent *d)
+    bool sliding(physent *d, bool power)
     {
-        if(impulseslide && (d->type == ENT_PLAYER || d->type == ENT_AI))
-            return ((gameent *)d)->impulse[IM_SLIDE] && lastmillis-((gameent *)d)->impulse[IM_SLIDE] <= impulseslide;
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        {
+            gameent *e = (gameent *)d;
+            if(!power && (e->turnside || (impulseslip && e->impulse[IM_SLIP] && lastmillis-e->impulse[IM_SLIP] <= impulseslip)))
+                return true;
+            if(impulseslide && e->impulse[IM_SLIDE] && lastmillis-e->impulse[IM_SLIDE] <= impulseslide && (!power || (!d->timeinair && e->action[AC_CROUCH])))
+                return true;
+        }
         return false;
     }
 
@@ -293,7 +299,7 @@ namespace physics
         if(!d->onladder && !liquidcheck(d) && (d->type == ENT_PLAYER || d->type == ENT_AI) && PHYS(gravity) > 0)
         {
             gameent *e = (gameent *)d;
-            if(e->turnside || sliding(e)) return false;
+            if((e->turnside || !e->action[AC_CROUCH]) && sliding(e)) return false;
             return true;
         }
         return false;
@@ -840,7 +846,7 @@ namespace physics
                     }
                 }
             }
-            bool found = false, slide = sliding(d) && iscrouching(d);
+            bool found = false, slide = sliding(d, true);
             if(d->turnside || d->action[AC_SPECIAL] || slide)
             {
                 const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
