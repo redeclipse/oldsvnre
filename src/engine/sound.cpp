@@ -18,7 +18,7 @@ VARF(0, soundchans, 1, 32, 128, initwarning("sound configuration", INIT_RESET, C
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundbufferlen, 128, 1024, INT_MAX-1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
-VARF(IDF_PERSIST, musicvol, 0, 128, 255, changedvol = true);
+VARF(IDF_PERSIST, musicvol, 0, 255, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 0, INT_MAX-1);
 VAR(IDF_PERSIST, musicfadeout, 0, 5000, INT_MAX-1);
 SVAR(0, titlemusic, "sounds/theme");
@@ -135,7 +135,7 @@ void playmusic(const char *name, const char *cmd)
                     if(musicfadein) Mix_FadeInMusic(music, cmd && *cmd ? 0 : -1, musicfadein);
                     else Mix_PlayMusic(music, cmd && *cmd ? 0 : -1);
                     Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
-                    found = true;
+                    changedvol = found = true;
                 }
                 if(found) break;
             }
@@ -151,7 +151,11 @@ void smartmusic(bool cond, bool autooff)
 {
     if(nosound || !mastervol || !musicvol || (!cond && Mix_PlayingMusic()) || !*titlemusic) return;
     if(!music || !Mix_PlayingMusic() || (cond && strcmp(musicfile, titlemusic))) playmusic(titlemusic);
-    else if(music && Mix_PlayingMusic()) Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
+    else if(music && Mix_PlayingMusic())
+    {
+        Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
+        changedvol = true;
+    }
 }
 ICOMMAND(0, smartmusic, "ii", (int *a, int *b), smartmusic(*a, *b));
 
@@ -460,6 +464,7 @@ void resetsound()
         if(musicfadein) Mix_FadeInMusic(music, musicdonecmd ? 0 : -1, musicfadein);
         else Mix_PlayMusic(music, musicdonecmd ? 0 : -1);
         Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
+        changedvol = true;
     }
     else
     {
