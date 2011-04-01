@@ -216,7 +216,7 @@ namespace game
             case 4: if(!physics::iscrouching(player1)) break;
             case 3: if(player1->physstate != PHYS_FLOOR) break;
             case 2: if(player1->move || player1->strafe) break;
-            case 1: if(physics::sliding(player1) || (player1->timeinair && (!zooming || !lastzoom || player1->timeinair >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
+            case 1: if(physics::sliding(player1, true) || (player1->timeinair && (!zooming || !lastzoom || player1->timeinair >= zoomlocktime || player1->impulse[IM_JUMP]))) break;
             case 0: default: return true; break;
         }
         zoomset(false, 0);
@@ -2036,7 +2036,7 @@ namespace game
                     else anim |= ANIM_END<<ANIM_SECONDARY;
                 }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(physics::sliding(d) && physics::iscrouching(d)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
+                else if(physics::sliding(d, true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(physics::sprinting(d))
                 {
                     if(d->move>0) anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
