@@ -9,7 +9,7 @@ Mix_Music *music = NULL;
 SDL_RWops *musicrw = NULL;
 stream *musicstream = NULL;
 char *musicfile = NULL, *musicdonecmd = NULL;
-int soundsatonce = 0, lastsoundmillis = 0, musictime = -1;
+int soundsatonce = 0, lastsoundmillis = 0, musictime = -1, musicdonetime = -1;
 
 VARF(IDF_PERSIST, mastervol, 0, 255, 255, changedvol = true);
 VAR(IDF_PERSIST, soundvol, 0, 255, 255);
@@ -57,6 +57,7 @@ void stopmusic(bool docmd)
         if(docmd) execute(cmd);
         delete[] cmd;
     }
+    musicdonetime = -1;
 }
 
 void musicdone(bool docmd)
@@ -129,9 +130,10 @@ void playmusic(const char *name, const char *cmd)
                     DELETEA(musicfile);
                     DELETEA(musicdonecmd);
                     musicfile = newstring(name);
-                    if(cmd[0]) musicdonecmd = newstring(cmd);
-                    if(musicfadein) Mix_FadeInMusic(music, cmd[0] ? 0 : -1, musicfadein);
-                    else Mix_PlayMusic(music, cmd[0] ? 0 : -1);
+                    if(cmd && *cmd) musicdonecmd = newstring(cmd);
+                    musicdonetime = -1;
+                    if(musicfadein) Mix_FadeInMusic(music, cmd && *cmd ? 0 : -1, musicfadein);
+                    else Mix_PlayMusic(music, cmd && *cmd ? 0 : -1);
                     Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
                     found = true;
                 }
@@ -148,7 +150,7 @@ COMMANDN(0, music, playmusic, "ss");
 void smartmusic(bool cond, bool autooff)
 {
     if(nosound || !mastervol || !musicvol || (!cond && Mix_PlayingMusic()) || !*titlemusic) return;
-    if(!music || !Mix_PlayingMusic() || (cond && strcmp(musicfile, titlemusic))) playmusic(titlemusic, "");
+    if(!music || !Mix_PlayingMusic() || (cond && strcmp(musicfile, titlemusic))) playmusic(titlemusic);
     else if(music && Mix_PlayingMusic()) Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
 }
 ICOMMAND(0, smartmusic, "ii", (int *a, int *b), smartmusic(*a, *b));
@@ -307,7 +309,11 @@ void updatesounds()
     if(music || Mix_PlayingMusic())
     {
         if(nosound || !mastervol || !musicvol) stopmusic(false);
-        else if(!Mix_PlayingMusic()) musicdone(true);
+        else if(!Mix_PlayingMusic())
+        {
+            if(musicdonetime < 0) musicdonetime = totalmillis;
+            else if(totalmillis-musicdonetime >= 500) musicdone(true);
+        }
         else if(changedvol)
         {
             Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
