@@ -1782,7 +1782,7 @@ namespace game
             else if(maptime < 0)
             {
                 maptime = lastmillis;
-                if(*mapmusic && (!music || !Mix_PlayingMusic() || strcmp(mapmusic, musicfile))) playmusic(mapmusic, "");
+                if(*mapmusic && (!music || !Mix_PlayingMusic() || strcmp(mapmusic, musicfile))) playmusic(mapmusic);
                 else musicdone(false);
                 RUNWORLD("on_start");
                 return;
