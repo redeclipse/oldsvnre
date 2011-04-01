@@ -556,6 +556,7 @@ namespace game
         if(d->state == CS_DEAD || d->state == CS_WAITING) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {
+            if(d == focus && d->weapselect == WEAP_MELEE && !thirdpersonview(true)) return 0; // hack
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
             if(millis > 0) total *= 1.f-(float(millis)/float(prot));
             if(d == player1 && inzoom())
@@ -1338,41 +1339,6 @@ namespace game
         return vec::hexcolor(pulsecols[n/PULSECOLOURS][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[n2/PULSECOLOURS][n2%PULSECOLOURS]), (lastmillis%50)/50.0f);
     }
 
-    void lighteffects(dynent *d, vec &color, vec &dir)
-    {
-        if(d == (dynent *)&avatarmodel) d = focus;
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
-        {
-            gameent *e = (gameent *)d;
-            if(burntime && e->burning(lastmillis, burntime))
-            {
-                vec burncol = vec(burncolour(d)).max(vec::hexcolor(teamtype[e->team].colour));
-                color.max(burncol).lerp(burncol, 0.6f);
-            }
-            if(bleedtime && e->bleeding(lastmillis, bleedtime))
-            {
-                int millis = lastmillis-e->lastbleedtime, delay = min(bleeddelay, 500);
-                if(millis <= delay)
-                {
-                    delay /= 2;
-                    float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                    vec bleedcol = vec(1, 0.2f, 0.2f).max(vec::hexcolor(teamtype[e->team].colour)).mul(amt);
-                    color.max(bleedcol).lerp(bleedcol, 0.6f);
-                }
-            }
-        }
-        else if(d->type == ENT_PROJ)
-        {
-            projent *e = (projent *)d;
-            if(e->projtype == PRJ_DEBRIS && !e->limited)
-            {
-                vec burncol = burncolour(d);
-                burncol.lerp(color, clamp((e->lifespan - 0.3f)/0.5f, 0.0f, 1.0f));
-                color.max(burncol).lerp(burncol, 0.6f);
-            }
-        }
-    }
-
     void particletrack(particle *p, uint type, int &ts,  bool lastpass)
     {
         if(!p || !p->owner || (p->owner->type != ENT_PLAYER && p->owner->type != ENT_AI)) return;
@@ -2119,24 +2085,40 @@ namespace game
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
-        e->light.material[0] = bvec(d->colour());
-        if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
+        if(e->light.millis != lastmillis)
         {
-            float scale = 1;
-            switch(d->weapstate[d->weapselect])
+            e->light.material[0] = bvec(d->colour());
+            if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
-                case WEAP_S_RELOAD:
+                float scale = 1;
+                switch(d->weapstate[d->weapselect])
                 {
-                    int millis = lastmillis-d->weaplast[d->weapselect], check = d->weapwait[d->weapselect]/2;
-                    scale = millis >= check ? (millis-check)/float(check) : 0.f;
-                    break;
+                    case WEAP_S_RELOAD:
+                    {
+                        int millis = lastmillis-d->weaplast[d->weapselect], check = d->weapwait[d->weapselect]/2;
+                        scale = millis >= check ? (millis-check)/float(check) : 0.f;
+                        break;
+                    }
+                    default: scale = d->ammo[d->weapselect]/float(WEAP(d->weapselect, max)); break;
                 }
-                default: scale = d->ammo[d->weapselect]/float(WEAP(d->weapselect, max)); break;
+                uchar wepmat = uchar(255*scale);
+                e->light.material[1] = bvec(wepmat, wepmat, wepmat);
             }
-            uchar wepmat = uchar(255*scale);
-            e->light.material[1] = bvec(wepmat, wepmat, wepmat);
+            else e->light.material[1] = bvec(255, 255, 255);
+            e->light.effect = vec(0, 0, 0);
+            if(burntime && d->burning(lastmillis, burntime))
+                e->light.effect.max(vec(burncolour(d)).max(vec::hexcolor(teamtype[d->team].colour)));
+            if(bleedtime && d->bleeding(lastmillis, bleedtime))
+            {
+                int millis = lastmillis-d->lastbleedtime, delay = min(bleeddelay, 500);
+                if(millis <= delay)
+                {
+                    delay /= 2;
+                    float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
+                    e->light.effect.max(vec(1, 0.2f, 0.2f).max(vec::hexcolor(teamtype[d->team].colour)).mul(amt));
+                }
+            }
         }
-        else e->light.material[1] = bvec(255, 255, 255);
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 

@@ -235,11 +235,14 @@ namespace bomber
                     entitylight *light = &entities::ents[f.ent]->light;
                     float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/3)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
                     int interval = lastmillis%1000;
-                    bvec colour = bvec::fromcolor(pulsecolour());
-                    if(light->millis != lastmillis) f.light.material[0] = light->material[0] = colour;
+                    if(light->millis != lastmillis)
+                    {
+                        light->effect = pulsecolour();
+                        light->material[0] = bvec::fromcolor(light->effect);
+                    }
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    int pcolour = (int(colour.x)<<16)|(int(colour.y)<<8)|int(colour.z);
+                    int pcolour = (int(light->effect.x)<<16)|(int(light->effect.y)<<8)|int(light->effect.z);
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
                     if(f.droptime)
                     {

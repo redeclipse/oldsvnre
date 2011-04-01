@@ -18,9 +18,10 @@ namespace defend
         vec colour = vec::hexcolor(teamtype[owner].colour);
         if(enemy)
         {
+            int team = owner && enemy && !m_gsp1(game::gamemode, game::mutators) ? TEAM_NEUTRAL : enemy;
             int timestep = totalmillis%1000;
             float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*occupy, 0.f, 1.f);
-            colour.lerp(vec::hexcolor(teamtype[enemy].colour), amt);
+            colour.lerp(vec::hexcolor(teamtype[team].colour), amt);
         }
         return colour;
     }

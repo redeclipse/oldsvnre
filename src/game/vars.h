@@ -60,7 +60,7 @@ GVAR(0, maxcarry, 1, 2, WEAP_CARRY);
 GVAR(0, spawnrotate, 0, 4, VAR_MAX); // 0 = let client decide, 1 = sequence, 2+ = random
 GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
 GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);
-GVAR(0, trialweapon, 0, WEAP_SWORD, WEAP_MAX-1);
+GVAR(0, trialweapon, 0, WEAP_MELEE, WEAP_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib/arena matches
