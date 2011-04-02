@@ -239,7 +239,7 @@ namespace bomber
                     light->material[0] = bvec::fromcolor(light->effect);
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
-                    int pcolour = (int(light->effect.x)<<16)|(int(light->effect.y)<<8)|int(light->effect.z);
+                    int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
                     if(f.droptime)
                     {
