@@ -1007,22 +1007,31 @@ namespace server
         modecheck(mode, muts);
     }
 
-    #define mapshrink(a,b,c) \
-        if(a && b) \
+    #define mapshrink(a,b,c) if(a && b) \
+    { \
+        char *p = shrinklist(b, c, 1); \
+        if(p) \
         { \
-            char *p = shrinklist(b, c, 1); \
-            if(p) \
-            { \
-                DELETEA(b); \
-                b = p; \
-            } \
-        }
+            DELETEA(b); \
+            b = p; \
+        } \
+    }
 
     #define mapcull(a,b,c) \
+    { \
         mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
-        mapshrink(m_jetpack(b, c), a, GAME(jetpackmaps));
+        mapshrink(m_jetpack(b, c), a, GAME(jetpackmaps)); \
+        if(GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
+        { \
+            int players = numclients(); \
+            mapshrink(GAME(smallmapmax) && players <= GAME(smallmapmax), a, GAME(smallmaps)) \
+            else mapshrink(GAME(mediummapmax) && players <= GAME(mediummapmax), a, GAME(mediummaps)) \
+            else mapshrink(GAME(mediummapmax) && players > GAME(mediummapmax), a, GAME(largemaps)) \
+        } \
+    }
 
     #define maplist(a,b,c) \
+    { \
         if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
         else if(m_capture(b)) a = newstring(GAME(capturemaps)); \
         else if(m_defend(b)) a = newstring(GAME(defendmaps)); \
@@ -1030,7 +1039,8 @@ namespace server
         else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
         else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
         else a = newstring(GAME(allowmaps)); \
-        mapcull(a, b, c);
+        if(GAME(mapsfilter)) mapcull(a, b, c); \
+    }
 
     const char *choosemap(const char *suggest, int mode, int muts, int force)
     {
