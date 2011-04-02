@@ -1695,12 +1695,13 @@ namespace hud
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse(physics::allowjetpack() ? 0 : 2) && impulsemeter && impulsecost && inventoryimpulse)
             {
-                float len = clamp(game::focus->impulse[IM_METER]/float(impulsemeter), 0.f, 1.f);
+                int meter = game::focus->impulse[IM_METER]+(impulsecost*game::focus->impulse[IM_POWER]);
+                float len = clamp(meter/float(impulsemeter), 0.f, 1.f);
                 settexture(progresstex, 3);
                 float r = 1, g = 1, b = 1, f = 1;
                 int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
                 if(teaminventory) skewcolour(r, g, b);
-                if(inventoryflash && game::focus->impulse[IM_METER])
+                if(inventoryflash && meter)
                 {
                     int timestep = totalmillis%1000;
                     float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
@@ -1719,7 +1720,7 @@ namespace hud
                 {
                     pushfont("sub");
                     draw_textx("%s%d%%", x+iw/2+ow, y-sy-iw/2-FONTH/2, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1,
-                        game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fy" : "\fo") : "\fg",
+                        meter > 0 ? (impulsemeter-meter > impulsecost ? "\fy" : "\fo") : "\fg",
                             int((1-len)*100));
                     popfont();
                 }

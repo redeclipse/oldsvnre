@@ -1690,8 +1690,6 @@ namespace game
                 cameras.sort(cament::camsort);
                 cam = &cameras[0];
                 lasttvcam = lastmillis;
-                conoutft(CON_EVENT, "viewing camera: %d/%d (%s) %.4f %d %d", cam->type, cam->id,
-                            cam->player ? game::colorname(cam->player) : "-", cam->score, cam->pri, cam->cansee);
             }
             camrefresh(cam, renew);
             if(!lasttvchg || cam->type != lasttype || cam->id != lastid)

@@ -47,7 +47,7 @@ namespace physics
                 {
                     if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
                     if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
-                    if(cost == 0 && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
+                    if(cost == 0 && impulsestyle == 1 && !e->impulse[IM_POWER] && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
                 }
                 return true;
             }
@@ -700,7 +700,7 @@ namespace physics
 
     bool canregenimpulse(gameent *d)
     {
-        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
+        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay) && !d->impulse[IM_POWER])
         {
             if(impulseregenjetdelay && d->impulse[IM_JETPACK] && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_JETPACK] < impulseregenjetdelay))
                 return false;
@@ -718,8 +718,11 @@ namespace physics
         else if(game::allowmove(d))
         {
             bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
+
             if(impulsemeter)
             {
+                if(d->impulse[IM_POWER] && d->impulse[IM_METER] > impulsemeter) d->impulse[IM_POWER] = 0;
+
                 bool sprint = sprinting(d, false);
                 if(sprint && impulsesprint > 0)
                 {
@@ -768,7 +771,7 @@ namespace physics
                 }
             }
 
-            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
+            if(d->turnside && (!allowimpulse(3) || d->impulse[IM_POWER] || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
                 d->turnside = 0;
 
             if(d->turnside)
@@ -793,36 +796,53 @@ namespace physics
             {
                 if((d->ai || impulseaction) && canimpulse(d, 0, 1))
                 {
-                    bool dash = false, pulse = false;
-                    if(!d->ai && onfloor) dash = impulseaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
-                    else pulse = ((d->ai || impulseaction >= 2) && d->action[AC_JUMP]) || ((d->ai || impulseaction >= 2) && d->action[AC_DASH]);
-                    if(dash || pulse)
+                    bool power = d->impulse[IM_POWER] && !d->action[AC_CROUCH], dash = false, pulse = false;
+                    if(!d->impulse[IM_POWER])
+                    {
+                        if(!d->ai && onfloor) dash = impulseaction >= 2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
+                        else pulse = ((d->ai || impulseaction >= 2) && d->action[AC_JUMP]) || ((d->ai || impulseaction >= 2) && d->action[AC_DASH]);
+                    }
+                    if(power || dash || pulse)
                     {
                         bool moving = (d->ai || impulseaction != 1) && (d->move || d->strafe);
-                        float skew = moving ? impulseboost : impulsejump;
+                        float skew = moving && !power ? impulseboost : impulsejump;
                         if(onfloor)
                         {
-                            if(moving && (iscrouching(d) || (d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
+                            if(moving && !power && (iscrouching(d) || (d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
                             d->impulse[IM_JUMP] = lastmillis;
                         }
                         float force = impulsevelocity(d, skew);
+                        if(onfloor && power) force += jumpforce(d, true);
                         if(force > 0)
                         {
                             vec dir(0, 0, 1);
-                            if(!pulse || moving || onfloor)
+                            if(!power && (!pulse || moving || onfloor))
                                 vecfromyawpitch(d->aimyaw, !onfloor || movepitch(d) ? d->aimpitch : 0.f, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                            if(!onfloor && moving && impulseboostz != 0) dir.z += impulseboostz;
+                            if(!onfloor && moving && !power && impulseboostz != 0) dir.z += impulseboostz;
                             (d->vel = dir).normalize().mul(force);
-                            d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
+                            d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, !power && dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
+                            if(power) d->impulse[IM_POWER]--;
                             if(!allowjetpack()) d->action[AC_JUMP] = false;
                             client::addmsg(N_SPHY, "ri2", d->clientnum, dash ? SPHY_DASH : SPHY_BOOST);
                             game::impulseeffect(d);
                         }
                     }
                 }
+
                 if(onfloor && d->action[AC_JUMP])
                 {
-                    if(allowjetpack() && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
+                    if(d->action[AC_CROUCH])
+                    {
+                        if(d->impulse[IM_POWER] < impulsecount && canimpulse(d, 0, 1) && (!impulsemeter || d->impulse[IM_METER]+(impulsecost*(d->impulse[IM_POWER]+1)) <= impulsemeter))
+                        {
+                            d->impulse[IM_POWER]++;
+                            client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
+                            playsound(S_JUMP, d->o, d);
+                            regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
+                        }
+                        d->action[AC_JUMP] = false;
+                    }
+                    else if(allowjetpack() && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
                         d->action[AC_JUMP] = false;
                     else
                     {
@@ -847,7 +867,7 @@ namespace physics
                 }
             }
             bool found = false, slide = sliding(d, true);
-            if(d->turnside || d->action[AC_SPECIAL] || slide)
+            if(!d->impulse[IM_POWER] && (d->turnside || d->action[AC_SPECIAL] || slide))
             {
                 const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
                 loopi(d->turnside ? 6 : 4)
