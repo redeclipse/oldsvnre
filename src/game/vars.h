@@ -5,14 +5,6 @@ GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 GVAR(IDF_ADMIN, automaster, 0, 0, 1);
 
-GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
-GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
-GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
-GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
-GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
-GVAR(IDF_ADMIN, votelock, 0, 2, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
-GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
-
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
 
@@ -33,8 +25,8 @@ GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in th
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, mainmaps, "bath center darkness deadsimple deathtrap deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 
+GSVAR(IDF_ADMIN, mainmaps, "bath center darkness deadsimple deathtrap deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "bath center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "bath center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "bath center deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
@@ -45,11 +37,28 @@ GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
 GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
+GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple deli dropzone dutility echo ghost linear longestyard panic stone wet");
+GSVAR(IDF_ADMIN, mediummaps, "bath center darkness deadsimple deathtrap deli dropzone echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, largemaps, "center dawn deadsimple deathtrap deli depot facility forge foundation futuresport ghost lab linear mist nova processing spacetech tranquility tribal ubik venus warp");
+
+
+GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
+GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
+GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
+
+GVAR(IDF_ADMIN, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
+GVAR(IDF_ADMIN, mapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
+GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
+GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
+GVAR(IDF_ADMIN, votelock, 0, 1, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
+GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
+
+GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
+GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map
+
 namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
-
-GVAR(0, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 
 GFVAR(0, maxalive, 0, 0, FVAR_MAX); // only allow this*numplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
