@@ -218,12 +218,9 @@ namespace capture
                 if(f.proj) above.z -= f.proj->height;
             }
             entitylight *light = &f.light;
-            if(light->millis != lastmillis)
-            {
-                int interval = lastmillis%1000;
-                light->effect = vec::hexcolor(teamtype[f.team].colour).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
-            }
-            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT, NULL, NULL, 0, 0, 1);
+            int interval = lastmillis%1000;
+            light->effect = vec::hexcolor(teamtype[f.team].colour).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
+            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
             above.z += enttype[AFFINITY].radius*2/3;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
             defformatstring(info)("<super>%s flag", teamtype[f.team].name);

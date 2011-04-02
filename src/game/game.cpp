@@ -2105,14 +2105,17 @@ namespace game
                 e->light.material[1] = bvec(wepmat, wepmat, wepmat);
             }
             else e->light.material[1] = bvec(255, 255, 255);
-            e->light.effect = vec(0, 0, 0);
             if(burntime && d->burning(lastmillis, burntime))
+            {
+                flags |= MDL_LIGHTFX;
                 e->light.effect.max(vec(burncolour(d)).max(vec::hexcolor(teamtype[d->team].colour)));
+            }
             if(bleedtime && d->bleeding(lastmillis, bleedtime))
             {
                 int millis = lastmillis-d->lastbleedtime, delay = min(bleeddelay, 500);
                 if(millis <= delay)
                 {
+                    flags |= MDL_LIGHTFX;
                     delay /= 2;
                     float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
                     e->light.effect.max(vec(1, 0.2f, 0.2f).max(vec::hexcolor(teamtype[d->team].colour)).mul(amt));

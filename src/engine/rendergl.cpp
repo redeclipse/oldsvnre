@@ -2335,14 +2335,14 @@ FVAR(IDF_PERSIST, polycolour, 0, 1, 1);
 FVAR(IDF_PERSIST, polylight, 0, 1, 1);
 FVAR(IDF_PERSIST, polybright, 0, 0.65f, 1);
 
-void polyhue(dynent *d, vec &colour, bool light, bool fast)
+void polyhue(dynent *d, vec &colour, int flags)
 {
-    if(light && d->light.millis != lastmillis)
+    if(flags&MDL_LIGHT && d->light.millis != lastmillis)
     {
         vec lightpos = d->type == ENT_PLAYER || d->type == ENT_AI ? d->feetpos(0.75f*(d->height + d->aboveeye)) : d->o;
-        lightreaching(lightpos, d->light.color, d->light.dir, fast);
+        lightreaching(lightpos, d->light.color, d->light.dir, (flags&MDL_LIGHT_FAST)!=0);
         dynlightreaching(lightpos, d->light.color, d->light.dir);
-        if(!d->light.effect.iszero()) d->light.color.max(d->light.effect).lerp(d->light.effect, 0.6f);
+        if(flags&MDL_LIGHTFX) d->light.color.max(d->light.effect).lerp(d->light.effect, 0.6f);
         d->light.millis = lastmillis;
     }
     vec c = vec(colour).mul(polycolour).mul(vec(d->light.color).mul(polylight));
