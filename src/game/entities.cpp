@@ -2444,15 +2444,13 @@ namespace entities
                             int millis = lastmillis-e.lastuse;
                             if(millis < 500) size = fade = 1.f-(float(millis)/500.f);
                         }
-                        if(e.light.millis != lastmillis)
+                        if(e.type == WEAPON)
                         {
-                            if(e.type == WEAPON)
-                            {
-                                int col = weaptype[w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators))].colour, interval = lastmillis%1000;
-                                e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
-                            }
-                            if(colour >= 0) e.light.material[0] = bvec(colour);
+                            flags |= MDL_LIGHTFX;
+                            int col = weaptype[w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators))].colour, interval = lastmillis%1000;
+                            e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
+                        if(colour >= 0) e.light.material[0] = bvec(colour);
                         rendermodel(&e.light, mdlname, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0.f, flags, NULL, NULL, 0, 0, fade, size);
                     }
                 }
