@@ -3424,7 +3424,7 @@ namespace server
             if(ci->state.state == CS_ALIVE)
             {
                 suicideevent ev;
-                ev.flags = 0;
+                ev.flags = HIT_SPEC;
                 ev.process(ci);
             }
             if(smode) smode->leavegame(ci);

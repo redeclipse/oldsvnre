@@ -26,6 +26,38 @@ namespace defend
         return colour;
     }
 
+    void checkcams(vector<cament> &cameras)
+    {
+        loopv(st.flags) // flags/bases
+        {
+            defendstate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent)) continue;
+            int pri = f.owner == game::player1->team ? 1 : 0;
+            if(f.owner == game::player1->team && f.enemy) pri++;
+            vec pos = f.o; pos.z += enttype[AFFINITY].radius/2;
+            cameras.add(cament(pos, cament::AFFINITY, i, pri));
+        }
+    }
+
+    void updatecam(cament &c)
+    {
+        switch(c.type)
+        {
+            case cament::AFFINITY:
+            {
+                if(st.flags.inrange(c.id))
+                {
+                    defendstate::flag &f = st.flags[c.id];
+                    int pri = f.owner == game::player1->team ? 1 : 0;
+                    if(f.owner == game::player1->team && f.enemy) pri++;
+                    c.pos = f.o; c.pos.z += enttype[AFFINITY].radius/2;
+                    c.pri = pri;
+                }
+                break;
+            }
+        }
+    }
+
     void render()
     {
         loopv(st.flags)

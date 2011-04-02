@@ -214,6 +214,47 @@ namespace bomber
         return sy;
     }
 
+    void checkcams(vector<cament> &cameras)
+    {
+        loopv(st.flags) // flags/bases
+        {
+            bomberstate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent)) continue;
+            int pri = isbomberaffinity(f) ? 1 : 0;
+            if(f.owner || f.droptime) pri++;
+            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius/4;
+            cameras.add(cament(pos, cament::AFFINITY, i, pri));
+        }
+    }
+
+    void updatecam(cament &c)
+    {
+        switch(c.type)
+        {
+            case cament::PLAYER:
+            {
+                if(c.player) loopv(st.flags)
+                {
+                    bomberstate::flag &f = st.flags[i];
+                    if(f.owner == c.player) c.pri += c.player->team == game::player1->team ? 2 : 1;
+                }
+                break;
+            }
+            case cament::AFFINITY:
+            {
+                if(st.flags.inrange(c.id))
+                {
+                    bomberstate::flag &f = st.flags[c.id];
+                    int pri = isbomberaffinity(f) ? 1 : 0;
+                    if(f.owner || f.droptime) pri++;
+                    c.pos = f.pos(); c.pos.z += enttype[AFFINITY].radius/4;
+                    c.pri = pri;
+                }
+                break;
+            }
+        }
+    }
+
     void render()
     {
         loopv(st.flags) // flags/bases
