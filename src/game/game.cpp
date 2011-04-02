@@ -12,7 +12,7 @@ namespace game
     gameent *player1 = new gameent(), *focus = player1;
     avatarent avatarmodel;
     vector<gameent *> players, waiting;
-    vector<camstate> cameras;
+    vector<cament> cameras;
 
     VAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS);
     FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
@@ -58,12 +58,11 @@ namespace game
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
 
     VARF(IDF_PERSIST, specmode, 0, 1, 1, follow = 0); // 0 = float, 1 = tv
-    VARF(IDF_PERSIST, waitmode, 0, 1, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
+    VARF(IDF_PERSIST, waitmode, 0, 2, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, INT_MAX-1);
     FVAR(IDF_PERSIST, spectvspeed, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, spectvpitch, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, spectvbias, 0, 2.5f, 1000);
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
@@ -876,6 +875,7 @@ namespace game
             else if(flags&HIT_DEATH) concatstring(d->obit, *obitdeath ? obitdeath : "died");
             else if(flags&HIT_SPAWN) concatstring(d->obit, "tried to spawn inside solid matter");
             else if(flags&HIT_LOST) concatstring(d->obit, "got very, very lost");
+            else if(flags&HIT_SPEC) concatstring(d->obit, "gave up their corporeal form");
             else if(flags && isweap(weap) && !burning && !bleeding)
             {
                 static const char *suicidenames[WEAP_MAX] = {
@@ -1531,134 +1531,177 @@ namespace game
         }
     }
 
+    bool camrefresh(cament *cam, bool renew = false)
+    {
+        bool rejigger = false;
+        if(cam->player && cam->type != cament::PLAYER)
+        {
+            loopv(cameras)
+            {
+                if(cameras[i].type == cament::PLAYER && cameras[i].player == cam->player)
+                {
+                    cam = &cameras[i];
+                    rejigger = true;
+                    break;
+                }
+            }
+            if(!rejigger) cam->player = NULL;
+        }
+        if(renew || rejigger || (cam->player && focus != cam->player) || (!cam->player && focus != player1))
+        {
+            if(cam->player)
+            {
+                focus = cam->player;
+                follow = cam->id;
+            }
+            else
+            {
+                focus = player1;
+                follow = 0;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    bool camupdate(cament *c, bool update = false)
+    {
+        c->reset();
+        if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
+        loopv(cameras) if(cameras[i].type != cament::ENTITY && c != &cameras[i])
+        {
+            cament &f = cameras[i];
+            switch(f.type)
+            {
+                case cament::PLAYER:
+                {
+                    if(!f.player || f.player->state != CS_ALIVE || (f.player->state == CS_DEAD && !f.player->lastdeath)) continue;
+                    break;
+                }
+                default: break;
+            }
+            vec trg, pos = f.pos;
+            float dist = c->pos.dist(pos);
+            if(dist >= c->mindist && dist <= min(c->maxdist, float(fog)) && (raycubelos(c->pos, pos, trg) || raycubelos(c->pos, pos = f.pos, trg)))
+            {
+                float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
+                if(!c->player && update)
+                {
+                    vec dir = pos;
+                    if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
+                    dir.sub(c->pos).normalize();
+                    vectoyawpitch(dir, yaw, pitch);
+                }
+                if(update || getsight(c->pos, yaw, pitch, pos, trg, min(c->maxdist, float(fog)), curfov, fovy) || getsight(c->pos, yaw, pitch, pos = f.pos, trg, min(c->maxdist, float(fog)), curfov, fovy))
+                {
+                    c->cansee++;
+                    c->dir.add(f.pos);
+                    c->score += dist;
+                }
+            }
+        }
+        if(c->cansee > 0)
+        {
+            if(c->cansee > 1)
+            {
+                c->dir.div(c->cansee);
+                c->score /= c->cansee;
+            }
+            if(c->pri) c->score /= c->pri+1;
+            if(c->player) c->cansee++;
+            return true;
+        }
+        return false;
+    }
+
     void cameratv()
     {
         bool isspec = player1->state == CS_SPECTATOR;
         int numdyns = numdynents();
         if(cameras.empty())
         {
-            loopk(2)
+            physent a = *player1;
+            a.radius = a.height = 4.f;
+            a.state = CS_ALIVE;
+            loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (!enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL && insideworld(entities::ents[i]->o)))
             {
-                physent d = *player1;
-                d.radius = d.height = 4.f;
-                d.state = CS_ALIVE;
-                loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (k && !enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL && insideworld(entities::ents[i]->o)))
+                gameentity &e = *(gameentity *)entities::ents[i];
+                a.o = e.o;
+                if(enttype[e.type].radius) a.o.z += enttype[e.type].radius;
+                if(physics::entinmap(&a, false))
                 {
-                    gameentity &e = *(gameentity *)entities::ents[i];
-                    d.o = e.o;
-                    if(enttype[e.type].radius) d.o.z += enttype[e.type].radius;
-                    if(physics::entinmap(&d, false))
+                    cament &c = cameras.add(cament(a.o, cament::ENTITY, i));
+                    if(e.type == CAMERA)
                     {
-                        camstate &c = cameras.add();
-                        c.pos = d.o; c.ent = i;
-                        if(!k)
-                        {
-                            vecfromyawpitch(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0], e.attrs[1], 1, 0, c.dir);
-                            if(e.attrs[2]) c.mindist = e.attrs[2];
-                            if(e.attrs[3]) c.maxdist = e.attrs[3];
-                        }
+                        vecfromyawpitch(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0], e.attrs[1], 1, 0, c.dir);
+                        if(e.attrs[2]) c.mindist = e.attrs[2];
+                        if(e.attrs[3]) c.maxdist = e.attrs[3];
                     }
                 }
-                if(!cameras.empty()) break;
             }
             gameent *d = NULL;
-            loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
+            loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
-                camstate &c = cameras.add();
-                c.pos = d->headpos();
-                c.ent = -1; c.idx = i;
-                if(d->state == CS_DEAD) deathcamyawpitch(d, d->yaw, d->pitch);
+                vec pos = d->headpos();
+                cament &c = cameras.add(cament(pos, cament::PLAYER, i+1, m_team(gamemode, mutators) && d->team == player1->team ? 3 : 2, d));
+                if(d->state == CS_DEAD || d->state == CS_WAITING) deathcamyawpitch(d, d->yaw, d->pitch);
                 vecfromyawpitch(d->yaw, d->pitch, 1, 0, c.dir);
             }
+            if(m_capture(gamemode)) capture::checkcams(cameras);
+            else if(m_defend(gamemode)) defend::checkcams(cameras);
+            else if(m_bomber(gamemode)) bomber::checkcams(cameras);
         }
-        else loopv(cameras) if(cameras[i].ent < 0 && cameras[i].idx >= 0 && cameras[i].idx < numdyns)
+        else loopv(cameras) switch(cameras[i].type)
         {
-            gameent *d = (gameent *)iterdynents(cameras[i].idx);
-            if(!d) { cameras.remove(i--); continue; }
-            cameras[i].pos = d->headpos();
-            if(d->state == CS_DEAD) deathcamyawpitch(d, d->yaw, d->pitch);
-            vecfromyawpitch(d->yaw, d->pitch, 1, 0, cameras[i].dir);
+            case cament::PLAYER:
+            {
+                if(cameras[i].player || ((cameras[i].player = (gameent *)iterdynents(cameras[i].id))))
+                {
+                    cameras[i].pos = cameras[i].player->headpos();
+                    if(cameras[i].player->state == CS_DEAD || cameras[i].player->state == CS_WAITING)
+                        deathcamyawpitch(cameras[i].player, cameras[i].player->yaw, cameras[i].player->pitch);
+                }
+            }
+            default:
+            {
+                cameras[i].pri = 0;
+                if(cameras[i].type != cament::PLAYER && cameras[i].player) cameras[i].player = NULL;
+                if(m_capture(gamemode)) capture::updatecam(cameras[i]);
+                else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
+                else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
+                break;
+            }
         }
 
         if(!cameras.empty())
         {
-            camstate *cam = &cameras[0];
-            int ent = cam->ent, entidx = cam->ent >= 0 ? cam->ent : cam->idx;
-            bool renew = !lasttvcam || lastmillis-lasttvcam >= spectvtime, override = !lasttvcam || lastmillis-lasttvcam >= max(spectvtime/2, 2500);
-            loopk(3)
+            bool renew = !lasttvcam || lastmillis-lasttvcam >= spectvtime,
+                 override = !lasttvcam || lastmillis-lasttvcam >= max(spectvtime/2, 2000);
+            cament *cam = &cameras[0];
+            camrefresh(cam);
+            int lasttype = cam->type, lastid = cam->id;
+            if(renew || (!camupdate(cam) && override))
             {
-                int found = 0;
-                loopvj(cameras)
-                {
-                    camstate &c = cameras[j]; c.reset();
-                    gameent *d, *t = c.ent < 0 && c.idx >= 0 ? (gameent *)iterdynents(c.idx) : NULL;
-                    loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != t && (d->state == CS_ALIVE || d->state == CS_DEAD) && d->aitype < AI_START)
-                    {
-                        vec trg, pos = d->feetpos();
-                        float dist = c.pos.dist(d->feetpos());
-                        if(dist >= c.mindist && dist <= min(c.maxdist, float(fog)) && (raycubelos(c.pos, pos, trg) || raycubelos(c.pos, pos = d->headpos(), trg)))
-                        {
-                            if(t && (t->state == CS_DEAD || t->state == CS_WAITING) && !t->lastdeath) continue;
-                            bool fixed = t && t->state != CS_WAITING;
-                            float yaw = fixed ? t->yaw : camera1->yaw, pitch = fixed ? t->pitch : camera1->pitch;
-                            if(!fixed && (k || renew))
-                            {
-                                vec dir = pos;
-                                if(c.cansee.length()) dir.add(vec(c.dir).div(c.cansee.length()));
-                                dir.sub(c.pos).normalize();
-                                vectoyawpitch(dir, yaw, pitch);
-                            }
-                            if(k || renew || getsight(c.pos, yaw, pitch, pos, trg, min(c.maxdist, float(fog)), curfov, fovy) || getsight(c.pos, yaw, pitch, pos = d->headpos(), trg, min(c.maxdist, float(fog)), curfov, fovy))
-                            {
-                                c.cansee.add(i);
-                                c.dir.add(pos);
-                                c.score += dist;
-                            }
-                        }
-                    }
-                    if(c.cansee.length() > (override && !t ? 1 : 0))
-                    {
-                        if(c.cansee.length() > 1)
-                        {
-                            float amt = float(c.cansee.length());
-                            c.dir.div(amt);
-                            c.score /= amt;
-                        }
-                        found++;
-                    }
-                    else { c.dir = c.pos; c.score = t ? 1e14f : 1e16f; }
-                    if(t && t->state == CS_ALIVE && spectvbias > 0) c.score /= spectvbias;
-                    if(k <= 1) break;
-                }
-                if(!found)
-                {
-                    if(k == 1)
-                    {
-                        if(override) renew = true;
-                        else break;
-                    }
-                }
-                else break;
+                loopv(cameras) if(!camupdate(&cameras[i], true)) cameras[i].reset();
+                renew = true;
             }
             if(renew)
             {
-                cameras.sort(camstate::camsort);
+                cameras.sort(cament::camsort);
                 cam = &cameras[0];
                 lasttvcam = lastmillis;
-                if(!lasttvchg || (cam->ent >= 0 ? (ent >= 0 && cam->ent != entidx) : (ent < 0 && cam->idx != entidx)))
-                {
-                    lasttvchg = lastmillis;
-                    ent = entidx = -1;
-                }
-                if(cam->ent < 0 && cam->idx >= 0)
-                {
-                    if((focus = (gameent *)iterdynents(cam->idx)) != NULL) follow = cam->idx;
-                    else { focus = player1; follow = 0; }
-                }
-                else { focus = player1; follow = 0; }
+                conoutft(CON_EVENT, "viewing camera: %d/%d (%s) %.4f %d %d", cam->type, cam->id,
+                            cam->player ? game::colorname(cam->player) : "-", cam->score, cam->pri, cam->cansee);
             }
+            camrefresh(cam, renew);
+            if(!lasttvchg || cam->type != lasttype || cam->id != lastid)
+            {
+                lasttvchg = lastmillis;
+                if(!renew) renew = true;
+            }
+            else if(renew) renew = false;
             camera1->o = cam->pos;
-            if(cam->ent < 0 && focus != player1 && focus->state != CS_WAITING)
+            if(focus != player1)
             {
                 camera1->yaw = camera1->aimyaw = focus->yaw;
                 camera1->pitch = camera1->aimpitch = focus->pitch;
@@ -1667,7 +1710,7 @@ namespace game
             else
             {
                 vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
-                if(spectvspeed > 0) scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, (float(curtime)/1000.f)*spectvspeed, spectvpitch);
+                if(!renew && spectvspeed > 0) scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, (float(curtime)/1000.f)*spectvspeed, spectvpitch);
                 else { camera1->yaw = camera1->aimyaw; camera1->pitch = camera1->aimpitch; }
             }
             camera1->resetinterp();

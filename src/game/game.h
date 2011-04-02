@@ -316,8 +316,8 @@ gametypes gametype[] = {
         G_DEFEND,       G_M_TEAM,
         {
             G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1,
-            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
+            G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
             G_M_NONE
         },
         "defend-the-flag",                  { "quick", "conquer", "" },
@@ -1342,6 +1342,42 @@ struct projent : dynent
     }
 };
 
+struct cament
+{
+    static const float DISTMAX = 512;
+    static const float DISTMIN = 8;
+
+    enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
+
+    int type, id, pri, cansee;
+    vec pos, dir;
+    float mindist, maxdist, score;
+    gameent *player;
+
+    cament() : type(-1), id(-1), pri(0), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL) { reset(); }
+    cament(int t, int i, int p = 0, gameent *d = NULL) : type(t), id(i), pri(p), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
+    cament(vec &v, int t, int i, int p = 0, gameent *d = NULL) : type(t), id(i), pri(p), pos(v), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
+    ~cament() {}
+
+    void reset()
+    {
+        cansee = 0;
+        dir = vec(0, 0, 0);
+        score = 0;
+    }
+
+    static int camsort(const cament *a, const cament *b)
+    {
+        if(a->score > 0 && b->score <= 0) return -1;
+        if(a->score <= 0 && b->score > 0) return 1;
+        if(a->cansee > b->cansee) return -1;
+        if(a->cansee < b->cansee) return 1;
+        if(a->score < b->score) return -1;
+        if(a->score > b->score) return 1;
+        return 0;
+    }
+};
+
 namespace client
 {
     extern bool demoplayback, sendinfo, sendcrc;
@@ -1459,31 +1495,7 @@ namespace game
     };
     extern avatarent avatarmodel;
 
-    struct camstate
-    {
-        int ent, idx;
-        vec pos, dir;
-        vector<int> cansee;
-        float mindist, maxdist, score;
-
-        camstate() : idx(-1), mindist(4), maxdist(4096), score(0) { reset(); }
-        ~camstate() {}
-
-        void reset()
-        {
-            cansee.shrink(0);
-            dir = vec(0, 0, 0);
-            score = 0;
-        }
-
-        static int camsort(const camstate *a, const camstate *b)
-        {
-            if(a->score < b->score) return -1;
-            if(a->score > b->score) return 1;
-            return 0;
-        }
-    };
-    extern vector<camstate> cameras;
+    extern vector<cament> cameras;
     extern int numwaiting();
     extern gameent *newclient(int cn);
     extern gameent *getclient(int cn);
