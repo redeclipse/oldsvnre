@@ -221,7 +221,6 @@ GVAR(0, impulseslip, 0, 250, VAR_MAX); // time before floor friction kicks back 
 GVAR(0, impulsedelay, 0, 125, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 500, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
-GVAR(0, impulseslidedelay, 0, 250, VAR_MAX); // minimum air time before allowing a power slide
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last

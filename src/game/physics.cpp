@@ -808,15 +808,15 @@ namespace physics
                         float skew = moving && !power ? impulseboost : impulsejump;
                         if(onfloor)
                         {
-                            if(moving && !power && (iscrouching(d) || (d->strafe && !d->move) || (d->move && !d->strafe))) skew = impulsedash;
-                            d->impulse[IM_JUMP] = lastmillis;
+                            if(!power) skew = impulsedash;
+                            if(!dash) d->impulse[IM_JUMP] = lastmillis;
                         }
                         float force = impulsevelocity(d, skew);
                         if(onfloor && power) force += jumpforce(d, true);
                         if(force > 0)
                         {
                             vec dir(0, 0, 1);
-                            if(!power && (!pulse || moving || onfloor))
+                            if(!power && (dash || moving || onfloor))
                                 vecfromyawpitch(d->aimyaw, !onfloor || movepitch(d) ? d->aimpitch : 0.f, moving ? d->move : 1, moving ? d->strafe : 0, dir);
                             if(!onfloor && moving && !power && impulseboostz != 0) dir.z += impulseboostz;
                             (d->vel = dir).normalize().mul(force);
@@ -910,7 +910,7 @@ namespace physics
                             float mag = impulsevelocity(d, impulseparkour);
                             if(mag > 0)
                             {
-                                (d->vel = dir).reflect(wall).normalize().mul(mag);
+                                d->vel.reflect(wall).normalize().mul(mag/2);
                                 d->vel.z += mag;
                                 d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                                 d->turnmillis = PHYSMILLIS;
@@ -1151,18 +1151,10 @@ namespace physics
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
                 if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
-                if(!pl->timeinair && timeinair)
+                if(!pl->timeinair && timeinair >= PHYSMILLIS*2 && mag >= 20)
                 {
-                    if(local && timeinair >= impulseslidedelay && allowimpulse(1) && ((gameent *)pl)->action[AC_CROUCH])
-                    {
-                        ((gameent *)pl)->action[AC_DASH] = true;
-                        ((gameent *)pl)->actiontime[AC_DASH] = lastmillis;
-                    }
-                    if(timeinair >= PHYSMILLIS*2 && mag >= 20)
-                    {
-                        int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
-                        playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
-                    }
+                    int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
+                    playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
                 }
             }
         }
