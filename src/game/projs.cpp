@@ -170,7 +170,7 @@ namespace projs
         return false;
     }
 
-    bool radialeffect(gameent *d, projent &proj, bool explode, int radius)
+    bool radialeffect(dynent *d, projent &proj, bool explode, int radius)
     {
         bool push = WEAP(proj.weap, pusharea) > 1, radiated = false;
         float maxdist = push ? radius*WEAP(proj.weap, pusharea) : radius;
@@ -182,12 +182,13 @@ namespace projs
             }
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(!isaitype(d->aitype) || aistyle[d->aitype].hitbox)
+            gameent *e = (gameent *)d;
+            if(!isaitype(e->aitype) || aistyle[e->aitype].hitbox)
             {
                 float rdist[3] = { -1, -1, -1 };
-                radialpush(d->legs, d->lrad.x, d->lrad.y, d->lrad.z, d->lrad.z, rdist[0]);
-                radialpush(d->torso, d->trad.x, d->trad.y, d->trad.z, d->trad.z, rdist[1]);
-                radialpush(d->head, d->hrad.x, d->hrad.y, d->hrad.z, d->hrad.z, rdist[2]);
+                radialpush(e->legs, e->lrad.x, e->lrad.y, e->lrad.z, e->lrad.z, rdist[0]);
+                radialpush(e->torso, e->trad.x, e->trad.y, e->trad.z, e->trad.z, rdist[1]);
+                radialpush(e->head, e->hrad.x, e->hrad.y, e->hrad.z, e->hrad.z, rdist[2]);
                 int closest = -1;
                 loopi(3) if(rdist[i] >= 0 && (closest < 0 || rdist[i] <= rdist[closest])) closest = i;
                 loopi(3) if(rdist[i] >= 0)
@@ -201,12 +202,12 @@ namespace projs
                     }
                     if(rdist[i] <= radius)
                     {
-                        hitpush(d, proj, flag|(explode ? HIT_EXPLODE : HIT_BURN), radius, rdist[i], proj.curscale);
+                        hitpush(e, proj, flag|(explode ? HIT_EXPLODE : HIT_BURN), radius, rdist[i], proj.curscale);
                         radiated = true;
                     }
                     else if(WEAP(proj.weap, pusharea) > 1 && rdist[i] <= maxdist)
                     {
-                        hitpush(d, proj, flag|HIT_WAVE, radius, rdist[i], proj.curscale);
+                        hitpush(e, proj, flag|HIT_WAVE, radius, rdist[i], proj.curscale);
                         radiated = true;
                     }
                 }
@@ -214,17 +215,17 @@ namespace projs
             else
             {
                 float dist = -1;
-                radialpush(d->o, d->xradius, d->yradius, d->height, d->aboveeye, dist);
+                radialpush(e->o, e->xradius, e->yradius, e->height, e->aboveeye, dist);
                 if(dist >= 0)
                 {
                     if(dist <= radius)
                     {
-                        hitpush(d, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale);
+                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale);
                         radiated = true;
                     }
                     else if(WEAP(proj.weap, pusharea) > 1 && dist <= maxdist)
                     {
-                        hitpush(d, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, radius, dist, proj.curscale);
+                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, radius, dist, proj.curscale);
                         radiated = true;
                     }
                 }
@@ -232,9 +233,10 @@ namespace projs
         }
         else if(d->type == ENT_PROJ && explode)
         {
+            projent *e = (projent *)d;
             float dist = -1;
-            radialpush(d->o, d->xradius, d->yradius, d->height, d->aboveeye, dist);
-            if(dist >= 0 && dist <= radius) projpush((projent *)d);
+            radialpush(e->o, e->xradius, e->yradius, e->height, e->aboveeye, dist);
+            if(dist >= 0 && dist <= radius) projpush(e);
         }
         return radiated;
     }
@@ -1728,7 +1730,7 @@ namespace projs
                         int numdyns = game::numdynents(true);
                         loopj(numdyns)
                         {
-                            gameent *f = (gameent *)game::iterdynents(j, true);
+                            dynent *f = game::iterdynents(j, true);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
                             radialeffect(f, proj, true, radius);
                         }
@@ -1742,7 +1744,7 @@ namespace projs
                         int numdyns = game::numdynents();
                         loopj(numdyns)
                         {
-                            gameent *f = (gameent *)game::iterdynents(j);
+                            dynent *f = game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true)) continue;
                             if(radialeffect(f, proj, false, radius)) proj.lastradial = lastmillis;
                         }

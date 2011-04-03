@@ -286,10 +286,15 @@ namespace physics
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;
-            if(!power && (e->turnside || (impulseslip && e->impulse[IM_SLIP] && lastmillis-e->impulse[IM_SLIP] <= impulseslip)))
-                return true;
-            if(impulseslide && e->impulse[IM_SLIDE] && lastmillis-e->impulse[IM_SLIDE] <= impulseslide && (!power || (!d->timeinair && e->action[AC_CROUCH])))
-                return true;
+            if((!power && e->turnside) || (impulseslip && e->impulse[IM_SLIP] && lastmillis-e->impulse[IM_SLIP] <= impulseslip) || (impulseslide && e->impulse[IM_SLIDE] && lastmillis-e->impulse[IM_SLIDE] <= impulseslide))
+            {
+                if(!power || e->action[AC_CROUCH])
+                {
+                    if(power && impulseslide && impulseslip && e->impulse[IM_SLIP] > e->impulse[IM_SLIDE])
+                        e->impulse[IM_SLIDE] = e->impulse[IM_SLIP];
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -817,7 +822,15 @@ namespace physics
                         {
                             vec dir(0, 0, 1);
                             if(!power && (dash || moving || onfloor))
-                                vecfromyawpitch(d->aimyaw, !onfloor || movepitch(d) ? d->aimpitch : 0.f, moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                            {
+                                float yaw = d->aimyaw, pitch = !onfloor || movepitch(d) ? d->aimpitch : 0.f;
+                                vecfromyawpitch(yaw, pitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
+                                if(onfloor && !d->floor.iszero())
+                                {
+                                    dir.project(d->floor);
+                                    if(dir.z < 0) force += -dir.z*force;
+                                }
+                            }
                             if(!onfloor && moving && !power && impulseboostz != 0) dir.z += impulseboostz;
                             (d->vel = dir).normalize().mul(force);
                             d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, !power && dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
@@ -900,7 +913,7 @@ namespace physics
                     wall.normalize();
                     if(fabs(wall.z) <= impulseparkournorm)
                     {
-                        bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3) && (!onfloor || d->onladder);
+                        bool parkour = d->action[AC_SPECIAL] && canimpulse(d, -1, 3) && !onfloor && !d->onladder;
                         float yaw = 0, pitch = 0;
                         vectoyawpitch(wall, yaw, pitch);
                         float off = yaw-d->aimyaw;
@@ -910,8 +923,9 @@ namespace physics
                             float mag = impulsevelocity(d, impulseparkour);
                             if(mag > 0)
                             {
-                                d->vel.reflect(wall).normalize().mul(mag/2);
-                                d->vel.z += mag;
+                                vecfromyawpitch(d->aimyaw, d->aimpitch, 1, 0, dir);
+                                (d->vel = dir).reflect(wall).normalize().mul(mag/2);
+                                d->vel.z += mag/2;
                                 d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                                 d->turnmillis = PHYSMILLIS;
                                 d->turnside = 0; d->turnroll = 0;
