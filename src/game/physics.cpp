@@ -783,7 +783,7 @@ namespace physics
             {
                 if(d->action[AC_JUMP] && canimpulse(d, -1, 3))
                 {
-                    float mag = impulsevelocity(d, impulseparkour);
+                    float mag = impulsevelocity(d, impulseparkourkick);
                     if(mag > 0)
                     {
                         vec rft; vecfromyawpitch(d->aimyaw, 0, 1, 0, rft);
@@ -809,7 +809,9 @@ namespace physics
                     }
                     if(power || dash || pulse)
                     {
-                        bool moving = (d->ai || impulseaction != 1) && (d->move || d->strafe);
+                        bool action = !power && (d->ai || impulseaction != 1);
+                        int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
+                        bool moving = move || strafe;
                         float skew = moving && !power ? impulseboost : impulsejump;
                         if(onfloor)
                         {
@@ -821,11 +823,11 @@ namespace physics
                         if(force > 0)
                         {
                             vec dir(0, 0, 1);
-                            if(!power && (dash || moving || onfloor))
+                            if((!power || moving) && (dash || moving || onfloor))
                             {
-                                float yaw = d->aimyaw, pitch = !onfloor || movepitch(d) ? d->aimpitch : 0.f;
-                                vecfromyawpitch(yaw, pitch, moving ? d->move : 1, moving ? d->strafe : 0, dir);
-                                if(onfloor && !d->floor.iszero())
+                                float yaw = d->aimyaw, pitch = moving && pulse ? d->aimpitch : 0;
+                                vecfromyawpitch(yaw, pitch, move, strafe, dir);
+                                if(dash && !d->floor.iszero())
                                 {
                                     dir.project(d->floor);
                                     if(dir.z < 0) force += -dir.z*force;
@@ -920,12 +922,11 @@ namespace physics
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
                         if(!d->turnside && parkour && impulsekick > 0 && fabs(off) >= impulsekick)
                         {
-                            float mag = impulsevelocity(d, impulseparkour);
+                            float mag = impulsevelocity(d, impulseparkourkick);
                             if(mag > 0)
                             {
                                 vecfromyawpitch(d->aimyaw, d->aimpitch, 1, 0, dir);
-                                (d->vel = dir).reflect(wall).normalize().mul(mag/2);
-                                d->vel.z += mag/2;
+                                (d->vel = dir).reflect(wall).normalize().mul(mag);
                                 d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                                 d->turnmillis = PHYSMILLIS;
                                 d->turnside = 0; d->turnroll = 0;
@@ -1099,8 +1100,8 @@ namespace physics
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);
                     }
                 }
-                if(pl->physstate < PHYS_SLIDE && sub >= 0.5f && pl->submerged < 0.5f && pl->vel.z > 1e-16f)
-                    pl->vel.z = max(pl->vel.z, max(jumpforce(pl, false), max(gravityforce(pl), 50.f)));
+                if(pl->physstate < PHYS_SLIDE && sub >= 0.5f && pl->submerged < 0.5f && pl->vel.z > 1e-3f)
+                    pl->vel.z = max(pl->vel.z, max(jumpforce(pl, false), max(gravityforce(pl), 50.f)))*2;
             }
         }
         else pl->submerged = 0;
