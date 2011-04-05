@@ -708,6 +708,11 @@ namespace recorder
         return 1.0f - float(dps)/float(dps+file->videofps); // strictly speaking should lock to read dps - 1.0=perfect, 0.5=half of frames are beingdropped
     }
 
+    int gettime()
+    {
+        return inbetweenframes ? getclockmillis() : totalmillis;
+    }
+
     int videoencoder(void *data) // runs on a separate thread
     {
         for (int numvid = 0, numsound = 0;;)
@@ -770,7 +775,7 @@ namespace recorder
         }
         else if(state == REC_OK)
         {
-            uint nextframe = ((totalmillis - starttime)*file->videofps)/1000;
+            uint nextframe = (max(gettime() - starttime, 0)*file->videofps)/1000;
             soundbuffer &s = soundbuffers.add();
             s.load(stream, len, nextframe);
         }
@@ -780,6 +785,12 @@ namespace recorder
     void start(const char *filename, int videofps, int videow, int videoh, bool sound)
     {
         if(file) return;
+
+        useshaderbyname("moviergb");
+        useshaderbyname("movieyuv");
+        useshaderbyname("moviey");
+        useshaderbyname("movieu");
+        useshaderbyname("moviev");
 
         int fps, bestdiff, worstdiff;
         getfps(fps, bestdiff, worstdiff);
@@ -797,13 +808,7 @@ namespace recorder
         }
         conoutf("movie recording to: %s %dx%d @ %dfps%s", file->filename, file->videow, file->videoh, file->videofps, (file->soundfrequency>0)?" + sound":"");
 
-        useshaderbyname("moviergb");
-        useshaderbyname("movieyuv");
-        useshaderbyname("moviey");
-        useshaderbyname("movieu");
-        useshaderbyname("moviev");
-
-        starttime = totalmillis;
+        starttime = gettime();
         loopi(file->videofps) stats[i] = 0;
         statsindex = 0;
         dps = 0;
@@ -1019,7 +1024,7 @@ namespace recorder
         }
         SDL_LockMutex(videolock);
         if(moviesync && videobuffers.full()) SDL_CondWait(shouldread, videolock);
-        uint nextframe = ((totalmillis - starttime)*file->videofps)/1000;
+        uint nextframe = (max(gettime() - starttime, 0)*file->videofps)/1000;
         if(!videobuffers.full() && (lastframe == ~0U || nextframe > lastframe))
         {
             videobuffer &m = videobuffers.adding();

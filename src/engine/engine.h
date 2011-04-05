@@ -550,6 +550,7 @@ extern void pushevent(const SDL_Event &e);
 extern bool interceptkey(int sym);
 extern void getfps(int &fps, int &bestdiff, int &worstdiff);
 extern void swapbuffers();
+extern int getclockmillis();
 
 // menu
 extern float menuscale;
