@@ -1696,7 +1696,7 @@ namespace hud
             if(game::focus->aitype < AI_START && physics::allowimpulse(physics::allowjetpack() ? 0 : 2) && impulsemeter && impulsecost && inventoryimpulse)
             {
                 int meter = game::focus->impulse[IM_METER]+(impulsecost*game::focus->impulse[IM_POWER]);
-                float len = clamp(meter/float(impulsemeter), 0.f, 1.f);
+                float len = clamp(float(meter)/float(impulsemeter), 0.f, 1.f);
                 settexture(progresstex, 3);
                 float r = 1, g = 1, b = 1, f = 1;
                 int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
