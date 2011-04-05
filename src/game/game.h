@@ -1502,7 +1502,8 @@ namespace game
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);
     extern void clientdisconnected(int cn, int reason = DISC_NONE);
     extern char *colorname(gameent *d, char *name = NULL, const char *prefix = "", bool team = true, bool dupname = true);
-    extern void announce(int idx, int targ, gameent *d, const char *msg, ...);
+    extern void announce(int idx, gameent *d = NULL);
+    extern void announcef(int idx, int targ, gameent *d, const char *msg, ...);
     extern void respawn(gameent *d);
     extern void impulseeffect(gameent *d, int effect = 0);
     extern void suicide(gameent *d, int flags);

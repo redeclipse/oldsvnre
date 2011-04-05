@@ -464,7 +464,7 @@ namespace bomber
             if(value > 1 && isbomberaffinity(f))
             {
                 affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
-                game::announce(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
+                game::announcef(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
             }
         }
         st.returnaffinity(i, lastmillis, value!=0);
@@ -479,7 +479,7 @@ namespace bomber
         hud::teamscore(d->team).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
-        game::announce(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
+        game::announcef(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
 
@@ -492,7 +492,7 @@ namespace bomber
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
-            game::announce(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
+            game::announcef(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
         }
         st.takeaffinity(i, d, lastmillis);
     }

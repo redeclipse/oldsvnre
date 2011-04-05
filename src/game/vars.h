@@ -35,10 +35,10 @@ GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign bath center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple deli dropzone dutility echo ghost linear longestyard panic stone wet");
-GSVAR(IDF_ADMIN, mediummaps, "bath center darkness deadsimple deathtrap deli dropzone echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, mediummaps, "center darkness deadsimple deathtrap deli dropzone echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, largemaps, "center dawn deadsimple deathtrap deli depot facility forge foundation futuresport ghost lab linear mist nova processing spacetech tranquility tribal ubik venus warp");
 
 

@@ -275,7 +275,7 @@ namespace defend
                 int numdyns = game::numdynents();
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
-                game::announce(S_V_FLAGSECURED, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS secured %s", teamtype[owner].chat, teamtype[owner].name, b.name);
+                game::announcef(S_V_FLAGSECURED, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS secured %s", teamtype[owner].chat, teamtype[owner].name, b.name);
                 defformatstring(text)("<super>%s\fzZeSECURED", teamtype[owner].chat);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, 0xFFFFFF, 3, 1, -10);
                 if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[owner].colour>>16, (teamtype[owner].colour>>8)&0xFF, teamtype[owner].colour&0xFF).mul(2.f/0xFF), 500, 250);
@@ -287,7 +287,7 @@ namespace defend
             int numdyns = game::numdynents();
             loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                 if((d = e) == game::focus) break;
-            game::announce(S_V_FLAGOVERTHROWN, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS overthrew %s", teamtype[enemy].chat, teamtype[enemy].name, b.name);
+            game::announcef(S_V_FLAGOVERTHROWN, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs%s%s\fS overthrew %s", teamtype[enemy].chat, teamtype[enemy].name, b.name);
             defformatstring(text)("<super>%s\fzZeOVERTHROWN", teamtype[enemy].chat);
             part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, 0xFFFFFF, 3, 1, -10);
             if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[enemy].colour>>16, (teamtype[enemy].colour>>8)&0xFF, teamtype[enemy].colour&0xFF).mul(2.f/0xFF), 500, 250);

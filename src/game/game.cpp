@@ -272,20 +272,24 @@ namespace game
         else resetsway();
     }
 
-    void announce(int idx, int targ, gameent *d, const char *msg, ...)
+    void announce(int idx, gameent *d)
     {
-        if(targ >= 0 && msg && *msg)
-        {
-            defvformatstring(text, msg, msg);
-            conoutft(targ, "%s", text);
-        }
         if(idx >= 0)
         {
             physent *t = !d || d == focus ? camera1 : d;
             playsound(idx, t->o, t, (t == camera1 ? SND_FORCED : SND_DIRECT)|SND_NOCULL, -1, -1, -1, d ? &d->aschan : NULL);
         }
     }
-    ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announce(*idx, *targ, NULL, "\fw%s", s));
+    void announcef(int idx, int targ, gameent *d, const char *msg, ...)
+    {
+        if(targ >= 0 && msg && *msg)
+        {
+            defvformatstring(text, msg, msg);
+            conoutft(targ, "%s", text);
+        }
+        announce(idx, d);
+    }
+    ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announcef(*idx, *targ, NULL, "\fw%s", s));
 
     bool tvmode()
     {
@@ -1120,8 +1124,8 @@ namespace game
                 case 5: default: show = true; break;
             }
             int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-            if(showobitdists && d != actor) announce(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
-            else announce(anc, target, d, "\fw%s", d->obit);
+            if(showobitdists && d != actor) announcef(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
+            else announcef(anc, target, d, "\fw%s", d->obit);
         }
         if(gibscale > 0)
         {
