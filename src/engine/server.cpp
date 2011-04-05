@@ -828,15 +828,22 @@ VARF(IDF_PERSIST, clockerror, 990000, 1000000, 1010000, clockreset());
 VARF(IDF_PERSIST, clockfix, 0, 0, 1, clockreset());
 #endif
 
-int updatetimer()
+int getclockmillis()
 {
 #ifdef STANDALONE
-    int millis = (int)enet_time_get();
+    return (int)enet_time_get();
 #else
     int millis = SDL_GetTicks() - clockrealbase;
     if(clockfix) millis = int(millis*(double(clockerror)/1000000));
     millis += clockvirtbase;
-    if(millis<totalmillis) millis = totalmillis;
+    return max(millis, totalmillis);
+#endif
+}
+
+int updatetimer()
+{
+    int millis = getclockmillis();
+#ifndef STANDALONE
     extern void limitfps(int &millis, int curmillis);
     limitfps(millis, totalmillis);
 #endif
