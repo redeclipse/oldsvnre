@@ -152,7 +152,7 @@ namespace hud
             scoreson = on;
             if(m_play(game::gamemode) && interm)
             {
-                if(m_campaign(game::gamemode)) game::announce(S_V_MCOMPLETE, CON_MESG, game::player1, "\fwmission completed");
+                if(m_campaign(game::gamemode)) game::announcef(S_V_MCOMPLETE, CON_MESG, game::player1, "\fwmission completed");
                 else if(m_fight(game::gamemode) && !m_trial(game::gamemode))
                 {
                     if(!groupplayers()) return;
@@ -161,15 +161,15 @@ namespace hud
                     {
                         int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                         if(m_defend(game::gamemode) && sg.total==INT_MAX)
-                            game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team secured all flags", teamtype[sg.team].chat, teamtype[sg.team].name);
-                        else if(m_trial(game::gamemode)) game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total ? timetostr(sg.total) : "dnf");
-                        else game::announce(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total);
+                            game::announcef(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team secured all flags", teamtype[sg.team].chat, teamtype[sg.team].name);
+                        else if(m_trial(game::gamemode)) game::announcef(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total ? timetostr(sg.total) : "dnf");
+                        else game::announcef(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total);
                     }
                     else
                     {
                         int anc = sg.players[0] == game::player1 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
-                        if(m_trial(game::gamemode)) game::announce(anc, CON_MESG, game::player1, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
-                        else game::announce(anc, CON_MESG, game::player1, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->points);
+                        if(m_trial(game::gamemode)) game::announcef(anc, CON_MESG, game::player1, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                        else game::announcef(anc, CON_MESG, game::player1, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->points);
                     }
                 }
             }
@@ -363,7 +363,8 @@ namespace hud
             if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 g.pushlist(); // vertical
-                if(m_defend(game::gamemode) && defendlimit && sg.total >= defendlimit) g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
+                if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
+                    g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
                 else g.textf("%s: %d", fgcolor, NULL, teamtype[sg.team].name, sg.total);
                 g.pushlist(); // horizontal
             }

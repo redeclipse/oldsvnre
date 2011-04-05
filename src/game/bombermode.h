@@ -204,7 +204,7 @@ struct bomberservmode : bomberstate, servmode
                 hasaffinity++;
             }
             if(!hasaffinity) { hasflaginfo = false; return; }
-            ancmsgft(-1, S_V_BOMBSTART, CON_EVENT, "\fathe \fs\fwbomb\fS has been spawned");
+            ancmsgft(-1, S_V_BOMBSTART, CON_INFO, "\fathe \fs\fwbomb\fS has been spawned");
             bombertime = 0;
         }
         int t = (gamemillis/GAME(bomberholdinterval))-((gamemillis-(curtime+scoresec))/GAME(bomberholdinterval));

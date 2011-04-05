@@ -460,7 +460,7 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        game::announce(S_V_FLAGDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the \fs%s%s\fS flag", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name);
+        game::announcef(S_V_FLAGDROP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s dropped the the \fs%s%s\fS flag", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name);
         st.dropaffinity(i, droploc, inertia, lastmillis);
     }
 
@@ -501,7 +501,7 @@ namespace capture
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.spawnloc, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
-        game::announce(S_V_FLAGRETURN, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s returned the \fs%s%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) || m_gsp3(game::gamemode, game::mutators) ? f.taketime : f.droptime)));
+        game::announcef(S_V_FLAGRETURN, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s returned the \fs%s%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) || m_gsp3(game::gamemode, game::mutators) ? f.taketime : f.droptime)));
         st.returnaffinity(i, lastmillis);
     }
 
@@ -512,7 +512,7 @@ namespace capture
         if(value > 0)
         {
             affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
-            game::announce(S_V_FLAGRESET, CON_INFO, NULL, "\fathe \fs%s%s\fS flag has been reset", teamtype[f.team].chat, teamtype[f.team].name);
+            game::announcef(S_V_FLAGRESET, CON_INFO, NULL, "\fathe \fs%s%s\fS flag has been reset", teamtype[f.team].chat, teamtype[f.team].name);
         }
         st.returnaffinity(i, lastmillis);
     }
@@ -528,7 +528,7 @@ namespace capture
         }
         else affinityeffect(goal, d->team, f.pos(), f.spawnloc, 3, "CAPTURED");
         hud::teamscore(d->team).total = score;
-        game::announce(S_V_FLAGSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s scored the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
+        game::announcef(S_V_FLAGSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s scored the \fs%s%s\fS flag for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[f.team].chat, teamtype[f.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
     }
 
@@ -539,7 +539,7 @@ namespace capture
         d->action[AC_AFFINITY] = false;
         d->actiontime[AC_AFFINITY] = 0;
         affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, f.team == d->team ? "SECURED" : "TAKEN");
-        game::announce(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s %s the \fs%s%s\fS flag", game::colorname(d), f.droptime ? (f.team == d->team ? "secured" : "picked up") : "stole", teamtype[f.team].chat, teamtype[f.team].name);
+        game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s %s the \fs%s%s\fS flag", game::colorname(d), f.droptime ? (f.team == d->team ? "secured" : "picked up") : "stole", teamtype[f.team].chat, teamtype[f.team].name);
         st.takeaffinity(i, d, lastmillis);
     }
 
