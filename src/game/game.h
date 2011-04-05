@@ -1344,9 +1344,7 @@ struct projent : dynent
 
 struct cament
 {
-    static const float DISTMAX = 512;
-    static const float DISTMIN = 8;
-
+    enum { DISTMIN = 8, DISTMAX = 1024 };
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
     int type, id, pri, cansee;
