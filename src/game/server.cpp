@@ -686,7 +686,11 @@ namespace server
                 if(flush) sendf(-1, 1, "ri2ss", N_COMMAND, -1, &id.name[3], val);
             }
         });
+#ifndef STANDALONE
+        execfile("localexec.cfg", false);
+#else
         execfile("servexec.cfg", false);
+#endif
         //if(eastereggs())
         //{
         //    if(returningfiremod) setmod(sv_returningfire, 1);

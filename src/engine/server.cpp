@@ -1462,8 +1462,8 @@ void rehash(bool reload)
 #ifdef MASTERSERVER
     reloadmaster();
 #endif
-    execfile("servinit.cfg", false);
 #ifndef STANDALONE
+    execfile("localinit.cfg", false);
     execfile("defaults.cfg");
     initing = INIT_LOAD;
     interactive = true;
@@ -1471,6 +1471,8 @@ void rehash(bool reload)
     execfile("autoexec.cfg", false);
     interactive = false;
     initing = NOT_INITING;
+#else
+    execfile("servinit.cfg", false);
 #endif
     conoutf("\fwconfiguration reloaded");
     rehashing = 0;
