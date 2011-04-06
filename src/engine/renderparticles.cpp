@@ -1386,30 +1386,30 @@ void part_flares(const vec &o, const vec &v, float z1, const vec &d, const vec &
 
 void part_portal(const vec &o, float size, float blend, float yaw, float pitch, int type, int fade, int color)
 {
-    if(!canaddparticles()) return;
-    portalrenderer *p = dynamic_cast<portalrenderer *>(parts[type]);
-    if(p) p->addportal(o, fade, color, size, blend, yaw, pitch);
+    if(!canaddparticles() || (parts[type]->type&PT_TYPE) != PT_PORTAL) return;
+    portalrenderer *p = (portalrenderer *)parts[type];
+    p->addportal(o, fade, color, size, blend, yaw, pitch);
 }
 
 void part_icon(const vec &o, Texture *tex, float size, float blend, int grav, int collide, int fade, int color, float start, float length, physent *pl)
 {
-    if(!canaddparticles()) return;
-    iconrenderer *p = dynamic_cast<iconrenderer *>(parts[PART_ICON]);
-    if(p) p->addicon(o, tex, fade, color, size, blend, grav, collide, start, length, pl);
+    if(!canaddparticles() || (parts[PART_ICON]->type&PT_TYPE) != PT_ICON) return;
+    iconrenderer *p = (iconrenderer *)parts[PART_ICON];
+    p->addicon(o, tex, fade, color, size, blend, grav, collide, start, length, pl);
 }
 
 void part_line(const vec &o, const vec &v, float size, float blend, int fade, int color, int type)
 {
-    if(!canaddparticles()) return;
-    lineprimitiverenderer *p = dynamic_cast<lineprimitiverenderer *>(parts[type]);
-    if(p) p->addline(o, v, fade, color, size, blend);
+    if(!canaddparticles() || (parts[type]->type&PT_TYPE) != PT_LINE) return;
+    lineprimitiverenderer *p = (lineprimitiverenderer *)parts[type];
+    p->addline(o, v, fade, color, size, blend);
 }
 
 void part_triangle(const vec &o, float yaw, float pitch, float size, float blend, int fade, int color, bool fill, int type)
 {
-    if(!canaddparticles()) return;
-    trisprimitiverenderer *p = dynamic_cast<trisprimitiverenderer *>(parts[type]);
-    if(p) p->addtriangle(o, yaw, pitch, fade, color, size, blend, fill);
+    if(!canaddparticles() || (parts[type]->type&PT_TYPE) != PT_TRIANGLE) return;
+    trisprimitiverenderer *p = (trisprimitiverenderer *)parts[type];
+    p->addtriangle(o, yaw, pitch, fade, color, size, blend, fill);
 }
 
 void part_dir(const vec &o, float yaw, float pitch, float size, float blend, int fade, int color, bool fill)
@@ -1431,28 +1431,25 @@ void part_trace(const vec &o, const vec &v, float size, float blend, int fade, i
 
 void part_ellipse(const vec &o, const vec &v, float size, float blend, int fade, int color, int axis, bool fill, int type)
 {
-    if(!canaddparticles()) return;
-    loopprimitiverenderer *p = dynamic_cast<loopprimitiverenderer *>(parts[type]);
-    if(p) p->addellipse(o, v, fade, color, size, blend, axis, fill);
+    if(!canaddparticles() || (parts[type]->type&PT_TYPE) != PT_ELLIPSE) return;
+    loopprimitiverenderer *p = (loopprimitiverenderer *)parts[type];
+    p->addellipse(o, v, fade, color, size, blend, axis, fill);
 }
 
 void part_radius(const vec &o, const vec &v, float size, float blend, int fade, int color, bool fill)
 {
-    if(!canaddparticles()) return;
-    loopprimitiverenderer *p = dynamic_cast<loopprimitiverenderer *>(parts[PART_ELLIPSE]);
-    if(p)
-    {
-        p->addellipse(o, v, fade, color, size, blend, 0, fill);
-        p->addellipse(o, v, fade, color, size, blend, 1, fill);
-        p->addellipse(o, v, fade, color, size, blend, 2, fill);
-    }
+    if(!canaddparticles() || (parts[PT_ELLIPSE]->type&PT_TYPE) != PT_ELLIPSE) return;
+    loopprimitiverenderer *p = (loopprimitiverenderer *)parts[PART_ELLIPSE];
+    p->addellipse(o, v, fade, color, size, blend, 0, fill);
+    p->addellipse(o, v, fade, color, size, blend, 1, fill);
+    p->addellipse(o, v, fade, color, size, blend, 2, fill);
 }
 
 void part_cone(const vec &o, const vec &dir, float radius, float angle, float size, float blend, int fade, int color, bool fill, int type)
 {
-    if(!canaddparticles()) return;
-    coneprimitiverenderer *p = dynamic_cast<coneprimitiverenderer *>(parts[type]);
-    if(p) p->addcone(o, dir, radius, angle, fade, color, size, blend, fill);
+    if(!canaddparticles() || (parts[type]->type&PT_TYPE) != PT_CONE) return;
+    coneprimitiverenderer *p = (coneprimitiverenderer *)parts[type];
+    p->addcone(o, dir, radius, angle, fade, color, size, blend, fill);
 }
 
 //dir = 0..6 where 0=up

@@ -264,8 +264,8 @@ void mdlname()
 COMMAND(0, mdlname, "");
 
 #define checkragdoll \
-    skelmodel *m = dynamic_cast<skelmodel *>(loadingmodel); \
-    if(!m) { conoutf("\frnot loading a skeletal model"); return; } \
+    if(!loadingmodel->skeletal()) { conoutf("\frnot loading a skeletal model"); return; } \
+    skelmodel *m = (skelmodel *)loadingmodel; \
     skelmodel::skelmeshgroup *meshes = (skelmodel::skelmeshgroup *)m->parts.last()->meshes; \
     if(!meshes) return; \
     skelmodel::skeleton *skel = meshes->skel; \
