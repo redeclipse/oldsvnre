@@ -1292,15 +1292,22 @@ struct gameent : dynent, gamestate
     {
         if(!colour)
         {
-            if(name[0]) 
+            if(name[0])
             {
                 int len = strlen(name);
-                loopi(len) colour = (colour+max(name[i]-' ', 1))%0xFFFFFF;
+                bvec col(0, 0, 0);
+                loopi(len)
+                {
+                    int c = max(name[i]-' ', 1);
+                    col[c%3] += c;
+                }
+                loopi(3) col[i] = (col[i]%255)+1;
+                colour = (col.x<<16)|(col.y<<8)|col.z;
             }
             if(!colour) colour = rnd(0xFFFFFF)+1;
         }
         undertone[0] = colour;
-        bvec tone = bvec(colour).mul(2).div(3).add(85);
+        bvec tone = bvec(colour).mul(3).div(4).add(63);
         undertone[1] = (tone.x<<16)|(tone.y<<8)|tone.z;
     }
 
