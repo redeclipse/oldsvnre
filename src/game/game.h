@@ -1561,7 +1561,7 @@ namespace entities
     extern int showentdescs;
     extern vector<extentity *> ents;
     extern int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
-    extern void clearentcache();
+    extern void clearentcache(bool full = true);
     extern int closestent(int type, const vec &pos, float mindist, bool links = false);
     extern bool collateitems(gameent *d, vector<actitem> &actitems);
     extern void checkitems(gameent *d);

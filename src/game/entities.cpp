@@ -13,12 +13,13 @@ namespace entities
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(0, maxwaypoints, 128, 8192, INT_MAX-1); // max waypoints to drop unless forced
+    VAR(0, maxjetpackwaypoints, 128, 32768, INT_MAX-1); // max waypoints to drop if jetpacks allowed
     VAR(0, dropwaypoints, 0, 2, 3); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = only until max, 3 = forced
     VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (hasai && (!haswaypoints || (physics::allowjetpack() && !hasjetpoints)) ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
+        return dropwaypoints >= (hasai && numwaypoints < max(maxwaypoints, maxjetpackwaypoints) && (!haswaypoints || (physics::allowjetpack() && !hasjetpoints)) ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
     }
 
     bool clipped(const vec &o, bool aiclip)
@@ -358,6 +359,13 @@ namespace entities
         checkspawns(n);
     }
 
+    enum
+    {
+        ENTCACHE_STATIC = 0,
+        ENTCACHE_DYNAMIC,
+        NUMENTCACHES
+    };
+
     struct entcachenode
     {
         float split[2];
@@ -368,127 +376,154 @@ namespace entities
         bool isleaf(int which) const { return (child[1]&(1<<(30+which)))!=0; }
     };
 
-    vector<entcachenode> entcache;
-    int entcachedepth = -1;
-    vec entcachemin(1e16f, 1e16f, 1e16f), entcachemax(-1e16f, -1e16f, -1e16f);
-
-    float calcentcacheradius(extentity &e)
+    struct entcache
     {
-        switch(e.type)
+        vector<entcachenode> nodes;
+        int firstent, lastent, maxdepth;
+        vec bbmin, bbmax;
+    
+        entcache() { clear(); }
+
+        void clear()
         {
-            case WAYPOINT: return 0;
-            case TRIGGER: case TELEPORT: case PUSHER: case CHECKPOINT:
-                if(e.attrs[e.type == CHECKPOINT ? 0 : 3]) return e.attrs[e.type == CHECKPOINT ? 0 : 3]; // fall through
-            default: return enttype[e.type].radius;
+            nodes.setsize(0);
+            firstent = lastent = -1;
+            maxdepth = -1;
+            bbmin = vec(1e16f, 1e16f, 1e16f);
+            bbmax = vec(-1e16f, -1e16f, -1e16f);
         }
-    }
 
-    static void buildentcache(int *indices, int numindices, const vec &vmin, const vec &vmax, int depth = 1)
-    {
-        int axis = 2;
-        loopk(2) if(vmax[k] - vmin[k] > vmax[axis] - vmin[axis]) axis = k;
-
-        vec leftmin(1e16f, 1e16f, 1e16f), leftmax(-1e16f, -1e16f, -1e16f), rightmin(1e16f, 1e16f, 1e16f), rightmax(-1e16f, -1e16f, -1e16f);
-        float split = 0.5f*(vmax[axis] + vmin[axis]), splitleft = -1e16f, splitright = 1e16f;
-        int left, right;
-        for(left = 0, right = numindices; left < right;) if(ents.inrange(indices[left]))
+        static float calcradius(extentity &e)
         {
-            extentity &e = *ents[indices[left]];
-            float radius = calcentcacheradius(e);
-            if(max(split - (e.o[axis]-radius), 0.0f) > max((e.o[axis]+radius) - split, 0.0f))
+            switch(e.type)
             {
-                ++left;
-                splitleft = max(splitleft, e.o[axis]+radius);
-                leftmin.min(vec(e.o).sub(radius));
-                leftmax.max(vec(e.o).add(radius));
-            }
-            else
-            {
-                --right;
-                swap(indices[left], indices[right]);
-                splitright = min(splitright, e.o[axis]-radius);
-                rightmin.min(vec(e.o).sub(radius));
-                rightmax.max(vec(e.o).add(radius));
+                case WAYPOINT: return 0;
+                case TRIGGER: case TELEPORT: case PUSHER: case CHECKPOINT:
+                    if(e.attrs[e.type == CHECKPOINT ? 0 : 3]) return e.attrs[e.type == CHECKPOINT ? 0 : 3]; // fall through
+                default: return enttype[e.type].radius;
             }
         }
 
-        if(!left || right==numindices)
+        void build(int first = 0, int last = -1)
         {
-            leftmin = rightmin = vec(1e16f, 1e16f, 1e16f);
-            leftmax = rightmax = vec(-1e16f, -1e16f, -1e16f);
-            left = right = numindices/2;
-            splitleft = -1e16f;
-            splitright = 1e16f;
-            loopi(numindices) if(ents.inrange(indices[i]))
+            if(last < 0) last = ents.length(); 
+            vector<int> indices;
+            for(int i = first; i < last; i++)
             {
-                extentity &e = *ents[indices[i]];
-                float radius = calcentcacheradius(e);
-                if(i < left)
+                extentity &e = *ents[i];
+                if(e.type==WAYPOINT || enttype[e.type].usetype != EU_NONE)
                 {
+                    indices.add(i);
+                    if(firstent < 0) firstent = i;
+                    lastent = i;
+                    float radius = calcradius(e);
+                    bbmin.min(vec(e.o).sub(radius));
+                    bbmax.max(vec(e.o).add(radius));
+                }
+            }
+            build(indices.getbuf(), indices.length(), bbmin, bbmax);
+        }
+
+        void build(int *indices, int numindices, const vec &vmin, const vec &vmax, int depth = 1)
+        {
+            int axis = 2;
+            loopk(2) if(vmax[k] - vmin[k] > vmax[axis] - vmin[axis]) axis = k;
+
+            vec leftmin(1e16f, 1e16f, 1e16f), leftmax(-1e16f, -1e16f, -1e16f), rightmin(1e16f, 1e16f, 1e16f), rightmax(-1e16f, -1e16f, -1e16f);
+            float split = 0.5f*(vmax[axis] + vmin[axis]), splitleft = -1e16f, splitright = 1e16f;
+            int left, right;
+            for(left = 0, right = numindices; left < right;) if(ents.inrange(indices[left]))
+            {
+                extentity &e = *ents[indices[left]];
+                float radius = calcradius(e);
+                if(max(split - (e.o[axis]-radius), 0.0f) > max((e.o[axis]+radius) - split, 0.0f))
+                {
+                    ++left;
                     splitleft = max(splitleft, e.o[axis]+radius);
                     leftmin.min(vec(e.o).sub(radius));
                     leftmax.max(vec(e.o).add(radius));
                 }
                 else
                 {
+                    --right;
+                    swap(indices[left], indices[right]);
                     splitright = min(splitright, e.o[axis]-radius);
                     rightmin.min(vec(e.o).sub(radius));
                     rightmax.max(vec(e.o).add(radius));
                 }
             }
+
+            if(!left || right==numindices)
+            {
+                leftmin = rightmin = vec(1e16f, 1e16f, 1e16f);
+                leftmax = rightmax = vec(-1e16f, -1e16f, -1e16f);
+                left = right = numindices/2;
+                splitleft = -1e16f;
+                splitright = 1e16f;
+                loopi(numindices) if(ents.inrange(indices[i]))
+                {
+                    extentity &e = *ents[indices[i]];
+                    float radius = calcradius(e);
+                    if(i < left)
+                    {
+                        splitleft = max(splitleft, e.o[axis]+radius);
+                        leftmin.min(vec(e.o).sub(radius));
+                        leftmax.max(vec(e.o).add(radius));
+                    }
+                    else
+                    {
+                        splitright = min(splitright, e.o[axis]-radius);
+                        rightmin.min(vec(e.o).sub(radius));
+                        rightmax.max(vec(e.o).add(radius));
+                    }
+                }
+            }
+
+            int node = nodes.length();
+            nodes.add();
+            nodes[node].split[0] = splitleft;
+            nodes[node].split[1] = splitright;
+
+            if(left<=1) nodes[node].child[0] = (axis<<30) | (left>0 ? indices[0] : 0x3FFFFFFF);
+            else
+            {
+                nodes[node].child[0] = (axis<<30) | (nodes.length()-node);
+                if(left) build(indices, left, leftmin, leftmax, depth+1);
+            }
+
+            if(numindices-right<=1) nodes[node].child[1] = (1<<31) | (left<=1 ? 1<<30 : 0) | (numindices-right>0 ? indices[right] : 0x3FFFFFFF);
+            else
+            {
+                nodes[node].child[1] = (left<=1 ? 1<<30 : 0) | (nodes.length()-node);
+                if(numindices-right) build(&indices[right], numindices-right, rightmin, rightmax, depth+1);
+            }
+
+            maxdepth = max(maxdepth, depth);
         }
+    } entcaches[NUMENTCACHES];
 
-        int node = entcache.length();
-        entcache.add();
-        entcache[node].split[0] = splitleft;
-        entcache[node].split[1] = splitright;
+    static int invalidatedentcaches = 0, clearedentcaches = (1<<NUMENTCACHES)-1, numinvalidateentcaches = 0;
 
-        if(left==1) entcache[node].child[0] = (axis<<30) | indices[0];
-        else
-        {
-            entcache[node].child[0] = (axis<<30) | entcache.length();
-            if(left) buildentcache(indices, left, leftmin, leftmax, depth+1);
-        }
-
-        if(numindices-right==1) entcache[node].child[1] = (1<<31) | (left==1 ? 1<<30 : 0) | indices[right];
-        else
-        {
-            entcache[node].child[1] = (left==1 ? 1<<30 : 0) | entcache.length();
-            if(numindices-right) buildentcache(&indices[right], numindices-right, rightmin, rightmax, depth+1);
-        }
-
-        entcachedepth = max(entcachedepth, depth);
-    }
-
-    bool docacheclear = false;
-    void clearentcache()
+    static inline void invalidateentcache(int ent)
     {
-        entcache.setsize(0);
-        entcachedepth = -1;
-        entcachemin = vec(1e16f, 1e16f, 1e16f);
-        entcachemax = vec(-1e16f, -1e16f, -1e16f);
+        if(++numinvalidateentcaches >= 1000) { numinvalidateentcaches = 0; invalidatedentcaches = (1<<NUMENTCACHES)-1; }
+        else loopi(NUMENTCACHES) if((ent >= entcaches[i].firstent && ent <= entcaches[i].lastent) || i+1 >= NUMENTCACHES) invalidatedentcaches |= 1<<i;
+    }
+        
+    void clearentcache(bool full)
+    {
+        loopi(NUMENTCACHES) if(full || invalidatedentcaches&(1<<i)) { entcaches[i].clear(); clearedentcaches |= 1<<i; }
+        invalidatedentcaches = 0;
+        if(full || invalidatedentcaches == (1<<NUMENTCACHES)-1) numinvalidateentcaches = 0;
         ai::wps.clear();
     }
     ICOMMAND(0, clearentcache, "", (void), clearentcache());
 
     void buildentcache()
     {
-        entcache.setsize(0);
-        vector<int> indices;
-        entcachemin = vec(1e16f, 1e16f, 1e16f);
-        entcachemax = vec(-1e16f, -1e16f, -1e16f);
-        loopv(ents)
-        {
-            extentity &e = *ents[i];
-            if(e.type==WAYPOINT || enttype[e.type].usetype != EU_NONE)
-            {
-                indices.add(i);
-                float radius = calcentcacheradius(e);
-                entcachemin.min(vec(e.o).sub(radius));
-                entcachemax.max(vec(e.o).add(radius));
-            }
-        }
-        buildentcache(indices.getbuf(), indices.length(), entcachemin, entcachemax);
+        loopi(NUMENTCACHES) if(entcaches[i].maxdepth < 0)
+            entcaches[i].build(i > 0 ? entcaches[i-1].lastent+1 : 0, i+1 >= NUMENTCACHES || entcaches[i+1].maxdepth < 0 ? -1 : entcaches[i+1].firstent);
+        clearedentcaches = 0;
         ai::wps.clear();
         loopi(entities::lastenttype[WAYPOINT]) if(entities::ents[i]->type == WAYPOINT && entities::ents[i]->attrs[1] < 0)
             ai::wps.avoidnear(NULL, entities::ents[i]->o, enttype[WAYPOINT].radius);
@@ -504,9 +539,7 @@ namespace entities
 
     int closestent(int type, const vec &pos, float mindist, bool links)
     {
-        if(entcachedepth<0) buildentcache();
-
-        entcachestack.setsize(0);
+        if(clearedentcaches) buildentcache();
 
         #define CHECKCLOSEST(branch) do { \
             int n = curnode->childindex(branch); \
@@ -520,7 +553,8 @@ namespace entities
             } \
         } while(0)
         int closest = -1;
-        loop(force, 2) for(entcachenode *curnode = &entcache[0];;)
+        entcachenode *curnode;
+        loop(which, 2) for(curnode = &entcaches[which].nodes[0], entcachestack.setsize(0);;)
         {
             int axis = curnode->axis();
             float dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
@@ -528,7 +562,7 @@ namespace entities
             {
                 if(dist2 < mindist)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKCLOSEST(1);
                 }
             }
@@ -537,7 +571,7 @@ namespace entities
                 CHECKCLOSEST(0);
                 if(dist2 < mindist)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKCLOSEST(1);
                 }
             }
@@ -545,27 +579,23 @@ namespace entities
             {
                 if(dist2 < mindist)
                 {
-                    if(!curnode->isleaf(1)) entcachestack.add(&entcache[curnode->childindex(1)]);
+                    if(!curnode->isleaf(1)) entcachestack.add(curnode + curnode->childindex(1));
                     else CHECKCLOSEST(1);
                 }
-                curnode = &entcache[curnode->childindex(0)];
+                curnode += curnode->childindex(0);
                 continue;
             }
-            if(entcachestack.empty()) { if(closest >= 0) return closest; else break; }
+            if(entcachestack.empty()) break;
             curnode = entcachestack.pop();
         }
-        return -1;
+        return closest;
     }
 
     void findentswithin(int type, const vec &pos, float mindist, float maxdist, vector<int> &results)
     {
+        if(clearedentcaches) buildentcache();
+
         float mindist2 = mindist*mindist, maxdist2 = maxdist*maxdist;
-
-        if(entcachedepth<0) buildentcache();
-
-        entcachestack.setsize(0);
-
-        entcachenode *curnode = &entcache[0];
         #define CHECKWITHIN(branch) do { \
             int n = curnode->childindex(branch); \
             if(ents.inrange(n)) { \
@@ -577,7 +607,8 @@ namespace entities
                 } \
             } \
         } while(0)
-        for(;;)
+        entcachenode *curnode;
+        loop(which, 2) for(curnode = &entcaches[which].nodes[0], entcachestack.setsize(0);;)
         {
             int axis = curnode->axis();
             float dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
@@ -585,7 +616,7 @@ namespace entities
             {
                 if(dist2 < maxdist)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKWITHIN(1);
                 }
             }
@@ -594,7 +625,7 @@ namespace entities
                 CHECKWITHIN(0);
                 if(dist2 < maxdist)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKWITHIN(1);
                 }
             }
@@ -602,26 +633,22 @@ namespace entities
             {
                 if(dist2 < maxdist)
                 {
-                    if(!curnode->isleaf(1)) entcachestack.add(&entcache[curnode->childindex(1)]);
+                    if(!curnode->isleaf(1)) entcachestack.add(curnode + curnode->childindex(1));
                     else CHECKWITHIN(1);
                 }
-                curnode = &entcache[curnode->childindex(0)];
+                curnode += curnode->childindex(0);
                 continue;
             }
-            if(entcachestack.empty()) return;
+            if(entcachestack.empty()) break;
             curnode = entcachestack.pop();
         }
     }
 
     void avoidset::avoidnear(dynent *d, const vec &pos, float limit)
     {
+        if(clearedentcaches) buildentcache();
+
         float limit2 = limit*limit;
-
-        if(entcachedepth<0) buildentcache();
-
-        entcachestack.setsize(0);
-
-        entcachenode *curnode = &entcache[0];
         #define CHECKNEAR(branch) do { \
             int n = curnode->childindex(branch); \
             if(ents.inrange(n)) { \
@@ -629,7 +656,8 @@ namespace entities
                 if(e.type == WAYPOINT && e.o.squaredist(pos) < limit2) add(d, n); \
             } \
         } while(0)
-        for(;;)
+        entcachenode *curnode;
+        loop(which, 2) for(curnode = &entcaches[which].nodes[0], entcachestack.setsize(0);;)
         {
             int axis = curnode->axis();
             float dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
@@ -637,7 +665,7 @@ namespace entities
             {
                 if(dist2 < limit)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKNEAR(1);
                 }
             }
@@ -646,7 +674,7 @@ namespace entities
                 CHECKNEAR(0);
                 if(dist2 < limit)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKNEAR(1);
                 }
             }
@@ -654,24 +682,21 @@ namespace entities
             {
                 if(dist2 < limit)
                 {
-                    if(!curnode->isleaf(1)) entcachestack.add(&entcache[curnode->childindex(1)]);
+                    if(!curnode->isleaf(1)) entcachestack.add(curnode + curnode->childindex(1));
                     else CHECKNEAR(1);
                 }
-                curnode = &entcache[curnode->childindex(0)];
+                curnode += curnode->childindex(0);
                 continue;
             }
-            if(entcachestack.empty()) return;
+            if(entcachestack.empty()) break;
             curnode = entcachestack.pop();
         }
     }
 
     void collateents(const vec &pos, float xyrad, float zrad, vector<actitem> &actitems)
     {
-        if(entcachedepth<0) buildentcache();
+        if(clearedentcaches) buildentcache();
 
-        entcachestack.setsize(0);
-
-        entcachenode *curnode = &entcache[0];
         #define CHECKITEM(branch) do { \
             int n = curnode->childindex(branch); \
             if(ents.inrange(n)) { \
@@ -689,7 +714,8 @@ namespace entities
                 } \
             } \
         } while(0)
-        for(;;)
+        entcachenode *curnode;
+        loop(which, 2) for(curnode = &entcaches[which].nodes[0], entcachestack.setsize(0);;)
         {
             int axis = curnode->axis();
             float mindist = axis<2 ? xyrad : zrad, dist1 = pos[axis] - curnode->split[0], dist2 = curnode->split[1] - pos[axis];
@@ -697,7 +723,7 @@ namespace entities
             {
                 if(dist2 < mindist)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKITEM(1);
                 }
             }
@@ -706,7 +732,7 @@ namespace entities
                 CHECKITEM(0);
                 if(dist2 < mindist)
                 {
-                    if(!curnode->isleaf(1)) { curnode = &entcache[curnode->childindex(1)]; continue; }
+                    if(!curnode->isleaf(1)) { curnode += curnode->childindex(1); continue; }
                     CHECKITEM(1);
                 }
             }
@@ -714,13 +740,13 @@ namespace entities
             {
                 if(dist2 < mindist)
                 {
-                    if(!curnode->isleaf(1)) entcachestack.add(&entcache[curnode->childindex(1)]);
+                    if(!curnode->isleaf(1)) entcachestack.add(curnode + curnode->childindex(1));
                     else CHECKITEM(1);
                 }
-                curnode = &entcache[curnode->childindex(0)];
+                curnode += curnode->childindex(0);
                 continue;
             }
-            if(entcachestack.empty()) return;
+            if(entcachestack.empty()) break;
             curnode = entcachestack.pop();
         }
     }
@@ -1306,7 +1332,7 @@ namespace entities
             lastenttype[e.type] = max(lastenttype[e.type], i+1);
             lastusetype[enttype[e.type].usetype] = max(lastusetype[enttype[e.type].usetype], i+1);
         }
-        docacheclear = true;
+        invalidateentcache(i);
     }
 
     float dropheight(extentity &e)
@@ -2390,11 +2416,7 @@ namespace entities
                 playsound(e.attrs[0], e.o, NULL, flags, e.attrs[3], e.attrs[1], e.attrs[2], &e.schan);
             }
         }
-        if(docacheclear)
-        {
-            clearentcache();
-            docacheclear = false;
-        }
+        if(invalidatedentcaches) clearentcache(false);
     }
 
     void render()
