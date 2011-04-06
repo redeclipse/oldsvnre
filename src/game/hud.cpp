@@ -216,7 +216,9 @@ namespace hud
     FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radarcardblend, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 1, 1000);
+    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.45f, 1000);
+    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.9f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
@@ -1164,8 +1166,8 @@ namespace hud
             else colour[0] = vec::hexcolor(d->colour(1));
             colour[1] = vec::hexcolor(d->colour(0));
             const char *tex = dominated ? dominatedtex : bliptex;
-            float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend*radarplayerblend,
-                  pos = 2, size = radarplayersize*(dominated ? 1.5f : 1.f);
+            float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend,
+                  pos = 2, size = dominated ? 1.5f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
@@ -1190,9 +1192,8 @@ namespace hud
             loopi(2)
             {
                 if(!i && chkcond(radarplayernames, game::tvmode()))
-                    drawblip(i ? tex : hinttex, pos, w, h, size, fade, dir, colour[i], "radar", "%s", game::colorname(d, NULL, "", false));
-                else drawblip(i ? tex : hinttex, pos, w, h, size, fade, dir, colour[i]);
-                if(!i) size *= 0.5f;
+                    drawblip(i ? tex : hinttex, pos, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), dir, colour[i], "radar", "%s", game::colorname(d, NULL, "", false));
+                else drawblip(i ? tex : hinttex, pos, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), dir, colour[i]);
             }
         }
     }
