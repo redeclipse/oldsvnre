@@ -26,6 +26,8 @@
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-fno-exceptions" />
+					<Add option="-fno-rtti" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -144,6 +146,8 @@
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-fno-exceptions" />
+					<Add option="-fno-rtti" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DMASTERSERVER" />
 					<Add option="-DIRC" />
@@ -178,7 +182,6 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fsigned-char" />
-					<Add option="-fomit-frame-pointer" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DMASTERSERVER" />
 					<Add option="-DIRC" />
@@ -205,6 +208,8 @@
 				<Compiler>
 					<Add option="-fsigned-char" />
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-fno-exceptions" />
+					<Add option="-fno-rtti" />
 				</Compiler>
 			</Target>
 			<Target title="genkey">
@@ -225,6 +230,8 @@
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
 					<Add option="-fomit-frame-pointer" />
+					<Add option="-fno-exceptions" />
+					<Add option="-fno-rtti" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DGENKEY" />
 					<Add directory="shared" />
