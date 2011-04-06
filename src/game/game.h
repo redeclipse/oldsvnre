@@ -1296,19 +1296,14 @@ struct gameent : dynent, gamestate
             {
                 int len = strlen(name);
                 bvec col(0, 0, 0);
-                loopi(len)
-                {
-                    int c = max(name[i]-' ', 1);
-                    col[c%3] += c;
-                }
+                loopi(len) col[i%3] += max(name[i]-' ', 1);
                 loopi(3) col[i] = (col[i]%255)+1;
                 colour = (col.x<<16)|(col.y<<8)|col.z;
             }
             if(!colour) colour = rnd(0xFFFFFF)+1;
         }
         undertone[0] = colour;
-        bvec tone = bvec(colour).mul(3).div(4).add(63);
-        undertone[1] = (tone.x<<16)|(tone.y<<8)|tone.z;
+        undertone[1] = (((((colour>>16)&0xFF)*3/4)+63)<<16) |(((((colour>>8)&0xFF)*3/4)+63)<<8) | (((colour&0xFF)*3/4)+63);
     }
 
     void setname(const char *n = NULL)
