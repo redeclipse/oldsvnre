@@ -1292,7 +1292,11 @@ struct gameent : dynent, gamestate
     {
         if(!colour)
         {
-            if(name[0]) loopi(strlen(name)) colour = int(colour+max(name[i]-32, 1))%0xFFFFFF;
+            if(name[0]) 
+            {
+                int len = strlen(name);
+                loopi(len) colour = (colour+max(name[i]-' ', 1))%0xFFFFFF;
+            }
             if(!colour) colour = rnd(0xFFFFFF)+1;
         }
         undertone[0] = colour;
