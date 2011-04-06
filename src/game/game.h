@@ -1290,22 +1290,13 @@ struct gameent : dynent, gamestate
 
     void setundertone(int colour = 0)
     {
-        ivec col((colour>>16)&0xFF, (colour>>8)&0xFF, colour&0xFF);
         if(!colour) 
-        {
-            if(name[0])
-            {
-                int len = strlen(name);
-                loopi(len) col[i%3] += max(name[i]-' ', 1);
-                col.mask(0xFF).max(1);
-            }
-            if(!colour) 
-            {
-                colour = rnd(0xFFFFFF);
-                col = vec((colour>>16)&0xFF, (colour>>8)&0xFF, colour&0xFF).max(1);
-            }
+        { 
+            if(name[0]) { colour = detrnd(hthash(name), 0x10000); colour |= detrnd(colour, 0x10000)<<16; }
+            else colour = rnd(0xFFFFFF);
         }
-        ivec col2 = ivec(col).mul(3).div(4).add(64); 
+        ivec col(max((colour>>16)&0xFF, 1), max((colour>>8)&0xFF, 1), max(colour&0xFF, 1)),
+             col2 = ivec(col).mul(3).div(4).add(64); 
         col.mul(3).div(5);
         undertone[0] = (col.x<<16)|(col.y<<8)|col.z;
         undertone[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
