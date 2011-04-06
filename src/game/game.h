@@ -936,7 +936,7 @@ struct eventicon
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
-    int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
+    int team, undertone, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
@@ -946,10 +946,11 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
 
-    gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
+    gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), undertone(0), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
+        undertone = rnd(0xFFFFFF)+1;
         name[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);

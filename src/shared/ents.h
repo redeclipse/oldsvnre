@@ -14,7 +14,7 @@ struct entbase                                   // persistent map entity
     uchar reserved[3];                          // left-over space due to struct alignment
 };
 
-enum { MAXLIGHTMATERIALS = 2 };
+enum { MAXLIGHTMATERIALS = 3 };
 
 struct entitylight
 {

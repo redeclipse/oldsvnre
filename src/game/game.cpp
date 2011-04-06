@@ -2133,6 +2133,7 @@ namespace game
         if(e->light.millis != lastmillis)
         {
             e->light.material[0] = bvec(d->colour());
+            e->light.material[1] = bvec(d->undertone);
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2147,9 +2148,9 @@ namespace game
                     default: scale = d->ammo[d->weapselect]/float(WEAP(d->weapselect, max)); break;
                 }
                 uchar wepmat = uchar(255*scale);
-                e->light.material[1] = bvec(wepmat, wepmat, wepmat);
+                e->light.material[2] = bvec(wepmat, wepmat, wepmat);
             }
-            else e->light.material[1] = bvec(255, 255, 255);
+            else e->light.material[2] = bvec(255, 255, 255);
             if(burntime && d->burning(lastmillis, burntime))
             {
                 flags |= MDL_LIGHTFX;
