@@ -192,6 +192,7 @@ enum
     PT_TRIANGLE,
     PT_ELLIPSE,
     PT_CONE,
+    PT_TYPE     = 0xFF,
 
     PT_MOD      = 1<<8,
     PT_RND4     = 1<<9,     // uses random image quarters
