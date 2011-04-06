@@ -1295,15 +1295,18 @@ struct gameent : dynent, gamestate
             if(name[0])
             {
                 int len = strlen(name);
-                bvec col(0, 0, 0);
+                ivec col(0, 0, 0);
                 loopi(len) col[i%3] += max(name[i]-' ', 1);
-                loopi(3) col[i] = (col[i]%255)+1;
+                col.mask(0xFF).add(1);
                 colour = (col.x<<16)|(col.y<<8)|col.z;
             }
             if(!colour) colour = rnd(0xFFFFFF)+1;
         }
-        undertone[0] = colour;
-        undertone[1] = (((((colour>>16)&0xFF)*3/4)+63)<<16) |(((((colour>>8)&0xFF)*3/4)+63)<<8) | (((colour&0xFF)*3/4)+63);
+        ivec col((colour>>16)&0xFF, (colour>>8)&0xFF, colour&0xFF), col2 = col; 
+        col.div(2);
+        col2.mul(3).div(4).add(64);
+        undertone[0] = (col.x<<16)|(col.y<<8)|col.z;
+        undertone[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
     }
 
     void setname(const char *n = NULL)
