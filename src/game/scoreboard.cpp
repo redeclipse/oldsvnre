@@ -355,7 +355,7 @@ namespace hud
                 if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x339933 : 0x999933;
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 3);
-                g.text("", 0, status, o->colour(2));
+                g.text("", 0, status, o->colour(1));
                 g.poplist();
             });
             g.poplist();
@@ -482,8 +482,8 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 1);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0xFFFFFF, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false));
+                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, o->colour(1), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s", 0xFFFFFF, hud::conopentex, o->colour(1), game::colorname(o, NULL, "", false));
                 if(i+1<spectators.length() && (i+1)%3) g.space(1);
                 else g.poplist();
                 g.poplist();
