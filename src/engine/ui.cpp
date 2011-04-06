@@ -136,7 +136,7 @@ struct gui : guient
                 if(mouseaction[0]&GUI_UP) { b; } \
                 hit = true; \
             } \
-            icon_(textureload(a, 3, true, false), false, x, y, guibound[1], !hit); \
+            icon_(textureload(a, 3, true, false), false, x, y, guibound[1], !hit, hit ? 0xFF0000 : 0xFFFFFF); \
             y += guibound[1]*3/2; \
         }
         uibtn("textures/exit", cleargui(1));
@@ -202,9 +202,9 @@ struct gui : guient
         return 0;
     }
 
-    int text  (const char *text, int color, const char *icon) { autotab(); return button_(text, color, icon, false, false); }
-    int button(const char *text, int color, const char *icon, bool faded) { autotab(); return button_(text, color, icon, true, faded); }
-    int title (const char *text, int color, const char *icon) { autotab(); return button_(text, color, icon, false, false, "emphasis"); }
+    int text  (const char *text, int color, const char *icon, int icolor) { autotab(); return button_(text, color, icon, icolor, false, false); }
+    int button(const char *text, int color, const char *icon, int icolor, bool faded) { autotab(); return button_(text, color, icon, icolor, true, faded); }
+    int title (const char *text, int color, const char *icon, int icolor) { autotab(); return button_(text, color, icon, icolor, false, false, "emphasis"); }
 
     void separator() { autotab(); line_(5); }
 
@@ -249,12 +249,12 @@ struct gui : guient
         return hitx>=x && hity>=y && hitx<x+w && hity<y+h;
     }
 
-    int image(Texture *t, float scale, bool overlaid)
+    int image(Texture *t, float scale, bool overlaid, int icolor)
     {
         autotab();
         if(scale == 0) scale = 1;
         int size = (int)(scale*2*guibound[1])-guishadow;
-        if(visible()) icon_(t, overlaid, curx, cury, size, ishit(size+guishadow, size+guishadow));
+        if(visible()) icon_(t, overlaid, curx, cury, size, ishit(size+guishadow, size+guishadow), icolor);
         return layout(size+guishadow, size+guishadow);
     }
 
@@ -564,7 +564,7 @@ struct gui : guient
         defaultshader->set();
     }
 
-    void icon_(Texture *t, bool overlaid, int x, int y, int size, bool hit)
+    void icon_(Texture *t, bool overlaid, int x, int y, int size, bool hit, int icolor)
     {
         float xs = 0, ys = 0;
         if(t)
@@ -609,7 +609,8 @@ struct gui : guient
             ys -= 2*ypad;
         }
         static const float tc[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
-        const vec &color = hit && !overlaid ? vec(0.5f, 0.5f, 0.5f) : vec(1, 1, 1);
+        vec color = vec::hexcolor(icolor);
+        if(hit && !overlaid) color.div(2);
         glColor3fv(color.v);
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2fv(tc[0]); glVertex2f(xi,    yi);
@@ -756,7 +757,7 @@ struct gui : guient
         layout(ishorizontal() ? guibound[0] : 0, ishorizontal() ? 0 : guibound[1]);
     }
 
-    int button_(const char *text, int color, const char *icon, bool clickable, bool faded, const char *font = "")
+    int button_(const char *text, int color, const char *icon, int icolor, bool clickable, bool faded, const char *font = "")
     {
         if(font && *font) gui::pushfont(font);
         int w = 0, h = max((int)FONTH, guibound[1]);
@@ -772,7 +773,7 @@ struct gui : guient
             if(icon)
             {
                 defformatstring(tname)("%s%s", strncmp("textures/", icon, 9) ? "textures/" : "", icon);
-                icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], faded && clickable && !hit);
+                icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], faded && clickable && !hit, icolor);
                 x += guibound[1];
             }
             if(icon && text) x += 8;

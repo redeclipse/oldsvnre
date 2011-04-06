@@ -475,17 +475,17 @@ struct guient
     virtual void start(int starttime, float basescale, int *tab = NULL, bool allowinput = true, bool wantstitle = true) = 0;
     virtual void end() = 0;
 
-    virtual int text(const char *text, int color, const char *icon = NULL) = 0;
-    int textf(const char *fmt, int color, const char *icon = NULL, ...)
+    virtual int text(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
+    int textf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, ...)
     {
-        defvformatstring(str, icon, fmt);
-        return text(str, color, icon);
+        defvformatstring(str, icolor, fmt);
+        return text(str, color, icon, icolor);
     }
-    virtual int button(const char *text, int color, const char *icon = NULL, bool faded = true) = 0;
-    int buttonf(const char *fmt, int color, const char *icon = NULL, bool faded = true, ...)
+    virtual int button(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true) = 0;
+    int buttonf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true, ...)
     {
         defvformatstring(str, faded, fmt);
-        return button(str, color, icon, faded);
+        return button(str, color, icon, icolor, faded);
     }
     virtual void background(int color, int parentw = 0, int parenth = 0) = 0;
 
@@ -495,8 +495,8 @@ struct guient
     virtual void allowautotab(bool on) = 0;
     virtual bool shouldtab() { return false; }
     virtual void tab(const char *name = NULL, int color = 0xFFFFFF) = 0;
-    virtual int title(const char *text, int color = 0xFFFFFF, const char *icon = NULL) = 0;
-    virtual int image(Texture *t, float scale, bool overlaid = false) = 0;
+    virtual int title(const char *text, int color = 0xFFFFFF, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
+    virtual int image(Texture *t, float scale, bool overlaid = false, int icolor = 0xFFFFFF) = 0;
     virtual int texture(VSlot &vslot, float scale, bool overlaid = true) = 0;
     virtual int slice(Texture *t, float scale, float start = 0, float end = 1, const char *text = NULL) = 0;
     virtual void slider(int &val, int vmin, int vmax, int color, char *label = NULL, bool reverse = false, bool scroll = false) = 0;

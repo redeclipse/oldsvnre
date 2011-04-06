@@ -187,15 +187,15 @@ namespace hud
         g.pushlist();
         g.space(1);
         g.pushfont("super");
-        if(*maptitle) g.textf("%s", 0xFFFFFF, NULL, maptitle);
-        else g.textf("(%s)", 0xFFFFFF, NULL, mapname);
+        if(*maptitle) g.textf("%s", 0xFFFFFF, NULL, 0, maptitle);
+        else g.textf("(%s)", 0xFFFFFF, NULL, 0, mapname);
         g.popfont();
         if(*mapauthor)
         {
             g.pushlist();
             g.space(3);
             g.pushfont("emphasis");
-            g.textf("by %s", 0xFFFFFF, NULL, mapauthor);
+            g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor);
             g.popfont();
             g.poplist();
         }
@@ -203,12 +203,12 @@ namespace hud
         g.pushfont("default");
         defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
         if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
-        g.textf("%s", 0xFFFFFF, NULL, gname);
+        g.textf("%s", 0xFFFFFF, NULL, 0, gname);
         if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
         {
-            if(!game::timeremaining) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL);
-            else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL);
-            else g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, hud::timetostr(game::timeremaining, 2));
+            if(!game::timeremaining) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
+            else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
+            else g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, hud::timetostr(game::timeremaining, 2));
         }
         g.popfont();
         g.poplist();
@@ -217,16 +217,16 @@ namespace hud
             g.pushlist();
             g.space(2);
             g.pushfont("radar");
-            g.textf("\fdon ", 0xFFFFFF, NULL);
+            g.textf("\fdon ", 0xFFFFFF, NULL, 0);
             g.popfont();
             if(*serverdesc)
             {
                 g.pushfont("sub");
-                g.textf("%s ", 0xFFFFFF, NULL, serverdesc);
+                g.textf("%s ", 0xFFFFFF, NULL, 0, serverdesc);
                 g.popfont();
             }
             g.pushfont("radar");
-            g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, connectname, connectport);
+            g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, 0, connectname, connectport);
             g.popfont();
             g.poplist();
         }
@@ -237,44 +237,44 @@ namespace hud
             const char *msg = game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait";
             g.space(1);
             g.pushlist();
-            g.pushfont("default"); g.textf("%s", 0xFFFFFF, NULL, msg); g.popfont();
+            g.pushfont("default"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
             g.space(2);
             SEARCHBINDCACHE(attackkey)("action 0", 0);
             g.pushfont("sub");
             if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
             {
-                if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL);
-                else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, hud::timetostr(delay, -1));
+                if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, hud::timetostr(delay, -1));
                 else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                 {
                     int n = game::numwaiting();
-                    if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, n, n != 1 ? "players" : "player");
-                    else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL);
+                    if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
+                    else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
                 }
                 g.poplist();
                 if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
-                    g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, attackkey);
+                    g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey);
             }
             else
             {
-                g.textf("Ready to respawn", 0xFFFFFF, NULL);
+                g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
                 g.poplist();
-                if(game::player1->state != CS_WAITING) g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, attackkey);
+                if(game::player1->state != CS_WAITING) g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey);
             }
             if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
             {
                 SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, waitmodekey);
+                g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey);
             }
             if(m_arena(game::gamemode, game::mutators))
             {
                 SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                g.textf("Press \fs\fc%s\fS to \fs%s\fS loadouts", 0xFFFFFF, NULL, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
+                g.textf("Press \fs\fc%s\fS to \fs%s\fS loadouts", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
             }
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, teamkey);
+                g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey);
             }
             g.popfont();
         }
@@ -282,33 +282,33 @@ namespace hud
         {
             g.space(1);
             g.pushfont("default");
-            if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL);
-            else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL);
+            if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
+            else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
             else if(m_team(game::gamemode, game::mutators))
-                g.textf("Team \fs%s%s\fS", 0xFFFFFF, NULL, teamtype[game::player1->team].chat, teamtype[game::player1->team].name);
-            else g.textf("Free for All", 0xFFFFFF, NULL);
+                g.textf("Team \fs%s%s\fS", 0xFFFFFF, NULL, 0, teamtype[game::player1->team].chat, teamtype[game::player1->team].name);
+            else g.textf("Free for All", 0xFFFFFF, NULL, 0);
             g.popfont();
         }
         else if(game::player1->state == CS_SPECTATOR)
         {
             g.space(1);
-            g.pushfont("default"); g.textf("%s", 0xFFFFFF, NULL, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
+            g.pushfont("default"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
             g.pushfont("sub");
-            g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, speconkey);
+            g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey);
             SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-            g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, specmodekey, game::tvmode() ? "interact" : "switch to TV");
+            g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV");
             g.popfont();
         }
 
         SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
         g.pushfont("sub");
-        g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, scoresoff ? "Release" : "Press", scoreboardkey);
+        g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey);
         g.popfont();
         g.pushlist();
         g.space(2);
         g.pushfont("radar");
-        g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL);
+        g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0);
         g.popfont();
         g.poplist();
         g.poplist();
@@ -319,10 +319,11 @@ namespace hud
             if((k%2)==0) g.pushlist(); // horizontal
 
             scoregroup &sg = *groups[k];
-            int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? teamtype[sg.team].colour : 0,
+            int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? teamtype[sg.team].colour : 0x333333,
                 fgcolor = 0xFFFFFF;
 
             g.pushlist(); // vertical
+            g.background(bgcolor);
             g.pushlist(); // horizontal
 
             #define loopscoregroup(b) \
@@ -351,11 +352,11 @@ namespace hud
                     if(o->dominating.find(game::focus) >= 0) status = hud::dominatingtex;
                     else if(o->dominated.find(game::focus) >= 0) status = hud::dominatedtex;
                 }
-                int bgcol = o==game::player1 && highlightscore ? 0x888888 : 0;
-                if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x226622 : 0x666622;
+                int bgcol = o==game::player1 && highlightscore ? 0x999999 : 0;
+                if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x339933 : 0x999933;
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 3);
-                g.text("", 0, status);
+                g.text("", 0, status, o->colour(1));
                 g.poplist();
             });
             g.poplist();
@@ -364,8 +365,8 @@ namespace hud
             {
                 g.pushlist(); // vertical
                 if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
-                    g.textf("%s: WIN", fgcolor, NULL, teamtype[sg.team].name);
-                else g.textf("%s: %d", fgcolor, NULL, teamtype[sg.team].name, sg.total);
+                    g.textf("%s: WIN", fgcolor, NULL, 0, teamtype[sg.team].name);
+                else g.textf("%s: %d", fgcolor, NULL, 0, teamtype[sg.team].name, sg.total);
                 g.pushlist(); // horizontal
             }
 
@@ -373,7 +374,7 @@ namespace hud
             g.pushlist();
             g.text("name ", fgcolor);
             g.poplist();
-            loopscoregroup(g.textf("%s ", 0xFFFFFF, NULL, game::colorname(o, NULL, "", false)));
+            loopscoregroup(g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)));
             g.poplist();
 
             if(showpoints)
@@ -381,7 +382,7 @@ namespace hud
                 g.pushlist();
                 g.strut(7);
                 g.text("points", fgcolor);
-                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, o->points));
+                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->points));
                 g.poplist();
             }
 
@@ -392,13 +393,13 @@ namespace hud
                 {
                     g.strut(10);
                     g.text("best lap", fgcolor);
-                    loopscoregroup(g.textf("%s", 0xFFFFFF, NULL, o->cptime ? timetostr(o->cptime) : "\fadnf"));
+                    loopscoregroup(g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"));
                 }
                 else
                 {
                     g.strut(6);
                     g.text("frags", fgcolor);
-                    loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, o->frags));
+                    loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->frags));
                 }
                 g.poplist();
             }
@@ -409,7 +410,7 @@ namespace hud
                 g.strut(5);
                 g.text("pj", fgcolor);
                 loopscoregroup({
-                    g.textf("%d", 0xFFFFFF, NULL, o->plag);
+                    g.textf("%d", 0xFFFFFF, NULL, 0, o->plag);
                 });
                 g.poplist();
             }
@@ -419,7 +420,7 @@ namespace hud
                 g.pushlist();
                 g.strut(5);
                 g.text("ping", fgcolor);
-                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, o->ping));
+                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->ping));
                 g.poplist();
             }
 
@@ -428,7 +429,7 @@ namespace hud
                 g.pushlist();
                 g.strut(4);
                 g.text("cn", fgcolor);
-                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, o->clientnum));
+                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum));
                 g.poplist();
             }
 
@@ -438,7 +439,7 @@ namespace hud
                 g.strut(3);
                 g.text("sk", fgcolor);
                 loopscoregroup({
-                    if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, o->skill);
+                    if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
                     else g.space(1);
                 });
                 g.poplist();
@@ -450,7 +451,7 @@ namespace hud
                 g.strut(3);
                 g.text("on", fgcolor);
                 loopscoregroup({
-                    if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, o->ownernum);
+                    if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
                     else g.space(1);
                 });
                 g.poplist();
@@ -472,26 +473,30 @@ namespace hud
         if(showspectators && spectators.length())
         {
             g.space(1);
+            g.pushlist();
             loopv(spectators)
             {
                 gameent *o = spectators[i];
                 int bgcol = o==game::player1 && highlightscore ? 0x888888 : 0;
                 if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x226622 : 0x666622;
                 if((i%3)==0) g.pushlist();
-                if(bgcol) g.background(bgcol, -1);
+                g.pushlist();
+                if(bgcol) g.background(bgcol, 1);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0xFFFFFF, hud::conopentex, game::colorname(o, NULL, "", false));
+                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, o->colour(1), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s", 0xFFFFFF, hud::conopentex, o->colour(1), game::colorname(o, NULL, "", false));
                 if(i+1<spectators.length() && (i+1)%3) g.space(1);
                 else g.poplist();
+                g.poplist();
             }
+            g.poplist();
         }
         if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || showscoresinfo))
         {
             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
             g.space(1);
             g.pushfont("sub");
-            g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL,
+            g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                 game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                 game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
                 game::player1->totaldamage);
