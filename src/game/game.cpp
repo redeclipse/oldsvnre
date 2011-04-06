@@ -2154,7 +2154,10 @@ namespace game
             if(burntime && d->burning(lastmillis, burntime))
             {
                 flags |= MDL_LIGHTFX;
-                e->light.effect.max(vec(burncolour(d)).max(vec::hexcolor(d->colour())));
+                vec col = burncolour(d);
+                e->light.material[1] = bvec(vec(e->light.material[1].x, e->light.material[1].y, e->light.material[1].z).div(255.f).max(col));
+                col.max(vec::hexcolor(d->colour()));
+                e->light.effect.max(col);
             }
             if(bleedtime && d->bleeding(lastmillis, bleedtime))
             {
@@ -2164,7 +2167,10 @@ namespace game
                     flags |= MDL_LIGHTFX;
                     delay /= 2;
                     float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                    e->light.effect.max(vec(1, 0.2f, 0.2f).max(vec::hexcolor(d->colour())).mul(amt));
+                    vec col = vec(1, 0.2f, 0.2f);
+                    e->light.material[1] = bvec(vec(e->light.material[1].x, e->light.material[1].y, e->light.material[1].z).div(255.f).max(col).mul(amt));
+                    col.max(vec::hexcolor(d->colour())).mul(amt);
+                    e->light.effect.max(col);
                 }
             }
         }

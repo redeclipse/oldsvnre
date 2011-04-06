@@ -950,8 +950,8 @@ struct gameent : dynent, gamestate
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
-        setundertone(rnd(0xFFFFFF)+1);
-        name[0] = info[0] = obit[0] = 0;
+        setname();
+        info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);
         cleartags();
@@ -1288,10 +1288,23 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setundertone(int colour)
+    void setundertone(int colour = 0)
     {
+        if(!colour)
+        {
+            if(name[0]) loopi(strlen(name)) colour = int(colour+max(name[i]-32, 1))%0xFFFFFF;
+            if(!colour) colour = rnd(0xFFFFFF)+1;
+        }
         undertone[0] = colour;
-        undertone[1] = ((((colour>>16)&0xFF)/2)<<16)|((((colour>>8)&0xFF)/2)<<8)|((colour&0xFF)/2);
+        bvec tone = bvec(colour).mul(2).div(3).add(85);
+        undertone[1] = (tone.x<<16)|(tone.y<<8)|tone.z;
+    }
+
+    void setname(const char *n = NULL)
+    {
+        if(n && *n) copystring(name, n, MAXNAMELEN+1);
+        else name[0] = 0;
+        setundertone();
     }
 
     int colour(int tone = 0)
