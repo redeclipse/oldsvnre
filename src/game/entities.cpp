@@ -507,7 +507,7 @@ namespace entities
     static inline void invalidateentcache(int ent)
     {
         if(++numinvalidateentcaches >= 1000) { numinvalidateentcaches = 0; invalidatedentcaches = (1<<NUMENTCACHES)-1; }
-        else loopi(NUMENTCACHES) if((ent >= entcaches[i].firstent && ent <= entcaches[i].lastent) || i+1 >= NUMENTCACHES) invalidatedentcaches |= 1<<i;
+        else loopi(NUMENTCACHES) if((ent >= entcaches[i].firstent && ent <= entcaches[i].lastent) || i+1 >= NUMENTCACHES) { invalidatedentcaches |= 1<<i; break; }
     }
         
     void clearentcache(bool full)
