@@ -2092,10 +2092,10 @@ struct texturegui : guicb
             if(i+1 != origtab) continue; //don't load textures on non-visible tabs!
             g.pushlist();
             g.pushlist();
-            if(g.button("\fgauto apply", 0xFFFFFF, autoapplytexgui ? "checkboxon" : "checkbox", autoapplytexgui ? false : true)&GUI_UP)
+            if(g.button("\fgauto apply", 0xFFFFFF, autoapplytexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autoapplytexgui ? false : true)&GUI_UP)
                 autoapplytexgui = autoapplytexgui ? 0 : 1;
             g.space(2);
-            if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", autoclosetexgui ? false : true)&GUI_UP)
+            if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, autoclosetexgui ? false : true)&GUI_UP)
                 autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
             g.poplist();
             g.pushlist();

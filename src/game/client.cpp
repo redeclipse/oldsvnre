@@ -182,8 +182,9 @@ namespace client
     {
         if(name[0])
         {
-            string text; filtertext(text, name);
-            copystring(game::player1->name, text, MAXNAMELEN);
+            string text;
+            filtertext(text, name);
+            game::player1->setname(text);
             addmsg(N_SWITCHNAME, "rs", game::player1->name);
         }
         else conoutft(CON_INFO, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
@@ -1390,7 +1391,7 @@ namespace client
                         copystring(newname, game::colorname(d, text));
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    copystring(d->name, text, MAXNAMELEN+1);
+                    d->setname(text);
                     break;
 
                 case N_CLIENTINIT: // another client either connected or changed name/team
