@@ -12,14 +12,13 @@ namespace entities
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
-    VAR(0, maxwaypoints, 128, 8192, INT_MAX-1); // max waypoints to drop unless forced
-    VAR(0, maxjetpackwaypoints, 128, 32768, INT_MAX-1); // max waypoints to drop if jetpacks allowed
+    VAR(0, maxwaypoints, 128, 16384, INT_MAX-1); // max waypoints to drop unless forced
     VAR(0, dropwaypoints, 0, 2, 3); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = only until max, 3 = forced
     VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (hasai && numwaypoints < max(maxwaypoints, maxjetpackwaypoints) && (!haswaypoints || (physics::allowjetpack() && !hasjetpoints)) ? 1 : (hasai && numwaypoints < maxwaypoints ? 2 : 3));
+        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : ((!haswaypoints || (physics::allowjetpack() && !hasjetpoints)) ? 1 : 2));
     }
 
     bool clipped(const vec &o, bool aiclip)
