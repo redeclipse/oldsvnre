@@ -76,9 +76,9 @@ struct animmodel : model
         Shader *shader;
         float spec, ambient, glow, specglare, glowglare, fullbright, envmapmin, envmapmax, scrollu, scrollv, alphatest;
         bool alphablend, cullface;
-        int material;
+        int material, material2;
 
-        skin() : owner(0), tex(notexture), masks(notexture), envmap(NULL), unlittex(NULL), normalmap(NULL), shader(NULL), spec(1.0f), ambient(0.3f), glow(3.0f), specglare(1), glowglare(1), fullbright(0), envmapmin(0), envmapmax(0), scrollu(0), scrollv(0), alphatest(0.9f), alphablend(true), cullface(true), material(0) {}
+        skin() : owner(0), tex(notexture), masks(notexture), envmap(NULL), unlittex(NULL), normalmap(NULL), shader(NULL), spec(1.0f), ambient(0.3f), glow(3.0f), specglare(1), glowglare(1), fullbright(0), envmapmin(0), envmapmax(0), scrollu(0), scrollv(0), alphatest(0.9f), alphablend(true), cullface(true), material(0), material(2) {}
 
         bool multitextured() { return enableglow; }
         bool envmapped() { return hasCM && envmapmax>0 && envmapmodels && (renderpath!=R_FIXEDFUNCTION || maxtmus >= 3); }
@@ -169,8 +169,10 @@ struct animmodel : model
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec, minshade, glow);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, spec, minshade, glow);
             }
-            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1);
+            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1), 
+                matcolor2 = material2 > 0 && lightmaterial ? lightmaterial[min(material2, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1);
             setenvparamf("lightmaterial", SHPARAM_PIXEL, 6, matcolor.x, matcolor.y, matcolor.z, 1);
+            setenvparamf("lightmaterial2", SHPARAM_PIXEL, 7, matcolor2.x, matcolor2.y, matcolor2.z, 1);
             setenvparamf("texscroll", SHPARAM_VERTEX, 5, lastmillis/1000.0f, scrollu*lastmillis/1000.0f, scrollv*lastmillis/1000.0f);
             if(envmaptmu>=0 && envmapmax>0) setenvparamf("envmapscale", bumpmapped() ? SHPARAM_PIXEL : SHPARAM_VERTEX, 3, envmapmin-envmapmax, envmapmax);
             if(glaring) setenvparamf("glarescale", SHPARAM_PIXEL, 4, 16*specglare, 4*glowglare);
@@ -1225,10 +1227,15 @@ struct animmodel : model
         loopv(parts) loopvj(parts[i]->skins) parts[i]->skins[j].cullface = cullface;
     }
 
-    void setmaterial(int material)
+    void setmaterial(int material, int material2)
     {
         if(parts.empty()) loaddefaultparts();
-        loopv(parts) loopvj(parts[i]->skins) parts[i]->skins[j].material = material;
+        loopv(parts) loopvj(parts[i]->skins) 
+        {
+            skin &s = parts[i]->skins[j];
+            s.material = material;
+            s.material2 = material2;
+        }
     }
 
     void calcbb(int frame, vec &center, vec &radius)
@@ -1517,9 +1524,9 @@ template<class MDL, class MESH> struct modelcommands
         loopmeshes(meshname, m, m.noclip = *noclip!=0);
     }
 
-    static void setmaterial(char *meshname, int *material)
+    static void setmaterial(char *meshname, int *material, int *material2)
     {
-        loopskins(meshname, s, s.material = clamp(*material, 0, int(MAXLIGHTMATERIALS)));
+        loopskins(meshname, s, { s.material = clamp(*material, 0, int(MAXLIGHTMATERIALS)); s.material2 = clamp(*material2, 0, int(MAXLIGHTMATERIALS)); });
     }
 
     static void setlink(int *parent, int *child, char *tagname, float *x, float *y, float *z)
@@ -1554,7 +1561,7 @@ template<class MDL, class MESH> struct modelcommands
             modelcommand(setshader, "shader", "ss");
             modelcommand(setscroll, "scroll", "sff");
             modelcommand(setnoclip, "noclip", "si");
-            modelcommand(setmaterial, "material", "si");
+            modelcommand(setmaterial, "material", "sii");
         }
         if(MDL::multiparted()) modelcommand(setlink, "link", "iisfff");
     }

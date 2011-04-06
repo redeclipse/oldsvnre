@@ -31,7 +31,7 @@ struct model
     virtual void setalphablend(bool blend) {}
     virtual void setfullbright(float fullbright) {}
     virtual void setcullface(bool cullface) {}
-    virtual void setmaterial(int material) {}
+    virtual void setmaterial(int material, int material2) {}
 
     virtual void preloadBIH() { if(!bih) setBIH(); }
     virtual void preloadshaders() {}
