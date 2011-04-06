@@ -1147,14 +1147,14 @@ struct gameent : dynent, gamestate
 
     void checkhitboxes()
     {
-        float hsize = max(xradius*0.45f, yradius*0.45f);
+        float hsize = max(xradius*0.475f, yradius*0.475f);
         if(head == vec(-1, -1, -1))
         {
             head = o;
             head.z -= hsize*0.375f;
         }
         else head.z += hsize*0.375f;
-        hrad = vec(xradius*0.45f, yradius*0.45f, hsize);
+        hrad = vec(xradius*0.475f, yradius*0.475f, hsize);
         if(torso == vec(-1, -1, -1))
         {
             torso = o;
