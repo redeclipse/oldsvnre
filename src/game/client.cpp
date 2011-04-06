@@ -1423,7 +1423,7 @@ namespace client
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.shrink(0);
                     }
-                    copystring(d->name, text, MAXNAMELEN+1);
+                    d->setname(text);
                     int team = clamp(getint(p), int(TEAM_NEUTRAL), int(TEAM_ENEMY));
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
