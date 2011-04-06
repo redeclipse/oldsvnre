@@ -858,7 +858,7 @@ bool ircgui(guient *g, const char *s)
         {
             if(!ircnetgui(g, n, false)) return false;
         }
-        else g->textf("not currently connected to %s", 0xFFFFFF, NULL, s);
+        else g->textf("not currently connected to %s", 0xFFFFFF, NULL, 0, s);
     }
     else
     {
@@ -867,12 +867,12 @@ bool ircgui(guient *g, const char *s)
         {
             ircnet *n = ircnets[i];
             g->pushlist();
-            g->buttonf("%s via %s:[%d]", 0xFFFFFF, NULL, true, n->name, n->serv, n->port);
+            g->buttonf("%s via %s:[%d]", 0xFFFFFF, NULL, 0, true, n->name, n->serv, n->port);
             g->space(1);
             const char *ircstates[IRC_MAX] = {
                     "\froffline", "\foconnecting", "\fynegotiating", "\fgonline"
             };
-            g->buttonf("\fs%s\fS as %s", 0xFFFFFF, NULL, true, ircstates[n->state], n->nick);
+            g->buttonf("\fs%s\fS as %s", 0xFFFFFF, NULL, 0, true, ircstates[n->state], n->nick);
             g->poplist();
             nets++;
         }

@@ -2132,8 +2132,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(d->colour());
-            e->light.material[1] = bvec(d->undertone);
+            e->light.material[0] = bvec(d->colour(0));
+            e->light.material[1] = bvec(d->colour(1));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2154,7 +2154,7 @@ namespace game
             if(burntime && d->burning(lastmillis, burntime))
             {
                 flags |= MDL_LIGHTFX;
-                e->light.effect.max(vec(burncolour(d)).max(vec::hexcolor(teamtype[d->team].colour)));
+                e->light.effect.max(vec(burncolour(d)).max(vec::hexcolor(d->colour())));
             }
             if(bleedtime && d->bleeding(lastmillis, bleedtime))
             {
@@ -2164,7 +2164,7 @@ namespace game
                     flags |= MDL_LIGHTFX;
                     delay /= 2;
                     float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                    e->light.effect.max(vec(1, 0.2f, 0.2f).max(vec::hexcolor(teamtype[d->team].colour)).mul(amt));
+                    e->light.effect.max(vec(1, 0.2f, 0.2f).max(vec::hexcolor(d->colour())).mul(amt));
                 }
             }
         }

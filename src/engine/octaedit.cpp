@@ -2165,9 +2165,9 @@ struct texturegui : guicb
             if(texmru.inrange(menutex))
             {
                 VSlot &v = lookupvslot(texmru[menutex]);
-                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, texmru[menutex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
+                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, texmru[menutex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
             }
-            else g.textf("no texture selected", 0x888888, NULL);
+            else g.textf("no texture selected", 0x888888);
             g.poplist();
             g.poplist();
             g.poplist();
