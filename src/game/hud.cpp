@@ -210,11 +210,13 @@ namespace hud
     TVAR(IDF_PERSIST, bombtex, "textures/bomb", 3);
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
+    TVAR(IDF_PERSIST, hurttex, "textures/hurt", 3);
+    TVAR(IDF_PERSIST, hinttex, "textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarcardsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radarcardblend, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
@@ -222,7 +224,7 @@ namespace hud
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaritemsize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radarsize, 0, 0.04f, 1000);
-    FVAR(IDF_PERSIST, radaroffset, 0, 0.025f, 1000);
+    FVAR(IDF_PERSIST, radaroffset, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, radardist, 0, 0, INT_MAX-1); // 0 = use world size
     VAR(IDF_PERSIST, radarcard, 0, 0, 2);
     VAR(IDF_PERSIST, radaritems, 0, 2, 2);
@@ -1156,7 +1158,11 @@ namespace hud
             dir.normalize();
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
                  dominated = radarplayereffects && d->dominated.find(game::focus) >= 0;
-            vec colour = burning ? game::burncolour(d) : (dominated ? vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]) : vec::hexcolor(d->colour()));
+            vec colour[2];
+            if(burning) colour[0] = game::burncolour(d);
+            else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
+            else colour[0] = vec::hexcolor(d->colour(1));
+            colour[1] = vec::hexcolor(d->colour(0));
             const char *tex = dominated ? dominatedtex : bliptex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend*radarplayerblend,
                   pos = 2, size = radarplayersize*(dominated ? 1.5f : 1.f);
@@ -1181,9 +1187,13 @@ namespace hud
                 fade *= clamp(vec(d->vel).add(d->falling).magnitude()/movespeed, 0.f, 1.f);
             }
             else if(d->state != CS_EDITING) return;
-            if(chkcond(radarplayernames, game::tvmode()))
-                drawblip(tex, pos, w, h, size, fade, dir, colour, "radar", "%s", game::colorname(d, NULL, "", false));
-            else drawblip(tex, pos, w, h, size, fade, dir, colour);
+            loopi(2)
+            {
+                if(!i && chkcond(radarplayernames, game::tvmode()))
+                    drawblip(i ? tex : hinttex, pos, w, h, size, fade, dir, colour[i], "radar", "%s", game::colorname(d, NULL, "", false));
+                else drawblip(i ? tex : hinttex, pos, w, h, size, fade, dir, colour[i]);
+                if(!i) size *= 0.5f;
+            }
         }
     }
 
@@ -1302,9 +1312,9 @@ namespace hud
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(hurttex, 4+size, w, h, size, fade, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
                 }
-                else drawblip(arrowtex, 4+size, w, h, size, fade, dir, d.colour);
+                else drawblip(hurttex, 4+size, w, h, size, fade, dir, d.colour);
             }
         }
         if(radardamage >= 2)
