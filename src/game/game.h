@@ -529,7 +529,7 @@ extern char msgsizelookup(int msg);
 enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_KICK, SPHY_SKATE, SPHY_DASH, SPHY_POWER, SPHY_EXTINGUISH, SPHY_MAX };
 enum { CON_CHAT = CON_GAMESPECIFIC, CON_EVENT, CON_MAX, CON_LO = CON_MESG, CON_HI = CON_SELF, CON_IMPORTANT = CON_SELF };
 
-#define DEMO_MAGIC "DMOZ"
+#define DEMO_MAGIC "RED_ECLIPSE_DEMO"
 struct demoheader
 {
     char magic[16];
@@ -1290,21 +1290,23 @@ struct gameent : dynent, gamestate
 
     void setundertone(int colour = 0)
     {
-        if(!colour)
+        ivec col((colour>>16)&0xFF, (colour>>8)&0xFF, colour&0xFF);
+        if(!colour) 
         {
             if(name[0])
             {
                 int len = strlen(name);
-                ivec col(0, 0, 0);
                 loopi(len) col[i%3] += max(name[i]-' ', 1);
-                col.mask(0xFF).add(1);
-                colour = (col.x<<16)|(col.y<<8)|col.z;
+                col.mask(0xFF).max(1);
             }
-            if(!colour) colour = rnd(0xFFFFFF)+1;
+            if(!colour) 
+            {
+                colour = rnd(0xFFFFFF);
+                col = vec((colour>>16)&0xFF, (colour>>8)&0xFF, colour&0xFF).max(1);
+            }
         }
-        ivec col((colour>>16)&0xFF, (colour>>8)&0xFF, colour&0xFF), col2 = col; 
-        col.div(2);
-        col2.mul(3).div(4).add(64);
+        ivec col2 = ivec(col).mul(3).div(4).add(64); 
+        col.mul(3).div(5);
         undertone[0] = (col.x<<16)|(col.y<<8)|col.z;
         undertone[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
     }
