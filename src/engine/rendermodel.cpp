@@ -41,13 +41,13 @@ MODELTYPE(MDL_IQM, iqm);
 
 #define checkmdl if(!loadingmodel) { conoutf("\frnot loading a model"); return; }
 
-void mdlmaterial(int *material)
+void mdlmaterial(int *material, int *material2)
 {
     checkmdl;
-    loadingmodel->setmaterial(clamp(*material, 0, int(MAXLIGHTMATERIALS)));
+    loadingmodel->setmaterial(clamp(*material, 0, int(MAXLIGHTMATERIALS)), clamp(*material, 0, int(MAXLIGHTMATERIALS)));
 }
 
-COMMAND(0, mdlmaterial, "i");
+COMMAND(0, mdlmaterial, "ii");
 
 void mdlcullface(int *cullface)
 {
