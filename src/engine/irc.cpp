@@ -79,13 +79,14 @@ void converttext(char *dst, const char *src)
                 c = *++src;
                 if(c) ++src;
             }
-            else if(c == '=')
+            else if(c == '[')
             {
-                for(int count = 0, c = *++src; c && count < 7; c = *++src)
+                const char *end = src, *start = end;
+                end += strcspn(end, "]\0");
+                if(end && *end == ']')
                 {
-                    if(isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (count == 1 && c == 'x'))
-                        count++;
-                    else break;
+                    char *val = newstring(start, end - start);
+                    if(val) { src += strlen(val); DELETEP(val); }
                 }
             }
             else if(c == 's') { colorpos++; continue; }
