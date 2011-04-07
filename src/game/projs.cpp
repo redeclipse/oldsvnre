@@ -825,7 +825,7 @@ namespace projs
                 part_flare(from, targ, WEAP2(weap, adelay, flags&HIT_ALT)/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
             }
             int peak = WEAP2(weap, adelay, flags&HIT_ALT)/4, fade = min(peak/2, 75);
-            adddynlight(from, 32, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).div(512.f), fade, peak - fade, DL_FLASH);
+            adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
         }
 
         loopv(shots)

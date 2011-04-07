@@ -420,33 +420,20 @@ namespace hud
         }
     }
 
-    void skewcolour(float &r, float &g, float &b, int colour, bool faded)
+    template<class T>
+    void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
         if(colour <= 0) colour = game::focus->colour(-colour);
-        r *= (colour>>16)/255.f;
-        g *= ((colour>>8)&0xFF)/255.f;
-        b *= (colour&0xFF)/255.f;
+        vec c = vec::hexcolor(colour);
+        r = T(r*c.r);
+        g = T(g*c.g);
+        b = T(b*c.b);
         if(!game::focus->team && faded)
         {
             float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
-            r *= f;
-            g *= f;
-            b *= f;
-        }
-    }
-
-    void skewcolour(int &r, int &g, int &b, int colour, bool faded)
-    {
-        if(colour <= 0) colour = game::focus->colour(-colour);
-        r = int(r*((colour>>16)/255.f));
-        g = int(g*(((colour>>8)&0xFF)/255.f));
-        b = int(b*((colour&0xFF)/255.f));
-        if(!game::focus->team && faded)
-        {
-            float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
-            r = int(r*f);
-            g = int(g*f);
-            b = int(b*f);
+            r = T(r*f);
+            g = T(g*f);
+            b = T(b*f);
         }
     }
 
@@ -569,15 +556,10 @@ namespace hud
             }
             default: break;
         }
-        float r = clipcolour, g = clipcolour, b = clipcolour;
-        if(clipcolour > 0)
-        {
-            r = ((WEAP(weap, colour)>>16)/255.f)*clipcolour;
-            g = (((WEAP(weap, colour)>>8)&0xFF)/255.f)*clipcolour;
-            b = ((WEAP(weap, colour)&0xFF)/255.f)*clipcolour;
-        }
-        else if(clipstone) skewcolour(r, g, b, 1-clipstone);
-        glColor4f(r, g, b, fade);
+        vec c(clipcolour, clipcolour, clipcolour);
+        if(clipcolour > 0) c.mul(vec::hexcolor(WEAP(weap, colour)));
+        else if(clipstone) skewcolour(c.r, c.g, c.b, 1-clipstone);
+        glColor4f(c.r, c.g, c.b, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
@@ -597,7 +579,7 @@ namespace hud
                         drawslice(0.5f/maxammo+ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
                 }
-                glColor4f(r, g, b, clipblend*hudblend);
+                glColor4f(c.r, c.g, c.b, clipblend*hudblend);
                 size = s*clipskew[weapid];
                 break;
             }
@@ -618,7 +600,7 @@ namespace hud
                             drawslice(0.5f/maxammo+ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
                     }
-                    glColor4f(r, g, b, clipblend*hudblend);
+                    glColor4f(c.r, c.g, c.b, clipblend*hudblend);
                     size = s*clipskew[weapid];
                 }
                 break;
@@ -1555,18 +1537,13 @@ namespace hud
                     else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
                     else continue;
                     bool instate = (i == game::focus->weapselect || game::focus->weapstate[i] != WEAP_S_USE);
-                    float r = 1.f, g = 1.f, b = 1.f;
-                    if(inventorycolour)
-                    {
-                        r = (WEAP(i, colour)>>16)/255.f;
-                        g = ((WEAP(i, colour)>>8)&0xFF)/255.f;
-                        b = (WEAP(i, colour)&0xFF)/255.f;
-                    }
-                    else if(inventorytone) skewcolour(r, g, b, 1-inventorytone);
+                    vec c(1, 1, 1);
+                    if(inventorycolour) c.mul(vec::hexcolor(WEAP(i, colour)));
+                    else if(inventorytone) skewcolour(c.r, c.g, c.b, 1-inventorytone);
                     int oldy = y-sy;
                     if(inventoryammo && (instate || inventoryammo > 1) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        sy += drawitem(hudtexs[i], x, y-sy, size, false, r, g, b, fade, skew, "super", "%d", game::focus->ammo[i]);
-                    else sy += drawitem(hudtexs[i], x, y-sy, size, false, r, g, b, fade, skew);
+                        sy += drawitem(hudtexs[i], x, y-sy, size, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
+                    else sy += drawitem(hudtexs[i], x, y-sy, size, false, c.r, c.g, c.b, fade, skew);
                     if(inventoryweapids && (instate || inventoryweapids > 1))
                     {
                         static string weapids[WEAP_MAX];
@@ -2073,7 +2050,8 @@ namespace hud
                             default: break;
                         }
                         glBindTexture(GL_TEXTURE_2D, t->id);
-                        glColor4f((colour>>16)/255.f, ((colour>>8)&0xFF)/255.f, (colour&0xFF)/255.f, fade);
+                        vec c = vec::hexcolor(colour);
+                        glColor4f(c.r, c.g, c.b, fade);
                         drawtex(tx-width/2, ty-size, width, size);
                         ty -= game::focus->icons[i].type < eventicon::AFFINITY ? int(size*2/3) : int(size);
                     }
