@@ -36,7 +36,7 @@
         putint(q, ci->clientnum); //add player id
         putint(q, ci->ping);
         sendstring(ci->name, q);
-        sendstring(teamtype[ci->team].name, q); //backward compatibility mode
+        sendstring(TEAM(ci->team, name), q); //backward compatibility mode
         putint(q, ci->state.frags);
         putint(q, ci->state.gscore);
         putint(q, ci->state.deaths);
@@ -61,7 +61,7 @@
 
         loopv(scores)
         {
-            sendstring(teamtype[scores[i].team].name, p); //backward compatibility mode
+            sendstring(TEAM(scores[i].team, name), p); //backward compatibility mode
             putint(p, (int)scores[i].total);
 
             if(m_defend(gamemode))

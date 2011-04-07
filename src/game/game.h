@@ -536,49 +536,8 @@ struct demoheader
     int version, gamever;
 };
 
-enum
-{
-    TEAM_NEUTRAL = 0, TEAM_ALPHA, TEAM_OMEGA, TEAM_ENEMY, TEAM_MAX,
-    TEAM_FIRST = TEAM_ALPHA, TEAM_LAST = TEAM_OMEGA, TEAM_NUM = (TEAM_LAST-TEAM_FIRST)+1, TEAM_COUNT = TEAM_LAST+1
-};
-struct teamtypes
-{
-    int type,           colour; const char  *name,
-        *icon,              *chat,      *colname;
-};
-#ifdef GAMESERVER
-teamtypes teamtype[] = {
-    {
-        TEAM_NEUTRAL,   0x999999,           "neutral",
-        "team",             "\fa",      ""
-    },
-    {
-        TEAM_ALPHA,     0x5F66FF,           "alpha",
-        "teamalpha",        "\fb",      "blue"
-    },
-    {
-        TEAM_OMEGA,     0xFF4F44,           "omega",
-        "teamomega",        "\fr",      "red"
-    },
-    {
-        TEAM_ENEMY,     0x666666,           "enemy",
-        "team",             "\fd",      "grey"
-    }
-};
-#else
-extern teamtypes teamtype[];
-#endif
-struct score
-{
-    int team, total;
-    score() {}
-    score(int s, int n) : team(s), total(n) {}
-};
-enum { BASE_NONE = 0, BASE_HOME = 1<<0, BASE_FLAG = 1<<1, BASE_BOTH = BASE_HOME|BASE_FLAG };
+#include "team.h"
 
-#define numteams(a,b)   (m_fight(a) && m_team(a,b) ? TEAM_NUM : 1)
-#define isteam(a,b,c,d) (m_fight(a) && m_team(a,b) ? (c >= d && c <= numteams(a,b)) : c == TEAM_NEUTRAL)
-#define valteam(a,b)    (a >= b && a <= TEAM_NUM)
 #define adjustscaled(t,n,s) { \
     if(n > 0) { n = (t)(n/(1.f+sqrtf((float)curtime)/float(s))); if(n <= 0) n = (t)0; } \
     else if(n < 0) { n = (t)(n/(1.f+sqrtf((float)curtime)/float(s))); if(n >= 0) n = (t)0; } \
@@ -1317,7 +1276,7 @@ struct gameent : dynent, gamestate
             if(!(tone%2)) return undertone[1];
             return undertone[0];
         }
-        return teamtype[team].colour;
+        return TEAM(team, colour);
     }
 };
 
