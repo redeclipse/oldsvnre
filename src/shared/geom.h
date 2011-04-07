@@ -6,6 +6,7 @@ struct vec
     union
     {
         struct { float x, y, z; };
+        struct { float r, g, b; };
         float v[3];
     };
 
@@ -958,6 +959,7 @@ struct ivec
     union
     {
         struct { int x, y, z; };
+        struct { int r, g, b; };
         int v[3];
     };
 
@@ -1026,6 +1028,7 @@ struct bvec
     union
     {
         struct { uchar x, y, z; };
+        struct { uchar r, g, b; };
         uchar v[3];
     };
 

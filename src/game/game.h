@@ -1434,8 +1434,6 @@ namespace hud
     extern void drawtex(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
     extern void drawsized(float x, float y, float s);
     extern void colourskew(float &r, float &g, float &b, float skew = 1);
-    extern void skewcolour(float &r, float &g, float &b, int colour = 0, bool faded = false);
-    extern void skewcolour(int &r, int &g, int &b, int colour = 0, bool faded = false);
     extern void drawindicator(int weap, int x, int y, int s);
     extern void drawclip(int weap, int x, int y, float s);
     extern void drawpointertex(const char *tex, int x, int y, int s, float r = 1, float g = 1, float b = 1, float fade = 1);

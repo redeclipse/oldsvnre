@@ -1449,7 +1449,7 @@ namespace client
                         if(game::dynlighteffects)
                         {
                             int colour = f->colour();
-                            adddynlight(f->headpos(), f->height*2, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).mul(2.f/0xFF), 250, 250);
+                            adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
                     }
@@ -1486,7 +1486,7 @@ namespace client
                         if(game::dynlighteffects)
                         {
                             int colour = f->colour();
-                            adddynlight(f->headpos(), f->height*2, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).mul(2.f/0xFF), 250, 250);
+                            adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
                     }
@@ -1675,7 +1675,7 @@ namespace client
                         }
                         regularshape(PART_SPARK, enttype[e.type].radius*1.5f, colour, 53, 50, 350, e.o, 1.5f, 1, 1, 0, 35);
                         if(game::dynlighteffects)
-                            adddynlight(e.o, enttype[e.type].radius*2, vec(colour>>16, (colour>>8)&0xFF, colour&0xFF).mul(2.f/0xFF), 250, 250);
+                            adddynlight(e.o, enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                     }
                     break;
                 }

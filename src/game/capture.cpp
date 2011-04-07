@@ -119,8 +119,8 @@ namespace capture
             if(headsup || f.lastowner == game::focus)
             {
                 int millis = lastmillis-f.interptime, colour = TEAM(f.team, colour);
-                float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend,
-                    r = (colour>>16)/255.f, g = ((colour>>8)&0xFF)/255.f, b = (colour&0xFF)/255.f;
+                float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend;
+                vec c = vec::hexcolor(colour);
                 if(f.owner || f.droptime)
                 {
                     if(f.owner == game::focus)
@@ -135,13 +135,13 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, false, r, g, b, fade, skew, "sub", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, false, c.r, c.g, c.b, fade, skew, "sub", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
                 if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
-                    if(wait < 1) hud::drawprogress(x, oldy, wait, 1-wait, s, false, r, g, b, fade*0.25f, skew);
-                    if(f.owner) hud::drawprogress(x, oldy, 0, wait, s, false, r, g, b, fade, skew, "sub", "\fs%s\fS (%d%%)", game::colorname(f.owner), int(wait*100.f));
-                    else hud::drawprogress(x, oldy, 0, wait, s, false, r, g, b, fade, skew, "default", "%d%%", int(wait*100.f));
+                    if(wait < 1) hud::drawprogress(x, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, fade*0.25f, skew);
+                    if(f.owner) hud::drawprogress(x, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "sub", "\fs%s\fS (%d%%)", game::colorname(f.owner), int(wait*100.f));
+                    else hud::drawprogress(x, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "default", "%d%%", int(wait*100.f));
                 }
                 else if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
             }
@@ -299,7 +299,7 @@ namespace capture
                 int millis = lastmillis-f.interptime;
                 if(millis <= 1000) trans = float(millis)/1000.f;
             }
-            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2*trans)), enttype[AFFINITY].radius*trans, vec((TEAM(f.team, colour)>>16), ((TEAM(f.team, colour)>>8)&0xFF), (TEAM(f.team, colour)&0xFF)).div(255.f), 0, 0, DL_KEEP);
+            adddynlight(vec(f.pos()).add(vec(0, 0, enttype[AFFINITY].radius/2*trans)), enttype[AFFINITY].radius*trans, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
         }
     }
 
@@ -483,7 +483,7 @@ namespace capture
                 defformatstring(text)("<super>\fzZe%s", str);
                 part_textcopy(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, TEAM(team, colour), 3, 1, -10);
             }
-            if(game::dynlighteffects) adddynlight(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(TEAM(team, colour)>>16, (TEAM(team, colour)>>8)&0xFF, TEAM(team, colour)&0xFF).mul(2.f/0xFF), 500, 250);
+            if(game::dynlighteffects) adddynlight(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(team, colour)).mul(2.f), 500, 250);
         }
         if(to.x >= 0)
         {
@@ -492,7 +492,7 @@ namespace capture
                 defformatstring(text)("<super>\fzZe%s",str);
                 part_textcopy(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, TEAM(team, colour), 3, 1, -10);
             }
-            if(game::dynlighteffects) adddynlight(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(TEAM(team, colour)>>16, (TEAM(team, colour)>>8)&0xFF, TEAM(team, colour)&0xFF).mul(2.f/0xFF), 500, 250);
+            if(game::dynlighteffects) adddynlight(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(team, colour)).mul(2.f), 500, 250);
         }
         if(from.x >= 0 && to.x >= 0) part_trail(PART_SPARK, 500, from, to, TEAM(team, colour), 1, 1, -10);
     }
