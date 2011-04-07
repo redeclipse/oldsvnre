@@ -6,7 +6,7 @@ enum
 
 #define TEAMS(a,b) \
     GSVAR(0, team##a##name, #a); \
-    GVAR(0, team##a##colour, 0, b, 0xFFFFFF);
+    GVAR(IDF_HEX, team##a##colour, 0, b, 0xFFFFFF);
 
 TEAMS(neutral, 0x999999);
 TEAMS(alpha, 0x5F66FF);
