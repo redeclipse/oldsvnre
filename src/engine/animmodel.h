@@ -158,16 +158,16 @@ struct animmodel : model
             if(fullbright)
             {
                 glColor4f(fullbright/2, fullbright/2, fullbright/2, transparent);
-                setenvparamf("lightscale", SHPARAM_VERTEX, 2, 0, 2, glow);
-                setenvparamf("lightscale", SHPARAM_PIXEL, 2, 0, 2, glow);
+                setenvparamf("lightscale", SHPARAM_VERTEX, 2, 0, 2, glow*glowmodels);
+                setenvparamf("lightscale", SHPARAM_PIXEL, 2, 0, 2, glow*glowmodels);
             }
             else
             {
                 float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f, minshade = max(ambient, mincolor);
                 vec color = vec(lightcolor).max(mincolor);
                 glColor4f(color.x, color.y, color.z, transparent);
-                setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec, minshade, glow);
-                setenvparamf("lightscale", SHPARAM_PIXEL, 2, spec, minshade, glow);
+                setenvparamf("lightscale", SHPARAM_VERTEX, 2, spec*lightmodels, minshade, glow*glowmodels);
+                setenvparamf("lightscale", SHPARAM_PIXEL, 2, spec*lightmodels, minshade, glow*glowmodels);
             }
             vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1), 
                 matcolor2 = material2 > 0 && lightmaterial ? lightmaterial[min(material2, int(MAXLIGHTMATERIALS))-1].tocolor() : vec(1, 1, 1);
