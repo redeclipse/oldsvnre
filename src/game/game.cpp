@@ -358,7 +358,7 @@ namespace game
                 if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
-            conoutft(CON_SELF, "weapon selection is now: \fs%s%s\fS and \fs%s%s\fS",
+            conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]%s\fS and \fs\f[%d]%s\fS",
                 WEAP(d->loadweap[0], colour), (d->loadweap[0] >= WEAP_OFFSET ? WEAP(d->loadweap[0], name) : "random"),
                 WEAP(d->loadweap[1], colour), (d->loadweap[1] >= WEAP_OFFSET ? WEAP(d->loadweap[1], name) : "random")
             );
@@ -1318,7 +1318,7 @@ namespace game
         formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->colour(), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
-            defformatstring(s)(" [\fs%s%d\fS\f[%d]]", d->aitype >= 0 ? "\fw" : "\fd", d->clientnum, d->colour());
+            defformatstring(s)(" [%s%d\f[%d]]", d->aitype >= 0 ? "\fw" : "\fd", d->clientnum, d->colour());
             concatstring(cname, s);
         }
         concatstring(cname, "\fS");

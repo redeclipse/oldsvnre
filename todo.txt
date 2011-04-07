@@ -14,7 +14,6 @@
 * Multiple sample support
 
 = Code/Wishlist/Other =
-* Make parkour mechanics require a certain height off the ground?
 * Commands to perform common geometry operations: slope, arch, stairs, circle, sphere?
 * Move things like mastermode, ban, etc to server side commands/variables?
 * Create "assisted secures" for stf (player1, player2, player3 secured flag N)
