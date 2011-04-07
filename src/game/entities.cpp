@@ -18,7 +18,7 @@ namespace entities
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : ((!haswaypoints || (physics::allowjetpack() && !hasjetpoints)) ? 1 : 2));
+        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : (!haswaypoints || (physics::allowjetpack() && !hasjetpoints) ? 1 : 2));
     }
 
     bool clipped(const vec &o, bool aiclip)
