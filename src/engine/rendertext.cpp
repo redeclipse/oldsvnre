@@ -159,19 +159,16 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
             if(alt) TEXTCOLOR(h); \
         } \
     } \
-    else if(g[h] == '=' && g[h+1] == '0' && g[h+2] == 'x') \
+    else if(g[h] == '[') \
     { \
-        string v; \
-        int count = 0; \
-        for(h++; g[h] && count < 8; h++) \
+        const char *end = g; end += h+1; \
+        const char *start = end; \
+        end += strcspn(end, "]\0"); \
+        if(end && *end == ']') \
         { \
-            if(isdigit(g[h]) || (g[h] >= 'a' && g[h] <= 'f') || (g[h] >= 'A' && g[h] <= 'F') || (count == 1 && g[h] == 'x')) \
-                v[count++] = g[h]; \
-            else break; \
+            char *val = newstring(start, end - start); \
+            if(val) { TEXTHEXCOLOR(bvec(parseint(val))); h += strlen(val)+1; DELETEP(val); } \
         } \
-        v[count] = 0; \
-        if(count) TEXTHEXCOLOR(bvec(parseint(v))); \
-        h--; \
     } \
     else TEXTCOLOR(h); \
 }
