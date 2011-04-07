@@ -165,7 +165,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         const char *start = &g[h]; \
         const char *end = strchr(start, ']'); \
         if(end) { TEXTHEXCOLOR(bvec(parseint(start))); h += end-start; } \
-        else h += strlen(start); \
+        else break; \
     } \
     else TEXTCOLOR(h); \
 }
@@ -183,7 +183,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         if(c=='\t')      { x = TEXTTAB(x); TEXTWHITE(i) }\
         else if(c==' ')  { x += curfont->defaultw; TEXTWHITE(i) }\
         else if(c=='\n') { TEXTLINE(i) TEXTALIGN }\
-        else if(c=='\f') { if(str[i+1]) { i++; TEXTCOLORIZE(str, i); }}\
+        else if(c=='\f') { if(str[i+1]) { i++; TEXTCOLORIZE(str, i); } }\
         else if(curfont->chars.inrange(c-33))\
         {\
             if(maxwidth != -1)\
@@ -214,7 +214,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
                 {\
                     TEXTINDEX(j)\
                     int c = str[j];\
-                    if(c=='\f') { if(str[j+1]) { j++; TEXTCOLORIZE(str, j); }}\
+                    if(c=='\f') { if(str[j+1]) { j++; TEXTCOLORIZE(str, j); } }\
                     else { TEXTCHAR(j) }\
                 }
 
