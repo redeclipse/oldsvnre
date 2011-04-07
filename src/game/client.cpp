@@ -173,7 +173,7 @@ namespace client
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
-    ICOMMAND(0, getteam, "", (), result(teamtype[game::player1->team].name));
+    ICOMMAND(0, getteam, "", (), result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
 
     const char *getname() { return game::player1->name; }
@@ -201,7 +201,7 @@ namespace client
 
                 loopi(numteams(game::gamemode, game::mutators))
                 {
-                    if((t && t == i+TEAM_FIRST) || !strcasecmp(teamtype[i+TEAM_FIRST].name, team))
+                    if((t && t == i+TEAM_FIRST) || !strcasecmp(TEAM(i+TEAM_FIRST, name), team))
                     {
                         return i+TEAM_FIRST;
                     }
@@ -228,7 +228,7 @@ namespace client
             }
             else conoutft(CON_INFO, "\frcan only change teams when actually playing in team games");
         }
-        else conoutft(CON_INFO, "\fs\fgyour team is:\fS \fs%s%s\fS", teamtype[game::player1->team].chat, teamtype[game::player1->team].name);
+        else conoutft(CON_INFO, "\fs\fgyour team is:\fS \fs\f[%d]%s\fS", TEAM(game::player1->team, colour), TEAM(game::player1->team, name));
     }
     ICOMMAND(0, team, "s", (char *s), switchteam(s));
 
@@ -506,7 +506,7 @@ namespace client
         defformatstring(m)("%s", game::colorname(d));
         if(flags&SAY_TEAM)
         {
-            defformatstring(t)(" (\fs%s%s\fS)", teamtype[d->team].chat, teamtype[d->team].name);
+            defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(d->team, colour), TEAM(d->team, name));
             concatstring(m, t);
         }
         if(flags&SAY_ACTION) formatstring(s)("\fv* \fs%s\fS \fs\fv%s\fS", m, text);

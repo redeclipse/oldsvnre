@@ -161,9 +161,9 @@ namespace hud
                     {
                         int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                         if(m_defend(game::gamemode) && sg.total==INT_MAX)
-                            game::announcef(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team secured all flags", teamtype[sg.team].chat, teamtype[sg.team].name);
-                        else if(m_trial(game::gamemode)) game::announcef(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with the fastest lap: \fs\fc%s\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total ? timetostr(sg.total) : "dnf");
-                        else game::announcef(anc, CON_MESG, game::player1, "\fw\fs%s%s\fS team won the match with a total score of: \fs\fc%d\fS", teamtype[sg.team].chat, teamtype[sg.team].name, sg.total);
+                            game::announcef(anc, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS team secured all flags", TEAM(sg.team, colour), TEAM(sg.team, name));
+                        else if(m_trial(game::gamemode)) game::announcef(anc, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS team won the match with the fastest lap: \fs\fc%s\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total ? timetostr(sg.total) : "dnf");
+                        else game::announcef(anc, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS team won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
                     }
                     else
                     {
@@ -285,7 +285,7 @@ namespace hud
             if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
             else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
             else if(m_team(game::gamemode, game::mutators))
-                g.textf("Team \fs%s%s\fS", 0xFFFFFF, NULL, 0, teamtype[game::player1->team].chat, teamtype[game::player1->team].name);
+                g.textf("Team \fs\f[%d]%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), TEAM(game::player1->team, name));
             else g.textf("Free for All", 0xFFFFFF, NULL, 0);
             g.popfont();
         }
@@ -318,7 +318,7 @@ namespace hud
             if((k%2)==0) g.pushlist(); // horizontal
 
             scoregroup &sg = *groups[k];
-            int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? teamtype[sg.team].colour : 0x333333,
+            int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333,
                 fgcolor = 0xFFFFFF;
 
             g.pushlist(); // vertical
@@ -366,8 +366,8 @@ namespace hud
             {
                 g.pushlist(); // vertical
                 if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
-                    g.textf("%s: WIN", fgcolor, NULL, 0, teamtype[sg.team].name);
-                else g.textf("%s: %d", fgcolor, NULL, 0, teamtype[sg.team].name, sg.total);
+                    g.textf("%s: WIN", fgcolor, NULL, 0, TEAM(sg.team, name));
+                else g.textf("%s: %d", fgcolor, NULL, 0, TEAM(sg.team, name), sg.total);
                 g.pushlist(); // horizontal
             }
 
@@ -537,7 +537,7 @@ namespace hud
             default: break;
         }
         int sy = hud::drawitem(hud::inventorytex, x, y, s-s/4, false, 1.f, 1.f, 1.f, fade, skew, "default", "\fs%s[\fS%d\fs%s]\fS", colour, score, colour);
-        hud::drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "sub", fade, "%s%s", teamtype[team].chat, name);
+        hud::drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "sub", fade, "\f[%d]%s", TEAM(team, colour), name);
         return sy;
     }
 
@@ -553,7 +553,7 @@ namespace hud
             {
                 if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
                 if(!sy) sy += s/8;
-                sy += drawinventoryitem(x, y-sy, s-s/4, 1.25f-clamp(numout,1,3)*0.25f*inventoryskew, blend*inventoryblend, k, sg.team, sg.total, teamtype[sg.team].name);
+                sy += drawinventoryitem(x, y-sy, s-s/4, 1.25f-clamp(numout,1,3)*0.25f*inventoryskew, blend*inventoryblend, k, sg.team, sg.total, TEAM(sg.team, name));
                 if((numout += 1) > 3) return sy;
             }
             else

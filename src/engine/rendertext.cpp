@@ -110,39 +110,39 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
     }
     else
     {
-        xtraverts += varray::end();
-        int f = a;
         if(d=='S') d = stack[(sp > 0) ? --sp : sp]; // restore color
         else stack[sp] = d;
-        switch(d)
-        {
-            case 'g': case '0': color = bvec( 64, 255,  64); break; // green
-            case 'b': case '1': color = bvec(86,  92,  255); break; // blue
-            case 'y': case '2': color = bvec(255, 255,   0); break; // yellow
-            case 'r': case '3': color = bvec(255,  64,  64); break; // red
-            case 'a': case '4': color = bvec(192, 192, 192); break; // grey
-            case 'm': case '5': color = bvec(255, 186, 255); break; // magenta
-            case 'o': case '6': color = bvec(255,  64,   0); break; // orange
-            case 'w': case '7': color = bvec(255, 255, 255); break; // white
-            case 'k': case '8': color = bvec(0,     0,   0); break; // black
-            case 'c': case '9': color = bvec(64,  255, 255); break; // cyan
-            case 'v': color = bvec(192,  96, 255); break; // violet
-            case 'p': color = bvec(224,  64, 224); break; // purple
-            case 'n': color = bvec(164,  72,  56); break; // brown
-            case 'G': color = bvec( 86, 164,  56); break; // dark green
-            case 'B': color = bvec( 56,  64, 172); break; // dark blue
-            case 'Y': color = bvec(172, 172,   0); break; // dark yellow
-            case 'R': color = bvec(172,  56,  56); break; // dark red
-            case 'M': color = bvec(172,  72, 172); break; // dark magenta
-            case 'O': color = bvec(172,  56,   0); break; // dark orange
-            case 'C': color = bvec(48,  172, 172); break; // dark cyan
-            case 'A': case 'd': color = bvec(102, 102, 102); break; // dark grey
-            case 'e': case 'E': f -= d!='E' ? f/2 : f/4; break;
-            case 'u': color = bvec(r, g, b); break; // user colour
-            case 'Z': default: break; // everything else
-        }
-        glColor4ub(color.x, color.y, color.z, f);
     }
+    xtraverts += varray::end();
+    int f = a;
+    switch(d)
+    {
+        case 'g': case '0': color = bvec( 64, 255,  64); break; // green
+        case 'b': case '1': color = bvec(86,  92,  255); break; // blue
+        case 'y': case '2': color = bvec(255, 255,   0); break; // yellow
+        case 'r': case '3': color = bvec(255,  64,  64); break; // red
+        case 'a': case '4': color = bvec(192, 192, 192); break; // grey
+        case 'm': case '5': color = bvec(255, 186, 255); break; // magenta
+        case 'o': case '6': color = bvec(255,  64,   0); break; // orange
+        case 'w': case '7': color = bvec(255, 255, 255); break; // white
+        case 'k': case '8': color = bvec(0,     0,   0); break; // black
+        case 'c': case '9': color = bvec(64,  255, 255); break; // cyan
+        case 'v': color = bvec(192,  96, 255); break; // violet
+        case 'p': color = bvec(224,  64, 224); break; // purple
+        case 'n': color = bvec(164,  72,  56); break; // brown
+        case 'G': color = bvec( 86, 164,  56); break; // dark green
+        case 'B': color = bvec( 56,  64, 172); break; // dark blue
+        case 'Y': color = bvec(172, 172,   0); break; // dark yellow
+        case 'R': color = bvec(172,  56,  56); break; // dark red
+        case 'M': color = bvec(172,  72, 172); break; // dark magenta
+        case 'O': color = bvec(172,  56,   0); break; // dark orange
+        case 'C': color = bvec(48,  172, 172); break; // dark cyan
+        case 'A': case 'd': color = bvec(102, 102, 102); break; // dark grey
+        case 'e': case 'E': f -= d!='E' ? f/2 : f/4; break;
+        case 'u': color = bvec(r, g, b); break; // user colour
+        case 'Z': default: break; // everything else
+    }
+    glColor4ub(color.x, color.y, color.z, f);
 }
 
 #define TEXTTAB(g) clamp(g + (PIXELTAB - (g % PIXELTAB)), g + FONTW, g + PIXELTAB)
@@ -164,7 +164,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         h++; \
         const char *start = &g[h]; \
         const char *end = strchr(start, ']'); \
-        if(end) { TEXTHEXCOLOR(bvec(parseint(start))); h += end-start+1; } \
+        if(end) { TEXTHEXCOLOR(bvec(parseint(start))); h += end-start; } \
         else h += strlen(start); \
     } \
     else TEXTCOLOR(h); \
@@ -224,7 +224,7 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
     #define TEXTWHITE(idx) if(y+FONTH > hity && x >= hitx) return idx;
     #define TEXTLINE(idx) if(y+FONTH > hity) return idx;
     #define TEXTCOLOR(idx)
-    #define TEXTHEXCOLOR(col)
+    #define TEXTHEXCOLOR(ret)
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w+1; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -245,7 +245,7 @@ void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int f
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
-    #define TEXTHEXCOLOR(col)
+    #define TEXTHEXCOLOR(ret)
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w + 1;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -265,7 +265,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) if(x > width) width = x;
     #define TEXTCOLOR(idx)
-    #define TEXTHEXCOLOR(col)
+    #define TEXTHEXCOLOR(ret)
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w + 1;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -287,7 +287,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) ly += FONTH;
     #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
-    #define TEXTHEXCOLOR(col) { color = col; glColor4ub(color.x, color.y, color.z, a); }
+    #define TEXTHEXCOLOR(ret) { color = ret; glColor4ub(color.x, color.y, color.z, a); }
     #define TEXTCHAR(idx) x += draw_char(c, left+x, top+y)+1;
     #define TEXTWORD TEXTWORDSKELETON
     char colorstack[10];

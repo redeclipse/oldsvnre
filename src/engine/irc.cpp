@@ -81,13 +81,8 @@ void converttext(char *dst, const char *src)
             }
             else if(c == '[')
             {
-                const char *end = src, *start = end;
-                end += strcspn(end, "]\0");
-                if(end && *end == ']')
-                {
-                    char *val = newstring(start, end - start);
-                    if(val) { src += strlen(val); DELETEP(val); }
-                }
+                const char *end = strchr(src, ']');
+                src += end ? end-src : strlen(src);
             }
             else if(c == 's') { colorpos++; continue; }
             else if(c == 'S') { c = colorstack[--colorpos]; }

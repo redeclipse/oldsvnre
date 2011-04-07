@@ -803,7 +803,7 @@ namespace server
     {
         if(!name) name = ci->name;
         static string cname;
-        formatstring(cname)("\fs%s%s", teamtype[ci->team].chat, name);
+        formatstring(cname)("\fs%s%s", tcolstrs[ci->team], name);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
             defformatstring(s)(" [\fs%s%d\fS]", ci->state.aitype >= 0 ? "\fc" : "\fw", ci->clientnum);
@@ -4344,7 +4344,7 @@ namespace server
                     defformatstring(m)("%s", colorname(cp));
                     if(flags&SAY_TEAM)
                     {
-                        defformatstring(t)(" (\fs%s%s\fS)", teamtype[cp->team].chat, teamtype[cp->team].name);
+                        defformatstring(t)(" (\fs%s%s\fS)", tcolstrs[cp->team], TEAM(cp->team, name));
                         concatstring(m, t);
                     }
                     if(flags&SAY_ACTION) relayf(0, "\fv* \fs%s\fS \fs\fv%s\fS", m, text);

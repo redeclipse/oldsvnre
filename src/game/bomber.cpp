@@ -75,7 +75,7 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec dir = vec(f.pos()).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(teamtype[f.team].colour);
+            vec dir = vec(f.pos()).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             float area = 3, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -295,11 +295,11 @@ namespace bomber
                 }
                 else if(!m_gsp2(game::gamemode, game::mutators))
                 {
-                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, teamtype[f.team].colour, 1.f, trans*0.25f);
-                    part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, teamtype[f.team].colour, 1.f, trans*0.65f);
+                    part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
+                    part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.65f);
                     above.z += enttype[AFFINITY].radius/2*trans+2.5f;
-                    defformatstring(info)("<super>%s goal", teamtype[f.team].name);
-                    part_textcopy(above, info, PART_TEXT, 1, teamtype[f.team].colour, 2, max(trans, 0.5f));
+                    defformatstring(info)("<super>%s goal", TEAM(f.team, name));
+                    part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
                 }
             }
         }
@@ -314,7 +314,7 @@ namespace bomber
             float trans = 1.f;
             int millis = lastmillis-f.interptime;
             if(millis <= 1000) trans = float(millis)/1000.f;
-            vec colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(teamtype[f.team].colour);
+            vec colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             adddynlight(f.pos(), enttype[AFFINITY].radius*trans, colour, 0, 0, DL_KEEP);
         }
     }
@@ -329,12 +329,7 @@ namespace bomber
         #define setupaddaffinity(a,b) \
         { \
             index = st.addaffinity(entities::ents[a]->o, entities::ents[a]->attrs[0]); \
-            if(st.flags.inrange(index)) \
-            { \
-                st.flags[index].ent = a; \
-                int colour = st.flags[index].team == TEAM_NEUTRAL ? 0xFFFFFF : teamtype[st.flags[index].team].colour; \
-                entities::ents[a]->light.material[0] = st.flags[index].light.material[0] = bvec(colour); \
-            } \
+            if(st.flags.inrange(index)) st.flags[index].ent = a; \
             else continue; \
         }
         #define setupchkaffinity(a,b) \
@@ -425,21 +420,21 @@ namespace bomber
         {
             if(effect&1)
             {
-                defformatstring(text)("<super>%s\fzZe%s", teamtype[team].chat, str);
-                part_textcopy(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, teamtype[TEAM_NEUTRAL].colour, 3, 1, -10);
+                defformatstring(text)("<super>\fzZe%s", str);
+                part_textcopy(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, TEAM(team, colour), 3, 1, -10);
             }
-            if(game::dynlighteffects) adddynlight(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[team].colour>>16, (teamtype[team].colour>>8)&0xFF, teamtype[team].colour&0xFF).mul(2.f/0xFF), 500, 250);
+            if(game::dynlighteffects) adddynlight(vec(from).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(TEAM(team, colour)>>16, (TEAM(team, colour)>>8)&0xFF, TEAM(team, colour)&0xFF).mul(2.f/0xFF), 500, 250);
         }
         if(to.x >= 0)
         {
             if(effect&2)
             {
-                defformatstring(text)("<super>%s\fzZe%s", teamtype[team].chat, str);
-                part_textcopy(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, teamtype[TEAM_NEUTRAL].colour, 3, 1, -10);
+                defformatstring(text)("<super>\fzZe%s", str);
+                part_textcopy(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), text, PART_TEXT, game::eventiconfade, TEAM(team, colour), 3, 1, -10);
             }
-            if(game::dynlighteffects) adddynlight(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(teamtype[team].colour>>16, (teamtype[team].colour>>8)&0xFF, teamtype[team].colour&0xFF).mul(2.f/0xFF), 500, 250);
+            if(game::dynlighteffects) adddynlight(vec(to).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec(TEAM(team, colour)>>16, (TEAM(team, colour)>>8)&0xFF, TEAM(team, colour)&0xFF).mul(2.f/0xFF), 500, 250);
         }
-        if(from.x >= 0 && to.x >= 0) part_trail(PART_SPARK, 500, from, to, teamtype[team].colour, 1, 1, -10);
+        if(from.x >= 0 && to.x >= 0) part_trail(PART_SPARK, 500, from, to, TEAM(team, colour), 1, 1, -10);
     }
 
     void destroyaffinity(const vec &o)
@@ -479,7 +474,7 @@ namespace bomber
         hud::teamscore(d->team).total = score;
         gameent *e = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
         int snd = e->team ? (e->team != g.team ? S_V_YOUWIN : S_V_YOULOSE) : WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE);
-        game::announcef(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs%s%s\fS base for \fs%s%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), teamtype[g.team].chat, teamtype[g.team].name, teamtype[d->team].chat, teamtype[d->team].name, score, hud::timetostr(lastmillis-f.inittime));
+        game::announcef(snd, d == e ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs\f[%d]%s\fS base for \fs\f[%d]%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
 

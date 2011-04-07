@@ -1315,10 +1315,10 @@ namespace game
     {
         if(!name) name = d->name;
         static string cname;
-        formatstring(cname)("%s\fs%s%s", *prefix ? prefix : "", teamtype[d->team].chat, name);
+        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->colour(), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
-            defformatstring(s)(" [\fs%s%d\fS]", d->aitype >= 0 ? "\fc" : "\fw", d->clientnum);
+            defformatstring(s)(" [\fs%s%d\fS\f[%d]]", d->aitype >= 0 ? "\fw" : "\fd", d->clientnum, d->colour());
             concatstring(cname, s);
         }
         concatstring(cname, "\fS");
@@ -2238,7 +2238,7 @@ namespace game
                                     bvec pcol = bvec::fromcolor(bomber::pulsecolour());
                                     colour = (pcol.x<<16)|(pcol.y<<8)|pcol.z;
                                 }
-                                else colour = teamtype[d->icons[i].value].colour;
+                                else colour = TEAM(d->icons[i].value, colour);
                                 // fall-through
                             default: nudge *= 1.5f; break;
                         }

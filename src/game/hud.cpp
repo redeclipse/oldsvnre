@@ -873,7 +873,7 @@ namespace hud
                             if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                             else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         }
-                        else ty += draw_textx("\fzZeTeam \fs%s%s\fS \fs\fw(\fS\fs%s%s\fS\fs\fw)\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamtype[target->team].chat, teamtype[target->team].name, teamtype[target->team].chat, teamtype[target->team].colname);
+                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), TEAM(target->team, name));
                     }
                 }
             }
@@ -1827,7 +1827,8 @@ namespace hud
                         if(!lastnewgame && lastteam)
                         {
                             const char *pre = "";
-                            float skew = inventoryskew, fade = blend*inventoryblend;
+                            float skew = inventoryskew, fade = blend*inventoryblend, r = 1, g = 1, b = 1;
+                            skewcolour(r, g, b);
                             int millis = totalmillis-lastteam;
                             if(millis <= inventoryteams)
                             {
@@ -1837,14 +1838,14 @@ namespace hud
                                 pre = "\fzwR";
                             }
                             int oldy = cm+int(cs*skew);
-                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, false, 1, 1, 1, fade, skew));
-                            if(m_campaign(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "sub", fade, "%s%scampaign", teamtype[game::focus->team].chat, pre));
+                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, false, r, g, b, fade, skew));
+                            if(m_campaign(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "sub", fade, "\f[%d]%scampaign", TEAM(game::focus->team, colour), pre));
                             else if(!m_team(game::gamemode, game::mutators))
                             {
-                                if(m_trial(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "sub", fade, "%s%stime-trial", teamtype[game::focus->team].chat, pre));
-                                else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "%s%sffa", teamtype[game::focus->team].chat, pre));
+                                if(m_trial(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "sub", fade, "\f[%d]%stime-trial", TEAM(game::focus->team, colour), pre));
+                                else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "\f[%d]%sffa", TEAM(game::focus->team, colour), pre));
                             }
-                            else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "%s%s%s", teamtype[game::focus->team].chat, pre, teamtype[game::focus->team].name));
+                            else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "\f[%d]%s%s", TEAM(game::focus->team, colour), pre, TEAM(game::focus->team, name)));
                         }
                     }
                     if((cc = drawselection(cx[i], cy[i], cs, cm, blend)) > 0) cy[i] -= cc+cr;
@@ -2068,7 +2069,7 @@ namespace hud
                         switch(game::focus->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = weaptype[game::focus->icons[i].value].colour; break;
-                            case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : teamtype[game::focus->icons[i].value].colour; break;
+                            case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : TEAM(game::focus->icons[i].value, colour); break;
                             default: break;
                         }
                         glBindTexture(GL_TEXTURE_2D, t->id);

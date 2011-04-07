@@ -143,7 +143,7 @@ namespace entities
                 {
                     if(valteam(attr[0], TEAM_FIRST))
                     {
-                        defformatstring(str)("team %s", teamtype[attr[0]].name);
+                        defformatstring(str)("team %s", TEAM(attr[0], name));
                         addentinfo(str);
                     }
                 }
@@ -380,7 +380,7 @@ namespace entities
         vector<entcachenode> nodes;
         int firstent, lastent, maxdepth;
         vec bbmin, bbmax;
-    
+
         entcache() { clear(); }
 
         void clear()
@@ -405,7 +405,7 @@ namespace entities
 
         void build(int first = 0, int last = -1)
         {
-            if(last < 0) last = ents.length(); 
+            if(last < 0) last = ents.length();
             vector<int> indices;
             for(int i = first; i < last; i++)
             {
@@ -508,7 +508,7 @@ namespace entities
         if(++numinvalidateentcaches >= 1000) { numinvalidateentcaches = 0; invalidatedentcaches = (1<<NUMENTCACHES)-1; }
         else loopi(NUMENTCACHES) if((ent >= entcaches[i].firstent && ent <= entcaches[i].lastent) || i+1 >= NUMENTCACHES) { invalidatedentcaches |= 1<<i; break; }
     }
-        
+
     void clearentcache(bool full)
     {
         loopi(NUMENTCACHES) if(full || invalidatedentcaches&(1<<i)) { entcaches[i].clear(); clearedentcaches |= 1<<i; }
@@ -1092,7 +1092,6 @@ namespace entities
                 while(e.attrs[3] < 0) e.attrs[3] += 101;
                 while(e.attrs[3] >= 101) e.attrs[3] -= 101;
                 if(e.attrs[4] < 0) e.attrs[4] = 0;
-                e.light.material[0] = e.attrs[6] ? bvec(e.attrs[6]) : bvec(255, 255, 255);
             case PARTICLES:
             case MAPSOUND:
             case LIGHTFX:
@@ -1190,7 +1189,6 @@ namespace entities
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
                 while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
                 while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
-                e.light.material[0] = bvec(teamtype[e.attrs[0]].colour);
                 break;
             case TELEPORT:
                 while(e.attrs[0] < -1) e.attrs[0] += 361;
@@ -2240,7 +2238,7 @@ namespace entities
             {
                 case PLAYERSTART:
                 {
-                    part_radius(vec(e.o).add(vec(0, 0, game::player1->zradius/2)), vec(game::player1->xradius, game::player1->yradius, game::player1->zradius/2), 1, 1, 1, teamtype[e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL].colour);
+                    part_radius(vec(e.o).add(vec(0, 0, game::player1->zradius/2)), vec(game::player1->xradius, game::player1->yradius, game::player1->zradius/2), 1, 1, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
                     break;
                 }
                 case ACTOR:
@@ -2301,9 +2299,9 @@ namespace entities
                 case AFFINITY:
                 {
                     float radius = (float)enttype[e.type].radius;
-                    part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, teamtype[e.attrs[0]].colour);
+                    part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, TEAM(e.attrs[0], colour));
                     radius = radius*2/3; // capture pickup dist
-                    part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, teamtype[e.attrs[0]].colour);
+                    part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, TEAM(e.attrs[0], colour));
                     break;
                 }
                 case WAYPOINT:
@@ -2330,7 +2328,7 @@ namespace entities
             {
                 case PLAYERSTART: case CHECKPOINT:
                 {
-                    entdirpart(e.o, e.attrs[1], e.attrs[2], 4.f, 1, teamtype[e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL].colour);
+                    entdirpart(e.o, e.attrs[1], e.attrs[2], 4.f, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
                     break;
                 }
                 case MAPMODEL:
@@ -2436,7 +2434,8 @@ namespace entities
                     vec pos = e.o;
                     if(mdlname && *mdlname)
                     {
-                        int flags = MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, colour = -1;
+                        int flags = MDL_SHADOW|MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED,
+                            colour = -1;
                         float fade = 1, yaw = 0, pitch = 0, size = 1;
                         if(!active)
                         {
@@ -2444,7 +2443,7 @@ namespace entities
                             if(e.type == AFFINITY || e.type == PLAYERSTART)
                             {
                                 yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0);
-                                colour = teamtype[e.attrs[0]].colour;
+                                colour = TEAM(e.attrs[0], colour);
                                 pitch = e.attrs[2];
                             }
                             else if(e.type == ACTOR)
@@ -2465,13 +2464,15 @@ namespace entities
                             int millis = lastmillis-e.lastuse;
                             if(millis < 500) size = fade = 1.f-(float(millis)/500.f);
                         }
-                        if(e.type == WEAPON)
+                        if(e.type == MAPMODEL && e.attrs[6]) colour = e.attrs[6];
+                        else if(e.type == WEAPON)
                         {
                             flags |= MDL_LIGHTFX;
                             int col = weaptype[w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators))].colour, interval = lastmillis%1000;
                             e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
                         if(colour >= 0) e.light.material[0] = bvec(colour);
+                        else e.light.material[0] = bvec(255, 255, 255);
                         rendermodel(&e.light, mdlname, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0.f, flags, NULL, NULL, 0, 0, fade, size);
                     }
                 }
