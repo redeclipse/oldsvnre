@@ -1270,7 +1270,7 @@ struct gameent : dynent, gamestate
 
     int colour(int tone = 0)
     {
-        if(aitype >= AI_START && isweap(weapselect)) return weaptype[weapselect].colour;
+        if(aitype >= AI_START && isweap(weapselect)) return WEAP(weapselect, colour);
         if(tone || team == TEAM_NEUTRAL)
         {
             if(!(tone%2)) return undertone[1];

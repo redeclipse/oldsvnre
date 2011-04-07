@@ -1656,7 +1656,7 @@ namespace client
                     if(e.spawned)
                     {
                         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
-                            colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF;
+                            colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF;
                         playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_SPAWN) : S_ITEMSPAWN, e.o);
                         if(entities::showentdescs)
                         {

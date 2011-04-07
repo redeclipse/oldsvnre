@@ -185,7 +185,7 @@ namespace entities
                         else formatstring(ds)("%s", gametype[attr[3]].name);
                         addentinfo(ds);
                     }
-                    addentinfo(weaptype[attr[5] > 0 && attr[5] <= WEAP_MAX ? attr[5]-1 : aistyle[attr[0]+AI_START].weap].name);
+                    addentinfo(WEAP(attr[5] > 0 && attr[5] <= WEAP_MAX ? attr[5]-1 : aistyle[attr[0]+AI_START].weap, name));
                 }
                 break;
             }
@@ -194,7 +194,7 @@ namespace entities
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 if(isweap(attr1))
                 {
-                    defformatstring(str)("\fs%s%s\fS", weaptype[attr1].text, weaptype[attr1].name);
+                    defformatstring(str)("\fs\f[%d]%s\fS", WEAP(attr1, colour), WEAP(attr1, name));
                     addentinfo(str);
                     if(full)
                     {
@@ -329,7 +329,7 @@ namespace entities
     {
         gameentity &e = *(gameentity *)ents[n];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
-            colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF;
+            colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF;
         if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
         if(isweap(g))
         {
@@ -2450,7 +2450,7 @@ namespace entities
                             {
                                 yaw = e.attrs[1]+90;
                                 pitch = e.attrs[2];
-                                colour = weaptype[e.attrs[5] > 0 ? e.attrs[5]-1 : aistyle[e.attrs[0]].weap].colour;
+                                colour = WEAP(e.attrs[5] > 0 ? e.attrs[5]-1 : aistyle[e.attrs[0]].weap, colour);
                                 size = e.attrs[8] > 0 ? e.attrs[8]/100.f : aistyle[e.attrs[0]].scale;
                             }
                         }
@@ -2468,7 +2468,7 @@ namespace entities
                         else if(e.type == WEAPON)
                         {
                             flags |= MDL_LIGHTFX;
-                            int col = weaptype[w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators))].colour, interval = lastmillis%1000;
+                            int col = WEAP(w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
                             e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
                         if(colour >= 0) e.light.material[0] = bvec(colour);
@@ -2507,7 +2507,7 @@ namespace entities
         bool edit = m_edit(game::gamemode) && cansee(e), isedit = edit && game::player1->state == CS_EDITING,
                 hasent = isedit && idx >= 0 && (entgroup.find(idx) >= 0 || enthover == idx);
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
-            colour = e.type == WEAPON ? weaptype[attr].colour : 0xFFFFFF, interval = lastmillis%1000;
+            colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {

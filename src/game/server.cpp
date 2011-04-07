@@ -437,7 +437,7 @@ namespace server
             {
                 if(request)
                 {
-                    if(isweap(aweap)) srvmsgft(ci->clientnum, CON_EVENT, "sorry, the \fs%s%s\fS is not available, please select a different weapon", weaptype[aweap].text, weaptype[aweap].name);
+                    if(isweap(aweap)) srvmsgft(ci->clientnum, CON_EVENT, "sorry, the \fs\f[%d]%s\fS is not available, please select a different weapon", WEAP(aweap, colour), WEAP(aweap, name));
                     sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
                 }
                 return false;

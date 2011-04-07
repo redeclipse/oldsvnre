@@ -37,7 +37,7 @@ namespace weapons
         {
             switch(*o)
             {
-                case 0: result(weaptype[*n].name); break;
+                case 0: result(WEAP(*n, name)); break;
                 case 1: result(hud::itemtex(WEAPON, *n)); break;
                 default: break;
             }
