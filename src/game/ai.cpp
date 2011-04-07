@@ -1664,7 +1664,7 @@ namespace ai
                 if(aidebug > 2)
                 {
                     if(isweap(d->ai->weappref))
-                        part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), weaptype[d->ai->weappref].name);
+                        part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), WEAP(d->ai->weappref, name));
                     gameent *e = game::getclient(d->ai->enemy);
                     if(e) part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), game::colorname(e, NULL, "<default>"));
                 }

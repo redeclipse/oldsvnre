@@ -564,7 +564,7 @@ namespace projs
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
                     proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
-                    proj.light.material[0] = bvec(weaptype[proj.weap].colour);
+                    proj.light.material[0] = bvec(WEAP(proj.weap, colour));
                 }
                 else
                 {
@@ -1045,7 +1045,7 @@ namespace projs
             case PRJ_EJECT:
             {
                 if(isweap(proj.weap) && ejecthint)
-                    part_create(PART_HINT, 1, proj.o, weaptype[proj.weap].colour, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f);
+                    part_create(PART_HINT, 1, proj.o, WEAP(proj.weap, colour), max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f);
                 bool moving = proj.movement >= 1;
                 if(moving && lastmillis-proj.lasteffect >= 100)
                 {
@@ -1844,7 +1844,7 @@ namespace projs
                         if(e.type == WEAPON)
                         {
                             flags |= MDL_LIGHTFX;
-                            int col = weaptype[w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators))].colour, interval = lastmillis%1000;
+                            int col = WEAP(w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
                             proj.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
                     }

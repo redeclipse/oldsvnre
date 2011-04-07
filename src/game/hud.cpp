@@ -572,9 +572,9 @@ namespace hud
         float r = clipcolour, g = clipcolour, b = clipcolour;
         if(clipcolour > 0)
         {
-            r = ((weaptype[weap].colour>>16)/255.f)*clipcolour;
-            g = (((weaptype[weap].colour>>8)&0xFF)/255.f)*clipcolour;
-            b = ((weaptype[weap].colour&0xFF)/255.f)*clipcolour;
+            r = ((WEAP(weap, colour)>>16)/255.f)*clipcolour;
+            g = (((WEAP(weap, colour)>>8)&0xFF)/255.f)*clipcolour;
+            b = ((WEAP(weap, colour)&0xFF)/255.f)*clipcolour;
         }
         else if(clipstone) skewcolour(r, g, b, 1-clipstone);
         glColor4f(r, g, b, fade);
@@ -1250,7 +1250,7 @@ namespace hud
             {
                 int attr1 = w_attr(game::gamemode, attr[0], m_weapon(game::gamemode, game::mutators));
                 tex = itemtex(WEAPON, attr1);
-                colour = vec::hexcolor(weaptype[attr1].colour);
+                colour = vec::hexcolor(WEAP(attr1, colour));
                 fade *= radaritemblend;
                 size = radaritemsize;
             }
@@ -1558,9 +1558,9 @@ namespace hud
                     float r = 1.f, g = 1.f, b = 1.f;
                     if(inventorycolour)
                     {
-                        r = (weaptype[i].colour>>16)/255.f;
-                        g = ((weaptype[i].colour>>8)&0xFF)/255.f;
-                        b = (weaptype[i].colour&0xFF)/255.f;
+                        r = (WEAP(i, colour)>>16)/255.f;
+                        g = ((WEAP(i, colour)>>8)&0xFF)/255.f;
+                        b = (WEAP(i, colour)&0xFF)/255.f;
                     }
                     else if(inventorytone) skewcolour(r, g, b, 1-inventorytone);
                     int oldy = y-sy;
@@ -1585,7 +1585,7 @@ namespace hud
                                 }
                                 lastweapids = changedkeys;
                             }
-                            drawitemsubtext(x, oldy, size, TEXT_RIGHT_UP, skew, "sub", fade, "%s%s", inventorycolour >= 2 ? weaptype[i].text : "\fa", weapids[n]);
+                            drawitemsubtext(x-size, oldy, size, TEXT_RIGHT_UP, skew, "sub", fade, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, weapids[n]);
                         }
                     }
                 }
@@ -2068,7 +2068,7 @@ namespace hud
                         int size = int(FONTH*skew), width = int((t->w/float(t->h))*size);
                         switch(game::focus->icons[i].type)
                         {
-                            case eventicon::WEAPON: colour = weaptype[game::focus->icons[i].value].colour; break;
+                            case eventicon::WEAPON: colour = WEAP(game::focus->icons[i].value, colour); break;
                             case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : TEAM(game::focus->icons[i].value, colour); break;
                             default: break;
                         }

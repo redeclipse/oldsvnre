@@ -350,7 +350,7 @@ namespace game
             {
                 const char *s = j ? b : a;
                 if(*s >= '0' && *s <= '9') d->loadweap[j] = parseint(s);
-                else loopi(WEAP_MAX) if(!strcasecmp(weaptype[i].name, s))
+                else loopi(WEAP_MAX) if(!strcasecmp(WEAP(i, name), s))
                 {
                     d->loadweap[j] = i;
                     break;
@@ -359,8 +359,8 @@ namespace game
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
             conoutft(CON_SELF, "weapon selection is now: \fs%s%s\fS and \fs%s%s\fS",
-                weaptype[d->loadweap[0]].text, (d->loadweap[0] >= WEAP_OFFSET ? weaptype[d->loadweap[0]].name : "random"),
-                weaptype[d->loadweap[1]].text, (d->loadweap[1] >= WEAP_OFFSET ? weaptype[d->loadweap[1]].name : "random")
+                WEAP(d->loadweap[0], colour), (d->loadweap[0] >= WEAP_OFFSET ? WEAP(d->loadweap[0], name) : "random"),
+                WEAP(d->loadweap[1], colour), (d->loadweap[1] >= WEAP_OFFSET ? WEAP(d->loadweap[1], name) : "random")
             );
         }
         else conoutft(CON_MESG, "\foweapon selection is only available in arena");
@@ -2231,7 +2231,7 @@ namespace game
                     {
                         switch(d->icons[i].type)
                         {
-                            case eventicon::WEAPON: colour = weaptype[d->icons[i].value].colour; size = size*2/3; nudge = size; break;
+                            case eventicon::WEAPON: colour = WEAP(d->icons[i].value, colour); size = size*2/3; nudge = size; break;
                             case eventicon::AFFINITY:
                                 if(m_bomber(gamemode))
                                 {
