@@ -161,14 +161,11 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
     } \
     else if(g[h] == '[') \
     { \
-        const char *end = g; end += h+1; \
-        const char *start = end; \
-        end += strcspn(end, "]\0"); \
-        if(end && *end == ']') \
-        { \
-            char *val = newstring(start, end - start); \
-            if(val) { TEXTHEXCOLOR(bvec(parseint(val))); h += strlen(val)+1; DELETEP(val); } \
-        } \
+        h++; \
+        const char *start = &g[h]; \
+        const char *end = strchr(start, ']'); \
+        if(end) { TEXTHEXCOLOR(bvec(parseint(start))); h += end-start+1; } \
+        else h += strlen(start); \
     } \
     else TEXTCOLOR(h); \
 }
