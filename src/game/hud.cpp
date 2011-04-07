@@ -94,11 +94,12 @@ namespace hud
     TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
     TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
 
-    VAR(IDF_PERSIST, teamglow, 0, 1, 1); // colour based on team
-    VAR(IDF_PERSIST, teamclips, 0, 1, 2);
-    VAR(IDF_PERSIST, teaminventory, 0, 1, 1);
-    VAR(IDF_PERSIST, teamcrosshair, 0, 0, 2);
-    VAR(IDF_PERSIST, teamnotices, 0, 0, 1);
+    VAR(IDF_PERSIST, glowtone, 0, 1, 3); // colour based on tone (1 = team/overtone, 2 = undertone, 3 = overtone)
+    VAR(IDF_PERSIST, clipstone, 0, 1, 3);
+    VAR(IDF_PERSIST, inventorytone, 0, 1, 3);
+    VAR(IDF_PERSIST, crosshairtone, 0, 0, 3);
+    VAR(IDF_PERSIST, noticestone, 0, 0, 3);
+
     VAR(IDF_PERSIST, teamkillnum, 0, 3, INT_MAX-1);
     VAR(IDF_PERSIST, teamkilltime, 0, 60000, INT_MAX-1);
 
@@ -419,13 +420,13 @@ namespace hud
         }
     }
 
-    void skewcolour(float &r, float &g, float &b, bool t)
+    void skewcolour(float &r, float &g, float &b, int colour, bool faded)
     {
-        int colour = game::focus->colour();
+        if(colour <= 0) colour = game::focus->colour(-colour);
         r *= (colour>>16)/255.f;
         g *= ((colour>>8)&0xFF)/255.f;
         b *= (colour&0xFF)/255.f;
-        if(!game::focus->team && t)
+        if(!game::focus->team && faded)
         {
             float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
             r *= f;
@@ -434,13 +435,13 @@ namespace hud
         }
     }
 
-    void skewcolour(int &r, int &g, int &b, bool t)
+    void skewcolour(int &r, int &g, int &b, int colour, bool faded)
     {
-        int colour = game::focus->colour();
+        if(colour <= 0) colour = game::focus->colour(-colour);
         r = int(r*((colour>>16)/255.f));
         g = int(g*(((colour>>8)&0xFF)/255.f));
         b = int(b*((colour&0xFF)/255.f));
-        if(!game::focus->team && t)
+        if(!game::focus->team && faded)
         {
             float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
             r = int(r*f);
@@ -575,7 +576,7 @@ namespace hud
             g = (((weaptype[weap].colour>>8)&0xFF)/255.f)*clipcolour;
             b = ((weaptype[weap].colour&0xFF)/255.f)*clipcolour;
         }
-        else if(teamclips) skewcolour(r, g, b);
+        else if(clipstone) skewcolour(r, g, b, 1-clipstone);
         glColor4f(r, g, b, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
@@ -664,7 +665,7 @@ namespace hud
                 if(!game::zooming) amt = 1.f-amt;
                 cs += int(off*amt);
             }
-            if(teamcrosshair >= (game::focus->team ? 1 : 2)) skewcolour(r, g, b);
+            if(crosshairtone) skewcolour(r, g, b, 1-crosshairtone);
             int heal = m_health(game::gamemode, game::mutators);
             if(crosshairflash && game::focus->state == CS_ALIVE && game::focus->health < heal)
             {
@@ -762,19 +763,19 @@ namespace hud
     {
         glPushMatrix();
         glScalef(noticescale, noticescale, 1);
-        pushfont("emphasis");
+        pushfont("default");
         int ty = ((hudheight/2)+int(hudheight/2*noticeoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
             tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
-        if(teamnotices) skewcolour(tr, tg, tb);
+        if(noticestone) skewcolour(tr, tg, tb, 1-noticestone);
         if(lastmillis-game::maptime <= titlefade*3)
         {
 
             ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname);
-            pushfont("default");
+            pushfont("sub");
             if(*mapauthor) ty += draw_textx("by %s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, mapauthor);
             popfont();
-            pushfont("sub");
+            pushfont("radar");
             defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
             if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
             ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname);
@@ -794,7 +795,7 @@ namespace hud
             ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
             if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
             {
-                pushfont("sub");
+                pushfont("radar");
                 ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                 popfont();
             }
@@ -803,7 +804,7 @@ namespace hud
                 SEARCHBINDCACHE(attackkey)("action 0", 0);
                 if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
-                    pushfont("default");
+                    pushfont("sub");
                     if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                     else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
                     else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
@@ -815,19 +816,19 @@ namespace hud
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
                     {
-                        pushfont("sub");
+                        pushfont("radar");
                         ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         popfont();
                     }
                 }
                 else
                 {
-                    pushfont("default");
+                    pushfont("sub");
                     ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                     popfont();
                     if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
                     {
-                        pushfont("sub");
+                        pushfont("radar");
                         ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                         popfont();
                     }
@@ -835,21 +836,21 @@ namespace hud
                 if(target == game::player1 && target->state == CS_WAITING && shownotices >= 3)
                 {
                     SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                    pushfont("sub");
+                    pushfont("radar");
                     ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
                     popfont();
                 }
                 if(target == game::player1 && m_arena(game::gamemode, game::mutators))
                 {
                     SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                    pushfont("sub");
+                    pushfont("radar");
                     ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadouts", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change");
                     popfont();
                 }
                 if(target == game::player1 && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
                 {
                     SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                    pushfont("sub");
+                    pushfont("radar");
                     ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
                     popfont();
                 }
@@ -878,13 +879,13 @@ namespace hud
             }
             if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
             {
-                pushfont("sub");
+                pushfont("radar");
                 ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                 popfont();
             }
             if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
             {
-                pushfont("sub");
+                pushfont("radar");
                 static vector<actitem> actitems;
                 actitems.setsize(0);
                 if(entities::collateitems(target, actitems))
@@ -963,7 +964,7 @@ namespace hud
         if(game::player1->state == CS_SPECTATOR)
         {
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-            pushfont("sub");
+            pushfont("radar");
             ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
             if(shownotices >= 2)
             {
@@ -1401,7 +1402,7 @@ namespace hud
         if(glow || pulse)
         {
             float gr = 1, gg = 1, gb = 1, gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
-            if(teamglow) skewcolour(gr, gg, gb);
+            if(glowtone) skewcolour(gr, gg, gb, 1-glowtone);
             if(pulse)
             {
                 int timestep = totalmillis%1000;
@@ -1561,7 +1562,7 @@ namespace hud
                         g = ((weaptype[i].colour>>8)&0xFF)/255.f;
                         b = (weaptype[i].colour&0xFF)/255.f;
                     }
-                    else if(teaminventory) skewcolour(r, g, b);
+                    else if(inventorytone) skewcolour(r, g, b, 1-inventorytone);
                     int oldy = y-sy;
                     if(inventoryammo && (instate || inventoryammo > 1) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, false, r, g, b, fade, skew, "super", "%d", game::focus->ammo[i]);
@@ -1615,7 +1616,7 @@ namespace hud
             if(hashealth && (glow || pulse))
             {
                 float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
-                if(teamglow) skewcolour(gr, gg, gb);
+                if(glowtone) skewcolour(gr, gg, gb, 1-glowtone);
                 if(pulse)
                 {
                     int timestep = totalmillis%1000;
@@ -1699,34 +1700,35 @@ namespace hud
             }
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
-                pushfont(!hashealth || m_trial(game::gamemode) ? "super" : "default");
-                int ty = draw_textx("\fd%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
+                pushfont(!hashealth || m_trial(game::gamemode) ? "default" : "sub");
+                int ty = draw_textx("%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 128, 128, 128, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
                 if(!hashealth) sy += ty;
                 popfont();
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse(physics::allowjetpack() ? 0 : 2) && impulsemeter && impulsecost && inventoryimpulse)
             {
-                int meter = game::focus->impulse[IM_METER]+(impulsecost*game::focus->impulse[IM_POWER]);
+                int meter = game::focus->impulse[IM_METER]+(impulsecost*game::focus->impulse[IM_POWER]),
+                    iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
                 float len = clamp(float(meter)/float(impulsemeter), 0.f, 1.f);
                 settexture(progresstex, 3);
-                float r = 1, g = 1, b = 1, f = 1;
-                int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
-                if(teaminventory) skewcolour(r, g, b);
-                if(inventoryflash && meter)
+                int timestep = totalmillis%1000;
+                float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
+                loopi(2)
                 {
-                    int timestep = totalmillis%1000;
-                    float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
-                    r += (1.f-r)*amt;
-                    g += (1.f-g)*amt;
-                    b -= b*amt;
-                    f += (1.f-f)*amt;
+                    float r = 1, g = 1, b = 1, f = 1;
+                    if(inventorytone) skewcolour(r, g, b, -i);
+                    if(inventoryflash && meter)
+                    {
+                        r += (1.f-r)*amt;
+                        g += (1.f-g)*amt;
+                        b -= b*amt;
+                        f += (1.f-f)*amt;
+                    }
+                    glColor4f(r, g, b, fade*f*0.5f);
+                    drawslice(0, 1, ix, iy, i ? is*2/3 : is);
+                    glColor4f(r, g, b, fade*f);
+                    drawslice(len, 1-len, ix, iy, i ? is*2/3 : is);
                 }
-                glColor4f(r, g, b, fade*f*0.5f);
-                drawslice(0, 1, ix, iy, is);
-                drawslice(0, 1, ix, iy, is*2/3);
-                glColor4f(r, g, b, fade*f);
-                drawslice(len, 1-len, ix, iy, is);
-                drawslice(len, 1-len, ix, iy, is*2/3);
                 if(inventoryimpulse >= 2)
                 {
                     pushfont("sub");

@@ -111,18 +111,18 @@ namespace bomber
                 bomberstate::flag &f = st.flags[i];
                 if(f.owner == game::player1)
                 {
-                    pushfont("super");
+                    pushfont("default");
                     ty += draw_textx("\fzwaYou have the bomb", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
                     popfont();
                     if(bombercarrytime)
                     {
                         int delay = bombercarrytime-(lastmillis-f.taketime);
-                        pushfont("emphasis");
+                        pushfont("sub");
                         ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
                         popfont();
                     }
                     SEARCHBINDCACHE(altkey)("action 9", 0);
-                    pushfont("sub");
+                    pushfont("radar");
                     ty += draw_textx("Press \fs\fc%s\fS to throw it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                     popfont();
                     break;
