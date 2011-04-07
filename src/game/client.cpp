@@ -48,7 +48,7 @@ namespace client
         if(found)
         {
             if(!mapvotes.empty()) mapvotes.sort(votecmp);
-            if(msg) conoutft(CON_EVENT, "%s cleared their previous vote", game::colorname(d));
+            if(msg && d == game::player1) conoutft(CON_EVENT, "%s cleared their previous vote", game::colorname(d));
         }
     }
 

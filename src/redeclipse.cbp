@@ -794,6 +794,13 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
+		<Unit filename="game\team.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+			<Option target="server" />
+			<Option target="server-dbg" />
+		</Unit>
 		<Unit filename="game\vars.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
