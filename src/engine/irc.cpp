@@ -79,6 +79,15 @@ void converttext(char *dst, const char *src)
                 c = *++src;
                 if(c) ++src;
             }
+            else if(c == '=')
+            {
+                for(int count = 0, c = *++src; c && count < 7; c = *++src)
+                {
+                    if(isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (count == 1 && c == 'x'))
+                        count++;
+                    else break;
+                }
+            }
             else if(c == 's') { colorpos++; continue; }
             else if(c == 'S') { c = colorstack[--colorpos]; }
             int oldcolor = colorstack[colorpos]; colorstack[colorpos] = c;

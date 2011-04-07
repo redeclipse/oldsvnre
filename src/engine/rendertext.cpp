@@ -145,8 +145,36 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
     }
 }
 
-#define TEXTTAB(x) clamp(x + (PIXELTAB - (x % PIXELTAB)), x + FONTW, x + PIXELTAB)
-#define TEXTBLINK(x,y,z) { if(x[y] == 'z') { int q = blinkingtext && totalmillis%500 > 250 ? 2 : 1; if(x[y+q]) { y += q; z; } y += 2-q; } else { z } }
+#define TEXTTAB(g) clamp(g + (PIXELTAB - (g % PIXELTAB)), g + FONTW, g + PIXELTAB)
+#define TEXTCOLORIZE(g,h) \
+{ \
+    if(g[h] == 'z' && g[h+1]) \
+    { \
+        h++; \
+        bool alt = blinkingtext && totalmillis%500 > 250; \
+        TEXTCOLOR(h); \
+        if(g[h+1]) \
+        { \
+            h++; \
+            if(alt) TEXTCOLOR(h); \
+        } \
+    } \
+    else if(g[h] == '=' && g[h+1] == '0' && g[h+2] == 'x') \
+    { \
+        string v; \
+        int count = 0; \
+        for(h++; g[h] && count < 8; h++) \
+        { \
+            if(isdigit(g[h]) || (g[h] >= 'a' && g[h] <= 'f') || (g[h] >= 'A' && g[h] <= 'F') || (count == 1 && g[h] == 'x')) \
+                v[count++] = g[h]; \
+            else break; \
+        } \
+        v[count] = 0; \
+        if(count) TEXTHEXCOLOR(bvec(parseint(v))); \
+        h--; \
+    } \
+    else TEXTCOLOR(h); \
+}
 #define TEXTALIGN \
     x = (!(flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT) ? TEXTTAB(0) : 0); \
     if(!y && (flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT)) maxwidth -= PIXELTAB; \
@@ -161,7 +189,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         if(c=='\t')      { x = TEXTTAB(x); TEXTWHITE(i) }\
         else if(c==' ')  { x += curfont->defaultw; TEXTWHITE(i) }\
         else if(c=='\n') { TEXTLINE(i) TEXTALIGN }\
-        else if(c=='\f') { if(str[i+1]) { i++; TEXTBLINK(str,i, TEXTCOLOR(i)); }}\
+        else if(c=='\f') { if(str[i+1]) { i++; TEXTCOLORIZE(str, i); }}\
         else if(curfont->chars.inrange(c-33))\
         {\
             if(maxwidth != -1)\
@@ -192,7 +220,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
                 {\
                     TEXTINDEX(j)\
                     int c = str[j];\
-                    if(c=='\f') { if(str[j+1]) { j++; TEXTBLINK(str,j, TEXTCOLOR(j)); }}\
+                    if(c=='\f') { if(str[j+1]) { j++; TEXTCOLORIZE(str, j); }}\
                     else { TEXTCHAR(j) }\
                 }
 
@@ -202,6 +230,7 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
     #define TEXTWHITE(idx) if(y+FONTH > hity && x >= hitx) return idx;
     #define TEXTLINE(idx) if(y+FONTH > hity) return idx;
     #define TEXTCOLOR(idx)
+    #define TEXTHEXCOLOR(col)
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w+1; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -209,6 +238,7 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
     #undef TEXTWHITE
     #undef TEXTLINE
     #undef TEXTCOLOR
+    #undef TEXTHEXCOLOR
     #undef TEXTCHAR
     #undef TEXTWORD
     return i;
@@ -221,6 +251,7 @@ void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int f
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
+    #define TEXTHEXCOLOR(col)
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w + 1;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -229,6 +260,7 @@ void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int f
     #undef TEXTWHITE
     #undef TEXTLINE
     #undef TEXTCOLOR
+    #undef TEXTHEXCOLOR
     #undef TEXTCHAR
     #undef TEXTWORD
 }
@@ -239,6 +271,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) if(x > width) width = x;
     #define TEXTCOLOR(idx)
+    #define TEXTHEXCOLOR(col)
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w + 1;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -249,6 +282,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
     #undef TEXTWHITE
     #undef TEXTLINE
     #undef TEXTCOLOR
+    #undef TEXTHEXCOLOR
     #undef TEXTCHAR
     #undef TEXTWORD
 }
@@ -259,6 +293,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) ly += FONTH;
     #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
+    #define TEXTHEXCOLOR(col) { color = col; glColor4ub(color.x, color.y, color.z, a); }
     #define TEXTCHAR(idx) x += draw_char(c, left+x, top+y)+1;
     #define TEXTWORD TEXTWORDSKELETON
     char colorstack[10];
@@ -286,6 +321,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #undef TEXTWHITE
     #undef TEXTLINE
     #undef TEXTCOLOR
+    #undef TEXTHEXCOLOR
     #undef TEXTCHAR
     #undef TEXTWORD
     return ly + FONTH;
