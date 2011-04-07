@@ -141,7 +141,7 @@ namespace defend
             loopv(st.flags) if(insideaffinity(st.flags[i], game::player1) && (st.flags[i].owner == game::player1->team || st.flags[i].enemy == game::player1->team))
             {
                 defendstate::flag &f = st.flags[i];
-                pushfont("super");
+                pushfont("default");
                 float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1) * defendoccupy), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::player1->team;
                 ty += draw_textx("\fzwa%s \fs%s%d%%\fS complete", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg"), int(occupy*100.f))*hud::noticescale;

@@ -182,11 +182,11 @@ namespace hud
         g.start(menustart, menuscale, NULL, false);
         int numgroups = groupplayers();
         g.pushlist();
-        g.image(NULL, 7, true);
+        g.image(NULL, 6, true);
         g.space(2);
         g.pushlist();
         g.space(1);
-        g.pushfont("super");
+        g.pushfont("default");
         if(*maptitle) g.textf("%s", 0xFFFFFF, NULL, 0, maptitle);
         else g.textf("(%s)", 0xFFFFFF, NULL, 0, mapname);
         g.popfont();
@@ -194,13 +194,13 @@ namespace hud
         {
             g.pushlist();
             g.space(3);
-            g.pushfont("emphasis");
+            g.pushfont("sub");
             g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor);
             g.popfont();
             g.poplist();
         }
         g.pushlist();
-        g.pushfont("default");
+        g.pushfont("sub");
         defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
         if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
         g.textf("%s", 0xFFFFFF, NULL, 0, gname);
@@ -237,10 +237,10 @@ namespace hud
             const char *msg = game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait";
             g.space(1);
             g.pushlist();
-            g.pushfont("default"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
+            g.pushfont("sub"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
             g.space(2);
             SEARCHBINDCACHE(attackkey)("action 0", 0);
-            g.pushfont("sub");
+            g.pushfont("radar");
             if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
             {
                 if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
@@ -281,7 +281,7 @@ namespace hud
         else if(game::player1->state == CS_ALIVE)
         {
             g.space(1);
-            g.pushfont("default");
+            g.pushfont("sub");
             if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
             else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
             else if(m_team(game::gamemode, game::mutators))
@@ -292,9 +292,9 @@ namespace hud
         else if(game::player1->state == CS_SPECTATOR)
         {
             g.space(1);
-            g.pushfont("default"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
+            g.pushfont("sub"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-            g.pushfont("sub");
+            g.pushfont("radar");
             g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey);
             SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
             g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV");
@@ -302,18 +302,17 @@ namespace hud
         }
 
         SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
-        g.pushfont("sub");
+        g.pushfont("radar");
         g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey);
-        g.popfont();
         g.pushlist();
         g.space(2);
-        g.pushfont("radar");
         g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0);
         g.popfont();
         g.poplist();
         g.poplist();
         g.poplist();
         g.space(1);
+        g.pushfont(numgroups>1 ? "radar" : "sub");
         loopk(numgroups)
         {
             if((k%2)==0) g.pushlist(); // horizontal
@@ -355,7 +354,10 @@ namespace hud
                 if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x339933 : 0x999933;
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 3);
-                g.text("", 0, status, o->colour(1));
+                g.pushlist();
+                g.background(o->colour(1));
+                g.text("", 0, status, o->colour(2));
+                g.poplist();
                 g.poplist();
             });
             g.poplist();
@@ -371,9 +373,10 @@ namespace hud
 
             g.pushlist();
             g.pushlist();
+            g.space(1);
             g.text("name ", fgcolor);
             g.poplist();
-            loopscoregroup(g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)));
+            loopscoregroup(g.pushlist(); g.space(1); g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)); g.poplist());
             g.poplist();
 
             if(showpoints)
@@ -468,10 +471,11 @@ namespace hud
             if(k+1<numgroups && (k+1)%2) g.space(2);
             else g.poplist(); // horizontal
         }
-
+        g.popfont();
         if(showspectators && spectators.length())
         {
             g.space(1);
+            g.pushfont("radar");
             g.pushlist();
             loopv(spectators)
             {
@@ -482,19 +486,20 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 1);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, o->colour(1), game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0xFFFFFF, hud::conopentex, o->colour(1), game::colorname(o, NULL, "", false));
+                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s", 0xFFFFFF, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false));
                 if(i+1<spectators.length() && (i+1)%3) g.space(1);
                 else g.poplist();
                 g.poplist();
             }
             g.poplist();
+            g.popfont();
         }
         if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || showscoresinfo))
         {
             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
             g.space(1);
-            g.pushfont("sub");
+            g.pushfont("radar");
             g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                 game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                 game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,

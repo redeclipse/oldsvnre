@@ -1290,13 +1290,13 @@ struct gameent : dynent, gamestate
 
     void setundertone(int colour = 0)
     {
-        if(!colour) 
-        { 
+        if(!colour)
+        {
             if(name[0]) { colour = detrnd(hthash(name), 0x10000); colour |= detrnd(colour, 0x10000)<<16; }
             else colour = rnd(0xFFFFFF);
         }
         ivec col(max((colour>>16)&0xFF, 1), max((colour>>8)&0xFF, 1), max(colour&0xFF, 1)),
-             col2 = ivec(col).mul(3).div(4).add(64); 
+             col2 = ivec(col).mul(3).div(4).add(64);
         col.mul(3).div(5);
         undertone[0] = (col.x<<16)|(col.y<<8)|col.z;
         undertone[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
@@ -1475,8 +1475,8 @@ namespace hud
     extern void drawtex(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
     extern void drawsized(float x, float y, float s);
     extern void colourskew(float &r, float &g, float &b, float skew = 1);
-    extern void skewcolour(float &r, float &g, float &b, bool t = false);
-    extern void skewcolour(int &r, int &g, int &b, bool t = false);
+    extern void skewcolour(float &r, float &g, float &b, int colour = 0, bool faded = false);
+    extern void skewcolour(int &r, int &g, int &b, int colour = 0, bool faded = false);
     extern void drawindicator(int weap, int x, int y, int s);
     extern void drawclip(int weap, int x, int y, float s);
     extern void drawpointertex(const char *tex, int x, int y, int s, float r = 1, float g = 1, float b = 1, float fade = 1);

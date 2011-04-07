@@ -91,17 +91,19 @@ namespace capture
                     else if(f.droptime) droppedflags.add(i);
                 }
             }
-            pushfont("super");
-            if(!takenflags.empty()) ty += draw_textx("\fzwaFlag has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-            else if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
             {
+                pushfont("default");
                 ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+                popfont();
                 SEARCHBINDCACHE(altkey)("action 9", 0);
-                pushfont("sub");
+                pushfont("radar");
                 ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
             }
+            pushfont("sub");
+            if(!takenflags.empty()) ty += draw_textx("\fzwaFlag has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+            else if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
             popfont();
         }
     }
