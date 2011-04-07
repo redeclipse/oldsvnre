@@ -498,7 +498,8 @@ void save_config(char *mname)
             if(str[0])
             {
                 aliases++;
-                h->printf("\"%s\" = [%s]\n", id.name, str);
+                if(validatealias(str)) h->printf("\"%s\" = [%s]\n", id.name, str);
+                else { h->printf("\"%s\" = ", id.name); writeescapedstring(h, str); }
             }
         }
     }
