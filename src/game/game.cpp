@@ -1586,7 +1586,7 @@ namespace game
             }
             vec trg, pos = f.pos;
             float dist = c->pos.dist(pos);
-            if(dist >= c->mindist && dist <= min(c->maxdist, float(fog)) && (raycubelos(c->pos, pos, trg) || raycubelos(c->pos, pos = f.pos, trg)))
+            if(dist >= c->mindist && dist <= min(c->maxdist, float(fog-fog/4)) && (raycubelos(c->pos, pos, trg) || raycubelos(c->pos, pos = f.pos, trg)))
             {
                 float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
                 if(!c->player && update)
@@ -1596,7 +1596,7 @@ namespace game
                     dir.sub(c->pos).normalize();
                     vectoyawpitch(dir, yaw, pitch);
                 }
-                if(update || getsight(c->pos, yaw, pitch, pos, trg, min(c->maxdist, float(fog)), curfov, fovy) || getsight(c->pos, yaw, pitch, pos = f.pos, trg, min(c->maxdist, float(fog)), curfov, fovy))
+                if(update || getsight(c->pos, yaw, pitch, pos, trg, min(c->maxdist, float(fog-fog/4)), curfov, fovy) || getsight(c->pos, yaw, pitch, pos = f.pos, trg, min(c->maxdist, float(fog-fog/4)), curfov, fovy))
                 {
                     c->cansee++;
                     c->dir.add(f.pos);

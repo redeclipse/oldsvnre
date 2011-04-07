@@ -262,6 +262,15 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
                     c = *++src;
                     if(c) c = *++src;
                 }
+                else if(c == '=')
+                {
+                    for(int count = 0, c = *++src; c && count < 7; c = *++src)
+                    {
+                        if(isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (count == 1 && c == 'x'))
+                            count++;
+                        else break;
+                    }
+                }
             }
             continue;
         }
