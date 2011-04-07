@@ -336,7 +336,7 @@ namespace hud
             {
                 g.pushlist();
                 g.background(bgcolor, numgroups>1 ? 3 : 5);
-                g.text("", 0, hud::teamtex(sg.team));
+                g.text(" ", 0, hud::teamtex(sg.team));
                 g.poplist();
             }
             g.pushlist();
@@ -477,21 +477,37 @@ namespace hud
             g.space(1);
             g.pushfont("radar");
             g.pushlist();
+            g.pushlist();
+            int count = numgroups > 1 ? 5 : 3;
+            bool pushed = false;
             loopv(spectators)
             {
                 gameent *o = spectators[i];
                 int bgcol = o==game::player1 && highlightscore ? 0x888888 : 0;
                 if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x226622 : 0x666622;
-                if((i%3)==0) g.pushlist();
+                if((i%count)==0)
+                {
+                    g.pushlist();
+                    pushed = true;
+                }
                 g.pushlist();
-                if(bgcol) g.background(bgcol, 1);
+                if(bgcol) g.background(bgcol);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0xFFFFFF, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0xFFFFFF, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false));
-                if(i+1<spectators.length() && (i+1)%3) g.space(1);
-                else g.poplist();
+                    g.textf("%s (%d)", 0x888888, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s", 0x888888, hud::conopentex, o->colour(2), game::colorname(o, NULL, "", false));
                 g.poplist();
+                if((i+1)%count)
+                {
+                    if(i+1<spectators.length()) g.space(1);
+                }
+                else if(pushed)
+                {
+                    g.poplist();
+                    pushed = false;
+                }
             }
+            if(pushed) g.poplist();
+            g.poplist();
             g.poplist();
             g.popfont();
         }
