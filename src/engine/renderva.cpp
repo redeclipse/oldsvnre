@@ -411,7 +411,19 @@ void rendermapmodel(extentity &e)
         basetime = 0;
     }
     mapmodelinfo &mmi = getmminfo(e.attrs[0]);
-    if(&mmi) rendermodel(&e.light, mmi.name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
+    if(&mmi)
+    {
+        int colour = e.attrs[6] ? e.attrs[6] : -1;
+        if(e.attrs[7] || e.attrs[8])
+        {
+            vec r(1, 1, 1);
+            if(colour >= 0) r = vec::hexcolor(colour);
+            r.mul(game::getpalette(e.attrs[7], e.attrs[8]));
+            colour = (int(r.x*255)<<16)|(int(r.y*255)<<8)|(int(r.z*255));
+        }
+        e.light.material[0] = colour >= 0 ? bvec(colour) : bvec(255, 255, 255);
+        rendermodel(&e.light, mmi.name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
+    }
 }
 
 extern int reflectdist;

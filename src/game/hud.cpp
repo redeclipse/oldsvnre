@@ -71,7 +71,7 @@ namespace hud
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
-    FVAR(IDF_PERSIST, noticeblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, noticeblend, 0, 0.85f, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);

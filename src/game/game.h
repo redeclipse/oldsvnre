@@ -61,7 +61,7 @@ struct enttypes
     int type,           priority, links,    radius, usetype,    numattrs,
             canlink, reclink;
     bool    noisy,  syncs,  resyncs;
-    const char *name,           *attrs[9];
+    const char *name,           *attrs[11];
 };
 #ifdef GAMESERVER
 enttypes enttype[] = {
@@ -78,10 +78,10 @@ enttypes enttype[] = {
                 "light",        { "radius", "red",      "green",    "blue"  }
     },
     {
-        MAPMODEL,       1,          58,     0,      EU_NONE,    7,
+        MAPMODEL,       1,          58,     0,      EU_NONE,    9,
             (1<<TRIGGER), (1<<TRIGGER),
             false,  false,  false,
-                "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour" }
+                "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
     {
         PLAYERSTART,    1,          59,     0,      EU_NONE,    5,
@@ -96,11 +96,11 @@ enttypes enttype[] = {
                 "envmap",       { "radius", "size", "blur" }
     },
     {
-        PARTICLES,      1,          59,     0,      EU_NONE,    9,
+        PARTICLES,      1,          59,     0,      EU_NONE,    11,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<TRIGGER)|(1<<PUSHER),
             false,  false,  false,
-                "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i" }
+                "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
     },
     {
         MAPSOUND,       1,          58,     0,      EU_NONE,    5,
@@ -129,11 +129,11 @@ enttypes enttype[] = {
                 "weapon",       { "type",   "flags",    "mode",     "id" }
     },
     {
-        TELEPORT,       1,          50,     12,     EU_AUTO,    6,
+        TELEPORT,       1,          50,     12,     EU_AUTO,    8,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,
-                "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type" }
+                "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex" }
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    9,

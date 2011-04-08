@@ -1197,6 +1197,8 @@ namespace entities
                 while(e.attrs[1] > 90) e.attrs[1] -= 180;
                 while(e.attrs[5] < 0) e.attrs[5] += 3;
                 while(e.attrs[5] > 2) e.attrs[5] -= 3;
+                while(e.attrs[6] < 0) e.attrs[6]++;
+                while(e.attrs[7] < 0) e.attrs[7]++;
                 break;
             case WAYPOINT:
                 if(create) numwaypoints++;
@@ -2465,15 +2467,14 @@ namespace entities
                             int millis = lastmillis-e.lastuse;
                             if(millis < 500) size = fade = 1.f-(float(millis)/500.f);
                         }
-                        if(e.type == MAPMODEL && e.attrs[6]) colour = e.attrs[6];
-                        else if(e.type == WEAPON)
+                        if(e.type == WEAPON)
                         {
                             flags |= MDL_LIGHTFX;
                             int col = WEAP(w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
                             e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
-                        if(colour >= 0) e.light.material[0] = bvec(colour);
-                        else e.light.material[0] = bvec(255, 255, 255);
+                        else e.light.effect = vec(0, 0, 0);
+                        e.light.material[0] = colour >= 0 ? bvec(colour) : bvec(255, 255, 255);
                         rendermodel(&e.light, mdlname, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0.f, flags, NULL, NULL, 0, 0, fade, size);
                     }
                 }
@@ -2485,6 +2486,11 @@ namespace entities
     {
         float yaw = e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0], radius = float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius);
         int attr = int(e.attrs[4]), colour = (((attr&0xF)<<4)|((attr&0xF0)<<8)|((attr&0xF00)<<12))+0x0F0F0F;
+        if(e.attrs[6] || e.attrs[7])
+        {
+            vec r = vec(vec::hexcolor(colour)).mul(game::getpalette(e.attrs[6], e.attrs[7]));
+            colour = (int(r.x*255)<<16)|(int(r.y*255)<<8)|(int(r.z*255));
+        }
         part_portal(e.o, radius, 1, yaw, e.attrs[1], PART_TELEPORT, 0, colour);
     }
 
@@ -2537,15 +2543,15 @@ namespace entities
                     const char *attrname = enttype[e.type].attrs[k];
                     if(e.type == PARTICLES && k) switch(e.attrs[0])
                     {
-                        case 0: switch(k) { case 1: attrname = "length"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; default: attrname = ""; } break;
+                        case 0: switch(k) { case 1: attrname = "length"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "palette"; break; case 6: attrname = "palindex"; break; default: attrname = ""; } break;
                         case 1: switch(k) { case 1: attrname = "dir"; break; default: attrname = ""; } break;
                         case 2: switch(k) { case 1: attrname = "dir"; break; default: attrname = ""; } break;
-                        case 3: switch(k) { case 1: attrname = "size"; break; case 2: attrname = "colour"; break; default: attrname = ""; } break;
-                        case 4: case 7: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; default: attrname = ""; break; } break;
-                        case 8: case 9: case 10: case 11: case 12: case 13: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "decal"; break; case 7: attrname = "gravity"; break; case 8: attrname = "velocity"; break; default: attrname = ""; break; } break;
-                        case 14: case 15: switch(k) { case 1: attrname = "radius"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "gravity"; break; case 7: attrname = "velocity"; break; default: attrname = ""; } break;
-                        case 6: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "colour2"; break; default: attrname = ""; } break;
-                        case 5: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; default: attrname = ""; } break;
+                        case 3: switch(k) { case 1: attrname = "size"; break; case 2: attrname = "colour"; break; case 3: attrname = "palette"; break; case 4: attrname = "palindex"; break; default: attrname = ""; } break;
+                        case 4: case 7: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "palette"; break; case 7: attrname = "palindex"; break; default: attrname = ""; break; } break;
+                        case 8: case 9: case 10: case 11: case 12: case 13: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "decal"; break; case 7: attrname = "gravity"; break; case 8: attrname = "velocity"; break; case 9: attrname = "palette"; break; case 10: attrname = "palindex"; break; default: attrname = ""; break; } break;
+                        case 14: case 15: switch(k) { case 1: attrname = "radius"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "gravity"; break; case 7: attrname = "velocity"; break; case 8: attrname = "palette"; break; case 9: attrname = "palindex"; break; default: attrname = ""; } break;
+                        case 6: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "colour2"; break; case 4: attrname = "palette1"; break; case 5: attrname = "palindex1"; break; case 6: attrname = "palette2"; break; case 7: attrname = "palindex2"; break; default: attrname = ""; } break;
+                        case 5: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "palette"; break; case 4: attrname = "palindex"; break; default: attrname = ""; } break;
                         case 32: case 33: case 34: case 35: switch(k) { case 1: attrname = "red"; break; case 2: attrname = "green"; break; case 3: attrname = "blue"; break; default: attrname = ""; } break;
                         default: attrname = ""; break;
                     }
