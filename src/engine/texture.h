@@ -562,7 +562,7 @@ struct VSlot
         envscale = vec(0, 0, 0);
     }
 
-    vec getcolorscale() const { return vec(colorscale).mul(game::getpalette(palette, palindex)); }
+    vec getcolorscale() const { return palette || palindex ? vec(colorscale).mul(game::getpalette(palette, palindex)) : colorscale; }
 
     void cleanup()
     {
