@@ -511,6 +511,7 @@ enum
     VSLOT_LAYER,
     VSLOT_ALPHA,
     VSLOT_COLOR,
+    VSLOT_PALETTE,
     VSLOT_NUM
 };
 
@@ -528,6 +529,7 @@ struct VSlot
     int rotation, xoffset, yoffset;
     float scrollS, scrollT;
     int layer;
+    int palette, palindex;
     float alphafront, alphaback;
     vec colorscale;
     vec glowcolor, pulseglowcolor;
@@ -550,7 +552,7 @@ struct VSlot
         scale = 1;
         rotation = xoffset = yoffset = 0;
         scrollS = scrollT = 0;
-        layer = 0;
+        layer = palette = palindex = 0;
         alphafront = DEFAULT_ALPHA_FRONT;
         alphaback = DEFAULT_ALPHA_BACK;
         colorscale = vec(1, 1, 1);
@@ -559,6 +561,8 @@ struct VSlot
         pulseglowspeed = 0;
         envscale = vec(0, 0, 0);
     }
+
+    vec getcolorscale() const { return vec(colorscale).mul(game::getpalette(palette, palindex)); }
 
     void cleanup()
     {

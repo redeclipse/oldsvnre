@@ -375,7 +375,7 @@ void texagrad(ImageData &s, float x2, float y2, float x1, float y1)
     y1 = 1 - y1;
     y2 = 1 - y2;
     float minx = 1, miny = 1, maxx = 1, maxy = 1;
-    if(x1 != x2) 
+    if(x1 != x2)
     {
         minx = (0 - x1) / (x2 - x1);
         maxx = (1 - x1) / (x2 - x1);
@@ -385,8 +385,8 @@ void texagrad(ImageData &s, float x2, float y2, float x1, float y1)
         miny = (0 - y1) / (y2 - y1);
         maxy = (1 - y1) / (y2 - y1);
     }
-    float dx = (maxx - minx)/max(s.w-1, 1), 
-          dy = (maxy - miny)/max(s.h-1, 1), 
+    float dx = (maxx - minx)/max(s.w-1, 1),
+          dy = (maxy - miny)/max(s.h-1, 1),
           cury = miny;
     for(uchar *dstrow = s.data + s.bpp - 1, *endrow = dstrow + s.h*s.pitch; dstrow < endrow; dstrow += s.pitch)
     {
@@ -1413,6 +1413,11 @@ static void propagatevslot(VSlot &dst, const VSlot &src, int diff, bool edit = f
         dst.alphaback = src.alphaback;
     }
     if(diff & (1<<VSLOT_COLOR)) dst.colorscale = src.colorscale;
+    if(diff & (1<<VSLOT_PALETTE))
+    {
+        dst.palette = src.palette;
+        dst.palindex = src.palindex;
+    }
 }
 
 static void propagatevslot(VSlot *root, int changed)
@@ -1468,6 +1473,11 @@ static void mergevslot(VSlot &dst, const VSlot &src, int diff, Slot *slot = NULL
         dst.alphaback = src.alphaback;
     }
     if(diff & (1<<VSLOT_COLOR)) dst.colorscale.mul(src.colorscale);
+    if(diff & (1<<VSLOT_PALETTE))
+    {
+        dst.palette = src.palette;
+        dst.palindex = src.palindex;
+    }
 }
 
 void mergevslot(VSlot &dst, const VSlot &src, const VSlot &delta)
@@ -1515,6 +1525,7 @@ static bool comparevslot(const VSlot &dst, const VSlot &src, int diff)
     if(diff & (1<<VSLOT_LAYER) && dst.layer != src.layer) return false;
     if(diff & (1<<VSLOT_ALPHA) && (dst.alphafront != src.alphafront || dst.alphaback != src.alphaback)) return false;
     if(diff & (1<<VSLOT_COLOR) && dst.colorscale != src.colorscale) return false;
+    if(diff & (1<<VSLOT_PALETTE) && (dst.palette != src.palette || dst.palindex != src.palindex)) return false;
     return true;
 }
 
@@ -1770,6 +1781,16 @@ void texcolor(float *r, float *g, float *b)
     propagatevslot(s.variants, 1<<VSLOT_COLOR);
 }
 COMMAND(0, texcolor, "fff");
+
+void texpalette(int *p, int *x)
+{
+    if(slots.empty()) return;
+    Slot &s = *slots.last();
+    s.variants->palette = max(*p, 0);
+    s.variants->palindex = max(*x, 0);
+    propagatevslot(s.variants, 1<<VSLOT_PALETTE);
+}
+COMMAND(0, texpalette, "i");
 
 void texffenv(int *ffenv)
 {
@@ -2051,10 +2072,11 @@ Texture *loadthumbnail(Slot &slot)
     linkslotshader(slot, false);
     linkvslotshader(vslot, false);
     vector<char> name;
-    if(vslot.colorscale == vec(1, 1, 1)) addname(name, slot, slot.sts[0], false, "<thumbnail>");
+    vec colorscale = vslot.getcolorscale();
+    if(colorscale == vec(1, 1, 1)) addname(name, slot, slot.sts[0], false, "<thumbnail>");
     else
     {
-        defformatstring(prefix)("<thumbnail:%.2f/%.2f/%.2f>", vslot.colorscale.x, vslot.colorscale.y, vslot.colorscale.z);
+        defformatstring(prefix)("<thumbnail:%.2f/%.2f/%.2f>", colorscale.x, colorscale.y, colorscale.z);
         addname(name, slot, slot.sts[0], false, prefix);
     }
     int glow = -1;
@@ -2070,10 +2092,11 @@ Texture *loadthumbnail(Slot &slot)
     VSlot *layer = vslot.layer ? &lookupvslot(vslot.layer, false) : NULL;
     if(layer)
     {
-        if(layer->colorscale == vec(1, 1, 1)) addname(name, *layer->slot, layer->slot->sts[0], true, "<layer>");
+        vec layerscale = layer->getcolorscale();
+        if(layerscale == vec(1, 1, 1)) addname(name, *layer->slot, layer->slot->sts[0], true, "<layer>");
         else
         {
-            defformatstring(prefix)("<layer:%.2f/%.2f/%.2f>", vslot.colorscale.x, vslot.colorscale.y, vslot.colorscale.z);
+            defformatstring(prefix)("<layer:%.2f/%.2f/%.2f>", layerscale.x, layerscale.y, layerscale.z);
             addname(name, *layer->slot, layer->slot->sts[0], true, prefix);
         }
     }
@@ -2084,12 +2107,14 @@ Texture *loadthumbnail(Slot &slot)
     {
         ImageData s, g, l;
         texturedata(s, NULL, &slot.sts[0], false);
-        if(vslot.colorscale != vec(1, 1, 1)) texmad(s, vslot.colorscale, vec(0, 0, 0));
+        vec colorscale = vslot.getcolorscale();
+        if(vslot.colorscale != vec(1, 1, 1)) texmad(s, colorscale, vec(0, 0, 0));
         if(glow >= 0) texturedata(g, NULL, &slot.sts[glow], false);
         if(layer)
         {
+            vec layerscale = layer->getcolorscale();
             texturedata(l, NULL, &layer->slot->sts[0], false);
-            if(layer->colorscale != vec(1, 1, 1)) texmad(l, layer->colorscale, vec(0, 0, 0));
+            if(layerscale != vec(1, 1, 1)) texmad(l, layerscale, vec(0, 0, 0));
         }
         if(!s.data) t = slot.thumbnail = notexture;
         else

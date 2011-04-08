@@ -1759,6 +1759,17 @@ void vcolor(float *r, float *g, float *b)
 }
 COMMAND(0, vcolor, "fff");
 
+void vpalette(int *p, int *x)
+{
+    if(noedit() || multiplayer()) return;
+    VSlot ds;
+    ds.changed = 1<<VSLOT_PALETTE;
+    ds.palette = max(*p, 0);
+    ds.palindex = max(*x, 0);
+    mpeditvslot(ds, allfaces, sel, true);
+}
+COMMAND(0, vpalette, "ii");
+
 void vreset()
 {
     if(noedit() || multiplayer()) return;
@@ -2251,9 +2262,10 @@ void render_texture_panel(int w, int h)
                 }
                 loopk(4) { tc[k][0] = tc[k][0]/sx - xoff/tex->xs; tc[k][1] = tc[k][1]/sy - yoff/tex->ys; }
                 glBindTexture(GL_TEXTURE_2D, tex->id);
+                vec colorscale = vslot.getcolorscale();
                 loopj(glowtex ? 3 : 2)
                 {
-                    if(j < 2) glColor4f(j*vslot.colorscale.x, j*vslot.colorscale.y, j*vslot.colorscale.z, texpaneltimer/1000.0f);
+                    if(j < 2) glColor4f(j*colorscale.x, j*colorscale.y, j*colorscale.z, texpaneltimer/1000.0f);
                     else
                     {
                         glBindTexture(GL_TEXTURE_2D, glowtex->id);
@@ -2269,7 +2281,8 @@ void render_texture_panel(int w, int h)
                     xtraverts += 4;
                     if(j==1 && layertex)
                     {
-                        glColor4f(layer->colorscale.x, layer->colorscale.y, layer->colorscale.z, texpaneltimer/1000.0f);
+                        vec layerscale = layer->getcolorscale();
+                        glColor4f(layerscale.x, layerscale.y, layerscale.z, texpaneltimer/1000.0f);
                         glBindTexture(GL_TEXTURE_2D, layertex->id);
                         glBegin(GL_TRIANGLE_STRIP);
                         glTexCoord2fv(tc[0]); glVertex2f(x+r/2, y+r/2);

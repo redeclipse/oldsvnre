@@ -1398,8 +1398,8 @@ static void genfogshader(vector<char> &vsbuf, vector<char> &psbuf, const char *v
     {
         psbuf.put(ps, psend - ps);
         const char *psdef = "\n#define FOG_COLOR ";
-        const char *psfog = 
-            pspragma && !strncmp(pspragma+pragmalen, "rgba", 4) ? 
+        const char *psfog =
+            pspragma && !strncmp(pspragma+pragmalen, "rgba", 4) ?
                 "\ngl_FragColor = mix((FOG_COLOR), gl_FragColor, clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0));\n" :
                 "\ngl_FragColor.rgb = mix((FOG_COLOR).rgb, gl_FragColor.rgb, clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0));\n";
         int clen = 0;
