@@ -2488,7 +2488,7 @@ namespace entities
         int attr = int(e.attrs[4]), colour = (((attr&0xF)<<4)|((attr&0xF0)<<8)|((attr&0xF00)<<12))+0x0F0F0F;
         if(e.attrs[6] || e.attrs[7])
         {
-            vec r = vec(vec::hexcolor(colour)).mul(game::getpalette(e.attrs[6], e.attrs[7]));
+            vec r = vec::hexcolor(colour).mul(game::getpalette(e.attrs[6], e.attrs[7]));
             colour = (int(r.x*255)<<16)|(int(r.y*255)<<8)|(int(r.z*255));
         }
         part_portal(e.o, radius, 1, yaw, e.attrs[1], PART_TELEPORT, 0, colour);
