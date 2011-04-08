@@ -1608,6 +1608,17 @@ void defaultparticles()
 }
 #endif
 
+static int partcolour(int c, int p, int x)
+{
+    if(p || x)
+    {
+        vec r(1, 1, 1);
+        if(c > 0) r = vec::hexcolor(c);
+        r.mul(game::getpalette(p, x));
+        return (int(r.x*255)<<16)|(int(r.y*255)<<8)|(int(r.z*255));
+    }
+    return c;
+}
 void makeparticle(const vec &o, attrvector &attr)
 {
     switch(attr[0])
@@ -1616,7 +1627,7 @@ void makeparticle(const vec &o, attrvector &attr)
         {
             float radius = attr[1] ? float(attr[1])/100.0f : 1.5f,
                   height = attr[2] ? float(attr[2])/100.0f : radius*3;
-            regularflame(PART_FLAME, o, radius, height, attr[3] ? attr[3] : 0xF05010, 3, attr[4] > 0 ? attr[4]/2 : 500, 2.0f, 1, -5, 0, 30);
+            regularflame(PART_FLAME, o, radius, height, partcolour(attr[3] ? attr[3] : 0xF05010, attr[5], attr[6]), 3, attr[4] > 0 ? attr[4]/2 : 500, 2.0f, 1, -5, 0, 30);
             regularflame(PART_SMOKE, vec(o.x, o.y, o.z + 2.f*min(radius, height)), radius, height, 0x101008, 1, attr[4] > 0 ? attr[4] : 1000, 2.0f, 1, -10, 0, 30);
             break;
         }
@@ -1634,7 +1645,7 @@ void makeparticle(const vec &o, attrvector &attr)
             int types[3] = { PART_EXPLOSION, PART_SHOCKWAVE, PART_SHOCKBALL },
                 type = types[attr[3] >= 0 && attr[3] <= 2 ? attr[3] : 0];
             float blend = attr[4] > 0 && attr[4] < 100 ? attr[4]/100.f : 1.f;
-            newparticle(o, vec(0, 0, 1), 1, type, attr[2], 4.f, blend)->val = 1+attr[1];
+            newparticle(o, vec(0, 0, 1), 1, type, partcolour(attr[2], attr[3], attr[4]), 4.f, blend)->val = 1+attr[1];
             break;
         }
         case 4:  //tape - <dir> <length> <rgb>
@@ -1651,11 +1662,12 @@ void makeparticle(const vec &o, attrvector &attr)
             const float sizemap[] = { 0.28f, 0.0f, 0.0f, 0.25f, 4.f, 2.f, 0.6f, 4.f, 0.5f, 0.2f }, velmap[] = { 0, 0, 0, 0, 30, 30, 50, 20, 10, 20 };
             int type = typemap[attr[0]-4], fade = attr[4] > 0 ? attr[4] : 250,
                 grav = attr[0] > 7 && attr[7] != 0 ? attr[7] : gravmap[attr[0]-4],
-                decal = attr[0] > 7 && attr[6] > 0 && attr[6] <= DECAL_MAX ? attr[6]-1 : -1;
+                decal = attr[0] > 7 && attr[6] > 0 && attr[6] <= DECAL_MAX ? attr[6]-1 : -1,
+                colour = attr[0] > 7 ? partcolour(attr[3], attr[9], attr[10]) : partcolour(attr[3], attr[6], attr[7]);
             float size = attr[5] != 0 ? attr[5]/100.f : sizemap[attr[0]-4],
                   vel = attr[0] > 7 && attr[8] != 0 ? attr[8] : velmap[attr[0]-4];
-            if(attr[1] >= 256) regularshape(type, max(1+attr[2], 1), attr[3], attr[1]-256, 5, fade, o, size, 1, grav, decal, vel);
-            else newparticle(o, offsetvec(o, attr[1], max(1+attr[2], 0)), fade, type, attr[3], size, 1, grav, decal);
+            if(attr[1] >= 256) regularshape(type, max(1+attr[2], 1), colour, attr[1]-256, 5, fade, o, size, 1, grav, decal, vel);
+            else newparticle(o, offsetvec(o, attr[1], max(1+attr[2], 0)), fade, type, colour, size, 1, grav, decal);
             break;
         }
         case 14: // flames <radius> <height> <rgb>
@@ -1670,14 +1682,15 @@ void makeparticle(const vec &o, attrvector &attr)
         case 6: //meter, metervs - <percent> <rgb> <rgb2>
         {
             float length = clamp(attr[1], 0, 100)/100.f;
-            part_icon(o, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, attr[3], length, 1-length); // fall through
+            part_icon(o, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, partcolour(attr[3], attr[6], attr[7]), length, 1-length); // fall through
         }
         case 5:
         {
             float length = clamp(attr[1], 0, 100)/100.f;
             Texture *t = textureload(hud::progresstex, 3);
-            part_icon(o, t, 2, 1, 0, 0, 1, attr[2], 0, length);
-            part_icon(o, t, 3, 1, 0, 0, 1, attr[2], (totalmillis%1000)/1000.f, 0.1f);
+            int colour = partcolour(attr[2], attr[4], attr[5]);
+            part_icon(o, t, 2, 1, 0, 0, 1, colour, 0, length);
+            part_icon(o, t, 3, 1, 0, 0, 1, colour, (totalmillis%1000)/1000.f, 0.1f);
             break;
         }
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
