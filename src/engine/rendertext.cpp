@@ -183,8 +183,7 @@ static int draw_icon(const char *name, int x, int y)
         const char *end = strchr(start, ']'); \
         if(end) \
         { \
-            char *value = newstring(start, end-start); \
-            if(value && *value) { TEXTHEXCOLOR(bvec(parseint(value))); DELETEP(value); } \
+            if(end > start) { TEXTHEXCOLOR(bvec(parseint(start))); } \
             h += end-start; \
         } \
         else break; \
@@ -196,8 +195,11 @@ static int draw_icon(const char *name, int x, int y)
         const char *end = strchr(start, '>'); \
         if(end) \
         { \
-            char *value = newstring(start, end-start); \
-            if(value && *value) { TEXTICON(value); DELETEP(value); } \
+            if(end > start) \
+            { \
+                string value; copystring(value, start, min(end - start + 1, MAXSTRLEN)); \
+                TEXTICON(value); \
+            } \
             h += end-start; \
         } \
         else break; \
