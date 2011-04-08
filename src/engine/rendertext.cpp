@@ -197,7 +197,7 @@ static int draw_icon(const char *name, int x, int y)
         { \
             if(end > start) \
             { \
-                string value; copystring(value, start, min(end - start + 1, MAXSTRLEN)); \
+                string value; copystring(value, start, min(int(end - start + 1), MAXSTRLEN)); \
                 TEXTICON(value); \
             } \
             h += end-start; \
