@@ -1376,7 +1376,7 @@ namespace game
         formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->colour(), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
-            defformatstring(s)(" [%s%d\f[%d]]", d->aitype >= 0 ? "\fw" : "\fd", d->clientnum, d->colour());
+            defformatstring(s)(" [%d]", d->clientnum);
             concatstring(cname, s);
         }
         concatstring(cname, "\fS");

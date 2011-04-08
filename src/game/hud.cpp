@@ -78,6 +78,7 @@ namespace hud
     FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
+    VAR(IDF_PERSIST, noticeicons, 0, 1, 1);
 
     TVAR(IDF_PERSIST, neutraltex, "textures/team", 3);
     TVAR(IDF_PERSIST, alphatex, "textures/teamalpha", 3);
@@ -777,7 +778,7 @@ namespace hud
             ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
             if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
             {
-                pushfont("radar");
+                pushfont("sub");
                 ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                 popfont();
             }
@@ -855,19 +856,19 @@ namespace hud
                             if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                             else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         }
-                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), TEAM(target->team, name));
+                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]\f<%s>%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), hud::teamtex(target->team), TEAM(target->team, name));
                     }
                 }
             }
             if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
             {
-                pushfont("radar");
+                pushfont("sub");
                 ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
                 popfont();
             }
             if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
             {
-                pushfont("radar");
+                pushfont("emphasis");
                 static vector<actitem> actitems;
                 actitems.setsize(0);
                 if(entities::collateitems(target, actitems))
@@ -908,10 +909,10 @@ namespace hud
                                     {
                                         static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
                                         attrs[0] = drop;
-                                        defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false));
-                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false));
+                                        defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, noticeicons!=0));
+                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, noticeicons!=0));
                                     }
-                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false));
+                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, noticeicons!=0));
                                     break;
                                 }
                             }
@@ -924,8 +925,10 @@ namespace hud
                         actitems.pop();
                     }
                 }
+                popfont();
                 if(shownotices >= 4)
                 {
+                    pushfont("radar");
                     if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
                     {
                         SEARCHBINDCACHE(attackkey)("action 0", 0);
@@ -938,8 +941,8 @@ namespace hud
                         SEARCHBINDCACHE(reloadkey)("action 2", 0);
                         ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
                     }
+                    popfont();
                 }
-                popfont();
             }
         }
 
