@@ -1665,7 +1665,7 @@ namespace client
                             if(texname && *texname) part_icon(pos, textureload(texname, 3), 2, 1, -10, 0, game::eventiconfade, colour);
                             else
                             {
-                                const char *item = entities::entinfo(e.type, e.attrs, false);
+                                const char *item = entities::entinfo(e.type, e.attrs, 0);
                                 if(item && *item)
                                 {
                                     defformatstring(ds)("<emphasis>%s", item);

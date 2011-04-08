@@ -806,7 +806,7 @@ namespace server
         formatstring(cname)("\fs%s%s", tcolstrs[ci->team], name);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
-            defformatstring(s)(" [\fs%s%d\fS]", ci->state.aitype >= 0 ? "\fc" : "\fw", ci->clientnum);
+            defformatstring(s)(" [%d]", ci->clientnum);
             concatstring(cname, s);
         }
         concatstring(cname, "\fS");

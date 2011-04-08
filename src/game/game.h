@@ -1527,7 +1527,7 @@ namespace entities
     extern void setspawn(int n, int m);
     extern bool tryspawn(dynent *d, const vec &o, short yaw = 0, short pitch = 0);
     extern void spawnplayer(gameent *d, int ent = -1, bool suicide = false);
-    extern const char *entinfo(int type, attrvector &attr, bool full = false);
+    extern const char *entinfo(int type, attrvector &attr, bool full = false, bool icon = false);
     extern void useeffects(gameent *d, int n, int c, bool s, int g, int r, int v = -1);
     extern const char *entmdlname(int type, attrvector &attr);
     extern bool clipped(const vec &o, bool aiclip = false);

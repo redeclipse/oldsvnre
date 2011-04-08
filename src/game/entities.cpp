@@ -60,7 +60,7 @@ namespace entities
         return 0;
     }
 
-    const char *entinfo(int type, attrvector &attr, bool full)
+    const char *entinfo(int type, attrvector &attr, bool full, bool icon)
     {
         static string entinfostr; entinfostr[0] = 0;
         #define addentinfo(s) if(*(s)) { \
@@ -194,7 +194,7 @@ namespace entities
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 if(isweap(attr1))
                 {
-                    defformatstring(str)("\fs\f[%d]%s\fS", WEAP(attr1, colour), WEAP(attr1, name));
+                    defformatstring(str)("\fs\f[%d]%s%s%s\fS", WEAP(attr1, colour), icon ? "\f<" : "", icon ? hud::itemtex(type, attr1) : WEAP(attr1, name), icon ? ">" : "");
                     addentinfo(str);
                     if(full)
                     {
