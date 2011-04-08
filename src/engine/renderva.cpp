@@ -1420,9 +1420,8 @@ static void changeglow(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
 
 VAR(0, blankgeom, 0, 0, 1);
 
-static void changecolor(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
+static void changecolor(renderstate &cur, int pass, Slot &slot, VSlot &vslot, const vec &colorscale)
 {
-    vec colorscale = vslot.getcolorscale();
     if(colorscale == vec(1, 1, 1))
     {
         if(cur.causticstmu >= 0)
@@ -1474,7 +1473,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
                 float alpha = cur.alphaing > 1 ? vslot.alphafront : vslot.alphaback;
                 if(cur.colorscale != colorscale)
                 {
-                    changecolor(cur, pass, slot, vslot);
+                    changecolor(cur, pass, slot, vslot, colorscale);
                     if(cur.alphascale != alpha) { cur.alphascale = alpha; cur.color[3] = alpha; }
                     glColor4fv(cur.color);
                 }
@@ -1487,7 +1486,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
             }
             else if(cur.colorscale != colorscale)
             {
-                changecolor(cur, pass, slot, vslot);
+                changecolor(cur, pass, slot, vslot, colorscale);
                 glColor4fv(cur.color);
             }
             vslot.skipped = 0;
