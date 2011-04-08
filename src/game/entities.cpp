@@ -2450,7 +2450,8 @@ namespace entities
                             {
                                 yaw = e.attrs[1]+90;
                                 pitch = e.attrs[2];
-                                colour = WEAP(e.attrs[5] > 0 ? e.attrs[5]-1 : aistyle[e.attrs[0]].weap, colour);
+                                int weap = e.attrs[5] > 0 ? e.attrs[5]-1 : aistyle[e.attrs[0]].weap;
+                                if(isweap(weap)) colour = WEAP(weap, colour);
                                 size = e.attrs[8] > 0 ? e.attrs[8]/100.f : aistyle[e.attrs[0]].scale;
                             }
                         }

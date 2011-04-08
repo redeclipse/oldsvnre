@@ -300,6 +300,11 @@ void savevslot(stream *f, VSlot &vs, int prev)
     {
         loopk(3) f->putlil<float>(vs.colorscale[k]);
     }
+    if(vs.changed & (1<<VSLOT_PALETTE))
+    {
+        f->putlil<int>(vs.palette);
+        f->putlil<int>(vs.palindex);
+    }
 }
 
 void savevslots(stream *f, int numvslots)
@@ -375,6 +380,11 @@ void loadvslot(stream *f, VSlot &vs, int changed)
     {
         loopk(3) vs.colorscale[k] = f->getlil<float>();
     }
+    if(vs.changed & (1<<VSLOT_PALETTE))
+    {
+        vs.palette = f->getlil<int>();
+        vs.palindex = f->getlil<int>();
+    }
 }
 
 void loadvslots(stream *f, int numvslots)
@@ -445,6 +455,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
             h->printf("texalpha %f %f\n", s.variants->alphafront, s.variants->alphaback);
         if(s.variants->colorscale != vec(1, 1, 1))
             h->printf("texcolor %f %f %f\n", s.variants->colorscale.x, s.variants->colorscale.y, s.variants->colorscale.z);
+        if(s.variants->palette > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
         if(s.texgrass)
         {
             h->printf("texgrass \"%s\"\n", s.texgrass);

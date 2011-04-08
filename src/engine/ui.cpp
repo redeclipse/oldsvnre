@@ -672,7 +672,11 @@ struct gui : guient
             if(vslot.rotation <= 2 || vslot.rotation == 5) { yoff *= -1; loopk(4) tc[k][1] *= -1; }
         }
         loopk(4) { tc[k][0] = tc[k][0]/xt - float(xoff)/t->xs; tc[k][1] = tc[k][1]/yt - float(yoff)/t->ys; }
-        if(slot.loaded) glColor3f(color.x*vslot.colorscale.x, color.y*vslot.colorscale.y, color.z*vslot.colorscale.z);
+        if(slot.loaded)
+        {
+            vec colorscale = vslot.getcolorscale();
+            glColor3f(color.x*colorscale.x, color.y*colorscale.y, color.z*colorscale.z);
+        }
         else glColor3fv(color.v);
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP);
@@ -697,8 +701,9 @@ struct gui : guient
         }
         if(layertex)
         {
+            vec layerscale = layer->getcolorscale();
             glBindTexture(GL_TEXTURE_2D, layertex->id);
-            glColor3f(color.x*layer->colorscale.x, color.y*layer->colorscale.y, color.z*layer->colorscale.z);
+            glColor3f(color.x*layerscale.x, color.y*layerscale.y, color.z*layerscale.z);
             glBegin(GL_TRIANGLE_STRIP);
             glTexCoord2fv(tc[0]); glVertex2f(x+xs/2, y+ys/2);
             glTexCoord2fv(tc[1]); glVertex2f(x+xs,   y+ys/2);

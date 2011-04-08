@@ -385,6 +385,64 @@ namespace game
         return vec::hexcolor(pulsecols[0][n]).lerp(vec::hexcolor(pulsecols[0][n2]), (lastmillis%50)/50.0f);
     }
 
+    vec getpalette(int palette, int index)
+    { // colour palette abstractions for textures, etc.
+        switch(palette)
+        {
+            case 0: // misc
+            {
+                switch(index)
+                {
+                    case 0: break; // off
+                    case 1: case 2: case 3:
+                        return vec::hexcolor(pulsecols[index-1][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
+                        break;
+                    case 4: case 5: case 6:
+                    {
+                        size_t seed = size_t(camera1) + (lastmillis/50);
+                        int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS);
+                        return vec::hexcolor(pulsecols[index-4][n]).lerp(vec::hexcolor(pulsecols[index-4][n2]), (lastmillis%50)/50.0f);
+                        break;
+                    }
+                    default: break;
+                }
+                break;
+            }
+            case 1: // teams
+            {
+                int team = index;
+                if(team < 0 || team >= TEAM_MAX+TEAM_NUM || (!m_team(gamemode, mutators) && !m_edit(gamemode) && team >= TEAM_FIRST && team <= TEAM_LAST))
+                    team = TEAM_NEUTRAL; // abstract team coloured levels to neutral
+                else if(team >= TEAM_MAX) team = (team%TEAM_MAX)+TEAM_FIRST; // force team colour palette
+                return vec::hexcolor(TEAM(team, colour));
+                break;
+            }
+            case 2: // weapons
+            {
+                int weap = index;
+                if(weap < 0 || weap >= WEAP_MAX*2-1) weap = -1;
+                else if(weap >= WEAP_MAX) weap = w_attr(gamemode, weap%WEAP_MAX, m_weapon(gamemode, mutators));
+                else
+                {
+                    weap = w_attr(gamemode, weap, m_weapon(gamemode, mutators));
+                    if(!isweap(weap)) weap = -1;
+                    else if(m_arena(gamemode, mutators) && weap < WEAP_ITEM && GAME(maxcarry) <= 2) weap = -1;
+                    else switch(WEAP(weap, allowed))
+                    {
+                        case 0: weap = -1; break;
+                        case 1: if(m_duke(gamemode, mutators)) weap = -1; // fall through
+                        case 2: if(m_limited(gamemode, mutators)) weap = -1;
+                        case 3: default: break;
+                    }
+                }
+                if(isweap(weap)) return vec::hexcolor(WEAP(weap, colour));
+                break;
+            }
+            default: break;
+        }
+        return vec(1, 1, 1);
+    }
+
     void adddynlights()
     {
         if(dynlighteffects)

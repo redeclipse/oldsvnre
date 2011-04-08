@@ -834,7 +834,7 @@ void renderdepthobstacles(const vec &bbmin, const vec &bbmax, float scale, float
 
         drawvatris(va, 3*va->tris, va->edata);
         xtravertsva += va->verts;
-        if(va->alphabacktris + va->alphafronttris > 0) 
+        if(va->alphabacktris + va->alphafronttris > 0)
         {
             drawvatris(va, 3*(va->alphabacktris + va->alphafronttris), va->edata + 3*(va->tris + va->blendtris));
             xtravertsva += 3*(va->alphabacktris + va->alphafronttris);
@@ -1422,7 +1422,8 @@ VAR(0, blankgeom, 0, 0, 1);
 
 static void changecolor(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
 {
-    if(vslot.colorscale == vec(1, 1, 1))
+    vec colorscale = vslot.getcolorscale();
+    if(colorscale == vec(1, 1, 1))
     {
         if(cur.causticstmu >= 0)
         {
@@ -1450,8 +1451,8 @@ static void changecolor(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
             glActiveTexture_(GL_TEXTURE0_ARB+cur.diffusetmu);
         }
     }
-    cur.colorscale = vslot.colorscale;
-    memcpy(cur.color, vslot.colorscale.v, sizeof(vslot.colorscale));
+    cur.colorscale = colorscale;
+    memcpy(cur.color, colorscale.v, sizeof(colorscale));
 }
 
 static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
@@ -1463,6 +1464,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
             glBindTexture(GL_TEXTURE_2D, cur.textures[cur.diffusetmu] = diffusetex);
     }
 
+    vec colorscale = vslot.getcolorscale();
     if(renderpath==R_FIXEDFUNCTION)
     {
         if(pass==RENDERPASS_LIGHTMAP || pass==RENDERPASS_COLOR)
@@ -1470,7 +1472,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
             if(cur.alphaing)
             {
                 float alpha = cur.alphaing > 1 ? vslot.alphafront : vslot.alphaback;
-                if(cur.colorscale != vslot.colorscale)
+                if(cur.colorscale != colorscale)
                 {
                     changecolor(cur, pass, slot, vslot);
                     if(cur.alphascale != alpha) { cur.alphascale = alpha; cur.color[3] = alpha; }
@@ -1483,7 +1485,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
                     glColor4fv(cur.color);
                 }
             }
-            else if(cur.colorscale != vslot.colorscale)
+            else if(cur.colorscale != colorscale)
             {
                 changecolor(cur, pass, slot, vslot);
                 glColor4fv(cur.color);
@@ -1492,10 +1494,10 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
         }
         else if(pass==RENDERPASS_DYNLIGHT)
         {
-            if(cur.colorscale != vslot.colorscale)
+            if(cur.colorscale != colorscale)
             {
-                cur.colorscale = vslot.colorscale;
-                glColor3f(cur.lightcolor.x*vslot.colorscale.x, cur.lightcolor.y*vslot.colorscale.y, cur.lightcolor.z*vslot.colorscale.z);
+                cur.colorscale = colorscale;
+                glColor3f(cur.lightcolor.x*colorscale.x, cur.lightcolor.y*colorscale.y, cur.lightcolor.z*colorscale.z);
             }
         }
         if((pass==RENDERPASS_LIGHTMAP || pass==RENDERPASS_ENVMAP) && slot.shader->type&SHADER_ENVMAP && slot.ffenv && hasCM && maxtmus >= 2 && envpass)
@@ -1530,19 +1532,19 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
         if(cur.alphaing)
         {
             float alpha = cur.alphaing > 1 ? vslot.alphafront : vslot.alphaback;
-            if(cur.colorscale != vslot.colorscale || cur.alphascale != alpha)
+            if(cur.colorscale != colorscale || cur.alphascale != alpha)
             {
-                cur.colorscale = vslot.colorscale;
+                cur.colorscale = colorscale;
                 cur.alphascale = alpha;
-                setenvparamf("colorparams", SHPARAM_PIXEL, 6, 2*alpha*vslot.colorscale.x, 2*alpha*vslot.colorscale.y, 2*alpha*vslot.colorscale.z, alpha);
+                setenvparamf("colorparams", SHPARAM_PIXEL, 6, 2*alpha*colorscale.x, 2*alpha*colorscale.y, 2*alpha*colorscale.z, alpha);
                 GLfloat fogc[4] = { alpha*cur.fogcolor[0], alpha*cur.fogcolor[1], alpha*cur.fogcolor[2], cur.fogcolor[3] };
                 glFogfv(GL_FOG_COLOR, fogc);
             }
         }
-        else if(cur.colorscale != vslot.colorscale)
+        else if(cur.colorscale != colorscale)
         {
-            cur.colorscale = vslot.colorscale;
-            setenvparamf("colorparams", SHPARAM_PIXEL, 6, 2*vslot.colorscale.x, 2*vslot.colorscale.y, 2*vslot.colorscale.z, 1);
+            cur.colorscale = colorscale;
+            setenvparamf("colorparams", SHPARAM_PIXEL, 6, 2*colorscale.x, 2*colorscale.y, 2*colorscale.z, 1);
         }
         int tmu = cur.lightmaptmu+1, envmaptmu = -1;
         if(slot.shader->type&SHADER_NORMALSLMS) tmu++;
