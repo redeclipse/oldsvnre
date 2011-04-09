@@ -226,7 +226,12 @@ namespace entities
             }
             case MAPSOUND:
             {
-                if(mapsounds.inrange(attr[0])) addentinfo(mapsounds[attr[0]].name);
+                if(mapsounds.inrange(attr[0]))
+                {
+                    int samples = mapsounds[attr[0]].samples.length();
+                    defformatstring(ds)("%s (%d %s)", mapsounds[attr[0]].name, samples, samples == 1 ? "sample" : "samples");
+                    addentinfo(ds);
+                }
                 if(full)
                 {
                     if(attr[4]&SND_NOATTEN) addentinfo("noatten");

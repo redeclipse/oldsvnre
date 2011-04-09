@@ -4653,9 +4653,9 @@ namespace server
                     if(oldtype == PLAYERSTART || sents[n].type == PLAYERSTART) setupspawns(true);
                     hasgameinfo = true;
                     QUEUE_MSG;
-                    if(tweaked)
+                    if(tweaked && enttype[sents[n].type].usetype != EU_NONE)
                     {
-                        setspawn(n, true, true, true);
+                        if(enttype[sents[n].type].usetype == EU_ITEM) setspawn(n, true, true, true);
                         if(sents[n].type == TRIGGER) setuptriggers(true);
                     }
                     break;
