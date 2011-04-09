@@ -219,10 +219,10 @@ void guinoautotab(uint *contents)
 SVAR(0, guirollovername, "");
 SVAR(0, guirolloveraction, "");
 
-void guibutton(char *name, char *action, char *icon, char *altact)
+void guibutton(char *name, char *action, char *altact, char *icon, int *colour)
 {
     if(!cgui) return;
-    int ret = cgui->button(name, 0xFFFFFF, *icon ? icon : NULL);
+    int ret = cgui->button(name, *colour ? *colour : 0xFFFFFF, *icon ? icon : NULL);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -300,9 +300,9 @@ void guislice(char *path, char *action, float *scale, float *start, float *end, 
     }
 }
 
-void guitext(char *name, char *icon)
+void guitext(char *name, char *icon, int *colour)
 {
-    if(cgui) cgui->text(name, 0xFFFFFF, icon[0] ? icon : NULL);
+    if(cgui) cgui->text(name, *colour ? *colour : 0xFFFFFF, icon[0] ? icon : NULL);
 }
 
 void guititle(char *name)
@@ -318,6 +318,11 @@ void guitab(char *name)
 void guibar()
 {
     if(cgui) cgui->separator();
+}
+
+void guibackground(int *colour, int *levels)
+{
+    if(cgui) cgui->background(*colour, *levels);
 }
 
 void guistrut(float *strut, int *alt)
@@ -395,7 +400,7 @@ void guiprogress(float *percent, float *scale)
     cgui->progress(*percent, *scale);
 }
 
-void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int *scroll)
+void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int *scroll, int *colour)
 {
     if(!cgui) return;
     int oldval = getval(var), val = oldval, vmin = *max ? *min : getvarmin(var), vmax = *max ? *max : getvarmax(var);
@@ -404,11 +409,11 @@ void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int 
         int vdef = getvardef(var);
         vmax = vdef > vmin ? vdef*3 : vmin*4;
     }
-    cgui->slider(val, vmin, vmax, 0xFFFFFF, NULL, *reverse ? true : false, *scroll ? true : false);
+    cgui->slider(val, vmin, vmax, *colour ? *colour : 0xFFFFFF, NULL, *reverse ? true : false, *scroll ? true : false);
     if(val != oldval) updateval(var, val, onchange);
 }
 
-void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scroll)
+void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scroll, int *colour)
 {
     if(!cgui) return;
     vector<int> vals;
@@ -423,11 +428,11 @@ void guilistslider(char *var, char *list, char *onchange, int *reverse, int *scr
     int val = getval(var), oldoffset = vals.length()-1, offset = oldoffset;
     loopv(vals) if(val <= vals[i]) { oldoffset = offset = i; break; }
     defformatstring(label)("%d", val);
-    cgui->slider(offset, 0, vals.length()-1, 0xFFFFFF, label, *reverse ? true : false, *scroll ? true : false);
+    cgui->slider(offset, 0, vals.length()-1, *colour ? *colour : 0xFFFFFF, label, *reverse ? true : false, *scroll ? true : false);
     if(offset != oldoffset) updateval(var, vals[offset], onchange);
 }
 
-void guinameslider(char *var, char *names, char *list, char *onchange, int *reverse, int *scroll)
+void guinameslider(char *var, char *names, char *list, char *onchange, int *reverse, int *scroll, int *colour)
 {
     if(!cgui) return;
     vector<int> vals;
@@ -442,62 +447,62 @@ void guinameslider(char *var, char *names, char *list, char *onchange, int *reve
     int val = getval(var), oldoffset = vals.length()-1, offset = oldoffset;
     loopv(vals) if(val <= vals[i]) { oldoffset = offset = i; break; }
     char *label = indexlist(names, offset);
-    cgui->slider(offset, 0, vals.length()-1, 0xFFFFFF, label, *reverse ? true : false, *scroll ? true : false);
+    cgui->slider(offset, 0, vals.length()-1, *colour ? *colour : 0xFFFFFF, label, *reverse ? true : false, *scroll ? true : false);
     if(offset != oldoffset) updateval(var, vals[offset], onchange);
     delete[] label;
 }
 
-void guicheckbox(char *name, char *var, float *on, int *off, char *onchange)
+void guicheckbox(char *name, char *var, float *on, int *off, char *onchange, int *colour)
 {
     bool enabled = getfval(var) != *off, two = getvarmax(var) == 2, next = two && getfval(var) == 1.0f;
-    if(cgui && cgui->button(name, 0xFFFFFF, enabled ? (two && !next ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, enabled ? false : true)&GUI_UP)
+    if(cgui && cgui->button(name, *colour ? *colour : 0xFFFFFF, enabled ? (two && !next ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, enabled ? false : true)&GUI_UP)
     {
         updateval(var, enabled ? (two && next ? 2.0f : *off) : (*on || *off ? *on : 1.0f), onchange);
     }
 }
 
-void guiradio(char *name, char *var, float *n, char *onchange)
+void guiradio(char *name, char *var, float *n, char *onchange, int *colour)
 {
     bool enabled = getfval(var)==*n;
-    if(cgui && cgui->button(name, 0xFFFFFF, enabled ? "radioboxon" : "radiobox", 0xFFFFFF, enabled ? false : true)&GUI_UP)
+    if(cgui && cgui->button(name, *colour ? *colour : 0xFFFFFF, enabled ? "radioboxon" : "radiobox", *colour ? *colour : 0xFFFFFF, enabled ? false : true)&GUI_UP)
     {
         if(!enabled) updateval(var, *n, onchange);
     }
 }
 
-void guibitfield(char *name, char *var, int *mask, char *onchange)
+void guibitfield(char *name, char *var, int *mask, char *onchange, int *colour)
 {
     int val = getval(var);
     bool enabled = (val & *mask) != 0;
-    if(cgui && cgui->button(name, 0xFFFFFF, enabled ? "checkboxon" : "checkbox", 0xFFFFFF, enabled ? false : true)&GUI_UP)
+    if(cgui && cgui->button(name, *colour ? *colour : 0xFFFFFF, enabled ? "checkboxon" : "checkbox", *colour ? *colour : 0xFFFFFF, enabled ? false : true)&GUI_UP)
     {
         updateval(var, enabled ? val & ~*mask : val | *mask, onchange);
     }
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guifield(char *var, int *maxlength, char *onchange)
+void guifield(char *var, int *maxlength, char *onchange, int *colour)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->field(var, 0xFFFFFF, *maxlength ? *maxlength : 12, 0, initval);
+    char *result = cgui->field(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, 0, initval);
     if(result) updateval(var, result, onchange);
 }
 
 //-ve maxlength indicates a wrapped text field of any (approx 260 chars) length, |maxlength| is the field width
-void guieditor(char *name, int *maxlength, int *height, int *mode)
+void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour)
 {
     if(!cgui) return;
-    cgui->field(name, 0xFFFFFF, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode);
+    cgui->field(name, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode);
     //returns a non-NULL pointer (the currentline) when the user commits, could then manipulate via text* commands
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guikeyfield(char *var, int *maxlength, char *onchange)
+void guikeyfield(char *var, int *maxlength, char *onchange, int *colour)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->keyfield(var, 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval);
+    char *result = cgui->keyfield(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval);
     if(result) updateval(var, result, onchange);
 }
 
@@ -567,8 +572,8 @@ void guimodify(char *name, char *contents)
 COMMAND(0, newgui, "sss");
 COMMAND(0, guiheader, "s");
 COMMAND(0, guimodify, "ss");
-COMMAND(0, guibutton, "ssss");
-COMMAND(0, guitext, "ss");
+COMMAND(0, guibutton, "ssssi");
+COMMAND(0, guitext, "ssi");
 COMMANDN(0, cleargui, cleargui_, "i");
 ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");
@@ -586,16 +591,16 @@ COMMAND(0, guifont,"se");
 COMMAND(0, guiimage,"ssfiss");
 COMMAND(0, guislice,"ssfffsss");
 COMMAND(0, guiprogress,"ff");
-COMMAND(0, guislider,"siisii");
-COMMAND(0, guilistslider, "sssii");
-COMMAND(0, guinameslider, "ssssii");
-COMMAND(0, guiradio,"ssfs");
-COMMAND(0, guibitfield, "ssis");
-COMMAND(0, guicheckbox, "ssffs");
+COMMAND(0, guislider,"siisiii");
+COMMAND(0, guilistslider, "sssiii");
+COMMAND(0, guinameslider, "ssssiii");
+COMMAND(0, guiradio,"ssfsi");
+COMMAND(0, guibitfield, "ssisi");
+COMMAND(0, guicheckbox, "ssffsi");
 COMMAND(0, guitab, "s");
-COMMAND(0, guifield, "sis");
-COMMAND(0, guikeyfield, "sis");
-COMMAND(0, guieditor, "siii");
+COMMAND(0, guifield, "sisi");
+COMMAND(0, guikeyfield, "sisi");
+COMMAND(0, guieditor, "siiii");
 
 struct change
 {
