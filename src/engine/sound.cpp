@@ -225,14 +225,14 @@ int addsound(const char *name, int vol, int maxrad, int minrad, int value, vecto
         } \
     }
     string sam;
-    loopi(2)
+    loopi(value > 1 ? 2 : 1)
     {
-        if(!i) formatstring(sam)("%s1", name);
+        if(value > 1 && !i) formatstring(sam)("%s1", name);
         else copystring(sam, name);
         loadsound(sam);
         if(!sample->sound)
         {
-            if(i) conoutf("\frfailed to load sample: %s", name);
+            if(value < 2 || i) conoutf("\frfailed to load sample: %s", name);
         }
         else break;
     }
