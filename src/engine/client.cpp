@@ -158,7 +158,7 @@ void disconnect(int onlyclean, int async)
     if(!onlyclean) localconnect(false);
 }
 
-ICOMMAND(0, connect, "sis", (char *n, int *a, char *pwd), connectserv(*n ? n : servermaster, *n || *a ? *a : servermasterport, pwd));
+ICOMMAND(0, connect, "sis", (char *n, int *a, char *pwd), connectserv(*n ? n : servermaster, *n || *a ? *a : ENG_SERVER_PORT, pwd));
 COMMANDN(0, disconnect, trydisconnect, "");
 
 ICOMMAND(0, lanconnect, "is", (int *a, char *pwd), connectserv(NULL, *a, pwd));

@@ -1667,7 +1667,7 @@ namespace game
                     c->cansee++;
                     c->dir.add(f.pos);
                     c->score += dist;
-                    if(c->cansee >= cament::TRACKMAX) break;
+                    //if(c->cansee >= cament::TRACKMAX) break;
                 }
             }
         }
@@ -1724,6 +1724,7 @@ namespace game
                 {
                     cameras[i].pos = cameras[i].player->headpos();
                     vecfromyawpitch(cameras[i].player->yaw, cameras[i].player->pitch, 1, 0, cameras[i].dir);
+                    cameras[i].pri = m_team(gamemode, mutators) && cameras[i].player && cameras[i].player->team == player1->team ? 1 : 0;
                 }
             }
             default:
@@ -1733,7 +1734,6 @@ namespace game
                     cameras[i].pri = 0;
                     if(cameras[i].player) cameras[i].player = NULL;
                 }
-                else cameras[i].pri = m_team(gamemode, mutators) && cameras[i].player && cameras[i].player->team == player1->team ? 1 : 0;
                 if(m_capture(gamemode)) capture::updatecam(cameras[i]);
                 else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
                 else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
