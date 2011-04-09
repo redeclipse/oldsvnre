@@ -27,7 +27,7 @@
 * rename normalscale to explodescale
 * pid file (and daemon state (?)) for servers
 * don't assume flak bounces all the time
-* make all sound slots allow random variations
+* finish sound slot sample setup for sounds > S_GAMESPECIGFIC and < S_GAME
 
 = Licensing Issues =
 Files: data/sounds/ambience/wind.ogg

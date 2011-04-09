@@ -226,7 +226,7 @@ namespace entities
             }
             case MAPSOUND:
             {
-                if(mapsounds.inrange(attr[0])) addentinfo(mapsounds[attr[0]].sample->name);
+                if(mapsounds.inrange(attr[0])) addentinfo(mapsounds[attr[0]].name);
                 if(full)
                 {
                     if(attr[4]&SND_NOATTEN) addentinfo("noatten");
