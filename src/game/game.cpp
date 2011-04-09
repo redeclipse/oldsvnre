@@ -2258,7 +2258,7 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = 0xFFFFFF;
+            int colour = d->colour();
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
