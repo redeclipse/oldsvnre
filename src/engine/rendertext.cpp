@@ -153,10 +153,10 @@ static int draw_icon(const char *name, int x, int y)
     {
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0, 0); glVertex2f(x, y-FONTX/8);
-        glTexCoord2f(1, 0); glVertex2f(x+FONTX, y-FONTX/8);
-        glTexCoord2f(0, 1); glVertex2f(x, y+FONTX*7/8);
-        glTexCoord2f(1, 1); glVertex2f(x+FONTX, y+FONTX*7/8);
+        glTexCoord2f(0, 0); glVertex2f(x, y);
+        glTexCoord2f(1, 0); glVertex2f(x+FONTX, y);
+        glTexCoord2f(0, 1); glVertex2f(x, y+FONTX);
+        glTexCoord2f(1, 1); glVertex2f(x+FONTX, y+FONTX);
         glEnd();
     }
     return FONTX;
