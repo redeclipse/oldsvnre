@@ -548,7 +548,7 @@ void save_config(char *mname)
     loopv(mapsounds)
     {
         if(verbose) progress(float(i)/float(mapsounds.length()), "saving mapsound slots...");
-        h->printf("mapsound \"%s\"", mapsounds[i].sample->name);
+        h->printf("mapsound \"%s\"", mapsounds[i].name);
         if((mapsounds[i].vol > 0 && mapsounds[i].vol < 255) || mapsounds[i].maxrad > 0 || mapsounds[i].minrad >= 0)
             h->printf(" %d", mapsounds[i].vol);
         if(mapsounds[i].maxrad > 0 || mapsounds[i].minrad >= 0) h->printf(" %d", mapsounds[i].maxrad);
