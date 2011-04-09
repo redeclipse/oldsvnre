@@ -1331,17 +1331,17 @@ struct projent : dynent
 
 struct cament
 {
-    enum { DISTMIN = 8, DISTMAX = 1024 };
+    enum { DISTMIN = 8, DISTMAX = 512, TRACKMAX = 8 };
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
     int type, id, pri, cansee;
     vec pos, dir;
-    float mindist, maxdist, score;
+    float dist, mindist, maxdist, score;
     gameent *player;
 
-    cament() : type(-1), id(-1), pri(0), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL) { reset(); }
-    cament(int t, int i, int p = 0, gameent *d = NULL) : type(t), id(i), pri(p), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
-    cament(vec &v, int t, int i, int p = 0, gameent *d = NULL) : type(t), id(i), pri(p), pos(v), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
+    cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL) { reset(); }
+    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
+    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), pos(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
     ~cament() {}
 
     void reset()
@@ -1355,10 +1355,14 @@ struct cament
     {
         if(a->score > 0 && b->score <= 0) return -1;
         if(a->score <= 0 && b->score > 0) return 1;
+        if(a->pri > b->pri) return -1;
+        if(a->pri < b->pri) return 1;
         if(a->cansee > b->cansee) return -1;
         if(a->cansee < b->cansee) return 1;
         if(a->score < b->score) return -1;
         if(a->score > b->score) return 1;
+        if(a->dist < b->dist) return -1;
+        if(a->dist > b->dist) return 1;
         return 0;
     }
 };
