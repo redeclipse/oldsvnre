@@ -285,7 +285,7 @@ namespace hud
             if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
             else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
             else if(m_team(game::gamemode, game::mutators))
-                g.textf("Team \fs\f[%d]%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), TEAM(game::player1->team, name));
+                g.textf("Team \fs\f[%d]\f<%s>%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtex(game::player1->team), TEAM(game::player1->team, name));
             else g.textf("Free for All", 0xFFFFFF, NULL, 0);
             g.popfont();
         }
@@ -336,7 +336,7 @@ namespace hud
             {
                 g.pushlist();
                 g.background(bgcolor, numgroups>1 ? 3 : 5);
-                g.text(" ", 0, hud::teamtex(sg.team));
+                g.text(" ", 0, hud::teamtex(sg.team), TEAM(sg.team, colour));
                 g.poplist();
             }
             g.pushlist();
