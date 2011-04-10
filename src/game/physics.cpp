@@ -931,7 +931,7 @@ namespace physics
                                 d->turnmillis = PHYSMILLIS;
                                 d->turnside = 0; d->turnroll = 0;
                                 d->turnyaw = impulseturn >= 2 ? off : 0;
-                                d->action[AC_SPECIAL] = false;
+                                //d->action[AC_SPECIAL] = false;
                                 client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                                 game::impulseeffect(d);
                             }
@@ -954,7 +954,7 @@ namespace physics
                                     if(off > 180) off -= 360;
                                     else if(off < -180) off += 360;
                                     d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_SKATE, lastmillis);
-                                    d->action[AC_SPECIAL] = false;
+                                    //d->action[AC_SPECIAL] = false;
                                     d->turnmillis = PHYSMILLIS;
                                     d->turnside = side; d->turnyaw = impulseturn ? off : 0;
                                     d->turnroll = (impulseroll*d->turnside)-d->roll;
