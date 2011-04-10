@@ -194,7 +194,7 @@ namespace entities
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 if(isweap(attr1))
                 {
-                    defformatstring(str)("\fs\f[%d]%s%s%s%s\fS", WEAP(attr1, colour), icon ? "\f<" : "", icon ? hud::itemtex(type, attr1) : WEAP(attr1, name), icon ? ">" : "", icon ? WEAP(attr1, name) : "");
+                    defformatstring(str)("\fs\f[%d]%s%s%s%s\fS", WEAP(attr1, colour), icon ? "\f(" : "", icon ? hud::itemtex(type, attr1) : WEAP(attr1, name), icon ? ")" : "", icon ? WEAP(attr1, name) : "");
                     addentinfo(str);
                     if(full)
                     {

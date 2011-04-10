@@ -80,7 +80,7 @@ namespace capture
         static string s; s[0] = 0;
         loopv(f)
         {
-            defformatstring(d)("%s\f[%d]\f<%s>%s", i && named ? " " : "", TEAM(st.flags[f[i]].team, colour), hud::flagtex, named ? TEAM(st.flags[f[i]].team, name) : "");
+            defformatstring(d)("%s\f[%d]\f(%s)%s", i && named ? " " : "", TEAM(st.flags[f[i]].team, colour), hud::flagtex, named ? TEAM(st.flags[f[i]].team, name) : "");
             concatstring(s, d);
         }
         return s;

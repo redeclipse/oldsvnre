@@ -855,7 +855,7 @@ namespace hud
                             if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                             else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         }
-                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]\f<%s>%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), hud::teamtex(target->team), TEAM(target->team, name));
+                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), hud::teamtex(target->team), TEAM(target->team, name));
                     }
                 }
             }

@@ -151,15 +151,24 @@ static int draw_icon(const char *name, int x, int y)
     Texture *t = textureload(name, 3);
     if(t)
     {
+        int width = int((t->w/float(t->h))*FONTX);
         glBindTexture(GL_TEXTURE_2D, t->id);
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2f(0, 0); glVertex2f(x, y);
-        glTexCoord2f(1, 0); glVertex2f(x+FONTX, y);
+        glTexCoord2f(1, 0); glVertex2f(x+width, y);
         glTexCoord2f(0, 1); glVertex2f(x, y+FONTX);
-        glTexCoord2f(1, 1); glVertex2f(x+FONTX, y+FONTX);
+        glTexCoord2f(1, 1); glVertex2f(x+width, y+FONTX);
         glEnd();
+        return width;
     }
-    return FONTX;
+    return 0;
+}
+
+static int icon_width(const char *name)
+{
+    Texture *t = textureload(name, 3);
+    if(t) return int((t->w/float(t->h))*FONTX);
+    return 0;
 }
 
 #define TEXTTAB(g) clamp(g + (PIXELTAB - (g % PIXELTAB)), g + FONTW, g + PIXELTAB)
@@ -188,11 +197,11 @@ static int draw_icon(const char *name, int x, int y)
         } \
         else break; \
     } \
-    else if(g[h] == '<') \
+    else if(g[h] == '(') \
     { \
         h++; \
         const char *start = &g[h]; \
-        const char *end = strchr(start, '>'); \
+        const char *end = strchr(start, ')'); \
         if(end) \
         { \
             if(end > start) \
@@ -262,7 +271,7 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
     #define TEXTLINE(idx) if(y+FONTH > hity) return idx;
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += FONTX + 1;
+    #define TEXTICON(ret) x += icon_width(ret) + 1;
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w+1; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -285,7 +294,7 @@ void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int f
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += FONTX + 1;
+    #define TEXTICON(ret) x += icon_width(ret) + 1;
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w + 1;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -307,7 +316,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
     #define TEXTLINE(idx) if(x > width) width = x;
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += FONTX + 1;
+    #define TEXTICON(ret) x += icon_width(ret) + 1;
     #define TEXTCHAR(idx) x += curfont->chars[c-33].w + 1;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -331,7 +340,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #define TEXTLINE(idx) ly += FONTH;
     #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
     #define TEXTHEXCOLOR(ret) { color = ret; glColor4ub(color.x, color.y, color.z, a); }
-    #define TEXTICON(ret) { x += (iconpass ? draw_icon(ret, left+x, top+y) : FONTX) + 1; neediconpass = true; }
+    #define TEXTICON(ret) { x += (iconpass ? draw_icon(ret, left+x, top+y) : icon_width(ret)) + 1; neediconpass = true; }
     #define TEXTCHAR(idx) { x += (!iconpass ? draw_char(c, left+x, top+y) : curfont->chars[c-33].w) + 1; }
     #define TEXTWORD TEXTWORDSKELETON
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

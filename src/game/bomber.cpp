@@ -112,7 +112,7 @@ namespace bomber
                 if(f.owner == game::player1)
                 {
                     pushfont("emphasis");
-                    ty += draw_textx("You have: \fs\f[%d]\f<%s>bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
+                    ty += draw_textx("You have: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
                     popfont();
                     if(bombercarrytime)
                     {
