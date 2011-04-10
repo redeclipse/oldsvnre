@@ -312,7 +312,7 @@ namespace hud
         g.poplist();
         g.poplist();
         g.space(1);
-        g.pushfont(numgroups>1 ? "radar" : "sub");
+        g.pushfont(numgroups>1 ? "radar" : "default");
         loopk(numgroups)
         {
             if((k%2)==0) g.pushlist(); // horizontal
@@ -373,10 +373,9 @@ namespace hud
 
             g.pushlist();
             g.pushlist();
-            g.space(1);
-            g.text("name ", fgcolor);
+            g.text(" name ", fgcolor);
             g.poplist();
-            loopscoregroup(g.pushlist(); g.space(1); g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)); g.poplist());
+            loopscoregroup(g.pushlist(); g.textf(" %s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)); g.poplist());
             g.poplist();
 
             if(showpoints)
@@ -515,7 +514,7 @@ namespace hud
         {
             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
             g.space(1);
-            g.pushfont("radar");
+            g.pushfont("deault");
             g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                 game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                 game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
