@@ -69,11 +69,11 @@ namespace defend
             if(light->millis != lastmillis) light->material[0] = bvec::fromcolor(skewcolour(b.owner, b.enemy, occupy));
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
-                formatstring(b.info)("<super>\fs\f[%d]%s\fS vs. \fs\f[%d]%s\fS", TEAM(b.owner, colour), TEAM(b.owner, name), TEAM(b.enemy, colour), TEAM(b.enemy, name));
+                formatstring(b.info)("<super>\fs\f[%d]\f<%s>%s\fS vs. \fs\f[%d]\f<%s>%s\fS", TEAM(b.owner, colour), hud::teamtex(b.owner), TEAM(b.owner, name), TEAM(b.enemy, colour), hud::teamtex(b.enemy), TEAM(b.enemy, name));
             else
             {
                 int defend = b.owner ? b.owner : b.enemy;
-                formatstring(b.info)("<super>\fs\f[%d]%s\fS", TEAM(defend, colour), TEAM(defend, name));
+                formatstring(b.info)("<super>\fs\f[%d]\f<%s>%s\fS", TEAM(defend, colour), hud::teamtex(defend), TEAM(defend, name));
             }
             vec above = b.o;
             above.z += enttype[AFFINITY].radius/2+2.5f;
@@ -141,10 +141,10 @@ namespace defend
             loopv(st.flags) if(insideaffinity(st.flags[i], game::player1) && (st.flags[i].owner == game::player1->team || st.flags[i].enemy == game::player1->team))
             {
                 defendstate::flag &f = st.flags[i];
-                pushfont("default");
+                pushfont("emphasis");
                 float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1) * defendoccupy), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::player1->team;
-                ty += draw_textx("\fzwa%s \fs%s%d%%\fS complete", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg"), int(occupy*100.f))*hud::noticescale;
+                ty += draw_textx("%s \fs\f[%d]\f<%s>\f<%s>\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", TEAM(f.owner, colour), hud::teamtex(f.owner), hud::flagtex, overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
                 break;
             }
@@ -196,7 +196,7 @@ namespace defend
                     hud::drawprogress(x, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew);
                     hud::drawprogress(x, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade, skew, !skewed && headsup ? "default" : "sub", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : "\fw", int(occupy*100.f));
                 }
-                else if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, 1.f, 1.f, 1.f, fade, skew);
+                else if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, c1.r, c1.g, c1.b, fade, skew);
             }
         }
         return sy;

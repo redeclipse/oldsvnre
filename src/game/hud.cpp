@@ -78,7 +78,6 @@ namespace hud
     FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
-    VAR(IDF_PERSIST, noticeicons, 0, 1, 1);
 
     TVAR(IDF_PERSIST, neutraltex, "textures/team", 3);
     TVAR(IDF_PERSIST, alphatex, "textures/teamalpha", 3);
@@ -909,10 +908,10 @@ namespace hud
                                     {
                                         static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
                                         attrs[0] = drop;
-                                        defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, noticeicons!=0));
-                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, noticeicons!=0));
+                                        defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
+                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
                                     }
-                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, noticeicons!=0));
+                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                     break;
                                 }
                             }
