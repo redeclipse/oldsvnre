@@ -219,7 +219,7 @@ GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 
 GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
 GVAR(0, impulseslide, 0, 1000, VAR_MAX); // time before powerslides end
 GVAR(0, impulseslip, 0, 300, VAR_MAX); // time before floor friction kicks back in
-GVAR(0, impulsedelay, 0, 150, VAR_MAX); // minimum time between boosts
+GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
