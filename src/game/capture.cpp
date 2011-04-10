@@ -75,6 +75,17 @@ namespace capture
         }
     }
 
+    char *buildflagstr(vector<int> &f, bool named = false)
+    {
+        static string s; s[0] = 0;
+        loopv(f)
+        {
+            defformatstring(d)("%s\f[%d]\f<%s>%s", i && named ? " " : "", TEAM(st.flags[f[i]].team, colour), hud::flagtex, named ? TEAM(st.flags[f[i]].team, name) : "");
+            concatstring(s, d);
+        }
+        return s;
+    }
+
     void drawnotices(int w, int h, int &tx, int &ty, float blend)
     {
         if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
@@ -93,17 +104,26 @@ namespace capture
             }
             if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
             {
-                pushfont("default");
-                ty += draw_textx("\fzwaYou have the flag", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+                pushfont("emphasis");
+                char *str = buildflagstr(hasflags, hasflags.length() <= 3);
+                ty += draw_textx("You have: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 popfont();
                 SEARCHBINDCACHE(altkey)("action 9", 0);
-                pushfont("radar");
-                ty += draw_textx("Press \fs\fc%s\fS to drop it", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
+                pushfont("sub");
+                ty += draw_textx("Press \fs\fc%s\fS to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
             }
-            pushfont("sub");
-            if(!takenflags.empty()) ty += draw_textx("\fzwaFlag has been taken", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
-            else if(!droppedflags.empty()) ty += draw_textx("\fzwaFlag has been dropped", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1)*hud::noticescale;
+            pushfont("default");
+            if(!takenflags.empty())
+            {
+                char *str = buildflagstr(takenflags, takenflags.length() <= 3);
+                ty += draw_textx("%s taken: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, takenflags.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
+            }
+            else if(!droppedflags.empty())
+            {
+                char *str = buildflagstr(droppedflags, droppedflags.length() <= 3);
+                ty += draw_textx("%s dropped: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, droppedflags.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
+            }
             popfont();
         }
     }
@@ -140,10 +160,9 @@ namespace capture
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(captureresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureresetdelay), 0.f, 1.f);
                     if(wait < 1) hud::drawprogress(x, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, fade*0.25f, skew);
-                    if(f.owner) hud::drawprogress(x, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "sub", "\fs%s\fS (%d%%)", game::colorname(f.owner), int(wait*100.f));
-                    else hud::drawprogress(x, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "default", "%d%%", int(wait*100.f));
+                    hud::drawprogress(x, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "default", "%d%%", int(wait*100.f));
                 }
-                else if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
+                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;
