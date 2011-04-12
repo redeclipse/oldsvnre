@@ -173,8 +173,9 @@ namespace client
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
-    ICOMMAND(0, getteam, "", (), result(TEAM(game::player1->team, name)));
+    ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
+    ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
 
     const char *getname() { return game::player1->name; }
 
@@ -531,6 +532,8 @@ namespace client
     {
         if(!waiting(false))
         {
+            if(flags&SAY_TEAM && !m_team(game::gamemode, game::mutators))
+                flags &= ~SAY_TEAM;
             saytext(game::player1, flags, text);
             addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, text);
         }
@@ -1956,8 +1959,13 @@ namespace client
                     int wn = getint(p), tn = getint(p);
                     gameent *w = game::getclient(wn);
                     if(!w) return;
-                    if(w == game::focus && w->team != tn) hud::lastteam = 0;
-                    w->team = tn;
+                    if(w->team != tn)
+                    {
+                        w->team = tn;
+                        if(game::showplayerinfo && w->aitype < 0)
+                            conoutft(CON_EVENT, "\fa%s is now on team \fs[%d]\f<%s>%s", game::colorname(w), TEAM(w->team, colour), hud::teamtex(w->team), TEAM(w->team, name));
+                        if(w == game::focus) hud::lastteam = 0;
+                    }
                     break;
                 }
 

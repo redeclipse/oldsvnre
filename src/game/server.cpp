@@ -4335,6 +4335,7 @@ namespace server
                     getstring(text, p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
+                    if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
