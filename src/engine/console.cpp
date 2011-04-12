@@ -363,7 +363,7 @@ struct hline
     {
         return strcmp(commandbuf, buf) ||
                (commandaction ? !action || strcmp(commandaction, action) : action!=NULL) ||
-               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) || (commandcolour ? commandcolour != colour : colour!=0);
+               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) || commandcolour != colour;
     }
 
     void save()
