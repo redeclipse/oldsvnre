@@ -66,6 +66,8 @@ void setscreensaver(bool active)
 #endif
 }
 
+extern void cleargamma();
+
 void cleanup()
 {
     recorder::stop();
@@ -77,7 +79,7 @@ void cleanup()
     showcursor(true);
     if(scursor) SDL_FreeCursor(scursor);
     SDL_WM_GrabInput(SDL_GRAB_OFF);
-    SDL_SetGamma(1, 1, 1);
+    cleargamma();
     freeocta(worldroot);
     extern void clear_command();    clear_command();
     extern void clear_console();    clear_console();
@@ -113,7 +115,7 @@ void fatal(const char *s, ...)    // failure exit
             {
                 showcursor(true);
                 SDL_WM_GrabInput(SDL_GRAB_OFF);
-                SDL_SetGamma(1, 1, 1);
+                cleargamma();
             }
             #ifdef WIN32
             MessageBox(NULL, msg, "Red Eclipse: Error", MB_OK|MB_SYSTEMMODAL);
@@ -266,22 +268,29 @@ void screenres(int *w, int *h)
 
 COMMAND(0, screenres, "ii");
 
+static int curgamma = 100;
 VARF(IDF_PERSIST, gamma, 30, 100, 300,
 {
+    if(gamma == curgamma) return;
+    curgamma = gamma;
     float f = gamma/100.0f;
     if(SDL_SetGamma(f,f,f)==-1)
     {
-        conoutf("\frcould not set gamma (card/driver doesn't support it?)");
-        conoutf("\frsdl: %s", SDL_GetError());
+        conoutf("\frcould not set gamma: %s", SDL_GetError());
     }
 });
 
-void resetgamma()
+void restoregamma()
 {
-    float f = gamma/100.0f;
-    if(f==1) return;
+    if(curgamma == 100) return;
+    float f = curgamma/100.0f;
     SDL_SetGamma(1, 1, 1);
     SDL_SetGamma(f, f, f);
+}
+
+void cleargamma()
+{
+    if(curgamma != 100) SDL_SetGamma(1, 1, 1);
 }
 
 int desktopw = 0, desktoph = 0;
@@ -456,7 +465,7 @@ void resetgl()
     reloadfonts();
     inbetweenframes = true;
     progress(0, "initializing...");
-    resetgamma();
+    restoregamma();
     reloadshaders();
     reloadtextures();
     initlights();
