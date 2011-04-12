@@ -6,7 +6,7 @@ vector<cline> conlines;
 int commandmillis = -1;
 string commandbuf;
 char *commandaction = NULL, *commandicon = NULL;
-int commandpos = -1;
+int commandpos = -1, commandcolour = 0;
 
 void conline(int type, const char *sf, int n)
 {
@@ -275,7 +275,7 @@ ICOMMAND(0, searchwaitbinds, "siss", (char *action, int *limit, char *sep, char 
 
 ICOMMAND(0, keyspressed, "iss", (int *limit, char *sep, char *pretty), { vector<char> list; getkeypressed(max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
 
-void inputcommand(char *init, char *action = NULL, char *icon = NULL) // turns input to the command line on or off
+void inputcommand(char *init, char *action = NULL, char *icon = NULL, int colour = 0) // turns input to the command line on or off
 {
     commandmillis = init ? totalmillis : -totalmillis;
     SDL_EnableUNICODE(commandmillis > 0 ? 1 : 0);
@@ -286,10 +286,11 @@ void inputcommand(char *init, char *action = NULL, char *icon = NULL) // turns i
     commandpos = -1;
     if(action && action[0]) commandaction = newstring(action);
     if(icon && icon[0]) commandicon = newstring(icon);
+    commandcolour = colour;
 }
 
 ICOMMAND(0, saycommand, "C", (char *init), inputcommand(init));
-COMMAND(0, inputcommand, "sss");
+ICOMMAND(0, inputcommand, "sssi", (char *init, char *action, char *icon, int *colour), inputcommand(init, action, icon, *colour));
 
 #if !defined(WIN32) && !defined(__APPLE__)
 #include <X11/Xlib.h>
@@ -337,8 +338,9 @@ SVAR(0, commandbuffer, "");
 struct hline
 {
     char *buf, *action, *icon;
+    int colour;
 
-    hline() : buf(NULL), action(NULL), icon(NULL) {}
+    hline() : buf(NULL), action(NULL), icon(NULL), colour(0) {}
     ~hline()
     {
         DELETEA(buf);
@@ -354,13 +356,14 @@ struct hline
         DELETEA(commandicon);
         if(action) commandaction = newstring(action);
         if(icon) commandicon = newstring(icon);
+        commandcolour = colour;
     }
 
     bool shouldsave()
     {
         return strcmp(commandbuf, buf) ||
                (commandaction ? !action || strcmp(commandaction, action) : action!=NULL) ||
-               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL);
+               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) || (commandcolour ? commandcolour != colour : colour!=0);
     }
 
     void save()
@@ -368,6 +371,7 @@ struct hline
         buf = newstring(commandbuf);
         if(commandaction) action = newstring(commandaction);
         if(commandicon) icon = newstring(commandicon);
+        colour = commandcolour;
     }
 
     void run()

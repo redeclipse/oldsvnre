@@ -1078,10 +1078,12 @@ namespace hud
             {
                 pushfont("command");
                 Texture *t = textureload(commandicon ? commandicon : inputtex, 3);
+                vec c(1, 1, 1);
+                if(commandcolour) c = vec::hexcolor(commandcolour);
                 float f = float(totalmillis%1000)/1000.f;
                 if(f < 0.5f) f = 1.f-f;
                 glBindTexture(GL_TEXTURE_2D, t->id);
-                glColor4f(1.f, 1.f, 1.f, fullconblend*fade*f);
+                glColor4f(c.x, c.y, c.z, fullconblend*fade*f);
                 drawtex(x, z, FONTH, FONTH);
                 z += draw_textx("%s", (concenter ? x+s/2-FONTW*3 : x)+(FONTH+FONTW), z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, commandpos >= 0 ? commandpos : strlen(commandbuf), s-(FONTH+FONTW), commandbuf);
                 popfont();
