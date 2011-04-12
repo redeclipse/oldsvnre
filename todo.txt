@@ -11,7 +11,8 @@
 
 = Sounds =
 * Team change announcer?
-* Multiple sample support
+* "imminent doom" sound when holding the ball in bomber for too long?
+* Different announcer for dropped/taken instead of just "warning"?
 
 = Code/Wishlist/Other =
 * Commands to perform common geometry operations: slope, arch, stairs, circle, sphere?
@@ -28,7 +29,6 @@
 * pid file (and daemon state (?)) for servers
 * don't assume flak bounces all the time
 * finish sound slot sample setup for sounds > S_GAMESPECIGFIC and < S_GAME
-* client mode abstract system (like smode for the game side)
 
 = Licensing Issues =
 Files: data/sounds/ambience/wind.ogg
