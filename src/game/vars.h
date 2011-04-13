@@ -222,14 +222,16 @@ GVAR(0, impulseslip, 0, 300, VAR_MAX); // time before floor friction kicks back 
 GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before powerslides end
 GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
+GVAR(0, impulsekickdelay, 0, 450, VAR_MAX); // minimum time between wall kicks/climbs
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
+GVAR(0, impulsepower, 0, 10000, VAR_MAX); // impulse max power length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
 GFVAR(0, impulsejetpack, 0, 1.5f, FVAR_MAX); // jetpack impulse meter depletion
-GFVAR(0, impulsepowerup, 0, 5.f, FVAR_MAX); // power jump impulse meter charge rate
-GFVAR(0, impulsepowerjump, 0, 15.f, FVAR_MAX); // power jump impulse meter depletion
+GFVAR(0, impulsepowerup, 0, 5.f, FVAR_MAX); // power jump meter charge rate
+GFVAR(0, impulsepowerjump, 0, 15.f, FVAR_MAX); // power jump meter depletion
 GFVAR(0, impulseregen, 0, 4.f, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregensprint, 0, 0.75f, FVAR_MAX); // impulse regen sprinting modifier

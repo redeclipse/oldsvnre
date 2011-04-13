@@ -313,7 +313,7 @@ namespace physics
             {
                 if(!power || e->action[AC_CROUCH])
                 {
-                    if(power && impulseslide && impulseslip && e->impulse[IM_SLIP] > e->impulse[IM_SLIDE])
+                    if(power && impulseslide && impulseslip && e->move == 1 && e->impulse[IM_SLIP] > e->impulse[IM_SLIDE])
                         e->impulse[IM_SLIDE] = e->impulse[IM_SLIP];
                     return true;
                 }
@@ -747,13 +747,13 @@ namespace physics
         {
             bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
 
-            if(impulsemeter)
+            if(impulsemeter && millis)
             {
                 bool sprint = sprinting(d, false);
                 if(sprint && impulsesprint > 0)
                 {
                     int len = int(ceilf(millis*impulsesprint));
-                    if(canimpulse(d, len, 2))
+                    if(len > 0 && canimpulse(d, len, 2))
                     {
                         d->impulse[IM_METER] += len;
                         d->impulse[IM_REGEN] = lastmillis;
@@ -765,7 +765,7 @@ namespace physics
                     if(powered(d, true))
                     {
                         int len = int(ceilf(millis*impulsepowerjump));
-                        if(canimpulse(d, len, 0))
+                        if(len > 0 && canimpulse(d, len, 0))
                         {
                             if((d->impulse[IM_POWER] -= len) < 0) d->impulse[IM_POWER] = 0;
                             d->impulse[IM_REGEN] = lastmillis;
@@ -780,7 +780,7 @@ namespace physics
                     else if(isjetpack && impulsejetpack > 0)
                     {
                         int len = int(ceilf(millis*impulsejetpack));
-                        if(canimpulse(d, len, 0))
+                        if(len > 0 && canimpulse(d, len, 0))
                         {
                             d->impulse[IM_METER] += len;
                             d->impulse[IM_REGEN] = lastmillis;
@@ -815,8 +815,10 @@ namespace physics
                 }
                 if(!d->ai && onfloor && !isjetpack && impulsemethod&1 && d->action[AC_JUMP] && d->action[AC_CROUCH])
                 {
-                    int len = int(ceilf(millis*impulsepowerup));
-                    if(canimpulse(d, len, 0))
+                    int pwr = min(impulsepower, impulsemeter), len = int(ceilf(millis*impulsepowerup)),
+                        tot = d->impulse[IM_POWER]+len;
+                    if(tot > pwr) len -= tot%pwr;
+                    if(len > 0 && canimpulse(d, len, 0))
                     {
                         d->impulse[IM_METER] += len;
                         d->impulse[IM_POWER] += len;
@@ -958,17 +960,20 @@ namespace physics
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
                         if(!d->turnside && parkour && impulsekick > 0 && fabs(off) >= impulsekick)
                         {
-                            float mag = impulsevelocity(d, impulseparkourkick);
-                            if(mag > 0)
+                            if(!d->impulse[IM_TIME] || d->impulse[IM_TYPE] != IM_T_KICK || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
                             {
-                                vecfromyawpitch(d->aimyaw, d->aimpitch, 1, 0, dir);
-                                (d->vel = dir.normalize()).reflect(wall).normalize().mul(mag);
-                                d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
-                                d->turnmillis = PHYSMILLIS;
-                                d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                                //d->action[AC_SPECIAL] = false;
-                                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
-                                game::impulseeffect(d);
+                                float mag = impulsevelocity(d, impulseparkourkick);
+                                if(mag > 0)
+                                {
+                                    vecfromyawpitch(d->aimyaw, d->aimpitch, 1, 0, dir);
+                                    (d->vel = dir.normalize()).reflect(wall).normalize().mul(mag);
+                                    d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
+                                    d->turnmillis = PHYSMILLIS;
+                                    d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                                    //d->action[AC_SPECIAL] = false;
+                                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
+                                    game::impulseeffect(d);
+                                }
                             }
                             break;
                         }
@@ -1136,7 +1141,7 @@ namespace physics
                     }
                 }
                 if(pl->physstate < PHYS_SLIDE && sub >= 0.5f && pl->submerged < 0.5f && pl->vel.z > 1e-3f)
-                    pl->vel.z = max(pl->vel.z, max(jumpforce(pl, false), max(gravityforce(pl), 50.f)))*2;
+                    pl->vel.z = max(pl->vel.z, max(jumpforce(pl, false), max(gravityforce(pl), 50.f)));
             }
         }
         else pl->submerged = 0;
@@ -1203,7 +1208,7 @@ namespace physics
                 if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
                 if(!pl->timeinair)
                 {
-                    if(local && impulsemethod&2 && timeinair >= impulsedelay && allowimpulse(1) && ((gameent *)pl)->action[AC_CROUCH])
+                    if(local && impulsemethod&2 && timeinair >= impulsedelay && pl->move == 1 && allowimpulse(1) && ((gameent *)pl)->action[AC_CROUCH])
                     {
                         ((gameent *)pl)->action[AC_DASH] = true;
                         ((gameent *)pl)->actiontime[AC_DASH] = lastmillis;
