@@ -193,21 +193,22 @@ GFVAR(0, forcefloorcurb, -1, -1, FVAR_MAX);
 GFVAR(0, forceaircurb, -1, -1, FVAR_MAX);
 GFVAR(0, forceslidecurb, -1, -1, FVAR_MAX);
 
-GFVAR(0, movespeed, 0, 100, FVAR_MAX); // speed
+GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
-GFVAR(0, movesprint, 0, 1.6f, FVAR_MAX); // sprinting modifier
-GFVAR(0, movejetpack, 0, 1.6f, FVAR_MAX); // jetpack modifier
-GFVAR(0, movestraight, 0, 1.2f, FVAR_MAX); // non-strafe modifier
-GFVAR(0, movestrafe, 0, 1, FVAR_MAX); // strafe modifier
-GFVAR(0, moveinair, 0, 0.9f, FVAR_MAX); // in-air modifier
-GFVAR(0, movestepup, 0, 0.95f, FVAR_MAX); // step-up modifier
-GFVAR(0, movestepdown, 0, 1.15f, FVAR_MAX); // step-down modifier
+GFVAR(0, movesprint, FVAR_NONZERO, 1.6f, FVAR_MAX); // sprinting modifier
+GFVAR(0, movejetpack, FVAR_NONZERO, 1.6f, FVAR_MAX); // jetpack modifier
+GFVAR(0, movepowerjump, FVAR_NONZERO, 4.6f, FVAR_MAX); // powerjump modifier
+GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
+GFVAR(0, movestrafe, FVAR_NONZERO, 1, FVAR_MAX); // strafe modifier
+GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
+GFVAR(0, movestepup, FVAR_NONZERO, 0.95f, FVAR_MAX); // step-up modifier
+GFVAR(0, movestepdown, FVAR_NONZERO, 1.15f, FVAR_MAX); // step-down modifier
 
-GFVAR(0, jumpspeed, 0, 110, FVAR_MAX); // extra velocity to add when jumping
-GFVAR(0, impulsespeed, 0, 90, FVAR_MAX); // extra velocity to add when impulsing
+GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
+GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing
+
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
-GFVAR(0, impulseboostz, -1, 0, 1); // thrust z modifier
 GFVAR(0, impulsedash, 0, 1.2f, FVAR_MAX); // dashing/powerslide modifier
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, FVAR_MAX); // melee modifier
@@ -217,8 +218,8 @@ GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z no
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
 GVAR(0, impulsecount, 0, 6, VAR_MAX); // number of impulse actions per air transit
-GVAR(0, impulseslide, 0, 1000, VAR_MAX); // time before powerslides end
 GVAR(0, impulseslip, 0, 300, VAR_MAX); // time before floor friction kicks back in
+GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before powerslides end
 GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
@@ -227,7 +228,9 @@ GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
 GFVAR(0, impulsejetpack, 0, 1.5f, FVAR_MAX); // jetpack impulse meter depletion
-GFVAR(0, impulseregen, 0, 4.0, FVAR_MAX); // impulse regen multiplier
+GFVAR(0, impulsepowerup, 0, 5.f, FVAR_MAX); // power jump impulse meter charge rate
+GFVAR(0, impulsepowerjump, 0, 15.f, FVAR_MAX); // power jump impulse meter depletion
+GFVAR(0, impulseregen, 0, 4.f, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregensprint, 0, 0.75f, FVAR_MAX); // impulse regen sprinting modifier
 GFVAR(0, impulseregenjetpack, 0, 1.5f, FVAR_MAX); // impulse regen jetpack modifier
