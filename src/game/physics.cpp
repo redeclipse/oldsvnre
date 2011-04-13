@@ -876,7 +876,7 @@ namespace physics
                             if(!power && (dash || moving || onfloor))
                             {
                                 float yaw = d->aimyaw, pitch = moving && pulse ? d->aimpitch : 0;
-                                vecfromyawpitch(yaw, pitch, move, strafe, dir);
+                                vecfromyawpitch(yaw, pitch, moving ? move : 1, strafe, dir);
                                 if(dash && !d->floor.iszero() && !dir.iszero())
                                 {
                                     dir.project(d->floor).normalize();
