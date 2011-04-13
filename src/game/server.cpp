@@ -1838,12 +1838,12 @@ namespace server
                     maplist(list, reqmode, reqmuts);
                     break;
                 }
-                case 5: if(!haspriv(ci, PRIV_MAX, "select a custom maps")) return; break;
+                case 5: if(!haspriv(ci, PRIV_MAX, "select a map to play")) return; break;
                 case 0: default: break;
             }
             if(list)
             {
-                if(checklist(reqmap, strlen(reqmap), list) < 0 && !haspriv(ci, GAME(mapslock)%2 ? PRIV_MASTER : PRIV_ADMIN, "select a custom maps"))
+                if(checklist(reqmap, strlen(reqmap), list) < 0 && !haspriv(ci, GAME(mapslock)%2 ? PRIV_MASTER : PRIV_ADMIN, "select maps not in the rotation"))
                 {
                     DELETEA(list);
                     return;

@@ -1184,7 +1184,11 @@ struct gameent : dynent, gamestate
     {
         if(impulse[IM_POWER])
         {
-            if((impulse[IM_POWER] -= cost) < 0) impulse[IM_POWER] = 0;
+            if((impulse[IM_POWER] -= cost) < 0)
+            {
+                impulse[IM_METER] -= impulse[IM_POWER]; // add the rest to our meter then
+                impulse[IM_POWER] = 0;
+            }
         }
         else impulse[IM_METER] += cost;
         impulse[IM_TIME] = impulse[IM_REGEN] = millis;
