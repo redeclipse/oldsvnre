@@ -1963,7 +1963,7 @@ namespace client
                     {
                         w->team = tn;
                         if(game::showplayerinfo && w->aitype < 0)
-                            conoutft(CON_EVENT, "\fa%s is now on team \fs[%d]\f<%s>%s", game::colorname(w), TEAM(w->team, colour), hud::teamtex(w->team), TEAM(w->team, name));
+                            conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(w->team, colour), hud::teamtex(w->team), TEAM(w->team, name));
                         if(w == game::focus) hud::lastteam = 0;
                     }
                     break;
