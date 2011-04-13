@@ -1182,7 +1182,11 @@ struct gameent : dynent, gamestate
 
     void doimpulse(int cost, int type, int millis)
     {
-        impulse[IM_METER] += cost;
+        if(impulse[IM_POWER])
+        {
+            if((impulse[IM_POWER] -= cost) < 0) impulse[IM_POWER] = 0;
+        }
+        else impulse[IM_METER] += cost;
         impulse[IM_TIME] = impulse[IM_REGEN] = millis;
         if(type == IM_T_DASH) impulse[IM_SLIDE] = millis;
         if(type != IM_T_KICK) impulse[IM_SLIP] = millis;
@@ -1381,7 +1385,7 @@ namespace physics
     extern int smoothmove, smoothdist, sprintstyle;
     extern bool carryaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
-    extern bool allowjetpack();
+    extern bool allowjetpack(physent *d = NULL);
     extern bool allowimpulse(int level = 2);
     extern bool jetpack(physent *d);
     extern bool sliding(physent *d, bool power = false);
