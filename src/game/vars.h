@@ -52,6 +52,7 @@ GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow 
 GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
 GVAR(IDF_ADMIN, votelock, 0, 1, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
+GFVAR(IDF_ADMIN, votethreshold, 0, 0.5f, 1); // auto-pass votes when this many agree
 
 GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
 GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map

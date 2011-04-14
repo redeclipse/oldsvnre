@@ -29,6 +29,8 @@
 * pid file (and daemon state (?)) for servers
 * don't assume flak bounces all the time
 * finish sound slot sample setup for sounds > S_GAMESPECIGFIC and < S_GAME
+* invasion mutator
+* "modifiers" or jetpack/bots/etc that are voteable but carry a different priority
 
 = Licensing Issues =
 Files: data/sounds/ambience/wind.ogg
