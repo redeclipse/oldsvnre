@@ -1084,8 +1084,9 @@ namespace hud
                 if(f < 0.5f) f = 1.f-f;
                 glBindTexture(GL_TEXTURE_2D, t->id);
                 glColor4f(c.x, c.y, c.z, fullconblend*fade*f);
-                drawtex(x, z, FONTH, FONTH);
-                z += draw_textx("%s", (concenter ? x+s/2-FONTW*3 : x)+(FONTH+FONTW), z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, commandpos >= 0 ? commandpos : strlen(commandbuf), s-(FONTH+FONTW), commandbuf);
+                float th = FONTH, tw = float(t->w)/float(t->h)*th;
+                drawtex(x, z, th, tw);
+                z += draw_textx("%s", (concenter ? x+s/2-FONTW*3 : x)+(tw+FONTW), z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, commandpos >= 0 ? commandpos : strlen(commandbuf), s-(FONTH+FONTW), commandbuf);
                 popfont();
             }
         }
@@ -1102,25 +1103,34 @@ namespace hud
     void drawblip(const char *tex, float area, int w, int h, float s, float blend, vec &dir, const vec &colour, const char *font, const char *text, ...)
     {
         float yaw = -atan2(dir.x, dir.y)/RAD, x = sinf(RAD*yaw), y = -cosf(RAD*yaw),
-            size = max(w, h)/2, tx = w/2, ty = h/2, ts = size*radarsize, tp = ts*s, tq = tp/2, tr = (size*radaroffset)+(ts*area);
+            size = max(w, h)/2, tx = w/2, ty = h/2, ts = size*radarsize, tp = ts*s, tq = tp/2,
+            tr = (size*radaroffset)+(ts*area);
         vec pos = vec(tx+(tr*x), ty+(tr*y), 0);
-        settexture(tex, 3);
         glColor4f(colour.x, colour.y, colour.z, blend);
-        glBegin(GL_TRIANGLE_STRIP);
-        loopk(4)
+        Texture *t = textureload(tex, 3);
+        if(t)
         {
-            vec norm;
-            switch(k)
+            float tw = float(t->w)/float(t->h)*tq;
+            glBindTexture(GL_TEXTURE_2D, t->id);
+            glBegin(GL_TRIANGLE_STRIP);
+            loopk(4)
             {
-                case 0: vecfromyawpitch(yaw, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
-                case 1: vecfromyawpitch(yaw, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
-                case 2: vecfromyawpitch(yaw, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
-                case 3: vecfromyawpitch(yaw, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                vec norm;
+                switch(k)
+                {
+                    case 0: vecfromyawpitch(yaw, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
+                    case 1: vecfromyawpitch(yaw, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
+                    case 2: vecfromyawpitch(yaw, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
+                    case 3: vecfromyawpitch(yaw, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                }
+                norm.normalize();
+                norm.x *= tq;
+                norm.y *= tw;
+                norm.add(pos);
+                glVertex2f(norm.x, norm.y);
             }
-            norm.z = 0; norm.normalize().mul(tq).add(pos);
-            glVertex2f(norm.x, norm.y);
+            glEnd();
         }
-        glEnd();
         if(text && *text)
         {
             if(font && *font) pushfont(font);
@@ -1382,7 +1392,8 @@ namespace hud
     int drawitem(const char *tex, int x, int y, float size, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
-        float q = clamp(skew, 0.f, 1.f), f = fade*q, cr = r*q, cg = g*q, cb = b*q, s = size*skew;
+        Texture *t = textureload(tex, 3);
+        float q = clamp(skew, 0.f, 1.f), f = fade*q, cr = r*q, cg = g*q, cb = b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
         int glow = int(s*inventoryglow), heal = m_health(game::gamemode, game::mutators);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
         if(glow || pulse)
@@ -1401,17 +1412,17 @@ namespace hud
             }
             settexture(inventorytex, 3);
             glColor4f(gr, gg, gb, f*gf);
-            drawsized(left ? x-glow : x-int(s)-glow, y-int(s)-glow, int(s)+glow*2);
+            drawtex(left ? x-glow : x-int(w)-glow, y-int(s)-glow, int(s)+glow*2, int(w)+glow*2);
         }
-        settexture(tex, 3);
         glColor4f(cr, cg, cb, f);
-        drawsized(left ? x : x-int(s), y-int(s), int(s));
+        glBindTexture(GL_TEXTURE_2D, t->id);
+        drawtex(left ? x : x-int(w), y-int(s), int(s), int(w));
         if(text && *text)
         {
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (x+s) : x)*(1.f/skew)), ty = int((y-s+s/32)*(1.f/skew));
+            int tx = int((left ? (x+w) : x)*(1.f/skew)), ty = int((y-s+s/32)*(1.f/skew));
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, int(255*f), TEXT_RIGHT_JUSTIFY, -1, -1, str);
             if(font && *font) popfont();
