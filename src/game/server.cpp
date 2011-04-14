@@ -1750,7 +1750,7 @@ namespace server
             else morethanone = 0;
             best = &votes[i];
         }
-        bool gotvotes = best && best->count >= min(max(maxvotes/2, force ? 1 : 2), force ? 1 : maxvotes);
+        bool gotvotes = best && best->count >= min(max(int(maxvotes*GAME(votethreshold)), force ? 1 : 2), force ? 1 : maxvotes);
         if(force && gotvotes && morethanone)
         {
             int r = rnd(morethanone+1), n = 0;
