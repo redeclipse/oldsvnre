@@ -1208,7 +1208,9 @@ namespace server
         {
             clientinfo *ci = clients[k];
             if(ci->state.dropped.find(i) && (!spawned || gamemillis < sents[i].millis)) return true;
-            else if(carry) loopj(WEAP_MAX) if(ci->state.entid[j] == i) return spawned;
+            else if(carry) loopj(WEAP_MAX)
+                if(ci->online && ci->state.state == CS_ALIVE && ci->state.entid[j] == i && ci->state.hasweap(j, m_weapon(gamemode, mutators)))
+                    return spawned;
         }
         if(spawned && gamemillis < sents[i].millis) return true;
         return false;
@@ -2073,6 +2075,7 @@ namespace server
                     d.value = ts.ammo[i];
                     setspawn(d.ent, false);
                     ts.dropped.add(d.ent, d.value);
+                    ts.entid[i] = -1;
                 }
             }
             if(level && !drop.empty())
@@ -3111,6 +3114,7 @@ namespace server
         gs.weapshot[weap] = sub;
         gs.shotdamage += WEAP2(weap, damage, flags&HIT_ALT)*shots.length();
         loopv(shots) gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].add(shots[i].id);
+        if(!gs.hasweap(weap, m_weapon(gamemode, mutators))) gs.entid[weap] = -1; // its gone..
     }
 
     void switchevent::process(clientinfo *ci)
