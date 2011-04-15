@@ -669,7 +669,7 @@ struct gamestate
 
     bool canswitch(int weap, int sweap, int millis, int skip = 0)
     {
-        if((aitype >= AI_START || weap != WEAP_MELEE || sweap == WEAP_MELEE || weapselect == WEAP_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip)) && hasweap(weap, sweap) && weapwaited(weap, millis, skipwait(weap, 0, millis, skip)))
+        if((aitype >= AI_START || weap != WEAP_MELEE || sweap == WEAP_MELEE || weapselect == WEAP_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skip) && hasweap(weap, sweap) && weapwaited(weap, millis, skip))
             return true;
         return false;
     }
@@ -698,7 +698,7 @@ struct gamestate
             case EU_AUTO: case EU_ACT: return true; break;
             case EU_ITEM:
             { // can't use when reloading or firing
-                if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip)))
+                if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skip))
                     return true;
                 break;
             }
