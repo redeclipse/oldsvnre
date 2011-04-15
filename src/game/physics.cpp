@@ -937,9 +937,9 @@ namespace physics
                     if(collided || (hitplayer ? !d->action[AC_SPECIAL] && !slide : wall.iszero())) continue;
                     if((d->action[AC_SPECIAL] || slide) && hitplayer)
                     {
+                        d->action[AC_SPECIAL] = false;
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor || slide))
                         {
-                            d->action[AC_SPECIAL] = false;
                             if(!onfloor && !slide) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
                             if(d->turnside)
                             {
@@ -947,6 +947,7 @@ namespace physics
                                 d->turnside = 0; d->turnyaw = d->turnroll = 0;
                             }
                         }
+                        else game::errorsnd(d);
                         break;
                     }
                     else if(!d->turnside && !d->action[AC_SPECIAL]) continue;

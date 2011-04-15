@@ -3097,18 +3097,19 @@ namespace server
             if(!gs.canshoot(weap, flags, m_weapon(gamemode, mutators), millis, (1<<WEAP_S_RELOAD)))
             {
                 if(sub && WEAP(weap, max)) ci->state.ammo[weap] = max(ci->state.ammo[weap]-sub, 0);
+                if(!gs.hasweap(weap, m_weapon(gamemode, mutators))) gs.entid[weap] = -1; // its gone..
                 if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: shoot [%d] failed - current state disallows it", weap);
                 return;
             }
-            else if(gs.weapload[weap] > 0)
+            else if(gs.weapload[gs.weapselect] > 0)
             {
-                takeammo(ci, weap, gs.weapload[weap]+sub);
-                gs.weapload[weap] = -gs.weapload[weap];
-                sendf(-1, 1, "ri5", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap]);
+                takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
+                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
+                sendf(-1, 1, "ri5", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect]);
             }
             else return;
         }
-        else takeammo(ci, weap, sub);
+        takeammo(ci, weap, sub);
         gs.setweapstate(weap, flags&HIT_ALT ? WEAP_S_SECONDARY : WEAP_S_PRIMARY, WEAP2(weap, adelay, flags&HIT_ALT), millis);
         sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
@@ -3160,9 +3161,9 @@ namespace server
             if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
             return;
         }
-        if(!gs.weapwaited(weap, millis, gs.skipwait(weap, 0, millis, (1<<WEAP_S_SWITCH), true)))
+        if(!gs.weapwaited(weap, millis, gs.skipwait(weap, 0, millis, (1<<WEAP_S_SWITCH))))
         {
-            if(!gs.weapwaited(weap, millis, gs.skipwait(weap, 0, millis, (1<<WEAP_S_RELOAD), true)))
+            if(!gs.weapwaited(weap, millis, gs.skipwait(weap, 0, millis, (1<<WEAP_S_RELOAD))))
             {
                 if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
                 return;

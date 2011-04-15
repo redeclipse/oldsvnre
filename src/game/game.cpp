@@ -272,6 +272,13 @@ namespace game
         else resetsway();
     }
 
+    int errorchan = -1;
+    void errorsnd(gameent *d)
+    {
+        if(d == game::player1 && !issound(errorchan))
+            playsound(S_ERROR, d->o, d, SND_FORCED, -1, -1, -1, &errorchan);
+    }
+
     void announce(int idx, gameent *d)
     {
         if(idx >= 0)
