@@ -952,6 +952,7 @@ namespace client
         if(d->action[AC_SPRINT] == (d!=game::player1 || physics::sprintstyle < 3)) flags |= 1<<9;
         if(d->action[AC_CROUCH]) flags |= 1<<10;
         if(d->conopen) flags |= 1<<11;
+        if(d->action[AC_SPECIAL]) flags |= 1<<12; // TEMP::FIXME - shift conopen up
         putuint(q, flags);
         loopk(3)
         {
@@ -1175,6 +1176,7 @@ namespace client
                 actmod(AC_SPRINT, 9);
                 actmod(AC_CROUCH, 10);
                 d->conopen = flags&(1<<11) ? true : false;
+                actmod(AC_SPECIAL, 12); // TEMP::FIXME - shift conopen up
                 vec oldpos(d->o);
                 d->o = o;
                 d->o.z += d->height;
