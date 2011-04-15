@@ -140,7 +140,7 @@ enum { SHPARAM_LOOKUP = 0, SHPARAM_VERTEX, SHPARAM_PIXEL, SHPARAM_UNIFORM };
 struct ShaderParam
 {
     const char *name;
-    int type, index, loc;
+    int type, index, loc, palette, palindex;
     float val[4];
 };
 
@@ -469,21 +469,21 @@ struct Texture
     GLuint idframe(int id)
     {
         if(!frames.empty())
-            return frames[clamp(id, 0, frames.length()-1)];
+            return frames[::clamp(id, 0, frames.length()-1)];
         return id;
     }
 
     GLuint getframe(float amt)
     {
         if(!frames.empty())
-            return frames[clamp(int((frames.length()-1)*amt), 0, frames.length()-1)];
+            return frames[::clamp(int((frames.length()-1)*amt), 0, frames.length()-1)];
         return id;
     }
 
     GLuint retframe(int cur, int total)
     {
         if(!frames.empty())
-            return frames[clamp((frames.length()-1)*cur/total, 0, frames.length()-1)];
+            return frames[::clamp((frames.length()-1)*cur/total, 0, frames.length()-1)];
         return id;
     }
 };
@@ -532,8 +532,8 @@ struct VSlot
     int palette, palindex;
     float alphafront, alphaback;
     vec colorscale;
-    vec glowcolor, pulseglowcolor;
     float pulseglowspeed;
+    ShaderParam *glowcolor, *pulseglowcolor;
     vec envscale;
     int skipped;
 
@@ -556,17 +556,37 @@ struct VSlot
         alphafront = DEFAULT_ALPHA_FRONT;
         alphaback = DEFAULT_ALPHA_BACK;
         colorscale = vec(1, 1, 1);
-        glowcolor = vec(1, 1, 1);
-        pulseglowcolor = vec(0, 0, 0);
         pulseglowspeed = 0;
+        glowcolor = pulseglowcolor = NULL;
         envscale = vec(0, 0, 0);
     }
 
     vec getcolorscale() const { return palette || palindex ? vec(colorscale).mul(game::getpalette(palette, palindex)) : colorscale; }
+    vec getglowcolor() const 
+    { 
+        if(glowcolor)
+        {
+            vec c(glowcolor->val);
+            if(glowcolor->palette || glowcolor->palindex) c.mul(game::getpalette(glowcolor->palette, glowcolor->palindex));
+            return c.clamp(0.0f, 1.0f);
+        }
+        return vec(1, 1, 1);
+    }
+    vec getpulseglowcolor() const 
+    { 
+        if(pulseglowcolor)
+        {
+            vec c(pulseglowcolor->val);
+            if(pulseglowcolor->palette || pulseglowcolor->palindex) c.mul(game::getpalette(pulseglowcolor->palette, pulseglowcolor->palindex));
+            return c.clamp(0.0f, 1.0f);
+        }
+        return vec(0, 0, 0);
+    }
 
     void cleanup()
     {
         linked = false;
+        glowcolor = pulseglowcolor = NULL;
     }
 };
 

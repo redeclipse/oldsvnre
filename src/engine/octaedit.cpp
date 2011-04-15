@@ -1778,19 +1778,19 @@ void vreset()
 }
 COMMAND(0, vreset, "");
 
-void vshaderparam(const char *name, float *x, float *y, float *z, float *w)
+void vshaderparam(const char *name, float *x, float *y, float *z, float *w, int *palette, int *palindex)
 {
     if(noedit() || multiplayer()) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_SHPARAM;
     if(name[0])
     {
-        ShaderParam p = { getshaderparamname(name), SHPARAM_LOOKUP, -1, -1, {*x, *y, *z, *w} };
+        ShaderParam p = { getshaderparamname(name), SHPARAM_LOOKUP, -1, -1, *palette, *palindex, {*x, *y, *z, *w} };
         ds.params.add(p);
     }
     mpeditvslot(ds, allfaces, sel, true);
 }
-COMMAND(0, vshaderparam, "sffff");
+COMMAND(0, vshaderparam, "sffffii");
 
 void mpedittex(int tex, int allfaces, selinfo &sel, bool local)
 {
@@ -2272,7 +2272,8 @@ void render_texture_panel(int w, int h)
                     {
                         glBindTexture(GL_TEXTURE_2D, glowtex->id);
                         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-                        glColor4f(vslot.glowcolor.x, vslot.glowcolor.y, vslot.glowcolor.z, texpaneltimer/1000.0f);
+                        vec glowcolor = vslot.getglowcolor();
+                        glColor4f(glowcolor.x, glowcolor.y, glowcolor.z, texpaneltimer/1000.0f);
                     }
                     glBegin(GL_TRIANGLE_STRIP);
                     glTexCoord2fv(tc[0]); glVertex2f(x,   y);
