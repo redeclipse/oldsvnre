@@ -211,6 +211,7 @@ namespace hud
     TVAR(IDF_PERSIST, bombtex, "textures/bomb", 3);
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
+    TVAR(IDF_PERSIST, questiontex, "textures/question", 3);
     TVAR(IDF_PERSIST, hurttex, "textures/hurt", 3);
     TVAR(IDF_PERSIST, hinttex, "textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
