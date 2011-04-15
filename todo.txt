@@ -23,7 +23,8 @@
 * user-selectable colours (ensure all players are visible but not too bright?)
 * should things like jetpack, power jump, and power slide be modifiers?
 * would attaching particles to a mapmodel be useful? (esp. wrt animated, rotating, or moving mapmodels)
-* melee (butt and kick) animations (requires sending AC_SPECIAL?)
+* remember to move conopen to bit 8 and shift the actions up after collating the synced ones
+* sync power level on impulse meter too?
 
 = Models =
 * Weapons (better rifle skin/norm, redo sword UVW/skin/norm and find a better idle, rework shotgun skin, adjust vwep)
