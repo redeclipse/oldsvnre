@@ -3161,9 +3161,9 @@ namespace server
             if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
             return;
         }
-        if(!gs.weapwaited(weap, millis, gs.skipwait(weap, 0, millis, (1<<WEAP_S_SWITCH))))
+        if(!gs.weapwaited(weap, millis, (1<<WEAP_S_SWITCH)))
         {
-            if(!gs.weapwaited(weap, millis, gs.skipwait(weap, 0, millis, (1<<WEAP_S_RELOAD))))
+            if(!gs.weapwaited(weap, millis, (1<<WEAP_S_RELOAD)))
             {
                 if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
                 return;
