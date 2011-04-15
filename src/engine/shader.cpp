@@ -656,7 +656,13 @@ static inline void setglslslotparam(const ShaderParam &p, LocalShaderParamState 
     if(!(mask&(1<<i)))
     {
         mask |= 1<<i;
-        setuniformval(l, p.val);
+        if(p.palette || p.palindex)
+        {
+            vec palcol = game::getpalette(p.palette, p.palindex);
+            float palval[4] = { p.val[0]*palcol.x, p.val[1]*palcol.y, p.val[2]*palcol.z, p.val[3] };
+            setuniformval(l, palval);
+        }
+        else setuniformval(l, p.val);
     }
 }
 
@@ -690,7 +696,14 @@ static inline void setasmslotparam(const ShaderParam &p, LocalShaderParamState &
     {
         mask |= 1<<l.index;
         ShaderParamState &val = (l.type==SHPARAM_VERTEX ? vertexparamstate[RESERVEDSHADERPARAMS+l.index] : pixelparamstate[RESERVEDSHADERPARAMS+l.index]);
-        if(memcmp(val.val, p.val, sizeof(val.val))) memcpy(val.val, p.val, sizeof(val.val));
+        if(p.palette || p.palindex)
+        {
+            vec palcol = game::getpalette(p.palette, p.palindex);
+            float palval[4] = { p.val[0]*palcol.x, p.val[1]*palcol.y, p.val[2]*palcol.z, p.val[3] };
+            if(memcmp(val.val, palval, sizeof(val.val))) memcpy(val.val, palval, sizeof(val.val));
+            else if(val.dirty==ShaderParamState::CLEAN) return;
+        } 
+        else if(memcmp(val.val, p.val, sizeof(val.val))) memcpy(val.val, p.val, sizeof(val.val));
         else if(val.dirty==ShaderParamState::CLEAN) return;
         glProgramEnvParameter4fv_(l.type==SHPARAM_VERTEX ? GL_VERTEX_PROGRAM_ARB : GL_FRAGMENT_PROGRAM_ARB, RESERVEDSHADERPARAMS+l.index, val.val);
         val.local = true;
@@ -1696,7 +1709,7 @@ static void linkslotshaderparams(vector<ShaderParam> &params, Shader *sh, bool l
             ShaderParam &dparam = sh->defaultparams[i];
             if(param.name ? dparam.name==param.name : dparam.type==param.type && dparam.index==param.index)
             {
-                if(memcmp(param.val, dparam.val, sizeof(param.val))) loc = i;
+                if(param.palette != dparam.palette || param.palindex != dparam.palindex || memcmp(param.val, dparam.val, sizeof(param.val))) loc = i;
                 break;
             }
         }
@@ -1727,10 +1740,12 @@ void linkvslotshader(VSlot &s, bool load)
     if(s.slot->texmask&(1<<TEX_GLOW))
     {
         ShaderParam *cparam = findshaderparam(s, "glowcolor");
-        if(cparam) loopk(3) s.glowcolor[k] = clamp(cparam->val[k], 0.0f, 1.0f);
+        s.glowcolor = cparam; 
+        //if(cparam) loopk(3) s.glowcolor[k] = clamp(cparam->val[k], 0.0f, 1.0f);
         ShaderParam *pulseparam = findshaderparam(s, "pulseglowcolor"),
                     *speedparam = findshaderparam(s, "pulseglowspeed");
-        if(pulseparam) loopk(3) s.pulseglowcolor[k] = clamp(pulseparam->val[k], 0.0f, 1.0f);
+        s.pulseglowcolor = pulseparam;
+        //if(pulseparam) loopk(3) s.pulseglowcolor[k] = clamp(pulseparam->val[k], 0.0f, 1.0f);
         if(speedparam) s.pulseglowspeed = speedparam->val[0]/1000.0f;
     }
     if(sh->type&SHADER_ENVMAP)
@@ -1790,7 +1805,7 @@ const char *getshaderparamname(const char *name)
     return name;
 }
 
-void addshaderparam(const char *name, int type, int n, float x, float y, float z, float w)
+void addshaderparam(const char *name, int type, int n, float x, float y, float z, float w, int palette = 0, int palindex = 0)
 {
     if((type==SHPARAM_VERTEX || type==SHPARAM_PIXEL) && (n<0 || n>=MAXSHADERPARAMS))
     {
@@ -1803,6 +1818,8 @@ void addshaderparam(const char *name, int type, int n, float x, float y, float z
         ShaderParam &param = curparams[i];
         if(param.type == type && (name ? param.name==name : param.index == n))
         {
+            param.palette = palette;
+            param.palindex = palindex;
             param.val[0] = x;
             param.val[1] = y;
             param.val[2] = z;
@@ -1810,17 +1827,17 @@ void addshaderparam(const char *name, int type, int n, float x, float y, float z
             return;
         }
     }
-    ShaderParam param = {name, type, n, -1, {x, y, z, w}};
+    ShaderParam param = {name, type, n, -1, palette, palindex, {x, y, z, w}};
     curparams.add(param);
 }
 
-ICOMMAND(0, setvertexparam, "iffff", (int *n, float *x, float *y, float *z, float *w), addshaderparam(NULL, SHPARAM_VERTEX, *n, *x, *y, *z, *w));
-ICOMMAND(0, setpixelparam, "iffff", (int *n, float *x, float *y, float *z, float *w), addshaderparam(NULL, SHPARAM_PIXEL, *n, *x, *y, *z, *w));
-ICOMMAND(0, setuniformparam, "sffff", (char *name, float *x, float *y, float *z, float *w), addshaderparam(name, SHPARAM_UNIFORM, -1, *x, *y, *z, *w));
-ICOMMAND(0, setshaderparam, "sffff", (char *name, float *x, float *y, float *z, float *w), addshaderparam(name, SHPARAM_LOOKUP, -1, *x, *y, *z, *w));
-ICOMMAND(0, defvertexparam, "siffff", (char *name, int *n, float *x, float *y, float *z, float *w), addshaderparam(name[0] ? name : NULL, SHPARAM_VERTEX, *n, *x, *y, *z, *w));
-ICOMMAND(0, defpixelparam, "siffff", (char *name, int *n, float *x, float *y, float *z, float *w), addshaderparam(name[0] ? name : NULL, SHPARAM_PIXEL, *n, *x, *y, *z, *w));
-ICOMMAND(0, defuniformparam, "sffff", (char *name, float *x, float *y, float *z, float *w), addshaderparam(name, SHPARAM_UNIFORM, -1, *x, *y, *z, *w));
+ICOMMAND(0, setvertexparam, "iffffii", (int *n, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(NULL, SHPARAM_VERTEX, *n, *x, *y, *z, *w, *p, *pidx));
+ICOMMAND(0, setpixelparam, "iffffii", (int *n, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(NULL, SHPARAM_PIXEL, *n, *x, *y, *z, *w, *p, *pidx));
+ICOMMAND(0, setuniformparam, "sffffii", (char *name, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(name, SHPARAM_UNIFORM, -1, *x, *y, *z, *w, *p, *pidx));
+ICOMMAND(0, setshaderparam, "sffffii", (char *name, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(name, SHPARAM_LOOKUP, -1, *x, *y, *z, *w, *p, *pidx));
+ICOMMAND(0, defvertexparam, "siffffii", (char *name, int *n, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(name[0] ? name : NULL, SHPARAM_VERTEX, *n, *x, *y, *z, *w, *p, *pidx));
+ICOMMAND(0, defpixelparam, "siffffii", (char *name, int *n, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(name[0] ? name : NULL, SHPARAM_PIXEL, *n, *x, *y, *z, *w, *p, *pidx));
+ICOMMAND(0, defuniformparam, "sffffii", (char *name, float *x, float *y, float *z, float *w, int *p, int *pidx), addshaderparam(name, SHPARAM_UNIFORM, -1, *x, *y, *z, *w, *p, *pidx));
 
 #define NUMPOSTFXBINDS 10
 

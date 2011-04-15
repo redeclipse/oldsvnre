@@ -1439,6 +1439,8 @@ static void mergevslot(VSlot &dst, const VSlot &src, int diff, Slot *slot = NULL
             ShaderParam &dp = dst.params[j];
             if(sp.name == dp.name)
             {
+                dp.palette = sp.palette;
+                dp.palindex = sp.palindex;
                 memcpy(dp.val, sp.val, sizeof(dp.val));
                 goto nextparam;
             }
@@ -1515,7 +1517,7 @@ static bool comparevslot(const VSlot &dst, const VSlot &src, int diff)
         loopv(src.params)
         {
             const ShaderParam &sp = src.params[i], &dp = dst.params[i];
-            if(sp.name != dp.name || memcmp(sp.val, dp.val, sizeof(sp.val))) return false;
+            if(sp.name != dp.name || sp.palette != dp.palette || sp.palindex != dp.palindex || memcmp(sp.val, dp.val, sizeof(sp.val))) return false;
         }
     }
     if(diff & (1<<VSLOT_SCALE) && dst.scale != src.scale) return false;
@@ -2080,12 +2082,14 @@ Texture *loadthumbnail(Slot &slot)
         addname(name, slot, slot.sts[0], false, prefix);
     }
     int glow = -1;
+    vec glowcolor(1, 1, 1);
     if(slot.texmask&(1<<TEX_GLOW))
     {
         loopvj(slot.sts) if(slot.sts[j].type==TEX_GLOW) { glow = j; break; }
         if(glow >= 0)
         {
-            defformatstring(prefix)("<glow:%.2f/%.2f/%.2f>", vslot.glowcolor.x, vslot.glowcolor.y, vslot.glowcolor.z);
+            glowcolor = vslot.getglowcolor();
+            defformatstring(prefix)("<glow:%.2f/%.2f/%.2f>", glowcolor.x, glowcolor.y, glowcolor.z);
             addname(name, slot, slot.sts[glow], true, prefix);
         }
     }
@@ -2107,8 +2111,7 @@ Texture *loadthumbnail(Slot &slot)
     {
         ImageData s, g, l;
         texturedata(s, NULL, &slot.sts[0], false);
-        vec colorscale = vslot.getcolorscale();
-        if(vslot.colorscale != vec(1, 1, 1)) texmad(s, colorscale, vec(0, 0, 0));
+        if(colorscale != vec(1, 1, 1)) texmad(s, colorscale, vec(0, 0, 0));
         if(glow >= 0) texturedata(g, NULL, &slot.sts[glow], false);
         if(layer)
         {
@@ -2124,7 +2127,7 @@ Texture *loadthumbnail(Slot &slot)
             if(g.data)
             {
                 if(g.w != s.w || g.h != s.h) scaleimage(g, s.w, s.h);
-                addglow(s, g, vslot.glowcolor);
+                addglow(s, g, glowcolor);
             }
             if(l.data)
             {

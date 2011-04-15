@@ -269,13 +269,16 @@ void savevslot(stream *f, VSlot &vs, int prev)
     f->putlil<int>(prev);
     if(vs.changed & (1<<VSLOT_SHPARAM))
     {
-        f->putlil<ushort>(vs.params.length());
+        ushort flags = vs.params.length();
+        loopv(vs.params) if(vs.params[i].palette || vs.params[i].palindex) flags |= 0x8000;
+        f->putlil<ushort>(flags);
         loopv(vs.params)
         {
             ShaderParam &p = vs.params[i];
             f->putlil<ushort>(strlen(p.name));
             f->write(p.name, strlen(p.name));
             loopk(4) f->putlil<float>(p.val[k]);
+            if(flags&0x8000) { f->putlil<int>(vs.palette); f->putlil<int>(vs.palindex); }
         }
     }
     if(vs.changed & (1<<VSLOT_SCALE)) f->putlil<float>(vs.scale);
@@ -342,7 +345,7 @@ void loadvslot(stream *f, VSlot &vs, int changed)
     vs.changed = changed;
     if(vs.changed & (1<<VSLOT_SHPARAM))
     {
-        int numparams = f->getlil<ushort>();
+        int flags = f->getlil<ushort>(), numparams = flags&0x7FFF;
         string name;
         loopi(numparams)
         {
@@ -356,6 +359,8 @@ void loadvslot(stream *f, VSlot &vs, int changed)
             p.index = -1;
             p.loc = -1;
             loopk(4) p.val[k] = f->getlil<float>();
+            p.palette = flags&0x8000 ? f->getlil<int>() : 0;
+            p.palindex = flags&0x8000 ? f->getlil<int>() : 0;
         }
     }
     if(vs.changed & (1<<VSLOT_SCALE)) vs.scale = f->getlil<float>();
@@ -424,6 +429,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
             if(s.params[j].type == SHPARAM_LOOKUP || s.params[j].type == SHPARAM_UNIFORM) h->printf(" \"%s\"", s.params[j].name);
             else h->printf(" %d", s.params[j].index);
             loopk(4) h->printf(" %f", s.params[j].val[k]);
+            if(s.params[j].palette > 0 || s.params[j].palindex > 0) h->printf(" %d %d", s.params[j].palette, s.params[j].palindex);
             h->printf("\n");
         }
     }
@@ -455,7 +461,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
             h->printf("texalpha %f %f\n", s.variants->alphafront, s.variants->alphaback);
         if(s.variants->colorscale != vec(1, 1, 1))
             h->printf("texcolor %f %f %f\n", s.variants->colorscale.x, s.variants->colorscale.y, s.variants->colorscale.z);
-        if(s.variants->palette > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
+        if(s.variants->palette > 0 || s.variants->palindex > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
         if(s.texgrass)
         {
             h->printf("texgrass \"%s\"\n", s.texgrass);

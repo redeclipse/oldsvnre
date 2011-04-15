@@ -689,8 +689,9 @@ struct gui : guient
         {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             glBindTexture(GL_TEXTURE_2D, glowtex->id);
-            if(hit || overlaid) glColor3f(color.x*vslot.glowcolor.x, color.y*vslot.glowcolor.y, color.z*vslot.glowcolor.z);
-            else glColor3fv(vslot.glowcolor.v);
+            vec glowcolor = vslot.getglowcolor();
+            if(hit || overlaid) glColor3f(color.x*glowcolor.x, color.y*glowcolor.y, color.z*glowcolor.z);
+            else glColor3fv(glowcolor.v);
             glBegin(GL_TRIANGLE_STRIP);
             glTexCoord2fv(tc[0]); glVertex2f(x,    y);
             glTexCoord2fv(tc[1]); glVertex2f(x+xs, y);

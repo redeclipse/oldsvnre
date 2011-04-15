@@ -1360,13 +1360,13 @@ static void changeenv(renderstate &cur, int pass, Slot &slot, VSlot &vslot, geom
 
 static void changeglow(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
 {
-    vec color = vslot.glowcolor;
+    vec color = vslot.getglowcolor();
     if(vslot.pulseglowspeed)
     {
         float k = lastmillis*vslot.pulseglowspeed;
         k -= floor(k);
         k = fabs(k*2 - 1);
-        color.lerp(color, vslot.pulseglowcolor, k);
+        color.lerp(color, vslot.getpulseglowcolor(), k);
     }
     if(pass==RENDERPASS_GLOW)
     {
