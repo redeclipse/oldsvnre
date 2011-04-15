@@ -145,7 +145,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
     glColor4ub(color.x, color.y, color.z, f);
 }
 
-#define FONTX (max(curfont->defaultw, curfont->defaulth)*5/4)
+#define FONTX (max(curfont->defaultw, curfont->defaulth)*9/8)
 static int draw_icon(const char *name, int x, int y)
 {
     Texture *t = textureload(name, 3);

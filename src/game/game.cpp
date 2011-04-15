@@ -365,9 +365,9 @@ namespace game
                 if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
-            conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]%s\fS and \fs\f[%d]%s\fS",
-                WEAP(d->loadweap[0], colour), (d->loadweap[0] >= WEAP_OFFSET ? WEAP(d->loadweap[0], name) : "random"),
-                WEAP(d->loadweap[1], colour), (d->loadweap[1] >= WEAP_OFFSET ? WEAP(d->loadweap[1], name) : "random")
+            conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
+                WEAP(d->loadweap[0] >= WEAP_OFFSET ? d->loadweap[0] : WEAP_GRENADE, colour), (d->loadweap[0] >= WEAP_OFFSET ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex), (d->loadweap[0] >= WEAP_OFFSET ? WEAP(d->loadweap[0], name) : "random"),
+                WEAP(d->loadweap[1] >= WEAP_OFFSET ? d->loadweap[1] : WEAP_GRENADE, colour), (d->loadweap[1] >= WEAP_OFFSET ? hud::itemtex(WEAPON, d->loadweap[1]) : hud::questiontex), (d->loadweap[1] >= WEAP_OFFSET ? WEAP(d->loadweap[1], name) : "random")
             );
         }
         else conoutft(CON_MESG, "\foweapon selection is only available in arena");
