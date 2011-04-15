@@ -1110,7 +1110,6 @@ namespace hud
         Texture *t = textureload(tex, 3);
         if(t)
         {
-            float tw = float(t->w)/float(t->h)*tq;
             glBindTexture(GL_TEXTURE_2D, t->id);
             glBegin(GL_TRIANGLE_STRIP);
             loopk(4)
@@ -1123,10 +1122,7 @@ namespace hud
                     case 2: vecfromyawpitch(yaw, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
                     case 3: vecfromyawpitch(yaw, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
                 }
-                norm.normalize();
-                norm.x *= tq;
-                norm.y *= tw;
-                norm.add(pos);
+                norm.normalize().mul(tq).add(pos);
                 glVertex2f(norm.x, norm.y);
             }
             glEnd();
