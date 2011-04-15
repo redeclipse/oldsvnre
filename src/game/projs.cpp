@@ -838,6 +838,22 @@ namespace projs
         d->setweapstate(weap, flags&HIT_ALT ? WEAP_S_SECONDARY : WEAP_S_PRIMARY, adelay, lastmillis);
         d->ammo[weap] = max(d->ammo[weap]-offset, 0);
         d->weapshot[weap] = offset;
+        if(d->aitype < AI_START || aistyle[d->aitype].canmove)
+        {
+            vec kick;
+            vecfromyawpitch(d->yaw, d->pitch, 1, 0, kick);
+            kick.normalize().mul(-WEAP2(weap, kickpush, flags&HIT_ALT));
+            if(!kick.iszero())
+            {
+                if(WEAP2(weap, power, flags&HIT_ALT) && WEAP2(weap, cooked, flags&HIT_ALT) == 1)
+                    kick.mul(scale);
+                if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
+                float kickmod = kickpushscale;
+                if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod *= kickpushzoom;
+                if(physics::iscrouching(d) && !physics::sliding(d)) kickmod *= kickpushcrouch;
+                d->vel.add(vec(kick).mul(kickmod));
+            }
+        }
     }
 
     void iter(projent &proj)
@@ -1095,10 +1111,10 @@ namespace projs
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 150, 0x884411, 1.f, 0.5f);
+                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 250, 0x884411, 1.f, 0.5f);
                             part_splash(PART_SPARK, 10, 350, proj.o, 0x884411, 0.125f, 1, 1, 0, expl, 15);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 75, teamhint(proj.owner, 0x884411), 1.f, 0.2f);
+                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 125, teamhint(proj.owner, 0x884411), 1.f, 0.2f);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
@@ -1122,9 +1138,9 @@ namespace projs
                             if(expl > 0)
                             {
                                 quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                                int len = proj.weap != WEAP_ROCKET ? 500 : 1000;
+                                int len = proj.weap != WEAP_ROCKET ? 750 : 1000;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, 0xAA4400, 1.f, 0.5f);
-                                part_splash(PART_SPARK, 30, len*3, proj.o, 0xAA4400, 0.25f, 1, 1, 0, expl, 20);
+                                part_splash(PART_SPARK, 30, len*2, proj.o, 0xAA4400, 0.25f, 1, 1, 0, expl, 20);
                                 if(WEAP(proj.weap, pusharea) >= 1)
                                     part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, teamhint(proj.owner, 0xAA4400), 1.f, 0.2f);
                             }
@@ -1161,9 +1177,9 @@ namespace projs
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 150, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711, 1.f, 0.5f);
+                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 250, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711, 1.f, 0.5f);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 75, teamhint(proj.owner, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711), 1.f, 0.2f);
+                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 125, teamhint(proj.owner, proj.weap == WEAP_SMG ? 0xAA4400 : 0xAA7711), 1.f, 0.2f);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 10))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
@@ -1174,7 +1190,7 @@ namespace projs
                     }
                     case WEAP_PLASMA:
                     {
-                        int len = proj.flags&HIT_ALT ? 500 : 250;
+                        int len = proj.flags&HIT_ALT ? 750 : 375;
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {

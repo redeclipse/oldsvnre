@@ -260,25 +260,15 @@ namespace weapons
         {
             from = d->muzzlepos(weap, secondary);
             to = targ;
+
             vec unitv;
             float dist = to.dist(from, unitv);
             if(dist > 0) unitv.div(dist);
             else vecfromyawpitch(d->yaw, d->pitch, 1, 0, unitv);
-            if(d->aitype < AI_START || aistyle[d->aitype].canmove)
-            {
-                vec kick = vec(unitv).mul(-WEAP2(weap, kickpush, secondary));
-                if(!kick.iszero())
-                {
-                    if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
-                    float kickmod = kickpushscale;
-                    if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod *= kickpushzoom;
-                    if(physics::iscrouching(d) && !physics::sliding(d)) kickmod *= kickpushcrouch;
-                    d->vel.add(vec(kick).mul(kickmod));
-                }
-            }
 
             // move along the eye ray towards the weap origin, stopping when something is hit
             // nudge the target a tiny bit forward in the direction of the target for stability
+
             vec eyedir(from);
             eyedir.sub(d->o);
             float eyedist = eyedir.magnitude();
