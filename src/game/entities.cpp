@@ -996,7 +996,7 @@ namespace entities
             }
             if(tried && d->action[AC_USE])
             {
-                if(d == game::player1) playsound(S_ERROR, d->o, d);
+                game::errorsnd(d);
                 d->action[AC_USE] = false;
             }
         }

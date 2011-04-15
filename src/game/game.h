@@ -659,27 +659,24 @@ struct gamestate
         return millis-weaplast[weap] >= weapwait[weap];
     }
 
-    int skipwait(int weap, int flags, int millis, int skip = 0, bool override = false)
+    int skipwait(int weap, int flags, int millis, int skip = 0)
     {
         int skipstate = skip;
-        if(WEAP2(weap, sub, flags&HIT_ALT) && (skip&(1<<WEAP_S_RELOAD)) && weapstate[weap] == WEAP_S_RELOAD && millis-weaplast[weap] < weapwait[weap])
-        {
-            if(!override && ammo[weap]-weapload[weap] < WEAP2(weap, sub, flags&HIT_ALT))
-                skipstate &= ~(1<<WEAP_S_RELOAD);
-        }
+        if(weap == weapselect && WEAP2(weap, sub, flags&HIT_ALT) && (skip&(1<<WEAP_S_RELOAD)) && weapstate[weap] == WEAP_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < WEAP2(weap, sub, flags&HIT_ALT))
+            skipstate &= ~(1<<WEAP_S_RELOAD);
         return skipstate;
     }
 
     bool canswitch(int weap, int sweap, int millis, int skip = 0)
     {
-        if((aitype >= AI_START || weap != WEAP_MELEE || sweap == WEAP_MELEE || weapselect == WEAP_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip, true)) && hasweap(weap, sweap) && weapwaited(weap, millis, skipwait(weap, 0, millis, skip, true)))
+        if((aitype >= AI_START || weap != WEAP_MELEE || sweap == WEAP_MELEE || weapselect == WEAP_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip)) && hasweap(weap, sweap) && weapwaited(weap, millis, skipwait(weap, 0, millis, skip)))
             return true;
         return false;
     }
 
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
-        if(weap == weapselect || (weap == WEAP_MELEE && weapwaited(weap, millis, skipwait(weapselect, flags, millis, skip))))
+        if(weap == weapselect || (weap == WEAP_MELEE && weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip))))
             if((hasweap(weap, sweap) && ammo[weap] >= (WEAP2(weap, power, flags&HIT_ALT) ? 1 : WEAP2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
                 return true;
         return false;
@@ -701,7 +698,7 @@ struct gamestate
             case EU_AUTO: case EU_ACT: return true; break;
             case EU_ITEM:
             { // can't use when reloading or firing
-                if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip, true)))
+                if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip)))
                     return true;
                 break;
             }
@@ -1497,6 +1494,7 @@ namespace game
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);
     extern void clientdisconnected(int cn, int reason = DISC_NONE);
     extern char *colorname(gameent *d, char *name = NULL, const char *prefix = "", bool team = true, bool dupname = true);
+    extern void errorsnd(gameent *d);
     extern void announce(int idx, gameent *d = NULL);
     extern void announcef(int idx, int targ, gameent *d, const char *msg, ...);
     extern void respawn(gameent *d);

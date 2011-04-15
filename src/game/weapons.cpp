@@ -86,7 +86,7 @@ namespace weapons
     void weaponswitch(gameent *d, int a = -1, int b = -1)
     {
         if(a < -1 || b < -1 || a >= WEAP_MAX || b >= WEAP_MAX || (weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay)) return;
-        if(!d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH), true))) return;
+        if(!d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))) return;
         int s = slot(d, d->weapselect);
         loopi(WEAP_MAX) // only loop the amount of times we have weaps for
         {
@@ -123,7 +123,7 @@ namespace weapons
             }
             else if(a >= 0) break;
         }
-        if(d == game::player1) playsound(S_ERROR, d->o, d);
+        game::errorsnd(d);
     }
     ICOMMAND(0, weapon, "ss", (char *a, char *b), weaponswitch(game::player1, *a ? parseint(a) : -1, *b ? parseint(b) : -1));
 
@@ -133,7 +133,7 @@ namespace weapons
         bool found = false;
         if(isweap(weap) && weap >= WEAP_OFFSET && weap != m_weapon(game::gamemode, game::mutators))
         {
-            if(d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH), true)))
+            if(d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH))))
             {
                 client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
                 d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
@@ -141,12 +141,12 @@ namespace weapons
             }
         }
         d->action[AC_DROP] = false;
-        if(!found && d == game::player1) playsound(S_ERROR, d->o, d);
+        if(!found) game::errorsnd(d);
     }
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(d == game::player1)
+        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT))
         {
             bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT),
                  noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
@@ -234,8 +234,18 @@ namespace weapons
 
         if(offset < 0)
         {
-            offset = max(d->weapload[weap], 1)+sub;
-            d->weapload[weap] = -d->weapload[weap];
+            if(weap == d->weapselect)
+            {
+                offset = max(d->weapload[weap], 1)+sub;
+                d->weapload[weap] = -d->weapload[weap];
+            }
+            else
+            {
+                offset = max(d->weapload[d->weapselect], 1);
+                d->weapload[d->weapselect] = -d->weapload[d->weapselect];
+                d->ammo[d->weapselect] = max(d->ammo[d->weapselect]-offset, 0);
+                offset = sub;
+            }
         }
         else offset = sub;
 
