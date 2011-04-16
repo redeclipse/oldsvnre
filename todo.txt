@@ -31,6 +31,10 @@
 * model yawscale, like pitchscale, so the torso can turn slightly before the legs follow?
 * new "weapon" - shield? always equipped when carried, protects against damage?
 * in addition to hitpush/slow add a stun time?
+* move waypoints to their own (more memory/processing efficient) array
+* give all entities coloured name/icons (like hud::Ntex for text)
+* give console lines each their own contextual icons?
+* better damage/fire hud effects (pseudo particle system?)
 
 = Models =
 * Weapons (better rifle skin/norm, redo sword UVW/skin/norm and find a better idle, rework shotgun skin, adjust vwep)
