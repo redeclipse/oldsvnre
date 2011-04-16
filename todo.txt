@@ -25,6 +25,12 @@
 * would attaching particles to a mapmodel be useful? (esp. wrt animated, rotating, or moving mapmodels)
 * remember to move conopen to bit 8 and shift the actions up after collating the synced ones
 * sync power level on impulse meter too?
+* footstep sounds (and texture "materials"?)
+* mode specific vars (maxhealth2/maxhealthdeathmatch, maxhealth [universal])
+* tertiary firing modes (by pressing both buttons together?) [special actions? dash, etc]
+* model yawscale, like pitchscale, so the torso can turn slightly before the legs follow?
+* new "weapon" - shield? always equipped when carried, protects against damage?
+* in addition to hitpush/slow add a stun time?
 
 = Models =
 * Weapons (better rifle skin/norm, redo sword UVW/skin/norm and find a better idle, rework shotgun skin, adjust vwep)

@@ -102,7 +102,7 @@ namespace capture
                     else if(f.droptime) droppedflags.add(i);
                 }
             }
-            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators))
+            if(!hasflags.empty())
             {
                 pushfont("emphasis");
                 char *str = buildflagstr(hasflags, hasflags.length() <= 3);
@@ -119,7 +119,7 @@ namespace capture
                 char *str = buildflagstr(takenflags, takenflags.length() <= 3);
                 ty += draw_textx("%s taken: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, takenflags.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
             }
-            else if(!droppedflags.empty())
+            if(!droppedflags.empty())
             {
                 char *str = buildflagstr(droppedflags, droppedflags.length() <= 3);
                 ty += draw_textx("%s dropped: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, droppedflags.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
