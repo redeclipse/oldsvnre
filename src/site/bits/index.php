@@ -6,26 +6,29 @@
     $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
 
-    $app['banner'] = "<b>Player model fully paid for!</b> Donations help fund more open source efforts.";
+    $app['banner'] = "<b>Donate</b>, help make our project a little better.";
     $app['bannerurl'] = "/donate";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
     // nav items should be in reverse order for the top navbar 
     $app['targets']['donate'] = array('name' => 'Donate', 'url' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'alturl' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'nav' => 1, 'redir' => 1);
-    $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
-    $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Main_Page', 'alturl' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=', 'nav' => 1, 'redir' => 1);
     $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['tracker'] = array('name' => 'Bug Tracker', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/report/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
+    $app['targets']['forum'] = array('name' => 'Forums', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
+    $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Main_Page', 'alturl' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
-    $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'https://sourceforge.net/apps/trac/redeclipse/', 'alturl' => 'https://sourceforge.net/apps/trac/redeclipse/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/', 'nav' => -1, 'redir' => 1);
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/changeset/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/ticket/', 'nav' => -1, 'redir' => 1);
 
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['playdeb'] = array('name' => 'Playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
     $app['targets']['aur'] = array('name' => 'AUR', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
+    $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&amp;subdir=&amp;sortby=date&amp;order=descending&amp;searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
@@ -111,7 +114,7 @@
                     <h3>Builtin Editor: create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
                     <p id="svn">get the <a href="/devel">development version</a> and live on the bleeding edge</p>
-                    <p id="mirror">or find Linux packages on <a href="/playdeb">PlayDeb</a> and <a href="/aur">AUR</a></p>
+                    <p id="mirror">or find Linux packages on <a href="/playdeb">PlayDeb</a>, <a href="/aur">AUR</a>, and <a href="/chakra">Chakra</a></p>
                 </div>
                 <div id="player">
                     <object width="500" height="308" type="application/x-shockwave-flash" data="http://www.youtube.com/v/<?php echo $app['youtubevid']; ?>&amp;color1=0x000000&amp;color2=0x000000&amp;border=0&amp;fs=1&amp;egm=0&amp;showsearch=0&amp;showinfo=0&amp;ap=%2526fmt%3D18">
@@ -181,7 +184,7 @@
                         <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=326559&amp;type=8" alt="Get Red Eclipse at SourceForge" title="Get Red Eclipse at SourceForge" width="80" height="15" border="0" />
                     </a>
                 </div>
-                <a href="/download">Download</a>, or <a href="/chat">Talk to Us</a> today.
+                <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forums">Discuss</a>, or <a href="/bugs">Report a Bug</a> today.
             </div>
             <div id="copyright" align="center">
                 <p>Red Eclipse, Copyright (C) 2011 Quinton Reeves, Lee Salzman</p>

@@ -252,7 +252,7 @@ GVAR(0, zoomlocktime, 0, 500, VAR_MAX); // time before zoomlock kicks in when in
 GVAR(0, zoomlimit, 1, 10, 150);
 GVAR(0, zoomtime, 1, 100, VAR_MAX);
 
-GFVAR(0, normalscale, 0, 1, FVAR_MAX);
+GFVAR(0, normalscale, 0, 1, FVAR_MAX); // FIXME:: rename to explodescale?
 GFVAR(0, limitedscale, 0, 0.75f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
 GVAR(0, criticalchance, 0, 100, VAR_MAX);

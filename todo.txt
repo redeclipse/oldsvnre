@@ -1,37 +1,10 @@
 = Code/Wishlist/Misc =
-* Commands to perform common geometry operations: slope, arch, stairs, circle, sphere?
-* Move things like mastermode, ban, etc to server side commands/variables?
-* Create "assisted secures" for stf (player1, player2, player3 secured flag N)
-* Master server tracking and unlockable system
-* event scripting (?)
-* 2d-hud based damage numbers (?)
-* shooting range inanimates (?)
-* pathfinding and ai in campaign should schedule route generation and herd decision making to reduce overhead (?)
-* allow vote for bots and random mode/mutator
-* add mutator for unlimited impulse (?)
-* rename normalscale to explodescale
-* pid file (and daemon state (?)) for servers
-* don't assume flak bounces all the time
-* finish sound slot sample setup for sounds > S_GAMESPECIGFIC and < S_GAME
-* invasion mutator
-* "modifiers":
-    like mutators for bots/etc that are voteable but carry a different priority
-    eg. a vote will pass but ignore these params if the params don't pass
-    would require some way of approving the parameters or not along with the vote
-* traditional style radar (as an option)?
-* "weights" that dynamically alters weight depending on things being carried? (esp. wrt bomber-ball)
-* user-selectable colours (ensure all players are visible but not too bright?)
-* should things like jetpack, power jump, and power slide be modifiers?
 * would attaching particles to a mapmodel be useful? (esp. wrt animated, rotating, or moving mapmodels)
-* remember to move conopen to bit 8 and shift the actions up after collating the synced ones
-* sync power level on impulse meter too?
 * footstep sounds (and texture "materials"?)
 * mode specific vars (maxhealth2/maxhealthdeathmatch, maxhealth [universal])
 * tertiary firing modes (by pressing both buttons together?) [special actions? dash, etc]
 * model yawscale, like pitchscale, so the torso can turn slightly before the legs follow?
 * new "weapon" - shield? always equipped when carried, protects against damage?
-* in addition to hitpush/slow add a stun time?
-* move waypoints to their own (more memory/processing efficient) array
 * give all entities coloured name/icons (like hud::Ntex for text)
 * give console lines each their own contextual icons?
 * better damage/fire hud effects (pseudo particle system?)
