@@ -23,6 +23,6 @@ freely, subject to the following restrictions:
     3. This notice may not be removed or altered from any source
     distribution.
 
-The license covers the Red Eclipse map "Flak Panic", its architecture, layout, and general concept. Red Eclipse, the Cube Engine 2, as well as any textures, sounds, and models used in the map are not covered by this license and may have individual copyrights and distribution restrictions (see individual readmes).
+The license covers the Red Eclipse map "Flak Panic" (panic.mpz, panic.cfg, panic.png), its architecture, layout, and general concept. Red Eclipse, the Cube Engine 2, as well as any textures, sounds, and models used in the map are not covered by this license and may have individual copyrights and distribution restrictions (see individual readmes).
 
 Contact: favorito.redeclipse@gmail.com
