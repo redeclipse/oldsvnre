@@ -426,7 +426,7 @@ void sendfile(int cn, int chan, stream *file, const char *format, ...)
     }
     else if(!clients.inrange(cn)) return;
 
-    int len = (int)min(file->size(), off_t(INT_MAX));
+    int len = (int)min(file->size(), stream::offset(INT_MAX));
     if(len <= 0 || len > 16<<20) return;
 
     packetbuf p(MAXTRANS+len, ENET_PACKET_FLAG_RELIABLE);
