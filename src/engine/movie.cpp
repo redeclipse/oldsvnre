@@ -69,13 +69,13 @@ struct aviwriter
         return double(totalsize);
     }
 
-    void startchunk(const char *fcc)
+    void startchunk(const char *fcc, uint size = 0)
     {
         f->write(fcc, 4);
-        const uint size = 0;
-        f->write(&size, 4);
+        f->putlil<uint>(size);
         totalsize += 4 + 4;
         chunkoffsets[++chunkdepth] = totalsize;
+        totalsize += size;
     }
 
     void listchunk(const char *fcc, const char *lfcc)
@@ -88,15 +88,20 @@ struct aviwriter
     void endchunk()
     {
         assert(chunkdepth >= 0);
-        if(segments.empty()) totalsize = f->tell();
+        --chunkdepth;
+    }
+
+    void endlistchunk()
+    {
+        assert(chunkdepth >= 0);
         int size = int(totalsize - chunkoffsets[chunkdepth]);
         f->seek(-4 - size, SEEK_CUR);
         f->putlil(size);
         f->seek(0, SEEK_END);
         if(size & 1) { f->putchar(0x00); totalsize++; }
-        --chunkdepth;
+        endchunk();
     }
-
+        
     void writechunk(const char *fcc, const void *data, uint len) // simplify startchunk()/endchunk() to avoid f->seek()
     {
         f->write(fcc, 4);
@@ -223,7 +228,7 @@ struct aviwriter
 
         listchunk("LIST", "hdrl");
 
-        startchunk("avih");
+        startchunk("avih", 56);
         f->putlil<uint>(1000000 / videofps); // microsecsperframe
         f->putlil<uint>(0); // maxbytespersec
         f->putlil<uint>(0); // reserved
@@ -240,7 +245,7 @@ struct aviwriter
 
         listchunk("LIST", "strl");
 
-        startchunk("strh");
+        startchunk("strh", 56);
         f->write("vids", 4); // fcctype
         f->write("I420", 4); // fcchandler
         f->putlil<uint>(0); // flags
@@ -260,7 +265,7 @@ struct aviwriter
         f->putlil<ushort>(videoh); // frame bottom
         endchunk(); // strh
 
-        startchunk("strf");
+        startchunk("strf", 40);
         f->putlil<uint>(40); //headersize
         f->putlil<uint>(videow); // width
         f->putlil<uint>(videoh); // height
@@ -274,7 +279,7 @@ struct aviwriter
         f->putlil<uint>(0); // colorsrequired
         endchunk(); // strf
 
-        startchunk("indx");
+        startchunk("indx", 24 + 16*MAX_SUPER_INDEX);
         superindexvideooffset = f->tell();
         f->putlil<ushort>(4); // longs per entry
         f->putlil<ushort>(0); // index of indexes
@@ -292,7 +297,7 @@ struct aviwriter
         }
         endchunk(); // indx
 
-        endchunk(); // LIST strl
+        endlistchunk(); // LIST strl
 
         if(soundfrequency > 0)
         {
@@ -300,7 +305,7 @@ struct aviwriter
 
             listchunk("LIST", "strl");
 
-            startchunk("strh");
+            startchunk("strh", 56);
             f->write("auds", 4); // fcctype
             f->putlil<uint>(1); // fcchandler - normally 4cc, but audio is a special case
             f->putlil<uint>(0); // flags
@@ -320,7 +325,7 @@ struct aviwriter
             f->putlil<ushort>(0); // frame bottom
             endchunk(); // strh
 
-            startchunk("strf");
+            startchunk("strf", 18);
             f->putlil<ushort>(1); // format (uncompressed PCM)
             f->putlil<ushort>(soundchannels); // channels
             f->putlil<uint>(soundfrequency); // sampleframes per second
@@ -330,7 +335,7 @@ struct aviwriter
             f->putlil<ushort>(0); // size
             endchunk(); //strf
 
-            startchunk("indx");
+            startchunk("indx", 24 + 16*MAX_SUPER_INDEX);
             superindexsoundoffset = f->tell();
             f->putlil<ushort>(4); // longs per entry
             f->putlil<ushort>(0); // index of indexes
@@ -348,24 +353,22 @@ struct aviwriter
             }
             endchunk(); // indx
 
-            endchunk(); // LIST strl
+            endlistchunk(); // LIST strl
         }
 
         listchunk("LIST", "odml");
-        startchunk("dmlh");
+        startchunk("dmlh", 4);
         fileextframesoffset = f->tell();
         f->putlil<uint>(0);
         endchunk(); // dmlh
-        endchunk(); // LIST odml
+        endlistchunk(); // LIST odml
 
         listchunk("LIST", "INFO");
-
         const char *software = "Red Eclipse";
         writechunk("ISFT", software, strlen(software)+1);
+        endlistchunk(); // LIST INFO
 
-        endchunk(); // LIST INFO
-
-        endchunk(); // LIST hdrl
+        endlistchunk(); // LIST hdrl
 
         nextsegment();
 
@@ -618,7 +621,7 @@ struct aviwriter
 
     void flushsegment()
     {
-        endchunk(); // LIST movi
+        endlistchunk(); // LIST movi
 
         avisegmentinfo &seg = segments.last();
 
@@ -637,7 +640,7 @@ struct aviwriter
 
         if(segments.length() == 1)
         {
-            startchunk("idx1");
+            startchunk("idx1", index.length()*16);
             loopv(index)
             {
                 aviindexentry &entry = index[i];
@@ -647,13 +650,12 @@ struct aviwriter
                 f->putlil<uint>(entry.offset); // offset (relative to movi)
                 f->putlil<uint>(entry.size); // size
             }
-            totalsize += index.length()*(4 + 4 + 4 + 4);
             endchunk();
         }
 
         seg.videoframes = videoframes;
         seg.videoindexoffset = totalsize;
-        startchunk("ix00");
+        startchunk("ix00", 24 + indexframes*8);
         f->putlil<ushort>(2); // longs per entry
         f->putlil<ushort>(0x0100); // index of chunks
         f->putlil<uint>(indexframes); // entries in use
@@ -668,7 +670,6 @@ struct aviwriter
             f->putlil<uint>(e.offset + 4 + 4);
             f->putlil<uint>(e.size);
         }
-        totalsize += 2 + 2 + 4 + 4 + 4 + 4 + 4 + indexframes*(4 + 4);
         endchunk(); // ix00
         seg.videoindexsize = uint(totalsize - seg.videoindexoffset);
 
@@ -676,7 +677,7 @@ struct aviwriter
         {
             seg.soundframes = soundframes;
             seg.soundindexoffset = totalsize;
-            startchunk("ix01");
+            startchunk("ix01", 24 + soundframes*8);
             f->putlil<ushort>(2); // longs per entry
             f->putlil<ushort>(0x0100); // index of chunks
             f->putlil<uint>(soundframes); // entries in use
@@ -691,12 +692,11 @@ struct aviwriter
                 f->putlil<uint>(e.offset + 4 + 4);
                 f->putlil<uint>(e.size);
             }
-            totalsize += 2 + 2 + 4 + 4 + 4 + 4 + 4 + soundframes*(4 + 4);
             endchunk(); // ix01
             seg.soundindexsize = uint(totalsize - seg.soundindexoffset);
         }
 
-        endchunk(); // RIFF AVI/AVIX
+        endlistchunk(); // RIFF AVI/AVIX
     }
 
     bool nextsegment()
