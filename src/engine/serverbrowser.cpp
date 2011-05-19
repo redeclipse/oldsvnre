@@ -505,16 +505,13 @@ void updatefrommaster()
     }
     else conoutf("master server not replying");
     refreshservers();
+    reqmaster = true;
 }
 COMMAND(0, updatefrommaster, "");
 
 void updateservers()
 {
-    if(servers.empty() && !reqmaster)
-    {
-        updatefrommaster();
-        reqmaster = true;
-    }
+    if(!reqmaster) updatefrommaster();
     refreshservers();
     if(!sortedservers)
     {
