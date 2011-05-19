@@ -91,8 +91,10 @@ void cleanup()
 void quit()                  // normal exit
 {
     extern void writeinitcfg();
+    extern void writeservercfg();
     inbetweenframes = false;
     writeinitcfg();
+    writeservercfg();
     writecfg();
     abortconnect();
     disconnect(1);

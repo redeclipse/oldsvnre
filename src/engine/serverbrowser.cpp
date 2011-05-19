@@ -524,3 +524,17 @@ void updateservers()
     intret(servers.length());
 }
 COMMAND(0, updateservers, "");
+
+void writeservercfg()
+{
+    stream *f = openfile("servers.cfg", "w");
+    if(!f) return;
+    f->printf("// servers connected to are added here automatically\n\n");
+    loopv(servers)
+    {
+        serverinfo *s = servers[i];
+        f->printf("addserver %s %d\n", s->name, s->port);
+    }
+    delete f;
+}
+
