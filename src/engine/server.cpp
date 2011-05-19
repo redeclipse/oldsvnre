@@ -1479,6 +1479,7 @@ void rehash(bool reload)
     execfile("defaults.cfg");
     initing = INIT_LOAD;
     interactive = true;
+    execfile("servers.cfg", false);
     execfile("config.cfg", false);
     execfile("autoexec.cfg", false);
     interactive = false;
