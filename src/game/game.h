@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         210
+#define GAMEVERSION         211
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -17,16 +17,11 @@
 
 enum
 {
-    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_JETPACK, S_LAND,
-    S_PAIN, S_PAIN2, S_PAIN3, S_PAIN4, S_PAIN5, S_PAIN6, S_DEATH, S_DEATH2, // TEMP::FIXME, convert to new random sample system when gameversion changes
-    S_SPLASH, S_SPLASH2, S_UNDERWATER,
-    S_SPLOSH, S_SPLOSH2, S_SPLOSH3,
-    S_DEBRIS, S_DEBRIS2, S_DEBRIS3,
-    S_BURNING, S_BURNFIRE, S_EXTINGUISH,
-    S_SHELL, S_SHELL2, S_SHELL3, S_SHELL4, S_SHELL5, S_SHELL6,
-    S_ITEMUSE, S_ITEMSPAWN,
-    S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8, S_BURNED, S_CRITICAL,
-    S_RESPAWN, S_CHAT, S_ERROR, S_ALARM,
+    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_JETPACK, S_LAND, S_PAIN, S_DEATH,
+    S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNING, S_BURNFIRE,
+    S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
+    S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
+    S_BURNED, S_CRITICAL, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM,
     S_V_FLAGSECURED, S_V_FLAGOVERTHROWN, S_V_FLAGPICKUP, S_V_FLAGDROP, S_V_FLAGRETURN, S_V_FLAGSCORE, S_V_FLAGRESET,
     S_V_BOMBSTART, S_V_BOMBPICKUP, S_V_BOMBRESET,
     S_V_FIGHT, S_V_CHECKPOINT, S_V_ONEMINUTE, S_V_HEADSHOT,
@@ -37,8 +32,6 @@ enum
     S_V_FRAGGED, S_V_OWNED,
     S_GAME
 };
-
-enum { S_R_DIE = 2, S_R_PAIN = 6, S_R_SPLOSH = 3, S_R_DEBRIS = 3, S_R_SHELL = 6, S_R_DAMAGE = 8 };
 
 enum                                // entity types
 {
@@ -482,7 +475,7 @@ enum
     N_CLIENT, N_RELOAD, N_REGEN,
     N_ADDBOT, N_DELBOT, N_INITAI,
     N_MAPCRC, N_CHECKMAPS,
-    N_SWITCHNAME, N_SWITCHTEAM,
+    N_SETPLAYERINFO, N_SWITCHTEAM,
     N_AUTHTRY, N_AUTHCHAL, N_AUTHANS,
     NUMSV
 };
@@ -511,7 +504,7 @@ char msgsizelookup(int msg)
         N_CLIENT, 0, N_RELOAD, 0, N_REGEN, 0,
         N_ADDBOT, 0, N_DELBOT, 0, N_INITAI, 0,
         N_MAPCRC, 0, N_CHECKMAPS, 1,
-        N_SWITCHNAME, 0, N_SWITCHTEAM, 0,
+        N_SETPLAYERINFO, 0, N_SWITCHTEAM, 0,
         N_AUTHTRY, 0, N_AUTHCHAL, 0, N_AUTHANS, 0,
         -1
     };
@@ -572,7 +565,7 @@ enum { IM_T_NONE = 0, IM_T_DASH, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, ammo[WEAP_MAX], entid[WEAP_MAX];
+    int health, ammo[WEAP_MAX], entid[WEAP_MAX], colour[2];
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
@@ -581,8 +574,19 @@ struct gamestate
         aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
+        setcolour();
     }
     ~gamestate() {}
+
+    void setcolour(int colour1 = 0, int colour2 = 0)
+    {
+        if(!colour1) colour1 = rnd(0xFFFFFF);
+        if(!colour2) colour2 = rnd(0xFFFFFF);
+        ivec col1(max((colour1>>16)&0xFF, 1), max((colour1>>8)&0xFF, 1), max(colour1&0xFF, 1)),
+             col2(max((colour2>>16)&0xFF, 1), max((colour2>>8)&0xFF, 1), max(colour2&0xFF, 1));
+        colour[0] = (col1.x<<16)|(col1.y<<8)|col1.z;
+        colour[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
+    }
 
     int hasweap(int weap, int sweap, int level = 0, int exclude = -1)
     {
@@ -892,7 +896,7 @@ struct eventicon
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
-    int team, undertone[2], clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
+    int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
@@ -906,8 +910,7 @@ struct gameent : dynent, gamestate
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
-        setname();
-        info[0] = obit[0] = 0;
+        name[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);
         cleartags();
@@ -1252,35 +1255,20 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setundertone(int colour = 0)
+    void setinfo(const char *n = NULL, int colour1 = 0, int colour2 = 0)
     {
-        if(!colour)
-        {
-            if(name[0]) { colour = detrnd(hthash(name), 0x10000); colour |= detrnd(colour, 0x10000)<<16; }
-            else colour = rnd(0xFFFFFF);
-        }
-        ivec col(max((colour>>16)&0xFF, 1), max((colour>>8)&0xFF, 1), max(colour&0xFF, 1)),
-             col2 = ivec(col).mul(3).div(4).add(64);
-        col.mul(3).div(5);
-        undertone[0] = (col.x<<16)|(col.y<<8)|col.z;
-        undertone[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
+        if(n && *n) copystring(name, n, MAXNAMELEN+1); else name[0] = 0;
+        setcolour(colour1, colour2);
     }
 
-    void setname(const char *n = NULL)
+    int getcolour(int tone = 0)
     {
-        if(n && *n) copystring(name, n, MAXNAMELEN+1);
-        else name[0] = 0;
-        setundertone();
-    }
-
-    int colour(int tone = 0)
-    {
-        if(aitype >= AI_START && isweap(weapselect)) return WEAP(weapselect, colour);
-        if(tone || team == TEAM_NEUTRAL)
+        if(!tone && aitype >= AI_START)
         {
-            if(!(tone%2)) return undertone[1];
-            return undertone[0];
+            int weap = isweap(loadweap[0]) ? loadweap[0] : weapselect;
+            if(isweap(weap)) return WEAP(weap, colour);
         }
+        if(tone || team == TEAM_NEUTRAL) return colour[tone%2 ? 0 : 1];
         return TEAM(team, colour);
     }
 };

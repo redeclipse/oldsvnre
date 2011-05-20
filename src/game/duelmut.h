@@ -197,7 +197,7 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                srvmsgf(-1, "\fyteam \fs%s%s\fS are the victors", tcolstrs[alive[0]->team], TEAM(alive[0]->team, name));
+                                srvmsgf(-1, "\fyteam \fs\f[%d]%s\fS are the victors", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
                                 loopv(playing)
                                 {
                                     if(playing[i]->team == alive[0]->team)

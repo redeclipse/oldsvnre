@@ -5,7 +5,7 @@
 
 #define ENG_VERSION         101
 #define ENG_NAME            "Red Eclipse"
-#define ENG_RELEASE         "Ides Patch #1"
+#define ENG_RELEASE         "Bleeding Edge"
 #define ENG_URL             "www.redeclipse.net"
 #ifdef WIN32
 #define ENG_PLATFORM        "win"
@@ -14,11 +14,11 @@
 #else
 #define ENG_PLATFORM        "nix"
 #endif
-#define ENG_DEVEL           false
+#define ENG_DEVEL           true
 
-#define ENG_SERVER_PORT     (ENG_DEVEL ? 28803 : 28801)
 #define ENG_LAN_PORT        28799
 #define ENG_MASTER_PORT     28800
+#define ENG_SERVER_PORT     28801
 #define ENG_MASTER_HOST     "play.redeclipse.net"
 
 #ifdef IRC

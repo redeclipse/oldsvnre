@@ -316,6 +316,17 @@ namespace server
             }
             return gameoffset+id;
         }
+
+        int getcolour(int tone = 0)
+        {
+            if(!tone && state.aitype >= AI_START)
+            {
+                int weap = isweap(state.loadweap[0]) ? state.loadweap[0] : state.weapselect;
+                if(isweap(weap)) return WEAP(weap, colour);
+            }
+            if(tone || team == TEAM_NEUTRAL) return state.colour[tone%2 ? 0 : 1];
+            return TEAM(team, colour);
+        }
     };
 
     struct worldstate
@@ -804,7 +815,7 @@ namespace server
     {
         if(!name) name = ci->name;
         static string cname;
-        formatstring(cname)("\fs%s%s", tcolstrs[ci->team], name);
+        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(), name);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
             defformatstring(s)(" [%d]", ci->clientnum);
@@ -2565,6 +2576,7 @@ namespace server
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
             sendstring(ci->name, p);
+            loopi(2) putint(p, ci->state.colour[i]);
             putint(p, ci->team);
         }
     }
@@ -4351,7 +4363,7 @@ namespace server
                     defformatstring(m)("%s", colorname(cp));
                     if(flags&SAY_TEAM)
                     {
-                        defformatstring(t)(" (\fs%s%s\fS)", tcolstrs[cp->team], TEAM(cp->team, name));
+                        defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(cp->team, colour), TEAM(cp->team, name));
                         concatstring(m, t);
                     }
                     if(flags&SAY_ACTION) relayf(0, "\fv* \fs%s\fS \fs\fv%s\fS", m, text);
@@ -4371,16 +4383,19 @@ namespace server
                     break;
                 }
 
-                case N_SWITCHNAME:
+                case N_SETPLAYERINFO:
                 {
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colorname(ci));
                     getstring(text, p);
+                    loopi(2) ci->state.colour[i] = getint(p);
                     if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     copystring(ci->name, text, MAXNAMELEN+1);
                     relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     QUEUE_STR(ci->name);
+                    QUEUE_INT(ci->state.colour[0]);
+                    QUEUE_INT(ci->state.colour[1]);
                     break;
                 }
 

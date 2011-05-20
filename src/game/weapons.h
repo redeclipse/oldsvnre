@@ -369,7 +369,7 @@ extern weaptypes weaptype[];
 #define WEAP2(weap,name,second) (*weap_stat_##name[weap][second?1:0])
 #define WEAPSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
 #endif
-#define WEAPLM(a,b,c)           (a*(m_limited(b, c) || m_arena(b, c) ? GAME(limitedscale) : GAME(normalscale)))
+#define WEAPLM(a,b,c)           (a*(m_limited(b, c) || m_arena(b, c) ? GAME(explodelimited) : GAME(explodescale)))
 #define WEAPEX(a,b,c,d,e)       (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? int(ceilf(WEAPLM(WEAP2(a, explode, b)*e, c, d))) : 0)
 #define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? clamp(int(ceilf(max(WEAP2(a, spread, b), f)*e)), WEAP2(a, minspread, b), WEAP2(a, maxspread, b) ? WEAP2(a, maxspread, b) : INT_MAX) : 0)
 #define WEAPSND(a,b)            (weaptype[a].sound+b)
