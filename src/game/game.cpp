@@ -526,7 +526,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col = vec::hexcolor(d->colour()).mul(illumlevel);
+                    vec col = vec::hexcolor(d->getcolour()).mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -808,10 +808,10 @@ namespace game
             {
                 if(playdamagetones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
                 {
-                    const int dmgsnd[S_R_DAMAGE] = { 0, 10, 25, 50, 75, 100, 150, 200 };
+                    const int dmgsnd[8] = { 0, 10, 25, 50, 75, 100, 150, 200 };
                     int snd = -1;
                     if(flags&BURN) snd = S_BURNED;
-                    else loopirev(S_R_DAMAGE) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
+                    else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
                     if(snd >= 0) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 }
                 if(aboveheaddamage)
@@ -870,7 +870,7 @@ namespace game
                         if(kidmode || bloodscale <= 0 || bloodsparks)
                             part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
                     }
-                    if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN+rnd(S_R_PAIN), d->o, d, 0, -1, -1, -1, &d->vschan);
+                    if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
                     if(!burning && !bleeding) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
                     d->lastpain = lastmillis;
                 }
@@ -930,7 +930,7 @@ namespace game
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), isfocus = d == focus || actor == focus,
              isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce > 1 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
         int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
-            dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH+rnd(S_R_SPLOSH) : S_DEATH+rnd(S_R_DIE);
+            dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH;
         if(d != player1) d->resetinterp();
         if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
         formatstring(d->obit)("%s ", colorname(d));
@@ -1380,7 +1380,7 @@ namespace game
     {
         if(!name) name = d->name;
         static string cname;
-        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->colour(), name);
+        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->getcolour(), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
             defformatstring(s)(" [%d]", d->clientnum);
@@ -2238,8 +2238,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(d->colour(0));
-            e->light.material[1] = bvec(d->colour(1));
+            e->light.material[0] = bvec(d->getcolour(0));
+            e->light.material[1] = bvec(d->getcolour(1));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2299,7 +2299,7 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = d->colour();
+            int colour = d->getcolour();
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
@@ -2505,7 +2505,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, d->colour(), 0.5f*amt, amt);
+                    part_flare(origin, v, 1, PART_FLARE, d->getcolour(), 0.5f*amt, amt);
                 }
                 if(d->weapselect == WEAP_SWORD || powering)
                 {

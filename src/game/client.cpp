@@ -173,24 +173,25 @@ namespace client
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
+    ICOMMAND(0, getcolour, "i", (int *m), intret(game::player1->getcolour(*m)));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
 
     const char *getname() { return game::player1->name; }
 
-    void switchname(const char *name)
+    void setplayerinfo(const char *name, int colour1, int colour2)
     {
         if(name[0])
         {
             string text;
             filtertext(text, name);
-            game::player1->setname(text);
-            addmsg(N_SWITCHNAME, "rs", game::player1->name);
+            game::player1->setinfo(text, colour1, colour2);
+            addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour[0], game::player1->colour[1]);
         }
-        else conoutft(CON_INFO, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
+        conoutft(CON_INFO, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
-    ICOMMAND(0, name, "s", (char *s), switchname(s));
+    ICOMMAND(0, setinfo, "sii", (char *s, int *m, int *n), setplayerinfo(s, *m, *n));
 
     int teamname(const char *team)
     {
@@ -235,7 +236,7 @@ namespace client
 
     void writeclientinfo(stream *f)
     {
-        f->printf("name \"%s\"\n\n", game::player1->name);
+        f->printf("setinfo \"%s\" 0x%8x 0x%8x\n\n", game::player1->name, game::player1->colour[0], game::player1->colour[1]);
     }
 
     void connectattempt(const char *name, int port, const char *password, const ENetAddress &address)
@@ -948,11 +949,11 @@ namespace client
             if(d->falling.x || d->falling.y || d->falling.z > 0) flags |= 1<<6;
         }
         if((int)d->aimyaw!=(int)d->yaw || (int)d->aimpitch!=(int)d->pitch) flags |= 1<<7;
-        if(d->action[AC_JUMP]) flags |= 1<<8;
-        if(d->action[AC_SPRINT] == (d!=game::player1 || physics::sprintstyle < 3)) flags |= 1<<9;
-        if(d->action[AC_CROUCH]) flags |= 1<<10;
-        if(d->conopen) flags |= 1<<11;
-        if(d->action[AC_SPECIAL]) flags |= 1<<12; // TEMP::FIXME - shift conopen up
+        if(d->conopen) flags |= 1<<8;
+        if(d->action[AC_JUMP]) flags |= 1<<9;
+        if(d->action[AC_SPRINT] == (d!=game::player1 || physics::sprintstyle < 3)) flags |= 1<<10;
+        if(d->action[AC_CROUCH]) flags |= 1<<11;
+        if(d->action[AC_SPECIAL]) flags |= 1<<12;
         putuint(q, flags);
         loopk(3)
         {
@@ -1166,17 +1167,17 @@ namespace client
                 d->strafe = (physstate>>5)&2 ? -1 : (physstate>>5)&1;
                 d->turnside = (physstate>>7)&2 ? -1 : (physstate>>7)&1;
                 d->impulse[IM_METER] = meter;
+                d->conopen = flags&(1<<8) ? true : false;
                 #define actmod(x,y) \
                 { \
                     bool val = d->action[x]; \
                     d->action[x] = flags&(1<<y) ? true : false; \
                     if(val != d->action[x]) d->actiontime[x] = lastmillis; \
                 }
-                actmod(AC_JUMP, 8);
-                actmod(AC_SPRINT, 9);
-                actmod(AC_CROUCH, 10);
-                d->conopen = flags&(1<<11) ? true : false;
-                actmod(AC_SPECIAL, 12); // TEMP::FIXME - shift conopen up
+                actmod(AC_JUMP, 9);
+                actmod(AC_SPRINT, 10);
+                actmod(AC_CROUCH, 11);
+                actmod(AC_SPECIAL, 12);
                 vec oldpos(d->o);
                 d->o = o;
                 d->o.z += d->height;
@@ -1384,32 +1385,38 @@ namespace client
                     break;
                 }
 
-                case N_SWITCHNAME:
+                case N_SETPLAYERINFO:
+                {
                     getstring(text, p);
+                    int colour[2];
+                    loopi(2) colour[i] = getint(p);
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
                     if(strcmp(d->name, text))
                     {
                         string oldname, newname;
-                        copystring(oldname, game::colorname(d, NULL, "", false));
-                        copystring(newname, game::colorname(d, text));
+                        copystring(oldname, game::colorname(d));
+                        d->setinfo(text, colour[0], colour[1]);
+                        copystring(newname, game::colorname(d));
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    d->setname(text);
+                    else d->setinfo(text, colour[0], colour[1]);
                     break;
+                }
 
                 case N_CLIENTINIT: // another client either connected or changed name/team
                 {
-                    int cn = getint(p);
+                    int cn = getint(p), colour[2];
                     gameent *d = game::newclient(cn);
                     if(!d)
                     {
                         getstring(text, p);
-                        getint(p);
+                        loopi(3) getint(p);
                         break;
                     }
                     getstring(text, p);
+                    loopi(2) colour[i] = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
                     if(d->name[0])        // already connected
@@ -1418,17 +1425,19 @@ namespace client
                         {
                             string oldname, newname;
                             copystring(oldname, game::colorname(d, NULL, "", false));
+                            d->setinfo(text, colour[0], colour[1]);
                             copystring(newname, game::colorname(d, text));
                             if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                         }
+                        else d->setinfo(text, colour[0], colour[1]);
                     }
                     else                    // new client
                     {
+                        d->setinfo(text, colour[0], colour[1]);
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game", game::colorname(d, text, "", false));
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.shrink(0);
                     }
-                    d->setname(text);
                     int team = clamp(getint(p), int(TEAM_NEUTRAL), int(TEAM_ENEMY));
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
@@ -1453,7 +1462,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->colour();
+                            int colour = f->getcolour();
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
@@ -1490,7 +1499,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->colour();
+                            int colour = f->getcolour();
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }

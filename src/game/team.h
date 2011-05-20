@@ -14,11 +14,9 @@ TEAMS(omega, 0xFF4F44);
 TEAMS(enemy, 0x555555);
 
 #ifdef GAMESERVER
-const char *tcolstrs[TEAM_MAX] = { "\fa", "\fb", "\fr", "\fd" }; // TEMP::FIXME
 #define TEAMDEF(proto,name)     proto *sv_team_stat_##name[] = { &sv_teamneutral##name, &sv_teamalpha##name, &sv_teamomega##name, &sv_teamenemy##name };
 #define TEAM(team,name)         (*sv_team_stat_##name[team])
 #else
-extern const char *tcolstrs[];
 #ifdef GAMEWORLD
 #define TEAMDEF(proto,name)     proto *team_stat_##name[] = { &teamneutral##name, &teamalpha##name, &teamomega##name, &teamenemy##name };
 #else

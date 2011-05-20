@@ -34,7 +34,7 @@ namespace projs
     VAR(IDF_PERSIST, projtraillength, 1, 350, INT_MAX-1);
     VAR(IDF_PERSIST, projfirehint, 0, 1, 1);
     VAR(IDF_PERSIST, projteamhint, 0, 0, 1);
-    #define teamhint(a,b) (projteamhint ? (a)->colour() : b)
+    #define teamhint(a,b) (projteamhint ? (a)->getcolour() : b)
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     VAR(IDF_PERSIST, muzzleflare, 0, 2, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
@@ -373,20 +373,20 @@ namespace projs
                 {
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                    playsound(S_SPLOSH+rnd(S_R_SPLOSH), proj.o, NULL, 0, vol);
+                    playsound(S_SPLOSH, proj.o, NULL, 0, vol);
                     break;
                 } // otherwise fall through
             }
             case PRJ_DEBRIS:
             {
                 int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                playsound(S_DEBRIS+rnd(S_R_DEBRIS), proj.o, NULL, 0, vol);
+                playsound(S_DEBRIS, proj.o, NULL, 0, vol);
                 break;
             }
             case PRJ_EJECT: case PRJ_AFFINITY:
             {
                 int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                playsound(S_SHELL+rnd(S_R_SHELL), proj.o, NULL, 0, vol);
+                playsound(S_SHELL, proj.o, NULL, 0, vol);
                 break;
             }
             default: break;

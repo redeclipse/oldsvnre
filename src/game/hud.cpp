@@ -94,7 +94,7 @@ namespace hud
     TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
     TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
 
-    VAR(IDF_PERSIST, glowtone, 0, 1, 3); // colour based on tone (1 = team/overtone, 2 = undertone, 3 = overtone)
+    VAR(IDF_PERSIST, glowtone, 0, 1, 3); // colour based on tone (1 = team/overtone, 2 = colour, 3 = overtone)
     VAR(IDF_PERSIST, clipstone, 0, 1, 3);
     VAR(IDF_PERSIST, inventorytone, 0, 1, 3);
     VAR(IDF_PERSIST, crosshairtone, 0, 0, 3);
@@ -424,7 +424,7 @@ namespace hud
     template<class T>
     void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
-        if(colour <= 0) colour = game::focus->colour(-colour);
+        if(colour <= 0) colour = game::focus->getcolour(-colour);
         vec c = vec::hexcolor(colour);
         r = T(r*c.r);
         g = T(g*c.g);
@@ -1157,8 +1157,8 @@ namespace hud
             vec colour[2];
             if(burning) colour[0] = game::burncolour(d);
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
-            else colour[0] = vec::hexcolor(d->colour(1));
-            colour[1] = vec::hexcolor(d->colour(0));
+            else colour[0] = vec::hexcolor(d->getcolour(1));
+            colour[1] = vec::hexcolor(d->getcolour(0));
             const char *tex = dominated ? dominatedtex : bliptex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend,
                   pos = 2, size = dominated ? 1.5f : 1.f;
@@ -1318,13 +1318,13 @@ namespace hud
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
             {
                 vec dir = vec(game::focus->o).sub(camera1->o).normalize().rotate_around_z(-camera1->yaw*RAD);
-                drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, vec::hexcolor(game::focus->colour()), "radar", "you");
+                drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, vec::hexcolor(game::focus->getcolour()), "radar", "you");
             }
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
                 vec pos = vec(a->o).sub(camera1->o).normalize(), dir = vec(pos).rotate_around_z(-camera1->yaw*RAD);
-                vec colour = vec::hexcolor(a->colour());
+                vec colour = vec::hexcolor(a->getcolour());
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
                     if(a->state == CS_ALIVE) drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, dir, colour, "radar", "%s (%d)", game::colorname(a), a->health);
