@@ -653,7 +653,7 @@ void rendermaterials()
             {
                 case MAT_WATER:
                 {
-                    if(m.orient == O_TOP) continue;
+                    if(!wslot.loaded || m.orient == O_TOP) continue;
                     else if(lastmat==MAT_WATER) break;
                     else
                     {
@@ -751,6 +751,7 @@ void rendermaterials()
                 }
                 case MAT_LAVA:
                 {
+                    if(!lslot.loaded) continue;
                     if(lastmat==MAT_LAVA && lastorient!=O_TOP && m.orient!=O_TOP) break;
                     else
                     {
