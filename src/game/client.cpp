@@ -180,18 +180,18 @@ namespace client
 
     const char *getname() { return game::player1->name; }
 
-    void setplayerinfo(const char *name, int colour1, int colour2)
+    void setplayerinfo(const char *name, int col)
     {
         if(name[0])
         {
             string text;
             filtertext(text, name);
-            game::player1->setinfo(text, colour1, colour2);
-            addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour[0], game::player1->colour[1]);
+            game::player1->setinfo(text, col);
+            addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour[0]);
         }
         conoutft(CON_INFO, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
-    ICOMMAND(0, setinfo, "sii", (char *s, int *m, int *n), setplayerinfo(s, *m, *n));
+    ICOMMAND(0, setinfo, "si", (char *s, int *m), setplayerinfo(s, *m));
 
     int teamname(const char *team)
     {
@@ -1388,8 +1388,7 @@ namespace client
                 case N_SETPLAYERINFO:
                 {
                     getstring(text, p);
-                    int colour[2];
-                    loopi(2) colour[i] = getint(p);
+                    int colour = getint(p);
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
@@ -1397,17 +1396,17 @@ namespace client
                     {
                         string oldname, newname;
                         copystring(oldname, game::colorname(d));
-                        d->setinfo(text, colour[0], colour[1]);
+                        d->setinfo(text, colour);
                         copystring(newname, game::colorname(d));
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    else d->setinfo(text, colour[0], colour[1]);
+                    else d->setinfo(text, colour);
                     break;
                 }
 
                 case N_CLIENTINIT: // another client either connected or changed name/team
                 {
-                    int cn = getint(p), colour[2];
+                    int cn = getint(p), colour;
                     gameent *d = game::newclient(cn);
                     if(!d)
                     {
@@ -1416,7 +1415,7 @@ namespace client
                         break;
                     }
                     getstring(text, p);
-                    loopi(2) colour[i] = getint(p);
+                    colour = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
                     if(d->name[0])        // already connected
@@ -1425,15 +1424,15 @@ namespace client
                         {
                             string oldname, newname;
                             copystring(oldname, game::colorname(d, NULL, "", false));
-                            d->setinfo(text, colour[0], colour[1]);
+                            d->setinfo(text, colour);
                             copystring(newname, game::colorname(d, text));
                             if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                         }
-                        else d->setinfo(text, colour[0], colour[1]);
+                        else d->setinfo(text, colour);
                     }
                     else                    // new client
                     {
-                        d->setinfo(text, colour[0], colour[1]);
+                        d->setinfo(text, colour);
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game", game::colorname(d, text, "", false));
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.shrink(0);

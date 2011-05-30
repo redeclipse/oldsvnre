@@ -131,13 +131,13 @@ namespace hud
     FVAR(IDF_PERSIST, crosshairaccamt, 0, 0.75f, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairthrob, 1e-4f, 0.3f, 1000);
-    TVAR(IDF_PERSIST, relativecursortex, "textures/relative", 3);
+    TVAR(IDF_PERSIST, pointertex, "textures/pointer", 3);
     TVAR(IDF_PERSIST, guicursortex, "textures/cursor", 3);
-    TVAR(IDF_PERSIST, editcursortex, "textures/crosshair", 3);
-    TVAR(IDF_PERSIST, speccursortex, "textures/crosshair", 3);
-    TVAR(IDF_PERSIST, crosshairtex, "textures/crosshair", 3);
+    TVAR(IDF_PERSIST, crosshairtex, "crosshairs/cross/cross-01", 3);
+    TVAR(IDF_PERSIST, hitcrosshairtex, "crosshairs/cross/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, editcursortex, "", 3);
+    TVAR(IDF_PERSIST, speccursortex, "", 3);
     TVAR(IDF_PERSIST, teamcrosshairtex, "", 3);
-    TVAR(IDF_PERSIST, hitcrosshairtex, "textures/hitcrosshair", 3);
     VAR(IDF_PERSIST, cursorstyle, 0, 0, 1); // 0 = top left tracking, 1 = center
     FVAR(IDF_PERSIST, cursorsize, 0, 0.025f, 1000);
     FVAR(IDF_PERSIST, cursorblend, 0, 1, 1);
@@ -448,10 +448,10 @@ namespace hud
     {
         switch(index)
         {
-            case POINTER_RELATIVE: return relativecursortex;
+            case POINTER_RELATIVE: return pointertex;
             case POINTER_GUI: return guicursortex;
-            case POINTER_EDIT: return editcursortex;
-            case POINTER_SPEC: return speccursortex;
+            case POINTER_EDIT: return *editcursortex ? editcursortex : crosshairtex;
+            case POINTER_SPEC: return *speccursortex ? speccursortex : crosshairtex;
             case POINTER_HAIR: return crosshairtex;
             case POINTER_TEAM: return teamcrosshairtex;
             case POINTER_ZOOM: return *zoomcrosshairtex ? zoomcrosshairtex : crosshairtex;

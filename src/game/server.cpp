@@ -4388,14 +4388,14 @@ namespace server
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colorname(ci));
                     getstring(text, p);
-                    loopi(2) ci->state.colour[i] = getint(p);
+                    int colour = getint(p);
                     if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     copystring(ci->name, text, MAXNAMELEN+1);
+                    ci->state.setcolour(colour);
                     relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour[0]);
-                    QUEUE_INT(ci->state.colour[1]);
                     break;
                 }
 

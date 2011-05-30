@@ -578,12 +578,11 @@ struct gamestate
     }
     ~gamestate() {}
 
-    void setcolour(int colour1 = 0, int colour2 = 0)
+    void setcolour(int col = 0)
     {
-        if(!colour1) colour1 = rnd(0xFFFFFF);
-        if(!colour2) colour2 = rnd(0xFFFFFF);
-        ivec col1(max((colour1>>16)&0xFF, 1), max((colour1>>8)&0xFF, 1), max(colour1&0xFF, 1)),
-             col2(max((colour2>>16)&0xFF, 1), max((colour2>>8)&0xFF, 1), max(colour2&0xFF, 1));
+        if(!col) col = rnd(0xFFFFFF);
+        ivec col1(max((col>>16)&0xFF, 1), max((col>>8)&0xFF, 1), max(col&0xFF, 1)),
+             col2 = ivec(col).mul(7).div(8).add(32);
         colour[0] = (col1.x<<16)|(col1.y<<8)|col1.z;
         colour[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
     }
@@ -1255,10 +1254,10 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setinfo(const char *n = NULL, int colour1 = 0, int colour2 = 0)
+    void setinfo(const char *n = NULL, int col = 0)
     {
         if(n && *n) copystring(name, n, MAXNAMELEN+1); else name[0] = 0;
-        setcolour(colour1, colour2);
+        setcolour(col);
     }
 
     int getcolour(int tone = 0)
