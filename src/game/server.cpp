@@ -3877,7 +3877,7 @@ namespace server
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
     {
-        if(sender<0) return;
+        if(sender<0 || p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED) return;
         char text[MAXTRANS];
         int type = -1, prevtype = -1;
         clientinfo *ci = sender>=0 ? (clientinfo *)getinfo(sender) : NULL;
