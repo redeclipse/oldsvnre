@@ -74,13 +74,13 @@ struct bomberservmode : bomberstate, servmode
         int score = 0;
         if(g.team != ci->team)
         {
-            givepoints(ci, 5);
+            givepoints(ci, GAME(bomberpoints));
             ci->state.gscore++;
             score = addscore(ci->team, 1);
         }
         else
         {
-            givepoints(ci, -5);
+            givepoints(ci, -GAME(bomberpenalty));
             ci->state.gscore--;
             score = addscore(ci->team, -1);
         }
@@ -135,7 +135,7 @@ struct bomberservmode : bomberstate, servmode
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         if(f.lastowner == ci->clientnum && f.droptime && (GAME(bomberpickupdelay) < 0 || lastmillis-f.droptime <= GAME(bomberpickupdelay))) return;
         bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
-        givepoints(ci, 3);
+        givepoints(ci, GAME(bomberpickuppoints));
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
 
