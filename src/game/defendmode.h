@@ -73,7 +73,7 @@ struct defendservmode : defendstate, servmode
                 if(!b.owners || !b.enemies)
                 {
                     int pts = b.occupy(b.enemy, GAME(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, GAME(defendoccupy), m_gsp1(gamemode, mutators));
-                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], 3);
+                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], GAME(defendpoints));
                 }
                 sendaffinity(i);
             }

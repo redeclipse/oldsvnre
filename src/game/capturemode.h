@@ -57,7 +57,7 @@ struct captureservmode : capturestate, servmode
                 if(iscapturehome(f, ci->team) && (f.owner < 0 || (m_gsp1(gamemode, mutators) && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     capturestate::returnaffinity(i, gamemillis);
-                    givepoints(ci, 5);
+                    givepoints(ci, GAME(capturepoints));
                     if(flags[i].team != ci->team)
                     {
                         ci->state.gscore++;
@@ -89,13 +89,13 @@ struct captureservmode : capturestate, servmode
         if(!m_gsp(gamemode, mutators) && f.team == ci->team)
         {
             capturestate::returnaffinity(i, gamemillis);
-            givepoints(ci, 5);
+            givepoints(ci, GAME(capturepoints));
             sendf(-1, 1, "ri3", N_RETURNAFFIN, ci->clientnum, i);
         }
         else
         {
             capturestate::takeaffinity(i, ci->clientnum, gamemillis);
-            if(f.team != ci->team) givepoints(ci, 3);
+            if(f.team != ci->team) givepoints(ci, GAME(capturepickuppoints));
             sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
         }
     }
@@ -135,7 +135,7 @@ struct captureservmode : capturestate, servmode
                 if(f.team != ci->team)
                 {
                     capturestate::returnaffinity(i, gamemillis);
-                    givepoints(ci, 5);
+                    givepoints(ci, GAME(capturepoints));
                     ci->state.gscore++;
                     int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
@@ -149,7 +149,7 @@ struct captureservmode : capturestate, servmode
             else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(captureresetdelay))
             {
                 capturestate::returnaffinity(i, gamemillis);
-                loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -5);
+                loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -GAME(capturepenalty));
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
             }
         }

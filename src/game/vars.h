@@ -136,6 +136,9 @@ GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
 GVAR(0, capturepickupdelay, -1, 5000, VAR_MAX);
+GVAR(0, capturepoints, 0, 5, VAR_MAX); // points added to score
+GVAR(0, capturepenalty, 0, 5, VAR_MAX); // points taken from score
+GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, captureextinguish, 0, 6, 7);
 GFVAR(0, capturerelativity, 0, 0.25f, FVAR_MAX);
@@ -156,6 +159,9 @@ GVAR(0, bomberholdlimit, 0, 0, VAR_MAX); // finish when score is this or more (h
 GVAR(0, bomberresetdelay, 0, 15000, VAR_MAX);
 GVAR(0, bomberpickupdelay, -1, 5000, VAR_MAX);
 GVAR(0, bombercarrytime, 0, 15000, VAR_MAX);
+GVAR(0, bomberpoints, 0, 5, VAR_MAX); // points added to score
+GVAR(0, bomberpenalty, 0, 5, VAR_MAX); // points taken from score
+GVAR(0, bomberpickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, bomberholdpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, VAR_MAX);
@@ -267,10 +273,22 @@ GFVAR(0, kickpushcrouch, 0, 0, FVAR_MAX);
 GFVAR(0, kickpushsway, 0, 0.0125f, FVAR_MAX);
 GFVAR(0, kickpushzoom, 0, 0.125f, FVAR_MAX);
 
+GVAR(0, fragbonus, 0, 1, VAR_MAX);
+GVAR(0, enemybonus, 0, 0, VAR_MAX);
+GVAR(0, teamkillpenalty, 0, 1, VAR_MAX);
+GVAR(0, firstbloodpoints, 0, 2, VAR_MAX);
+GVAR(0, headshotpoints, 0, 2, VAR_MAX);
+
 GVAR(0, assistkilldelay, 0, 5000, VAR_MAX);
 GVAR(0, multikilldelay, 0, 5000, VAR_MAX);
+GVAR(0, multikillpoints, 0, 1, 1);
+GVAR(0, multikillbonus, 0, 1, VAR_MAX);
 GVAR(0, spreecount, 0, 5, VAR_MAX);
+GVAR(0, spreepoints, 0, 1, 1);
+GVAR(0, spreebonus, 0, 1, VAR_MAX);
 GVAR(0, dominatecount, 0, 5, VAR_MAX);
+GVAR(0, dominatepoints, 0, 2, VAR_MAX);
+GVAR(0, revengepoints, 0, 2, VAR_MAX);
 
 GVAR(0, alloweastereggs, 0, 1, 1); // 0 = off, 1 = on
 GVAR(0, returningfire, 0, 0, 1); // 0 = off, 1 = on
