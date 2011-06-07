@@ -73,7 +73,7 @@ GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);
 GVAR(0, trialweapon, 0, WEAP_MELEE, WEAP_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
-GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib/arena matches
+GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib matches
 GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
 GVAR(0, bomberdelay, 0, 3000, VAR_MAX); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to spawning player
@@ -259,7 +259,7 @@ GVAR(0, zoomlimit, 1, 10, 150);
 GVAR(0, zoomtime, 1, 100, VAR_MAX);
 
 GFVAR(0, explodescale, 0, 1, FVAR_MAX);
-GFVAR(0, explodelimited, 0, 0.75f, FVAR_MAX);
+GFVAR(0, explodelimited, 0, 0.5f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
 GVAR(0, criticalchance, 0, 100, VAR_MAX);
 
@@ -290,5 +290,5 @@ GVAR(0, dominatecount, 0, 5, VAR_MAX);
 GVAR(0, dominatepoints, 0, 2, VAR_MAX);
 GVAR(0, revengepoints, 0, 2, VAR_MAX);
 
-GVAR(0, alloweastereggs, 0, 1, 1); // 0 = off, 1 = on
+GVAR(0, alloweastereggs, 0, 1, 2); // 0 = off, 1 = on, 2 = extended (annoying ones)
 GVAR(0, returningfire, 0, 0, 1); // 0 = off, 1 = on

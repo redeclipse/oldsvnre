@@ -266,10 +266,10 @@ namespace hud
                 SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
                 g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey);
             }
-            if(m_arena(game::gamemode, game::mutators))
+            if(m_loadout(game::gamemode, game::mutators))
             {
                 SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                g.textf("Press \fs\fc%s\fS to \fs%s\fS loadouts", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
+                g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
             }
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {

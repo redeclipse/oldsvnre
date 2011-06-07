@@ -351,9 +351,10 @@ namespace game
 
     void chooseloadweap(gameent *d, const char *a, const char *b)
     {
-        if(m_arena(gamemode, mutators))
+        if(m_loadout(gamemode, mutators))
         {
-            loopj(2)
+            if(m_league(gamemode, mutators)) d->loadweap[1] = WEAP_PISTOL;
+            loopj(m_league(gamemode, mutators) ? 1 : 2)
             {
                 const char *s = j ? b : a;
                 if(*s >= '0' && *s <= '9') d->loadweap[j] = parseint(s);
@@ -362,15 +363,24 @@ namespace game
                     d->loadweap[j] = i;
                     break;
                 }
-                if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
+                if(d->loadweap[j] < w_lmin(gamemode, mutators) || d->loadweap[j] >= w_lmax(gamemode, mutators)) d->loadweap[j] = WEAP_MAX;
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
-            conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
-                WEAP(d->loadweap[0] >= WEAP_OFFSET ? d->loadweap[0] : WEAP_GRENADE, colour), (d->loadweap[0] >= WEAP_OFFSET ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex), (d->loadweap[0] >= WEAP_OFFSET ? WEAP(d->loadweap[0], name) : "random"),
-                WEAP(d->loadweap[1] >= WEAP_OFFSET ? d->loadweap[1] : WEAP_GRENADE, colour), (d->loadweap[1] >= WEAP_OFFSET ? hud::itemtex(WEAPON, d->loadweap[1]) : hud::questiontex), (d->loadweap[1] >= WEAP_OFFSET ? WEAP(d->loadweap[1], name) : "random")
-            );
+            if(m_league(gamemode, mutators))
+            {
+                conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS",
+                    WEAP(d->loadweap[0] != WEAP_MAX ? d->loadweap[0] : WEAP_MELEE, colour), (d->loadweap[0] != WEAP_MAX ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex), (d->loadweap[0] != WEAP_MAX ? WEAP(d->loadweap[0], name) : "random")
+                );
+            }
+            else
+            {
+                conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
+                    WEAP(d->loadweap[0] != WEAP_MAX ? d->loadweap[0] : WEAP_MELEE, colour), (d->loadweap[0] != WEAP_MAX ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex), (d->loadweap[0] != WEAP_MAX ? WEAP(d->loadweap[0], name) : "random"),
+                    WEAP(d->loadweap[1] != WEAP_MAX ? d->loadweap[1] : WEAP_MELEE, colour), (d->loadweap[1] != WEAP_MAX ? hud::itemtex(WEAPON, d->loadweap[1]) : hud::questiontex), (d->loadweap[1] != WEAP_MAX ? WEAP(d->loadweap[1], name) : "random")
+                );
+            }
         }
-        else conoutft(CON_MESG, "\foweapon selection is only available in arena");
+        else conoutft(CON_MESG, "\foweapon selection is only available in arena or league");
     }
     ICOMMAND(0, loadweap, "ss", (char *a, char *b), chooseloadweap(player1, a, b));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap[*n!=0 ? 1 : 0]));
@@ -433,7 +443,7 @@ namespace game
                 {
                     weap = w_attr(gamemode, weap, m_weapon(gamemode, mutators));
                     if(!isweap(weap)) weap = -1;
-                    else if(m_arena(gamemode, mutators) && weap < WEAP_ITEM && GAME(maxcarry) <= 2) weap = -1;
+                    else if(m_loadout(gamemode, mutators) && weap < w_lmax(gamemode, mutators) && GAME(maxcarry) <= 2) weap = -1;
                     else switch(WEAP(weap, allowed))
                     {
                         case 0: weap = -1; break;
@@ -605,7 +615,7 @@ namespace game
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
             {
-                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators));
+                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health*enemystrength : m_leaguehp(gamemode, mutators, d->loadweap[0]));
                 if(m_resize(gamemode, mutators))
                 {
                     minscale = minresizescale;
@@ -639,7 +649,7 @@ namespace game
 
     void heightoffset(gameent *d)
     {
-        d->setscale(rescale(d), curtime);
+        d->setscale(rescale(d), curtime, false, gamemode, mutators);
         float offset = d->height;
         d->o.z -= d->height;
         if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
@@ -906,7 +916,7 @@ namespace game
         if(hithurts(flags))
         {
             d->health = health;
-            if(d->health <= m_health(gamemode, mutators)) d->lastregen = 0;
+            if(d->health <= m_leaguehp(gamemode, mutators, d->loadweap[0])) d->lastregen = 0;
             d->lastpain = lastmillis;
             actor->totaldamage += damage;
         }
@@ -1318,7 +1328,7 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
-            d->mapchange(lastmillis, m_health(gamemode, mutators));
+            d->mapchange(lastmillis, m_leaguehp(gamemode, mutators, d->loadweap[0]));
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
         if(!empty) client::sendinfo = client::sendcrc = true;
@@ -1926,7 +1936,7 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(m_arena(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap[0] < 0 && !client::waiting() && !menuactive())
+            if(m_loadout(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap[0] < 0 && !client::waiting() && !menuactive())
                 showgui("loadout", -1);
         }
         else if(!menuactive()) showgui("main", -1);
