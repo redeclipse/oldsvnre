@@ -189,7 +189,7 @@ namespace client
             game::player1->setinfo(text, col);
             addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour[0]);
         }
-        conoutft(CON_INFO, "\fayour name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
+        conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
     ICOMMAND(0, setinfo, "si", (char *s, int *m), setplayerinfo(s, *m));
 
@@ -236,7 +236,7 @@ namespace client
 
     void writeclientinfo(stream *f)
     {
-        f->printf("setinfo \"%s\" 0x%8x 0x%8x\n\n", game::player1->name, game::player1->colour[0], game::player1->colour[1]);
+        f->printf("setinfo \"%s\" 0x%06x\n\n", game::player1->name, game::player1->colour[0]);
     }
 
     void connectattempt(const char *name, int port, const char *password, const ENetAddress &address)
@@ -1087,6 +1087,7 @@ namespace client
             d->lastweap = d->weapselect = isweap(weap) ? weap : WEAP_MELEE;
             loopi(WEAP_MAX) d->ammo[i] = getint(p);
         }
+        d->setscale(game::rescale(d), 0, true, game::gamemode, game::mutators);
     }
 
     void updatepos(gameent *d)
@@ -1456,7 +1457,7 @@ namespace client
                     gameent *f = game::newclient(lcn);
                     if(f && f != game::player1 && !f->ai)
                     {
-                        f->respawn(lastmillis, m_health(game::gamemode, game::mutators));
+                        f->respawn(lastmillis);
                         parsestate(f, p);
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
@@ -1488,7 +1489,7 @@ namespace client
                         break;
                     }
                     if(f == game::player1 && editmode) toggleedit();
-                    f->respawn(lastmillis, m_health(game::gamemode, game::mutators));
+                    f->respawn(lastmillis);
                     parsestate(f, p);
                     f->state = CS_ALIVE;
                     if(f == game::player1 || f->ai)
@@ -1653,7 +1654,7 @@ namespace client
                         int lcn = getint(p);
                         if(p.overread() || lcn < 0) break;
                         gameent *f = game::newclient(lcn);
-                        if(f && f!=game::player1 && !f->ai) f->respawn(0, m_health(game::gamemode, game::mutators));
+                        if(f && f!=game::player1 && !f->ai) f->respawn();
                         parsestate(f, p, true);
                     }
                     break;
