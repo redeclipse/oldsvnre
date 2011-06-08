@@ -189,7 +189,7 @@ namespace client
             game::player1->setinfo(text, col);
             addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour[0]);
         }
-        conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
+        if(initing == NOT_INITING) conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
     ICOMMAND(0, setinfo, "si", (char *s, int *m), setplayerinfo(s, *m));
 
