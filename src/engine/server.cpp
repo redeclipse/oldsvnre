@@ -257,16 +257,19 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
             else
             {
                 c = *++src;
-                if(c=='z')
+                if(!c) break;
+                else if(c=='z')
                 {
                     c = *++src;
                     if(c) c = *++src;
+                    if(!c) break;
                 }
-                else if(c == '[')
+                else if(c == '[' || c == ')')
                 {
-                    const char *end = strchr(src, ']');
+                    const char *end = strchr(src, c == '[' ? ']' : ')');
                     src += end ? end-src : strlen(src);
                 }
+                
             }
             continue;
         }
