@@ -1488,15 +1488,16 @@ namespace entities
             if(!ents.inrange(current)) continue;
             extentity &ent = *ents[current];
             linkvector &links = ent.links;
+            bool jetter = physics::allowjetpack(d);
             loopv(links)
             {
                 int link = links[i];
                 if(ents.inrange(link) && ents[link]->type == ents[node]->type && (link == node || link == goal || !ents[link]->links.empty()))
                 {
                     bool wp = ents[link]->type == WAYPOINT;
-                    if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !physics::allowjetpack()) continue;
+                    if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !jetter) continue;
                     linkq &n = nodes[link];
-                    int weight = physics::allowjetpack() ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
+                    int weight = jetter ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
                     float curscore = prevscore + ents[link]->o.dist(ent.o)*weight;
                     if(n.id == routeid && curscore >= n.curscore) continue;
                     n.curscore = curscore;
