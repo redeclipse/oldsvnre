@@ -3480,7 +3480,7 @@ namespace server
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastburnowner);
                         dodamage(ci, co ? co : ci, GAME(burndamage), -1, HIT_BURN);
-                        if(m_league(gamemode, mutators) && ci->state.loadweap[0] == WEAP_FLAMER)
+                        if(m_league(gamemode, mutators) && WEAP(ci->state.loadweap[0], leaguetraits)&(1<<TRAIT_BURNRES))
                         {
                             sendf(-1, 1, "ri3", N_SPHY, ci->clientnum, SPHY_EXTINGUISH);
                             ci->state.lastburn = ci->state.lastburntime = 0;
@@ -3495,7 +3495,7 @@ namespace server
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastbleedowner);
                         dodamage(ci, co ? co : ci, GAME(bleeddamage), -1, HIT_BLEED);
-                        if(m_league(gamemode, mutators) && ci->state.loadweap[0] == WEAP_SWORD)
+                        if(m_league(gamemode, mutators) && WEAP(ci->state.loadweap[0], leaguetraits)&(1<<TRAIT_BLEEDRES))
                             ci->state.lastbleed = ci->state.lastbleedtime = 0;
                         else ci->state.lastbleedtime += GAME(bleeddelay);
                     }

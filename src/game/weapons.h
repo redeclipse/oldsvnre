@@ -68,6 +68,15 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 #define doesbleed(x,y)  (isweap(x) && WEAP2(x, residual, y&HIT_ALT) == 2)
 #define WALT(x)         (WEAP_MAX+WEAP_##x)
 
+enum
+{
+    TRAIT_NONE = 0,
+    TRAIT_JETPACK,
+    TRAIT_BURNRES,
+    TRAIT_BLEEDRES,
+    TRAIT_ALL = (1<<TRAIT_JETPACK)|(1<<TRAIT_BURNRES)|(1<<TRAIT_BLEEDRES)
+};
+
 #define WEAPON(a, \
     w0, w11, w12, w2, w3, w4, w5, w6, w7, w8, w9, wa, wb1, wb2, wc, wd, we1, we2, we3, we4, we5, we6, \
     wf, wg, wh, wi, wj, wk, mwj, mwk, xwj, xwk, wl, wm, wn1, wn2, wo1, wo2, wo3, wo4, wo5, wo6, wo7, wo8, wo9, wo10, wp, wq, \
@@ -75,7 +84,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     t0, t1, t2, t3, y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, ya, yb, yc, yd, ye1, ye2, yf1, yf2, yg, yh, \
     yi, yj, yk, yl, ym, yn, yo, yp, yq, yr, ys1, ys2, yt1, yt2, yw1, yw2, yx1, yx2, yy, yz, \
     ya3, ya4, ya5, ya6, ya7, ya8, ya9, ya10, ya11, ya12, ya13, ya14, \
-    ll01, ll02, ll03, ll04 \
+    ll01, ll02, ll03, ll04, ll05 \
  ) \
     GSVAR(0, a##name, #a); GVAR(IDF_HEX, a##colour, 0, w0, 0xFFFFFF); \
     GVAR(0, a##add, 1, w11, VAR_MAX); GVAR(0, a##max, 1, w12, VAR_MAX); \
@@ -138,8 +147,9 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GFVAR(0, a##flakffwd1, 0, ya9, 1); GFVAR(0, a##flakffwd2, 0, ya10, 1); \
     GFVAR(0, a##flakoffset1, 0, ya11, FVAR_MAX); GFVAR(0, a##flakoffset2, 0, ya12, FVAR_MAX); \
     GFVAR(0, a##flakskew1, 0, ya13, FVAR_MAX); GFVAR(0, a##flakskew2, 0, ya14, FVAR_MAX); \
-    GFVAR(0, a##leaguehealth, 0, ll01, FVAR_MAX); GFVAR(0, a##leagueweight, 0, ll02, FVAR_MAX); \
-    GFVAR(0, a##leaguespeed, 0, ll03, FVAR_MAX); GFVAR(0, a##leaguescale, 0, ll04, FVAR_MAX);
+    GVAR(0, a##leaguetraits, 0, ll01, TRAIT_ALL); \
+    GFVAR(0, a##leaguehealth, 0, ll02, FVAR_MAX); GFVAR(0, a##leagueweight, 0, ll03, FVAR_MAX); \
+    GFVAR(0, a##leaguespeed, 0, ll04, FVAR_MAX); GFVAR(0, a##leaguescale, 0, ll05, FVAR_MAX);
 
 //  name    col
 //  add     max     sub1    sub2    adly1   adly2   rdly    dam1    dam2    spd1    spd2    pow1    pow2    time1   time2
@@ -153,6 +163,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  kpsh1   kpsh2   hpsh1   hpsh2   slow1   slow2   aidst1  aidst2  psz1    psz2    plen1   plen2   freq    push
 //  cmult   cdist   dlta1   dlta2   trce1   trce2   hdmin1  hdmin2  whpdm1  whipdm2 tordm1  tordm2  legdm1  legdm2
 //  fscale1 fscale2 fsprd1  fsprd2  frel1   frel2   fffwd1  fffwd2  foff1   foff2   fskew1  fskew2
+//  ltraits
 //  lhealth lweight lspeed  lscale
 WEAPON(melee, 0xEEEEEE,
     1,      1,      0,      0,      500,    750,    50,     30,     40,     0,      0,      0,      0,      100,    100,
@@ -166,7 +177,8 @@ WEAPON(melee, 0xEEEEEE,
     0,      0,      200,    400,    1,      2,      16,     16,     1,      2,      0,      0,      0,      1,
     2,      0,      10,     10,     2,      4,      0,      0,      0.8f,   0.8f,   0.7f,   0.6f,   0.3f,   0.3f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
-    1.5f,   0.5f,   1.5f,   0.7f
+    (1<<TRAIT_JETPACK),
+    0.8f,   0.8f,   1.3f,   0.8f
 );
 WEAPON(pistol, 0x888888,
     10,     10,     1,      2,      150,    300,    1000,   35,     11,     3000,   1000,   0,      0,      2000,   400,
@@ -180,7 +192,8 @@ WEAPON(pistol, 0x888888,
     5,      3,      35,     50,     0.25f,  0.15f,  256,    256,    1,      1,      10,     10,     1,      1,
     3,      128,    10,     10,     1,      1,      0,      0,      0.8f,   0.8f,   0.65f,  0.65f,  0.325f, 0.325f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
-    2.f,    0.7f,   1.2f,   0.8f
+    (1<<TRAIT_BLEEDRES),
+    0.75f,  0.65f,  1.75f,  0.7f
 );
 WEAPON(sword, 0x2222AA,
     1,      1,      0,      0,      500,    750,    50,     30,     60,     0,      0,      0,      0,      350,    500,
@@ -194,7 +207,8 @@ WEAPON(sword, 0x2222AA,
     0,      0,      250,    500,    0.75f,  1,      48,     48,     1,      1.25f,  0,      0,      1,      1,
     2,      0,      10,     10,     3,      5,      0,      0,      0.8f,   0.8f,   0.65f,  0.65f,  0.3f,   0.3f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
-    1.f,    1.f,    1.2f,   1.1f
+    (1<<TRAIT_BLEEDRES),
+    1.5f,   1.f,    0.9f,   1.1f
 );
 WEAPON(shotgun, 0xFFFF44,
     2,      8,      1,      2,      600,    900,    750,    15,     5,      1000,   250,    0,      0,      400,    5000,
@@ -208,7 +222,8 @@ WEAPON(shotgun, 0xFFFF44,
     30,     60,     200,    100,    1,      0.5f,   256,    512,    0.75f,  0.75f,  25,     15,     1,      1.5f,
     2,      256,    10,     10,     1,      1,      0,      0,      0.8f,   0.9f,   0.6f,   0.7f,   0.3f,   0.4f,
     1,      1,      1,      0.2f,   1,      1.5f,   0,      0,      8,      8,      1,      1,
-    2.f,    1.5f,   0.7f,   1.2f
+    (1<<TRAIT_BLEEDRES),
+    1.25f,   1.25f,  0.8f,  1.25f
 );
 WEAPON(smg, 0xFF8844,
     40,     40,     1,      2,      100,    200,    1500,   22,     10,     2000,   350,    0,      0,      800,    150,
@@ -222,7 +237,8 @@ WEAPON(smg, 0xFF8844,
     5,      10,     150,    75,     1.5f,   0.75f,  512,    96,     0.5f,   0.6f,   35,     25,     1,      1.5f,
     3,      128,    10,     1000,   1,      1,      0,      0,      0.8f,   0.8f,   0.7f,   0.7f,   0.35f,  0.35f,
     1,      0.5f,   0.2f,   0.1f,   1,      1,      0,      0,      8,      8,      1,      1,
-    0.7f,   0.7f,   1.f,    0.9f
+    (1<<TRAIT_BLEEDRES),
+    2.f,    1.5f,   0.5f,   1.5f
 );
 WEAPON(flamer, 0xAA2222,
     25,     25,     1,      5,      100,    500,    2000,   8,      8,      300,    150,    0,      500,    350,    350,
@@ -236,7 +252,8 @@ WEAPON(flamer, 0xAA2222,
     0.25f,  1,      25,     100,    0.25f,  1,      64,     128,    12,     24,     0,      5,      2,      1.5f,
     4,      64,     10,     10,     1,      1,      4,      4,      0.65f,  0.65f,  0.45f,  0.45f,  0.25f,  0.25f,
     0.5f,   0.5f,   0.1f,   0.1f,   1,      1,      0.5f,   0.5f,   8,      8,      1,      1,
-    0.8f,   1.f,    1.f,    1.f
+    (1<<TRAIT_BURNRES),
+    0.75f,  0.75f,  0.75f,  0.75f
 );
 WEAPON(plasma, 0x44FFFF,
     20,     20,     1,      20,     300,    1000,   2000,   20,     10,     1000,   30,     0,      2000,   750,    5000,
@@ -250,7 +267,8 @@ WEAPON(plasma, 0x44FFFF,
     10,     150,    100,    -250,   1,      2,      128,    64,     2.5f,   45,     0,      0,      2,      1.5f,
     2,      0,      10,     10,     1,      1,      8,      4,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
-    1.5f,   1.2f,   0.9f,   0.9f
+    (1<<TRAIT_BURNRES),
+    0.9f,   1.2f,   0.9f,   0.9f
 );
 WEAPON(rifle, 0xAA66FF,
     5,      5,      1,      1,      750,    1000,   1750,   32,     150,    5000,   100000, 0,      0,      5000,   5000,
@@ -264,6 +282,7 @@ WEAPON(rifle, 0xAA66FF,
     20,     10,     100,    200,    1,      2,      768,    2048,   2,      2,      256,    512,    1,      1.25f,
     2,      1024,   10,     10,     1,      1,      4,      4,      0.6f,   0.75f,  0.4f,   0.5f,   0.2f,   0.25f,
     1,      1,      0.25f,  0.25f,  1,      1,      0,      0,      8,      8,      1,      1,
+    (1<<TRAIT_BLEEDRES),
     0.8f,   1.1f,   0.8f,   0.8f
 );
 WEAPON(grenade, 0x44FF44,
@@ -278,6 +297,7 @@ WEAPON(grenade, 0x44FF44,
     5,      5,      250,    250,    2,      2,      384,    256,    2,      2,      0,      0,      2,      2,
     2,      0,      10,     10,     1,      1,      8,      8,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,
     1,      1,      1,      1,      0,      0,      0,      0,      0,      0,      1,      1,
+    (1<<TRAIT_BURNRES),
     1.1f,   1.1f,   1.f,    1.1f
 );
 WEAPON(rocket, 0x993311,
@@ -292,7 +312,8 @@ WEAPON(rocket, 0x993311,
     150,    150,    750,    500,    4,      3,      1024,   512,    3,      3,      0,      0,      3,      4,
     2,      0,      10,     10,     1,      1,      16,     16,     0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,
     1,      1,      1,      1,      0,      0,      0,      0,      0,      0,      1,      1,
-    1.2f,   1.2f,   0.6f,   1.3f
+    (1<<TRAIT_BURNRES),
+    1.2f,   1.6f,   0.6f,   1.4f
 );
 
 struct weaptypes
@@ -461,6 +482,8 @@ WEAPDEF2(float, flakrel);
 WEAPDEF2(float, flakffwd);
 WEAPDEF2(float, flakoffset);
 WEAPDEF2(float, flakskew);
+
+WEAPDEF(int, leaguetraits);
 WEAPDEF(float, leaguehealth);
 WEAPDEF(float, leagueweight);
 WEAPDEF(float, leaguespeed);

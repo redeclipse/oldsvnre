@@ -919,7 +919,7 @@ namespace ai
             int entid = obs.remap(d, n, epos, retry);
             if(entities::ents.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
             {
-                if(entities::ents[entid]->attrs[0]&WP_F_JETPACK && !physics::canjetpack(d)) return false;
+                if(entities::ents[entid]->attrs[0]&WP_F_JETPACK && !physics::allowjetpack(d)) return false;
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;
                 d->ai->targnode = entid;
@@ -993,7 +993,7 @@ namespace ai
         vec off = vec(pos).sub(d->feetpos());
         if(d->blocked) off.z += JUMPMIN; // it could help..
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 100 && !d->turnside,
-            impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 500 || d->vel.z < 1), jet = air && physics::canjetpack(d),
+            impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 500 || d->vel.z < 1), jet = air && physics::allowjetpack(d),
             jumper = (locked || d->blocked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
             jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1169,7 +1169,7 @@ namespace ai
             }
 
             bool wantsimpulse = false;
-            if(physics::allowimpulse(physics::allowjetpack() ? 0 : 2))
+            if(physics::allowimpulse(physics::allowjetpack(d) ? 0 : 2))
             {
                 if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsimpulse = true;
                 else if(b.idle == -1 && !d->ai->dontmove)

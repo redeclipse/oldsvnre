@@ -45,9 +45,18 @@ namespace physics
     bool allowjetpack(physent *d)
     {
         if(isjetpack) return true;
-        if(d && (d->type == ENT_PLAYER || d->type == ENT_AI) && powered(d, true))
-            return true;
-        return false;
+        if(d)
+        {
+            if(d->type == ENT_PLAYER || d->type == ENT_AI)
+            {
+                gameent *e = (gameent *)d;
+                if(powered(d, true)) return true;
+                if(m_league(game::gamemode, game::mutators))
+                    return isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_JETPACK);
+            }
+            return false;
+        }
+        return m_league(game::gamemode, game::mutators);
     }
     bool allowimpulse(int level) { return impulseallowed >= level && (impulsestyle || allowjetpack()); }
 
@@ -777,7 +786,7 @@ namespace physics
                             d->impulse[IM_POWER] = 0;
                         }
                     }
-                    else if(isjetpack && impulsejetpack > 0)
+                    else if(allowjetpack(d) && impulsejetpack > 0)
                     {
                         int len = int(ceilf(millis*impulsejetpack));
                         if(len > 0 && canimpulse(d, len, 0))
@@ -787,6 +796,7 @@ namespace physics
                         }
                         else jetting = d->action[AC_JUMP] = false;
                     }
+                    else jetting = d->action[AC_JUMP] = false;
                 }
                 if(d->impulse[IM_METER] > 0 && canregenimpulse(d))
                 {
