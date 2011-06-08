@@ -2573,7 +2573,7 @@ namespace server
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
             sendstring(ci->name, p);
-            loopi(2) putint(p, ci->state.colour[i]);
+            putint(p, ci->state.colour[0]);
             putint(p, ci->team);
         }
     }
