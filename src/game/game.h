@@ -1122,19 +1122,19 @@ struct cament
         score = 0;
     }
 
-    static int camsort(const cament *a, const cament *b)
+    static bool camsort(const cament &a, const cament &b)
     {
-        if(a->score > 0 && b->score <= 0) return -1;
-        if(a->score <= 0 && b->score > 0) return 1;
-        if(a->pri > b->pri) return -1;
-        if(a->pri < b->pri) return 1;
-        if(a->cansee > b->cansee) return -1;
-        if(a->cansee < b->cansee) return 1;
-        if(a->score < b->score) return -1;
-        if(a->score > b->score) return 1;
-        if(a->dist < b->dist) return -1;
-        if(a->dist > b->dist) return 1;
-        return 0;
+        if(a.score > 0 && b.score <= 0) return true;
+        if(a.score <= 0 && b.score > 0) return false;
+        if(a.pri > b.pri) return true;
+        if(a.pri < b.pri) return false;
+        if(a.cansee > b.cansee) return true;
+        if(a.cansee < b.cansee) return false;
+        if(a.score < b.score) return true;
+        if(a.score > b.score) return false;
+        if(a.dist < b.dist) return true;
+        if(a.dist > b.dist) return false;
+        return false;
     }
 };
 

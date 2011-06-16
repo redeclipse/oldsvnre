@@ -180,6 +180,8 @@ struct ident
     int getint() const;
     const char *getstr() const;
     void getval(tagval &v) const;
+
+    static bool compare(ident *x, ident *y) { return strcmp(x->name, y->name) < 0; }
 };
 
 static inline bool htcmp(const char *key, const ident &id) { return !strcmp(key, id.name); }
@@ -301,7 +303,6 @@ extern int pointlist(const char *s, int pos, int &len);
 extern int checklist(const char *word, int size, const char *list);
 extern char *shrinklist(const char *list, const char *limit, int failover);
 
-extern int sortidents(ident **x, ident **y);
 extern void writeescapedstring(stream *f, const char *s);
 
 extern void checksleep(int millis);

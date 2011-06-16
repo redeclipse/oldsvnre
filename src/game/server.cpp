@@ -1225,7 +1225,15 @@ namespace server
         return false;
     }
 
-    int sortrandomly(int *a, int *b) { return rnd(3)-1; }
+    template<class T>
+    void sortrandomly(vector<T> &src)
+    {
+        vector<T> dst;
+        dst.reserve(src.length());
+        while(src.length()) dst.add(src.removeunordered(rnd(src.length())));
+        src.move(dst);
+    }
+
     void setupitems(bool update)
     {
         static vector<int> items, actors;
@@ -1261,12 +1269,12 @@ namespace server
         }
         if(!items.empty())
         {
-            items.sort(sortrandomly);
+            sortrandomly(items);
             loopv(items) sents[items[i]].millis += GAME(itemspawndelay)*i;
         }
         if(!actors.empty())
         {
-            actors.sort(sortrandomly);
+            sortrandomly(actors);
             loopv(actors) sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : GAME(enemyspawndelay))*i;
         }
     }
@@ -2226,11 +2234,9 @@ namespace server
 
         crcinfo(int crc, int matches) : crc(crc), matches(matches) {}
 
-        static int compare(const crcinfo *x, const crcinfo *y)
+        static bool compare(const crcinfo &x, const crcinfo &y)
         {
-            if(x->matches > y->matches) return -1;
-            if(x->matches < y->matches) return 1;
-            return 0;
+            return x.matches > y.matches;
         }
     };
 

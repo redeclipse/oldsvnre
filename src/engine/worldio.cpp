@@ -490,7 +490,7 @@ void save_config(char *mname)
     h->printf("// Variables stored in map file, may be uncommented here, or changed from editmode.\n");
     vector<ident *> ids;
     enumerate(idents, ident, id, ids.add(&id));
-    ids.sort(sortidents);
+    ids.sort(ident::compare);
     loopv(ids)
     {
         ident &id = *ids[i];
@@ -1389,13 +1389,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
     return false;
 }
 
-static int mtlsort(const int *x, const int *y)
-{
-    if(*x < *y) return -1;
-    if(*x > *y) return 1;
-    return 0;
-}
-
 void writeobj(char *name)
 {
     defformatstring(fname)("%s.obj", name);
@@ -1469,7 +1462,7 @@ void writeobj(char *name)
     }
     f->printf("\n");
 
-    usedmtl.sort(mtlsort);
+    usedmtl.sort();
     loopv(usedmtl)
     {
         vector<ivec> &keys = mtls[usedmtl[i]];

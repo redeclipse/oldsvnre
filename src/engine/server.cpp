@@ -1413,7 +1413,7 @@ void writecfg()
     client::writeclientinfo(f);
     vector<ident *> ids;
     enumerate(idents, ident, id, ids.add(&id));
-    ids.sort(sortidents);
+    ids.sort(ident::compare);
     bool found = false;
     loopv(ids)
     {

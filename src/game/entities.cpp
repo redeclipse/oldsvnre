@@ -755,11 +755,9 @@ namespace entities
         }
     }
 
-    static int sortitems(const actitem *a, const actitem *b)
+    static inline bool sortitems(const actitem &a, const actitem &b)
     {
-        if(a->score > b->score) return -1;
-        if(a->score < b->score) return 1;
-        return 0;
+        return a.score > b.score;
     }
 
     bool collateitems(gameent *d, vector<actitem> &actitems)

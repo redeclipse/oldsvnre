@@ -149,7 +149,7 @@ VERTWN(vertln, {
     } \
 }
 
-void rendervertwater(uint subdiv, int xo, int yo, int z, uint size, uchar mat = MAT_WATER)
+void rendervertwater(uint subdiv, int xo, int yo, int z, uint size, uchar mat)
 {
     wx1 = xo;
     wy1 = yo;
@@ -212,7 +212,7 @@ uint calcwatersubdiv(int x, int y, int z, uint size)
     return subdiv;
 }
 
-uint renderwaterlod(int x, int y, int z, uint size, uchar mat = MAT_WATER)
+uint renderwaterlod(int x, int y, int z, uint size, uchar mat)
 {
     if(size <= (uint)(32 << waterlod))
     {
@@ -262,7 +262,7 @@ uint renderwaterlod(int x, int y, int z, uint size, uchar mat = MAT_WATER)
         xtraverts += 4; \
     }
 
-void renderflatwater(int x, int y, int z, uint rsize, uint csize, uchar mat = MAT_WATER)
+void renderflatwater(int x, int y, int z, uint rsize, uint csize, uchar mat)
 {
     switch(mat)
     {
@@ -292,17 +292,19 @@ void renderflatwater(int x, int y, int z, uint rsize, uint csize, uchar mat = MA
 
 VARF(IDF_WORLD, vertwater, 0, 1, 1, if(!(identflags&IDF_WORLD)) allchanged());
 
+static inline void renderwater(const materialsurface &m, int mat = MAT_WATER)
+{
+    if(!vertwater || minimapping) renderflatwater(m.o.x, m.o.y, m.o.z, m.rsize, m.csize, mat);
+    else if(renderwaterlod(m.o.x, m.o.y, m.o.z, m.csize, mat) >= (uint)m.csize * 2)
+        rendervertwater(m.csize, m.o.x, m.o.y, m.o.z, m.csize, mat);
+}
+
 void renderlava(const materialsurface &m, Texture *tex, float scale)
 {
     lavaxk = 8.0f/(tex->xs*scale);
     lavayk = 8.0f/(tex->ys*scale);
     lavascroll = lastmillis/1000.0f;
-    if(vertwater)
-    {
-        if(renderwaterlod(m.o.x, m.o.y, m.o.z, m.csize, MAT_LAVA) >= (uint)m.csize * 2)
-            rendervertwater(m.csize, m.o.x, m.o.y, m.o.z, m.csize, MAT_LAVA);
-    }
-    else renderflatwater(m.o.x, m.o.y, m.o.z, m.rsize, m.csize, MAT_LAVA);
+    renderwater(m, MAT_LAVA);
 }
 
 /* reflective/refractive water */
@@ -509,9 +511,7 @@ void renderwaterff()
                 lastdepth = m.depth;
             }
 
-            if(!vertwater) renderflatwater(m.o.x, m.o.y, m.o.z, m.rsize, m.csize);
-            else if(renderwaterlod(m.o.x, m.o.y, m.o.z, m.csize) >= (uint)m.csize * 2)
-                rendervertwater(m.csize, m.o.x, m.o.y, m.o.z, m.csize);
+            renderwater(m);
         }
         if(varray::data.length()) varray::end();
     }
@@ -726,9 +726,7 @@ void renderwater()
                 lastdepth = m.depth;
             }
 
-            if(!vertwater || minimapping) renderflatwater(m.o.x, m.o.y, m.o.z, m.rsize, m.csize);
-            else if(renderwaterlod(m.o.x, m.o.y, m.o.z, m.csize) >= (uint)m.csize * 2)
-                rendervertwater(m.csize, m.o.x, m.o.y, m.o.z, m.csize);
+            renderwater(m);
         }
         if(varray::data.length()) varray::end();
     }

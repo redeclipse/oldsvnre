@@ -1,4 +1,5 @@
 #include "game.h"
+
 namespace client
 {
     bool sendinfo = false, isready = false, remote = false,
@@ -6,6 +7,8 @@ namespace client
     int lastping = 0, sessionid = 0;
     string connectpass = "";
     int needclipboard = -1;
+
+    extern int sortvotes;
 
     struct mapvote
     {
@@ -15,23 +18,20 @@ namespace client
 
         mapvote() {}
         ~mapvote() { players.shrink(0); }
+
+        static bool compare(const mapvote &a, const mapvote &b)
+        {
+            if(sortvotes)
+            {
+                if(a.players.length() > b.players.length()) return true;
+                if(a.players.length() < b.players.length()) return false;
+            }
+            return a.millis < b.millis;
+        }
     };
     vector<mapvote> mapvotes;
 
-    static int votecmp(mapvote *a, mapvote *b)
-    {
-        extern int sortvotes;
-        if(sortvotes)
-        {
-            if(a->players.length() > b->players.length()) return -1;
-            if(b->players.length() > a->players.length()) return 1;
-        }
-        if(a->millis < b->millis) return -1;
-        if(b->millis < a->millis) return 1;
-        return 0;
-    }
-
-    VARF(IDF_PERSIST, sortvotes, 0, 0, 1, mapvotes.sort(votecmp));
+    VARF(IDF_PERSIST, sortvotes, 0, 0, 1, mapvotes.sort(mapvote::compare));
     VARF(IDF_PERSIST, cleanvotes, 0, 0, 1, {
         if(cleanvotes && !mapvotes.empty()) loopvrev(mapvotes) if(mapvotes[i].players.empty()) mapvotes.remove(i);
     });
@@ -47,7 +47,7 @@ namespace client
         }
         if(found)
         {
-            if(!mapvotes.empty()) mapvotes.sort(votecmp);
+            if(!mapvotes.empty()) mapvotes.sort(mapvote::compare);
             if(msg && d == game::player1) conoutft(CON_EVENT, "%s cleared their previous vote", game::colorname(d));
         }
     }
@@ -74,7 +74,7 @@ namespace client
             m->millis = totalmillis;
         }
         m->players.add(d);
-        mapvotes.sort(votecmp);
+        mapvotes.sort(mapvote::compare);
         SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
         conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS, press \fs\fc%s\fS to vote", game::colorname(d), server::gamename(mode, muts), text, votekey);
     }
@@ -112,7 +112,7 @@ namespace client
         if(!f) return;
         vector<ident *> ids;
         enumerate(idents, ident, id, ids.add(&id));
-        ids.sort(sortidents);
+        ids.sort(ident::compare);
         loopv(ids)
         {
             ident &id = *ids[i];
@@ -2235,13 +2235,15 @@ namespace client
         if(ac > bc) return -1;
         if(ac < bc) return 1;
 
-        #define retcp(c) if(c) { return c; }
-        #define retsw(c,d,e) \
-            if(c != d) \
+        #define retcp(c) { int cv = (c); if(cv) { return cv; } }
+        #define retsw(c,d,e) { \
+            int cv = (c), dv = (d); \
+            if(cv != dv) \
             { \
-                if(e) { return c > d ? 1 : -1; } \
-                else { return c < d ? 1 : -1; } \
-            }
+                if((e)) { return cv > dv ? 1 : -1; } \
+                else { return cv < dv ? 1 : -1; } \
+            } \
+        }
 
         loopv(serversortstyles)
         {

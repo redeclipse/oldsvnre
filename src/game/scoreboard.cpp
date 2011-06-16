@@ -62,38 +62,38 @@ namespace hud
         return false;
     }
 
-    static int playersort(const gameent **a, const gameent **b)
+    static inline bool playersort(const gameent *a, const gameent *b)
     {
-        if((*a)->state==CS_SPECTATOR)
+        if(a->state==CS_SPECTATOR)
         {
-            if((*b)->state==CS_SPECTATOR) return strcmp((*a)->name, (*b)->name);
-            else return 1;
+            if(b->state==CS_SPECTATOR) return strcmp(a->name, b->name) < 0;
+            else return false;
         }
-        else if((*b)->state==CS_SPECTATOR) return -1;
+        else if(b->state==CS_SPECTATOR) return true;
         if(m_trial(game::gamemode))
         {
-            if(((*a)->cptime && !(*b)->cptime) || ((*a)->cptime && (*b)->cptime && (*a)->cptime < (*b)->cptime)) return -1;
-            if(((*b)->cptime && !(*a)->cptime) || ((*a)->cptime && (*b)->cptime && (*b)->cptime < (*a)->cptime)) return 1;
+            if((a->cptime && !b->cptime) || (a->cptime && b->cptime && a->cptime < b->cptime)) return true;
+            if((b->cptime && !a->cptime) || (a->cptime && b->cptime && b->cptime < a->cptime)) return false;
         }
-        if((*a)->points > (*b)->points) return -1;
-        if((*a)->points < (*b)->points) return 1;
-        if((*a)->frags > (*b)->frags) return -1;
-        if((*a)->frags < (*b)->frags) return 1;
-        return strcmp((*a)->name, (*b)->name);
+        if(a->points > b->points) return true;
+        if(a->points < b->points) return false;
+        if(a->frags > b->frags) return true;
+        if(a->frags < b->frags) return false;
+        return strcmp(a->name, b->name) < 0;
     }
 
-    static int scoregroupcmp(const scoregroup **x, const scoregroup **y)
+    static inline bool scoregroupcmp(const scoregroup *x, const scoregroup *y)
     {
-        if(!(*x)->team)
+        if(!x->team)
         {
-            if((*y)->team) return 1;
+            if(y->team) return false;
         }
-        else if(!(*y)->team) return -1;
-        if((*x)->total > (*y)->total) return -1;
-        if((*x)->total < (*y)->total) return 1;
-        if((*x)->players.length() > (*y)->players.length()) return -1;
-        if((*x)->players.length() < (*y)->players.length()) return 1;
-        return (*x)->team && (*y)->team ? (*x)->team-(*y)->team : 0;
+        else if(!y->team) return true;
+        if(x->total > y->total) return true;
+        if(x->total < y->total) return false;
+        if(x->players.length() > y->players.length()) return true;
+        if(x->players.length() < y->players.length()) return false;
+        return x->team && y->team && x->team < y->team;
     }
 
     int groupplayers()
