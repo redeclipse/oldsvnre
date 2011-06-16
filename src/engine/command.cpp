@@ -1750,11 +1750,6 @@ bool execfile(const char *cfgfile, bool msg, bool nonworld)
     return true;
 }
 
-int sortidents(ident **x, ident **y)
-{
-    return strcmp((*x)->name, (*y)->name);
-}
-
 void writeescapedstring(stream *f, const char *s)
 {
     f->putchar('"');
@@ -2417,7 +2412,7 @@ void getvariable(int num)
     }
     if(ids.inrange(num))
     {
-        ids.sort(sortidents);
+        ids.sort(ident::compare);
         formatstring(text)("%s", ids[num]->name);
     }
     else formatstring(text)("%d", ids.length());

@@ -406,7 +406,7 @@ void checkpings()
     }
 }
 
-int serverinfocompare(serverinfo **a, serverinfo **b) { return client::servercompare(*a, *b); }
+static inline int serverinfocompare(serverinfo *a, serverinfo *b) { return client::servercompare(a, b) < 0; }
 
 VAR(IDF_PERSIST, serverupdateinterval, 0, 10, INT_MAX-1);
 
