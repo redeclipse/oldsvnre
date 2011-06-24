@@ -440,7 +440,7 @@ namespace server
         {
             int aweap = ci->state.loadweap[j];
             if(ci->state.loadweap[j] >= w_lmax(gamemode, mutators)) ci->state.loadweap[j] = WEAP_MAX;
-            else if(ci->state.loadweap[j] >= w_lmin(gamemode, mutators)) switch(WEAP(ci->state.loadweap[j], allowed))
+            else if(ci->state.loadweap[j] >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap[j], allowed))
             {
                 case 0: ci->state.loadweap[j] = -1; break;
                 case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
@@ -3394,7 +3394,7 @@ namespace server
                 if(sents[i].type == WEAPON)
                 {
                     int attr = w_attr(gamemode, sents[i].attrs[0], sweap);
-                    if(attr < w_lmin(gamemode, mutators) || attr >= w_lmax(gamemode, mutators)) continue;
+                    if(attr < WEAP_OFFSET || attr >= w_lmax(gamemode, mutators)) continue;
                 }
                 if(finditem(i, true)) items[sents[i].type]++;
                 else if(!sents.inrange(lowest[sents[i].type]) || sents[i].millis < sents[lowest[sents[i].type]].millis)

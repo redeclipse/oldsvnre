@@ -440,7 +440,7 @@ struct gamestate
     int skipwait(int weap, int flags, int millis, int skip = 0)
     {
         int skipstate = skip;
-        if(weap == weapselect && WEAP2(weap, sub, flags&HIT_ALT) && (skip&(1<<WEAP_S_RELOAD)) && weapstate[weap] == WEAP_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < WEAP2(weap, sub, flags&HIT_ALT))
+        if(WEAP2(weap, sub, flags&HIT_ALT) && (skip&(1<<WEAP_S_RELOAD)) && weapstate[weap] == WEAP_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < WEAP2(weap, sub, flags&HIT_ALT))
             skipstate &= ~(1<<WEAP_S_RELOAD);
         return skipstate;
     }
@@ -454,7 +454,7 @@ struct gamestate
 
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
-        if(weap == weapselect || (weap == WEAP_MELEE && weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip))))
+        if(weap == weapselect || (weap == WEAP_MELEE && (flags&HIT_ALT || weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip)))))
             if((hasweap(weap, sweap) && ammo[weap] >= (WEAP2(weap, power, flags&HIT_ALT) ? 1 : WEAP2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
                 return true;
         return false;
@@ -544,18 +544,18 @@ struct gamestate
                 loopj(m_league(gamemode, mutators) ? 1 : 2)
                 {
                     aweap[j] = loadweap[j];
-                    if(aweap[j] < w_lmin(gamemode, mutators) || aweap[j] >= w_lmax(gamemode, mutators) || (j && aweap[0] == aweap[1]))
+                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= w_lmax(gamemode, mutators) || (j && aweap[0] == aweap[1]))
                     {
-                        aweap[j] = rnd(w_lmax(gamemode, mutators)-w_lmin(gamemode, mutators))+w_lmin(gamemode, mutators); // random
+                        aweap[j] = rnd(w_lmax(gamemode, mutators)-WEAP_OFFSET)+WEAP_OFFSET; // random
                         int iters = 0;
                         while(++iters < 10 && ((j && aweap[0] == aweap[1]) || WEAP(aweap[j], allowed) <= (m_duke(gamemode, mutators) ? 1 : 0)))
                         {
-                            if(++aweap[j] >= w_lmax(gamemode, mutators)) aweap[j] = w_lmin(gamemode, mutators);
+                            if(++aweap[j] >= w_lmax(gamemode, mutators)) aweap[j] = WEAP_OFFSET;
                         }
                     }
                     ammo[aweap[j]] = max(WEAPUSE(aweap[j]), 1);
                 }
-                if(m_league(gamemode, mutators)) loadweap[1] = aweap[0];
+                if(m_league(gamemode, mutators)) loadweap[1] = WEAP_PISTOL;
                 lastweap = weapselect = aweap[0];
             }
             else

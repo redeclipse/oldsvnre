@@ -231,5 +231,4 @@ extern mutstypes mutstype[];
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= -w2) && (isweap(w1) && WEAP(w1, carried)))
 #define w_attr(a,w1,w2)     (m_edit(a) || (w1 >= WEAP_OFFSET && w1 != w2) ? w1 : (w2 == WEAP_GRENADE ? WEAP_ROCKET : WEAP_GRENADE))
 #define w_spawn(weap)       int(GAME(itemspawntime)*WEAP(weap, frequency))
-#define w_lmin(a,b)         (m_league(a, b) ? 0 : WEAP_OFFSET)
 #define w_lmax(a,b)         (m_league(a, b) ? WEAP_MAX : WEAP_ITEM)

@@ -746,6 +746,56 @@ namespace physics
         return false;
     }
 
+    bool impulseplayer(gameent *d, bool onfloor, bool jetting, bool slide = false)
+    {
+        bool power = !slide && onfloor && !jetting && powered(d, true);
+        if(power || ((d->ai || impulseaction || slide) && canimpulse(d, 0, 1)))
+        {
+            bool dash = false, pulse = false;
+            if(slide) dash = true;
+            else if(!power)
+            {
+                if(!d->ai && onfloor) dash = impulseaction&2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
+                else pulse = ((d->ai || impulseaction&1) && d->action[AC_JUMP]) || ((d->ai || impulseaction&2) && d->action[AC_DASH]);
+            }
+            if(power || dash || pulse)
+            {
+                bool action = d->ai || slide || (!power && impulseaction&2);
+                int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
+                bool moving = move || strafe;
+                float skew = moving ? impulseboost : impulsejump;
+                if(onfloor)
+                {
+                    if(!power) skew = impulsedash;
+                    if(!dash) d->impulse[IM_JUMP] = lastmillis;
+                }
+                float force = impulsevelocity(d, skew);
+                if(power) force += jumpforce(d, true);
+                if(force > 0)
+                {
+                    vec dir(0, 0, 1);
+                    if(!power && (dash || moving || onfloor))
+                    {
+                        float yaw = d->aimyaw, pitch = moving && pulse ? d->aimpitch : 0;
+                        vecfromyawpitch(yaw, pitch, moving ? move : 1, strafe, dir);
+                        if(dash && !d->floor.iszero() && !dir.iszero())
+                        {
+                            dir.project(d->floor).normalize();
+                            if(dir.z < 0) force += -dir.z*force;
+                        }
+                    }
+                    (d->vel = dir.normalize()).mul(force);
+                    d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
+                    if(!allowjetpack()) d->action[AC_JUMP] = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, dash ? SPHY_DASH : SPHY_BOOST);
+                    game::impulseeffect(d);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     void modifyinput(gameent *d, vec &m, bool wantsmove, bool floating, int millis)
     {
         if(floating)
@@ -860,49 +910,7 @@ namespace physics
             }
             else
             {
-                bool power = onfloor && !jetting && powered(d, true);
-                if(power || ((d->ai || impulseaction) && canimpulse(d, 0, 1)))
-                {
-                    bool dash = false, pulse = false;
-                    if(!power)
-                    {
-                        if(!d->ai && onfloor) dash = impulseaction&2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
-                        else pulse = ((d->ai || impulseaction&1) && d->action[AC_JUMP]) || ((d->ai || impulseaction&2) && d->action[AC_DASH]);
-                    }
-                    if(power || dash || pulse)
-                    {
-                        bool action = d->ai || (!power && impulseaction&2);
-                        int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
-                        bool moving = move || strafe;
-                        float skew = moving ? impulseboost : impulsejump;
-                        if(onfloor)
-                        {
-                            if(!power) skew = impulsedash;
-                            if(!dash) d->impulse[IM_JUMP] = lastmillis;
-                        }
-                        float force = impulsevelocity(d, skew);
-                        if(power) force += jumpforce(d, true);
-                        if(force > 0)
-                        {
-                            vec dir(0, 0, 1);
-                            if(!power && (dash || moving || onfloor))
-                            {
-                                float yaw = d->aimyaw, pitch = moving && pulse ? d->aimpitch : 0;
-                                vecfromyawpitch(yaw, pitch, moving ? move : 1, strafe, dir);
-                                if(dash && !d->floor.iszero() && !dir.iszero())
-                                {
-                                    dir.project(d->floor).normalize();
-                                    if(dir.z < 0) force += -dir.z*force;
-                                }
-                            }
-                            (d->vel = dir.normalize()).mul(force);
-                            d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
-                            if(!allowjetpack()) d->action[AC_JUMP] = false;
-                            client::addmsg(N_SPHY, "ri2", d->clientnum, dash ? SPHY_DASH : SPHY_BOOST);
-                            game::impulseeffect(d);
-                        }
-                    }
-                }
+                impulseplayer(d, onfloor, jetting);
                 if(onfloor && d->action[AC_JUMP] && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
                 {
                     if(allowjetpack() && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
@@ -948,9 +956,9 @@ namespace physics
                     if((d->action[AC_SPECIAL] || slide) && hitplayer)
                     {
                         d->action[AC_SPECIAL] = false;
-                        if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, !onfloor || slide))
+                        if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
                         {
-                            if(!onfloor && !slide) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
+                            if(!impulseplayer(d, onfloor, jetting, true)) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
                             if(d->turnside)
                             {
                                 d->turnmillis = PHYSMILLIS;

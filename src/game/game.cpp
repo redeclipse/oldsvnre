@@ -363,7 +363,7 @@ namespace game
                     d->loadweap[j] = i;
                     break;
                 }
-                if(d->loadweap[j] < w_lmin(gamemode, mutators) || d->loadweap[j] >= w_lmax(gamemode, mutators)) d->loadweap[j] = WEAP_MAX;
+                if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= w_lmax(gamemode, mutators)) d->loadweap[j] = WEAP_MAX;
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
             if(m_league(gamemode, mutators))
@@ -2129,7 +2129,12 @@ namespace game
             {
                 if(physics::jetpack(d))
                 {
-                    if(d->move>0) anim |= (ANIM_JETPACK_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    if(d->action[AC_SPECIAL] || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY)
+                    {
+                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                        basetime2 = d->actiontime[AC_SPECIAL];
+                    }
+                    else if(d->move>0) anim |= (ANIM_JETPACK_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_JETPACK_LEFT : ANIM_JETPACK_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= (ANIM_JETPACK_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else anim |= (ANIM_JETPACK_UP|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2142,7 +2147,7 @@ namespace game
                     if(d->impulse[IM_TYPE] == IM_T_KICK) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
                     else if(d->move>0)
                     {
-                        if(d->action[AC_SPECIAL])
+                        if(d->action[AC_SPECIAL] || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY)
                         {
                             anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                             basetime2 = d->actiontime[AC_SPECIAL];
@@ -2151,7 +2156,7 @@ namespace game
                     }
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
-                    else if(d->action[AC_SPECIAL])
+                    else if(d->action[AC_SPECIAL] || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2166,7 +2171,7 @@ namespace game
                     {
                         if(d->move>0)
                         {
-                            if(d->action[AC_SPECIAL])
+                            if(d->action[AC_SPECIAL] || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY)
                             {
                                 anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                                 basetime2 = d->actiontime[AC_SPECIAL];
@@ -2179,7 +2184,7 @@ namespace game
                     }
                     else if(d->move>0)
                     {
-                        if(d->action[AC_SPECIAL])
+                        if(d->action[AC_SPECIAL] || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY)
                         {
                             anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                             basetime2 = d->actiontime[AC_SPECIAL];
@@ -2188,7 +2193,7 @@ namespace game
                     }
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
                     else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
-                    else if(d->action[AC_SPECIAL])
+                    else if(d->action[AC_SPECIAL] || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2197,7 +2202,7 @@ namespace game
                     if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
                 }
                 else if(d->turnside) anim |= ((d->turnside>0 ? ANIM_WALL_RUN_LEFT : ANIM_WALL_RUN_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
-                else if(physics::sliding(d, true)) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
+                else if(physics::sliding(d, true) || d->weapstate[WEAP_MELEE] == WEAP_S_SECONDARY) anim |= (ANIM_POWERSLIDE|ANIM_LOOP)<<ANIM_SECONDARY;
                 else if(physics::sprinting(d))
                 {
                     if(d->move>0) anim |= (ANIM_IMPULSE_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
