@@ -206,7 +206,6 @@ namespace hud
 
     VAR(IDF_PERSIST, showradar, 0, 2, 2);
     TVAR(IDF_PERSIST, bliptex, "textures/blip", 3);
-    TVAR(IDF_PERSIST, cardtex, "textures/card", 3);
     TVAR(IDF_PERSIST, flagtex, "textures/flag", 3);
     TVAR(IDF_PERSIST, bombtex, "textures/bomb", 3);
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
@@ -219,8 +218,8 @@ namespace hud
     FVAR(IDF_PERSIST, radarcardblend, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.85f, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.45f, 1000);
-    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
@@ -1159,9 +1158,9 @@ namespace hud
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
             else colour[0] = vec::hexcolor(d->getcolour(1));
             colour[1] = vec::hexcolor(d->getcolour(0));
-            const char *tex = dominated ? dominatedtex : bliptex;
+            const char *tex = dominated ? dominatedtex : playertex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend,
-                  pos = 2, size = dominated ? 1.5f : 1.f;
+                  pos = 2, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
@@ -1173,7 +1172,6 @@ namespace hud
                 }
                 else return;
                 tex = deadtex;
-                size *= 1.25f;
 
             }
             else if(d->state == CS_ALIVE)
