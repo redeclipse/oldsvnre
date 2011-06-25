@@ -536,7 +536,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col = vec::hexcolor(d->getcolour()).mul(illumlevel);
+                    vec col = vec::hexcolor(d->getcolour(2)).mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -1390,7 +1390,7 @@ namespace game
     {
         if(!name) name = d->name;
         static string cname;
-        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->getcolour(), name);
+        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->getcolour(2), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
             defformatstring(s)(" [%d]", d->clientnum);
@@ -2253,8 +2253,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(d->getcolour(0));
-            e->light.material[1] = bvec(d->getcolour(1));
+            e->light.material[0] = bvec(d->getcolour(2));
+            e->light.material[1] = bvec(d->getcolour(3));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2314,7 +2314,7 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = d->getcolour();
+            int colour = d->getcolour(2);
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
@@ -2520,7 +2520,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, d->getcolour(), 0.5f*amt, amt);
+                    part_flare(origin, v, 1, PART_FLARE, d->getcolour(2), 0.5f*amt, amt);
                 }
                 if(d->weapselect == WEAP_SWORD || powering)
                 {

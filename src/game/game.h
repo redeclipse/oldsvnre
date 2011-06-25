@@ -340,7 +340,7 @@ enum { IM_T_NONE = 0, IM_T_DASH, IM_T_BOOST, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, ammo[WEAP_MAX], entid[WEAP_MAX], colour[2];
+    int health, ammo[WEAP_MAX], entid[WEAP_MAX], colour;
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
@@ -356,10 +356,8 @@ struct gamestate
     void setcolour(int col = 0)
     {
         if(!col) col = rnd(0xFFFFFF);
-        ivec col1(max((col>>16)&0xFF, 1), max((col>>8)&0xFF, 1), max(col&0xFF, 1)),
-             col2 = ivec(col).mul(7).div(8).add(32);
-        colour[0] = (col1.x<<16)|(col1.y<<8)|col1.z;
-        colour[1] = (col2.x<<16)|(col2.y<<8)|col2.z;
+        ivec col1(max((col>>16)&0xFF, 1), max((col>>8)&0xFF, 1), max(col&0xFF, 1));
+        colour = (col1.x<<16)|(col1.y<<8)|col1.z;
     }
 
     int hasweap(int weap, int sweap, int level = 0, int exclude = -1)
@@ -1041,13 +1039,17 @@ struct gameent : dynent, gamestate
 
     int getcolour(int tone = 0)
     {
-        if(!tone && aitype >= AI_START)
+        if(aitype >= AI_START)
         {
-            int weap = isweap(loadweap[0]) ? loadweap[0] : weapselect;
-            if(isweap(weap)) return WEAP(weap, colour);
+            if(!(tone%2))
+            {
+                int weap = isweap(loadweap[0]) ? loadweap[0] : weapselect;
+                if(isweap(weap)) return WEAP(weap, colour);
+            }
+            return colour;
         }
-        if(tone || team == TEAM_NEUTRAL) return colour[tone%2 ? 0 : 1];
-        return TEAM(team, colour);
+        if(tone >= 2) return team == TEAM_NEUTRAL ? (tone%2 ? TEAM(team, colour) : colour) : (tone%2 ? colour : TEAM(team, colour));
+        return tone%2 ? TEAM(team, colour) : colour;
     }
 };
 

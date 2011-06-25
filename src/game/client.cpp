@@ -187,7 +187,7 @@ namespace client
             string text;
             filtertext(text, name);
             game::player1->setinfo(text, col);
-            addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour[0]);
+            addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour);
         }
         if(initing == NOT_INITING) conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
@@ -236,7 +236,7 @@ namespace client
 
     void writeclientinfo(stream *f)
     {
-        f->printf("setinfo \"%s\" 0x%06x\n\n", game::player1->name, game::player1->colour[0]);
+        f->printf("setinfo \"%s\" 0x%06x\n\n", game::player1->name, game::player1->colour);
     }
 
     void connectattempt(const char *name, int port, const char *password, const ENetAddress &address)
@@ -1462,7 +1462,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->getcolour();
+                            int colour = f->getcolour(1);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
@@ -1499,7 +1499,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->getcolour();
+                            int colour = f->getcolour(1);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
