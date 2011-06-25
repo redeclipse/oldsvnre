@@ -183,16 +183,29 @@ struct captureservmode : capturestate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(hasflaginfo && GAME(regenaffinity)) loopv(flags)
+        if(hasflaginfo)
         {
-            flag &f = flags[i];
-            bool insidehome = (iscapturehome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f);
-            if(insidehome || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
+            if(m_gsp2(gamemode, mutators)) loopv(flags)
             {
-                if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
-                if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
-                if(GAME(regenextra)) amt += GAME(regenextra);
-                return;
+                flag &f = flags[i];
+                if(iscaptureaffinity(f, ci->team) && f.owner < 0 && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2.f)
+                {
+                    if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
+                    if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
+                    if(GAME(regenextra)) amt += GAME(regenextra);
+                    return;
+                }
+            }
+            if(GAME(regenaffinity)) loopv(flags)
+            {
+                flag &f = flags[i];
+                if((iscapturehome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f) || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
+                {
+                    if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
+                    if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
+                    if(GAME(regenextra)) amt += GAME(regenextra);
+                    return;
+                }
             }
         }
     }
