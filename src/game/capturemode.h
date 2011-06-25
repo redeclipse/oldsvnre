@@ -190,7 +190,7 @@ struct captureservmode : capturestate, servmode
                 flag &f = flags[i];
                 if(iscaptureaffinity(f, ci->team) && f.owner < 0 && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2.f)
                 {
-                    if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
+                    if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators, ci->state.loadweap[0])*GAME(maxhealth)), total);
                     if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
                     if(GAME(regenextra)) amt += GAME(regenextra);
                     return;
@@ -201,7 +201,7 @@ struct captureservmode : capturestate, servmode
                 flag &f = flags[i];
                 if((iscapturehome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f) || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
                 {
-                    if(GAME(extrahealth)) total = max(GAME(extrahealth), total);
+                    if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators, ci->state.loadweap[0])*GAME(maxhealth)), total);
                     if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
                     if(GAME(regenextra)) amt += GAME(regenextra);
                     return;

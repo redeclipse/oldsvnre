@@ -615,7 +615,7 @@ namespace game
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
             {
-                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health*enemystrength : m_leaguehp(gamemode, mutators, d->loadweap[0]));
+                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators, d->loadweap[0]));
                 if(m_resize(gamemode, mutators))
                 {
                     minscale = minresizescale;
@@ -916,7 +916,7 @@ namespace game
         if(hithurts(flags))
         {
             d->health = health;
-            if(d->health <= m_leaguehp(gamemode, mutators, d->loadweap[0])) d->lastregen = 0;
+            if(d->health <= m_health(gamemode, mutators, d->loadweap[0])) d->lastregen = 0;
             d->lastpain = lastmillis;
             actor->totaldamage += damage;
         }
@@ -1328,7 +1328,7 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
-            d->mapchange(lastmillis, m_leaguehp(gamemode, mutators, d->loadweap[0]));
+            d->mapchange(lastmillis, m_health(gamemode, mutators, d->loadweap[0]));
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
         if(!empty) client::sendinfo = client::sendcrc = true;

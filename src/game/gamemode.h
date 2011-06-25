@@ -224,8 +224,8 @@ extern mutstypes mutstype[];
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
-#define m_health(a,b)       (m_insta(a,b) ? 1 : GAME(spawnhealth))
-#define m_leaguehp(a,b,c)   (int(m_health(a,b)*(!m_insta(a, b) && m_league(a, b) && isweap(c) ? WEAP(c, leaguehealth) : 1.f)))
+#define m_spawnhp(a,b)      (m_insta(a,b) ? 1 : GAME(spawnhealth))
+#define m_health(a,b,c)     (int(m_spawnhp(a,b)*(!m_insta(a, b) && m_league(a, b) && isweap(c) ? WEAP(c, leaguehealth) : 1.f)))
 
 #define w_reload(w1,w2)     (w1 != WEAP_MELEE && ((isweap(w2) ? w1 == w2 : w1 < -w2) || (isweap(w1) && WEAP(w1, reloads))))
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= -w2) && (isweap(w1) && WEAP(w1, carried)))

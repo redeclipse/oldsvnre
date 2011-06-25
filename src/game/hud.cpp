@@ -334,7 +334,7 @@ namespace hud
             {
                 if(game::focus->state >= CS_SPECTATOR || game::focus->state == CS_EDITING) break;
                 float damage = game::focus->state == CS_ALIVE ? min(damageresidue, 100)/100.f : 1.f,
-                      healthscale = float(m_leaguehp(game::gamemode, game::mutators, game::focus->loadweap[0]));
+                      healthscale = float(m_health(game::gamemode, game::mutators, game::focus->loadweap[0]));
                 if(healthscale > 0) damage = max(damage, 1.f-max(game::focus->health, 0)/healthscale);
                 amt += damage*0.65f;
                 if(burntime && game::focus->burning(lastmillis, burntime))
@@ -648,7 +648,7 @@ namespace hud
                 cs += int(off*amt);
             }
             if(crosshairtone) skewcolour(r, g, b, 1-crosshairtone);
-            int heal = m_leaguehp(game::gamemode, game::mutators, game::focus->loadweap[0]);
+            int heal = m_health(game::gamemode, game::mutators, game::focus->loadweap[0]);
             if(crosshairflash && game::focus->state == CS_ALIVE && game::focus->health < heal)
             {
                 int timestep = totalmillis%1000;
@@ -1389,7 +1389,7 @@ namespace hud
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
         float q = clamp(skew, 0.f, 1.f), f = fade*q, cr = r*q, cg = g*q, cb = b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
-        int glow = int(s*inventoryglow), heal = m_leaguehp(game::gamemode, game::mutators, game::focus->loadweap[0]);
+        int glow = int(s*inventoryglow), heal = m_health(game::gamemode, game::mutators, game::focus->loadweap[0]);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
         if(glow || pulse)
         {
@@ -1598,7 +1598,7 @@ namespace hud
         int size = s+s/2, width = s-s/4, sy = 0, sw = width+s/16;
         if(game::focus->state == CS_ALIVE)
         {
-            int glow = int(width*inventoryglow), heal = m_leaguehp(game::gamemode, game::mutators, game::focus->loadweap[0]);
+            int glow = int(width*inventoryglow), heal = m_health(game::gamemode, game::mutators, game::focus->loadweap[0]);
             bool hashealth = inventoryhealth && (!m_trial(game::gamemode) || trialdamage), pulse = inventoryflash && game::focus->health < heal;
             if(hashealth && (glow || pulse))
             {
