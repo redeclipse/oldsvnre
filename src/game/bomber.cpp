@@ -222,7 +222,8 @@ namespace bomber
             if(!entities::ents.inrange(f.ent)) continue;
             int pri = isbomberaffinity(f) ? 1 : 0;
             if(f.owner || f.droptime) pri++;
-            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius/4;
+            vec pos = f.owner ? f.owner->abovehead() : f.pos();
+            pos.z += enttype[AFFINITY].radius/4;
             cameras.add(cament(pos, cament::AFFINITY, i, pri));
         }
     }
