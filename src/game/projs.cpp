@@ -77,6 +77,7 @@ namespace projs
             else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
             else skew = 0;
         }
+        if(actor == target) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
 
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
     }
@@ -104,7 +105,8 @@ namespace projs
             int hflags = proj.flags|flags;
             float size = hflags&HIT_WAVE ? radial*WEAP(proj.weap, pusharea) : radial;
             int damage = calcdamage(proj.owner, d, proj.weap, hflags, radial, size, dist, scale);
-            game::hiteffect(proj.weap, hflags, damage, d, proj.owner, dir, false);
+            if(damage) game::hiteffect(proj.weap, hflags, damage, d, proj.owner, dir, false);
+            else return;
         }
         hitmsg &h = hits.add();
         h.flags = flags;

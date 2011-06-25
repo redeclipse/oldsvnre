@@ -3003,7 +3003,7 @@ namespace server
         gs.lastdeath = gamemillis;
     }
 
-    int calcdamage(int weap, int &flags, int radial, float size, float dist, float scale)
+    int calcdamage(int weap, int &flags, int radial, float size, float dist, float scale, bool self)
     {
         flags &= ~HIT_SFLAGS;
         if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
@@ -3018,6 +3018,7 @@ namespace server
             else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
             else skew = 0;
         }
+        if(self) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
 
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
     }
@@ -3078,8 +3079,10 @@ namespace server
                     float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
-                        int damage = calcdamage(weap, hflags, radial, size, dist, skew);
-                        dodamage(target, ci, damage, weap, hflags, h.dir);
+                        int damage = calcdamage(weap, hflags, radial, size, dist, skew, ci == target);
+                        if(damage) dodamage(target, ci, damage, weap, hflags, h.dir);
+                        else if(GAME(serverdebug) >= 2)
+                            srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] determined zero damage", weap, id, i, h.target);
                     }
                     else if(GAME(serverdebug) >= 2)
                         srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] state disallows it", weap, id, i, h.target);
