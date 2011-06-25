@@ -813,7 +813,7 @@ namespace projs
         {
             bool isfire = weapfx[weap].colour > 0;
             int colour = isfire ? weapfx[weap].colour : pulsecols[0][rnd(PULSECOLOURS)];
-            if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0xAAAAAA, 1, 0.25f, -20);
+            if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0x888888, 1, 0.25f, -20);
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
                 part_splash(isfire ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 15);
             if(muzzlechk(muzzleflash, d) && weapfx[weap].partsize > 0)
@@ -917,8 +917,7 @@ namespace projs
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                             int col = ((int(220*max(1.f-proj.lifespan,0.3f))<<16))|((int(160*max(1.f-proj.lifespan,0.2f)))<<8);
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.25f);
-                            part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
                             part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
                             part_create(PART_HINT, 1, proj.o, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.125f*proj.curscale);
                         }
@@ -979,8 +978,7 @@ namespace projs
                             if(size > 0)
                             {
                                 proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                                part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*0.25f);
-                                part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
+                                part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             }
                         }
                         break;
@@ -992,8 +990,7 @@ namespace projs
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                             int col = ((int(224*max(1.f-proj.lifespan,0.3f))<<16))|((int(80*max(1.f-proj.lifespan,0.1f)))<<8);
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*0.25f);
-                            part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, col), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
                             if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                             {
                                 part_create(PART_PLASMA, 1, proj.o, col, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5.f);
@@ -1023,8 +1020,7 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, 0x6611FF), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.25f);
-                            part_flare(proj.to, proj.o, 1, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, teamhint(proj.owner, 0x6611FF), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
                             if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                             {
                                 part_create(PART_PLASMA, 1, proj.o, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5.f);
@@ -1228,8 +1224,7 @@ namespace projs
                                 part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, teamhint(proj.owner, 0x6611FF), 1.f, 0.2f);
                         }
                         else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
-                        part_flare(proj.to, proj.o, len, PART_FLARE, teamhint(proj.owner, 0x6611FF), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.25f);
-                        part_flare(proj.to, proj.o, len, PART_FLARE_LERP, 0x6611FF, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f);
+                        part_flare(proj.to, proj.o, len, PART_FLARE, teamhint(proj.owner, 0x6611FF), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                         {
                             adddecal(DECAL_SCORCH, proj.o, proj.norm, max(expl, 2.f));
