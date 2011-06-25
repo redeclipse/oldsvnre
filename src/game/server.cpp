@@ -466,7 +466,7 @@ namespace server
         {
             if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
-                int rgn = actor->state.health, heal = min(actor->state.health+hurt, GAME(maxhealth)), eff = heal-rgn;
+                int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators, actor->state.loadweap[0])*GAME(maxhealthvampire))), eff = heal-rgn;
                 if(eff)
                 {
                     actor->state.health = heal;
@@ -2848,7 +2848,7 @@ namespace server
             }
             hurt = min(target->state.health, realdamage);
             target->state.health -= realdamage;
-            if(target->state.health <= m_leaguehp(gamemode, mutators, target->state.loadweap[0])) target->state.lastregen = 0;
+            if(target->state.health <= m_health(gamemode, mutators, target->state.loadweap[0])) target->state.lastregen = 0;
             target->state.lastpain = gamemillis;
             actor->state.damage += realdamage;
             if(target->state.health <= 0) realflags |= HIT_KILL;
@@ -2876,7 +2876,7 @@ namespace server
             else fragvalue = -fragvalue;
             int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
             pointvalue *= isai ? GAME(enemybonus) : GAME(fragbonus);
-            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_leaguehp(gamemode, mutators, target->state.loadweap[0]) : m_leaguehp(gamemode, mutators, target->state.loadweap[0])*3/2)))
+            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.loadweap[0]) : m_health(gamemode, mutators, target->state.loadweap[0])*3/2)))
                 style = FRAG_OBLITERATE;
             target->state.spree = 0;
             if(m_team(gamemode, mutators) && actor->team == target->team)
@@ -3513,7 +3513,7 @@ namespace server
                 else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleedtime = 0;
                 if(m_regen(gamemode, mutators) && ci->state.aitype < AI_START)
                 {
-                    int total = m_leaguehp(gamemode, mutators, ci->state.loadweap[0]), amt = GAME(regenhealth),
+                    int total = m_health(gamemode, mutators, ci->state.loadweap[0]), amt = GAME(regenhealth),
                         delay = ci->state.lastregen ? GAME(regentime) : GAME(regendelay);
                     if(smode) smode->regen(ci, total, amt, delay);
                     if(delay && ci->state.health != total)
@@ -3526,7 +3526,7 @@ namespace server
                             {
                                 amt = -GAME(regenhealth);
                                 total = ci->state.health;
-                                low = m_leaguehp(gamemode, mutators, ci->state.loadweap[0]);
+                                low = m_health(gamemode, mutators, ci->state.loadweap[0]);
                             }
                             int rgn = ci->state.health, heal = clamp(ci->state.health+amt, low, total), eff = heal-rgn;
                             if(eff)
@@ -3549,7 +3549,7 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-                    ci->state.respawn(gamemillis, m_leaguehp(gamemode, mutators, ci->state.loadweap[0]));
+                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.loadweap[0]));
                     sendspawn(ci);
                 }
             }

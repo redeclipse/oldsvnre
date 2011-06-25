@@ -605,7 +605,7 @@ namespace bomber
             bool home = isbomberhome(f, ai::owner(d));
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || !m_regen(game::gamemode, game::mutators) || d->health >= max(spawnhealth, extrahealth);
+            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->loadweap[0]);
             ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {
@@ -696,7 +696,7 @@ namespace bomber
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->aitype == AI_BOT)
             {
-                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= max(spawnhealth, extrahealth);
+                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->loadweap[0]);
                 if(regen && lastmillis-b.millis >= (201-d->skill)*33)
                 {
                     static vector<int> targets; // build a list of others who are interested in this

@@ -564,7 +564,7 @@ struct gamestate
                 lastweap = weapselect = sweap;
             }
         }
-        health = heal ? heal : m_leaguehp(gamemode, mutators, loadweap[0]);
+        health = heal ? heal : m_health(gamemode, mutators, loadweap[0]);
     }
 
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)

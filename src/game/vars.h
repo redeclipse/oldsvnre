@@ -81,8 +81,8 @@ GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
 GVAR(0, spawnhealth, 0, 100, VAR_MAX);
-GVAR(0, extrahealth, 0, 150, VAR_MAX);
-GVAR(0, maxhealth, 0, 200, VAR_MAX);
+GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
+GFVAR(0, maxhealthvampire, 0, 2.0f, FVAR_MAX);
 
 GFVAR(0, actorscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, maxresizescale, 1, 2, FVAR_MAX);
