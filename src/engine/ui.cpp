@@ -321,7 +321,7 @@ struct gui : guient
                 else px = x + guibound[0]/2 - w/2 + ((xsize-w)*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at left
                 py = y;
             }
-            text_(label, px, py, hit ? 0xFF4444 : color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN);
+            text_(label, px, py, hit && color == 0xFFFFFF ? 0xFF4444 : color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN);
             if(hit)
             {
                 if(mouseaction[0]&GUI_PRESSED)
@@ -774,7 +774,7 @@ struct gui : guient
         if(visible())
         {
             bool hit = ishit(w, FONTH);
-            if(hit && clickable) color = 0xFF4444;
+            if(hit && clickable && color == 0xFFFFFF) color = 0xFF4444;
             int x = curx;
             if(icon)
             {

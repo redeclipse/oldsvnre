@@ -1883,7 +1883,7 @@ namespace game
         }
         if(!curtime) { gets2c(); if(player1->clientnum >= 0) client::c2sinfo(); return; }
 
-        if(!*player1->name && !menuactive()) showgui("name", -1);
+        if(!*player1->name && !menuactive()) showgui("profile", -1);
         if(connected())
         {
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
