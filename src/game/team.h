@@ -8,7 +8,7 @@ enum
     GSVAR(0, team##a##name, #a); \
     GVAR(IDF_HEX, team##a##colour, 0, b, 0xFFFFFF);
 
-TEAMS(neutral, 0x888888);
+TEAMS(neutral, 0x666666);
 TEAMS(alpha, 0x5F66FF);
 TEAMS(omega, 0xFF4F44);
 TEAMS(enemy, 0x555555);

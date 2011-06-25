@@ -319,13 +319,17 @@ namespace server
 
         int getcolour(int tone = 0)
         {
-            if(!tone && state.aitype >= AI_START)
+            if(state.aitype >= AI_START)
             {
-                int weap = isweap(state.loadweap[0]) ? state.loadweap[0] : state.weapselect;
-                if(isweap(weap)) return WEAP(weap, colour);
+                if(!(tone%2))
+                {
+                    int weap = isweap(state.loadweap[0]) ? state.loadweap[0] : state.weapselect;
+                    if(isweap(weap)) return WEAP(weap, colour);
+                }
+                return state.colour;
             }
-            if(tone || team == TEAM_NEUTRAL) return state.colour[tone%2 ? 0 : 1];
-            return TEAM(team, colour);
+            if(tone == 2) return team == TEAM_NEUTRAL ? state.colour : TEAM(team, colour);
+            return tone%2 ? TEAM(team, colour) : state.colour;
         }
     };
 
@@ -812,7 +816,7 @@ namespace server
     {
         if(!name) name = ci->name;
         static string cname;
-        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(), name);
+        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(1), name);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
             defformatstring(s)(" [%d]", ci->clientnum);
@@ -2580,7 +2584,7 @@ namespace server
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
             sendstring(ci->name, p);
-            putint(p, ci->state.colour[0]);
+            putint(p, ci->state.colour);
             putint(p, ci->team);
         }
     }
@@ -4406,7 +4410,7 @@ namespace server
                     ci->state.setcolour(colour);
                     relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     QUEUE_STR(ci->name);
-                    QUEUE_INT(ci->state.colour[0]);
+                    QUEUE_INT(ci->state.colour);
                     break;
                 }
 

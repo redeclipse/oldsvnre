@@ -34,7 +34,7 @@ namespace projs
     VAR(IDF_PERSIST, projtraillength, 1, 350, INT_MAX-1);
     VAR(IDF_PERSIST, projfirehint, 0, 1, 1);
     VAR(IDF_PERSIST, projteamhint, 0, 0, 1);
-    #define teamhint(a,b) (projteamhint ? (a)->getcolour() : b)
+    #define teamhint(a,b) (projteamhint ? (a)->getcolour(1) : b)
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     VAR(IDF_PERSIST, muzzleflare, 0, 2, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
