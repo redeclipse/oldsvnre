@@ -1244,7 +1244,7 @@ namespace projs
                 }
                 if(proj.owner)
                 {
-                    if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                    if(!proj.child && !m_insta(game::gamemode, game::mutators) && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                     {
                         int w = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT)%WEAP_MAX, life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
                         float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.curscale,
