@@ -746,13 +746,13 @@ namespace physics
         return false;
     }
 
-    bool impulseplayer(gameent *d, bool onfloor, bool jetting, bool slide = false)
+    bool impulseplayer(gameent *d, bool onfloor, bool jetting, bool melee = false)
     {
-        bool power = !slide && onfloor && !jetting && powered(d, true);
-        if(power || ((d->ai || impulseaction || slide) && canimpulse(d, 0, 1)))
+        bool power = !melee && onfloor && !jetting && powered(d, true);
+        if(power || ((d->ai || impulseaction || melee) && canimpulse(d, 0, 1)))
         {
             bool dash = false, pulse = false;
-            if(slide) dash = true;
+            if(melee) { dash = onfloor; pulse = !onfloor; }
             else if(!power)
             {
                 if(!d->ai && onfloor) dash = impulseaction&2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
@@ -760,14 +760,14 @@ namespace physics
             }
             if(power || dash || pulse)
             {
-                bool action = d->ai || slide || (!power && impulseaction&2);
+                bool mchk = !melee || onfloor, action = mchk && (d->ai || melee || (!power && impulseaction&2));
                 int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
-                bool moving = move || strafe;
+                bool moving = mchk && (move || strafe);
                 float skew = moving ? impulseboost : impulsejump;
                 if(onfloor)
                 {
                     if(!power) skew = impulsedash;
-                    if(!dash) d->impulse[IM_JUMP] = lastmillis;
+                    if(!dash && !melee) d->impulse[IM_JUMP] = lastmillis;
                 }
                 float force = impulsevelocity(d, skew);
                 if(power) force += jumpforce(d, true);
@@ -785,9 +785,9 @@ namespace physics
                         }
                     }
                     (d->vel = dir.normalize()).mul(force);
-                    d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, dash ? IM_T_DASH : IM_T_BOOST, lastmillis);
+                    d->doimpulse(allowimpulse() && impulsemeter ? impulsecost : 0, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
                     if(!allowjetpack()) d->action[AC_JUMP] = false;
-                    client::addmsg(N_SPHY, "ri2", d->clientnum, dash ? SPHY_DASH : SPHY_BOOST);
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, melee ? SPHY_MELEE : (dash ? SPHY_DASH : SPHY_BOOST));
                     game::impulseeffect(d);
                     return true;
                 }
@@ -958,14 +958,14 @@ namespace physics
                         d->action[AC_SPECIAL] = false;
                         if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
                         {
-                            if(!impulseplayer(d, onfloor, jetting, true)) d->vel = vec(0, 0, impulsevelocity(d, impulsemelee));
+                            impulseplayer(d, onfloor, jetting, true);
                             if(d->turnside)
                             {
                                 d->turnmillis = PHYSMILLIS;
                                 d->turnside = 0; d->turnyaw = d->turnroll = 0;
                             }
                         }
-                        else game::errorsnd(d);
+                        //else game::errorsnd(d);
                         break;
                     }
                     else if(!d->turnside && !d->action[AC_SPECIAL]) continue;
