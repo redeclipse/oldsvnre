@@ -984,7 +984,7 @@ namespace physics
                                 float mag = impulsevelocity(d, impulseparkourkick);
                                 if(mag > 0)
                                 {
-                                    vecfromyawpitch(d->aimyaw, d->aimpitch, 1, 0, dir);
+                                    vecfromyawpitch(d->aimyaw, (90+d->aimpitch)*0.5f, 1, 0, dir);
                                     (d->vel = dir.normalize()).reflect(wall).normalize().mul(mag);
                                     d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                                     d->turnmillis = PHYSMILLIS;
