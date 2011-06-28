@@ -598,7 +598,7 @@ namespace game
     float spawnfade(gameent *d)
     {
         int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
-        if(len > 0)
+        if(len > 1000)
         {
             int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
             if(millis <= len) { if(millis >= over) return 1.f-((millis-over)/float(interval)); }
