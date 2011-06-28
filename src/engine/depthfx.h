@@ -8,7 +8,6 @@ VAR(0, depthfxbias, 0, 1, 64);
 
 extern void cleanupdepthfx();
 VARF(IDF_PERSIST, fpdepthfx, 0, 0, 1, cleanupdepthfx());
-VARF(IDF_PERSIST, depthfxprecision, 0, 0, 1, cleanupdepthfx());
 VAR(IDF_PERSIST, depthfxemuprecision, 0, 1, 1);
 VARF(IDF_PERSIST, depthfxsize, 6, 7, 12, cleanupdepthfx());
 VAR(IDF_PERSIST, depthfx, 0, 1, 1);
@@ -31,8 +30,8 @@ static struct depthfxtexture : rendertarget
 {
     const GLenum *colorformats() const
     {
-        static const GLenum colorfmts[] = { GL_FLOAT_RG16_NV, GL_RGB16F_ARB, GL_RGB16, GL_RGBA, GL_RGBA8, GL_RGB, GL_RGB8, GL_FALSE };
-        return &colorfmts[hasTF && hasFBO ? (fpdepthfx ? (hasNVFB && texrect() && !filter() ? 0 : 1) : (depthfxprecision ? 2 : 3)) : 3];
+        static const GLenum colorfmts[] = { GL_FLOAT_RG16_NV, GL_RGB16F_ARB, GL_RGBA, GL_RGBA8, GL_RGB, GL_RGB8, GL_FALSE };
+        return &colorfmts[hasTF && hasFBO && fpdepthfx ? (hasNVFB && texrect() && !filter() ? 0 : 1) : 2];
     }
 
     float eyedepth(const vec &p) const
@@ -72,7 +71,7 @@ static struct depthfxtexture : rendertarget
     bool screenview() const { return depthfxrect!=0; }
     bool texrect() const { return depthfxrect && hasTR; }
     bool filter() const { return depthfxfilter!=0; }
-    bool highprecision() const { return colorfmt==GL_FLOAT_RG16_NV || colorfmt==GL_RGB16F_ARB || colorfmt==GL_RGB16; }
+    bool highprecision() const { return colorfmt==GL_FLOAT_RG16_NV || colorfmt==GL_RGB16F_ARB; }
     bool emulatehighprecision() const { return depthfxemuprecision && !depthfxfilter; }
 
     bool shouldrender()
