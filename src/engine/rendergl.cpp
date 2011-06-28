@@ -349,8 +349,7 @@ void gl_checkextensions()
         reserveshadowmaptc = 3;
         minimizetcusage = 1;
         emulatefog = 1;
-        if(hasTF) setvar("depthfxprecision", 1, false, true);
-
+        if(hasTF && hasNVFB) setvar("fpdepthfx", 1, false, true);
     }
     else if(strstr(vendor, "NVIDIA"))
     {
