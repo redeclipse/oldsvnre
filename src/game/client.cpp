@@ -1087,7 +1087,6 @@ namespace client
             d->lastweap = d->weapselect = isweap(weap) ? weap : WEAP_MELEE;
             loopi(WEAP_MAX) d->ammo[i] = getint(p);
         }
-        d->setscale(game::rescale(d), 0, true, game::gamemode, game::mutators);
     }
 
     void updatepos(gameent *d)
@@ -1468,6 +1467,7 @@ namespace client
                         }
                     }
                     else parsestate(NULL, p);
+                    f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
                     break;
                 }
 
@@ -1506,6 +1506,7 @@ namespace client
                     }
                     ai::spawned(f, ent);
                     if(f == game::focus) game::resetcamera();
+                    f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
                     break;
                 }
 
@@ -1656,6 +1657,7 @@ namespace client
                         gameent *f = game::newclient(lcn);
                         if(f && f!=game::player1 && !f->ai) f->respawn();
                         parsestate(f, p, true);
+                        f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
                     }
                     break;
                 }
