@@ -381,6 +381,15 @@ namespace physics
     {
         float mag = vec(d->vel).add(d->falling).magnitude(),
               speed = (impulsespeed+mag)*amt*d->curscale, limit = impulselimit*d->curscale;
+        if(m_league(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        {
+            gameent *e = (gameent *)d;
+            if(isweap(e->loadweap[0]))
+            {
+                speed *= WEAP(e->loadweap[0], leaguespeed);
+                limit *= WEAP(e->loadweap[0], leaguespeed);
+            }
+        }
         return limit > 0 && speed > limit ? limit : speed;
     }
 
