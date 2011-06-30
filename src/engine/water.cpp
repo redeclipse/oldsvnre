@@ -1062,6 +1062,8 @@ void queryreflections()
         glColorMask(COLORMASK, GL_TRUE);
         glEnable(GL_CULL_FACE);
     }
+
+    glFlush();
 }
 
 VAR(IDF_PERSIST, maxreflect, 1, 1, 8);
