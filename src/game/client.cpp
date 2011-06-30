@@ -2228,12 +2228,22 @@ namespace client
         if(!serversort || !*serversort) resetserversort();
 
         int ac = 0, bc = 0;
-        if(a->address.host == ENET_HOST_ANY || a->ping >= serverinfo::WAITING || a->attr.empty() || a->attr[0] != GAMEVERSION) ac = -1;
-        else if(a->address.host == masteraddress.host) ac = INT_MAX;
-        else ac = 1 + a->priority;
-        if(b->address.host == ENET_HOST_ANY || b->ping >= serverinfo::WAITING || b->attr.empty() || b->attr[0] != GAMEVERSION) bc = -1;
-        else if(b->address.host == masteraddress.host) bc = INT_MAX;
-        else bc = 1 + b->priority;
+        if(a->address.host == ENET_HOST_ANY || a->ping >= serverinfo::WAITING || a->attr.empty()) ac = -1;
+        else
+        {
+            ac = a->attr[0] == GAMEVERSION ? 0x7FFF : clamp(a->attr[0], 0, 0x7FFF-1);
+            ac <<= 16;
+            if(a->address.host == masteraddress.host) ac |= 0xFFFF;
+            else ac |= clamp(1 + a->priority, 1, 0xFFFF-1);
+        }
+        if(b->address.host == ENET_HOST_ANY || b->ping >= serverinfo::WAITING || b->attr.empty()) bc = -1;
+        else
+        {
+            bc = b->attr[0] == GAMEVERSION ? 0x7FFF : clamp(b->attr[0], 0, 0x7FFF-1);
+            bc <<= 16;
+            if(b->address.host == masteraddress.host) bc |= 0xFFFF;
+            else bc |= clamp(1 + b->priority, 1, 0xFFFF-1);
+        }
         if(ac > bc) return -1;
         if(ac < bc) return 1;
 
