@@ -75,7 +75,7 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec dir = vec(f.pos()).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
+            vec pos = f.pos(), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             float area = 3, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -97,8 +97,7 @@ namespace bomber
                     size *= 1.25f;
                 }
             }
-            dir.rotate_around_z(-camera1->yaw*RAD).normalize();
-            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, fade, dir, colour);
+            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, fade, (isbombertarg(f, game::focus->team) ? 0 : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
         }
     }
 
@@ -222,8 +221,7 @@ namespace bomber
             if(!entities::ents.inrange(f.ent)) continue;
             int pri = isbomberaffinity(f) ? 1 : 0;
             if(f.owner || f.droptime) pri++;
-            vec pos = f.owner ? f.owner->abovehead() : f.pos();
-            pos.z += enttype[AFFINITY].radius/4;
+            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius/4;
             cameras.add(cament(pos, cament::AFFINITY, i, pri));
         }
     }
@@ -248,9 +246,9 @@ namespace bomber
                     bomberstate::flag &f = st.flags[c.id];
                     int pri = isbomberaffinity(f) ? 1 : 0;
                     if(f.owner || f.droptime) pri++;
-                    c.pos = f.owner ? f.owner->abovehead() : f.pos();
-                    c.pos.z += enttype[AFFINITY].radius/4;
+                    c.pos = f.pos(); c.pos.z += enttype[AFFINITY].radius/4;
                     c.pri = pri;
+                    if(f.owner) c.player = f.owner;
                 }
                 break;
             }
