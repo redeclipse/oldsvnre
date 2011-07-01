@@ -281,7 +281,7 @@ namespace hud
     TVAR(IDF_PERSIST, revengetex, "<anim:50,1,4,1>textures/revenge", 3);
     TVAR(IDF_PERSIST, firstbloodtex, "<anim:50,1,4,1>textures/firstblood", 3);
 
-    bool needminimap() { return radarstyle == 2; }
+    bool needminimap() { return true; }
 
     bool chkcond(int val, bool cond)
     {
@@ -1332,10 +1332,12 @@ namespace hud
     {
         if(radarstyle == 2)
         {
-            float s = max(w, h)/2*radarcorner*2-4, x = w-s+2, y = 2;
+            float s = max(w, h)/2*radarcorner*2, x = w-s, y = 0;
             vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir;
             vecfromyawpitch(camera1->yaw, 0, 1, 0, dir);
             float scale = clamp(max(minimapradius.x, minimapradius.y)/3, 384.f, float(radarrange()));
+            glColor4f(1, 1, 1, 1);
+            bindminimap();
             glBegin(GL_TRIANGLE_FAN);
             loopi(16)
             {
