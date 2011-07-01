@@ -112,25 +112,23 @@ namespace defend
         loopv(st.flags)
         {
             defendstate::flag &f = st.flags[i];
-            vec dir(f.o); dir.sub(camera1->o);
             float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), fade = blend*hud::radaraffinityblend;
-            vec colour = skewcolour(f.owner, f.enemy, occupy);
+            vec colour = skewcolour(f.owner, f.enemy, occupy), dir = vec(f.o).sub(camera1->o);
             if(f.owner != game::focus->team && f.enemy != game::focus->team)
             {
                 float dist = dir.magnitude(),
                     diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
                 fade *= diff*0.5f;
             }
-            dir.rotate_around_z(-camera1->yaw*RAD); dir.normalize();
             const char *tex = f.hasflag ? hud::arrowtex : (f.owner == game::focus->team && f.enemy ? hud::alerttex : hud::flagtex);
             float size = hud::radaraffinitysize*(f.hasflag ? 1.25f : 1);
             if(hud::radaraffinitynames >= (f.hasflag ? 1 : 2))
             {
                 bool overthrow = f.owner && f.enemy == game::focus->team;
-                if(occupy < 1.f) hud::drawblip(tex, 3, w, h, size, fade, dir, colour, "radar", "\f[%d]%d%%", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), int(occupy*100.f));
-                else hud::drawblip(tex, 3, w, h, size, fade, dir, colour, "radar", "\f[%d]%s", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), TEAM(f.owner, name));
+                if(occupy < 1.f) hud::drawblip(tex, 3, w, h, size, fade, f.hasflag ? 0 : hud::radarstyle, f.hasflag ? dir : f.o, colour, "radar", "\f[%d]%d%%", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), int(occupy*100.f));
+                else hud::drawblip(tex, 3, w, h, size, fade, f.hasflag ? 0 : hud::radarstyle, f.hasflag ? dir : f.o, colour, "radar", "\f[%d]%s", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), TEAM(f.owner, name));
             }
-            else hud::drawblip(tex, 3, w, h, size, fade, dir, colour);
+            else hud::drawblip(tex, 3, w, h, size, fade, f.hasflag ? 0 : hud::radarstyle, f.hasflag ? dir : f.o, colour);
         }
     }
 
