@@ -17,11 +17,11 @@ namespace hud
         damageloc(int a, int t, int d, const vec &p, const vec &c) : attacker(a), outtime(t), damage(d), dir(p), colour(c) {}
     };
     vector<damageloc> damagelocs;
-    VAR(IDF_PERSIST, damageresiduefade, 0, 500, INT_MAX-1);
+    VAR(IDF_PERSIST, damageresiduefade, 0, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, showhud, 0, 1, 1);
     VAR(IDF_PERSIST, huduioverride, 0, 1, 2); // 0=off, 1=except intermission, 2=interactive ui only
-    VAR(IDF_PERSIST, hudsize, 0, 2048, INT_MAX-1);
+    VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
     FVAR(IDF_PERSIST, gapsize, 0, 0.01f, 1000);
 
@@ -39,13 +39,13 @@ namespace hud
     COMMAND(0, toggleconsole, "");
 
     VAR(IDF_PERSIST, titlefade, 0, 2000, 10000);
-    VAR(IDF_PERSIST, tvmodefade, 0, 1000, INT_MAX-1);
-    VAR(IDF_PERSIST, spawnfade, 0, 2000, INT_MAX-1);
+    VAR(IDF_PERSIST, tvmodefade, 0, 1000, VAR_MAX);
+    VAR(IDF_PERSIST, spawnfade, 0, 2000, VAR_MAX);
 
-    VAR(IDF_PERSIST, commandfade, 0, 200, INT_MAX-1);
+    VAR(IDF_PERSIST, commandfade, 0, 200, VAR_MAX);
     FVAR(IDF_PERSIST, commandfadeamt, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, commandfadeskew, 0, 0.25f, 1);
-    VAR(IDF_PERSIST, uifade, 0, 200, INT_MAX-1);
+    VAR(IDF_PERSIST, uifade, 0, 200, VAR_MAX);
     FVAR(IDF_PERSIST, uifadeamt, 0, 0.5f, 1);
 
     int conskip = 0;
@@ -57,16 +57,16 @@ namespace hud
     COMMANDN(0, conskip, setconskip, "i");
 
     VAR(IDF_PERSIST, consize, 0, 5, 100);
-    VAR(IDF_PERSIST, contime, 0, 30000, INT_MAX-1);
-    VAR(IDF_PERSIST, confade, 0, 1000, INT_MAX-1);
-    VAR(IDF_PERSIST, conoverflow, 0, 5, INT_MAX-1);
+    VAR(IDF_PERSIST, contime, 0, 30000, VAR_MAX);
+    VAR(IDF_PERSIST, confade, 0, 1000, VAR_MAX);
+    VAR(IDF_PERSIST, conoverflow, 0, 5, VAR_MAX);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
     FVAR(IDF_PERSIST, conblend, 0, 0.75f, 1);
     VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
-    VAR(IDF_PERSIST, chatcontime, 0, 30000, INT_MAX-1);
-    VAR(IDF_PERSIST, chatconfade, 0, 2000, INT_MAX-1);
-    VAR(IDF_PERSIST, chatconoverflow, 0, 5, INT_MAX-1);
+    VAR(IDF_PERSIST, chatcontime, 0, 30000, VAR_MAX);
+    VAR(IDF_PERSIST, chatconfade, 0, 2000, VAR_MAX);
+    VAR(IDF_PERSIST, chatconoverflow, 0, 5, VAR_MAX);
     FVAR(IDF_PERSIST, chatconblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
@@ -76,7 +76,7 @@ namespace hud
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
     FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
-    VAR(IDF_PERSIST, noticetime, 0, 5000, INT_MAX-1);
+    VAR(IDF_PERSIST, noticetime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
 
     TVAR(IDF_PERSIST, neutraltex, "textures/team", 3);
@@ -100,8 +100,8 @@ namespace hud
     VAR(IDF_PERSIST, crosshairtone, 0, 0, 4);
     VAR(IDF_PERSIST, noticestone, 0, 0, 4);
 
-    VAR(IDF_PERSIST, teamkillnum, 0, 3, INT_MAX-1);
-    VAR(IDF_PERSIST, teamkilltime, 0, 60000, INT_MAX-1);
+    VAR(IDF_PERSIST, teamkillnum, 0, 3, VAR_MAX);
+    VAR(IDF_PERSIST, teamkilltime, 0, 60000, VAR_MAX);
 
     TVAR(IDF_PERSIST, underlaytex, "", 3);
     VAR(IDF_PERSIST, underlaydisplay, 0, 0, 2); // 0 = only firstperson and alive, 1 = only when alive, 2 = always
@@ -126,7 +126,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
-    VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, INT_MAX-1);
+    VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, VAR_MAX);
     FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
     FVAR(IDF_PERSIST, crosshairaccamt, 0, 0.75f, 1);
     VAR(IDF_PERSIST, crosshairflash, 0, 1, 1);
@@ -149,7 +149,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
-    VAR(IDF_PERSIST, inventoryteams, 0, 10000, INT_MAX-1);
+    VAR(IDF_PERSIST, inventoryteams, 0, 10000, VAR_MAX);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
@@ -231,11 +231,16 @@ namespace hud
     FVAR(IDF_PERSIST, radaroffset, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, radarcorner, 0, 0.15f, 1000);
     FVAR(IDF_PERSIST, radarcornersize, 0, 0.04f, 1000);
-    VAR(IDF_PERSIST, radardist, 0, 0, INT_MAX-1); // 0 = use world size
-    VAR(IDF_PERSIST, radarcornerdist, 0, 512, INT_MAX-1); // 0 = use world size
+    FVAR(IDF_PERSIST, radarcorneroffset, 0, 0.045f, 1);
+    FVAR(IDF_PERSIST, radarcornerblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radartexblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, radartexbright, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, radarcornerbright, 0, 0.8f, 1);
+    VAR(IDF_PERSIST, radardist, 0, 0, VAR_MAX); // 0 = use world size
+    VAR(IDF_PERSIST, radarcornerdist, 0, 512, VAR_MAX); // 0 = use world size
     VAR(IDF_PERSIST, radaritems, 0, 2, 2);
     VAR(IDF_PERSIST, radaritemspawn, 0, 1, 1);
-    VAR(IDF_PERSIST, radaritemtime, 0, 5000, INT_MAX-1);
+    VAR(IDF_PERSIST, radaritemtime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, radaritemnames, 0, 0, 2);
     VAR(IDF_PERSIST, radarplayers, 0, 2, 2);
     VAR(IDF_PERSIST, radarplayerfilter, 0, 0, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit/tv
@@ -246,17 +251,17 @@ namespace hud
     VAR(IDF_PERSIST, radarcornertone, 0, 3, 4); // colour based on tone (1 = colour, 2 = team, 3/4 = switched)
 
     VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
-    VAR(IDF_PERSIST, radardamagemerge, 1, 250, INT_MAX-1);
-    VAR(IDF_PERSIST, radardamagetime, 1, 250, INT_MAX-1);
-    VAR(IDF_PERSIST, radardamagefade, 1, 2500, INT_MAX-1);
+    VAR(IDF_PERSIST, radardamagemerge, 1, 250, VAR_MAX);
+    VAR(IDF_PERSIST, radardamagetime, 1, 250, VAR_MAX);
+    VAR(IDF_PERSIST, radardamagefade, 1, 2500, VAR_MAX);
     FVAR(IDF_PERSIST, radardamagesize, 0, 8, 1000);
     FVAR(IDF_PERSIST, radardamageblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
-    VAR(IDF_PERSIST, radardamagemin, 1, 25, INT_MAX-1);
-    VAR(IDF_PERSIST, radardamagemax, 1, 100, INT_MAX-1);
+    VAR(IDF_PERSIST, radardamagemin, 1, 25, VAR_MAX);
+    VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
     VAR(IDF_PERSIST, showeditradar, 0, 0, 1);
-    VAR(IDF_PERSIST, editradardist, 0, 64, INT_MAX-1); // 0 = use radardist
+    VAR(IDF_PERSIST, editradardist, 0, 64, VAR_MAX); // 0 = use radardist
     VAR(IDF_PERSIST, editradarnoisy, 0, 1, 2);
 
     VAR(IDF_PERSIST, motionblurfx, 0, 1, 2); // 0 = off, 1 = on, 2 = override
@@ -357,7 +362,7 @@ namespace hud
 
     void damage(int n, const vec &loc, gameent *actor, int weap, int flags)
     {
-        damageresidue = clamp(damageresidue+(n*(flags*HIT_BLEED ? 5 : 1)), 0, 200);
+        damageresidue = clamp(damageresidue+(n*(flags&HIT_BLEED ? 3 : 1)), 0, 200);
         vec colour = doesburn(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
             dir = vec(loc).sub(camera1->o).normalize();
         loopv(damagelocs)
@@ -426,14 +431,14 @@ namespace hud
     template<class T>
     void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
-        if(colour <= 0) colour = game::focus->getcolour(-colour);
+        if(colour <= 0) colour = game::focus->getcolour(0-colour);
         vec c = vec::hexcolor(colour);
         r = T(r*c.r);
         g = T(g*c.g);
         b = T(b*c.b);
         if(!game::focus->team && faded)
         {
-            float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.375f;
+            float f = game::focus->state == CS_SPECTATOR || game::focus->state == CS_EDITING ? 0.25f : 0.5f;
             r = T(r*f);
             g = T(g*f);
             b = T(b*f);
@@ -1128,7 +1133,7 @@ namespace hud
                 ts = size*radarcorner;
                 tx = w-ts;
                 ty = ts;
-                ts -= tq*3/2;
+                ts -= ts*radarcorneroffset;
                 tr = ts*dist;
                 break;
             }
@@ -1332,26 +1337,25 @@ namespace hud
     {
         if(radarstyle == 2)
         {
-            float s = max(w, h)/2*radarcorner*2, x = w-s, y = 0;
             vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir;
             vecfromyawpitch(camera1->yaw, 0, 1, 0, dir);
-            float scale = clamp(max(minimapradius.x, minimapradius.y)/3, 384.f, float(radarrange()));
-            glColor4f(1, 1, 1, 1);
+            float scale = radarrange(), size = max(w, h)/2, s = size*radarcorner, x = w-s*2, y = 0, q = s*2*radarcorneroffset, r = s-q;
             bindminimap();
+            glColor4f(radarcornerbright, radarcornerbright, radarcornerbright, radarcornerblend);
             glBegin(GL_TRIANGLE_FAN);
             loopi(16)
             {
                 vec tc = vec(dir).rotate_around_z(i/16.0f*2*M_PI);
                 glTexCoord2f(pos.x + tc.x*scale*minimapscale.x, pos.y + tc.y*scale*minimapscale.y);
                 vec v = vec(0, -1, 0).rotate_around_z(i/16.0f*2*M_PI);
-                glVertex2f(x + 0.5f*s*(1.0f + v.x), y + 0.5f*s*(1.0f + v.y));
+                glVertex2f(x + q + r*(1.0f + v.x), y + q + r*(1.0f + v.y));
             }
             glEnd();
             float gr = 1, gg = 1, gb = 1;
-            if(radarcornertone) skewcolour(gr, gg, gb, radarcornertone-1);
+            if(radarcornertone) skewcolour(gr, gg, gb, 1-radarcornertone);
             settexture(radarcornertex, 3);
-            glColor3f(gr, gg, gb);
-            drawtex(w-s, 0, s, s);
+            glColor4f(gr*radartexbright, gg*radartexbright, gb*radartexbright, radartexblend);
+            drawtex(w-s*2, 0, s*2, s*2);
         }
         if(chkcond(radaritems, game::tvmode()) || m_edit(game::gamemode)) drawentblips(w, h, blend*radarblend); // 2
         if(chkcond(radaraffinity, game::tvmode())) // 3
