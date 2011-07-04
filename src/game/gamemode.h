@@ -135,7 +135,7 @@ mutstypes mutstype[] = {
         "onslaught",
     },
     {
-        G_M_JETPACK,    G_M_JETPACK,        G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_LEAGUE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_JETPACK,    G_M_JETPACK,        G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "jetpack",
     },
     {
@@ -151,7 +151,7 @@ mutstypes mutstype[] = {
         "resize",
     },
     {
-        G_M_LEAGUE,     G_M_LEAGUE,         G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_LEAGUE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
+        G_M_LEAGUE,     G_M_LEAGUE,         G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ONSLAUGHT|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_LEAGUE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "league",
     },
     {
@@ -225,10 +225,10 @@ extern mutstypes mutstype[];
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
 #define m_spawnhp(a,b)      (m_insta(a,b) ? 1 : GAME(spawnhealth))
-#define m_health(a,b,c)     (int(m_spawnhp(a,b)*(!m_insta(a, b) && m_league(a, b) && isweap(c) ? WEAP(c, leaguehealth) : 1.f)))
+#define m_health(a,b,c)     (int(ceilf(m_spawnhp(a,b)*(!m_insta(a, b) && m_league(a, b) && isweap(c) ? WEAP(c, leaguehealth) : 1.f))))
 
 #define w_reload(w1,w2)     (w1 != WEAP_MELEE && ((isweap(w2) ? w1 == w2 : w1 < -w2) || (isweap(w1) && WEAP(w1, reloads))))
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= -w2) && (isweap(w1) && WEAP(w1, carried)))
 #define w_attr(a,w1,w2)     (m_edit(a) || (w1 >= WEAP_OFFSET && w1 != w2) ? w1 : (w2 == WEAP_GRENADE ? WEAP_ROCKET : WEAP_GRENADE))
-#define w_spawn(weap)       int(GAME(itemspawntime)*WEAP(weap, frequency))
+#define w_spawn(weap)       int(ceilf(GAME(itemspawntime)*WEAP(weap, frequency)))
 #define w_lmax(a,b)         (m_league(a, b) ? WEAP_MAX : WEAP_ITEM)

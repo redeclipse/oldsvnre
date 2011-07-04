@@ -1155,7 +1155,7 @@ namespace physics
     extern bool carryaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowjetpack(physent *d = NULL);
-    extern bool allowimpulse(int level = 2);
+    extern bool allowimpulse(physent *d, int level = 2);
     extern bool jetpack(physent *d);
     extern bool sliding(physent *d, bool power = false);
     extern bool sprinting(physent *d, bool turn = true);

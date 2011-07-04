@@ -8,7 +8,6 @@
 * give all entities coloured name/icons (like hud::Ntex for text)
 * give console lines each their own contextual icons?
 * better damage/fire hud effects (pseudo particle system?)
-* traditional style radar as an option
 * league mutator (tf2-like gameplay)
 * campaign
 
