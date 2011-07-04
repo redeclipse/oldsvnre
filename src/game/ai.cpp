@@ -992,8 +992,8 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         if(d->blocked) off.z += JUMPMIN; // it could help..
-        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 100 && !d->turnside,
-            impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 500 || d->vel.z < 1), jet = air && physics::allowjetpack(d),
+        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
+            impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 700 || d->vel.z < 1), jet = air && physics::allowjetpack(d),
             jumper = (locked || d->blocked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
             jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1017,7 +1017,7 @@ namespace ai
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
             int seed = (111-d->skill)*(locked || impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
             d->ai->jumpseed = lastmillis+seed+rnd(seed*2);
-            seed *= 50; if(b.idle) seed *= 100;
+            seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
         if(air && physics::canimpulse(d, -1, 3) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
@@ -1169,7 +1169,7 @@ namespace ai
             }
 
             bool wantsimpulse = false;
-            if(physics::allowimpulse(physics::allowjetpack(d) ? 0 : 2))
+            if(physics::allowimpulse(d))
             {
                 if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsimpulse = true;
                 else if(b.idle == -1 && !d->ai->dontmove)

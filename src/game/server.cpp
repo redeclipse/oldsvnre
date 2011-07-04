@@ -4114,6 +4114,11 @@ namespace server
                     cp->state.loadweap[0] = aweap;
                     cp->state.loadweap[1] = bweap;
                     chkloadweap(cp);
+                    if(cp->state.state == CS_ALIVE)
+                    {
+                        cp->state.state = CS_DEAD;
+                        waiting(cp, 1, 1);
+                    }
                     break;
                 }
 

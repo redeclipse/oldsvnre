@@ -70,11 +70,11 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
 enum
 {
-    TRAIT_NONE = 0,
-    TRAIT_JETPACK,
+    TRAIT_JETPACK = 0,
+    TRAIT_IMPULSE,
     TRAIT_BURNRES,
     TRAIT_BLEEDRES,
-    TRAIT_ALL = (1<<TRAIT_JETPACK)|(1<<TRAIT_BURNRES)|(1<<TRAIT_BLEEDRES)
+    TRAIT_ALL = (1<<TRAIT_JETPACK)|(1<<TRAIT_IMPULSE)|(1<<TRAIT_BURNRES)|(1<<TRAIT_BLEEDRES)
 };
 
 #define WEAPON(a, \
@@ -179,7 +179,7 @@ WEAPON(melee, 0xEEEEEE,
     2,      0,      10,     10,     2,      4,      0,      0,      0.8f,   0.8f,   0.7f,   0.6f,   0.3f,   0.3f,   0,      0,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
     0,
-    0.8f,   0.8f,   1.3f,   0.8f
+    1,      1,      1,      1
 );
 WEAPON(pistol, 0x888888,
     10,     10,     1,      2,      150,    300,    1000,   35,     11,     3000,   1000,   0,      0,      2000,   400,
@@ -194,7 +194,7 @@ WEAPON(pistol, 0x888888,
     3,      128,    10,     10,     1,      1,      0,      0,      0.8f,   0.8f,   0.65f,  0.65f,  0.325f, 0.325f, 0,      0,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
     0,
-    0.75f,  0.65f,  1.75f,  0.7f
+    1,      1,      1,      1
 );
 WEAPON(sword, 0x2222AA,
     1,      1,      0,      0,      500,    750,    50,     30,     60,     0,      0,      0,      0,      350,    500,
@@ -208,8 +208,8 @@ WEAPON(sword, 0x2222AA,
     0,      0,      250,    500,    0.75f,  1,      48,     48,     1,      1.25f,  0,      0,      1,      1,
     2,      0,      10,     10,     3,      5,      0,      0,      0.8f,   0.8f,   0.65f,  0.65f,  0.3f,   0.3f,   0,      0,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
-    (1<<TRAIT_JETPACK),
-    1.5f,   1.f,    0.9f,   1.1f
+    (1<<TRAIT_BLEEDRES),
+    2.f,    1.5f,   0.5f,   1.5f
 );
 WEAPON(shotgun, 0xFFFF44,
     2,      8,      1,      2,      600,    900,    750,    15,     5,      1000,   250,    0,      0,      400,    5000,
@@ -224,7 +224,7 @@ WEAPON(shotgun, 0xFFFF44,
     2,      256,    10,     10,     1,      1,      0,      0,      0.8f,   0.9f,   0.6f,   0.7f,   0.3f,   0.4f,   0.5f,   0.5f,
     1,      1,      1,      0.2f,   1,      1.5f,   0,      0,      8,      8,      1,      1,
     (1<<TRAIT_BLEEDRES),
-    1.25f,   1.25f,  0.8f,  1.25f
+    1.25f,   1.25f,  0.8f,  1.2f
 );
 WEAPON(smg, 0xFF8844,
     40,     40,     1,      2,      100,    200,    1500,   22,     10,     2000,   350,    0,      0,      800,    150,
@@ -238,8 +238,8 @@ WEAPON(smg, 0xFF8844,
     5,      10,     150,    75,     1.5f,   0.75f,  512,    96,     0.5f,   0.6f,   35,     25,     1,      1.5f,
     3,      128,    10,     1000,   1,      1,      0,      0,      0.8f,   0.8f,   0.7f,   0.7f,   0.35f,  0.35f,  0.5f,   0.5f,
     1,      0.5f,   0.2f,   0.1f,   1,      1,      0,      0,      8,      8,      1,      1,
-    (1<<TRAIT_BLEEDRES),
-    2.f,    1.5f,   0.5f,   1.5f
+    (1<<TRAIT_IMPULSE),
+    0.85f,  1.f,    1.2f,   0.8f
 );
 WEAPON(flamer, 0xAA2222,
     25,     25,     1,      5,      100,    500,    2000,   8,      8,      300,    150,    0,      500,    350,    350,
@@ -268,7 +268,7 @@ WEAPON(plasma, 0x44FFFF,
     10,     150,    100,    -250,   1,      2,      128,    64,     2.5f,   45,     0,      0,      2,      1.5f,
     2,      0,      10,     10,     1,      1,      8,      4,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,   0.5f,   0.5f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
-    (1<<TRAIT_BURNRES),
+    (1<<TRAIT_JETPACK),
     0.9f,   1.2f,   0.9f,   0.9f
 );
 WEAPON(rifle, 0xAA66FF,
