@@ -3318,6 +3318,7 @@ namespace server
         }
         setspawn(ent, false, true);
         gs.useitem(ent, sents[ent].type, attr, amt, sweap, millis);
+        if(sents[ent].type == WEAPON && isweap(attr)) gs.weapjams[attr] = 0;
         sendf(-1, 1, "ri8", N_ITEMACC, ci->clientnum, ent, amt, sents[ent].spawned ? 1 : 0, weap, dropped, value);
     }
 

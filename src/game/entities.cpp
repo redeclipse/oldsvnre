@@ -2165,6 +2165,7 @@ namespace entities
                 e.attrs.add(0, max(5, enttype[ACTOR].numattrs));
                 e.attrs[0] = (i%5 != 4 ? AI_GRUNT : AI_TURRET)-1;
                 e.attrs[5] = (i/5)%(WEAP_MAX+1);
+                if(e.attrs[0] == AI_TURRET && e.attrs[5] == WEAP_MELEE) e.attrs[5] = WEAP_SMG;
                 switch(ents[i]->type)
                 {
                     case PLAYERSTART:
