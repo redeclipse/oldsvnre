@@ -155,7 +155,7 @@ namespace server
         float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
-        int score, spree, crits, rewards, gscore, teamkills, shotdamage, damage;
+        int score, spree, crits, rewards, gscore, teamkills, shotdamage, damage, weapjams[WEAP_MAX];
         int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes;
         vector<dmghist> damagelog;
@@ -171,7 +171,11 @@ namespace server
         {
             if(state != CS_SPECTATOR) state = CS_DEAD;
             dropped.reset();
-            loopi(WEAP_MAX) loopj(2) weapshots[i][j].reset();
+            loopi(WEAP_MAX)
+            {
+                loopj(2) weapshots[i][j].reset();
+                weapjams[i] = 0;
+            }
             if(!change) score = timeplayed = 0;
             else gamestate::mapchange();
             frags = spree = crits = rewards = gscore = deaths = teamkills = shotdamage = damage = 0;
@@ -183,6 +187,7 @@ namespace server
         {
             lastboost = 0;
             lastburnowner = lastbleedowner = -1;
+            loopi(WEAP_MAX) weapjams[i] = 0;
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
             vel = falling = vec(0, 0, 0);
@@ -2070,7 +2075,7 @@ namespace server
     void takeammo(clientinfo *ci, int weap, int amt = 1) { ci->state.ammo[weap] = max(ci->state.ammo[weap]-amt, 0); }
 
     struct droplist { int weap, ent, value; };
-    void dropitems(clientinfo *ci, int level = 2)
+    void dropitems(clientinfo *ci, int level = 2, int weap = -1)
     {
         if(ci->state.aitype >= AI_START) ci->state.weapreset(false);
         else
@@ -2090,18 +2095,19 @@ namespace server
             {
                 loopi(WEAP_MAX) if(i != sweap && ts.hasweap(i, sweap) && sents.inrange(ts.entid[i]))
                 {
+                    if(isweap(weap) && i != weap) continue;
+                    setspawn(ts.entid[i], false);
                     droplist &d = drop.add();
                     d.weap = i;
                     d.ent = ts.entid[i];
                     d.value = ts.ammo[i];
-                    setspawn(d.ent, false);
                     ts.dropped.add(d.ent, d.value);
-                    ts.entid[i] = -1;
+                    ts.entid[i] = ts.ammo[i] = -1;
                 }
             }
             if(level && !drop.empty())
                 sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
-            ts.weapreset(false);
+            //ts.weapreset(false);
         }
     }
 
@@ -3095,6 +3101,26 @@ namespace server
         }
     }
 
+    bool weaponjam(clientinfo *ci, int millis, int weap, int load)
+    {
+        if(isweap(weap) && GAME(reloadjamming) && WEAP(weap, jamchance))
+        {
+            int sweap = m_weapon(gamemode, mutators);
+            if(sweap >= 0)
+            {
+                ci->state.weapjams[weap]++;
+                int offset = WEAP(weap, jamchance)-ci->state.weapjams[weap];
+                if(offset <= 0 || !rnd(offset))
+                {
+                    ci->state.weapjams[weap] = ci->state.ammo[weap] = ci->state.weapload[weap] = 0;
+                    dropitems(ci, GAME(reloadjamming) >= 3 ? 3 : 1, weap == sweap || GAME(reloadjamming)%2 == 0 ? -1 : weap);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     void shotevent::process(clientinfo *ci)
     {
         servstate &gs = ci->state;
@@ -3126,6 +3152,7 @@ namespace server
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
+                if(weaponjam(ci, millis, gs.weapselect, gs.weapload[gs.weapselect]) && gs.weapselect != m_weapon(gamemode, mutators)) return;
                 sendf(-1, 1, "ri5", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect]);
             }
             else return;
@@ -3160,6 +3187,11 @@ namespace server
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
+                if(weaponjam(ci, millis, gs.weapselect, gs.weapload[gs.weapselect]) && gs.weapselect != m_weapon(gamemode, mutators))
+                {
+                    sendf(ci->clientnum, 1, "ri3", N_WEAPSELECT, ci->clientnum, gs.weapselect);
+                    return;
+                }
                 sendf(-1, 1, "ri5", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect]);
             }
             else return;
@@ -3256,6 +3288,7 @@ namespace server
             {
                 takeammo(ci, gs.weapselect, gs.weapload[gs.weapselect]);
                 gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
+                if(weaponjam(ci, millis, gs.weapselect, gs.weapload[gs.weapselect]) && gs.weapselect != sweap) return;
                 sendf(-1, 1, "ri5", N_RELOAD, ci->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect]);
             }
             else return;
@@ -3275,7 +3308,7 @@ namespace server
                 if(sents.inrange(gs.entid[weap]))
                 {
                     dropped = gs.entid[weap];
-                    value = gs.ammo[weap] ? gs.ammo[weap] : WEAP(weap, max);
+                    value = gs.ammo[weap];
                     setspawn(dropped, false);
                     gs.setweapstate(weap, WEAP_S_SWITCH, WEAPSWITCHDELAY, millis);
                     gs.dropped.add(dropped, value);
