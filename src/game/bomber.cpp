@@ -80,7 +80,7 @@ namespace bomber
             if(isbomberaffinity(f))
             {
                 size *= 1.25f;
-                area = 3;
+                area = 2;
                 if(!f.owner && !f.droptime)
                 {
                     int millis = lastmillis-f.interptime;
@@ -90,14 +90,14 @@ namespace bomber
             else if(!m_gsp2(game::gamemode, game::mutators))
             {
                 float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
-                area = 4;
+                area = 3;
                 if(isbombertarg(f, game::focus->team) && !hasbombs.empty())
                 {
                     fade += (1.f-fade)*diff;
                     size *= 1.25f;
                 }
             }
-            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, fade, (isbombertarg(f, game::focus->team) ? 0 : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
+            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, fade, (isbombertarg(f, game::focus->team) ? -1-hud::radarstyle : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
         }
     }
 
