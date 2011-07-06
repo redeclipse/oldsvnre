@@ -494,10 +494,12 @@ namespace hud
             Texture *t = textureload(indicatortex, 3);
             if(t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             else glBlendFunc(GL_ONE, GL_ONE);
-            glBindTexture(GL_TEXTURE_2D, t->getframe(amt));
+            glBindTexture(GL_TEXTURE_2D, t->id);
+            float val = amt < 0.25f ? amt : (amt > 0.75f ? 1.f-amt : 0.25f);
+            glColor4f(val*4.f, val*4.f, val*4.f, indicatorblend*hudblend*val);
+            drawsized(x-s, y-s, s*2);
             glColor4f(r, g, b, indicatorblend*hudblend);
-            if(t->frames.length() > 1) drawsized(x-s/2, y-s/2, s);
-            else drawslice(0, clamp(amt, 0.f, 1.f), x, y, s);
+            drawslice(0, clamp(amt, 0.f, 1.f), x, y, s);
         }
     }
 
