@@ -492,7 +492,7 @@ struct gamestate
             {
                 int prev = ammo[attr], value = amt >= 0 ? amt : WEAPUSE(attr);
                 weapswitch(attr, millis, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_USE);
-                ammo[attr] = clamp(max(ammo[attr], 0)+value, 1, WEAP(attr, max));
+                ammo[attr] = clamp(max(ammo[attr], 0)+value, 0, WEAP(attr, max));
                 weapload[attr] = ammo[attr]-prev;
                 entid[attr] = id;
                 break;
