@@ -93,6 +93,7 @@ namespace hud
     TVAR(IDF_PERSIST, healthtex, "textures/health", 3);
     TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
     TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
+    TVAR(IDF_PERSIST, warningtex, "textures/warning", 3);
 
     VAR(IDF_PERSIST, glowtone, 0, 3, 4); // colour based on tone (1 = colour, 2 = team, 3/4 = switched)
     VAR(IDF_PERSIST, clipstone, 0, 3, 4);
@@ -100,6 +101,9 @@ namespace hud
     VAR(IDF_PERSIST, crosshairtone, 0, 0, 4);
     VAR(IDF_PERSIST, noticestone, 0, 0, 4);
 
+    VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
+    VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
+    FVAR(IDF_PERSIST, teamhurtsize, 0, 0.015f, 1000);
     VAR(IDF_PERSIST, teamkillnum, 0, 3, VAR_MAX);
     VAR(IDF_PERSIST, teamkilltime, 0, 60000, VAR_MAX);
 
@@ -2026,6 +2030,29 @@ namespace hud
         if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : !third && chkcond(showradar, game::tvmode())))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
+        if(teamhurttime && game::focus == game::player1)
+        {
+            vec targ;
+            bool hasbound = false;
+            int dist = teamhurtdist ? teamhurtdist : getworldsize();
+            loopv(game::players) if(game::players[i] && game::players[i]->team == game::player1->team)
+            {
+                if(lastmillis-game::players[i]->lastteamhit > teamhurttime) continue;
+                if(!getsight(camera1->o, camera1->yaw, camera1->pitch, game::players[i]->o, targ, dist, curfov, fovy)) continue;
+                if(!hasbound)
+                {
+                    Texture *t = textureload(hud::warningtex, 3);
+                    glBindTexture(GL_TEXTURE_2D, t->id);
+                    float amt = float(lastmillis%500)/500.f, value = (amt > 0.5f ? 1.f-amt : amt)*2.f;
+                    glColor4f(value, value*0.125f, value*0.125f, value);
+                    hasbound = true;
+                }
+                float cx = 0.5f, cy = 0.5f, cz = 1;
+                vectocursor(game::players[i]->o, cx, cy, cz);
+                int s = int(teamhurtsize*w), sx = int(cx*w-s), sy = int(cy*h-s);
+                hud::drawsized(sx, sy, s*2);
+            }
+        }
 
         if(!texpaneltimer)
         {

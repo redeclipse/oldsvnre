@@ -670,7 +670,8 @@ struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
-        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan, lasthit, lastkill, lastattacker, lastpoints, quake;
+        actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
+        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake;
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
@@ -758,7 +759,7 @@ struct gameent : dynent, gamestate
     void clearstate(int gamemode = 0, int mutators = 0)
     {
         loopi(IM_MAX) impulse[i] = 0;
-        cplast = lasthit = lastkill = quake = turnmillis = turnside = 0;
+        cplast = lasthit = lastteamhit = lastkill = quake = turnmillis = turnside = 0;
         turnroll = turnyaw = 0;
         lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
