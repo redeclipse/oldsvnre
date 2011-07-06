@@ -888,8 +888,11 @@ namespace game
                 {
                     bool sameteam = m_team(gamemode, mutators) && d->team == actor->team;
                     if(!sameteam) pushdamagemerge(d, actor, weap, damage, burning ? damagemerge::BURN : (bleeding ? damagemerge::BLEED : 0));
-                    else if(actor == focus && !burning && !bleeding && !issound(alarmchan))
-                        playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan);
+                    else if(actor == player1 && !burning && !bleeding)
+                    {
+                        d->lastteamhit = lastmillis;
+                        if(!issound(alarmchan)) playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan);
+                    }
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
