@@ -190,9 +190,10 @@ namespace defend
                 sy += hud::drawitem(hud::flagtex, x, y-sy, s, false, c.r, c.g, c.b, fade, skew);
                 if(f.enemy)
                 {
+                    int sx = x-int(s*skew);
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
-                    hud::drawprogress(x, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew);
-                    hud::drawprogress(x, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade, skew, !skewed && headsup ? "default" : "sub", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : "\fw", int(occupy*100.f));
+                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew);
+                    hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade, skew, !skewed && headsup ? "default" : "sub", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : "\fw", int(occupy*100.f));
                 }
                 else if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, c1.r, c1.g, c1.b, fade, skew);
             }
