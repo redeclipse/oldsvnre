@@ -205,7 +205,8 @@ namespace hud
     FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showradar, 0, 2, 2);
-    VAR(IDF_PERSIST, radarstyle, 0, 0, 2); // 0 = compass-sectional, 1 = compass-sectional-distance, 2 = right-corner-positional
+    VAR(IDF_PERSIST, radarstyle, 0, 1, 2); // 0 = compass-sectional, 1 = compass-distance, 2 = right-corner-positional
+    FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
     TVAR(IDF_PERSIST, radarcornertex, "textures/radar", 3);
     TVAR(IDF_PERSIST, bliptex, "textures/blip", 3);
     TVAR(IDF_PERSIST, playerbliptex, "textures/blip", 3);
@@ -219,16 +220,16 @@ namespace hud
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.85f, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.35f, 1000);
-    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.4f, 1000);
+    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.8f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaritemsize, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, radarsize, 0, 0.04f, 1000);
-    FVAR(IDF_PERSIST, radaroffset, 0, 0.04f, 1000);
+    FVAR(IDF_PERSIST, radarsize, 0, 0.045f, 1000);
+    FVAR(IDF_PERSIST, radaroffset, 0, 0.065f, 1000);
     FVAR(IDF_PERSIST, radarcorner, 0, 0.15f, 1000);
     FVAR(IDF_PERSIST, radarcornersize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, radarcorneroffset, 0, 0.045f, 1);
@@ -236,7 +237,7 @@ namespace hud
     FVAR(IDF_PERSIST, radartexblend, 0, 0.9f, 1);
     FVAR(IDF_PERSIST, radartexbright, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, radarcornerbright, 0, 0.8f, 1);
-    VAR(IDF_PERSIST, radardist, 0, 0, VAR_MAX); // 0 = use world size
+    VAR(IDF_PERSIST, radardist, 0, 512, VAR_MAX); // 0 = use world size
     VAR(IDF_PERSIST, radarcornerdist, 0, 512, VAR_MAX); // 0 = use world size
     VAR(IDF_PERSIST, radaritems, 0, 2, 2);
     VAR(IDF_PERSIST, radaritemspawn, 0, 1, 1);
@@ -260,8 +261,8 @@ namespace hud
     VAR(IDF_PERSIST, radardamagemin, 1, 25, VAR_MAX);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
-    VAR(IDF_PERSIST, showeditradar, 0, 0, 1);
-    VAR(IDF_PERSIST, editradardist, 0, 64, VAR_MAX); // 0 = use radardist
+    VAR(IDF_PERSIST, showeditradar, 0, 1, 1);
+    VAR(IDF_PERSIST, editradardist, 0, 128, VAR_MAX); // 0 = use radardist
     VAR(IDF_PERSIST, editradarnoisy, 0, 1, 2);
 
     VAR(IDF_PERSIST, motionblurfx, 0, 1, 2); // 0 = off, 1 = on, 2 = override
@@ -1107,7 +1108,7 @@ namespace hud
         switch(radarstyle)
         {
             case 2: return radarcornerdist ? radarcornerdist : getworldsize();
-            case 1: case 0: default: return radardist ? radardist : getworldsize();
+            case 1: case 0: case -1: default: return radardist ? radardist : getworldsize();
         }
         return getworldsize();
     }
@@ -1115,8 +1116,12 @@ namespace hud
     void drawblip(const char *tex, float area, int w, int h, float s, float blend, int style, vec &pos, const vec &colour, const char *font, const char *text, ...)
     {
         vec dir;
-        float dist = 0;
-        if(!style) dir = pos;
+        float dist = 1;
+        if(style < 0)
+        {
+            style = -style-1;
+            dir = pos;
+        }
         else
         {
             dir = vec(pos).sub(camera1->o);
@@ -1137,14 +1142,28 @@ namespace hud
                 tr = ts*dist;
                 break;
             }
-            case 1: case 0: default:
+            case 1:
             {
                 tx = w/2;
                 ty = h/2;
-                tr = (size*radaroffset)+(ts*area)+(ts*dist);
+                tr = (size*radaroffset)+(ts*4*dist);
+                break;
+            }
+            case 0: default:
+            {
+                tx = w/2;
+                ty = h/2;
+                tr = (size*radaroffset)+(ts*area);
+                break;
             }
         }
-        vec loc = vec(tx+(tr*x), ty+(tr*y), 0);
+        vec loc(tr*x, tr*y, 0);
+        if(radarstyle != 2 && radaraspect != 0 && w != h)
+        {
+            if(w > h) loc.x *= (float(w)/float(h))*radaraspect;
+            else loc.y *= (float(h)/float(w))*radaraspect;
+        }
+        loc.x += tx; loc.y += ty;
         glColor4f(colour.x, colour.y, colour.z, blend);
         Texture *t = textureload(tex, 3);
         if(t)
@@ -1195,8 +1214,7 @@ namespace hud
             else colour[0] = vec::hexcolor(d->getcolour(0));
             colour[1] = vec::hexcolor(d->getcolour(1));
             const char *tex = dominated ? dominatedtex : playerbliptex;
-            float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend,
-                  pos = 2, size = dominated ? 1.25f : 1.f;
+            float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
@@ -1220,8 +1238,8 @@ namespace hud
             loopi(2)
             {
                 if(!i && chkcond(radarplayernames, game::tvmode()))
-                    drawblip(i ? tex : hinttex, pos, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i], "radar", "%s", game::colorname(d, NULL, "", false));
-                else drawblip(i ? tex : hinttex, pos, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i]);
+                    drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i], "radar", "%s", game::colorname(d, NULL, "", false));
+                else drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i]);
             }
         }
     }
@@ -1254,9 +1272,9 @@ namespace hud
             else fade *= radarblipblend;
             if(game::focus->state != CS_EDITING && !insel && inspawn > 0.f)
                 fade = radaritemspawn ? 1.f-inspawn : fade+((1.f-fade)*(1.f-inspawn));
-            if(insel) drawblip(tex, 1, w, h, size, fade*blend, radarstyle, o, colour, "radar", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
-            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 1, w, h, size, fade*blend, radarstyle, o, colour, "radar", "%s", entities::entinfo(type, attr, false));
-            else drawblip(tex, 1, w, h, size, fade*blend, radarstyle, o, colour);
+            if(insel) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "radar", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
+            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "radar", "%s", entities::entinfo(type, attr, false));
+            else drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour);
         }
     }
 
@@ -1310,9 +1328,9 @@ namespace hud
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(hurttex, 4+size, w, h, size, fade, 0, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(hurttex, 3+size, w, h, size, fade, 0, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
                 }
-                else drawblip(hurttex, 4+size, w, h, size, fade, 0, dir, d.colour);
+                else drawblip(hurttex, 3+size, w, h, size, fade, 0, dir, d.colour);
             }
         }
         if(radardamage >= 2)
@@ -1326,7 +1344,7 @@ namespace hud
                 vec colour = vec::hexcolor(a->getcolour(1));
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
-                    if(a->state == CS_ALIVE) drawblip(arrowtex, 4+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s (%d)", game::colorname(a), a->health);
+                    if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s (%d)", game::colorname(a), a->health);
                     else drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s", game::colorname(a));
                 }
             }

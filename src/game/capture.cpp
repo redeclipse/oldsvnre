@@ -70,8 +70,8 @@ namespace capture
                         tex = hud::alerttex;
                     }
                 }
-                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, 3, w, h, size, fade, arrow ? 0 : hud::radarstyle, arrow ? dir : pos, colour, "radar", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
-                else hud::drawblip(tex, 3, w, h, hud::radaraffinitysize, fade, arrow ? 0 : hud::radarstyle, arrow ? dir : pos, colour);
+                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour, "radar", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
+                else hud::drawblip(tex, arrow ? 3 : 2, w, h, hud::radaraffinitysize, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour);
             }
         }
     }
