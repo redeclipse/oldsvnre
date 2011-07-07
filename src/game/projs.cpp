@@ -484,11 +484,6 @@ namespace projs
                 proj.waterfric = WEAP2(proj.weap, waterfric, proj.flags&HIT_ALT);
                 proj.weight = WEAP2(proj.weap, weight, proj.flags&HIT_ALT);
                 proj.projcollide = WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
-                if(proj.child)
-                {
-                    proj.projcollide &= ~(IMPACT_GEOM|BOUNCE_PLAYER|IMPACT_SHOTS|COLLIDE_SHOTS|COLLIDE_CONT);
-                    proj.projcollide |= BOUNCE_GEOM|IMPACT_PLAYER;
-                }
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
                 proj.mdl = weaptype[proj.weap].proj;

@@ -103,7 +103,7 @@ namespace hud
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
-    FVAR(IDF_PERSIST, teamhurtsize, 0, 0.015f, 1000);
+    FVAR(IDF_PERSIST, teamhurtsize, 0, 0.0175f, 1000);
     VAR(IDF_PERSIST, teamkillnum, 0, 3, VAR_MAX);
     VAR(IDF_PERSIST, teamkilltime, 0, 60000, VAR_MAX);
 
@@ -231,7 +231,7 @@ namespace hud
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radaritemsize, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, radaritemsize, 0, 0.65f, 1000);
     FVAR(IDF_PERSIST, radarsize, 0, 0.045f, 1000);
     FVAR(IDF_PERSIST, radaroffset, 0, 0.065f, 1000);
     FVAR(IDF_PERSIST, radarcorner, 0, 0.15f, 1000);
@@ -2030,7 +2030,7 @@ namespace hud
         if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : !third && chkcond(showradar, game::tvmode())))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
-        if(teamhurttime && game::focus == game::player1)
+        if(teamhurttime && game::focus == game::player1 && lastmillis-game::player1->lastteamhit <=  teamhurttime)
         {
             vec targ;
             bool hasbound = false;
@@ -2043,7 +2043,7 @@ namespace hud
                 {
                     Texture *t = textureload(hud::warningtex, 3);
                     glBindTexture(GL_TEXTURE_2D, t->id);
-                    float amt = float(lastmillis%500)/500.f, value = (amt > 0.5f ? 1.f-amt : amt)*2.f;
+                    float amt = float(lastmillis%250)/250.f, value = (amt > 0.5f ? 1.f-amt : amt)*2.f;
                     glColor4f(value, value*0.125f, value*0.125f, value);
                     hasbound = true;
                 }

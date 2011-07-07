@@ -890,7 +890,7 @@ namespace game
                     if(!sameteam) pushdamagemerge(d, actor, weap, damage, burning ? damagemerge::BURN : (bleeding ? damagemerge::BLEED : 0));
                     else if(actor == player1 && !burning && !bleeding)
                     {
-                        d->lastteamhit = lastmillis;
+                        player1->lastteamhit = d->lastteamhit = lastmillis;
                         if(!issound(alarmchan)) playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan);
                     }
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
