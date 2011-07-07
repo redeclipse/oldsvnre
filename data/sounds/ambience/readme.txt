@@ -2,29 +2,27 @@ Files: *
 Copyright: Copyright Quinton "quin" Reeves, Alex "blackshoe" Anguix
 License: CC-BY-SA
 
+Files: water.ogg
+Copyright: Copyright Paul Hertz ("ignotus")
+           <http://www.freesound.org/usersViewSingle.php?id=13366>
+License: CC-BY-SA
+Comment:
+ This sound originate a sample found at:
+ http://www.freesound.org/samplesViewSingle.php?id=14779
+
+ Special permission for relicensing under CC-BY-SA have been granted by the
+ author.
+
 Files: wind.ogg
 Copyright: Copyright Batuhan Bozkurt
            <http://www.freesound.org/usersViewSingle.php?id=60547>
-License: Creative Commons Sampling Plus 1.0 License
-
-Files: firelight.ogg
-Copyright: Copyright Ludovic "Slanesh" Kierasinski
-           <http://www.freesound.org/usersViewSingle.php?id=266482>
-License: Creative Commons Sampling Plus 1.0 License
-
-Files: water.ogg
-Copyright: Copyright ignotus
-           <http://www.freesound.org/usersViewSingle.php?id=13366>
-License: Creative Commons Sampling Plus 1.0 License
-
-Files: frogs.ogg forestflies.ogg
-Copyright: Copyright Sabastien "oyez" Cirotteau
-           <http://www.freesound.org/usersViewSingle.php?id=13235>
-License: Creative Commons Sampling Plus 1.0 License
+License: CC-BY-SA
 Comment:
- These sounds originate from samples found at:
- http://www.freesound.org/samplesViewSingle.php?id=7384
- http://www.freesound.org/samplesViewSingle.php?id=7387
+ This sound originate a sample found at:
+ http://www.freesound.org/samplesViewSingle.php?id=17735
+
+ Special permission for relicensing under CC-BY-SA have been granted by the
+ author.
 
 Files: hum.ogg
 Copyright: Copyright 2006 Therac-25
