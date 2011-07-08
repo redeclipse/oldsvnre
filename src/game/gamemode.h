@@ -90,7 +90,7 @@ gametypes gametype[] = {
             G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_LEAGUE|G_M_GSP1|G_M_GSP2,
             G_M_NONE
         },
-        "bomber-ball",                      { "multi", "hold", "" },
+        "bomber-ball",                      { "basket", "hold", "" },
     },
     {
         G_TRIAL,        G_M_NONE,

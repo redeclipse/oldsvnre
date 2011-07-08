@@ -109,7 +109,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!m_team(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(!m_team(gamemode, mutators) || !m_gsp1(gamemode, mutators) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
         scorebomb(ci, relay, goal);
     }
 
@@ -141,7 +141,7 @@ struct bomberservmode : bomberstate, servmode
 
     void returnaffinity(int i, int v)
     {
-        bomberstate::returnaffinity(i, gamemillis, v != 0 && m_gsp1(gamemode, mutators));
+        bomberstate::returnaffinity(i, gamemillis, false);
         sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? v : 0);
         if(v && !flags[i].enabled)
         {
@@ -174,34 +174,24 @@ struct bomberservmode : bomberstate, servmode
         {
             if(gamemillis < bombertime) return;
             int hasaffinity = 0;
-            if(!m_gsp1(gamemode, mutators))
+            vector<int> candidates[TEAM_MAX];
+            loopv(flags) candidates[flags[i].team].add(i);
+            int wants = !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
+            loopi(wants)
             {
-                vector<int> candidates[TEAM_MAX];
-                loopv(flags) candidates[flags[i].team].add(i);
-                int wants = !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
-                loopi(wants)
+                int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
+                if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, TEAM_NEUTRAL))
                 {
-                    int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
-                    if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, TEAM_NEUTRAL))
-                    {
-                        bomberstate::returnaffinity(candidates[i][r], gamemillis, true);
-                        sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
-                        hasaffinity++;
-                    }
-                }
-                if(hasaffinity < wants)
-                {
-                    if(hasaffinity && !m_gsp2(gamemode, mutators)) changemap(smapname, gamemode, mutators|G_M_GSP2);
-                    else hasflaginfo = false;
-                    return;
+                    bomberstate::returnaffinity(candidates[i][r], gamemillis, true);
+                    sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
+                    hasaffinity++;
                 }
             }
-            else loopv(flags) if(isteam(gamemode, mutators, flags[i].team, TEAM_NEUTRAL))
-            { // multi-ball
-                if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && flags[i].team) continue;
-                bomberstate::returnaffinity(i, gamemillis, true);
-                sendf(-1, 1, "ri3", N_RESETAFFIN, i, 1);
-                hasaffinity++;
+            if(hasaffinity < wants)
+            {
+                if(hasaffinity && !m_gsp2(gamemode, mutators)) changemap(smapname, gamemode, mutators|G_M_GSP2);
+                else hasflaginfo = false;
+                return;
             }
             if(!hasaffinity) { hasflaginfo = false; return; }
             ancmsgft(-1, S_V_BOMBSTART, CON_INFO, "\fathe \fs\fwbomb\fS has been spawned");
