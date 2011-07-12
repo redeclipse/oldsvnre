@@ -421,7 +421,7 @@ extern void setlocations(bool wanthome = true);
 // client
 struct serverinfo
 {
-    enum { WAITING = 999 };
+    enum { WAITING = INT_MAX };
     enum { UNRESOLVED = 0, RESOLVING, RESOLVED };
 
     string name;
@@ -433,7 +433,7 @@ struct serverinfo
     ENetAddress address;
 
     serverinfo(uint ip, int port, int priority = 0)
-     : numplayers(0), lastping(0), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port), priority(priority)
+     : numplayers(0), lastping(-1), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port), priority(priority)
     {
         name[0] = map[0] = sdesc[0] = '\0';
         address.host = ip;
@@ -442,7 +442,28 @@ struct serverinfo
     }
     ~serverinfo() { reset(); }
 
-    void reset() { players.deletearrays(); }
+    void reset() 
+    { 
+        lastping = -1;
+        players.deletearrays(); 
+    }
+
+    void checkdecay(int decay)
+    {
+        if(lastping >= 0 && totalmillis - lastping >= decay)
+        {
+            ping = WAITING;
+            lastping = -1;
+        }
+        if(lastping < 0) lastping = totalmillis;
+    }
+
+    void addping(int rtt, int millis)
+    {
+        if(millis >= lastping) lastping = -1;
+        if(ping == WAITING) ping = rtt;
+        else ping = (ping + rtt)/2;
+    }
 };
 extern vector<serverinfo *> servers;
 extern void sendclientpacket(ENetPacket *packet, int chan);
