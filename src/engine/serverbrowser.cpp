@@ -289,6 +289,9 @@ void addserver(const char *name, int port)
 ICOMMAND(0, addserver, "si", (char *n, int *p), addserver(n, *p > 0 ? *p : ENG_SERVER_PORT));
 VAR(0, searchlan, 0, 0, 1);
 VAR(IDF_PERSIST, maxservpings, 0, 10, 1000);
+VAR(IDF_PERSIST, serverupdateinterval, 0, 10, INT_MAX-1);
+VAR(IDF_PERSIST, serverdecay, 0, 20, INT_MAX-1);
+VAR(0, serverwaiting, 1, serverinfo::WAITING, 0);
 
 void pingservers()
 {
@@ -315,11 +318,13 @@ void pingservers()
         serverinfo &si = *servers[lastping];
         if(++lastping >= servers.length()) lastping = 0;
         if(si.address.host == ENET_HOST_ANY) continue;
-        si.lastping = totalmillis;
         buf.data = ping;
         buf.dataLength = p.length();
         enet_socket_send(pingsock, &si.address, &buf, 1);
+
+        si.checkdecay(serverdecay*1000);
     }
+
     if(searchlan)
     {
         ENetAddress address;
@@ -382,12 +387,10 @@ void checkpings()
         serverinfo *si = NULL;
         loopv(servers) if(addr.host == servers[i]->address.host && addr.port == servers[i]->address.port) { si = servers[i]; break; }
         if(!si && searchlan) si = newserver(NULL, addr.port-1, 1, addr.host);
-        if(si) si->reset();
-        else continue;
+        if(!si) continue;
         ucharbuf p(ping, len);
-        int millis = getint(p);
-        if(si->lastping && millis != si->lastping) si->ping = serverinfo::WAITING;
-        else si->ping = totalmillis - millis;
+        int millis = getint(p), rtt = clamp(totalmillis - millis, 0, min(serverdecay*1000, totalmillis));
+        if(rtt < serverdecay*1000) si->addping(rtt, millis);
         si->numplayers = getint(p);
         int numattr = getint(p);
         si->attr.shrink(0);
@@ -397,6 +400,7 @@ void checkpings()
         getstring(text, p);
         filtertext(si->sdesc, text);
         if(!strcmp(si->sdesc, "unnamed")) copystring(si->sdesc, si->name);
+        si->players.deletearrays();
         loopi(si->numplayers)
         {
             getstring(text, p);
@@ -407,8 +411,6 @@ void checkpings()
 }
 
 static inline int serverinfocompare(serverinfo *a, serverinfo *b) { return client::servercompare(a, b) < 0; }
-
-VAR(IDF_PERSIST, serverupdateinterval, 0, 10, INT_MAX-1);
 
 void refreshservers()
 {
