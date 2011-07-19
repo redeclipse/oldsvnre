@@ -1425,7 +1425,6 @@ namespace ai
     {
         if(!issuspended(d))
         {
-            vec dp = d->headpos();
             if(d->state != CS_ALIVE || !game::allowmove(d)) d->stopmoving(true);
             else
             {
