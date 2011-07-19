@@ -648,7 +648,7 @@ namespace projs
         if(proj.projtype != PRJ_SHOT) updatebb(proj, true);
         if(!proj.child && (proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced))
         {
-            vec dir = vec(proj.to).sub(proj.o), orig = proj.o;
+            vec dir = vec(proj.to).sub(proj.o);
             float maxdist = dir.magnitude();
             if(maxdist > 1e-3f)
             {

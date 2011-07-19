@@ -4,7 +4,6 @@ Texture *sky[6] = { 0, 0, 0, 0, 0, 0 }, *clouds[6] = { 0, 0, 0, 0, 0, 0 };
 
 void loadsky(const char *basename, Texture *texs[6])
 {
-    bool fail = false;
     loopi(6)
     {
         const char *side = cubemapsides[i].name;
@@ -12,7 +11,6 @@ void loadsky(const char *basename, Texture *texs[6])
         if((texs[i] = textureload(name, 3, true, false)) == notexture)
         {
             conoutf("\frcould not load sky texture %s_%s", basename, side);
-            fail = true;
         }
     }
 }

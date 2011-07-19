@@ -1235,7 +1235,6 @@ namespace client
     {
         static char text[MAXTRANS];
         int type = -1, prevtype = -1;
-        bool mapchanged = false;
 
         while(p.remaining())
         {
@@ -1350,7 +1349,6 @@ namespace client
                     getstring(text, p);
                     int getit = getint(p), mode = getint(p), muts = getint(p);
                     changemapserv(getit != 1 ? text : NULL, mode, muts, getit == 2);
-                    mapchanged = true;
                     if(needsmap) switch(getit)
                     {
                         case 0: case 2:
