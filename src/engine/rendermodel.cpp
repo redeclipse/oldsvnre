@@ -303,6 +303,7 @@ COMMAND(0, rdtri, "iii");
 void rdjoint(int *n, int *t, const char *v1, const char *v2, const char *v3)
 {
     checkragdoll;
+    if(*n < 0 || *n >= skel->numbones) return;
     ragdollskel::joint &j = ragdoll->joints.add();
     j.bone = *n;
     j.tri = *t;
