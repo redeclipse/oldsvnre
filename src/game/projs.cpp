@@ -969,6 +969,7 @@ namespace projs
                     {
                         if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                         {
+                            part_create(PART_PLASMA, 1, proj.o, projcol(proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5*proj.curscale);
                             part_create(PART_PLASMA, 1, proj.o, projcol(proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*proj.curscale);
                             if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, projcol(proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*projhintsize*proj.curscale, projhintblend);
                         }
