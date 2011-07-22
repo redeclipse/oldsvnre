@@ -2507,14 +2507,15 @@ namespace game
             {
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
                      powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
-                     reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD;
+                     reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
+                     secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                     part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.8f*scale, min(0.65f*scale, 0.8f), 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), 0xFF6818, 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
-                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), pulsecols[0][rnd(PULSECOLOURS)], 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), WEAP2(d->weapselect, partcol, secondary), 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
+                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), WEAP2(d->weapselect, partcol, secondary), 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && !reloading)
                 {
@@ -2523,7 +2524,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, d->getcolour(2), 0.5f*amt, amt);
+                    part_flare(origin, v, 1, PART_FLARE, WEAP2(d->weapselect, partcol, secondary), 0.5f*amt, amt);
                 }
                 if(d->weapselect == WEAP_SWORD || powering)
                 {
@@ -2532,34 +2533,34 @@ namespace game
                         float size, radius;
                     } powerfx[WEAP_MAX] = {
                         { 0, 0, 0, 0 },
-                        { 2, PART_SPARK, 0xFFCC22, 0.1f, 1.5f },
-                        { 4, PART_LIGHTNING_FLARE, 0x1111CC, 1, 1 },
-                        { 2, PART_SPARK, 0xFFAA00, 0.15f, 2 },
-                        { 2, PART_SPARK, 0xFF8800, 0.1f, 2 },
-                        { 2, PART_FIREBALL, 0, 0.5f, 6 },
-                        { 1, PART_PLASMA, 0x226688, 0.15f, 2 },
-                        { 2, PART_PLASMA, 0x6611FF, 0.1f, 2.5f },
-                        { 3, PART_PLASMA, 0, 0.5f, 0.125f },
-                        { 0, 0, 0, 0 },
+                        { 2, PART_SPARK, 0.1f, 1.5f },
+                        { 4, PART_LIGHTNING_FLARE, 1, 1 },
+                        { 2, PART_SPARK, 0.15f, 2 },
+                        { 2, PART_SPARK, 0.1f, 2 },
+                        { 2, PART_FIREBALL, 0.5f, 6 },
+                        { 1, PART_PLASMA, 0.15f, 2 },
+                        { 2, PART_PLASMA, 0.1f, 2.5f },
+                        { 3, PART_PLASMA, 0.5f, 0.125f },
+                        { 0, 0, 0 },
                     };
                     switch(powerfx[d->weapselect].type)
                     {
                         case 1: case 2:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : pulsecols[0][rnd(PULSECOLOURS)];
+                            int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)];
                             regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
                             break;
                         }
                         case 3:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : ((int(254*max(1.f-amt,0.5f))<<16)+1)|((int(128*max(1.f-amt,0.f))+1)<<8), interval = lastmillis%1000;
+                            int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)], interval = lastmillis%1000;
                             float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
                             part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc);
                             break;
                         }
                         case 4:
                         {
-                            int colour = powerfx[d->weapselect].colour > 0 ? powerfx[d->weapselect].colour : pulsecols[0][rnd(PULSECOLOURS)];
+                            int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)];
                             part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, powerfx[d->weapselect].size, max(amt, 0.1f));
                             break;
                         }
