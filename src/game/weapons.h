@@ -206,7 +206,7 @@ WEAPON(pistol,      0x888888,       0x666611,       0x666611,       -1,         
     0,
     1,      1,      1,      1
 );
-WEAPON(sword,       0x2222AA,       0x2222AA,       0x2222AA,       0x2222AA,       0x2222AA,
+WEAPON(sword,       0x111199,       0x111199,       0x111199,       0x111199,       0x111199,
     1,      1,      0,      0,      500,    750,    50,     30,     60,     0,      0,      0,      0,      350,    500,
     10,     10,     0,      0,      200,    200,    0,      0,      1,      1,      1,      1,      0,      0,      0,      0,
     1,      1,      1,      1,      -1,             -1,             15,     30,     5,      5,      500,    500,    0,      0,
@@ -223,7 +223,7 @@ WEAPON(sword,       0x2222AA,       0x2222AA,       0x2222AA,       0x2222AA,   
     (1<<TRAIT_BLEEDRES),
     2.f,    1.5f,   0.5f,   1.5f
 );
-WEAPON(shotgun,     0xBBBB22,       0xBBBB22,       0xBBBB22,       0xBBBB22,       0xBBBB22,
+WEAPON(shotgun,     0x999911,       0x999911,       0x999911,       0x999911,       0x999911,
     2,      8,      1,      2,      600,    900,    750,    15,     5,      1000,   250,    0,      0,      400,    5000,
     0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      4,      2,      16,     0,      0,      0,
     1,      4,      10,     10,     -1,             WALT(SHOTGUN),  16,     4,      5,      40,     250,    2000,   0,      0,
@@ -240,7 +240,7 @@ WEAPON(shotgun,     0xBBBB22,       0xBBBB22,       0xBBBB22,       0xBBBB22,   
     (1<<TRAIT_BLEEDRES),
     1.25f,   1.25f,  0.8f,  1.2f
 );
-WEAPON(smg,         0xDD6622,       0xDD6622,       0xDD6622,       0xDD6622,       0xDD6622,
+WEAPON(smg,         0xEE7722,       0xEE7722,       0xEE7722,       0xEE7722,       0xEE7722,
     40,     40,     1,      2,      100,    200,    1500,   22,     10,     2000,   350,    0,      0,      800,    150,
     0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      3,      6,      0,      0,      0,      0,
     2,      2,      20,     20,     -1,             WALT(SMG),      16,     4,      5,      20,     500,    500,    0,      0,
@@ -274,7 +274,7 @@ WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,         
     (1<<TRAIT_BURNRES),
     0.75f,  0.75f,  0.75f,  0.75f
 );
-WEAPON(plasma,      0x44FFFF,       0x44FFFF,       0x44FFFF,       0x44FFFF,       0x44FFFF,
+WEAPON(plasma,      0x44CCCC,       0x44CCCC,       0x44CCCC,       0x44CCCC,       0x44CCCC,
     20,     20,     1,      20,     300,    1000,   2000,   20,     10,     1000,   30,     0,      2000,   750,    5000,
     0,      75,     0,      0,      200,    200,    10,     50,     1,      1,      2,      1,      0,      0,      0,      0,
     2,      1,      50,     10,     -1,             -1,             10,     5,      5,      5,      500,    500,    0,      0,
@@ -308,7 +308,7 @@ WEAPON(rifle,       0x6622AA,       0x6622AA,       0x6622AA,       0x6622AA,   
     (1<<TRAIT_BLEEDRES),
     0.8f,   1.1f,   0.8f,   0.8f
 );
-WEAPON(grenade,     0x44FF44,       -1,             -1,             0x981808,      0x981808,
+WEAPON(grenade,     0x119911,       -1,             -1,             0x981808,      0x981808,
     1,      2,      1,      1,      1000,   1000,   1500,   100,    100,    250,    250,    3000,   3000,   3000,   3000,
     75,     75,     0,      0,      200,    200,    75,     75,     1,      1,      1,      1,      0,      0,      0,      0,
     0,      0,      5,      5,      WEAP_SHOTGUN,   WEAP_SHOTGUN,   150,    150,    75,     75,     3000,   3000,   300,    300,
@@ -325,7 +325,7 @@ WEAPON(grenade,     0x44FF44,       -1,             -1,             0x981808,   
     (1<<TRAIT_BURNRES),
     1.1f,   1.1f,   1.f,    1.1f
 );
-WEAPON(rocket,      0x882211,       -1,             -1,              0x981808,      0x981808,
+WEAPON(rocket,      0x882200,       -1,             -1,              0x981808,      0x981808,
     1,      1,      1,      1,      1000,   1000,   1500,   200,     200,   1000,   250,    2000,   2000,   5000,   5000,
     0,      0,      0,      0,      200,    200,    100,    100,     1,     1,      1,      1,      0,      0,      0,      0,
     0,      0,      10,     10,     WEAP_SMG,       WEAP_SMG,        300,   300,    75,     75,     3000,   3000,   400,    400,
@@ -432,7 +432,7 @@ extern weaptypes weaptype[];
 #define WEAP2(weap,name,second) (*weap_stat_##name[weap][second?1:0])
 #define WEAPSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
 #endif
-#define WEAPLM(a,b,c)           (a*(m_limited(b, c) || m_loadout(b, c) ? GAME(explodelimited) : GAME(explodescale)))
+#define WEAPLM(a,b,c)           (a*(m_league(b, c) ? GAME(explodeleague) : (m_limited(b, c) ? GAME(explodelimited) : GAME(explodescale))))
 #define WEAPEX(a,b,c,d,e)       (!m_insta(c, d) || m_loadout(c, d) || a != WEAP_RIFLE ? int(ceilf(WEAPLM(WEAP2(a, explode, b)*e, c, d))) : 0)
 #define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_loadout(c, d) || a != WEAP_RIFLE ? clamp(int(ceilf(max(WEAP2(a, spread, b), f)*e)), WEAP2(a, minspread, b), WEAP2(a, maxspread, b) ? WEAP2(a, maxspread, b) : INT_MAX) : 0)
 #define WEAPSND(a,b)            (weaptype[a].sound+b)
