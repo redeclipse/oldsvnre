@@ -338,7 +338,7 @@ namespace entities
         if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
         if(isweap(g))
         {
-            d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
+            d->setweapstate(g, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
             d->ammo[g] = -1;
             if(d->weapselect != g)
             {
@@ -346,14 +346,14 @@ namespace entities
                 d->weapselect = g;
             }
         }
-        d->useitem(n, e.type, attr, c, sweap, lastmillis);
+        d->useitem(n, e.type, attr, c, sweap, lastmillis, weaponswitchdelay);
         playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
         if(game::dynlighteffects) adddynlight(d->headpos(-d->height/2), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
         if(ents.inrange(r) && ents[r]->type == WEAPON)
         {
             gameentity &f = *(gameentity *)ents[r];
             attr = w_attr(game::gamemode, f.attrs[0], sweap);
-            if(isweap(attr)) projs::drop(d, attr, r, v, d == game::player1 || d->ai);
+            if(isweap(attr)) projs::drop(d, attr, r, v, d == game::player1 || d->ai, 0, g);
         }
         if(e.spawned != s)
         {
@@ -837,7 +837,7 @@ namespace entities
                     if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
                     {
                         client::addmsg(N_ITEMUSE, "ri3", d->clientnum, lastmillis-game::maptime, n);
-                        d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
+                        d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
                         d->action[AC_USE] = false;
                     }
                     else tried = true;

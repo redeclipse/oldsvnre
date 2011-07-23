@@ -50,7 +50,7 @@ namespace weapons
         {
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
-            d->weapswitch(weap, lastmillis);
+            d->weapswitch(weap, lastmillis, weaponswitchdelay);
             return true;
         }
         return false;
@@ -136,7 +136,7 @@ namespace weapons
             if(d->weapwaited(d->weapselect, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
             {
                 client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-                d->setweapstate(d->weapselect, WEAP_S_WAIT, WEAPSWITCHDELAY, lastmillis);
+                d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
                 found = true;
             }
         }

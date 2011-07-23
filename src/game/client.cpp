@@ -1627,11 +1627,11 @@ namespace client
                     if(ds) loopj(ds)
                     {
                         int gs = getint(p), drop = getint(p), value = getint(p);
-                        if(target) projs::drop(target, gs, drop, value, local, j);
+                        if(target) projs::drop(target, gs, drop, value, local, j, weap);
                     }
                     if(isweap(weap) && target)
                     {
-                        target->weapswitch(weap, lastmillis);
+                        target->weapswitch(weap, lastmillis, weaponswitchdelay);
                         playsound(WEAPSND(weap, S_W_SWITCH), target->o, target, target == game::focus ? SND_FORCED : 0, -1, -1, -1, &target->wschan);
                     }
                     break;
