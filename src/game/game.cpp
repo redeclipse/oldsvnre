@@ -2514,9 +2514,9 @@ namespace game
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.8f*scale, min(0.65f*scale, 0.8f), 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
-                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
+                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.5f*scale, min(0.65f*scale, 0.8f), 0, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f), 0, 0);
+                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && !reloading)
                 {
