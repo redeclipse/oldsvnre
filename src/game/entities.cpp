@@ -18,7 +18,7 @@ namespace entities
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : (!haswaypoints || (physics::allowjetpack() && !hasjetpoints) ? 1 : 2));
+        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : (!haswaypoints || (physics::allowhover() && !hasjetpoints) ? 1 : 2));
     }
 
     bool clipped(const vec &o, bool aiclip)
@@ -291,7 +291,7 @@ namespace entities
                 if(full)
                 {
                     if(attr[0]&WP_F_CROUCH) addentinfo("crouch");
-                    if(attr[0]&WP_F_JETPACK) addentinfo("jetpack");
+                    if(attr[0]&WP_F_HOVER) addentinfo("hover");
                 }
                 break;
             }
@@ -1486,14 +1486,14 @@ namespace entities
             if(!ents.inrange(current)) continue;
             extentity &ent = *ents[current];
             linkvector &links = ent.links;
-            bool jetter = physics::allowjetpack(d);
+            bool jetter = physics::allowhover(d);
             loopv(links)
             {
                 int link = links[i];
                 if(ents.inrange(link) && ents[link]->type == ents[node]->type && (link == node || link == goal || !ents[link]->links.empty()))
                 {
                     bool wp = ents[link]->type == WAYPOINT;
-                    if(wp && ents[link]->attrs[0]&WP_F_JETPACK && !jetter) continue;
+                    if(wp && ents[link]->attrs[0]&WP_F_HOVER && !jetter) continue;
                     linkq &n = nodes[link];
                     int weight = jetter ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
                     float curscore = prevscore + ents[link]->o.dist(ent.o)*weight;
@@ -1547,14 +1547,14 @@ namespace entities
         {
             vec v = d->feetpos();
             int weight = getweight(v);
-            bool shoulddrop = !d->ai && weight >= 0 && waypointdrop(hasai), jetting = physics::jetpack(d), create = false;
+            bool shoulddrop = !d->ai && weight >= 0 && waypointdrop(hasai), jetting = physics::hover(d), create = false;
             float dist = float(shoulddrop ? enttype[WAYPOINT].radius : ai::CLOSEDIST);
             int curnode = closestent(WAYPOINT, v, dist, false), prevnode = d->lastnode;
 
             if(!ents.inrange(curnode) && shoulddrop)
             {
                 int cmds = WP_F_NONE;
-                if(jetting) cmds |= WP_F_JETPACK;
+                if(jetting) cmds |= WP_F_HOVER;
                 else if(physics::iscrouching(d) && !physics::sliding(d, true)) cmds |= WP_F_CROUCH;
                 curnode = ents.length();
                 attrvector wpattrs;
@@ -2147,7 +2147,7 @@ namespace entities
                 case WAYPOINT:
                     numwaypoints++;
                     haswaypoints = true;
-                    if(ents[i]->attrs[0]&WP_F_JETPACK) hasjetpoints = true;
+                    if(ents[i]->attrs[0]&WP_F_HOVER) hasjetpoints = true;
                     break;
                 case ACTOR: numactors++; break;
                 default: break;

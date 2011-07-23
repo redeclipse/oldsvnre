@@ -70,11 +70,11 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
 enum
 {
-    TRAIT_JETPACK = 0,
+    TRAIT_HOVER = 0,
     TRAIT_IMPULSE,
     TRAIT_BURNRES,
     TRAIT_BLEEDRES,
-    TRAIT_ALL = (1<<TRAIT_JETPACK)|(1<<TRAIT_IMPULSE)|(1<<TRAIT_BURNRES)|(1<<TRAIT_BLEEDRES)
+    TRAIT_ALL = (1<<TRAIT_HOVER)|(1<<TRAIT_IMPULSE)|(1<<TRAIT_BURNRES)|(1<<TRAIT_BLEEDRES)
 };
 
 #define WEAPON(a, \
@@ -288,7 +288,7 @@ WEAPON(plasma,      0x44CCCC,       0x44CCCC,       0x44CCCC,       0x44CCCC,   
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_RADIAL|COLLIDE_OWNER|COLLIDE_STICK,
-    (1<<TRAIT_JETPACK),
+    (1<<TRAIT_HOVER),
     0.9f,   1.2f,   0.9f,   0.9f
 );
 WEAPON(rifle,       0x6622AA,       0x6622AA,       0x6622AA,       0x6622AA,       0x6622AA,

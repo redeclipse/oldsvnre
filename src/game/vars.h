@@ -35,7 +35,7 @@ GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, hovermaps, "alphacampaign center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple deli dropzone dutility echo ghost linear longestyard panic stone wet");
 GSVAR(IDF_ADMIN, mediummaps, "blink center darkness deadsimple deathtrap deli dropzone echo error facility forge foundation futuresport ghost keystone lab linear mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
@@ -203,13 +203,17 @@ GFVAR(0, forceslidecurb, -1, -1, FVAR_MAX);
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
 GFVAR(0, movesprint, FVAR_NONZERO, 1.6f, FVAR_MAX); // sprinting modifier
-GFVAR(0, movejetpack, FVAR_NONZERO, 1.6f, FVAR_MAX); // jetpack modifier
+GFVAR(0, movehover, FVAR_NONZERO, 1.6f, FVAR_MAX); // hover modifier
 GFVAR(0, movepowerjump, FVAR_NONZERO, 4.6f, FVAR_MAX); // powerjump modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
 GFVAR(0, movestrafe, FVAR_NONZERO, 1, FVAR_MAX); // strafe modifier
 GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
 GFVAR(0, movestepup, FVAR_NONZERO, 0.95f, FVAR_MAX); // step-up modifier
 GFVAR(0, movestepdown, FVAR_NONZERO, 1.15f, FVAR_MAX); // step-down modifier
+
+GVAR(0, hoverdelay, 0, 250, VAR_MAX); // minimum time between hover
+GVAR(0, hoverheight, 0, 128, VAR_MAX); // hover maximum height off ground
+GVAR(0, hoverdecay, 1, 20, VAR_MAX); // decay rate of one unit per this many ms
 
 GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing
@@ -230,19 +234,18 @@ GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before powerslides end
 GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsekickdelay, 0, 450, VAR_MAX); // minimum time between wall kicks/climbs
-GVAR(0, impulsejetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsepower, 0, 10000, VAR_MAX); // impulse max power length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
-GFVAR(0, impulsejetpack, 0, 1.5f, FVAR_MAX); // jetpack impulse meter depletion
+GFVAR(0, impulsehover, 0, 0.5f, FVAR_MAX); // hover impulse meter depletion
 GFVAR(0, impulsepowerup, 0, 5.f, FVAR_MAX); // power jump meter charge rate
 GFVAR(0, impulsepowerjump, 0, 15.f, FVAR_MAX); // power jump meter depletion
 GFVAR(0, impulseregen, 0, 4.f, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregensprint, 0, 0.75f, FVAR_MAX); // impulse regen sprinting modifier
-GFVAR(0, impulseregenjetpack, 0, 1.5f, FVAR_MAX); // impulse regen jetpack modifier
+GFVAR(0, impulseregenhover, 0, 1.5f, FVAR_MAX); // impulse regen hover modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
 GVAR(0, impulseregendelay, 0, 250, VAR_MAX); // delay before impulse regens
