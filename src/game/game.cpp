@@ -878,7 +878,7 @@ namespace game
                         if(!kidmode && bloodscale > 0)
                             part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
                         if(kidmode || bloodscale <= 0 || bloodsparks)
-                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1.f, 1, 50, DECAL_STAIN, int(d->radius));
+                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
                     if(!burning && !bleeding) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
@@ -2538,24 +2538,24 @@ namespace game
                         { 4, PART_LIGHTNING_FLARE, 1, 1 },
                         { 2, PART_SPARK, 0.15f, 2 },
                         { 2, PART_SPARK, 0.1f, 2 },
-                        { 2, PART_FIREBALL, 0.5f, 6 },
-                        { 1, PART_PLASMA, 0.15f, 2 },
-                        { 2, PART_PLASMA, 0.1f, 2.5f },
-                        { 3, PART_PLASMA, 0.5f, 0.125f },
+                        { 2, PART_FIREBALL, 0.1f, 6 },
+                        { 1, PART_PLASMA, 0.05f, 2 },
+                        { 2, PART_PLASMA, 0.05f, 2.5f },
+                        { 3, PART_PLASMA, 0.1f, 0.125f },
                         { 0, 0, 0 },
                     };
                     switch(powerfx[d->weapselect].type)
                     {
                         case 1: case 2:
                         {
-                            regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
+                            regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f), 1, 0, 5+(amt*5));
                             break;
                         }
                         case 3:
                         {
                             int interval = lastmillis%1000;
                             float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                            part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc);
+                            part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc, max(amt, 0.1f));
                             break;
                         }
                         case 4:

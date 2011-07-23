@@ -440,7 +440,7 @@ namespace bomber
     void destroyaffinity(const vec &o)
     {
         float radius = max(WEAPEX(WEAP_GRENADE, false, game::gamemode, game::mutators, 1), enttype[AFFINITY].radius);
-        part_create(PART_PLASMA_SOFT, 250, o, 0xAA4400, radius*0.5f);
+        part_create(PART_PLASMA_SOFT, 250, o, 0xAA4400, radius*0.5f, 0.5f);
         part_explosion(o, radius, PART_EXPLOSION, 500, 0xAA4400, 1.f, 0.5f);
         part_explosion(o, radius*2, PART_SHOCKWAVE, 250, 0xAA4400, 1.f, 0.1f);
         part_create(PART_SMOKE_LERP_SOFT, 500, o, 0x333333, radius*0.75f, 0.5f, -15);
