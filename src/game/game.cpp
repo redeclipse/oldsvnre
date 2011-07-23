@@ -572,7 +572,7 @@ namespace game
                         sounds[d->jschan].vol = min((lastmillis-sounds[d->jschan].millis)*2, 255);
                         sounds[d->jschan].ends = lastmillis+250;
                     }
-                    else playsound(S_JETPACK, d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
+                    else playsound(S_HOVER, d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
                     if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
@@ -746,7 +746,7 @@ namespace game
         }
         else if(issound(d->fschan)) removesound(d->fschan);
         if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->resetbleeding();
-        if(issound(d->jschan) && !physics::jetpack(d))
+        if(issound(d->jschan) && !physics::hover(d))
         {
             if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
             else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/250.f)));
@@ -2130,17 +2130,17 @@ namespace game
         {
             if(secondary && allowmove(d) && (!isaitype(d->aitype) || aistyle[d->aitype].canmove))
             {
-                if(physics::jetpack(d))
+                if(physics::hover(d))
                 {
                     if(d->action[AC_SPECIAL])
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
                     }
-                    else if(d->move>0) anim |= (ANIM_JETPACK_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_JETPACK_LEFT : ANIM_JETPACK_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= (ANIM_JETPACK_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else anim |= (ANIM_JETPACK_UP|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->move>0) anim |= (ANIM_HOVER_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_HOVER_LEFT : ANIM_HOVER_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= (ANIM_HOVER_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else anim |= (ANIM_HOVER_UP|ANIM_LOOP)<<ANIM_SECONDARY;
                 }
                 else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2510,12 +2510,13 @@ namespace game
                      reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
                      secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
+                int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)];
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                     part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.8f*scale, min(0.65f*scale, 0.8f), 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), WEAP2(d->weapselect, partcol, secondary), 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
-                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), WEAP2(d->weapselect, partcol, secondary), 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f), 0, 0);
+                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && !reloading)
                 {
@@ -2524,7 +2525,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, WEAP2(d->weapselect, partcol, secondary), 0.5f*amt, amt);
+                    part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt);
                 }
                 if(d->weapselect == WEAP_SWORD || powering)
                 {
@@ -2547,20 +2548,18 @@ namespace game
                     {
                         case 1: case 2:
                         {
-                            int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)];
                             regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt, 0.5f), 1, 0, 5+(amt*5));
                             break;
                         }
                         case 3:
                         {
-                            int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)], interval = lastmillis%1000;
+                            int interval = lastmillis%1000;
                             float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
                             part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc);
                             break;
                         }
                         case 4:
                         {
-                            int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)];
                             part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, powerfx[d->weapselect].size, max(amt, 0.1f));
                             break;
                         }
@@ -2568,7 +2567,7 @@ namespace game
                     }
                 }
                 if(d->turnside || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
-                if(physics::jetpack(d)) impulseeffect(d, 2);
+                if(physics::hover(d)) impulseeffect(d, 2);
             }
             if(burntime && d->burning(lastmillis, burntime))
             {

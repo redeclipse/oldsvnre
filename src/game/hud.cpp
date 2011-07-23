@@ -356,7 +356,7 @@ namespace hud
                     amt += 0.25f+(float((lastmillis-game::focus->lastbleed)%bleeddelay)/float(bleeddelay))*0.35f;
                 if(game::focus->turnside || game::focus->impulse[IM_JUMP])
                     amt += game::focus->turnside ? 0.125f : 0.25f;
-                if(physics::jetpack(game::focus)) amt += 0.125f;
+                if(physics::hover(game::focus)) amt += 0.125f;
                 break;
             }
             case 2: amt += motionbluramt; break;
