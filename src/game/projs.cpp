@@ -742,7 +742,7 @@ namespace projs
         return &proj;
     }
 
-    void drop(gameent *d, int g, int n, int v, bool local, int c)
+    void drop(gameent *d, int g, int n, int v, bool local, int c, int w)
     {
         if(g >= WEAP_OFFSET && isweap(g))
         {
@@ -751,7 +751,8 @@ namespace projs
                 if(entities::ents.inrange(n))
                     create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(g), w_spawn(g), 1, 1, n, v, c);
                 d->ammo[g] = -1;
-                d->setweapstate(g, WEAP_S_SWITCH, WEAPSWITCHDELAY, lastmillis);
+                if(w >= 0) d->setweapstate(g, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
+                else d->setweapstate(g, WEAP_S_JAM, weaponjamtime, lastmillis);
             }
             else if(g == WEAP_GRENADE)
                 create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 1, WEAP2(g, time, false), 1, 1, 1, g);

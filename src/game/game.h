@@ -201,8 +201,6 @@ enum
     ANIM_MAX
 };
 
-#define WEAPSWITCHDELAY PHYSMILLIS*2
-
 #ifndef GAMESERVER
 #define PULSECOLOURS 8
 const int pulsecols[3][PULSECOLOURS] = {
@@ -418,14 +416,14 @@ struct gamestate
         weaplast[weap] = millis;
     }
 
-    void weapswitch(int weap, int millis, int state = WEAP_S_SWITCH)
+    void weapswitch(int weap, int millis, int delay, int state = WEAP_S_SWITCH)
     {
         if(isweap(weap))
         {
             lastweap = weapselect;
-            setweapstate(lastweap, WEAP_S_SWITCH, WEAPSWITCHDELAY, millis);
+            setweapstate(lastweap, WEAP_S_SWITCH, delay, millis);
             weapselect = weap;
-            setweapstate(weap, state, WEAPSWITCHDELAY, millis);
+            setweapstate(weap, state, delay, millis);
         }
     }
 
@@ -483,7 +481,7 @@ struct gamestate
         return false;
     }
 
-    void useitem(int id, int type, int attr, int amt, int sweap, int millis)
+    void useitem(int id, int type, int attr, int amt, int sweap, int millis, int delay)
     {
         switch(type)
         {
@@ -491,7 +489,7 @@ struct gamestate
             case WEAPON:
             {
                 int prev = ammo[attr], value = amt >= 0 ? amt : WEAPUSE(attr);
-                weapswitch(attr, millis, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_USE);
+                weapswitch(attr, millis, delay, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_USE);
                 ammo[attr] = clamp(max(ammo[attr], 0)+value, 0, WEAP(attr, max));
                 weapload[attr] = ammo[attr]-prev;
                 entid[attr] = id;
@@ -1179,7 +1177,7 @@ namespace projs
     extern void remove(gameent *owner);
     extern void destruct(gameent *d, int id);
     extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local);
-    extern void drop(gameent *d, int g, int n, int v = -1, bool local = true, int c = 0);
+    extern void drop(gameent *d, int g, int n, int v = -1, bool local = true, int c = 0, int w = -1);
     extern void adddynlights();
     extern void render();
 }
