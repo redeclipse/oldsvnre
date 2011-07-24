@@ -51,9 +51,9 @@ const char *mac_sauerbratendir() {
     return path ? copystring(dir, [path fileSystemRepresentation]) : NULL;
 }
 
-const char *mac_resourcedir()
+const char *mac_resourcedir(const char *what)
 {
     static string dir;
-    CFURLGetFileSystemRepresentation(CFBundleCopyResourceURL(CFBundleGetMainBundle(), CFSTR("data"), NULL, NULL), true, (UInt8*)dir, MAXSTRLEN);
+    CFURLGetFileSystemRepresentation(CFBundleCopyResourceURL(CFBundleGetMainBundle(), CFSTR(what), NULL, NULL), true, (UInt8*)dir, MAXSTRLEN);
     return dir;
 }
