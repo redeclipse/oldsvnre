@@ -53,12 +53,7 @@ const char *mac_sauerbratendir() {
 
 const char *mac_resourcedir()
 {
-    CFBundleRef mainbundle;
-    mainbundle = CFBundleGetMainBundle();
-    if(!mainbundle) return NULL;
-    CFURLRef resource = CFBundleCopyResourceURL(mainbundle, CFStringCreateWithCString(NULL, "Contents/Resources", kCFStringEncodingASCII), NULL, NULL);
-    if(!resource) return NULL;
     static string dir;
-    if(!CFURLGetFileSystemRepresentation(resource, true, (UInt8*)dir, MAXSTRLEN)) return NULL;
+    CFURLGetFileSystemRepresentation(CFBundleCopyResourceURL(CFBundleGetMainBundle(), CFSTR("data"), NULL, NULL), true, (UInt8*)dir, MAXSTRLEN);
     return dir;
 }
