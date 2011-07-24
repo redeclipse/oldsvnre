@@ -36,7 +36,7 @@ namespace physics
     #define ishover       (PHYS(gravity) == 0 || m_hover(game::gamemode, game::mutators))
     bool powered(physent *d, bool check = false)
     {
-        if(!ishover && !m_league(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        if(!m_league(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             return ((gameent *)d)->impulse[IM_POWER] && (!check || !((gameent *)d)->action[AC_CROUCH]);
         }
@@ -892,7 +892,7 @@ namespace physics
                         else d->impulse[IM_COLLECT] += millis;
                     }
                 }
-                if(!d->ai && onfloor && !ishover && !m_league(game::gamemode, game::mutators) && impulsemethod&1 && d->action[AC_JUMP] && d->action[AC_CROUCH])
+                if(!d->ai && onfloor && !m_league(game::gamemode, game::mutators) && impulsemethod&1 && d->action[AC_JUMP] && d->action[AC_CROUCH])
                 {
                     int pwr = min(impulsepower, impulsemeter), len = int(ceilf(millis*impulsepowerup)),
                         tot = d->impulse[IM_POWER]+len;
@@ -906,17 +906,14 @@ namespace physics
                 }
             }
 
-            if(allowhover(d))
+            if(allowhover(d) && jetting)
             {
-                if(jetting)
+                if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/hoverdecay));
+                else if(hoverheight > 0 && !powered(d, true))
                 {
-                    if(d->o.z >= hdr.worldsize) m.z = -(millis/float(hoverdecay));
-                    else if(hoverheight > 0)
-                    {
-                        vec v(0, 0, -1);
-                        float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-hoverheight;
-                        if(d->o.z-floor >= hoverheight) m.z = -(millis/float(hoverdecay));
-                    }
+                    vec v(0, 0, -1);
+                    float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-hoverheight;
+                    if(d->o.z-floor >= hoverheight) m.z = min(m.z, 0-(millis/hoverdecay));
                 }
             }
 
