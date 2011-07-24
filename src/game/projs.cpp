@@ -1882,7 +1882,6 @@ namespace projs
                 case WEAP_PISTOL: case WEAP_SHOTGUN: case WEAP_SMG: case WEAP_RIFLE: if(proj.movement >= 1)
                 {
                     float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(64.f, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from))));
-                    vec pos = vec(proj.o).sub(vec(proj.o).sub(proj.from).mul(size*0.5f));
                     adddynlight(proj.o, 1.25f*size, vec::hexcolor(WEAPPCOL(proj.weap, partcol, proj.flags&HIT_ALT)));
                 } break;
                 case WEAP_PLASMA: case WEAP_FLAMER: case WEAP_GRENADE: case WEAP_ROCKET:
