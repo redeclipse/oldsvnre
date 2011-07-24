@@ -36,7 +36,7 @@ CompressionMethod
 zlib
 
 Copyright
-{(C) 2010 Red Eclipse Team}
+{(C) 2011 Red Eclipse Team}
 
 CreateDesktopShortcut
 Yes
@@ -165,7 +165,7 @@ UpgradeApplicationID
 {}
 
 Version
-0.75
+1.10
 
 ViewReadme
 Yes
