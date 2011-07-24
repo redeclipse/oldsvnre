@@ -1365,10 +1365,8 @@ void setlocations(bool wanthome)
 #if defined(__APPLE__)
         else
         {
-            extern const char *mac_resourcedir();
-            const char *dir = mac_resourcedir(); // ./redeclipse.app/Contents/Resources
-            defformatstring(resource)("%s/data/defaults.cfg", dir);
-            conoutf("attempting to use resources in: %s", resource);
+            extern const char *mac_resourcedir(const char *what);
+            const char *dir = mac_resourcedir("data/defaults.cfg"); // ./redeclipse.app/Contents/Resources
             if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
         }
 #endif
