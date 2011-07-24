@@ -1,6 +1,6 @@
 Name "RedEclipse"
 
-OutFile "redeclipse_1.0_win32.exe"
+OutFile "redeclipse_1.1_win32.exe"
 
 InstallDir "$PROGRAMFILES\Red Eclipse"
 
@@ -22,7 +22,7 @@ Section "Red Eclipse (required)"
   
   SetOutPath $INSTDIR
   
-  File /r "..\..\*.*"
+  File /r "..\..\..\*.*"
   
   WriteRegStr HKLM "SOFTWARE\Red Eclipse" "Install_Dir" "$INSTDIR"
   
