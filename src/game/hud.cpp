@@ -71,7 +71,7 @@ namespace hud
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
-    FVAR(IDF_PERSIST, noticeblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, noticeblend, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
@@ -117,14 +117,14 @@ namespace hud
     VAR(IDF_PERSIST, showdamage, 0, 2, 2); // 1 shows just damage texture, 2 blends as well
     VAR(IDF_PERSIST, damagefade, 0, 0, 1);
     TVAR(IDF_PERSIST, damagetex, "textures/damage", 3);
-    FVAR(IDF_PERSIST, damageblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, damageblend, 0, 1, 1);
     FVAR(IDF_PERSIST, damageskew, 0, 0.25f, 1);
     TVAR(IDF_PERSIST, burntex, "textures/burn", 3);
-    FVAR(IDF_PERSIST, burnblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, burnblend, 0, 0.75f, 1);
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
-    FVAR(IDF_PERSIST, indicatorblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, indicatorblend, 0, 1, 1);
     TVAR(IDF_PERSIST, indicatortex, "textures/progress", 3);
     TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
 
@@ -161,14 +161,14 @@ namespace hud
     VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorythrob, 0, 0.0625f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.07f, 1000);
-    FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.6f, 1000);
-    FVAR(IDF_PERSIST, inventoryblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
+    FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.75f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryeditblend, 0, 0.75f, 1);
-    FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.65f, 1000);
+    FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.5f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
@@ -223,22 +223,22 @@ namespace hud
     TVAR(IDF_PERSIST, hinttex, "textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, radarplayersize, 0, 0.4f, 1000);
-    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.8f, 1);
+    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radaritemsize, 0, 0.65f, 1000);
+    FVAR(IDF_PERSIST, radaritemsize, 0, 0.75f, 1000);
     FVAR(IDF_PERSIST, radarsize, 0, 0.045f, 1000);
     FVAR(IDF_PERSIST, radaroffset, 0, 0.065f, 1000);
     FVAR(IDF_PERSIST, radarcorner, 0, 0.15f, 1000);
     FVAR(IDF_PERSIST, radarcornersize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, radarcorneroffset, 0, 0.045f, 1);
     FVAR(IDF_PERSIST, radarcornerblend, 0, 0.75f, 1);
-    FVAR(IDF_PERSIST, radartexblend, 0, 0.9f, 1);
+    FVAR(IDF_PERSIST, radartexblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radartexbright, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, radarcornerbright, 0, 0.8f, 1);
     VAR(IDF_PERSIST, radardist, 0, 512, VAR_MAX); // 0 = use world size
@@ -260,7 +260,7 @@ namespace hud
     VAR(IDF_PERSIST, radardamagetime, 1, 250, VAR_MAX);
     VAR(IDF_PERSIST, radardamagefade, 1, 2500, VAR_MAX);
     FVAR(IDF_PERSIST, radardamagesize, 0, 8, 1000);
-    FVAR(IDF_PERSIST, radardamageblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radardamageblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
     VAR(IDF_PERSIST, radardamagemin, 1, 25, VAR_MAX);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
