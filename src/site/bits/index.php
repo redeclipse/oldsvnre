@@ -1,13 +1,13 @@
 <?php
-    $app['releasever'] = "v1.0 (Ides Edition)";
-    $app['releasedate'] = "15th March 2011";
-    $app['releasefile'] = "redeclipse_1.0";
+    $app['releasever'] = "v1.1 (Supernova Edition)";
+    $app['releasedate'] = "24th July 2011";
+    $app['releasefile'] = "redeclipse_1.1";
     $app['background'] = "/bits/background_01.jpg";
     $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
 
-    $app['banner'] = "<b>Donate</b>, help make our project a little better.";
-    $app['bannerurl'] = "/donate";
+    $app['banner'] = "<b>New Release:</b> ". $app['releasedate'] ." <i>". $app['releasever'] ."</i>";
+    $app['bannerurl'] = "/download";
 
     $app['targets'] = array('home' => array('name' => '', 'url' => '/', 'alturl' => '', 'nav' => -1, 'redir' => 0));
 
@@ -110,8 +110,9 @@
                 <div id="main">
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
                     <h3>Available for Windows, Linux/BSD and Mac OSX</h3>
-                    <h3>Agile gameplay: wall run/kick, impulse dash, and jetpack</h3>
-                    <h3>Builtin Editor: create your own maps cooperatively online</h3>
+                    <h3>Parkour, impulse boosts &amp; dashing, and power jumps</h3>
+                    <h3>Favourite gamemodes with tons of mutators and variables</h3>
+                    <h3>Builtin editor lets you create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
                     <p id="svn">get the <a href="/devel">development version</a> and live on the bleeding edge</p>
                     <p id="mirror">or find Linux packages on <a href="/playdeb">PlayDeb</a>, <a href="/aur">AUR</a>, and <a href="/chakra">Chakra</a></p>
@@ -150,12 +151,13 @@
             </div>
             <div class="endblock">&nbsp;</div>
             <div class="leftcol">
-                <p>Red Eclipse is a <i>Free and Open Source</i> game, using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; <!--you can <a href="/download">download a package</a> for Windows, Linux/BSD, Mac OSX, or -->grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
-                <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a variety of environments. For more information, please see our <a href="/chat">Chat</a>.</p>
+                <p>Red Eclipse is a <i>Free and Open Source</i> game, built on <a href="http://www.cubeengine.com/">Cube Engine 2</a> using <a href="http://libsdl.org/">SDL</a> and <a href="http://opengl.org/">OpenGL</a> which allows it to be ported to many platforms; you can <a href="/download">download a package</a> for <i>Windows, Linux/BSD, Mac OSX</i>, or grab a development copy from our <a href="/devel">Subversion</a> repository and live on the bleeding edge.</p>
+                <p>The game is a single-player and multi-player first-person ego-shooter, built as a total conversion of <a href="http://www.cubeengine.com/">Cube Engine 2</a>, which lends itself toward a balanced gameplay, completely at the control of map makers, while maintaining a general theme of agility in a variety of environments. For more information, please see our <a href="/wiki">Wiki</a> or <a href="/forums">Forums</a>.</p>
             </div>
             <div class="vbar">&nbsp;</div>
             <div class="leftcol">
-                <p>In a true open source <i>by the people for the people</i> nature, it tries to work closely with the gaming and open source communities to provide a better overall experience, taking all sorts of feedback from your average player, to your seasoned developer, aiming to create a story-driven game environment that is flexible, fun, easy to use, and pleasing to the eye.</p>
+                <p>In a true open source <i>by the people for the people</i> nature, we try to work closely with the gaming and open source communities to provide a better overall experience, taking all sorts of feedback from your average player, to your seasoned developer, aiming to create a story-driven game environment that is flexible, fun, easy to use, and pleasing to the eye.</p>
+                <p>If you think you might have something to contribute to the game or community, please feel free to drop by our <a href="/chat">Chat</a> or <a href="/forums">Forums</a> and talk to us directly. We try to maintain a standard of friendly behaviour in our community, so don't be afraid to speak up and have your say in building this game for us all <b>:)</b></p>
             </div>
             <div class="rightblock">
                 <h4>Support Us</h4>
@@ -184,7 +186,7 @@
                         <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=326559&amp;type=8" alt="Get Red Eclipse at SourceForge" title="Get Red Eclipse at SourceForge" width="80" height="15" border="0" />
                     </a>
                 </div>
-                <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forums">Discuss</a>, or <a href="/bugs">Report a Bug</a> today.
+                <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forums">Discuss</a>, <a href="/wiki">Learn More</a>, or <a href="/bugs">Report a Bug</a> today.
             </div>
             <div id="copyright" align="center">
                 <p>Red Eclipse, Copyright (C) 2011 Quinton Reeves, Lee Salzman</p>
