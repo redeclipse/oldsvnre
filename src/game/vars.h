@@ -129,7 +129,7 @@ GVAR(0, duellimit, 0, 5000, VAR_MAX); // .. before duel goes to next round
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
-GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
+GVAR(0, teambalance, 0, 2, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 
@@ -148,7 +148,7 @@ GFVAR(0, captureweight, FVAR_MIN, 100, FVAR_MAX);
 GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 
-GVAR(0, defendlimit, 0, 300, VAR_MAX); // finish when score is this or more
+GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, defendinterval, 0, 100, VAR_MAX);
 GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy
@@ -212,8 +212,8 @@ GFVAR(0, movestepup, FVAR_NONZERO, 0.95f, FVAR_MAX); // step-up modifier
 GFVAR(0, movestepdown, FVAR_NONZERO, 1.15f, FVAR_MAX); // step-down modifier
 
 GVAR(0, hoverdelay, 0, 250, VAR_MAX); // minimum time between hover
-GVAR(0, hoverheight, 0, 128, VAR_MAX); // hover maximum height off ground
-GVAR(0, hoverdecay, 1, 20, VAR_MAX); // decay rate of one unit per this many ms
+GFVAR(0, hoverheight, 0, 128, FVAR_MAX); // hover maximum height off ground
+GFVAR(0, hoverdecay, 1, 15, FVAR_MAX); // decay rate of one unit per this many ms
 
 GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing

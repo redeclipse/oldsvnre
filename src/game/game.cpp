@@ -2510,7 +2510,7 @@ namespace game
                      reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
                      secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
-                int colour = WEAP2(d->weapselect, partcol, secondary) >= 0 ? WEAP2(d->weapselect, partcol, secondary) : pulsecols[clamp((0-WEAP2(d->weapselect, partcol, secondary))-1, 0, 2)][rnd(PULSECOLOURS)];
+                int colour = WEAPPCOL(d->weapselect, partcol, secondary);
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
