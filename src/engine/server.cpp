@@ -1359,18 +1359,15 @@ void trytofindocta(bool fallback)
 
 void setlocations(bool wanthome)
 {
-    if(!fileexists(findfile("data/defaults.cfg", "r"), "r"))
-    {
-        if(fileexists(findfile("../data/defaults.cfg", "r"), "r")) chdir("..");
 #if defined(__APPLE__)
-        else
-        {
-            extern const char *mac_resourcedir(const char *what);
-            const char *dir = mac_resourcedir("data/defaults.cfg"); // ./redeclipse.app/Contents/Resources
-            if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
-        }
+    extern const char *mac_resourcedir(const char *what);
+    const char *dir = mac_resourcedir("data"); // ./redeclipse.app/Contents/Resources
+    conoutf("attempting to use resources in: %s", dir);
+    defformatstring(resource)("%s/defaults.cfg", dir);
+    if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
 #endif
-    }
+    if(!fileexists(findfile("data/defaults.cfg", "r"), "r"))
+        if(fileexists(findfile("../data/defaults.cfg", "r"), "r")) chdir("..");
     addpackagedir("data");
     if(wanthome)
     {
