@@ -269,7 +269,7 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
                     const char *end = strchr(src, c == '[' ? ']' : ')');
                     src += end ? end-src : strlen(src);
                 }
-                
+
             }
             continue;
         }
@@ -1368,6 +1368,7 @@ void setlocations(bool wanthome)
             extern const char *mac_resourcedir();
             const char *dir = mac_resourcedir(); // ./redeclipse.app/Contents/Resources
             defformatstring(resource)("%s/data/defaults.cfg", dir);
+            conoutf("attempting to use resources in: %s", resource);
             if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
         }
 #endif
