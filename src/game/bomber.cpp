@@ -79,7 +79,6 @@ namespace bomber
             float area = 3, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
-                size *= 1.25f;
                 area = 2;
                 if(!f.owner && !f.droptime)
                 {
