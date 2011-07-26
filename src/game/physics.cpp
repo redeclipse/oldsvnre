@@ -34,21 +34,11 @@ namespace physics
     int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastsprint = 0;
 
     #define ishover       (PHYS(gravity) == 0 || m_hover(game::gamemode, game::mutators))
-    bool powered(physent *d, bool check = false)
-    {
-        if(!m_league(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI))
-        {
-            return ((gameent *)d)->impulse[IM_POWER] && (!check || !((gameent *)d)->action[AC_CROUCH]);
-        }
-        return false;
-    }
-
     bool allowhover(physent *d)
     {
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
-            if(powered(d, true)) return true;
             if(m_league(game::gamemode, game::mutators))
                 return isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_HOVER);
            return ishover;
@@ -61,7 +51,6 @@ namespace physics
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
-            if(powered(d, true)) return true;
             if(m_league(game::gamemode, game::mutators))
                 return isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_IMPULSE);
             return impulseallowed >= level && (impulsestyle || allowhover(d));
@@ -76,17 +65,11 @@ namespace physics
             gameent *e = (gameent *)d;
             if(e->aitype < AI_START && allowimpulse(d, level))
             {
-                bool power = powered(e, true);
                 int meter = e->impulse[IM_METER];
-                if(power) meter -= e->impulse[IM_POWER];
                 if(impulsemeter && meter+(cost > 0 ? cost : impulsecost) > impulsemeter) return false;
                 if(cost <= 0)
                 {
-                    if(cost == 0)
-                    {
-                        if(power) return false;
-                        if(impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
-                    }
+                    if(cost == 0 && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
                     if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
                     if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
                 }
@@ -272,7 +255,7 @@ namespace physics
         if(canhover(d))
         {
             gameent *e = (gameent *)d;
-            if(e->action[AC_JUMP] || powered(e, true))
+            if(e->action[AC_JUMP])
             {
                 e->impulse[IM_HOVER] = lastmillis;
                 return true;
@@ -381,7 +364,7 @@ namespace physics
                 default: break;
             }
             if(sprinting(pl, false)) vel *= movesprint;
-            if(hover(pl)) vel *= powered(pl, true) ? movepowerjump : movehover;
+            if(hover(pl)) vel *= movehover;
         }
         return vel;
     }
@@ -755,7 +738,7 @@ namespace physics
 
     bool canregenimpulse(gameent *d)
     {
-        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay) && (ishover || !d->impulse[IM_POWER]))
+        if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
         {
             if(impulseregenjetdelay && d->impulse[IM_HOVER] && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_HOVER] < impulseregenjetdelay))
                 return false;
@@ -764,10 +747,10 @@ namespace physics
         return false;
     }
 
-    bool impulseplayer(gameent *d, bool onfloor, bool jetting, bool melee = false)
+    bool impulseplayer(gameent *d, bool &onfloor, bool &jetting, bool melee = false)
     {
-        bool power = !melee && onfloor && !jetting && powered(d, true);
-        if(power || ((d->ai || impulseaction || melee) && canimpulse(d, 0, 1)))
+        bool power = !melee && onfloor && !jetting && sliding(d, true) && d->action[AC_JUMP];
+        if((power || d->ai || impulseaction || melee) && canimpulse(d, 0, 1))
         {
             bool dash = false, pulse = false;
             if(melee) { dash = onfloor; pulse = !onfloor; }
@@ -781,7 +764,7 @@ namespace physics
                 bool mchk = !melee || onfloor, action = mchk && (d->ai || melee || (!power && impulseaction&2));
                 int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
                 bool moving = mchk && (move || strafe);
-                float skew = moving ? impulseboost : impulsejump;
+                float skew = power ? impulsepower : (moving ? impulseboost : impulsejump);
                 if(onfloor)
                 {
                     if(!power) skew = impulsedash;
@@ -805,6 +788,7 @@ namespace physics
                     (d->vel = dir.normalize()).mul(force);
                     d->doimpulse(allowimpulse(d) && impulsemeter ? impulsecost : 0, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
                     if(!allowhover(d)) d->action[AC_JUMP] = false;
+                    if(power || pulse) onfloor = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, melee ? SPHY_MELEE : (dash ? SPHY_DASH : SPHY_BOOST));
                     game::impulseeffect(d);
                     return true;
@@ -840,22 +824,7 @@ namespace physics
                 }
                 if(jetting)
                 {
-                    if(powered(d, true))
-                    {
-                        int len = int(ceilf(millis*impulsepowerjump));
-                        if(len > 0 && impchk)
-                        {
-                            if((d->impulse[IM_POWER] -= len) < 0) d->impulse[IM_POWER] = 0;
-                            d->impulse[IM_REGEN] = lastmillis;
-                            m = vec(0, 0, 1);
-                        }
-                        else
-                        {
-                            jetting = false;
-                            d->impulse[IM_POWER] = 0;
-                        }
-                    }
-                    else if(allowhover(d) && impulsehover > 0)
+                    if(allowhover(d) && impulsehover > 0)
                     {
                         int len = int(ceilf(millis*impulsehover));
                         if(len > 0 && impchk)
@@ -892,24 +861,12 @@ namespace physics
                         else d->impulse[IM_COLLECT] += millis;
                     }
                 }
-                if(!d->ai && onfloor && !m_league(game::gamemode, game::mutators) && impulsemethod&1 && d->action[AC_JUMP] && d->action[AC_CROUCH])
-                {
-                    int pwr = min(impulsepower, impulsemeter), len = int(ceilf(millis*impulsepowerup)),
-                        tot = d->impulse[IM_POWER]+len;
-                    if(tot > pwr) len -= tot%pwr;
-                    if(len > 0 && impchk)
-                    {
-                        d->impulse[IM_METER] += len;
-                        d->impulse[IM_POWER] += len;
-                    }
-                    else d->action[AC_JUMP] = false;
-                }
             }
 
             if(allowhover(d) && jetting)
             {
                 if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/hoverdecay));
-                else if(hoverheight > 0 && !powered(d, true))
+                else if(hoverheight > 0)
                 {
                     vec v(0, 0, -1);
                     float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-hoverheight;
@@ -917,7 +874,7 @@ namespace physics
                 }
             }
 
-            if(d->turnside && (!allowimpulse(d, 3) || powered(d) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
+            if(d->turnside && (!allowimpulse(d, 3) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
                 d->turnside = 0;
 
             if(d->turnside)
@@ -932,7 +889,7 @@ namespace physics
                         d->doimpulse(impulsemeter ? impulsecost : 0, IM_T_KICK, lastmillis);
                         d->turnmillis = PHYSMILLIS;
                         d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                        d->action[AC_JUMP] = false;
+                        d->action[AC_JUMP] = onfloor = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
                         game::impulseeffect(d);
                     }
@@ -960,7 +917,7 @@ namespace physics
                         d->resetphys();
                         d->impulse[IM_JUMP] = lastmillis;
                         if(allowhover(d) && !allowimpulse(d)) d->doimpulse(0, IM_T_BOOST, lastmillis);
-                        d->action[AC_JUMP] = false;
+                        d->action[AC_JUMP] = onfloor = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                         playsound(S_JUMP, d->o, d);
                         regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
