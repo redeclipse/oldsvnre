@@ -204,7 +204,6 @@ GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
 GFVAR(0, movesprint, FVAR_NONZERO, 1.6f, FVAR_MAX); // sprinting modifier
 GFVAR(0, movehover, FVAR_NONZERO, 1.6f, FVAR_MAX); // hover modifier
-GFVAR(0, movepowerjump, FVAR_NONZERO, 4.6f, FVAR_MAX); // powerjump modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
 GFVAR(0, movestrafe, FVAR_NONZERO, 1, FVAR_MAX); // strafe modifier
 GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
@@ -220,6 +219,7 @@ GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add whe
 
 GFVAR(0, impulselimit, 0, 0, FVAR_MAX); // maximum impulse speed
 GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
+GFVAR(0, impulsepower, 0, 1.3f, FVAR_MAX); // power jump modifier
 GFVAR(0, impulsedash, 0, 1.2f, FVAR_MAX); // dashing/powerslide modifier
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
 GFVAR(0, impulsemelee, 0, 0.5f, FVAR_MAX); // melee modifier
@@ -235,13 +235,10 @@ GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsekickdelay, 0, 450, VAR_MAX); // minimum time between wall kicks/climbs
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
-GVAR(0, impulsepower, 0, 10000, VAR_MAX); // impulse max power length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
 GFVAR(0, impulsehover, 0, 0.5f, FVAR_MAX); // hover impulse meter depletion
-GFVAR(0, impulsepowerup, 0, 5.f, FVAR_MAX); // power jump meter charge rate
-GFVAR(0, impulsepowerjump, 0, 15.f, FVAR_MAX); // power jump meter depletion
 GFVAR(0, impulseregen, 0, 4.f, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregensprint, 0, 0.75f, FVAR_MAX); // impulse regen sprinting modifier

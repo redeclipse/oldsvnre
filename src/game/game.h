@@ -325,7 +325,7 @@ enum { SINFO_STATUS = 0, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_DESC, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_HOVER, IM_POWER, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_HOVER, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_DASH, IM_T_MELEE, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_MELEE };
 enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, SPHY_SKATE, SPHY_POWER, SPHY_EXTINGUISH, SPHY_MAX };
 
@@ -957,15 +957,7 @@ struct gameent : dynent, gamestate
 
     void doimpulse(int cost, int type, int millis)
     {
-        if(impulse[IM_POWER])
-        {
-            if((impulse[IM_POWER] -= cost) < 0)
-            {
-                impulse[IM_METER] -= impulse[IM_POWER]; // add the rest to our meter then
-                impulse[IM_POWER] = 0;
-            }
-        }
-        else impulse[IM_METER] += cost;
+        impulse[IM_METER] += cost;
         impulse[IM_TIME] = impulse[IM_REGEN] = millis;
         if(type == IM_T_DASH) impulse[IM_SLIDE] = millis;
         if(type != IM_T_KICK) impulse[IM_SLIP] = millis;

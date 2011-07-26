@@ -1741,8 +1741,7 @@ namespace hud
             if(game::focus->aitype < AI_START && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
             {
                 int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
-                float len = clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f),
-                    power = clamp(float(game::focus->impulse[IM_POWER])/float(impulsemeter), 0.f, 1.f);
+                float len = clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                 settexture(progresstex, 3);
                 int timestep = totalmillis%1000;
                 float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
@@ -1761,11 +1760,6 @@ namespace hud
                     drawslice(0, 1, ix, iy, i ? is*2/3 : is);
                     glColor4f(r, g, b, fade*f);
                     drawslice(len, 1-len, ix, iy, i ? is*2/3 : is);
-                    if(power > 0)
-                    {
-                        glColor4f(1-amt, 1-amt, 1-amt, fade*(1-amt));
-                        drawslice(0, power, ix, iy, i ? is*2/3 : is);
-                    }
                 }
                 if(inventoryimpulse >= 2)
                 {
