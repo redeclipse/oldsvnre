@@ -2825,36 +2825,28 @@ namespace server
         }
         else
         {
-            if(isweap(weap))
+            if(isweap(weap) && GAME(criticalchance) > 0 && WEAP(weap, critmult) > 0)
             {
-                bool docrit = false;
-                if(WEAP2(weap, critdash, flags&HIT_ALT) && actor->state.lastboost && gamemillis-actor->state.lastboost <= WEAP2(weap, critdash, flags&HIT_ALT))
-                    docrit = true;
-                else if(GAME(criticalchance) > 0)
+                bool crdash = WEAP2(weap, critdash, flags&HIT_ALT) && actor->state.lastboost && gamemillis-actor->state.lastboost <= WEAP2(weap, critdash, flags&HIT_ALT);
+                actor->state.crits++;
+                int offset = GAME(criticalchance)-actor->state.crits;
+                if(target != actor)
                 {
-                    actor->state.crits++;
-                    if(WEAP(weap, critmult) > 0)
+                    if(crdash && WEAP(weap, critboost) > 0) offset = int(offset*(1.f/WEAP(weap, critboost)));
+                    if(WEAP(weap, critdist) != 0)
                     {
-                        int offset = GAME(criticalchance)-actor->state.crits;
-                        if(target != actor && WEAP(weap, critdist) != 0)
-                        {
-                            float dist = actor->state.o.dist(target->state.o);
-                            if(WEAP(weap, critdist) < 0 && dist < 0-WEAP(weap, critdist))
-                                offset = int(offset*clamp(dist, 1.f, 0-WEAP(weap, critdist))/(0-WEAP(weap, critdist)));
-                            else if(WEAP(weap, critdist) > 0 && dist > WEAP(weap, critdist))
-                                offset = int(offset*WEAP(weap, critdist)/clamp(dist, WEAP(weap, critdist), 1e16f));
-                        }
-                        if(offset <= 0 || !rnd(offset))
-                        {
-                            docrit = true;
-                            actor->state.crits = 0;
-                        }
+                        float dist = actor->state.o.dist(target->state.o);
+                        if(WEAP(weap, critdist) < 0 && dist < 0-WEAP(weap, critdist))
+                            offset = int(offset*clamp(dist, 1.f, 0-WEAP(weap, critdist))/(0-WEAP(weap, critdist)));
+                        else if(WEAP(weap, critdist) > 0 && dist > WEAP(weap, critdist))
+                            offset = int(offset*WEAP(weap, critdist)/clamp(dist, WEAP(weap, critdist), 1e16f));
                     }
                 }
-                if(docrit)
+                if(offset <= 0 || !rnd(offset))
                 {
                     realflags |= HIT_CRIT;
                     realdamage = int(realdamage*WEAP(weap, critmult));
+                    actor->state.crits = 0;
                 }
             }
             hurt = min(target->state.health, realdamage);
