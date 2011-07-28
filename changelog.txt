@@ -1,0 +1,2 @@
+- instead of always landing a critical when dashing, double the chances
+- made power jump move use a powerslide+jump combo rather than a charge
