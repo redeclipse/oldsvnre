@@ -1181,7 +1181,7 @@ namespace physics
     extern bool hover(physent *d);
     extern bool sliding(physent *d, bool power = false);
     extern bool sprinting(physent *d, bool turn = true);
-    extern bool canimpulse(physent *d, int cost = 0, int level = 2);
+    extern bool canimpulse(physent *d, int level = 2, bool kick = false);
     extern bool canhover(physent *d);
     extern bool movecamera(physent *pl, const vec &dir, float dist, float stepdist);
     extern void smoothplayer(gameent *d, int res, bool local);
