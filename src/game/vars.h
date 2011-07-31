@@ -129,7 +129,7 @@ GVAR(0, duellimit, 0, 5000, VAR_MAX); // .. before duel goes to next round
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
-GVAR(0, teambalance, 0, 2, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
+GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 
@@ -266,7 +266,7 @@ GFVAR(0, explodeleague, 0, 0.25f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
 GVAR(0, criticalchance, 0, 100, VAR_MAX);
 GVAR(0, weaponjamming, 0, 3, 4); // 0 = off, 1 = drop the weapon, 2 = drop all weapons, 3/4 = 1/2 + explode
-GVAR(0, weaponjamtime, 0, 5000, VAR_MAX);
+GVAR(0, weaponjamtime, 0, 1000, VAR_MAX);
 GVAR(0, weaponswitchdelay, 0, 500, VAR_MAX);
 
 GFVAR(0, hitpushscale, 0, 1, FVAR_MAX);
