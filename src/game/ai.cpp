@@ -993,7 +993,7 @@ namespace ai
         vec off = vec(pos).sub(d->feetpos());
         if(d->blocked) off.z += JUMPMIN; // it could help..
         bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
-            impulse = air && physics::canimpulse(d, 0, 1) && (d->timeinair > 700 || d->vel.z < 1), jet = air && physics::allowhover(d),
+            impulse = air && physics::canimpulse(d, 1, false) && (d->timeinair > 700 || d->vel.z < 1), jet = air && physics::allowhover(d),
             jumper = (locked || d->blocked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
             jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1020,7 +1020,7 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
-        if(air && physics::canimpulse(d, -1, 3) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
+        if(air && physics::canimpulse(d, 3, true) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
             d->action[AC_SPECIAL] = true;
         else if(!aipassive && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
         {
