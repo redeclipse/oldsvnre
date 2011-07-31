@@ -28,7 +28,7 @@
     $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['playdeb'] = array('name' => 'Playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
     $app['targets']['aur'] = array('name' => 'AUR', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
-    $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&amp;subdir=&amp;sortby=date&amp;order=descending&amp;searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
+    $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&subdir=&sortby=date&order=descending&searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
 
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
