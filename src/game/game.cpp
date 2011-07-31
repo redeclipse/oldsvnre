@@ -896,9 +896,11 @@ namespace game
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
-            if(isweap(weap) && !burning && !bleeding && (d == player1 || !isaitype(d->aitype) || (aistyle[d->aitype].canmove && d->health > 0)))
+            if(isweap(weap) && !burning && !bleeding)
             {
                 float scale = float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT));
+                if(hithurts(flags) && WEAP2(weap, stuntime, flags&HIT_ALT))
+                    d->addstun(weap, lastmillis, int(scale*WEAP2(weap, stuntime, flags&HIT_ALT)), scale*WEAP2(weap, stunscale, flags&HIT_ALT));
                 if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
                 {
                     float force = flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale;

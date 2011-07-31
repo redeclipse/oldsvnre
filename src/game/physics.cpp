@@ -352,24 +352,27 @@ namespace physics
         if(floating) vel *= floatspeed/100.0f;
         else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
+            gameent *e = (gameent *)pl;
             vel *= movespeed/100.f;
-            if((!d->timeinair && !sliding(d) && iscrouching(d)) || (d == game::player1 && game::inzoom()))
+            if((!e->timeinair && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
                 vel *= movecrawl;
-            if(pl->move >= 0) vel *= pl->strafe ? movestrafe : movestraight;
-            switch(pl->physstate)
+            if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
+            switch(e->physstate)
             {
                 case PHYS_FALL: if(PHYS(gravity) > 0) vel *= moveinair; break;
                 case PHYS_STEP_DOWN: vel *= movestepdown; break;
                 case PHYS_STEP_UP: vel *= movestepup; break;
                 default: break;
             }
-            if(sprinting(pl, false)) vel *= movesprint;
-            if(hover(pl)) vel *= movehover;
-            if(carryaffinity((gameent *)pl))
+            if(sprinting(e, false)) vel *= movesprint;
+            if(hover(e)) vel *= movehover;
+            if(carryaffinity(e))
             {
                 if(m_capture(game::gamemode)) vel *= capturecarryspeed;
                 else if(m_bomber(game::gamemode)) vel *= bombercarryspeed;
             }
+            float stun = clamp(e->stunned(lastmillis), 0.f, 1.f);
+            if(stun > 0) vel *= 1.f-stun;
         }
         return vel;
     }
@@ -387,6 +390,8 @@ namespace physics
                 if(m_capture(game::gamemode)) rescaleimpulse(capturecarryspeed)
                 else if(m_bomber(game::gamemode)) rescaleimpulse(bombercarryspeed)
             }
+            float stun = clamp(e->stunned(lastmillis), 0.f, 1.f);
+            if(stun > 0) rescaleimpulse(1.f-stun);
             if(m_league(game::gamemode, game::mutators) && isweap(e->loadweap[0])) rescaleimpulse(WEAP(e->loadweap[0], leaguespeed))
         }
         return limit > 0 && speed > limit ? limit : speed;
