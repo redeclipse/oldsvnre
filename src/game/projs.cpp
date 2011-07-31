@@ -93,8 +93,8 @@ namespace projs
         float dmag = dir.magnitude();
         if(dmag > 1e-3f) dir.div(dmag);
         else dir = vec(0, 0, 1);
-        if(proj.child || !weaptype[proj.weap].traced)
-        {
+        if(flags&HIT_PROJ)
+        { // transfer the momentum
             float speed = proj.vel.magnitude();
             if(speed > 1e-6f)
             {
