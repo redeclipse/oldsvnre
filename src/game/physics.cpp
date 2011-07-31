@@ -365,6 +365,11 @@ namespace physics
             }
             if(sprinting(pl, false)) vel *= movesprint;
             if(hover(pl)) vel *= movehover;
+            if(carryaffinity((gameent *)pl))
+            {
+                if(m_capture(game::gamemode)) vel *= capturecarryspeed;
+                else if(m_bomber(game::gamemode)) vel *= bombercarryspeed;
+            }
         }
         return vel;
     }
@@ -373,14 +378,16 @@ namespace physics
     {
         float mag = vec(d->vel).add(d->falling).magnitude(),
               speed = (impulsespeed+mag)*amt*d->curscale, limit = impulselimit*d->curscale;
-        if(m_league(game::gamemode, game::mutators) && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;
-            if(isweap(e->loadweap[0]))
+            #define rescaleimpulse(n) { speed *= n; limit *= n; }
+            if(carryaffinity(e))
             {
-                speed *= WEAP(e->loadweap[0], leaguespeed);
-                limit *= WEAP(e->loadweap[0], leaguespeed);
+                if(m_capture(game::gamemode)) rescaleimpulse(capturecarryspeed)
+                else if(m_bomber(game::gamemode)) rescaleimpulse(bombercarryspeed)
             }
+            if(m_league(game::gamemode, game::mutators) && isweap(e->loadweap[0])) rescaleimpulse(WEAP(e->loadweap[0], leaguespeed))
         }
         return limit > 0 && speed > limit ? limit : speed;
     }
