@@ -186,7 +186,7 @@ namespace client
         {
             string text;
             filtertext(text, name);
-            game::player1->setinfo(text, col);
+            game::player1->setinfo(text, col ? col : game::player1->colour);
             addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour);
         }
         if(initing == NOT_INITING) conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
@@ -915,6 +915,7 @@ namespace client
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_CONNECT);
         sendstring(game::player1->name, p);
+        putint(p, game::player1->colour);
         mkstring(hash);
         if(connectpass[0])
         {
@@ -1404,16 +1405,16 @@ namespace client
 
                 case N_CLIENTINIT: // another client either connected or changed name/team
                 {
-                    int cn = getint(p), colour;
+                    int cn = getint(p);
                     gameent *d = game::newclient(cn);
                     if(!d)
                     {
                         getstring(text, p);
-                        loopi(3) getint(p);
+                        loopi(2) getint(p);
                         break;
                     }
                     getstring(text, p);
-                    colour = getint(p);
+                    int colour = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
                     if(d->name[0])        // already connected

@@ -3933,6 +3933,8 @@ namespace server
                 if(!text[0]) copystring(text, "unnamed");
                 filtertext(text, text, true, true, true, MAXNAMELEN);
                 copystring(ci->name, text, MAXNAMELEN+1);
+                int colour = getint(p);
+                ci->state.setcolour(colour);
 
                 string password = "", authname = "";
                 getstring(text, p); copystring(password, text);
