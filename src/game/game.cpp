@@ -898,15 +898,17 @@ namespace game
             }
             if(isweap(weap) && !burning && !bleeding && (d == player1 || !isaitype(d->aitype) || (aistyle[d->aitype].canmove && d->health > 0)))
             {
+                float scale = float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT));
                 if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
                 {
                     float force = flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale;
-                    d->vel.mul(1.f-((float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT)))*WEAP2(weap, slow, flags&HIT_ALT))*force);
+                    d->vel.mul(1.f-(scale*WEAP2(weap, slow, flags&HIT_ALT))*force);
                 }
                 if(WEAP2(weap, hitpush, flags&HIT_ALT) != 0)
                 {
+                    if(d == actor) scale *= 1/WEAP2(weap, selfdmg, flags&HIT_ALT);
                     float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
-                    d->vel.add(vec(dir).mul((float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT)))*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators)));
+                    d->vel.add(vec(dir).mul(scale*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators)));
                 }
             }
             ai::damaged(d, actor, weap, flags, damage);
