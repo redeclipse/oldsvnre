@@ -185,7 +185,7 @@ enum
     ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
     ANIM_HOVER_FORWARD, ANIM_HOVER_BACKWARD, ANIM_HOVER_LEFT, ANIM_HOVER_RIGHT, ANIM_HOVER_UP,
     ANIM_WALL_RUN_LEFT, ANIM_WALL_RUN_RIGHT, ANIM_WALL_JUMP, ANIM_POWERSLIDE, ANIM_FLYKICK,
-    ANIM_SINK, ANIM_EDIT, ANIM_SWITCH, ANIM_USE, ANIM_WIN, ANIM_LOSE,
+    ANIM_SINK, ANIM_EDIT, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
     ANIM_CROUCH_JUMP_FORWARD, ANIM_CROUCH_JUMP_BACKWARD, ANIM_CROUCH_JUMP_LEFT, ANIM_CROUCH_JUMP_RIGHT, ANIM_CROUCH_JUMP,
     ANIM_MELEE, ANIM_MELEE_PRIMARY, ANIM_MELEE_SECONDARY,
@@ -198,6 +198,7 @@ enum
     ANIM_RIFLE, ANIM_RIFLE_PRIMARY, ANIM_RIFLE_SECONDARY, ANIM_RIFLE_RELOAD,
     ANIM_GRENADE, ANIM_GRENADE_PRIMARY, ANIM_GRENADE_SECONDARY, ANIM_GRENADE_RELOAD, ANIM_GRENADE_POWER,
     ANIM_ROCKET, ANIM_ROCKET_PRIMARY, ANIM_ROCKET_SECONDARY, ANIM_ROCKET_RELOAD,
+    ANIM_SWITCH, ANIM_USE, ANIM_JAM,
     ANIM_MAX
 };
 
@@ -639,7 +640,7 @@ const char * const animnames[] =
     "dash forward", "dash backward", "dash left", "dash right", "dash up",
     "hover forward", "hover backward", "hover left", "hover right", "hover up",
     "wall run left", "wall run right", "wall jump", "power slide", "fly kick",
-    "sink", "edit", "switch", "use", "win", "lose",
+    "sink", "edit", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
     "crouch jump forward", "crouch jump backward", "crouch jump left", "crouch jump right", "crouch jump",
     "melee", "melee primary", "melee secondary",
@@ -652,6 +653,7 @@ const char * const animnames[] =
     "rifle", "rifle primary", "rifle secondary", "rifle reload",
     "grenade", "grenade primary", "grenade secondary", "grenade reload", "grenade power",
     "rocket", "rocket primary", "rocket secondary", "rocket reload",
+    "switch", "use", "jam",
     ""
 };
 #else
