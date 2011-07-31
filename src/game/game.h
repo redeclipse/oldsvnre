@@ -666,19 +666,26 @@ struct eventicon
     int type, millis, fade, length, value;
 };
 
+struct stunevent
+{
+    int weap, millis, delay;
+    float scale;
+};
+
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
-        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake;
-    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll;
+        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, stuntime;
+    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll, stunscale;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string name, info, obit;
     vector<int> airnodes;
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
+    vector<stunevent> stuns;
 
     gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
@@ -767,6 +774,7 @@ struct gameent : dynent, gamestate
         setscale(1, 0, true, gamemode, mutators);
         airnodes.shrink(0);
         icons.shrink(0);
+        stuns.shrink(0);
     }
 
     void respawn(int millis = 0, int heal = 0, int gamemode = 0, int mutators = 0)
@@ -1043,6 +1051,27 @@ struct gameent : dynent, gamestate
         }
         if(tone >= 2) return team == TEAM_NEUTRAL ? (tone%2 ? TEAM(team, colour) : colour) : (tone%2 ? colour : TEAM(team, colour));
         return tone%2 ? TEAM(team, colour) : colour;
+    }
+
+    void addstun(int weap, int millis, int delay, float scale)
+    {
+        stunevent &s = stuns.add();
+        s.weap = weap;
+        s.millis = millis;
+        s.delay = delay;
+        s.scale = scale;
+    }
+
+    float stunned(int millis)
+    {
+        float stun = 0;
+        loopv(stuns)
+        {
+            stunevent &s = stuns[i];
+            if(millis-s.millis >= s.delay) stuns.remove(i--);
+            else stun += s.scale*(1.f-(float(millis-s.millis)/float(s.delay)));
+        }
+        return stun;
     }
 };
 
