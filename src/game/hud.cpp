@@ -129,6 +129,7 @@ namespace hud
     TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
+    VAR(IDF_PERSIST, crosshairweapons, 0, 1, 2); // 0 = off, 1 = crosshair-specific weapons, 2 = also appy colour
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, VAR_MAX);
     FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
@@ -137,8 +138,30 @@ namespace hud
     FVAR(IDF_PERSIST, crosshairthrob, 1e-4f, 0.3f, 1000);
     TVAR(IDF_PERSIST, pointertex, "textures/pointer", 3);
     TVAR(IDF_PERSIST, guicursortex, "textures/cursor", 3);
-    TVAR(IDF_PERSIST, crosshairtex, "crosshairs/cross/cross-01", 3);
-    TVAR(IDF_PERSIST, hitcrosshairtex, "crosshairs/cross/cross-01-hit", 3);
+
+    TVAR(IDF_PERSIST, crosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, hithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, meleecrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, meleehithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, pistolcrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, pistolhithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, swordcrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, swordhithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, shotguncrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, shotgunhithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, smgcrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, smghithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, plasmacrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, plasmahithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, flamercrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, flamerhithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, riflecrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, riflehithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, grenadecrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, grenadehithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST, rocketcrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, rockethithairtex, "crosshairs/cross-01-hit", 3);
+
     TVAR(IDF_PERSIST, editcursortex, "", 3);
     TVAR(IDF_PERSIST, speccursortex, "", 3);
     TVAR(IDF_PERSIST, teamcrosshairtex, "", 3);
@@ -453,10 +476,10 @@ namespace hud
     enum
     {
         POINTER_NONE = 0, POINTER_RELATIVE, POINTER_GUI, POINTER_EDIT, POINTER_SPEC,
-        POINTER_HAIR, POINTER_TEAM, POINTER_ZOOM, POINTER_MAX
+        POINTER_HAIR, POINTER_TEAM, POINTER_ZOOM, POINTER_HIT, POINTER_MAX
     };
 
-    const char *getpointer(int index)
+    const char *getpointer(int index, int weap = -1)
     {
         switch(index)
         {
@@ -464,14 +487,37 @@ namespace hud
             case POINTER_GUI: return guicursortex;
             case POINTER_EDIT: return *editcursortex ? editcursortex : crosshairtex;
             case POINTER_SPEC: return *speccursortex ? speccursortex : crosshairtex;
-            case POINTER_HAIR: return crosshairtex;
+            case POINTER_HAIR:
+            {
+                if(crosshairweapons && isweap(weap))
+                {
+                    const char *crosshairtexs[WEAP_MAX] = {
+                        meleecrosshairtex, pistolcrosshairtex, swordcrosshairtex, shotguncrosshairtex, smgcrosshairtex,
+                        flamercrosshairtex, plasmacrosshairtex, riflecrosshairtex, grenadecrosshairtex, rocketcrosshairtex, // end of regular weapons
+                    };
+                    if(*crosshairtexs[weap]) return crosshairtexs[weap];
+                }
+                return crosshairtex;
+            }
             case POINTER_TEAM: return teamcrosshairtex;
             case POINTER_ZOOM: return *zoomcrosshairtex ? zoomcrosshairtex : crosshairtex;
+            case POINTER_HIT:
+            {
+                if(crosshairweapons && isweap(weap))
+                {
+                    const char *hithairtexs[WEAP_MAX] = {
+                        meleehithairtex, pistolhithairtex, swordhithairtex, shotgunhithairtex, smghithairtex,
+                        flamerhithairtex, plasmahithairtex, riflehithairtex, grenadehithairtex, rockethithairtex, // end of regular weapons
+                    };
+                    if(*hithairtexs[weap]) return hithairtexs[weap];
+                }
+                return hithairtex;
+            }
             default: break;
         }
         return NULL;
     }
-
+    ICOMMAND(0, getpointer, "ii", (int *i, int *j), result(getpointer(*i, *j)));
 
     void drawindicator(int weap, int x, int y, int s, bool secondary)
     {
@@ -652,9 +698,11 @@ namespace hud
     void drawpointer(int w, int h, int index)
     {
         int cs = int((index == POINTER_GUI ? cursorsize : crosshairsize)*hudsize);
-        float r = 1, g = 1, b = 1, fade = (index == POINTER_GUI ? cursorblend : crosshairblend)*hudblend;
+        float fade = (index == POINTER_GUI ? cursorblend : crosshairblend)*hudblend;
+        vec c(1, 1, 1);
         if(game::focus->state == CS_ALIVE && index >= POINTER_HAIR)
         {
+            if(crosshairweapons >= 2) c = vec::hexcolor(WEAP(game::focus->weapselect, colour));
             if(index == POINTER_ZOOM && *zoomcrosshairtex && game::inzoom() && WEAP(game::focus->weapselect, zooms))
             {
                 int frame = lastmillis-game::lastzoom, off = int(zoomcrosshairsize*hudsize)-cs;
@@ -662,15 +710,15 @@ namespace hud
                 if(!game::zooming) amt = 1.f-amt;
                 cs += int(off*amt);
             }
-            if(crosshairtone) skewcolour(r, g, b, 1-crosshairtone);
+            if(crosshairtone) skewcolour(c.r, c.g, c.b, 1-crosshairtone);
             int heal = m_health(game::gamemode, game::mutators, game::focus->loadweap[0]);
             if(crosshairflash && game::focus->state == CS_ALIVE && game::focus->health < heal)
             {
                 int timestep = totalmillis%1000;
                 float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
-                r += (1.f-r)*amt;
-                g -= g*amt;
-                b -= b*amt;
+                c.r += (1.f-c.r)*amt;
+                c.g -= c.g*amt;
+                c.b -= c.b*amt;
                 fade += (1.f-fade)*amt;
             }
             if(crosshairthrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime)
@@ -688,7 +736,7 @@ namespace hud
             int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f), ss = int(crosshairsize*hudsize),
                 sx = game::mousestyle() != 1 ? cx : nx, sy = game::mousestyle() != 1 ? cy : ny;
             #define POINTER(a,b,c) (a == POINTER_GUI && !cursorstyle ? b : b-c/2)
-            drawpointertex(getpointer(index), sx-cs/2, sy-cs/2, cs, r, g, b, fade);
+            drawpointertex(getpointer(index, game::focus->weapselect), sx-cs/2, sy-cs/2, cs, c.r, c.g, c.b, fade);
             if(index > POINTER_GUI)
             {
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
@@ -697,12 +745,12 @@ namespace hud
                     if(showindicator) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
                 if(game::mousestyle() >= 1) // renders differently
-                    drawpointertex(getpointer(POINTER_RELATIVE), (game::mousestyle() != 1 ? nx : cx)-ss/2, (game::mousestyle() != 1 ? ny : cy)-ss/2, ss, 1, 1, 1, crosshairblend*hudblend);
-                if(crosshairhitspeed && *hitcrosshairtex && totalmillis-game::focus->lasthit <= crosshairhitspeed)
-                    drawpointertex(hitcrosshairtex, sx-ss/2, sy-ss/2, ss, 1, 1, 1, crosshairblend*hudblend);
+                    drawpointertex(getpointer(POINTER_RELATIVE), (game::mousestyle() != 1 ? nx : cx)-ss/2, (game::mousestyle() != 1 ? ny : cy)-ss/2, ss, c.r, c.g, c.b, crosshairblend*hudblend);
+                if(crosshairhitspeed && totalmillis-game::focus->lasthit <= crosshairhitspeed)
+                    drawpointertex(getpointer(POINTER_HIT, game::focus->weapselect), sx-ss/2, sy-ss/2, ss, c.r, c.g, c.b, crosshairblend*hudblend);
             }
         }
-        else drawpointertex(getpointer(index), cx, cy, cs, r, g, b, fade);
+        else drawpointertex(getpointer(index, game::focus->weapselect), cx, cy, cs, c.r, c.g, c.b, fade);
     }
 
     void drawpointers(int w, int h)
