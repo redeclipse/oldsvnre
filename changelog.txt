@@ -1,3 +1,4 @@
+- restored old team balancing behaviour
 - added weapon stun effect which impedes movement for a certain time
 - made the carrier of the flag/bomb move slower
 - instead of always landing a critical when dashing, double the chances
