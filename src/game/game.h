@@ -522,7 +522,7 @@ struct gamestate
     void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         weapreset(true);
-        if(!isweap(sweap)) sweap = aitype >= AI_START || !isweap(m_weapon(gamemode, mutators)) ? WEAP_MELEE : m_weapon(gamemode, mutators);
+        if(!isweap(sweap)) sweap = aitype >= AI_START ? WEAP_MELEE : (isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : WEAP_PISTOL);
         if(isweap(sweap)) ammo[sweap] = max(WEAPUSE(sweap), 1);
         if(aitype >= AI_START)
         {
