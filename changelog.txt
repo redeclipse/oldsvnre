@@ -1,3 +1,4 @@
+- changed grenade secondary fire to explode on impact
 - impulse moves now disregard cost and scale depending on available energy
 - restored old team balancing behaviour
 - added weapon stun effect which impedes movement for a certain time
