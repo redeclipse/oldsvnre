@@ -395,11 +395,17 @@ namespace game
         }
     }
 
-    vec weappulsecolour(dynent *d)
+    vec pulsecolour(physent *d, int i, int cycle)
     {
-        size_t seed = size_t(d) + (lastmillis/50);
+        size_t seed = size_t(d) + (lastmillis/cycle);
         int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS);
-        return vec::hexcolor(pulsecols[0][n]).lerp(vec::hexcolor(pulsecols[0][n2]), (lastmillis%50)/50.0f);
+        return vec::hexcolor(pulsecols[i][n]).lerp(vec::hexcolor(pulsecols[i][n2]), (lastmillis%cycle)/float(cycle));
+    }
+
+    int hexpulsecolour(physent *d, int i, int cycle)
+    {
+        bvec h = bvec::fromcolor(pulsecolour(d, i, cycle));
+        return (h.r<<16)|(h.g<<8)|h.b;
     }
 
     vec getpalette(int palette, int index)
@@ -415,12 +421,8 @@ namespace game
                         return vec::hexcolor(pulsecols[index-1][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
                         break;
                     case 4: case 5: case 6:
-                    {
-                        size_t seed = size_t(camera1) + (lastmillis/50);
-                        int n = detrnd(seed, PULSECOLOURS), n2 = detrnd(seed + 1, PULSECOLOURS);
-                        return vec::hexcolor(pulsecols[index-4][n]).lerp(vec::hexcolor(pulsecols[index-4][n2]), (lastmillis%50)/50.0f);
+                        return pulsecolour(camera1, index-4, 50);
                         break;
-                    }
                     default: break;
                 }
                 break;
@@ -485,7 +487,7 @@ namespace game
                     if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                     {
                         float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                        adddynlight(d->ejectpos(d->weapselect), 16*scale, weappulsecolour(d), 0, 0, DL_KEEP);
+                        adddynlight(d->ejectpos(d->weapselect), 16*scale, pulsecolour(d), 0, 0, DL_KEEP);
                     }
                     if(d->weapselect == WEAP_SWORD || powering)
                     {
@@ -513,7 +515,7 @@ namespace game
                                 size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
                             vec col;
                             if(powerdl[d->weapselect].colour > 0) col = vec::hexcolor(powerdl[d->weapselect].colour).mul(thresh);
-                            else if(powerdl[d->weapselect].type != 2) col = vec(weappulsecolour(d)).mul(thresh);
+                            else if(powerdl[d->weapselect].type != 2) col = pulsecolour(d).mul(thresh);
                             else col = vec(max(1.f-amt,0.5f), 0.5f*max(1.f-amt,0.f), 0);
                             adddynlight(d->muzzlepos(d->weapselect), size, col, 0, 0, DL_KEEP);
                         }
@@ -2520,7 +2522,7 @@ namespace game
                      reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
                      secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
-                int colour = WEAPPCOL(d->weapselect, partcol, secondary);
+                int colour = WEAPPCOL(d, d->weapselect, partcol, secondary);
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));

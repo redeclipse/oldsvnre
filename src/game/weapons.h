@@ -441,7 +441,7 @@ extern weaptypes weaptype[];
 #define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
 #define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
 #define WEAPUSE(a)              (WEAP(a, reloads) ? WEAP(a, max) : WEAP(a, add))
-#define WEAPPCOL(a,b,c)         (WEAP2(a, b, c) >= 0 ? WEAP2(a, b, c) : pulsecols[clamp((0-WEAP2(a, b, c))-1, 0, 2)][rnd(PULSECOLOURS)])
+#define WEAPPCOL(d,a,b,c)       (WEAP2(a, b, c) >= 0 ? WEAP2(a, b, c) : game::hexpulsecolour(d, clamp(-1-WEAP2(a, b, c), 0, 2), 50))
 
 WEAPDEF(char *, name);
 WEAPDEF(int, colour);
