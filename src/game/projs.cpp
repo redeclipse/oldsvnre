@@ -249,15 +249,24 @@ namespace projs
 
     void remove(gameent *owner)
     {
-        loopv(projs) if(projs[i]->owner == owner)
+        loopv(projs)
         {
-            if(projs[i]->projtype == PRJ_SHOT)
+            if(projs[i]->target == owner) projs[i]->target = NULL;
+            if(projs[i]->stick == owner)
             {
-                if(projs[i]->projcollide&COLLIDE_SHOTS) collideprojs.removeobj(projs[i]);
-                delete projs[i];
-                projs.removeunordered(i--);
+                projs[i]->stuck = false;
+                projs[i]->stick = NULL;
             }
-            else projs[i]->owner = NULL;
+            if(projs[i]->owner == owner)
+            {
+                if(projs[i]->projtype == PRJ_SHOT)
+                {
+                    if(projs[i]->projcollide&COLLIDE_SHOTS) collideprojs.removeobj(projs[i]);
+                    delete projs[i];
+                    projs.removeunordered(i--);
+                }
+                else projs[i]->owner = NULL;
+            }
         }
     }
 
@@ -1337,13 +1346,21 @@ namespace projs
         {
             if(d)
             {
-                proj.norm = vec(d->o).sub(proj.o).normalize();
+                proj.norm = vec(d->headpos(-d->height*0.5f)).sub(proj.o).normalize();
+                if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&COLLIDE_STICK)
+                {
+                    proj.stuck = true;
+                    proj.stick = (gameent *)d;
+                    proj.stickpos = vec(proj.o).sub(d->headpos(-d->height*0.5f));
+                    proj.stickpos.rotate_around_z(-d->yaw*RAD);
+                    return 1;
+                }
                 if(!hiteffect(proj, d, flags, proj.norm)) return 1;
             }
             else
             {
                 proj.norm = norm;
-                if(proj.projcollide&COLLIDE_STICK)
+                if(proj.projcollide&IMPACT_GEOM && proj.projcollide&COLLIDE_STICK)
                 {
                     proj.o.sub(vec(dir).mul(proj.radius*0.125f));
                     proj.stuck = true;
@@ -1447,7 +1464,7 @@ namespace projs
                             targ = proj.target->headpos(-proj.target->height/2);
                             break;
                         }
-                        physent *t = NULL;
+                        gameent *t = NULL;
                         switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))
                         {
                             case 4: case 5:
@@ -1680,6 +1697,13 @@ namespace projs
                         init(proj, true);
                     }
                     else continue;
+                }
+                if(proj.stuck && proj.stick)
+                {
+                    proj.o = proj.stickpos;
+                    proj.o.rotate_around_z(proj.stick->yaw*RAD);
+                    proj.o.add(proj.stick->headpos(-proj.stick->height*0.5f));
+                    proj.resetinterp();
                 }
                 iter(proj);
                 if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)

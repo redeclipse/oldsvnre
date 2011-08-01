@@ -1079,7 +1079,7 @@ enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ
 
 struct projent : dynent
 {
-    vec from, to, norm, inertia;
+    vec from, to, norm, inertia, stickpos;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
     float movement, roll, lifespan, lifesize, minspeed;
     bool local, limited, stuck, escaped, child;
@@ -1087,11 +1087,11 @@ struct projent : dynent
     float elasticity, reflectivity, relativity, waterfric;
     int schan, id, weap, flags, hitflags;
     entitylight light;
-    gameent *owner;
-    physent *hit, *target;
+    gameent *owner, *target, *stick;
+    physent *hit;
     const char *mdl;
 
-    projent() : projtype(PRJ_SHOT), id(-1), hitflags(HITFLAG_NONE), owner(NULL), hit(NULL), target(NULL), mdl(NULL) { reset(); }
+    projent() : projtype(PRJ_SHOT), id(-1), hitflags(HITFLAG_NONE), owner(NULL), target(NULL), stick(NULL), hit(NULL), mdl(NULL) { reset(); }
     ~projent()
     {
         removetrackedparticles(this);
@@ -1106,7 +1106,7 @@ struct projent : dynent
         type = ENT_PROJ;
         state = CS_ALIVE;
         norm = vec(0, 0, 1);
-        inertia = vec(0, 0, 0);
+        inertia = stickpos = vec(0, 0, 0);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = -1;
         movement = roll = lifespan = lifesize = minspeed = 0;
