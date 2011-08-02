@@ -1,3 +1,4 @@
+- improved plasma primary fire and made flamer secondary fire sticky
 - readded jetpack as another mutator
 - changed grenade primary fire to explode on impact and made secondary fire able to stick to players
 - impulse moves now disregard cost and scale depending on available energy

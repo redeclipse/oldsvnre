@@ -43,10 +43,10 @@ enum
 enum
 {
     IMPACT_GEOM = 1<<0, BOUNCE_GEOM = 1<<1, IMPACT_PLAYER = 1<<2, BOUNCE_PLAYER = 1<<3, IMPACT_SHOTS = 1<<4,
-    COLLIDE_RADIAL = 1<<5, COLLIDE_TRACE = 1<<6, COLLIDE_OWNER = 1<<7, COLLIDE_CONT = 1<<8, COLLIDE_STICK = 1<<9, COLLIDE_SHOTS = 1<<10,
+    COLLIDE_TRACE = 1<<5, COLLIDE_OWNER = 1<<6, COLLIDE_CONT = 1<<7, COLLIDE_STICK = 1<<8, COLLIDE_SHOTS = 1<<9,
     COLLIDE_GEOM = IMPACT_GEOM|BOUNCE_GEOM,
     COLLIDE_PLAYER = IMPACT_PLAYER|BOUNCE_PLAYER,
-    HIT_PLAYER = IMPACT_PLAYER|BOUNCE_PLAYER|COLLIDE_RADIAL
+    HIT_PLAYER = IMPACT_PLAYER|BOUNCE_PLAYER
 };
 
 enum
@@ -260,36 +260,36 @@ WEAPON(smg,         0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,   
     0.85f,  1.f,    1.2f,   0.8f
 );
 WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,             -1,
-    25,     25,     1,      5,      100,    500,    2000,   8,      8,      300,    150,    0,      500,    350,    350,
-    0,      25,     0,      0,      200,    200,    18,     28,     1,      1,      5,      5,      0,      0,      0,      0,
-    0,      0,      10,     10,     -1,             WALT(FLAMER),   12,     4,      5,      5,      1000,   5000,   200,    250,
+    25,     25,     1,      5,      100,    500,    2000,   8,      8,      300,    150,    0,      500,    200,    200,
+    0,      25,     0,      0,      200,    200,    16,     24,     1,      1,      5,      5,      0,      0,      0,      0,
+    0,      0,      10,     10,     -1,             WALT(FLAMER),   12,     4,      5,      5,      1000,   3000,   200,    250,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
-    BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
+    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_STICK|COLLIDE_OWNER,
     3,      3,      0,      1,      0,      0,      1,      1,      1,      1,      1,      1,      0,      1,      0,
     2,      0,      0,      0,      25,     0,      0,
     0,      0,      0,      0,      0.5f,   0.35f,  0,      0,      0.95f,  0.5f,   1,      1,      200,    100,    1,      1,
-    0.25f,  1,      25,     100,    0.25f,  1,      64,     128,    18,     28,     0,      5,      2,      1.5f,   0,      0,
+    0.25f,  1,      25,     100,    0.25f,  1,      64,     128,    16,     24,     0,      5,      2,      1.5f,   0,      0,
     4,      64,     2,      10,     10,     1,      1,      4,      4,      0.65f,  0.65f,  0.45f,  0.45f,  0.25f,  0.25f,  0.5f,   0.5f,
     0.5f,   0.5f,   0.1f,   0.1f,   1,      1,      0.5f,   0.5f,   8,      8,      1,      1,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
-    BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
+    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_STICK|COLLIDE_OWNER,
     (1<<TRAIT_BURNRES),
     0.75f,  0.75f,  0.75f,  0.75f
 );
 WEAPON(plasma,      0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,
-    20,     20,     1,      20,     300,    1000,   2000,   20,     10,     1000,   30,     0,      2000,   750,    5000,
-    0,      75,     0,      0,      200,    200,    10,     50,     1,      1,      2,      1,      0,      0,      0,      0,
+    20,     20,     1,      20,     250,    1000,   2000,   20,     12,     1500,   35,     0,      2000,   750,    5000,
+    0,      75,     0,      0,      200,    200,    10,     48,     1,      1,      2,      1,      0,      0,      0,      0,
     2,      1,      50,     10,     -1,             -1,             10,     5,      5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
-    IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_RADIAL|COLLIDE_OWNER|COLLIDE_STICK,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK,
     1,      0,      0,      1,      0,      0,      0,      1,      0,      0,      1,      1,      0,      1,      0,
     2,      0,      0,      0,      35,     35,     50,
-    0,      0.5f,   0,      0.5f,   0.5f,   0.5f,   0,      0,      0.125f, 0.125f, 1,      1,      0,      0,      4,      2,
-    10,     150,    100,    -250,   1,      2,      128,    64,     5,      25,     0,      0,      2,      1.5f,   0.25f,  0.75f,
+    0,      0.5f,   0,      0.5f,   0.5f,   0.5f,   0,      0,      0.1f,   0.1f,   1,      1,      0,      0,      4,      2,
+    10,     150,    100,    -500,   1,      2,      128,    64,     5,      24,     0,      0,      2,      1.5f,   0.25f,  0.75f,
     2,      0,      2,      10,     10,     1,      1,      8,      4,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,   0.5f,   0.5f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
-    IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_RADIAL|COLLIDE_OWNER|COLLIDE_STICK,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK,
     (1<<TRAIT_HOVER),
     0.9f,   1.2f,   0.9f,   0.9f
 );
