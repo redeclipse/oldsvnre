@@ -33,15 +33,15 @@ namespace physics
 
     int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastsprint = 0;
 
-    #define ishover       (PHYS(gravity) == 0 || m_hover(game::gamemode, game::mutators))
-    bool allowhover(physent *d)
+    #define ishover       (PHYS(gravity) == 0 || m_hover(game::gamemode, game::mutators) || m_jetpack(game::gamemode, game::mutators))
+    bool allowhover(physent *d, bool fly)
     {
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
         {
             gameent *e = (gameent *)d;
             if(m_league(game::gamemode, game::mutators))
-                return isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_HOVER);
-           return ishover;
+                return !fly && isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_HOVER);
+           return ishover ? (fly ? m_jetpack(game::gamemode, game::mutators) || PHYS(gravity) == 0 : true) : false;
         }
         return false;
     }
@@ -880,7 +880,7 @@ namespace physics
             if(allowhover(d) && jetting)
             {
                 if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/hoverdecay));
-                else if(hoverheight > 0)
+                else if(m_hover(game::gamemode, game::mutators) && hoverheight > 0)
                 {
                     vec v(0, 0, -1);
                     float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-hoverheight;

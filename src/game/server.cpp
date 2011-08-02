@@ -1029,7 +1029,7 @@ namespace server
         modecheck(mode, muts);
     }
 
-    #define mapshrink(a,b,c) if(a && b) \
+    #define mapshrink(a,b,c) if((a) && (b)) \
     { \
         char *p = shrinklist(b, c, 1); \
         if(p) \
@@ -1042,7 +1042,7 @@ namespace server
     #define mapcull(a,b,c) \
     { \
         mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
-        mapshrink(m_hover(b, c), a, GAME(hovermaps)); \
+        mapshrink(m_hover(b, c) || m_jetpack(b, c), a, GAME(hovermaps)); \
         if(GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
         { \
             int players = numclients(); \

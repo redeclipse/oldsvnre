@@ -3,7 +3,7 @@ namespace entities
 {
     vector<extentity *> ents;
     int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numwaypoints = 0, numactors = 0;
-    bool haswaypoints = false, hasjetpoints = false;
+    bool haswaypoints = false, hasflypoints = false, hashoverpoints = false;
 
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
     VAR(IDF_PERSIST, showentinfo, 0, 2, 5);
@@ -18,7 +18,7 @@ namespace entities
 
     bool waypointdrop(bool hasai)
     {
-        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : (!haswaypoints || (physics::allowhover() && !hasjetpoints) ? 1 : 2));
+        return dropwaypoints >= (!hasai || numwaypoints >= maxwaypoints ? 3 : (!haswaypoints || (physics::allowhover() && (m_jetpack(game::gamemode, game::mutators) || PHYS(gravity) == 0 ? !hasflypoints : !hashoverpoints)) ? 1 : 2));
     }
 
     bool clipped(const vec &o, bool aiclip)
@@ -291,6 +291,7 @@ namespace entities
                 if(full)
                 {
                     if(attr[0]&WP_F_CROUCH) addentinfo("crouch");
+                    if(attr[0]&WP_F_FLY) addentinfo("fly");
                     if(attr[0]&WP_F_HOVER) addentinfo("hover");
                 }
                 break;
@@ -1486,13 +1487,14 @@ namespace entities
             if(!ents.inrange(current)) continue;
             extentity &ent = *ents[current];
             linkvector &links = ent.links;
-            bool jetter = physics::allowhover(d);
+            bool jetter = physics::allowhover(d), flyer = physics::allowhover(d, true);
             loopv(links)
             {
                 int link = links[i];
                 if(ents.inrange(link) && ents[link]->type == ents[node]->type && (link == node || link == goal || !ents[link]->links.empty()))
                 {
                     bool wp = ents[link]->type == WAYPOINT;
+                    if(wp && ents[link]->attrs[0]&WP_F_FLY && !flyer) continue;
                     if(wp && ents[link]->attrs[0]&WP_F_HOVER && !jetter) continue;
                     linkq &n = nodes[link];
                     int weight = jetter ? 1 : max(wp ? ents[link]->attrs[1] : getweight(ents[link]->o), 1);
@@ -1554,7 +1556,7 @@ namespace entities
             if(!ents.inrange(curnode) && shoulddrop)
             {
                 int cmds = WP_F_NONE;
-                if(jetting) cmds |= WP_F_HOVER;
+                if(jetting) cmds |= (physics::allowhover(d, true) ? WP_F_FLY : WP_F_HOVER);
                 else if(physics::iscrouching(d) && !physics::sliding(d, true)) cmds |= WP_F_CROUCH;
                 curnode = ents.length();
                 attrvector wpattrs;
@@ -2127,7 +2129,7 @@ namespace entities
 
     void initents(stream *g, int mtype, int mver, char *gid, int gver)
     {
-        haswaypoints = hasjetpoints = false;
+        haswaypoints = hasflypoints = hashoverpoints = false;
         numwaypoints = numactors = 0;
         loopv(ents)
         {
@@ -2147,7 +2149,8 @@ namespace entities
                 case WAYPOINT:
                     numwaypoints++;
                     haswaypoints = true;
-                    if(ents[i]->attrs[0]&WP_F_HOVER) hasjetpoints = true;
+                    if(ents[i]->attrs[0]&WP_F_FLY) hasflypoints = true;
+                    if(ents[i]->attrs[0]&WP_F_HOVER) hashoverpoints = true;
                     break;
                 case ACTOR: numactors++; break;
                 default: break;
