@@ -176,7 +176,7 @@ namespace projs
         return false;
     }
 
-    bool radialeffect(dynent *d, projent &proj, bool explode, int radius)
+    bool radialeffect(dynent *d, projent &proj, int flags, int radius)
     {
         bool push = WEAP(proj.weap, pusharea) > 1, radiated = false;
         float maxdist = push ? radius*WEAP(proj.weap, pusharea) : radius;
@@ -208,7 +208,7 @@ namespace projs
                     }
                     if(rdist[i] <= radius)
                     {
-                        hitpush(e, proj, flag|(explode ? HIT_EXPLODE : HIT_BURN), radius, rdist[i], proj.curscale);
+                        hitpush(e, proj, flag|flags, radius, rdist[i], proj.curscale);
                         radiated = true;
                     }
                     else if(WEAP(proj.weap, pusharea) > 1 && rdist[i] <= maxdist)
@@ -226,7 +226,7 @@ namespace projs
                 {
                     if(dist <= radius)
                     {
-                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|(explode ? HIT_EXPLODE : HIT_BURN), radius, dist, proj.curscale);
+                        hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|flags, radius, dist, proj.curscale);
                         radiated = true;
                     }
                     else if(WEAP(proj.weap, pusharea) > 1 && dist <= maxdist)
@@ -237,7 +237,7 @@ namespace projs
                 }
             }
         }
-        else if(d->type == ENT_PROJ && explode)
+        else if(d->type == ENT_PROJ && flags&HIT_EXPLODE)
         {
             projent *e = (projent *)d;
             float dist = -1;
@@ -1772,7 +1772,7 @@ namespace projs
                         {
                             dynent *f = game::iterdynents(j, true);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
-                            radialeffect(f, proj, true, radius);
+                            radialeffect(f, proj, HIT_EXPLODE, radius);
                         }
                     }
                 }
@@ -1786,7 +1786,7 @@ namespace projs
                         {
                             dynent *f = game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true)) continue;
-                            if(radialeffect(f, proj, false, radius)) proj.lastradial = lastmillis;
+                            if(radialeffect(f, proj, HIT_BURN, radius)) proj.lastradial = lastmillis;
                         }
                     }
                 }
