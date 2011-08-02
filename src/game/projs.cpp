@@ -945,6 +945,7 @@ namespace projs
                             proj.lasteffect = lastmillis - (lastmillis%(projtraildelay*2));
                         }
                         else part_create(PART_FIREBALL_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend);
+                        if(proj.flags&HIT_ALT) part_create(PART_FIREBALL_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size*0.5f, blend);
                         break;
                     }
                     case WEAP_GRENADE:
