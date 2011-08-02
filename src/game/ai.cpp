@@ -266,12 +266,12 @@ namespace ai
         }
     }
 
-    bool checkothers(vector<int> &targets, gameent *d, int state, int targtype, int target, bool teams)
+    int checkothers(vector<int> &targets, gameent *d, int state, int targtype, int target, bool teams, int *members)
     { // checks the states of other ai for a match
         targets.shrink(0);
         gameent *e = NULL;
         int numdyns = game::numdynents();
-        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && e->ai && e->state == CS_ALIVE && e->aitype == d->aitype)
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)))
         {
             if(targets.find(e->clientnum) >= 0) continue;
             if(teams)
@@ -282,13 +282,15 @@ namespace ai
                     if(m_team(game::gamemode, game::mutators) && dt != et) continue;
                 }
             }
+            if(members) *members++;
+            if(e == d || !e->ai || e->state != CS_ALIVE || e->aitype != d->aitype) continue;
             aistate &b = e->ai->getstate();
             if(state >= 0 && b.type != state) continue;
             if(target >= 0 && b.target != target) continue;
             if(targtype >=0 && b.targtype != targtype) continue;
             targets.add(e->clientnum);
         }
-        return !targets.empty();
+        return targets.length();
     }
 
     bool makeroute(gameent *d, aistate &b, int node, bool changed, bool retry)
@@ -443,6 +445,8 @@ namespace ai
             n.target = e->clientnum;
             n.targtype = AI_T_ACTOR;
             n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->ai->weappref) ? 1e4f : 1e2f));
+            n.tolerance = 0.25f;
+            n.team = true;
         }
     }
 
@@ -467,6 +471,7 @@ namespace ai
                         n.target = j;
                         n.targtype = AI_T_ENTITY;
                         n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
+                        n.tolerance = 0;
                     }
                     break;
                 }
@@ -493,6 +498,7 @@ namespace ai
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
                         n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
+                        n.tolerance = 0;
                     }
                     break;
                 }
@@ -528,6 +534,7 @@ namespace ai
                     n.node = entities::closestent(WAYPOINT, entities::ents[i]->o, CLOSEDIST, true);
                     n.targtype = AI_T_AFFINITY;
                     n.score = -1;
+                    n.tolerance = 1;
                 }
             }
         }
@@ -538,6 +545,7 @@ namespace ai
             n.target = n.node = entities::ents[d->aientity]->links[i];
             n.targtype = AI_T_NODE;
             n.score = -1;
+            n.tolerance = 1;
         }
         while(!interests.empty())
         {
@@ -545,14 +553,12 @@ namespace ai
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
             bool proceed = true;
-            static vector<int> targets;
-            targets.setsize(0);
-            if(m_fight(game::gamemode) && d->aitype == AI_BOT) switch(n.state)
+            if(m_fight(game::gamemode) && d->aitype == AI_BOT)
             {
-                case AI_S_DEFEND: // don't get into herds
-                    proceed = !checkothers(targets, d, n.state, n.targtype, n.target, true);
-                    break;
-                default: break;
+                int members = 0;
+                static vector<int> targets; targets.setsize(0);
+                int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
+                if(others >= int(members*n.tolerance)) proceed = false;
             }
             if(proceed && (!aistyle[d->aitype].canmove || makeroute(d, b, n.node, false)))
             {
