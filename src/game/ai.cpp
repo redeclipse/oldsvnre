@@ -919,6 +919,7 @@ namespace ai
             int entid = obs.remap(d, n, epos, retry);
             if(entities::ents.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
             {
+                if(entities::ents[entid]->attrs[0]&WP_F_FLY && !physics::allowhover(d, true)) return false;
                 if(entities::ents[entid]->attrs[0]&WP_F_HOVER && !physics::allowhover(d)) return false;
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;

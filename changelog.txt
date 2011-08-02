@@ -1,3 +1,4 @@
+- readded jetpack as another mutator
 - changed grenade primary fire to explode on impact and made secondary fire able to stick to players
 - impulse moves now disregard cost and scale depending on available energy
 - restored old team balancing behaviour

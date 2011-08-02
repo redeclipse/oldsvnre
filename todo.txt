@@ -1,4 +1,5 @@
 = Code/Wishlist/Misc =
+* free camera when at intermission ala spectator
 * would attaching particles to a mapmodel be useful? (esp. wrt animated, rotating, or moving mapmodels)
 * footstep sounds (and texture "materials"?)
 * mode specific vars (maxhealth2/maxhealthdeathmatch, maxhealth [universal])

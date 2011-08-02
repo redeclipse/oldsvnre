@@ -40,7 +40,8 @@ enum
 {
     WP_F_NONE = 0,
     WP_F_CROUCH = 1<<0,
-    WP_F_HOVER = 1<<1
+    WP_F_FLY = 1<<1,
+    WP_F_HOVER = 1<<2
 };
 namespace entities { struct avoidset; };
 
