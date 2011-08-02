@@ -80,8 +80,9 @@ namespace ai
     struct interest
     {
         int state, node, target, targtype;
-        float score;
-        interest() : state(-1), node(-1), target(-1), targtype(-1), score(0.f) {}
+        float score, tolerance;
+        bool team;
+        interest() : state(-1), node(-1), target(-1), targtype(-1), score(0.f), tolerance(1.f), team(false) {}
         ~interest() {}
     };
 
@@ -222,7 +223,7 @@ namespace ai
     extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm);
 
     extern bool badhealth(gameent *d);
-    extern bool checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false);
+    extern int checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false, int *members = NULL);
     extern bool makeroute(gameent *d, aistate &b, int node, bool changed = true, bool retry = false);
     extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, bool retry = false);
     extern bool randomnode(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX);

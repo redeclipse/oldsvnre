@@ -641,6 +641,8 @@ namespace bomber
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
+                    n.tolerance = 0.25f;
+                    n.team = true;
                 }
             }
             else if(isbomberaffinity(f))
@@ -653,6 +655,8 @@ namespace bomber
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos());
+                    n.tolerance = 0.25f;
+                    n.team = true;
                 }
                 else
                 { // help by defending the attacker
@@ -660,11 +664,14 @@ namespace bomber
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
                         ai::interest &n = interests.add();
-                        n.state = ai::owner(d) == ai::owner(t) ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
+                        bool team = ai::owner(d) == ai::owner(t);
+                        n.state = team ? ai::AI_S_DEFEND : ai::AI_S_PURSUE;
                         n.node = t->lastnode;
                         n.target = t->clientnum;
                         n.targtype = ai::AI_T_ACTOR;
                         n.score = d->o.squaredist(t->o);
+                        n.tolerance = 0.25f;
+                        n.team = team;
                     }
                 }
             }
