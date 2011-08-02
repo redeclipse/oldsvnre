@@ -281,11 +281,11 @@ namespace hud
     VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
     VAR(IDF_PERSIST, radardamagemerge, 1, 250, VAR_MAX);
     VAR(IDF_PERSIST, radardamagetime, 1, 250, VAR_MAX);
-    VAR(IDF_PERSIST, radardamagefade, 1, 2500, VAR_MAX);
-    FVAR(IDF_PERSIST, radardamagesize, 0, 8, 1000);
+    VAR(IDF_PERSIST, radardamagefade, 1, 3500, VAR_MAX);
+    FVAR(IDF_PERSIST, radardamagesize, 0, 20, 1000);
     FVAR(IDF_PERSIST, radardamageblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
-    VAR(IDF_PERSIST, radardamagemin, 1, 25, VAR_MAX);
+    VAR(IDF_PERSIST, radardamagemin, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
     VAR(IDF_PERSIST, showeditradar, 0, 1, 1);
@@ -1382,24 +1382,24 @@ namespace hud
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(hurttex, 3+size, w, h, size, fade, 0, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, dir, d.colour, "radar", "%s +%d", a ? game::colorname(a) : "?", d.damage);
                 }
-                else drawblip(hurttex, 3+size, w, h, size, fade, 0, dir, d.colour);
+                else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, dir, d.colour);
             }
         }
         if(radardamage >= 2)
         {
             bool dead = (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath;
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
-                drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::focus->getcolour(1)), "radar", "you");
+                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::focus->getcolour(1)), "radar", "you");
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
                 vec colour = vec::hexcolor(a->getcolour(1));
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
-                    if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s (%d)", game::colorname(a), a->health);
-                    else drawblip(arrowtex, 3+radardamagetrack, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s", game::colorname(a));
+                    if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s (%d)", game::colorname(a), a->health);
+                    else drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s", game::colorname(a));
                 }
             }
         }
