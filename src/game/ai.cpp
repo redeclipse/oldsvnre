@@ -268,7 +268,7 @@ namespace ai
 
     int checkothers(vector<int> &targets, gameent *d, int state, int targtype, int target, bool teams, int *members)
     { // checks the states of other ai for a match
-        targets.shrink(0);
+        targets.setsize(0);
         gameent *e = NULL;
         int numdyns = game::numdynents();
         loopi(numdyns) if((e = (gameent *)game::iterdynents(i)))
