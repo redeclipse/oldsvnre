@@ -282,7 +282,7 @@ namespace ai
                     if(m_team(game::gamemode, game::mutators) && dt != et) continue;
                 }
             }
-            if(members) *members++;
+            if(members) (*members)++;
             if(e == d || !e->ai || e->state != CS_ALIVE || e->aitype != d->aitype) continue;
             aistate &b = e->ai->getstate();
             if(state >= 0 && b.type != state) continue;
