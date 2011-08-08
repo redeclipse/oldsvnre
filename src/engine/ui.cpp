@@ -534,7 +534,7 @@ struct gui : guient
 
     void background(int color, int inheritw, int inherith)
     {
-        if(layoutpass) return;
+        if(!visible()) return;
         glDisable(GL_TEXTURE_2D);
         notextureshader->set();
         glColor4ub(color>>16, (color>>8)&0xFF, color&0xFF, 0x80);
