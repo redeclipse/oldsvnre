@@ -201,8 +201,8 @@ namespace auth
 
     void regserver()
     {
-        loopv(bans) if(bans[i].time == -2) bans.remove(i--);
-        loopv(allows) if(allows[i].time == -2) allows.remove(i--);
+        loopvrev(bans) if(bans[i].time == -2) bans.remove(i);
+        loopvrev(allows) if(allows[i].time == -2) allows.remove(i);
         conoutf("updating master server");
         requestmasterf("server %d\n", serverport);
         lastactivity = totalmillis;
