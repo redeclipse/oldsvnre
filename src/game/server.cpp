@@ -731,11 +731,21 @@ namespace server
         }
     }
 
+    void resetbans()
+    {
+        loopvrev(bans) if(bans[i].time != -1 && bans[i].time != -2) bans.remove(i);
+    }
+
+    void resetallows()
+    {
+        loopvrev(allows) if(allows[i].time != -1 && allows[i].time != -2) allows.remove(i);
+    }
+
     void cleanup(bool init = false)
     {
         setpause(false);
-        if(GAME(resetmmonend)) { mastermode = MM_OPEN; allows.shrink(0); }
-        if(GAME(resetbansonend)) bans.shrink(0);
+        if(GAME(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
+        if(GAME(resetbansonend)) resetbans();
         if(GAME(resetvarsonend) || init) resetgamevars(true);
         changemap();
     }
@@ -1743,9 +1753,9 @@ namespace server
     {
         setpause(false);
         if(demorecord) enddemorecord();
-        if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; allows.shrink(0); }
+        if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetvarsonend) >= 2) resetgamevars(true);
-        if(GAME(resetbansonend) >= 2) bans.shrink(0);
+        if(GAME(resetbansonend) >= 2) resetbans();
     }
 
     bool checkvotes(bool force = false)
@@ -4601,7 +4611,7 @@ namespace server
                         if(haspriv(ci, PRIV_ADMIN) || (mastermask()&(1<<mm)))
                         {
                             mastermode = mm;
-                            allows.shrink(0);
+                            resetallows();
                             if(mastermode >= MM_PRIVATE)
                             {
                                 loopv(clients)
@@ -4622,7 +4632,7 @@ namespace server
                 {
                     if(haspriv(ci, PRIV_MASTER, "clear bans"))
                     {
-                        bans.shrink(0);
+                        resetbans();
                         srvoutf(3, "cleared existing bans");
                     }
                     break;
