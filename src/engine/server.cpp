@@ -45,6 +45,7 @@ void addipinfo(vector<ipinfo> &info, const char *name)
     ipinfo &p = info.add();
     p.ip = ip.i;
     p.mask = mask.i;
+    p.type = ipinfo::LOCAL;
 }
 ICOMMAND(0, addban, "s", (char *name), addipinfo(bans, name));
 ICOMMAND(0, addallow, "s", (char *name), addipinfo(allows, name));
@@ -324,8 +325,8 @@ void cleanupserver()
 
 void reloadserver()
 {
-    loopv(bans) if(bans[i].time == -1) bans.remove(i--);
-    loopv(allows) if(allows[i].time == -1) allows.remove(i--);
+    loopvrev(bans) if(bans[i].type == ipinfo::LOCAL) bans.remove(i);
+    loopvrev(allows) if(allows[i].type == ipinfo::LOCAL) allows.remove(i);
 }
 
 void process(ENetPacket *packet, int sender, int chan);

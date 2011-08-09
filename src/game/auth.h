@@ -190,10 +190,10 @@ namespace auth
         else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
         else if(!strcmp(w[0], "ban") || !strcmp(w[0], "allow"))
         {
-            ipinfo &p = (strcmp(w[0], "ban") ? allows : bans).add();
-            p.ip = (uint)(atoi(w[1]));
-            p.mask = (uint)(atoi(w[2]));
-            p.time = -2; // master info
+            ipinfo &p = (!strcmp(w[0], "ban") ? bans : allows).add();
+            p.ip = uint(atoi(w[1]));
+            p.mask = uint(atoi(w[2]));
+            p.type = ipinfo::GLOBAL; // master info
         }
         //else if(w[0]) conoutf("authserv sent invalid command: %s", w[0]);
         loopj(numargs) if(w[j]) delete[] w[j];
@@ -201,8 +201,8 @@ namespace auth
 
     void regserver()
     {
-        loopvrev(bans) if(bans[i].time == -2) bans.remove(i);
-        loopvrev(allows) if(allows[i].time == -2) allows.remove(i);
+        loopvrev(bans) if(bans[i].type == ipinfo::GLOBAL) bans.remove(i);
+        loopvrev(allows) if(allows[i].type == ipinfo::GLOBAL) allows.remove(i);
         conoutf("updating master server");
         requestmasterf("server %d\n", serverport);
         lastactivity = totalmillis;

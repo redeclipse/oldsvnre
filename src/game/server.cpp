@@ -733,12 +733,12 @@ namespace server
 
     void resetbans()
     {
-        loopvrev(bans) if(bans[i].time != -1 && bans[i].time != -2) bans.remove(i);
+        loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY) bans.remove(i);
     }
 
     void resetallows()
     {
-        loopvrev(allows) if(allows[i].time != -1 && allows[i].time != -2) allows.remove(i);
+        loopvrev(allows) if(allows[i].type == ipinfo::TEMPORARY) allows.remove(i);
     }
 
     void cleanup(bool init = false)
@@ -3614,7 +3614,7 @@ namespace server
                 if(smode) smode->update();
                 mutate(smuts, mut->update());
             }
-            loopvrev(bans) if(totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
+            loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY && totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
             loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
 
             if(masterupdate)
@@ -3643,7 +3643,7 @@ namespace server
         }
         else if(!GAME(resetbansonend))
         {
-            loopvrev(bans) if(totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
+            loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY && totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
         }
         aiman::checkai();
         auth::update();
@@ -4619,6 +4619,7 @@ namespace server
                                     ipinfo &allow = allows.add();
                                     allow.time = totalmillis;
                                     allow.ip = getclientip(clients[i]->clientnum);
+                                    allow.mask = 0xFFFFFFFF;
                                 }
                             }
                             srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mastermode));
@@ -4650,7 +4651,7 @@ namespace server
                         if(checkipinfo(allows, ip))
                         {
                             if(!haspriv(ci, PRIV_ADMIN, "kick protected people")) break;
-                            else loopv(allows) if((ip & allows[i].mask) == allows[i].ip) allows.remove(i--);
+                            else loopvrev(allows) if((ip & allows[i].mask) == allows[i].ip) allows.remove(i);
                         }
                         ipinfo &ban = bans.add();
                         ban.time = totalmillis;

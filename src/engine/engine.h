@@ -42,10 +42,11 @@ enum { PACKAGEDIR_OCTA = 1<<0 };
 extern const char *disc_reasons[];
 struct ipinfo
 {
+    enum { TEMPORARY = 0, LOCAL, GLOBAL };
     enet_uint32 ip, mask;
-    int time;
+    int type, time;
 
-    ipinfo() : ip(0), mask(0), time(-1) {}
+    ipinfo() : ip(0), mask(0), type(TEMPORARY), time(-1) {}
     ~ipinfo() {}
 };
 extern vector<ipinfo> bans, allows;

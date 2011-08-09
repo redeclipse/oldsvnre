@@ -300,8 +300,8 @@ bool checkmasterclientinput(masterclient &c)
                 conoutf("master peer %s registered as a server",  c.name);
                 c.isserver = true;
             }
-            loopv(bans) if(bans[i].time == -1) masteroutf(c, "ban %u %u\n", bans[i].ip, bans[i].mask);
-            loopv(allows) if(allows[i].time == -1) masteroutf(c, "allow %u %u\n", allows[i].ip, allows[i].mask);
+            loopv(bans) if(bans[i].type == ipinfo::LOCAL) masteroutf(c, "ban %u %u\n", bans[i].ip, bans[i].mask);
+            loopv(allows) if(allows[i].type == ipinfo::LOCAL) masteroutf(c, "allow %u %u\n", allows[i].ip, allows[i].mask);
             found = true;
         }
         if(!strcmp(w[0], "version") || !strcmp(w[0], "update"))
