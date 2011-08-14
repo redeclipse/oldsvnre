@@ -355,6 +355,7 @@ void checkmaster()
     loopv(masterclients)
     {
         masterclient &c = *masterclients[i];
+        if(c.authreqs.length()) purgeauths(c);
         if(c.shouldping && (!c.lastping || ((!c.lastpong || ENET_TIME_GREATER(c.lastping, c.lastpong)) && ENET_TIME_DIFFERENCE(totalmillis, c.lastping) > PING_TIME)))
         {
             if(c.numpings < PING_RETRY)
