@@ -21,6 +21,7 @@ namespace auth
     clientinfo *findauth(uint id)
     {
         loopv(clients) if(clients[i]->authreq == id) return clients[i];
+        loopv(connects) if(connects[i]->authreq == id) return connects[i];
         return NULL;
     }
 
@@ -123,6 +124,7 @@ namespace auth
             ci->connectauth = false;
             int disc = allowconnect(ci);
             if(disc) { disconnect_client(ci->clientnum, disc); return; }
+            connected(ci);
         }
     }
 
@@ -149,6 +151,7 @@ namespace auth
                 int disc = allowconnect(ci);
                 if(disc) { disconnect_client(ci->clientnum, disc); return; }
             }
+            connected(ci);
         }
     }
 

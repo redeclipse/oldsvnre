@@ -2122,6 +2122,8 @@ namespace server
         }
     }
 
+    void connected(clientinfo *ci);
+
     #include "auth.h"
 
     void spectator(clientinfo *ci, int sender = -1)
@@ -3601,6 +3603,9 @@ namespace server
 
     void serverupdate()
     {
+        loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
+        loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY && totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
+
         if(numclients())
         {
             if(!paused) gamemillis += curtime;
@@ -3614,8 +3619,6 @@ namespace server
                 if(smode) smode->update();
                 mutate(smuts, mut->update());
             }
-            loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY && totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
-            loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
 
             if(masterupdate)
             {
@@ -3640,10 +3643,6 @@ namespace server
                 }
             }
             if(shouldcheckvotes) checkvotes();
-        }
-        else if(!GAME(resetbansonend))
-        {
-            loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY && totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
         }
         aiman::checkai();
         auth::update();
@@ -3782,7 +3781,11 @@ namespace server
 
     int checktype(int type, clientinfo *ci)
     {
-        if(ci && ci->local) return type;
+        if(ci)
+        {
+            if(!ci->connected) return type == (ci->connectauth ? N_AUTHANS : N_CONNECT) || type == N_PING ? type : -1;
+            if(ci->local) return type;
+        }
         // only allow edit messages in coop-edit mode
         if(type >= N_EDITENT && type <= N_NEWMAP && (!m_edit(gamemode) || !ci || ci->state.state == CS_SPECTATOR)) return -1;
         // server only messages
@@ -3927,6 +3930,23 @@ namespace server
         }
     }
 
+    void connected(clientinfo *ci)
+    {
+        connects.removeobj(ci);
+        clients.add(ci);
+
+        ci->connected = true;
+        ci->needclipboard = totalmillis ? totalmillis : 1;
+        masterupdate = true;
+        ci->state.lasttimeplayed = lastmillis;
+
+        sendwelcome(ci);
+        if(restorescore(ci)) sendresume(ci);
+        sendinitclient(ci);
+        int amt = numclients();
+        relayf(2, "\fg%s (%s) has joined the game (%d %s)", colorname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
+    }
+
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
     {
         if(sender<0 || p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED) return;
@@ -3936,40 +3956,50 @@ namespace server
         if(ci && !ci->connected)
         {
             if(chan==0) return;
-            else if(chan!=1 || getint(p)!=N_CONNECT) { disconnect_client(sender, DISC_TAGT); return; }
-            else
+            else if(chan!=1) { disconnect_client(sender, DISC_TAGT); return; }
+            else while(p.length() < p.maxlen) switch(checktype(getint(p), ci))
             {
-                getstring(text, p);
-                if(!text[0]) copystring(text, "unnamed");
-                filtertext(text, text, true, true, true, MAXNAMELEN);
-                copystring(ci->name, text, MAXNAMELEN+1);
-                int colour = getint(p);
-                ci->state.setcolour(colour);
-
-                string password = "", authname = "";
-                getstring(text, p); copystring(password, text);
-                getstring(text, p); copystring(authname, text);
-                int disc = auth::allowconnect(ci, password, authname);
-                if(disc)
+                case N_CONNECT:
                 {
-                    disconnect_client(sender, disc);
-                    return;
+                    getstring(text, p);
+                    if(!text[0]) copystring(text, "unnamed");
+                    filtertext(text, text, true, true, true, MAXNAMELEN);
+                    copystring(ci->name, text, MAXNAMELEN+1);
+                    int colour = getint(p);
+                    ci->state.setcolour(colour);
+
+                    string password = "", authname = "";
+                    getstring(text, p); copystring(password, text);
+                    getstring(text, p); copystring(authname, text);
+                    int disc = auth::allowconnect(ci, password, authname);
+                    if(disc)
+                    {
+                        disconnect_client(sender, disc);
+                        return;
+                    }
+
+                    if(!ci->connectauth) connected(ci); 
+
+                    break;
                 }
 
-                connects.removeobj(ci);
-                clients.add(ci);
+                case N_AUTHANS:
+                {
+                    uint id = (uint)getint(p);
+                    getstring(text, p);
+                    auth::answerchallenge(ci, id, text);
+                    break;
+                }
+                    
+                case N_PING:
+                    getint(p);
+                    break;
 
-                ci->connected = true;
-                ci->needclipboard = totalmillis ? totalmillis : 1;
-                masterupdate = true;
-                ci->state.lasttimeplayed = lastmillis;
-
-                sendwelcome(ci);
-                if(restorescore(ci)) sendresume(ci);
-                sendinitclient(ci);
-                int amt = numclients();
-                relayf(2, "\fg%s (%s) has joined the game (%d %s)", colorname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
+                default:
+                    disconnect_client(sender, DISC_TAGT);
+                    return;
             }
+            return;
         }
         else if(chan==2)
         {
