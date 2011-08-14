@@ -122,7 +122,7 @@ namespace auth
         {
             ci->connectauth = false;
             int disc = allowconnect(ci);
-            if(disc) { disconnect_client(id, disc); return; }
+            if(disc) { disconnect_client(ci->clientnum, disc); return; }
         }
     }
 
