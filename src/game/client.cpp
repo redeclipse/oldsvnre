@@ -95,6 +95,7 @@ namespace client
     }
     ICOMMAND(0, getvote, "ii", (int *num, int *player), getvotes(*num, *player));
 
+    VAR(IDF_PERSIST, authconnect, 0, 1, 1);
     string authname = "", authkey = "";
 
     void setauthkey(const char *name, const char *key)
@@ -923,7 +924,7 @@ namespace client
             memset(connectpass, 0, sizeof(connectpass));
         }
         sendstring(hash, p);
-        sendstring(authname, p);
+        sendstring(authconnect ? authname : "", p);
         sendclientpacket(p.finalize(), 1);
     }
 
