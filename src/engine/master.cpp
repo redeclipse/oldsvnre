@@ -15,7 +15,7 @@
 #define MASTER_LIMIT 4096
 #define CLIENT_TIME (60*1000)
 #define SERVER_TIME (35*60*1000)
-#define AUTH_TIME (60*1000)
+#define AUTH_TIME (30*1000)
 #define DUP_LIMIT 16
 #define PING_TIME 3000
 #define PING_RETRY 5
