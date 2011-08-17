@@ -3971,7 +3971,7 @@ namespace server
                     string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
                     getstring(text, p); copystring(authname, text);
-                    int disc = auth::allowconnect(ci, password, authname);
+                    int disc = auth::allowconnect(ci, true, password, authname);
                     if(disc)
                     {
                         disconnect_client(sender, disc);

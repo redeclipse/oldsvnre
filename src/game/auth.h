@@ -79,7 +79,7 @@ namespace auth
         }
     }
 
-    int allowconnect(clientinfo *ci, const char *pwd = "", const char *authname = "")
+    int allowconnect(clientinfo *ci, bool connecting = true, const char *pwd = "", const char *authname = "")
     {
         if(ci->local) return DISC_NONE;
         if(m_local(gamemode)) return DISC_PRIVATE;
@@ -122,7 +122,7 @@ namespace auth
         if(ci->connectauth)
         {
             ci->connectauth = false;
-            int disc = allowconnect(ci);
+            int disc = allowconnect(ci, false);
             if(disc) { disconnect_client(ci->clientnum, disc); return; }
             connected(ci);
         }
@@ -148,7 +148,7 @@ namespace auth
             ci->connectauth = false;
             if(ci->authlevel < 0)
             {
-                int disc = allowconnect(ci);
+                int disc = allowconnect(ci, false);
                 if(disc) { disconnect_client(ci->clientnum, disc); return; }
             }
             connected(ci);
