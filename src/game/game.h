@@ -241,7 +241,7 @@ enum
     N_PING, N_PONG, N_CLIENTPING, N_TICK, N_NEWGAME, N_ITEMACC, N_SERVMSG, N_GAMEINFO, N_RESUME,
     N_EDITMODE, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_REMIP, N_CLIPBOARD, N_NEWMAP,
     N_GETMAP, N_SENDMAP, N_FAILMAP, N_SENDMAPFILE, N_SENDMAPSHOT, N_SENDMAPCONFIG,
-    N_MASTERMODE, N_KICK, N_CLEARBANS, N_CURRENTMASTER, N_SPECTATOR, N_WAITING, N_SETMASTER, N_SETTEAM,
+    N_MASTERMODE, N_KICKBAN, N_CLEARBANS, N_CURRENTMASTER, N_SPECTATOR, N_WAITING, N_SETMASTER, N_SETTEAM,
     N_AFFIN, N_INFOAFFIN,
     N_TAKEAFFIN, N_RETURNAFFIN, N_RESETAFFIN, N_DROPAFFIN, N_SCOREAFFIN, N_INITAFFIN, N_SCORE,
     N_LISTDEMOS, N_SENDDEMOLIST, N_GETDEMO, N_SENDDEMO,
@@ -270,7 +270,7 @@ char msgsizelookup(int msg)
         N_SERVMSG, 0, N_GAMEINFO, 0, N_RESUME, 0,
         N_EDITMODE, 2, N_EDITENT, 0, N_EDITLINK, 4, N_EDITVAR, 0, N_EDITF, 16, N_EDITT, 16, N_EDITM, 15, N_FLIP, 14, N_COPY, 14, N_PASTE, 14, N_ROTATE, 15, N_REPLACE, 16, N_DELCUBE, 14, N_REMIP, 1, N_NEWMAP, 2,
         N_GETMAP, 0, N_SENDMAP, 0, N_FAILMAP, 0, N_SENDMAPFILE, 0, N_SENDMAPSHOT, 0, N_SENDMAPCONFIG, 0,
-        N_MASTERMODE, 2, N_KICK, 2, N_CLEARBANS, 1, N_CURRENTMASTER, 3, N_SPECTATOR, 3, N_WAITING, 2, N_SETMASTER, 0, N_SETTEAM, 0,
+        N_MASTERMODE, 2, N_KICKBAN, 2, N_CLEARBANS, 1, N_CURRENTMASTER, 3, N_SPECTATOR, 3, N_WAITING, 2, N_SETMASTER, 0, N_SETTEAM, 0,
         N_AFFIN, 0, N_INFOAFFIN, 0,
         N_DROPAFFIN, 0, N_SCOREAFFIN, 0, N_RETURNAFFIN, 0, N_TAKEAFFIN, 0, N_RESETAFFIN, 0, N_INITAFFIN, 0, N_SCORE, 0,
         N_LISTDEMOS, 1, N_SENDDEMOLIST, 0, N_GETDEMO, 2, N_SENDDEMO, 0,
@@ -891,26 +891,24 @@ struct gameent : dynent, gamestate
 
     void checkhitboxes()
     {
-        float hsize = max(xradius*0.475f, yradius*0.475f);
+        float hsize = max(xradius*0.45f, yradius*0.45f);
         if(head == vec(-1, -1, -1))
         {
             head = o;
             head.z -= hsize*0.375f;
         }
-        else head.z += hsize*0.375f;
-        hrad = vec(xradius*0.475f, yradius*0.475f, hsize);
+        hrad = vec(xradius*0.5f, yradius*0.5f, hsize);
         if(torso == vec(-1, -1, -1))
         {
             torso = o;
-            torso.z -= height*0.375f;
+            torso.z -= height*0.45f;
         }
-        torso.z += hsize*0.625f;
         float tsize = (head.z-hrad.z)-torso.z;
         trad = vec(xradius, yradius, tsize);
         float lsize = ((torso.z-trad.z)-(o.z-height))*0.5f;
         legs = torso;
         legs.z -= trad.z+lsize;
-        lrad = vec(xradius*0.75f, yradius*0.75f, lsize);
+        lrad = vec(xradius*0.85f, yradius*0.85f, lsize);
         if(waist == vec(-1, -1, -1))
         {
             vec dir; vecfromyawpitch(yaw, 0, -1, 0, dir);

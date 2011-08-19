@@ -151,7 +151,7 @@ GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this
 
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
-GVAR(0, defendinterval, 0, 100, VAR_MAX);
+GVAR(0, defendinterval, 0, 50, VAR_MAX);
 GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 
@@ -255,7 +255,7 @@ GFVAR(0, movespread, 0, 1, FVAR_MAX);
 GFVAR(0, inairspread, 0, 1, FVAR_MAX);
 GFVAR(0, impulsespread, 0, 1, FVAR_MAX);
 
-GVAR(0, zoomlock, 0, 1, 4); // 0 = free, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor, 4 = must also be crouched
+GVAR(0, zoomlock, 0, 0, 4); // 0 = unrestricted, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor, 4 = must also be crouched
 GVAR(0, zoomlocktime, 0, 500, VAR_MAX); // time before zoomlock kicks in when in the air
 GVAR(0, zoomlimit, 1, 10, 150);
 GVAR(0, zoomtime, 1, 100, VAR_MAX);
@@ -279,11 +279,11 @@ GFVAR(0, kickpushcrouch, 0, 0, FVAR_MAX);
 GFVAR(0, kickpushsway, 0, 0.0125f, FVAR_MAX);
 GFVAR(0, kickpushzoom, 0, 0.125f, FVAR_MAX);
 
-GVAR(0, fragbonus, 0, 1, VAR_MAX);
-GVAR(0, enemybonus, 0, 0, VAR_MAX);
-GVAR(0, teamkillpenalty, 0, 1, VAR_MAX);
-GVAR(0, firstbloodpoints, 0, 2, VAR_MAX);
-GVAR(0, headshotpoints, 0, 2, VAR_MAX);
+GVAR(0, fragbonus, 0, 3, VAR_MAX);
+GVAR(0, enemybonus, 0, 1, VAR_MAX);
+GVAR(0, teamkillpenalty, 0, 2, VAR_MAX);
+GVAR(0, firstbloodpoints, 0, 1, VAR_MAX);
+GVAR(0, headshotpoints, 0, 1, VAR_MAX);
 
 GVAR(0, assistkilldelay, 0, 5000, VAR_MAX);
 GVAR(0, multikilldelay, 0, 5000, VAR_MAX);
@@ -293,8 +293,8 @@ GVAR(0, spreecount, 0, 5, VAR_MAX);
 GVAR(0, spreepoints, 0, 1, 1);
 GVAR(0, spreebonus, 0, 1, VAR_MAX);
 GVAR(0, dominatecount, 0, 5, VAR_MAX);
-GVAR(0, dominatepoints, 0, 2, VAR_MAX);
-GVAR(0, revengepoints, 0, 2, VAR_MAX);
+GVAR(0, dominatepoints, 0, 1, VAR_MAX);
+GVAR(0, revengepoints, 0, 1, VAR_MAX);
 
 GVAR(0, alloweastereggs, 0, 1, 2); // 0 = off, 1 = on, 2 = extended (annoying ones)
 GVAR(0, returningfire, 0, 0, 1); // 0 = off, 1 = on

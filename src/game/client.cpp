@@ -398,12 +398,13 @@ namespace client
     }
     ICOMMAND(0, listclients, "i", (int *local), listclients(*local!=0));
 
-    void kick(const char *arg)
+    void kickban(const char *arg, bool ban)
     {
         int i = parseplayer(arg);
-        if(i>=0 && i!=game::player1->clientnum) addmsg(N_KICK, "ri", i);
+        if(i>=0 && i!=game::player1->clientnum) addmsg(N_KICKBAN, "ri2", i, ban ? 1 : 0);
     }
-    ICOMMAND(0, kick, "s", (char *s), kick(s));
+    ICOMMAND(0, kick, "s", (char *s), kickban(s, false));
+    ICOMMAND(0, ban, "s", (char *s), kickban(s, true));
     ICOMMAND(0, clearbans, "", (), addmsg(N_CLEARBANS, "r"));
 
     void setteam(const char *arg1, const char *arg2)

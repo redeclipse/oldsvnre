@@ -83,7 +83,7 @@ namespace auth
     {
         if(ci->local) return DISC_NONE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(ci->privilege >= PRIV_ADMIN) return DISC_NONE;
+        if(ci->privilege >= PRIV_ADMIN || ci->authlevel >= PRIV_MASTER) return DISC_NONE;
         if(*authname)
         {
             if(ci->connectauth) return DISC_NONE;
@@ -141,18 +141,15 @@ namespace auth
             case 'u': n = PRIV_NONE; break;
         }
         ci->authlevel = n;
-        srvoutf(-2, "\fy%s identified as '\fs\fc%s\fS'", colorname(ci), name);
-        if(ci->authlevel > PRIV_NONE && GAME(automaster)) setmaster(ci, true, ci->authlevel);
         if(ci->connectauth)
         {
             ci->connectauth = false;
-            if(ci->authlevel < 0)
-            {
-                int disc = allowconnect(ci, false);
-                if(disc) { disconnect_client(ci->clientnum, disc); return; }
-            }
+            int disc = allowconnect(ci, false);
+            if(disc) { disconnect_client(ci->clientnum, disc); return; }
             connected(ci);
         }
+        srvoutf(-2, "\fy%s identified as '\fs\fc%s\fS'", colorname(ci), name);
+        if(ci->authlevel > PRIV_NONE && GAME(automaster)) setmaster(ci, true, ci->authlevel);
     }
 
     void authchallenged(uint id, const char *val)

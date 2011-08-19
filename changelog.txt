@@ -1,3 +1,9 @@
+- hitbox size and "flickering" fixes
+- split apart kick and ban commands so users can be removed without a ban
+- turned off zoomlock due to popular demand (POLL: http://forum.freegamedev.net/viewtopic.php?f=53&t=1727)
+- critical bugs fixed in auth/ban system
+- improved rifle primary fire damage zones and hitpush
+- tweaked points variables to make a bit more sense relative to each other
 - improved plasma primary fire and made flamer secondary fire sticky
 - readded jetpack as another mutator
 - changed grenade primary fire to explode on impact and made secondary fire able to stick to players
