@@ -3425,24 +3425,21 @@ namespace server
 
     void checkents()
     {
-        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_limited(gamemode, mutators);
+        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_limited(gamemode, mutators) && GAME(itemthreshold) > 0;
         int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators), players = 0;
         memset(items, 0, sizeof(items)); memset(lowest, -1, sizeof(lowest));
         if(thresh)
         {
             loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.aitype < AI_START)
-            {
-                items[WEAPON] += clients[i]->state.carry(sweap);
                 players++;
-            }
             loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
             {
                 if(sents[i].type == WEAPON)
                 {
                     int attr = w_attr(gamemode, sents[i].attrs[0], sweap);
-                    if(attr < WEAP_OFFSET || attr >= w_lmax(gamemode, mutators)) continue;
+                    if(attr < WEAP_OFFSET || attr >= WEAP_ITEM) continue;
                 }
-                if(finditem(i, true)) items[sents[i].type]++;
+                if(finditem(i, true, true)) items[sents[i].type]++;
                 else if(!sents.inrange(lowest[sents[i].type]) || sents[i].millis < sents[lowest[sents[i].type]].millis)
                     lowest[sents[i].type] = i;
             }
@@ -3978,7 +3975,7 @@ namespace server
                         return;
                     }
 
-                    if(!ci->connectauth) connected(ci); 
+                    if(!ci->connectauth) connected(ci);
 
                     break;
                 }
@@ -3990,7 +3987,7 @@ namespace server
                     auth::answerchallenge(ci, id, text);
                     break;
                 }
-                    
+
                 case N_PING:
                     getint(p);
                     break;
@@ -4669,25 +4666,30 @@ namespace server
                     break;
                 }
 
-                case N_KICK:
+                case N_KICKBAN:
                 {
                     int victim = getint(p);
-                    if(haspriv(ci, PRIV_MASTER, "kick people") && victim >= 0 && ci->clientnum != victim)
+                    bool ban = getint(p) != 0;
+                    if(haspriv(ci, PRIV_MASTER, "kick/ban people") && victim >= 0 && ci->clientnum != victim)
                     {
                         uint ip = getclientip(victim);
                         if(!ip) break;
                         clientinfo *cp = (clientinfo *)getinfo(victim);
-                        if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, "kick")) break;
+                        if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, "kick/ban")) break;
                         if(checkipinfo(allows, ip))
                         {
-                            if(!haspriv(ci, PRIV_ADMIN, "kick protected people")) break;
-                            else loopvrev(allows) if((ip & allows[i].mask) == allows[i].ip) allows.remove(i);
+                            if(!haspriv(ci, PRIV_ADMIN, "kick/ban protected people")) break;
+                            else if(ban) loopvrev(allows) if((ip & allows[i].mask) == allows[i].ip) allows.remove(i);
                         }
-                        ipinfo &ban = bans.add();
-                        ban.time = totalmillis;
-                        ban.ip = ip;
-                        ban.mask = 0xFFFFFFFF;
-                        disconnect_client(victim, DISC_KICK);
+                        if(ban)
+                        {
+                            ipinfo &ban = bans.add();
+                            ban.time = totalmillis;
+                            ban.ip = ip;
+                            ban.mask = 0xFFFFFFFF;
+                            disconnect_client(victim, DISC_IPBAN);
+                        }
+                        else disconnect_client(victim, DISC_KICK);
                     }
                     break;
                 }

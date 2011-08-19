@@ -1180,9 +1180,10 @@ namespace game
         if(!log.empty())
         {
             concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
-            loopv(log)
+            loopv(log) if(log[i])
             {
                 concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
+                if(log[i]->aitype >= AI_START) concatstring(d->obit, "a ");
                 concatstring(d->obit, colorname(log[i]));
             }
         }

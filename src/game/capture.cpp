@@ -561,7 +561,7 @@ namespace capture
         d->action[AC_AFFINITY] = false;
         d->actiontime[AC_AFFINITY] = 0;
         affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, f.team == d->team ? "SECURED" : "TAKEN");
-        game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s %s the \fs\f[%d]%s\fS flag", game::colorname(d), f.droptime ? (f.team == d->team ? "secured" : "picked up") : "stole", TEAM(f.team, colour), TEAM(f.team, name));
+        game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s %s the \fs\f[%d]%s\fS flag", game::colorname(d), f.team == d->team ? "secured" : (f.droptime ? "picked up" : "stole"), TEAM(f.team, colour), TEAM(f.team, name));
         st.takeaffinity(i, d, lastmillis);
     }
 
