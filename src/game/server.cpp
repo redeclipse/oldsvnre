@@ -4526,6 +4526,7 @@ namespace server
                     while((n = getint(p)) != -1)
                     {
                         int type = getint(p), numattr = getint(p), numkin = getint(p);
+                        if(p.overread()) break;
                         if(!hasgameinfo && enttype[type].syncs)
                         {
                             while(sents.length() <= n) sents.add();
