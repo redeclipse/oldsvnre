@@ -21,7 +21,7 @@ struct ragdollskel
     {
         int vert[2];
         float mindist, maxdist;
-    }; 
+    };
 
     struct rotlimit
     {
@@ -102,14 +102,14 @@ struct ragdollskel
             r.tri[1] = j;
         }
     }
- 
+
     void setup()
     {
         setupjoints();
         setuprotfrictions();
 
         loaded = true;
-    } 
+    }
 
     void addreljoint(int bone, int parent)
     {
@@ -147,7 +147,7 @@ struct ragdolldata
           lastmove(lastmillis),
           timestep(0),
           scale(scale),
-          verts(new vert[skel->verts.length()]), 
+          verts(new vert[skel->verts.length()]),
           tris(new matrix3x3[skel->tris.length()]),
           animjoints(!skel->animjoints || skel->joints.empty() ? NULL : new matrix3x4[skel->joints.length()]),
           reljoints(skel->reljoints.empty() ? NULL : new matrix3x4[skel->reljoints.length()])
@@ -246,8 +246,8 @@ struct ragdolldata
 };
 
 /*
-    seed particle position = avg(modelview * base2anim * spherepos)  
-    mapped transform = invert(curtri) * origtrig 
+    seed particle position = avg(modelview * base2anim * spherepos)
+    mapped transform = invert(curtri) * origtrig
     parented transform = parent{invert(curtri) * origtrig} * (invert(parent{base2anim}) * base2anim)
 */
 
@@ -280,12 +280,12 @@ inline void ragdolldata::applyrotlimit(ragdollskel::tri &t1, ragdollskel::tri &t
     vec m1 = vec(v1a.pos).add(v1b.pos).add(v1c.pos).div(3),
         m2 = vec(v2a.pos).add(v2b.pos).add(v2c.pos).div(3),
         q1a, q1b, q1c, q2a, q2b, q2c;
-    float w1 = q1a.cross(axis, vec(v1a.pos).sub(m1)).magnitude() + 
-               q1b.cross(axis, vec(v1b.pos).sub(m1)).magnitude() + 
+    float w1 = q1a.cross(axis, vec(v1a.pos).sub(m1)).magnitude() +
+               q1b.cross(axis, vec(v1b.pos).sub(m1)).magnitude() +
                q1c.cross(axis, vec(v1c.pos).sub(m1)).magnitude(),
-          w2 = q2a.cross(axis, vec(v2a.pos).sub(m2)).magnitude() + 
-               q2b.cross(axis, vec(v2b.pos).sub(m2)).magnitude() + 
-               q2c.cross(axis, vec(v2c.pos).sub(m2)).magnitude(); 
+          w2 = q2a.cross(axis, vec(v2a.pos).sub(m2)).magnitude() +
+               q2b.cross(axis, vec(v2b.pos).sub(m2)).magnitude() +
+               q2c.cross(axis, vec(v2c.pos).sub(m2)).magnitude();
     angle /= w1 + w2 + 1e-9f;
     float a1 = angle*w2, a2 = -angle*w1,
           s1 = sinf(a1), s2 = sinf(a2);
@@ -303,7 +303,7 @@ inline void ragdolldata::applyrotlimit(ragdollskel::tri &t1, ragdollskel::tri &t
     v2c.newpos.add(vec().cross(c2, q2c).add(vec(q2c).mul(s2)).add(v2c.pos));
     v2c.weight++;
 }
-    
+
 void ragdolldata::constrainrot()
 {
     loopv(skel->rotlimits)
@@ -317,7 +317,7 @@ void ragdolldata::constrainrot()
         float angle;
         if(!rot.calcangleaxis(angle, axis)) continue;
         angle = r.maxangle - fabs(angle);
-        if(angle >= 0) continue; 
+        if(angle >= 0) continue;
         angle += 1e-3f;
 
         applyrotlimit(skel->tris[r.tri[0]], skel->tris[r.tri[1]], angle, axis);
@@ -419,9 +419,9 @@ void ragdolldata::move(dynent *pl, float ts)
     if(collidemillis && lastmillis > collidemillis) return;
 
     physics::updateragdoll(pl, center, radius);
-    float gravity = physics::gravityforce(pl)*ragdollgravity;
+    float gravity = physics::gravityvel(pl)*ragdollgravity;
 
-    calcrotfriction(); 
+    calcrotfriction();
     float tsfric = timestep ? ts/timestep : 1,
           airfric = ragdollairfric + min((ragdollbodyfricscale*collisions)/skel->verts.length(), 1.0f)*(ragdollbodyfric - ragdollairfric);
     bool liquid = physics::liquidcheck(pl);
@@ -448,7 +448,7 @@ void ragdolldata::move(dynent *pl, float ts)
             v.pos = v.oldpos;
             v.oldpos.sub(dir.reflect(wall));
             collisions++;
-        }   
+        }
     }
 
     timestep = ts;
@@ -462,7 +462,7 @@ void ragdolldata::move(dynent *pl, float ts)
     constrain();
     calctris();
     calcboundsphere();
-}    
+}
 
 FVAR(0, ragdolleyesmooth, 0, 0.5f, 1);
 VAR(0, ragdolleyesmoothmillis, 1, 50, 10000);

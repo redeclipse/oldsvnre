@@ -195,12 +195,18 @@ GFVAR(0, enemyspeed, 0, 1, FVAR_MAX);
 GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values by this much
 
-GFVAR(0, forcegravity, -1, -1, FVAR_MAX);
-GFVAR(0, forceliquidspeed, -1, -1, 1);
-GFVAR(0, forceliquidcurb, -1, -1, FVAR_MAX);
-GFVAR(0, forcefloorcurb, -1, -1, FVAR_MAX);
-GFVAR(0, forceaircurb, -1, -1, FVAR_MAX);
-GFVAR(0, forceslidecurb, -1, -1, FVAR_MAX);
+GFVAR(0, gravityforce, -1, -1, FVAR_MAX);
+GFVAR(0, gravityscale, 0, 1, FVAR_MAX);
+GFVAR(0, liquidspeedforce, -1, -1, 1);
+GFVAR(0, liquidspeedscale, 0, 1, FVAR_MAX);
+GFVAR(0, liquidcurbforce, -1, -1, FVAR_MAX);
+GFVAR(0, liquidcurbscale, 0, 1, FVAR_MAX);
+GFVAR(0, floorcurbforce, -1, -1, FVAR_MAX);
+GFVAR(0, floorcurbscale, 0, 1, FVAR_MAX);
+GFVAR(0, aircurbforce, -1, -1, FVAR_MAX);
+GFVAR(0, aircurbscale, 0, 1, FVAR_MAX);
+GFVAR(0, slidecurbforce, -1, -1, FVAR_MAX);
+GFVAR(0, slidecurbscale, 0, 1, FVAR_MAX);
 
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
