@@ -348,7 +348,7 @@ extern void clearsleep(bool clearworlds = true);
 #if defined(GAMEWORLD)
 #define IDF_GAME (IDF_CLIENT|IDF_REWRITE)
 #define GAME(name) (name)
-#define PHYS(name) (force##name >= 0 ? force##name : physics::name)
+#define PHYS(name) ((GAME(name##force) >= 0 ? GAME(name##force) : physics::name)*GAME(name##scale))
 #define GICOMMAND(flags, n, g, proto, svbody, ccbody) ICOMMAND(flags|IDF_GAME, n, g, proto, ccbody)
 #define GVARN(flags, name, global, min, cur, max) _VAR(name, global, min, cur, max, flags|IDF_GAME)
 #define GVAR(flags, name, min, cur, max) _VAR(name, name, min, cur, max, flags|IDF_GAME)
@@ -374,7 +374,7 @@ extern void clearsleep(bool clearworlds = true);
 #define GSVARF(flags, name, cur, svbody, ccbody) _SVARF(sv_##name, sv_##name, cur, svbody, flags|IDF_GAME)
 #else
 #define GAME(name) (name)
-#define PHYS(name) (force##name >= 0 ? force##name : physics::name)
+#define PHYS(name) ((GAME(name##force) >= 0 ? GAME(name##force) : physics::name)*GAME(name##scale))
 #define GICOMMAND(flags, n, g, proto, svbody, ccbody)
 #define GVARN(flags, name, global, min, cur, max) extern int name
 #define GVAR(flags, name, min, cur, max) extern int name

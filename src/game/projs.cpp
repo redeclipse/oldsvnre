@@ -1504,7 +1504,7 @@ namespace projs
                 }
             }
         }
-        if(proj.weight != 0.f) proj.vel.z -= physics::gravityforce(&proj)*secs;
+        if(proj.weight != 0.f) proj.vel.z -= physics::gravityvel(&proj)*secs;
 
         vec dir(proj.vel), pos(proj.o);
         int mat = lookupmaterial(vec(proj.o.x, proj.o.y, proj.o.z + (proj.aboveeye - proj.height)/2));

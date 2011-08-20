@@ -64,7 +64,7 @@ namespace physics
     extern float gravity, floatspeed, stairheight, floorz, slopez, wallz, stepspeed, liquidfric, liquidscale, sinkfric, floorfric, airfric;
     extern float liquidmerge(physent *d, float from, float to);
     extern bool liquidcheck(physent *d);
-    extern float gravityforce(physent *d);
+    extern float gravityvel(physent *d);
     extern bool isfloating(physent *d);
     extern float movevelocity(physent *d, bool floating = false);
     extern bool issolid(physent *d, physent *e = NULL, bool esc = true);

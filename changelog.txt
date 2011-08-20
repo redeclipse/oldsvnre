@@ -1,3 +1,4 @@
+- added physics scaling vars to complement/replace the overrides
 - hitbox size and "flickering" fixes
 - split apart kick and ban commands so users can be removed without a ban
 - turned off zoomlock due to popular demand (POLL: http://forum.freegamedev.net/viewtopic.php?f=53&t=1727)

@@ -291,10 +291,10 @@ namespace physics
         return from;
     }
 
-    float jumpforce(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->curscale; }
-    float gravityforce(physent *d) { return PHYS(gravity)*(d->weight/100.f); }
+    float jumpvel(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->curscale; }
+    float gravityvel(physent *d) { return PHYS(gravity)*(d->weight/100.f); }
 
-    float stepforce(physent *d, bool up)
+    float stepvel(physent *d, bool up)
     {
         if(d->physstate > PHYS_FALL) return stepspeed;
         return 1.f;
@@ -451,7 +451,7 @@ namespace physics
     bool trystepup(physent *d, vec &dir, const vec &obstacle, float maxstep, const vec &floor)
     {
         vec old(d->o), stairdir = (obstacle.z >= 0 && obstacle.z < slopez ? vec(-obstacle.x, -obstacle.y, 0) : vec(dir.x, dir.y, 0)).rescale(1);
-        float force = stepforce(d, true);
+        float force = stepvel(d, true);
         bool cansmooth = true;
         d->o = old;
         /* check if there is space atop the stair to move to */
@@ -785,7 +785,7 @@ namespace physics
                 }
                 int cost = impulsecost;
                 float force = impulsevelocity(d, skew, cost);
-                if(power) force += jumpforce(d, true);
+                if(power) force += jumpvel(d, true);
                 if(force > 0)
                 {
                     vec dir(0, 0, 1);
@@ -816,7 +816,7 @@ namespace physics
     {
         if(floating)
         {
-            if(game::allowmove(d) && d->action[AC_JUMP]) d->vel.z += jumpforce(d, false);
+            if(game::allowmove(d) && d->action[AC_JUMP]) d->vel.z += jumpvel(d, false);
         }
         else if(game::allowmove(d))
         {
@@ -919,7 +919,7 @@ namespace physics
                     //if(allowhover(d) && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
                     //    d->action[AC_JUMP] = false;
                     //else
-                    float force = jumpforce(d, true);
+                    float force = jumpvel(d, true);
                     if(force > 0)
                     {
                         d->vel.z += force;
@@ -1096,13 +1096,13 @@ namespace physics
         vec g(0, 0, 0);
         if(PHYS(gravity) > 0)
         {
-            if(pl->physstate == PHYS_FALL) g.z -= gravityforce(pl)*secs;
+            if(pl->physstate == PHYS_FALL) g.z -= gravityvel(pl)*secs;
             else if(pl->floor.z > 0 && pl->floor.z < floorz)
             {
                 g.z = -1;
                 g.project(pl->floor);
                 g.normalize();
-                g.mul(gravityforce(pl)*secs);
+                g.mul(gravityvel(pl)*secs);
             }
             if(!liquidcheck(pl) || (!pl->move && !pl->strafe)) pl->falling.add(g);
         }
@@ -1164,7 +1164,7 @@ namespace physics
                     }
                 }
                 if(pl->physstate < PHYS_SLIDE && sub >= 0.5f && pl->submerged < 0.5f && pl->vel.z > 1e-3f)
-                    pl->vel.z = max(pl->vel.z, max(jumpforce(pl, false), max(gravityforce(pl), 50.f)));
+                    pl->vel.z = max(pl->vel.z, max(jumpvel(pl, false), max(gravityvel(pl), 50.f)));
             }
         }
         else pl->submerged = 0;
