@@ -118,7 +118,7 @@ struct entcompat
     uchar reserved;
 };
 
-#define WATER_AMPLITUDE 0.8f
+#define WATER_AMPLITUDE 0.4f
 #define WATER_OFFSET 1.1f
 
 enum
