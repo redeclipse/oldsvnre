@@ -4526,7 +4526,7 @@ namespace server
                     while((n = getint(p)) != -1)
                     {
                         int type = getint(p), numattr = getint(p), numkin = getint(p);
-                        if(p.overread()) break;
+                        if(p.overread() || type < 0 || type >= MAXENTTYPES || n < 0 || n >= MAXENTS || numattr < 0 || numattr > MAXENTATTRS || numkin < 0 || numkin > MAXENTKIN) break;
                         if(!hasgameinfo && enttype[type].syncs)
                         {
                             while(sents.length() <= n) sents.add();
@@ -4535,14 +4535,14 @@ namespace server
                             sents[n].spawned = false; // wait a bit then load 'em up
                             sents[n].millis = gamemillis;
                             sents[n].attrs.add(0, max(5, numattr));
-                            loopk(numattr) sents[n].attrs[k] = getint(p);
+                            loopk(numattr) { if(p.overread()) break; sents[n].attrs[k] = getint(p); }
                             sents[n].kin.add(0, numkin);
-                            loopk(numkin) sents[n].kin[k] = getint(p);
+                            loopk(numkin) { if(p.overread()) break; sents[n].kin[k] = getint(p); }
                         }
                         else
                         {
-                            loopk(numattr) getint(p);
-                            loopk(numkin) getint(p);
+                            loopk(numattr) { if(p.overread()) break; getint(p); }
+                            loopk(numkin) { if(p.overread()) break; getint(p); }
                         }
                     }
                     if(!hasgameinfo) setupgameinfo(np);
