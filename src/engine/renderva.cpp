@@ -2014,7 +2014,7 @@ void cleanupva()
     loopi(NUMCAUSTICS) caustictex[i] = NULL;
 }
 
-VAR(IDF_WORLD, causticscale, 0, 100, 10000);
+VAR(IDF_WORLD, causticscale, 0, 50, 10000);
 VAR(IDF_WORLD, causticmillis, 0, 75, 1000);
 VARF(IDF_PERSIST, caustics, 0, 1, 1, loadcaustics());
 
