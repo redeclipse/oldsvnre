@@ -83,7 +83,9 @@ VARF(IDF_HEX|IDF_WORLD, skylight, 0, 0, 0xFFFFFF,
 });
 VARN(IDF_WORLD, lmshadows, lmshadows_, 0, 2, 2);
 VARN(IDF_WORLD, lmaa, lmaa_, 0, 3, 3);
-static int lmshadows = 2, lmaa = 3;
+VARN(IDF_WORLD, lerptjoints, lerptjoints_, 0, 1, 1);
+static int lmshadows = 2, lmaa = 3, lerptjoints = 1;
+
 
 static surfaceinfo brightsurfaces[6] =
 {
@@ -1848,9 +1850,9 @@ bool setlightmapquality(int quality)
 {
     switch(quality)
     {
-        case  1: lmshadows = 2; lmaa = 3; break;
-        case  0: lmshadows = lmshadows_; lmaa = lmaa_; break;
-        case -1: lmshadows = 1; lmaa = 0; break;
+        case  1: lmshadows = 2; lmaa = 3; lerptjoints = 1; break;
+        case  0: lmshadows = lmshadows_; lmaa = lmaa_; lerptjoints = lerptjoints_; break;
+        case -1: lmshadows = 1; lmaa = 0; lerptjoints = 0; break;
         default: return false;
     }
     return true;
@@ -1941,7 +1943,7 @@ void calclight(int *quality)
     check_calclight_lmprog = false;
     SDL_TimerID timer = SDL_AddTimer(250, calclighttimer, NULL);
     Uint32 start = SDL_GetTicks();
-    calcnormals();
+    calcnormals(lerptjoints > 0);
     show_calclight_lmprog();
     setupthreads();
     generatelightmaps(worldroot, 0, 0, 0, hdr.worldsize >> 1);
@@ -2004,7 +2006,7 @@ void patchlight(int *quality)
     SDL_TimerID timer = SDL_AddTimer(250, calclighttimer, NULL);
     if(patchnormals) progress(0, "computing normals...");
     Uint32 start = SDL_GetTicks();
-    if(patchnormals) calcnormals();
+    if(patchnormals) calcnormals(lerptjoints > 0);
     show_calclight_lmprog();
     setupthreads();
     generatelightmaps(worldroot, 0, 0, 0, hdr.worldsize >> 1);

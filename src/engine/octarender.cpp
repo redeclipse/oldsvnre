@@ -1686,6 +1686,16 @@ void findtjoints(int cur, const edgegroup &g)
     }
 }
 
+void findtjoints()
+{
+    recalcocprog = 0;
+    gencubeedges();
+    tjoints.setsize(0);
+    enumeratekt(edgegroups, edgegroup, g, int, e, findtjoints(e, g));
+    cubeedges.setsize(0);
+    edgegroups.clear();
+}
+
 void octarender()                               // creates va s for all leaf cubes that don't already have them
 {
     int csi = 0;
@@ -1738,14 +1748,7 @@ void allchanged(bool load)
     guessshadowdir();
     entitiesinoctanodes();
     tjoints.setsize(0);
-    if(filltjoints)
-    {
-        recalcocprog = 0;
-        gencubeedges();
-        enumeratekt(edgegroups, edgegroup, g, int, e, findtjoints(e, g));
-        cubeedges.setsize(0);
-        edgegroups.clear();
-    }
+    if(filltjoints) findtjoints();
     octarender();
     if(load) precachetextures();
     setupmaterials();
