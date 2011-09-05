@@ -260,11 +260,11 @@ WEAPON(smg,         0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,   
     0.85f,  1.f,    1.2f,   0.8f
 );
 WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,             -1,
-    25,     25,     1,      5,      100,    500,    2000,   8,      8,      300,    150,    0,      500,    200,    200,
+    25,     25,     1,      5,      100,    500,    2000,   4,      4,      300,    150,    0,      500,    200,    200,
     0,      25,     0,      0,      200,    200,    16,     24,     1,      1,      5,      5,      0,      0,      0,      0,
     0,      0,      10,     10,     -1,             WALT(FLAMER),   12,     4,      5,      5,      1000,   3000,   200,    250,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
-    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_STICK|COLLIDE_OWNER,
+    BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
     3,      3,      0,      1,      0,      0,      1,      1,      1,      1,      1,      1,      0,      1,      0,
     2,      0,      0,      0,      25,     0,      0,
     0,      0,      0,      0,      0.5f,   0.35f,  0,      0,      0.95f,  0.5f,   1,      1,      200,    100,    1,      1,

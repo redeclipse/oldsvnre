@@ -90,10 +90,10 @@ GFVAR(0, minresizescale, FVAR_NONZERO, 0.5f, 1);
 
 GVAR(0, burntime, 0, 3500, VAR_MAX);
 GVAR(0, burndelay, 0, 1000, VAR_MAX);
-GVAR(0, burndamage, 0, 5, VAR_MAX);
+GVAR(0, burndamage, 0, 3, VAR_MAX);
 GVAR(0, bleedtime, 0, 3500, VAR_MAX);
 GVAR(0, bleeddelay, 0, 1000, VAR_MAX);
-GVAR(0, bleeddamage, 0, 5, VAR_MAX);
+GVAR(0, bleeddamage, 0, 3, VAR_MAX);
 
 GVAR(0, regendelay, 0, 3000, VAR_MAX); // regen after no damage for this long
 GVAR(0, regenguard, 0, 1000, VAR_MAX); // regen this often when guarding an affinity
