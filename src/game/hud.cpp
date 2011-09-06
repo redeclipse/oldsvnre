@@ -38,9 +38,9 @@ namespace hud
     void toggleconsole() { fullconsole = !fullconsole; }
     COMMAND(0, toggleconsole, "");
 
-    VAR(IDF_PERSIST, titlefade, 0, 2000, 10000);
+    VAR(IDF_PERSIST, titlefade, 0, 1000, 10000);
     VAR(IDF_PERSIST, tvmodefade, 0, 1000, VAR_MAX);
-    VAR(IDF_PERSIST, spawnfade, 0, 2000, VAR_MAX);
+    VAR(IDF_PERSIST, spawnfade, 0, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, commandfade, 0, 200, VAR_MAX);
     FVAR(IDF_PERSIST, commandfadeamt, 0, 0.5f, 1);
