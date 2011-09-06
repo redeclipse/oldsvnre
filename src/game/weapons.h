@@ -260,7 +260,7 @@ WEAPON(smg,         0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,   
     0.85f,  1.f,    1.2f,   0.8f
 );
 WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,             -1,
-    25,     25,     1,      5,      100,    500,    2000,   4,      4,      300,    150,    0,      500,    200,    200,
+    25,     25,     1,      5,      100,    500,    2000,   5,      5,      300,    150,    0,      500,    200,    200,
     0,      25,     0,      0,      200,    200,    16,     24,     1,      1,      5,      5,      0,      0,      0,      0,
     0,      0,      10,     10,     -1,             WALT(FLAMER),   12,     4,      5,      5,      1000,   3000,   200,    250,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
@@ -272,12 +272,12 @@ WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,         
     4,      64,     2,      10,     10,     1,      1,      4,      4,      0.65f,  0.65f,  0.45f,  0.45f,  0.25f,  0.25f,  0.5f,   0.5f,
     0.5f,   0.5f,   0.1f,   0.1f,   1,      1,      0.5f,   0.5f,   8,      8,      1,      1,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
-    IMPACT_GEOM|IMPACT_PLAYER|COLLIDE_STICK|COLLIDE_OWNER,
+    BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
     (1<<TRAIT_BURNRES),
     0.75f,  0.75f,  0.75f,  0.75f
 );
 WEAPON(plasma,      0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,
-    20,     20,     1,      20,     250,    1000,   2000,   20,     12,     1500,   35,     0,      2000,   750,    5000,
+    20,     20,     1,      20,     300,    1000,   2000,   15,     10,     1500,   35,     0,      2000,   750,    5000,
     0,      75,     0,      0,      200,    200,    10,     48,     1,      1,      2,      1,      0,      0,      0,      0,
     2,      1,      50,     10,     -1,             -1,             10,     5,      5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
