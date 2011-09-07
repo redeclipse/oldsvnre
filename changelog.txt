@@ -1,3 +1,4 @@
+- preliminary "ground pound" impulse move
 - reduced damage for flamer and burning/bleeding
 - added physics scaling vars to complement/replace the overrides
 - hitbox size and "flickering" fixes
