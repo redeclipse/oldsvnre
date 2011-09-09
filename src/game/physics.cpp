@@ -969,9 +969,28 @@ namespace physics
                         }
                     }
                 }
+                if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && ((d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay) || sliding(d, true) || d->impulse[IM_TYPE] == IM_T_POUND))
+                {
+                    vec oldpos = d->o, dir;
+                    vecfromyawpitch(d->aimyaw, d->impulse[IM_TYPE] == IM_T_POUND ? -80 : 0, 1, 0, dir);
+                    d->o.add(dir.normalize());
+                    bool collided = collide(d, dir);
+                    d->o = oldpos;
+                    if(!collided && hitplayer && weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
+                    {
+                        d->action[AC_SPECIAL] = false;
+                        d->resetjump();
+                        impulseplayer(d, onfloor, jetting, true);
+                        if(d->turnside)
+                        {
+                            d->turnmillis = PHYSMILLIS;
+                            d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                        }
+                    }
+                }
             }
-            bool found = false, slide = sliding(d, true), pound = d->impulse[IM_TYPE] == IM_T_POUND;
-            if(d->turnside || d->action[AC_SPECIAL] || slide || pound)
+            bool found = false;
+            if(d->turnside || d->action[AC_SPECIAL])
             {
                 const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
                 loopi(d->turnside ? 6 : 4)
@@ -981,28 +1000,11 @@ namespace physics
                     if(move == 2) move = d->move > 0 ? d->move : 0;
                     if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
                     if(!move && !strafe) continue;
-                    vecfromyawpitch(d->aimyaw, pound ? -impulsepoundpitch : 0, move, strafe, dir);
+                    vecfromyawpitch(d->aimyaw, 0, move, strafe, dir);
                     d->o.add(dir.normalize());
                     bool collided = collide(d, dir);
                     d->o = oldpos;
-                    if(collided || (hitplayer ? !d->action[AC_SPECIAL] && !slide && !pound : wall.iszero())) continue;
-                    if((d->action[AC_SPECIAL] || slide || pound) && hitplayer)
-                    {
-                        d->action[AC_SPECIAL] = false;
-                        if(weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
-                        {
-                            d->resetjump();
-                            impulseplayer(d, onfloor, jetting, true);
-                            if(d->turnside)
-                            {
-                                d->turnmillis = PHYSMILLIS;
-                                d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                            }
-                        }
-                        //else game::errorsnd(d);
-                        break;
-                    }
-                    else if(!d->turnside && !d->action[AC_SPECIAL]) continue;
+                    if(collided || hitplayer || wall.iszero()) continue;
                     wall.normalize();
                     if(fabs(wall.z) <= impulseparkournorm)
                     {

@@ -2139,10 +2139,15 @@ namespace game
             {
                 if(physics::hover(d))
                 {
-                    if(d->action[AC_SPECIAL])
+                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
+                    }
+                    else if(d->impulse[IM_TYPE] == IM_T_MELEE)
+                    {
+                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                        basetime2 = d->impulse[IM_TIME];
                     }
                     else if(d->move>0) anim |= (ANIM_HOVER_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_HOVER_LEFT : ANIM_HOVER_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2155,59 +2160,40 @@ namespace game
                 {
                     basetime2 = d->impulse[IM_TIME];
                     if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_POUND) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
-                    else if(d->move>0)
-                    {
-                        if(d->action[AC_SPECIAL])
-                        {
-                            anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                            basetime2 = d->actiontime[AC_SPECIAL];
-                        }
-                        else anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
-                    }
-                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
-                    else if(d->action[AC_SPECIAL])
+                    else if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
                     }
+                    else if(d->impulse[IM_TYPE] == IM_T_MELEE)
+                    {
+                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
+                        basetime2 = d->impulse[IM_TIME];
+                    }
+                    else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= ANIM_DASH_BACKWARD<<ANIM_SECONDARY;
                     else anim |= ANIM_DASH_UP<<ANIM_SECONDARY;
                 }
                 else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && ((d->impulse[IM_JUMP] && d->timeinair) || d->timeinair >= PHYSMILLIS))
                 {
                     if(d->impulse[IM_JUMP] && d->timeinair) basetime2 = d->impulse[IM_JUMP];
                     else if(d->timeinair) basetime2 = lastmillis-d->timeinair;
-                    if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
-                    {
-                        if(d->move>0)
-                        {
-                            if(d->action[AC_SPECIAL])
-                            {
-                                anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                                basetime2 = d->actiontime[AC_SPECIAL];
-                            }
-                            else anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
-                        }
-                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_CROUCH_JUMP_LEFT : ANIM_CROUCH_JUMP_RIGHT)<<ANIM_SECONDARY;
-                        else if(d->move<0) anim |= ANIM_CROUCH_JUMP_BACKWARD<<ANIM_SECONDARY;
-                        else anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY;
-                    }
-                    else if(d->move>0)
-                    {
-                        if(d->action[AC_SPECIAL])
-                        {
-                            anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                            basetime2 = d->actiontime[AC_SPECIAL];
-                        }
-                        else anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
-                    }
-                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
-                    else if(d->action[AC_SPECIAL])
+                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
                     }
+                    else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
+                    {
+                        if(d->move>0) anim |= ANIM_CROUCH_JUMP_FORWARD<<ANIM_SECONDARY;
+                        else if(d->strafe) anim |= (d->strafe>0 ? ANIM_CROUCH_JUMP_LEFT : ANIM_CROUCH_JUMP_RIGHT)<<ANIM_SECONDARY;
+                        else if(d->move<0) anim |= ANIM_CROUCH_JUMP_BACKWARD<<ANIM_SECONDARY;
+                        else anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY;
+                    }
+                    else if(d->move>0) anim |= ANIM_JUMP_FORWARD<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= (d->strafe>0 ? ANIM_JUMP_LEFT : ANIM_JUMP_RIGHT)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= ANIM_JUMP_BACKWARD<<ANIM_SECONDARY;
                     else anim |= ANIM_JUMP<<ANIM_SECONDARY;
                     if(!basetime2) anim |= ANIM_END<<ANIM_SECONDARY;
                 }
