@@ -412,7 +412,7 @@ namespace client
         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
         {
             int i = parseplayer(arg1);
-            if(i>=0 && i!=game::player1->clientnum)
+            if(i>=0)
             {
                 int t = teamname(arg2);
                 if(t) addmsg(N_SETTEAM, "ri2", i, t);
