@@ -143,6 +143,7 @@ VAR(0, serverport, 1, ENG_SERVER_PORT, INT_MAX-1);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
+uint totalsecs = 0;
 const char *load = NULL;
 vector<char *> gameargs;
 
@@ -871,6 +872,13 @@ int updatetimer()
     }
     lastmillis += curtime;
     totalmillis = millis;
+    static int lastsec = 0;
+    if(totalmillis - lastsec >= 1000) 
+    {
+        int cursecs = (totalmillis - lastsec) / 1000;
+        totalsecs += cursecs;
+        lastsec += cursecs * 1000;
+    }
     return elapsed;
 }
 
