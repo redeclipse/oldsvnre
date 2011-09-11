@@ -87,7 +87,7 @@
         {
             case EXT_UPTIME:
             {
-                putint(p, uint(totalmillis)/1000); //in seconds
+                putint(p, totalsecs); //in seconds
                 break;
             }
 
