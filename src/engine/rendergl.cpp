@@ -2367,7 +2367,7 @@ void polybox(vec o, float tofloor, float toceil, float xradius, float yradius)
     glBegin(GL_QUADS);
     loopi(6) loopj(4)
     {
-        const ivec &cc = cubecoords[fv[i][j]];
+        const ivec &cc = facecoords[i][j];
         glVertex3f(o.x + (cc.x ? xradius : -xradius), o.y + (cc.y ? yradius : -yradius), o.z + (cc.z ? toceil : -tofloor));
     }
     glEnd();
