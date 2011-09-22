@@ -483,6 +483,7 @@ namespace bomber
         bomberstate::flag &f = st.flags[i];
         d->action[AC_AFFINITY] = false;
         d->actiontime[AC_AFFINITY] = 0;
+        playsound(S_CATCH, d->o, d);
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
