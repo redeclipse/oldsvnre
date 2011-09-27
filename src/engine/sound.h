@@ -40,6 +40,8 @@ struct soundsample
 
     soundsample() : name(NULL) {}
     ~soundsample() { DELETEA(name); }
+
+    void cleanup();
 };
 
 struct soundslot

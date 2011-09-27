@@ -66,6 +66,15 @@ void musicdone(bool docmd)
     else stopmusic(docmd);
 }
 
+void soundsample::cleanup()
+{
+    if(sound)
+    {
+        Mix_FreeChunk(sound);
+        sound = NULL;
+    }
+}
+
 void stopsound()
 {
     if(nosound) return;
@@ -73,6 +82,7 @@ void stopsound()
     nosound = true;
     stopmusic(false);
     clearsound();
+    enumerate(soundsamples, soundsample, s, s.cleanup());
     soundsamples.clear();
     gamesounds.setsize(0);
     closemumble();
@@ -460,7 +470,7 @@ void resetsound()
     if(!nosound)
     {
         loopv(sounds) removesound(i);
-        enumerate(soundsamples, soundsample, s, { Mix_FreeChunk(s.sound); s.sound = NULL; });
+        enumerate(soundsamples, soundsample, s, s.cleanup());
         if(music)
         {
             Mix_HaltMusic();
