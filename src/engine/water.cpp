@@ -173,7 +173,7 @@ void rendervertwater(uint subdiv, int xo, int yo, int z, uint size, uchar mat)
     {
         case MAT_WATER:
         {
-            whoffset = fmod(lastmillis/(renderpath!=R_FIXEDFUNCTION ? 600.0f : 300.0f)/(2*M_PI), 1.0f);
+            whoffset = fmod(float(lastmillis/(renderpath!=R_FIXEDFUNCTION ? 600.0f : 300.0f)/(2*M_PI)), 1.0f);
             if(renderpath!=R_FIXEDFUNCTION) { renderwaterstrips(vertwt, z); }
             else
             {
@@ -194,7 +194,7 @@ void rendervertwater(uint subdiv, int xo, int yo, int z, uint size, uchar mat)
 
         case MAT_LAVA:
         {
-            whoffset = fmod(lastmillis/2000.0f/(2*M_PI), 1.0f);
+            whoffset = fmod(float(lastmillis/2000.0f/(2*M_PI)), 1.0f);
             renderwaterstrips(vertl, z);
             break;
         }
