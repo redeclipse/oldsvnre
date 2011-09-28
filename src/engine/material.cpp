@@ -186,7 +186,7 @@ int visiblematerial(cube &c, int orient, int x, int y, int z, int size, uchar ma
     return MATSURF_NOT_VISIBLE;
 }
 
-void genmatsurfs(cube &c, int cx, int cy, int cz, int size, vector<materialsurface> &matsurfs, uchar &vismask, uchar &clipmask)
+void genmatsurfs(cube &c, int cx, int cy, int cz, int size, vector<materialsurface> &matsurfs)
 {
     loopi(6)
     {
@@ -205,12 +205,6 @@ void genmatsurfs(cube &c, int cx, int cy, int cz, int size, vector<materialsurfa
                 m.csize = m.rsize = size;
                 if(dimcoord(i)) m.o[dimension(i)] += size;
                 matsurfs.add(m);
-                if(isclipped(c.material&matmask))
-                {
-                    clipmask |= 1<<i;
-                    if(vis == MATSURF_VISIBLE) vismask |= 1<<i;
-                    else vismask &= ~(1<<i);
-                }
                 break;
             }
         }
@@ -343,6 +337,7 @@ void setupmaterials(int start, int len)
     for(int i = start; i < len; i++)
     {
         vtxarray *va = valist[i];
+        materialsurface *skip = NULL;
         loopj(va->matsurfs)
         {
             materialsurface &m = va->matbuf[j];
@@ -409,6 +404,11 @@ void setupmaterials(int start, int len)
                 }
             }
             if(m.material&MATF_VOLUME) hasmat |= 1<<m.material;
+            m.skip = 0;
+            if(skip && m.material == skip->material && m.orient == skip->orient && skip->skip < 0xFF)
+                skip->skip++;
+            else 
+                skip = &m;
         }
     }
     loopv(water)
@@ -498,9 +498,9 @@ void sortmaterials(vector<materialsurface *> &vismats)
             materialsurface &m = va->matbuf[i];
             if(!editmode || !showmat || envmapping)
             {
-                if(m.material==MAT_WATER && (m.orient==O_TOP || (refracting<0 && reflectz>hdr.worldsize))) continue;
-                if(m.flags&materialsurface::F_EDIT) continue;
-                if(glaring && m.material!=MAT_LAVA) continue;
+                if(m.material==MAT_WATER && (m.orient==O_TOP || (refracting<0 && reflectz>hdr.worldsize))) { i += m.skip; continue; }
+                if(m.flags&materialsurface::F_EDIT) { i += m.skip; continue; }
+                if(glaring && m.material!=MAT_LAVA) { i += m.skip; continue; }
             }
             else if(glaring) continue;
             vismats.add(&m);

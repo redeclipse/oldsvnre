@@ -84,15 +84,13 @@ struct LightMapTexture
 
 extern vector<LightMapTexture> lightmaptexs;
 
-enum { LMID_AMBIENT = 0, LMID_AMBIENT1, LMID_BRIGHT, LMID_BRIGHT1, LMID_DARK, LMID_DARK1, LMID_RESERVED };
-
 extern void clearlights();
 extern void initlights();
 extern void clearlightcache(int e = -1);
 extern void resetlightmaps(bool fullclean = true);
-extern void newsurfaces(cube &c, const surfaceinfo *surfs, int numsurfs);
-extern void freesurfaces(cube &c);
 extern void brightencube(cube &c);
+extern void setsurfaces(cube &c, const surfaceinfo *surfs, const vertinfo *verts, int numverts);
+extern void setsurface(cube &c, int orient, const surfaceinfo &surf, const vertinfo *verts, int numverts);
 extern void previewblends(const ivec &bo, const ivec &bs);
 
 struct lerpvert
@@ -115,13 +113,10 @@ struct lerpbounds
 
 extern void calcnormals(bool lerptjoints = false);
 extern void clearnormals();
-extern void findnormal(const vec &key, const vec &surface, vec &v, bool checktnormals = true);
+extern void findnormal(const vec &key, const vec &surface, vec &v);
 extern void calclerpverts(const vec2 *c, const vec *n, lerpvert *lv, int &numv);
 extern void initlerpbounds(const lerpvert *lv, int numv, lerpbounds &start, lerpbounds &end);
 extern void lerpnormal(float v, const lerpvert *lv, int numv, lerpbounds &start, lerpbounds &end, vec &normal, vec &nstep);
-
-extern void newnormals(cube &c);
-extern void freenormals(cube &c);
 
 #define CHECK_CALCLIGHT_PROGRESS_LOCKED(exit, show_calclight_lmprog, before, after) \
     if(check_calclight_lmprog) \
@@ -142,6 +137,7 @@ extern volatile bool check_calclight_lmprog;
 
 extern void check_calclight_canceled();
 extern void fixlightmapnormals();
-
+extern void fixrotatedlightmaps();
+ 
 extern int lightmapping;
 
