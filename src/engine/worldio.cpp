@@ -1025,7 +1025,7 @@ void save_world(const char *mname, bool nodata, bool forcesave)
     {
         loopv(lightmaps)
         {
-            if(verbose) progress(float(i)/float(lightmaps.length()), "saving lightmaps...");
+            progress(float(i)/float(lightmaps.length()), "saving lightmaps...");
             LightMap &lm = lightmaps[i];
             f->putchar(lm.type | (lm.unlitx>=0 ? 0x80 : 0));
             if(lm.unlitx>=0)
@@ -1038,13 +1038,13 @@ void save_world(const char *mname, bool nodata, bool forcesave)
         if(verbose) conoutf("\fasaved %d lightmaps", lightmaps.length());
         if(getnumviewcells()>0)
         {
-            if(verbose) progress(0, "saving PVS...");
+            progress(0, "saving PVS...");
             savepvs(f);
             if(verbose) conoutf("\fasaved %d PVS view cells", getnumviewcells());
         }
         if(shouldsaveblendmap())
         {
-            if(verbose) progress(0, "saving blendmap...");
+            progress(0, "saving blendmap...");
             saveblendmap(f);
             if(verbose) conoutf("\fasaved blendmap");
         }
