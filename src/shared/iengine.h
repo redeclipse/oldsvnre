@@ -422,19 +422,25 @@ extern void setlocations(bool wanthome = true);
 // client
 struct serverinfo
 {
-    enum { WAITING = INT_MAX };
+    enum 
+    {
+        MAXPINGS = 3, 
+
+        WAITING = INT_MAX 
+    };
     enum { UNRESOLVED = 0, RESOLVING, RESOLVED };
 
     string name;
     string map;
     string sdesc;
-    int numplayers, lastping, ping, resolved, port, priority;
+    int numplayers, lastping, nextping, ping, resolved, port, priority;
+    int pings[MAXPINGS];
     vector<int> attr;
     vector<char *> players;
     ENetAddress address;
 
     serverinfo(uint ip, int port, int priority = 0)
-     : numplayers(0), lastping(-1), ping(WAITING), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port), priority(priority)
+     : numplayers(0), resolved(ip==ENET_HOST_ANY ? UNRESOLVED : RESOLVED), port(port), priority(priority)
     {
         name[0] = map[0] = sdesc[0] = '\0';
         address.host = ip;
@@ -443,30 +449,46 @@ struct serverinfo
     }
     ~serverinfo() { reset(); }
 
+    void clearpings()
+    {
+        ping = WAITING;
+        loopk(MAXPINGS) pings[k] = WAITING;
+        nextping = 0;
+        lastping = -1;
+    }
+
     void reset() 
     { 
-        lastping = -1;
+        clearpings();
         players.deletearrays(); 
+        numplayers = 0;
     }
 
     void checkdecay(int decay)
     {
         if(lastping >= 0 && totalmillis - lastping >= decay)
-        {
-            ping = WAITING;
-            lastping = -1;
-        }
+            reset();
         if(lastping < 0) lastping = totalmillis;
+    }
+
+    void calcping()
+    {
+        int numpings = 0, totalpings = 0;
+        loopk(MAXPINGS) if(pings[k] != WAITING) { totalpings += pings[k]; numpings++; }
+        ping = numpings ? totalpings/numpings : WAITING;
     }
 
     void addping(int rtt, int millis)
     {
         if(millis >= lastping) lastping = -1;
-        if(ping == WAITING) ping = rtt;
-        else ping = (ping + rtt)/2;
+        pings[nextping] = rtt;
+        nextping = (nextping+1)%MAXPINGS;
+        calcping();
     }
 };
+
 extern vector<serverinfo *> servers;
+
 extern void sendclientpacket(ENetPacket *packet, int chan);
 extern void flushclient();
 extern void disconnect(int onlyclean = 0, int async = 0);
