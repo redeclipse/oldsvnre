@@ -238,7 +238,7 @@ struct mergecompat
     ushort u1, u2, v1, v2;
 };
 
-cube *loadchildren(stream *f, const ivec &co, int size);
+cube *loadchildren(stream *f, const ivec &co, int size, bool &failed);
 
 void convertoldsurfaces(cube &c, const ivec &co, int size, surfacecompat *srcsurfs, int hassurfs, normalscompat *normals, int hasnorms, mergecompat *merges, int hasmerges)
 {
@@ -340,14 +340,14 @@ void convertoldsurfaces(cube &c, const ivec &co, int size, surfacecompat *srcsur
     setsurfaces(c, dstsurfs, verts, totalverts);
 }
 
-void loadc(stream *f, cube &c, const ivec &co, int size)
+void loadc(stream *f, cube &c, const ivec &co, int size, bool &failed)
 {
     bool haschildren = false;
     int octsav = f->getchar();
     switch(octsav&0x7)
     {
         case OCTSAV_CHILDREN:
-            c.children = loadchildren(f, co, size>>1);
+            c.children = loadchildren(f, co, size>>1, failed);
             return;
 
         case OCTSAV_LODCUBE: haschildren = true;    break;
@@ -355,8 +355,7 @@ void loadc(stream *f, cube &c, const ivec &co, int size)
         case OCTSAV_SOLID:  solidfaces(c);          break;
         case OCTSAV_NORMAL: f->read(c.edges, 12); break;
 
-        default:
-            fatal("garbage in map");
+        default: failed = true; return;
     }
     loopi(6) c.texture[i] = hdr.version<14 ? f->getchar() : f->getlil<ushort>();
     if(hdr.version < 7) loopi(3) f->getchar(); //f->read(c.colour, 3);
@@ -545,14 +544,17 @@ void loadc(stream *f, cube &c, const ivec &co, int size)
         }
     }
 
-    c.children = (haschildren ? loadchildren(f, co, size>>1) : NULL);
+    c.children = (haschildren ? loadchildren(f, co, size>>1, failed) : NULL);
 }
 
-cube *loadchildren(stream *f, const ivec &co, int size)
+cube *loadchildren(stream *f, const ivec &co, int size, bool &failed)
 {
     cube *c = newcubes();
-    loopi(8) loadc(f, c[i], ivec(i, co.x, co.y, co.z, size), size);
-    // TODO: remip c from children here
+    loopi(8) 
+    {
+        loadc(f, c[i], ivec(i, co.x, co.y, co.z, size), size, failed);
+        if(failed) break;
+    }
     return c;
 }
 
@@ -1081,16 +1083,6 @@ void swapXZ(cube *c)
     }
 }
 
-static void fixoversizedcubes(cube *c, int size)
-{
-    if(size <= 0x1000) return;
-    loopi(8)
-    {
-        if(!c[i].children) subdividecube(c[i], true, false);
-        fixoversizedcubes(c[i].children, size>>1);
-    }
-}
-
 static void sanevars()
 {
     setvar("fullbright", 0, false);
@@ -1574,16 +1566,15 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             loadvslots(f, hdr.numvslots);
 
             progress(0, "loading octree...");
-            worldroot = loadchildren(f, ivec(0, 0, 0), hdr.worldsize>>1);
-
+            bool failed = false;
+            worldroot = loadchildren(f, ivec(0, 0, 0), hdr.worldsize>>1, failed);
+            if(failed) conoutf("\frgarbage in map");
+                
             if(hdr.version <= 11)
                 swapXZ(worldroot);
 
             if(hdr.version <= 8)
                 converttovectorworld();
-
-            if(hdr.worldsize > 0x1000 && hdr.version <= 25)
-                fixoversizedcubes(worldroot, hdr.worldsize>>1);
 
             progress(0, "validating...");
             validatec(worldroot, hdr.worldsize>>1);
@@ -1591,35 +1582,39 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             worldscale = 0;
             while(1<<worldscale < hdr.worldsize) worldscale++;
 
-            if(hdr.version >= 7) loopi(hdr.lightmaps)
+            if(!failed)
             {
-                if(verbose) progress(i/(float)hdr.lightmaps, "loading lightmaps...");
-                LightMap &lm = lightmaps.add();
-                if(hdr.version >= 17)
+                if(hdr.version >= 7) loopi(hdr.lightmaps)
                 {
-                    int type = f->getchar();
-                    lm.type = type&0x7F;
-                    if(hdr.version >= 20 && type&0x80)
+                    if(verbose) progress(i/(float)hdr.lightmaps, "loading lightmaps...");
+                    LightMap &lm = lightmaps.add();
+                    if(hdr.version >= 17)
                     {
-                        lm.unlitx = f->getlil<ushort>();
-                        lm.unlity = f->getlil<ushort>();
+                        int type = f->getchar();
+                        lm.type = type&0x7F;
+                        if(hdr.version >= 20 && type&0x80)
+                        {
+                            lm.unlitx = f->getlil<ushort>();
+                            lm.unlity = f->getlil<ushort>();
+                        }
                     }
+                    if(lm.type&LM_ALPHA && (lm.type&LM_TYPE)!=LM_BUMPMAP1) lm.bpp = 4;
+                    lm.data = new uchar[lm.bpp*LM_PACKW*LM_PACKH];
+                    f->read(lm.data, lm.bpp * LM_PACKW * LM_PACKH);
+                    lm.finalize();
                 }
-                if(lm.type&LM_ALPHA && (lm.type&LM_TYPE)!=LM_BUMPMAP1) lm.bpp = 4;
-                lm.data = new uchar[lm.bpp*LM_PACKW*LM_PACKH];
-                f->read(lm.data, lm.bpp * LM_PACKW * LM_PACKH);
-                lm.finalize();
+
+                if(hdr.numpvs > 0) loadpvs(f);
+                if(hdr.blendmap) loadblendmap(f);
+
+                if(verbose) conoutf("\faloaded %d lightmaps", hdr.lightmaps);
             }
 
-            if(hdr.numpvs > 0) loadpvs(f);
-            if(hdr.blendmap) loadblendmap(f);
-
-            if(verbose) conoutf("\faloaded %d lightmaps", hdr.lightmaps);
-
-            mapcrc = f->getcrc();
             progress(0, "loading world...");
             game::loadworld(f, maptype);
             entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
+
+            mapcrc = f->getcrc();
 
             identflags |= IDF_WORLD;
             defformatstring(cfgname)("%s.cfg", mapname);
