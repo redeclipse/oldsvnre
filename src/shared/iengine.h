@@ -445,9 +445,9 @@ struct serverinfo
         name[0] = map[0] = sdesc[0] = '\0';
         address.host = ip;
         address.port = port+1;
-        reset();
+        clearpings();
     }
-    ~serverinfo() { reset(); }
+    ~serverinfo() { cleanup(); }
 
     void clearpings()
     {
@@ -457,17 +457,23 @@ struct serverinfo
         lastping = -1;
     }
 
+    void cleanup()
+    {
+        clearpings();
+        attr.setsize(0);
+        players.deletearrays();
+        numplayers = 0;
+    }
+
     void reset() 
     { 
-        clearpings();
-        players.deletearrays(); 
-        numplayers = 0;
+        lastping = -1;
     }
 
     void checkdecay(int decay)
     {
         if(lastping >= 0 && totalmillis - lastping >= decay)
-            reset();
+            cleanup();
         if(lastping < 0) lastping = totalmillis;
     }
 
