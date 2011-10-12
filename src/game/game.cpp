@@ -988,7 +988,7 @@ namespace game
         else
         {
             concatstring(d->obit, "was ");
-            if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "destroyed by a");
+            if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
             else if(burning) concatstring(d->obit, "set ablaze by");
             else if(bleeding) concatstring(d->obit, "fatally wounded by");
             else if(isweap(weap))
