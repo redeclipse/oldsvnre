@@ -1566,8 +1566,7 @@ static const uint *runcode(const uint *code, tagval &result)
                 if(id->flags&IDF_UNKNOWN)
                 {
                     debugcode("\frunknown command: %s", id->name);
-                    freeargs(args, numargs, 0);
-                    continue;
+                    goto forceresult;
                 }
                 CALLALIAS(0);
                 continue;
