@@ -1869,7 +1869,7 @@ void edittex_(int *dir)
 
 void gettex()
 {
-    if(noedit()) return;
+    if(noedit(true)) return;
     filltexlist();
     int tex = -1;
     loopxyz(sel, sel.grid, tex = c.texture[sel.orient]);
@@ -1883,7 +1883,7 @@ void gettex()
 
 void getcurtex()
 {
-    if(noedit()) return;
+    if(noedit(true)) return;
     filltexlist();
     int index = curtexindex < 0 ? 0 : curtexindex;
     if(!texmru.inrange(index)) return;
@@ -1892,7 +1892,7 @@ void getcurtex()
 
 void getseltex()
 {
-    if(noedit()) return;
+    if(noedit(true)) return;
     cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
     if(c.children || isempty(c)) return;
     intret(c.texture[sel.orient]);
@@ -1900,7 +1900,7 @@ void getseltex()
 
 void gettexname(int *tex, int *subslot)
 {
-    if(noedit() || *tex<0) return;
+    if(noedit(true) || *tex<0) return;
     VSlot &vslot = lookupvslot(*tex);
     Slot &slot = *vslot.slot;
     if(!slot.sts.inrange(*subslot)) return;
