@@ -300,7 +300,7 @@ extern void renderellipse(vec &o, float xradius, float yradius, float yaw);
 
 // octa
 extern cube *newcubes(uint face = F_EMPTY, int mat = MAT_AIR);
-extern cubeext *growcubeext(cube &c, int maxverts);
+extern cubeext *growcubeext(cubeext *ext, int maxverts);
 extern void setcubeext(cube &c, cubeext *ext);
 extern cubeext *newcubeext(cube &c, int maxverts = 0, bool init = true);
 extern void getcubevector(cube &c, int d, int x, int y, int z, ivec &p);
