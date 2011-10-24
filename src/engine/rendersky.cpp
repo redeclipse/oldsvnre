@@ -4,13 +4,25 @@ Texture *sky[6] = { 0, 0, 0, 0, 0, 0 }, *clouds[6] = { 0, 0, 0, 0, 0, 0 };
 
 void loadsky(const char *basename, Texture *texs[6])
 {
+    const char *wildcard = strchr(basename, '*');
     loopi(6)
     {
         const char *side = cubemapsides[i].name;
-        defformatstring(name)("%s_%s", basename, side);
+        string name;
+        copystring(name, basename);
+        if(wildcard)
+        {
+            char *chop = strchr(name, '*');
+            if(chop) { *chop = '\0'; concatstring(name, side); concatstring(name, wildcard+1); }
+        }
+        else
+        {
+            defformatstring(ext)("_%s", side);
+            concatstring(name, ext);
+        }
         if((texs[i] = textureload(name, 3, true, false)) == notexture)
         {
-            conoutf("\frcould not load sky texture %s_%s", basename, side);
+            conoutf("\frcould not load side %s of sky texture %s", side, basename);
         }
     }
 }
