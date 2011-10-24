@@ -880,6 +880,8 @@ static bool fuzzycollideplanes(physent *d, const vec &dir, float cutoff, cube &c
         float dist = w.dist(pw);
         if(dist >= 0) return true;
         if(dist <= bestdist) continue;
+        wall = vec(0, 0, 0);
+        bestdist = dist;
         if(!dir.iszero())
         {
             if(w.dot(dir) >= -cutoff*dir.magnitude()) continue;
@@ -910,7 +912,6 @@ static bool fuzzycollideplanes(physent *d, const vec &dir, float cutoff, cube &c
         }
         if(clampcollide(p, entvol, w, pw)) continue;
         wall = w;
-        bestdist = dist;
     }
     if(wall.iszero())
     {
@@ -952,7 +953,6 @@ static bool cubecollidesolid(physent *d, const vec &dir, float cutoff, cube &c, 
                     ((dir.x*w.x < 0 || dir.y*w.y < 0) ? -d->radius : 0)))
                 continue;
         }
-        //wall.add(w);
         wall = w;
         bestdist = dist;
     }
@@ -961,7 +961,6 @@ static bool cubecollidesolid(physent *d, const vec &dir, float cutoff, cube &c, 
         inside = true;
         return true;
     }
-    //wall.normalize();
     return false;
 }
 
@@ -997,7 +996,6 @@ static bool cubecollideplanes(physent *d, const vec &dir, float cutoff, cube &c,
                     ((dir.x*w.x < 0 || dir.y*w.y < 0) ? -d->radius : 0)))
                 continue;
         }
-        //wall.add(w);
         wall = w;
         bestdist = dist;
     }
@@ -1007,6 +1005,8 @@ static bool cubecollideplanes(physent *d, const vec &dir, float cutoff, cube &c,
         vec pw = entvol.supportpoint(vec(w).neg());
         float dist = w.dist(pw);
         if(dist <= bestdist) continue;
+        wall = vec(0, 0, 0);
+        bestdist = dist;
         if(!dir.iszero())
         {
             if(w.dot(dir) >= -cutoff*dir.magnitude()) continue;
@@ -1017,16 +1017,13 @@ static bool cubecollideplanes(physent *d, const vec &dir, float cutoff, cube &c,
                 continue;
         }
         if(clampcollide(p, entvol, w, pw)) continue;
-        //wall.add(w);
         wall = w;
-        bestdist = dist;
     }
     if(wall.iszero())
     {
         inside = true;
         return true;
     }
-    //wall.normalize();
     return false;
 }
 
