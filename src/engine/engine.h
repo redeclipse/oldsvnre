@@ -507,7 +507,7 @@ extern void addserver(const char *name, int port);
 extern char *connectname;
 extern int connectport;
 extern void localservertoclient(int chan, ENetPacket *packet);
-extern bool connected(bool attempt = true);
+extern bool connected(bool attempt = true, bool local = true);
 extern void connectserv(const char *name = NULL, int port = ENG_SERVER_PORT, const char *password = NULL);
 extern void reconnect();
 extern void lanconnect();

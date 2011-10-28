@@ -2341,7 +2341,7 @@ namespace server
     bool servcmd(int nargs, const char *cmd, const char *arg)
     { // incoming command from scripts
 #ifndef STANDALONE
-        if(::connected(false)) return false;
+        if(::connected(false, false)) return false;
 #endif
         ident *id = idents.access(cmd);
         if(id && id->flags&IDF_SERVER)
