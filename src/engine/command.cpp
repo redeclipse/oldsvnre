@@ -2022,9 +2022,9 @@ char *shrinklist(const char *list, const char *limit, int failover)
     whitespaceskip;
     while(*s)
     {
-        const char *elem = s;
+        const char *elem = s, *pelem = elem;
         elementskip;
-        int len = s-elem;
+        int len = s-elem, plen = len;
         if(*elem=='"')
         {
             elem++;
@@ -2033,7 +2033,7 @@ char *shrinklist(const char *list, const char *limit, int failover)
         if(checklist(elem, len, limit) >= 0)
         {
             if(!p.empty()) p.add(' ');
-            p.put(elem, len);
+            p.put(pelem, plen);
         }
         whitespaceskip;
     }
