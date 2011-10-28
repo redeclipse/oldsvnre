@@ -36,9 +36,9 @@ void throttle()
     enet_peer_throttle_configure(curpeer, throttle_interval*1000, throttle_accel, throttle_decel);
 }
 
-bool connected(bool attempt)
+bool connected(bool attempt, bool local)
 {
-    return curpeer || (attempt && connpeer) || connectedlocally;
+    return curpeer || (attempt && connpeer) || (local && connectedlocally);
 }
 
 void abortconnect(bool msg)
