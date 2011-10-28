@@ -1048,11 +1048,11 @@ namespace client
             if(messagereliable) p.reliable();
             messagereliable = false;
         }
-        if(lastmillis-lastping>250)
+        if(totalmillis-lastping>250)
         {
             putint(p, N_PING);
-            putint(p, lastmillis);
-            lastping = lastmillis;
+            putint(p, totalmillis);
+            lastping = totalmillis;
         }
 
         sendclientpacket(p.finalize(), 1);
@@ -1848,7 +1848,7 @@ namespace client
                 }
 
                 case N_PONG:
-                    addmsg(N_CLIENTPING, "i", game::player1->ping = (game::player1->ping*5+lastmillis-getint(p))/6);
+                    addmsg(N_CLIENTPING, "i", game::player1->ping = (game::player1->ping*5+totalmillis-getint(p))/6);
                     break;
 
                 case N_CLIENTPING:
