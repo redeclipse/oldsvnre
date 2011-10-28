@@ -762,7 +762,7 @@ namespace game
         loopv(players) if(players[i])
         {
             gameent *d = players[i];
-            const int lagtime = lastmillis-d->lastupdate;
+            const int lagtime = totalmillis-d->lastupdate;
             if(d->ai || !lagtime || intermission) continue;
             //else if(lagtime > 1000) continue;
             physics::smoothplayer(d, 1, false);
