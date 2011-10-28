@@ -603,7 +603,7 @@ namespace client
 
     bool sendcmd(int nargs, const char *cmd, const char *arg)
     {
-        if(!waiting(false))
+        if(connected(false))
         {
             addmsg(N_COMMAND, "ri2ss", game::player1->clientnum, nargs, cmd, arg);
             return true;
@@ -1109,11 +1109,11 @@ namespace client
             if(fx<fy) d->o.y += dy<0 ? r-fy : -(r-fy);  // push aside
             else      d->o.x += dx<0 ? r-fx : -(r-fx);
         }
-        int lagtime = lastmillis-d->lastupdate;
+        int lagtime = totalmillis-d->lastupdate;
         if(lagtime)
         {
             if(d->lastupdate) d->plag = (d->plag*5+lagtime)/6;
-            d->lastupdate = lastmillis;
+            d->lastupdate = totalmillis;
         }
     }
 
