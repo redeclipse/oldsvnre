@@ -436,7 +436,7 @@ struct gui : guient
         layout(w, h);
         if(e->maxy != 1)
         {
-            int slines = e->lines.length()-e->pixelheight/guibound[1];
+            int slines = e->limitscrolly();
             if(slines > 0)
             {
                 int pos = e->scrolly;

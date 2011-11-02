@@ -73,6 +73,8 @@ bool checkipinfo(vector<ipinfo> &info, enet_uint32 ip)
     return false;
 }
 
+#define LOGSTRLEN 512
+
 FILE *logfile = NULL;
 
 void closelogfile()
@@ -250,7 +252,7 @@ void getstring(char *text, ucharbuf &p, int len)
 
 void filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, int len)
 {
-    for(int c = *src; c; c = *++src)
+    for(int c = uchar(*src); c; c = uchar(*++src))
     {
         if(newline && (c=='\n' || c=='\r')) c = ' ';
         if(c=='\f')
@@ -275,7 +277,7 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
             }
             continue;
         }
-        if(isspace(c) ? whitespace : isprint(c))
+        if(iswinprint(c) || (isspace(c) ? whitespace : isprint(c)))
         {
             *dst++ = c;
             if(!--len) break;
@@ -981,6 +983,8 @@ static void setupconsole()
     GetConsoleScreenBufferInfo(outhandle, &coninfo);
     coninfo.dwSize.Y = MAXLOGLINES;
     SetConsoleScreenBufferSize(outhandle, coninfo.dwSize);
+    SetConsoleCP(1252);
+    SetConsoleOutputCP(1252);
     loopv(loglines)
     {
         logline &line = loglines[i];
@@ -1125,8 +1129,12 @@ void logoutfv(const char *fmt, va_list args)
 {
     if(logfile)
     {
-        vfprintf(logfile, fmt, args);
-        fputc('\n', logfile);
+        static char buf[LOGSTRLEN];
+        static uchar ubuf[3*sizeof(buf)];
+        vformatstring(buf, fmt, args, sizeof(buf));
+        int numu = encodeutf8(ubuf, sizeof(ubuf)-1, (uchar *)buf, strlen(buf)); 
+        ubuf[numu++] = '\n';
+        fwrite(ubuf, 1, numu, logfile);
     }
     if(appwindow)
     {
@@ -1143,8 +1151,12 @@ void logoutfv(const char *fmt, va_list args)
 
 void logoutfv(const char *fmt, va_list args)
 {
-    vfprintf(logfile ? logfile : stdout, fmt, args);
-    fputc('\n', logfile ? logfile : stdout);
+    static char buf[LOGSTRLEN];
+    static uchar ubuf[3*sizeof(buf)];
+    vformatstring(buf, fmt, args, sizeof(buf));
+    int numu = encodeutf8(ubuf, sizeof(ubuf)-1, (uchar *)buf, strlen(buf));
+    ubuf[numu++] = '\n';
+    fwrite(ubuf, 1, numu, logfile ? logfile : stdout);
 }
 
 #endif
@@ -1412,7 +1424,7 @@ void setlocations(bool wanthome)
 void writecfg()
 {
 #ifndef STANDALONE
-    stream *f = openfile("config.cfg", "w");
+    stream *f = openutf8file("config.cfg", "wb");
     if(!f) return;
     client::writeclientinfo(f);
     vector<ident *> ids;

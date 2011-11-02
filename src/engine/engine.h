@@ -168,14 +168,13 @@ struct font
 {
     struct charinfo
     {
-        short x, y, w, h;
+        short x, y, w, h, offsetx, offsety, advance, tex;
     };
 
     char *name;
-    Texture *tex;
+    vector<Texture *> texs;
     vector<charinfo> chars;
-    short defaultw, defaulth;
-    short offsetx, offsety, offsetw, offseth;
+    int charoffset, defaultw, defaulth;
 };
 
 #define FONTH (curfont->defaulth)
