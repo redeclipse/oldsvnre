@@ -776,7 +776,7 @@ void save_config(char *mname)
 {
     if(autosavebackups) backup(mname, ".cfg", hdr.revision, autosavebackups > 2, !(autosavebackups%2));
     defformatstring(fname)("%s.cfg", mname);
-    stream *h = openfile(fname, "w");
+    stream *h = openutf8file(fname, "wb");
     if(!h) { conoutf("\frcould not write config to %s", fname); return; }
 
     // config
