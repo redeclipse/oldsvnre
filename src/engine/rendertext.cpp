@@ -62,10 +62,21 @@ void fontchar(int *x, int *y, int *w, int *h, int *offsetx, int *offsety, int *a
     c.tex = fontdeftex;
 }
 
+void fontskip(int *n)
+{
+    if(!fontdef) return;
+    loopi(max(*n, 1))
+    {
+        font::charinfo &c = fontdef->chars.add();
+        c.x = c.y = c.w = c.h = c.offsetx = c.offsety = c.advance = c.tex = 0;
+    }
+}
+
 COMMANDN(0, font, newfont, "ssii");
 COMMAND(0, fontoffset, "s");
 COMMAND(0, fonttex, "s");
 COMMAND(0, fontchar, "iiiiiii");
+COMMAND(0, fontskip, "i");
 
 bool setfont(const char *name)
 {
@@ -266,10 +277,12 @@ static int icon_width(const char *name)
         else if(c=='\f') { if(str[i+1]) { i++; TEXTCOLORIZE(str, i); } }\
         else if(curfont->chars.inrange(c-curfont->charoffset))\
         {\
+            int cw = curfont->chars[c-curfont->charoffset].advance;\
+            if(cw <= 0) continue;\
             if(maxwidth != -1)\
             {\
                 int j = i;\
-                int w = curfont->chars[c-curfont->charoffset].advance;\
+                int w = cw;\
                 for(; str[i+1]; i++)\
                 {\
                     int c = uchar(str[i+1]);\
@@ -277,7 +290,7 @@ static int icon_width(const char *name)
                     if(i-j > 16) break;\
                     if(!curfont->chars.inrange(c-curfont->charoffset)) break;\
                     int cw = curfont->chars[c-curfont->charoffset].advance;\
-                    if(w + cw >= maxwidth) break; \
+                    if(cw <= 0 || w + cw >= maxwidth) break; \
                     w += cw;\
                 }\
                 if(x + w >= maxwidth && j!=0) { TEXTLINE(j-1) TEXTALIGN }\
@@ -295,7 +308,7 @@ static int icon_width(const char *name)
                     TEXTINDEX(j)\
                     int c = uchar(str[j]);\
                     if(c=='\f') { if(str[j+1]) { j++; TEXTCOLORIZE(str, j); } }\
-                    else { TEXTCHAR(j) }\
+                    else { int cw = curfont->chars[c-curfont->charoffset].advance; TEXTCHAR(j) }\
                 }
 
 int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
@@ -306,7 +319,7 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret);
-    #define TEXTCHAR(idx) x += curfont->chars[c-curfont->charoffset].advance; TEXTWHITE(idx)
+    #define TEXTCHAR(idx) x += cw; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
     #undef TEXTINDEX
@@ -329,7 +342,7 @@ void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int f
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret);
-    #define TEXTCHAR(idx) x += curfont->chars[c-curfont->charoffset].advance;
+    #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
     TEXTSKELETON
@@ -351,7 +364,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret);
-    #define TEXTCHAR(idx) x += curfont->chars[c-curfont->charoffset].advance;
+    #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
     TEXTSKELETON
@@ -375,7 +388,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
     #define TEXTHEXCOLOR(ret) { color = ret; glColor4ub(color.x, color.y, color.z, a); }
     #define TEXTICON(ret) { x += (iconpass ? draw_icon(ret, left+x, top+y) : icon_width(ret)); neediconpass = true; }
-    #define TEXTCHAR(idx) { x += (!iconpass ? draw_char(tex, c, left+x, top+y) : curfont->chars[c-curfont->charoffset].advance); }
+    #define TEXTCHAR(idx) { if(!iconpass) draw_char(tex, c, left+x, top+y); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     Texture *tex = curfont->texs[0];
