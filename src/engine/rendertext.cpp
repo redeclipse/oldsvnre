@@ -191,22 +191,22 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
 }
 
 #define FONTX (max(curfont->defaultw, curfont->defaulth)*9/8)
-static int draw_icon(const char *name, int x, int y)
+static int draw_icon(Texture *&tex, const char *name, int x, int y)
 {
     Texture *t = textureload(name, 3);
-    if(t)
+    if(!t) return 0;
+    if(tex != t)
     {
-        int width = int((t->w/float(t->h))*FONTX);
-        glBindTexture(GL_TEXTURE_2D, t->id);
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0, 0); glVertex2f(x, y);
-        glTexCoord2f(1, 0); glVertex2f(x+width, y);
-        glTexCoord2f(0, 1); glVertex2f(x, y+FONTX);
-        glTexCoord2f(1, 1); glVertex2f(x+width, y+FONTX);
-        glEnd();
-        return width;
+        xtraverts += varray::end();
+        tex = t;
+        glBindTexture(GL_TEXTURE_2D, tex->id);
     }
-    return 0;
+    int width = int((t->w/float(t->h))*FONTX);
+    varray::attrib<float>(x,         y        ); varray::attrib<float>(0, 0);
+    varray::attrib<float>(x + width, y        ); varray::attrib<float>(1, 0);
+    varray::attrib<float>(x + width, y + FONTX); varray::attrib<float>(0, 1);
+    varray::attrib<float>(x,         y + FONTX); varray::attrib<float>(1, 1);
+    return width;
 }
 
 static int icon_width(const char *name)
@@ -385,10 +385,10 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #define TEXTINDEX(idx) if(cursor == idx) { cx = x; cy = y; }
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) ly += FONTH;
-    #define TEXTCOLOR(idx) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
-    #define TEXTHEXCOLOR(ret) { color = ret; glColor4ub(color.x, color.y, color.z, a); }
-    #define TEXTICON(ret) { x += (iconpass ? draw_icon(ret, left+x, top+y) : icon_width(ret)); neediconpass = true; }
-    #define TEXTCHAR(idx) { if(!iconpass) draw_char(tex, c, left+x, top+y); x += cw; }
+    #define TEXTCOLOR(idx) if(usecolor) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
+    #define TEXTHEXCOLOR(ret) if(usecolor) { xtraverts += varray::end(); color = ret; glColor4ub(color.x, color.y, color.z, a); }
+    #define TEXTICON(ret) { x += draw_icon(tex, ret, left+x, top+y); }
+    #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     Texture *tex = curfont->texs[0];
@@ -397,28 +397,20 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     varray::defattrib(varray::ATTRIB_VERTEX, 2, GL_FLOAT);
     varray::defattrib(varray::ATTRIB_TEXCOORD0, 2, GL_FLOAT);
     varray::begin(GL_QUADS);
-    bool neediconpass = false;
-    int cx = -FONTW, cy = 0, ly = 0, left = rleft, top = rtop;
-    loop(iconpass, 2)
+    bool usecolor = true;
+    if(a < 0) { usecolor = false; a = -a; }
+    int colorpos = 0, cx = -FONTW, cy = 0, ly = 0, left = rleft, top = rtop;
+    char colorstack[10];
+    memset(colorstack, 'u', sizeof(colorstack)); //indicate user color
+    bvec color(r, g, b);
+    glColor4ub(color.x, color.y, color.z, a);
+    TEXTSKELETON
+    xtraverts += varray::end();
+    if(cursor >= 0)
     {
-        char colorstack[10];
-        bvec color(r, g, b);
-        int colorpos = 0;
-        loopi(10) colorstack[i] = 'u'; //indicate user color
-        glColor4ub(color.x, color.y, color.z, a);
-        cx = -FONTW; cy = 0;
-        TEXTSKELETON
-        if(!iconpass)
-        {
-            xtraverts += varray::end();
-            if(cursor >= 0)
-            {
-                glColor4ub(255, 255, 255, int(255*clamp(1.f-(float(totalmillis%500)/500.f), 0.5f, 1.f)));
-                draw_char(tex, '_', left+cx, top+cy+FONTH/6);
-                xtraverts += varray::end();
-            }
-            if(!neediconpass) break;
-        }
+        glColor4ub(255, 255, 255, int(255*clamp(1.f-(float(totalmillis%500)/500.f), 0.5f, 1.f)));
+        draw_char(tex, '_', left+cx, top+cy+FONTH/6);
+        xtraverts += varray::end();
     }
     varray::disable();
     #undef TEXTINDEX
