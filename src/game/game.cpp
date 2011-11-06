@@ -2440,7 +2440,7 @@ namespace game
                     {
                         if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
                             showweap = false;
-                        weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
+                        weapflags = animflags = (weaptype[weap].anim+d->weapstate[weap])|ANIM_CLAMP;
                         break;
                     }
                     case WEAP_S_RELOAD:
