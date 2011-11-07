@@ -68,7 +68,6 @@ void ircsend(ircnet *n, const char *msg, ...)
         {
             case '\v': ubuf[i] = '\x01'; break;
             case '\f': ubuf[i] = '\x03'; break;
-            case '\b': ubuf[i] = '\x0F'; break;
         }
         buf.data = ubuf;
         buf.dataLength = numu;    
@@ -114,12 +113,12 @@ void converttext(char *dst, const char *src)
                 case 'p': *dst++ = '\f'; *dst++ = '0'; *dst++ = '6'; break; // purple
                 case 'n': *dst++ = '\f'; *dst++ = '0'; *dst++ = '5'; break; // brown
                 case 'd': case 'A': *dst++ = '\f'; *dst++ = '0'; *dst++ = '1'; break; // dark grey
-                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\b'; break;
+                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\f'; break;
                 default: colorstack[colorpos] = oldcolor; break;
             }
             continue;
         }
-        if(isspace(c) || isprint(c)) *dst++ = c;
+        if(iscubeprint(c) || isspace(c)) *dst++ = c;
     }
     *dst = '\0';
 }
@@ -173,8 +172,7 @@ int ircrecv(ircnet *n)
         {
             case '\x01': n->input[n->inputlen+i] = '\v'; break;
             case '\x03': n->input[n->inputlen+i] = '\f'; break;
-            case '\x0F': n->input[n->inputlen+i] = '\b'; break;
-            case '\v': case '\f': case '\b': n->input[n->inputlen+i] = ' '; break;
+            case '\v': case '\f': n->input[n->inputlen+i] = ' '; break;
         }
         n->inputlen += len;
         
