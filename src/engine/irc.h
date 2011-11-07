@@ -27,7 +27,7 @@ enum { IRCT_NONE = 0, IRCT_CLIENT, IRCT_RELAY, IRCT_MAX };
 enum { IRC_DISC = 0, IRC_ATTEMPT, IRC_CONN, IRC_ONLINE, IRC_MAX };
 struct ircnet
 {
-    int type, state, port, lastattempt;
+    int type, state, port, lastattempt, inputcarry, inputlen;
     string name, serv, nick, ip, passkey, authname, authpass;
     ENetAddress address;
     ENetSocket sock;
@@ -42,6 +42,7 @@ struct ircnet
     {
         type = IRCT_NONE;
         state = IRC_DISC;
+        inputcarry = inputlen = 0;
         port = lastattempt = 0;
         name[0] = serv[0] = nick[0] = ip[0] = passkey[0] = authname[0] = authpass[0] = 0;
         channels.shrink(0);
@@ -56,14 +57,13 @@ extern ircnet *ircfind(const char *name);
 extern void ircestablish(ircnet *n);
 extern void ircsend(ircnet *n, const char *msg, ...);
 extern void ircoutf(int relay, const char *msg, ...);
-extern int ircrecv(ircnet *n, int timeout = 0);
-extern char *ircread(ircnet *n);
+extern int ircrecv(ircnet *n);
 extern void ircnewnet(int type, const char *name, const char *serv, int port, const char *nick, const char *ip = "", const char *passkey = "");
 extern ircchan *ircfindchan(ircnet *n, const char *name);
 extern bool ircjoin(ircnet *n, ircchan *c);
 extern bool ircenterchan(ircnet *n, const char *name);
 extern bool ircnewchan(int type, const char *name, const char *channel, const char *friendly = "", const char *passkey = "", int relay = 0);
-extern void ircparse(ircnet *n, char *reply);
+extern void ircparse(ircnet *n);
 extern void ircdiscon(ircnet *n);
 extern void irccleanup();
 extern void ircslice();

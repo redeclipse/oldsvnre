@@ -58,9 +58,22 @@ void ircsend(ircnet *n, const char *msg, ...)
     if(verbose >= 2) console(0, "[%s] >>> %s", n->name, str);
     concatstring(str, "\n");
     ENetBuffer buf;
-    buf.data = str;
-    buf.dataLength = strlen((char *)buf.data);
-    enet_socket_send(n->sock, NULL, &buf, 1);
+    uchar ubuf[512];
+    int len = strlen(str), carry = 0;
+    while(carry < len)
+    {
+        int numu = encodeutf8(ubuf, sizeof(ubuf)-1, &((uchar *)str)[carry], len - carry, &carry);
+        if(carry >= len) ubuf[numu++] = '\n';
+        loopi(numu) switch(ubuf[i])
+        {
+            case '\v': ubuf[i] = '\x01'; break;
+            case '\f': ubuf[i] = '\x03'; break;
+            case '\b': ubuf[i] = '\x0F'; break;
+        }
+        buf.data = ubuf;
+        buf.dataLength = numu;    
+        enet_socket_send(n->sock, NULL, &buf, 1);
+    }
 }
 
 VAR(0, ircfilter, 0, 1, 2);
@@ -89,19 +102,19 @@ void converttext(char *dst, const char *src)
             int oldcolor = colorstack[colorpos]; colorstack[colorpos] = c;
             switch(c)
             {
-                case 'g': case '0': case 'G': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '3'; break; // green
-                case 'b': case '1': case 'B': *dst++ = '\x03'; *dst++ = '1'; *dst++ = '2'; break; // blue
-                case 'y': case '2': case 'Y': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '3'; break; // yellow
-                case 'r': case '3': case 'R': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '4'; break; // red
-                case 'a': case '4': *dst++ = '\x03'; *dst++ = '1'; *dst++ = '4'; break; // grey
-                case 'm': case '5': case 'M': *dst++ = '\x03'; *dst++ = '1'; *dst++ = '3'; break; // magenta
-                case 'o': case '6': case 'O': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '7'; break; // orange
-                case 'c': case '9': case 'C': *dst++ = '\x03'; *dst++ = '1'; *dst++ = '0'; break; // cyan
-                case 'v': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '6'; break; // violet
-                case 'p': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '6'; break; // purple
-                case 'n': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '5'; break; // brown
-                case 'd': case 'A': *dst++ = '\x03'; *dst++ = '0'; *dst++ = '1'; break; // dark grey
-                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\x0f'; break;
+                case 'g': case '0': case 'G': *dst++ = '\f'; *dst++ = '0'; *dst++ = '3'; break; // green
+                case 'b': case '1': case 'B': *dst++ = '\f'; *dst++ = '1'; *dst++ = '2'; break; // blue
+                case 'y': case '2': case 'Y': *dst++ = '\f'; *dst++ = '0'; *dst++ = '3'; break; // yellow
+                case 'r': case '3': case 'R': *dst++ = '\f'; *dst++ = '0'; *dst++ = '4'; break; // red
+                case 'a': case '4': *dst++ = '\f'; *dst++ = '1'; *dst++ = '4'; break; // grey
+                case 'm': case '5': case 'M': *dst++ = '\f'; *dst++ = '1'; *dst++ = '3'; break; // magenta
+                case 'o': case '6': case 'O': *dst++ = '\f'; *dst++ = '0'; *dst++ = '7'; break; // orange
+                case 'c': case '9': case 'C': *dst++ = '\f'; *dst++ = '1'; *dst++ = '0'; break; // cyan
+                case 'v': *dst++ = '\f'; *dst++ = '0'; *dst++ = '6'; break; // violet
+                case 'p': *dst++ = '\f'; *dst++ = '0'; *dst++ = '6'; break; // purple
+                case 'n': *dst++ = '\f'; *dst++ = '0'; *dst++ = '5'; break; // brown
+                case 'd': case 'A': *dst++ = '\f'; *dst++ = '0'; *dst++ = '1'; break; // dark grey
+                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\b'; break;
                 default: colorstack[colorpos] = oldcolor; break;
             }
             continue;
@@ -139,29 +152,42 @@ void ircoutf(int relay, const char *msg, ...)
     }
 }
 
-int ircrecv(ircnet *n, int timeout)
+int ircrecv(ircnet *n)
 {
     if(!n) return -1;
     if(n->sock == ENET_SOCKET_NULL) return -1;
+    int total = 0;
     enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
-    ENetBuffer buf;
-    int nlen = strlen((char *)n->input);
-    buf.data = ((char *)n->input)+nlen;
-    buf.dataLength = sizeof(n->input)-nlen;
-    if(enet_socket_wait(n->sock, &events, timeout) >= 0 && events)
+    while(enet_socket_wait(n->sock, &events, 0) >= 0 && events)
     {
+        ENetBuffer buf;
+        buf.data = n->input + n->inputlen;
+        buf.dataLength = sizeof(n->input) - n->inputlen;
         int len = enet_socket_receive(n->sock, NULL, &buf, 1);
         if(len <= 0)
         {
             enet_socket_destroy(n->sock);
             return -1;
         }
-        buf.data = ((char *)buf.data)+len;
-        ((char *)buf.data)[0] = 0;
-        buf.dataLength -= len;
-        return len;
+        loopi(len) switch(n->input[n->inputlen+i])
+        {
+            case '\x01': n->input[n->inputlen+i] = '\v'; break;
+            case '\x03': n->input[n->inputlen+i] = '\f'; break;
+            case '\x0F': n->input[n->inputlen+i] = '\b'; break;
+            case '\v': case '\f': case '\b': n->input[n->inputlen+i] = ' '; break;
+        }
+        n->inputlen += len;
+        
+        int carry = 0, decoded = decodeutf8(&n->input[n->inputcarry], &n->input[n->inputcarry], n->inputlen - n->inputcarry, &carry);
+        if(carry > decoded) 
+        {    
+            memmove(&n->input[n->inputcarry + decoded], &n->input[n->inputcarry + carry], n->inputlen - (n->inputcarry + carry)); 
+            n->inputlen -= carry - decoded;
+        }
+        n->inputcarry += decoded;
+        total += decoded;
     }
-    return 0;
+    return total;
 }
 
 void ircnewnet(int type, const char *name, const char *serv, int port, const char *nick, const char *ip, const char *passkey)
@@ -394,18 +420,18 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
         {
             bool ismsg = strcasecmp(w[g], "NOTICE");
             int len = strlen(w[g+2]);
-            if(w[g+2][0] == '\001' && w[g+2][len-1] == '\001')
+            if(w[g+2][0] == '\v' && w[g+2][len-1] == '\v')
             {
                 char *p = w[g+2];
                 p++;
                 const char *word = p;
-                p += strcspn(p, " \001\0");
+                p += strcspn(p, " \v\0");
                 if(p-word > 0)
                 {
                     char *q = newstring(word, p-word);
                     p++;
                     const char *start = p;
-                    p += strcspn(p, "\001\0");
+                    p += strcspn(p, "\v\0");
                     char *r = p-start > 0 ? newstring(start, p-start) : newstring("");
                     if(ismsg)
                     {
@@ -416,9 +442,9 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
                             ircprintf(n, 4, g ? w[g+1] : NULL, "\fr%s requests: %s %s", user[0], q, r);
 
                             if(!strcasecmp(q, "VERSION"))
-                                ircsend(n, "NOTICE %s :\001VERSION %s v%.2f-%s (%s), %s\001", user[0], ENG_NAME, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE, ENG_URL);
+                                ircsend(n, "NOTICE %s :\vVERSION %s v%.2f-%s (%s), %s\v", user[0], ENG_NAME, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE, ENG_URL);
                             else if(!strcasecmp(q, "PING")) // eh, echo back
-                                ircsend(n, "NOTICE %s :\001PING %s\001", user[0], r);
+                                ircsend(n, "NOTICE %s :\vPING %s\v", user[0], r);
                         }
                     }
                     else ircprintf(n, 4, g ? w[g+1] : NULL, "\fr%s replied: %s %s", user[0], q, r);
@@ -542,7 +568,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
         }
         if(numeric) switch(numeric)
         {
-            case 001:
+            case 1:
             {
                 if(n->state == IRC_CONN)
                 {
@@ -583,41 +609,30 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
     }
 }
 
-void ircparse(ircnet *n, char *reply)
+void ircparse(ircnet *n)
 {
     const int MAXWORDS = 25;
-    char *w[MAXWORDS], *p = reply;
+    char *w[MAXWORDS], *p = (char *)n->input, *start = p, *end = &p[n->inputcarry];
     loopi(MAXWORDS) w[i] = NULL;
-    while(p && *p)
+    while(p < end)
     {
-        while(p && (*p == '\n' || *p == '\r' || *p == ' ')) p++; // eat up all the crap
-        const char *start = p;
-        bool line = false;
-        int numargs = 0, g = *p == ':' ? 1 : 0;
-        if(g) p++;
         bool full = false;
-        loopi(MAXWORDS)
+        int numargs = 0, g = 0;
+        while(isspace(*p)) { if(++p >= end) goto cleanup; }
+        start = p;
+        if(*p == ':') { g = 1; ++p; }
+        for(;;)
         {
-            if(!p || !*p) break;
             const char *word = p;
-            if(*p == ':') full = true; // uses the rest of the input line then
-            p += strcspn(p, full ? "\r\n" : " \r\n");
+            if(*p == ':') { word++; full = true; } // uses the rest of the input line then
+            while(*p != '\r' && *p != '\n' && (full || *p != ' ')) { if(++p >= end) goto cleanup; }
 
-            char *s = NULL;
-            if(p-word > (full ? 1 : 0))
-            {
-                if(full) s = newstring(word+1, p-word-1);
-                else s = newstring(word, p-word);
-            }
-            else s = newstring("");
-            w[numargs] = s;
-            numargs++;
+            if(numargs < MAXWORDS) w[numargs++] = newstring(word, p-word);
 
-            if(*p == '\n' || *p == '\r') line = true;
-            if(*p) p++; else break;
-            if(line) break;
+            if(*p == '\n' || *p == '\r') { ++p; start = p; break; }
+            else while(*p == ' ') { if(++p >= end) goto cleanup; }
         }
-        if(line && numargs)
+        if(numargs)
         {
             char *user[3] = { NULL, NULL, NULL };
             if(g)
@@ -656,16 +671,16 @@ void ircparse(ircnet *n, char *reply)
             if(numargs > g) ircprocess(n, user, g, numargs, w);
             loopi(3) DELETEA(user[i]);
         }
+    cleanup:
         loopi(MAXWORDS) DELETEA(w[i]);
-        if(!line)
-        {
-            char *s = newstring(start); // can't copy a buffer into itself so dupe it first
-            copystring(reply, s);
-            DELETEA(s);
-            return;
-        }
     }
-    *reply = 0;
+    int parsed = start - (char *)n->input;
+    if(parsed > 0)
+    {
+        memmove(n->input, start, n->inputlen - parsed);
+        n->inputcarry -= parsed;
+        n->inputlen -= parsed; 
+    }
 }
 
 void ircdiscon(ircnet *n)
@@ -732,11 +747,7 @@ void ircslice()
                     {
                         case -1: ircdiscon(n); break; // fail
                         case 0: break;
-                        default:
-                        {
-                            ircparse(n, (char *)n->input);
-                            break;
-                        }
+                        default: ircparse(n); break;
                     }
                     break;
                 }
@@ -766,7 +777,7 @@ void irccmd(ircnet *n, ircchan *c, char *s)
             {
                 if(c)
                 {
-                    ircsend(n, "PRIVMSG %s :\001ACTION %s\001", c->name, r);
+                    ircsend(n, "PRIVMSG %s :\vACTION %s\v", c->name, r);
                     ircprintf(n, 1, c->name, "\fv* %s %s", n->nick, r);
                 }
                 else ircprintf(n, 4, NULL, "\fcyou are not on a channel");
