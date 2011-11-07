@@ -204,8 +204,8 @@ static int draw_icon(Texture *&tex, const char *name, int x, int y)
     int width = int((t->w/float(t->h))*FONTX);
     varray::attrib<float>(x,         y        ); varray::attrib<float>(0, 0);
     varray::attrib<float>(x + width, y        ); varray::attrib<float>(1, 0);
-    varray::attrib<float>(x + width, y + FONTX); varray::attrib<float>(0, 1);
-    varray::attrib<float>(x,         y + FONTX); varray::attrib<float>(1, 1);
+    varray::attrib<float>(x + width, y + FONTX); varray::attrib<float>(1, 1);
+    varray::attrib<float>(x,         y + FONTX); varray::attrib<float>(0, 1);
     return width;
 }
 
