@@ -113,7 +113,7 @@ void converttext(char *dst, const char *src)
                 case 'p': *dst++ = '\f'; *dst++ = '0'; *dst++ = '6'; break; // purple
                 case 'n': *dst++ = '\f'; *dst++ = '0'; *dst++ = '5'; break; // brown
                 case 'd': case 'A': *dst++ = '\f'; *dst++ = '0'; *dst++ = '1'; break; // dark grey
-                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\f'; break;
+                case 'u': case 'w': case '7': case 'k': case '8': *dst++ = '\f'; *dst++ = '0'; *dst++ = '0'; break;
                 default: colorstack[colorpos] = oldcolor; break;
             }
             continue;
