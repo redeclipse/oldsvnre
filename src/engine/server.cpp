@@ -314,7 +314,7 @@ const char *escapetext(const char *src, bool quoteonly)
         }
         if(c=='\n') { *dst++ = ' '; continue; }
         if(c=='\"') { *dst++ = '^'; *dst++ = '\"'; continue; }
-        if(isspace(c) || isprint(c)) *dst++ = c;
+        if(iscubeprint(c) || isspace(c)) *dst++ = c;
     }
     *dst = '\0';
     return escbuf;
