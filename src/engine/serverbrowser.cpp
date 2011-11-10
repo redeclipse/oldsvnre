@@ -514,15 +514,23 @@ void updatefrommaster()
 }
 COMMAND(0, updatefrommaster, "");
 
-void updateservers()
+void sortservers()
 {
-    if(!reqmaster) updatefrommaster();
-    refreshservers();
     if(!sortedservers)
     {
         servers.sort(serverinfocompare);
         sortedservers = true;
     }
+}
+COMMAND(0, sortservers, "");
+
+VAR(IDF_PERSIST, autosortservers, 0, 1, 1);
+
+void updateservers()
+{
+    if(!reqmaster) updatefrommaster();
+    refreshservers();
+    if(autosortservers) sortservers();
     intret(servers.length());
 }
 COMMAND(0, updateservers, "");
