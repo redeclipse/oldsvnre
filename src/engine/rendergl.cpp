@@ -2142,7 +2142,11 @@ void drawviewtype(int targtype)
     rendermaterials();
     renderalphageom();
 
+    if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     renderparticles(true);
+
+    if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     if(game::thirdpersonview()) renderavatar(false);
     else
