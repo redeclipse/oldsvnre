@@ -305,7 +305,7 @@ struct gui : guient
             }
             int w = text_width(label);
 
-            bool hit = false;
+            bool hit = false, forcecolor = false;
             int px, py;
             if(ishorizontal())
             {
@@ -321,7 +321,8 @@ struct gui : guient
                 else px = x + guibound[0]/2 - w/2 + ((xsize-w)*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at left
                 py = y;
             }
-            text_(label, px, py, hit && color == 0xFFFFFF ? 0xFF4444 : color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN);
+            if(hit && color == 0xFFFFFF) { forcecolor = true; color = 0xFF4444; }
+            text_(label, px, py, color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN, forcecolor);
             if(hit)
             {
                 if(mouseaction[0]&GUI_PRESSED)
@@ -524,12 +525,12 @@ struct gui : guient
 
     }
 
-    void text_(const char *text, int x, int y, int color, int alpha, bool shadow)
+    void text_(const char *text, int x, int y, int color, int alpha, bool shadow, bool force = false)
     {
         if(FONTH < guibound[1]) y += (guibound[1]-FONTH)/2;
         else if(FONTH > guibound[1]) y -= (FONTH-guibound[1])/2;
-        if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, 0xC0*alpha/255);
-        draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, alpha);
+        if(shadow) draw_text(text, x+guishadow, y+guishadow, 0x00, 0x00, 0x00, -0xC0*alpha/255);
+        draw_text(text, x, y, color>>16, (color>>8)&0xFF, color&0xFF, force ? -alpha : alpha);
     }
 
     void background(int color, int inheritw, int inherith)
@@ -773,8 +774,8 @@ struct gui : guient
 
         if(visible())
         {
-            bool hit = ishit(w, FONTH);
-            if(hit && clickable && color == 0xFFFFFF) color = 0xFF4444;
+            bool hit = ishit(w, FONTH), forcecolor = false;
+            if(hit && clickable && color == 0xFFFFFF) { forcecolor = true; color = 0xFF4444; }
             int x = curx;
             if(icon)
             {
@@ -783,7 +784,7 @@ struct gui : guient
                 x += guibound[1];
             }
             if(icon && text) x += 8;
-            if(text) text_(text, x, cury, color, hit || !faded || !clickable ? 255 : guiblend, hit && clickable);
+            if(text) text_(text, x, cury, color, hit || !faded || !clickable ? 255 : guiblend, hit && clickable, forcecolor);
         }
         if(font && *font) gui::popfont();
         return layout(w, h);
