@@ -129,7 +129,7 @@ namespace hud
     TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
-    VAR(IDF_PERSIST, crosshairweapons, 0, 1, 2); // 0 = off, 1 = crosshair-specific weapons, 2 = also appy colour
+    VAR(IDF_PERSIST, crosshairweapons, 0, 0, 2); // 0 = off, 1 = crosshair-specific weapons, 2 = also appy colour
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, VAR_MAX);
     FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
