@@ -50,9 +50,9 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 1);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, firstpersondist, -10000, -0.25f, 10000);
-    FVAR(IDF_PERSIST, firstpersonshift, -10000, 0.3f, 10000);
-    FVAR(IDF_PERSIST, firstpersonadjust, -10000, -0.07f, 10000);
+    FVAR(IDF_PERSIST, firstpersondist, -1, -0.25f, 1);
+    FVAR(IDF_PERSIST, firstpersonshift, -1, 0.3f, 1);
+    FVAR(IDF_PERSIST, firstpersonadjust, -1, -0.07f, 1);
 
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
