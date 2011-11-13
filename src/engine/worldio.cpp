@@ -405,6 +405,19 @@ void loadc(stream *f, cube &c, const ivec &co, int size, bool &failed)
                 }
             }
         }
+        if(hdr.version <= 8) edgespan2vectorcube(c);
+        if(hdr.version <= 11)
+        {
+            swap(c.faces[0], c.faces[2]);
+            swap(c.texture[0], c.texture[4]);
+            swap(c.texture[1], c.texture[5]);
+            if(hassurfs&0x33)
+            {
+                swap(surfaces[0], surfaces[4]);
+                swap(surfaces[1], surfaces[5]);
+                hassurfs = (hassurfs&~0x33) | ((hassurfs&0x30)>>4) | ((hassurfs&0x03)<<4);
+            }
+        }
         if(hdr.version >= 20)
         {
             if(octsav&0x80)
@@ -1068,22 +1081,6 @@ static uint mapcrc = 0;
 
 uint getmapcrc() { return mapcrc; }
 
-void swapXZ(cube *c)
-{
-    loopi(8)
-    {
-        swap(c[i].faces[0],   c[i].faces[2]);
-        swap(c[i].texture[0], c[i].texture[4]);
-        swap(c[i].texture[1], c[i].texture[5]);
-        if(c[i].ext && c[i].ext->surfaces)
-        {
-            swap(c[i].ext->surfaces[0], c[i].ext->surfaces[4]);
-            swap(c[i].ext->surfaces[1], c[i].ext->surfaces[5]);
-        }
-        if(c[i].children) swapXZ(c[i].children);
-    }
-}
-
 static void sanevars()
 {
     setvar("fullbright", 0, false);
@@ -1571,12 +1568,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             worldroot = loadchildren(f, ivec(0, 0, 0), hdr.worldsize>>1, failed);
             if(failed) conoutf("\frgarbage in map");
                 
-            if(hdr.version <= 11)
-                swapXZ(worldroot);
-
-            if(hdr.version <= 8)
-                converttovectorworld();
-
             progress(0, "validating...");
             validatec(worldroot, hdr.worldsize>>1);
 
