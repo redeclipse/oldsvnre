@@ -4315,12 +4315,8 @@ namespace server
                     loopj(hits)
                     {
                         if(p.overread()) break;
-                        if(!havecn || j >= 100)
-                        {
-                            loopi(7) getint(p);
-                            continue;
-                        }
-                        hitset &hit = ev->hits.add();
+                        static hitset dummy;
+                        hitset &hit = havecn && j < 100 ? ev->hits.add() : dummy;
                         hit.flags = getint(p);
                         hit.proj = getint(p);
                         hit.target = getint(p);
