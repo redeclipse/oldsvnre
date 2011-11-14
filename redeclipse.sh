@@ -2,7 +2,8 @@
 # RE_DATA should refer to the directory in which Red Eclipse data files are placed.
 #RE_DATA=~/redeclipse
 #RE_DATA=/usr/local/redeclipse
-RE_DATA=.
+#RE_DATA=.
+RE_DATA=$(dirname $0)
 
 # RE_BIN should refer to the directory in which Red Eclipse executable files are placed.
 RE_BIN=${RE_DATA}/bin
