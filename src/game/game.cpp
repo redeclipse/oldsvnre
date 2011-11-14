@@ -774,7 +774,7 @@ namespace game
         if(burntime && hithurts(flags) && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
         {
             d->lastburntime = lastmillis;
-            if(!issound(d->fschan)) playsound(S_BURNFIRE, d->o, d, SND_LOOP, d != focus ? 128 : 224, -1, -1, &d->fschan);
+            if(!issound(d->fschan)) playsound(S_BURNING, d->o, d, SND_LOOP, d != focus ? 128 : 224, -1, -1, &d->fschan);
             if(isweap(weap)) d->lastburn = lastmillis;
             else return true;
         }
@@ -823,6 +823,7 @@ namespace game
                     const int dmgsnd[8] = { 0, 10, 25, 50, 75, 100, 150, 200 };
                     int snd = -1;
                     if(flags&BURN) snd = S_BURNED;
+                    else if(flags&BLEED) snd = S_BLEED;
                     else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
                     if(snd >= 0) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
                 }
