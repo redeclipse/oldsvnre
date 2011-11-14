@@ -4097,6 +4097,7 @@ namespace server
                 case N_SPHY:
                 {
                     int lcn = getint(p), idx = getint(p);
+                    if(idx == SPHY_POWER) getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
                     if(idx == SPHY_EXTINGUISH)
@@ -4106,7 +4107,6 @@ namespace server
                     }
                     else if((idx == SPHY_BOOST || idx == SPHY_DASH) && (!cp->state.lastboost || gamemillis-cp->state.lastboost > GAME(impulsedelay)))
                         cp->state.lastboost = gamemillis;
-                    else if(idx == SPHY_POWER) getint(p);
                     QUEUE_MSG;
                     break;
                 }
