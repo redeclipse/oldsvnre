@@ -2243,7 +2243,10 @@ namespace server
         }
 
         if(m_fight(gamemode) && numclients()) sendf(-1, 1, "ri2", N_TICK, timeremaining);
-        if(m_demo(gamemode)) setupdemoplayback();
+        if(m_demo(gamemode)) 
+        {
+            if(clients.length()) setupdemoplayback();
+        }
         else if(demonextmatch)
         {
             demonextmatch = false;
@@ -3666,6 +3669,10 @@ namespace server
     {
         clientinfo *ci = (clientinfo *)getinfo(n);
         bool complete = !numclients(n);
+        if(local)
+        {
+            if(m_demo(gamemode)) enddemoplayback();
+        }
         if(ci->connected)
         {
             if(reason != DISC_SHUTDOWN)
@@ -3938,6 +3945,8 @@ namespace server
         sendinitclient(ci);
         int amt = numclients();
         relayf(2, "\fg%s (%s) has joined the game (%d %s)", colorname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
+
+        if(m_demo(gamemode)) setupdemoplayback();
     }
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
