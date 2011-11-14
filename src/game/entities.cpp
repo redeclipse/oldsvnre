@@ -1603,10 +1603,15 @@ namespace entities
         }
     }
 
+    struct octatele
+    {
+        int ent, tag;
+    };
+    vector<octatele> octateles;
+
     void readent(stream *g, int mtype, int mver, char *gid, int gver, int id)
     {
         gameentity &f = *(gameentity *)ents[id];
-        f.mark = 0;
         if(mtype == MAP_OCTA)
         {
             // translate into our format
@@ -1654,14 +1659,16 @@ namespace entities
                 // TELEDEST         -   TELEPORT (linked)
                 case 20: case 21:
                 {
+                    octatele &t = octateles.add();
+                    t.ent = id;
                     if(f.type == 21)
                     {
-                        f.mark = f.attrs[1]+1; // needs translating later
+                        t.tag = f.attrs[1]+1; // needs translating later
                         f.attrs[1] = -1;
                     }
                     else
                     {
-                        f.mark = -(f.attrs[0]+1);
+                        t.tag = -(f.attrs[0]+1);
                         f.attrs[0] = -1;
                     }
                     f.attrs[2] = f.attrs[3] = f.attrs[4] = 0;
@@ -1770,29 +1777,77 @@ namespace entities
     void importentities(int mtype, int mver, int gver)
     {
         int flag = 0, teams[TEAM_NUM] = {0};
+        if(verbose) progress(0, "importing entities...");
+        loopv(octateles) // translate teledest to teleport and link them appropriately
+        {
+            octatele &t = octateles[i];
+            if(t.tag <= 0) continue;
+            gameentity &e = *(gameentity *)ents[t.ent];
+            if(e.type != TELEPORT) continue;
+            loopvj(octateles)
+            {
+                octatele &p = octateles[j];
+                if(p.tag != -t.tag) continue;
+                gameentity &f = *(gameentity *)ents[p.ent];
+                if(f.type != TELEPORT) continue;
+                if(verbose) conoutf("\frWARNING: teledest %d and teleport %d linked automatically", t.ent, p.ent);
+                f.links.add(t.ent);
+            } 
+        }
+        loopv(octateles) // second pass teledest translation
+        {
+            octatele &t = octateles[i];
+            if(t.tag <= 0) continue;
+            gameentity &e = *(gameentity *)ents[t.ent];
+            if(e.type != TELEPORT) continue;
+            int dest = -1;
+            float bestdist = enttype[TELEPORT].radius*4.f;
+            loopvj(octateles)
+            {
+                octatele &p = octateles[j];
+                if(p.tag >= 0) continue;
+                gameentity &f = *(gameentity *)ents[p.ent];
+                if(f.type != TELEPORT) continue;
+                float dist = e.o.dist(f.o);
+                if(dist > bestdist) continue;
+                dest = p.ent;
+                bestdist = dist;
+            }
+            if(dest < 0) 
+            {
+                if(verbose) conoutf("\frWARNING: teledest %d has become a teleport", i);
+            }
+            else
+            {
+                gameentity &f = *(gameentity *)ents[dest];
+                if(verbose) conoutf("\frWARNING: replaced teledest %d with closest teleport %d", i, dest);
+                f.attrs[0] = e.attrs[0]; // copy the yaw
+                loopvk(e.links) if(f.links.find(e.links[k]) < 0) f.links.add(e.links[k]);
+                loopvj(ents) if(j != i && j != dest)
+                {
+                    gameentity &g = *(gameentity *)ents[j];
+                    if(g.type == TELEPORT)
+                    {
+                        int link = g.links.find(i);
+                        if(link >= 0)
+                        {
+                            g.links.remove(link);
+                            if(g.links.find(dest) < 0) g.links.add(dest);
+                            if(verbose) conoutf("\frWARNING: imported link to teledest %d to teleport %d", i, j);
+                        }
+                    }
+                }
+                e.type = NOTUSED; // get rid of ye olde teledest
+                e.links.shrink(0);
+            }
+        }
+        octateles.setsize(0);
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(verbose) progress(float(i)/float(ents.length()), "importing entities...");
-
+            if(verbose) progress(float(i+1)/float(ents.length()), "importing entities...");
             switch(e.type)
             {
-                case TELEPORT:
-                {
-                    if(e.mark > 0) // translate teledest to teleport and link them appropriately
-                    {
-                        loopvj(ents) if(j != i) // find linked teleport(s)
-                        {
-                            gameentity &f = *(gameentity *)ents[j];
-                            if(f.type == TELEPORT && -f.mark == e.mark)
-                            {
-                                if(verbose) conoutf("\frWARNING: teledest %d and teleport %d linked automatically", i, j);
-                                f.links.add(i);
-                            }
-                        }
-                    }
-                    break;
-                }
                 case WEAPON:
                 {
                     float mindist = float(enttype[WEAPON].radius*enttype[WEAPON].radius*6);
@@ -1847,51 +1902,8 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-
             switch(e.type)
             {
-                case TELEPORT:
-                {
-                    if(e.mark > 0) // second pass teledest translation
-                    {
-                        int dest = -1;
-                        loopvj(ents) if(j != i) // see if this teledest is sitting on top of a teleport already
-                        {
-                            gameentity &f = *(gameentity *)ents[j];
-
-                            if(f.type == TELEPORT && f.mark < 0 &&
-                                (!ents.inrange(dest) || e.o.dist(f.o) < ents[dest]->o.dist(f.o)) &&
-                                    e.o.dist(f.o) <= enttype[TELEPORT].radius*4.f)
-                                        dest = j;
-                        }
-                        if(ents.inrange(dest))
-                        {
-                            gameentity &f = *(gameentity *)ents[dest];
-                            if(verbose) conoutf("\frWARNING: replaced teledest %d with closest teleport %d", i, dest);
-                            f.attrs[0] = e.attrs[0]; // copy the yaw
-                            loopvk(e.links) if(f.links.find(e.links[k]) < 0) f.links.add(e.links[k]);
-                            loopvj(ents) if(j != i && j != dest)
-                            {
-                                gameentity &g = *(gameentity *)ents[j];
-                                if(g.type == TELEPORT)
-                                {
-                                    int link = g.links.find(i);
-                                    if(link >= 0)
-                                    {
-                                        g.links.remove(link);
-                                        if(g.links.find(dest) < 0) g.links.add(dest);
-                                        if(verbose) conoutf("\frWARNING: imported link to teledest %d to teleport %d", i, j);
-                                    }
-                                }
-                            }
-                            e.type = NOTUSED; // get rid of ye olde teledest
-                            e.links.shrink(0);
-                            break;
-                        }
-                        else if(verbose) conoutf("\frWARNING: teledest %d has become a teleport", i);
-                    }
-                    break;
-                }
                 case AFFINITY:
                 {
                     if(!e.attrs[0]) e.attrs[0] = ++flag; // assign a sane idx
@@ -2001,7 +2013,6 @@ namespace entities
                             vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);
                             e.o.add(dir);
                         }
-                        e.mark = 0;
                     }
                     if(e.attrs[0] >= 0) checkyawmode(e, mtype, mver, gver, 0, -1);
                     break;
