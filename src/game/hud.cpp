@@ -116,10 +116,10 @@ namespace hud
 
     VAR(IDF_PERSIST, showdamage, 0, 2, 2); // 1 shows just damage texture, 2 blends as well
     VAR(IDF_PERSIST, damagefade, 0, 0, 1);
-    TVAR(IDF_PERSIST, damagetex, "textures/damage", 3);
+    TVAR(IDF_PERSIST, damagetex, "<grey>textures/damage", 3);
     FVAR(IDF_PERSIST, damageblend, 0, 1, 1);
     FVAR(IDF_PERSIST, damageskew, 0, 0.25f, 1);
-    TVAR(IDF_PERSIST, burntex, "textures/burn", 3);
+    TVAR(IDF_PERSIST, burntex, "<grey>textures/burn", 3);
     FVAR(IDF_PERSIST, burnblend, 0, 0.75f, 1);
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
@@ -242,7 +242,7 @@ namespace hud
     TVAR(IDF_PERSIST, arrowtex, "textures/arrow", 3);
     TVAR(IDF_PERSIST, alerttex, "textures/alert", 3);
     TVAR(IDF_PERSIST, questiontex, "textures/question", 3);
-    TVAR(IDF_PERSIST, hurttex, "textures/hurt", 3);
+    TVAR(IDF_PERSIST, hurttex, "<grey>textures/hurt", 3);
     TVAR(IDF_PERSIST, hinttex, "textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
