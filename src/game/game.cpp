@@ -338,7 +338,7 @@ namespace game
     {
         if(d == player1)
         {
-            if(hud::hasinput(true, false)) return false;
+            //if(hud::hasinput(true, false)) return false;
             if(tvmode()) return false;
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
