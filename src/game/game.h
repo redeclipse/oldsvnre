@@ -597,10 +597,9 @@ struct gameentity : extentity
 {
     int schan;
     int lastuse, lastspawn;
-    int mark;
     linkvector kin;
 
-    gameentity() : schan(-1), lastuse(0), lastspawn(0), mark(0) {}
+    gameentity() : schan(-1), lastuse(0), lastspawn(0) {}
     ~gameentity()
     {
         if(issound(schan)) removesound(schan);
