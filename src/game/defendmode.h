@@ -202,7 +202,7 @@ struct defendservmode : defendstate, servmode
             flag &b = flags[i];
             if(b.owner == ci->team && !b.enemy && insideaffinity(b, ci->state.o, 2.f))
             {
-                if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators, ci->state.loadweap[0])*GAME(maxhealth)), total);
+                if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
                 if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
                 if(GAME(regenextra)) amt += GAME(regenextra);
                 return;

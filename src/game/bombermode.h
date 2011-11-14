@@ -282,7 +282,7 @@ struct bomberservmode : bomberstate, servmode
             bool insidehome = (isbomberhome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius);
             if(insidehome || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
             {
-                if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators, ci->state.loadweap[0])*GAME(maxhealth)), total);
+                if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
                 if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
                 if(GAME(regenextra)) amt += GAME(regenextra);
                 return;

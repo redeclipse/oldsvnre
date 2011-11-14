@@ -1771,7 +1771,7 @@ namespace projs
                         loopj(numdyns)
                         {
                             dynent *f = game::iterdynents(j, true);
-                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false)) continue;
+                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false, false)) continue;
                             radialeffect(f, proj, HIT_EXPLODE, radius);
                         }
                     }
@@ -1785,7 +1785,7 @@ namespace projs
                         loopj(numdyns)
                         {
                             dynent *f = game::iterdynents(j);
-                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true)) continue;
+                            if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
                             if(radialeffect(f, proj, HIT_BURN, radius)) proj.lastradial = lastmillis;
                         }
                     }

@@ -564,7 +564,7 @@ void loadc(stream *f, cube &c, const ivec &co, int size, bool &failed)
 cube *loadchildren(stream *f, const ivec &co, int size, bool &failed)
 {
     cube *c = newcubes();
-    loopi(8) 
+    loopi(8)
     {
         loadc(f, c[i], ivec(i, co.x, co.y, co.z, size), size, failed);
         if(failed) break;
@@ -1567,7 +1567,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             bool failed = false;
             worldroot = loadchildren(f, ivec(0, 0, 0), hdr.worldsize>>1, failed);
             if(failed) conoutf("\frgarbage in map");
-                
+
             progress(0, "validating...");
             validatec(worldroot, hdr.worldsize>>1);
 
