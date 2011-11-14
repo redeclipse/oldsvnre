@@ -669,7 +669,7 @@ namespace capture
             if(d->aitype == AI_BOT && (!home || m_gsp3(game::gamemode, game::mutators)) && !(f.base&BASE_FLAG)) continue; // don't bother with other bases
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->loadweap[0]);
+            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators);
             ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {
@@ -767,7 +767,7 @@ namespace capture
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->aitype == AI_BOT)
             {
-                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->loadweap[0]);
+                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators);
                 if(regen && lastmillis-b.millis >= (201-d->skill)*33)
                 {
                     static vector<int> targets; // build a list of others who are interested in this

@@ -319,7 +319,7 @@ namespace defend
                 targets.setsize(0);
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
                 gameent *e = NULL;
-                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->loadweap[0]);
+                bool regen = !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators);
                 int numdyns = game::numdynents();
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
@@ -347,7 +347,7 @@ namespace defend
         if(st.flags.inrange(b.target))
         {
             defendstate::flag &f = st.flags[b.target];
-            bool regen = d->aitype != AI_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->loadweap[0]);
+            bool regen = d->aitype != AI_BOT || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators);
             int walk = f.enemy && f.enemy != ai::owner(d) ? 1 : 0;
             if(regen && (!f.enemy && ai::owner(d) == f.owner))
             {

@@ -535,24 +535,23 @@ struct gamestate
             if(sweap != WEAP_MELEE) ammo[WEAP_MELEE] = WEAP(WEAP_MELEE, max);
             if(GAME(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != WEAP_GRENADE)
                 ammo[WEAP_GRENADE] = max(WEAP(WEAP_GRENADE, max), 1);
-            if(m_loadout(gamemode, mutators))
+            if(m_arena(gamemode, mutators))
             {
                 int aweap[2] = { -1, -1 };
-                loopj(m_league(gamemode, mutators) ? 1 : 2)
+                loopj(2)
                 {
                     aweap[j] = loadweap[j];
-                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= w_lmax(gamemode, mutators) || (j && aweap[0] == aweap[1]))
+                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= WEAP_ITEM || (j && aweap[0] == aweap[1]))
                     {
-                        aweap[j] = rnd(w_lmax(gamemode, mutators)-WEAP_OFFSET)+WEAP_OFFSET; // random
+                        aweap[j] = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // random
                         int iters = 0;
                         while(++iters < 10 && ((j && aweap[0] == aweap[1]) || WEAP(aweap[j], allowed) <= (m_duke(gamemode, mutators) ? 1 : 0)))
                         {
-                            if(++aweap[j] >= w_lmax(gamemode, mutators)) aweap[j] = WEAP_OFFSET;
+                            if(++aweap[j] >= WEAP_ITEM) aweap[j] = WEAP_OFFSET;
                         }
                     }
                     ammo[aweap[j]] = max(WEAPUSE(aweap[j]), 1);
                 }
-                if(m_league(gamemode, mutators)) loadweap[1] = WEAP_PISTOL;
                 lastweap = weapselect = aweap[0];
             }
             else
@@ -561,7 +560,7 @@ struct gamestate
                 lastweap = weapselect = sweap;
             }
         }
-        health = heal ? heal : m_health(gamemode, mutators, loadweap[0]);
+        health = heal ? heal : m_health(gamemode, mutators);
     }
 
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
@@ -712,19 +711,16 @@ struct gameent : dynent, gamestate
         int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
         if(reset) bspeed = aistyle[type].speed;
         speed = bspeed*curscale;
-        if(m_league(gamemode, mutators) && isweap(loadweap[0])) speed *= WEAP(loadweap[0], leaguespeed);
         xradius = aistyle[type].xradius*curscale;
         yradius = aistyle[type].yradius*curscale;
         zradius = height = aistyle[type].height*curscale;
         weight = aistyle[type].weight*curscale;
-        if(m_league(gamemode, mutators) && isweap(loadweap[0])) weight *= WEAP(loadweap[0], leagueweight);
         radius = max(xradius, yradius);
         aboveeye = curscale;
     }
 
     void setscale(float scale = 1, int millis = 0, bool reset = false, int gamemode = 0, int mutators = 0)
     {
-        if(m_league(gamemode, mutators) && isweap(loadweap[0])) scale *= WEAP(loadweap[0], leaguescale);
         if(scale != curscale)
         {
             if(state == CS_ALIVE && millis > 0)

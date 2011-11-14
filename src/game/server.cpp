@@ -444,18 +444,17 @@ namespace server
     extern void waiting(clientinfo *ci, int doteam = 0, int drop = 2, bool exclude = false);
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
-        if(m_league(gamemode, mutators)) ci->state.loadweap[1] = WEAP_PISTOL;
-        loopj(m_league(gamemode, mutators) ? 1 : 2)
+        loopj(2)
         {
             int aweap = ci->state.loadweap[j];
-            if(ci->state.loadweap[j] >= w_lmax(gamemode, mutators)) ci->state.loadweap[j] = WEAP_MAX;
+            if(ci->state.loadweap[j] >= WEAP_ITEM) ci->state.loadweap[j] = WEAP_MELEE;
             else if(ci->state.loadweap[j] >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap[j], allowed))
             {
                 case 0: ci->state.loadweap[j] = -1; break;
                 case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
                 case 2: case 3: default: break;
             }
-            if(ci->state.loadweap[j] < 0 && ci->state.aitype < 0)
+            if(!isweap(ci->state.loadweap[j]) && ci->state.aitype < 0)
             {
                 if(request)
                 {
@@ -475,7 +474,7 @@ namespace server
         {
             if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
-                int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators, actor->state.loadweap[0])*GAME(maxhealthvampire))), eff = heal-rgn;
+                int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators)*GAME(maxhealthvampire))), eff = heal-rgn;
                 if(eff)
                 {
                     actor->state.health = heal;
@@ -556,13 +555,13 @@ namespace server
             if(ci->state.aitype >= AI_START) return true;
             else if(tryspawn)
             {
-                if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
-                if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 if(m_trial(gamemode) && ci->state.cpmillis < 0) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? GAME(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
@@ -1213,7 +1212,7 @@ namespace server
             {
                 int attr = w_attr(gamemode, sents[i].attrs[0], m_weapon(gamemode, mutators));
                 if(!isweap(attr)) return false;
-                if(m_loadout(gamemode, mutators) && attr < w_lmax(gamemode, mutators) && GAME(maxcarry) <= 2) return false;
+                if(m_arena(gamemode, mutators) && attr < WEAP_ITEM && GAME(maxcarry) <= 2) return false;
                 switch(WEAP(attr, allowed))
                 {
                     case 0: return false;
@@ -2004,7 +2003,7 @@ namespace server
                 { suggest, ci->team, ci->lastteam },
                 { suggest, ci->lastteam, ci->team }
             };
-            loopi(3) if(!isteam(gamemode, mutators, teams[GAME(teampersist)][i], TEAM_FIRST))
+            loopi(3) if(isteam(gamemode, mutators, teams[GAME(teampersist)][i], TEAM_FIRST))
             {
                 team = teams[GAME(teampersist)][i];
                 if(GAME(teampersist) == 2) return team;
@@ -2867,7 +2866,7 @@ namespace server
             }
             hurt = min(target->state.health, realdamage);
             target->state.health -= realdamage;
-            if(target->state.health <= m_health(gamemode, mutators, target->state.loadweap[0])) target->state.lastregen = 0;
+            if(target->state.health <= m_health(gamemode, mutators)) target->state.lastregen = 0;
             target->state.lastpain = gamemillis;
             actor->state.damage += realdamage;
             if(target->state.health <= 0) realflags |= HIT_KILL;
@@ -2895,7 +2894,7 @@ namespace server
             else fragvalue = -fragvalue;
             int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
             pointvalue *= isai ? GAME(enemybonus) : GAME(fragbonus);
-            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.loadweap[0]) : m_health(gamemode, mutators, target->state.loadweap[0])*3/2)))
+            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators) : m_health(gamemode, mutators)*3/2)))
                 style = FRAG_OBLITERATE;
             target->state.spree = 0;
             if(m_team(gamemode, mutators) && actor->team == target->team)
@@ -3412,7 +3411,7 @@ namespace server
         else sendf(-1, 1, "ri2", N_WAITING, ci->clientnum);
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
-        if(m_loadout(gamemode, mutators)) chkloadweap(ci);
+        if(m_arena(gamemode, mutators)) chkloadweap(ci);
         if(doteam && (doteam == 2 || !isteam(gamemode, mutators, ci->team, TEAM_FIRST)))
             setteam(ci, chooseteam(ci), false, true);
     }
@@ -3534,12 +3533,7 @@ namespace server
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastburnowner);
                         dodamage(ci, co ? co : ci, GAME(burndamage), -1, HIT_BURN);
-                        if(m_league(gamemode, mutators) && isweap(ci->state.loadweap[0]) && WEAP(ci->state.loadweap[0], leaguetraits)&(1<<TRAIT_BURNRES))
-                        {
-                            sendf(-1, 1, "ri3", N_SPHY, ci->clientnum, SPHY_EXTINGUISH);
-                            ci->state.lastburn = ci->state.lastburntime = 0;
-                        }
-                        else ci->state.lastburntime += GAME(burndelay);
+                        ci->state.lastburntime += GAME(burndelay);
                     }
                 }
                 else if(ci->state.lastburn) ci->state.lastburn = ci->state.lastburntime = 0;
@@ -3549,15 +3543,13 @@ namespace server
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastbleedowner);
                         dodamage(ci, co ? co : ci, GAME(bleeddamage), -1, HIT_BLEED);
-                        if(m_league(gamemode, mutators) && isweap(ci->state.loadweap[0]) && WEAP(ci->state.loadweap[0], leaguetraits)&(1<<TRAIT_BLEEDRES))
-                            ci->state.lastbleed = ci->state.lastbleedtime = 0;
-                        else ci->state.lastbleedtime += GAME(bleeddelay);
+                        ci->state.lastbleedtime += GAME(bleeddelay);
                     }
                 }
                 else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleedtime = 0;
                 if(m_regen(gamemode, mutators) && ci->state.aitype < AI_START)
                 {
-                    int total = m_health(gamemode, mutators, ci->state.loadweap[0]), amt = GAME(regenhealth),
+                    int total = m_health(gamemode, mutators), amt = GAME(regenhealth),
                         delay = ci->state.lastregen ? GAME(regentime) : GAME(regendelay);
                     if(smode) smode->regen(ci, total, amt, delay);
                     if(delay && ci->state.health != total)
@@ -3570,7 +3562,7 @@ namespace server
                             {
                                 amt = -GAME(regenhealth);
                                 total = ci->state.health;
-                                low = m_health(gamemode, mutators, ci->state.loadweap[0]);
+                                low = m_health(gamemode, mutators);
                             }
                             int rgn = ci->state.health, heal = clamp(ci->state.health+amt, low, total), eff = heal-rgn;
                             if(eff)
@@ -3593,7 +3585,7 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.loadweap[0]));
+                    ci->state.respawn(gamemillis, m_health(gamemode, mutators));
                     sendspawn(ci);
                 }
             }
@@ -4180,7 +4172,7 @@ namespace server
                 {
                     int lcn = getint(p), aweap = getint(p), bweap = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || !isweap(aweap) || !m_loadout(gamemode, mutators)) break;
+                    if(!hasclient(cp, ci) || !isweap(aweap) || !m_arena(gamemode, mutators)) break;
                     cp->state.loadweap[0] = aweap;
                     cp->state.loadweap[1] = bweap;
                     chkloadweap(cp);

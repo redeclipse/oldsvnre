@@ -272,7 +272,6 @@ GVAR(0, zoomtime, 1, 100, VAR_MAX);
 
 GFVAR(0, explodescale, 0, 1, FVAR_MAX);
 GFVAR(0, explodelimited, 0, 0.5f, FVAR_MAX);
-GFVAR(0, explodeleague, 0, 0.25f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
 GVAR(0, criticalchance, 0, 100, VAR_MAX);
 GVAR(0, weaponjamming, 0, 0, 4); // 0 = off, 1 = drop the weapon, 2 = drop all weapons, 3/4 = 1/2 + explode

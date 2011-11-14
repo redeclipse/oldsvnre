@@ -37,24 +37,14 @@ namespace physics
     bool allowhover(physent *d, bool fly)
     {
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
-        {
-            gameent *e = (gameent *)d;
-            if(m_league(game::gamemode, game::mutators))
-                return !fly && isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_HOVER);
            return ishover ? (fly ? m_jetpack(game::gamemode, game::mutators) || PHYS(gravity) == 0 : true) : false;
-        }
         return false;
     }
 
     bool allowimpulse(physent *d, int level)
     {
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
-        {
-            gameent *e = (gameent *)d;
-            if(m_league(game::gamemode, game::mutators))
-                return isweap(e->loadweap[0]) && WEAP(e->loadweap[0], leaguetraits)&(1<<TRAIT_IMPULSE);
             return impulseallowed >= level && (impulsestyle || allowhover(d));
-        }
         return false;
     }
 
@@ -192,7 +182,7 @@ namespace physics
         return false;
     }
 
-    bool issolid(physent *d, physent *e, bool esc)
+    bool issolid(physent *d, physent *e, bool esc, bool impact)
     {
         bool projectile = false, actor = false;
         if(e) switch(e->type)
@@ -205,7 +195,7 @@ namespace physics
                 projent *p = (projent *)e;
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
-                    if(p->hit == d || !(p->projcollide&HIT_PLAYER)) return false;
+                    if(impact && (p->hit == d || !(p->projcollide&HIT_PLAYER))) return false;
                     if(p->owner == d && ((!returningfire && !(p->projcollide&COLLIDE_OWNER)) || (esc && !p->escaped))) return false;
                 }
                 else if(d->type == ENT_PROJ)
@@ -398,7 +388,6 @@ namespace physics
             }
             float stun = clamp(e->stunned(lastmillis), 0.f, 1.f);
             if(stun > 0) { rescaleimpulse(1.f-stun); }
-            if(m_league(game::gamemode, game::mutators) && isweap(e->loadweap[0])) { rescaleimpulse(WEAP(e->loadweap[0], leaguespeed)); }
         }
         speed += vec(d->vel).add(d->falling).magnitude();
         return limit > 0 && speed > limit ? limit : speed;
