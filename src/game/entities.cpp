@@ -1792,7 +1792,7 @@ namespace entities
                 if(f.type != TELEPORT) continue;
                 if(verbose) conoutf("\frWARNING: teledest %d and teleport %d linked automatically", t.ent, p.ent);
                 f.links.add(t.ent);
-            } 
+            }
         }
         loopv(octateles) // second pass teledest translation
         {
@@ -1813,7 +1813,7 @@ namespace entities
                 dest = p.ent;
                 bestdist = dist;
             }
-            if(dest < 0) 
+            if(dest < 0)
             {
                 if(verbose) conoutf("\frWARNING: teledest %d has become a teleport", i);
             }
@@ -2449,7 +2449,7 @@ namespace entities
                 gameentity &e = *(gameentity *)ents[i];
                 if(e.type <= NOTUSED || e.type >= MAXENTTYPES) continue;
                 bool active = enttype[e.type].usetype == EU_ITEM && (e.spawned || (e.lastuse && lastmillis-e.lastuse < 500));
-                if(m_edit(game::gamemode) || active)
+                if((m_edit(game::gamemode) && rendermainview) || active)
                 {
                     const char *mdlname = entmdlname(e.type, e.attrs);
                     vec pos = e.o;
