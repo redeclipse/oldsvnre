@@ -1438,7 +1438,7 @@ void part_ellipse(const vec &o, const vec &v, float size, float blend, int fade,
 
 void part_radius(const vec &o, const vec &v, float size, float blend, int fade, int color, bool fill)
 {
-    if(!canaddparticles() || (parts[PT_ELLIPSE]->type&PT_TYPE) != PT_ELLIPSE) return;
+    if(!canaddparticles() || (parts[PART_ELLIPSE]->type&PT_TYPE) != PT_ELLIPSE) return;
     loopprimitiverenderer *p = (loopprimitiverenderer *)parts[PART_ELLIPSE];
     p->addellipse(o, v, fade, color, size, blend, 0, fill);
     p->addellipse(o, v, fade, color, size, blend, 1, fill);
