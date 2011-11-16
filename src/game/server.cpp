@@ -1038,7 +1038,7 @@ namespace server
         modecheck(mode, muts);
     }
 
-    #define mapshrink(a,b,c) if((a) && (b)) \
+    #define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
     { \
         char *p = shrinklist(b, c, 1); \
         if(p) \
@@ -1050,6 +1050,7 @@ namespace server
 
     #define mapcull(a,b,c) \
     { \
+        mapshrink(m_multi(b, c), a, GAME(multimaps)); \
         mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
         mapshrink(m_hover(b, c) || m_jetpack(b, c), a, GAME(hovermaps)); \
         if(GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
@@ -1351,12 +1352,12 @@ namespace server
             ents.add(n);
             cycle.add(0);
         }
-    } spawns[TEAM_COUNT];
+    } spawns[TEAM_ALL];
 
     void setupspawns(bool update, int players = 0)
     {
         nplayers = totalspawns = 0;
-        loopi(TEAM_COUNT) spawns[i].reset();
+        loopi(TEAM_ALL) spawns[i].reset();
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
@@ -1376,7 +1377,7 @@ namespace server
                     {
                         loopi(numt) if(spawns[i+TEAM_FIRST].ents.empty())
                         {
-                            loopj(TEAM_COUNT) spawns[j].reset();
+                            loopj(TEAM_ALL) spawns[j].reset();
                             totalspawns = 0;
                             break;
                         }
@@ -1986,6 +1987,7 @@ namespace server
         float score;
         int clients;
 
+        teamcheck() : team(TEAM_NEUTRAL), score(0.f), clients(0) {}
         teamcheck(int n) : team(n), score(0.f), clients(0) {}
         teamcheck(int n, float r) : team(n), score(r), clients(0) {}
         teamcheck(int n, int s) : team(n), score(s), clients(0) {}
@@ -2012,7 +2014,8 @@ namespace server
             if(balance < 3 && ci->state.aitype >= 0) balance = 1;
             if(balance || team < 0)
             {
-                teamcheck teamchecks[TEAM_NUM] = { teamcheck(TEAM_ALPHA), teamcheck(TEAM_OMEGA) };
+                teamcheck teamchecks[TEAM_TOTAL];
+                loopk(TEAM_TOTAL) teamchecks[k].team = k+1;
                 loopv(clients)
                 {
                     clientinfo *cp = clients[i];
@@ -2243,7 +2246,7 @@ namespace server
         }
 
         if(m_fight(gamemode) && numclients()) sendf(-1, 1, "ri2", N_TICK, timeremaining);
-        if(m_demo(gamemode)) 
+        if(m_demo(gamemode))
         {
             if(clients.length()) setupdemoplayback();
         }

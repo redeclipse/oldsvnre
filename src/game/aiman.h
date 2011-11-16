@@ -204,7 +204,7 @@ namespace aiman
             { // skew this if teams are unbalanced
                 if(GAME(teambalance) != 3)
                 {
-                    int plrs[TEAM_NUM] = {0}, highest = -1;
+                    int plrs[TEAM_TOTAL] = {0}, highest = -1;
                     loopv(clients) if(clients[i]->state.aitype < 0 && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
                     {
                         int team = clients[i]->team-TEAM_FIRST;
