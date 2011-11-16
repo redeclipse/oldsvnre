@@ -240,7 +240,7 @@ namespace aiman
             if(bots > GAME(botlimit))
             {
                 balance -= bots-GAME(botlimit);
-                if(m_team(gamemode, mutators)) balance -= balance%numt;
+                if(m_team(gamemode, mutators) && balance%numt) balance += numt-(balance%numt);
             }
         }
         if(balance > 0)
