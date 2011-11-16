@@ -1151,8 +1151,8 @@ namespace entities
                 while(e.attrs[2] >= G_MAX) e.attrs[2] -= G_MAX*2;
                 break;
             case PLAYERSTART:
-                while(e.attrs[0] < 0) e.attrs[0] += TEAM_COUNT;
-                while(e.attrs[0] >= TEAM_COUNT) e.attrs[0] -= TEAM_COUNT;
+                while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
+                while(e.attrs[0] >= TEAM_ALL) e.attrs[0] -= TEAM_ALL;
             case CHECKPOINT:
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
@@ -1185,8 +1185,8 @@ namespace entities
                 if(e.attrs[8] < 0) e.attrs[8] = 0;
                 break;
             case AFFINITY:
-                while(e.attrs[0] < 0) e.attrs[0] += TEAM_COUNT;
-                while(e.attrs[0] >= TEAM_COUNT) e.attrs[0] -= TEAM_COUNT;
+                while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
+                while(e.attrs[0] >= TEAM_ALL) e.attrs[0] -= TEAM_ALL;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
@@ -1776,7 +1776,7 @@ namespace entities
 
     void importentities(int mtype, int mver, int gver)
     {
-        int flag = 0, teams[TEAM_NUM] = {0};
+        int flag = 0, teams[TEAM_TOTAL] = {0};
         if(verbose) progress(0, "importing entities...");
         loopv(octateles) // translate teledest to teleport and link them appropriately
         {
@@ -1910,7 +1910,7 @@ namespace entities
                     if(!valteam(e.attrs[1], TEAM_NEUTRAL)) // assign a team
                     {
                         int lowest = -1;
-                        loopk(TEAM_NUM) if(lowest<0 || teams[k] < teams[lowest]) lowest = i;
+                        loopk(TEAM_TOTAL) if(lowest<0 || teams[k] < teams[lowest]) lowest = i;
                         e.attrs[1] = lowest+TEAM_FIRST;
                         teams[lowest]++;
                     }
@@ -1966,7 +1966,7 @@ namespace entities
                         e.attrs[1] = yaw;
                         e.attrs[2] = e.attrs[3] = e.attrs[4] = 0;
                     }
-                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_LAST) e.attrs[0] = TEAM_NEUTRAL;
+                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_MULTI) e.attrs[0] = TEAM_NEUTRAL;
                     if(mtype == MAP_MAPZ && gver <= 201)
                     {
                         if(e.attrs[3] > 3)
@@ -2064,7 +2064,7 @@ namespace entities
                         e.attrs[2] = e.attrs[3];
                         e.attrs[3] = e.attrs[4] = 0;
                     }
-                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_LAST) e.attrs[0] = TEAM_NEUTRAL;
+                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_MULTI) e.attrs[0] = TEAM_NEUTRAL;
                     checkyawmode(e, mtype, mver, gver, 1, 3);
                     break;
                 }

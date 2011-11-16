@@ -40,9 +40,9 @@ struct bomberservmode : bomberstate, servmode
         if(bombertime >= 0) return;
         if(m_team(gamemode, mutators))
         {
-            int alive[TEAM_MAX] = {0};
+            int alive[TEAM_MAX] = {0}, numt = numteams(gamemode, mutators);
             loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
-            if(!alive[TEAM_ALPHA] || !alive[TEAM_OMEGA]) return;
+            loopk(numt) if(!alive[k+1]) return;
         }
         else
         {
@@ -176,7 +176,7 @@ struct bomberservmode : bomberstate, servmode
             int hasaffinity = 0;
             vector<int> candidates[TEAM_MAX];
             loopv(flags) candidates[flags[i].team].add(i);
-            int wants = !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators) ? 1 : TEAM_COUNT;
+            int wants = teamcount(gamemode, mutators);
             loopi(wants)
             {
                 int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;

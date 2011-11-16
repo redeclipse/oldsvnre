@@ -34,6 +34,7 @@ GSVAR(IDF_ADMIN, holdmaps, "bath center darkness deadsimple deli depot dropzone 
 GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
+GSVAR(IDF_ADMIN, multimaps, "deadsimple");
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
 GSVAR(IDF_ADMIN, hovermaps, "alphacampaign center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
