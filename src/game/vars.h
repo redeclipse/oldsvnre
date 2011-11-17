@@ -186,6 +186,7 @@ GVAR(0, skillmin, 1, 50, 101);
 GVAR(0, skillmax, 1, 75, 101);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botlimit, 0, 16, VAR_MAX);
+GVAR(0, botoffset, VAR_MIN, 0, VAR_MAX);
 GFVAR(0, botspeed, 0, 1, FVAR_MAX);
 GFVAR(0, botscale, FVAR_NONZERO, 1, FVAR_MAX);
 GVAR(0, enemybalance, 0, 1, 3);

@@ -761,6 +761,11 @@ namespace server
     void cleanup(bool init = false)
     {
         setpause(false);
+        if(sv_botoffset != 0)
+        {
+            setvar("sv_botoffset", 0, true);
+            sendf(-1, 1, "ri2ss", N_COMMAND, -1, "botoffset", "0");
+        }
         if(GAME(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetbansonend)) resetbans();
         if(GAME(resetvarsonend) || init) resetgamevars(true);
@@ -1496,7 +1501,7 @@ namespace server
         setupitems(true);
         setupspawns(true, m_trial(gamemode) ? 0 : np);
         hasgameinfo = true;
-        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+        aiman::dorefresh = GAME(airefresh);
     }
 
     void sendspawn(clientinfo *ci)
@@ -1994,7 +1999,7 @@ namespace server
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
-            if(ci->state.aitype < 0) aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh); // get the ai to reorganise
+            if(ci->state.aitype < 0) aiman::dorefresh = GAME(airefresh); // get the ai to reorganise
         }
         if(info) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
@@ -2211,7 +2216,7 @@ namespace server
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
         aiman::clearai();
-        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+        aiman::dorefresh = GAME(airefresh);
 
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
@@ -2807,7 +2812,7 @@ namespace server
         if(smode) smode->initclient(ci, p, true);
         mutate(smuts, mut->initclient(ci, p, true));
         if(ci) ci->online = true;
-        aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+        aiman::dorefresh = GAME(airefresh);
         return 1;
     }
 
@@ -3529,7 +3534,7 @@ namespace server
             ci->state.state = CS_SPECTATOR;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
             setteam(ci, TEAM_NEUTRAL, false, true);
-            aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+            aiman::dorefresh = GAME(airefresh);
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
@@ -3540,7 +3545,7 @@ namespace server
             waiting(ci, 2, 1);
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
-            aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+            aiman::dorefresh = GAME(airefresh);
             if(ci->clientmap[0] || ci->mapcrc) checkmaps();
         }
     }
@@ -3711,7 +3716,7 @@ namespace server
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
                 savescore(ci);
                 aiman::removeai(ci, complete);
-                if(!complete) aiman::dorefresh = max(totalmillis+GAME(airefresh), aiman::dorefresh);
+                if(!complete) aiman::dorefresh = GAME(airefresh);
             }
             sendf(-1, 1, "ri3", N_DISCONNECT, n, reason);
             ci->connected = false;
