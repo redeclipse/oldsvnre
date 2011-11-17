@@ -1878,7 +1878,7 @@ namespace game
             if(!maptime) { maptime = -1; return; } // skip the first loop
             else if(maptime < 0)
             {
-                maptime = lastmillis;
+                maptime = max(lastmillis, 1);
                 if(*mapmusic && (!music || !Mix_PlayingMusic() || strcmp(mapmusic, musicfile))) playmusic(mapmusic);
                 else musicdone(false);
                 RUNWORLD("on_start");
