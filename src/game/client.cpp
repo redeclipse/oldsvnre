@@ -187,7 +187,7 @@ namespace client
         {
             string text;
             filtertext(text, name);
-            game::player1->setinfo(text, col ? col : game::player1->colour);
+            game::player1->setinfo(text, col >= 0 ? col : game::player1->colour);
             addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour);
         }
         if(initing == NOT_INITING) conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
