@@ -174,7 +174,7 @@ namespace client
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
-    ICOMMAND(0, getcolour, "i", (int *m), intret(game::player1->getcolour(*m!=0)));
+    ICOMMAND(0, getcolour, "i", (int *m), intret(*m <= 1 ? game::player1->getcolour(*m!=0) : game::player1->colour));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
