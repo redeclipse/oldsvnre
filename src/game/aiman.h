@@ -1,7 +1,7 @@
 // server-side ai manager
 namespace aiman
 {
-    int oldteambalance = -1, oldskillmin = -1, oldskillmax = -1, oldbotbalance = -2, oldbotlimit = -1;
+    int oldteambalance = -1, oldskillmin = -1, oldskillmax = -1, oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0;
 
     int findaiclient(int exclude)
     {
@@ -101,7 +101,7 @@ namespace aiman
         sendf(-1, 1, "ri3", N_DISCONNECT, cn, DISC_NONE);
         clients.removeobj(ci);
         delclient(cn);
-        dorefresh = max(totalmillis, dorefresh);
+        dorefresh = 1;
     }
 
     bool delai(int type)
@@ -221,6 +221,7 @@ namespace aiman
                             else balance++;
                         }
                     }
+                    if(m_team(gamemode, mutators) && balance%numt) balance += numt-(balance%numt);
                 }
                 else balance = max(people*numt, numt); // humans vs. bots, just directly balance
                 loopvrev(clients)
@@ -238,11 +239,8 @@ namespace aiman
                 }
             }
             int bots = balance-people;
-            if(bots > GAME(botlimit))
-            {
-                balance -= bots-GAME(botlimit);
-                if(m_team(gamemode, mutators) && balance%numt) balance += numt-(balance%numt);
-            }
+            if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
+            balance += GAME(botoffset);
         }
         if(balance > 0)
         {
@@ -278,7 +276,6 @@ namespace aiman
     { // clear and remove all ai immediately
         loopvrev(clients) if(type ? (type == 2 ? clients[i]->state.aitype >= AI_START : clients[i]->state.aitype == AI_BOT) : true)
             deleteai(clients[i]);
-        dorefresh = 0;
     }
 
     void checkai()
@@ -287,13 +284,18 @@ namespace aiman
         {
             if(hasgameinfo && !interm)
             {
-                #define checkold(n) if(old##n != GAME(n)) { dorefresh = max(totalmillis, dorefresh); old##n = GAME(n); }
+                #define checkold(n) if(old##n != GAME(n)) { dorefresh = 1; old##n = GAME(n); }
                 checkold(teambalance);
                 checkold(skillmin);
                 checkold(skillmax);
                 checkold(botbalance);
                 checkold(botlimit);
-                if(totalmillis >= dorefresh) { dorefresh = 0; checksetup(); }
+                checkold(botoffset);
+                if(dorefresh)
+                {
+                    dorefresh -= curtime;
+                    if(dorefresh <= 0) { dorefresh = 0; checksetup(); }
+                }
                 checkenemies();
                 loopvrev(clients) if(clients[i]->state.aitype >= 0) reinitai(clients[i]);
                 while(true) if(!reassignai()) break;
