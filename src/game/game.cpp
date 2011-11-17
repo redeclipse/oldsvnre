@@ -128,6 +128,9 @@ namespace game
     VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, INT_MAX-1);
 
+    VAR(IDF_PERSIST, playertone, 0, 1, 1); // use player tone as secondary colour instead of team colour
+    VAR(IDF_PERSIST, playertonemix, 0, 1, 2); // mix tone with team colour, 1 = if teamed, 2 = always
+
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
     ICOMMAND(0, mutators, "", (), intret(mutators));
     ICOMMAND(0, getintermission, "", (), intret(intermission ? 1 : 0));
@@ -2240,8 +2243,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(d->getcolour());
-            e->light.material[1] = bvec(d->getcolour(true));
+            e->light.material[0] = bvec(playertone ? d->getcolour(CTONE_DEFAULT) : TEAM(d->team, colour));
+            e->light.material[1] = bvec(playertone ? d->getcolour(playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : TEAM(d->team, colour));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
