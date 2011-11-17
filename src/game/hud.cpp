@@ -97,11 +97,11 @@ namespace hud
     TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "textures/warning", 3);
 
-    VAR(IDF_PERSIST, glowtone, 0, 3, 4); // colour based on tone (1 = colour, 2 = team, 3/4 = switched)
-    VAR(IDF_PERSIST, clipstone, 0, 3, 4);
-    VAR(IDF_PERSIST, inventorytone, 0, 2, 4);
-    VAR(IDF_PERSIST, crosshairtone, 0, 0, 4);
-    VAR(IDF_PERSIST, noticestone, 0, 0, 4);
+    VAR(IDF_PERSIST, glowtone, 0, 3, 3); // colour based on tone (1 = colour, 2 = team, 3 = switched)
+    VAR(IDF_PERSIST, clipstone, 0, 3, 3);
+    VAR(IDF_PERSIST, inventorytone, 0, 2, 3);
+    VAR(IDF_PERSIST, crosshairtone, 0, 0, 3);
+    VAR(IDF_PERSIST, noticestone, 0, 0, 3);
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
@@ -278,7 +278,7 @@ namespace hud
     VAR(IDF_PERSIST, radarplayereffects, 0, 1, 1);
     VAR(IDF_PERSIST, radaraffinity, 0, 2, 2);
     VAR(IDF_PERSIST, radaraffinitynames, 0, 1, 2);
-    VAR(IDF_PERSIST, radarcornertone, 0, 3, 4); // colour based on tone (1 = colour, 2 = team, 3/4 = switched)
+    VAR(IDF_PERSIST, radarcornertone, 0, 3, 3); // colour based on tone (1 = colour, 2 = team, 3 = switched)
 
     VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
     VAR(IDF_PERSIST, radardamagemerge, 1, 250, VAR_MAX);
@@ -461,7 +461,13 @@ namespace hud
     template<class T>
     void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
-        if(colour <= 0) colour = game::focus->getcolour((0-colour)!=0);
+        switch(colour)
+        {
+            case 0: colour = game::focus->getcolour(true); break;
+            case -1: colour = game::focus->getcolour(); break;
+            case -2: colour = game::focus->getcolour(!m_team(game::gamemode, game::mutators)); break;
+            default: break;
+        }
         vec c = vec::hexcolor(colour);
         r = T(r*c.r);
         g = T(g*c.g);
