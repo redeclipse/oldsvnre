@@ -176,7 +176,7 @@ namespace ai
         d->setparams(true, game::gamemode, game::mutators);
     }
 
-    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm)
+    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl)
     {
         gameent *o = game::newclient(on);
         string m;
@@ -211,6 +211,7 @@ namespace ai
         d->ownernum = on;
         d->skill = sk;
         d->team = tm;
+        d->colour = cl;
         setparams(d);
 
         if(resetthisguy) projs::remove(d);
