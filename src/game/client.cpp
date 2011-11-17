@@ -174,7 +174,7 @@ namespace client
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
-    ICOMMAND(0, getcolour, "i", (int *m), intret(game::player1->getcolour(*m)));
+    ICOMMAND(0, getcolour, "i", (int *m), intret(game::player1->getcolour(*m!=0)));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
@@ -1462,7 +1462,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->getcolour(1);
+                            int colour = f->getcolour(true);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
@@ -1500,7 +1500,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->getcolour(1);
+                            int colour = f->getcolour(true);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
@@ -2162,10 +2162,10 @@ namespace client
                 {
                     int bn = getint(p), on = getint(p), at = getint(p), et = getint(p), sk = clamp(getint(p), 1, 101);
                     getstring(text, p);
-                    int tm = getint(p);
+                    int tm = getint(p), cl = getint(p);
                     gameent *b = game::newclient(bn);
                     if(!b) break;
-                    ai::init(b, at, et, on, sk, bn, text, tm);
+                    ai::init(b, at, et, on, sk, bn, text, tm, cl);
                     break;
                 }
 

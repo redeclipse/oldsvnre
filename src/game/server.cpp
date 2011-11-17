@@ -322,19 +322,14 @@ namespace server
             return gameoffset+id;
         }
 
-        int getcolour(int tone = 0)
+        int getcolour(bool tone = false)
         {
-            if(state.aitype >= AI_START)
+            if(tone)
             {
-                if(!(tone%2))
-                {
-                    int weap = isweap(state.loadweap[0]) ? state.loadweap[0] : state.weapselect;
-                    if(isweap(weap)) return WEAP(weap, colour);
-                }
-                return state.colour;
+                if(state.colour && state.aitype < AI_START) return state.colour;
+                if(isweap(state.weapselect)) return WEAP(state.weapselect, colour);
             }
-            if(tone == 2) return team == TEAM_NEUTRAL ? state.colour : TEAM(team, colour);
-            return tone%2 ? TEAM(team, colour) : state.colour;
+            return TEAM(team, colour);
         }
     };
 
@@ -830,7 +825,7 @@ namespace server
     {
         if(!name) name = ci->name;
         static string cname;
-        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(1), name);
+        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(true), name);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
             defformatstring(s)(" [%d]", ci->clientnum);
@@ -2605,6 +2600,7 @@ namespace server
                 putint(p, ci->state.skill);
                 sendstring(ci->name, p);
                 putint(p, ci->team);
+                putint(p, ci->state.colour);
             }
         }
         else
@@ -3970,8 +3966,7 @@ namespace server
                     if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     copystring(ci->name, text, MAXNAMELEN+1);
-                    int colour = getint(p);
-                    ci->state.setcolour(colour);
+                    ci->state.colour = max(getint(p), 0);
 
                     string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
@@ -4478,11 +4473,10 @@ namespace server
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colorname(ci));
                     getstring(text, p);
-                    int colour = getint(p);
+                    ci->state.colour = max(getint(p), 0);
                     if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     copystring(ci->name, text, MAXNAMELEN+1);
-                    ci->state.setcolour(colour);
                     relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);

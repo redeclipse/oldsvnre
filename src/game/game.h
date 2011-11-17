@@ -344,20 +344,12 @@ struct gamestate
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0),
+    gamestate() : colour(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0),
         aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
-        setcolour();
     }
     ~gamestate() {}
-
-    void setcolour(int col = 0)
-    {
-        if(!col) col = rnd(0xFFFFFF);
-        ivec col1(max((col>>16)&0xFF, 1), max((col>>8)&0xFF, 1), max(col&0xFF, 1));
-        colour = (col1.x<<16)|(col1.y<<8)|col1.z;
-    }
 
     int hasweap(int weap, int sweap, int level = 0, int exclude = -1)
     {
@@ -1028,22 +1020,17 @@ struct gameent : dynent, gamestate
     void setinfo(const char *n = NULL, int col = 0)
     {
         if(n && *n) copystring(name, n, MAXNAMELEN+1); else name[0] = 0;
-        setcolour(col);
+        colour = max(col, 0);
     }
 
-    int getcolour(int tone = 0)
+    int getcolour(bool tone = false)
     {
-        if(aitype >= AI_START)
+        if(tone)
         {
-            if(!(tone%2))
-            {
-                int weap = isweap(loadweap[0]) ? loadweap[0] : weapselect;
-                if(isweap(weap)) return WEAP(weap, colour);
-            }
-            return colour;
+            if(colour && aitype < AI_START) return colour;
+            if(isweap(weapselect)) return WEAP(weapselect, colour);
         }
-        if(tone >= 2) return team == TEAM_NEUTRAL ? (tone%2 ? TEAM(team, colour) : colour) : (tone%2 ? colour : TEAM(team, colour));
-        return tone%2 ? TEAM(team, colour) : colour;
+        return TEAM(team, colour);
     }
 
     void addstun(int weap, int millis, int delay, float scale)
