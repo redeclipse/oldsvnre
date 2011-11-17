@@ -322,14 +322,37 @@ namespace server
             return gameoffset+id;
         }
 
-        int getcolour(bool tone = false)
+        int findcolour(bool tone = false, bool mix = false)
         {
             if(tone)
             {
-                if(state.colour && state.aitype < AI_START) return state.colour;
-                if(isweap(state.weapselect)) return WEAP(state.weapselect, colour);
+                int col = state.aitype < AI_START ? state.colour : 0;
+                if(!col && isweap(state.weapselect)) col = WEAP(state.weapselect, colour);
+                if(col)
+                {
+                    if(mix)
+                    {
+                        int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
+                            c = TEAM(team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF);
+                        col = (clamp((r1/2)+(r2/2), 0, 255)<<16)|(clamp((g1/2)+(g2/2), 0, 255)<<8)|clamp((b1/2)+(b2/2), 0, 255);
+                    }
+                    return col;
+                }
             }
             return TEAM(team, colour);
+        }
+
+        int getcolour(int level = 0)
+        {
+            switch(level)
+            {
+                case -1: return state.colour;
+                case CTONE_MIXED: return findcolour(true, true); break;
+                case CTONE_ALONE: return findcolour(team != TEAM_NEUTRAL); break;
+                case CTONE_TEAM: return findcolour(team == TEAM_NEUTRAL); break;
+                case CTONE_TONE: return findcolour(true); break;
+                case CTONE_DEFAULT: default: return findcolour(); break;
+            }
         }
     };
 
@@ -825,7 +848,7 @@ namespace server
     {
         if(!name) name = ci->name;
         static string cname;
-        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(true), name);
+        formatstring(cname)("\fs\f[%d]%s", ci->getcolour(CTONE_TONE), name);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
             defformatstring(s)(" [%d]", ci->clientnum);

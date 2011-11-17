@@ -356,7 +356,7 @@ namespace hud
                 if(bgcol) g.background(bgcol, 3);
                 g.pushlist();
                 g.background(o->getcolour());
-                g.text("", 0, status, o->getcolour(true));
+                g.text("", 0, status, o->getcolour(CTONE_TONE));
                 g.poplist();
                 g.poplist();
             });

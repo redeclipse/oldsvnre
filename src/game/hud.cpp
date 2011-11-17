@@ -97,11 +97,12 @@ namespace hud
     TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "textures/warning", 3);
 
-    VAR(IDF_PERSIST, glowtone, 0, 3, 3); // colour based on tone (1 = colour, 2 = team, 3 = switched)
-    VAR(IDF_PERSIST, clipstone, 0, 3, 3);
-    VAR(IDF_PERSIST, inventorytone, 0, 2, 3);
-    VAR(IDF_PERSIST, crosshairtone, 0, 0, 3);
-    VAR(IDF_PERSIST, noticestone, 0, 0, 3);
+    VAR(IDF_PERSIST, glowtone, 0, 2, CTONE_MAX); // colour based on tone (1 = colour, 2 = team, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
+    VAR(IDF_PERSIST, clipstone, 0, 2, CTONE_MAX);
+    VAR(IDF_PERSIST, inventorytone, 0, 2, CTONE_MAX);
+    VAR(IDF_PERSIST, crosshairtone, 0, 0, CTONE_MAX);
+    VAR(IDF_PERSIST, noticestone, 0, 0, CTONE_MAX);
+    VAR(IDF_PERSIST, radartone, 0, 2, 5);
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
@@ -278,7 +279,6 @@ namespace hud
     VAR(IDF_PERSIST, radarplayereffects, 0, 1, 1);
     VAR(IDF_PERSIST, radaraffinity, 0, 2, 2);
     VAR(IDF_PERSIST, radaraffinitynames, 0, 1, 2);
-    VAR(IDF_PERSIST, radarcornertone, 0, 3, 3); // colour based on tone (1 = colour, 2 = team, 3 = switched)
 
     VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
     VAR(IDF_PERSIST, radardamagemerge, 1, 250, VAR_MAX);
@@ -461,13 +461,7 @@ namespace hud
     template<class T>
     void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
-        switch(colour)
-        {
-            case 0: colour = game::focus->getcolour(true); break;
-            case -1: colour = game::focus->getcolour(); break;
-            case -2: colour = game::focus->getcolour(!m_team(game::gamemode, game::mutators)); break;
-            default: break;
-        }
+        if(colour <= 0) colour = game::focus->getcolour(0-colour);
         vec c = vec::hexcolor(colour);
         r = T(r*c.r);
         g = T(g*c.g);
@@ -1273,8 +1267,8 @@ namespace hud
             vec colour[2];
             if(burning) colour[0] = game::burncolour(d);
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
-            else colour[0] = vec::hexcolor(d->getcolour());
-            colour[1] = vec::hexcolor(d->getcolour(true));
+            else colour[0] = vec::hexcolor(game::playertone ? d->getcolour() : TEAM(d->team, colour));
+            colour[1] = vec::hexcolor(game::playertone ? d->getcolour(game::playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : TEAM(d->team, colour));
             const char *tex = dominated ? dominatedtex : playerbliptex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -1399,11 +1393,11 @@ namespace hud
         {
             bool dead = (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath;
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
-                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::focus->getcolour(true)), "radar", "you");
+                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::focus->getcolour(CTONE_TONE)), "radar", "you");
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
-                vec colour = vec::hexcolor(a->getcolour(true));
+                vec colour = vec::hexcolor(a->getcolour(CTONE_TONE));
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
                     if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s (%d)", game::colorname(a), a->health);
@@ -1432,7 +1426,7 @@ namespace hud
             }
             glEnd();
             float gr = 1, gg = 1, gb = 1;
-            if(radarcornertone) skewcolour(gr, gg, gb, 1-radarcornertone);
+            if(radartone) skewcolour(gr, gg, gb, 1-radartone);
             settexture(radarcornertex, 3);
             glColor4f(gr*radartexbright, gg*radartexbright, gb*radartexbright, radartexblend);
             drawtex(w-s*2, 0, s*2, s*2);

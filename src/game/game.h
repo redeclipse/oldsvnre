@@ -336,6 +336,7 @@ enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, S
 #include "ai.h"
 #include "vars.h"
 
+enum { CTONE_DEFAULT = 0, CTONE_TONE, CTONE_TEAM, CTONE_ALONE, CTONE_MIXED, CTONE_MAX };
 // inherited by gameent and server clients
 struct gamestate
 {
@@ -1023,14 +1024,37 @@ struct gameent : dynent, gamestate
         colour = max(col, 0);
     }
 
-    int getcolour(bool tone = false)
+    int findcolour(bool tone = false, bool mix = false)
     {
         if(tone)
         {
-            if(colour && aitype < AI_START) return colour;
-            if(isweap(weapselect)) return WEAP(weapselect, colour);
+            int col = aitype < AI_START ? colour : 0;
+            if(!col && isweap(weapselect)) col = WEAP(weapselect, colour);
+            if(col)
+            {
+                if(mix)
+                {
+                    int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
+                        c = TEAM(team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF);
+                    col = (clamp((r1/2)+(r2/2), 0, 255)<<16)|(clamp((g1/2)+(g2/2), 0, 255)<<8)|clamp((b1/2)+(b2/2), 0, 255);
+                }
+                return col;
+            }
         }
         return TEAM(team, colour);
+    }
+
+    int getcolour(int level = 0)
+    {
+        switch(level)
+        {
+            case -1: return colour;
+            case CTONE_MIXED: return findcolour(true, true); break;
+            case CTONE_ALONE: return findcolour(team != TEAM_NEUTRAL); break;
+            case CTONE_TEAM: return findcolour(team == TEAM_NEUTRAL); break;
+            case CTONE_TONE: return findcolour(true); break;
+            case CTONE_DEFAULT: default: return findcolour(); break;
+        }
     }
 
     void addstun(int weap, int millis, int delay, float scale)
@@ -1242,7 +1266,7 @@ namespace game
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
-            announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow;
+            announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow, playertone, playertonemix;
     extern float bloodscale, debrisscale;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
