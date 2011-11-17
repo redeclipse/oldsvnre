@@ -12,6 +12,7 @@ namespace entities
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
+    VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
     VAR(0, maxwaypoints, 128, 16384, INT_MAX-1); // max waypoints to drop unless forced
     VAR(0, dropwaypoints, 0, 2, 3); // drop waypoints during play, 0 = off, 1 = only as needed, 2 = only until max, 3 = forced
     VAR(0, showwaypoints, 0, 0, 1); // show waypoints during play
@@ -2460,7 +2461,7 @@ namespace entities
                         float fade = 1, yaw = 0, pitch = 0, size = 1;
                         if(!active)
                         {
-                            fade = 0.5f;
+                            if(showentmodels < (e.type == PLAYERSTART || e.type == ACTOR ? 2 : 1)) continue;
                             if(e.type == AFFINITY || e.type == PLAYERSTART)
                             {
                                 yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0);
@@ -2475,6 +2476,7 @@ namespace entities
                                 if(isweap(weap)) colour = WEAP(weap, colour);
                                 size = e.attrs[8] > 0 ? e.attrs[8]/100.f : aistyle[e.attrs[0]].scale;
                             }
+                            fade = 0.5f;
                         }
                         else if(e.spawned)
                         {
