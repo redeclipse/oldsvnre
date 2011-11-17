@@ -1,7 +1,6 @@
 struct gameent;
 
 enum { AI_BOT, AI_TURRET, AI_GRUNT, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
-enum { AI_F_NONE = 0, AI_F_RANDWEAP = 1<<0 };
 #define isaitype(a) (a >= 0 && a <= AI_MAX-1)
 
 struct aistyles
@@ -15,7 +14,7 @@ struct aistyles
 aistyles aistyle[] = {
     {
         AI_BOT,         -1,             0,
-            3,          3,          14,         200,        50,         1,
+            3,          3,          15,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
                 "bot",      "actors/player",     "actors/player/hwep"
     },
@@ -27,7 +26,7 @@ aistyles aistyle[] = {
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,
-            3,          3,          14,         150,        40,         1,
+            3,          3,          15,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    "actors/grunt",      "actors/player/hwep"
     },
