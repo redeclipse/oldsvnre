@@ -1779,7 +1779,7 @@ namespace projs
                 else if(WEAP2(proj.weap, radial, proj.flags&HIT_ALT))
                 {
                     if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
-                    if(!proj.limited && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= 40))
+                    if(!proj.limited && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= WEAP2(proj.weap, radial, proj.flags&HIT_ALT)))
                     {
                         int numdyns = game::numdynents();
                         loopj(numdyns)

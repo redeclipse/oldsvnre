@@ -75,9 +75,11 @@ namespace client
         }
         m->players.add(d);
         mapvotes.sort(mapvote::compare);
-        SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
         if(!isignored(d->clientnum))
+        {
+            SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
             conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS, press \fs\fc%s\fS to vote", game::colorname(d), server::gamename(mode, muts), text, votekey);
+        }
     }
 
     void getvotes(int vote, int player)
