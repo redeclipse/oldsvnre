@@ -424,6 +424,7 @@ namespace ai
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
+            if(d->dominating.find(e)) dist *= 0.5f;
             if((!t || dist < tp.squaredist(dp)) && ((mindist > 0 && dist <= mindist) || force || cansee(d, dp, ep, d->aitype >= AI_START)))
             {
                 t = e;

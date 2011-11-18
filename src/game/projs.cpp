@@ -73,7 +73,7 @@ namespace projs
 
         float skew = damagescale*clamp(scale, 0.f, 1.f);
         if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-        else if(WEAP2(weap, taper, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+        else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
         if(!(flags&HIT_HEAD))
         {
             if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
@@ -873,19 +873,31 @@ namespace projs
         if(proj.projtype == PRJ_SHOT)
         {
             updatetargets(proj);
-            if(WEAP2(proj.weap, taper, proj.flags&HIT_ALT) > 0)
+            float spanin = WEAP2(proj.weap, taperin, proj.flags&HIT_ALT), spanout = WEAP2(proj.weap, taperout, proj.flags&HIT_ALT);
+            if(spanin+spanout > 1.f)
             {
-                if(WEAP2(proj.weap, taperspan, proj.flags&HIT_ALT) > 0)
+                float off = (spanin+spanout)-1.f;
+                if(spanout > 0.f)
                 {
-                    if(proj.lifespan > WEAP2(proj.weap, taperspan, proj.flags&HIT_ALT))
+                    off *= 0.5f;
+                    spanout -= off;
+                    if(spanout < 0.f)
                     {
-                        if(!proj.stuck) proj.lifesize = clamp((1.f+WEAP2(proj.weap, taperspan, proj.flags&HIT_ALT))-proj.lifespan, 1.f-WEAP2(proj.weap, taper, proj.flags&HIT_ALT), 1.f);
+                        off += 0.f-spanout;
+                        spanout = 0.f;
                     }
-                    else proj.lifesize = proj.lifespan*(1.f/WEAP2(proj.weap, taperspan, proj.flags&HIT_ALT));
                 }
-                else if(!proj.stuck) proj.lifesize = clamp(1.f-proj.lifespan, 1.f-WEAP2(proj.weap, taper, proj.flags&HIT_ALT), 1.f);
+                spanin = max(0.f, spanin-off);
             }
-            else if(WEAP2(proj.weap, radial, proj.flags&HIT_ALT)) proj.lifesize = proj.lifespan;
+            if(spanin > 0)
+            {
+                if(proj.lifespan < spanin) proj.lifesize = clamp(proj.lifespan*(1.f/spanin), 0.f, 1.f);
+                else if(spanout > 0 && proj.lifespan > (1.f-spanout))
+                {
+                    if(!proj.stuck) proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))*(1.f/spanout)), 0.f, 1.f);
+                }
+                else proj.lifesize = 1;
+            }
             else proj.lifesize = 1;
         }
         updatebb(proj);
