@@ -76,7 +76,8 @@ namespace client
         m->players.add(d);
         mapvotes.sort(mapvote::compare);
         SEARCHBINDCACHE(votekey)("showgui maps 2", 0);
-        conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS, press \fs\fc%s\fS to vote", game::colorname(d), server::gamename(mode, muts), text, votekey);
+        if(!isignored(d->clientnum))
+            conoutft(CON_EVENT, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS, press \fs\fc%s\fS to vote", game::colorname(d), server::gamename(mode, muts), text, votekey);
     }
 
     void getvotes(int vote, int player)
@@ -240,54 +241,6 @@ namespace client
         f->printf("setinfo \"%s\" 0x%06x\n\n", game::player1->name, game::player1->colour);
     }
 
-    void connectattempt(const char *name, int port, const char *password, const ENetAddress &address)
-    {
-        if(*password) { copystring(connectpass, password); }
-        else memset(connectpass, 0, sizeof(connectpass));
-    }
-
-    void connectfail()
-    {
-        memset(connectpass, 0, sizeof(connectpass));
-    }
-
-    void gameconnect(bool _remote)
-    {
-        remote = _remote;
-        if(editmode) toggleedit();
-    }
-
-    void gamedisconnect(int clean)
-    {
-        if(editmode) toggleedit();
-        gettingmap = needsmap = remote = isready = sendinfo = false;
-        sessionid = 0;
-        messages.shrink(0);
-        mapvotes.shrink(0);
-        messagereliable = false;
-        projs::remove(game::player1);
-        removetrackedparticles(game::player1);
-        removetrackedsounds(game::player1);
-        game::player1->clientnum = -1;
-        game::player1->privilege = PRIV_NONE;
-        game::gamemode = G_EDITMODE;
-        game::mutators = 0;
-        loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
-        game::waiting.setsize(0);
-        emptymap(0, true, NULL, true);
-        smartmusic(true, false);
-        enumerate(idents, ident, id, {
-            if(id.flags&IDF_CLIENT) switch(id.type)
-            {
-                case ID_VAR: setvar(id.name, id.def.i, true); break;
-                case ID_FVAR: setfvar(id.name, id.def.f, true); break;
-                case ID_SVAR: setsvar(id.name, *id.def.s ? id.def.s : "", true); break;
-                default: break;
-            }
-        });
-        if(clean) game::clientmap[0] = '\0';
-    }
-
     bool allowedittoggle(bool edit)
     {
         bool allow = edit || m_edit(game::gamemode); // && game::player1->state == CS_ALIVE);
@@ -407,6 +360,29 @@ namespace client
     ICOMMAND(0, ban, "s", (char *s), kickban(s, true));
     ICOMMAND(0, clearbans, "", (), addmsg(N_CLEARBANS, "r"));
 
+    vector<int> ignores;
+    void ignore(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        if(!d || d == game::player1) return;
+        conoutft(CON_EVENT, "\fs\fcignoring:\fS %s", d->name);
+        if(ignores.find(cn) < 0) ignores.add(cn);
+    }
+
+    void unignore(int cn)
+    {
+        if(ignores.find(cn) < 0) return;
+        gameent *d = game::getclient(cn);
+        if(d) conoutft(CON_EVENT, "\fs\fcstopped ignoring:\fS %s", d->name);
+        ignores.removeobj(cn);
+    }
+
+    bool isignored(int cn) { return ignores.find(cn) >= 0; }
+
+    ICOMMAND(0, ignore, "s", (char *arg), ignore(parseplayer(arg)));
+    ICOMMAND(0, unignore, "s", (char *arg), unignore(parseplayer(arg)));
+    ICOMMAND(0, isignored, "s", (char *arg), intret(isignored(parseplayer(arg)) ? 1 : 0));
+
     void setteam(const char *arg1, const char *arg2)
     {
         if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
@@ -457,6 +433,55 @@ namespace client
     ICOMMAND(0, spectator, "is", (int *val, char *who), togglespectator(*val, who));
 
     ICOMMAND(0, checkmaps, "", (), addmsg(N_CHECKMAPS, "r"));
+
+    void connectattempt(const char *name, int port, const char *password, const ENetAddress &address)
+    {
+        if(*password) { copystring(connectpass, password); }
+        else memset(connectpass, 0, sizeof(connectpass));
+    }
+
+    void connectfail()
+    {
+        memset(connectpass, 0, sizeof(connectpass));
+    }
+
+    void gameconnect(bool _remote)
+    {
+        remote = _remote;
+        if(editmode) toggleedit();
+    }
+
+    void gamedisconnect(int clean)
+    {
+        if(editmode) toggleedit();
+        gettingmap = needsmap = remote = isready = sendinfo = false;
+        sessionid = 0;
+        ignores.shrink(0);
+        messages.shrink(0);
+        mapvotes.shrink(0);
+        messagereliable = false;
+        projs::remove(game::player1);
+        removetrackedparticles(game::player1);
+        removetrackedsounds(game::player1);
+        game::player1->clientnum = -1;
+        game::player1->privilege = PRIV_NONE;
+        game::gamemode = G_EDITMODE;
+        game::mutators = 0;
+        loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
+        game::waiting.setsize(0);
+        emptymap(0, true, NULL, true);
+        smartmusic(true, false);
+        enumerate(idents, ident, id, {
+            if(id.flags&IDF_CLIENT) switch(id.type)
+            {
+                case ID_VAR: setvar(id.name, id.def.i, true); break;
+                case ID_FVAR: setfvar(id.name, id.def.f, true); break;
+                case ID_SVAR: setsvar(id.name, *id.def.s ? id.def.s : "", true); break;
+                default: break;
+            }
+        });
+        if(clean) game::clientmap[0] = '\0';
+    }
 
     void addmsg(int type, const char *fmt, ...)
     {
@@ -598,7 +623,7 @@ namespace client
             if(d || verbose >= 2)
                 conoutft(CON_EVENT, "\fc%s set %s to %s", d ? game::colorname(d) : "the server", cmd, val);
         }
-        else if(verbose)conoutft(CON_EVENT, "\fr%s sent unknown command: %s", d ? game::colorname(d) : "the server", cmd);
+        else if(verbose) conoutft(CON_EVENT, "\fr%s sent unknown command: %s", d ? game::colorname(d) : "the server", cmd);
     }
 
     bool sendcmd(int nargs, const char *cmd, const char *arg)
@@ -1322,7 +1347,7 @@ namespace client
                     gameent *t = game::getclient(tcn);
                     int flags = getint(p);
                     getstring(text, p);
-                    if(!t) break;
+                    if(!t || isignored(t->clientnum) || isignored(t->ownernum)) break;
                     saytext(t, flags, text);
                     break;
                 }
@@ -1399,7 +1424,8 @@ namespace client
                         copystring(oldname, game::colorname(d));
                         d->setinfo(text, colour);
                         copystring(newname, game::colorname(d));
-                        if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
+                        if(game::showplayerinfo && !isignored(d->clientnum))
+                            conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
                     else d->setinfo(text, colour);
                     break;
@@ -1427,7 +1453,8 @@ namespace client
                             copystring(oldname, game::colorname(d, NULL, "", false));
                             d->setinfo(text, colour);
                             copystring(newname, game::colorname(d, text));
-                            if(game::showplayerinfo) conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
+                            if(game::showplayerinfo && !isignored(d->clientnum))
+                                conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                         }
                         else d->setinfo(text, colour);
                     }
