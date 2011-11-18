@@ -113,8 +113,8 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, a##critdash1, 0, xe, VAR_MAX); GVAR(0, a##critdash2, 0, xf, VAR_MAX); \
     GVAR(0, a##jamchance, 0, xg, VAR_MAX); \
     GVAR(0, a##stuntime1, 0, xh1, VAR_MAX); GVAR(0, a##stuntime2, 0, xh2, VAR_MAX); \
-    GFVAR(0, a##taper1, 0, t0, 1); GFVAR(0, a##taper2, 0, t1, 1); \
-    GFVAR(0, a##taperspan1, 0, t2, 1); GFVAR(0, a##taperspan2, 0, t3, 1); \
+    GFVAR(0, a##taperin1, 0, t0, 1); GFVAR(0, a##taperin2, 0, t1, 1); \
+    GFVAR(0, a##taperout1, 0, t2, 1); GFVAR(0, a##taperout2, 0, t3, 1); \
     GFVAR(0, a##elasticity1, FVAR_MIN, y0, FVAR_MAX); GFVAR(0, a##elasticity2, FVAR_MIN, y1, FVAR_MAX); \
     GFVAR(0, a##reflectivity1, 0, y2, 360); GFVAR(0, a##reflectivity2, 0, y3, 360); \
     GFVAR(0, a##relativity1, FVAR_MIN, y4, FVAR_MAX); GFVAR(0, a##relativity2, FVAR_MIN, y5, FVAR_MAX); \
@@ -153,7 +153,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  collide2
 //  ext1    ext2    cook1   cook2   guide1  guide2  radl1   radl2   resid1  resid2  rlds    crd     zooms   fa1     fa2
 //  allw    laser   cdash1  cdash2  jamch   stnt1   stnt2
-//  tpr1    tpr2    tspan1  tspan2  elas1   elas2   rflt1   rflt2   relt1   relt2   wfrc1   wfrc2   wght1   wght2   rads1   rads2
+//  tpin1   tpin2   tpout1  tpout2  elas1   elas2   rflt1   rflt2   relt1   relt2   wfrc1   wfrc2   wght1   wght2   rads1   rads2
 //  kpsh1   kpsh2   hpsh1   hpsh2   slow1   slow2   aidst1  aidst2  psz1    psz2    plen1   plen2   freq    push    stns1   stns2
 //  cmult   cdist   cboost  dlta1   dlta2   trce1   trce2   hdmin1  hdmin2  whpdm1  whipdm2 tordm1  tordm2  legdm1  legdm2  selfdm1 selfdm2
 //  fscale1 fscale2 fsprd1  fsprd2  frel1   frel2   fffwd1  fffwd2  foff1   foff2   fskew1  fskew2
@@ -237,14 +237,14 @@ WEAPON(smg,         0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,   
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER
 );
 WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,             -1,
-    25,     25,     1,      5,      100,    500,    2000,   5,      5,      300,    150,    0,      500,    200,    200,
+    25,     25,     1,      5,      100,    500,    2000,   5,      5,      300,    150,    0,      500,    250,    250,
     0,      25,     0,      0,      200,    200,    16,     16,     1,      1,      5,      5,      0,      0,      0,      0,
     0,      0,      10,     10,     -1,             WALT(FLAMER),   12,     4,      5,      5,      1000,   3000,   200,    250,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
     BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
     3,      3,      0,      1,      0,      0,      25,     25,     1,      1,      1,      1,      0,      1,      0,
     2,      0,      0,      0,      25,     0,      0,
-    0,      0,      0,      0,      0.5f,   0.35f,  0,      0,      0.95f,  0.5f,   1,      1,      200,    100,    1,      1,
+    0.75f,  0.75f,  0,      0,      0.5f,   0.35f,  0,      0,      0.95f,  0.5f,   1,      1,      200,    100,    1,      1,
     0.25f,  1,      25,     100,    0.25f,  1,      64,     128,    16,     24,     0,      5,      2,      1.5f,   0,      0,
     4,      64,     2,      10,     10,     1,      1,      4,      4,      0.65f,  0.65f,  0.45f,  0.45f,  0.25f,  0.25f,  0.5f,   0.5f,
     0.5f,   0.5f,   0.1f,   0.1f,   1,      1,      0.5f,   0.5f,   8,      8,      1,      1,
@@ -253,14 +253,14 @@ WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,         
 );
 WEAPON(plasma,      0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,
     20,     20,     1,      20,     300,    1000,   2000,   15,     5,      1500,   35,     0,      2000,   750,    5000,
-    0,      75,     0,      0,      200,    200,    10,     48,     1,      1,      2,      1,      0,      0,      0,      0,
+    0,      75,     0,      0,      200,    200,    12,     48,     1,      1,      2,      1,      0,      0,      0,      0,
     2,      1,      50,     10,     -1,             -1,             10,     5,      5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK,
     1,      0,      0,      1,      0,      0,      10,     200,    0,      0,      1,      1,      0,      1,      0,
     2,      0,      0,      0,      35,     35,     50,
     0,      0.5f,   0,      0.5f,   0.5f,   0.5f,   0,      0,      0.1f,   0.1f,   1,      1,      0,      0,      4,      2,
-    10,     150,    100,    -500,   1,      2,      128,    64,     5,      24,     0,      0,      2,      1.5f,   0.25f,  0.75f,
+    10,     150,    100,    -500,   1,      2,      128,    64,     6,      24,     0,      0,      2,      1.5f,   0.25f,  0.75f,
     2,      0,      2,      10,     10,     1,      1,      8,      4,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,   0.5f,   0.5f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
@@ -453,8 +453,8 @@ WEAPDEF(int, laser);
 WEAPDEF2(int, critdash);
 WEAPDEF(int, jamchance);
 WEAPDEF2(int, stuntime);
-WEAPDEF2(float, taper);
-WEAPDEF2(float, taperspan);
+WEAPDEF2(float, taperin);
+WEAPDEF2(float, taperout);
 WEAPDEF2(float, elasticity);
 WEAPDEF2(float, reflectivity);
 WEAPDEF2(float, relativity);
