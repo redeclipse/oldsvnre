@@ -446,7 +446,7 @@ namespace ai
             n.node = e->lastnode;
             n.target = e->clientnum;
             n.targtype = AI_T_ACTOR;
-            n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->ai->weappref) ? 1e4f : 1e2f));
+            n.score = e->o.squaredist(d->o)/(force ? 1e8f : (hasweap(d, d->ai->weappref) ? 1.f : 0.5f));
             n.tolerance = 0.25f;
             n.team = true;
         }
@@ -472,7 +472,7 @@ namespace ai
                         n.node = entities::closestent(WAYPOINT, e.o, CLOSEDIST, true);
                         n.target = j;
                         n.targtype = AI_T_ENTITY;
-                        n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
+                        n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
                         n.tolerance = 0;
                     }
                     break;
@@ -499,7 +499,7 @@ namespace ai
                         n.node = entities::closestent(WAYPOINT, proj.o, CLOSEDIST, true);
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
-                        n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1e2f));
+                        n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
                         n.tolerance = 0;
                     }
                     break;
@@ -560,7 +560,7 @@ namespace ai
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);
                 int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
-                if(others >= int(members*n.tolerance)) proceed = false;
+                if(others >= int(ceilf(members*n.tolerance))) proceed = false;
             }
             if(proceed && (!aistyle[d->aitype].canmove || makeroute(d, b, n.node, false)))
             {
