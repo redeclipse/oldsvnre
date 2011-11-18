@@ -1285,6 +1285,7 @@ namespace game
             e->dominated.removeobj(d);
         }
         if(focus == d) { focus = player1; follow = 0; } // just in case
+        client::unignore(d->clientnum);
         waiting.removeobj(d);
         cameras.shrink(0);
         client::clearvotes(d);
