@@ -1073,7 +1073,7 @@ namespace server
 
     #define mapcull(a,b,c) \
     { \
-        mapshrink(m_multi(b, c), a, GAME(multimaps)); \
+        mapshrink(m_multi(b, c) && (m_capture(b) || m_bomber(b)), a, GAME(multimaps)); \
         mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
         mapshrink(m_hover(b, c) || m_jetpack(b, c), a, GAME(hovermaps)); \
         if(GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
