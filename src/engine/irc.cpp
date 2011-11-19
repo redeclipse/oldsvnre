@@ -70,7 +70,7 @@ void ircsend(ircnet *n, const char *msg, ...)
             case '\f': ubuf[i] = '\x03'; break;
         }
         buf.data = ubuf;
-        buf.dataLength = numu;    
+        buf.dataLength = numu;
         enet_socket_send(n->sock, NULL, &buf, 1);
     }
 }
@@ -91,9 +91,9 @@ void converttext(char *dst, const char *src)
                 c = *++src;
                 if(c) ++src;
             }
-            else if(c == '[')
+            else if(c == '[' || c == '(')
             {
-                const char *end = strchr(src, ']');
+                const char *end = strchr(src, c == '[' ? ']' : ')');
                 src += end ? end-src : strlen(src);
             }
             else if(c == 's') { colorpos++; continue; }
@@ -175,11 +175,11 @@ int ircrecv(ircnet *n)
             case '\v': case '\f': n->input[n->inputlen+i] = ' '; break;
         }
         n->inputlen += len;
-        
+
         int carry = 0, decoded = decodeutf8(&n->input[n->inputcarry], &n->input[n->inputcarry], n->inputlen - n->inputcarry, &carry);
-        if(carry > decoded) 
-        {    
-            memmove(&n->input[n->inputcarry + decoded], &n->input[n->inputcarry + carry], n->inputlen - (n->inputcarry + carry)); 
+        if(carry > decoded)
+        {
+            memmove(&n->input[n->inputcarry + decoded], &n->input[n->inputcarry + carry], n->inputlen - (n->inputcarry + carry));
             n->inputlen -= carry - decoded;
         }
         n->inputcarry += decoded;
@@ -677,7 +677,7 @@ void ircparse(ircnet *n)
     {
         memmove(n->input, start, n->inputlen - parsed);
         n->inputcarry -= parsed;
-        n->inputlen -= parsed; 
+        n->inputlen -= parsed;
     }
 }
 

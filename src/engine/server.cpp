@@ -147,7 +147,7 @@ static void writelog(FILE *file, const char *fmt, va_list args)
         fwrite(ubuf, 1, numu, file);
     }
 }
- 
+
 #ifdef STANDALONE
 void localservertoclient(int chan, ENetPacket *packet) {}
 VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
@@ -282,7 +282,7 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
                     if(c) c = *++src;
                     if(!c) break;
                 }
-                else if(c == '[' || c == ')')
+                else if(c == '[' || c == '(')
                 {
                     const char *end = strchr(src, c == '[' ? ']' : ')');
                     src += end ? end-src : strlen(src);
@@ -889,7 +889,7 @@ int updatetimer()
     lastmillis += curtime;
     totalmillis = millis;
     static int lastsec = 0;
-    if(totalmillis - lastsec >= 1000) 
+    if(totalmillis - lastsec >= 1000)
     {
         int cursecs = (totalmillis - lastsec) / 1000;
         totalsecs += cursecs;
@@ -992,7 +992,7 @@ static void writeline(logline &line)
         int numu = encodeutf8(ubuf, sizeof(ubuf), &((uchar *)line.buf)[carry], len - carry, &carry);
         DWORD written = 0;
         WriteConsole(outhandle, ubuf, numu, &written, NULL);
-    }     
+    }
 }
 
 static void setupconsole()
