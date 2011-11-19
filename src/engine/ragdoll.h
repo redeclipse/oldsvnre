@@ -440,7 +440,7 @@ void ragdolldata::move(dynent *pl, float ts)
     loopv(skel->verts)
     {
         vert &v = verts[i];
-        if(v.pos.z < 0) { v.pos.z = 0; v.oldpos = v.pos; collisions++; }
+        //if(v.pos.z < 0) { v.pos.z = 0; v.oldpos = v.pos; collisions++; }
         vec dir = vec(v.pos).sub(v.oldpos);
         v.collided = !collidevert(v.pos, dir, skel->verts[i].radius);
         if(v.collided)
