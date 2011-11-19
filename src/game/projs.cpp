@@ -38,7 +38,7 @@ namespace projs
     FVAR(IDF_PERSIST, projhintsize, 0, 1.25f, FVAR_MAX);
     FVAR(IDF_PERSIST, projfirehintsize, 0, 1.5f, FVAR_MAX);
 
-    #define projhint(a,b)   (projhints >= 2 ? (a)->getcolour(projhints-2) : b)
+    #define projhint(a,b)   (projhints >= 2 ? game::getcolour(a, projhints-2) : b)
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     VAR(IDF_PERSIST, muzzleflare, 0, 2, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all

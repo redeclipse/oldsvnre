@@ -1607,7 +1607,7 @@ namespace ai
 
     void drawroute(gameent *d, aistate &b, float amt)
     {
-        int colour = d->getcolour(CTONE_MIXED), last = -1;
+        int colour = game::getcolour(d, CTONE_MIXED), last = -1;
         loopvrev(d->ai->route)
         {
             if(d->ai->route.inrange(last))

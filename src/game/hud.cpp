@@ -461,7 +461,7 @@ namespace hud
     template<class T>
     void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
-        if(colour <= 0) colour = game::focus->getcolour(0-colour);
+        if(colour <= 0) colour = game::getcolour(game::focus, 0-colour);
         vec c = vec::hexcolor(colour);
         r = T(r*c.r);
         g = T(g*c.g);
@@ -1267,8 +1267,8 @@ namespace hud
             vec colour[2];
             if(burning) colour[0] = game::burncolour(d);
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
-            else colour[0] = vec::hexcolor(game::playertone ? d->getcolour() : TEAM(d->team, colour));
-            colour[1] = vec::hexcolor(game::playertone ? d->getcolour(game::playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : TEAM(d->team, colour));
+            else colour[0] = vec::hexcolor(game::getcolour(d, CTONE_DEFAULT));
+            colour[1] = vec::hexcolor(game::getcolour(d, game::playertone ? (game::playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
             const char *tex = dominated ? dominatedtex : playerbliptex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -1393,11 +1393,11 @@ namespace hud
         {
             bool dead = (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath;
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
-                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::focus->getcolour(CTONE_TONE)), "radar", "you");
+                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::getcolour(game::focus)), "radar", "you");
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
-                vec colour = vec::hexcolor(a->getcolour(CTONE_TONE));
+                vec colour = vec::hexcolor(game::getcolour(a));
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
                     if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "radar", "%s (%d)", game::colorname(a), a->health);

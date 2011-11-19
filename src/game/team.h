@@ -11,12 +11,12 @@ enum
     GSVAR(0, team##a##name, #a); \
     GVAR(IDF_HEX, team##a##colour, 0, b, 0xFFFFFF);
 
-TEAMS(neutral, 0x888888);
+TEAMS(neutral, 0x999999);
 TEAMS(alpha, 0x5F66FF);
 TEAMS(omega, 0xFF4F44);
 TEAMS(kappa, 0xFFFF44);
 TEAMS(sigma, 0x22FF22);
-TEAMS(enemy, 0x555555);
+TEAMS(enemy, 0x999999);
 
 #ifdef GAMESERVER
 #define TEAMDEF(proto,name)     proto *sv_team_stat_##name[] = { &sv_teamneutral##name, &sv_teamalpha##name, &sv_teamomega##name, &sv_teamkappa##name, &sv_teamsigma##name, &sv_teamenemy##name };
