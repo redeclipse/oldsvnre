@@ -531,7 +531,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col = vec::hexcolor(d->getcolour()).mul(illumlevel);
+                    vec col = vec::hexcolor(game::getcolour(d)).mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -892,7 +892,7 @@ namespace game
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
-            if(isweap(weap) && !burning && !bleeding)
+            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove))
             {
                 float scale = float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT));
                 if(hithurts(flags) && WEAP2(weap, stuntime, flags&HIT_ALT))
@@ -1395,7 +1395,7 @@ namespace game
     {
         if(!name) name = d->name;
         static string cname;
-        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", d->getcolour(), name);
+        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", game::getcolour(d), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
             defformatstring(s)(" [%d]", d->clientnum);
@@ -1403,6 +1403,39 @@ namespace game
         }
         concatstring(cname, "\fS");
         return cname;
+    }
+
+    int findcolour(gameent *d, bool tone, bool mix)
+    {
+        if(tone)
+        {
+            int col = d->aitype < AI_START ? d->colour : 0;
+            if(!col && isweap(d->weapselect)) col = WEAP(d->weapselect, colour);
+            if(col)
+            {
+                if(mix)
+                {
+                    int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
+                        c = TEAM(ai::owner(d), colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF);
+                    col = (clamp((r1/2)+(r2/2), 0, 255)<<16)|(clamp((g1/2)+(g2/2), 0, 255)<<8)|clamp((b1/2)+(b2/2), 0, 255);
+                }
+                return col;
+            }
+        }
+        return TEAM(ai::owner(d), colour);
+    }
+
+    int getcolour(gameent *d, int level)
+    {
+        switch(level)
+        {
+            case -1: return d->colour;
+            case CTONE_MIXED: return findcolour(d, true, true); break;
+            case CTONE_ALONE: return findcolour(d, d->team != TEAM_NEUTRAL); break;
+            case CTONE_TEAM: return findcolour(d, d->team == TEAM_NEUTRAL); break;
+            case CTONE_TONE: return findcolour(d, true); break;
+            case CTONE_DEFAULT: default: return findcolour(d); break;
+        }
     }
 
     void suicide(gameent *d, int flags)
@@ -2244,8 +2277,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(playertone ? d->getcolour(CTONE_DEFAULT) : TEAM(d->team, colour));
-            e->light.material[1] = bvec(playertone ? d->getcolour(playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : TEAM(d->team, colour));
+            e->light.material[0] = bvec(game::getcolour(d, CTONE_DEFAULT));
+            e->light.material[1] = bvec(game::getcolour(d, playertone ? (playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2305,7 +2338,7 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = d->getcolour();
+            int colour = game::getcolour(d);
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {

@@ -336,7 +336,6 @@ enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, S
 #include "ai.h"
 #include "vars.h"
 
-enum { CTONE_DEFAULT = 0, CTONE_TONE, CTONE_TEAM, CTONE_ALONE, CTONE_MIXED, CTONE_MAX };
 // inherited by gameent and server clients
 struct gamestate
 {
@@ -1024,39 +1023,6 @@ struct gameent : dynent, gamestate
         colour = max(col, 0);
     }
 
-    int findcolour(bool tone = false, bool mix = false)
-    {
-        if(tone)
-        {
-            int col = aitype < AI_START ? colour : 0;
-            if(!col && isweap(weapselect)) col = WEAP(weapselect, colour);
-            if(col)
-            {
-                if(mix)
-                {
-                    int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
-                        c = TEAM(team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF);
-                    col = (clamp((r1/2)+(r2/2), 0, 255)<<16)|(clamp((g1/2)+(g2/2), 0, 255)<<8)|clamp((b1/2)+(b2/2), 0, 255);
-                }
-                return col;
-            }
-        }
-        return TEAM(team, colour);
-    }
-
-    int getcolour(int level = 0)
-    {
-        switch(level)
-        {
-            case -1: return colour;
-            case CTONE_MIXED: return findcolour(true, true); break;
-            case CTONE_ALONE: return findcolour(team != TEAM_NEUTRAL); break;
-            case CTONE_TEAM: return findcolour(team == TEAM_NEUTRAL); break;
-            case CTONE_TONE: return findcolour(true); break;
-            case CTONE_DEFAULT: default: return findcolour(); break;
-        }
-    }
-
     void addstun(int weap, int millis, int delay, float scale)
     {
         stunevent &s = stuns.add();
@@ -1264,6 +1230,7 @@ namespace hud
     extern int drawinventory(int x, int y, int s, int m, float blend);
 }
 
+enum { CTONE_DEFAULT = 0, CTONE_TONE, CTONE_TEAM, CTONE_ALONE, CTONE_MIXED, CTONE_MAX };
 namespace game
 {
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
@@ -1291,6 +1258,8 @@ namespace game
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);
     extern void clientdisconnected(int cn, int reason = DISC_NONE);
     extern char *colorname(gameent *d, char *name = NULL, const char *prefix = "", bool team = true, bool dupname = true);
+    extern int getcolour(gameent *d, int level = 0);
+    extern int findcolour(gameent *d, bool tone = false, bool mix = false);
     extern void errorsnd(gameent *d);
     extern void announce(int idx, gameent *d = NULL);
     extern void announcef(int idx, int targ, gameent *d, const char *msg, ...);

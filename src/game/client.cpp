@@ -177,7 +177,7 @@ namespace client
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
-    ICOMMAND(0, getcolour, "i", (int *m), intret(game::player1->getcolour(*m)));
+    ICOMMAND(0, getcolour, "i", (int *m), intret(game::getcolour(game::player1, *m)));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
@@ -1491,7 +1491,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->getcolour(CTONE_TEAM);
+                            int colour = game::getcolour(f, CTONE_TEAM);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
@@ -1529,7 +1529,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = f->getcolour(CTONE_TEAM);
+                            int colour = game::getcolour(f, CTONE_TEAM);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
