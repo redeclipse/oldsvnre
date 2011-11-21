@@ -316,7 +316,7 @@ namespace hud
     TVAR(IDF_PERSIST, revengetex, "textures/revenge", 3);
     TVAR(IDF_PERSIST, firstbloodtex, "textures/firstblood", 3);
 
-    ICOMMAND(0, conout, "C", (int *n, char *s), conoutft(clamp(*n, 0, CON_MAX-1), "%s", s));
+    ICOMMAND(0, conout, "is", (int *n, char *s), conoutft(clamp(*n, 0, CON_MAX-1), "%s", s));
 
     bool needminimap() { return true; }
 
