@@ -2187,7 +2187,7 @@ namespace game
                 else if(d->physstate == PHYS_FALL && !d->turnside && !d->onladder && d->impulse[IM_TYPE] != IM_T_NONE && lastmillis-d->impulse[IM_TIME] <= 1000)
                 {
                     basetime2 = d->impulse[IM_TIME];
-                    if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_POUND) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
+                    if(d->impulse[IM_TYPE] == IM_T_KICK) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
                     else if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;

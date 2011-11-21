@@ -55,7 +55,6 @@ namespace physics
             gameent *e = (gameent *)d;
             if(e->aitype < AI_START && allowimpulse(d, level))
             {
-                if(e->impulse[IM_TYPE] == IM_T_POUND) return false;
                 if(!kick && impulsestyle == 1 && e->impulse[IM_TYPE] > IM_T_NONE && e->impulse[IM_TYPE] < IM_T_WALL) return false;
                 if(e->impulse[IM_TIME] && lastmillis-e->impulse[IM_TIME] <= impulsedelay) return false;
                 if(impulsestyle <= 2 && e->impulse[IM_COUNT] >= impulsecount) return false;
@@ -283,12 +282,7 @@ namespace physics
     }
 
     float jumpvel(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->curscale; }
-    float gravityvel(physent *d)
-    {
-        if((d->type == ENT_PLAYER || d->type == ENT_AI) && ((gameent *)d)->impulse[IM_TYPE] == IM_T_POUND)
-            return PHYS(gravity)*(d->weight/100.f)*impulsepoundweight;
-        return PHYS(gravity)*(d->weight/100.f);
-    }
+    float gravityvel(physent *d) { return PHYS(gravity)*(d->weight/100.f); }
 
     float stepvel(physent *d, bool up)
     {
@@ -797,7 +791,7 @@ namespace physics
                     (d->vel = dir.normalize()).mul(force);
                     d->doimpulse(cost, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
                     if(!allowhover(d)) d->action[AC_JUMP] = false;
-                    if(power || pulse) d->action[AC_CROUCH] = onfloor = false;
+                    if(power || pulse) onfloor = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, melee ? SPHY_MELEE : (dash ? SPHY_DASH : SPHY_BOOST));
                     game::impulseeffect(d);
                     return true;
@@ -936,32 +930,10 @@ namespace physics
                         }
                     }
                 }
-                else
-                {
-                    if(d->action[AC_CROUCH] && canimpulse(d, 1, true))
-                    {
-                        vec v(0, 0, -1);
-                        float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-impulsepoundheight;
-                        if(d->o.z-floor >= impulsepoundheight)
-                        {
-                            int cost = impulsecost;
-                            float mag = impulsevelocity(d, impulsepound, cost);
-                            if(mag > 0)
-                            {
-                                d->vel = vec(0, 0, -mag);
-                                d->doimpulse(cost, IM_T_POUND, lastmillis);
-                                d->turnmillis = PHYSMILLIS;
-                                d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_POUND);
-                                game::impulseeffect(d);
-                            }
-                        }
-                    }
-                }
-                if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && ((d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay) || sliding(d, true) || d->impulse[IM_TYPE] == IM_T_POUND))
+                if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && ((d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay) || sliding(d, true)))
                 {
                     vec oldpos = d->o, dir;
-                    vecfromyawpitch(d->aimyaw, d->impulse[IM_TYPE] == IM_T_POUND ? -80 : 0, 1, 0, dir);
+                    vecfromyawpitch(d->aimyaw, 0, 1, 0, dir);
                     d->o.add(dir.normalize());
                     bool collided = collide(d, dir);
                     d->o = oldpos;
@@ -1252,10 +1224,18 @@ namespace physics
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
                 if(local && jetting && !hover(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
-                if(!pl->timeinair && timeinair >= PHYSMILLIS*2 && mag >= 20)
+                if(!pl->timeinair)
                 {
-                    int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
-                    playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
+                    if(local && impulsemethod&2 && timeinair >= impulsedelay && pl->move == 1 && allowimpulse(pl, 1) && ((gameent *)pl)->action[AC_CROUCH])
+                    {
+                        ((gameent *)pl)->action[AC_DASH] = true;
+                        ((gameent *)pl)->actiontime[AC_DASH] = lastmillis;
+                    }
+                    if(timeinair >= PHYSMILLIS*2 && mag >= 20)
+                    {
+                        int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
+                        playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
+                    }
                 }
             }
         }
