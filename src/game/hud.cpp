@@ -303,18 +303,18 @@ namespace hud
     TVAR(IDF_PERSIST, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST, badgetex, "textures/cube2badge", 3);
 
-    TVAR(IDF_PERSIST, spree1tex, "<anim:50,1,4,1>textures/carnage", 3);
-    TVAR(IDF_PERSIST, spree2tex, "<anim:50,1,4,1>textures/slaughter", 3);
-    TVAR(IDF_PERSIST, spree3tex, "<anim:50,1,4,1>textures/massacre", 3);
-    TVAR(IDF_PERSIST, spree4tex, "<anim:50,1,4,1>textures/bloodbath", 3);
-    TVAR(IDF_PERSIST, multi1tex, "<anim:50,1,4,1>textures/double", 3);
-    TVAR(IDF_PERSIST, multi2tex, "<anim:50,1,4,1>textures/triple", 3);
-    TVAR(IDF_PERSIST, multi3tex, "<anim:50,1,4,1>textures/multi", 3);
-    TVAR(IDF_PERSIST, headshottex, "<anim:50,1,4,1>textures/headshot", 3);
-    TVAR(IDF_PERSIST, criticaltex, "<anim:50,1,4,1>textures/critical", 3);
-    TVAR(IDF_PERSIST, dominatetex, "<anim:50,1,4,1>textures/dominate", 3);
-    TVAR(IDF_PERSIST, revengetex, "<anim:50,1,4,1>textures/revenge", 3);
-    TVAR(IDF_PERSIST, firstbloodtex, "<anim:50,1,4,1>textures/firstblood", 3);
+    TVAR(IDF_PERSIST, spree1tex, "textures/carnage", 3);
+    TVAR(IDF_PERSIST, spree2tex, "textures/slaughter", 3);
+    TVAR(IDF_PERSIST, spree3tex, "textures/massacre", 3);
+    TVAR(IDF_PERSIST, spree4tex, "textures/bloodbath", 3);
+    TVAR(IDF_PERSIST, multi1tex, "textures/double", 3);
+    TVAR(IDF_PERSIST, multi2tex, "textures/triple", 3);
+    TVAR(IDF_PERSIST, multi3tex, "textures/multi", 3);
+    TVAR(IDF_PERSIST, headshottex, "textures/headshot", 3);
+    TVAR(IDF_PERSIST, criticaltex, "textures/critical", 3);
+    TVAR(IDF_PERSIST, dominatetex, "textures/dominate", 3);
+    TVAR(IDF_PERSIST, revengetex, "textures/revenge", 3);
+    TVAR(IDF_PERSIST, firstbloodtex, "textures/firstblood", 3);
 
     bool needminimap() { return true; }
 
