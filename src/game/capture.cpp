@@ -229,7 +229,7 @@ namespace capture
                 if(millis <= 1000) trans += float(millis)/1000.f;
                 else trans = 1.f;
             }
-            else if(f.base&BASE_HOME) trans = 0.25f;
+            else if(f.base&BASE_HOME) trans = 0.5f;
             if(trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             above.z += enttype[AFFINITY].radius/2+2.5f;
             if((f.base&BASE_HOME) || (!f.owner && !f.droptime))
@@ -275,16 +275,13 @@ namespace capture
             if(!entities::ents.inrange(f.ent) || !(f.base&BASE_FLAG) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos());
             float yaw = 0;
-            if(f.owner)
-            {
-                yaw += f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
-                while(yaw >= 360.f) yaw -= 360.f;
-            }
+            if(f.owner) yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
             else
             {
-                yaw += (f.interptime+(360/st.flags.length()*i))%360;
+                yaw = ((lastmillis/8)+(360/st.flags.length()*i))%360;
                 if(f.proj) above.z -= f.proj->height;
             }
+            while(yaw >= 360.f) yaw -= 360.f;
             int interval = lastmillis%1000;
             entitylight *light = &f.light;
             light->material[0] = bvec(TEAM(f.team, colour));
