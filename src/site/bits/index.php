@@ -24,6 +24,7 @@
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/changeset/', 'nav' => -1, 'redir' => 1);
     $app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/ticket/', 'nav' => -1, 'redir' => 1);
 
+    $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['playdeb'] = array('name' => 'Playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
