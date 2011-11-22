@@ -2540,8 +2540,7 @@ namespace entities
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
-            part_create(PART_HINT_SOFT, 1, o, colour, radius, fluc*skew);
-            part_create(PART_EDIT, 1, o, colour, radius*0.75f, fluc*skew);
+            part_create(PART_HINT_BOLD_SOFT, 1, o, colour, radius, fluc*skew);
         }
         if(isedit ? (showentinfo >= (hasent ? 2 : 3)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
