@@ -15,7 +15,7 @@ namespace physics
     FVAR(IDF_WORLD, stepspeed, 1e-4f, 1.f, 1000);
 
     FVAR(IDF_PERSIST, floatspeed, 1e-4f, 100, 1000);
-    FVAR(IDF_PERSIST, floatcurb, 0, 1.f, 1000);
+    FVAR(IDF_PERSIST, floatcurb, 0, 3.f, 1000);
 
     FVAR(IDF_PERSIST, impulseroll, 0, 15, 90);
     FVAR(IDF_PERSIST, impulsetolerance, 0, 3, 6);
