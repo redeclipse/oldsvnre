@@ -1496,7 +1496,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     loopk(numattr) e.attrs[k] = f->getlil<int>();
                 }
                 if((maptype == MAP_OCTA && hdr.version <= 27) || (maptype == MAP_MAPZ && hdr.version <= 31)) e.attrs[4] = 0; // init ever-present attr5
-                if(maptype == MAP_OCTA) loopj(eif) f->getchar();
+                if(maptype == MAP_OCTA) f->seek(eif, SEEK_CUR);
 
                 // sauerbraten version increments
                 if(hdr.version <= 10 && e.type >= 7) e.type++;
@@ -1513,6 +1513,16 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
 
                 // redeclipse version increments
                 if((maptype == MAP_OCTA || (maptype == MAP_MAPZ && hdr.version <= 35)) && e.type >= ET_SUNLIGHT) e.type++;
+                if(!samegame && (e.type >= ET_GAMESPECIFIC || hdr.version <= 14))
+                {
+                    if(maptype == MAP_MAPZ && entities::maylink(hdr.gamever <= 49 && e.type >= 10 ? e.type-1 : e.type, hdr.gamever))
+                    {
+                        int links = f->getlil<int>();
+                        f->seek(sizeof(int)*links, SEEK_CUR);
+                    }
+                    entities::deleteent(ents.pop());
+                    continue;
+                }
                 entities::readent(f, maptype, hdr.version, hdr.gameid, hdr.gamever, i);
                 if(maptype == MAP_MAPZ && entities::maylink(hdr.gamever <= 49 && e.type >= 10 ? e.type-1 : e.type, hdr.gamever))
                 {
