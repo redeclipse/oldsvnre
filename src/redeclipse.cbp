@@ -213,7 +213,7 @@
 				</Compiler>
 			</Target>
 			<Target title="genkey">
-				<Option output="..\bin\regenkey.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\genkey.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\genkey" />
 				<Option deps_output=".deps\server" />
@@ -246,9 +246,45 @@
 					<Add directory="lib" />
 				</Linker>
 			</Target>
+			<Target title="cube2font">
+				<Option output="..\bin\cube2font.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\" />
+				<Option object_output=".objs\cube2font" />
+				<Option deps_output=".deps\server" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Option projectCompilerOptionsRelation="1" />
+				<Option projectLinkerOptionsRelation="1" />
+				<Option projectIncludeDirsRelation="1" />
+				<Option projectResourceIncludeDirsRelation="1" />
+				<Option projectLibDirsRelation="1" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-fsigned-char" />
+					<Add option="-fno-exceptions" />
+					<Add option="-DSTANDALONE" />
+					<Add option="-DGENKEY" />
+					<Add directory="shared" />
+					<Add directory="engine" />
+					<Add directory="game" />
+					<Add directory="enet\include" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="freetype" />
+					<Add library="zdll" />
+					<Add library="png" />
+					<Add directory="lib" />
+				</Linker>
+			</Target>
 		</Build>
 		<VirtualTargets>
 			<Add alias="All" targets="client;server;" />
+			<Add alias="Tools" targets="genkey;cube2font;" />
 		</VirtualTargets>
 		<Unit filename="engine\animmodel.h">
 			<Option target="client" />
@@ -1042,7 +1078,6 @@
 			<Option target="client" />
 			<Option target="client-dbg" />
 			<Option target="server" />
-			<Option target="genkey" />
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
@@ -1069,6 +1104,10 @@
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 			<Option target="data" />
+		</Unit>
+		<Unit filename="shared\cube2font.c">
+			<Option compilerVar="CC" />
+			<Option target="cube2font" />
 		</Unit>
 		<Unit filename="shared\ents.h">
 			<Option target="data" />
@@ -1118,7 +1157,15 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
-		<Unit filename="shared\tools.h" />
+		<Unit filename="shared\tools.h">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+			<Option target="server" />
+			<Option target="server-dbg" />
+			<Option target="data" />
+			<Option target="genkey" />
+		</Unit>
 		<Unit filename="shared\zip.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
