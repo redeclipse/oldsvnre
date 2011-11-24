@@ -496,7 +496,7 @@ void readychanges(block3 &b, cube *c, const ivec &cor, int size)
                 int hasmerges = c[i].ext->va->hasmerges;
                 destroyva(c[i].ext->va);
                 c[i].ext->va = NULL;
-                if(hasmerges) invalidatemerges(c[i], o, size, true); 
+                if(hasmerges) invalidatemerges(c[i], o, size, true);
             }
             freeoctaentities(c[i]);
             c[i].ext->tjoints = -1;
@@ -1856,6 +1856,7 @@ void edittex(int i, bool save = true, bool edit = true)
     }
     if(edit) mpedittex(i, allfaces, sel, true);
 }
+ICOMMAND(0, settex, "i", (int *slot), edittex(*slot));
 
 void edittex_(int *dir)
 {
