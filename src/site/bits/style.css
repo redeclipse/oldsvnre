@@ -6,9 +6,9 @@ h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF;
 #container { margin: 0px auto; width: 980px; padding: 0px; }
 #main { margin: 5px 0px 0px 30px; width: 410px; float: left; }
 #button { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1126px; margin: 0px 0px 0px 65px; padding: 12px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #773a00; }
-#rel, #svn, #mirror { font: 12px Arial, Helvetica, sans-serif; color: #dfbfb7; margin: 0px; padding: 10px 0px 0px; float: left; width: 402px; text-align: center; }
-#rel a, #svn a, #mirror a { color: #FFFFFF; border-bottom: 1px dotted #FFFFFF; text-decoration: none; }
-#rel a:hover, #svn a:hover, #mirror a:hover { color: #FFFFFF; text-decoration: none; border-bottom: 1px solid #FFFFFF; }
+#rel, #svn, #digidist, #mirror { font: 12px Arial, Helvetica, sans-serif; color: #dfbfb7; margin: 0px; padding: 5px 0px 0px; float: left; width: 402px; text-align: center; }
+#rel a, #svn a, #digidist a,  #mirror a { color: #FFFFFF; border-bottom: 1px dotted #FFFFFF; text-decoration: none; }
+#rel a:hover, #svn a:hover, #digidist a:hover, #mirror a:hover { color: #FFFFFF; text-decoration: none; border-bottom: 1px solid #FFFFFF; }
 #button:hover { font: bold normal 20px "Trebuchet MS", Arial, Helvetica, sans-serif; color: #FFFFFF; background: url(/bits/sprite.png) no-repeat -690px -1217px; margin: 0px 0px 0px 65px; padding: 12px 0px 0px 98px; float: left; height: 64px; width: 176px; text-decoration: none; text-shadow: -1px -1px 1px #ff4444; }
 #button em { font: normal 12px Arial, Helvetica, sans-serif; text-decoration: none; }
 #header { margin: 10px 0px 0px; padding: 10px 0px; float: left; width: 980px; background: url(/bits/sprite.png) no-repeat center top; }
@@ -51,7 +51,7 @@ a.info span.bubble { display: none }
 a.info:hover span.bubble { display:block; position:absolute; top:2em; left:-10em; width:158px; color:#FFFFFF; text-align: center; padding:10px 0px 0px; background: url(/bits/sprite.png) no-repeat -671px -777px; height: 30px; }
 #facebook { background: url(/bits/sprite.png) no-repeat -282px -876px; display: block; float: left; height: 41px; padding: 0px; width: 41px; }
 #google { background: url(/bits/sprite.png) no-repeat -282px -927px; display: block; float: left; height: 41px; padding: 0px; width: 41px; }
-#blackboxbeta { background: url(/bits/sprite.png) no-repeat -282px -1076px; display: block; float: left; height: 41px; padding: 0px; width: 41px; }
+#desura { background: url(/bits/sprite.png) no-repeat -282px -1076px; display: block; float: left; height: 41px; padding: 0px; width: 41px; }
 #playdeb { background: url(/bits/sprite.png) no-repeat -282px -1126px; display: block; float: left; height: 41px; padding: 0px; width: 41px; }
 #youtube { background: url(/bits/sprite.png) no-repeat -282px -1027px; display: block; float: left; height: 41px; padding: 0px; width: 41px; }
 #gallery img { padding: 0px; margin: 2px 19px 2px 19px; float: left; }
