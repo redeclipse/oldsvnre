@@ -252,7 +252,7 @@ WEAPON(flamer,      0xBB2222,       -1,             -1,             -1,         
     BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER
 );
 WEAPON(plasma,      0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,
-    20,     20,     1,      20,     300,    1000,   2000,   15,     5,      1500,   35,     0,      2000,   750,    5000,
+    20,     20,     1,      20,     300,    1000,   2000,   15,     10,     1500,   35,     0,      2000,   750,    5000,
     0,      75,     0,      0,      200,    200,    12,     48,     1,      1,      2,      1,      0,      0,      0,      0,
     2,      1,      50,     10,     -1,             -1,             10,     5,      5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER,
@@ -297,7 +297,7 @@ WEAPON(grenade,     0x119911,       -1,             -1,             0x981808,   
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS
 );
 WEAPON(rocket,      0x882200,       -1,             -1,              0x981808,      0x981808,
-    1,      1,      1,      1,      1000,   1000,   1500,   200,     200,   1000,   250,    2000,   2000,   5000,   5000,
+    1,      1,      1,      1,      1000,   1000,   1500,   150,     150,   1000,   250,    2000,   2000,   5000,   5000,
     0,      0,      0,      0,      200,    200,    100,    100,     1,     1,      1,      1,      0,      0,      0,      0,
     0,      0,      10,     10,     WEAP_SMG,       WEAP_SMG,        300,   300,    75,     75,     3000,   3000,   400,    400,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_SHOTS,
