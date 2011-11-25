@@ -46,7 +46,7 @@ namespace aiman
                 clientinfo *ci = clients[i];
                 if(ci->state.ownernum < 0)
                 { // reuse a slot that was going to removed
-                    ci->state.ownernum = findaiclient();
+                    if((ci->state.ownernum = findaiclient()) < 0) return false;
                     ci->state.aireinit = 1;
                     ci->state.aitype = type;
                     ci->state.aientity = ent;
