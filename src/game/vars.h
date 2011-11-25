@@ -24,22 +24,22 @@ GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the c
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath blink center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath blink cargo center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, mainmaps, "bath blink center darkness deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, capturemaps, "bath center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic stone tranquility tribal venus warp wet");
-GSVAR(IDF_ADMIN, defendmaps, "bath center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
-GSVAR(IDF_ADMIN, bombermaps, "bath center deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
-GSVAR(IDF_ADMIN, holdmaps, "bath center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, mainmaps, "bath blink cargo center darkness deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, capturemaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, defendmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, bombermaps, "bath cargo center deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
+GSVAR(IDF_ADMIN, holdmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
-GSVAR(IDF_ADMIN, multimaps, "deadsimple"); // applies to modes which *require* multi spawns (ctf/bb)
+GSVAR(IDF_ADMIN, multimaps, "cargo deadsimple"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
-GSVAR(IDF_ADMIN, hovermaps, "alphacampaign center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, hovermaps, "alphacampaign cargo center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
-GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple deli dropzone dutility echo ghost linear longestyard panic stone wet");
-GSVAR(IDF_ADMIN, mediummaps, "blink center darkness deadsimple deathtrap deli dropzone echo error facility forge foundation futuresport ghost keystone lab linear mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, smallmaps, "bath cargo darkness deadsimple deli dropzone dutility echo ghost linear longestyard panic stone wet");
+GSVAR(IDF_ADMIN, mediummaps, "blink cargo center darkness deadsimple deathtrap deli dropzone echo error facility forge foundation futuresport ghost keystone lab linear mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, largemaps, "blink center dawn deadsimple deathtrap deli depot error facility forge foundation futuresport ghost lab linear mist nova processing spacetech tranquility tribal ubik venus warp");
 
 
@@ -89,10 +89,10 @@ GFVAR(0, actorscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, maxresizescale, 1, 2, FVAR_MAX);
 GFVAR(0, minresizescale, FVAR_NONZERO, 0.5f, 1);
 
-GVAR(0, burntime, 0, 3500, VAR_MAX);
+GVAR(0, burntime, 0, 5500, VAR_MAX);
 GVAR(0, burndelay, 0, 1000, VAR_MAX);
 GVAR(0, burndamage, 0, 3, VAR_MAX);
-GVAR(0, bleedtime, 0, 3500, VAR_MAX);
+GVAR(0, bleedtime, 0, 5500, VAR_MAX);
 GVAR(0, bleeddelay, 0, 1000, VAR_MAX);
 GVAR(0, bleeddamage, 0, 3, VAR_MAX);
 
