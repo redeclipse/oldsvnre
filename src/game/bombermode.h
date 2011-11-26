@@ -176,7 +176,7 @@ struct bomberservmode : bomberstate, servmode
             int hasaffinity = 0;
             vector<int> candidates[TEAM_MAX];
             loopv(flags) candidates[flags[i].team].add(i);
-            int wants = teamcount(gamemode, mutators);
+            int wants = m_gsp2(gamemode, mutators) ? 1 : teamcount(gamemode, mutators);
             loopi(wants)
             {
                 int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
@@ -189,12 +189,18 @@ struct bomberservmode : bomberstate, servmode
             }
             if(hasaffinity < wants)
             {
-                if(hasaffinity && !m_gsp2(gamemode, mutators)) changemap(smapname, gamemode, mutators|G_M_GSP2);
-                else hasflaginfo = false;
-                return;
+                if(!candidates[TEAM_NEUTRAL].empty() && !m_gsp2(gamemode, mutators))
+                {
+                    srvmsgf(-1, "\fzoythis map does have enough goals, switching on hold mutator");
+                    sendf(-1, 1, "risi3", N_MAPCHANGE, smapname, 0, gamemode, mutators|G_M_GSP2);
+                    changemap(smapname, gamemode, mutators|G_M_GSP2);
+                    return;
+                }
+                hasflaginfo = false;
+                loopv(flags) sendf(-1, 1, "ri3", N_RESETAFFIN, i, 0);
+                srvmsgf(-1, "\fs\fzoythis map is not playable in:\fS %s", gamename(gamemode, mutators));
             }
-            if(!hasaffinity) { hasflaginfo = false; return; }
-            ancmsgft(-1, S_V_BOMBSTART, CON_INFO, "\fathe \fs\fwbomb\fS has been spawned");
+            else ancmsgft(-1, S_V_BOMBSTART, CON_INFO, "\fathe \fs\fwbomb\fS has been spawned");
             bombertime = 0;
         }
         int t = (gamemillis/GAME(bomberholdinterval))-((gamemillis-(curtime+scoresec))/GAME(bomberholdinterval));
