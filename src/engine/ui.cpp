@@ -779,7 +779,7 @@ struct gui : guient
             int x = curx;
             if(icon)
             {
-                defformatstring(tname)("%s%s", strncmp("textures/", icon, 9) ? "textures/" : "", icon);
+                const char *tname = strstr(icon, "textures/") ? icon : makerelpath("textures", icon);
                 icon_(textureload(tname, 3, true, false), false, x, cury, guibound[1], faded && clickable && !hit, icolor);
                 x += guibound[1];
             }
