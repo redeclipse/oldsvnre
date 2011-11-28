@@ -178,7 +178,7 @@ struct font
 };
 
 #define FONTH (curfont->defaulth)
-#define FONTW (curfont->defaultw)
+#define FONTW (FONTH/2)
 #define PIXELTAB (4*FONTW)
 
 extern font *curfont;
