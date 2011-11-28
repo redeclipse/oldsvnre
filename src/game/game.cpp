@@ -22,7 +22,7 @@ namespace game
     SVAR(IDF_WORLD, obitdeath, "");
     SVAR(IDF_WORLD, mapmusic, "");
 
-    VAR(IDF_PERSIST, musictype, 0, 1, 2); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random
+    VARF(IDF_PERSIST, musictype, 0, 1, 2, musicdone(true)); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random
     SVAR(IDF_WORLD, musicdir, "sounds/music");
 
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
