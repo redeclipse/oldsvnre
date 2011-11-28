@@ -549,7 +549,7 @@ namespace hud
         if(amt > 0)
         {
             Texture *t = textureload(indicatortex, 3);
-            if(t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            if(t->bpp == 2 || t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             else glBlendFunc(GL_ONE, GL_ONE);
             glBindTexture(GL_TEXTURE_2D, t->id);
             float val = amt < 0.25f ? amt : (amt > 0.75f ? 1.f-amt : 0.25f);
@@ -577,7 +577,7 @@ namespace hud
         int ammo = game::focus->ammo[weap], maxammo = WEAP(weap, max), weapid = weap;
         if(clipsizes[weap] != maxammo) weapid = 0;
         Texture *t = textureload(cliptexs[weapid], 3);
-        if(t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if(t->bpp == 2 || t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         else glBlendFunc(GL_ONE, GL_ONE);
 
         const float clipskew[WEAP_MAX] = {
@@ -694,7 +694,7 @@ namespace hud
         Texture *t = tex && *tex ? textureload(tex, 3) : NULL;
         if(t && t != notexture)
         {
-            if(t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            if(t->bpp == 2 || t->bpp == 4) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             else glBlendFunc(GL_ONE, GL_ONE);
             glColor4f(r, g, b, fade);
             glBindTexture(GL_TEXTURE_2D, t->id);
