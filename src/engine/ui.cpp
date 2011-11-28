@@ -909,8 +909,8 @@ namespace UI
 
         if(code<0) switch(code)
         { // fall-through-o-rama
-            case -5: mouseaction[1] |= GUI_ALT;
-            case -4: mouseaction[1] |= isdown ? GUI_DOWN : GUI_UP;
+            case -5: if(fieldmode == FIELDEDIT) break; mouseaction[1] |= GUI_ALT;
+            case -4: if(fieldmode == FIELDEDIT) break; mouseaction[1] |= isdown ? GUI_DOWN : GUI_UP;
                 if(active()) return true;
                 break;
             case -3: mouseaction[0] |= GUI_ALT;
@@ -954,9 +954,13 @@ namespace UI
             case SDLK_LEFT:
             case SDLK_RIGHT:
             case SDLK_LSHIFT:
-            case SDLK_RSHIFT: break;
+            case SDLK_RSHIFT: 
+            case -4:
+            case -5:
+                break;
             default:
                 if(!cooked || (code<32)) return false;
+                break;
         }
         if(!isdown) return true;
         e->key(code, cooked);

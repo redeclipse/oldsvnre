@@ -600,11 +600,10 @@ void consolekey(int code, bool isdown, int cooked)
 
 void keypress(int code, bool isdown, int cooked)
 {
-    int alpha = cooked < 0x80 ? cooked : '?';
     keym *haskey = keyms.access(code);
     if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
-    else if(commandmillis > 0) consolekey(code, isdown, alpha);
-    else if(!hud::keypress(code, isdown, alpha) && haskey) execbind(*haskey, isdown);
+    else if(commandmillis > 0) consolekey(code, isdown, cooked);
+    else if(!hud::keypress(code, isdown, cooked) && haskey) execbind(*haskey, isdown);
 }
 
 char *getcurcommand()
