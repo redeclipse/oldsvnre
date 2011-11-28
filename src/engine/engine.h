@@ -174,10 +174,13 @@ struct font
     char *name;
     vector<Texture *> texs;
     vector<charinfo> chars;
-    int charoffset, defaultw, defaulth;
+    int charoffset, defaultw, defaulth, scale;
+
+    font() : name(NULL) {}
+    ~font() { DELETEA(name); }
 };
 
-#define FONTH (curfont->defaulth)
+#define FONTH (curfont->scale)
 #define FONTW (FONTH/2)
 #define PIXELTAB (4*FONTW)
 
