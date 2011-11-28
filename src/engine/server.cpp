@@ -1445,7 +1445,7 @@ void writecfg()
         bool saved = false;
         if(id.flags&IDF_PERSIST) switch(id.type)
         {
-            case ID_VAR: if(*id.storage.i != id.def.i) { found = saved = true; f->printf((id.flags&IDF_HEX ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i); } break;
+            case ID_VAR: if(*id.storage.i != id.def.i) { found = saved = true; f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i); } break;
             case ID_FVAR: if(*id.storage.f != id.def.f) { found = saved = true; f->printf("%s %s", id.name, floatstr(*id.storage.f)); } break;
             case ID_SVAR: if(strcmp(*id.storage.s, id.def.s)) { found = saved = true; f->printf("%s ", id.name); writeescapedstring(f, *id.storage.s); } break;
         }

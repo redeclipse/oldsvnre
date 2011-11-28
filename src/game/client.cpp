@@ -129,7 +129,7 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf((id.flags&IDF_HEX ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i);
+                    f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i);
                     f->printf("\n");
                     break;
                 case ID_FVAR:
@@ -601,7 +601,7 @@ namespace client
                     int ret = parseint(arg);
                     *id->storage.i = ret;
                     id->changed();
-                    formatstring(val)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                    formatstring(val)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
                     break;
                 }
                 case ID_FVAR:
@@ -1761,7 +1761,7 @@ namespace client
                                 if(val > id->maxval) val = id->maxval;
                                 else if(val < id->minval) val = id->minval;
                                 setvar(text, val, true);
-                                defformatstring(str)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                                defformatstring(str)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
                                 conoutft(CON_EVENT, "\fc%s set worldvar %s to %s", game::colorname(d), id->name, str);
                             }
                             break;
