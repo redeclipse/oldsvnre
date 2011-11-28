@@ -671,7 +671,7 @@ namespace server
                     case ID_VAR:
                     {
                         setvar(id.name, id.def.i, true);
-                        if(flush) formatstring(val)(id.flags&IDF_HEX ? (id.maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id.storage.i);
+                        if(flush) formatstring(val)(id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id.storage.i);
                         break;
                     }
                     case ID_FVAR:
@@ -2362,7 +2362,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
+                        conoutft(CON_MESG, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
                         return true;
                     }
                     if(id->maxval < id->minval)
@@ -2382,7 +2382,7 @@ namespace server
                     checkvar(id, arg);
                     *id->storage.i = ret;
                     id->changed();
-                    formatstring(scmdval)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                    formatstring(scmdval)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
                     break;
                 }
                 case ID_FVAR:
@@ -2453,12 +2453,12 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
+                        srvmsgf(ci->clientnum, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
                         return;
                     }
                     else if(locked && !haspriv(ci, locked >= 3 ? PRIV_MAX : (locked >= 2 ? PRIV_ADMIN : PRIV_MASTER), "change variables"))
                     {
-                        formatstring(val)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                        formatstring(val)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
                         sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, &id->name[3], val);
                         return;
                     }
@@ -2479,7 +2479,7 @@ namespace server
                     checkvar(id, arg);
                     *id->storage.i = ret;
                     id->changed();
-                    formatstring(val)(id->flags&IDF_HEX ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                    formatstring(val)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
                     break;
                 }
                 case ID_FVAR:
@@ -2681,7 +2681,7 @@ namespace server
                 {
                     case ID_VAR:
                     {
-                        formatstring(val)(id.flags&IDF_HEX ? (id.maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id.storage.i);
+                        formatstring(val)(id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id.storage.i);
                         break;
                     }
                     case ID_FVAR:

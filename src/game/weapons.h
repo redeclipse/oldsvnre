@@ -77,8 +77,8 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     ya3, ya4, ya5, ya6, ya7, ya8, ya9, ya10, ya11, ya12, ya13, ya14, ya15, ya16 \
  ) \
     GSVAR(0, a##name, #a); GVAR(IDF_HEX, a##colour, 0, w01, 0xFFFFFF); \
-    GVAR(0, a##partcol1, -3, w02, 0xFFFFFF); GVAR(0, a##partcol2, -3, w03, 0xFFFFFF); \
-    GVAR(0, a##explcol1, -3, w04, 0xFFFFFF); GVAR(0, a##explcol2, -3, w05, 0xFFFFFF); \
+    GVAR(IDF_HEX, a##partcol1, -3, w02, 0xFFFFFF); GVAR(IDF_HEX, a##partcol2, -3, w03, 0xFFFFFF); \
+    GVAR(IDF_HEX, a##explcol1, -3, w04, 0xFFFFFF); GVAR(IDF_HEX, a##explcol2, -3, w05, 0xFFFFFF); \
     GVAR(0, a##add, 1, w11, VAR_MAX); GVAR(0, a##max, 1, w12, VAR_MAX); \
     GVAR(0, a##sub1, 0, w2, VAR_MAX); GVAR(0, a##sub2, 0, w3, VAR_MAX); \
     GVAR(0, a##adelay1, 20, w4, VAR_MAX); GVAR(0, a##adelay2, 20, w5, VAR_MAX); GVAR(0, a##rdelay, 50, w6, VAR_MAX); \
