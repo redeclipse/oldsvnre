@@ -188,7 +188,7 @@ struct font
 
 #define FONTH (curfont->scale)
 #define FONTW (FONTH/2)
-#define PIXELTAB (4*FONTW)
+#define FONTTAB (4*FONTW)
 
 extern font *curfont;
 

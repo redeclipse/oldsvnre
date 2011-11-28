@@ -121,24 +121,25 @@ bool setfont(const char *name)
     return true;
 }
 
-int text_width(const char *str, int flags) { //@TODO deprecate in favour of text_bounds(..)
-    int width, height;
-    text_bounds(str, width, height, -1, flags);
+float text_widthf(const char *str, int flags) 
+{
+    float width, height;
+    text_boundsf(str, width, height, -1, flags);
     return width;
 }
 
+#define TEXTTAB(g) ((g) + max(float(FONTTAB - fmod((g), FONTTAB)), float(FONTW)))
+
 void tabify(const char *str, int *numtabs)
 {
-    vector<char> tabbed;
-    tabbed.put(str, strlen(str));
-    int w = text_width(str), tw = max(*numtabs, 0)*PIXELTAB;
-    while(w < tw)
-    {
-        tabbed.add('\t');
-        w = ((w+PIXELTAB)/PIXELTAB)*PIXELTAB;
-    }
-    tabbed.add('\0');
-    result(tabbed.getbuf());
+    int tw = max(*numtabs, 0)*FONTTAB-1, tabs = 0;
+    for(float w = text_widthf(str); w <= tw; w = TEXTTAB(w)) ++tabs; 
+    int len = strlen(str);
+    char *tstr = newstring(len + tabs);
+    memcpy(tstr, str, len);
+    memset(&tstr[len], '\t', tabs);
+    tstr[len+tabs] = '\0';
+    stringret(tstr);
 }
 
 COMMAND(0, tabify, "si");
@@ -247,7 +248,6 @@ static float icon_width(const char *name, float scale)
     return 0;
 }
 
-#define TEXTTAB(g) (g + max(float(PIXELTAB - fmod(g, PIXELTAB)), float(FONTW)))
 #define TEXTCOLORIZE(g,h) \
 { \
     if(g[h] == 'z' && g[h+1]) \
@@ -292,8 +292,8 @@ static float icon_width(const char *name, float scale)
     else TEXTCOLOR(h); \
 }
 #define TEXTALIGN \
-    x = (!(flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT) ? PIXELTAB : 0); \
-    if(!y && (flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT)) maxwidth -= PIXELTAB; \
+    x = (!(flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT) ? FONTTAB : 0); \
+    if(!y && (flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT)) maxwidth -= FONTTAB; \
     y += FONTH;
 #define TEXTSKELETON \
     float y = 0, x = 0, scale = curfont->scale/float(curfont->defaulth);\
@@ -343,7 +343,7 @@ static float icon_width(const char *name, float scale)
 
 #define TEXTEND(cursor) if(cursor >= i) { do { TEXTINDEX(cursor); } while(0); }
 
-int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
+int text_visible(const char *str, float hitx, float hity, int maxwidth, int flags)
 {
     #define TEXTINDEX(idx)
     #define TEXTWHITE(idx) if(y+FONTH > hity && x >= hitx) return idx;
@@ -366,9 +366,9 @@ int text_visible(const char *str, int hitx, int hity, int maxwidth, int flags)
 }
 
 //inverse of text_visible
-void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int flags)
+void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, int flags)
 {
-    #define TEXTINDEX(idx) if(cursor == idx) { cx = int(x); cy = int(y); break; }
+    #define TEXTINDEX(idx) if(cursor == idx) { cx = x; cy = y; break; }
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
@@ -389,11 +389,11 @@ void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int f
     #undef TEXTWORD
 }
 
-void text_bounds(const char *str, int &width, int &height, int maxwidth, int flags)
+void text_boundsf(const char *str, float &width, float &height, int maxwidth, int flags)
 {
     #define TEXTINDEX(idx)
     #define TEXTWHITE(idx)
-    #define TEXTLINE(idx) if(x > width) width = int(ceil(x));
+    #define TEXTLINE(idx) if(x > width) width = x;
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
     #define TEXTICON(ret) x += icon_width(ret, scale);
@@ -401,7 +401,7 @@ void text_bounds(const char *str, int &width, int &height, int maxwidth, int fla
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
     TEXTSKELETON
-    height = int(ceil(y + FONTH));
+    height = y + FONTH;
     TEXTLINE(_)
     #undef TEXTINDEX
     #undef TEXTWHITE

@@ -76,7 +76,8 @@ struct gui : guient
         return false;
     }
 
-    bool visible() { return (!tcurrent || tpos==*tcurrent) && !layoutpass; }
+    static inline bool visibletab() { return !tcurrent || tpos == *tcurrent; }
+    bool visible() { return !layoutpass && visibletab(); }
 
     //tab is always at top of page
     void tab(const char *name, int color)
@@ -101,7 +102,8 @@ struct gui : guient
             name = title;
         }
         defformatstring(tabtitle)("\fs\fd[\fS%s%s%s\fs\fd]\fS", visible() ? " " : "", name, visible() ? " " : "");
-        gui::pushfont(visible() ? "super" : "default");
+        bool vis = visibletab();
+        gui::pushfont(vis ? "super" : "default");
         int w = text_width(tabtitle);
         if(layoutpass)
         {
@@ -112,7 +114,7 @@ struct gui : guient
         {
             cury = -ysize;
             int x1 = curx + tx + guibound[0], x2 = x1 + w, y1 = cury - guibound[1]*2, y2 = cury - guibound[1]*2 + FONTH, alpha = guiblend;
-            if(visible()) { tcolor = 0xFFFFFF; alpha = 255; }
+            if(vis) { tcolor = 0xFFFFFF; alpha = 255; }
             else if(tcurrent && hitx>=x1 && hity>=y1 && hitx<x2 && hity<y2)
             {
                 if(!guiclicktab || mouseaction[0]&GUI_UP) *tcurrent = tpos; // switch tab
