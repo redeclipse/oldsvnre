@@ -128,7 +128,7 @@ float text_widthf(const char *str, int flags)
     return width;
 }
 
-#define TEXTTAB(g) ((g) + max(float(FONTTAB - fmodf((g), FONTTAB)), float(FONTW)))
+#define TEXTTAB(x) (max((int((x)/FONTTAB)+1.0f)*FONTTAB, (x) + FONTW))
 
 void tabify(const char *str, int *numtabs)
 {
