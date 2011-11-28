@@ -852,7 +852,7 @@ namespace server
     {
         switch(n)
         {
-            case 0: return ENG_VERSION;
+            case 0: return RE_VERSION;
             case 1: return GAMEVERSION;
             case 2: case 3: return version[n%2];
         }

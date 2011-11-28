@@ -3,23 +3,29 @@
 
 #include "cube.h"
 
-#define ENG_VERSION         120
-#define ENG_NAME            "Red Eclipse"
-#define ENG_RELEASE         "Cosmic Edition"
-#define ENG_URL             "www.redeclipse.net"
-#ifdef WIN32
-#define ENG_PLATFORM        "win"
-#elif defined(__APPLE__)
-#define ENG_PLATFORM        "mac"
-#else
-#define ENG_PLATFORM        "nix"
-#endif
-#define ENG_DEVEL           true
+#define RE_VER_MAJOR        1
+#define RE_VER_MINOR        2
+#define RE_VER_PATCH        0
+#define RE_VER_STR          "1.2"
+#define RE_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
+#define RE_VER              RE_VER_MAKE(RE_VER_MAJOR, RE_VER_MINOR, RE_VER_PATCH)
+#define RE_VERSION          (RE_VER_MAJOR*100)+(RE_VER_MINOR*10)+RE_VER_PATCH
 
-#define ENG_LAN_PORT        28799
-#define ENG_MASTER_PORT     28800
-#define ENG_SERVER_PORT     28801
-#define ENG_MASTER_HOST     "play.redeclipse.net"
+#define RE_NAME            "Red Eclipse"
+#define RE_RELEASE         "Cosmic Edition"
+#define RE_URL             "www.redeclipse.net"
+#ifdef WIN32
+#define RE_PLATFORM        "win"
+#elif defined(__APPLE__)
+#define RE_PLATFORM        "mac"
+#else
+#define RE_PLATFORM        "nix"
+#endif
+
+#define RE_LAN_PORT        28799
+#define RE_MASTER_PORT     28800
+#define RE_SERVER_PORT     28801
+#define RE_MASTER_HOST     "play.redeclipse.net"
 
 #ifdef IRC
 #include "irc.h"
@@ -509,7 +515,7 @@ extern char *connectname;
 extern int connectport;
 extern void localservertoclient(int chan, ENetPacket *packet);
 extern bool connected(bool attempt = true, bool local = true);
-extern void connectserv(const char *name = NULL, int port = ENG_SERVER_PORT, const char *password = NULL);
+extern void connectserv(const char *name = NULL, int port = RE_SERVER_PORT, const char *password = NULL);
 extern void reconnect();
 extern void lanconnect();
 extern void abortconnect(bool msg = true);
