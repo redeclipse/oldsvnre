@@ -22,6 +22,9 @@ namespace game
     SVAR(IDF_WORLD, obitdeath, "");
     SVAR(IDF_WORLD, mapmusic, "");
 
+    VAR(IDF_PERSIST, musictype, 0, 1, 2); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random
+    SVAR(IDF_WORLD, musicdir, "sounds/music");
+
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
     VAR(IDF_PERSIST, mouseabsolute, 0, 0, 1);
     VAR(IDF_PERSIST, mousetype, 0, 0, 2);
@@ -278,7 +281,7 @@ namespace game
     int errorchan = -1;
     void errorsnd(gameent *d)
     {
-        if(d == game::player1 && !issound(errorchan))
+        if(d == player1 && !issound(errorchan))
             playsound(S_ERROR, d->o, d, SND_FORCED, -1, -1, -1, &errorchan);
     }
 
@@ -531,7 +534,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col = vec::hexcolor(game::getcolour(d)).mul(illumlevel);
+                    vec col = vec::hexcolor(getcolour(d)).mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -1395,7 +1398,7 @@ namespace game
     {
         if(!name) name = d->name;
         static string cname;
-        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", game::getcolour(d), name);
+        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", getcolour(d), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
             defformatstring(s)(" [%d]", d->clientnum);
@@ -1913,10 +1916,26 @@ namespace game
             else if(maptime < 0)
             {
                 maptime = max(lastmillis, 1);
-                if(*mapmusic && (!music || !Mix_PlayingMusic() || strcmp(mapmusic, musicfile))) playmusic(mapmusic);
-                else musicdone(false);
+                musicdone(false);
                 RUNWORLD("on_start");
                 return;
+            }
+            else if(musictype && (!music || !Mix_PlayingMusic()))
+            {
+                defformatstring(musicfile)("%s", mapmusic);
+                if(*musicdir && (musictype == 2 || (musictype && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
+                {
+                    vector<char *> files;
+                    listfiles(musicdir, NULL, files);
+                    while(!files.empty())
+                    {
+                        int r = rnd(files.length());
+                        formatstring(musicfile)("%s/%s", musicdir, files[r]);
+                        if(playmusic(musicfile)) break;
+                        else files.remove(r);
+                    }
+                }
+                else if(*musicfile) playmusic(musicfile);
             }
         }
         if(!curtime) { gets2c(); if(player1->clientnum >= 0) client::c2sinfo(); return; }
@@ -2167,7 +2186,7 @@ namespace game
             {
                 if(physics::hover(d))
                 {
-                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
+                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(gamemode, mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2188,7 +2207,7 @@ namespace game
                 {
                     basetime2 = d->impulse[IM_TIME];
                     if(d->impulse[IM_TYPE] == IM_T_KICK) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
-                    else if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
+                    else if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(gamemode, mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2207,7 +2226,7 @@ namespace game
                 {
                     if(d->impulse[IM_JUMP] && d->timeinair) basetime2 = d->impulse[IM_JUMP];
                     else if(d->timeinair) basetime2 = lastmillis-d->timeinair;
-                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
+                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(gamemode, mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2277,8 +2296,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(game::getcolour(d, CTONE_DEFAULT));
-            e->light.material[1] = bvec(game::getcolour(d, playertone ? (playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
+            e->light.material[0] = bvec(getcolour(d, CTONE_DEFAULT));
+            e->light.material[1] = bvec(getcolour(d, playertone ? (playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2327,7 +2346,7 @@ namespace game
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
-            const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<default>");
+            const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<emphasis>");
             if(name && *name)
             {
                 pos.z += aboveheadnamesize/2;
@@ -2338,7 +2357,7 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = game::getcolour(d);
+            int colour = getcolour(d);
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
@@ -2473,13 +2492,10 @@ namespace game
                     }
                     case WEAP_S_RELOAD:
                     {
-                        if(weaptype[weap].anim != ANIM_MELEE && weaptype[weap].anim != ANIM_SWORD)
-                        {
-                            if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
-                                showweap = false;
-                            weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
-                            break;
-                        }
+                        if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
+                            showweap = false;
+                        weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
+                        break;
                     }
                     case WEAP_S_IDLE: case WEAP_S_WAIT: default:
                     {
@@ -2557,7 +2573,7 @@ namespace game
                 if(d->weapselect == WEAP_SWORD || powering)
                 {
                     static const struct powerfxs {
-                        int type, parttype, colour;
+                        int type, parttype;
                         float size, radius;
                     } powerfx[WEAP_MAX] = {
                         { 0, 0, 0, 0 },
@@ -2569,7 +2585,7 @@ namespace game
                         { 1, PART_PLASMA, 0.05f, 2 },
                         { 2, PART_PLASMA, 0.05f, 2.5f },
                         { 3, PART_PLASMA, 0.1f, 0.125f },
-                        { 0, 0, 0 },
+                        { 0, 0, 0, 0 },
                     };
                     switch(powerfx[d->weapselect].type)
                     {

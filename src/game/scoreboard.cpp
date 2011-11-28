@@ -381,7 +381,7 @@ namespace hud
             if(showpoints)
             {
                 g.pushlist();
-                g.strut(7);
+                g.strut(6);
                 g.text("points", fgcolor);
                 loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->points));
                 g.poplist();
@@ -398,7 +398,7 @@ namespace hud
                 }
                 else
                 {
-                    g.strut(6);
+                    g.strut(5);
                     g.text("frags", fgcolor);
                     loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->frags));
                 }
@@ -408,7 +408,7 @@ namespace hud
             if(showpj)
             {
                 g.pushlist();
-                g.strut(5);
+                g.strut(4);
                 g.text("pj", fgcolor);
                 loopscoregroup({
                     g.textf("%d", 0xFFFFFF, NULL, 0, o->plag);
@@ -419,7 +419,7 @@ namespace hud
             if(showping)
             {
                 g.pushlist();
-                g.strut(5);
+                g.strut(4);
                 g.text("ping", fgcolor);
                 loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->ping));
                 g.poplist();
@@ -428,7 +428,7 @@ namespace hud
             if(showclientnum || game::player1->privilege>=PRIV_MASTER)
             {
                 g.pushlist();
-                g.strut(4);
+                g.strut(3);
                 g.text("cn", fgcolor);
                 loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum));
                 g.poplist();

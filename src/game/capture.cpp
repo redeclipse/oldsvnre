@@ -218,10 +218,7 @@ namespace capture
         loopv(st.flags) // flags/bases
         {
             capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || (f.owner == game::focus && !game::thirdpersonview(true))) continue;
-            entitylight *light = &entities::ents[f.ent]->light;
-            light->material[0] = bvec(TEAM(f.team, colour));
-            vec above(f.spawnloc);
+            if(!entities::ents.inrange(f.ent)) continue;
             float trans = 0.f;
             if((f.base&BASE_FLAG) && !f.owner && !f.droptime)
             {
@@ -230,6 +227,10 @@ namespace capture
                 else trans = 1.f;
             }
             else if(f.base&BASE_HOME) trans = 0.5f;
+            else continue;
+            entitylight *light = &entities::ents[f.ent]->light;
+            light->material[0] = bvec(TEAM(f.team, colour));
+            vec above(f.spawnloc);
             if(trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             above.z += enttype[AFFINITY].radius/2+2.5f;
             if((f.base&BASE_HOME) || (!f.owner && !f.droptime))

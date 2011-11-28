@@ -99,6 +99,7 @@ namespace hud
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
 
     VAR(IDF_PERSIST, glowtone, 0, 2, CTONE_MAX); // colour based on tone (1 = colour, 2 = team, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
+    VAR(IDF_PERSIST, healthtone, 0, 2, CTONE_MAX); // colour based on tone (1 = colour, 2 = team, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
     VAR(IDF_PERSIST, clipstone, 0, 2, CTONE_MAX);
     VAR(IDF_PERSIST, inventorytone, 0, 2, CTONE_MAX);
     VAR(IDF_PERSIST, crosshairtone, 0, 0, CTONE_MAX);
@@ -466,7 +467,7 @@ namespace hud
     template<class T>
     void skewcolour(T &r, T &g, T &b, int colour = 0, bool faded = false)
     {
-        if(colour <= 0) colour = game::getcolour(game::focus, 0-colour);
+        if(colour < 0) colour = game::getcolour(game::focus, -1-colour);
         vec c = vec::hexcolor(colour);
         r = T(r*c.r);
         g = T(g*c.g);
@@ -626,7 +627,7 @@ namespace hud
         }
         vec c(clipcolour, clipcolour, clipcolour);
         if(clipcolour > 0) c.mul(vec::hexcolor(WEAP(weap, colour)));
-        else if(clipstone) skewcolour(c.r, c.g, c.b, 1-clipstone);
+        else if(clipstone) skewcolour(c.r, c.g, c.b, -clipstone);
         glColor4f(c.r, c.g, c.b, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
@@ -717,7 +718,7 @@ namespace hud
                 if(!game::zooming) amt = 1.f-amt;
                 cs += int(off*amt);
             }
-            if(crosshairtone) skewcolour(c.r, c.g, c.b, 1-crosshairtone);
+            if(crosshairtone) skewcolour(c.r, c.g, c.b, -crosshairtone);
             int heal = m_health(game::gamemode, game::mutators);
             if(crosshairflash && game::focus->state == CS_ALIVE && game::focus->health < heal)
             {
@@ -819,7 +820,7 @@ namespace hud
         int ty = ((hudheight/2)+int(hudheight/2*noticeoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
             tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
-        if(noticestone) skewcolour(tr, tg, tb, 1-noticestone);
+        if(noticestone) skewcolour(tr, tg, tb, -noticestone);
         if(lastmillis-game::maptime <= titlefade*3)
         {
 
@@ -1431,7 +1432,7 @@ namespace hud
             }
             glEnd();
             float gr = 1, gg = 1, gb = 1;
-            if(radartone) skewcolour(gr, gg, gb, 1-radartone);
+            if(radartone) skewcolour(gr, gg, gb, -radartone);
             settexture(radarcornertex, 3);
             glColor4f(gr*radartexbright, gg*radartexbright, gb*radartexbright, radartexblend);
             drawtex(w-s*2, 0, s*2, s*2);
@@ -1495,7 +1496,7 @@ namespace hud
         if(glow || pulse)
         {
             float gr = 1, gg = 1, gb = 1, gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
-            if(glowtone) skewcolour(gr, gg, gb, 1-glowtone);
+            if(glowtone) skewcolour(gr, gg, gb, -glowtone);
             if(pulse)
             {
                 int timestep = totalmillis%1000;
@@ -1650,7 +1651,7 @@ namespace hud
                     bool instate = (i == game::focus->weapselect || game::focus->weapstate[i] != WEAP_S_USE);
                     vec c(1, 1, 1);
                     if(inventorycolour) c.mul(vec::hexcolor(WEAP(i, colour)));
-                    else if(inventorytone) skewcolour(c.r, c.g, c.b, 1-inventorytone);
+                    else if(inventorytone) skewcolour(c.r, c.g, c.b, -inventorytone);
                     int oldy = y-sy;
                     if(inventoryammo && (instate || inventoryammo > 1) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
@@ -1704,7 +1705,7 @@ namespace hud
             if(hashealth && (glow || pulse))
             {
                 float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryhealthglowblend;
-                if(glowtone) skewcolour(gr, gg, gb, 1-glowtone);
+                if(glowtone) skewcolour(gr, gg, gb, -healthtone);
                 if(pulse)
                 {
                     int timestep = totalmillis%1000;
@@ -2052,7 +2053,6 @@ namespace hud
             y = h-FONTH/2;
             y -= draw_textx("v%.2f-%s (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE);
             y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, ENG_URL);
-            if(loadbackinfo && *loadbackinfo) y -= draw_textx("%s",  w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, loadbackinfo);
             popfont();
         }
     }

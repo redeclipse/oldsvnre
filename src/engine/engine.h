@@ -3,9 +3,9 @@
 
 #include "cube.h"
 
-#define ENG_VERSION         110
+#define ENG_VERSION         120
 #define ENG_NAME            "Red Eclipse"
-#define ENG_RELEASE         "Supernova Edition"
+#define ENG_RELEASE         "Cosmic Edition"
 #define ENG_URL             "www.redeclipse.net"
 #ifdef WIN32
 #define ENG_PLATFORM        "win"
@@ -545,7 +545,6 @@ enum
 extern int initing;
 
 extern bool progressing;
-extern const char *loadbackinfo;
 extern float loadprogress;
 extern void progress(float bar1 = 0, const char *text1 = NULL, float bar2 = 0, const char *text2 = NULL);
 

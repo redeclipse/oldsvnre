@@ -745,35 +745,6 @@ static bool findarg(int argc, char **argv, const char *str)
     return false;
 }
 
-const char *loadbackinfo = "";
-void eastereggs()
-{
-    time_t ct = time(NULL); // current time
-    struct tm *lt = localtime(&ct);
-
-    /*
-    tm_sec      seconds after the minute (0-61)
-    tm_min      minutes after the hour (0-59)
-    tm_hour     hours since midnight (0-23)
-    tm_mday     day of the month (1-31)
-    tm_mon      months since January (0-11)
-    tm_year     elapsed years since 1900
-    tm_wday     days since Sunday (0-6)
-    tm_yday     days since January 1st (0-365)
-    tm_isdst    1 if daylight savings is on, zero if not,
-    */
-    int month = lt->tm_mon+1, day = lt->tm_wday+1, mday = lt->tm_mday;
-    if(day == 6 && mday == 13) loadbackinfo = "Friday the 13th";
-    else if(month == 10 && mday == 31) loadbackinfo = "Happy Halloween";
-    if(month == 2 && mday == 6)     loadbackinfo = "Happy Birthday Ahven!";
-    if(month == 2 && mday == 9)     loadbackinfo = "Happy Birthday Quin!";
-    if(month == 4 && mday == 18)    loadbackinfo = "Happy Birthday Geartrooper!";
-    if(month == 6 && mday == 9)     loadbackinfo = "Happy Birthday W!CK3D!";
-    if(month == 7 && mday == 2)     loadbackinfo = "Happy Birthday c0rdawg and LedInfrared!";
-    if(month == 9 && mday == 26)    loadbackinfo = "Happy Birthday Dazza!";
-    if(month == 12 && mday == 8)    loadbackinfo = "Happy Birthday Hirato!";
-}
-
 bool progressing = false;
 
 FVAR(0, loadprogress, 0, 0, 1);
@@ -934,7 +905,6 @@ int main(int argc, char **argv)
     signal(SIGPIPE, fatalsignal);
     signal(SIGALRM, fatalsignal);
 #endif
-    eastereggs();
 
     conoutf("loading gl..");
     gl_checkextensions();
