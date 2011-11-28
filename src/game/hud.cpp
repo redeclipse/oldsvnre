@@ -62,16 +62,16 @@ namespace hud
     VAR(IDF_PERSIST, conoverflow, 0, 5, VAR_MAX);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
-    FVAR(IDF_PERSIST, conblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, conblend, 0, 1, 1);
     VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, VAR_MAX);
     VAR(IDF_PERSIST, chatconfade, 0, 2000, VAR_MAX);
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, VAR_MAX);
-    FVAR(IDF_PERSIST, chatconblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, chatconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
-    FVAR(IDF_PERSIST, noticeblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
@@ -93,6 +93,7 @@ namespace hud
     TVAR(IDF_PERSIST, waittex, "textures/wait", 3);
     TVAR(IDF_PERSIST, chattex, "textures/conopen", 3);
     TVAR(IDF_PERSIST, healthtex, "textures/health", 3);
+    TVAR(IDF_PERSIST, healthglowtex, "textures/healthglow", 3);
     TVAR(IDF_PERSIST, progresstex, "textures/progress", 3);
     TVAR(IDF_PERSIST, inventorytex, "textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "textures/warning", 3);
@@ -112,10 +113,10 @@ namespace hud
 
     TVAR(IDF_PERSIST, underlaytex, "", 3);
     VAR(IDF_PERSIST, underlaydisplay, 0, 0, 2); // 0 = only firstperson and alive, 1 = only when alive, 2 = always
-    FVAR(IDF_PERSIST, underlayblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, underlayblend, 0, 1, 1);
     TVAR(IDF_PERSIST, overlaytex, "", 3);
     VAR(IDF_PERSIST, overlaydisplay, 0, 0, 2); // 0 = only firstperson and alive, 1 = only when alive, 2 = always
-    FVAR(IDF_PERSIST, overlayblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, overlayblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, showdamage, 0, 2, 2); // 1 shows just damage texture, 2 blends as well
     VAR(IDF_PERSIST, damagefade, 0, 0, 1);
@@ -123,7 +124,7 @@ namespace hud
     FVAR(IDF_PERSIST, damageblend, 0, 1, 1);
     FVAR(IDF_PERSIST, damageskew, 0, 0.25f, 1);
     TVAR(IDF_PERSIST, burntex, "<grey>textures/burn", 3);
-    FVAR(IDF_PERSIST, burnblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, burnblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
@@ -190,7 +191,9 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
-    FVAR(IDF_PERSIST, inventoryglowblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, inventoryglowblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryhealthglow, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, inventoryhealthglowblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -215,7 +218,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showclips, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
-    FVAR(IDF_PERSIST, clipblend, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, clipblend, 0, 1, 1000);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
     TVAR(IDF_PERSIST, pistolcliptex, "textures/pistolclip", 3);
     TVAR(IDF_PERSIST, shotguncliptex, "textures/shotgunclip", 3);
@@ -249,7 +252,7 @@ namespace hud
     TVAR(IDF_PERSIST, hinttex, "textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radarplayerhintblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayersize, 0, 0.4f, 1000);
     FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
@@ -263,7 +266,7 @@ namespace hud
     FVAR(IDF_PERSIST, radarcorner, 0, 0.15f, 1000);
     FVAR(IDF_PERSIST, radarcornersize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, radarcorneroffset, 0, 0.045f, 1);
-    FVAR(IDF_PERSIST, radarcornerblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, radarcornerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radartexblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radartexbright, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, radarcornerbright, 0, 0.8f, 1);
@@ -1696,11 +1699,11 @@ namespace hud
         int size = s+s/2, width = s-s/4, sy = 0, sw = width+s/16;
         if(game::focus->state == CS_ALIVE)
         {
-            int glow = int(width*inventoryglow), heal = m_health(game::gamemode, game::mutators);
+            int glow = int(width*inventoryhealthglow), heal = m_health(game::gamemode, game::mutators);
             bool hashealth = inventoryhealth && (!m_trial(game::gamemode) || trialdamage), pulse = inventoryflash && game::focus->health < heal;
             if(hashealth && (glow || pulse))
             {
-                float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
+                float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryhealthglowblend;
                 if(glowtone) skewcolour(gr, gg, gb, 1-glowtone);
                 if(pulse)
                 {
@@ -1712,7 +1715,7 @@ namespace hud
                     gf += (1.f-gf)*skew;
                     glow += int(glow*skew);
                 }
-                settexture(inventorytex, 3);
+                settexture(healthglowtex, 3);
                 glColor4f(gr, gg, gb, fade*gf);
                 drawtex(x-glow, y-size-glow, width+glow*2, size+glow*2);
             }
