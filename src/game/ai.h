@@ -103,7 +103,7 @@ namespace ai
         }
     };
 
-    const int NUMPREVNODES = 6;
+    const int NUMPREVNODES = 8;
 
     struct aiinfo
     {
