@@ -18,7 +18,7 @@ VARF(0, soundchans, 1, 32, 128, initwarning("sound configuration", INIT_RESET, C
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundbufferlen, 128, 1024, INT_MAX-1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
-VARF(IDF_PERSIST, musicvol, 0, 255, 255, changedvol = true);
+VARF(IDF_PERSIST, musicvol, 0, 80, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 1000, INT_MAX-1);
 VAR(IDF_PERSIST, musicfadeout, 0, 2500, INT_MAX-1);
 SVAR(0, titlemusic, "sounds/theme");
@@ -119,9 +119,9 @@ Mix_Music *loadmusic(const char *name)
     return music;
 }
 
-void playmusic(const char *name, const char *cmd)
+bool playmusic(const char *name, const char *cmd)
 {
-    if(nosound) return;
+    if(nosound) return false;
 
     stopmusic(false);
 
@@ -146,13 +146,13 @@ void playmusic(const char *name, const char *cmd)
                     else Mix_PlayMusic(music, cmd && *cmd ? 0 : -1);
                     Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
                     changedvol = found = true;
+                    return true;
                 }
-                if(found) break;
             }
-            if(found) break;
         }
-        if(!music) { conoutf("\frcould not play music: %s", name); return; }
+        if(!music) conoutf("\frcould not play music: %s", name);
     }
+    return false;
 }
 
 COMMANDN(0, music, playmusic, "ss");
