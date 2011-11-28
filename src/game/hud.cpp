@@ -98,13 +98,13 @@ namespace hud
     TVAR(IDF_PERSIST, inventorytex, "<grey>textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
 
-    VAR(IDF_PERSIST, glowtone, 0, 2, CTONE_MAX); // colour based on tone (1 = colour, 2 = team, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
-    VAR(IDF_PERSIST, healthtone, 0, 2, CTONE_MAX); // colour based on tone (1 = colour, 2 = team, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
-    VAR(IDF_PERSIST, clipstone, 0, 2, CTONE_MAX);
-    VAR(IDF_PERSIST, inventorytone, 0, 2, CTONE_MAX);
+    VAR(IDF_PERSIST, glowtone, 0, 3, CTONE_MAX); // colour based on tone (1 = team, 2 = tone, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
+    VAR(IDF_PERSIST, healthtone, 0, 3, CTONE_MAX); // colour based on tone (1 = team, 2 = tone, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
+    VAR(IDF_PERSIST, clipstone, 0, 3, CTONE_MAX);
+    VAR(IDF_PERSIST, inventorytone, 0, 3, CTONE_MAX);
     VAR(IDF_PERSIST, crosshairtone, 0, 0, CTONE_MAX);
     VAR(IDF_PERSIST, noticestone, 0, 0, CTONE_MAX);
-    VAR(IDF_PERSIST, radartone, 0, 2, 5);
+    VAR(IDF_PERSIST, radartone, 0, 3, 5);
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
