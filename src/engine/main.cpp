@@ -31,7 +31,7 @@ void showcursor(bool show)
 void setcaption(const char *text)
 {
     static string caption = "";
-    defformatstring(newcaption)("%s v%.2f-%s (%s)%s%s", ENG_NAME, float(ENG_VERSION)/100.f, ENG_PLATFORM, ENG_RELEASE, text ? ": " : "", text ? text : "");
+    defformatstring(newcaption)("%s v%s-%s (%s)%s%s", RE_NAME, RE_VER_STR, RE_PLATFORM, RE_RELEASE, text ? ": " : "", text ? text : "");
     if(strcmp(caption, newcaption))
     {
         copystring(caption, newcaption);
@@ -792,7 +792,6 @@ int main(int argc, char **argv)
     #endif
     #endif
     #endif
-
 
     setlogfile(NULL);
     setlocations(true);

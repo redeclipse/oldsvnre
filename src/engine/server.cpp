@@ -6,7 +6,7 @@
 #include <shlobj.h>
 #endif
 
-VAR(0, version, 1, ENG_VERSION, -1); // for scripts
+VAR(0, version, 1, RE_VERSION, -1); // for scripts
 VAR(0, kidmode, 0, 0, 1); // kid protections
 
 const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
@@ -155,7 +155,7 @@ VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
 VAR(0, servertype, 0, 1, 3); // 0: local only, 1: private, 2: public, 3: dedicated
 #endif
 VAR(0, serveruprate, 0, 0, INT_MAX-1);
-VAR(0, serverport, 1, ENG_SERVER_PORT, INT_MAX-1);
+VAR(0, serverport, 1, RE_SERVER_PORT, INT_MAX-1);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
@@ -607,8 +607,8 @@ void disconnectmaster()
     masteraddress.port = ENET_PORT_ANY;
 }
 
-VARF(0, servermasterport, 1, ENG_MASTER_PORT, INT_MAX-1, disconnectmaster());
-SVARF(0, servermaster, ENG_MASTER_HOST, disconnectmaster());
+VARF(0, servermasterport, 1, RE_MASTER_PORT, INT_MAX-1, disconnectmaster());
+SVARF(0, servermaster, RE_MASTER_HOST, disconnectmaster());
 
 ENetSocket connectmaster(bool reuse)
 {
@@ -1250,7 +1250,7 @@ void setupserver()
     {
         enet_socket_set_option(pongsock, ENET_SOCKOPT_NONBLOCK, 1);
 
-        address.port = ENG_LAN_PORT;
+        address.port = RE_LAN_PORT;
         lansock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
         if(lansock != ENET_SOCKET_NULL && (enet_socket_set_option(lansock, ENET_SOCKOPT_REUSEADDR, 1) < 0 || enet_socket_bind(lansock, &address) < 0))
         {

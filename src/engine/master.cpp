@@ -21,7 +21,7 @@
 #define PING_RETRY 5
 
 VAR(0, masterserver, 0, 0, 1);
-VAR(0, masterport, 1, ENG_MASTER_PORT, INT_MAX-1);
+VAR(0, masterport, 1, RE_MASTER_PORT, INT_MAX-1);
 SVAR(0, masterip, "");
 SVAR(0, masterscriptclient, "");
 SVAR(0, masterscriptserver, "");
@@ -52,7 +52,7 @@ struct masterclient
     vector<authreq> authreqs;
     bool isserver, ishttp, listserver, shouldping, shouldpurge;
 
-    masterclient() : inputpos(0), outputpos(0), port(ENG_SERVER_PORT), numpings(0), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
+    masterclient() : inputpos(0), outputpos(0), port(RE_SERVER_PORT), numpings(0), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
@@ -232,7 +232,7 @@ void checkmasterpongs()
         }
     }
 }
-    
+
 bool checkmasterclientinput(masterclient &c)
 {
     if(c.inputpos < 0) return false;
@@ -283,7 +283,7 @@ bool checkmasterclientinput(masterclient &c)
         bool found = false;
         if(!strcmp(w[0], "server") && !c.ishttp)
         {
-            c.port = ENG_SERVER_PORT;
+            c.port = RE_SERVER_PORT;
             if(w[1]) c.port = clamp(atoi(w[1]), 1, INT_MAX-1);
             c.shouldping = true;
             c.numpings = 0;
@@ -344,7 +344,7 @@ bool checkmasterclientinput(masterclient &c)
 
 void checkmaster()
 {
-    if(mastersocket == ENET_SOCKET_NULL || pingsocket == ENET_SOCKET_NULL) return; 
+    if(mastersocket == ENET_SOCKET_NULL || pingsocket == ENET_SOCKET_NULL) return;
 
     ENetSocketSet readset, writeset;
     ENetSocket maxsock = max(mastersocket, pingsocket);
@@ -375,7 +375,7 @@ void checkmaster()
                 c.shouldping = false;
                 masteroutf(c, "echo \"failed pinging server\n");
             }
-        }   
+        }
         if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);
         else ENET_SOCKETSET_ADD(readset, c.socket);
         maxsock = max(maxsock, c.socket);
