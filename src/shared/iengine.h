@@ -150,11 +150,32 @@ extern bool popfont(int num = 1);
 extern int draw_text(const char *str, int rleft, int rtop, int r = 255, int g = 255, int b = 255, int a = 255, int flags = TEXT_SHADOW, int cursor = -1, int maxwidth = -1);
 extern int draw_textx(const char *fstr, int left, int top, int r = 255, int g = 255, int b = 255, int a = 255, int flags = TEXT_SHADOW, int cursor = -1, int maxwidth = -1, ...);
 extern int draw_textf(const char *fstr, int left, int top, ...);
-extern int text_width(const char *str, int flags = 0);
-extern void text_bounds(const char *str, int &width, int &height, int maxwidth = -1, int flags = 0);
-extern int text_visible(const char *str, int hitx, int hity, int maxwidth = -1, int flags = 0);
-extern void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int flags = 0);
+extern float text_widthf(const char *str, int flags = 0);
+extern void text_boundsf(const char *str, float &width, float &height, int maxwidth = -1, int flags = 0);
+extern int text_visible(const char *str, float hitx, float hity, int maxwidth = -1, int flags = 0);
+extern void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, int flags = 0);
 
+static inline int text_width(const char *str, int flags = 0)
+{
+    return int(ceil(text_widthf(str, flags)));
+}
+
+static inline void text_bounds(const char *str, int &width, int &height, int maxwidth = -1, int flags = 0)
+{
+    float widthf, heightf;
+    text_boundsf(str, widthf, heightf, maxwidth, flags);
+    width = int(ceil(widthf));
+    height = int(ceil(heightf));
+}
+
+static inline void text_pos(const char *str, int cursor, int &cx, int &cy, int maxwidth, int flags = 0)
+{
+    float cxf, cyf;
+    text_posf(str, cursor, cxf, cyf, maxwidth, flags);
+    cx = int(cxf);
+    cy = int(cyf);
+}
+ 
 // renderva
 enum
 {

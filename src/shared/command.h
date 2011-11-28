@@ -192,6 +192,7 @@ extern const char *intstr(int v);
 extern void intret(int v);
 extern const char *floatstr(float v);
 extern void floatret(float v);
+extern void stringret(char *s);
 extern void result(tagval &v);
 extern void result(const char *s);
 extern char *conc(tagval *v, int n, bool space, const char *prefix = NULL);
