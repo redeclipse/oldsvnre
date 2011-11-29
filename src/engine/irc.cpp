@@ -362,6 +362,8 @@ ICOMMAND(0, ircfriendlychan, "sss", (const char *name, const char *chan, const c
     copystring(c->friendly, s);
 });
 
+#define MAXLINES 100
+
 void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
 {
     defvformatstring(str, msg, msg);
@@ -372,20 +374,20 @@ void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
         if(c)
         {
             formatstring(s)("\fs\fa[%s:%s]\fS", n->name, c->name);
-            c->addline(str, 100);
+            c->addline(str, MAXLINES);
             if(n->type == IRCT_RELAY && c->relay >= relay)
                 server::srvmsgf(relay > 1 ? -2 : -3, "\fs\fa[%s]\fS %s", c->friendly, str);
         }
         else
         {
             formatstring(s)("\fs\fa[%s:%s]\fS", n->name, target);
-            n->addline(str, 100);
+            n->addline(str, MAXLINES);
         }
     }
     else
     {
         formatstring(s)("\fs\fa[%s]\fS", n->name);
-        n->addline(newstring(str), 100);
+        n->addline(newstring(str), MAXLINES);
     }
     console(0, "%s %s", s, str); // console is not used to relay
 }
@@ -804,7 +806,7 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
     if(c->newlines < c->lines.length())
     {
         editor *e = UI::geteditor(cwindow, EDITORREADONLY);
-        if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++]);
+        if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++], MAXLINES);
     }
     g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
@@ -827,7 +829,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     if(n->newlines < n->lines.length())
     {
         editor *e = UI::geteditor(window, EDITORREADONLY);
-        if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++]);
+        if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++], MAXLINES);
     }
     g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
 

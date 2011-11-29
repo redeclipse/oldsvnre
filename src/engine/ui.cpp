@@ -1011,11 +1011,18 @@ namespace UI
         return useeditor(name, mode, false, init);
     }
 
-    void editorline(editor *e, const char *str)
+    void editorline(editor *e, const char *str, int limit)
     {
         if(!e) return;
         if(e->lines.length() != 1 || !e->lines[0].empty()) e->lines.add();
         e->lines.last().set(str);
+        if(limit >= 0 && e->lines.length() > limit)
+        {
+            int n = e->lines.length()-limit;
+            e->removelines(0, n);
+            e->cy = max(e->cy - n, 0);
+            if(e->scrolly != editor::SCROLLEND) e->scrolly = max(e->scrolly - n, 0);
+        }
         e->mark(false);
     }
 
