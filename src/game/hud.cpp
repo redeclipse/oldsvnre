@@ -1700,76 +1700,81 @@ namespace hud
         int size = s+s/2, width = s-s/4, sy = 0, sw = width+s/16;
         if(game::focus->state == CS_ALIVE)
         {
-            int glow = int(width*inventoryhealthglow), heal = m_health(game::gamemode, game::mutators);
+            int heal = m_health(game::gamemode, game::mutators);
             bool hashealth = inventoryhealth && (!m_trial(game::gamemode) || trialdamage), pulse = inventoryflash && game::focus->health < heal;
-            if(hashealth && (glow || pulse))
+            if(inventoryhealth >= 2)
             {
-                float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryhealthglowblend;
-                if(glowtone) skewcolour(gr, gg, gb, -healthtone);
-                if(pulse)
+                int glow = int(width*inventoryhealthglow);
+                if(hashealth && (glow || pulse))
                 {
-                    int timestep = totalmillis%1000;
-                    float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
-                    gr += (1.f-gr)*skew;
-                    gg -= gg*skew;
-                    gb -= gb*skew;
-                    gf += (1.f-gf)*skew;
-                    glow += int(glow*skew);
-                }
-                settexture(healthglowtex, 3);
-                glColor4f(gr, gg, gb, fade*gf);
-                drawtex(x-glow, y-size-glow, width+glow*2, size+glow*2);
-            }
-            int offset = 0;
-            if(game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000) fade *= (lastmillis-game::focus->lastspawn)/1000.f;
-            else if(inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime)
-            {
-                float amt = clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f);
-                offset = int(width*inventorythrob*(amt > 1.f ? amt-1.f : 1.f-amt));
-            }
-            if(hashealth && inventoryhealth >= 2)
-            {
-                const struct healthbarstep
-                {
-                    float health, r, g, b;
-                } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
-                settexture(healthtex, 3);
-                glBegin(GL_TRIANGLE_STRIP);
-                int cx = x-offset, cy = y-size-offset, cw = width+offset*2, ch = size+offset*2;
-                float health = clamp(game::focus->health/float(heal), 0.0f, 1.0f);
-                const float margin = 0.1f;
-                loopi(4)
-                {
-                    const healthbarstep &step = steps[i];
-                    if(i > 0)
+                    float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryhealthglowblend;
+                    sy += glow*2;
+                    if(glowtone) skewcolour(gr, gg, gb, -healthtone);
+                    if(pulse)
                     {
-                        if(step.health > health && steps[i-1].health <= health)
-                        {
-                            float hoff = 1 - health, hlerp = (health - steps[i-1].health) / (step.health - steps[i-1].health),
-                                  r = step.r*hlerp + steps[i-1].r*(1-hlerp),
-                                  g = step.g*hlerp + steps[i-1].g*(1-hlerp),
-                                  b = step.b*hlerp + steps[i-1].b*(1-hlerp);
-                            glColor4f(r, g, b, fade); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
-                            glColor4f(r, g, b, fade); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
-                        }
-                        if(step.health > health + margin)
-                        {
-                            float hoff = 1 - (health + margin), hlerp = (health + margin - steps[i-1].health) / (step.health - steps[i-1].health),
-                                  r = step.r*hlerp + steps[i-1].r*(1-hlerp),
-                                  g = step.g*hlerp + steps[i-1].g*(1-hlerp),
-                                  b = step.b*hlerp + steps[i-1].b*(1-hlerp);
-                            glColor4f(r, g, b, 0); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
-                            glColor4f(r, g, b, 0); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
-                            break;
-                        }
+                        int timestep = totalmillis%1000;
+                        float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
+                        gr += (1.f-gr)*skew;
+                        gg -= gg*skew;
+                        gb -= gb*skew;
+                        gf += (1.f-gf)*skew;
+                        glow += int(glow*skew);
                     }
-                    float off = 1 - step.health, hfade = fade, r = step.r, g = step.g, b = step.b;
-                    if(step.health > health) hfade *= 1 - (step.health - health)/margin;
-                    glColor4f(r, g, b, hfade); glTexCoord2f(0, off); glVertex2f(cx, cy + off*ch);
-                    glColor4f(r, g, b, hfade); glTexCoord2f(1, off); glVertex2f(cx + cw, cy + off*ch);
+                    settexture(healthglowtex, 3);
+                    glColor4f(gr, gg, gb, fade*gf);
+                    drawtex(x-glow, y-size-glow, width+glow*2, size+glow*2);
                 }
-                glEnd();
-                sy += size;
+                int offset = 0;
+                if(game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000) fade *= (lastmillis-game::focus->lastspawn)/1000.f;
+                else if(inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime)
+                {
+                    float amt = clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f);
+                    offset = int(width*inventorythrob*(amt > 1.f ? amt-1.f : 1.f-amt));
+                }
+                if(hashealth)
+                {
+                    const struct healthbarstep
+                    {
+                        float health, r, g, b;
+                    } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
+                    settexture(healthtex, 3);
+                    glBegin(GL_TRIANGLE_STRIP);
+                    int cx = x-offset, cy = y-size-offset, cw = width+offset*2, ch = size+offset*2;
+                    float health = clamp(game::focus->health/float(heal), 0.0f, 1.0f);
+                    const float margin = 0.1f;
+                    loopi(4)
+                    {
+                        const healthbarstep &step = steps[i];
+                        if(i > 0)
+                        {
+                            if(step.health > health && steps[i-1].health <= health)
+                            {
+                                float hoff = 1 - health, hlerp = (health - steps[i-1].health) / (step.health - steps[i-1].health),
+                                      r = step.r*hlerp + steps[i-1].r*(1-hlerp),
+                                      g = step.g*hlerp + steps[i-1].g*(1-hlerp),
+                                      b = step.b*hlerp + steps[i-1].b*(1-hlerp);
+                                glColor4f(r, g, b, fade); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
+                                glColor4f(r, g, b, fade); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
+                            }
+                            if(step.health > health + margin)
+                            {
+                                float hoff = 1 - (health + margin), hlerp = (health + margin - steps[i-1].health) / (step.health - steps[i-1].health),
+                                      r = step.r*hlerp + steps[i-1].r*(1-hlerp),
+                                      g = step.g*hlerp + steps[i-1].g*(1-hlerp),
+                                      b = step.b*hlerp + steps[i-1].b*(1-hlerp);
+                                glColor4f(r, g, b, 0); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
+                                glColor4f(r, g, b, 0); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
+                                break;
+                            }
+                        }
+                        float off = 1 - step.health, hfade = fade, r = step.r, g = step.g, b = step.b;
+                        if(step.health > health) hfade *= 1 - (step.health - health)/margin;
+                        glColor4f(r, g, b, hfade); glTexCoord2f(0, off); glVertex2f(cx, cy + off*ch);
+                        glColor4f(r, g, b, hfade); glTexCoord2f(1, off); glVertex2f(cx + cw, cy + off*ch);
+                    }
+                    glEnd();
+                    sy += size;
+                }
             }
             if(hashealth)
             {
