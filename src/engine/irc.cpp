@@ -854,7 +854,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
 bool ircgui(guient *g, const char *s)
 {
     g->allowautotab(false);
-    g->strut(101);
+    g->strut(94);
     if(s && *s)
     {
         ircnet *n = ircfind(s);
