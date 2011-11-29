@@ -801,8 +801,11 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
     if(tab) g->tab(c->name, 0xFFFFFF, front);
 
     defformatstring(cwindow)("%s_%s_window", n->name, c->name);
-    editor *e = UI::geteditor(cwindow, EDITORREADONLY);
-    if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++], true);
+    if(c->newlines < c->lines.length())
+    {
+        editor *e = UI::geteditor(cwindow, EDITORREADONLY);
+        if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++], true);
+    }
     g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
     defformatstring(cinput)("%s_%s_input", n->name, c->name);
@@ -821,8 +824,11 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     if(tab) g->tab(n->name);
 
     defformatstring(window)("%s_window", n->name);
-    editor *e = UI::geteditor(window, EDITORREADONLY);
-    if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++], true);
+    if(n->newlines < n->lines.length())
+    {
+        editor *e = UI::geteditor(window, EDITORREADONLY);
+        if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++], true);
+    }
     g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
     defformatstring(input)("%s_input", n->name);

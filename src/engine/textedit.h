@@ -658,7 +658,7 @@ static editor *currentfocus() { return (editors.length() > 0)?editors.last():NUL
 
 static void readyeditors()
 {
-    loopv(editors) editors[i]->active = (editors[i]->mode==EDITORFOREVER);
+    loopv(editors) editors[i]->active = (editors[i]->mode>=EDITORFOREVER);
 }
 
 static void flusheditors()
