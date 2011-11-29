@@ -535,7 +535,7 @@ extern bool checkchallenge(const char *answerstr, void *correct);
 
 // gui
 enum { GUI_DOWN = 1<<0, GUI_UP = 1<<1, GUI_ALT = 1<<2, GUI_PRESSED = 1<<3, GUI_ROLLOVER = 1<<4, GUI_DRAGGED = 1<<5 };
-enum { EDITORREADONLY = 0, EDITORFOCUSED, EDITORUSED, EDITORFOREVER };
+enum { EDITORFOCUSED = 1, EDITORUSED, EDITORFOREVER, EDITORREADONLY };
 
 struct Texture;
 struct VSlot;

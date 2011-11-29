@@ -444,7 +444,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     if(cursor >= 0)
     {
         glColor4ub(255, 255, 255, int(255*clamp(1.f-(float(totalmillis%500)/500.f), 0.5f, 1.f)));
-        draw_char(tex, '_', left+cx, top+cy+FONTH/6, scale);
+        draw_char(tex, '_', left+cx, top+cy, scale);
         xtraverts += varray::end();
     }
     varray::disable();
