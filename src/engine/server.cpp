@@ -540,7 +540,7 @@ VAR(IDF_PERSIST, autoconnect, 0, 0, 1);
 extern bool connectedlocally;
 void localconnect(bool force)
 {
-    if((!connected() || !connectedlocally) && (force || autoconnect))
+    if(!connected() && (force || autoconnect))
     {
         setsvar("connectname", "");
         setvar("connectport", 0);
