@@ -26,7 +26,7 @@ aistyles aistyle[] = {
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,
-            3,          3,          15,         150,        40,         1,
+            3,          3,          16,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    "actors/grunt",      "actors/player/hwep"
     },
