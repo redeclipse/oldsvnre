@@ -377,17 +377,20 @@ struct gui : guient
             e->linewrap = (length<0);
             e->maxx = (e->linewrap) ? -1 : length;
             e->maxy = (height<=0)?1:-1;
-            e->pixelwidth = abs(length)*guibound[0];
+            e->pixelwidth = abs(length)*FONTW;
             if(e->linewrap && e->maxy==1)
             {
                 int temp;
                 text_bounds(e->lines[0].text, temp, e->pixelheight, e->pixelwidth); //only single line editors can have variable height
             }
             else
-                e->pixelheight = guibound[1]*max(height, 1);
+                e->pixelheight = FONTH*max(height, 1);
         }
-        int h = e->pixelheight;
-        int w = e->pixelwidth + guibound[0];
+        int h = e->pixelheight, hpad = 0, w = e->pixelwidth, wpad = guibound[0];
+        if((h+hpad)%guibound[1]) hpad += guibound[1] - (h+hpad)%guibound[1];
+        h += hpad;
+        if((w+wpad)%guibound[0]) wpad += guibound[0] - (w+wpad)%guibound[0];
+        w += wpad;
 
         bool wasvertical = isvertical();
         if(wasvertical && e->maxy != 1) pushlist(false);
@@ -416,7 +419,7 @@ struct gui : guient
                 }
             }
             if(hit && editing && (mouseaction[0]&GUI_PRESSED)!=0 && fieldtype==FIELDEDIT)
-                e->hit(int(floor(hitx-(curx+guibound[0]/2))), int(floor(hity-cury)), (mouseaction[0]&GUI_DRAGGED)!=0); //mouse request position
+                e->hit(int(floor(hitx-(curx+wpad/2))), int(floor(hity-(cury+hpad/2))), (mouseaction[0]&GUI_DRAGGED)!=0); //mouse request position
             if(editing && (fieldmode==FIELDCOMMIT || fieldmode==FIELDABORT)) // commit field if user pressed enter
             {
                 if(fieldmode==FIELDCOMMIT) result = e->currentline().text;
@@ -425,7 +428,7 @@ struct gui : guient
             }
             else fieldsactive = true;
 
-            e->draw(curx+guibound[0]/2, cury, color, editing);
+            e->draw(curx+wpad/2, cury+hpad/2, color, editing);
 
             lineshader->set();
             glDisable(GL_TEXTURE_2D);
