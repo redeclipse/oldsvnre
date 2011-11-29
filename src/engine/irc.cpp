@@ -287,6 +287,7 @@ bool ircjoin(ircnet *n, ircchan *c)
     else ircsend(n, "JOIN %s", c->name);
     c->state = IRCC_JOINING;
     c->lastjoin = totalmillis;
+    c->lastsync = 0;
     return true;
 }
 
@@ -321,7 +322,7 @@ bool ircnewchan(int type, const char *name, const char *channel, const char *fri
     d.state = IRCC_NONE;
     d.type = type;
     d.relay = relay;
-    d.lastjoin = 0;
+    d.lastjoin = d.lastsync = 0;
     copystring(d.name, channel);
     copystring(d.friendly, friendly && *friendly ? friendly : channel);
     copystring(d.passkey, passkey);
@@ -478,7 +479,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             if(c && !strcasecmp(user[0], n->nick))
             {
                 c->state = IRCC_JOINED;
-                c->lastjoin = totalmillis;
+                c->lastjoin = c->lastsync = totalmillis;
             }
             ircprintf(n, 3, w[g+1], "\fg%s (%s@%s) has joined", user[0], user[1], user[2]);
         }
@@ -492,6 +493,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             {
                 c->state = IRCC_NONE;
                 c->lastjoin = totalmillis;
+                c->lastsync = 0;
             }
             ircprintf(n, 3, w[g+1], "\fo%s (%s@%s) has left", user[0], user[1], user[2]);
         }
@@ -510,6 +512,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             {
                 c->state = IRCC_KICKED;
                 c->lastjoin = totalmillis;
+                c->lastsync = 0;
             }
             ircprintf(n, 3, w[g+1], "\fr%s (%s@%s) has kicked %s from %s", user[0], user[1], user[2], w[g+2], w[g+1]);
         }
@@ -595,6 +598,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
                 {
                     c->state = IRCC_BANNED;
                     c->lastjoin = totalmillis;
+                    c->lastsync = 0;
                     if(c->type == IRCCT_AUTO)
                         ircprintf(n, 4, w[g+2], "\fbwaiting 5 mins to rejoin %s", c->name);
                 }
@@ -721,6 +725,7 @@ void ircslice()
                         ircchan *c = &n->channels[j];
                         c->state = IRCC_NONE;
                         c->lastjoin = totalmillis;
+                        c->lastsync = 0;
                     }
                     break;
                 }
@@ -812,18 +817,18 @@ void irccmd(ircnet *n, ircchan *c, char *s)
     }
 }
 
-bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab)
+bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
 {
-    if(tab) g->tab(c->name);
+    if(tab) g->tab(c->name, 0xFFFFFF, front);
 
     defformatstring(cwindow)("%s_%s_window", n->name, c->name);
     g->fieldclear(cwindow);
     loopvk(c->lines) g->fieldline(cwindow, c->lines[k]);
-    g->field(cwindow, 0x666666, -120, 30, NULL, EDITORREADONLY);
+    g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
     g->fieldscroll(cwindow);
 
     defformatstring(cinput)("%s_%s_input", n->name, c->name);
-    char *v = g->field(cinput, 0x666666, -120, 0, "", EDITORFOREVER);
+    char *v = g->field(cinput, 0x666666, -100, 0, "", EDITORFOREVER);
     if(v && *v)
     {
         irccmd(n, c, v);
@@ -833,6 +838,7 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab)
     return true;
 }
 
+int lastchanupdate = -1;
 bool ircnetgui(guient *g, ircnet *n, bool tab)
 {
     if(tab) g->tab(n->name);
@@ -840,11 +846,11 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     defformatstring(window)("%s_window", n->name);
     g->fieldclear(window);
     loopvk(n->lines) g->fieldline(window, n->lines[k]);
-    g->field(window, 0x666666, -120, 30, NULL, EDITORREADONLY);
+    g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
     g->fieldscroll(window);
 
     defformatstring(input)("%s_input", n->name);
-    char *w = g->field(input, 0x666666, -120, 0, "", EDITORFOREVER);
+    char *w = g->field(input, 0x666666, -100, 0, "", EDITORFOREVER);
     if(w && *w)
     {
         irccmd(n, NULL, w);
@@ -855,8 +861,9 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     loopvj(n->channels) if(n->channels[j].state != IRCC_NONE && n->channels[j].name[0])
     {
         ircchan *c = &n->channels[j];
-        if(!ircchangui(g, n, c, true)) return false;
+        if(!ircchangui(g, n, c, true, c->lastsync && c->lastsync > lastchanupdate)) return false;
     }
+    lastchanupdate = totalmillis;
 
     return true;
 }
@@ -864,7 +871,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
 bool ircgui(guient *g, const char *s)
 {
     g->allowautotab(false);
-    g->strut(121);
+    g->strut(101);
     if(s && *s)
     {
         ircnet *n = ircfind(s);

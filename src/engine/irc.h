@@ -2,7 +2,7 @@ enum { IRCC_NONE = 0, IRCC_JOINING, IRCC_JOINED, IRCC_KICKED, IRCC_BANNED };
 enum { IRCCT_NONE = 0, IRCCT_AUTO };
 struct ircchan
 {
-    int state, type, relay, lastjoin;
+    int state, type, relay, lastjoin, lastsync;
     string name, friendly, passkey;
 #ifndef STANDALONE
     vector<char *> lines;
@@ -15,7 +15,7 @@ struct ircchan
     {
         state = IRCC_NONE;
         type = IRCCT_NONE;
-        relay = lastjoin = 0;
+        relay = lastjoin = lastsync = 0;
         name[0] = friendly[0] = passkey[0] = 0;
 #ifndef STANDALONE
         loopv(lines) DELETEA(lines[i]);

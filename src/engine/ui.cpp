@@ -41,7 +41,7 @@ struct gui : guient
         if(tcurrent)
         {
             if(layoutpass && !tpos) tcurrent = NULL; //disable tabs because you didn't start with one
-            if(shouldautotab && !curdepth && (layoutpass ? 0 : cury) + ysize > guiautotab*guibound[1]) tab(NULL, tcolor);
+            if(shouldautotab && !curdepth && (layoutpass ? 0 : cury) + ysize > guiautotab*guibound[1]) tab(NULL, tcolor, false);
         }
     }
 
@@ -80,10 +80,11 @@ struct gui : guient
     bool visible() { return !layoutpass && visibletab(); }
 
     //tab is always at top of page
-    void tab(const char *name, int color)
+    void tab(const char *name, int color, bool front)
     {
         if(curdepth != 0) return;
         tpos++;
+        if(front && tcurrent && *tcurrent != tpos) *tcurrent = tpos;
         if(!hastitle)
         {
             if(layoutpass)
@@ -956,7 +957,7 @@ namespace UI
             case SDLK_LEFT:
             case SDLK_RIGHT:
             case SDLK_LSHIFT:
-            case SDLK_RSHIFT: 
+            case SDLK_RSHIFT:
             case -4:
             case -5:
                 break;
