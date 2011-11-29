@@ -604,7 +604,7 @@ namespace UI
     extern void addcb(guicb *cb);
     extern void limitscale(float scale);
     extern editor *geteditor(const char *name, int mode, const char *init = NULL);
-    extern void editorline(editor *e, const char *str);
+    extern void editorline(editor *e, const char *str, int limit = -1);
     extern void editorclear(editor *e, const char *init = "");
     extern void editoredit(editor *e);
 }

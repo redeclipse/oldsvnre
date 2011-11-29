@@ -576,7 +576,7 @@ struct editor
             text_pos(lines[ey].text, ex, pex, pey, maxwidth, TEXT_NO_INDENT);
             int maxy = lines.length();
             int h = 0;
-            for(int i = scrolly; i < maxy; i++)
+            for(int i = starty; i < maxy; i++)
             {
                 int width, height;
                 text_bounds(lines[i].text, width, height, maxwidth, TEXT_NO_INDENT);
