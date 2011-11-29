@@ -293,6 +293,7 @@ extern void rendergame();
 extern void renderavatar(bool early);
 extern void invalidatepostfx();
 extern void drawnoview();
+extern bool hasnoview();
 extern void gl_drawframe(int w, int h);
 extern void drawminimap();
 extern void enablepolygonoffset(GLenum type);
@@ -499,6 +500,7 @@ extern vector<char *> gameargs;
 extern void initgame();
 extern void cleanupserver();
 extern void serverslice(uint timeout = 0);
+extern int updatetimer(bool limit);
 
 extern void retrieveservers(vector<char> &data);
 extern void localclienttoserver(int chan, ENetPacket *);
@@ -553,6 +555,7 @@ extern int initing;
 extern bool progressing;
 extern float loadprogress;
 extern void progress(float bar1 = 0, const char *text1 = NULL, float bar2 = 0, const char *text2 = NULL);
+extern void limitfps(int &millis, int curmillis);
 
 enum
 {

@@ -865,12 +865,11 @@ int getclockmillis()
 #endif
 }
 
-int updatetimer()
+int updatetimer(bool limit)
 {
     int millis = getclockmillis();
 #ifndef STANDALONE
-    extern void limitfps(int &millis, int curmillis);
-    limitfps(millis, totalmillis);
+    if(limit) limitfps(millis, totalmillis);
 #endif
     int elapsed = millis-totalmillis;
     if(paused) curtime = 0;
@@ -1181,7 +1180,7 @@ void serverloop()
         //int _lastmillis = lastmillis;
         //lastmillis = totalmillis = (int)enet_time_get();
         //curtime = lastmillis-_lastmillis;
-        updatetimer();
+        updatetimer(false);
 
 #ifdef MASTERSERVER
         checkmaster();
