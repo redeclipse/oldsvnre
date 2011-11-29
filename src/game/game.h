@@ -810,7 +810,7 @@ struct gameent : dynent, gamestate
         if(origin == vec(-1, -1, -1))
         {
             vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-            dir.mul(radius*0.75f); right.mul(radius*0.85f); dir.z -= height*0.075f;
+            dir.mul(radius*0.75f); right.mul(radius*0.85f); dir.z -= height*0.25f;
             origin = vec(o).add(dir).add(right);
         }
         return origin;
@@ -818,7 +818,7 @@ struct gameent : dynent, gamestate
 
     vec originpos(bool melee = false, bool secondary = false)
     {
-        if(melee) return secondary ? feetpos() : headpos(height*0.075f);
+        if(melee) return secondary ? feetpos() : headpos(-height*0.25f);
         return checkoriginpos();
     }
 
@@ -851,7 +851,7 @@ struct gameent : dynent, gamestate
             else
             {
                 vec dir, right; vecfromyawpitch(yaw, pitch, 1, 0, dir); vecfromyawpitch(yaw, pitch, 0, -1, right);
-                dir.mul(radius*1.25f); right.mul(radius*0.75f); dir.z -= height*0.075f;
+                dir.mul(radius*0.9f); right.mul(radius*0.6f); dir.z -= height*0.25f;
                 muzzle = vec(o).add(dir).add(right);
             }
         }
@@ -860,7 +860,7 @@ struct gameent : dynent, gamestate
 
     vec muzzlepos(int weap = -1, bool secondary = false)
     {
-        if(isweap(weap)) return checkmuzzlepos(weap);
+        if(isweap(weap) && weap != WEAP_MELEE) return checkmuzzlepos(weap);
         return originpos(weap == WEAP_MELEE, secondary);
     }
 
@@ -872,7 +872,7 @@ struct gameent : dynent, gamestate
 
     vec ejectpos(int weap = -1)
     {
-        if(isweap(weap)) return checkejectpos();
+        if(isweap(weap) && weap != WEAP_MELEE) return checkejectpos();
         return muzzlepos();
     }
 
