@@ -365,48 +365,27 @@ ICOMMAND(0, ircfriendlychan, "sss", (const char *name, const char *chan, const c
 void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
 {
     defvformatstring(str, msg, msg);
-    mkstring(s);
+    string s;
     if(target && *target && strcasecmp(target, n->nick))
     {
         ircchan *c = ircfindchan(n, target);
         if(c)
         {
             formatstring(s)("\fs\fa[%s:%s]\fS", n->name, c->name);
-#ifndef STANDALONE
-            while(c->lines.length() >= 100)
-            {
-                char *a = c->lines.remove(0);
-                DELETEA(a);
-            }
-            c->lines.add(newstring(str));
-#endif
+            c->addline(str, 100);
             if(n->type == IRCT_RELAY && c->relay >= relay)
                 server::srvmsgf(relay > 1 ? -2 : -3, "\fs\fa[%s]\fS %s", c->friendly, str);
         }
         else
         {
             formatstring(s)("\fs\fa[%s:%s]\fS", n->name, target);
-#ifndef STANDALONE
-            while(n->lines.length() >= 100)
-            {
-                char *a = n->lines.remove(0);
-                DELETEA(a);
-            }
-            n->lines.add(newstring(str));
-#endif
+            n->addline(str, 100);
         }
     }
     else
     {
         formatstring(s)("\fs\fa[%s]\fS", n->name);
-#ifndef STANDALONE
-        while(n->lines.length() >= 100)
-        {
-            char *a = n->lines.remove(0);
-            DELETEA(a);
-        }
-        n->lines.add(newstring(str));
-#endif
+        n->addline(newstring(str), 100);
     }
     console(0, "%s %s", s, str); // console is not used to relay
 }
@@ -822,18 +801,16 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
     if(tab) g->tab(c->name, 0xFFFFFF, front);
 
     defformatstring(cwindow)("%s_%s_window", n->name, c->name);
-    g->fieldclear(cwindow);
-    loopvk(c->lines) g->fieldline(cwindow, c->lines[k]);
+    editor *e = UI::geteditor(cwindow, EDITORREADONLY);
+    if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++], true);
     g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
-    g->fieldscroll(cwindow);
 
     defformatstring(cinput)("%s_%s_input", n->name, c->name);
     char *v = g->field(cinput, 0x666666, -100, 0, "", EDITORFOREVER);
     if(v && *v)
     {
         irccmd(n, c, v);
-        *v = 0;
-        g->fieldedit(cinput);
+        UI::editoredit(UI::geteditor(cinput, EDITORFOREVER));
     }
     return true;
 }
@@ -844,18 +821,16 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     if(tab) g->tab(n->name);
 
     defformatstring(window)("%s_window", n->name);
-    g->fieldclear(window);
-    loopvk(n->lines) g->fieldline(window, n->lines[k]);
+    editor *e = UI::geteditor(window, EDITORREADONLY);
+    if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++], true);
     g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
-    g->fieldscroll(window);
 
     defformatstring(input)("%s_input", n->name);
     char *w = g->field(input, 0x666666, -100, 0, "", EDITORFOREVER);
     if(w && *w)
     {
         irccmd(n, NULL, w);
-        *w = 0;
-        g->fieldedit(input);
+        UI::editoredit(UI::geteditor(input, EDITORFOREVER));
     }
 
     loopvj(n->channels) if(n->channels[j].state != IRCC_NONE && n->channels[j].name[0])

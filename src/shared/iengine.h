@@ -579,10 +579,6 @@ struct guient
     virtual void space(float size = 1) = 0;
     virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = 0) = 0;
     virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = 0) = 0;
-    virtual void fieldline(const char *name, const char *str) = 0;
-    virtual void fieldclear(const char *name, const char *init = "") = 0;
-    virtual int fieldedit(const char *name) = 0;
-    virtual void fieldscroll(const char *name, int n = -1) = 0;
 };
 
 struct guicb
@@ -593,6 +589,8 @@ struct guicb
 };
 
 extern char *guioverlaytex, *guislidertex;
+
+struct editor;
 
 namespace UI
 {
@@ -605,6 +603,10 @@ namespace UI
     extern bool hit(bool on, bool act);
     extern void addcb(guicb *cb);
     extern void limitscale(float scale);
+    extern editor *geteditor(const char *name, int mode, const char *init = NULL);
+    extern void editorline(editor *e, const char *str, bool scroll = false);
+    extern void editorclear(editor *e, const char *init = "");
+    extern void editoredit(editor *e);
 }
 
 // client

@@ -1,12 +1,37 @@
 enum { IRCC_NONE = 0, IRCC_JOINING, IRCC_JOINED, IRCC_KICKED, IRCC_BANNED };
 enum { IRCCT_NONE = 0, IRCCT_AUTO };
-struct ircchan
+struct irclines
+{
+    int newlines;
+    vector<char *> lines;
+   
+    void reset()
+    {
+        lines.deletearrays();
+        newlines = 0;
+    }
+
+    void choplines(int limit)
+    {
+        while(lines.length() >= limit)
+        {
+            delete[] lines.remove(0);
+            newlines = min(newlines, lines.length());
+        }
+    }
+
+    void addline(const char *str, int limit = -1)
+    {
+#ifndef STANDALONE
+        if(limit >= 0) choplines(limit);
+        lines.add(newstring(str));
+#endif
+    }
+};
+struct ircchan : irclines
 {
     int state, type, relay, lastjoin, lastsync;
     string name, friendly, passkey;
-#ifndef STANDALONE
-    vector<char *> lines;
-#endif
 
     ircchan() { reset(); }
     ~ircchan() { reset(); }
@@ -17,22 +42,18 @@ struct ircchan
         type = IRCCT_NONE;
         relay = lastjoin = lastsync = 0;
         name[0] = friendly[0] = passkey[0] = 0;
-#ifndef STANDALONE
-        loopv(lines) DELETEA(lines[i]);
-        lines.shrink(0);
-#endif
+        irclines::reset();
     }
 };
 enum { IRCT_NONE = 0, IRCT_CLIENT, IRCT_RELAY, IRCT_MAX };
 enum { IRC_DISC = 0, IRC_ATTEMPT, IRC_CONN, IRC_ONLINE, IRC_MAX };
-struct ircnet
+struct ircnet : irclines
 {
     int type, state, port, lastattempt, inputcarry, inputlen;
     string name, serv, nick, ip, passkey, authname, authpass;
     ENetAddress address;
     ENetSocket sock;
     vector<ircchan> channels;
-    vector<char *> lines;
     uchar input[4096];
 
     ircnet() { reset(); }
@@ -46,8 +67,7 @@ struct ircnet
         port = lastattempt = 0;
         name[0] = serv[0] = nick[0] = ip[0] = passkey[0] = authname[0] = authpass[0] = 0;
         channels.shrink(0);
-        loopv(lines) DELETEA(lines[i]);
-        lines.shrink(0);
+        irclines::reset();
     }
 };
 

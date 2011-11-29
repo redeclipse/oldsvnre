@@ -398,7 +398,7 @@ struct gui : guient
             e->rendered = true;
 
             bool hit = ishit(w, h);
-            bool editing = (fieldmode != FIELDSHOW) && (e==currentfocus());
+            bool editing = (fieldmode != FIELDSHOW) && e==currentfocus() && e->mode!=EDITORREADONLY;
             if(mouseaction[0]&GUI_UP && mergedepth >= 0 && hit) mouseaction[0] &= ~GUI_UP;
             if(mouseaction[0]&GUI_DOWN) //mouse request focus
             {
@@ -451,56 +451,6 @@ struct gui : guient
         }
         if(font && *font) gui::popfont();
         return result;
-    }
-
-    void fieldline(const char *name, const char *str)
-    {
-        if(!layoutpass) return;
-        loopv(editors) if(strcmp(editors[i]->name, name) == 0)
-        {
-            editor *e = editors[i];
-            e->lines.add().set(str);
-            e->mark(false);
-            return;
-        }
-    }
-
-    void fieldclear(const char *name, const char *init)
-    {
-        if(!layoutpass) return;
-        loopvrev(editors) if(strcmp(editors[i]->name, name) == 0)
-        {
-            editor *e = editors[i];
-            e->clear(init);
-            return;
-        }
-    }
-
-    int fieldedit(const char *name)
-    {
-        loopvrev(editors) if(strcmp(editors[i]->name, name) == 0)
-        {
-            editor *e = editors[i];
-            useeditor(e->name, e->mode, true);
-            e->mark(false);
-            e->cx = e->cy = 0;
-            fieldmode = FIELDEDIT;
-            return fieldmode;
-        }
-        return fieldmode;
-    }
-
-    void fieldscroll(const char *name, int n)
-    {
-        if(n < 0 && mouseaction[0]&GUI_PRESSED) return; // don't auto scroll during edits
-        if(!layoutpass) return;
-        loopv(editors) if(strcmp(editors[i]->name, name) == 0)
-        {
-            editor *e = editors[i];
-            e->scrolly = e->cx = 0;
-            e->cy = n >= 0 ? n : e->lines.length();
-            return;
-        }
     }
 
     void rect_(float x, float y, float w, float h, int usetc = -1, bool lines = false)
@@ -1051,4 +1001,39 @@ namespace UI
         }
         loopi(2) mouseaction[i] = 0;
     }
+
+    editor *geteditor(const char *name, int mode, const char *init)
+    {
+        return useeditor(name, mode, false, init);
+    }
+
+    void editorline(editor *e, const char *str, bool scroll)
+    {
+        if(!e) return;
+        int slines = e->limitscrolly();
+        if(e->lines.length() != 1 || !e->lines[0].empty()) e->lines.add();
+        e->lines.last().set(str);
+        if(scroll && (e->cy < 0 || e->cy >= slines))
+        {
+            e->cx = 0;
+            e->scrolly = 0;
+            e->cy = e->lines.length()-1;
+        }
+        e->mark(false);
+    }
+
+    void editorclear(editor *e, const char *init)
+    {
+        if(!e) return;
+        e->clear(init);
+    }
+
+    void editoredit(editor *e)
+    {
+        if(!e) return;
+        useeditor(e->name, e->mode, true);
+        e->clear();
+        fieldmode = FIELDEDIT;
+    }
 };
+
