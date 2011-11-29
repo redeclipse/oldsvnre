@@ -397,7 +397,7 @@ struct gui : guient
         {
             e->rendered = true;
 
-            bool hit = ishit(w, h);
+            bool hit = ishit(w, h) && e->mode!=EDITORREADONLY;
             bool editing = (fieldmode != FIELDSHOW) && e==currentfocus() && e->mode!=EDITORREADONLY;
             if(mouseaction[0]&GUI_UP && mergedepth >= 0 && hit) mouseaction[0] &= ~GUI_UP;
             if(mouseaction[0]&GUI_DOWN) //mouse request focus
@@ -443,9 +443,13 @@ struct gui : guient
             int slines = e->limitscrolly();
             if(slines > 0)
             {
-                int pos = e->scrolly;
-                slider(e->scrolly, slines, 0, color, NULL, false, true);
-                if(pos != e->scrolly) e->cy = e->scrolly;
+                int oldpos = e->scrolly == editor::SCROLLEND ? slines : e->scrolly, newpos = oldpos;
+                slider(newpos, slines, 0, color, NULL, false, true);
+                if(oldpos != newpos) 
+                {
+                    e->cy = newpos;
+                    e->scrolly = e->mode == EDITORREADONLY && newpos >= slines ? editor::SCROLLEND : newpos;
+                }
             }
             if(wasvertical) poplist();
         }
@@ -843,7 +847,7 @@ namespace UI
     bool keypress(int code, bool isdown, int cooked)
     {
         editor *e = currentfocus();
-        if(fieldmode == FIELDKEY)
+        if(fieldmode == FIELDKEY && e && e->mode != EDITORREADONLY)
         {
             switch(code)
             {
@@ -877,7 +881,7 @@ namespace UI
             default: break;
         }
 
-        if(fieldmode == FIELDSHOW || !e) return false;
+        if(fieldmode == FIELDSHOW || !e || e->mode == EDITORREADONLY) return false;
         switch(code)
         {
             case SDLK_ESCAPE: //cancel editing without commit
@@ -1007,18 +1011,11 @@ namespace UI
         return useeditor(name, mode, false, init);
     }
 
-    void editorline(editor *e, const char *str, bool scroll)
+    void editorline(editor *e, const char *str)
     {
         if(!e) return;
-        int slines = e->limitscrolly();
         if(e->lines.length() != 1 || !e->lines[0].empty()) e->lines.add();
         e->lines.last().set(str);
-        if(scroll && (e->cy < 0 || e->cy >= slines))
-        {
-            e->cx = 0;
-            e->scrolly = 0;
-            e->cy = e->lines.length()-1;
-        }
         e->mark(false);
     }
 
