@@ -483,16 +483,16 @@ int draw_textx(const char *fstr, int left, int top, int r, int g, int b, int a, 
     return draw_text(str, left, top, r, g, b, a, flags, cursor, maxwidth);
 }
 
-vector<const char *> fontstack;
+vector<font *> fontstack;
 
 bool pushfont(const char *name)
 {
     if(!fontstack.length() && curfont)
-        fontstack.add(curfont->name);
+        fontstack.add(curfont);
 
     if(setfont(name))
     {
-        fontstack.add(name);
+        fontstack.add(curfont);
         return true;
     }
     return false;
@@ -502,8 +502,10 @@ bool popfont(int num)
 {
     loopi(num)
     {
-        if(!fontstack.length()) break;
+        if(fontstack.empty()) break;
         fontstack.pop();
     }
-    return setfont(fontstack.length() ? fontstack.last() : "default");
+    if(fontstack.length()) { curfont = fontstack.last(); return true; }
+    return setfont("default");
 }
+

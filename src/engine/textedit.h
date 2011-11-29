@@ -138,6 +138,8 @@ struct editline
 
 struct editor
 {
+    enum { SCROLLEND = INT_MAX };
+
     int mode; //editor mode - 1= keep while focused, 2= keep while used in gui, 3= keep forever (i.e. until mode changes)
     bool active, rendered;
     const char *name;
@@ -157,7 +159,7 @@ struct editor
 
     editor(const char *name, int mode, const char *initval) :
         mode(mode), active(true), rendered(false), name(newstring(name)), filename(NULL),
-        cx(0), cy(0), mx(-1), maxx(-1), maxy(-1), scrolly(0), linewrap(false), pixelwidth(-1), pixelheight(-1)
+        cx(0), cy(0), mx(-1), maxx(-1), maxy(-1), scrolly(mode==EDITORREADONLY ? SCROLLEND : 0), linewrap(false), pixelwidth(-1), pixelheight(-1)
     {
         //printf("editor %08x '%s'\n", this, name);
         lines.add().set(initval ? initval : "");
@@ -535,7 +537,7 @@ struct editor
         for(int ph = pixelheight; slines > 0 && ph > 0;)
         {
             int width, height;
-            text_bounds(lines[slines-1].text, width, height, maxwidth);
+            text_bounds(lines[slines-1].text, width, height, maxwidth, TEXT_NO_INDENT);
             if(height > ph) break;
             ph -= height;
             slines--;
@@ -551,17 +553,18 @@ struct editor
         bool selection = region(sx, sy, ex, ey);
 
         // fix scrolly so that <cx, cy> is always on screen
-        if(cy < scrolly) scrolly = cy;
+        int starty = scrolly;
+        if(starty==SCROLLEND) { cy = lines.length()-1; starty = 0; }
+        if(cy < starty) starty = cy;
         else
         {
-            if(scrolly < 0) scrolly = 0;
             int h = 0;
-            for(int i = cy; i >= scrolly; i--)
+            for(int i = cy; i >= starty; i--)
             {
                 int width, height;
                 text_bounds(lines[i].text, width, height, maxwidth, TEXT_NO_INDENT);
                 h += height;
-                if(h > pixelheight) { scrolly = i + 1; break; }
+                if(h > pixelheight) { starty = i + 1; break; }
             }
         }
 
@@ -584,10 +587,10 @@ struct editor
             }
             maxy--;
 
-            if(ey >= scrolly && sy <= maxy)
+            if(ey >= starty && sy <= maxy)
             {
                 // crop top/bottom within window
-                if(sy < scrolly) { sy = scrolly; psy = 0; psx = 0; }
+                if(sy < starty) { sy = starty; psy = 0; psx = 0; }
                 if(ey > maxy) { ey = maxy; pey = pixelheight - FONTH; pex = pixelwidth; }
 
                 notextureshader->set();
@@ -625,7 +628,7 @@ struct editor
         }
 
         int h = 0;
-        for(int i = scrolly; i < lines.length(); i++)
+        for(int i = starty; i < lines.length(); i++)
         {
             int width, height;
             text_bounds(lines[i].text, width, height, maxwidth, TEXT_NO_INDENT);

@@ -804,7 +804,7 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
     if(c->newlines < c->lines.length())
     {
         editor *e = UI::geteditor(cwindow, EDITORREADONLY);
-        if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++], true);
+        if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++]);
     }
     g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
@@ -827,7 +827,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     if(n->newlines < n->lines.length())
     {
         editor *e = UI::geteditor(window, EDITORREADONLY);
-        if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++], true);
+        if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++]);
     }
     g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
