@@ -569,7 +569,7 @@ struct guient
     virtual int image(Texture *t, float scale, bool overlaid = false, int icolor = 0xFFFFFF) = 0;
     virtual int texture(VSlot &vslot, float scale, bool overlaid = true) = 0;
     virtual int slice(Texture *t, float scale, float start = 0, float end = 1, const char *text = NULL) = 0;
-    virtual void slider(int &val, int vmin, int vmax, int color, char *label = NULL, bool reverse = false, bool scroll = false) = 0;
+    virtual void slider(int &val, int vmin, int vmax, int color, const char *label = NULL, bool reverse = false, bool scroll = false) = 0;
     virtual void separator() = 0;
     virtual void progress(float percent, float scale) = 0;
     virtual void strut(float size = 1) = 0;

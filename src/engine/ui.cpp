@@ -16,6 +16,7 @@ VAR(IDF_PERSIST, guiautotab, 6, 16, 40);
 VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guiblend, 1, 156, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
+VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 
 static bool needsinput = false, hastitle = true;
 
@@ -96,12 +97,7 @@ struct gui : guient
             return;
         }
         if(color) tcolor = color;
-        if(!name)
-        {
-            static string title;
-            formatstring(title)("%d", tpos);
-            name = title;
-        }
+        if(!name) name = intstr(tpos);
         defformatstring(tabtitle)("\fs\fd[\fS%s%s%s\fs\fd]\fS", visible() ? " " : "", name, visible() ? " " : "");
         bool vis = visibletab();
         gui::pushfont(vis ? "super" : "default");
@@ -209,7 +205,7 @@ struct gui : guient
     int button(const char *text, int color, const char *icon, int icolor, bool faded) { autotab(); return button_(text, color, icon, icolor, true, faded); }
     int title (const char *text, int color, const char *icon, int icolor) { autotab(); return button_(text, color, icon, icolor, false, false, "emphasis"); }
 
-    void separator() { autotab(); line_(5); }
+    void separator() { autotab(); line_(guisepsize); }
 
     //use to set min size (useful when you have progress bars)
     void strut(float size) { layout(isvertical() ? int(size*guibound[0]) : 0, isvertical() ? 0 : int(size*guibound[1])); }
@@ -291,38 +287,35 @@ struct gui : guient
         layout(size, size);
     }
 
-    void slider(int &val, int vmin, int vmax, int color, char *label, bool reverse, bool scroll)
+    void slider(int &val, int vmin, int vmax, int color, const char *label, bool reverse, bool scroll)
     {
         autotab();
         int x = curx;
         int y = cury;
-        line_(guilinesize);
+        int space = line_(guilinesize, 1.0f, ishorizontal() ? guibound[0]*3 : guibound[1]);
         if(visible())
         {
             pushfont("emphasis");
-            if(!label)
-            {
-                static string s;
-                formatstring(s)("%d", val);
-                label = s;
-            }
+            if(!label) label = intstr(val);
             int w = text_width(label);
 
             bool hit = false, forcecolor = false;
             int px, py;
             if(ishorizontal())
             {
-                hit = ishit(guilinesize, ysize, x, y);
-                px = x + (guilinesize-w)/2;
-                if(reverse) py = y + ((ysize-guibound[1])*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at top
-                else py = y + (ysize-guibound[1]) - ((ysize-guibound[1])*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at bottom
+                hit = ishit(guilinesize, ysize, x + space/2 - guilinesize/2, y);
+                px = x + space/2 - w/2;
+                py = ((ysize-guibound[1])*(val-vmin))/max(vmax-vmin, 1);
+                if(reverse) py += y; //vmin at top
+                else py = y + (ysize-guibound[1]) - py; //vmin at bottom
             }
             else
             {
-                hit = ishit(xsize, guilinesize, x, y);
-                if(reverse) px = x + (xsize-guibound[0]/2-w/2) - ((xsize-w)*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at right
-                else px = x + guibound[0]/2 - w/2 + ((xsize-w)*(val-vmin))/((vmax==vmin) ? 1 : (vmax-vmin)); //vmin at left
-                py = y;
+                hit = ishit(xsize, guilinesize, x, y + space/2 - guilinesize/2);
+                px = ((xsize-w)*(val-vmin))/max(vmax-vmin, 1);
+                if(reverse) px = x + (xsize-guibound[0]/2-w/2) - px; //vmin at right
+                else px += x + guibound[0]/2 - w/2; //vmin at left
+                py = y + space/2 - FONTH/2;
             }
             if(hit && color == 0xFFFFFF) { forcecolor = true; color = 0xFF4444; }
             text_(label, px, py, color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN, forcecolor);
@@ -331,21 +324,22 @@ struct gui : guient
                 if(mouseaction[0]&GUI_PRESSED)
                 {
                     int vnew = vmax-vmin+1;
-                    if(ishorizontal()) vnew = reverse ? int(vnew*(hity-y-guibound[1]/2)/(ysize-guibound[1])) : int(vnew*(y+ysize-guibound[1]/2-hity)/(ysize-guibound[1]));
-                    else vnew = reverse ? int(vnew*(x+xsize-guibound[0]/2-hitx)/(xsize-w)) : int(vnew*(hitx-x-guibound[0]/2)/(xsize-w));
-                    vnew = clamp(vnew + vmin, vmin, vmax);
+                    if(ishorizontal()) vnew = int((vnew*(reverse ? hity-y-guibound[1]/2 : y+ysize-guibound[1]/2-hity))/(ysize-guibound[1]));
+                    else vnew = int((vnew*(reverse ? x+xsize-guibound[0]/2-hitx : hitx-x-guibound[0]/2))/(xsize-w));
+                    vnew += vmin; 
+                    vnew = clamp(vnew, vmin, vmax);
                     if(vnew != val) val = vnew;
                 }
                 else if(mouseaction[1]&GUI_UP)
                 {
-                    int vval = val+((reverse ? !(mouseaction[1]&GUI_ALT) : (mouseaction[1]&GUI_ALT)) ? -1 : 1),
+                    int vval = val+(reverse == !(mouseaction[1]&GUI_ALT) ? -1 : 1),
                         vnew = clamp(vval, vmin, vmax);
                     if(vnew != val) val = vnew;
                 }
             }
             else if(scroll && lists[curlist].mouse[1]&GUI_UP)
             {
-                int vval = val+((reverse ? !(lists[curlist].mouse[1]&GUI_ALT) : (lists[curlist].mouse[1]&GUI_ALT)) ? -1 : 1),
+                int vval = val+(reverse == !(lists[curlist].mouse[1]&GUI_ALT) ? -1 : 1),
                     vnew = clamp(vval, vmin, vmax);
                 if(vnew != val) val = vnew;
             }
@@ -699,8 +693,9 @@ struct gui : guient
         }
     }
 
-    void line_(int size, float percent = 1.0f)
+    int line_(int size, float percent = 1.0f, int space = 0)
     {
+        space = max(max(space, guibound[0]), size);
         if(visible())
         {
             if(!slidertex) slidertex = textureload(guislidertex, 3, true, false);
@@ -710,17 +705,18 @@ struct gui : guient
             {
                 glColor4f(0.5f, 0.5f, 0.5f, 0.375f);
                 if(ishorizontal())
-                    rect_(curx + guibound[0]/2 - size, cury, size*2, ysize, 0);
+                    rect_(curx + space/2 - size/2, cury, size, ysize, 0);
                 else
-                    rect_(curx, cury + guibound[0]/2 - size, xsize, size*2, 1);
+                    rect_(curx, cury + space/2 - size/2, xsize, size, 1);
             }
             glColor3f(0.5f, 0.5f, 0.5f);
             if(ishorizontal())
-                rect_(curx + guibound[0]/2 - size, cury + ysize*(1-percent), size*2, ysize*percent, 0);
+                rect_(curx + space/2 - size/2, cury + ysize*(1-percent), size, ysize*percent, 0);
             else
-                rect_(curx, cury + guibound[0]/2 - size, xsize*percent, size*2, 1);
+                rect_(curx, cury + space/2 - size/2, xsize*percent, size, 1);
         }
-        layout(ishorizontal() ? guibound[0] : 0, ishorizontal() ? 0 : guibound[1]);
+        layout(ishorizontal() ? space : 0, ishorizontal() ? 0 : space);
+        return space;
     }
 
     int button_(const char *text, int color, const char *icon, int icolor, bool clickable, bool faded, const char *font = "")
