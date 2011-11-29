@@ -193,7 +193,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryhealthglow, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, inventoryhealthglow, 0, 0.025f, 1);
     FVAR(IDF_PERSIST, inventoryhealthglowblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);

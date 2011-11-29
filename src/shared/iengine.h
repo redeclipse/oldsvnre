@@ -175,7 +175,7 @@ static inline void text_pos(const char *str, int cursor, int &cx, int &cy, int m
     cx = int(cxf);
     cy = int(cyf);
 }
- 
+
 // renderva
 enum
 {
@@ -443,11 +443,11 @@ extern void setlocations(bool wanthome = true);
 // client
 struct serverinfo
 {
-    enum 
+    enum
     {
-        MAXPINGS = 3, 
+        MAXPINGS = 3,
 
-        WAITING = INT_MAX 
+        WAITING = INT_MAX
     };
     enum { UNRESOLVED = 0, RESOLVING, RESOLVED };
 
@@ -486,8 +486,8 @@ struct serverinfo
         numplayers = 0;
     }
 
-    void reset() 
-    { 
+    void reset()
+    {
         lastping = -1;
     }
 
@@ -565,7 +565,7 @@ struct guient
 
     virtual void allowautotab(bool on) = 0;
     virtual bool shouldtab() { return false; }
-    virtual void tab(const char *name = NULL, int color = 0xFFFFFF) = 0;
+    virtual void tab(const char *name = NULL, int color = 0xFFFFFF, bool front = false) = 0;
     virtual int title(const char *text, int color = 0xFFFFFF, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
     virtual int image(Texture *t, float scale, bool overlaid = false, int icolor = 0xFFFFFF) = 0;
     virtual int texture(VSlot &vslot, float scale, bool overlaid = true) = 0;

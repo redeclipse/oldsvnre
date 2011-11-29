@@ -1398,7 +1398,7 @@ namespace game
     {
         if(!name) name = d->name;
         static string cname;
-        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", getcolour(d), name);
+        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", TEAM(d->team, colour), name);
         if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
         {
             defformatstring(s)(" [%d]", d->clientnum);
