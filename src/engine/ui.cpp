@@ -330,24 +330,23 @@ struct gui : guient
             {
                 if(mouseaction[0]&GUI_PRESSED)
                 {
-                    int vnew = (vmin < vmax ? 1 : -1)+vmax-vmin;
+                    int vnew = vmax-vmin+1;
                     if(ishorizontal()) vnew = reverse ? int(vnew*(hity-y-guibound[1]/2)/(ysize-guibound[1])) : int(vnew*(y+ysize-guibound[1]/2-hity)/(ysize-guibound[1]));
                     else vnew = reverse ? int(vnew*(x+xsize-guibound[0]/2-hitx)/(xsize-w)) : int(vnew*(hitx-x-guibound[0]/2)/(xsize-w));
-                    vnew += vmin;
-                    vnew = vmin < vmax ? clamp(vnew, vmin, vmax) : clamp(vnew, vmax, vmin);
+                    vnew = clamp(vnew + vmin, vmin, vmax);
                     if(vnew != val) val = vnew;
                 }
                 else if(mouseaction[1]&GUI_UP)
                 {
                     int vval = val+((reverse ? !(mouseaction[1]&GUI_ALT) : (mouseaction[1]&GUI_ALT)) ? -1 : 1),
-                        vnew = vmin < vmax ? clamp(vval, vmin, vmax) : clamp(vval, vmax, vmin);
+                        vnew = clamp(vval, vmin, vmax);
                     if(vnew != val) val = vnew;
                 }
             }
             else if(scroll && lists[curlist].mouse[1]&GUI_UP)
             {
                 int vval = val+((reverse ? !(lists[curlist].mouse[1]&GUI_ALT) : (lists[curlist].mouse[1]&GUI_ALT)) ? -1 : 1),
-                    vnew = vmin < vmax ? clamp(vval, vmin, vmax) : clamp(vval, vmax, vmin);
+                    vnew = clamp(vval, vmin, vmax);
                 if(vnew != val) val = vnew;
             }
             popfont();
@@ -447,7 +446,7 @@ struct gui : guient
             if(slines > 0)
             {
                 int oldpos = e->scrolly == editor::SCROLLEND ? slines : e->scrolly, newpos = oldpos;
-                slider(newpos, slines, 0, color, NULL, false, true);
+                slider(newpos, 0, slines, color, NULL, true, true);
                 if(oldpos != newpos) 
                 {
                     e->cy = newpos;
