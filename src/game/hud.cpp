@@ -320,6 +320,77 @@ namespace hud
     TVAR(IDF_PERSIST, revengetex, "textures/revenge", 3);
     TVAR(IDF_PERSIST, firstbloodtex, "textures/firstblood", 3);
 
+    TVAR(IDF_PERSIST, modeeditingtex, "textures/modeediting.png", 3);
+    TVAR(IDF_PERSIST, modecampaigntex, "textures/modecampaign.png", 3);
+    TVAR(IDF_PERSIST, modedeathmatchtex, "textures/modedeathmatch.png", 3);
+    TVAR(IDF_PERSIST, modetimetrialtex, "textures/modetimetrial.png", 3);
+
+    TVAR(IDF_PERSIST, modecapturetex, "textures/modecapture.png", 3);
+    TVAR(IDF_PERSIST, modecapturereturntex, "textures/modecapturereturn.png", 3);
+    TVAR(IDF_PERSIST, modecapturedefendtex, "textures/modecapturedefend.png", 3);
+    TVAR(IDF_PERSIST, modecaptureprotecttex, "textures/modecaptureprotect.png", 3);
+
+    TVAR(IDF_PERSIST, modedefendtex, "textures/modedefend.png", 3);
+    TVAR(IDF_PERSIST, modedefendquicktex, "textures/modedefendquick.png", 3);
+    TVAR(IDF_PERSIST, modedefendconquertex, "textures/modedefendconquer.png", 3);
+
+    TVAR(IDF_PERSIST, modebombertex, "textures/modebomber.png", 3);
+    TVAR(IDF_PERSIST, modebomberbaskettex, "textures/modebomberbasket.png", 3);
+    TVAR(IDF_PERSIST, modebomberholdtex, "textures/modebomberhold.png", 3);
+
+    TVAR(IDF_PERSIST, modemultitex, "textures/modemulti.png", 3);
+    TVAR(IDF_PERSIST, modeteamtex, "textures/modeteam.png", 3);
+    TVAR(IDF_PERSIST, modeinstatex, "textures/modeinsta.png", 3);
+    TVAR(IDF_PERSIST, modemedievaltex, "textures/modemedieval.png", 3);
+    TVAR(IDF_PERSIST, modeballistictex, "textures/modeballistic.png", 3);
+    TVAR(IDF_PERSIST, modedueltex, "textures/modeduel.png", 3);
+    TVAR(IDF_PERSIST, modesurvivortex, "textures/modesurvivor.png", 3);
+    TVAR(IDF_PERSIST, modearenatex, "textures/modearena.png", 3);
+    TVAR(IDF_PERSIST, modeonslaughttex, "textures/modeonslaught.png", 3);
+    TVAR(IDF_PERSIST, modehovertex, "textures/modehover.png", 3);
+    TVAR(IDF_PERSIST, modevampiretex, "textures/modevampire.png", 3);
+    TVAR(IDF_PERSIST, modeexperttex, "textures/modeexpert.png", 3);
+    TVAR(IDF_PERSIST, moderesizetex, "textures/moderesize.png", 3);
+
+    void modetexs(int g, int m, bool implied, vector<char> &list)
+    {
+        server::modecheck(g, m);
+        #define ADDMODE(s) { list.put(s, strlen(s)); list.add(' '); }
+        if(m_edit(g)) ADDMODE(modeeditingtex)
+        else if(m_campaign(g)) ADDMODE(modecampaigntex)
+        else if(m_trial(g)) ADDMODE(modetimetrialtex)
+        else if(m_capture(g))
+        {
+            if(m_gsp1(g, m)) ADDMODE(modecapturereturntex)
+            else if(m_gsp2(g, m)) ADDMODE(modecapturedefendtex)
+            else if(m_gsp3(g, m)) ADDMODE(modecaptureprotecttex)
+            else ADDMODE(modecapturetex)
+        }
+        else if(m_defend(g))
+        {
+            if(m_gsp1(g, m)) ADDMODE(modedefendquicktex)
+            else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex)
+            else ADDMODE(modedefendtex)
+        }
+        else ADDMODE(modedeathmatchtex)
+
+        if(m_multi(g, m) && (implied || !(m_implied(g, m)&G_M_MULTI))) ADDMODE(modemultitex)
+        if(m_team(g, m) && (implied || !(m_implied(g, m)&G_M_TEAM))) ADDMODE(modeteamtex)
+        if(m_insta(g, m) && (implied || !(m_implied(g, m)&G_M_INSTA))) ADDMODE(modeinstatex)
+        if(m_medieval(g, m) && (implied || !(m_implied(g, m)&G_M_MEDIEVAL))) ADDMODE(modemedievaltex)
+        if(m_ballistic(g, m) && (implied || !(m_implied(g, m)&G_M_BALLISTIC))) ADDMODE(modeballistictex)
+        if(m_duel(g, m) && (implied || !(m_implied(g, m)&G_M_DUEL))) ADDMODE(modedueltex)
+        if(m_survivor(g, m) && (implied || !(m_implied(g, m)&G_M_SURVIVOR))) ADDMODE(modesurvivortex)
+        if(m_arena(g, m) && (implied || !(m_implied(g, m)&G_M_ARENA))) ADDMODE(modearenatex)
+        if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
+        if((m_hover(g, m) && (implied || !(m_implied(g, m)&G_M_HOVER))) || (m_hover(g, m) && (implied || !(m_implied(g, m)&G_M_HOVER)))) ADDMODE(modehovertex)
+        if(m_vampire(g, m) && (implied || !(m_implied(g, m)&G_M_VAMPIRE))) ADDMODE(modevampiretex)
+        if(m_expert(g, m) && (implied || !(m_implied(g, m)&G_M_EXPERT))) ADDMODE(modeexperttex)
+        if(m_resize(g, m) && (implied || !(m_implied(g, m)&G_M_RESIZE))) ADDMODE(moderesizetex)
+    }
+
+    ICOMMAND(0, modetexlist, "iii", (int *g, int *m, int *p), vector<char> list; modetexs(*g, *m, *p!=0, list); result(list.getbuf()));
+
     ICOMMAND(0, conout, "is", (int *n, char *s), conoutft(clamp(*n, 0, CON_MAX-1), "%s", s));
 
     bool needminimap() { return true; }
