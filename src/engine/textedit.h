@@ -695,13 +695,14 @@ static editor *useeditor(const char *name, int mode, bool focus, const char *ini
 )
 
 ICOMMAND(0, textlist, "", (), // @DEBUG return list of all the editors
-    mkstring(s);
+    vector<char> s;
     loopv(editors)
-    {
-        if(i > 0) concatstring(s, ", ");
-        concatstring(s, editors[i]->name);
+    { 
+        if(i > 0) s.put(", ", 2);
+        s.put(editors[i]->name, strlen(editors[i]->name));
     }
-    result(s);
+    s.add('\0');
+    result(s.getbuf());
 );
 TEXTCOMMAND(textshow, "", (), // @DEBUG return the start of the buffer
     editline line;
@@ -716,11 +717,7 @@ ICOMMAND(0, textfocus, "si", (char *name, int *mode), // focus on a (or create a
 TEXTCOMMAND(textprev, "", (), editors.insert(0, top); editors.pop();); // return to the previous editor
 TEXTCOMMAND(textmode, "i", (int *m), // (1= keep while focused, 2= keep while used in gui, 3= keep forever (i.e. until mode changes)) topmost editor, return current setting if no args
     if(*m) top->mode = *m;
-    else
-    {
-        defformatstring(s)("%d", top->mode);
-        result(s);
-    }
+    else intret(top->mode);
 );
 TEXTCOMMAND(textsave, "s", (char *file),  // saves the topmost (filename is optional)
     if(*file) top->setfile(path(file, true));
@@ -751,7 +748,7 @@ TEXTCOMMAND(textcopy, "", (), editor *b = useeditor(PASTEBUFFER, EDITORFOREVER, 
 TEXTCOMMAND(textpaste, "", (), editor *b = useeditor(PASTEBUFFER, EDITORFOREVER, false); top->insertallfrom(b););
 TEXTCOMMAND(textmark, "i", (int *m),  // (1=mark, 2=unmark), return current mark setting if no args
     if(*m) top->mark(*m==1);
-    else result(top->region() ? "1" : "2");
+    else intret(top->region() ? 1 : 2);
 );
 TEXTCOMMAND(textselectall, "", (), top->selectall(););
 TEXTCOMMAND(textclear, "", (), top->clear(););
