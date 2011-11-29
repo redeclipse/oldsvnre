@@ -630,20 +630,22 @@ void swapbuffers()
 }
 
 VAR(IDF_PERSIST, maxfps, 0, 200, 1000);
+VAR(IDF_PERSIST, menufps, 0, 60, 1000);
 
 void limitfps(int &millis, int curmillis)
 {
-    if(!maxfps) return;
+    int limit = hasnoview() && menufps ? (maxfps ? min(maxfps, menufps) : menufps) : maxfps;
+    if(!limit) return;
     static int fpserror = 0;
-    int delay = 1000/maxfps - (millis-curmillis);
+    int delay = 1000/limit - (millis-curmillis);
     if(delay < 0) fpserror = 0;
     else
     {
-        fpserror += 1000%maxfps;
-        if(fpserror >= maxfps)
+        fpserror += 1000%limit;
+        if(fpserror >= limit)
         {
             ++delay;
-            fpserror -= maxfps;
+            fpserror -= limit;
         }
         if(delay > 0)
         {
@@ -960,7 +962,7 @@ int main(int argc, char **argv)
 
     for(int frameloops = 0; ; frameloops = frameloops >= INT_MAX-1 ? MAXFPSHISTORY+1 : frameloops+1)
     {
-        int elapsed = updatetimer();
+        int elapsed = updatetimer(true);
         updatefps(frameloops, elapsed);
         checkinput();
         menuprocess();

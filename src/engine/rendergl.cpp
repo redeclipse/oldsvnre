@@ -2230,9 +2230,15 @@ void drawviewtype(int targtype)
     }
 }
 
+bool hasnoview()
+{
+    return client::waiting()>0;
+}
+
 void gl_drawframe(int w, int h)
 {
-    if(!client::waiting())
+    if(hasnoview()) drawnoview();
+    else
     {
         fogmat = lookupmaterial(camera1->o)&MATF_VOLUME;
         causticspass = 0.f;
@@ -2331,7 +2337,6 @@ void gl_drawframe(int w, int h)
         }
         glDisable(GL_TEXTURE_2D);
     }
-    else drawnoview();
 }
 
 void usetexturing(bool on)
