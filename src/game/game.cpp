@@ -49,10 +49,17 @@ namespace game
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
+
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
-    FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.0f, 1000);
+    FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.f, 1000);
     FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 10);
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 10);
+
+    VAR(IDF_PERSIST, firstpersonbob, 0, 1, 1);
+    FVAR(IDF_PERSIST, firstpersonbobstep, 1, 28.f, 1000);
+    FVAR(IDF_PERSIST, firstpersonbobside, 0, 1, 10);
+    FVAR(IDF_PERSIST, firstpersonbobup, 0, 1, 10);
+
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersondist, -1, -0.25f, 1);
     FVAR(IDF_PERSIST, firstpersonshift, -1, 0.3f, 1);
@@ -254,7 +261,7 @@ namespace game
 
     void addsway(gameent *d)
     {
-        float speed = physics::movevelocity(d), step = viewbobbing ? viewbobstep : firstpersonswaystep;
+        float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
         if(d->physstate >= PHYS_SLOPE)
         {
             swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
@@ -262,7 +269,7 @@ namespace game
             swaydist = fmod(swaydist, 2*step);
             bobfade = swayfade = 1;
             bobdist += swayspeed*curtime/1000.0f;
-            bobdist = fmod(bobdist, 2*viewbobstep);
+            bobdist = fmod(bobdist, 2*firstpersonbobstep);
         }
         else
         {
@@ -275,8 +282,8 @@ namespace game
             if(bobfade > 0)
             {
                 bobdist += swayspeed*bobfade*curtime/1000.0f;
-                bobdist = fmod(bobdist, 2*viewbobstep);
-                bobfade -= 0.5f*(curtime*speed)/(viewbobstep*1000.0f);
+                bobdist = fmod(bobdist, 2*firstpersonbobstep);
+                bobfade -= 0.5f*(curtime*speed)/(firstpersonbobstep*1000.0f);
             }
         }
 
@@ -1757,13 +1764,13 @@ namespace game
     vec camerapos(physent *d)
     {
         vec pos = d->headpos();
-        if(viewbobbing && d == focus && !intermission)
+        if(firstpersonbob && d == focus && !intermission && !thirdpersonview(true))
         {
             vec dir;
             vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-            float steps = bobdist/viewbobstep*M_PI;
-            dir.mul(viewbobside*cosf(steps));
-            dir.z = viewbobup*(fabs(sinf(steps)) - 1);
+            float steps = bobdist/firstpersonbobstep*M_PI;
+            dir.mul(firstpersonbobside*cosf(steps));
+            dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1);
             pos.add(dir).add(bobdir);
         }
         return pos;
@@ -2176,7 +2183,7 @@ namespace game
             if(firstpersonsway && !intermission)
             {
                 vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                float steps = swaydist/(viewbobbing ? viewbobstep : firstpersonswaystep)*M_PI;
+                float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
                 dir.mul(firstpersonswayside*cosf(steps));
                 dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
                 o.add(dir).add(swaydir).add(swaypush);
