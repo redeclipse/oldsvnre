@@ -217,6 +217,7 @@ extern mutstypes mutstype[];
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b) || m_ballistic(a, b))
+#define m_special(a,b)      (m_arena(a, b) || m_insta(a, b) || m_medieval(a, b) || m_ballistic(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))

@@ -7,10 +7,10 @@ namespace server
     {
         int type;
         bool spawned;
-        int millis;
+        int millis, last;
         attrvector attrs, kin;
 
-        srventity() : type(NOTUSED), spawned(false), millis(0) { reset(); }
+        srventity() : type(NOTUSED), spawned(false), millis(0), last(0) { reset(); }
         ~srventity() { reset(); }
 
         void reset()
@@ -1222,7 +1222,7 @@ namespace server
     bool finditem(int i, bool spawned = false, bool carry = false)
     {
         if(sents[i].spawned) return true;
-        if(sents[i].type == WEAPON) loopvk(clients)
+        if(sents[i].type == WEAPON && !(sents[i].attrs[1]&WEAP_F_FORCED)) loopvk(clients)
         {
             clientinfo *ci = clients[k];
             if(ci->state.dropped.find(i) && (!spawned || gamemillis < sents[i].millis)) return true;
@@ -2070,7 +2070,10 @@ namespace server
         {
             if(clear) loopvk(clients) clients[k]->state.dropped.removeall(ent);
             sents[ent].spawned = spawned;
-            sents[ent].millis = gamemillis+(sents[ent].type != WEAPON || sents[ent].attrs[1]&WEAP_F_FORCED ? GAME(itemspawndelay) : w_spawn(w_attr(gamemode, sents[ent].attrs[0], m_weapon(gamemode, mutators))));
+            sents[ent].millis = sents[ent].last = gamemillis;
+            if(sents[ent].type == WEAPON && !(sents[ent].attrs[1]&WEAP_F_FORCED))
+                sents[ent].millis += w_spawn(w_attr(gamemode, sents[ent].attrs[0], m_weapon(gamemode, mutators)));
+            else sents[ent].millis += GAME(itemspawntime);
             if(msg) sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
         }
     }
@@ -3168,7 +3171,11 @@ namespace server
         gs.weapshot[weap] = sub;
         gs.shotdamage += WEAP2(weap, damage, flags&HIT_ALT)*shots.length();
         loopv(shots) gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].add(shots[i].id);
-        if(!gs.hasweap(weap, m_weapon(gamemode, mutators))) gs.entid[weap] = -1; // its gone..
+        if(!gs.hasweap(weap, m_weapon(gamemode, mutators)))
+        {
+            //if(sents.inrange(gs.entid[weap])) setspawn(gs.entid[weap], false);
+            gs.entid[weap] = -1; // its gone..
+        }
     }
 
     void switchevent::process(clientinfo *ci)
@@ -3425,7 +3432,7 @@ namespace server
 
     void checkents()
     {
-        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_limited(gamemode, mutators) && GAME(itemthreshold) > 0;
+        bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_special(gamemode, mutators) && GAME(itemthreshold) > 0;
         int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators), players = 0;
         memset(items, 0, sizeof(items)); memset(lowest, -1, sizeof(lowest));
         if(thresh)
@@ -3467,7 +3474,7 @@ namespace server
                 if(enttype[sents[i].type].usetype == EU_ITEM && (allowed || sents[i].spawned))
                 {
                     bool found = finditem(i, true, true);
-                    if(allowed && thresh && i == lowest[sents[i].type])
+                    if(allowed && thresh && i == lowest[sents[i].type] && (gamemillis-sents[lowest[sents[i].type]].last > GAME(itemspawndelay)))
                     {
                         float dist = items[sents[i].type]/float(players*GAME(maxcarry));
                         if(dist < GAME(itemthreshold)) found = false;
@@ -3714,7 +3721,16 @@ namespace server
         putint(p, mutators);            // 3
         putint(p, timeremaining);       // 4
         putint(p, GAME(serverclients)); // 5
-        putint(p, serverpass[0] ? MM_PASSWORD : (m_local(gamemode) ? MM_PRIVATE : mastermode)); // 6
+        bool priv = m_local(gamemode);
+#ifndef STANDALONE
+        if(!priv)
+        {
+            bool haslocal = false;
+            loopv(clients) if(clients[i]->local) { haslocal = true; break; }
+            if(!haslocal) priv = true;
+        }
+#endif
+        putint(p, serverpass[0] ? MM_PASSWORD : (priv ? MM_PRIVATE : mastermode)); // 6
         putint(p, numgamevars); // 7
         putint(p, numgamemods); // 8
         sendstring(smapname, p);

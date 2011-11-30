@@ -105,7 +105,7 @@ GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while c
 
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
-GVAR(0, itemspawntime, 1, 30000, VAR_MAX); // when items respawn
+GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn
 GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both
 GFVAR(0, itemthreshold, 0, 2, FVAR_MAX); // if numitems/(players*maxcarry) is less than this, spawn one of this type
@@ -136,6 +136,8 @@ GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
+GVAR(0, capturedefenddelay, 0, 15000, VAR_MAX);
+GVAR(0, captureprotectdelay, 0, 15000, VAR_MAX);
 GVAR(0, capturepickupdelay, -1, 5000, VAR_MAX);
 GFVAR(0, capturecarryspeed, 0, 0.9f, FVAR_MAX);
 GVAR(0, capturepoints, 0, 5, VAR_MAX); // points added to score
