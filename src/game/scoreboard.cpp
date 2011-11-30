@@ -382,7 +382,7 @@ namespace hud
             {
                 g.pushlist();
                 g.strut(6);
-                g.text("points", fgcolor);
+                g.text("points ", fgcolor);
                 loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->points));
                 g.poplist();
             }
@@ -399,7 +399,7 @@ namespace hud
                 else
                 {
                     g.strut(5);
-                    g.text("frags", fgcolor);
+                    g.text("frags ", fgcolor);
                     loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->frags));
                 }
                 g.poplist();
@@ -409,7 +409,7 @@ namespace hud
             {
                 g.pushlist();
                 g.strut(4);
-                g.text("pj", fgcolor);
+                g.text("pj ", fgcolor);
                 loopscoregroup({
                     g.textf("%d", 0xFFFFFF, NULL, 0, o->plag);
                 });
@@ -420,7 +420,7 @@ namespace hud
             {
                 g.pushlist();
                 g.strut(4);
-                g.text("ping", fgcolor);
+                g.text("ping ", fgcolor);
                 loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->ping));
                 g.poplist();
             }
@@ -429,7 +429,7 @@ namespace hud
             {
                 g.pushlist();
                 g.strut(3);
-                g.text("cn", fgcolor);
+                g.text("cn ", fgcolor);
                 loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum));
                 g.poplist();
             }
@@ -438,7 +438,7 @@ namespace hud
             {
                 g.pushlist();
                 g.strut(3);
-                g.text("sk", fgcolor);
+                g.text("sk ", fgcolor);
                 loopscoregroup({
                     if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
                     else g.space(1);
@@ -514,7 +514,7 @@ namespace hud
         {
             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
             g.space(1);
-            g.pushfont("deault");
+            g.pushfont("default");
             g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                 game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                 game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
