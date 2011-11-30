@@ -925,10 +925,11 @@ namespace projs
                     case WEAP_SWORD:
                     {
                         part_flare(proj.from, proj.to, 1, PART_LIGHTNING_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 1);
-                        if(lastmillis-proj.lasteffect >= 25)
+                        if(lastmillis-proj.lasteffect >= 25 && proj.effectpos.dist(proj.to) >= 0.5f)
                         {
                             part_flare(proj.from, proj.to, 150, PART_LIGHTNING_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
                             proj.lasteffect = lastmillis - (lastmillis%25);
+                            proj.effectpos = proj.to;
                         }
                         break;
                     }
