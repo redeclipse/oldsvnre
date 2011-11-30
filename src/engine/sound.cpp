@@ -100,7 +100,7 @@ void stopmusic(bool docmd)
 void musicdone(bool docmd)
 {
     if(nosound) return;
-    if(musicfadeout && !docmd) 
+    if(musicfadeout && !docmd)
     {
         if(Mix_PlayingMusic()) Mix_FadeOutMusic(musicfadeout);
     }
@@ -373,7 +373,7 @@ void updatesounds()
         sound &s = sounds[i];
         if((!s.ends || lastmillis < s.ends) && Mix_Playing(sounds[i].chan))
         {
-            if(s.owner) s.pos = s.owner->o;
+            if(s.owner) s.pos = game::camerapos(s.owner);
             if(s.pos != s.oldpos) s.material = lookupmaterial(s.pos);
             calcvol(s.flags, s.vol, s.slot->vol, s.maxrad, s.minrad, s.pos, &s.curvol, &s.curpan, liquid || isliquid(s.material&MATF_VOLUME));
             s.oldpos = s.pos;
