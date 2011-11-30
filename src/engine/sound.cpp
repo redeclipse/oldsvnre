@@ -348,7 +348,7 @@ void updatesound(int chan)
         if(!waiting)
         {
             Mix_Volume(chan, s.curvol);
-            if(!soundmono && !(s.flags&SND_NOPAN))
+            if(!soundmono)
             {
                 SDL_LockAudio(); // workaround for race condition in inside Mix_SetPanning
                 Mix_SetPanning(chan, 255-s.curpan, s.curpan);
