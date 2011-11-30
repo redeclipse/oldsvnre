@@ -763,7 +763,7 @@ namespace physics
             }
             if(power || dash || pulse)
             {
-                bool mchk = !melee || onfloor, action = mchk && (d->ai || melee || (!power && impulseaction&2));
+                bool mchk = !melee || onfloor, action = mchk && (d->ai || melee || impulseaction&2);
                 int move = action ? d->move : 0, strafe = action ? d->strafe : 0;
                 bool moving = mchk && (move || strafe);
                 float skew = power ? impulsepower : (moving ? impulseboost : impulsejump);
@@ -774,21 +774,21 @@ namespace physics
                 }
                 int cost = impulsecost;
                 float force = impulsevelocity(d, skew, cost);
-                if(power) force += jumpvel(d, true);
                 if(force > 0)
                 {
                     vec dir(0, 0, 1);
-                    if(!power && (dash || moving || onfloor))
+                    if(power || dash || moving || onfloor)
                     {
-                        float yaw = d->aimyaw, pitch = moving && pulse ? d->aimpitch : 0;
+                        float yaw = d->aimyaw, pitch = moving && (power || pulse) ? d->aimpitch : 0;
                         vecfromyawpitch(yaw, pitch, moving ? move : 1, strafe, dir);
-                        if(dash && !d->floor.iszero() && !dir.iszero())
+                        if(!power && dash && !d->floor.iszero() && !dir.iszero())
                         {
                             dir.project(d->floor).normalize();
                             if(dir.z < 0) force += -dir.z*force;
                         }
                     }
                     (d->vel = dir.normalize()).mul(force);
+                    if(power) d->vel.z += jumpvel(d, true);
                     d->doimpulse(cost, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
                     if(!allowhover(d)) d->action[AC_JUMP] = false;
                     if(power || pulse) onfloor = false;
