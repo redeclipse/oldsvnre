@@ -1,4 +1,40 @@
 #include "engine.h"
+#include "SDL_mixer.h"
+
+struct soundsample
+{
+    Mix_Chunk *sound;
+    char *name;
+
+    soundsample() : name(NULL) {}
+    ~soundsample() { DELETEA(name); }
+
+    void cleanup()
+    {
+        Mix_FreeChunk(sound);
+        sound = NULL;
+    }
+};
+
+soundslot::soundslot() : vol(255), maxrad(-1), minrad(-1), name(NULL) {}
+soundslot::~soundslot() { DELETEA(name); }
+
+sound::sound() : hook(NULL) { reset(); }
+sound::~sound() {}
+bool sound::playing() { return chan >= 0 && Mix_Playing(chan); }
+void sound::reset()
+{
+    pos = oldpos = vec(-1, -1, -1);
+    slot = NULL;
+    owner = NULL;
+    vol = curvol = 255;
+    curpan = 127;
+    material = MAT_AIR;
+    flags = maxrad = minrad = millis = ends = 0;
+    slotnum = chan = -1;
+    if(hook) *hook = -1;
+    hook = NULL;
+}
 
 hashtable<const char *, soundsample> soundsamples;
 vector<soundslot> gamesounds, mapsounds;
@@ -41,6 +77,7 @@ void initsound()
 
 void stopmusic(bool docmd)
 {
+    if(nosound) return;
     if(Mix_PlayingMusic()) Mix_HaltMusic();
     if(music)
     {
@@ -62,24 +99,18 @@ void stopmusic(bool docmd)
 
 void musicdone(bool docmd)
 {
-    if(musicfadeout && !docmd) Mix_FadeOutMusic(musicfadeout);
-    else stopmusic(docmd);
-}
-
-void soundsample::cleanup()
-{
-    if(sound)
+    if(nosound) return;
+    if(musicfadeout && !docmd) 
     {
-        Mix_FreeChunk(sound);
-        sound = NULL;
+        if(Mix_PlayingMusic()) Mix_FadeOutMusic(musicfadeout);
     }
+    else stopmusic(docmd);
 }
 
 void stopsound()
 {
     if(nosound) return;
     Mix_HaltChannel(-1);
-    nosound = true;
     stopmusic(false);
     clearsound();
     enumerate(soundsamples, soundsample, s, s.cleanup());
@@ -87,11 +118,12 @@ void stopsound()
     gamesounds.setsize(0);
     closemumble();
     Mix_CloseAudio();
+    nosound = true;
 }
 
 void removesound(int c)
 {
-    Mix_HaltChannel(c);
+    if(!nosound) Mix_HaltChannel(c);
     sounds[c].reset();
 }
 
@@ -157,11 +189,16 @@ bool playmusic(const char *name, const char *cmd)
 
 COMMANDN(0, music, playmusic, "ss");
 
+bool playingmusic()
+{
+    return music && Mix_PlayingMusic();
+}
+
 void smartmusic(bool cond, bool autooff)
 {
     if(nosound || !mastervol || !musicvol || (!cond && Mix_PlayingMusic()) || !*titlemusic) return;
-    if(!music || !Mix_PlayingMusic() || (cond && strcmp(musicfile, titlemusic))) playmusic(titlemusic);
-    else if(music && Mix_PlayingMusic())
+    if(!playingmusic() || (cond && strcmp(musicfile, titlemusic))) playmusic(titlemusic);
+    else
     {
         Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
         changedvol = true;
@@ -311,9 +348,12 @@ void updatesound(int chan)
         if(!waiting)
         {
             Mix_Volume(chan, s.curvol);
-            SDL_LockAudio(); // workaround for race condition in inside Mix_SetPanning
-            Mix_SetPanning(chan, 255-s.curpan, s.curpan);
-            SDL_UnlockAudio();
+            if(!soundmono && !(s.flags&SND_NOPAN))
+            {
+                SDL_LockAudio(); // workaround for race condition in inside Mix_SetPanning
+                Mix_SetPanning(chan, 255-s.curpan, s.curpan);
+                SDL_UnlockAudio();
+            }
         }
     }
     else
