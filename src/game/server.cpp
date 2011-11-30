@@ -259,7 +259,7 @@ namespace server
         vector<gameevent *> events;
         vector<uchar> position, messages;
         int posoff, poslen, msgoff, msglen;
-        uint authreq, authlevel;
+        uint authreq;
         string authname;
         string clientmap;
         int mapcrc;
@@ -303,7 +303,6 @@ namespace server
             privilege = PRIV_NONE;
             connected = local = online = wantsmap = failedmap = connectauth = false;
             authreq = 0;
-            authlevel = -1;
             position.setsize(0);
             messages.setsize(0);
             needclipboard = 0;
@@ -790,7 +789,8 @@ namespace server
         switch(type)
         {
             case PRIV_ADMIN: return "admin";
-            case PRIV_MASTER: return "master";
+            case PRIV_MASTER: case PRIV_AUTH: return "master";
+            case PRIV_USER: return "user";
             case PRIV_MAX: return "local";
             default: return "alone";
         }
@@ -4896,27 +4896,21 @@ namespace server
                     {
                         if(adminpass[0] && (ci->local || (text[0] && checkpassword(ci, adminpass, text))))
                             auth::setmaster(ci, true, PRIV_ADMIN);
-                        else
+                        else if(ci->privilege <= PRIV_USER)
                         {
                             bool fail = false;
-                            if(ci->authlevel <= PRIV_NONE)
+                            if(!(mastermask()&MM_AUTOAPPROVE) && !ci->privilege)
                             {
-                                if(!(mastermask()&MM_AUTOAPPROVE) && !ci->privilege)
-                                {
-                                    srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need auth/admin access to gain master");
-                                    fail = true;
-                                }
-                                else
-                                {
-                                    loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_MASTER)
-                                    {
-                                        srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another master");
-                                        fail = true;
-                                        break;
-                                    }
-                                }
+                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need auth/admin access to gain master");
+                                fail = true;
                             }
-                            if(!fail) auth::setmaster(ci, true, ci->authlevel > PRIV_NONE ? ci->authlevel : PRIV_MASTER);
+                            else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_MASTER)
+                            {
+                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another master");
+                                fail = true;
+                                break;
+                            }
+                            if(!fail) auth::setmaster(ci, true, PRIV_MASTER);
                         }
                     }
                     else auth::setmaster(ci, false);

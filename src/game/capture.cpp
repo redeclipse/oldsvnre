@@ -821,7 +821,7 @@ namespace capture
                     capturestate::flag &g = st.flags[i];
                     if(g.owner == d) hasflags.add(i);
                 }
-                if(!hasflags.empty()) return ai::makeroute(d, b, f.pos());
+                if(!hasflags.empty()) return ai::makeroute(d, b, f.owner == d ? f.spawnloc : f.pos());
                 else if(!iscaptureaffinity(f, ai::owner(d))) return false;
             }
             if(iscaptureaffinity(f, ai::owner(d))) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
