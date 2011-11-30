@@ -329,10 +329,13 @@ void guistrut(float *strut, int *alt)
 {
     if(cgui)
     {
-        if(!*alt) cgui->pushlist();
-        cgui->strut(*strut);
-        if(!*alt) cgui->poplist();
+        if(*alt) cgui->strut(*strut); else cgui->space(*strut);
     }
+}
+
+void guispring(int *weight)
+{
+    if(cgui) cgui->spring(max(*weight, 1));
 }
 
 void guifont(char *font, uint *body)
@@ -509,7 +512,7 @@ void guikeyfield(char *var, int *maxlength, char *onchange, int *colour)
 
 void guibody(uint *contents, char *action, char *altact)
 {
-    if(!cgui || !contents) return;
+    if(!cgui) return;
     cgui->pushlist(action[0] ? true : false);
     execute(contents);
     int ret = cgui->poplist();
@@ -528,7 +531,7 @@ void guibody(uint *contents, char *action, char *altact)
 
 void guilist(uint *contents)
 {
-    if(!cgui || !contents) return;
+    if(!cgui) return;
     cgui->pushlist();
     execute(contents);
     cgui->poplist();
@@ -587,6 +590,7 @@ COMMAND(0, guititle, "s");
 COMMAND(0, guibar, "");
 COMMAND(0, guibackground, "ii");
 COMMAND(0, guistrut,"fi");
+COMMAND(0, guispring, "i");
 COMMAND(0, guifont,"se");
 COMMAND(0, guiimage,"ssfiss");
 COMMAND(0, guislice,"ssfffsss");

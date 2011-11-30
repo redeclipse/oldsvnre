@@ -572,10 +572,11 @@ struct guient
     virtual void slider(int &val, int vmin, int vmax, int color, const char *label = NULL, bool reverse = false, bool scroll = false) = 0;
     virtual void separator() = 0;
     virtual void progress(float percent, float scale) = 0;
-    virtual void strut(float size = 1) = 0;
     virtual void pushfont(const char *font) = 0;
     virtual void popfont() = 0;
+    virtual void strut(float size = 1) = 0;
     virtual void space(float size = 1) = 0;
+    virtual void spring(int weight = 1) = 0;
     virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = 0) = 0;
     virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = 0) = 0;
 };
