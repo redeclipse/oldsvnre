@@ -1049,7 +1049,7 @@ enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ
 
 struct projent : dynent
 {
-    vec from, to, norm, inertia, stickpos;
+    vec from, to, norm, inertia, stickpos, effectpos;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
     float movement, roll, lifespan, lifesize, minspeed;
     bool local, limited, stuck, escaped, child;
@@ -1077,6 +1077,7 @@ struct projent : dynent
         state = CS_ALIVE;
         norm = vec(0, 0, 1);
         inertia = stickpos = vec(0, 0, 0);
+        effectpos = vec(-1e16f, -1e16f, -1e16f);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = -1;
         movement = roll = lifespan = lifesize = minspeed = 0;

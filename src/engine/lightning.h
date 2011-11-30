@@ -29,7 +29,7 @@ static void setuplightning()
     }
 }
 
-static void renderlightning(Texture *tex, const vec &o, const vec &d, float sz)
+static void renderlightning(Texture *tex, const vec &o, const vec &d, float sz, const uchar *midcol, const uchar *endcol)
 {
     vec step(d);
     step.sub(o);
@@ -45,7 +45,8 @@ static void renderlightning(Texture *tex, const vec &o, const vec &d, float sz)
     float scroll = -float(lastmillis%lnscrollmillis)/lnscrollmillis,
           scrollscale = lnscrollscale*(LIGHTNINGSTEP*tex->ys)/(sz*tex->xs),
           blend = pow(clamp(float(lastmillis - lastlnjitter)/lnjittermillis, 0.0f, 1.0f), lnblendpower),
-          jitter0 = (1-blend)*lnjitterscale*sz/lnjitterradius, jitter1 = blend*lnjitterscale*sz/lnjitterradius;
+          jitter0 = (1-blend)*lnjitterscale*sz/lnjitterradius, jitter1 = blend*lnjitterscale*sz/lnjitterradius,
+          fadescale = sz/step.magnitude();
     glBegin(GL_TRIANGLE_STRIP);
     loopj(numsteps)
     {
@@ -62,13 +63,24 @@ static void renderlightning(Texture *tex, const vec &o, const vec &d, float sz)
         dir1.sub(cur);
         dir2.sub(camera1->o);
         across.cross(dir2, dir1).normalize().mul(sz);
-        glTexCoord2f(scroll, 1); glVertex3f(cur.x-across.x, cur.y-across.y, cur.z-across.z);
-        glTexCoord2f(scroll, 0); glVertex3f(cur.x+across.x, cur.y+across.y, cur.z+across.z);
+        if(!j)
+        {
+            vec start = vec(cur).sub(vec(step).mul(fadescale));
+            float startscroll = scroll - scrollscale*fadescale;
+            glColor4ubv(endcol); glTexCoord2f(startscroll, 1); glVertex3f(start.x-across.x, start.y-across.y, start.z-across.z);
+            glColor4ubv(endcol); glTexCoord2f(startscroll, 0); glVertex3f(start.x+across.x, start.y+across.y, start.z+across.z);
+        }
+        glColor4ubv(midcol); glTexCoord2f(scroll, 1); glVertex3f(cur.x-across.x, cur.y-across.y, cur.z-across.z);
+        glColor4ubv(midcol); glTexCoord2f(scroll, 0); glVertex3f(cur.x+across.x, cur.y+across.y, cur.z+across.z);
         scroll += scrollscale;
         if(j+1==numsteps)
         {
-            glTexCoord2f(scroll, 1); glVertex3f(next.x-across.x, next.y-across.y, next.z-across.z);
-            glTexCoord2f(scroll, 0); glVertex3f(next.x+across.x, next.y+across.y, next.z+across.z);
+            glColor4ubv(midcol); glTexCoord2f(scroll, 1); glVertex3f(next.x-across.x, next.y-across.y, next.z-across.z);
+            glColor4ubv(midcol); glTexCoord2f(scroll, 0); glVertex3f(next.x+across.x, next.y+across.y, next.z+across.z);
+            vec end = vec(next).add(vec(step).mul(fadescale));
+            float endscroll = scroll + scrollscale*fadescale;
+            glColor4ubv(endcol); glTexCoord2f(endscroll, 1); glVertex3f(end.x-across.x, end.y-across.y, end.z-across.z);
+            glColor4ubv(endcol); glTexCoord2f(endscroll, 0); glVertex3f(end.x+across.x, end.y+across.y, end.z+across.z);
         }
         cur = next;
     }
@@ -99,11 +111,18 @@ struct lightningrenderer : sharedlistrenderer
     void renderpart(sharedlistparticle *p, int blend, int ts, float size, uchar *color)
     {
         blend = min(blend<<2, 255);
+        uchar midcol[4], endcol[4];
         if(type&PT_MOD) //multiply alpha into color
-            glColor3ub((color[0]*blend)>>8, (color[1]*blend)>>8, (color[2]*blend)>>8);
+        {
+            midcol[0] = (color[0]*blend)>>8; midcol[1] = (color[1]*blend)>>8; midcol[2] = (color[2]*blend)>>8; midcol[3] = 0xFF;
+            memset(endcol, 0, 3); endcol[3] = 0xFF; 
+        }
         else
-            glColor4ub(color[0], color[1], color[2], blend);
-        renderlightning(tex, p->o, p->d, size);
+        {
+            memcpy(midcol, color, 3); midcol[3] = blend;
+            memcpy(endcol, color, 3); endcol[3] = 0;
+        }
+        renderlightning(tex, p->o, p->d, size, midcol, endcol);
     }
 };
 static lightningrenderer lightnings;
