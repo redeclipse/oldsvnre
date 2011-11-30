@@ -282,7 +282,7 @@ struct gui : guient
         if(scale == 0) scale = 1;
         int size = (int)(scale*2*guibound[1]), part = size*2/3;
         slice_(t, curx+part/8, cury+part/8, part, 0, percent);
-        string s; if(percent > 0) formatstring(s)("\fg%d%%", int(percent*100)); else formatstring(s)("\fgload");
+        string s; if(percent > 0) formatstring(s)("\fg%d%%", int(percent*100)); else formatstring(s)("\fg...");
         slice_(t, curx, cury, size, (SDL_GetTicks()%1000)/1000.f, 0.1f, s);
         layout(size, size);
     }
@@ -326,7 +326,7 @@ struct gui : guient
                     int vnew = vmax-vmin+1;
                     if(ishorizontal()) vnew = int((vnew*(reverse ? hity-y-guibound[1]/2 : y+ysize-guibound[1]/2-hity))/(ysize-guibound[1]));
                     else vnew = int((vnew*(reverse ? x+xsize-guibound[0]/2-hitx : hitx-x-guibound[0]/2))/(xsize-w));
-                    vnew += vmin; 
+                    vnew += vmin;
                     vnew = clamp(vnew, vmin, vmax);
                     if(vnew != val) val = vnew;
                 }
@@ -441,7 +441,7 @@ struct gui : guient
             {
                 int oldpos = e->scrolly == editor::SCROLLEND ? slines : e->scrolly, newpos = oldpos;
                 slider(newpos, 0, slines, color, NULL, true, true);
-                if(oldpos != newpos) 
+                if(oldpos != newpos)
                 {
                     e->cy = newpos;
                     e->scrolly = e->mode == EDITORREADONLY && newpos >= slines ? editor::SCROLLEND : newpos;

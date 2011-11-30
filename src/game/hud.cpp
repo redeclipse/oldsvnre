@@ -1,6 +1,6 @@
 #include "game.h"
 extern char *progresstitle, *progresstext;
-extern float progresspart;
+extern float progresspart, progressamt;
 
 namespace hud
 {
@@ -1541,7 +1541,7 @@ namespace hud
         glColor4f(cr, cg, cb, f*0.25f);
         drawslice(0, 1, cx, cy, cs*2/3);
         glColor4f(cr, cg, cb, f);
-        drawslice((totalmillis%1000)/1000.f, 0.1f, cx, cy, cs);
+        drawslice((SDL_GetTicks()%1000)/1000.f, 0.1f, cx, cy, cs);
         drawslice(start, length, cx, cy, cs*2/3);
         if(text && *text)
         {
@@ -2123,8 +2123,11 @@ namespace hud
             int y = h-FONTH/2;
             if(progressing)
             {
-                if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
-                else y -= draw_textx("%s", FONTH, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
+                if(progressamt > 0) drawprogress(FONTH, y, 0, progressamt, FONTH*2, true, 1, 1, 1, 1, 1, "consub", "\fy%d%%", int(progressamt*100));
+                else drawprogress(FONTH, y, 0, progressamt, FONTH*2, true, 1, 1, 1, 1, 1, "consub", "\fg...");
+                y -= FONTH/2;
+                if(*progresstext) y -= draw_textx("%s %s [\fs\fa%d%%\fS]", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...", progresstext, int(progresspart*100));
+                else y -= draw_textx("%s", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
             }
             y = h-FONTH/2;
             y -= draw_textx("v%s-%s (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, RE_VER_STR, RE_PLATFORM, RE_RELEASE);
