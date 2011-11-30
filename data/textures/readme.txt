@@ -7,15 +7,11 @@ In the absence of an explicit license, content is considered to be covered by
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
     http://creativecommons.org/licenses/by-sa/3.0/
 
-emblem.png, logo.png
-    Created by Luckystrike-Rx for Red Eclipse
-    Copyright (C) 2010 Red Eclipse Team
-    Use of any logos, trademarks, or other advertising/promotional material
-        for Red Eclipse are free to use without consent, when used in conjunction with
-        a Red Eclipse article, comment, review, or advertisement; regardless of the
-        media featured in said material. Use for any other reason is strictly
-        prohibited without express written consent of Red Eclipse.
-
 lava.jpg
     Created by RaZgRiZ Made with Filter Forge II Beta 3
     Licensed publicly for everyone to use and modify as long as the author is credited for the original work.
+
+emblem.png, logo.png
+    Created by Luckystrike-Rx
+	Copyright (C) 2009-2011 Red Eclipse Team
+	Covered under "THE RED ECLIPSE MARK POLICY" (see trademark.txt included with this distribution)
