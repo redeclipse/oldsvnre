@@ -194,13 +194,13 @@ namespace hud
         {
             g.pushlist();
             g.space(3);
-            g.pushfont("sub");
+            g.pushfont("reduced");
             g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor);
             g.popfont();
             g.poplist();
         }
         g.pushlist();
-        g.pushfont("sub");
+        g.pushfont("reduced");
         defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
         if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
         g.textf("%s", 0xFFFFFF, NULL, 0, gname);
@@ -216,16 +216,16 @@ namespace hud
         {
             g.pushlist();
             g.space(2);
-            g.pushfont("radar");
+            g.pushfont("little");
             g.textf("\fdon ", 0xFFFFFF, NULL, 0);
             g.popfont();
             if(*serverdesc)
             {
-                g.pushfont("sub");
+                g.pushfont("reduced");
                 g.textf("%s ", 0xFFFFFF, NULL, 0, serverdesc);
                 g.popfont();
             }
-            g.pushfont("radar");
+            g.pushfont("little");
             g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, 0, connectname, connectport);
             g.popfont();
             g.poplist();
@@ -237,10 +237,10 @@ namespace hud
             const char *msg = game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait";
             g.space(1);
             g.pushlist();
-            g.pushfont("sub"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
+            g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
             g.space(2);
             SEARCHBINDCACHE(attackkey)("action 0", 0);
-            g.pushfont("radar");
+            g.pushfont("little");
             if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
             {
                 if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
@@ -281,7 +281,7 @@ namespace hud
         else if(game::player1->state == CS_ALIVE)
         {
             g.space(1);
-            g.pushfont("sub");
+            g.pushfont("reduced");
             if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
             else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
             else if(m_team(game::gamemode, game::mutators))
@@ -292,9 +292,9 @@ namespace hud
         else if(game::player1->state == CS_SPECTATOR)
         {
             g.space(1);
-            g.pushfont("sub"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
+            g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-            g.pushfont("radar");
+            g.pushfont("little");
             g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey);
             SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
             g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV");
@@ -302,7 +302,7 @@ namespace hud
         }
 
         SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
-        g.pushfont("radar");
+        g.pushfont("little");
         g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey);
         g.pushlist();
         g.space(2);
@@ -312,7 +312,7 @@ namespace hud
         g.poplist();
         g.poplist();
         g.space(1);
-        g.pushfont(numgroups>1 ? "radar" : "default");
+        g.pushfont(numgroups>1 ? "little" : "default");
         loopk(numgroups)
         {
             if((k%2)==0) g.pushlist(); // horizontal
@@ -474,7 +474,7 @@ namespace hud
         if(showspectators && spectators.length())
         {
             g.space(1);
-            g.pushfont("radar");
+            g.pushfont("little");
             g.pushlist();
             g.pushlist();
             int count = numgroups > 1 ? 5 : 3;
@@ -524,26 +524,27 @@ namespace hud
         g.end();
     }
 
-    int drawinventoryitem(int x, int y, int s, float skew, float fade, int pos, int team, int score, const char *name)
+    int drawscoreitem(const char *icon, int colour, int x, int y, int s, int w, float fade, int pos, int score, const char *name)
     {
-        const char *colour = "\fa";
+        const char *col = "\fa";
         switch(pos)
         {
-            case 0: colour = "\fg"; break;
-            case 1: colour = "\fy"; break;
-            case 2: colour = "\fo"; break;
-            case 3: colour = "\fr"; break;
-            default: break;
+            case 0: col = "\fg"; break;
+            case 1: col = "\fy"; break;
+            case 2: col = "\fo"; break;
+            case 3: default: col = "\fr"; break;
         }
-        int sy = hud::drawitem(hud::inventorytex, x, y, s-s/4, false, 1.f, 1.f, 1.f, fade, skew, "default", "\fs%s[\fS%d\fs%s]\fS", colour, score, colour);
-        hud::drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "sub", fade, "\f[%d]%s", TEAM(team, colour), name);
+        vec c = vec::hexcolor(colour);
+        int sy = hud::drawitem(icon, x+w/2, y, s-w, true, c.r, c.g, c.b, fade);
+        hud::drawitemsubtext(x, y-sy+s/8, s, TEXT_LEFT_JUSTIFY, 1, "reduced", fade, "%s%d", col, score);
+        hud::drawitemsubtext(x, y, s, TEXT_LEFT_UP, 1, "tiny", fade, "\f[%d]%s", colour, name);
         return sy;
     }
 
-    int drawinventory(int x, int y, int s, int m, float blend)
+    int drawscore(int x, int y, int s, int m, float blend)
     {
         if(!m_fight(game::gamemode) || m_trial(game::gamemode)) return 0;
-        int sy = 0, numgroups = groupplayers(), numout = 0;
+        int sy = 0, numgroups = groupplayers(), numout = 0, ss = int((s-s/8)*inventoryscoresize);
         loopi(2) loopk(numgroups)
         {
             if(y-sy-s < m) break;
@@ -551,9 +552,9 @@ namespace hud
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
-                if(!sy) sy += s/8;
-                sy += drawinventoryitem(x, y-sy, s-s/4, 1.25f-clamp(numout,1,3)*0.25f*inventoryskew, blend*inventoryblend, k, sg.team, sg.total, TEAM(sg.team, name));
-                if((numout += 1) > 3) return sy;
+                int sk = numout && inventoryscoreshrink > 0 ? int(ss*min(numout*inventoryscoreshrink, inventoryscoreshrinkmax)) : 0;
+                sy += drawscoreitem(hud::teamtex(sg.team), TEAM(sg.team, colour), x, y-sy, ss, sk, blend*inventoryblend, k, sg.total, TEAM(sg.team, name));
+                if(++numout >= inventoryscorelimit) return sy;
             }
             else
             {
@@ -562,9 +563,9 @@ namespace hud
                 {
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
-                    if(!sy) sy += s/8;
-                    sy += drawinventoryitem(x, y-sy, s-s/4, 1.25f-clamp(numout,1,3)*0.25f*inventoryskew, blend*inventoryblend, j, sg.team, d->points, game::colorname(d, NULL, "", false));
-                    if((numout += 1) > 3) return sy;
+                    int sk = numout && inventoryscoreshrink > 0 ? int(ss*min(numout*inventoryscoreshrink, inventoryscoreshrinkmax)) : 0;
+                    sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_TONE), x, y-sy, ss, sk, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
+                    if(++numout >= inventoryscorelimit) return sy;
                 }
             }
         }
@@ -576,7 +577,7 @@ namespace hud
         int sy = 0;
         if(groupplayers())
         {
-            pushfont("sub");
+            pushfont("reduced");
             scoregroup &sg = *groups[0];
             if(m_team(game::gamemode, game::mutators))
             {

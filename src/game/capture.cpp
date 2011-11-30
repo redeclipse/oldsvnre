@@ -70,7 +70,7 @@ namespace capture
                         tex = hud::alerttex;
                     }
                 }
-                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour, "radar", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
+                if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour, "little", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
                 else hud::drawblip(tex, arrow ? 3 : 2, w, h, hud::radaraffinitysize, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour);
             }
         }
@@ -110,7 +110,7 @@ namespace capture
                 ty += draw_textx("You have: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, str)*hud::noticescale;
                 popfont();
                 SEARCHBINDCACHE(altkey)("action 9", 0);
-                pushfont("sub");
+                pushfont("reduced");
                 ty += draw_textx("Press \fs\fc%s\fS to drop", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, altkey)*hud::noticescale;
                 popfont();
             }
@@ -156,7 +156,7 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, false, c.r, c.g, c.b, fade, skew, "sub", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, false, c.r, c.g, c.b, fade, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
                 if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     int sx = x-int(s*skew);
@@ -164,7 +164,7 @@ namespace capture
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, fade*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "default", "%d%%", int(wait*100.f));
                 }
-                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "sub", fade, "\fs%s\fS", game::colorname(f.owner));
+                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", fade, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;

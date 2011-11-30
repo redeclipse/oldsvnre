@@ -805,7 +805,7 @@ struct gui : guient
         hastitle = wantstitle;
         passthrough = !allowinput;
         fontdepth = 0;
-        gui::pushfont("sub");
+        gui::pushfont("reduced");
         curdepth = curlist = mergedepth = mergelist = -1;
         tpos = tx = ty = 0;
         tcurrent = tab;
@@ -869,7 +869,7 @@ namespace UI
 
     void setup()
     {
-        pushfont("sub");
+        pushfont("reduced");
         loopk(2) guibound[k] = (k ? FONTH : FONTW);
         popfont();
         ready = true;
