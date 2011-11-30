@@ -535,7 +535,7 @@ namespace hud
             case 3: default: col = "\fr"; break;
         }
         vec c = vec::hexcolor(colour);
-        int sy = hud::drawitem(icon, x+w/2, y, s-w, true, c.r, c.g, c.b, fade);
+        int sy = hud::drawitem(icon, x+w/2, y, s-w, true, true, c.r, c.g, c.b, fade);
         hud::drawitemsubtext(x, y-sy+s/8, s, TEXT_LEFT_JUSTIFY, 1, "reduced", fade, "%s%d", col, score);
         hud::drawitemsubtext(x, y, s, TEXT_LEFT_UP, 1, "tiny", fade, "\f[%d]%s", colour, name);
         return sy;
