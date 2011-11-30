@@ -1556,7 +1556,7 @@ namespace ai
                 }
                 if(result <= 0)
                 {
-                    d->ai->clear(true);
+                    //d->ai->clear(true);
                     if(c.type != AI_S_WAIT)
                     {
                         switch(result)
