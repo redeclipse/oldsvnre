@@ -38,4 +38,4 @@ logo or other trademarks unique to the project (see trademark.txt).
 
     Red Eclipse, Copyright (C) 2009-2011 Red Eclipse Team
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
-    http://creativecommons.org/licenses/by-sa/3.0/
+    See cc-by-sa.txt or http://creativecommons.org/licenses/by-sa/3.0/
