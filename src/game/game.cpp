@@ -1931,7 +1931,7 @@ namespace game
                     {
                         int r = rnd(files.length());
                         formatstring(musicfile)("%s/%s", musicdir, files[r]);
-                        if(playmusic(musicfile)) break;
+                        if(files[r][0] != '.' && playmusic(musicfile)) break;
                         else files.remove(r);
                     }
                 }
