@@ -536,7 +536,7 @@ namespace hud
         }
         vec c = vec::hexcolor(colour);
         int sy = hud::drawitem(icon, x, y, s, true, true, c.r, c.g, c.b, fade, skew);
-        hud::drawitemsubtext(x, y-sy+(s-(s*skew))/8, s, TEXT_LEFT_JUSTIFY, skew, "default", fade, "%s%d", col, score);
+        hud::drawitemsubtext(x, y-sy+((s-(s*skew))/3), s, TEXT_LEFT_JUSTIFY, skew, "emphasis", fade, "%s%d", col, score);
         hud::drawitemsubtext(x, y, s, TEXT_LEFT_UP, skew, "reduced", fade, "\f[%d]%s", colour, name);
         return sy;
     }
@@ -544,7 +544,7 @@ namespace hud
     int drawscore(int x, int y, int s, int m, float blend)
     {
         if(!m_fight(game::gamemode) || m_trial(game::gamemode)) return 0;
-        int sy = 0, numgroups = groupplayers(), numout = 0, ss = int((s-s/8)*inventoryscoresize);
+        int sy = 0, numgroups = groupplayers(), numout = 0, ss = int((s-s/4)*inventoryscoresize);
         loopi(2) loopk(numgroups)
         {
             if(y-sy-s < m) break;
