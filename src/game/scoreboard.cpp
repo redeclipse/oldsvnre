@@ -524,7 +524,7 @@ namespace hud
         g.end();
     }
 
-    int drawscoreitem(const char *icon, int colour, int x, int y, int s, int w, float fade, int pos, int score, const char *name)
+    int drawscoreitem(const char *icon, int colour, int x, int y, int s, float skew, float fade, int pos, int score, const char *name)
     {
         const char *col = "\fa";
         switch(pos)
@@ -535,9 +535,9 @@ namespace hud
             case 3: default: col = "\fr"; break;
         }
         vec c = vec::hexcolor(colour);
-        int sy = hud::drawitem(icon, x+w/2, y, s-w, true, true, c.r, c.g, c.b, fade);
-        hud::drawitemsubtext(x, y-sy+s/8, s, TEXT_LEFT_JUSTIFY, 1, "reduced", fade, "%s%d", col, score);
-        hud::drawitemsubtext(x, y, s, TEXT_LEFT_UP, 1, "tiny", fade, "\f[%d]%s", colour, name);
+        int sy = hud::drawitem(icon, x, y, s, true, true, c.r, c.g, c.b, fade, skew);
+        hud::drawitemsubtext(x, y-sy+(s-(s*skew))/8, s, TEXT_LEFT_JUSTIFY, skew, "default", fade, "%s%d", col, score);
+        hud::drawitemsubtext(x, y, s, TEXT_LEFT_UP, skew, "reduced", fade, "\f[%d]%s", colour, name);
         return sy;
     }
 
@@ -552,7 +552,7 @@ namespace hud
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
-                int sk = numout && inventoryscoreshrink > 0 ? int(ss*min(numout*inventoryscoreshrink, inventoryscoreshrinkmax)) : 0;
+                float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
                 sy += drawscoreitem(hud::teamtex(sg.team), TEAM(sg.team, colour), x, y-sy, ss, sk, blend*inventoryblend, k, sg.total, TEAM(sg.team, name));
                 if(++numout >= inventoryscorelimit) return sy;
             }
@@ -563,7 +563,7 @@ namespace hud
                 {
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
-                    int sk = numout && inventoryscoreshrink > 0 ? int(ss*min(numout*inventoryscoreshrink, inventoryscoreshrinkmax)) : 0;
+                    float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
                     sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_TONE), x, y-sy, ss, sk, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
                     if(++numout >= inventoryscorelimit) return sy;
                 }

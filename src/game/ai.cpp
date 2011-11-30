@@ -631,8 +631,7 @@ namespace ai
             }
             else
             {
-                if(m_limited(game::gamemode, game::mutators) && !m_arena(game::gamemode, game::mutators))
-                    d->ai->weappref = m_weapon(game::gamemode, game::mutators);
+                if(m_limited(game::gamemode, game::mutators)) d->ai->weappref = m_weapon(game::gamemode, game::mutators);
                 else if(aiforcegun >= 0 && aiforcegun < WEAP_MAX) d->ai->weappref = aiforcegun;
                 else d->ai->weappref = rnd(WEAP_MAX-WEAP_OFFSET)+WEAP_OFFSET;
             }

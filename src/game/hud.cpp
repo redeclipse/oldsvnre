@@ -93,6 +93,7 @@ namespace hud
     TVAR(IDF_PERSIST, dominatedtex, "<grey>textures/dominated", 3);
     TVAR(IDF_PERSIST, inputtex, "textures/menu", 3);
     TVAR(IDF_PERSIST, waittex, "<grey>textures/wait", 3);
+    TVAR(IDF_PERSIST, spectex, "<grey>textures/conopen", 3);
     TVAR(IDF_PERSIST, chattex, "<grey>textures/conopen", 3);
     TVAR(IDF_PERSIST, healthtex, "<grey>textures/health", 3);
     TVAR(IDF_PERSIST, healthglowtex, "<grey>textures/healthglow", 3);
@@ -183,7 +184,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
-    VAR(IDF_PERSIST, inventoryteams, 0, 10000, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryteams, 0, 0, VAR_MAX);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryscorelimit, 0, 4, VAR_MAX);
@@ -194,7 +195,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.7f, 1000);
     FVAR(IDF_PERSIST, inventoryscoresize, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.15f, 1);
+    FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.1f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
@@ -1567,7 +1568,7 @@ namespace hud
     {
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
-        float q = clamp(skew, 0.f, 1.f), f = fade*q, cr = r*q, cg = g*q, cb = b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
+        float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
         int glow = int(s*inventoryglow), heal = m_health(game::gamemode, game::mutators);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
         if(bg && (glow || pulse))
@@ -1586,10 +1587,10 @@ namespace hud
                 gl += gl*amt;
             }
             settexture(inventorytex, 3);
-            glColor4f(gr, gg, gb, f*gf);
+            glColor4f(gr, gg, gb, fade*gf);
             drawtexture(left ? x-gl : x-w-gl, y-s-gl, s+gl*2, w+gl*2, left);
         }
-        glColor4f(cr, cg, cb, f);
+        glColor4f(cr, cg, cb, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         drawtexture(left ? x : x-w, y-s, s, w);
         if(text && *text)
@@ -1599,7 +1600,7 @@ namespace hud
             if(font && *font) pushfont(font);
             int tx = int((left ? (x+w) : x)*(1.f/skew)), ty = int((y-s+s/32)*(1.f/skew));
             defvformatstring(str, text, text);
-            draw_textx("%s", tx, ty, 255, 255, 255, int(255*f), TEXT_RIGHT_JUSTIFY, -1, -1, str);
+            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), TEXT_RIGHT_JUSTIFY, -1, -1, str);
             if(font && *font) popfont();
             glPopMatrix();
         }
@@ -1612,7 +1613,7 @@ namespace hud
         glPushMatrix();
         glScalef(skew, skew, 1);
         if(font && *font) pushfont(font);
-        int sy = int(FONTH*skew), tx = int(x*(1.f/skew)), ty = int((y-size/32)*(1.f/skew)), ti = int(255.f*blend*clamp(skew, 0.f, 1.f));
+        int sy = int(FONTH*skew), tx = int(x*(1.f/skew)), ty = int((y-size/32)*(1.f/skew)), ti = int(255.f*blend);
         defvformatstring(str, text, text);
         draw_textx("%s", tx, ty, 255, 255, 255, ti, align, -1, -1, str);
         if(font && *font) popfont();
@@ -1917,7 +1918,7 @@ namespace hud
             switch(game::player1->state)
             {
                 case CS_EDITING: state = "EDIT"; break;
-                case CS_SPECTATOR: state = "SPEC"; break;
+                case CS_SPECTATOR: state = "SPEC"; tex = spectex; break;
                 case CS_WAITING: state = "WAIT"; tex = waittex; break;
                 case CS_DEAD: state = "DEAD"; tex = deadtex; break;
             }
@@ -1928,7 +1929,7 @@ namespace hud
                 sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255)/2, TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
-            if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, sw, true, true, 1.f, 1.f, 1.f, fade, 1.f);
+            if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, sw, false, true, 1.f, 1.f, 1.f, fade, 1.f);
         }
         return sy;
     }
@@ -2003,7 +2004,7 @@ namespace hud
                         {
                             const char *pre = "";
                             float skew = inventoryskew, fade = blend*inventoryblend, r = 1, g = 1, b = 1;
-                            skewcolour(r, g, b);
+                            skewcolour(r, g, b, game::getcolour(game::focus, CTONE_DEFAULT));
                             int millis = totalmillis-lastteam;
                             if(millis <= inventoryteams)
                             {
@@ -2330,7 +2331,7 @@ namespace hud
                         float a = (lastmillis-game::focus->lastspawn)/float(spawnfade/3);
                         if(a < 3.f)
                         {
-                            vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, true);
+                            vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, game::getcolour(game::focus, CTONE_DEFAULT));
                             if(a < 1.f) { loopi(3) col[i] *= a; }
                             else { a = (a-1.f)*0.5f; loopi(3) col[i] += (1.f-col[i])*a; }
                             loopi(3) if(col[i] < colour[i]) colour[i] *= col[i];

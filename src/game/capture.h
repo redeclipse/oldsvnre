@@ -2,7 +2,10 @@
 #define iscaptureaffinity(a,b)  ((a.base&BASE_FLAG) && (a.team == b || a.team == TEAM_NEUTRAL))
 
 #ifdef GAMESERVER
+#define capturedelay (m_gsp2(gamemode, mutators) ? GAME(capturedefenddelay) : GAME(captureresetdelay))
 #define capturestate captureservstate
+#else
+#define capturedelay (m_gsp2(game::gamemode, game::mutators) ? GAME(capturedefenddelay) : GAME(captureresetdelay))
 #endif
 struct capturestate
 {
@@ -90,7 +93,7 @@ struct capturestate
     void create(int id)
     {
         flag &f = flags[id];
-        f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, captureresetdelay, captureresetdelay, 1, 1, id);
+        f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, capturedelay, capturedelay, 1, 1, id);
     }
 #endif
 #ifdef GAMESERVER

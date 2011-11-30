@@ -129,7 +129,7 @@ struct captureservmode : capturestate, servmode
         loopv(flags)
         {
             flag &f = flags[i];
-            if(m_gsp3(gamemode, mutators) && f.owner >= 0 && f.taketime && gamemillis-f.taketime >= GAME(captureresetdelay))
+            if(m_gsp3(gamemode, mutators) && f.owner >= 0 && f.taketime && gamemillis-f.taketime >= GAME(captureprotectdelay))
             {
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
                 if(f.team != ci->team)
@@ -146,7 +146,7 @@ struct captureservmode : capturestate, servmode
                     }
                 }
             }
-            else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= GAME(captureresetdelay))
+            else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= capturedelay)
             {
                 capturestate::returnaffinity(i, gamemillis);
                 loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -GAME(capturepenalty));
