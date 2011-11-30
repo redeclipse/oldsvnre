@@ -29,7 +29,6 @@ namespace auth
     {
         if(!nextauthreq) nextauthreq = 1;
         ci->authreq = nextauthreq++;
-        ci->authlevel = -1;
         requestmasterf("reqauth %u %s\n", ci->authreq, ci->authname);
         lastactivity = totalmillis;
         srvmsgft(ci->clientnum, CON_EVENT, "\fyplease wait, requesting credential match..");
@@ -53,13 +52,19 @@ namespace auth
         return true;
     }
 
-    void setmaster(clientinfo *ci, bool val, int flags = 0)
+    void setmaster(clientinfo *ci, bool val, int flags = 0, bool authed = false)
     {
         int privilege = ci->privilege;
         if(val)
         {
             if(ci->privilege >= flags) return;
             privilege = ci->privilege = flags;
+            if(authed)
+            {
+                if(ci->privilege > PRIV_USER) srvoutf(-2, "\fy%s identified as \fs\fc%s\fS and claimed \fs\fc%s\fS", colorname(ci), ci->authname, privname(privilege));
+                else srvoutf(-2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
+            }
+            else srvoutf(-2, "\fy%s claimed \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
         else
         {
@@ -68,8 +73,8 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_MASTER || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
+            srvoutf(-2, "\fy%s relinquished \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
-        srvoutf(-2, "\fy%s %s \fs\fc%s\fS", colorname(ci), val ? "claimed" : "relinquished", privname(privilege));
         masterupdate = true;
         if(paused)
         {
@@ -83,7 +88,7 @@ namespace auth
     {
         if(ci->local) return DISC_NONE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(ci->privilege >= PRIV_ADMIN || ci->authlevel >= PRIV_MASTER) return DISC_NONE;
+        if(ci->privilege >= PRIV_AUTH) return DISC_NONE;
         if(*authname)
         {
             if(ci->connectauth) return DISC_NONE;
@@ -117,7 +122,6 @@ namespace auth
         clientinfo *ci = findauth(id);
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
-        ci->authlevel = -1;
         srvmsgft(ci->clientnum, CON_EVENT, "\fYauthority request failed, please check your credentials");
         if(ci->connectauth)
         {
@@ -133,14 +137,15 @@ namespace auth
         clientinfo *ci = findauth(id);
         if(!ci) return;
         ci->authreq = 0;
-        int n = -1;
+        int n = PRIV_NONE;
         for(const char *c = flags; *c; c++) switch(*c)
         {
             case 'a': n = PRIV_ADMIN; break;
-            case 'm': n = PRIV_MASTER; break;
-            case 'u': n = PRIV_NONE; break;
+            case 'm': n = PRIV_AUTH; break;
+            case 'u': n = PRIV_USER; break;
         }
-        ci->authlevel = n;
+        if(n > PRIV_NONE) setmaster(ci, true, n, true);
+        else ci->authname[0] = 0;
         if(ci->connectauth)
         {
             ci->connectauth = false;
@@ -148,8 +153,6 @@ namespace auth
             if(disc) { disconnect_client(ci->clientnum, disc); return; }
             connected(ci);
         }
-        srvoutf(-2, "\fy%s identified as '\fs\fc%s\fS'", colorname(ci), name);
-        if(ci->authlevel > PRIV_NONE && GAME(automaster)) setmaster(ci, true, ci->authlevel);
     }
 
     void authchallenged(uint id, const char *val)

@@ -7,6 +7,7 @@ namespace ai
     vec aitarget(0, 0, 0);
 
     VAR(0, aidebug, 0, 0, 6);
+    VAR(0, aidebugfocus, 0, 1, 2);
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
     VAR(0, aicampaign, 0, 0, 1);
     VAR(0, aipassive, 0, 0, 1);
@@ -1368,7 +1369,7 @@ namespace ai
         if(d->blocked)
         {
             d->ai->blocktime += lastmillis-d->ai->lastrun;
-            if(d->ai->blocktime > (d->ai->blockseq+1)*500)
+            if(d->ai->blocktime > (d->ai->blockseq+1)*1000)
             {
                 switch(d->ai->blockseq)
                 {
@@ -1388,7 +1389,7 @@ namespace ai
         if(d->ai->targnode == d->ai->targlast)
         {
             d->ai->targtime += lastmillis-d->ai->lastrun;
-            if(d->ai->targtime > (d->ai->targseq+1)*1000)
+            if(d->ai->targtime > (d->ai->targseq+1)*2000)
             {
                 switch(d->ai->targseq)
                 {
@@ -1649,8 +1650,9 @@ namespace ai
         if(aidebug > 1)
         {
             int amt[2] = { 0, 0 };
-            loopv(game::players) if(game::players[i] && game::players[i]->ai) amt[0]++;
-            loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && game::players[i]->ai)
+            #define dbgfocus(a) (a->ai && (aidebugfocus ? a == game::focus || (aidebugfocus != 2 && !game::focus->ai) : false))
+            loopv(game::players) if(game::players[i] && dbgfocus(game::players[i])) amt[0]++;
+            loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && dbgfocus(game::players[i]))
             {
                 gameent *d = game::players[i];
                 bool top = true;
