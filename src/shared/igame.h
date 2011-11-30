@@ -111,6 +111,7 @@ namespace game
     extern void render();
     extern void renderavatar(bool early);
     extern bool thirdpersonview(bool viewonly = false);
+    extern vec camerapos(physent *d);
     extern void start();
 }
 #endif

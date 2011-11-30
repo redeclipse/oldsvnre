@@ -1754,7 +1754,7 @@ namespace game
         return false;
     }
 
-    vec camerapos(gameent *d)
+    vec camerapos(physent *d)
     {
         vec pos = d->headpos();
         if(viewbobbing && d == focus && !intermission)
