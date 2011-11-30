@@ -157,9 +157,9 @@ struct defendservmode : defendstate, servmode
             }
             if(steam)
             {
-                teamscore(steam).total = INT_MAX-1;
+                teamscore(steam).total = INT_MAX;
                 ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyall flags have been secured");
-                winner(steam, INT_MAX-1);
+                winner(steam, INT_MAX);
                 return;
             }
         }
