@@ -1374,11 +1374,16 @@ namespace ai
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2: case 3:
-                        if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                    {
+                        if(entities::ents.inrange(d->ai->targnode))
+                        {
+                            d->ai->addprevnode(d->ai->targnode);
+                            d->ai->clear(false);
+                        }
                         break;
-                    case 4: d->ai->clear(false); break;
-                    case 5: d->ai->reset(false); break;
-                    case 6: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    }
+                    case 4: d->ai->reset(false); break;
+                    case 5: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                     case 0: default: break;
                 }
                 d->ai->blockseq++;
@@ -1394,11 +1399,16 @@ namespace ai
                 switch(d->ai->targseq)
                 {
                     case 1: case 2: case 3:
-                        if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                    {
+                        if(entities::ents.inrange(d->ai->targnode))
+                        {
+                            d->ai->addprevnode(d->ai->targnode);
+                            d->ai->clear(false);
+                        }
                         break;
-                    case 4: d->ai->clear(false); break;
-                    case 5: d->ai->reset(false); break;
-                    case 6: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    }
+                    case 4: d->ai->reset(false); break;
+                    case 5: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                     case 0: default: break;
                 }
                 d->ai->targseq++;

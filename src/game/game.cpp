@@ -22,7 +22,7 @@ namespace game
     SVAR(IDF_WORLD, obitdeath, "");
     SVAR(IDF_WORLD, mapmusic, "");
 
-    VARF(IDF_PERSIST, musictype, 0, 1, 2, musicdone(true)); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random
+    VARF(IDF_PERSIST, musictype, 0, 1, 3, musicdone(true)); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none)
     SVAR(IDF_WORLD, musicdir, "sounds/music");
 
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
@@ -1923,7 +1923,7 @@ namespace game
             else if(musictype && (!music || !Mix_PlayingMusic()))
             {
                 defformatstring(musicfile)("%s", mapmusic);
-                if(*musicdir && (musictype == 2 || (musictype && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
+                if(*musicdir && (musictype == 2 || (musictype == 1 && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
                 {
                     vector<char *> files;
                     listfiles(musicdir, NULL, files);
