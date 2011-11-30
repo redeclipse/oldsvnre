@@ -154,7 +154,7 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            sy += hud::drawitem(hud::bombtex, x, oldy, s, false, colour.x, colour.y, colour.z, fade, skew);
+            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, fade, skew);
             if(f.droptime)
             {
                 int time = lastmillis-f.droptime, delay = bomberresetdelay-time;

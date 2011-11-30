@@ -1563,14 +1563,14 @@ namespace hud
         return int(s);
     }
 
-    int drawitem(const char *tex, int x, int y, float size, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
+    int drawitem(const char *tex, int x, int y, float size, bool bg, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
         float q = clamp(skew, 0.f, 1.f), f = fade*q, cr = r*q, cg = g*q, cb = b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
         int glow = int(s*inventoryglow), heal = m_health(game::gamemode, game::mutators);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
-        if(glow || pulse)
+        if(bg && (glow || pulse))
         {
             float gr = 1, gg = 1, gb = 1, gl = glow,
                 gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
@@ -1689,7 +1689,7 @@ namespace hud
         {
             gameentity &e = *(gameentity *)entities::ents[n];
             const char *itext = itemtex(e.type, e.attrs[0]);
-            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew, "default", "%s (%d)", enttype[e.type].name, n);
+            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew, "default", "%s (%d)", enttype[e.type].name, n);
             mkstring(attrstr);
             loopi(enttype[e.type].numattrs)
             {
@@ -1732,8 +1732,8 @@ namespace hud
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, -inventorytone);
                     int oldy = y-sy;
                     if(inventoryammo && (instate || inventoryammo > 1) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        sy += drawitem(hudtexs[i], x, y-sy, size, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
-                    else sy += drawitem(hudtexs[i], x, y-sy, size, false, c.r, c.g, c.b, fade, skew);
+                        sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
+                    else sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew);
                     if(inventoryweapids && (instate || inventoryweapids > 1))
                     {
                         static string weapids[WEAP_MAX];
@@ -1928,7 +1928,7 @@ namespace hud
                 sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255)/2, TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
-            if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, sw, true, 1.f, 1.f, 1.f, fade, 1.f);
+            if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, sw, true, true, 1.f, 1.f, 1.f, fade, 1.f);
         }
         return sy;
     }
@@ -2013,7 +2013,7 @@ namespace hud
                                 pre = "\fzwR";
                             }
                             int oldy = cm+int(cs*skew);
-                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, false, r, g, b, fade, skew));
+                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, true, false, r, g, b, fade, skew));
                             if(m_campaign(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "reduced", fade, "\f[%d]%scampaign", TEAM(game::focus->team, colour), pre));
                             else if(!m_team(game::gamemode, game::mutators))
                             {

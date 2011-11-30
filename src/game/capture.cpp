@@ -156,7 +156,7 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, false, c.r, c.g, c.b, fade, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, fade, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
                 if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     int sx = x-int(s*skew);
