@@ -902,32 +902,25 @@ namespace physics
             else
             {
                 impulseplayer(d, onfloor, jetting);
-                if(onfloor)
+                if(onfloor && d->action[AC_JUMP])// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
                 {
-                    if(d->action[AC_JUMP] && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
+                    float force = jumpvel(d, true);
+                    if(force > 0)
                     {
-                        // not quite sure why i did this..
-                        //if(allowhover(d) && d->impulse[IM_TIME] && lastmillis-d->impulse[IM_TIME] < impulsedelay)
-                        //    d->action[AC_JUMP] = false;
-                        //else
-                        float force = jumpvel(d, true);
-                        if(force > 0)
+                        d->vel.z += force;
+                        if(d->inliquid)
                         {
-                            d->vel.z += force;
-                            if(d->inliquid)
-                            {
-                                float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
-                                d->vel.x *= scale;
-                                d->vel.y *= scale;
-                            }
-                            d->resetphys();
-                            d->impulse[IM_JUMP] = lastmillis;
-                            if(allowhover(d) && !allowimpulse(d)) d->doimpulse(0, IM_T_BOOST, lastmillis);
-                            d->action[AC_JUMP] = onfloor = false;
-                            client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
-                            playsound(S_JUMP, d->o, d);
-                            regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
+                            float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
+                            d->vel.x *= scale;
+                            d->vel.y *= scale;
                         }
+                        d->resetphys();
+                        d->impulse[IM_JUMP] = lastmillis;
+                        if(allowhover(d) && !allowimpulse(d)) d->doimpulse(0, IM_T_BOOST, lastmillis);
+                        d->action[AC_JUMP] = onfloor = false;
+                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
+                        playsound(S_JUMP, d->o, d);
+                        regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
                     }
                 }
                 if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && ((d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay) || sliding(d, true)))
