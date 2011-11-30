@@ -5,8 +5,9 @@ namespace game
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
         lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lasttvmillis = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1;
     bool intermission = false, prevzoom = false, zooming = false;
-    float swayfade = 0, swayspeed = 0, swaydist = 0;
-    vec swaydir(0, 0, 0), swaypush(0, 0, 0);
+    float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
+    vec swaydir(0, 0, 0), swaypush(0, 0, 0), bobdir(0, 0, 0);
+
     string clientmap = "";
 
     gameent *player1 = new gameent(), *focus = player1;
@@ -49,9 +50,9 @@ namespace game
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
-    FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.0f, 100);
-    FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 1);
+    FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.0f, 1000);
+    FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 10);
+    FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 10);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersondist, -1, -0.25f, 1);
     FVAR(IDF_PERSIST, firstpersonshift, -1, 0.3f, 1);
@@ -247,35 +248,46 @@ namespace game
     {
         swaydir = swaypush = vec(0, 0, 0);
         swayfade = swayspeed = swaydist = 0;
+        bobdir = vec(0, 0, 0);
+        bobfade = bobdist = 0;
     }
 
     void addsway(gameent *d)
     {
-        if(firstpersonsway)
+        float speed = physics::movevelocity(d), step = viewbobbing ? viewbobstep : firstpersonswaystep;
+        if(d->physstate >= PHYS_SLOPE)
         {
-            float speed = physics::movevelocity(d);
-            if(d->physstate >= PHYS_SLOPE)
-            {
-                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
-                swaydist += swayspeed*curtime/1000.0f;
-                swaydist = fmod(swaydist, 2*firstpersonswaystep);
-                swayfade = 1;
-            }
-            else if(swayfade > 0)
+            swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
+            swaydist += swayspeed*curtime/1000.0f;
+            swaydist = fmod(swaydist, 2*step);
+            bobfade = swayfade = 1;
+            bobdist += swayspeed*curtime/1000.0f;
+            bobdist = fmod(bobdist, 2*viewbobstep);
+        }
+        else
+        {
+            if(swayfade > 0)
             {
                 swaydist += swayspeed*swayfade*curtime/1000.0f;
-                swaydist = fmod(swaydist, 2*firstpersonswaystep);
-                swayfade -= 0.5f*(curtime*speed)/(firstpersonswaystep*1000.0f);
+                swaydist = fmod(swaydist, 2*step);
+                swayfade -= 0.5f*(curtime*speed)/(step*1000.0f);
             }
-
-            float k = pow(0.7f, curtime/25.0f);
-            swaydir.mul(k);
-            vec vel = vec(d->vel).add(d->falling);
-            float speedscale = max(vel.magnitude(), speed);
-            if(speedscale > 0) swaydir.add(vec(vel).mul((1-k)/(15*speedscale)));
-            swaypush.mul(pow(0.5f, curtime/25.0f));
+            if(bobfade > 0)
+            {
+                bobdist += swayspeed*bobfade*curtime/1000.0f;
+                bobdist = fmod(bobdist, 2*viewbobstep);
+                bobfade -= 0.5f*(curtime*speed)/(viewbobstep*1000.0f);
+            }
         }
-        else resetsway();
+
+        float k = pow(0.7f, curtime/25.0f);
+        swaydir.mul(k);
+        vec vel = vec(d->vel).add(d->falling);
+        float speedscale = max(vel.magnitude(), speed);
+        if(speedscale > 0) swaydir.add(vec(vel).mul((1-k)/(15*speedscale)));
+        bobdir.mul(k);
+        if(speedscale > 0) bobdir.add(vec(vel).mul((1-k)/(15*speedscale)));
+        swaypush.mul(pow(0.5f, curtime/25.0f));
     }
 
     int errorchan = -1;
@@ -1742,6 +1754,21 @@ namespace game
         return false;
     }
 
+    vec camerapos(gameent *d)
+    {
+        vec pos = d->headpos();
+        if(viewbobbing && d == focus && !intermission)
+        {
+            vec dir;
+            vecfromyawpitch(d->yaw, 0, 0, 1, dir);
+            float steps = bobdist/viewbobstep*M_PI;
+            dir.mul(viewbobside*cosf(steps));
+            dir.z = viewbobup*(fabs(sinf(steps)) - 1);
+            pos.add(dir).add(bobdir);
+        }
+        return pos;
+    }
+
     void cameratv()
     {
         bool isspec = player1->state == CS_SPECTATOR, regen = !lasttvmillis || totalmillis-lasttvmillis >= 100;
@@ -1765,7 +1792,7 @@ namespace game
             gameent *d = NULL;
             loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
-                vec pos = d->headpos();
+                vec pos = camerapos(d);
                 cament &c = cameras.add(cament(pos, cament::PLAYER, i+1, camera1->o.dist(pos), d));
                 if(m_team(gamemode, mutators) && d->team == player1->team) c.pri = 1;
                 vecfromyawpitch(d->yaw, d->pitch, 1, 0, c.dir);
@@ -1780,7 +1807,7 @@ namespace game
             {
                 if(cameras[i].player || ((cameras[i].player = (gameent *)iterdynents(cameras[i].id))))
                 {
-                    cameras[i].pos = cameras[i].player->headpos();
+                    cameras[i].pos = camerapos(cameras[i].player);
                     vecfromyawpitch(cameras[i].player->yaw, cameras[i].player->pitch, 1, 0, cameras[i].dir);
                     cameras[i].pri = m_team(gamemode, mutators) && cameras[i].player && cameras[i].player->team == player1->team ? 1 : 0;
                 }
@@ -1887,7 +1914,7 @@ namespace game
         zoomset(false, 0);
         checkcamera();
         if(!focus) focus = player1;
-        camera1->o = focus->o;
+        camera1->o = camerapos(focus);
         camera1->yaw = focus->yaw;
         camera1->pitch = focus->pitch;
         camera1->roll = focus->calcroll(false);
@@ -2052,7 +2079,7 @@ namespace game
             }
             else
             {
-                camera1->o = focus->headpos();
+                camera1->o = camerapos(focus);
                 if(mousestyle() <= 1)
                     findorientation(camera1->o, (self ? player1 : focus)->yaw, (self ? player1 : focus)->pitch, worldpos);
                 camera1->aimyaw = self ? player1->yaw : (mousestyle() <= 1 ? focus->yaw : focus->aimyaw);
@@ -2142,14 +2169,14 @@ namespace game
         int type = clamp(d->aitype, 0, AI_MAX-1);
         const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
         float yaw = d->yaw, pitch = d->pitch, roll = d->calcroll(physics::iscrouching(d), true);
-        vec o = vec(third ? d->feetpos() : d->headpos());
+        vec o = third ? d->feetpos() : camerapos(d);
         if(!third)
         {
             vec dir;
             if(firstpersonsway && !intermission)
             {
                 vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                float steps = swaydist/firstpersonswaystep*M_PI;
+                float steps = swaydist/(viewbobbing ? viewbobstep : firstpersonswaystep)*M_PI;
                 dir.mul(firstpersonswayside*cosf(steps));
                 dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
                 o.add(dir).add(swaydir).add(swaypush);

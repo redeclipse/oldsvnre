@@ -308,3 +308,8 @@ GVAR(0, revengepoints, 0, 1, VAR_MAX);
 
 GVAR(0, alloweastereggs, 0, 1, 2); // 0 = off, 1 = on, 2 = extended (annoying ones)
 GVAR(0, returningfire, 0, 0, 1); // 0 = off, 1 = on
+
+GVAR(0, viewbobbing, 0, 1, 1);
+GFVAR(0, viewbobstep, 1, 28.f, 1000);
+GFVAR(0, viewbobside, 0, 1, 10);
+GFVAR(0, viewbobup, 0, 1, 10);
