@@ -175,7 +175,7 @@ void renderaction(int idx, int size, Texture *t, char code, const char *name, bo
     }
     if(code) y += draw_textx("[%s]", x, y, r, g, b, idx ? 255 : f, compassdir[idx].align, -1, -1, getkeyname(code));
     popfont();
-    pushfont(!idx || hit ? "emphasis" : "sub");
+    pushfont(!idx || hit ? "emphasis" : "reduced");
     draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
     popfont();
 }

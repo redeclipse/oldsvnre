@@ -1196,15 +1196,16 @@ namespace hud
 {
     extern char *conopentex, *playertex, *deadtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *flagtex, *bombtex, *arrowtex, *alerttex, *questiontex, *inventorytex, *indicatortex, *crosshairtex, *hithairtex,
                 *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex, *firstbloodtex;
-    extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames, inventorygame, teamkillnum;
-    extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize;
+    extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames, inventorygame, teamkillnum, inventoryscorelimit;
+    extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize, inventoryscoresize, inventoryscoreshrink, inventoryscoreshrinkmax;
     extern vector<int> teamkills;
     extern const char *icontex(int type, int value);
     extern bool chkcond(int val, bool cond);
     extern char *timetostr(int dur, int style = 0);
-    extern void drawquad(float x, float y, float w, float h, float tx1 = 0, float ty1 = 0, float tx2 = 1, float ty2 = 1);
-    extern void drawtex(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
-    extern void drawsized(float x, float y, float s);
+    extern void drawquad(float x, float y, float w, float h, float tx1 = 0, float ty1 = 0, float tx2 = 1, float ty2 = 1, bool flipx = false, bool flipy = false);
+    extern void drawcoord(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1, bool flipx = false, bool flipy = false);
+    extern void drawtexture(float x, float y, float w, float h, bool flipx = false, bool flipy = false);
+    extern void drawsized(float x, float y, float s, bool flipx = false, bool flipy = false);
     extern void colourskew(float &r, float &g, float &b, float skew = 1);
     extern void drawindicator(int weap, int x, int y, int s);
     extern void drawclip(int weap, int x, int y, float s);
@@ -1212,7 +1213,7 @@ namespace hud
     extern void drawpointer(int w, int h, int index);
     extern int numteamkills();
     extern float radarrange();
-    extern void drawblip(const char *tex, float area, int w, int h, float s, float blend, int style, vec &pos, const vec &colour = vec(1, 1, 1), const char *font = "sub", const char *text = NULL, ...);
+    extern void drawblip(const char *tex, float area, int w, int h, float s, float blend, int style, vec &pos, const vec &colour = vec(1, 1, 1), const char *font = "reduced", const char *text = NULL, ...);
     extern int drawprogress(int x, int y, float start, float length, float size, bool left, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, const char *font = NULL, const char *text = NULL, ...);
     extern int drawitem(const char *tex, int x, int y, float size, bool left = false, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, const char *font = NULL, const char *text = NULL, ...);
     extern int drawitemsubtext(int x, int y, float size, int align = TEXT_RIGHT_UP, float skew = 1, const char *font = NULL, float blend = 1, const char *text = NULL, ...);
@@ -1227,7 +1228,7 @@ namespace hud
     extern score &teamscore(int team);
     extern void resetscores();
     extern int trialinventory(int x, int y, int s, float blend);
-    extern int drawinventory(int x, int y, int s, int m, float blend);
+    extern int drawscore(int x, int y, int s, int m, float blend);
 }
 
 enum { CTONE_DEFAULT = 0, CTONE_TONE, CTONE_TEAM, CTONE_ALONE, CTONE_MIXED, CTONE_MAX };
