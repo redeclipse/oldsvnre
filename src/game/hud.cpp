@@ -187,7 +187,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryteams, 0, 0, VAR_MAX);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, 1);
-    VAR(IDF_PERSIST, inventoryscorelimit, 0, 4, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryscorelimit, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
@@ -210,7 +210,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
     FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
-    VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
+    VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
 
     TVAR(IDF_PERSIST, meleetex, "<grey>textures/melee", 3);
@@ -1776,7 +1776,7 @@ namespace hud
     int drawhealth(int x, int y, int s, float blend)
     {
         float fade = blend*inventoryblend;
-        int size = s+s/2, width = s-s/4, sy = 0, sw = width+s/16;
+        int size = s+s/2, width = s-s/4, sy = 0;
         if(game::focus->state == CS_ALIVE)
         {
             int heal = m_health(game::gamemode, game::mutators);
@@ -1866,17 +1866,19 @@ namespace hud
                     gg -= gg*skew;
                     gb -= gb*skew;
                 }
-                pushfont("super");
-                int dt = draw_textx("%d", x+width/2, y-sy+(inventoryhealth >= 2 ? size/3 : 0), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
-                if(!sy) sy += dt;
+                pushfont("huge");
+                int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth >= 2 ? size/3 : FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
+                if(inventoryhealth < 2) sy += ty;
                 popfont();
             }
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
-                pushfont(!hashealth || m_trial(game::gamemode) ? "default" : "reduced");
-                int ty = draw_textx("%d", hashealth ? x+width/2 : x, hashealth ? y : y-sy, 128, 128, 128, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
-                if(!hashealth) sy += ty;
+                pushfont("super");
+                sy += draw_textx("%d", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
                 popfont();
+                //pushfont("reduced");
+                //sy += draw_textx("speed", x+width/2, y-sy, 200, 200, 200, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
+                //popfont();
             }
             if(game::focus->aitype < AI_START && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
             {
@@ -1888,7 +1890,7 @@ namespace hud
                 loopi(2)
                 {
                     float r = 1, g = 1, b = 1, f = 1;
-                    if(inventorytone) skewcolour(r, g, b, -(i+1));
+                    if(inventorytone) skewcolour(r, g, b, -(i ? CTONE_MIXED+1 : CTONE_DEFAULT+1));
                     if(inventoryflash && game::focus->impulse[IM_METER])
                     {
                         r += (1.f-r)*amt;
@@ -1929,7 +1931,7 @@ namespace hud
                 sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255)/2, TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
-            if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, sw, false, true, 1.f, 1.f, 1.f, fade, 1.f);
+            if(inventorystatus && *tex) sy += drawitem(tex, x, y-sy, width, false, true, 1.f, 1.f, 1.f, fade, 1.f);
         }
         return sy;
     }
