@@ -207,6 +207,7 @@ void writeinitcfg()
     f->printf("shaders %d\n", useshaders);
     f->printf("shaderprecision %d\n", shaderprecision);
     f->printf("forceglsl %d\n", forceglsl);
+    extern int soundmono, soundchans, soundbufferlen, soundfreq;
     f->printf("soundmono %d\n", soundmono);
     f->printf("soundchans %d\n", soundchans);
     f->printf("soundbufferlen %d\n", soundbufferlen);

@@ -23,26 +23,10 @@ enum
 };
 
 #ifndef STANDALONE
-#include "SDL_mixer.h"
-extern bool nosound;
-extern int mastervol, soundvol, musicvol, soundmono, soundchans, soundbufferlen, soundfreq, maxsoundsatonce;
-extern Mix_Music *music;
-extern char *musicfile, *musicdonecmd;
-extern int soundsatonce, lastsoundmillis;
-
 #define SOUNDMINDIST        16.0f
 #define SOUNDMAXDIST        10000.f
 
-struct soundsample
-{
-    Mix_Chunk *sound;
-    char *name;
-
-    soundsample() : name(NULL) {}
-    ~soundsample() { DELETEA(name); }
-
-    void cleanup();
-};
+struct soundsample;
 
 struct soundslot
 {
@@ -50,10 +34,9 @@ struct soundslot
     int vol, maxrad, minrad;
     char *name;
 
-    soundslot() : vol(255), maxrad(-1), minrad(-1), name(NULL) { samples.shrink(0); }
-    ~soundslot() { DELETEA(name); }
+    soundslot();
+    ~soundslot();
 };
-
 
 struct sound
 {
@@ -64,33 +47,23 @@ struct sound
     int flags, maxrad, minrad, material;
     int millis, ends, slotnum, chan, *hook;
 
-    sound() : hook(NULL) { reset(); }
-    ~sound() {}
+    sound();
+    ~sound();
 
-    void reset()
-    {
-        pos = oldpos = vec(-1, -1, -1);
-        slot = NULL;
-        owner = NULL;
-        vol = curvol = 255;
-        curpan = 127;
-        material = MAT_AIR;
-        flags = maxrad = minrad = millis = ends = 0;
-        slotnum = chan = -1;
-        if(hook) *hook = -1;
-        hook = NULL;
-    }
+    void reset();
+    bool playing();
+    bool valid() { return chan >= 0 && playing(); }
 };
 
-extern hashtable<const char *, soundsample> soundsamples;
 extern vector<soundslot> gamesounds, mapsounds;
 extern vector<sound> sounds;
 
-#define issound(c) (sounds.inrange(c) && sounds[c].chan >= 0 && Mix_Playing(sounds[c].chan))
+#define issound(c) (sounds.inrange(c) && sounds[c].valid())
 
 extern void initsound();
 extern void stopsound();
 extern bool playmusic(const char *name, const char *cmd = NULL);
+extern bool playingmusic();
 extern void smartmusic(bool cond, bool autooff);
 extern void musicdone(bool docmd);
 extern void updatesounds();

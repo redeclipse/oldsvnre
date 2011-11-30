@@ -1920,7 +1920,7 @@ namespace game
                 RUNWORLD("on_start");
                 return;
             }
-            else if(musictype && (!music || !Mix_PlayingMusic()))
+            else if(musictype && !playingmusic())
             {
                 defformatstring(musicfile)("%s", mapmusic);
                 if(*musicdir && (musictype == 2 || (musictype == 1 && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
