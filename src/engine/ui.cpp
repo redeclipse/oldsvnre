@@ -23,7 +23,7 @@ static bool needsinput = false, hastitle = true;
 #include "textedit.h"
 struct gui : guient
 {
-    struct list { int parent, w, h, mouse[2]; };
+    struct list { int parent, w, h, springs, curspring, mouse[2]; };
 
     int nextlist;
     static vector<list> lists;
@@ -155,6 +155,7 @@ struct gui : guient
             }
             list &l = lists.add();
             l.parent = curlist;
+            l.springs = 0;
             curlist = lists.length()-1;
             l.mouse[0] = l.mouse[1] = xsize = ysize = 0;
         }
@@ -165,10 +166,20 @@ struct gui : guient
             {
                 list &l = lists.add();
                 l.parent = curlist;
+                l.springs = 0;
                 l.w = l.h = l.mouse[0] = l.mouse[1] = 0;
             }
-            xsize = lists[curlist].w;
-            ysize = lists[curlist].h;
+            list &l = lists[curlist];
+            l.curspring = 0;
+            if(l.springs > 0)
+            {
+                if(ishorizontal()) xsize = l.w; else ysize = l.h;
+            }
+            else
+            {
+                xsize = l.w;
+                ysize = l.h;
+            }
         }
         curdepth++;
         if(!layoutpass && visible() && ishit(xsize, ysize)) loopi(2) lists[curlist].mouse[i] = mouseaction[i]|GUI_ROLLOVER;
@@ -192,11 +203,17 @@ struct gui : guient
         if(mergelist >= 0 && curdepth < mergedepth) mergelist = mergedepth = -1;
         if(curlist >= 0)
         {
-            xsize = lists[curlist].w;
-            ysize = lists[curlist].h;
-            if(ishorizontal()) cury -= l.h;
-            else curx -= l.w;
-            return layout(l.w, l.h);
+            int w = xsize, h = ysize;
+            if(ishorizontal()) cury -= h; else curx -= w;
+            list &p = lists[curlist];
+            xsize = p.w;
+            ysize = p.h;
+            if(!layoutpass && p.springs > 0)
+            {
+                list &s = lists[p.parent];
+                if(ishorizontal()) xsize = s.w; else ysize = s.h;
+            }
+            return layout(w, h);
         }
         return 0;
     }
@@ -214,6 +231,26 @@ struct gui : guient
 
     void pushfont(const char *font) { ::pushfont(font); fontdepth++; }
     void popfont() { if(fontdepth) { ::popfont(); fontdepth--; } }
+
+    void spring(int weight)
+    {
+        if(curlist < 0) return;
+        list &l = lists[curlist];
+        if(layoutpass) { if(l.parent >= 0) l.springs += weight; return; }
+        int nextspring = min(l.curspring + weight, l.springs);
+        if(nextspring <= l.curspring) return;
+        if(ishorizontal())
+        {
+            int w = xsize - l.w;
+            layout((w*nextspring)/l.springs - (w*l.curspring)/l.springs, 0);
+        }
+        else
+        {
+            int h = ysize - l.h;
+            layout(0, (h*nextspring)/l.springs - (h*l.curspring)/l.springs);
+        }
+        l.curspring = nextspring;
+    }
 
     int layout(int w, int h)
     {
@@ -495,23 +532,19 @@ struct gui : guient
         int w = xsize, h = ysize;
         if(inheritw>0)
         {
-            int parentw = curlist;
-            while(inheritw>0 && lists[parentw].parent>=0)
-            {
+            int parentw = curlist, parentdepth = 0;
+            for(;parentdepth < inheritw && lists[parentw].parent>=0; parentdepth++)
                 parentw = lists[parentw].parent;
-                inheritw--;
-            }
-            w = lists[parentw].w;
+            list &p = lists[parentw];
+            w = p.springs > 0 && (curdepth-parentdepth)&1 ? lists[p.parent].w : p.w;
         }
         if(inherith>0)
         {
-            int parenth = curlist;
-            while(inherith>0 && lists[parenth].parent>=0)
-            {
+            int parenth = curlist, parentdepth = 0;
+            for(;parentdepth < inherith && lists[parenth].parent>=0; parentdepth++)
                 parenth = lists[parenth].parent;
-                inherith--;
-            }
-            h = lists[parenth].h;
+            list &p = lists[parenth];
+            h = p.springs > 0 && !((curdepth-parentdepth)&1) ? lists[p.parent].h : p.h;
         }
         rect_(curx, cury, w, h);
         glEnable(GL_TEXTURE_2D);
