@@ -21,7 +21,7 @@
 #define PING_RETRY 5
 
 VAR(0, masterserver, 0, 0, 1);
-VAR(0, masterport, 1, RE_MASTER_PORT, INT_MAX-1);
+VAR(0, masterport, 1, RE_MASTER_PORT, VAR_MAX);
 SVAR(0, masterip, "");
 SVAR(0, masterscriptclient, "");
 SVAR(0, masterscriptserver, "");
@@ -284,7 +284,7 @@ bool checkmasterclientinput(masterclient &c)
         if(!strcmp(w[0], "server") && !c.ishttp)
         {
             c.port = RE_SERVER_PORT;
-            if(w[1]) c.port = clamp(atoi(w[1]), 1, INT_MAX-1);
+            if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
             c.shouldping = true;
             c.numpings = 0;
             c.lastactivity = totalmillis ? totalmillis : 1;

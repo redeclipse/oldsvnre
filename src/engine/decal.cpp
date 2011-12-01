@@ -418,7 +418,7 @@ struct decalrenderer
             if(vis&2) pos[numverts++] = v[(order+3)&3].tovec().mul(size/8.0f).add(vo);
             planes[0].cross(pos[0], pos[1], pos[2]).normalize();
             if(convex) { planes[1].cross(pos[0], pos[2], pos[3]).normalize(); numplanes++; }
-        } 
+        }
 
         loopl(numplanes)
         {
@@ -610,7 +610,7 @@ void renderdecals(bool mainpass)
     decalrenderer::cleanuprenderstate();
 }
 
-VAR(IDF_PERSIST, maxdecaldistance, 128, 1024, INT_MAX-1);
+VAR(IDF_PERSIST, maxdecaldistance, 128, 1024, VAR_MAX);
 
 void adddecal(int type, const vec &center, const vec &surface, float radius, const bvec &color, int info)
 {

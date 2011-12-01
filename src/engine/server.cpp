@@ -154,8 +154,8 @@ VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
 #else
 VAR(0, servertype, 0, 1, 3); // 0: local only, 1: private, 2: public, 3: dedicated
 #endif
-VAR(0, serveruprate, 0, 0, INT_MAX-1);
-VAR(0, serverport, 1, RE_SERVER_PORT, INT_MAX-1);
+VAR(0, serveruprate, 0, 0, VAR_MAX);
+VAR(0, serverport, 1, RE_SERVER_PORT, VAR_MAX);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;

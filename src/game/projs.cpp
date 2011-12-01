@@ -9,9 +9,9 @@ namespace projs
     VAR(IDF_PERSIST, shadoweject, 0, 1, 1);
     VAR(IDF_PERSIST, shadowents, 0, 1, 1);
 
-    VAR(IDF_PERSIST, maxprojectiles, 1, 128, INT_MAX-1);
+    VAR(IDF_PERSIST, maxprojectiles, 1, 128, VAR_MAX);
 
-    VAR(IDF_PERSIST, ejectfade, 0, 3500, INT_MAX-1);
+    VAR(IDF_PERSIST, ejectfade, 0, 3500, VAR_MAX);
     VAR(IDF_PERSIST, ejectspin, 0, 1, 1);
     VAR(IDF_PERSIST, ejecthint, 0, 1, 1);
 

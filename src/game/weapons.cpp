@@ -2,7 +2,7 @@
 namespace weapons
 {
     VAR(IDF_PERSIST, autoreloading, 0, 2, 4); // 0 = never, 1 = when empty, 2 = weapons that don't add a full clip, 3 = always (+1 zooming weaps too)
-    VAR(IDF_PERSIST, autoreloaddelay, 0, 100, INT_MAX-1);
+    VAR(IDF_PERSIST, autoreloaddelay, 0, 100, VAR_MAX);
 
     VAR(IDF_PERSIST, skipspawnweapon, 0, 0, 6); // skip spawnweapon; 0 = never, 1 = if numweaps > 1 (+1), 3 = if carry > 0 (+2), 6 = always
     VAR(IDF_PERSIST, skipmelee, 0, 7, 10); // skip melee; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
@@ -10,7 +10,7 @@ namespace weapons
     VAR(IDF_PERSIST, skipgrenade, 0, 0, 10); // skip grenade; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
 
     int lastweapselect = 0;
-    VAR(IDF_PERSIST, weapselectdelay, 0, 150, INT_MAX-1);
+    VAR(IDF_PERSIST, weapselectdelay, 0, 150, VAR_MAX);
     VARF(IDF_PERSIST, weapselectslot, 0, 1, 1, changedkeys = lastmillis); // 0 = by id, 1 = by slot
 
     int slot(gameent *d, int n, bool back)

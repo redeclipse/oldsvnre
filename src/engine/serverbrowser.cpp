@@ -289,8 +289,8 @@ void addserver(const char *name, int port)
 ICOMMAND(0, addserver, "si", (char *n, int *p), addserver(n, *p > 0 ? *p : RE_SERVER_PORT));
 VAR(0, searchlan, 0, 0, 1);
 VAR(IDF_PERSIST, maxservpings, 0, 10, 1000);
-VAR(IDF_PERSIST, serverupdateinterval, 0, 10, INT_MAX-1);
-VAR(IDF_PERSIST, serverdecay, 0, 20, INT_MAX-1);
+VAR(IDF_PERSIST, serverupdateinterval, 0, 10, VAR_MAX);
+VAR(IDF_PERSIST, serverdecay, 0, 20, VAR_MAX);
 VAR(0, serverwaiting, 1, serverinfo::WAITING, 0);
 
 void pingservers()

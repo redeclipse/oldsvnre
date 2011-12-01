@@ -211,12 +211,6 @@ const int pulsecols[3][PULSECOLOURS] = {
 };
 #endif
 
-#define VAR_MIN INT_MIN+1
-#define VAR_MAX INT_MAX-1
-#define FVAR_MIN -1e6f
-#define FVAR_MAX 1e6f
-#define FVAR_NONZERO 1e-6f
-
 #include "weapons.h"
 #include "gamemode.h"
 
@@ -937,18 +931,6 @@ struct gameent : dynent, gamestate
         if(wantshitbox()) checkhitboxes();
     }
 
-    float calcroll(bool crouch, bool thirdperson = false)
-    {
-        float r = thirdperson ? 0 : roll, wobble = float(rnd(15)-7)*(float(min(quake, 100))/100.f);
-        switch(state)
-        {
-            case CS_SPECTATOR: case CS_WAITING: r = wobble*0.5f; break;
-            case CS_ALIVE: if(crouch) wobble *= 0.5f; r += wobble; break;
-            case CS_DEAD: r += wobble; break;
-            default: break;
-        }
-        return r;
-    }
 
     void doimpulse(int cost, int type, int millis)
     {

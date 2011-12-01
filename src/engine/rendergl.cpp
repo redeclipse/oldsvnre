@@ -758,7 +758,7 @@ void transplayer()
 float curfov = 100, fovy, aspect;
 int farplane, xtraverts, xtravertsva;
 
-VAR(IDF_WORLD, fog, 16, 4000, INT_MAX-1);
+VAR(IDF_WORLD, fog, 16, 4000, VAR_MAX);
 bvec fogcolor(0x80, 0x99, 0xB3);
 VARF(IDF_HEX|IDF_WORLD, fogcolour, 0, 0x8099B3, 0xFFFFFF,
 {
@@ -1677,10 +1677,10 @@ void drawminimap()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-VAR(IDF_PERSIST, scr_virtw, 0, 1024, INT_MAX-1);
-VAR(IDF_PERSIST, scr_virth, 0, 768, INT_MAX-1);
-VAR(IDF_PERSIST, scr_minw, 0, 640, INT_MAX-1);
-VAR(IDF_PERSIST, scr_minh, 0, 480, INT_MAX-1);
+VAR(IDF_PERSIST, scr_virtw, 0, 1024, VAR_MAX);
+VAR(IDF_PERSIST, scr_virth, 0, 768, VAR_MAX);
+VAR(IDF_PERSIST, scr_minw, 0, 640, VAR_MAX);
+VAR(IDF_PERSIST, scr_minh, 0, 480, VAR_MAX);
 
 void getscreenres(int &w, int &h)
 {

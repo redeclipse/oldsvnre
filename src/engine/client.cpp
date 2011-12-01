@@ -71,7 +71,7 @@ void trydisconnect()
 }
 
 SVAR(0, connectname, "");
-VAR(0, connectport, 0, 0, INT_MAX-1);
+VAR(0, connectport, 0, 0, VAR_MAX);
 
 void connectserv(const char *name, int port, const char *password)
 {
