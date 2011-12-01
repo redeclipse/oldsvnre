@@ -67,7 +67,7 @@ namespace capture
                     else if(!(f.base&BASE_FLAG) || f.owner || f.droptime)
                     {
                         fade += (1.f-fade)*diff;
-                        tex = hud::alerttex;
+                        if(f.base&BASE_FLAG) tex = hud::alerttex;
                     }
                 }
                 if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour, "little", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");

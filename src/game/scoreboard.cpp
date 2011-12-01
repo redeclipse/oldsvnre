@@ -531,30 +531,29 @@ namespace hud
         {
             case 0: col = "\fg"; break;
             case 1: col = "\fy"; break;
-            case 2: col = "\fo"; break;
-            case 3: default: col = "\fr"; break;
+            case 2: default: col = "\fo"; break;
         }
         vec c = vec::hexcolor(colour);
-        int sy = hud::drawitem(icon, x, y, s, true, true, c.r, c.g, c.b, fade, skew);
-        hud::drawitemsubtext(x, y-sy+((s-(s*skew))/3), s, TEXT_LEFT_JUSTIFY, skew, "emphasis", fade, "%s%d", col, score);
-        hud::drawitemsubtext(x, y, s, TEXT_LEFT_UP, skew, "reduced", fade, "\f[%d]%s", colour, name);
-        return sy;
+        int size = int(s*skew); size += int(size*inventoryglow);
+        hud::drawitem(icon, x, y+size, s, true, false, c.r, c.g, c.b, fade, skew, "super", "%s%d", col, score);
+        hud::drawitemsubtext(x, y+size, s, TEXT_RIGHT_UP, skew, "default", fade, "\f[%d]%s", colour, name);
+        return size;
     }
 
     int drawscore(int x, int y, int s, int m, float blend)
     {
         if(!m_fight(game::gamemode) || m_trial(game::gamemode)) return 0;
-        int sy = 0, numgroups = groupplayers(), numout = 0, ss = int((s-s/4)*inventoryscoresize);
+        int sy = 0, numgroups = groupplayers(), numout = 0;
         loopi(2) loopk(numgroups)
         {
-            if(y-sy-s < m) break;
+            if(sy > m) break;
             scoregroup &sg = *groups[k];
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
                 float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                sy += drawscoreitem(hud::teamtex(sg.team), TEAM(sg.team, colour), x, y-sy, ss, sk, blend*inventoryblend, k, sg.total, TEAM(sg.team, name));
-                if(++numout >= inventoryscorelimit) return sy;
+                sy += drawscoreitem(hud::teamtex(sg.team), TEAM(sg.team, colour), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, k, sg.total, TEAM(sg.team, name));
+                if(++numout >= inventoryscore) return sy;
             }
             else
             {
@@ -564,8 +563,8 @@ namespace hud
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_TONE), x, y-sy, ss, sk, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
-                    if(++numout >= inventoryscorelimit) return sy;
+                    sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_TONE), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
+                    if(++numout >= inventoryscore) return sy;
                 }
             }
         }

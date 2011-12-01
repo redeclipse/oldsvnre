@@ -80,6 +80,8 @@ namespace hud
     FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
     VAR(IDF_PERSIST, noticetime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
+    VAR(IDF_PERSIST, teamnotices, 0, 2, 2);
+    VAR(IDF_PERSIST, teamnoticedelay, 0, 2500, VAR_MAX);
 
     TVAR(IDF_PERSIST, neutraltex, "<grey>textures/team", 3);
     TVAR(IDF_PERSIST, alphatex, "<grey>textures/teamalpha", 3);
@@ -184,18 +186,16 @@ namespace hud
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
-    VAR(IDF_PERSIST, inventoryteams, 0, 0, VAR_MAX);
     VAR(IDF_PERSIST, inventorystatus, 0, 2, 2);
-    VAR(IDF_PERSIST, inventoryscore, 0, 1, 1);
-    VAR(IDF_PERSIST, inventoryscorelimit, 0, 2, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryscore, 0, 2, VAR_MAX);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorythrob, 0, 0.0625f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.7f, 1000);
-    FVAR(IDF_PERSIST, inventoryscoresize, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.1f, 1);
+    FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.7f, 1);
+    FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
@@ -988,14 +988,14 @@ namespace hud
         }
         else if(target->state == CS_ALIVE)
         {
-            if(m_fight(game::gamemode) && target == game::player1)
+            if(m_fight(game::gamemode) && target == game::player1 && teamnotices)
             {
                 if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
                     ty += draw_textx("\fzZyDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                if(inventoryteams)
+                if(teamnotices >= 2)
                 {
                     if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
-                    if(totalmillis-lastteam <= inventoryteams)
+                    if(totalmillis-lastteam <= teamnoticedelay)
                     {
                         if(m_campaign(game::gamemode)) ty += draw_textx("Campaign Mission", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         else if(!m_team(game::gamemode, game::mutators))
@@ -1867,7 +1867,7 @@ namespace hud
                     gb -= gb*skew;
                 }
                 pushfont("huge");
-                int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth >= 2 ? size/3 : FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
+                int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth >= 2 ? size/2-FONTH/2 : FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
                 if(inventoryhealth < 2) sy += ty;
                 popfont();
             }
@@ -1965,7 +1965,7 @@ namespace hud
     void drawinventory(int w, int h, int edge, float blend)
     {
         pushfont("console");
-        int cx[2] = { edge, w-edge }, cy[2] = { h-edge, h-edge }, cs = int(inventorysize*w), cr = cs/8, cc = 0, ch = edge+((chatconsize+chatconoverflow)*FONTH);
+        int cx[2] = { edge, w-edge }, cy[2] = { h-edge, h-edge }, cs = int(inventorysize*w), cr = cs/8, cc = 0;
         popfont();
         loopi(2) switch(i)
         {
@@ -1973,7 +1973,6 @@ namespace hud
             {
                 if((cc = drawhealth(cx[i], cy[i], cs, blend)) > 0) cy[i] -= cc+cr;
                 if((cc = drawtimer(cx[i], cy[i], cs, blend)) > 0) cy[i] -= cc+cr;
-                if(!m_edit(game::gamemode) && inventoryscore && ((cc = drawscore(cx[i], cy[i], cs, ch+edge, blend)) > 0)) cy[i] -= cc+cr;
                 break;
             }
             case 1:
@@ -1999,33 +1998,8 @@ namespace hud
                             cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, blend*inventoryblend, 1, "default", "%s%d", col, int(millis/1000.f));
                         }
                     }
-                    if(radarstyle != 2 && inventoryteams && game::focus == game::player1 && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
-                    {
-                        if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
-                        if(!lastnewgame && lastteam)
-                        {
-                            const char *pre = "";
-                            float skew = inventoryskew, fade = blend*inventoryblend, r = 1, g = 1, b = 1;
-                            skewcolour(r, g, b, game::getcolour(game::focus, CTONE_DEFAULT));
-                            int millis = totalmillis-lastteam;
-                            if(millis <= inventoryteams)
-                            {
-                                float tweak = clamp(millis/float(inventoryteams), 0.f, 1.f);
-                                skew += (1.f-skew)*(1.f-tweak);
-                                blend += (1.f-blend)*(1.f-tweak);
-                                pre = "\fzwR";
-                            }
-                            int oldy = cm+int(cs*skew);
-                            cm += int(drawitem(m_team(game::gamemode, game::mutators) ? teamtex(game::focus->team) : playertex, cx[i], oldy, cs, true, false, r, g, b, fade, skew));
-                            if(m_campaign(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "reduced", fade, "\f[%d]%scampaign", TEAM(game::focus->team, colour), pre));
-                            else if(!m_team(game::gamemode, game::mutators))
-                            {
-                                if(m_trial(game::gamemode)) cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "reduced", fade, "\f[%d]%stime-trial", TEAM(game::focus->team, colour), pre));
-                                else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "\f[%d]%sffa", TEAM(game::focus->team, colour), pre));
-                            }
-                            else cm += int(drawitemsubtext(cx[i]-int(cs*skew/2), oldy, cs, TEXT_CENTERED, skew, "default", fade, "\f[%d]%s%s", TEAM(game::focus->team, colour), pre, TEAM(game::focus->team, name)));
-                        }
-                    }
+                    else if(!m_edit(game::gamemode) && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, blend)) > 0)) cm += cc+cr;
+
                     if((cc = drawselection(cx[i], cy[i], cs, cm, blend)) > 0) cy[i] -= cc+cr;
                     if(inventorygame)
                     {
