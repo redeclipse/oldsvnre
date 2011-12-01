@@ -37,6 +37,11 @@ enum
 };
 
 enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS };
+#define VAR_MIN INT_MIN+1
+#define VAR_MAX INT_MAX-1
+#define FVAR_MIN -1e6f
+#define FVAR_MAX 1e6f
+#define FVAR_NONZERO 1e-6f
 
 enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_REWRITE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9, IDF_UNKNOWN = 1<<10 };
 

@@ -7,8 +7,8 @@ Shader *particleshader = NULL, *particlenotextureshader = NULL;
 
 VARF(IDF_PERSIST, maxparticles, 10, 2048, 40000, particleinit());
 VARF(IDF_PERSIST, fewparticles, 10, 64, 40000, particleinit());
-VAR(IDF_PERSIST, maxparticledistance, 256, 1024, INT_MAX-1);
-VAR(IDF_PERSIST, maxparticletrail, 256, 1024, INT_MAX-1);
+VAR(IDF_PERSIST, maxparticledistance, 256, 1024, VAR_MAX);
+VAR(IDF_PERSIST, maxparticletrail, 256, 1024, VAR_MAX);
 
 VAR(IDF_PERSIST, particletext, 0, 1, 1);
 VAR(IDF_PERSIST, particleglare, 0, 1, 100);
@@ -16,7 +16,7 @@ VAR(0, debugparticles, 0, 0, 1);
 
 // Check emit_particles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
-VAR(IDF_PERSIST, emitmillis, 0, 15, INT_MAX-1);
+VAR(IDF_PERSIST, emitmillis, 0, 15, VAR_MAX);
 static int lastemitframe = 0;
 static bool emit = false;
 

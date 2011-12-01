@@ -6,7 +6,7 @@ namespace game
         lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lasttvmillis = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1;
     bool intermission = false, prevzoom = false, zooming = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
-    vec swaydir(0, 0, 0), swaypush(0, 0, 0), bobdir(0, 0, 0);
+    vec swaydir(0, 0, 0), swaypush(0, 0, 0);
 
     string clientmap = "";
 
@@ -17,7 +17,7 @@ namespace game
 
     VAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS);
     FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
-    VAR(IDF_WORLD, illumradius, 0, 0, INT_MAX-1);
+    VAR(IDF_WORLD, illumradius, 0, 0, VAR_MAX);
     SVAR(IDF_WORLD, obitlava, "");
     SVAR(IDF_WORLD, obitwater, "");
     SVAR(IDF_WORLD, obitdeath, "");
@@ -30,7 +30,7 @@ namespace game
     VAR(IDF_PERSIST, mouseabsolute, 0, 0, 1);
     VAR(IDF_PERSIST, mousetype, 0, 0, 2);
     VAR(IDF_PERSIST, mousedeadzone, 0, 10, 100);
-    VAR(IDF_PERSIST, mousepanspeed, 1, 50, INT_MAX-1);
+    VAR(IDF_PERSIST, mousepanspeed, 1, 50, VAR_MAX);
 
     VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
     VAR(IDF_PERSIST, thirdpersonfollow, 0, 1, 1);
@@ -43,7 +43,7 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, thirdpersondist, -1000, 25, 1000);
 
-    VAR(0, follow, 0, 0, INT_MAX-1);
+    VAR(0, follow, 0, 0, VAR_MAX);
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
     FVAR(IDF_PERSIST, followdist, -1000, 25, 1000);
 
@@ -55,10 +55,11 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 10);
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 10);
 
-    VAR(IDF_PERSIST, firstpersonbob, 0, 1, 1);
+    VAR(IDF_PERSIST, firstpersonbob, 0, 1, 2); // 0 = off, 1 = roll bob, 2 = positional bob
     FVAR(IDF_PERSIST, firstpersonbobstep, 1, 28.f, 1000);
-    FVAR(IDF_PERSIST, firstpersonbobside, 0, 1, 10);
-    FVAR(IDF_PERSIST, firstpersonbobup, 0, 1, 10);
+    FVAR(IDF_PERSIST, firstpersonbobroll, 0, 0.3f, 10);
+    FVAR(IDF_PERSIST, firstpersonbobside, 0, 0.6f, 10);
+    FVAR(IDF_PERSIST, firstpersonbobup, 0, 0.6f, 10);
 
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersondist, -1, -0.25f, 1);
@@ -71,7 +72,7 @@ namespace game
     VARF(IDF_PERSIST, specmode, 0, 1, 1, follow = 0); // 0 = float, 1 = tv
     VARF(IDF_PERSIST, waitmode, 0, 2, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
 
-    VAR(IDF_PERSIST, spectvtime, 1000, 7500, INT_MAX-1);
+    VAR(IDF_PERSIST, spectvtime, 1000, 7500, VAR_MAX);
     FVAR(IDF_PERSIST, spectvspeed, 0, 0.35f, 1000);
     FVAR(IDF_PERSIST, spectvpitch, 0, 0.65f, 1000);
 
@@ -88,7 +89,7 @@ namespace game
 
     VAR(IDF_PERSIST, zoommousetype, 0, 0, 2);
     VAR(IDF_PERSIST, zoommousedeadzone, 0, 25, 100);
-    VAR(IDF_PERSIST, zoommousepanspeed, 1, 10, INT_MAX-1);
+    VAR(IDF_PERSIST, zoommousepanspeed, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, zoomfov, 1, 10, 150);
 
     VARF(IDF_PERSIST, zoomlevel, 1, 4, 10, checkzoom());
@@ -107,37 +108,36 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadiconsize, 0, 3, 1000);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
-    VAR(IDF_PERSIST, eventiconfade, 500, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, eventiconshort, 500, 3000, INT_MAX-1);
-    VAR(IDF_PERSIST, eventiconcrit, 500, 2000, INT_MAX-1);
+    VAR(IDF_PERSIST, eventiconfade, 500, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, eventiconshort, 500, 3000, VAR_MAX);
+    VAR(IDF_PERSIST, eventiconcrit, 500, 2000, VAR_MAX);
 
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
     VAR(IDF_PERSIST, obitannounce, 0, 1, 2); // 0 = off, 1 = only focus, 2 = everyone
     VAR(IDF_PERSIST, showplayerinfo, 0, 1, 1); // 0 = none, 1 = show events
 
-    VAR(IDF_PERSIST, damagemergedelay, 0, 75, INT_MAX-1);
-    VAR(IDF_PERSIST, damagemergeburn, 0, 250, INT_MAX-1);
-    VAR(IDF_PERSIST, damagemergebleed, 0, 250, INT_MAX-1);
+    VAR(IDF_PERSIST, damagemergedelay, 0, 75, VAR_MAX);
+    VAR(IDF_PERSIST, damagemergeburn, 0, 250, VAR_MAX);
+    VAR(IDF_PERSIST, damagemergebleed, 0, 250, VAR_MAX);
     VAR(IDF_PERSIST, playdamagetones, 0, 1, 3);
     VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
     VAR(IDF_PERSIST, playreloadnotify, 0, 3, 15);
 
-    VAR(IDF_PERSIST, quakefade, 0, 100, INT_MAX-1);
     VAR(IDF_PERSIST, ragdolls, 0, 1, 1);
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
-    VAR(IDF_PERSIST, bloodfade, 1, 3000, INT_MAX-1);
+    VAR(IDF_PERSIST, bloodfade, 1, 3000, VAR_MAX);
     VAR(IDF_PERSIST, bloodsize, 1, 50, 1000);
     VAR(IDF_PERSIST, bloodsparks, 0, 0, 1);
     FVAR(IDF_PERSIST, debrisscale, 0, 1, 1000);
-    VAR(IDF_PERSIST, debrisfade, 1, 5000, INT_MAX-1);
+    VAR(IDF_PERSIST, debrisfade, 1, 5000, VAR_MAX);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
-    VAR(IDF_PERSIST, gibfade, 1, 5000, INT_MAX-1);
-    VAR(IDF_PERSIST, burnfade, 100, 200, INT_MAX-1);
+    VAR(IDF_PERSIST, gibfade, 1, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, burnfade, 100, 200, VAR_MAX);
     FVAR(IDF_PERSIST, burnblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
-    VAR(IDF_PERSIST, impulsefade, 0, 200, INT_MAX-1);
-    VAR(IDF_PERSIST, ragdolleffect, 2, 500, INT_MAX-1);
+    VAR(IDF_PERSIST, impulsefade, 0, 200, VAR_MAX);
+    VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, playertone, 0, 1, 1); // use player tone as secondary colour instead of team colour
     VAR(IDF_PERSIST, playertonemix, 0, 1, 2); // mix tone with team colour, 1 = if teamed, 2 = always
@@ -254,22 +254,20 @@ namespace game
     void resetsway()
     {
         swaydir = swaypush = vec(0, 0, 0);
-        swayfade = swayspeed = swaydist = 0;
-        bobdir = vec(0, 0, 0);
-        bobfade = bobdist = 0;
+        swayfade = swayspeed = swaydist = bobfade = bobdist = 0;
     }
 
     void addsway(gameent *d)
     {
-        float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
-        if(d->physstate >= PHYS_SLOPE)
+        float speed = physics::movevelocity(d), step = firstpersonbob == 2 ? firstpersonbobstep : firstpersonswaystep;
+        if(d->physstate >= PHYS_SLOPE || d->onladder || d->turnside)
         {
             swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
             swaydist += swayspeed*curtime/1000.0f;
             swaydist = fmod(swaydist, 2*step);
-            bobfade = swayfade = 1;
             bobdist += swayspeed*curtime/1000.0f;
             bobdist = fmod(bobdist, 2*firstpersonbobstep);
+            bobfade = swayfade = 1;
         }
         else
         {
@@ -289,11 +287,9 @@ namespace game
 
         float k = pow(0.7f, curtime/25.0f);
         swaydir.mul(k);
-        vec vel = vec(d->vel).add(d->falling);
-        float speedscale = max(vel.magnitude(), speed);
-        if(speedscale > 0) swaydir.add(vec(vel).mul((1-k)/(15*speedscale)));
-        bobdir.mul(k);
-        if(speedscale > 0) bobdir.add(vec(vel).mul((1-k)/(15*speedscale)));
+        vec inertia = vec(d->vel).add(d->falling);
+        float speedscale = max(inertia.magnitude(), speed);
+        if(speedscale > 0) swaydir.add(vec(inertia).mul((1-k)/(15*speedscale)));
         swaypush.mul(pow(0.5f, curtime/25.0f));
     }
 
@@ -1764,14 +1760,14 @@ namespace game
     vec camerapos(physent *d)
     {
         vec pos = d->headpos();
-        if(firstpersonbob && d == focus && !intermission && !thirdpersonview(true))
+        if(firstpersonbob == 2 && d == focus && !intermission && !thirdpersonview(true))
         {
             vec dir;
             vecfromyawpitch(d->yaw, 0, 0, 1, dir);
             float steps = bobdist/firstpersonbobstep*M_PI;
             dir.mul(firstpersonbobside*cosf(steps));
             dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1);
-            pos.add(dir).add(bobdir);
+            pos.add(dir);
         }
         return pos;
     }
@@ -1915,6 +1911,25 @@ namespace game
         }
     }
 
+    float calcroll(gameent *d, bool bob = true)
+    {
+        bool thirdperson = d != focus || thirdpersonview(true);
+        float r = thirdperson ? 0 : d->roll, wobble = float(rnd(quakewobble)-quakewobble/2)*(float(min(d->quake, 100))/100.f);
+        switch(d->state)
+        {
+            case CS_SPECTATOR: case CS_WAITING: r = wobble*0.5f; break;
+            case CS_ALIVE: if(physics::iscrouching(d)) wobble *= 0.5f; r += wobble; break;
+            case CS_DEAD: r += wobble; break;
+            default: break;
+        }
+        if(bob && firstpersonbob == 1 && !thirdperson && !intermission)
+        {
+            float steps = bobdist/firstpersonbobstep*M_PI;
+            r += firstpersonbobroll*cosf(steps);
+        }
+        return r;
+    }
+
     void resetcamera()
     {
         lastcamera = 0;
@@ -1924,7 +1939,7 @@ namespace game
         camera1->o = camerapos(focus);
         camera1->yaw = focus->yaw;
         camera1->pitch = focus->pitch;
-        camera1->roll = focus->calcroll(false);
+        camera1->roll = calcroll(focus);
         camera1->resetinterp();
         focus->resetinterp();
     }
@@ -2131,7 +2146,7 @@ namespace game
                 fixfullrange(camera1->yaw, camera1->pitch, camera1->roll, false);
                 fixrange(camera1->aimyaw, camera1->aimpitch);
             }
-            camera1->roll = focus->calcroll(physics::iscrouching(focus));
+            camera1->roll = calcroll(focus);
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
             vecfromyawpitch(camera1->yaw, camera1->pitch+90, 1, 0, camup);
@@ -2175,7 +2190,7 @@ namespace game
     {
         int type = clamp(d->aitype, 0, AI_MAX-1);
         const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
-        float yaw = d->yaw, pitch = d->pitch, roll = d->calcroll(physics::iscrouching(d), true);
+        float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus, false);
         vec o = third ? d->feetpos() : camerapos(d);
         if(!third)
         {
@@ -2183,7 +2198,7 @@ namespace game
             if(firstpersonsway && !intermission)
             {
                 vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
+                float steps = swaydist/(firstpersonbob == 2 ? firstpersonbobstep : firstpersonswaystep)*M_PI;
                 dir.mul(firstpersonswayside*cosf(steps));
                 dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
                 o.add(dir).add(swaydir).add(swaypush);

@@ -55,8 +55,8 @@ VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESE
 VARF(0, soundbufferlen, 128, 1024, INT_MAX-1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
 VARF(IDF_PERSIST, musicvol, 0, 80, 255, changedvol = true);
-VAR(IDF_PERSIST, musicfadein, 0, 1000, INT_MAX-1);
-VAR(IDF_PERSIST, musicfadeout, 0, 2500, INT_MAX-1);
+VAR(IDF_PERSIST, musicfadein, 0, 1000, VAR_MAX);
+VAR(IDF_PERSIST, musicfadeout, 0, 2500, VAR_MAX);
 SVAR(0, titlemusic, "sounds/theme");
 
 void initsound()
