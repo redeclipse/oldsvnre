@@ -107,6 +107,7 @@ namespace hud
     VAR(IDF_PERSIST, healthtone, 0, 3, CTONE_MAX); // colour based on tone (1 = team, 2 = tone, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
     VAR(IDF_PERSIST, clipstone, 0, 3, CTONE_MAX);
     VAR(IDF_PERSIST, inventorytone, 0, 3, CTONE_MAX);
+    VAR(IDF_PERSIST, inventoryimpulsetone, 0, 1, 1);
     VAR(IDF_PERSIST, crosshairtone, 0, 0, CTONE_MAX);
     VAR(IDF_PERSIST, noticestone, 0, 0, CTONE_MAX);
     VAR(IDF_PERSIST, radartone, 0, 3, 5);
@@ -212,6 +213,10 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
     VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
+
+    VAR(IDF_PERSIST, inventoryresidual, 0, 1, 1);
+    TVAR(IDF_PERSIST, burningtex, "<grey>textures/alertburn", 3);
+    TVAR(IDF_PERSIST, bleedingtex, "<grey>textures/alertbleed", 3);
 
     TVAR(IDF_PERSIST, meleetex, "<grey>textures/melee", 3);
     TVAR(IDF_PERSIST, pistoltex, "<grey>textures/pistol", 3);
@@ -1890,7 +1895,7 @@ namespace hud
                 loopi(2)
                 {
                     float r = 1, g = 1, b = 1, f = 1;
-                    if(inventorytone) skewcolour(r, g, b, -(i ? CTONE_MIXED+1 : CTONE_DEFAULT+1));
+                    if(inventoryimpulsetone) skewcolour(r, g, b, -(i ? CTONE_MIXED+1 : CTONE_DEFAULT+1));
                     if(inventoryflash && game::focus->impulse[IM_METER])
                     {
                         r += (1.f-r)*amt;
@@ -1912,6 +1917,35 @@ namespace hud
                     popfont();
                 }
                 sy += iw;
+            }
+            if(inventoryresidual)
+            {
+                if(burntime && game::focus->burning(lastmillis, burntime))
+                {
+                    int millis = lastmillis-game::focus->lastburntime, delay = burndelay;
+                    vec c(1, 1, 1);
+                    if(inventorytone) skewcolour(c.r, c.g, c.b, -inventorytone);
+                    if(millis <= delay)
+                    {
+                        delay /= 2;
+                        float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
+                        c.max(vec(game::burncolour(game::focus)).mul(amt));
+                    }
+                    sy += drawitem(burningtex, x, y-sy, width, false, true, c.r, c.g, c.b, fade*inventoryblend);
+                }
+                if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
+                {
+                    int millis = lastmillis-game::focus->lastbleedtime, delay = bleeddelay;
+                    vec c(1, 1, 1);
+                    if(inventorytone) skewcolour(c.r, c.g, c.b, -inventorytone);
+                    if(millis <= delay)
+                    {
+                        delay /= 2;
+                        float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
+                        c.max(vec(1, 0.2f, 0.2f).mul(amt));
+                    }
+                    sy += drawitem(bleedingtex, x, y-sy, width, false, true, c.r, c.g, c.b, fade*inventoryblend);
+                }
             }
         }
         else

@@ -1870,8 +1870,7 @@ namespace game
             }
             if(cam->type == cament::AFFINITY && followdist > 0)
             {
-                vec dir;
-                vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
+                vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
                 physics::movecamera(camera1, dir, followdist, 1.0f);
             }
             camera1->resetinterp();
@@ -2117,8 +2116,7 @@ namespace game
                     float dist = focus != player1 ? followdist : thirdpersondist;
                     if(dist > 0)
                     {
-                        vec dir;
-                        vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, -1, 0, dir);
+                        vec dir; vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, -1, 0, dir);
                         physics::movecamera(camera1, dir, dist, 1.0f);
                     }
                 }
