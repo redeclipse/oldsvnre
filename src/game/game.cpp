@@ -41,11 +41,11 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 0.45f, 1);
-    FVAR(IDF_PERSIST, thirdpersondist, -1000, 25, 1000);
+    FVAR(IDF_PERSIST, thirdpersondist, 0, 25, 1000);
 
     VAR(0, follow, 0, 0, VAR_MAX);
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, followdist, -1000, 25, 1000);
+    FVAR(IDF_PERSIST, followdist, 0, 25, 1000);
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
@@ -1868,6 +1868,12 @@ namespace game
                     scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, (float(curtime)/1000.f)*spectvspeed, spectvpitch);
                 else { camera1->yaw = camera1->aimyaw; camera1->pitch = camera1->aimpitch; }
             }
+            if(cam->type == cament::AFFINITY && followdist > 0)
+            {
+                vec dir;
+                vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
+                physics::movecamera(camera1, dir, followdist, 1.0f);
+            }
             camera1->resetinterp();
         }
         else setvar(isspec ? "specmode" : "waitmode", 0, true);
@@ -2106,12 +2112,15 @@ namespace game
                     findorientation(camera1->o, (self ? player1 : focus)->yaw, (self ? player1 : focus)->pitch, worldpos);
                 camera1->aimyaw = self ? player1->yaw : (mousestyle() <= 1 ? focus->yaw : focus->aimyaw);
                 camera1->aimpitch = self ? player1->pitch : (mousestyle() <= 1 ? focus->pitch : focus->aimpitch);
-                float dist = self ? followdist : thirdpersondist;
-                if(thirdpersonview(true) && dist)
+                if(thirdpersonview(true))
                 {
-                    vec dir;
-                    vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, dist > 0 ? -1 : 1, 0, dir);
-                    physics::movecamera(camera1, dir, fabs(dist), 1.0f);
+                    float dist = focus != player1 ? followdist : thirdpersondist;
+                    if(dist > 0)
+                    {
+                        vec dir;
+                        vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, -1, 0, dir);
+                        physics::movecamera(camera1, dir, dist, 1.0f);
+                    }
                 }
                 camera1->resetinterp();
 
