@@ -897,7 +897,7 @@ void save_mapshot(char *mname)
 
     glDeleteTextures(1, &tex);
     glViewport(0, 0, screen->w, screen->h);
-    defformatstring(texname)("<blur:1,3>%s", mname);
+    defformatstring(texname)("%s", mname);
     reloadtexture(texname);
 }
 ICOMMAND(0, savemapshot, "s", (char *mname), save_mapshot(*mname ? mname : mapname));

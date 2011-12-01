@@ -576,8 +576,8 @@ struct gui : guient
             }
             else
             {
-                defformatstring(texname)("<blur:1,3>%s", mapname);
-                if((t = textureload(texname, 3, true, false)) == notexture) t = textureload("<blur:1,3>textures/emblem", 3, true, false);
+                defformatstring(texname)("%s", mapname);
+                if((t = textureload(texname, 3, true, false)) == notexture) t = textureload("textures/emblem", 3, true, false);
                 float scale = float(size)/max(t->xs, t->ys); //scale and preserve aspect ratio
                 xs = t->xs*scale; ys = t->ys*scale;
                 x += int((size-xs)/2);
