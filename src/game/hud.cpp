@@ -95,7 +95,7 @@ namespace hud
     TVAR(IDF_PERSIST, dominatedtex, "<grey>textures/dominated", 3);
     TVAR(IDF_PERSIST, inputtex, "textures/menu", 3);
     TVAR(IDF_PERSIST, waittex, "<grey>textures/wait", 3);
-    TVAR(IDF_PERSIST, spectex, "<grey>textures/conopen", 3);
+    TVAR(IDF_PERSIST, spectex, "<grey>textures/spec", 3);
     TVAR(IDF_PERSIST, chattex, "<grey>textures/conopen", 3);
     TVAR(IDF_PERSIST, healthtex, "<grey>textures/health", 3);
     TVAR(IDF_PERSIST, healthglowtex, "<grey>textures/healthglow", 3);
@@ -209,10 +209,12 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.5f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
-    VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
-    FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
     VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
+
+    VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
+    FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
+    TVAR(IDF_PERSIST, impulsetex, "<grey>textures/impulse", 3);
 
     VAR(IDF_PERSIST, inventoryresidual, 0, 1, 1);
     TVAR(IDF_PERSIST, burningtex, "<grey>textures/alertburn", 3);
@@ -1889,7 +1891,7 @@ namespace hud
             {
                 int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
                 float len = clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
-                settexture(progresstex, 3);
+                settexture(impulsetex, 3);
                 int timestep = totalmillis%1000;
                 float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
                 loopi(2)

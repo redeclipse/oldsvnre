@@ -500,11 +500,11 @@ namespace bomber
             if(f.owner)
             {
                 int takemillis = lastmillis-f.taketime;
-                if(d->ai && f.owner == d && takemillis >= (bombercarrytime ? bombercarrytime/2 : 1000))
+                if(bombercarrytime && d->ai && f.owner == d && takemillis >= bombercarrytime-550-bomberlockondelay)
                 {
                     if(d->action[AC_AFFINITY])
                     {
-                        if(takemillis >= bombercarrytime*3/4 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                        if(takemillis >= bombercarrytime-500 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
                             d->action[AC_AFFINITY] = false;
                     }
                     else
