@@ -23,7 +23,7 @@ namespace game
     SVAR(IDF_WORLD, obitdeath, "");
     SVAR(IDF_WORLD, mapmusic, "");
 
-    VARF(IDF_PERSIST, musictype, 0, 1, 3, musicdone(true)); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none)
+    VARF(IDF_PERSIST, musictype, 0, 1, 3, if(connected() && maptime > 0 && !intermission) musicdone(true)); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none)
     SVAR(IDF_WORLD, musicdir, "sounds/music");
 
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
@@ -49,6 +49,7 @@ namespace game
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
+    FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.f, 1000);
@@ -60,11 +61,6 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonbobroll, 0, 0.3f, 10);
     FVAR(IDF_PERSIST, firstpersonbobside, 0, 0.6f, 10);
     FVAR(IDF_PERSIST, firstpersonbobup, 0, 0.6f, 10);
-
-    FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, firstpersondist, -1, -0.25f, 1);
-    FVAR(IDF_PERSIST, firstpersonshift, -1, 0.3f, 1);
-    FVAR(IDF_PERSIST, firstpersonadjust, -1, -0.07f, 1);
 
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
@@ -2199,35 +2195,13 @@ namespace game
         const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus, false);
         vec o = third ? d->feetpos() : camerapos(d);
-        if(!third)
+        if(!third && firstpersonsway && !intermission)
         {
-            vec dir;
-            if(firstpersonsway && !intermission)
-            {
-                vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                float steps = swaydist/(firstpersonbob == 2 ? firstpersonbobstep : firstpersonswaystep)*M_PI;
-                dir.mul(firstpersonswayside*cosf(steps));
-                dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
-                o.add(dir).add(swaydir).add(swaypush);
-            }
-            if(firstpersondist != 0.f)
-            {
-                vecfromyawpitch(yaw, pitch, 1, 0, dir);
-                dir.mul(focus->radius*firstpersondist);
-                o.add(dir);
-            }
-            if(firstpersonshift != 0.f)
-            {
-                vecfromyawpitch(yaw, pitch, 0, -1, dir);
-                dir.mul(focus->radius*firstpersonshift);
-                o.add(dir);
-            }
-            if(firstpersonadjust != 0.f)
-            {
-                vecfromyawpitch(yaw, pitch+90.f, 1, 0, dir);
-                dir.mul(focus->height*firstpersonadjust);
-                o.add(dir);
-            }
+            vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
+            float steps = swaydist/(firstpersonbob == 2 ? firstpersonbobstep : firstpersonswaystep)*M_PI;
+            dir.mul(firstpersonswayside*cosf(steps));
+            dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
+            o.add(dir).add(swaydir).add(swaypush);
         }
 
         int anim = animflags, basetime = lastaction, basetime2 = 0;
