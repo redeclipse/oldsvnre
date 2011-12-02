@@ -99,18 +99,20 @@ namespace hud
     TVAR(IDF_PERSIST, chattex, "<grey>textures/conopen", 3);
     TVAR(IDF_PERSIST, healthtex, "<grey>textures/health", 3);
     TVAR(IDF_PERSIST, healthglowtex, "<grey>textures/healthglow", 3);
+    TVAR(IDF_PERSIST, impulsetex, "<grey>textures/impulse", 3);
+    TVAR(IDF_PERSIST, impulseglowtex, "<grey>textures/impulseglow", 3);
     TVAR(IDF_PERSIST, progresstex, "<grey>textures/progress", 3);
     TVAR(IDF_PERSIST, inventorytex, "<grey>textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
 
-    VAR(IDF_PERSIST, glowtone, 0, 3, CTONE_MAX); // colour based on tone (1 = team, 2 = tone, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
-    VAR(IDF_PERSIST, healthtone, 0, 3, CTONE_MAX); // colour based on tone (1 = team, 2 = tone, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
-    VAR(IDF_PERSIST, clipstone, 0, 3, CTONE_MAX);
-    VAR(IDF_PERSIST, inventorytone, 0, 3, CTONE_MAX);
-    VAR(IDF_PERSIST, inventoryimpulsetone, 0, 1, 1);
+    VAR(IDF_PERSIST, glowtone, 0, 5, CTONE_MAX); // colour based on tone (1 = team, 2 = tone, 3 = tone in ffa, 4 = tone in team, 5 = mixed)
+    VAR(IDF_PERSIST, healthtone, 0, 5, CTONE_MAX);
+    VAR(IDF_PERSIST, impulsetone, 0, 5, CTONE_MAX);
+    VAR(IDF_PERSIST, clipstone, 0, 5, CTONE_MAX);
+    VAR(IDF_PERSIST, inventorytone, 0, 5, CTONE_MAX);
     VAR(IDF_PERSIST, crosshairtone, 0, 0, CTONE_MAX);
     VAR(IDF_PERSIST, noticestone, 0, 0, CTONE_MAX);
-    VAR(IDF_PERSIST, radartone, 0, 3, 5);
+    VAR(IDF_PERSIST, radartone, 0, 5, 5);
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
@@ -201,20 +203,19 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryhealthglow, 0, 0.025f, 1);
-    FVAR(IDF_PERSIST, inventoryhealthglowblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.5f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3);
+    FVAR(IDF_PERSIST, healthglow, 0, 0.025f, 1);
+    FVAR(IDF_PERSIST, healthglowblend, 0, 1, 1);
+    VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
+    FVAR(IDF_PERSIST, impulseglow, 0, 0.025f, 1);
+    FVAR(IDF_PERSIST, impulseglowblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryvelocity, 0, 2, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
-
-    VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2);
-    FVAR(IDF_PERSIST, inventoryimpulseskew, 1e-4f, 0.8f, 1000);
-    TVAR(IDF_PERSIST, impulsetex, "<grey>textures/impulse", 3);
 
     VAR(IDF_PERSIST, inventoryresidual, 0, 1, 1);
     TVAR(IDF_PERSIST, burningtex, "<grey>textures/alertburn", 3);
@@ -1597,6 +1598,7 @@ namespace hud
             glColor4f(gr, gg, gb, fade*gf);
             drawtexture(left ? x-gl : x-w-gl, y-s-gl, s+gl*2, w+gl*2, left);
         }
+        else glow = 0;
         glColor4f(cr, cg, cb, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         drawtexture(left ? x : x-w, y-s, s, w);
@@ -1780,145 +1782,121 @@ namespace hud
         return sy;
     }
 
+    int drawbar(int x, int y, int w, int h, float fade, float amt, const char *tex, const char *glowtex, int tone, float glowy, float blend, float pulse, float throb)
+    {
+        int sy = 0;
+        if(*glowtex && (glowy > 0 || pulse > 0))
+        {
+            int glow = int(w*glowy);
+            float gr = 1.f, gg = 1.f, gb = 1.f, gf = blend;
+            sy += glow*2;
+            if(glowtone) skewcolour(gr, gg, gb, -tone);
+            if(pulse > 0)
+            {
+                int timestep = totalmillis%1000;
+                float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*pulse, 0.f, 1.f);
+                gr += (1.f-gr)*skew;
+                gg -= gg*skew;
+                gb -= gb*skew;
+                gf += (1.f-gf)*skew;
+                glow += int(glow*skew);
+            }
+            settexture(glowtex, 3);
+            glColor4f(gr, gg, gb, fade*gf);
+            drawtexture(x-glow, y-h-glow, w+glow*2, h+glow*2);
+        }
+        const struct barstep
+        {
+            float amt, r, g, b;
+        } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
+        settexture(tex, 3);
+        glBegin(GL_TRIANGLE_STRIP);
+        int offset = int(w*inventorythrob*throb), cx = x-offset, cy = y-h-offset, cw = w+offset*2, ch = h+offset*2;
+        const float margin = 0.1f;
+        loopi(4)
+        {
+            const barstep &step = steps[i];
+            if(i > 0)
+            {
+                if(step.amt > amt && steps[i-1].amt <= amt)
+                {
+                    float hoff = 1 - amt, hlerp = (amt - steps[i-1].amt) / (step.amt - steps[i-1].amt),
+                          r = step.r*hlerp + steps[i-1].r*(1-hlerp),
+                          g = step.g*hlerp + steps[i-1].g*(1-hlerp),
+                          b = step.b*hlerp + steps[i-1].b*(1-hlerp);
+                    glColor4f(r, g, b, fade); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
+                    glColor4f(r, g, b, fade); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
+                }
+                if(step.amt > amt + margin)
+                {
+                    float hoff = 1 - (amt + margin), hlerp = (amt + margin - steps[i-1].amt) / (step.amt - steps[i-1].amt),
+                          r = step.r*hlerp + steps[i-1].r*(1-hlerp),
+                          g = step.g*hlerp + steps[i-1].g*(1-hlerp),
+                          b = step.b*hlerp + steps[i-1].b*(1-hlerp);
+                    glColor4f(r, g, b, 0); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
+                    glColor4f(r, g, b, 0); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
+                    break;
+                }
+            }
+            float off = 1 - step.amt, hfade = fade, r = step.r, g = step.g, b = step.b;
+            if(step.amt > amt) hfade *= 1 - (step.amt - amt)/margin;
+            glColor4f(r, g, b, hfade); glTexCoord2f(0, off); glVertex2f(cx, cy + off*ch);
+            glColor4f(r, g, b, hfade); glTexCoord2f(1, off); glVertex2f(cx + cw, cy + off*ch);
+        }
+        glEnd();
+        sy += h;
+        return sy;
+    }
+
     int drawhealth(int x, int y, int s, float blend)
     {
         float fade = blend*inventoryblend;
         int size = s+s/2, width = s-s/4, sy = 0;
         if(game::focus->state == CS_ALIVE)
         {
-            int heal = m_health(game::gamemode, game::mutators);
-            bool hashealth = inventoryhealth && (!m_trial(game::gamemode) || trialdamage), pulse = inventoryflash && game::focus->health < heal;
-            if(inventoryhealth >= 2)
+            fade *= game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : 1.f;
+            if(inventoryhealth && (!m_trial(game::gamemode) || trialdamage))
             {
-                int glow = int(width*inventoryhealthglow);
-                if(hashealth && (glow || pulse))
-                {
-                    float gr = 1.f, gg = 1.f, gb = 1.f, gf = game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryhealthglowblend;
-                    sy += glow*2;
-                    if(glowtone) skewcolour(gr, gg, gb, -healthtone);
-                    if(pulse)
-                    {
-                        int timestep = totalmillis%1000;
-                        float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
-                        gr += (1.f-gr)*skew;
-                        gg -= gg*skew;
-                        gb -= gb*skew;
-                        gf += (1.f-gf)*skew;
-                        glow += int(glow*skew);
-                    }
-                    settexture(healthglowtex, 3);
-                    glColor4f(gr, gg, gb, fade*gf);
-                    drawtexture(x-glow, y-size-glow, width+glow*2, size+glow*2);
-                }
-                int offset = 0;
-                if(game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000) fade *= (lastmillis-game::focus->lastspawn)/1000.f;
-                else if(inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime)
-                {
-                    float amt = clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f);
-                    offset = int(width*inventorythrob*(amt > 1.f ? amt-1.f : 1.f-amt));
-                }
-                if(hashealth)
-                {
-                    const struct healthbarstep
-                    {
-                        float health, r, g, b;
-                    } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
-                    settexture(healthtex, 3);
-                    glBegin(GL_TRIANGLE_STRIP);
-                    int cx = x-offset, cy = y-size-offset, cw = width+offset*2, ch = size+offset*2;
-                    float health = clamp(game::focus->health/float(heal), 0.0f, 1.0f);
-                    const float margin = 0.1f;
-                    loopi(4)
-                    {
-                        const healthbarstep &step = steps[i];
-                        if(i > 0)
-                        {
-                            if(step.health > health && steps[i-1].health <= health)
-                            {
-                                float hoff = 1 - health, hlerp = (health - steps[i-1].health) / (step.health - steps[i-1].health),
-                                      r = step.r*hlerp + steps[i-1].r*(1-hlerp),
-                                      g = step.g*hlerp + steps[i-1].g*(1-hlerp),
-                                      b = step.b*hlerp + steps[i-1].b*(1-hlerp);
-                                glColor4f(r, g, b, fade); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
-                                glColor4f(r, g, b, fade); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
-                            }
-                            if(step.health > health + margin)
-                            {
-                                float hoff = 1 - (health + margin), hlerp = (health + margin - steps[i-1].health) / (step.health - steps[i-1].health),
-                                      r = step.r*hlerp + steps[i-1].r*(1-hlerp),
-                                      g = step.g*hlerp + steps[i-1].g*(1-hlerp),
-                                      b = step.b*hlerp + steps[i-1].b*(1-hlerp);
-                                glColor4f(r, g, b, 0); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
-                                glColor4f(r, g, b, 0); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
-                                break;
-                            }
-                        }
-                        float off = 1 - step.health, hfade = fade, r = step.r, g = step.g, b = step.b;
-                        if(step.health > health) hfade *= 1 - (step.health - health)/margin;
-                        glColor4f(r, g, b, hfade); glTexCoord2f(0, off); glVertex2f(cx, cy + off*ch);
-                        glColor4f(r, g, b, hfade); glTexCoord2f(1, off); glVertex2f(cx + cw, cy + off*ch);
-                    }
-                    glEnd();
-                    sy += size;
-                }
-            }
-            if(hashealth)
-            {
+                int heal = m_health(game::gamemode, game::mutators);
+                float pulse = inventoryflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
+                    throb = inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
+                if(inventoryhealth >= 2)
+                    sy += drawbar(x, y, width, size, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthglowtex, healthtone, healthglow, healthglowblend, pulse, throb);
                 float gr = 1.f, gg = 1.f, gb = 1.f;
-                if(pulse)
+                if(pulse > 0)
                 {
                     int timestep = totalmillis%1000;
-                    float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
+                    float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f), 0.f, 1.f)*pulse;
                     gr += (1.f-gr)*skew;
                     gg -= gg*skew;
                     gb -= gb*skew;
                 }
                 pushfont("huge");
-                int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth >= 2 ? size/2-FONTH/2 : FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
-                if(inventoryhealth < 2) sy += ty;
+                int ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth == 1 ? FONTH : size/2-FONTH/2), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
+                if(inventoryhealth == 1) sy += ty;
+                popfont();
+            }
+            int oldsy = sy;
+            bool hasimpulse = game::focus->aitype < AI_START && physics::allowimpulse(game::focus) && impulsemeter && impulsecost;
+            if(hasimpulse && inventoryimpulse)
+            {
+                float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
+                if(inventoryimpulse >= 2)
+                    sy += drawbar(x, y-sy, width, size, fade, amt, impulsetex, impulseglowtex, impulsetone, impulseglow, impulseglowblend, inventoryflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, game::focus->impulse[IM_METER] ? amt : 0.f);
+                pushfont("super");
+                int ty = draw_textx("%s%d", x+width/2, y-sy+(inventoryimpulse == 1 ? FONTH : size/2-FONTH/2), 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1,
+                    game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fc" : "\fy") : "\fg",
+                        int(amt*100));
+                if(inventoryimpulse == 1) oldsy = (sy += ty);
+                else oldsy = sy-size/2-FONTH/2;
                 popfont();
             }
             if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
             {
-                pushfont("super");
-                sy += draw_textx("%d", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
+                pushfont("default");
+                int ty = draw_textx("%d", x+width/2, y-oldsy, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
+                if(hasimpulse && inventoryimpulse == 1) sy += ty;
                 popfont();
-                //pushfont("reduced");
-                //sy += draw_textx("speed", x+width/2, y-sy, 200, 200, 200, int(fade*255), TEXT_CENTER_UP, -1, -1, int(vec(game::focus->vel).add(game::focus->falling).magnitude()));
-                //popfont();
-            }
-            if(game::focus->aitype < AI_START && physics::allowimpulse(game::focus) && impulsemeter && impulsecost && inventoryimpulse)
-            {
-                int iw = int(width*inventoryimpulseskew), ow = (width-iw)/2, is = iw/2, ix = x+ow+is, iy = y-sy-is;
-                float len = clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
-                settexture(impulsetex, 3);
-                int timestep = totalmillis%1000;
-                float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*len, 0.f, 1.f);
-                loopi(2)
-                {
-                    float r = 1, g = 1, b = 1, f = 1;
-                    if(inventoryimpulsetone) skewcolour(r, g, b, -(i ? CTONE_MIXED+1 : CTONE_DEFAULT+1));
-                    if(inventoryflash && game::focus->impulse[IM_METER])
-                    {
-                        r += (1.f-r)*amt;
-                        g += (1.f-g)*amt;
-                        b -= b*amt;
-                        f += (1.f-f)*amt;
-                    }
-                    glColor4f(r, g, b, fade*f*0.5f);
-                    drawslice(0, 1, ix, iy, i ? is*2/3 : is);
-                    glColor4f(r, g, b, fade*f);
-                    drawslice(len, 1-len, ix, iy, i ? is*2/3 : is);
-                }
-                if(inventoryimpulse >= 2)
-                {
-                    pushfont("reduced");
-                    draw_textx("%s%d%%", x+iw/2+ow, y-sy-iw/2-FONTH/2, 255, 255, 255, int(fade*255), TEXT_CENTERED, -1, -1,
-                        game::focus->impulse[IM_METER] > 0 ? (impulsemeter-game::focus->impulse[IM_METER] > impulsecost ? "\fy" : "\fo") : "\fg",
-                            int((1-len)*100));
-                    popfont();
-                }
-                sy += iw;
             }
             if(inventoryresidual)
             {
