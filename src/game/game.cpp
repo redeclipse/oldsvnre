@@ -21,10 +21,15 @@ namespace game
     SVAR(IDF_WORLD, obitlava, "");
     SVAR(IDF_WORLD, obitwater, "");
     SVAR(IDF_WORLD, obitdeath, "");
-    SVAR(IDF_WORLD, mapmusic, "");
 
-    VARF(IDF_PERSIST, musictype, 0, 1, 3, if(connected() && maptime > 0 && !intermission) musicdone(true)); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none)
-    SVAR(IDF_WORLD, musicdir, "sounds/music");
+    void stopmapmusic()
+    {
+        if(connected() && maptime > 0 && !intermission) musicdone(true);
+    }
+    VARF(IDF_PERSIST, musictype, 0, 1, 5, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done
+    VARF(IDF_PERSIST, musicedit, 0, 4, 5, stopmapmusic()); // same as above for editmode
+    SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
+    SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
     VAR(IDF_PERSIST, mouseabsolute, 0, 0, 1);
@@ -1970,22 +1975,26 @@ namespace game
                 RUNWORLD("on_start");
                 return;
             }
-            else if(musictype && !playingmusic())
+            else
             {
-                defformatstring(musicfile)("%s", mapmusic);
-                if(*musicdir && (musictype == 2 || (musictype == 1 && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
+                int type = m_edit(gamemode) ? musicedit : musictype;
+                if(type && !playingmusic())
                 {
-                    vector<char *> files;
-                    listfiles(musicdir, NULL, files);
-                    while(!files.empty())
+                    defformatstring(musicfile)("%s", mapmusic);
+                    if(*musicdir && (type == 2 || type == 5 || ((type == 1 || type == 4) && (!*musicfile || !fileexists(findfile(musicfile, "r"), "r")))))
                     {
-                        int r = rnd(files.length());
-                        formatstring(musicfile)("%s/%s", musicdir, files[r]);
-                        if(files[r][0] != '.' && playmusic(musicfile)) break;
-                        else files.remove(r);
+                        vector<char *> files;
+                        listfiles(musicdir, NULL, files);
+                        while(!files.empty())
+                        {
+                            int r = rnd(files.length());
+                            formatstring(musicfile)("%s/%s", musicdir, files[r]);
+                            if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : "")) break;
+                            else files.remove(r);
+                        }
                     }
+                    else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : "");
                 }
-                else if(*musicfile) playmusic(musicfile);
             }
         }
         if(!curtime) { gets2c(); if(player1->clientnum >= 0) client::c2sinfo(); return; }
