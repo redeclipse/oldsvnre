@@ -345,7 +345,7 @@ namespace server
     int gamemode = G_EDITMODE, mutators = 0, gamemillis = 0, gamelimit = 0;
     string smapname;
     int interm = 0, timeremaining = -1, oldtimelimit = -1;
-    bool maprequest = false;
+    bool maprequest = false, inovertime = false;
     enet_uint32 lastsend = 0;
     int mastermode = MM_OPEN;
     bool masterupdate = false, mapsending = false, shouldcheckvotes = false;
@@ -1115,6 +1115,7 @@ namespace server
         setpause(false);
         timeremaining = 0;
         gamelimit = min(gamelimit, gamemillis);
+        inovertime = false;
         if(smode) smode->intermission();
         mutate(smuts, mut->intermission());
         maprequest = false;
@@ -1131,37 +1132,132 @@ namespace server
             {
                 loopv(clients) if(clients[i]->state.cpmillis < 0 && gamemillis+clients[i]->state.cpmillis >= GAME(triallimit))
                 {
-                    ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fytime trial wait period has timed out");
+                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime trial wait period has timed out");
                     startintermission();
                     return;
                 }
             }
-            if(GAME(timelimit) != oldtimelimit || (gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000))
+            int limit = inovertime ? GAME(overtimelimit) : GAME(timelimit);
+            if(limit != oldtimelimit || (gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000))
             {
-                if(GAME(timelimit) != oldtimelimit)
+                if(limit != oldtimelimit)
                 {
-                    if(GAME(timelimit)) gamelimit += (GAME(timelimit)-oldtimelimit)*60000;
-                    oldtimelimit = GAME(timelimit);
+                    if(limit) gamelimit += (limit-oldtimelimit)*60000;
+                    oldtimelimit = limit;
                 }
                 if(timeremaining)
                 {
-                    if(GAME(timelimit))
+                    if(limit)
                     {
                         if(gamemillis >= gamelimit) timeremaining = 0;
                         else timeremaining = (gamelimit-gamemillis+1000-1)/1000;
                     }
                     else timeremaining = -1;
+                    bool wantsoneminute = true;
                     if(!timeremaining)
                     {
-                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fytime limit has been reached");
-                        startintermission();
-                        return; // bail
+                        bool wantsovertime = false;
+                        if(!inovertime && GAME(overtimeallow))
+                        {
+                            if(m_team(gamemode, mutators))
+                            {
+                                int best = -1;
+                                loopi(numteams(gamemode, mutators))
+                                {
+                                    score &cs = teamscore(i+TEAM_FIRST);
+                                    if(best < 0 || cs.total > teamscore(best).total)
+                                    {
+                                        best = i+TEAM_FIRST;
+                                        wantsovertime = false;
+                                    }
+                                    else if(best >= 0 && cs.total == teamscore(best).total)
+                                        wantsovertime = true;
+                                }
+                            }
+                            else
+                            {
+                                int best = -1;
+                                loopv(clients) if(clients[i]->state.aitype < AI_START)
+                                {
+                                    if(best < 0 || clients[i]->state.points > clients[best]->state.points)
+                                    {
+                                        best = i;
+                                        wantsovertime = false;
+                                    }
+                                    else if(best >= 0 && clients[i]->state.points == clients[best]->state.points)
+                                        wantsovertime = true;
+                                }
+                            }
+                        }
+                        if(wantsovertime)
+                        {
+                            limit = oldtimelimit = GAME(overtimelimit);
+                            if(limit)
+                            {
+                                timeremaining = limit*60;
+                                gamelimit += timeremaining*1000;
+                                ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended by \fs\fc%d\fS %s", limit, limit > 1 ? "minutes" : "minute");
+                            }
+                            else
+                            {
+                                timeremaining = -1;
+                                gamelimit = 0;
+                                ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended until someone wins");
+                            }
+                            inovertime = true;
+                            wantsoneminute = false;
+                        }
+                        else
+                        {
+                            ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime limit has been reached");
+                            startintermission();
+                            return; // bail
+                        }
                     }
-                    else
+                    if(timeremaining != 0)
                     {
                         sendf(-1, 1, "ri2", N_TICK, timeremaining);
-                        if(timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
+                        if(wantsoneminute && timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
                     }
+                }
+            }
+            if(inovertime)
+            {
+                bool wantsovertime = false;
+                if(m_team(gamemode, mutators))
+                {
+                    int best = -1;
+                    loopi(numteams(gamemode, mutators))
+                    {
+                        score &cs = teamscore(i+TEAM_FIRST);
+                        if(best < 0 || cs.total > teamscore(best).total)
+                        {
+                            best = i+TEAM_FIRST;
+                            wantsovertime = false;
+                        }
+                        else if(best >= 0 && cs.total == teamscore(best).total)
+                            wantsovertime = true;
+                    }
+                }
+                else
+                {
+                    int best = -1;
+                    loopv(clients) if(clients[i]->state.aitype < AI_START)
+                    {
+                        if(best < 0 || clients[i]->state.points > clients[best]->state.points)
+                        {
+                            best = i;
+                            wantsovertime = false;
+                        }
+                        else if(best >= 0 && clients[i]->state.points == clients[best]->state.points)
+                            wantsovertime = true;
+                    }
+                }
+                if(!wantsovertime)
+                {
+                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyovertime has ended, a winner has been chosen");
+                    startintermission();
+                    return; // bail
                 }
             }
             if(GAME(pointlimit) && m_scores(gamemode))
@@ -1169,11 +1265,11 @@ namespace server
                 if(m_team(gamemode, mutators))
                 {
                     int best = -1;
-                    loopv(scores) if(best < 0 || scores[i].total > scores[best].total)
-                        best = i;
-                    if(best >= 0 && scores[best].total >= GAME(pointlimit))
+                    loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+TEAM_FIRST).total > teamscore(best).total)
+                        best = i+TEAM_FIRST;
+                    if(best >= 0 && teamscore(best).total >= GAME(pointlimit))
                     {
-                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
+                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -1185,7 +1281,7 @@ namespace server
                         best = i;
                     if(best >= 0 && clients[best]->state.points >= GAME(pointlimit))
                     {
-                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
+                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                         startintermission();
                         return; // bail
                     }
@@ -2178,6 +2274,7 @@ namespace server
         oldtimelimit = GAME(timelimit);
         timeremaining = GAME(timelimit) ? GAME(timelimit)*60 : -1;
         gamelimit = GAME(timelimit) ? timeremaining*1000 : 0;
+        inovertime = false;
         sents.shrink(0);
         scores.shrink(0);
         loopv(savedscores) savedscores[i].mapchange();

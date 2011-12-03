@@ -222,7 +222,7 @@ struct duelservmode : servmode
                         {
                             srvmsgf(-1, "\fyeveryone died, \fzoyepic fail");
                             loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                                ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
+                                ancmsgft(playing[i]->clientnum, S_V_DRAW, -1, "");
                         }
                         clear();
                         break;

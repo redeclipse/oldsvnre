@@ -70,7 +70,7 @@ struct captureservmode : capturestate, servmode
                         }
                         if(GAME(capturelimit) && score >= GAME(capturelimit))
                         {
-                            ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
+                            ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                             startintermission();
                         }
                     }
@@ -141,7 +141,7 @@ struct captureservmode : capturestate, servmode
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
                     if(GAME(capturelimit) && score >= GAME(capturelimit))
                     {
-                        ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
+                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                         startintermission();
                     }
                 }

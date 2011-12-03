@@ -119,7 +119,9 @@ GFVAR(0, itemminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, itemrepulsion, 0, 8, FVAR_MAX);
 GFVAR(0, itemrepelspeed, 0, 25, FVAR_MAX);
 
-GVAR(0, timelimit, 0, 10, VAR_MAX);
+GVAR(0, timelimit, 0, 10, VAR_MAX); // maximum time a match may last, 0 = forever
+GVAR(0, overtimeallow, 0, 1, 1); // if scores are equal, go into overtime
+GVAR(0, overtimelimit, 0, 5, VAR_MAX); // maximum time overtime may last, 0 = forever
 GVAR(0, triallimit, 0, 60000, VAR_MAX);
 GVAR(0, intermlimit, 0, 15000, VAR_MAX); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 45000, VAR_MAX); // .. before vote passes by default
