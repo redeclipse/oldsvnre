@@ -3076,7 +3076,7 @@ namespace server
             dropitems(target);
             static vector<int> dmglog; dmglog.setsize(0);
             gethistory(target, actor, gamemillis, dmglog, true, 1);
-            sendf(-1, 1, "ri8iv", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
+            sendf(-1, 1, "ri9iv", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
             target->position.setsize(0);
             if(smode) smode->died(target, actor);
             mutate(smuts, mut->died(target, actor));
@@ -3110,7 +3110,7 @@ namespace server
         }
         static vector<int> dmglog; dmglog.setsize(0);
         gethistory(ci, ci, gamemillis, dmglog, true, 1);
-        sendf(-1, 1, "ri8iv", N_DIED, ci->clientnum, ci->clientnum, ci->state.frags, 0, -1, flags, ci->state.health, dmglog.length(), dmglog.length(), dmglog.getbuf());
+        sendf(-1, 1, "ri9iv", N_DIED, ci->clientnum, ci->clientnum, ci->state.frags, 0, 0, -1, flags, ci->state.health, dmglog.length(), dmglog.length(), dmglog.getbuf());
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
         mutate(smuts, mut->died(ci, NULL));

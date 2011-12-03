@@ -632,7 +632,7 @@ namespace game
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
             {
-                float minscale = 1, amtscale = max(d->health, 1)/float(d->aitype >= AI_START && !m_insta(gamemode, mutators) ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators));
+                float minscale = 1, amtscale = m_insta(gamemode, mutators) ? 1+(d->spree*instaresizeamt) : max(d->health, 1)/float(d->aitype >= AI_START ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators));
                 if(m_resize(gamemode, mutators))
                 {
                     minscale = minresizescale;
@@ -2175,7 +2175,7 @@ namespace game
 
                 bob = true;
             }
-            
+
             calcangles(camera1, focus, bob);
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
