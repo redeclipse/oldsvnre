@@ -61,11 +61,14 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 10);
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 10);
 
-    VAR(IDF_PERSIST, firstpersonbob, 0, 1, 2); // 0 = off, 1 = roll bob, 2 = positional bob
+    VAR(IDF_PERSIST, firstpersonbob, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonbobstep, 1, 28.f, 1000);
     FVAR(IDF_PERSIST, firstpersonbobroll, 0, 0.3f, 10);
     FVAR(IDF_PERSIST, firstpersonbobside, 0, 0.6f, 10);
     FVAR(IDF_PERSIST, firstpersonbobup, 0, 0.6f, 10);
+    FVAR(IDF_PERSIST, firstpersonbobfocusmindist, 0, 64, 10000);
+    FVAR(IDF_PERSIST, firstpersonbobfocusmaxdist, 0, 256, 10000);
+    FVAR(IDF_PERSIST, firstpersonbobfocus, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
@@ -260,7 +263,7 @@ namespace game
 
     void addsway(gameent *d)
     {
-        float speed = physics::movevelocity(d), step = firstpersonbob == 2 ? firstpersonbobstep : firstpersonswaystep;
+        float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
         if(d->physstate >= PHYS_SLOPE || d->onladder || d->turnside)
         {
             swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
@@ -1761,7 +1764,7 @@ namespace game
     vec camerapos(physent *d)
     {
         vec pos = d->headpos();
-        if(firstpersonbob == 2 && d == focus && !intermission && !thirdpersonview(true))
+        if(firstpersonbob && d == focus && !intermission && !thirdpersonview(true))
         {
             vec dir;
             vecfromyawpitch(d->yaw, 0, 0, 1, dir);
@@ -1917,7 +1920,7 @@ namespace game
         }
     }
 
-    float calcroll(gameent *d, bool bob = true)
+    float calcroll(gameent *d)
     {
         bool thirdperson = d != focus || thirdpersonview(true);
         float r = thirdperson ? 0 : d->roll, wobble = float(rnd(quakewobble)-quakewobble/2)*(float(min(d->quake, 100))/100.f);
@@ -1928,12 +1931,24 @@ namespace game
             case CS_DEAD: r += wobble; break;
             default: break;
         }
-        if(bob && firstpersonbob == 1 && !thirdperson && !intermission)
-        {
-            float steps = bobdist/firstpersonbobstep*M_PI;
-            r += firstpersonbobroll*cosf(steps);
-        }
         return r;
+    }
+
+    void calcangles(physent *c, gameent *d, bool bob = true)
+    {
+        c->roll = calcroll(d);
+        if(bob && firstpersonbob && !thirdperson && !intermission)
+        {
+            vec dir; vecfromyawpitch(c->yaw, c->pitch, 1, 0, dir);
+            float steps = bobdist/firstpersonbobstep*M_PI, dist = raycube(c->o, dir, firstpersonbobfocusmaxdist, RAY_CLIPMAT|RAY_POLY), yaw, pitch;
+            if(dist < 0 || dist > firstpersonbobfocusmaxdist) dist = firstpersonbobfocusmaxdist;
+            else if(dist < firstpersonbobfocusmindist) dist = firstpersonbobfocusmindist;
+            vectoyawpitch(vec(firstpersonbobside*cosf(steps), dist, firstpersonbobup*(fabs(sinf(steps)) - 1)), yaw, pitch);
+            c->yaw -= yaw*firstpersonbobfocus;
+            c->pitch -= pitch*firstpersonbobfocus;
+            c->roll += (1 - firstpersonbobfocus)*firstpersonbobroll*cosf(steps);
+            fixfullrange(c->yaw, c->pitch, c->roll, false);
+        }
     }
 
     void resetcamera()
@@ -2158,7 +2173,9 @@ namespace game
                 fixfullrange(camera1->yaw, camera1->pitch, camera1->roll, false);
                 fixrange(camera1->aimyaw, camera1->aimpitch);
             }
-            camera1->roll = calcroll(focus);
+            
+            calcangles(camera1, focus);
+
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
             vecfromyawpitch(camera1->yaw, camera1->pitch+90, 1, 0, camup);
@@ -2202,12 +2219,12 @@ namespace game
     {
         int type = clamp(d->aitype, 0, AI_MAX-1);
         const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
-        float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus, false);
+        float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
         if(!third && firstpersonsway && !intermission)
         {
             vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-            float steps = swaydist/(firstpersonbob == 2 ? firstpersonbobstep : firstpersonswaystep)*M_PI;
+            float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
             dir.mul(firstpersonswayside*cosf(steps));
             dir.z = firstpersonswayup*(fabs(sinf(steps)) - 1);
             o.add(dir).add(swaydir).add(swaypush);

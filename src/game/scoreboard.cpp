@@ -586,7 +586,7 @@ namespace hud
         }
         vec c = vec::hexcolor(colour);
         int size = int(s*skew); size += int(size*inventoryglow);
-        hud::drawitem(icon, x, y+size, s, true, false, c.r, c.g, c.b, fade, skew, "super", "%s%d", col, score);
+        hud::drawitem(icon, x, y+size, s, inventoryscoreglow!=0, false, c.r, c.g, c.b, fade, skew, "super", "%s%d", col, score);
         hud::drawitemsubtext(x, y+size, s, TEXT_RIGHT_UP, skew, "default", fade, "\f[%d]%s", colour, name);
         return size;
     }
@@ -614,7 +614,7 @@ namespace hud
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_TONE), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
+                    sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_MIXED), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
                     if(++numout >= inventoryscore) return sy;
                 }
             }
