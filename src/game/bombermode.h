@@ -102,7 +102,7 @@ struct bomberservmode : bomberstate, servmode
         }
         if(GAME(bomberlimit) && score >= GAME(bomberlimit))
         {
-            ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
+            ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
             startintermission();
         }
     }
@@ -227,7 +227,7 @@ struct bomberservmode : bomberstate, servmode
                         else total = ci->state.points;
                         if(GAME(bomberholdlimit) && total >= GAME(bomberholdlimit))
                         {
-                            ancmsgft(-1, S_GUIBACK, CON_EVENT, "\fyscore limit has been reached");
+                            ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
                             startintermission();
                         }
                     }

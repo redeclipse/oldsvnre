@@ -95,7 +95,7 @@ gametypes gametype[] = {
     {
         G_TRIAL,        G_M_NONE,
         {
-            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
+            G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE,
             G_M_NONE, G_M_NONE, G_M_NONE
         },
         "time-trial",                       { "", "", "" },
