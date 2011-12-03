@@ -189,6 +189,7 @@ namespace hud
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 2, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryscoreglow, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
