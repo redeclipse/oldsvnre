@@ -2118,7 +2118,7 @@ namespace game
                 }
             }
 
-            bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1 && !tvmode();
+            bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1 && !tvmode(), bob = false;
             if(!self && (focus->state == CS_DEAD || focus->state >= CS_SPECTATOR))
             {
                 camera1->aimyaw = camera1->yaw;
@@ -2172,9 +2172,11 @@ namespace game
                 }
                 fixfullrange(camera1->yaw, camera1->pitch, camera1->roll, false);
                 fixrange(camera1->aimyaw, camera1->aimpitch);
+
+                bob = true;
             }
             
-            calcangles(camera1, focus);
+            calcangles(camera1, focus, bob);
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
