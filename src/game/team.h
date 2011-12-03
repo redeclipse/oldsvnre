@@ -11,7 +11,7 @@ enum
     GSVAR(0, team##a##name, #a); \
     GVAR(IDF_HEX, team##a##colour, 0, b, 0xFFFFFF);
 
-TEAMS(neutral, 0xD0D0D0);
+TEAMS(neutral, 0xC0B0A0);
 TEAMS(alpha, 0x5F66FF);
 TEAMS(omega, 0xFF4F44);
 TEAMS(kappa, 0xFFFF44);
