@@ -83,15 +83,15 @@ namespace defend
             {
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z), (totalmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.enemy, colour), 0, occupy);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.owner, colour), occupy, 1-occupy);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, TEAM(b.owner, colour), occupy, 1-occupy);
             }
             else
             {
-                part_icon(above, textureload(hud::progresstex, 3), 3, 0.25f, 0, 0, 1, TEAM(b.owner, colour));
+                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, TEAM(b.owner, colour));
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.owner, colour));
             }
-            above.z += 0.5f;
-            defformatstring(str)("<emphasis>%d%%", int(occupy*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 0.5f);
+            above.z += 0.75f;
+            defformatstring(str)("<huge>%d%%", int(occupy*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 0.5f);
         }
     }
 
@@ -192,8 +192,8 @@ namespace defend
                 {
                     int sx = x-int(s*skew);
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
-                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew);
-                    hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade, skew, !skewed && headsup ? "default" : "reduced", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : "\fw", int(occupy*100.f));
+                    hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade*0.25f, skew);
+                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew, !skewed && headsup ? "super" : "default", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : "\fw", int(occupy*100.f));
                 }
                 if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, fade, skew);
             }
