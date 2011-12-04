@@ -14,9 +14,25 @@ struct captureservmode : capturestate, servmode
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
+        int numflags = 0, iterflags = 0;
+        loopv(flags) if(flags[i].owner == ci->clientnum) numflags++;
+        vec dir = inertia, olddir = dir;
+        if(numflags > 1 && dir.iszero())
+        {
+            dir.x = -sinf(RAD*ci->state.yaw);
+            dir.y = cosf(RAD*ci->state.yaw);
+            dir.x = rnd(101)/100.f;
+            olddir = dir.normalize().mul(max(dir.magnitude(), 1.f));
+        }
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(o).mul(DMF)), q(vec(inertia).mul(DMF));
+            if(numflags > 1)
+            {
+                float yaw = -45.f+(90/float(numflags+1)*(iterflags+1));
+                dir = vec(olddir).rotate_around_z(yaw*RAD);
+                iterflags++;
+            }
+            ivec p(vec(o).mul(DMF)), q(vec(dir).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, -1, i, p.x, p.y, p.z, q.x, q.y, q.z);
             capturestate::dropaffinity(i, o, inertia, gamemillis);
         }

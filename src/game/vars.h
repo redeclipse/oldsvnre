@@ -101,6 +101,7 @@ GVAR(0, regendelay, 0, 3000, VAR_MAX); // regen after no damage for this long
 GVAR(0, regenguard, 0, 1000, VAR_MAX); // regen this often when guarding an affinity
 GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating normally
 GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
+GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
 GVAR(0, regenextra, 0, 2, VAR_MAX); // add this to regen when influenced by affinity
 GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
 
@@ -153,6 +154,8 @@ GFVAR(0, captureelasticity, FVAR_MIN, 0.35f, FVAR_MAX);
 GFVAR(0, capturewaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, captureweight, FVAR_MIN, 100, FVAR_MAX);
 GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
+GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
+GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more

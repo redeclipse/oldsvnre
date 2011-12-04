@@ -326,22 +326,38 @@ namespace projs
                 vecfromyawpitch(aim[0][1], aim[1][1], 1, 0, dir[1]);
             }
             float minspeed = proj.minspeed;
-            if(itemrepulsion > 0 && proj.projtype == PRJ_ENT && entities::ents.inrange(proj.id) && enttype[entities::ents[proj.id]->type].usetype == EU_ITEM)
-            {
-                #define entbump(x) \
+            #define repel(x,r,z) \
+            { \
+                if(overlapsbox(proj.o, r, r, x, r, r)) \
                 { \
-                    if(overlapsbox(proj.o, itemrepulsion, itemrepulsion, x, itemrepulsion, itemrepulsion)) \
-                    { \
-                        vec nrm = vec(proj.o).sub(x).normalize(); \
-                        dir[1].add(nrm).normalize(); \
-                        minspeed = max(minspeed, itemrepelspeed); \
-                        break; \
-                    } \
+                    vec nrm = vec(proj.o).sub(x).normalize(); \
+                    dir[1].add(nrm).normalize(); \
+                    minspeed = max(minspeed, z); \
+                    break; \
+                } \
+            }
+            switch(proj.projtype)
+            {
+                case PRJ_ENT:
+                {
+                    if(itemrepulsion > 0 && entities::ents.inrange(proj.id) && enttype[entities::ents[proj.id]->type].usetype == EU_ITEM)
+                    {
+                        loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
+                            repel(projs[i]->o, itemrepulsion, itemrepelspeed);
+                        if(!minspeed) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
+                            repel(entities::ents[i]->o, itemrepulsion, itemrepelspeed);
+                    }
+                    break;
                 }
-                loopv(projs) if(projs[i]->projtype == PRJ_ENT && projs[i] != &proj && entities::ents.inrange(projs[i]->id) && enttype[entities::ents[projs[i]->id]->type].usetype == EU_ITEM)
-                    entbump(projs[i]->o);
-                if(!minspeed) loopi(entities::lastusetype[EU_ITEM]) if(enttype[entities::ents[i]->type].usetype == EU_ITEM && entities::ents[i]->spawned)
-                    entbump(entities::ents[i]->o);
+                case PRJ_AFFINITY:
+                {
+                    if(m_capture(game::gamemode) && capturerepulsion > 0)
+                    {
+                        loopv(projs) if(projs[i]->projtype == PRJ_AFFINITY && projs[i] != &proj)
+                            repel(projs[i]->o, capturerepulsion, capturerepelspeed);
+                    }
+                    break;
+                }
             }
             if(!dir[1].iszero()) proj.vel = vec(dir[1]).mul(max(mag, minspeed));
         }

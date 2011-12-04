@@ -3661,7 +3661,7 @@ namespace server
                             int low = 0;
                             if(ci->state.health > total)
                             {
-                                amt = -GAME(regenhealth);
+                                amt = -GAME(regendecay);
                                 total = ci->state.health;
                                 low = m_health(gamemode, mutators);
                             }
