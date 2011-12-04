@@ -249,6 +249,7 @@ static inline void poparg(ident &id)
 
 ICOMMAND(0, push, "rte", (ident *id, tagval *v, uint *code),
 {
+    if(id->type != ID_ALIAS || id->index < MAXARGS) return;
     identstack stack;
     pusharg(*id, *v, stack);
     v->type = VAL_NULL;
