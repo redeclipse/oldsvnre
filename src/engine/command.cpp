@@ -1903,6 +1903,7 @@ static inline bool getbool(const tagval &v)
     }
 }
 
+ICOMMAND(0, do, "e", (uint *body), executeret(body, *commandret));
 ICOMMAND(0, if, "tee", (tagval *cond, uint *t, uint *f), executeret(getbool(*cond) ? t : f, *commandret));
 ICOMMAND(0, ?, "ttt", (tagval *cond, tagval *t, tagval *f), result(*(getbool(*cond) ? t : f)));
 ICOMMAND(0, loop, "rie", (ident *id, int *n, uint *body),
