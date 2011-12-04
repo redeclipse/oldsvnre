@@ -580,21 +580,21 @@ namespace hud
         switch(pos)
         {
             case 0: col = "\fg"; break;
-            case 1: col = "\fy"; break;
-            case 2: default: col = "\fo"; break;
+            case 1: col = "\fc"; break;
+            case 2: col = "\fy"; break;
         }
         vec c = vec::hexcolor(colour);
         int size = int(s*skew); size += int(size*inventoryglow);
         if(m_defend(game::gamemode) && score == INT_MAX)
-            hud::drawitem(icon, x, y+size, s, inventoryscoreglow!=0, false, c.r, c.g, c.b, fade, skew, "huge", "%sWIN", col);
-        else hud::drawitem(icon, x, y+size, s, inventoryscoreglow!=0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%d", col, score);
+            hud::drawitem(icon, x, y+size, s, inventoryscorebg!=0, false, c.r, c.g, c.b, fade, skew, "huge", "%sWIN", col);
+        else hud::drawitem(icon, x, y+size, s, inventoryscorebg!=0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%d", col, score);
         hud::drawitemsubtext(x, y+size, s, TEXT_RIGHT_UP, skew, "default", fade, "\f[%d]%s", colour, name);
         return size;
     }
 
     int drawscore(int x, int y, int s, int m, float blend)
     {
-        if(!m_fight(game::gamemode) || m_trial(game::gamemode)) return 0;
+        if(!m_fight(game::gamemode) || m_trial(game::gamemode) || (inventoryscore == 1 && game::player1->state == CS_SPECTATOR && game::focus == game::player1)) return 0;
         int sy = 0, numgroups = groupplayers(), numout = 0;
         loopi(2) loopk(numgroups)
         {
