@@ -25,7 +25,7 @@ namespace hud
     VAR(IDF_PERSIST, huduioverride, 0, 1, 2); // 0=off, 1=except intermission, 2=interactive ui only
     VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, gapsize, 0, 0.01f, 1000);
+    FVAR(IDF_PERSIST, gapsize, 0, 0.005f, 1000);
 
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
@@ -185,22 +185,23 @@ namespace hud
     FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.575f, 1000);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
+    VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
-    VAR(IDF_PERSIST, inventoryscore, 0, 2, VAR_MAX);
-    VAR(IDF_PERSIST, inventoryscoreglow, 0, 0, 1);
+    VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
+    VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
     VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
-    VAR(IDF_PERSIST, inventoryflash, 0, 1, 1);
+    VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
     FVAR(IDF_PERSIST, inventorythrob, 0, 0.0625f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
-    FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.7f, 1000);
-    FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.7f, 1);
+    FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
+    FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.15f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryglow, 0, 0.15f, 1);
+    FVAR(IDF_PERSIST, inventoryglow, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
@@ -208,6 +209,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.5f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3); // 0 = off, 1 = text, 2 = bar, 3 = bar + text
+    VAR(IDF_PERSIST, healthflash, 0, 0, 1);
     FVAR(IDF_PERSIST, healththrob, 0, 0.035f, 1);
     FVAR(IDF_PERSIST, healthbartop, 0, 0.09375f, 1); // starts from this offset
     FVAR(IDF_PERSIST, healthbarbottom, 0, 0.0859375f, 1); // ends at this offset
@@ -215,6 +217,7 @@ namespace hud
     FVAR(IDF_PERSIST, healthbgblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2); // 0 = off, 1 = text, 2 = bar
+    VAR(IDF_PERSIST, impulseflash, 0, 0, 1);
     FVAR(IDF_PERSIST, impulsebartop, 0, 0.171875f, 1); // starts from this offset
     FVAR(IDF_PERSIST, impulsebarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, impulsebgglow, 0, 0.05f, 1);
@@ -1584,11 +1587,12 @@ namespace hud
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
         float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
-        int glow = int(s*inventoryglow), heal = m_health(game::gamemode, game::mutators);
+        int heal = m_health(game::gamemode, game::mutators);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
-        if(bg && (glow || pulse))
+        if(bg && inventorybg)
         {
-            float gr = 1, gg = 1, gb = 1, gl = glow,
+            int glow = 0;
+            float gr = 1, gg = 1, gb = 1,
                 gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
             if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
             if(pulse)
@@ -1599,13 +1603,12 @@ namespace hud
                 gg -= gg*amt;
                 gb -= gb*amt;
                 gf += (1.f-gf)*amt;
-                gl += gl*amt;
+                glow += int(s*inventoryglow*amt);
             }
             settexture(inventorytex, 3);
             glColor4f(gr, gg, gb, fade*gf);
-            drawtexture(left ? x-gl : x-w-gl, y-s-gl, s+gl*2, w+gl*2, left);
+            drawtexture(left ? x-glow : x-w-glow, y-s-glow, s+glow*2, w+glow*2, left);
         }
-        else glow = 0;
         glColor4f(cr, cg, cb, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         drawtexture(left ? x : x-w, y-s, s, w);
@@ -1620,7 +1623,7 @@ namespace hud
             if(font && *font) popfont();
             glPopMatrix();
         }
-        return int(s+glow);
+        return int(s);
     }
 
     int drawitemsubtext(int x, int y, float size, int align, float skew, const char *font, float blend, const char *text, ...)
@@ -1805,7 +1808,7 @@ namespace hud
                 gg -= gg*skew;
                 gb -= gb*skew;
                 gf += (1.f-gf)*skew;
-                glow += int(bgglow*skew);
+                glow += int(w*bgglow*skew);
             }
             settexture(bgtex, 3);
             glColor4f(gr, gg, gb, fade*gf);
@@ -1865,7 +1868,7 @@ namespace hud
             if(inventoryhealth && (!m_trial(game::gamemode) || trialdamage))
             {
                 int heal = m_health(game::gamemode, game::mutators);
-                float pulse = inventoryflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
+                float pulse = healthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
                     sy += drawbar(x, y, width, size, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, healthtone, healthbgglow, healthbgblend, pulse, throb*healththrob);
@@ -1878,7 +1881,7 @@ namespace hud
                     gg -= gg*skew;
                     gb -= gb*skew;
                 }
-                pushfont("huge");
+                pushfont("super");
                 int ty = 0;
                 if(inventoryhealth&1)
                     ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth == 1 ? FONTH : size/2-FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
@@ -1898,7 +1901,7 @@ namespace hud
             {
                 float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                 if(inventoryimpulse == 2)
-                    sy += drawbar(x, y-sy, width, size, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, impulsetone, impulsebgglow, impulsebgblend, inventoryflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
+                    sy += drawbar(x, y-sy, width, size, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, impulsetone, impulsebgglow, impulsebgblend, impulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
                 else
                 {
                     pushfont("emphasis");
