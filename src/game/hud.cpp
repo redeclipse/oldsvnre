@@ -309,7 +309,7 @@ namespace hud
     VAR(IDF_PERSIST, radardamagemin, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
-    VAR(IDF_PERSIST, showeditradar, 0, 1, 1);
+    VAR(IDF_PERSIST, showeditradar, 0, 0, 1);
     VAR(IDF_PERSIST, editradardist, 0, 128, VAR_MAX); // 0 = use radardist
     VAR(IDF_PERSIST, editradarnoisy, 0, 1, 2);
 
