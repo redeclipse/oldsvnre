@@ -98,9 +98,9 @@ namespace hud
     TVAR(IDF_PERSIST, spectex, "<grey>textures/spec", 3);
     TVAR(IDF_PERSIST, chattex, "<grey>textures/conopen", 3);
     TVAR(IDF_PERSIST, healthtex, "<grey>textures/health", 3);
-    TVAR(IDF_PERSIST, healthglowtex, "<grey>textures/healthglow", 3);
+    TVAR(IDF_PERSIST, healthbgtex, "<grey>textures/healthbg", 3);
     TVAR(IDF_PERSIST, impulsetex, "<grey>textures/impulse", 3);
-    TVAR(IDF_PERSIST, impulseglowtex, "<grey>textures/impulseglow", 3);
+    TVAR(IDF_PERSIST, impulsebgtex, "<grey>textures/impulsebg", 3);
     TVAR(IDF_PERSIST, progresstex, "<grey>textures/progress", 3);
     TVAR(IDF_PERSIST, inventorytex, "<grey>textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
@@ -208,11 +208,18 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryeditskew, 1e-4f, 0.5f, 1000);
 
     VAR(IDF_PERSIST, inventoryhealth, 0, 3, 3); // 0 = off, 1 = text, 2 = bar, 3 = bar + text
-    FVAR(IDF_PERSIST, healthglow, 0, 0.025f, 1);
-    FVAR(IDF_PERSIST, healthglowblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, healththrob, 0, 0.035f, 1);
+    FVAR(IDF_PERSIST, healthbartop, 0, 0.09375f, 1); // starts from this offset
+    FVAR(IDF_PERSIST, healthbarbottom, 0, 0.0859375f, 1); // ends at this offset
+    FVAR(IDF_PERSIST, healthbgglow, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, healthbgblend, 0, 1, 1);
+
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2); // 0 = off, 1 = text, 2 = bar
-    FVAR(IDF_PERSIST, impulseglow, 0, 0.025f, 1);
-    FVAR(IDF_PERSIST, impulseglowblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, impulsebartop, 0, 0.171875f, 1); // starts from this offset
+    FVAR(IDF_PERSIST, impulsebarbottom, 0, 0.0859375f, 1); // ends at this offset
+    FVAR(IDF_PERSIST, impulsebgglow, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, impulsebgblend, 0, 1, 1);
+
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
     VAR(IDF_PERSIST, inventorystatus, 0, 3, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
@@ -309,7 +316,7 @@ namespace hud
     VAR(IDF_PERSIST, radardamagemin, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
-    VAR(IDF_PERSIST, showeditradar, 0, 0, 1);
+    VAR(IDF_PERSIST, showeditradar, 0, 1, 1);
     VAR(IDF_PERSIST, editradardist, 0, 128, VAR_MAX); // 0 = use radardist
     VAR(IDF_PERSIST, editradarnoisy, 0, 1, 2);
 
@@ -1782,14 +1789,13 @@ namespace hud
         return sy;
     }
 
-    int drawbar(int x, int y, int w, int h, float fade, float amt, const char *tex, const char *glowtex, int tone, float glowy, float blend, float pulse, float throb)
+    int drawbar(int x, int y, int w, int h, float top, float bottom, float fade, float amt, const char *tex, const char *bgtex, int tone, float bgglow, float blend, float pulse, float throb)
     {
-        int sy = 0;
-        if(*glowtex && (glowy > 0 || pulse > 0))
+        int sy = 0, offset = int(w*throb);
+        if(*bgtex)
         {
-            int glow = int(w*glowy);
+            int glow = 0;
             float gr = 1.f, gg = 1.f, gb = 1.f, gf = blend;
-            sy += glow*2;
             if(tone) skewcolour(gr, gg, gb, tone);
             if(pulse > 0)
             {
@@ -1799,11 +1805,11 @@ namespace hud
                 gg -= gg*skew;
                 gb -= gb*skew;
                 gf += (1.f-gf)*skew;
-                glow += int(glow*skew);
+                glow += int(bgglow*skew);
             }
-            settexture(glowtex, 3);
+            settexture(bgtex, 3);
             glColor4f(gr, gg, gb, fade*gf);
-            drawtexture(x-glow, y-h-glow, w+glow*2, h+glow*2);
+            drawtexture(x-offset-glow, y-h-offset-glow, w+glow*2+offset*2, h+glow*2+offset*2);
         }
         const struct barstep
         {
@@ -1811,7 +1817,8 @@ namespace hud
         } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
         settexture(tex, 3);
         glBegin(GL_TRIANGLE_STRIP);
-        int offset = int(w*inventorythrob*throb), cx = x-offset, cy = y-h-offset, cw = w+offset*2, ch = h+offset*2;
+        float btoff = 1-bottom, middle = btoff-top;
+        int cx = x-offset, cy = y-h+int(h*top)-offset, cw = w+offset*2, ch = int(h*middle)+offset*2;
         const float margin = 0.1f;
         loopi(4)
         {
@@ -1824,8 +1831,8 @@ namespace hud
                           r = step.r*hlerp + steps[i-1].r*(1-hlerp),
                           g = step.g*hlerp + steps[i-1].g*(1-hlerp),
                           b = step.b*hlerp + steps[i-1].b*(1-hlerp);
-                    glColor4f(r, g, b, fade); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
-                    glColor4f(r, g, b, fade); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
+                    glColor4f(r, g, b, fade); glTexCoord2f(0, hoff*middle+top); glVertex2f(cx, cy + hoff*ch);
+                    glColor4f(r, g, b, fade); glTexCoord2f(1, hoff*middle+top); glVertex2f(cx + cw, cy + hoff*ch);
                 }
                 if(step.amt > amt + margin)
                 {
@@ -1833,15 +1840,15 @@ namespace hud
                           r = step.r*hlerp + steps[i-1].r*(1-hlerp),
                           g = step.g*hlerp + steps[i-1].g*(1-hlerp),
                           b = step.b*hlerp + steps[i-1].b*(1-hlerp);
-                    glColor4f(r, g, b, 0); glTexCoord2f(0, hoff); glVertex2f(cx, cy + hoff*ch);
-                    glColor4f(r, g, b, 0); glTexCoord2f(1, hoff); glVertex2f(cx + cw, cy + hoff*ch);
+                    glColor4f(r, g, b, 0); glTexCoord2f(0, hoff*middle+top); glVertex2f(cx, cy + hoff*ch);
+                    glColor4f(r, g, b, 0); glTexCoord2f(1, hoff*middle+top); glVertex2f(cx + cw, cy + hoff*ch);
                     break;
                 }
             }
             float off = 1 - step.amt, hfade = fade, r = step.r, g = step.g, b = step.b;
             if(step.amt > amt) hfade *= 1 - (step.amt - amt)/margin;
-            glColor4f(r, g, b, hfade); glTexCoord2f(0, off); glVertex2f(cx, cy + off*ch);
-            glColor4f(r, g, b, hfade); glTexCoord2f(1, off); glVertex2f(cx + cw, cy + off*ch);
+            glColor4f(r, g, b, hfade); glTexCoord2f(0, off*middle+top); glVertex2f(cx, cy + off*ch);
+            glColor4f(r, g, b, hfade); glTexCoord2f(1, off*middle+top); glVertex2f(cx + cw, cy + off*ch);
         }
         glEnd();
         sy += h;
@@ -1861,7 +1868,7 @@ namespace hud
                 float pulse = inventoryflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
-                    sy += drawbar(x, y, width, size, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthglowtex, healthtone, healthglow, healthglowblend, pulse, throb);
+                    sy += drawbar(x, y, width, size, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, healthtone, healthbgglow, healthbgblend, pulse, throb*healththrob);
                 float gr = 1.f, gg = 1.f, gb = 1.f;
                 if(pulse > 0)
                 {
@@ -1891,7 +1898,7 @@ namespace hud
             {
                 float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                 if(inventoryimpulse == 2)
-                    sy += drawbar(x, y-sy, width, size, fade, amt, impulsetex, impulseglowtex, impulsetone, impulseglow, impulseglowblend, inventoryflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, game::focus->impulse[IM_METER] ? amt : 0.f);
+                    sy += drawbar(x, y-sy, width, size, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, impulsetone, impulsebgglow, impulsebgblend, inventoryflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
                 else
                 {
                     pushfont("emphasis");

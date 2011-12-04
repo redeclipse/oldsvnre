@@ -288,15 +288,15 @@ namespace bomber
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);
-                        above.z += 0.5f;
-                        defformatstring(str)("<emphasis>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, max(trans, 0.5f)*0.5f);
+                        above.z += 0.75f;
+                        defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, max(trans, 0.5f)*0.5f);
                     }
                 }
                 else if(!m_gsp2(game::gamemode, game::mutators))
                 {
                     part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
                     part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.65f);
-                    above.z += enttype[AFFINITY].radius/2*trans+2.5f;
+                    above.z += enttype[AFFINITY].radius*trans+2.5f;
                     defformatstring(info)("<super>%s goal", TEAM(f.team, name));
                     part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
                 }
