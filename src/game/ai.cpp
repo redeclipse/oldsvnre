@@ -3,7 +3,6 @@ namespace ai
 {
     entities::avoidset obs, wps;
     int updatemillis = 0, iteration = 0, itermillis = 0;
-    float oldenemyspeed = -1, oldenemyscale = -1, oldbotspeed = -1, oldbotscale = -1;
     vec aitarget(0, 0, 0);
 
     VAR(0, aidebug, 0, 0, 6);
@@ -166,17 +165,6 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    void setparams(gameent *d)
-    {
-        if(!d->ai) return;
-        bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
-        if(hasent && entities::ents[d->aientity]->attrs[7] > 0) d->bspeed = d->speed = entities::ents[d->aientity]->attrs[7]*enemyspeed;
-        else d->bspeed = d->speed = aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].speed*(d->aitype >= AI_START ? enemyspeed : botspeed);
-        if(hasent && entities::ents[d->aientity]->attrs[8] > 0) d->ai->scale = d->curscale = (entities::ents[d->aientity]->attrs[8]/100.f)*enemyscale;
-        else d->ai->scale = d->curscale = aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].scale*(d->aitype >= AI_START ? enemyscale : botscale);
-        d->setparams(true, game::gamemode, game::mutators);
-    }
-
     void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl)
     {
         gameent *o = game::newclient(on);
@@ -213,7 +201,6 @@ namespace ai
         d->skill = sk;
         d->team = tm;
         d->colour = cl;
-        setparams(d);
 
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)
@@ -245,25 +232,9 @@ namespace ai
                 iteration = 1;
                 itermillis = totalmillis;
             }
-            bool a = false, b = false;
             int c = 0;
-            if(oldenemyspeed != enemyspeed || oldenemyscale != enemyscale)
-            {
-                oldenemyspeed = enemyspeed;
-                oldenemyscale = enemyscale;
-                a = true;
-            }
-            if(oldbotspeed != botspeed || oldbotscale != botscale)
-            {
-                oldbotspeed = botspeed;
-                oldbotscale = botscale;
-                b = true;
-            }
             loopv(game::players) if(game::players[i] && game::players[i]->ai)
-            {
-                if(game::players[i]->aitype >= AI_START ? a : b) setparams(game::players[i]);
                 think(game::players[i], ++c == iteration ? true : false);
-            }
             if(++iteration > c) iteration = 0;
         }
     }

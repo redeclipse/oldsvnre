@@ -288,7 +288,7 @@ namespace bomber
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);
-                        above.z += 0.75f;
+                        above.z += 1.f;
                         defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, max(trans, 0.5f)*0.5f);
                     }
                 }

@@ -1558,11 +1558,11 @@ namespace hud
     int drawprogress(int x, int y, float start, float length, float size, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
-        float q = clamp(skew, 0.f, 1.f), f = fade*q, cr = r*q, cg = g*q, cb = b*q, s = size*skew, cs = s/2, cx = left ? x+cs : x-cs, cy = y-cs;
+        float q = clamp(skew, 0.f, 1.f), cr = r*q, cg = g*q, cb = b*q, s = size*skew, cs = s/2, cx = left ? x+cs : x-cs, cy = y-cs;
         settexture(progresstex, 3);
-        glColor4f(cr, cg, cb, f*0.25f);
+        glColor4f(cr, cg, cb, fade*0.25f);
         drawslice(0, 1, cx, cy, cs*2/3);
-        glColor4f(cr, cg, cb, f);
+        glColor4f(cr, cg, cb, fade);
         drawslice((SDL_GetTicks()%1000)/1000.f, 0.1f, cx, cy, cs);
         drawslice(start, length, cx, cy, cs*2/3);
         if(text && *text)
@@ -1570,7 +1570,7 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int(cx*(1.f/skew)), ty = int((cy-FONTH/2)*(1.f/skew)), ti = int(255.f*f);
+            int tx = int(cx*(1.f/skew)), ty = int((cy-FONTH/2)*(1.f/skew)), ti = int(255.f*fade);
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, ti, TEXT_CENTERED, -1, -1, str);
             if(font && *font) popfont();
@@ -2018,9 +2018,9 @@ namespace hud
                             float amt = float(millis)/float(votelimit);
                             const char *col = "\fw";
                             if(amt > 0.75f) col = "\fg";
-                            else if(amt > 0.5f) col = "\fy";
-                            else if(amt > 0.25f) col = "\fo";
-                            else col = "\fr";
+                            else if(amt > 0.5f) col = "\fc";
+                            else if(amt > 0.25f) col = "\fy";
+                            else col = "\fo";
                             drawprogress(cx[i], cm+cs, 0, 1, cs, false, 1, 1, 1, blend*inventoryblend*0.25f, 1);
                             cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, blend*inventoryblend, 1, "default", "%s%d", col, int(millis/1000.f));
                         }

@@ -281,7 +281,20 @@ namespace physics
         return from;
     }
 
-    float jumpvel(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->curscale; }
+    float speedmod(physent *d)
+    {
+        float speed = d->curscale;
+        if((d->type == ENT_PLAYER || d->type == ENT_AI) && ((gameent *)d)->aitype >= 0)
+        {
+            gameent *e = (gameent *)d;
+            bool hasent = e->aitype >= AI_START && entities::ents.inrange(e->aientity) && entities::ents[e->aientity]->type == ACTOR;
+            if(hasent && entities::ents[e->aientity]->attrs[7] > 0) speed *= entities::ents[e->aientity]->attrs[7]*enemyspeed;
+            else speed *= e->aitype >= AI_START ? enemyspeed : botspeed;
+        }
+        return speed;
+    }
+
+    float jumpvel(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*speedmod(d); }
     float gravityvel(physent *d) { return PHYS(gravity)*(d->weight/100.f); }
 
     float stepvel(physent *d, bool up)
@@ -333,7 +346,7 @@ namespace physics
     float movevelocity(physent *d, bool floating)
     {
         physent *pl = d->type == ENT_CAMERA ? game::player1 : d;
-        float vel = max(pl->speed, 1.f);
+        float vel = max(pl->speed, 1.f)*speedmod(pl);
         if(floating) vel *= floatspeed/100.0f;
         else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
@@ -364,11 +377,12 @@ namespace physics
 
     float impulsevelocity(physent *d, float amt, int &cost)
     {
-        float speed = impulsespeed*amt*d->curscale, limit = impulselimit*d->curscale;
+        float speed = impulsespeed*amt*speedmod(d), limit = impulselimit*speedmod(d);
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;
             #define rescaleimpulse(n) { speed *= n; limit *= n; }
+            rescaleimpulse(speedmod(e));
             if(impulsemeter)
             {
                 int diff = impulsemeter-e->impulse[IM_METER];

@@ -90,7 +90,7 @@ namespace defend
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, TEAM(b.owner, colour));
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(b.owner, colour));
             }
-            above.z += 0.75f;
+            above.z += 1.f;
             defformatstring(str)("<huge>%d%%", int(occupy*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 0.5f);
         }
     }
@@ -142,7 +142,7 @@ namespace defend
                 pushfont("emphasis");
                 float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1) * defendoccupy), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::player1->team;
-                ty += draw_textx("%s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", TEAM(f.owner, colour), hud::teamtex(f.owner), hud::flagtex, overthrow ? "\fo" : (occupy < 1.f ? "\fy" : "\fg"), int(occupy*100.f))*hud::noticescale;
+                ty += draw_textx("%s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", TEAM(f.owner, colour), hud::teamtex(f.owner), hud::flagtex, overthrow ? "\fy" : (occupy < 1.f ? "\fc" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
                 break;
             }
@@ -162,7 +162,7 @@ namespace defend
             bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.owner == game::focus->team || st.flags.length() == 1);
             if(headsup || f.hasflag || millis <= 1000)
             {
-                int prevsy = sy; bool skewed = false;
+                int prevsy = sy;
                 float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend,
                     occupy = f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1)*defendoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
                 vec c = vec::hexcolor(TEAM(f.owner, colour)), c1 = c;
@@ -174,7 +174,6 @@ namespace defend
                 }
                 if(f.hasflag)
                 {
-                    skewed = true;
                     skew += (millis <= 1000 ? clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew) : 1.f-skew);
                     if(millis > 1000)
                     {
@@ -183,17 +182,14 @@ namespace defend
                     }
                 }
                 else if(millis <= 1000)
-                {
-                    skewed = true;
                     skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
-                }
                 sy += hud::drawitem(hud::flagtex, x, y-sy, s, true, false, c.r, c.g, c.b, fade, skew);
                 if(f.enemy)
                 {
                     int sx = x-int(s*skew);
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
                     hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade*0.25f, skew);
-                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew, !skewed && headsup ? "super" : "default", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fo" : (occupy < 1.f ? "\fy" : "\fg")) : "\fw", int(occupy*100.f));
+                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
                 }
                 if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, fade, skew);
             }
@@ -383,7 +379,7 @@ namespace defend
                 }
                 else walk = 1;
             }
-            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*16), walk);
+            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*8), walk);
         }
         return false;
     }

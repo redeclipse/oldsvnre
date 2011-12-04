@@ -156,7 +156,7 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, fade, skew, "default", f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : (f.droptime ? "\fodropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, fade, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured by" : "\fytaken by") : (f.droptime ? "\fcdropped" : ""));
                 if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     int sx = x-int(s*skew);
@@ -164,7 +164,7 @@ namespace capture
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, fade*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "super", "%d%%", int(wait*100.f));
                 }
-                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "default", fade, "\fs%s\fS", game::colorname(f.owner));
+                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", fade, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;
@@ -245,7 +245,7 @@ namespace capture
                 part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, TEAM(f.team, colour), (lastmillis%1000)/1000.f, 0.1f);
                 part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, TEAM(f.team, colour));
                 part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, TEAM(f.team, colour), 0, wait);
-                above.z += 0.75f;
+                above.z += 1.f;
                 defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f)*0.5f);
                 above.z += 2.5f;
             }
@@ -253,11 +253,11 @@ namespace capture
             {
                 if(f.owner)
                 {
-                    defformatstring(info)("<super>%s", game::colorname(f.owner));
+                    defformatstring(info)("<emphasis>%s", game::colorname(f.owner));
                     part_textcopy(above, info, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
                     above.z += 1.5f;
                 }
-                const char *info = f.owner ? (f.team == f.owner->team ? "\fysecured by" : "\frtaken by") : "\fodropped";
+                const char *info = f.owner ? (f.team == f.owner->team ? "<super>\fgsecured by" : "<super>\fytaken by") : "<super>\fcdropped";
                 part_text(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
             }
         }
@@ -300,7 +300,7 @@ namespace capture
                 part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, TEAM(f.team, colour));
                 part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(f.team, colour), 0, wait);
                 above.z += 0.5f;
-                defformatstring(str)("%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
                 above.z += 2.5f;
             }
         }

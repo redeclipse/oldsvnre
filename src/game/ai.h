@@ -113,14 +113,13 @@ namespace ai
         int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lasthunt, lastaction, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd,
             lastpusher, lastpushtime, lastmelee;
-        float scale, targyaw, targpitch, views[3], aimrnd[3];
+        float targyaw, targpitch, views[3], aimrnd[3];
         bool suspended, dontmove, tryreset, trywipe;
 
         aiinfo()
         {
             clearsetup();
             reset();
-            scale = 1;
             loopk(3) views[k] = aimrnd[k] = 0.f;
             suspended = true;
         }
