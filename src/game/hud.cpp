@@ -25,7 +25,7 @@ namespace hud
     VAR(IDF_PERSIST, huduioverride, 0, 1, 2); // 0=off, 1=except intermission, 2=interactive ui only
     VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, gapsize, 0, 0.005f, 1000);
+    FVAR(IDF_PERSIST, gapsize, 0, 0.01f, 1000);
 
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
@@ -2378,7 +2378,7 @@ namespace hud
         {
             drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
             if(showconsole >= 2 && ((!noview && !progressing) || forceprogress))
-                drawconsole(2, hudwidth, hudheight, br+gap, by, showfps > 1 || showstats > (m_edit(game::gamemode) ? 0 : 1) ? bs-gap*2 : (bs-gap*2)*2, consolefade);
+                drawconsole(2, hudwidth, hudheight, br+gap*2, by, showfps > 1 || showstats > (m_edit(game::gamemode) ? 0 : 1) ? bs-gap*4 : (bs-gap*4)*2, consolefade);
         }
 
         glDisable(GL_BLEND);
