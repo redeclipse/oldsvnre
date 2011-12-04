@@ -70,7 +70,6 @@ struct bomberservmode : bomberstate, servmode
     {
         flag g = flags[goal];
         if(!g.enabled) return;
-        bomberstate::returnaffinity(relay, gamemillis, false);
         int score = 0;
         if(g.team != ci->team)
         {
@@ -84,6 +83,7 @@ struct bomberservmode : bomberstate, servmode
             ci->state.gscore--;
             score = addscore(ci->team, -1);
         }
+        bomberstate::returnaffinity(relay, gamemillis, false);
         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
         if(GAME(bomberreset))
         {
@@ -139,9 +139,9 @@ struct bomberservmode : bomberstate, servmode
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
 
-    void returnaffinity(int i, int v)
+    void returnaffinity(int i, int v) // 0 = disable, 1 = return and wait, 2 = return instantly
     {
-        bomberstate::returnaffinity(i, gamemillis, false);
+        bomberstate::returnaffinity(i, gamemillis, v == 2);
         sendf(-1, 1, "ri3", N_RESETAFFIN, i, flags[i].enabled ? v : 0);
         if(v && !flags[i].enabled)
         {

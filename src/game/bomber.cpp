@@ -455,7 +455,7 @@ namespace bomber
         if(f.enabled && value)
         {
             destroyaffinity(f.pos());
-            if(value > 1 && isbomberaffinity(f))
+            if(value == 2 && isbomberaffinity(f))
             {
                 affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
                 game::announcef(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
