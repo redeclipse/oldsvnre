@@ -7,6 +7,7 @@ bool interactive = false;
 
 hashset<ident> idents; // contains ALL vars/commands/aliases
 vector<ident *> identmap;
+ident *dummyident = NULL;
 
 int identflags = 0;
 
@@ -146,6 +147,12 @@ static inline ident *addident(const ident &id)
 static bool initidents()
 {
     initedidents = true;
+    for(int i = 0; i < MAXARGS; i++)
+    {
+        defformatstring(argname)("arg%d", i+1);
+        newident(argname, IDF_ARG);
+    }
+    dummyident = newident("//dummy", IDF_UNKNOWN);
     if(identinits)
     {
         loopv(*identinits) addident((*identinits)[i]);
@@ -186,7 +193,9 @@ static struct identlink
 {
     ident *id;
     identlink *next;
-} *aliasstack = NULL;
+    int usedargs;
+    identstack *argstack;
+} noalias = { NULL, NULL, (1<<MAXARGS)-1, NULL }, *aliasstack = &noalias;
 
 VAR(0, dbgalias, 0, 4, 1000);
 
@@ -201,13 +210,13 @@ static void debugcode(const char *fmt, ...)
 
     if(!dbgalias) return;
     int total = 0, depth = 0;
-    for(identlink *l = aliasstack; l; l = l->next) total++;
-    for(identlink *l = aliasstack; l; l = l->next)
+    for(identlink *l = aliasstack; l != &noalias; l = l->next) total++;
+    for(identlink *l = aliasstack; l != &noalias; l = l->next)
     {
         ident *id = l->id;
         ++depth;
         if(depth < dbgalias) conoutft(CON_MESG, "  %d) %s", total-depth+1, id->name);
-        else if(!l->next) conoutft(CON_MESG, depth == dbgalias ? "  %d) %s" : "  ..%d) %s", total-depth+1, id->name);
+        else if(l->next == &noalias) conoutft(CON_MESG, depth == dbgalias ? "  %d) %s" : "  ..%d) %s", total-depth+1, id->name);
     }
 }
 
@@ -240,7 +249,6 @@ static inline void poparg(ident &id)
 
 ICOMMAND(0, push, "rte", (ident *id, tagval *v, uint *code),
 {
-    if(id->type != ID_ALIAS) return;
     identstack stack;
     pusharg(*id, *v, stack);
     v->type = VAL_NULL;
@@ -262,12 +270,46 @@ ident *newident(const char *name, int flags)
         if(isinteger(name)) 
         {
             debugcode("number %s is not a valid identifier name", name);
-            return newident("//dummy", IDF_UNKNOWN);
+            return dummyident;
         }
         ident init(ID_ALIAS, newstring(name), flags);
         id = addident(init);
     }
     return id;
+}
+
+ident *writeident(const char *name, int flags)
+{
+    ident *id = newident(name, flags);
+    if(id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index)))
+    {
+        pusharg(*id, nullret, aliasstack->argstack[id->index]);
+        aliasstack->usedargs |= 1<<id->index;
+    }
+    return id;
+}
+
+ident *readident(const char *name)
+{
+    ident *id = idents.access(name);
+    if(id && id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index)))
+       return NULL;
+    return id;
+}
+
+static inline void setarg(ident &id, tagval &v)
+{
+    if(aliasstack->usedargs&(1<<id.index))
+    {
+        if(id.valtype == VAL_STR) delete[] id.val.s;
+        id.setval(v);
+        freecode(id);
+    }
+    else
+    {
+        pusharg(id, v, aliasstack->argstack[id.index]);
+        aliasstack->usedargs |= 1<<id.index;
+    }
 }
 
 static inline void setalias(ident &id, tagval &v)
@@ -286,7 +328,10 @@ static void setalias(const char *name, tagval &v)
     ident *id = idents.access(name);
     if(id)
     {
-        if(id->type == ID_ALIAS) setalias(*id, v);
+        if(id->type == ID_ALIAS) 
+        {
+            if(id->index < MAXARGS) setarg(*id, v); else setalias(*id, v);
+        }
         else
         {
             debugcode("\frcannot redefine builtin %s with an alias", id->name);
@@ -468,7 +513,7 @@ void touchvar(const char *name)
 const char *getalias(const char *name)
 {
     ident *i = idents.access(name);
-    return i && i->type==ID_ALIAS ? i->getstr() : "";
+    return i && i->type==ID_ALIAS && (i->index >= MAXARGS || aliasstack->usedargs&(1<<i->index)) ? i->getstr() : "";
 }
 
 #ifndef STANDALONE
@@ -770,7 +815,8 @@ static inline void compileblock(vector<uint> &code)
 
 static inline void compileident(vector<uint> &code, const char *word = NULL)
 {
-    code.add(CODE_IDENT|(newident(word ? word : "//dummy", IDF_UNKNOWN)->index<<8));
+    ident *id = newident(word ? word : "//dummy", IDF_UNKNOWN);
+    code.add((id->index < MAXARGS ? CODE_IDENTARG : CODE_IDENT)|(id->index<<8));
 }
 
 static inline void compileint(vector<uint> &code, const char *word = NULL)
@@ -852,7 +898,7 @@ static bool compilelookup(vector<uint> &code, const char *&p, int ltype)
             case ID_VAR: code.add(CODE_IVAR|((ltype >= VAL_ANY ? VAL_INT : ltype)<<CODE_RET)|(id->index<<8)); goto done;
             case ID_FVAR: code.add(CODE_FVAR|((ltype >= VAL_ANY ? VAL_FLOAT : ltype)<<CODE_RET)|(id->index<<8)); goto done;
             case ID_SVAR: code.add(CODE_SVAR|((ltype >= VAL_ANY ? VAL_STR : ltype)<<CODE_RET)|(id->index<<8)); goto done;
-            case ID_ALIAS: code.add(CODE_LOOKUP|((ltype >= VAL_ANY ? VAL_STR : ltype)<<CODE_RET)|(id->index<<8)); goto done;
+            case ID_ALIAS: code.add((id->index < MAXARGS ? CODE_LOOKUPARG : CODE_LOOKUP)|((ltype >= VAL_ANY ? VAL_STR : ltype)<<CODE_RET)|(id->index<<8)); goto done;
             }
             compilestr(code, lookup, lookuplen, true);
             break;
@@ -934,7 +980,7 @@ static bool compileblocksub(vector<uint> &code, const char *&p)
             case ID_VAR: code.add(CODE_IVAR|RET_STR|(id->index<<8)); goto done;
             case ID_FVAR: code.add(CODE_FVAR|RET_STR|(id->index<<8)); goto done;
             case ID_SVAR: code.add(CODE_SVAR|RET_STR|(id->index<<8)); goto done;
-            case ID_ALIAS: code.add(CODE_LOOKUP|RET_STR|(id->index<<8)); goto done;
+            case ID_ALIAS: code.add((id->index < MAXARGS ? CODE_LOOKUPARG : CODE_LOOKUP)|RET_STR|(id->index<<8)); goto done;
             }
             compilestr(code, lookup, p-start, true);
             code.add(CODE_LOOKUPU|RET_STR);
@@ -1107,7 +1153,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
                     delete[] idname;
                 }
                 if(!(more = compilearg(code, p, VAL_ANY))) compilestr(code);
-                code.add(idname && id ? CODE_ALIAS|(id->index<<8) : CODE_ALIASU);
+                code.add(idname && id ? (id->index < MAXARGS ? CODE_ALIASARG : CODE_ALIAS)|(id->index<<8) : CODE_ALIASU);
                 goto endstatement;
         }
         numargs = 0;
@@ -1271,18 +1317,6 @@ typedef void (__cdecl *comfun7)(void *, void *, void *, void *, void *, void *, 
 typedef void (__cdecl *comfun8)(void *, void *, void *, void *, void *, void *, void *, void *);
 typedef void (__cdecl *comfunv)(tagval *, int);
 
-struct argidentsvector : vector<ident *>
-{
-    argidentsvector()
-    {
-        for(int i = 0; i < MAXARGS; i++)
-        {
-            defformatstring(argname)("arg%d", i+1);
-            add(newident(argname));
-        }
-    }
-} argidents;
-
 static const uint *runcode(const uint *code, tagval &result)
 {
     ident *id = NULL;
@@ -1376,10 +1410,26 @@ static const uint *runcode(const uint *code, tagval &result)
             case CODE_IDENT:
                 args[numargs++].setident(identmap[op>>8]);
                 continue;
+            case CODE_IDENTARG:
+            {
+                ident *id = identmap[op>>8];
+                if(!(aliasstack->usedargs&(1<<id->index)))
+                {
+                    pusharg(*id, nullret, aliasstack->argstack[id->index]);
+                    aliasstack->usedargs |= 1<<id->index;
+                }
+                args[numargs++].setident(id);
+                continue;
+            }
             case CODE_IDENTU:
             {
                 tagval &arg = args[numargs-1];
                 ident *id = newident(arg.type == VAL_STR || arg.type == VAL_MACRO ? arg.s : "//dummy", IDF_UNKNOWN);
+                if(id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index)))
+                {
+                    pusharg(*id, nullret, aliasstack->argstack[id->index]);
+                    aliasstack->usedargs |= 1<<id->index;
+                }
                 freearg(arg);
                 arg.setident(id);
                 continue;
@@ -1392,7 +1442,12 @@ static const uint *runcode(const uint *code, tagval &result)
                     id = idents.access(arg.s); \
                     if(id) switch(id->type) \
                     { \
-                        case ID_ALIAS: if(id->flags&IDF_UNKNOWN) break; freearg(arg); aval; continue; \
+                        case ID_ALIAS: \
+                            if(id->flags&IDF_UNKNOWN) break; \
+                            freearg(arg); \
+                            if(id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index))) { nval; continue; } \
+                            aval; \
+                            continue; \
                         case ID_SVAR: freearg(arg); sval; continue; \
                         case ID_VAR: freearg(arg); ival; continue; \
                         case ID_FVAR: freearg(arg); fval; continue; \
@@ -1415,6 +1470,14 @@ static const uint *runcode(const uint *code, tagval &result)
                     continue; \
                 }
                 LOOKUP(args[numargs++].setstr(newstring(id->getstr())));
+            case CODE_LOOKUPARG|RET_STR:
+                #define LOOKUPARG(aval, nval) { \
+                    id = identmap[op>>8]; \
+                    if(!(aliasstack->usedargs&(1<<id->index))) { nval; continue; } \
+                    aval; \
+                    continue; \
+                }
+                LOOKUPARG(args[numargs++].setstr(newstring(id->getstr())), args[numargs++].setstr(newstring("")));
             case CODE_LOOKUPU|RET_INT:
                 LOOKUPU(arg.setint(id->getint()),
                         arg.setint(parseint(*id->storage.s)),
@@ -1423,6 +1486,8 @@ static const uint *runcode(const uint *code, tagval &result)
                         arg.setint(0));
             case CODE_LOOKUP|RET_INT:
                 LOOKUP(args[numargs++].setint(id->getint()));
+            case CODE_LOOKUPARG|RET_INT:
+                LOOKUPARG(args[numargs++].setint(id->getint()), args[numargs++].setint(0));
             case CODE_LOOKUPU|RET_FLOAT:
                 LOOKUPU(arg.setfloat(id->getfloat()),
                         arg.setfloat(parsefloat(*id->storage.s)),
@@ -1431,6 +1496,8 @@ static const uint *runcode(const uint *code, tagval &result)
                         arg.setfloat(0.0f));
             case CODE_LOOKUP|RET_FLOAT:
                 LOOKUP(args[numargs++].setfloat(id->getfloat()));
+            case CODE_LOOKUPARG|RET_FLOAT:
+                LOOKUPARG(args[numargs++].setfloat(id->getfloat()), args[numargs++].setfloat(0.0f));
             case CODE_LOOKUPU|RET_NULL:
                 LOOKUPU(id->getval(arg),
                         arg.setstr(newstring(*id->storage.s)),
@@ -1439,6 +1506,8 @@ static const uint *runcode(const uint *code, tagval &result)
                         arg.setnull());
             case CODE_LOOKUP|RET_NULL:
                 LOOKUP(id->getval(args[numargs++]));
+            case CODE_LOOKUPARG|RET_NULL:
+                LOOKUPARG(id->getval(args[numargs++]), args[numargs++].setnull());
 
             case CODE_SVAR|RET_STR: case CODE_SVAR|RET_NULL: args[numargs++].setstr(newstring(*identmap[op>>8]->storage.s)); continue;
             case CODE_SVAR|RET_INT: args[numargs++].setint(parseint(*identmap[op>>8]->storage.s)); continue;
@@ -1530,6 +1599,10 @@ static const uint *runcode(const uint *code, tagval &result)
                 setalias(*identmap[op>>8], args[--numargs]);
                 freeargs(args, numargs, 0);
                 continue;
+            case CODE_ALIASARG:
+                setarg(*identmap[op>>8], args[--numargs]);
+                freeargs(args, numargs, 0);
+                continue;
             case CODE_ALIASU:
                 forcestr(args[0]);
                 setalias(args[0].s, args[--numargs]);
@@ -1540,10 +1613,10 @@ static const uint *runcode(const uint *code, tagval &result)
                 #define CALLALIAS(offset) { \
                     identstack argstack[MAXARGS]; \
                     for(int i = 0; i < numargs-offset; i++) \
-                        pusharg(*argidents[i], args[i+offset], argstack[i]); \
-                    int oldargs = _numargs; \
-                    _numargs = numargs-offset; \
-                    identlink aliaslink = { id, aliasstack }; \
+                        pusharg(*identmap[i], args[i+offset], argstack[i]); \
+                    int oldargs = _numargs, newargs = numargs-offset; \
+                    _numargs = newargs; \
+                    identlink aliaslink = { id, aliasstack, (1<<newargs)-1, argstack }; \
                     aliasstack = &aliaslink; \
                     if(!id->code) \
                     { \
@@ -1556,8 +1629,10 @@ static const uint *runcode(const uint *code, tagval &result)
                     code[0] -= 0x100; \
                     if(!(code[0]>>8)) delete[] code; \
                     aliasstack = aliaslink.next; \
-                    for(int i = 0; i < numargs-offset; i++) \
-                        poparg(*argidents[i]); \
+                    for(int i = 0; i < newargs; i++) \
+                        poparg(*identmap[i]); \
+                    for(int argmask = aliaslink.usedargs&(~0<<newargs), i = newargs; argmask; i++) \
+                        if(argmask&(1<<i)) { poparg(*identmap[i]); argmask &= ~(1<<i); } \
                     forcearg(result, op&CODE_RET_MASK); \
                     _numargs = oldargs; \
                     numargs = 0; \
@@ -1569,6 +1644,12 @@ static const uint *runcode(const uint *code, tagval &result)
                     debugcode("\frunknown command: %s", id->name);
                     goto forceresult;
                 }
+                CALLALIAS(0);
+                continue;
+            case CODE_CALLARG|RET_NULL: case CODE_CALLARG|RET_STR: case CODE_CALLARG|RET_FLOAT: case CODE_CALLARG|RET_INT:
+                forcenull(result);
+                id = identmap[op>>8];
+                if(!(aliasstack->usedargs&(1<<id->index))) goto forceresult;
                 CALLALIAS(0);
                 continue;
 
@@ -1655,6 +1736,7 @@ static const uint *runcode(const uint *code, tagval &result)
                         if(numargs <= 1) printvar(id); else setsvarchecked(id, forcestr(args[1]));
                         goto forceresult;
                     case ID_ALIAS:
+                        if(id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index))) goto forceresult;
                         if(id->valtype==VAL_NULL) goto noid;
                         freearg(args[0]);
                         CALLALIAS(1);
@@ -1868,7 +1950,38 @@ ICOMMAND(0, loopwhile, "riee", (ident *id, int *n, uint *cond, uint *body),
     }
     poparg(*id);
 });
-ICOMMAND(0, while, "ee", (uint *cond, uint *body), while(execute(cond)) execute(body));    // can't get any simpler than this :)
+ICOMMAND(0, while, "ee", (uint *cond, uint *body), while(execute(cond)) execute(body));
+ICOMMAND(0, loopconcat, "rie", (ident *id, int *n, uint *body),
+{
+    if(*n <= 0 || id->type!=ID_ALIAS) return;
+    identstack stack;
+    vector<char> s;
+    loopi(*n)
+    {
+        if(i)
+        {
+            if(id->valtype != VAL_INT) { if(id->valtype == VAL_STR) delete[] id->val.s; freecode(*id); id->valtype = VAL_INT; }
+            id->val.i = i;
+        }
+        else
+        {
+            tagval zero;
+            zero.setint(0);
+            pusharg(*id, zero, stack);
+            id->flags &= ~IDF_UNKNOWN;
+        }
+        tagval v;
+        executeret(body, v);
+        const char *vstr = v.getstr();
+        int len = strlen(vstr);
+        if(!s.empty()) s.add(' ');
+        s.put(vstr, len);
+        freearg(v);
+    }
+    poparg(*id);
+    s.add('\0');
+    result(s.getbuf());
+});
 
 void concat(tagval *v, int n)
 {
@@ -2103,7 +2216,6 @@ COMMANDN(0, getalias, getalias_, "s");
 
 void looplist(ident *id, const char *list, const uint *body, bool search)
 {
-    if(id->type!=ID_ALIAS) { if(search) intret(-1); return; }
     identstack stack;
     int n = 0;
     for(const char *s = list;;)

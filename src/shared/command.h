@@ -16,13 +16,13 @@ enum
     CODE_COMPILE,
     CODE_FORCE,
     CODE_RESULT,
-    CODE_IDENT, CODE_IDENTU,
+    CODE_IDENT, CODE_IDENTU, CODE_IDENTARG,
     CODE_COM, CODE_COMD, CODE_COMC, CODE_COMV,
     CODE_CONC, CODE_CONCW, CODE_CONCM, CODE_DOWN,
     CODE_SVAR, CODE_SVAR1,
     CODE_IVAR, CODE_IVAR1, CODE_IVAR2, CODE_IVAR3,
     CODE_FVAR, CODE_FVAR1,
-    CODE_LOOKUP, CODE_LOOKUPU, CODE_ALIAS, CODE_ALIASU, CODE_CALL, CODE_CALLU,
+    CODE_LOOKUP, CODE_LOOKUPU, CODE_LOOKUPARG, CODE_ALIAS, CODE_ALIASU, CODE_ALIASARG, CODE_CALL, CODE_CALLU, CODE_CALLARG,
     CODE_PRINT,
 
     CODE_OP_MASK = 0x3F,
@@ -43,7 +43,7 @@ enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS };
 #define FVAR_MAX 1e6f
 #define FVAR_NONZERO 1e-6f
 
-enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_REWRITE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9, IDF_UNKNOWN = 1<<10 };
+enum { IDF_PERSIST = 1<<0, IDF_READONLY = 1<<1, IDF_REWRITE = 1<<2, IDF_WORLD = 1<<3, IDF_COMPLETE = 1<<4, IDF_TEXTURE = 1<<5, IDF_CLIENT = 1<<6, IDF_SERVER = 1<<7, IDF_HEX = 1<<8, IDF_ADMIN = 1<<9, IDF_UNKNOWN = 1<<10, IDF_ARG = 1<<11 };
 
 struct ident;
 
@@ -281,6 +281,8 @@ extern int getvardef(const char *name);
 extern bool identexists(const char *name);
 extern ident *getident(const char *name);
 extern ident *newident(const char *name, int flags = 0);
+extern ident *readident(const char *name);
+extern ident *writeident(const char *name, int flags = 0);
 extern bool addcommand(const char *name, identfun fun, const char *narg, int flags = IDF_COMPLETE);
 
 extern uint *compilecode(const char *p);
