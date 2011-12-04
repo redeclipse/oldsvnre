@@ -34,7 +34,7 @@ struct captureservmode : capturestate, servmode
             }
             ivec p(vec(o).mul(DMF)), q(vec(dir).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, -1, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            capturestate::dropaffinity(i, o, inertia, gamemillis);
+            capturestate::dropaffinity(i, o, dir, gamemillis);
         }
     }
 
