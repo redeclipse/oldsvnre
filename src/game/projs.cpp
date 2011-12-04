@@ -730,7 +730,7 @@ namespace projs
         proj.lifetime = lifetime;
         proj.lifemillis = lifemillis ? lifemillis : proj.lifetime;
         proj.waittime = waittime;
-        proj.bspeed = proj.speed = speed;
+        proj.speed = speed;
         proj.id = id;
         proj.flags = flags;
         proj.curscale = scale;

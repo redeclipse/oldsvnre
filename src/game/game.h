@@ -694,8 +694,7 @@ struct gameent : dynent, gamestate
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
         int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
-        if(reset) bspeed = aistyle[type].speed;
-        speed = bspeed*curscale;
+        speed = aistyle[type].speed;
         xradius = aistyle[type].xradius*curscale;
         yradius = aistyle[type].yradius*curscale;
         zradius = height = aistyle[type].height*curscale;

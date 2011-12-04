@@ -193,8 +193,6 @@ namespace game
         else if(thirdpersonview(true)) r = thirdpersonfov;
         else r = firstpersonfov;
         return r;
-        //if(player1->state != CS_ALIVE) return r;
-        //return clamp(int(r*player1->curscale), max(r/2, min(r, 45)), min(r+r/4, max(r, 135)));
     }
 
     void checkzoom()
@@ -627,7 +625,12 @@ namespace game
     float rescale(gameent *d)
     {
         float total = actorscale;
-        if(d->ai) total *= d->ai->scale;
+        if(d->aitype >= 0)
+        {
+            bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
+            if(hasent && entities::ents[d->aientity]->attrs[8] > 0) total *= (entities::ents[d->aientity]->attrs[8]/100.f)*enemyscale;
+            else total *= aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].scale*(d->aitype >= AI_START ? enemyscale : botscale);
+        }
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
