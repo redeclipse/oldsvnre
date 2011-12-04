@@ -406,8 +406,7 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 3);
                 g.pushlist();
-                g.background(game::getcolour(o));
-                g.text("", 0, status, game::getcolour(o, CTONE_TONE));
+                g.text("", 0, status, game::getcolour(o, game::playertone ? (game::playertonemix >= (o->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
                 g.poplist();
                 g.poplist();
             });
@@ -616,7 +615,7 @@ namespace hud
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    sy += drawscoreitem(hud::playertex, game::getcolour(d, CTONE_MIXED), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
+                    sy += drawscoreitem(hud::playertex, game::getcolour(d, game::playertone ? (game::playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
                     if(++numout >= inventoryscore) return sy;
                 }
             }
