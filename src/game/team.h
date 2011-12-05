@@ -14,7 +14,7 @@ enum
 TEAMS(neutral, 0x90A090);
 TEAMS(alpha, 0x5F66FF);
 TEAMS(omega, 0xFF4F44);
-TEAMS(kappa, 0xFFFF44);
+TEAMS(kappa, 0xFFD022);
 TEAMS(sigma, 0x22FF22);
 TEAMS(enemy, 0x999999);
 
