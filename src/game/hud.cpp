@@ -228,6 +228,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorystatus, 0, 3, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
 
     VAR(IDF_PERSIST, inventoryresidual, 0, 1, 1);
+    VAR(IDF_PERSIST, residualflash, 0, 1, 1);
     TVAR(IDF_PERSIST, burningtex, "<grey>textures/alertburn", 3);
     TVAR(IDF_PERSIST, bleedingtex, "<grey>textures/alertbleed", 3);
 
@@ -1593,21 +1594,19 @@ namespace hud
         {
             int glow = int(s*inventorybgsize);
             sy += glow;
-            float gr = 1, gg = 1, gb = 1,
-                gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
-            if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+            float gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
+            vec gc(1, 1, 1);
+            if(inventorytone) skewcolour(gc.r, gc.g, gc.b, inventorytone);
             if(pulse)
             {
                 int timestep = totalmillis%1000;
                 float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
-                gr += (1.f-gr)*amt;
-                gg -= gg*amt;
-                gb -= gb*amt;
+                gc.lerp(vec(1, 0, 0), amt);
                 gf += (1.f-gf)*amt;
                 glow += int(s*inventoryglow*amt);
             }
             settexture(inventorytex, 3);
-            glColor4f(gr, gg, gb, fade*gf);
+            glColor4f(gc.r, gc.g, gc.b, fade*gf);
             drawtexture(left ? x-glow : x-w-glow, y-s-glow, s+glow*2, w+glow*2, left);
         }
         glColor4f(cr, cg, cb, fade);
@@ -1799,20 +1798,19 @@ namespace hud
         if(*bgtex)
         {
             int glow = 0;
-            float gr = 1.f, gg = 1.f, gb = 1.f, gf = blend;
-            if(tone) skewcolour(gr, gg, gb, tone);
+            float gf = blend;
+            vec gc(1, 1, 1);
+            if(tone) skewcolour(gc.r, gc.g, gc.b, tone);
             if(pulse > 0)
             {
                 int timestep = totalmillis%1000;
                 float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*pulse, 0.f, 1.f);
-                gr += (1.f-gr)*skew;
-                gg -= gg*skew;
-                gb -= gb*skew;
+                gc.lerp(vec(1, 0, 0), skew);
                 gf += (1.f-gf)*skew;
                 glow += int(w*bgglow*skew);
             }
             settexture(bgtex, 3);
-            glColor4f(gr, gg, gb, fade*gf);
+            glColor4f(gc.r, gc.g, gc.b, fade*gf);
             drawtexture(x-offset-glow, y-h-offset-glow, w+glow*2+offset*2, h+glow*2+offset*2);
         }
         const struct barstep
@@ -1873,19 +1871,17 @@ namespace hud
                     throb = inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
                     sy += drawbar(x, y, width, size, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, healthtone, healthbgglow, healthbgblend, pulse, throb*healththrob);
-                float gr = 1.f, gg = 1.f, gb = 1.f;
+                vec gc(1, 1, 1);
                 if(pulse > 0)
                 {
                     int timestep = totalmillis%1000;
                     float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f), 0.f, 1.f)*pulse;
-                    gr += (1.f-gr)*skew;
-                    gg -= gg*skew;
-                    gb -= gb*skew;
+                    gc.lerp(vec(1, 0, 0), skew);
                 }
                 pushfont("super");
                 int ty = 0;
                 if(inventoryhealth&1)
-                    ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth == 1 ? FONTH : size/2-FONTH), int(gr*255), int(gg*255), int(gb*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
+                    ty = draw_textx("%d", x+width/2, y-sy+(inventoryhealth == 1 ? FONTH : size/2-FONTH), int(gc.r*255), int(gc.g*255), int(gc.b*255), int(fade*255), TEXT_CENTERED, -1, -1, max(game::focus->health, 0));
                 if(inventoryhealth == 1) sy += ty;
                 popfont();
             }
@@ -1919,27 +1915,33 @@ namespace hud
             {
                 if(burntime && game::focus->burning(lastmillis, burntime))
                 {
-                    int millis = lastmillis-game::focus->lastburntime, delay = burndelay;
                     vec c(1, 1, 1);
                     if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
-                    if(millis <= delay)
+                    if(residualflash)
                     {
-                        delay /= 2;
-                        float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                        c.max(vec(game::burncolour(game::focus)).mul(amt));
+                        int millis = lastmillis-game::focus->lastburntime, delay = burndelay;
+                        if(millis <= delay)
+                        {
+                            delay /= 2;
+                            float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
+                            c.lerp(vec(1.f, 0.35f, 0.0625f), amt);
+                        }
                     }
                     sy += drawitem(burningtex, x, y-sy, width, false, true, c.r, c.g, c.b, fade*inventoryblend);
                 }
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
                 {
-                    int millis = lastmillis-game::focus->lastbleedtime, delay = bleeddelay;
                     vec c(1, 1, 1);
                     if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
-                    if(millis <= delay)
+                    if(residualflash)
                     {
-                        delay /= 2;
-                        float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                        c.max(vec(1, 0.2f, 0.2f).mul(amt));
+                        int millis = lastmillis-game::focus->lastbleedtime, delay = bleeddelay;
+                        if(millis <= delay)
+                        {
+                            delay /= 2;
+                            float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
+                            c.lerp(vec(1, 0.2f, 0.2f), amt);
+                        }
                     }
                     sy += drawitem(bleedingtex, x, y-sy, width, false, true, c.r, c.g, c.b, fade*inventoryblend);
                 }
