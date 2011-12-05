@@ -893,6 +893,52 @@ namespace server
     }
     ICOMMAND(0, gamename, "iii", (int *g, int *m, int *c), result(gamename(*g, *m, *c)));
 
+    const char *modedesc(int mode, int muts, int type)
+    {
+        if(!m_game(mode))
+        {
+            mode = G_DEATHMATCH;
+            muts = m_implied(mode, 0);
+        }
+        static string mdname; mdname[0] = 0;
+        if(type == 1 || type == 3 || type == 4) concatstring(mdname, gametype[mode].name);
+        if(type == 3 || type == 4) concatstring(mdname, ": ");
+        if(type == 2 || type == 3 || type == 4 || type == 5)
+        {
+            if((type == 4 || type == 5) && m_capture(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
+            else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
+            else concatstring(mdname, gametype[mode].desc);
+        }
+        return mdname;
+    }
+    ICOMMAND(0, modedesc, "iii", (int *g, int *m, int *c), result(modedesc(*g, *m, *c)));
+    VAR(0, maxmodes, G_MAX-1, G_MAX-1, -G_MAX-1);
+
+    const char *mutsdesc(int mode, int muts, int type)
+    {
+        if(!m_game(mode))
+        {
+            mode = G_DEATHMATCH;
+            muts = m_implied(mode, 0);
+        }
+        static string mtname; mtname[0] = 0;
+        loopi(G_M_NUM) if(muts&mutstype[i].type)
+        {
+            if(type == 4 || type == 5)
+            {
+                if(m_capture(mode) && m_gsp3(mode, muts)) break;
+                else if(m_bomber(mode) && m_gsp2(mode, muts)) break;
+            }
+            if(type == 1 || type == 3 || type == 4) concatstring(mtname, mutstype[i].name);
+            if(type == 3 || type == 4) concatstring(mtname, ": ");
+            if(type == 2 || type == 3 || type == 4 || type == 5) concatstring(mtname, mutstype[i].desc);
+            break;
+        }
+        return mtname;
+    }
+    ICOMMAND(0, mutsdesc, "iii", (int *g, int *m, int *c), result(mutsdesc(*g, *m, *c)));
+    VAR(0, maxmuts, G_M_NUM, G_M_NUM, -G_M_NUM);
+
     void modecheck(int &mode, int &muts, int trying)
     {
         if(!m_game(mode))
