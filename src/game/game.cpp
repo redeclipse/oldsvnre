@@ -2422,7 +2422,7 @@ namespace game
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {
-                if(d->conopen) t = textureload(hud::conopentex, 3);
+                if(d->conopen) t = textureload(hud::chattex, 3);
                 else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
                     t = textureload(hud::teamtex(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
                 else
