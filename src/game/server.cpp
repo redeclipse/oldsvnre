@@ -929,9 +929,9 @@ namespace server
                 if(m_capture(mode) && m_gsp3(mode, muts)) break;
                 else if(m_bomber(mode) && m_gsp2(mode, muts)) break;
             }
-            if(type == 1 || type == 3 || type == 4) concatstring(mtname, mutstype[i].name);
+            if(type == 1 || type == 3 || type == 4) concatstring(mtname, i >= G_M_GSP ? gametype[mode].gsp[i-G_M_GSP] : mutstype[i].name);
             if(type == 3 || type == 4) concatstring(mtname, ": ");
-            if(type == 2 || type == 3 || type == 4 || type == 5) concatstring(mtname, mutstype[i].desc);
+            if(type == 2 || type == 3 || type == 4 || type == 5) concatstring(mtname, i >= G_M_GSP ? gametype[mode].gsd[i-G_M_GSP] : mutstype[i].desc);
             break;
         }
         return mtname;
