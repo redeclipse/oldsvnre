@@ -542,8 +542,8 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0x888888, hud::conopentex, game::getcolour(o), game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0x888888, hud::conopentex, game::getcolour(o), game::colorname(o, NULL, "", false));
+                    g.textf("%s (%d)", 0x888888, hud::spectex, game::getcolour(o), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s", 0x888888, hud::spectex, game::getcolour(o), game::colorname(o, NULL, "", false));
                 g.poplist();
                 if((i+1)%count)
                 {
