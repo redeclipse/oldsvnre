@@ -1213,13 +1213,14 @@ namespace hud
     extern int drawscore(int x, int y, int s, int m, float blend);
 }
 
-enum { CTONE_DEFAULT = 0, CTONE_TONE, CTONE_TEAM, CTONE_ALONE, CTONE_MIXED, CTONE_MAX };
+enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE_TMIX, CTONE_AMIX, CTONE_MAX };
 namespace game
 {
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
-            announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow, playertone, playertonemix;
+            announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow,
+            playerovertone, playerundertone, playerdisplaytone, playereffecttone;
     extern float bloodscale, debrisscale;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;

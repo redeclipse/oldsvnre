@@ -406,7 +406,7 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 3);
                 g.pushlist();
-                g.text("", 0, status, game::getcolour(o, game::playertone ? (game::playertonemix >= (o->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
+                g.text("", 0, status, game::getcolour(o, game::playerdisplaytone));
                 g.poplist();
                 g.poplist();
             });
@@ -542,8 +542,8 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0x888888, hud::spectex, game::getcolour(o), game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0x888888, hud::spectex, game::getcolour(o), game::colorname(o, NULL, "", false));
+                    g.textf("%s (%d)", 0x888888, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s", 0x888888, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false));
                 g.poplist();
                 if((i+1)%count)
                 {
@@ -615,7 +615,7 @@ namespace hud
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    sy += drawscoreitem(hud::playertex, game::getcolour(d, game::playertone ? (game::playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
+                    sy += drawscoreitem(hud::playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
                     if(++numout >= inventoryscore) return sy;
                 }
             }
