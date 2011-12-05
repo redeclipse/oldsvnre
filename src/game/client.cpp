@@ -1491,7 +1491,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = game::getcolour(f, CTONE_TEAM);
+                            int colour = game::getcolour(f, game::playereffecttone);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
@@ -1529,7 +1529,7 @@ namespace client
                         if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
                         if(game::dynlighteffects)
                         {
-                            int colour = game::getcolour(f, CTONE_TEAM);
+                            int colour = game::getcolour(f, game::playereffecttone);
                             adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }

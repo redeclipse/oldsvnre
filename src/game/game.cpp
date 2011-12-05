@@ -143,8 +143,10 @@ namespace game
     VAR(IDF_PERSIST, impulsefade, 0, 200, VAR_MAX);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
 
-    VAR(IDF_PERSIST, playertone, 0, 1, 1); // use player tone as secondary colour instead of team colour
-    VAR(IDF_PERSIST, playertonemix, 0, 1, 2); // mix tone with team colour, 1 = if teamed, 2 = always
+    VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerundertone, -1, CTONE_TMIX, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_MIXED, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAMED, CTONE_MAX-1);
 
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
     ICOMMAND(0, mutators, "", (), intret(mutators));
@@ -551,7 +553,7 @@ namespace game
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
-                    vec col = vec::hexcolor(getcolour(d)).mul(illumlevel);
+                    vec col = vec::hexcolor(getcolour(d, playereffecttone)).mul(illumlevel);
                     adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
@@ -1455,11 +1457,13 @@ namespace game
         switch(level)
         {
             case -1: return d->colour;
+            case CTONE_TMIX: return findcolour(d, true, d->team != TEAM_NEUTRAL); break;
+            case CTONE_AMIX: return findcolour(d, true, d->team == TEAM_NEUTRAL); break;
             case CTONE_MIXED: return findcolour(d, true, true); break;
             case CTONE_ALONE: return findcolour(d, d->team != TEAM_NEUTRAL); break;
-            case CTONE_TEAM: return findcolour(d, d->team == TEAM_NEUTRAL); break;
+            case CTONE_TEAMED: return findcolour(d, d->team == TEAM_NEUTRAL); break;
             case CTONE_TONE: return findcolour(d, true); break;
-            case CTONE_DEFAULT: default: return findcolour(d); break;
+            case CTONE_TEAM: default: return findcolour(d); break;
         }
     }
 
@@ -2357,8 +2361,8 @@ namespace game
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
-            e->light.material[0] = bvec(getcolour(d, CTONE_DEFAULT));
-            e->light.material[1] = bvec(getcolour(d, playertone ? (playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
+            e->light.material[0] = bvec(getcolour(d, playerovertone));
+            e->light.material[1] = bvec(getcolour(d, playerundertone));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
                 float scale = 1;
@@ -2418,7 +2422,7 @@ namespace game
         if(aboveheadstatus)
         {
             Texture *t = NULL;
-            int colour = getcolour(d);
+            int colour = getcolour(d, playerovertone);
             if(d->state == CS_DEAD || d->state == CS_WAITING) t = textureload(hud::deadtex, 3);
             else if(d->state == CS_ALIVE)
             {

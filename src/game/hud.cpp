@@ -104,13 +104,13 @@ namespace hud
     TVAR(IDF_PERSIST, inventorytex, "<grey>textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
 
-    VAR(IDF_PERSIST|IDF_HEX, inventorytone, 0-CTONE_MAX, -5, 0xFFFFFF); // colour based on tone (postiive numbers = specific colour, 0 = off, -1 = team, -2 = tone, -3 = tone in ffa, -4 = tone in team, -5 = mixed)
-    VAR(IDF_PERSIST|IDF_HEX, healthtone, 0-CTONE_MAX, -5, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, impulsetone, 0-CTONE_MAX, -5, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, crosshairtone, 0-CTONE_MAX, 0, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, noticestone, 0-CTONE_MAX, 0, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, clipstone, 0-CTONE_MAX, -5, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, radartone, 0-CTONE_MAX, -5, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, healthtone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, impulsetone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, crosshairtone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, noticestone, -CTONE_MAX, 0, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, clipstone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, radartone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
@@ -1370,8 +1370,8 @@ namespace hud
             vec colour[2];
             if(burning) colour[0] = game::burncolour(d);
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
-            else colour[0] = vec::hexcolor(game::getcolour(d, CTONE_DEFAULT));
-            colour[1] = vec::hexcolor(game::getcolour(d, game::playertone ? (game::playertonemix >= (d->team != TEAM_NEUTRAL ? 1 : 2) ? CTONE_MIXED : CTONE_TONE) : CTONE_DEFAULT));
+            else colour[0] = vec::hexcolor(game::getcolour(d, game::playerovertone));
+            colour[1] = vec::hexcolor(game::getcolour(d, game::playerundertone));
             const char *tex = dominated ? dominatedtex : playerbliptex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -1496,11 +1496,11 @@ namespace hud
         {
             bool dead = (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath;
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
-                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::getcolour(game::focus)), "tiny", "you");
+                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::getcolour(game::focus, game::playereffecttone)), "tiny", "you");
             gameent *a = game::getclient(game::focus->lastattacker);
             if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
             {
-                vec colour = vec::hexcolor(game::getcolour(a));
+                vec colour = vec::hexcolor(game::getcolour(a, game::playereffecttone));
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
                 {
                     if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "tiny", "%s (%d)", game::colorname(a), a->health);
@@ -2340,7 +2340,7 @@ namespace hud
                         float a = (lastmillis-game::focus->lastspawn)/float(spawnfade/3);
                         if(a < 3.f)
                         {
-                            vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, game::getcolour(game::focus, CTONE_DEFAULT));
+                            vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, game::getcolour(game::focus, game::playereffecttone));
                             if(a < 1.f) { loopi(3) col[i] *= a; }
                             else { a = (a-1.f)*0.5f; loopi(3) col[i] += (1.f-col[i])*a; }
                             loopi(3) if(col[i] < colour[i]) colour[i] *= col[i];
