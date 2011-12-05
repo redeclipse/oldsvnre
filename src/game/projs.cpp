@@ -156,7 +156,7 @@ namespace projs
                 }
                 else if(d->type == ENT_PROJ) projpush((projent *)d);
             }
-            switch(proj.weap)
+            switch(WEAP2(proj.weap, parttype, proj.flags&HIT_ALT))
             {
                 case WEAP_RIFLE:
                     part_splash(PART_SPARK, 25, 500, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.125f, 1, 1, 0, 24, 20);
@@ -370,7 +370,7 @@ namespace projs
         {
             case PRJ_SHOT:
             {
-                switch(proj.weap)
+                switch(WEAP2(proj.weap, parttype, proj.flags&HIT_ALT))
                 {
                     case WEAP_SWORD:
                     {
@@ -936,7 +936,7 @@ namespace projs
                     if(issound(proj.schan)) sounds[proj.schan].vol = vol;
                     else playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
                 }
-                switch(proj.weap)
+                switch(WEAP2(proj.weap, parttype, proj.flags&HIT_ALT))
                 {
                     case WEAP_SWORD:
                     {
@@ -1139,7 +1139,7 @@ namespace projs
                 updatetargets(proj, 2);
                 if(proj.projcollide&COLLIDE_SHOTS) collideprojs.removeobj(&proj);
                 int vol = int(255*proj.curscale);
-                if(!proj.limited) switch(proj.weap)
+                if(!proj.limited) switch(WEAP2(proj.weap, parttype, proj.flags&HIT_ALT))
                 {
                     case WEAP_PISTOL:
                     {
@@ -1930,7 +1930,7 @@ namespace projs
         loopv(projs) if(projs[i]->ready() && projs[i]->projtype == PRJ_SHOT && !projs[i]->limited && !projs[i]->child)
         {
             projent &proj = *projs[i];
-            switch(proj.weap)
+            switch(WEAP2(proj.weap, parttype, proj.flags&HIT_ALT))
             {
                 case WEAP_SWORD: adddynlight(proj.o, 16, vec::hexcolor(WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT))); break;
                 case WEAP_PISTOL: case WEAP_SHOTGUN: case WEAP_SMG: case WEAP_RIFLE: if(proj.movement >= 1)
