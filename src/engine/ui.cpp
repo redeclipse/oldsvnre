@@ -14,7 +14,7 @@ static bool fieldsactive = false;
 VAR(IDF_PERSIST, guishadow, 0, 2, 8);
 VAR(IDF_PERSIST, guiautotab, 6, 16, 40);
 VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
-VAR(IDF_PERSIST, guiblend, 1, 156, 255);
+VAR(IDF_PERSIST, guiblend, 1, 255, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
 
@@ -29,13 +29,14 @@ struct gui : guient
     static vector<list> lists;
     static float hitx, hity;
     static int curdepth, curlist, xsize, ysize, curx, cury, fontdepth, mergelist, mergedepth;
-    static bool shouldautotab;
+    static bool shouldautotab, hitfx;
 
     static void reset() { lists.shrink(0); mergelist = mergedepth = -1; }
 
     static int ty, tx, tpos, *tcurrent, tcolor; //tracking tab size and position since uses different layout method...
 
     void allowautotab(bool on) { shouldautotab = on; }
+    void allowhitfx(bool on) { hitfx = on; }
 
     void autotab()
     {
@@ -354,8 +355,8 @@ struct gui : guient
                 else px += x + guibound[0]/2 - w/2; //vmin at left
                 py = y + space/2 - FONTH/2;
             }
-            if(hit/* && color == 0xFFFFFF*/) { forcecolor = true; color = 0xFF4444; }
-            text_(label, px, py, color, hit ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN, forcecolor);
+            if(hit && hitfx) { forcecolor = true; color = 0xFF4444; }
+            text_(label, px, py, color, hit && hitfx ? 255 : guiblend, hit && mouseaction[0]&GUI_DOWN, forcecolor);
             if(hit)
             {
                 if(mouseaction[0]&GUI_PRESSED)
@@ -597,7 +598,7 @@ struct gui : guient
         }
         static const float tc[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
         vec color = vec::hexcolor(icolor);
-        if(hit && !overlaid) color.div(2);
+        if(hit && hitfx && !overlaid) color.div(2);
         glColor3fv(color.v);
         glBegin(GL_TRIANGLE_STRIP);
         glTexCoord2fv(tc[0]); glVertex2f(xi,    yi);
@@ -608,7 +609,7 @@ struct gui : guient
         if(overlaid)
         {
             if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
-            const vec &ocolor = hit ? vec(1, 1, 1) : vec(0.5f, 0.5f, 0.5f);
+            const vec &ocolor = hit && hitfx ? vec(1, 0.25f, 0.25f) : vec(1, 1, 1);
             glColor3fv(ocolor.v);
             glBindTexture(GL_TEXTURE_2D, overlaytex->id);
             rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
@@ -649,7 +650,7 @@ struct gui : guient
         static Shader *rgbonlyshader = NULL;
         if(!rgbonlyshader) rgbonlyshader = lookupshaderbyname("rgbonly");
         rgbonlyshader->set();
-        const vec &color = hit && !overlaid ? vec(1.25f, 1.25f, 1.25f) : vec(1, 1, 1);
+        const vec &color = hit && hitfx && !overlaid ? vec(1.25f, 1.25f, 1.25f) : vec(1, 1, 1);
         float tc[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
         int xoff = vslot.xoffset, yoff = vslot.yoffset;
         if(vslot.rotation)
@@ -704,7 +705,7 @@ struct gui : guient
         if(overlaid)
         {
             if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
-            const vec &ocolor = hit ? vec(1, 1, 1) : vec(0.5f, 0.5f, 0.5f);
+            const vec &ocolor = hit && hitfx ? vec(1.f, 0.25f, 0.25f) : vec(1, 1, 1);
             glColor3fv(ocolor.v);
             glBindTexture(GL_TEXTURE_2D, overlaytex->id);
             rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
@@ -763,7 +764,7 @@ struct gui : guient
         if(visible())
         {
             bool hit = ishit(w, FONTH), forcecolor = false;
-            if(hit && clickable/* && color == 0xFFFFFF*/) { forcecolor = true; color = 0xFF4444; }
+            if(hit && hitfx && clickable) { forcecolor = true; color = 0xFF4444; }
             int x = curx;
             if(icon)
             {
@@ -772,7 +773,7 @@ struct gui : guient
                 x += guibound[1];
             }
             if(icon && text) x += 8;
-            if(text) text_(text, x, cury, color, hit || !faded || !clickable ? 255 : guiblend, hit && clickable, forcecolor);
+            if(text) text_(text, x, cury, color, (hit && hitfx) || !faded || !clickable ? 255 : guiblend, hit && clickable, forcecolor);
         }
         if(font && *font) gui::popfont();
         return layout(w, h);
@@ -858,7 +859,7 @@ TVARN(IDF_PERSIST, guislidertex, "textures/guislider", gui::slidertex, 0);
 
 vector<gui::list> gui::lists;
 float gui::basescale, gui::maxscale = 1, gui::hitx, gui::hity;
-bool gui::passthrough, gui::shouldautotab = true;
+bool gui::passthrough, gui::shouldautotab = true, gui::hitfx = true;
 int gui::curdepth, gui::fontdepth, gui::curlist, gui::xsize, gui::ysize, gui::curx, gui::cury, gui::mergelist, gui::mergedepth;
 int gui::ty, gui::tx, gui::tpos, *gui::tcurrent, gui::tcolor;
 static vector<gui> guis;

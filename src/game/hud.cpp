@@ -75,6 +75,7 @@ namespace hud
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, noticeblend, 0, 1, 1);
     FVAR(IDF_PERSIST, noticescale, 1e-4f, 1, 1000);
+    VAR(IDF_PERSIST, noticetitle, 0, 10000, 60000);
     FVAR(IDF_PERSIST, eventoffset, -1, 0.3f, 1);
     FVAR(IDF_PERSIST, eventblend, 0, 1, 1);
     FVAR(IDF_PERSIST, eventscale, 1e-4f, 2.5f, 1000);
@@ -850,7 +851,6 @@ namespace hud
         {
             int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f), ss = int(crosshairsize*hudsize),
                 sx = game::mousestyle() != 1 ? cx : nx, sy = game::mousestyle() != 1 ? cy : ny;
-            #define POINTER(a,b,c) (a == POINTER_GUI && !cursorstyle ? b : b-c/2)
             drawpointertex(getpointer(index, game::focus->weapselect), sx-cs/2, sy-cs/2, cs, c.r, c.g, c.b, fade);
             if(index > POINTER_GUI)
             {
@@ -928,7 +928,7 @@ namespace hud
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
             tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
-        if(lastmillis-game::maptime <= titlefade*3)
+        if(lastmillis-game::maptime <= noticetitle)
         {
 
             ty += draw_textx("%s", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, *maptitle ? maptitle : mapname);
