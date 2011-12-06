@@ -1971,7 +1971,7 @@ namespace hud
             {
                 sy -= x/2;
                 pushfont("emphasis");
-                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255)/2, TEXT_CENTER_UP, -1, -1, state);
+                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
             if(inventorystatus&2 && *tex) sy += drawitem(tex, x, y-sy, width, false, true, 1.f, 1.f, 1.f, fade, 1.f);
