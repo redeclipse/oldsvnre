@@ -217,7 +217,7 @@ namespace hud
     FVAR(IDF_PERSIST, healthbgblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2); // 0 = off, 1 = text, 2 = bar
-    VAR(IDF_PERSIST, impulseflash, 0, 0, 1);
+    VAR(IDF_PERSIST, impulseflash, 0, 1, 1);
     FVAR(IDF_PERSIST, impulsebartop, 0, 0.171875f, 1); // starts from this offset
     FVAR(IDF_PERSIST, impulsebarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, impulsebgglow, 0, 0.05f, 1);
@@ -578,27 +578,20 @@ namespace hud
     }
 
     template<class T>
-    void flashcolour(T &r, T &g, T &b, T br, T bg, T bb)
+    void flashcolour(T &r, T &g, T &b, T br, T bg, T bb, float amt)
     {
-        if(br > 0) r += (1.f-r)*br;
-        else if(br < 0) r += r*br;
-        if(bg > 0) g += (1.f-g)*bg;
-        else if(bg < 0) g += g*bg;
-        if(bb > 0) b += (1.f-b)*bb;
-        else if(bb < 0) b += b*bb;
+        r += (br-r)*amt;
+        g += (bg-g)*amt;
+        b += (bb-b)*amt;
     }
 
     template<class T>
-    void flashcolourf(T &r, T &g, T &b, T &f, T br, T bg, T bb, T bf)
+    void flashcolourf(T &r, T &g, T &b, T &f, T br, T bg, T bb, T bf, float amt)
     {
-        if(br > 0) r += (1.f-r)*br;
-        else if(br < 0) r += r*br;
-        if(bg > 0) g += (1.f-g)*bg;
-        else if(bg < 0) g += g*bg;
-        if(bb > 0) b += (1.f-b)*bb;
-        else if(bb < 0) b += b*bb;
-        if(bf > 0) f += (1.f-f)*bf;
-        else if(bf < 0) f += f*bf;
+        r += (br-r)*amt;
+        g += (bg-g)*amt;
+        b += (bb-b)*amt;
+        f += (bf-f)*amt;
     }
 
     enum
@@ -1624,7 +1617,7 @@ namespace hud
             {
                 int timestep = totalmillis%1000;
                 float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
-                flashcolourf(gr, gb, gg, gf, amt, -amt, -amt, amt);
+                flashcolourf(gr, gg, gb, gf, 1.f, 0.f, 0.f, 1.f, amt);
                 glow += int(s*inventoryglow*amt);
             }
             settexture(inventorytex, 3);
@@ -1814,7 +1807,7 @@ namespace hud
         return sy;
     }
 
-    int drawbar(int x, int y, int w, int h, float top, float bottom, float fade, float amt, const char *tex, const char *bgtex, int tone, float bgglow, float blend, float pulse, float throb)
+    int drawbar(int x, int y, int w, int h, int type, float top, float bottom, float fade, float amt, const char *tex, const char *bgtex, int tone, float bgglow, float blend, float pulse, float throb)
     {
         int sy = 0, offset = int(w*throb);
         if(*bgtex)
@@ -1826,7 +1819,7 @@ namespace hud
             {
                 int timestep = totalmillis%1000;
                 float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*pulse, 0.f, 1.f);
-                flashcolourf(gr, gb, gg, gf, skew, -skew, -skew, skew);
+                flashcolourf(gr, gg, gb, gf, type ? 0.5f : 1.f, 0.f, type ? 0.5f : 0.f, 1.f, skew);
                 glow += int(w*bgglow*skew);
             }
             settexture(bgtex, 3);
@@ -1836,7 +1829,10 @@ namespace hud
         const struct barstep
         {
             float amt, r, g, b;
-        } steps[] = { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } };
+        } steps[2][4] = {
+            { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } },
+            { { 0, 1, 0.25f, 0.25f }, { 0.35f, 1, 0, 1 }, { 0.65f, 0.25f, 0.25f, 1 }, { 1, 0, 1, 1 } }
+        };
         settexture(tex, 3);
         glBegin(GL_TRIANGLE_STRIP);
         float btoff = 1-bottom, middle = btoff-top;
@@ -1844,24 +1840,24 @@ namespace hud
         const float margin = 0.1f;
         loopi(4)
         {
-            const barstep &step = steps[i];
+            const barstep &step = steps[type][i];
             if(i > 0)
             {
-                if(step.amt > amt && steps[i-1].amt <= amt)
+                if(step.amt > amt && steps[type][i-1].amt <= amt)
                 {
-                    float hoff = 1 - amt, hlerp = (amt - steps[i-1].amt) / (step.amt - steps[i-1].amt),
-                          r = step.r*hlerp + steps[i-1].r*(1-hlerp),
-                          g = step.g*hlerp + steps[i-1].g*(1-hlerp),
-                          b = step.b*hlerp + steps[i-1].b*(1-hlerp);
+                    float hoff = 1 - amt, hlerp = (amt - steps[type][i-1].amt) / (step.amt - steps[type][i-1].amt),
+                          r = step.r*hlerp + steps[type][i-1].r*(1-hlerp),
+                          g = step.g*hlerp + steps[type][i-1].g*(1-hlerp),
+                          b = step.b*hlerp + steps[type][i-1].b*(1-hlerp);
                     glColor4f(r, g, b, fade); glTexCoord2f(0, hoff*middle+top); glVertex2f(cx, cy + hoff*ch);
                     glColor4f(r, g, b, fade); glTexCoord2f(1, hoff*middle+top); glVertex2f(cx + cw, cy + hoff*ch);
                 }
                 if(step.amt > amt + margin)
                 {
-                    float hoff = 1 - (amt + margin), hlerp = (amt + margin - steps[i-1].amt) / (step.amt - steps[i-1].amt),
-                          r = step.r*hlerp + steps[i-1].r*(1-hlerp),
-                          g = step.g*hlerp + steps[i-1].g*(1-hlerp),
-                          b = step.b*hlerp + steps[i-1].b*(1-hlerp);
+                    float hoff = 1 - (amt + margin), hlerp = (amt + margin - steps[type][i-1].amt) / (step.amt - steps[type][i-1].amt),
+                          r = step.r*hlerp + steps[type][i-1].r*(1-hlerp),
+                          g = step.g*hlerp + steps[type][i-1].g*(1-hlerp),
+                          b = step.b*hlerp + steps[type][i-1].b*(1-hlerp);
                     glColor4f(r, g, b, 0); glTexCoord2f(0, hoff*middle+top); glVertex2f(cx, cy + hoff*ch);
                     glColor4f(r, g, b, 0); glTexCoord2f(1, hoff*middle+top); glVertex2f(cx + cw, cy + hoff*ch);
                     break;
@@ -1890,13 +1886,13 @@ namespace hud
                 float pulse = healthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = inventorythrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
-                    sy += drawbar(x, y, width, size, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, healthtone, healthbgglow, healthbgblend, pulse, throb*healththrob);
+                    sy += drawbar(x, y, width, size, 0, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, healthtone, healthbgglow, healthbgblend, pulse, throb*healththrob);
                 float gr = 1, gg = 1, gb = 1;
                 if(pulse > 0)
                 {
                     int timestep = totalmillis%1000;
                     float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f), 0.f, 1.f)*pulse;
-                    flashcolour(gr, gb, gg, amt, -amt, -amt);
+                    flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                 }
                 pushfont("super");
                 int ty = 0;
@@ -1918,7 +1914,7 @@ namespace hud
             {
                 float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                 if(inventoryimpulse == 2)
-                    sy += drawbar(x, y-sy, width, size, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, impulsetone, impulsebgglow, impulsebgblend, impulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
+                    sy += drawbar(x, y-sy, width, size, 1, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, impulsetone, impulsebgglow, impulsebgblend, impulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
                 else
                 {
                     pushfont("emphasis");
@@ -1944,7 +1940,7 @@ namespace hud
                         {
                             delay /= 2;
                             float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                            flashcolour(gr, gg, gb, amt, -amt, -amt);
+                            flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                         }
                     }
                     sy += drawitem(bleedingtex, x, y-sy, width, false, true, gr, gg, gb, fade*inventoryblend);
@@ -1960,7 +1956,7 @@ namespace hud
                         {
                             delay /= 2;
                             float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                            flashcolour(gr, gg, gb, amt, amt*0.5f, -amt);
+                            flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
                         }
                     }
                     sy += drawitem(burningtex, x, y-sy, width, false, true, gr, gg, gb, fade*inventoryblend);
