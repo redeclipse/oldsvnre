@@ -215,6 +215,14 @@ void guinoautotab(uint *contents)
     cgui->allowautotab(true);
 }
 
+void guinohitfx(uint *contents)
+{
+    if(!cgui) return;
+    cgui->allowhitfx(false);
+    execute(contents);
+    cgui->allowhitfx(true);
+}
+
 //@DOC name and icon are optional
 SVAR(0, guirollovername, "");
 SVAR(0, guirolloveraction, "");
@@ -581,6 +589,7 @@ ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");
 COMMAND(0, guistayopen, "e");
 COMMAND(0, guinoautotab, "e");
+COMMAND(0, guinohitfx, "e");
 
 ICOMMAND(0, guicount, "", (), intret(menustack.length()));
 
