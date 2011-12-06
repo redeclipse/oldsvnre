@@ -45,7 +45,7 @@ namespace game
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
-    FVAR(IDF_PERSIST, thirdpersonblend, 0, 0.45f, 1);
+    FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     FVAR(IDF_PERSIST, thirdpersondist, 0, 25, 1000);
 
     VAR(0, follow, 0, 0, VAR_MAX);
@@ -106,7 +106,7 @@ namespace game
     VAR(IDF_PERSIST, aboveheadteam, 0, 1, 2);
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
     VAR(IDF_PERSIST, aboveheadicons, 0, 3, 3);
-    FVAR(IDF_PERSIST, aboveheadblend, 0.f, 0.75f, 1.f);
+    FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
@@ -2011,11 +2011,11 @@ namespace game
                         {
                             int r = rnd(files.length());
                             formatstring(musicfile)("%s/%s", musicdir, files[r]);
-                            if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : "")) break;
+                            if(files[r][0] != '.' && playmusic(musicfile, type >= 4 ? "music" : NULL)) break;
                             else files.remove(r);
                         }
                     }
-                    else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : "");
+                    else if(*musicfile) playmusic(musicfile, type >= 4 ? "music" : NULL);
                 }
             }
         }
