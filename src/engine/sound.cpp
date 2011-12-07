@@ -189,9 +189,23 @@ bool playmusic(const char *name, const char *cmd)
 
 COMMANDN(0, music, playmusic, "ss");
 
-bool playingmusic()
+bool playingmusic(bool check)
 {
-    return music && Mix_PlayingMusic();
+    if(music && Mix_PlayingMusic())
+    {
+        if(musicdonetime >= 0) musicdonetime = -1;
+        return true;
+    }
+    if(check)
+    {
+        if(musicdonetime < 0)
+        {
+            musicdonetime = totalmillis;
+            return true;
+        }
+        if(totalmillis-musicdonetime < 500) return true;
+    }
+    return false;
 }
 
 void smartmusic(bool cond, bool autooff)
@@ -384,19 +398,11 @@ void updatesounds()
     if(music || Mix_PlayingMusic())
     {
         if(nosound || !mastervol || !musicvol) stopmusic(false);
-        else if(!Mix_PlayingMusic())
+        else if(!playingmusic()) musicdone(true);
+        else if(changedvol)
         {
-            if(musicdonetime < 0) musicdonetime = totalmillis;
-            else if(totalmillis-musicdonetime >= 500) musicdone(true);
-        }
-        else
-        {
-            if(musicdonetime >= 0) musicdonetime = -1;
-            if(changedvol)
-            {
-                Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
-                changedvol = false;
-            }
+            Mix_VolumeMusic(int((mastervol/255.f)*(musicvol/255.f)*MIX_MAX_VOLUME));
+            changedvol = false;
         }
     }
 }
