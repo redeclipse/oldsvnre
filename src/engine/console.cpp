@@ -774,7 +774,7 @@ void complete(char *s, const char *cmdprefix)
         }
     }
     if(!s[cmdlen]) return;
-    if(!completesize) { completesize = (int)strlen(s)-cmdlen; lastcomplete[0] = '\0'; }
+    if(!completesize) { completesize = (int)strlen(&s[cmdlen]); lastcomplete[0] = '\0'; }
 
     filesval *f = NULL;
     if(completesize)
@@ -783,7 +783,7 @@ void complete(char *s, const char *cmdprefix)
         if(end)
         {
             string command;
-            copystring(command, &s[cmdlen], min(size_t(end-s), sizeof(command)));
+            copystring(command, &s[cmdlen], min(size_t(end-&s[cmdlen]+1), sizeof(command)));
             filesval **hasfiles = completions.access(command);
             if(hasfiles) f = *hasfiles;
         }
@@ -796,7 +796,7 @@ void complete(char *s, const char *cmdprefix)
         int commandsize = strchr(&s[cmdlen], ' ')+1-s;
         copystring(prefix, s, min(size_t(commandsize+1), sizeof(prefix)));
         f->update();
-        loopi(f->files.length())
+        loopv(f->files)
         {
             if(strncmp(f->files[i], &s[commandsize], completesize+cmdlen-commandsize)==0 &&
                 strcmp(f->files[i], lastcomplete) > 0 && (!nextcomplete || strcmp(f->files[i], nextcomplete) < 0))
