@@ -191,19 +191,22 @@ COMMANDN(0, music, playmusic, "ss");
 
 bool playingmusic(bool check)
 {
-    if(music && Mix_PlayingMusic())
+    if(music)
     {
-        if(musicdonetime >= 0) musicdonetime = -1;
-        return true;
-    }
-    if(check)
-    {
-        if(musicdonetime < 0)
+        if(Mix_PlayingMusic())
         {
-            musicdonetime = totalmillis;
+            if(musicdonetime >= 0) musicdonetime = -1;
             return true;
         }
-        if(totalmillis-musicdonetime < 500) return true;
+        if(check)
+        {
+            if(musicdonetime < 0)
+            {
+                musicdonetime = totalmillis;
+                return true;
+            }
+            if(totalmillis-musicdonetime < 500) return true;
+        }
     }
     return false;
 }
