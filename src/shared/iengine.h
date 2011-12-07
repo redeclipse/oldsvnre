@@ -83,7 +83,7 @@ extern int changedkeys;
 extern void keypress(int code, bool isdown, int cooked);
 extern char *getcurcommand();
 extern void resetcomplete();
-extern void complete(char *s);
+extern void complete(char *s, const char *cmdprefix);
 extern const char *searchbind(const char *action, int type);
 extern void searchbindlist(const char *action, int type, int limit, const char *sep, const char *pretty, vector<char> &names);
 
