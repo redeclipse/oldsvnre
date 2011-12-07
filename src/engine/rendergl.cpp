@@ -145,7 +145,6 @@ VAR(0, apple_glsldepth_bug, 0, 0, 1);
 VAR(0, apple_ff_bug, 0, 0, 1);
 VAR(0, apple_vp_bug, 0, 0, 1);
 VAR(0, sdl_backingstore_bug, -1, 0, 1);
-VAR(0, intel_quadric_bug, 0, 0, 1);
 VAR(0, mesa_program_bug, 0, 0, 1);
 VAR(0, avoidshaders, 1, 0, 0);
 VAR(0, minimizetcusage, 1, 0, 0);
@@ -312,7 +311,7 @@ void gl_checkextensions()
     }
     else conoutf("\frWARNING: No framebuffer object support. (reflective water may be slow)");
 
-#if defined(__APPLE__)
+#ifdef __APPLE__
     // Intel HD3000 broke occlusion queries - either causing software fallback, or returning wrong results
     if(!strstr(vendor, "Intel"))
 #endif
@@ -365,30 +364,26 @@ void gl_checkextensions()
         if(hasTF && (!strstr(renderer, "GeForce") || !checkseries(renderer, 6000, 6600)))
             setvar("fpdepthfx", 1, false, true); // FP filtering causes software fallback on 6200?
     }
-    else if(strstr(vendor, "Intel"))
+    else
     {
-        avoidshaders = 1;
-        intel_quadric_bug = 1;
-        reservevpparams = 20;
-        batchlightmaps = 0;
-        setvar("maxtexsize", 256, false, true);
-        setvar("ffdynlights", 0, false, true);
-
-        if(!hasOQ) setvar("waterrefract", 0, false, true);
-
+        if(strstr(vendor, "Intel"))
+        {
 #ifdef __APPLE__
-        apple_vp_bug = 1;
+            apple_vp_bug = 1;
 #endif
-    }
-    else if(strstr(vendor, "Tungsten") || strstr(vendor, "Mesa") || strstr(vendor, "DRI") || strstr(vendor, "Microsoft") || strstr(vendor, "S3 Graphics"))
-    {
-        avoidshaders = 1;
-        reservevpparams = 20;
-        batchlightmaps = 0;
-        setvar("maxtexsize", 256, false, true);
-        setvar("ffdynlights", 0, false, true);
+        }
 
-        if(!hasOQ) setvar("waterrefract", 0, false, true);
+        if(!hasext(exts, "GL_EXT_gpu_shader4"))
+        {
+            avoidshaders = 1;
+            batchlightmaps = 0;
+            setvar("maxtexsize", 256, false, true);
+            setvar("ffdynlights", 0, false, true);
+        }
+
+        reservevpparams = 20;
+
+        if(!hasOQ) waterrefract = 0;
     }
 
     if(hasext(exts, "GL_ARB_vertex_program") && hasext(exts, "GL_ARB_fragment_program"))
