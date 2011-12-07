@@ -6,7 +6,8 @@ vector<cline> conlines;
 int commandmillis = -1;
 string commandbuf;
 char *commandaction = NULL, *commandicon = NULL;
-int commandpos = -1, commandcolour = 0;
+enum { CF_COMPLETE = 1<<0, CF_EXECUTE = 1<<1 };
+int commandflags = 0, commandpos = -1, commandcolour = 0;
 
 void conline(int type, const char *sf, int n)
 {
@@ -275,7 +276,7 @@ ICOMMAND(0, searchwaitbinds, "siss", (char *action, int *limit, char *sep, char 
 
 ICOMMAND(0, keyspressed, "iss", (int *limit, char *sep, char *pretty), { vector<char> list; getkeypressed(max(*limit, 0), sep, pretty, list); result(list.getbuf()); });
 
-void inputcommand(char *init, char *action = NULL, char *icon = NULL, int colour = 0) // turns input to the command line on or off
+void inputcommand(char *init, char *action = NULL, char *icon = NULL, int colour = 0, char *flags = NULL) // turns input to the command line on or off
 {
     commandmillis = init ? totalmillis : -totalmillis;
     SDL_EnableUNICODE(commandmillis > 0 ? 1 : 0);
@@ -287,10 +288,18 @@ void inputcommand(char *init, char *action = NULL, char *icon = NULL, int colour
     if(action && action[0]) commandaction = newstring(action);
     if(icon && icon[0]) commandicon = newstring(icon);
     commandcolour = colour;
+    commandflags = 0;
+    if(flags) while(*flags) switch(*flags++)
+    {
+        case 'c': commandflags |= CF_COMPLETE; break;
+        case 'x': commandflags |= CF_EXECUTE; break;
+        case 's': commandflags |= CF_COMPLETE|CF_EXECUTE; break;
+    }
+    else if(init) commandflags |= CF_COMPLETE|CF_EXECUTE;
 }
 
 ICOMMAND(0, saycommand, "C", (char *init), inputcommand(init));
-ICOMMAND(0, inputcommand, "sssi", (char *init, char *action, char *icon, int *colour), inputcommand(init, action, icon, *colour));
+ICOMMAND(0, inputcommand, "sssis", (char *init, char *action, char *icon, int *colour, char *flags), inputcommand(init, action, icon, *colour, flags));
 
 #if !defined(WIN32) && !defined(__APPLE__)
 #include <X11/Xlib.h>
@@ -338,9 +347,9 @@ SVAR(0, commandbuffer, "");
 struct hline
 {
     char *buf, *action, *icon;
-    int colour;
+    int colour, flags;
 
-    hline() : buf(NULL), action(NULL), icon(NULL), colour(0) {}
+    hline() : buf(NULL), action(NULL), icon(NULL), colour(0), flags(0) {}
     ~hline()
     {
         DELETEA(buf);
@@ -357,13 +366,16 @@ struct hline
         if(action) commandaction = newstring(action);
         if(icon) commandicon = newstring(icon);
         commandcolour = colour;
+        commandflags = flags;
     }
 
     bool shouldsave()
     {
         return strcmp(commandbuf, buf) ||
                (commandaction ? !action || strcmp(commandaction, action) : action!=NULL) ||
-               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) || commandcolour != colour;
+               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) || 
+               commandcolour != colour ||
+               commandflags != flags;
     }
 
     void save()
@@ -372,11 +384,12 @@ struct hline
         if(commandaction) action = newstring(commandaction);
         if(commandicon) icon = newstring(commandicon);
         colour = commandcolour;
+        flags = commandflags;
     }
 
     void run()
     {
-        if(buf[0]=='/') execute(buf+1); // above all else
+        if(flags&CF_EXECUTE && buf[0]=='/') execute(buf+1); // above all else
         else if(action)
         {
             setsvar("commandbuffer", buf, true);
@@ -517,11 +530,11 @@ void consolekey(int code, bool isdown, int cooked)
                 break;
 
             case SDLK_TAB:
-                //if(!commandaction)
-                //{
+                if(commandflags&CF_COMPLETE)
+                {
                     complete(commandbuf);
                     if(commandpos>=0 && commandpos>=(int)strlen(commandbuf)) commandpos = -1;
-                //}
+                }
                 break;
 
             case SDLK_f:
