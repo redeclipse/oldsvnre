@@ -63,7 +63,7 @@ extern vector<sound> sounds;
 extern void initsound();
 extern void stopsound();
 extern bool playmusic(const char *name, const char *cmd = NULL);
-extern bool playingmusic();
+extern bool playingmusic(bool check = true);
 extern void smartmusic(bool cond, bool autooff);
 extern void musicdone(bool docmd);
 extern void updatesounds();
