@@ -262,3 +262,38 @@ extern mutstypes mutstype[];
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= -w2) && (isweap(w1) && WEAP(w1, carried)))
 #define w_attr(a,w1,w2)     (m_edit(a) || (w1 >= WEAP_OFFSET && w1 != w2) ? w1 : (w2 == WEAP_GRENADE ? WEAP_ROCKET : WEAP_GRENADE))
 #define w_spawn(weap)       int(ceilf(GAME(itemspawntime)*WEAP(weap, frequency)))
+
+#define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
+{ \
+    char *p = shrinklist(b, c, 1); \
+    if(p) \
+    { \
+        DELETEA(b); \
+        b = p; \
+    } \
+}
+
+#define mapcull(a,b,c,d) \
+{ \
+    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, GAME(multimaps)); \
+    mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
+    mapshrink(m_hover(b, c) || m_jetpack(b, c), a, GAME(hovermaps)); \
+    if(d > 0 && GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
+    { \
+        mapshrink(GAME(smallmapmax) && d <= GAME(smallmapmax), a, GAME(smallmaps)) \
+        else mapshrink(GAME(mediummapmax) && d <= GAME(mediummapmax), a, GAME(mediummaps)) \
+        else mapshrink(GAME(mediummapmax) && d > GAME(mediummapmax), a, GAME(largemaps)) \
+    } \
+}
+
+#define maplist(a,b,c,d) \
+{ \
+    if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
+    else if(m_capture(b)) a = newstring(GAME(capturemaps)); \
+    else if(m_defend(b)) a = newstring(GAME(defendmaps)); \
+    else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? GAME(holdmaps) : GAME(bombermaps)); \
+    else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
+    else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
+    else a = newstring(GAME(allowmaps)); \
+    if(GAME(mapsfilter)) mapcull(a, b, c, d); \
+}

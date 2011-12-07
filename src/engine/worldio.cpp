@@ -13,6 +13,7 @@ generic mapdirs[] = {
 };
 
 VAR(0, maptype, 1, -1, -1);
+VAR(0, maploading, 1, 0, -1);
 SVAR(0, mapfile, "");
 SVAR(0, mapname, "");
 
@@ -1090,6 +1091,7 @@ static void sanevars()
 bool load_world(const char *mname, bool temp)       // still supports all map formats that have existed since the earliest cube betas!
 {
     int loadingstart = SDL_GetTicks();
+    maploading = 1;
     loop(tempfile, 2) if(tempfile || temp)
     {
         loop(format, MAP_MAX)
@@ -1111,6 +1113,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             {
                 conoutf("\frerror loading %s: malformatted universal header", mapname);
                 delete f;
+                maploading = 0;
                 return false;
             }
             lilswap(&newhdr.version, 2);
@@ -1126,6 +1129,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     { \
                         conoutf("\frerror loading %s: malformatted mapz v%d[%d] header", mapname, newhdr.version, ver); \
                         delete f; \
+                        maploading = 0; \
                         return false; \
                     }
                 if(newhdr.version <= 25)
@@ -1176,6 +1180,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     {
                         conoutf("\frerror loading %s: malformatted mapz v%d header", mapname, newhdr.version);
                         delete f;
+                        maploading = 0;
                         return false;
                     }
                     lilswap(&newhdr.worldsize, 8);
@@ -1185,6 +1190,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 {
                     conoutf("\frerror loading %s: requires a newer version of Red Eclipse", mapname);
                     delete f;
+                    maploading = 0;
                     return false;
                 }
 
@@ -1295,6 +1301,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     { \
                         conoutf("\frerror loading %s: malformatted octa v%d[%d] header", mapname, ver, ohdr.version); \
                         delete f; \
+                        maploading = 0; \
                         return false; \
                     }
 
@@ -1350,6 +1357,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     {
                         conoutf("\frerror loading %s: malformatted octa v%d header", mapname, ohdr.version);
                         delete f;
+                        maploading = 0;
                         return false;
                     }
                     lilswap(&ohdr.worldsize, 7);
@@ -1359,6 +1367,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 {
                     conoutf("\frerror loading %s: requires a newer version of Cube 2 support", mapname);
                     delete f;
+                    maploading = 0;
                     return false;
                 }
 
@@ -1677,10 +1686,12 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
 
             progress(0, "starting world...");
             game::startmap(mapname, mname);
+            maploading = 0;
             return true;
         }
     }
     conoutf("\frunable to load %s", mname);
+    maploading = 0;
     return false;
 }
 
