@@ -1,5 +1,6 @@
 THE RED ECLIPSE MARK POLICY
 
+
   General Guidelines
 
 The purpose of the Red Eclipse mark policy is to encourage the widespread use of
@@ -25,16 +26,18 @@ terms):
 
 1. To refer to the Red Eclipse software in substantially unmodified form.
 
-  "Substantially unmodified" means built from the source code provided by The
-  Red Eclipse project, possibly with minor modifications including but not
-  limited to: the enabling or disabling of certain features by default,
-  translations into other languages, changes required for compatibility with a
-  particular operating system distribution, the inclusion of bug-fix patches, or
-  the bundling of additional maps, artwork and extensions).
+  "Substantially unmodified" for source code means built from the source code
+  provided by The Red Eclipse project, possibly with minor modifications
+  including but not limited to: the enabling or disabling of certain features by
+  default, translations into other languages, changes required for compatibility
+  with a particular operating system distribution, the inclusion of bug-fix
+  patches, or the bundling of additional extensions.
 
-  "Substantially unmodified" also means that the gameplay and art needs to
-  closely resemble that of Red Eclipse in it's unmodified form, and not create
-  an unfair advantage in gameplay.
+  "Substantially unmodified" for gameplay and art means using the game data
+  provided by The Red Eclipse project, possibly with minor modifications, for
+  example including additional maps, artwork, and sounds. The gameplay and art
+  needs to closely resemble that of Red Eclipse in it's unmodified form, and not
+  create an unfair advantage in gameplay.
 
   Example: You may modify Red Eclipse to start in windowed mode by default, but
            if you set the gravity in the game to zero, this counts as a
@@ -46,13 +49,11 @@ terms):
 
 2. To identify Red Eclipse as a distinct component of a software offering.
 
-3. To factually refer to The Red Eclipse Project itself, its products, or its
+3. To factually refer to The Red Eclipse project itself, its products, or its
    protocols.
 
    Example: You may use "Bob's Add-ons for Red Eclipse" or
             "Bob's forum for Red Eclipse" but not "Bob's Red Eclipse".
-
-   This also covers for example fan art, fan videos, and forum signatures.
 
 4. When referring to Red Eclipse that is not substantially unmodified, to say
    that such software is a "derivative of" or "based on" Red Eclipse. You may
@@ -90,14 +91,20 @@ The Red Eclipse project reserves the sole right to:
 
 1. Determine compliance with this policy.
 
-2. Modify this policy in ways consistent with its mission of protecting the
-   public, the community and the users.
+2. Modify this policy to preserve the rights of Red Eclipse, the public, the
+   community, and the users.
+   The latest version of the Red Eclipse Mark Policy should be available at
+   <http://www.redeclipse.net/wiki/Trademark_Policy>
 
 3. Grant exceptions to this policy, of any kind and for any reason whatsoever,
    other clauses notwithstanding.
 
 
   Other Use
+
+If you have questions regarding the policy, or if any of the examples are
+unclear, feel free to contact the Red Eclipse project, for example via the
+Red Eclipse forums.
 
 If you would like to use the Red Eclipse marks for any other use, please contact
 us and we'll discuss a way to make that happen. We don't have strong objections
@@ -114,7 +121,7 @@ as described above.
 
   Attribution
 
-This text is Copyright (C) 2011, the Red Eclipse project
+This text is Copyright (C) 2011, the Red Eclipse Team
 and is available under a Creative Commons Attribution-ShareAlike 3.0 Unported
 License <http://creativecommons.org/licenses/by-sa/3.0/>
 
