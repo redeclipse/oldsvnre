@@ -2679,7 +2679,8 @@ namespace game
             }
             if(burntime && d->burning(lastmillis, burntime))
             {
-                int millis = lastmillis-d->lastburn; float pc = d->curscale, intensity = 0.5f+(rnd(50)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
+                int millis = lastmillis-d->lastburn;
+                float pc = d->curscale, intensity = 0.5f+(rnd(50)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));

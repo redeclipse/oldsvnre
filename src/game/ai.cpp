@@ -13,6 +13,8 @@ namespace ai
     VAR(IDF_PERSIST, aideadfade, 0, 10000, VAR_MAX);
     VAR(IDF_PERSIST, showaiinfo, 0, 0, 2); // 0/1 = shows/hides bot join/parts, 2 = show more verbose info
 
+    bool dbgfocus(gameent *d)  { return d->ai && (!aidebugfocus || d == game::focus || (aidebugfocus != 2 && !game::focus->ai)); }
+
     float viewdist(int x) { return x <= 100 ? clamp((SIGHTMIN+(SIGHTMAX-SIGHTMIN))/100.f*float(x), float(SIGHTMIN), max(float(fog), ai::SIGHTMIN)) : max(float(fog), ai::SIGHTMIN); }
     float viewfieldx(int x) { return x <= 100 ? clamp((VIEWMIN+(VIEWMAX-VIEWMIN))/100.f*float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX); }
     float viewfieldy(int x) { return viewfieldx(x)*3.f/4.f; }
@@ -266,24 +268,24 @@ namespace ai
         return targets.length();
     }
 
-    bool makeroute(gameent *d, aistate &b, int node, bool changed, bool retry)
+    bool makeroute(gameent *d, aistate &b, int node, bool changed, int retries)
     {
         if(d->lastnode < 0) return false;
         if(changed && !d->ai->route.empty() && d->ai->route[0] == node) return true;
-        if(entities::route(d->lastnode, node, d->ai->route, obs, d, retry) > 0)
+        if(entities::route(d->lastnode, node, d->ai->route, obs, d, retries) > 0)
         {
             b.override = false;
             return true;
         }
-        d->ai->clear(true);
-        if(!retry) return makeroute(d, b, node, false, true);
+        // retry fails: 0 = first attempt, 1 = try ignoring obstacles, 2 = try ignoring prevnodes too
+        if(retries <= 1) return makeroute(d, b, node, false, retries+1);
         return false;
     }
 
-    bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed, bool retry)
+    bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed, int retries)
     {
         int node = entities::closestent(WAYPOINT, pos, CLOSEDIST, true);
-        return makeroute(d, b, node, changed, retry);
+        return makeroute(d, b, node, changed, retries);
     }
 
     bool randomnode(gameent *d, aistate &b, const vec &pos, float guard, float wander)
@@ -1342,6 +1344,7 @@ namespace ai
             d->ai->blocktime += lastmillis-d->ai->lastrun;
             if(d->ai->blocktime > (d->ai->blockseq+1)*1000)
             {
+                d->ai->blockseq++;
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2: case 3:
@@ -1349,10 +1352,10 @@ namespace ai
                         d->ai->clear(false);
                         break;
                     case 4: d->ai->reset(false); break;
-                    case 5: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
-                    case 0: default: break;
+                    case 5: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
-                d->ai->blockseq++;
+                if(aidebug >= 5 && dbgfocus(d))
+                    conoutf("%s blocked %dms sequence %d", game::colorname(d), d->ai->blocktime, d->ai->blockseq);
             }
         }
         else d->ai->blocktime = d->ai->blockseq = 0;
@@ -1362,6 +1365,7 @@ namespace ai
             d->ai->targtime += lastmillis-d->ai->lastrun;
             if(d->ai->targtime > (d->ai->targseq+1)*2000)
             {
+                d->ai->targseq++;
                 switch(d->ai->targseq)
                 {
                     case 1: case 2: case 3:
@@ -1369,10 +1373,10 @@ namespace ai
                         d->ai->clear(false);
                         break;
                     case 4: d->ai->reset(false); break;
-                    case 5: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
-                    case 0: default: break;
+                    case 5: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
-                d->ai->targseq++;
+                if(aidebug >= 5 && dbgfocus(d))
+                    conoutf("%s targeted %d too long %dms sequence %d", game::colorname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
             }
         }
         else
@@ -1387,14 +1391,15 @@ namespace ai
             if(millis <= 3000) { d->ai->tryreset = false; d->ai->huntseq = 0; }
             else if(millis > (d->ai->huntseq+1)*3000)
             {
+                d->ai->huntseq++;
                 switch(d->ai->huntseq)
                 {
-                    case 0: d->ai->clear(false); break;
-                    case 1: d->ai->reset(false); break;
-                    case 2: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
-                    default: break;
+                    case 1: d->ai->clear(false); break;
+                    case 2: d->ai->reset(false); break;
+                    case 3: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
-                d->ai->huntseq++;
+                if(aidebug >= 5 && dbgfocus(d))
+                    conoutf("%s hunting %dms sequence %d", game::colorname(d), millis, d->ai->huntseq);
             }
         }
     }
@@ -1507,14 +1512,10 @@ namespace ai
             else if(d->state == CS_ALIVE && parse)
             {
                 int result = 0;
-                loopj(NUMPREVNODES)
+                loopj(NUMPREVNODES) if(d->ai->route.find(d->ai->prevnodes[j]) >= 0)
                 {
-                    int node = d->ai->prevnodes[j];
-                    if(node != d->lastnode && node != d->ai->targnode && d->ai->route.find(node) >= 0)
-                    {
-                        d->ai->route.setsize(0);
-                        break;
-                    }
+                    d->ai->route.setsize(0);
+                    break;
                 }
                 c.idle = 0;
                 switch(c.type)
@@ -1527,7 +1528,6 @@ namespace ai
                 }
                 if(result <= 0)
                 {
-                    //d->ai->clear(true);
                     if(c.type != AI_S_WAIT)
                     {
                         switch(result)
@@ -1621,7 +1621,6 @@ namespace ai
         if(aidebug > 1)
         {
             int amt[2] = { 0, 0 };
-            #define dbgfocus(a) (a->ai && (aidebugfocus ? a == game::focus || (aidebugfocus != 2 && !game::focus->ai) : false))
             loopv(game::players) if(game::players[i] && dbgfocus(game::players[i])) amt[0]++;
             loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && dbgfocus(game::players[i]))
             {
