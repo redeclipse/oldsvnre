@@ -398,6 +398,12 @@ namespace hud
             else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex)
             else ADDMODE(modedefendtex)
         }
+        else if(m_bomber(g))
+        {
+            if(m_gsp1(g, m)) ADDMODE(modebomberbaskettex)
+            else if(m_gsp2(g, m)) ADDMODE(modebomberholdtex)
+            else ADDMODE(modebombertex)
+        }
         else ADDMODE(modedeathmatchtex)
 
         if(m_multi(g, m) && (implied || !(m_implied(g, m)&G_M_MULTI))) ADDMODE(modemultitex)

@@ -1074,42 +1074,6 @@ namespace server
         modecheck(mode, muts);
     }
 
-    #define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
-    { \
-        char *p = shrinklist(b, c, 1); \
-        if(p) \
-        { \
-            DELETEA(b); \
-            b = p; \
-        } \
-    }
-
-    #define mapcull(a,b,c) \
-    { \
-        mapshrink(m_multi(b, c) && (m_capture(b) || m_bomber(b)), a, GAME(multimaps)); \
-        mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
-        mapshrink(m_hover(b, c) || m_jetpack(b, c), a, GAME(hovermaps)); \
-        if(GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
-        { \
-            int players = numclients(); \
-            mapshrink(GAME(smallmapmax) && players <= GAME(smallmapmax), a, GAME(smallmaps)) \
-            else mapshrink(GAME(mediummapmax) && players <= GAME(mediummapmax), a, GAME(mediummaps)) \
-            else mapshrink(GAME(mediummapmax) && players > GAME(mediummapmax), a, GAME(largemaps)) \
-        } \
-    }
-
-    #define maplist(a,b,c) \
-    { \
-        if(m_campaign(b)) a = newstring(GAME(campaignmaps)); \
-        else if(m_capture(b)) a = newstring(GAME(capturemaps)); \
-        else if(m_defend(b)) a = newstring(GAME(defendmaps)); \
-        else if(m_bomber(b)) a = newstring(m_gsp2(gamemode, mutators) ? GAME(holdmaps) : GAME(bombermaps)); \
-        else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
-        else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
-        else a = newstring(GAME(allowmaps)); \
-        if(GAME(mapsfilter)) mapcull(a, b, c); \
-    }
-
     const char *choosemap(const char *suggest, int mode, int muts, int force)
     {
         static string chosen;
@@ -1124,7 +1088,7 @@ namespace server
         if(rotate)
         {
             char *list = NULL;
-            maplist(list, mode, muts);
+            maplist(list, mode, muts, numclients());
             if(list)
             {
                 int n = listlen(list), p = -1, c = -1;
@@ -2001,12 +1965,12 @@ namespace server
                 case 1: case 2:
                 {
                     list = newstring(GAME(allowmaps));
-                    mapcull(list, reqmode, reqmuts);
+                    mapcull(list, reqmode, reqmuts, numclients());
                     break;
                 }
                 case 3: case 4:
                 {
-                    maplist(list, reqmode, reqmuts);
+                    maplist(list, reqmode, reqmuts, numclients());
                     break;
                 }
                 case 5: if(!haspriv(ci, PRIV_MAX, "select a map to play")) return; break;

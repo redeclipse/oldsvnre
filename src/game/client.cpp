@@ -8,8 +8,18 @@ namespace client
     string connectpass = "";
     int needclipboard = -1;
 
-    extern int sortvotes;
+    ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), {
+         char *list = NULL;
+         maplist(list, *g, *m, *c);
+         if(list)
+         {
+             result(list);
+             DELETEA(list);
+         }
+         else result("");
+    });
 
+    extern int sortvotes;
     struct mapvote
     {
         vector<gameent *> players;
