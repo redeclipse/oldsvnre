@@ -1208,6 +1208,9 @@ namespace entities
             case WAYPOINT:
                 if(create) numwaypoints++;
                 e.attrs[1] = getweight(e.o);
+                //loopv(e.links) if(e.kin.find(e.links[i]) < 0) e.kin.add(e.links[i]);
+                //loopi(lastenttype[WAYPOINT]) if(i != n && ents[i]->type == WAYPOINT && ents[i]->links.find(n) >= 0 && e.kin.find(i) < 0)
+                //    e.kin.add(i);
                 break;
             default: break;
         }
@@ -1433,7 +1436,7 @@ namespace entities
 
     static inline float heapscore(linkq *q) { return q->score(); }
 
-    float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d, bool retry)
+    float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d, int retries)
     {
         if(!ents.inrange(node) || !ents.inrange(goal) || ents[goal]->type != ents[node]->type || goal == node || ents[node]->links.empty())
             return 0;
@@ -1451,23 +1454,29 @@ namespace entities
         }
         while(nodes.length() < ents.length()) nodes.add();
 
-        if(d && !retry)
+        if(d)
         {
-            if(d->ai) loopi(ai::NUMPREVNODES) if(d->ai->prevnodes[i] != node && nodes.inrange(d->ai->prevnodes[i]))
+            if(retries <= 1 && d->ai)
             {
-                nodes[d->ai->prevnodes[i]].id = routeid;
-                nodes[d->ai->prevnodes[i]].curscore = -1;
-                nodes[d->ai->prevnodes[i]].estscore = 0;
-            }
-            loopavoid(obstacles, d, { if(ents.inrange(ent) && ents[ent]->type == ents[node]->type)
-            {
-                if(ent != node && ents[node]->links.find(ent) < 0)
+                loopi(ai::NUMPREVNODES) if(d->ai->prevnodes[i] != node && nodes.inrange(d->ai->prevnodes[i]))
                 {
-                    nodes[ent].id = routeid;
-                    nodes[ent].curscore = -1;
-                    nodes[ent].estscore = 0;
+                    nodes[d->ai->prevnodes[i]].id = routeid;
+                    nodes[d->ai->prevnodes[i]].curscore = -1;
+                    nodes[d->ai->prevnodes[i]].estscore = 0;
                 }
-            }});
+            }
+            if(retries <= 0)
+            {
+                loopavoid(obstacles, d, { if(ents.inrange(ent) && ents[ent]->type == ents[node]->type)
+                {
+                    if(ent != node && ents[node]->links.find(ent) < 0)
+                    {
+                        nodes[ent].id = routeid;
+                        nodes[ent].curscore = -1;
+                        nodes[ent].estscore = 0;
+                    }
+                }});
+            }
         }
 
         nodes[node].id = routeid;
@@ -1479,6 +1488,7 @@ namespace entities
         route.setsize(0);
 
         int lowest = -1;
+        bool jetter = physics::allowhover(d), flyer = physics::allowhover(d, true);
         while(!queue.empty())
         {
             linkq *m = queue.removeheap();
@@ -1486,9 +1496,10 @@ namespace entities
             m->curscore = -1.f;
             int current = int(m-&nodes[0]);
             if(!ents.inrange(current)) continue;
+            //gameentity &ent = *(gameentity *)ents[current];
+            //linkvector &links = retries >= 3 ? ent.kin : ent.links;
             extentity &ent = *ents[current];
             linkvector &links = ent.links;
-            bool jetter = physics::allowhover(d), flyer = physics::allowhover(d, true);
             loopv(links)
             {
                 int link = links[i];
@@ -2127,6 +2138,7 @@ namespace entities
             o.y = f->getlil<float>();
             o.z = f->getlil<float>();
             extentity *e = NULL;
+            int n = ents.length();
             e = newent();
             ents.add(e);
             loopk(5) e->attrs.add(0);
@@ -2134,6 +2146,7 @@ namespace entities
             e->o = o;
             int numlinks = clamp(f->getchar(), 0, 6);
             loopi(numlinks) e->links.add(numents+f->getlil<ushort>());
+            fixentity(n);
         }
         delete f;
         conoutf("loaded %d waypoints from %s", numwp, wptname);
@@ -2212,8 +2225,9 @@ namespace entities
                     {
                         loopvk(ents) if(ents[k]->type == TRIGGER && ents[k]->links.find(e.links[j]) >= 0)
                         {
-                            if(((gameentity *)ents[i])->kin.find(k) < 0) ((gameentity *)ents[i])->kin.add(k);
-                            if(((gameentity *)ents[k])->kin.find(i) < 0) ((gameentity *)ents[k])->kin.add(i);
+                            gameentity &f = *(gameentity *)ents[k];
+                            if(e.kin.find(k) < 0) e.kin.add(k);
+                            if(f.kin.find(i) < 0) f.kin.add(i);
                         }
                     }
                 }

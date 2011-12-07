@@ -134,15 +134,15 @@ namespace ai
             weappref = targnode = targlast = enemy = lastpusher = -1;
         }
 
-        void clear(bool prev = true)
+        void clear(bool prev = false)
         {
             if(prev) memset(prevnodes, -1, sizeof(prevnodes));
             route.setsize(0);
         }
 
-        void wipe()
+        void wipe(bool prev = false)
         {
-            clear(true);
+            clear(prev);
             state.setsize(0);
             addstate(AI_S_WAIT);
             trywipe = false;
@@ -156,7 +156,7 @@ namespace ai
             tryreset = tryit;
         }
 
-        void reset(bool tryit = false) { wipe(); clean(tryit); }
+        void reset(bool tryit = false) { wipe(tryit); clean(tryit); }
         void unsuspend() { suspended = false; clean(false); }
 
         bool hasprevnode(int n) const
@@ -222,8 +222,8 @@ namespace ai
 
     extern bool badhealth(gameent *d);
     extern int checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false, int *members = NULL);
-    extern bool makeroute(gameent *d, aistate &b, int node, bool changed = true, bool retry = false);
-    extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, bool retry = false);
+    extern bool makeroute(gameent *d, aistate &b, int node, bool changed = true, int retries = 0);
+    extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, int retries = 0);
     extern bool randomnode(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX);
     extern bool randomnode(gameent *d, aistate &b, float guard = ALERTMIN, float wander = ALERTMAX);
     extern bool violence(gameent *d, aistate &b, gameent *e, bool pursue = false);
