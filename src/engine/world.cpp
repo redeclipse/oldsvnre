@@ -294,16 +294,16 @@ undoblock *copyundoents(undoblock *u)
 void pasteundoents(undoblock *u)
 {
     undoent *ue = u->ents();
-	int *attrs = u->attrs();
+    int *attrs = u->attrs();
     loopi(u->numents)
         entedit(ue[i].i, 
-		{ 
-			e.type = ue[i].type; 
-			e.o = ue[i].o; 
-			e.attrs.setsize(max(5, ue[i].numattrs)); 
-			loopk(ue[i].numattrs) e.attrs[k] = *attrs++; 
-			for(int k = ue[i].numattrs; k < 5; k++) e.attrs[k] = 0;
-		});
+        { 
+            e.type = ue[i].type; 
+            e.o = ue[i].o; 
+            if(e.attrs.length() < ue[i].numattrs) e.attrs.add(0, ue[i].numattrs - e.attrs.length());
+            else if(e.attrs.length() > ue[i].numattrs) e.attrs.setsize(ue[i].numattrs);
+            loopk(ue[i].numattrs) e.attrs[k] = *attrs++; 
+        });
 }
 
 void entflip()
