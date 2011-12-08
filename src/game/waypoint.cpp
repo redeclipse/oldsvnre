@@ -552,7 +552,7 @@ namespace ai
     {
         if(!mname || !*mname) mname = mapname;
         if(!*mname) return false;
-        formatstring(wptname)("packages/%s.wpt", mname);
+        formatstring(wptname)("%s.wpt", mname);
         path(wptname);
         return true;
     }
