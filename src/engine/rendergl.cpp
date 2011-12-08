@@ -195,6 +195,10 @@ void gl_checkextensions()
     sdl_backingstore_bug = -1;
 #endif
 
+    GLint val;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &val);
+    hwtexsize = val;
+
     //extern int shaderprecision;
     // default to low precision shaders on certain cards, can be overridden with -f3
     // char *weakcards[] = { "GeForce FX", "Quadro FX", "6200", "9500", "9550", "9600", "9700", "9800", "X300", "X600", "FireGL", "Intel", "Chrome", NULL }
@@ -376,9 +380,12 @@ void gl_checkextensions()
         if(!hasext(exts, "GL_EXT_gpu_shader4"))
         {
             avoidshaders = 1;
-            batchlightmaps = 0;
-            setvar("maxtexsize", 256, false, true);
-            setvar("ffdynlights", 0, false, true);
+            if(hwtexsize < 4096) 
+            {
+                setvar("maxtexsize", hwtexsize >= 2048 ? 512 : 256, false, true);
+                batchlightmaps = 0;
+            }
+            if(!hasTF) setvar("ffdynlights", 0, false, true);
         }
 
         reservevpparams = 20;
@@ -637,10 +644,6 @@ void gl_checkextensions()
             }
         }
     }
-
-    GLint val;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &val);
-    hwtexsize = val;
 }
 
 void glext(char *ext)
