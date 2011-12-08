@@ -1515,7 +1515,7 @@ namespace hud
             if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
                 drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::getcolour(game::focus, game::playereffecttone)), "tiny", "you");
             gameent *a = game::getclient(game::focus->lastattacker);
-            if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype < 0 || radardamage >= 4))))
+            if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype == AI_NONE || radardamage >= 4))))
             {
                 vec colour = vec::hexcolor(game::getcolour(a, game::playereffecttone));
                 if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))

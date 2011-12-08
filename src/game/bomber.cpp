@@ -18,7 +18,7 @@ namespace bomber
         int numdyns = game::numdynents();
         loopk(2)
         {
-            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype < 0))
+            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype == AI_NONE))
             {
                 float md = d->ai ? d->ai->views[2] : hdr.worldsize, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
                 if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
@@ -636,7 +636,7 @@ namespace bomber
                 { // defend the flag
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
@@ -650,7 +650,7 @@ namespace bomber
                 { // attack the flag
                     ai::interest &n = interests.add();
                     n.state = d->aitype == AI_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos());

@@ -85,6 +85,7 @@ void cleanup()
     extern void clear_console();    clear_console();
     extern void clear_mdls();       clear_mdls();
     stopsound();
+    closelogfile();
     SDL_Quit();
 }
 

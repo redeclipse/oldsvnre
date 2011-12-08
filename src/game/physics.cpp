@@ -186,7 +186,7 @@ namespace physics
         bool projectile = false, actor = false;
         if(e) switch(e->type)
         {
-            case ENT_PLAYER: case ENT_AI: if(((gameent *)e)->aitype >= 0) actor = true; break;
+            case ENT_PLAYER: case ENT_AI: if(((gameent *)e)->aitype > AI_NONE) actor = true; break;
             case ENT_PROJ:
             {
                 projectile = true;

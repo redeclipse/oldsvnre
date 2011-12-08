@@ -334,7 +334,7 @@ namespace defend
                 {
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.o, ai::CLOSEDIST, false);
+                    n.node = ai::closestwaypoint(f.o, ai::CLOSEDIST, false);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.o)/(!regen ? 100.f : 1.f);

@@ -58,7 +58,7 @@ namespace projs
                 switch(teamdamage)
                 {
                     case 2: default: break;
-                    case 1: if(actor->aitype < 0 || target->aitype >= 0) break;
+                    case 1: if(actor->aitype == AI_NONE || target->aitype > AI_NONE) break;
                     case 0: nodamage++; break;
                 }
             }
@@ -190,7 +190,7 @@ namespace projs
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;
-            if(!isaitype(e->aitype) || aistyle[e->aitype].hitbox)
+            if(aistyle[e->aitype].hitbox)
             {
                 float rdist[3] = { -1, -1, -1 };
                 radialpush(e->legs, e->lrad.x, e->lrad.y, e->lrad.z, e->lrad.z, rdist[0]);

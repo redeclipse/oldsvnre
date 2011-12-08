@@ -844,7 +844,7 @@ namespace client
     int otherclients()
     {
         int n = 0; // ai don't count
-        loopv(game::players) if(game::players[i] && game::players[i]->aitype < 0) n++;
+        loopv(game::players) if(game::players[i] && game::players[i]->aitype == AI_NONE) n++;
         return n;
     }
 
@@ -1997,7 +1997,7 @@ namespace client
                         s->stopmoving(true);
                         game::waiting.setsize(0);
                         gameent *d;
-                        loopv(game::players) if((d = game::players[i]) && d->aitype < 0 && d->state == CS_WAITING)
+                        loopv(game::players) if((d = game::players[i]) && d->aitype == AI_NONE && d->state == CS_WAITING)
                             game::waiting.add(d);
                     }
                     else if(!s->ai) s->resetinterp();
@@ -2016,7 +2016,7 @@ namespace client
                     if(w->team != tn)
                     {
                         w->team = tn;
-                        //if(game::showplayerinfo && w->aitype < 0)
+                        //if(game::showplayerinfo && w->aitype == AI_NONE)
                         //    conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(w->team, colour), hud::teamtex(w->team), TEAM(w->team, name));
                         if(w == game::focus) hud::lastteam = 0;
                     }
@@ -2071,7 +2071,7 @@ namespace client
                     t->cplast = laptime;
                     t->cptime = besttime;
                     t->cpmillis = t->impulse[IM_METER] = 0;
-                    if(showlaptimes > (t != game::focus ? (t->aitype >= 0 ? 2 : 1) : 0))
+                    if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
                     {
                         defformatstring(best)("%s", hud::timetostr(besttime));
                         conoutft(t != game::focus ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);

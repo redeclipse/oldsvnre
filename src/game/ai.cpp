@@ -1,7 +1,7 @@
 #include "game.h"
 namespace ai
 {
-    entities::avoidset obs, wps;
+    avoidset obstacles, wpavoid;
     int updatemillis = 0, iteration = 0, itermillis = 0;
     vec aitarget(0, 0, 0);
 
@@ -10,12 +10,16 @@ namespace ai
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
     VAR(0, aicampaign, 0, 0, 1);
     VAR(0, aipassive, 0, 0, 1);
+
+    VAR(0, showwaypoints, 0, 0, 1);
+    VAR(0, showwaypointsradius, 0, 256, VAR_MAX);
+
     VAR(IDF_PERSIST, aideadfade, 0, 10000, VAR_MAX);
     VAR(IDF_PERSIST, showaiinfo, 0, 0, 2); // 0/1 = shows/hides bot join/parts, 2 = show more verbose info
 
     bool dbgfocus(gameent *d)  { return d->ai && (!aidebugfocus || d == game::focus || (aidebugfocus != 2 && !game::focus->ai)); }
 
-    float viewdist(int x) { return x <= 100 ? clamp((SIGHTMIN+(SIGHTMAX-SIGHTMIN))/100.f*float(x), float(SIGHTMIN), max(float(fog), ai::SIGHTMIN)) : max(float(fog), ai::SIGHTMIN); }
+    float viewdist(int x) { return x <= 100 ? clamp((SIGHTMIN+(SIGHTMAX-SIGHTMIN))/100.f*float(x), float(SIGHTMIN), max(float(fog), SIGHTMIN)) : max(float(fog), SIGHTMIN); }
     float viewfieldx(int x) { return x <= 100 ? clamp((VIEWMIN+(VIEWMAX-VIEWMIN))/100.f*float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX); }
     float viewfieldy(int x) { return viewfieldx(x)*3.f/4.f; }
 
@@ -169,11 +173,15 @@ namespace ai
 
     void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl)
     {
+        if(!loadwaypoints()) importwaypoints();
+
         gameent *o = game::newclient(on);
+        bool resetthisguy = false;
+
         string m;
         if(o) copystring(m, game::colorname(o));
         else formatstring(m)("\fs\faunknown [\fs\fr%d\fS]\fS", on);
-        bool resetthisguy = false;
+
         if(!d->name[0])
         {
             if(showaiinfo && game::showplayerinfo)
@@ -272,7 +280,7 @@ namespace ai
     {
         if(d->lastnode < 0) return false;
         if(changed && !d->ai->route.empty() && d->ai->route[0] == node) return true;
-        if(entities::route(d->lastnode, node, d->ai->route, obs, d, retries) > 0)
+        if(route(d, d->lastnode, node, d->ai->route, obstacles, retries) > 0)
         {
             b.override = false;
             return true;
@@ -284,7 +292,7 @@ namespace ai
 
     bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed, int retries)
     {
-        int node = entities::closestent(WAYPOINT, pos, CLOSEDIST, true);
+        int node = ai::closestwaypoint(pos, CLOSEDIST, true);
         return makeroute(d, b, node, changed, retries);
     }
 
@@ -292,7 +300,7 @@ namespace ai
     {
         static vector<int> candidates;
         candidates.setsize(0);
-        entities::findentswithin(WAYPOINT, pos, guard, wander, candidates);
+        ai::findwaypointswithin(pos, guard, wander, candidates);
 
         while(!candidates.empty())
         {
@@ -377,7 +385,7 @@ namespace ai
     {
         if(e && !aipassive && targetable(d, e))
         {
-            if(pursue && entities::ents.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
+            if(pursue && waypoints.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
             if(d->ai->enemy != e->clientnum)
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
@@ -413,7 +421,7 @@ namespace ai
     {
         gameent *e = NULL;
         int numdyns = game::numdynents();
-        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->aitype < 0) && owner(d) == owner(e))
+        loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && (all || e->aitype == AI_NONE) && owner(d) == owner(e))
         {
             interest &n = interests.add();
             n.state = AI_S_DEFEND;
@@ -443,7 +451,7 @@ namespace ai
                     { // go get a weapon upgrade
                         interest &n = interests.add();
                         n.state = AI_S_INTEREST;
-                        n.node = entities::closestent(WAYPOINT, e.o, CLOSEDIST, true);
+                        n.node = ai::closestwaypoint(e.o, CLOSEDIST, true);
                         n.target = j;
                         n.targtype = AI_T_ENTITY;
                         n.score =  pos.squaredist(e.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
@@ -470,7 +478,7 @@ namespace ai
                         if(proj.owner == d) break;
                         interest &n = interests.add();
                         n.state = AI_S_INTEREST;
-                        n.node = entities::closestent(WAYPOINT, proj.o, CLOSEDIST, true);
+                        n.node = ai::closestwaypoint(proj.o, CLOSEDIST, true);
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
                         n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
@@ -507,7 +515,7 @@ namespace ai
                     interest &n = interests.add();
                     n.state = AI_S_PURSUE;
                     n.target = i;
-                    n.node = entities::closestent(WAYPOINT, entities::ents[i]->o, CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
                     n.targtype = AI_T_AFFINITY;
                     n.score = -1;
                     n.tolerance = 1;
@@ -680,7 +688,7 @@ namespace ai
                 int numdyns = game::numdynents();
                 loopi(numdyns) if((t = (gameent *)game::iterdynents(i)) && t != d && t->aitype < AI_START)
                 {
-                    if(d->aitype == AI_BOT ? (t->state != CS_SPECTATOR && t->aitype < 0) : (t->state == CS_ALIVE && d->o.squaredist(t->o) <= maxdist))
+                    if(d->aitype == AI_BOT ? (t->state != CS_SPECTATOR && t->aitype == AI_NONE) : (t->state == CS_ALIVE && d->o.squaredist(t->o) <= maxdist))
                     {
                         d->ai->unsuspend();
                         break;
@@ -712,6 +720,12 @@ namespace ai
             switch(b.targtype)
             {
                 case AI_T_NODE:
+                {
+                    if(check(d, b)) return 1;
+                    if(waypoints.inrange(b.target))
+                        return defense(d, b, waypoints[b.target].o) ? 1 : 0;
+                    break;
+                }
                 case AI_T_ENTITY:
                 {
                     if(check(d, b)) return 1;
@@ -756,11 +770,8 @@ namespace ai
                 case AI_T_NODE:
                 {
                     if(check(d, b)) return 1;
-                    if(entities::ents.inrange(b.target))
-                    {
-                        gameentity &e = *(gameentity *)entities::ents[b.target];
-                        if(vec(e.o).sub(d->feetpos()).magnitude() > CLOSEDIST) return makeroute(d, b, e.o) ? 1 : 0;
-                    }
+                    if(waypoints.inrange(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
+                        return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
                     break;
                 }
                 case AI_T_ENTITY:
@@ -873,12 +884,11 @@ namespace ai
         vec pos = d->feetpos();
         int node = -1;
         float mindist = ALERTMAX*ALERTMAX;
-        loopvrev(d->ai->route) if(entities::ents.inrange(d->ai->route[i]))
+        loopvrev(d->ai->route) if(waypoints.inrange(d->ai->route[i]))
         {
-            gameentity &e = *(gameentity *)entities::ents[d->ai->route[i]];
-            vec epos = e.o;
-            int entid = obs.remap(d, d->ai->route[i], epos, retry);
-            if(entities::ents.inrange(entid) && (retry || entid == d->ai->route[i] || !d->ai->hasprevnode(entid)))
+            vec epos = waypoints[d->ai->route[i]].o;
+            int entid = obstacles.remap(d, d->ai->route[i], epos, retry);
+            if(waypoints.inrange(entid) && (retry || entid == d->ai->route[i] || !d->ai->hasprevnode(entid)))
             {
                 float dist = epos.squaredist(pos);
                 if(dist < mindist)
@@ -893,23 +903,15 @@ namespace ai
 
     bool wpspot(gameent *d, int n, bool retry = false)
     {
-        if(entities::ents.inrange(n))
+        if(waypoints.inrange(n))
         {
-            gameentity &e = *(gameentity *)entities::ents[n];
-            vec epos = e.o;
-            int entid = obs.remap(d, n, epos, retry);
-            if(entities::ents.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
+            vec epos = waypoints[n].o;
+            int entid = obstacles.remap(d, n, epos, retry);
+            if(waypoints.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
             {
-                if(entities::ents[entid]->attrs[0]&WP_F_FLY && !physics::allowhover(d, true)) return false;
-                if(entities::ents[entid]->attrs[0]&WP_F_HOVER && !physics::allowhover(d)) return false;
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;
                 d->ai->targnode = entid;
-                if(aistyle[d->aitype].cancrouch && ((e.attrs[0] & WP_F_CROUCH && !d->action[AC_CROUCH]) || d->action[AC_CROUCH]) && (lastmillis-d->actiontime[AC_CROUCH] >= PHYSMILLIS*3))
-                {
-                    d->action[AC_CROUCH] = !d->action[AC_CROUCH];
-                    d->actiontime[AC_CROUCH] = lastmillis;
-                }
                 return true;
             }
         }
@@ -918,14 +920,14 @@ namespace ai
 
     bool anynode(gameent *d, aistate &b, bool retry = false)
     {
-        if(entities::ents.inrange(d->lastnode))
+        if(waypoints.inrange(d->lastnode))
         {
-            gameentity &e = *(gameentity *)entities::ents[d->lastnode];
+            waypoint &w = waypoints[d->lastnode];
             static vector<int> anyremap; anyremap.setsize(0);
-            if(!e.links.empty())
+            if(w.haslinks())
             {
-                loopv(e.links) if(entities::ents.inrange(e.links[i]) && (retry || !d->ai->hasprevnode(e.links[i])))
-                    anyremap.add(e.links[i]);
+                loopi(MAXWAYPOINTLINKS) if(w.links[i] && waypoints.inrange(w.links[i]) && (retry || !d->ai->hasprevnode(w.links[i])))
+                    anyremap.add(w.links[i]);
             }
             while(!anyremap.empty())
             {
@@ -1348,7 +1350,7 @@ namespace ai
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2: case 3:
-                        if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                        if(waypoints.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
                     case 4: d->ai->reset(false); break;
@@ -1369,7 +1371,7 @@ namespace ai
                 switch(d->ai->targseq)
                 {
                     case 1: case 2: case 3:
-                        if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                        if(waypoints.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
                     case 4: d->ai->reset(false); break;
@@ -1447,24 +1449,23 @@ namespace ai
 
     void avoid()
     {
-        obs.clear();
+        obstacles.clear();
         int numdyns = game::numdynents();
         loopi(numdyns)
         {
             gameent *d = (gameent *)game::iterdynents(i);
             if(!d) continue; // || d->aitype >= AI_START) continue;
             if(!d->ai && !d->airnodes.empty()) loopvj(d->airnodes)
-                if(entities::ents.inrange(d->airnodes[j]) && entities::ents[d->airnodes[j]]->type == WAYPOINT)
-                    obs.add(d, d->airnodes[j]);
+                if(waypoints.inrange(d->airnodes[j])) obstacles.add(d, d->airnodes[j]);
             if(d->state != CS_ALIVE || !physics::issolid(d)) continue;
-            obs.avoidnear(d, d->feetpos(), d->radius+2);
+            obstacles.avoidnear(d, d->feetpos(), d->radius+2);
         }
-        obs.add(wps);
+        obstacles.add(wpavoid);
         loopv(projs::projs)
         {
             projent *p = projs::projs[i];
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT && WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale))
-                obs.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale)*p->lifesize)+2);
+                obstacles.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale)*p->lifesize)+2);
         }
         loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
         {
@@ -1474,9 +1475,9 @@ namespace ai
             mmi.m->collisionbox(0, center, radius);
             if(entities::ents[i]->attrs[4]) { center.mul(entities::ents[i]->attrs[4]/100.f); radius.mul(entities::ents[i]->attrs[4]/100.f); }
             if(!mmi.m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]));
-            float limit = enttype[WAYPOINT].radius+(max(radius.x, max(radius.y, radius.z))*mmi.m->height);
+            float limit = WAYPOINTRADIUS+(max(radius.x, max(radius.y, radius.z))*mmi.m->height);
             vec pos = entities::ents[i]->o; pos.z += limit*0.5f;
-            obs.avoidnear(NULL, pos, limit);
+            obstacles.avoidnear(NULL, pos, limit);
         }
     }
 
@@ -1486,7 +1487,7 @@ namespace ai
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
         if(d->ai->state.empty()) setup(d, false, d->aientity);
-        bool cleannext = false, parse = run && entities::ents.inrange(d->lastnode);
+        bool cleannext = false, parse = run && waypoints.inrange(d->lastnode);
         loopvrev(d->ai->state)
         {
             aistate &c = d->ai->state[i];
@@ -1584,10 +1585,10 @@ namespace ai
             if(d->ai->route.inrange(last))
             {
                 int index = d->ai->route[i], prev = d->ai->route[last];
-                if(entities::ents.inrange(index) && entities::ents.inrange(prev))
+                if(waypoints.inrange(index) && waypoints.inrange(prev))
                 {
-                    gameentity &e = *(gameentity *)entities::ents[index], &f = *(gameentity *)entities::ents[prev];
-                    vec fr = f.o, dr = e.o;
+                    waypoint &w = waypoints[index], &v = waypoints[prev];
+                    vec fr = v.o, dr = w.o;
                     fr.z += amt; dr.z += amt;
                     part_trace(fr, dr, 1, 1, 1, colour);
                 }
@@ -1598,17 +1599,17 @@ namespace ai
         {
             vec fr = vec(d->feetpos()).add(vec(0, 0, amt));
             if(d->ai->spot != vec(0, 0, 0)) part_trace(fr, vec(d->ai->spot).add(vec(0, 0, 0.1f)), 1, 1, 1, 0x008888);
-            if(entities::ents.inrange(d->lastnode))
+            if(waypoints.inrange(d->lastnode))
             {
-                vec dr = vec(entities::ents[d->lastnode]->o).add(vec(0, 0, amt));
+                vec dr = vec(waypoints[d->lastnode].o).add(vec(0, 0, amt));
                 part_trace(fr, dr, 1, 1, 1, 0x884400);
                 fr = dr;
             }
             loopi(NUMPREVNODES)
             {
-                if(entities::ents.inrange(d->ai->prevnodes[i]))
+                if(waypoints.inrange(d->ai->prevnodes[i]))
                 {
-                    vec dr = vec(entities::ents[d->ai->prevnodes[i]]->o).add(vec(0, 0, amt));
+                    vec dr = vec(waypoints[d->ai->prevnodes[i]].o).add(vec(0, 0, amt));
                     part_trace(dr, fr, 1, 1, 1, 0x442200);
                     fr = dr;
                 }
@@ -1651,17 +1652,41 @@ namespace ai
             if(aidebug >= 4 && !m_edit(game::gamemode))
             {
                 int cur = 0;
-                loopv(obs.obstacles)
+                loopv(obstacles.obstacles)
                 {
-                    const entities::avoidset::obstacle &ob = obs.obstacles[i];
-                    int next = cur + ob.numentities;
+                    const avoidset::obstacle &ob = obstacles.obstacles[i];
+                    int next = cur + ob.numwaypoints;
                     for(; cur < next; cur++)
                     {
-                        int ent = obs.entities[cur];
-                        gameentity &e = *(gameentity *)entities::ents[ent];
-                        part_create(PART_EDIT, 1, e.o, 0xFF6600, 1.5f);
+                        int ent = obstacles.waypoints[cur];
+                        if(waypoints.inrange(ent))
+                            part_create(PART_EDIT, 1, waypoints[ent].o, 0xFF6600, 1.5f);
                     }
                     cur = next;
+                }
+            }
+        }
+        if(showwaypoints || aidebug > 5)
+        {
+            vector<int> close;
+            int len = waypoints.length();
+            if(showwaypointsradius)
+            {
+                findwaypointswithin(camera1->o, 0, showwaypointsradius, close);
+                len = close.length();
+            }
+            loopi(len)
+            {
+                int idx = showwaypointsradius ? close[i] : i;
+                waypoint &w = waypoints[idx];
+                loopj(MAXWAYPOINTLINKS)
+                {
+                     int link = w.links[j];
+                     if(!link) break;
+                     waypoint &v = waypoints[link];
+                     bool both = false;
+                     loopk(MAXWAYPOINTLINKS) if(v.links[k] == idx) { both = true; break; }
+                     part_trace(w.o, v.o, 1, 1, 1, both ? 0xAA44CC : 0x660088);
                 }
             }
         }

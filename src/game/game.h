@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         212
+#define GAMEVERSION         213
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -37,7 +37,7 @@ enum                                // entity types
 {
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
-    TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT, CAMERA, WAYPOINT, MAXENTTYPES
+    TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT, DUMMY1, DUMMY2,  MAXENTTYPES
 };
 
 enum { EU_NONE = 0, EU_ITEM, EU_AUTO, EU_ACT, EU_MAX };
@@ -130,7 +130,7 @@ enttypes enttype[] = {
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    9,
-            (1<<AFFINITY)|(1<<WAYPOINT), 0,
+            (1<<AFFINITY), 0,
             false,  true,   false,
                 "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed",    "scale" }
     },
@@ -161,16 +161,16 @@ enttypes enttype[] = {
                 "checkpoint",   { "radius", "yaw",      "pitch",    "mode",     "id",       "type" }
     },
     {
-        CAMERA,         1,          48,     0,      EU_NONE,    4,
+        DUMMY1,         1,          48,     0,      EU_NONE,    4,
             0, 0,
             false,  false,  false,
-                "camera",       { "yaw",   "pitch",     "mindist",  "maxdist" }
+                "dummy1",       { "" }
     },
     {
-        WAYPOINT,       0,          1,      16,     EU_NONE,    2,
-            (1<<WAYPOINT), 0,
+        DUMMY2,       0,          1,      16,     EU_NONE,    2,
+            (1<<DUMMY2), 0,
             true,   false,  false,
-                "waypoint",     { "flags",  "weight" }
+                "dummy2",     { "" }
     }
 };
 #else
@@ -339,7 +339,7 @@ struct gamestate
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
     gamestate() : colour(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0),
-        aitype(-1), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
+        aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
     }
@@ -693,7 +693,7 @@ struct gameent : dynent, gamestate
 
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
-        int type = clamp(aitype, int(AI_BOT), int(AI_MAX-1));
+        int type = clamp(aitype, 0, int(AI_MAX-1));
         speed = aistyle[type].speed;
         xradius = aistyle[type].xradius*curscale;
         yradius = aistyle[type].yradius*curscale;
@@ -920,7 +920,7 @@ struct gameent : dynent, gamestate
         }
     }
 
-    bool wantshitbox() { return type == ENT_PLAYER || (type == ENT_AI && (!isaitype(aitype) || aistyle[aitype].hitbox)); }
+    bool wantshitbox() { return type == ENT_PLAYER || (type == ENT_AI && aistyle[aitype].hitbox); }
 
     void checktags()
     {
@@ -1296,36 +1296,40 @@ namespace entities
     extern const char *entinfo(int type, attrvector &attr, bool full = false, bool icon = false);
     extern void useeffects(gameent *d, int n, int c, bool s, int g, int r, int v = -1);
     extern const char *entmdlname(int type, attrvector &attr);
-    extern bool clipped(const vec &o, bool aiclip = false);
     extern void edittoggled(bool edit);
     extern const char *findname(int type);
     extern void adddynlights();
     extern void render();
     extern void update();
+    extern void findentswithin(int type, const vec &pos, float mindist, float maxdist, vector<int> &results);
+}
+
+namespace ai
+{
     struct avoidset
     {
         struct obstacle
         {
             dynent *ent;
-            int numentities;
+            int numwaypoints;
             float above;
 
-            obstacle(dynent *ent) : ent(ent), numentities(0), above(-1) {}
+            obstacle(dynent *ent) : ent(ent), numwaypoints(0), above(-1) {}
         };
 
         vector<obstacle> obstacles;
-        vector<int> entities;
+        vector<int> waypoints;
 
         void clear()
         {
             obstacles.setsize(0);
-            entities.setsize(0);
+            waypoints.setsize(0);
         }
 
         void add(dynent *ent)
         {
             obstacle &ob = obstacles.add(obstacle(ent));
-            if(!ent) ob.above = enttype[WAYPOINT].radius;
+            if(!ent) ob.above = WAYPOINTRADIUS;
             else switch(ent->type)
             {
                 case ENT_PLAYER: case ENT_AI:
@@ -1347,18 +1351,18 @@ namespace entities
         void add(dynent *ent, int entity)
         {
             if(obstacles.empty() || ent != obstacles.last().ent) add(ent);
-            obstacles.last().numentities++;
-            entities.add(entity);
+            obstacles.last().numwaypoints++;
+            waypoints.add(entity);
         }
 
         void add(avoidset &avoid)
         {
-            entities.put(avoid.entities.getbuf(), avoid.entities.length());
+            waypoints.put(avoid.waypoints.getbuf(), avoid.waypoints.length());
             loopv(avoid.obstacles)
             {
                 obstacle &o = avoid.obstacles[i];
                 if(obstacles.empty() || o.ent != obstacles.last().ent) add(o.ent, o.above);
-                obstacles.last().numentities += o.numentities;
+                obstacles.last().numwaypoints += o.numwaypoints;
             }
         }
 
@@ -1370,13 +1374,13 @@ namespace entities
                 int cur = 0; \
                 loopv((v).obstacles) \
                 { \
-                    const entities::avoidset::obstacle &ob = (v).obstacles[i]; \
-                    int next = cur + ob.numentities; \
+                    const avoidset::obstacle &ob = (v).obstacles[i]; \
+                    int next = cur + ob.numwaypoints; \
                     if(!ob.ent || ob.ent != (d)) \
                     { \
-                        for(; cur < next; cur++) if((v).entities.inrange(cur)) \
+                        for(; cur < next; cur++) if((v).waypoints.inrange(cur)) \
                         { \
-                            int ent = (v).entities[cur]; \
+                            int wp = (v).waypoints[cur]; \
                             body; \
                         } \
                     } \
@@ -1386,7 +1390,7 @@ namespace entities
 
         bool find(int entity, gameent *d) const
         {
-            loopavoid(*this, d, { if(ent == entity) return true; });
+            loopavoid(*this, d, { if(wp == entity) return true; });
             return false;
         }
 
@@ -1398,21 +1402,21 @@ namespace entities
                 loopv(obstacles)
                 {
                     obstacle &ob = obstacles[i];
-                    int next = cur + ob.numentities;
+                    int next = cur + ob.numwaypoints;
                     if(!ob.ent || ob.ent != d || (d->blocked && ob.ent == d))
                     {
-                        for(; cur < next; cur++) if(entities[cur] == n)
+                        for(; cur < next; cur++) if(waypoints[cur] == n)
                         {
                             if(ob.above < 0) return retry ? n : -1;
                             vec above(pos.x, pos.y, ob.above);
                             if(above.z-d->o.z >= ai::JUMPMAX)
                                 return retry ? n : -1; // too much scotty
-                            int node = closestent(WAYPOINT, above, ai::CLOSEDIST, true);
-                            if(ents.inrange(node) && node != n)
+                            int node = ai::closestwaypoint(above, ai::CLOSEDIST, true);
+                            if(ai::waypoints.inrange(node) && node != n)
                             { // try to reroute above their head?
                                 if(!find(node, d))
                                 {
-                                    pos = ents[node]->o;
+                                    pos = ai::waypoints[node].o;
                                     return node;
                                 }
                                 else return retry ? n : -1;
@@ -1438,8 +1442,6 @@ namespace entities
             return n;
         }
     };
-    extern void findentswithin(int type, const vec &pos, float mindist, float maxdist, vector<int> &results);
-    extern float route(int node, int goal, vector<int> &route, const avoidset &obstacles, gameent *d = NULL, int retries = 0);
 }
 #elif defined(GAMESERVER)
 namespace client

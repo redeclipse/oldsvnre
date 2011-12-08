@@ -490,7 +490,7 @@ namespace hud
                 g.strut(3);
                 g.text("sk ", fgcolor);
                 loopscoregroup({
-                    if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
+                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
                     else g.space(1);
                 });
                 g.poplist();
@@ -502,7 +502,7 @@ namespace hud
                 g.strut(3);
                 g.text("on", fgcolor);
                 loopscoregroup({
-                    if(o->aitype >= 0) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
+                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
                     else g.space(1);
                 });
                 g.poplist();
