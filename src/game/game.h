@@ -1082,22 +1082,22 @@ struct cament
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
     int type, id, pri, cansee;
-    vec pos, dir;
+    vec pos, dir, olddir;
     float dist, mindist, maxdist, score;
     gameent *player;
     bool current, ignore;
 
-    cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL) { reset(); }
-    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
-    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), pos(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
+    cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false) { reset(); }
+    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false) { reset(); }
+    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), pos(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false) { reset(); }
     ~cament() {}
 
-    void reset()
+    void reset(bool update = false)
     {
         cansee = 0;
+        olddir = update ? dir : vec(0, 0, 0);
         dir = vec(0, 0, 0);
         score = 0;
-        current = ignore = false;
     }
 
     static bool camsort(const cament &a, const cament &b)
