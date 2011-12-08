@@ -1084,7 +1084,7 @@ namespace hud
                             if(enttype[e.type].usetype == EU_ITEM)
                             {
                                 int drop = -1, sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                                if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
+                                if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_ALL))
                                 {
                                     if(e.type == WEAPON && w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
                                         drop = target->drop(sweap);
