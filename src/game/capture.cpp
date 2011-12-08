@@ -596,7 +596,7 @@ namespace capture
                 loopv(st.flags)
                 {
                     capturestate::flag &g = st.flags[i];
-                    if(iscapturehome(g, ai::owner(d)) && (k || (!g.owner && !g.droptime)) &&
+                    if(iscapturehome(g, ai::owner(d)) && (k || ((!g.owner || g.owner == d) && !g.droptime)) &&
                         (!st.flags.inrange(goal) || g.pos().squaredist(pos) < st.flags[goal].pos().squaredist(pos)))
                     {
                         goal = i;
@@ -757,7 +757,7 @@ namespace capture
         if(st.flags.inrange(b.target))
         {
             capturestate::flag &f = st.flags[b.target];
-            if(iscaptureaffinity(f, ai::owner(d)) && f.owner)
+            if(iscaptureaffinity(f, ai::owner(d)) && f.owner && ai::owner(f.owner) != ai::owner(d))
             {
                 ai::violence(d, b, f.owner, false);
                 if(d->aitype != AI_BOT) return true;
