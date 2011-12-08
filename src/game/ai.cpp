@@ -1031,7 +1031,7 @@ namespace ai
         if(!aistyle[d->aitype].canstrafe && d->skill <= 100) frame *= 2;
         vec dp = d->headpos();
 
-        bool wasdontmove = d->ai->dontmove, idle = b.idle == 1 || (stupify && stupify <= skmod) || d->ai->suspended;
+        bool idle = b.idle == 1 || (stupify && stupify <= skmod) || d->ai->suspended;
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
         if(idle || !aistyle[d->aitype].canmove)
         {
@@ -1142,16 +1142,6 @@ namespace ai
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
         if(d->aitype == AI_BOT)
         {
-            if(idle)
-            {
-                bool wascrouching = lastmillis-d->actiontime[AC_CROUCH] <= PHYSMILLIS*2, wantscrouch = d->ai->dontmove && !wasdontmove && !d->action[AC_CROUCH];
-                if(wascrouching || wantscrouch)
-                {
-                    d->action[AC_CROUCH] = true;
-                    if(wantscrouch) d->actiontime[AC_CROUCH] = lastmillis;
-                }
-            }
-
             bool wantsimpulse = false;
             if(physics::allowimpulse(d))
             {
@@ -1455,8 +1445,6 @@ namespace ai
         {
             gameent *d = (gameent *)game::iterdynents(i);
             if(!d) continue; // || d->aitype >= AI_START) continue;
-            if(!d->ai && !d->airnodes.empty()) loopvj(d->airnodes)
-                if(waypoints.inrange(d->airnodes[j])) obstacles.add(d, d->airnodes[j]);
             if(d->state != CS_ALIVE || !physics::issolid(d)) continue;
             obstacles.avoidnear(d, d->feetpos(), d->radius+2);
         }
