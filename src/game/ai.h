@@ -1,7 +1,4 @@
-struct gameent;
-
-enum { AI_BOT, AI_TURRET, AI_GRUNT, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
-#define isaitype(a) (a >= 0 && a <= AI_MAX-1)
+enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
 
 struct aistyles
 {
@@ -12,6 +9,12 @@ struct aistyles
 };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
+    {
+        AI_NONE,         -1,             0,
+            3,          3,          15,         200,        50,         1,
+            true,       true,       true,       true,       true,       true,       true,
+                "player",   "actors/player",     "actors/player/hwep"
+    },
     {
         AI_BOT,         -1,             0,
             3,          3,          15,         200,        50,         1,
@@ -32,20 +35,15 @@ aistyles aistyle[] = {
     },
 };
 #else
+struct gameent;
 extern aistyles aistyle[];
-#endif
-
-enum
-{
-    WP_F_NONE = 0,
-    WP_F_CROUCH = 1<<0,
-    WP_F_FLY = 1<<1,
-    WP_F_HOVER = 1<<2
-};
-namespace entities { struct avoidset; };
 
 namespace ai
 {
+    const int MAXWAYPOINTS      = USHRT_MAX - 2;
+    const int MAXWAYPOINTLINKS  = 6;
+    const int WAYPOINTRADIUS    = 16;
+
     const float CLOSEDIST       = 32.f;    // is close
     const float JUMPMIN         = 1.5f;    // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
@@ -55,6 +53,53 @@ namespace ai
     const float ALERTMAX        = 512.f;   // maximum alert distance
     const float VIEWMIN         = 90.f;    // minimum field of view
     const float VIEWMAX         = 180.f;   // maximum field of view
+
+    struct waypoint
+    {
+        vec o;
+        float curscore, estscore;
+		int weight;
+        ushort route, prev;
+        ushort links[MAXWAYPOINTLINKS];
+
+        waypoint() {}
+        waypoint(const vec &o, int weight = 0) : o(o), weight(weight), route(0) { memset(links, 0, sizeof(links)); }
+
+        int score() const { return int(curscore) + int(estscore); }
+
+        int find(int wp)
+		{
+			loopi(MAXWAYPOINTLINKS) if(links[i] == wp) return i;
+			return -1;
+		}
+
+		bool haslinks()
+		{
+		    loopi(MAXWAYPOINTLINKS) if(links[i]) return true;
+		    return false;
+		}
+    };
+    extern vector<waypoint> waypoints;
+
+    struct oldwaypoint
+    {
+        vec o;
+        int ent;
+        linkvector links;
+    };
+    extern vector<oldwaypoint> oldwaypoints;
+
+    extern int closestwaypoint(const vec &pos, float mindist, bool links, gameent *d = NULL);
+    extern void findwaypointswithin(const vec &pos, float mindist, float maxdist, vector<int> &results);
+	extern void inferwaypoints(gameent *d, const vec &o, const vec &v, float mindist = ai::CLOSEDIST);
+
+    struct avoidset;
+    extern bool route(gameent *d, int node, int goal, vector<int> &route, const avoidset &obstacles, int retries = 0);
+    extern void navigate();
+    extern void clearwaypoints(bool full = false);
+    extern bool loadwaypoints(bool force = false, const char *mname = NULL);
+    extern void savewaypoints(bool force = false, const char *mname = NULL);
+    extern void importwaypoints();
 
     // ai state information for the owner client
     enum
@@ -205,7 +250,7 @@ namespace ai
         }
     };
 
-    extern entities::avoidset obs, wps;
+    extern avoidset obstacles, wpavoid;
     extern vec aitarget;
     extern int aidebug, aideadfade, showaiinfo;
 
@@ -240,3 +285,4 @@ namespace ai
     extern void render();
     extern void preload();
 };
+#endif

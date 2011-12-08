@@ -629,7 +629,7 @@ namespace game
     float rescale(gameent *d)
     {
         float total = actorscale;
-        if(d->aitype >= 0)
+        if(d->aitype > AI_NONE)
         {
             bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
             if(hasent && entities::ents[d->aientity]->attrs[8] > 0) total *= (entities::ents[d->aientity]->attrs[8]/100.f)*enemyscale;
@@ -677,7 +677,7 @@ namespace game
 
         d->setscale(rescale(d), curtime, false, gamemode, mutators);
         d->speedscale = d->curscale;
-        if(d->aitype >= 0)
+        if(d->aitype > AI_NONE)
         {
             bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
             if(hasent && entities::ents[d->aientity]->attrs[7] > 0) d->speedscale *= entities::ents[d->aientity]->attrs[7]*enemyspeed;
@@ -903,7 +903,7 @@ namespace game
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
                     vec p = d->headpos(-d->height/4);
-                    if(!isaitype(d->aitype) || aistyle[d->aitype].living)
+                    if(aistyle[d->aitype].living)
                     {
                         if(!kidmode && bloodscale > 0)
                             part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
@@ -985,7 +985,7 @@ namespace game
         d->lastattacker = actor->clientnum;
         if(d == actor)
         {
-            if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
+            if(!aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
             else if(flags&HIT_MELT) concatstring(d->obit, *obitlava ? obitlava : "melted into a ball of fire");
             else if(flags&HIT_WATER) concatstring(d->obit, *obitwater ? obitwater : "died");
             else if(flags&HIT_DEATH) concatstring(d->obit, *obitdeath ? obitdeath : "died");
@@ -1016,7 +1016,7 @@ namespace game
         else
         {
             concatstring(d->obit, "was ");
-            if(isaitype(d->aitype) && !aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
+            if(!aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
             else if(burning) concatstring(d->obit, "set ablaze by");
             else if(bleeding) concatstring(d->obit, "fatally wounded by");
             else if(isweap(weap))
@@ -1232,8 +1232,8 @@ namespace game
             {
                 case 1: if(isme || m_duke(gamemode, mutators)) show = true; break;
                 case 2: if(isme || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                case 3: if(isme || d->aitype < 0 || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                case 4: if(isme || d->aitype < 0 || actor->aitype < 0 || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                case 3: if(isme || d->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                case 4: if(isme || d->aitype == AI_NONE || actor->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
                 case 5: default: show = true; break;
             }
             int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
@@ -1245,7 +1245,7 @@ namespace game
             vec pos = d->headpos(-d->height*0.5f);
             int gib = clamp(max(damage,5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
             if(d->obliterated) amt *= 3;
-            loopi(amt) projs::create(pos, pos, true, d, !isaitype(d->aitype) || aistyle[d->aitype].living ? PRJ_GIBS : PRJ_DEBRIS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
+            loopi(amt) projs::create(pos, pos, true, d, aistyle[d->aitype].living ? PRJ_GIBS : PRJ_DEBRIS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
         if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
         {
@@ -1309,7 +1309,7 @@ namespace game
         if(!players.inrange(cn)) return;
         gameent *d = players[cn];
         if(!d) return;
-        if(d->name[0] && showplayerinfo && (d->aitype < 0 || ai::showaiinfo))
+        if(d->name[0] && showplayerinfo && (d->aitype == AI_NONE || ai::showaiinfo))
             conoutft(CON_EVENT, "\fo%s left the game (%s)", colorname(d), reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         int numdyns = numdynents();
@@ -1352,6 +1352,8 @@ namespace game
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
+        ai::savewaypoints();
+        ai::clearwaypoints(true);
         intermission = false;
         maptime = hud::lastnewgame = 0;
         projs::reset();
@@ -1799,17 +1801,11 @@ namespace game
         if(cameras.empty())
         {
             regen = true;
-            loopv(entities::ents) if(entities::ents[i]->type == CAMERA || (!enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL))
+            loopv(entities::ents) if(!enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL)
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
                 cament &c = cameras.add(cament(e.o, cament::ENTITY, i, camera1->o.dist(e.o)));
                 if(enttype[e.type].radius) c.pos.z += enttype[e.type].radius;
-                if(e.type == CAMERA)
-                {
-                    vecfromyawpitch(e.attrs[0] < 0 ? (lastmillis/5)%360 : e.attrs[0], e.attrs[1], 1, 0, c.dir);
-                    if(e.attrs[2]) c.mindist = e.attrs[2];
-                    if(e.attrs[3]) c.maxdist = e.attrs[3];
-                }
             }
             gameent *d = NULL;
             loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
@@ -2082,6 +2078,7 @@ namespace game
             else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
 
             physics::update();
+            ai::navigate();
             projs::update();
             ai::update();
             if(!intermission)
@@ -2263,7 +2260,7 @@ namespace game
         }
         else
         {
-            if(secondary && allowmove(d) && (!isaitype(d->aitype) || aistyle[d->aitype].canmove))
+            if(secondary && allowmove(d) && aistyle[d->aitype].canmove)
             {
                 if(physics::hover(d))
                 {
@@ -2427,7 +2424,7 @@ namespace game
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
-            const char *name = colorname(d, NULL, d->aitype < 0 ? "<super>" : "<emphasis>");
+            const char *name = colorname(d, NULL, d->aitype == AI_NONE ? "<super>" : "<emphasis>");
             if(name && *name)
             {
                 pos.z += aboveheadnamesize/2;

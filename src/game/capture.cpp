@@ -386,7 +386,7 @@ namespace capture
                     int best = -1;
                     float margin = 1e16f, mindist = 1e16f;
                     vector<int> route;
-                    entities::avoidset obstacles;
+                    ai::avoidset obstacles;
                     for(int q = 0; q < 2; q++) loopvj(entities::ents)
                     {
                         extentity *e = entities::ents[j];
@@ -395,12 +395,12 @@ namespace capture
                         float v = 0;
                         if(!q)
                         {
-                            int node = entities::closestent(WAYPOINT, e->o, 1e16f, true);
+                            int node = ai::closestwaypoint(e->o, 1e16f, true);
                             bool found = true;
                             loopvk(st.flags)
                             {
-                                int goal = entities::closestent(WAYPOINT, st.flags[k].spawnloc, 1e16f, true);
-                                float u[2] = { entities::route(node, goal, route, obstacles), entities::route(goal, node, route, obstacles) };
+                                int goal = ai::closestwaypoint(st.flags[k].spawnloc, 1e16f, true);
+                                float u[2] = { ai::route(NULL, node, goal, route, obstacles), ai::route(NULL, goal, node, route, obstacles) };
                                 if(u[0] > 0 && u[1] > 0) v += dists.add((u[0]+u[1])*0.5f);
                                 else
                                 {
@@ -700,7 +700,7 @@ namespace capture
                 { // defend the flag
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
@@ -714,7 +714,7 @@ namespace capture
                 { // attack the flag
                     ai::interest &n = interests.add();
                     n.state = d->aitype == AI_BOT ? ai::AI_S_PURSUE : ai::AI_S_DEFEND;
-                    n.node = entities::closestent(WAYPOINT, f.pos(), ai::CLOSEDIST, true);
+                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos());

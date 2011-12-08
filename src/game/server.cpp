@@ -438,7 +438,7 @@ namespace server
                 case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
                 case 2: case 3: default: break;
             }
-            if(!isweap(ci->state.loadweap[j]) && ci->state.aitype < 0)
+            if(!isweap(ci->state.loadweap[j]) && ci->state.aitype == AI_NONE)
             {
                 if(request)
                 {
@@ -506,7 +506,7 @@ namespace server
                     if(maxplayers-alive == 0)
                     {
                         int wait = 0;
-                        loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.aitype < 0)
+                        loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
                         {
                             wait++;
                             if(spawnq[i] == ci)
@@ -578,14 +578,14 @@ namespace server
                     {
                         loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
                         {
-                            if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype < 0)) return false;
+                            if(spawnq[i] != ci && (ci->state.state >= 0 || spawnq[i]->state.aitype == AI_NONE)) return false;
                             break;
                         }
                         // at this point is where it decides this player is spawning, so tell everyone else their position
                         if(maxplayers-alive == 1)
                         {
                             int wait = 0;
-                            loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype < 0)
+                            loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
                             {
                                 wait++;
                                 if(allowbroadcast(spawnq[i]->clientnum))
@@ -761,14 +761,14 @@ namespace server
     int peerowner(int n)
     {
         clientinfo *ci = (clientinfo *)getinfo(n);
-        if(ci && ci->state.aitype >= 0) return ci->state.ownernum;
+        if(ci && ci->state.aitype > AI_NONE) return ci->state.ownernum;
         return n;
     }
 
     bool allowbroadcast(int n)
     {
         clientinfo *ci = (clientinfo *)getinfo(n);
-        return ci && ci->connected && ci->state.aitype < 0;
+        return ci && ci->connected && ci->state.aitype == AI_NONE;
     }
 
     const char *mastermodename(int type)
@@ -803,7 +803,7 @@ namespace server
         {
             if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->clientnum != exclude &&
                 (!nospec || clients[i]->state.state != CS_SPECTATOR) &&
-                    (clients[i]->state.aitype < 0 || (aitype >= 0 && clients[i]->state.aitype <= aitype && clients[i]->state.ownernum >= 0)))
+                    (clients[i]->state.aitype == AI_NONE || (aitype > AI_NONE && clients[i]->state.aitype <= aitype && clients[i]->state.ownernum >= 0)))
                         n++;
         }
         return n;
@@ -1864,7 +1864,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *oi = clients[i];
-            if(oi->state.aitype >= 0) continue;
+            if(oi->state.aitype > AI_NONE) continue;
             maxvotes++;
             if(!oi->mapvote[0]) continue;
             votecount *vc = NULL;
@@ -2072,7 +2072,7 @@ namespace server
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
-            if(ci->state.aitype < 0) aiman::dorefresh = GAME(airefresh); // get the ai to reorganise
+            if(ci->state.aitype == AI_NONE) aiman::dorefresh = GAME(airefresh); // get the ai to reorganise
         }
         if(info) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
@@ -2107,7 +2107,7 @@ namespace server
                 if(GAME(teampersist) == 2) return team;
                 break;
             }
-            if(balance < 3 && ci->state.aitype >= 0) balance = 1;
+            if(balance < 3 && ci->state.aitype > AI_NONE) balance = 1;
             if(balance || team < 0)
             {
                 teamcheck teamchecks[TEAM_TOTAL];
@@ -2116,8 +2116,8 @@ namespace server
                 {
                     clientinfo *cp = clients[i];
                     if(!cp->team || cp == ci || cp->state.state == CS_SPECTATOR || cp->state.state == CS_EDITING) continue;
-                    if((cp->state.aitype >= 0 && cp->state.ownernum < 0) || cp->state.aitype >= AI_START) continue;
-                    if(ci->state.aitype >= 0 || (ci->state.aitype < 0 && cp->state.aitype < 0))
+                    if((cp->state.aitype > AI_NONE && cp->state.ownernum < 0) || cp->state.aitype >= AI_START) continue;
+                    if(ci->state.aitype > AI_NONE || (ci->state.aitype == AI_NONE && cp->state.aitype == AI_NONE))
                     { // remember: ai just balance teams
                         cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
                         cp->state.lasttimeplayed = lastmillis;
@@ -2127,7 +2127,7 @@ namespace server
                     }
                 }
                 teamcheck *worst = &teamchecks[0];
-                if(balance != 3 || ci->state.aitype >= 0)
+                if(balance != 3 || ci->state.aitype > AI_NONE)
                 {
                     loopi(numteams(gamemode, mutators))
                     {
@@ -2230,7 +2230,7 @@ namespace server
 
     void spectator(clientinfo *ci, int sender = -1)
     {
-        if(!ci || ci->state.aitype >= 0) return;
+        if(!ci || ci->state.aitype > AI_NONE) return;
         ci->state.state = CS_SPECTATOR;
         sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, 1);
         setteam(ci, TEAM_NEUTRAL, false, true);
@@ -2378,7 +2378,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0) continue;
+            if(ci->state.state==CS_SPECTATOR || ci->state.aitype > AI_NONE) continue;
             total++;
             if(!ci->clientmap[0])
             {
@@ -2398,7 +2398,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0 || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
+            if(ci->state.state==CS_SPECTATOR || ci->state.aitype > AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
             srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
             if(req < 0) ci->warned = true;
         }
@@ -2409,7 +2409,7 @@ namespace server
             if(i || info.matches <= crcs[i+1].matches) loopvj(clients)
             {
                 clientinfo *ci = clients[j];
-                if(ci->state.state==CS_SPECTATOR || ci->state.aitype >= 0 || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
+                if(ci->state.state==CS_SPECTATOR || ci->state.aitype > AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
                 srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
                 if(req < 0) ci->warned = true;
             }
@@ -2663,7 +2663,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *cs = clients[i];
-            if(cs->state.aitype >= 0 || !cs->name[0] || !cs->online || cs->wantsmap) continue;
+            if(cs->state.aitype > AI_NONE || !cs->name[0] || !cs->online || cs->wantsmap) continue;
             if(!best || cs->state.timeplayed > best->state.timeplayed) best = cs;
         }
         return best;
@@ -2693,7 +2693,7 @@ namespace server
 
     void putinitclient(clientinfo *ci, packetbuf &p)
     {
-        if(ci->state.aitype >= 0)
+        if(ci->state.aitype > AI_NONE)
         {
             if(ci->state.ownernum >= 0)
             {
@@ -2858,7 +2858,7 @@ namespace server
             loopv(clients)
             {
                 clientinfo *oi = clients[i];
-                if(oi->state.aitype >= 0 || (ci && oi->clientnum == ci->clientnum)) continue;
+                if(oi->state.aitype > AI_NONE || (ci && oi->clientnum == ci->clientnum)) continue;
                 if(oi->mapvote[0])
                 {
                     putint(p, N_MAPVOTE);
@@ -2934,7 +2934,7 @@ namespace server
                 switch(GAME(teamdamage))
                 {
                     case 2: default: break;
-                    case 1: if(actor->state.aitype < 0 || target->state.aitype >= 0) break;
+                    case 1: if(actor->state.aitype == AI_NONE || target->state.aitype > AI_NONE) break;
                     case 0: nodamage++; break;
                 }
             }
@@ -3015,7 +3015,7 @@ namespace server
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
-                if(!firstblood && actor->state.aitype < 0 && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
+                if(!firstblood && actor->state.aitype == AI_NONE && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
                 {
                     firstblood = true;
                     style |= FRAG_FIRSTBLOOD;
@@ -3852,7 +3852,7 @@ namespace server
             sendstring(cname, p);
             #endif
         }
-        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype < 0)
+        loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype == AI_NONE)
             sendstring(colorname(clients[i]), p);
         sendqueryreply(p);
     }
@@ -3989,7 +3989,7 @@ namespace server
         {
             clientinfo &ci = *clients[i];
             ENetPacket *packet;
-            if(ci.state.aitype < 0 && psize && (ci.posoff<0 || psize-ci.poslen>0))
+            if(ci.state.aitype == AI_NONE && psize && (ci.posoff<0 || psize-ci.poslen>0))
             {
                 packet = enet_packet_create(&ws.positions[ci.posoff<0 ? 0 : ci.posoff+ci.poslen],
                                             ci.posoff<0 ? psize : psize-ci.poslen,
@@ -3999,7 +3999,7 @@ namespace server
                 else { ++ws.uses; packet->freeCallback = freecallback; }
             }
 
-            if(ci.state.aitype < 0 && msize && (ci.msgoff<0 || msize-ci.msglen>0))
+            if(ci.state.aitype == AI_NONE && msize && (ci.msgoff<0 || msize-ci.msglen>0))
             {
                 packet = enet_packet_create(&ws.messages[ci.msgoff<0 ? 0 : ci.msgoff+ci.msglen],
                                             ci.msgoff<0 ? msize : msize-ci.msglen,
@@ -4231,7 +4231,7 @@ namespace server
                 case N_EDITMODE:
                 {
                     int val = getint(p);
-                    if(!ci || ci->state.aitype >= 0) break;
+                    if(!ci || ci->state.aitype > AI_NONE) break;
                     if(!allowstate(ci, val ? 4 : 5) && !haspriv(ci, PRIV_MASTER, "unspectate and edit")) { spectator(ci); break; }
                     ci->state.editspawn(gamemode, mutators);
                     if(val)
@@ -4815,7 +4815,7 @@ namespace server
                 {
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
-                    if(!cp || cp->state.aitype >= 0) break;
+                    if(!cp || cp->state.aitype > AI_NONE) break;
                     if((sn != sender || !allowstate(cp, val ? 3 : 1)) && !haspriv(ci, PRIV_MASTER, sn != sender ? "spectate others" : "unspectate")) break;
                     spectate(cp, val);
                     break;

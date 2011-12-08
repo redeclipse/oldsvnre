@@ -10,12 +10,12 @@ namespace aiman
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype >= 0 || !ci->name[0] || !ci->connected || ci->clientnum == exclude)
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->name[0] || !ci->connected || ci->clientnum == exclude)
                 siblings[i] = -1;
             else
             {
                 siblings[i] = 0;
-                loopvj(clients) if(clients[j]->state.aitype >= 0 && clients[j]->state.ownernum == ci->clientnum)
+                loopvj(clients) if(clients[j]->state.aitype > AI_NONE && clients[j]->state.ownernum == ci->clientnum)
                     siblings[i]++;
             }
         }
@@ -86,7 +86,7 @@ namespace aiman
 
     void deleteai(clientinfo *ci)
     {
-        if(ci->state.aitype < 0) return;
+        if(ci->state.aitype == AI_NONE) return;
         int cn = ci->clientnum;
         loopv(clients) if(clients[i] != ci)
         {
@@ -116,7 +116,7 @@ namespace aiman
 
     void reinitai(clientinfo *ci)
     {
-        if(ci->state.aitype < 0) return;
+        if(ci->state.aitype == AI_NONE) return;
         if(ci->state.ownernum < 0) deleteai(ci);
         else if(ci->state.aireinit >= 1)
         {
@@ -140,7 +140,7 @@ namespace aiman
 
     void removeai(clientinfo *ci, bool complete)
     { // either schedules a removal, or someone else to assign to
-        loopv(clients) if(clients[i]->state.aitype >= 0 && clients[i]->state.ownernum == ci->clientnum)
+        loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum == ci->clientnum)
             shiftai(clients[i], complete ? -1 : findaiclient(ci->clientnum));
     }
 
@@ -152,12 +152,12 @@ namespace aiman
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype >= 0 || !ci->name[0] || !ci->connected || ci->clientnum == exclude)
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->name[0] || !ci->connected || ci->clientnum == exclude)
                 siblings[i] = -1;
             else
             {
                 siblings[i] = 0;
-                loopvj(clients) if(clients[j]->state.aitype >= 0 && clients[j]->state.ownernum == ci->clientnum)
+                loopvj(clients) if(clients[j]->state.aitype > AI_NONE && clients[j]->state.ownernum == ci->clientnum)
                     siblings[i]++;
                 if(!siblings.inrange(hi) || siblings[i] > siblings[hi]) hi = i;
                 if(!siblings.inrange(lo) || siblings[i] < siblings[lo]) lo = i;
@@ -166,7 +166,7 @@ namespace aiman
         if(siblings.inrange(hi) && siblings.inrange(lo) && (siblings[hi]-siblings[lo]) > 1)
         {
             clientinfo *ci = clients[hi];
-            loopv(clients) if(clients[i]->state.aitype >= 0 && clients[i]->state.ownernum == ci->clientnum)
+            loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum == ci->clientnum)
             {
                 shiftai(clients[i], clients[lo]->clientnum);
                 return true;
@@ -178,7 +178,7 @@ namespace aiman
     void checksetup()
     {
         int m = max(GAME(skillmax), GAME(skillmin)), n = min(GAME(skillmin), m), numbots = 0;
-        loopv(clients) if(clients[i]->state.aitype >= 0 && clients[i]->state.ownernum >= 0)
+        loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum >= 0)
         {
             clientinfo *ci = clients[i];
             int o = clamp(m, 1, 101), p = clamp(n, 1, 101);
@@ -206,7 +206,7 @@ namespace aiman
                 if(GAME(teambalance) != 3)
                 {
                     int plrs[TEAM_TOTAL] = {0}, highest = -1;
-                    loopv(clients) if(clients[i]->state.aitype < 0 && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
+                    loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
                     {
                         int team = clients[i]->team-TEAM_FIRST;
                         plrs[team]++;
@@ -297,7 +297,7 @@ namespace aiman
                     if(dorefresh <= 0) { dorefresh = 0; checksetup(); }
                 }
                 checkenemies();
-                loopvrev(clients) if(clients[i]->state.aitype >= 0) reinitai(clients[i]);
+                loopvrev(clients) if(clients[i]->state.aitype > AI_NONE) reinitai(clients[i]);
                 while(true) if(!reassignai()) break;
             }
         }
