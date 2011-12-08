@@ -93,7 +93,7 @@ struct physent                                  // base entity type, can be affe
 
     int inmaterial;
     bool blocked, inliquid, onladder;
-    float submerged, curscale;
+    float submerged, curscale, speedscale;
     char move, strafe;
 
     uchar physstate;                            // one of PHYS_* above
@@ -102,7 +102,7 @@ struct physent                                  // base entity type, can be affe
     uchar collidetype;                          // one of COLLIDE_* above
 
     physent() : speed(100), weight(100), radius(3), aboveeye(1),
-        xradius(3), yradius(3), zradius(14), zmargin(0), curscale(1),
+        xradius(3), yradius(3), zradius(14), zmargin(0), curscale(1), speedscale(1),
         state(CS_ALIVE), type(ENT_PLAYER),
         collidetype(COLLIDE_ELLIPSE)
     {
