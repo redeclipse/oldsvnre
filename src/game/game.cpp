@@ -1720,7 +1720,7 @@ namespace game
     bool camupdate(cament *c, bool update = false)
     {
         float foglevel = float(fog*2/3);
-        c->reset();
+        c->reset(true);
         if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
         loopv(cameras) if(cameras[i].type != cament::ENTITY && c != &cameras[i])
         {
@@ -1729,7 +1729,7 @@ namespace game
             {
                 case cament::PLAYER:
                 {
-                    if(!f.player || f.player->state != CS_ALIVE) continue;
+                    if(!f.player || f.player->state != CS_ALIVE || (c->player && f.player && c->player == f.player)) continue;
                     break;
                 }
                 default: break;
@@ -1772,6 +1772,7 @@ namespace game
             if(c->player) c->cansee++;
             return true;
         }
+        c->dir = c->olddir;
         return false;
     }
 
@@ -1852,11 +1853,11 @@ namespace game
             cament *cam = &cameras[0];
             camrefresh(cam);
             int lasttype = cam->type, lastid = cam->id;
-            bool fail = regen && !camupdate(cam) && override;
-            if(renew || fail)
+            bool updated = camupdate(cam);
+            if(renew || (!updated && override))
             {
                 loopv(cameras) if(!camupdate(&cameras[i], true)) cameras[i].reset();
-                if(fail) renew = force = true;
+                if(!updated && override) renew = force = true;
             }
             if(renew)
             {
@@ -1867,12 +1868,7 @@ namespace game
                         cameras[i].ignore = true;
                 }
                 cameras.sort(cament::camsort);
-                if(force)
-                {
-                    cam->ignore = false;
-                    if(cam->player) loopv(cameras) if(cameras[i].player == cam->player)
-                        cameras[i].ignore = false;
-                }
+                if(force) loopv(cameras) if(cameras[i].ignore) cameras[i].ignore = false;
                 cam->current = false;
                 cam = &cameras[0];
                 cam->current = true;

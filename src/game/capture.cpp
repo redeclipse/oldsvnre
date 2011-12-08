@@ -178,7 +178,7 @@ namespace capture
             if(!entities::ents.inrange(f.ent)) continue;
             int pri = f.team == game::player1->team ? 1 : 0;
             if(f.owner || f.droptime) pri++;
-            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius/2;
+            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius*2/3;
             cameras.add(cament(pos, cament::AFFINITY, i, pri));
         }
     }
@@ -203,7 +203,7 @@ namespace capture
                     capturestate::flag &f = st.flags[c.id];
                     int pri = f.team == game::player1->team ? 1 : 0;
                     if(f.owner || f.droptime) pri++;
-                    c.pos = f.pos(); c.pos.z += enttype[AFFINITY].radius/2;
+                    c.pos = f.pos(); c.pos.z += enttype[AFFINITY].radius*2/3;
                     c.pri = pri;
                     if(f.owner) c.player = f.owner;
                 }
