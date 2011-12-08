@@ -44,7 +44,7 @@ namespace weapons
 
     bool weapselect(gameent *d, int weap, bool local)
     {
-        if(!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
+        if(!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, WEAP_S_FILTER))
         {
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
@@ -84,7 +84,7 @@ namespace weapons
     void weaponswitch(gameent *d, int a = -1, int b = -1)
     {
         if(a < -1 || b < -1 || a >= WEAP_MAX || b >= WEAP_MAX || (weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay)) return;
-        if(!d->weapwaited(d->weapselect, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH))) return;
+        if(!d->weapwaited(d->weapselect, lastmillis, WEAP_S_FILTER)) return;
         int s = slot(d, d->weapselect);
         loopi(WEAP_MAX) // only loop the amount of times we have weaps for
         {
@@ -131,7 +131,7 @@ namespace weapons
         bool found = false;
         if(isweap(weap) && weap >= WEAP_OFFSET && weap != m_weapon(game::gamemode, game::mutators))
         {
-            if(d->weapwaited(d->weapselect, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH)))
+            if(d->weapwaited(d->weapselect, lastmillis, WEAP_S_FILTER))
             {
                 client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
                 d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);

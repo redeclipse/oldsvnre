@@ -1291,7 +1291,7 @@ namespace ai
                         {
                             extentity &e = *entities::ents[ent];
                             int attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH))) switch(e.type)
+                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_FILTER)) switch(e.type)
                             {
                                 case WEAPON:
                                 {
