@@ -1085,6 +1085,7 @@ struct cament
     vec pos, dir;
     float dist, mindist, maxdist, score;
     gameent *player;
+    bool current, ignore;
 
     cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL) { reset(); }
     cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d) { reset(); }
@@ -1096,10 +1097,12 @@ struct cament
         cansee = 0;
         dir = vec(0, 0, 0);
         score = 0;
+        current = ignore = false;
     }
 
     static bool camsort(const cament &a, const cament &b)
     {
+        if(a.ignore) return false;
         if(a.score > 0 && b.score <= 0) return true;
         if(a.score <= 0 && b.score > 0) return false;
         if(a.pri > b.pri) return true;

@@ -76,7 +76,9 @@ namespace game
     VARF(IDF_PERSIST, specmode, 0, 1, 1, follow = 0); // 0 = float, 1 = tv
     VARF(IDF_PERSIST, waitmode, 0, 2, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
 
-    VAR(IDF_PERSIST, spectvtime, 1000, 7500, VAR_MAX);
+    VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
     FVAR(IDF_PERSIST, spectvspeed, 0, 0.35f, 1000);
     FVAR(IDF_PERSIST, spectvpitch, 0, 0.65f, 1000);
 
@@ -1807,15 +1809,13 @@ namespace game
             loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
                 vec pos = camerapos(d);
-                cament &c = cameras.add(cament(pos, cament::PLAYER, i+1, camera1->o.dist(pos), d));
-                if(m_team(gamemode, mutators) && d->team == player1->team) c.pri = 1;
-                vecfromyawpitch(d->yaw, d->pitch, 1, 0, c.dir);
+                cameras.add(cament(pos, cament::PLAYER, i+1, camera1->o.dist(pos), d));
             }
             if(m_capture(gamemode)) capture::checkcams(cameras);
             else if(m_defend(gamemode)) defend::checkcams(cameras);
             else if(m_bomber(gamemode)) bomber::checkcams(cameras);
         }
-        else loopv(cameras) switch(cameras[i].type)
+        loopv(cameras) switch(cameras[i].type)
         {
             case cament::PLAYER:
             {
@@ -1839,23 +1839,38 @@ namespace game
                 break;
             }
         }
-
         if(!cameras.empty())
         {
-            bool renew = !lasttvcam || lastmillis-lasttvcam >= spectvtime,
-                 override = !lasttvcam || lastmillis-lasttvcam >= max(spectvtime/2, 2000);
+            bool force = spectvmaxtime && lastmillis-lasttvchg >= spectvmaxtime,
+                 renew = force || !lasttvcam || lastmillis-lasttvcam >= spectvtime,
+                 override = !lasttvchg || lastmillis-lasttvchg >= spectvmintime;
             cament *cam = &cameras[0];
             camrefresh(cam);
             int lasttype = cam->type, lastid = cam->id;
-            if(renew || (regen && !camupdate(cam) && override))
+            bool fail = regen && !camupdate(cam) && override;
+            if(renew || fail)
             {
                 loopv(cameras) if(!camupdate(&cameras[i], true)) cameras[i].reset();
-                renew = true;
+                if(fail) renew = force = true;
             }
             if(renew)
             {
+                if(force)
+                {
+                    cam->ignore = true;
+                    if(cam->player) loopv(cameras) if(cameras[i].player == cam->player)
+                        cameras[i].ignore = true;
+                }
                 cameras.sort(cament::camsort);
+                if(force)
+                {
+                    cam->ignore = false;
+                    if(cam->player) loopv(cameras) if(cameras[i].player == cam->player)
+                        cameras[i].ignore = false;
+                }
+                cam->current = false;
                 cam = &cameras[0];
+                cam->current = true;
                 lasttvcam = lastmillis;
             }
             camrefresh(cam, renew);
