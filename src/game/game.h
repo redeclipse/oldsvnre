@@ -1062,7 +1062,7 @@ struct projent : dynent
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = -1;
         movement = roll = lifespan = lifesize = minspeed = 0;
-        curscale = 1;
+        curscale = speedscale = 1;
         extinguish = 0;
         limited = stuck = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;

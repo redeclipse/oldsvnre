@@ -671,11 +671,20 @@ namespace game
         return total;
     }
 
-    void heightoffset(gameent *d)
+    void checkoften(gameent *d, bool local)
     {
+        adjustscaled(int, d->quake, quakefade);
+
         d->setscale(rescale(d), curtime, false, gamemode, mutators);
-        float offset = d->height;
-        d->o.z -= d->height;
+        d->speedscale = d->curscale;
+        if(d->aitype >= 0)
+        {
+            bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
+            if(hasent && entities::ents[d->aientity]->attrs[7] > 0) d->speedscale *= entities::ents[d->aientity]->attrs[7]*enemyspeed;
+            else d->speedscale *= d->aitype >= AI_START ? enemyspeed : botspeed;
+        }
+
+        float offset = d->height; d->o.z -= d->height;
         if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
@@ -725,13 +734,9 @@ namespace game
         }
         else d->height = d->zradius;
         d->o.z += d->timeinair ? offset+(d->height-offset) : d->height;
-    }
 
-    void checkoften(gameent *d, bool local)
-    {
-        heightoffset(d);
         d->checktags();
-        adjustscaled(int, d->quake, quakefade);
+
         loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE)
         {
             bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS);

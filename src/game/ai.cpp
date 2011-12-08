@@ -1404,7 +1404,7 @@ namespace ai
         }
     }
 
-    #define issuspended(a) (a->ai->suspended || (a->aitype >= AI_START ? enemyspeed == 0 : botspeed == 0))
+    #define issuspended(a) (a->ai->suspended || a->speedscale == 0)
 
     void logic(gameent *d, aistate &b, bool run)
     {
