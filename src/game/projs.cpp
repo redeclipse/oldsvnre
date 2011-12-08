@@ -513,6 +513,7 @@ namespace projs
                 proj.waterfric = WEAP2(proj.weap, waterfric, proj.flags&HIT_ALT);
                 proj.weight = WEAP2(proj.weap, weight, proj.flags&HIT_ALT);
                 proj.projcollide = proj.child ? WEAP2(proj.weap, flakcollide, proj.flags&HIT_ALT) : WEAP2(proj.weap, collide, proj.flags&HIT_ALT);
+                proj.minspeed = proj.child ? WEAP2(proj.weap, flakminspeed, proj.flags&HIT_ALT) : WEAP2(proj.weap, minspeed, proj.flags&HIT_ALT);
                 proj.extinguish = WEAP2(proj.weap, extinguish, proj.flags&HIT_ALT)|4;
                 proj.lifesize = 1;
                 proj.mdl = weaptype[proj.weap].proj;
@@ -787,19 +788,23 @@ namespace projs
     void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
         int delay = WEAP2(weap, pdelay, flags&HIT_ALT), adelay = WEAP2(weap, adelay, flags&HIT_ALT),
-            life = WEAP2(weap, time, flags&HIT_ALT), speed = WEAP2(weap, speed, flags&HIT_ALT);
-
-        if(WEAP2(weap, power, flags&HIT_ALT)) switch(WEAP2(weap, cooked, flags&HIT_ALT))
+            power = WEAP2(weap, power, flags&HIT_ALT), cooked = WEAP2(weap, cooked, flags&HIT_ALT),
+            life = WEAP2(weap, time, flags&HIT_ALT), speed = WEAP2(weap, speed, flags&HIT_ALT),
+            limspeed = WEAP2(weap, limspeed, flags&HIT_ALT);
+        float skew = 1;
+        if(power && cooked)
         {
-            case 1: break;
-            case 2: case 3: life = int(ceilf(life*(1.f-scale))); if(!(WEAP2(weap, cooked, flags&HIT_ALT)%2)) scale = 1; break; // shorter
-            case 4: case 5: life = int(ceilf(life*scale)); if(!(WEAP2(weap, cooked, flags&HIT_ALT)%2)) scale = 1; break; // longer
-            default: scale = 1; break;
+            if(cooked&1)  skew = scale; // scaled
+            if(cooked&2)  skew = 1-scale; // inverted scale
+            if(cooked&4)  life = int(ceilf(life*scale)); // life scale
+            if(cooked&8)  life = int(ceilf(life*(1-scale))); // inverted life
+            if(cooked&16) speed = limspeed+int(ceilf(max(speed-limspeed, 0)*scale)); // speed scale
+            if(cooked&32) speed = limspeed+int(ceilf(max(speed-limspeed, 0)*(1-scale))); // inverted speed
         }
 
         if(weaptype[weap].sound >= 0)
         {
-            int slot = WEAPSNDF(weap, flags&HIT_ALT), vol = int(ceilf(255*scale));
+            int slot = WEAPSNDF(weap, flags&HIT_ALT), vol = int(ceilf(255*skew));
             if(slot >= 0 && vol > 0)
             {
                 if(weap == WEAP_FLAMER && !(flags&HIT_ALT))
@@ -855,7 +860,7 @@ namespace projs
         }
 
         loopv(shots)
-            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), delay, speed, shots[i].id, weap, flags, scale);
+            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), delay, speed, shots[i].id, weap, flags, skew);
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
 
@@ -872,7 +877,7 @@ namespace projs
             if(!kick.iszero())
             {
                 if(WEAP2(weap, power, flags&HIT_ALT) && WEAP2(weap, cooked, flags&HIT_ALT) == 1)
-                    kick.mul(scale);
+                    kick.mul(skew);
                 if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
                 float kickmod = kickpushscale;
                 if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod *= kickpushzoom;

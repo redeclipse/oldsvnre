@@ -442,13 +442,13 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
                 {
                     int lowest = -1;
                     loopv(sounds) if(sounds[i].chan >= 0 && !(sounds[i].flags&SND_NOCULL) && !(sounds[i].flags&SND_MAP))
-                        if(((flags&SND_NOCULL) || sounds[i].vol < cvol) && (!sounds.inrange(lowest) || sounds[i].vol < sounds[lowest].vol))
+                        if(((flags&SND_NOCULL) || sounds[i].curvol < cvol) && (!sounds.inrange(lowest) || sounds[i].curvol < sounds[lowest].curvol))
                             lowest = i;
                     if(sounds.inrange(lowest))
                     {
                         removesound(lowest);
                         chan = Mix_PlayChannel(-1, sample->sound, flags&SND_LOOP ? -1 : 0);
-                        if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].vol);
+                        if(verbose >= 4) conoutf("culled channel %d (%d)", lowest, sounds[lowest].curvol);
                     }
                 }
             }
