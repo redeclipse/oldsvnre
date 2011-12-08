@@ -666,7 +666,6 @@ struct gameent : dynent, gamestate
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string name, info, obit;
-    vector<int> airnodes;
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
@@ -752,7 +751,6 @@ struct gameent : dynent, gamestate
         obit[0] = 0;
         obliterated = false;
         setscale(1, 0, true, gamemode, mutators);
-        airnodes.shrink(0);
         icons.shrink(0);
         stuns.shrink(0);
     }
