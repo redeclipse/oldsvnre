@@ -591,7 +591,7 @@ namespace ai
         clearwpcache();
         return true;
     }
-    ICOMMAND(0, loadwaypoints, "s", (char *mname), loadwaypoints(true, mname));
+    ICOMMAND(0, loadwaypoints, "s", (char *mname), if(!loadwaypoints(true, mname)) importwaypoints());
 
     void savewaypoints(bool force, const char *mname)
     {
