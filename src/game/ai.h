@@ -271,7 +271,7 @@ namespace ai
     extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, int retries = 0);
     extern bool randomnode(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX);
     extern bool randomnode(gameent *d, aistate &b, float guard = ALERTMIN, float wander = ALERTMAX);
-    extern bool violence(gameent *d, aistate &b, gameent *e, bool pursue = false);
+    extern bool violence(gameent *d, aistate &b, gameent *e, int pursue = 0);
     extern bool patrol(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX, int walk = 1, bool retry = false);
     extern bool defense(gameent *d, aistate &b, const vec &pos, float guard = ALERTMIN, float wander = ALERTMAX, int walk = 0);
 

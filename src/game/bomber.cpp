@@ -693,11 +693,8 @@ namespace bomber
         if(st.flags.inrange(b.target))
         {
             bomberstate::flag &f = st.flags[b.target];
-            if(isbomberaffinity(f) && f.owner)
-            {
-                ai::violence(d, b, f.owner, false);
-                if(d->aitype != AI_BOT) return true;
-            }
+            if(isbomberaffinity(f) && f.owner && ai::owner(d) != ai::owner(f.owner))
+                return ai::violence(d, b, f.owner, 2);
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->aitype == AI_BOT)
             {
@@ -750,7 +747,16 @@ namespace bomber
             bomberstate::flag &f = st.flags[b.target];
             if(!entities::ents.inrange(f.ent) || !f.enabled) return false;
             b.idle = -1;
-            if(isbomberaffinity(f)) return f.owner ? ai::violence(d, b, f.owner, true) : ai::makeroute(d, b, f.pos());
+            if(isbomberaffinity(f))
+            {
+                if(f.owner)
+                {
+                    if(d == f.owner) return aihomerun(d, b);
+                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 2);
+                    else return ai::defense(d, b, f.pos());
+                }
+                else return ai::makeroute(d, b, f.pos());
+            }
             else if(isbombertarg(f, ai::owner(d)))
             {
                 static vector<int> hasbombs;
