@@ -14,4 +14,5 @@ lava.jpg
 emblem.png, logo.png
     Created by Luckystrike-Rx
 	Copyright (C) 2009-2011 Red Eclipse Team
-	Covered under "THE RED ECLIPSE MARK POLICY" (see trademark.txt included with this distribution)
+	Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
+	In addition covered by "THE RED ECLIPSE MARK POLICY" (see trademark.txt included with this distribution)
