@@ -190,7 +190,7 @@ extern void removetrackeddynlights(physent *owner);
 extern void makelightfx(extentity &e, extentity &f);
 
 // rendergl
-extern vec worldpos, camerapos, camdir, camright, camup;
+extern vec worldpos, camdir, camright, camup;
 extern void getscreenres(int &w, int &h);
 extern void gettextres(int &w, int &h);
 

@@ -380,7 +380,7 @@ void gl_checkextensions()
         if(!hasext(exts, "GL_EXT_gpu_shader4"))
         {
             avoidshaders = 1;
-            if(hwtexsize < 4096) 
+            if(hwtexsize < 4096)
             {
                 setvar("maxtexsize", hwtexsize >= 2048 ? 512 : 256, false, true);
                 batchlightmaps = 0;
@@ -731,7 +731,7 @@ ICOMMAND(0, getcampos, "", (),
 });
 
 physent camera, *camera1 = &camera;
-vec worldpos, camerapos, camdir, camright, camup;
+vec worldpos, camdir, camright, camup;
 
 void findorientation(vec &o, float yaw, float pitch, vec &pos)
 {
