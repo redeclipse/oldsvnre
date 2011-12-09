@@ -977,7 +977,7 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
-            impulse = air && physics::canimpulse(d, 1, false) && (d->timeinair > 700 || d->vel.z < 1), jet = air && physics::allowhover(d),
+            impulse = air && physics::canimpulse(d, 1, false) && d->timeinair > 700, jet = air && physics::allowhover(d),
             jumper = (locked || sequenced || impulse || jet || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
             jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1000,9 +1000,9 @@ namespace ai
         {
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
             int seed = (111-d->skill)*(locked || impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
-            d->ai->jumpseed = lastmillis+seed+rnd(seed*2);
+            d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= 100; if(b.idle) seed *= 10;
-            d->ai->jumprand = lastmillis+seed+rnd(seed*2);
+            d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
         if(!sequenced)
         {
@@ -1145,12 +1145,12 @@ namespace ai
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
         if(d->aitype == AI_BOT)
         {
-            bool wantsimpulse = false;
+            bool wantsrun = false;
             if(physics::allowimpulse(d))
             {
-                if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsimpulse = true;
+                if(!impulsemeter || impulsesprint == 0 || impulseregensprint > 0) wantsrun = true;
                 else if(b.idle == -1 && !d->ai->dontmove)
-                    wantsimpulse = (d->action[AC_SPRINT] || !d->actiontime[AC_SPRINT] || lastmillis-d->actiontime[AC_SPRINT] > PHYSMILLIS*2);
+                    wantsrun = (d->action[AC_SPRINT] || !d->actiontime[AC_SPRINT] || lastmillis-d->actiontime[AC_SPRINT] > PHYSMILLIS*2);
             }
 
             if(d->ai->lastpusher >= 0 && d->physstate == PHYS_FALL && lastmillis-d->ai->lastpushtime < (skmod/10)*250)
@@ -1164,14 +1164,14 @@ namespace ai
                 offpitch -= d->aimpitch;
                 if(fabs(offyaw)+fabs(offpitch) >= 135)
                 {
-                    wantsimpulse = false;
+                    wantsrun = false;
                     d->ai->lastpusher = -1;
                     d->ai->lastpushtime = 0;
                 }
                 else
                 {
                     d->ai->dontmove = true;
-                    wantsimpulse = false;
+                    wantsrun = false;
                 }
             }
             else
@@ -1180,7 +1180,7 @@ namespace ai
                 d->ai->lastpushtime = 0;
             }
 
-            if(d->action[AC_SPRINT] != wantsimpulse)
+            if(d->action[AC_SPRINT] != wantsrun)
                 if((d->action[AC_SPRINT] = !d->action[AC_SPRINT]) == true) d->actiontime[AC_SPRINT] = lastmillis;
         }
 

@@ -45,7 +45,7 @@ namespace ai
     const int WAYPOINTRADIUS    = 16;
 
     const float CLOSEDIST       = 32.f;    // is close
-    const float JUMPMIN         = 1.5f;    // decides to jump
+    const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
     const float SIGHTMIN        = 32.f;    // minimum line of sight
     const float SIGHTMAX        = 1024.f;  // maximum line of sight
