@@ -851,6 +851,11 @@
 			<Option target="client-prof" />
 			<Option target="server-dbg" />
 		</Unit>
+		<Unit filename="game\waypoint.cpp">
+			<Option target="client" />
+			<Option target="client-dbg" />
+			<Option target="client-prof" />
+		</Unit>
 		<Unit filename="game\weapons.cpp">
 			<Option target="client" />
 			<Option target="client-dbg" />
