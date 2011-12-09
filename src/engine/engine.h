@@ -156,7 +156,7 @@ extern PFNGLFOGCOORDPOINTEREXTPROC glFogCoordPointer_;
 
 extern physent *camera1, camera;
 extern mapz hdr;
-extern int worldscale;
+extern int worldscale, octaentsize;
 extern vector<ushort> texmru;
 extern int xtraverts, xtravertsva;
 extern const ivec cubecoords[8];

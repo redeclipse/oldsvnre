@@ -621,7 +621,7 @@ void entattrs(const char *str, attrvector &attrs)
         if(a)
         {
             attrs[k] = parseint(a);
-            DELETEA(a);
+            delete[] a;
         }
     }
 }

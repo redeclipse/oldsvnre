@@ -1876,7 +1876,6 @@ namespace client
                     loopk(numattrs) attrs[k] = getint(p);
                     mpeditent(i, vec(x, y, z), type, attrs, false);
                     entities::setspawn(i, 0);
-                    entities::clearentcache();
                     break;
                 }
 
