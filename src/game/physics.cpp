@@ -257,11 +257,11 @@ namespace physics
             if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
-                if((d != game::player1 && !e->ai) || !impulsemeter || e->impulse[IM_METER] < impulsemeter)
+                if((e != game::player1 && !e->ai) || !impulsemeter || e->impulse[IM_METER] < impulsemeter)
                 {
                     bool value = e->action[AC_SPRINT];
                     if(d == game::player1 && sprintstyle >= 3 && impulsesprint == 0) value = !value;
-                    if(value && (d->move || d->strafe)) return true;
+                    if(value && (e->move || e->strafe)) return true;
                 }
             }
         }
