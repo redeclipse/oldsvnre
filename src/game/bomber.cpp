@@ -16,12 +16,12 @@ namespace bomber
         int best = -1;
         vec targ;
         int numdyns = game::numdynents();
-        loopk(2)
+        loopk(d->aitype != AI_NONE ? 4 : 2)
         {
             loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype == AI_NONE))
             {
-                float md = d->ai ? d->ai->views[2] : hdr.worldsize, fx = d->ai ? d->ai->views[0] : curfov, fy = d->ai ? d->ai->views[1] : fovy;
-                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, md, fx, fy))
+                float fx = k >= 2 ? 360 : (d->ai ? d->ai->views[0] : curfov), fy = k >= 2 ? 360 : (d->ai ? d->ai->views[1] : fovy);
+                if(getsight(d->o, d->yaw, d->pitch, e->o, targ, bestdist, fx, fy))
                 {
                     vec dir = vec(e->o).sub(d->o).normalize();
                     float yaw, pitch; vectoyawpitch(dir, yaw, pitch);
