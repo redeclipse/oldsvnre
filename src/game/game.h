@@ -1282,8 +1282,6 @@ namespace entities
     extern int showentdescs;
     extern vector<extentity *> ents;
     extern int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
-    extern void clearentcache(bool full = true);
-    extern int closestent(int type, const vec &pos, float mindist, bool links = false);
     extern bool collateitems(gameent *d, vector<actitem> &actitems);
     extern void checkitems(gameent *d);
     extern void putitems(packetbuf &p);
@@ -1299,7 +1297,6 @@ namespace entities
     extern void adddynlights();
     extern void render();
     extern void update();
-    extern void findentswithin(int type, const vec &pos, float mindist, float maxdist, vector<int> &results);
 }
 
 namespace ai
