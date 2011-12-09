@@ -552,6 +552,8 @@ namespace ai
         waypoints.setsize(total);
     }
 
+
+    const int MAXWAYPOINTRADIUS = (WAYPOINTRADIUS*3)*(WAYPOINTRADIUS*3);
     bool cleanwaypoints()
     {
         int cleared = 0;
@@ -563,6 +565,11 @@ namespace ai
                 w.links[0] = 0;
                 w.links[1] = 0xFFFF;
                 cleared++;
+            }
+            else loopj(MAXWAYPOINTLINKS) if(w.links[j] && waypoints.inrange(w.links[j]))
+            {
+                waypoint &v = waypoints[w.links[j]];
+                if(w.o.squaredist(v.o) > MAXWAYPOINTRADIUS) w.links[j] = 0;
             }
         }
         if(cleared)
