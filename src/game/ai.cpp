@@ -315,7 +315,7 @@ namespace ai
         return randomnode(d, b, d->feetpos(), guard, wander);
     }
 
-    bool enemy(gameent *d, aistate &b, const vec &pos, float guard, bool pursue, bool force)
+    bool enemy(gameent *d, aistate &b, const vec &pos, float guard, int pursue, bool force)
     {
         gameent *t = NULL, *e = NULL;
         vec dp = d->headpos();
@@ -367,7 +367,7 @@ namespace ai
 
     bool defense(gameent *d, aistate &b, const vec &pos, float guard, float wander, int walk)
     {
-        bool hasenemy = enemy(d, b, pos, wander, weaptype[d->weapselect].melee, false);
+        bool hasenemy = enemy(d, b, pos, wander, weaptype[d->weapselect].melee ? 1 : 0, false);
         if(!aistyle[d->aitype].canmove) { b.idle = hasenemy ? 2 : 1; return true; }
         else if(!walk)
         {
@@ -381,11 +381,12 @@ namespace ai
         return patrol(d, b, pos, guard, wander, walk);
     }
 
-    bool violence(gameent *d, aistate &b, gameent *e, bool pursue)
+    bool violence(gameent *d, aistate &b, gameent *e, int pursue)
     {
         if(e && !aipassive && targetable(d, e))
         {
-            if(pursue && waypoints.inrange(d->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
+            if(pursue >= (b.targtype != AI_T_AFFINITY ? 1 : 2) && waypoints.inrange(d->lastnode))
+                d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
             if(d->ai->enemy != e->clientnum)
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
@@ -396,7 +397,7 @@ namespace ai
         return false;
     }
 
-    bool target(gameent *d, aistate &b, bool pursue = false, bool force = false, float mindist = 0.f)
+    bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f)
     {
         if(aipassive) return false;
         gameent *t = NULL, *e = NULL;
@@ -561,7 +562,7 @@ namespace ai
             {
                 d->ai->unsuspend();
                 aistate &b = d->ai->getstate();
-                violence(d, b, e, d->aitype != AI_BOT || weaptype[d->weapselect].melee);
+                violence(d, b, e, d->aitype != AI_BOT || weaptype[d->weapselect].melee ? 1 : 0);
             }
             if(d->aitype >= AI_START && e->aitype < AI_START) // alert the horde
             {
@@ -575,7 +576,7 @@ namespace ai
                     if(cansee(t, tp, dp, d->aitype >= AI_START) || tp.squaredist(dp) <= maxdist)
                     {
                         aistate &c = t->ai->getstate();
-                        violence(t, c, e, true);
+                        violence(t, c, e, 1);
                     }
                 }
             }
@@ -589,7 +590,7 @@ namespace ai
                     loopv(targets) if((t = game::getclient(targets[i])) && t->ai && t->aitype == AI_BOT && (hithurts(flags) || !game::getclient(t->ai->enemy)) && !t->ai->suspended)
                     {
                         aistate &c = t->ai->getstate();
-                        violence(t, c, e, weaptype[d->weapselect].melee);
+                        violence(t, c, e, weaptype[d->weapselect].melee ? 1 : 0);
                     }
                 }
             }
@@ -648,7 +649,7 @@ namespace ai
                 if(!hasweap(d, attr) && (!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0))
                 {
                     aistate &b = d->ai->getstate();
-                    if(b.type == AI_S_PURSUE && b.targtype == AI_T_AFFINITY) continue;
+                    if(b.targtype == AI_T_AFFINITY) continue; // don't override any affinity states
                     if(b.type == AI_S_INTEREST && (b.targtype == AI_T_ENTITY || b.targtype == AI_T_DROP))
                     {
                         if(entities::ents.inrange(b.target))
@@ -697,11 +698,11 @@ namespace ai
             }
         }
         if(check(d, b) || find(d, b)) return 1;
-        if(target(d, b, true, false, d->ai->suspended && d->aitype >= AI_START ? maxdist : 0.f)) return 1;
+        if(target(d, b, 2, false, d->ai->suspended && d->aitype >= AI_START ? maxdist : 0.f)) return 1;
 
         if(!d->ai->suspended)
         {
-            if(target(d, b, true, true)) return 1;
+            if(target(d, b, 2, true)) return 1;
             if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
             {
                 d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
@@ -788,7 +789,7 @@ namespace ai
                                 if(!e.spawned || !wantsweap(d, attr)) return 0;
                                 float guard = enttype[e.type].radius;
                                 if(d->feetpos().squaredist(e.o) <= guard*guard)
-                                    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee, false) ? 2 : 1;
+                                    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
                                 else b.idle = -1;
                                 break;
                             }
@@ -812,7 +813,7 @@ namespace ai
                             {
                                 if(!wantsweap(d, attr) || proj.owner == d) return 0;
                                 float guard = enttype[e.type].radius;
-                                if(d->feetpos().squaredist(e.o) <= guard*guard) b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee, false) ? 2 : 1;
+                                if(d->feetpos().squaredist(e.o) <= guard*guard) b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
                                 else b.idle = -1;
                                 break;
                             }
@@ -975,10 +976,9 @@ namespace ai
     void jumpto(gameent *d, aistate &b, const vec &pos, bool locked)
     {
         vec off = vec(pos).sub(d->feetpos());
-        if(d->blocked) off.z += JUMPMIN; // it could help..
-        bool offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
+        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
             impulse = air && physics::canimpulse(d, 1, false) && (d->timeinair > 700 || d->vel.z < 1), jet = air && physics::allowhover(d),
-            jumper = (locked || d->blocked || off.z >= JUMPMIN || impulse || jet || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
+            jumper = (locked || sequenced || impulse || jet || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
             jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
@@ -1004,12 +1004,15 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed*2);
         }
-        if(air && physics::canimpulse(d, 3, true) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
-            d->action[AC_SPECIAL] = true;
-        else if(!aipassive && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
+        if(!sequenced)
         {
-            d->action[AC_SPECIAL] = true;
-            d->ai->lastmelee = lastmillis;
+            if(air && physics::canimpulse(d, 3, true) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
+                d->action[AC_SPECIAL] = true;
+            else if(!aipassive && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
+            {
+                d->action[AC_SPECIAL] = true;
+                d->ai->lastmelee = lastmillis;
+            }
         }
     }
 
@@ -1056,13 +1059,13 @@ namespace ai
                 {
                     if(targetable(d, f))
                     {
-                        if(!enemyok) violence(d, b, f, weaptype[d->weapselect].melee);
+                        if(!enemyok) violence(d, b, f, weaptype[d->weapselect].melee ? 1 : 0);
                         enemyok = true;
                         e = f;
                     }
                     else enemyok = false;
                 }
-                else if(!enemyok && target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN))
+                else if(!enemyok && target(d, b, weaptype[d->weapselect].melee ? 1 : 0, false, ALERTMIN))
                     enemyok = (e = game::getclient(d->ai->enemy)) != NULL;
             }
             if(enemyok)
@@ -1089,10 +1092,10 @@ namespace ai
                     if(insight || quick)
                     {
                         bool shoot = canshoot(d, e, alt);
-                        if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && WEAP2(d->weapselect, power, alt)) switch(WEAP2(d->weapselect, cooked, alt))
-                        {
-                            case 2: case 3: shoot = false; break; // shorter
-                            case 1: case 4: case 5: default: break;
+                        if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && WEAP2(d->weapselect, power, alt) && WEAP2(d->weapselect, cooked, alt))
+                        { // TODO: make AI more aware of what they're shooting
+                            int cooked = WEAP2(d->weapselect, cooked, alt);
+                            if(cooked&8) shoot = false; // inverted life
                         }
                         if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
                         {
@@ -1405,7 +1408,7 @@ namespace ai
             if(d->state != CS_ALIVE || !game::allowmove(d)) d->stopmoving(true);
             else
             {
-                if(!request(d, b)) target(d, b, weaptype[d->weapselect].melee, false, ALERTMIN);
+                if(!request(d, b)) target(d, b, weaptype[d->weapselect].melee ? 1 : 0, false, ALERTMIN);
                 weapons::shoot(d, d->ai->target);
             }
         }
