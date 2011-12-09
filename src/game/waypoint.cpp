@@ -9,6 +9,12 @@ namespace ai
     vector<waypoint> waypoints;
     vector<oldwaypoint> oldwaypoints;
 
+    bool clipped(const vec &o)
+    {
+        int material = lookupmaterial(o), clipmat = material&MATF_CLIP;
+        return clipmat == MAT_CLIP || clipmat == MAT_AICLIP || material&MAT_DEATH || (material&MATF_VOLUME) == MAT_LAVA;
+    }
+
     int getweight(const vec &o)
     {
         vec pos = o; pos.z += JUMPMIN;
@@ -438,7 +444,7 @@ namespace ai
     void inferwaypoints(gameent *d, const vec &o, const vec &v, float mindist)
     {
         if(!shouldnavigate()) return;
-    	if(shoulddrop(d))
+    	if(shoulddrop(d) && !clipped(o) && !clipped(v))
     	{
 			int from = closestwaypoint(o, mindist, false), to = closestwaypoint(v, mindist, false);
 			if(!waypoints.inrange(from)) from = addwaypoint(o);
@@ -459,9 +465,7 @@ namespace ai
     {
         if(d->state != CS_ALIVE) { d->lastnode = -1; return; }
         vec v(d->feetpos());
-        bool dropping = shoulddrop(d);
-        int mat = lookupmaterial(v);
-        if((mat&MATF_CLIP) == MAT_CLIP || (mat&MATF_VOLUME) == MAT_LAVA || mat&MAT_DEATH) dropping = false;
+        bool dropping = shoulddrop(d) && !clipped(v);
         float dist = dropping ? WAYPOINTRADIUS : (d->ai ? WAYPOINTRADIUS : SIGHTMIN);
         int curnode = closestwaypoint(v, dist, false, d), prevnode = d->lastnode;
         if(!waypoints.inrange(curnode) && dropping) curnode = addwaypoint(v);
@@ -548,6 +552,30 @@ namespace ai
         waypoints.setsize(total);
     }
 
+    bool cleanwaypoints()
+    {
+        int cleared = 0;
+        loopv(waypoints)
+        {
+            waypoint &w = waypoints[i];
+            if(clipped(w.o))
+            {
+                w.links[0] = 0;
+                w.links[1] = 0xFFFF;
+                cleared++;
+            }
+        }
+        if(cleared)
+        {
+            player1->lastnode = -1;
+            loopv(players) if(players[i]) players[i]->lastnode = -1;
+            remapwaypoints();
+            clearwpcache();
+            return true;
+        }
+        return false;
+    }
+
     bool getwaypointfile(const char *mname, char *wptname)
     {
         if(!mname || !*mname) mname = mapname;
@@ -588,7 +616,7 @@ namespace ai
         delete f;
         conoutf("loaded %d waypoints from %s", numwp, wptname);
 
-        clearwpcache();
+        if(!cleanwaypoints()) clearwpcache();
         return true;
     }
     ICOMMAND(0, loadwaypoints, "s", (char *mname), if(!loadwaypoints(true, mname)) importwaypoints());
@@ -641,7 +669,7 @@ namespace ai
         }
         conoutf("imported %d waypoints from the map file", oldwaypoints.length());
         oldwaypoints.setsize(0);
-        clearwpcache();
+        if(!cleanwaypoints()) clearwpcache();
     }
 
     void delselwaypoints()
