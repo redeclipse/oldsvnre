@@ -1589,11 +1589,11 @@ namespace ai
         if(aidebug > 4)
         {
             vec fr = vec(d->feetpos()).add(vec(0, 0, amt));
-            if(d->ai->spot != vec(0, 0, 0)) part_trace(fr, vec(d->ai->spot).add(vec(0, 0, 0.1f)), 1, 1, 1, 0x008888);
+            if(d->ai->spot != vec(0, 0, 0)) part_trace(fr, vec(d->ai->spot).add(vec(0, 0, 0.1f)), 1, 1, 1, 0x00FFFF);
             if(waypoints.inrange(d->lastnode))
             {
                 vec dr = vec(waypoints[d->lastnode].o).add(vec(0, 0, amt));
-                part_trace(fr, dr, 1, 1, 1, 0x884400);
+                part_trace(fr, dr, 1, 1, 1, 0xFFFF00);
                 fr = dr;
             }
             loopi(NUMPREVNODES)
@@ -1601,7 +1601,7 @@ namespace ai
                 if(waypoints.inrange(d->ai->prevnodes[i]))
                 {
                     vec dr = vec(waypoints[d->ai->prevnodes[i]].o).add(vec(0, 0, amt));
-                    part_trace(dr, fr, 1, 1, 1, 0x442200);
+                    part_trace(dr, fr, 1, 1, 1, 0x663300);
                     fr = dr;
                 }
             }
