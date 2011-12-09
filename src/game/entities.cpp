@@ -476,7 +476,7 @@ namespace entities
         invalidatedentcaches = 0;
         if(full || invalidatedentcaches == (1<<NUMENTCACHES)-1) numinvalidateentcaches = 0;
     }
-    ICOMMAND(0, clearentcache, "", (void), clearentcache());
+    ICOMMAND(0, clearentcache, "", (), clearentcache());
 
     void buildentcache()
     {
