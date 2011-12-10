@@ -372,63 +372,6 @@ namespace capture
             if(!added && isteam(game::gamemode, game::mutators, entities::ents[i]->attrs[0], TEAM_FIRST)) // not linked and is a team flag
                 setupaddaffinity(i, BASE_BOTH); // add as both
         }
-        if(!st.flags.empty()) loopi(numteams(game::gamemode, game::mutators))
-        {
-            bool found = false;
-            loopvj(st.flags) if(st.flags[j].team == i+TEAM_FIRST) { found = true; break; }
-            if(!found)
-            {
-                loopvj(st.flags) if(st.flags[j].team == TEAM_NEUTRAL) { found = true; break; }
-                loopvj(st.flags) st.flags[j].team = TEAM_NEUTRAL;
-                if(!found)
-                {
-                    loopvj(st.flags) st.flags[j].base &= ~BASE_FLAG;
-                    int best = -1;
-                    float margin = 1e16f, mindist = 1e16f;
-                    vector<int> route;
-                    ai::avoidset obstacles;
-                    for(int q = 0; q < 2; q++) loopvj(entities::ents)
-                    {
-                        extentity *e = entities::ents[j];
-                        setupchkaffinity(j, { continue; });
-                        vector<float> dists;
-                        float v = 0;
-                        if(!q)
-                        {
-                            int node = ai::closestwaypoint(e->o, 1e16f, true);
-                            bool found = true;
-                            loopvk(st.flags)
-                            {
-                                int goal = ai::closestwaypoint(st.flags[k].spawnloc, 1e16f, true);
-                                float u[2] = { ai::route(NULL, node, goal, route, obstacles), ai::route(NULL, goal, node, route, obstacles) };
-                                if(u[0] > 0 && u[1] > 0) v += dists.add((u[0]+u[1])*0.5f);
-                                else
-                                {
-                                    found = false;
-                                    break;
-                                }
-                            }
-                            if(!found)
-                            {
-                                best = -1;
-                                margin = mindist = 1e16f;
-                                break;
-                            }
-                        }
-                        else loopvk(st.flags) v += dists.add(st.flags[k].spawnloc.dist(e->o));
-                        v /= st.flags.length();
-                        if(v <= mindist)
-                        {
-                            float m = 0;
-                            loopvk(dists) if(k) m += fabs(dists[k]-dists[k-1]);
-                            if(m <= margin) { best = j; margin = m; mindist = v; }
-                        }
-                    }
-                    if(entities::ents.inrange(best)) setupaddaffinity(best, BASE_FLAG);
-                }
-                break;
-            }
-        }
     }
 
     void sendaffinity(packetbuf &p)
