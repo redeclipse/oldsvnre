@@ -885,7 +885,7 @@ namespace ai
         vec pos = d->feetpos();
         int node = -1;
         float mindist = ALERTMAX*ALERTMAX;
-        loopvrev(d->ai->route) if(waypoints.inrange(d->ai->route[i]))
+        loopvrev(d->ai->route) if(d->lastnode != d->ai->route[i] && waypoints.inrange(d->ai->route[i]))
         {
             vec epos = waypoints[d->ai->route[i]].o;
             int entid = obstacles.remap(d, d->ai->route[i], epos, retry);
@@ -950,8 +950,10 @@ namespace ai
     {
         if(!d->ai->route.empty() && d->lastnode >= 0)
         {
-            int n = retries%2 ? d->ai->route.find(d->lastnode) : closenode(d, retries >= 2);
-            if(retries%2 && d->ai->route.inrange(n))
+            int n = !(retries%2) ? d->ai->route.find(d->lastnode) : closenode(d, retries >= 2);
+            if(aidebug >= 5 && retries && dbgfocus(d))
+                conoutf("%s hunt retry %d (last: %d, targ: %d)", game::colorname(d), retries, d->lastnode, n);
+            if(!(retries%2) && d->ai->route.inrange(n))
             {
                 while(d->ai->route.length() > n+1) d->ai->route.pop(); // waka-waka-waka-waka
                 if(!n)
@@ -979,7 +981,7 @@ namespace ai
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
             impulse = air && physics::canimpulse(d, 1, false) && d->timeinair > 700, jet = air && physics::allowhover(d),
             jumper = (locked || sequenced || impulse || jet || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
-            jump = jumper && (impulse || jet || lastmillis >= d->ai->jumpseed);
+            jump = jumper && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
             vec old = d->o;
