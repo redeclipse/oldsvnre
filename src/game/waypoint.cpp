@@ -66,7 +66,7 @@ namespace ai
             bbmin = vec(1e16f, 1e16f, 1e16f);
             bbmax = vec(-1e16f, -1e16f, -1e16f);
         }
-   
+
         void build(int first = -1, int last = -1)
         {
             if(last < 0) last = waypoints.length();
@@ -82,7 +82,7 @@ namespace ai
             }
             build(indices.getbuf(), indices.length(), bbmin, bbmax);
         }
- 
+
         void build(int *indices, int numindices, const vec &vmin, const vec &vmax, int depth = 1)
         {
             int axis = 2;
@@ -216,7 +216,7 @@ namespace ai
         } while(0)
         int closest = -1;
         wpcachenode *curnode;
-        loop(force, 2) 
+        loop(force, 2)
         {
             loop(which, NUMWPCACHES) for(curnode = &wpcaches[which].nodes[0], wpcachestack.setsize(0);;)
             {
@@ -378,7 +378,6 @@ namespace ai
             }
 			if(retries <= 0)
 			{
-				//vec pos = d->feetpos();
 				loopavoid(obstacles, d,
 				{
 					if(waypoints.inrange(wp) && wp != node && wp != goal && waypoints[node].find(wp) < 0 && waypoints[goal].find(wp) < 0)
