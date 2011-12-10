@@ -777,5 +777,3 @@ extern void setblurshader(int pass, int size, int radius, float *weights, float 
 #define TVARN(f, n, c, t, m) _TVARN(f, n, c, t, m)
 #define TVARC(f, n, c, t, m) Texture *##t; _TVARN(f, n, c, t, m)
 
-#define _ITVAR(f, n, c, m) _ISVAR(n, c, void changed() { if(*val.s) textureload(val.s, m, true); }, f|IDF_TEXTURE)
-#define ITVAR(f, n, c, m)  _ITVAR(f, n, c, m)
