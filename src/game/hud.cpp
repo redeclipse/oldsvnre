@@ -137,7 +137,7 @@ namespace hud
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
     FVAR(IDF_PERSIST, indicatorblend, 0, 1, 1);
-    TVAR(IDF_PERSIST, indicatortex, "textures/progress", 3);
+    TVAR(IDF_PERSIST, indicatortex, "<grey>textures/progress", 3);
     TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
