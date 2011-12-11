@@ -32,10 +32,8 @@ namespace defend
         {
             defendstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            int pri = f.owner == game::player1->team ? 1 : 0;
-            if(f.owner == game::player1->team && f.enemy) pri++;
             vec pos = f.o; pos.z += enttype[AFFINITY].radius*2/3;
-            cameras.add(cament(pos, cament::AFFINITY, i, pri));
+            cameras.add(cament(pos, cament::AFFINITY, i));
         }
     }
 
@@ -48,10 +46,8 @@ namespace defend
                 if(st.flags.inrange(c.id))
                 {
                     defendstate::flag &f = st.flags[c.id];
-                    int pri = f.owner == game::player1->team ? 1 : 0;
-                    if(f.owner == game::player1->team && f.enemy) pri++;
-                    c.o = f.o; c.o.z += enttype[AFFINITY].radius*2/3;
-                    c.pri = pri;
+                    c.o = f.o;
+                    c.o.z += enttype[AFFINITY].radius*2/3;
                 }
                 break;
             }

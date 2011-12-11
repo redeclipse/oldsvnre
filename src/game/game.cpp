@@ -1828,16 +1828,11 @@ namespace game
                 {
                     cameras[i].o = camerapos(cameras[i].player);
                     vecfromyawpitch(cameras[i].player->yaw, cameras[i].player->pitch, 1, 0, cameras[i].dir);
-                    cameras[i].pri = m_team(gamemode, mutators) && cameras[i].player && cameras[i].player->team == player1->team ? 1 : 0;
                 }
             }
             default:
             {
-                if(cameras[i].type != cament::PLAYER)
-                {
-                    cameras[i].pri = 0;
-                    if(cameras[i].player) cameras[i].player = NULL;
-                }
+                if(cameras[i].type != cament::PLAYER && cameras[i].player) cameras[i].player = NULL;
                 if(m_capture(gamemode)) capture::updatecam(cameras[i]);
                 else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
                 else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);

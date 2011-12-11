@@ -1079,7 +1079,7 @@ struct cament
     enum { DISTMIN = 8, DISTMAX = 512, TRACKMAX = 8 };
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
-    int type, id, pri, cansee;
+    int type, id, cansee;
     vec o, dir, olddir;
     float dist, mindist, maxdist, score;
     gameent *player;
@@ -1087,9 +1087,9 @@ struct cament
     vector<cament *> visible;
     cament *moveto;
 
-    cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
-    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
-    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), o(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), o(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
     ~cament() {}
 
     void reset(bool update = false)
@@ -1105,8 +1105,6 @@ struct cament
         if(a.ignore) return false;
         if(a.score > 0 && b.score <= 0) return true;
         if(a.score <= 0 && b.score > 0) return false;
-        if(a.pri > b.pri) return true;
-        if(a.pri < b.pri) return false;
         if(a.cansee > b.cansee) return true;
         if(a.cansee < b.cansee) return false;
         if(a.score < b.score) return true;
