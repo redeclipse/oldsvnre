@@ -1799,8 +1799,6 @@ namespace game
         return pos;
     }
 
-    float lastcamyaw = 0, lastcampitch = 0;
-    int lastcamyawmillis = 0, lastcampitchmillis = 0;
     bool cameratv()
     {
         if(!tvmode(false)) return false;
@@ -1895,8 +1893,7 @@ namespace game
             if(cam->type == cament::ENTITY && !cam->visible.empty())
                 cam->moveto = cam->visible[rnd(cam->visible.length())];
             else cam->moveto = NULL;
-            amt = lastcamyaw = lastcampitch = 0;
-            lastcamyawmillis = lastcampitchmillis = lastmillis;
+            amt = 0;
         }
         else if(renew) renew = false;
         camera1->o = cam->pos(amt);

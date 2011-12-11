@@ -174,14 +174,15 @@ namespace hud
     TVAR(IDF_PERSIST, rocketcrosshairtex, "crosshairs/circle-01", 3);
     TVAR(IDF_PERSIST, rockethithairtex, "crosshairs/circle-01-hit", 3);
 
-    TVAR(IDF_PERSIST, editcursortex, "", 3);
-    TVAR(IDF_PERSIST, speccursortex, "", 3);
+    TVAR(IDF_PERSIST, editcursortex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, speccursortex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST, tvcursortex, "", 3);
     TVAR(IDF_PERSIST, teamcrosshairtex, "", 3);
     VAR(IDF_PERSIST, cursorstyle, 0, 0, 1); // 0 = top left tracking, 1 = center
     FVAR(IDF_PERSIST, cursorsize, 0, 0.025f, 1000);
     FVAR(IDF_PERSIST, cursorblend, 0, 1, 1);
 
-    TVAR(IDF_PERSIST, zoomcrosshairtex, "", 3);
+    TVAR(IDF_PERSIST, zoomcrosshairtex, "crosshairs/cross-01", 3);
     FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.575f, 1000);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
@@ -614,8 +615,8 @@ namespace hud
         {
             case POINTER_RELATIVE: return pointertex;
             case POINTER_GUI: return guicursortex;
-            case POINTER_EDIT: return *editcursortex ? editcursortex : crosshairtex;
-            case POINTER_SPEC: return *speccursortex ? speccursortex : crosshairtex;
+            case POINTER_EDIT: return editcursortex;
+            case POINTER_SPEC: return game::tvmode() ? tvcursortex : speccursortex;
             case POINTER_HAIR:
             {
                 if(crosshairweapons && isweap(weap))
@@ -629,7 +630,7 @@ namespace hud
                 return crosshairtex;
             }
             case POINTER_TEAM: return teamcrosshairtex;
-            case POINTER_ZOOM: return *zoomcrosshairtex ? zoomcrosshairtex : crosshairtex;
+            case POINTER_ZOOM: return zoomcrosshairtex;
             case POINTER_HIT:
             {
                 if(crosshairweapons && isweap(weap))
@@ -832,7 +833,7 @@ namespace hud
         if(game::focus->state == CS_ALIVE && index >= POINTER_HAIR)
         {
             if(crosshairweapons >= 2) c = vec::hexcolor(WEAP(game::focus->weapselect, colour));
-            if(index == POINTER_ZOOM && *zoomcrosshairtex && game::inzoom() && WEAP(game::focus->weapselect, zooms))
+            if(index == POINTER_ZOOM && game::inzoom() && WEAP(game::focus->weapselect, zooms))
             {
                 int frame = lastmillis-game::lastzoom, off = int(zoomcrosshairsize*hudsize)-cs;
                 float amt = frame <= zoomtime ? clamp(float(frame)/float(zoomtime), 0.f, 1.f) : 1.f;
