@@ -687,7 +687,7 @@ namespace capture
         {
             capturestate::flag &f = st.flags[b.target];
             if(iscaptureaffinity(f, ai::owner(d)) && f.owner && ai::owner(f.owner) != ai::owner(d))
-                return ai::violence(d, b, f.owner, false);
+                return ai::violence(d, b, f.owner, 4);
             int walk = f.owner && ai::owner(f.owner) != ai::owner(d) ? 1 : 0;
             if(d->aitype == AI_BOT)
             {
@@ -755,7 +755,7 @@ namespace capture
                 if(f.owner)
                 {
                     if(d == f.owner) return aihomerun(d, b);
-                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 2);
+                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
                     else return ai::defense(d, b, f.pos());
                 }
                 else return ai::makeroute(d, b, f.pos());

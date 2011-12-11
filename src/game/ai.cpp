@@ -385,7 +385,7 @@ namespace ai
     {
         if(e && !aipassive && targetable(d, e))
         {
-            if(pursue && (pursue%2) == (b.targtype != AI_T_AFFINITY ? 1 : 0) && waypoints.inrange(d->lastnode) && waypoints.inrange(e->lastnode))
+            if(pursue && (pursue%2) == (b.targtype != AI_T_AFFINITY ? 1 : 0))
             {
                 if(makeroute(d, b, e->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
                 else if(pursue >= 3) return false; // can't pursue
