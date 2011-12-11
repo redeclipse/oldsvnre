@@ -76,7 +76,7 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
             vec pos = f.pos(), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
-            float area = 3, fade = blend*hud::radaraffinityblend, size = hud::radaraffinitysize;
+            float area = 3, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
                 area = 2;
@@ -88,15 +88,10 @@ namespace bomber
             }
             else if(!m_gsp2(game::gamemode, game::mutators))
             {
-                float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
                 area = 3;
-                if(isbombertarg(f, game::focus->team) && !hasbombs.empty())
-                {
-                    fade += (1.f-fade)*diff;
-                    size *= 1.25f;
-                }
+                if(isbombertarg(f, game::focus->team) && !hasbombs.empty()) size *= 1.25f;
             }
-            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, fade, (isbombertarg(f, game::focus->team) ? -1-hud::radarstyle : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
+            hud::drawblip(isbomberaffinity(f) ? hud::bombtex : (isbombertarg(f, game::focus->team) ? hud::arrowtex : hud::flagtex), area, w, h, size, blend*hud::radaraffinityblend, (isbombertarg(f, game::focus->team) ? -1-hud::radarstyle : hud::radarstyle), (isbombertarg(f, game::focus->team) ? dir : pos), colour);
         }
     }
 
@@ -139,13 +134,11 @@ namespace bomber
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             int millis = lastmillis-f.interptime;
             vec colour = pulsecolour();
-            float skew = hud::inventoryskew, fade = blend*hud::inventoryblend;
+            float skew = hud::inventoryskew;
             if(f.owner || f.droptime)
             {
                 if(f.owner == game::focus)
                 {
-                    float pc = (millis%1000)/500.f, amt = pc > 1 ? 2.f-pc : pc;
-                    fade += (1.f-fade)*amt;
                     if(millis <= 1000) skew += (1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f);
                     else skew = 1; // override it
                 }
@@ -154,11 +147,11 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, fade, skew);
+            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend*hud::inventoryblend, skew);
             if(f.droptime)
             {
                 int time = lastmillis-f.droptime, delay = bomberresetdelay-time;
-                hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fy%s", hud::timetostr(delay, -1));
+                hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "emphasis", blend*hud::inventoryblend, "\fy%s", hud::timetostr(delay, -1));
             }
             else if(f.owner)
             {
@@ -172,7 +165,7 @@ namespace bomber
                             gameent *e = game::getclient(findtarget(f.owner));
                             if(e)
                             {
-                                hud::drawitemsubtext(px, oldy-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzgy[%s\fzgy]", game::colorname(e));
+                                hud::drawitemsubtext(px, oldy-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", blend*hud::inventoryblend, "\fzgy[%s\fzgy]", game::colorname(e));
                                 vec pos = e->headpos();
                                 int interval = lastmillis%500;
                                 float cx = 0.5f, cy = 0.5f, cz = 1, rp = 1, gp = 1, bp = 1,
@@ -196,17 +189,17 @@ namespace bomber
                                     hud::drawsized(sx+ss/4, sy+ss/4, ss/2);
                                 }
                             }
-                            else hud::drawitemsubtext(px, oldy-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzoyready");
+                            else hud::drawitemsubtext(px, oldy-s/2, s, TEXT_RIGHT_UP, skew, "emphasis", blend*hud::inventoryblend, "\fzoyready");
                         }
                     }
                     if(bombercarrytime)
                     {
                         int time = lastmillis-f.taketime, delay = bombercarrytime-time;
-                        hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "emphasis", fade, "\fzgy%s", hud::timetostr(delay, -1));
+                        hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "emphasis", blend*hud::inventoryblend, "\fzgy%s", hud::timetostr(delay, -1));
                     }
-                    else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "super", fade, "\fzaw[\fzgy!\fzaw]");
+                    else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "super", blend*hud::inventoryblend, "\fzaw[\fzgy!\fzaw]");
                 }
-                else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", fade, "\fs%s\fS", game::colorname(f.owner));
+                else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;

@@ -112,23 +112,17 @@ namespace defend
         loopv(st.flags)
         {
             defendstate::flag &f = st.flags[i];
-            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy), fade = blend*hud::radaraffinityblend;
+            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
             vec colour = skewcolour(f.owner, f.enemy, occupy), dir = vec(f.o).sub(camera1->o);
-            if(f.owner != game::focus->team && f.enemy != game::focus->team)
-            {
-                float dist = dir.magnitude(),
-                    diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
-                fade *= diff*0.5f;
-            }
             const char *tex = f.hasflag ? hud::arrowtex : (f.owner == game::focus->team && f.enemy ? hud::alerttex : hud::flagtex);
             float size = hud::radaraffinitysize*(f.hasflag ? 1.25f : 1);
             if(hud::radaraffinitynames >= (f.hasflag ? 1 : 2))
             {
                 bool overthrow = f.owner && f.enemy == game::focus->team;
-                if(occupy < 1.f) hud::drawblip(tex, f.hasflag ? 3 : 2, w, h, size, fade, f.hasflag ? -1-hud::radarstyle : hud::radarstyle, f.hasflag ? dir : f.o, colour, "little", "\f[%d]%d%%", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), int(occupy*100.f));
-                else hud::drawblip(tex, f.hasflag ? 3 : 2, w, h, size, fade, f.hasflag ? -1-hud::radarstyle : hud::radarstyle, f.hasflag ? dir : f.o, colour, "little", "\f[%d]%s", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), TEAM(f.owner, name));
+                if(occupy < 1.f) hud::drawblip(tex, f.hasflag ? 3 : 2, w, h, size, blend*hud::radaraffinityblend, f.hasflag ? -1-hud::radarstyle : hud::radarstyle, f.hasflag ? dir : f.o, colour, "little", "\f[%d]%d%%", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), int(occupy*100.f));
+                else hud::drawblip(tex, f.hasflag ? 3 : 2, w, h, size, blend*hud::radaraffinityblend, f.hasflag ? -1-hud::radarstyle : hud::radarstyle, f.hasflag ? dir : f.o, colour, "little", "\f[%d]%s", f.hasflag ? (overthrow ? 0xFF8800 : (occupy < 1.f ? 0xFFFF00 : 0x00FF00)) : TEAM(f.owner, colour), TEAM(f.owner, name));
             }
-            else hud::drawblip(tex, f.hasflag ? 3 : 2, w, h, size, fade, f.hasflag ? -1 : hud::radarstyle, f.hasflag ? dir : f.o, colour);
+            else hud::drawblip(tex, f.hasflag ? 3 : 2, w, h, size, blend*hud::radaraffinityblend, f.hasflag ? -1 : hud::radarstyle, f.hasflag ? dir : f.o, colour);
         }
     }
 
@@ -163,7 +157,7 @@ namespace defend
             if(headsup || f.hasflag || millis <= 1000)
             {
                 int prevsy = sy;
-                float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend,
+                float skew = headsup ? hud::inventoryskew : 0.f,
                     occupy = f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1)*defendoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
                 vec c = vec::hexcolor(TEAM(f.owner, colour)), c1 = c;
                 if(f.enemy)
@@ -172,26 +166,17 @@ namespace defend
                     if(amt > 1.f) amt = 2.f-amt;
                     c.lerp(vec::hexcolor(TEAM(f.enemy, colour)), amt);
                 }
-                if(f.hasflag)
-                {
-                    skew += (millis <= 1000 ? clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew) : 1.f-skew);
-                    if(millis > 1000)
-                    {
-                        float pc = (millis%1000)/500.f, amt = pc > 1 ? 2.f-pc : pc;
-                        fade += (1.f-fade)*amt;
-                    }
-                }
-                else if(millis <= 1000)
-                    skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
-                sy += hud::drawitem(hud::flagtex, x, y-sy, s, true, false, c.r, c.g, c.b, fade, skew);
+                if(f.hasflag) skew += (millis <= 1000 ? clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew) : 1.f-skew);
+                else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
+                sy += hud::drawitem(hud::flagtex, x, y-sy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
                 if(f.enemy)
                 {
                     int sx = x-int(s*skew);
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
-                    hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, fade*0.25f, skew);
-                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, fade, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
+                    hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, blend*hud::inventoryblend*0.25f, skew);
+                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, blend*hud::inventoryblend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
                 }
-                if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, fade, skew);
+                if(f.owner) hud::drawitem(hud::teamtex(f.owner), x, y-prevsy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, blend*hud::inventoryblend, skew);
             }
         }
         return sy;
