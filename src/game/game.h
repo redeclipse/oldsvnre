@@ -1270,7 +1270,7 @@ namespace game
     extern bool inzoom();
     extern bool inzoomswitch();
     extern void zoomview(bool down);
-    extern bool tvmode();
+    extern bool tvmode(bool check = true);
     extern void resetcamera();
     extern void resetworld();
     extern void resetstate();

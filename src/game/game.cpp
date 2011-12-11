@@ -3,7 +3,7 @@
 namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
-        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lasttvmillis = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1;
+        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1;
     bool intermission = false, prevzoom = false, zooming = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
@@ -82,8 +82,6 @@ namespace game
     FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawspeed, 0, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchspeed, 0, 1, 1000);
-    VAR(IDF_PERSIST, spectvyawtime, 1000, 1000, VAR_MAX);
-    VAR(IDF_PERSIST, spectvpitchtime, 1000, 1000, VAR_MAX);
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
@@ -328,9 +326,9 @@ namespace game
     }
     ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announcef(*idx, *targ, NULL, "\fw%s", s));
 
-    bool tvmode()
+    bool tvmode(bool check)
     {
-        if(!m_edit(gamemode)) switch(player1->state)
+        if(!m_edit(gamemode) && (!check || !cameras.empty())) switch(player1->state)
         {
             case CS_SPECTATOR: if(specmode) return true; break;
             case CS_WAITING: if(waitmode >= (m_duke(gamemode, mutators) ? 1 : 2) && (!player1->lastdeath || lastmillis-player1->lastdeath >= 500))
@@ -1727,19 +1725,14 @@ namespace game
         float foglevel = float(fog*2/3);
         c->reset(true);
         if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
-        loopj(c->player ? 1 : (update ? 2 : 4))
+        loopj(c->player ? 1 : 2)
         {
             loopv(cameras) if(c != cameras[i])
             {
                 cament *cam = cameras[i];
                 switch(cam->type)
                 {
-                    case cament::ENTITY:
-                    {
-                        if(j < 2 || !entities::ents.inrange(cam->id)) continue;
-                        if(j < 3 && entities::ents[cam->id]->type != WEAPON) continue;
-                        break;
-                    }
+                    case cament::ENTITY: continue;
                     case cament::PLAYER:
                     {
                         if(!cam->player || cam->player->state != CS_ALIVE || (c->player && cam->player && c->player == cam->player)) continue;
@@ -1756,7 +1749,7 @@ namespace game
                     else
                     {
                         float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
-                        if(!c->player && (update || j > 0))
+                        if(!c->player && (update || j))
                         {
                             vec dir = from;
                             if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
@@ -1808,14 +1801,11 @@ namespace game
 
     float lastcamyaw = 0, lastcampitch = 0;
     int lastcamyawmillis = 0, lastcampitchmillis = 0;
-    void cameratv()
+    bool cameratv()
     {
-        bool isspec = player1->state == CS_SPECTATOR, regen = !lasttvmillis || totalmillis-lasttvmillis >= 100;
-        if(regen) lasttvmillis = totalmillis;
-        int numdyns = numdynents();
+        if(!tvmode(false)) return false;
         if(cameras.empty())
         {
-            regen = true;
             loopv(entities::ents) if(!enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL)
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
@@ -1835,6 +1825,7 @@ namespace game
                 }
             }
             gameent *d = NULL;
+            int numdyns = numdynents();
             loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
                 cament *c = cameras.add(new cament);
@@ -1847,6 +1838,7 @@ namespace game
             else if(m_defend(gamemode)) defend::checkcams(cameras);
             else if(m_bomber(gamemode)) bomber::checkcams(cameras);
         }
+        if(cameras.empty()) return false;
         loopv(cameras) switch(cameras[i]->type)
         {
             case cament::PLAYER:
@@ -1866,97 +1858,75 @@ namespace game
                 break;
             }
         }
-        if(!cameras.empty())
+        int millis = lasttvchg ? lastmillis-lasttvchg : 0;
+        bool force = spectvmaxtime && millis >= spectvmaxtime,
+             renew = force || !lasttvcam || lastmillis-lasttvcam >= spectvtime,
+             override = !lasttvchg || millis >= spectvmintime;
+        float amt = float(millis)/float(spectvmaxtime);
+        cament *cam = cameras[0];
+        camrefresh(cam);
+        int lasttype = cam->type, lastid = cam->id;
+        bool updated = camupdate(cam, cam->pos(amt));
+        if(renew || (!updated && override))
         {
-            int millis = lasttvchg ? lastmillis-lasttvchg : 0;
-            bool force = spectvmaxtime && millis >= spectvmaxtime,
-                 renew = force || !lasttvcam || lastmillis-lasttvcam >= spectvtime,
-                 override = !lasttvchg || millis >= spectvmintime;
-            float amt = float(millis)/float(spectvmaxtime);
-            cament *cam = cameras[0];
-            camrefresh(cam);
-            int lasttype = cam->type, lastid = cam->id;
-            bool updated = camupdate(cam, cam->pos(amt));
-            if(renew || (!updated && override))
+            loopv(cameras) if(!camupdate(cameras[i], cameras[i]->o, true)) cameras[i]->reset();
+            if(!updated && override) renew = force = true;
+        }
+        if(renew)
+        {
+            if(force)
             {
-                loopv(cameras) if(!camupdate(cameras[i], cameras[i]->o, true)) cameras[i]->reset();
-                if(!updated && override) renew = force = true;
+                cam->ignore = true;
+                if(cam->player) loopv(cameras) if(cameras[i]->player == cam->player)
+                    cameras[i]->ignore = true;
             }
-            if(renew)
+            cameras.sort(cament::camsort);
+            if(force) loopv(cameras) if(cameras[i]->ignore) cameras[i]->ignore = false;
+            cam->current = false;
+            cam = cameras[0];
+            cam->current = true;
+            lasttvcam = lastmillis;
+        }
+        camrefresh(cam, renew);
+        if(!lasttvchg || cam->type != lasttype || cam->id != lastid)
+        {
+            lasttvchg = lastmillis;
+            if(!renew) renew = true;
+            if(cam->type == cament::ENTITY && !cam->visible.empty())
+                cam->moveto = cam->visible[rnd(cam->visible.length())];
+            else cam->moveto = NULL;
+            amt = lastcamyaw = lastcampitch = 0;
+            lastcamyawmillis = lastcampitchmillis = lastmillis;
+        }
+        else if(renew) renew = false;
+        camera1->o = cam->pos(amt);
+        if(focus != player1)
+        {
+            camera1->yaw = camera1->aimyaw = focus->yaw;
+            camera1->pitch = camera1->aimpitch = focus->pitch;
+            camera1->roll = focus->roll;
+        }
+        else
+        {
+            vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
+            if(!renew && spectvyawspeed > 0)
             {
-                if(force)
-                {
-                    cam->ignore = true;
-                    if(cam->player) loopv(cameras) if(cameras[i]->player == cam->player)
-                        cameras[i]->ignore = true;
-                }
-                cameras.sort(cament::camsort);
-                if(force) loopv(cameras) if(cameras[i]->ignore) cameras[i]->ignore = false;
-                cam->current = false;
-                cam = cameras[0];
-                cam->current = true;
-                lasttvcam = lastmillis;
-            }
-            camrefresh(cam, renew);
-            if(!lasttvchg || cam->type != lasttype || cam->id != lastid)
-            {
-                lasttvchg = lastmillis;
-                if(!renew) renew = true;
-                if(cam->type == cament::ENTITY && !cam->visible.empty())
-                    cam->moveto = cam->visible[rnd(cam->visible.length())];
-                else cam->moveto = NULL;
-                amt = lastcamyaw = lastcampitch = 0;
-                lastcamyawmillis = lastcampitchmillis = lastmillis;
-            }
-            else if(renew) renew = false;
-            camera1->o = cam->pos(amt);
-            if(focus != player1)
-            {
-                camera1->yaw = camera1->aimyaw = focus->yaw;
-                camera1->pitch = camera1->aimpitch = focus->pitch;
-                camera1->roll = focus->roll;
+                float speed = float(curtime)/1000.f;
+                scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, speed*spectvyawspeed, speed*spectvpitchspeed, spectvrotate);
             }
             else
             {
-                vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
-                if(!renew && spectvyawspeed > 0)
-                {
-                    float oldyaw = camera1->yaw;
-                    if(oldyaw < camera1->aimyaw-180.0f) oldyaw += 360.0f;
-                    if(oldyaw > camera1->aimyaw+180.0f) oldyaw -= 360.0f;
-                    float speed = float(curtime)/1000.f, yawspeed = 1, pitchspeed = 1,
-                        yawoffset = camera1->aimyaw-oldyaw, pitchoffset = camera1->aimpitch-camera1->pitch;
-                    int yawmillis = lastmillis-lastcamyawmillis, pitchmillis = lastmillis-lastcampitchmillis;;
-                    if(((yawoffset > 0 && lastcamyaw <= 0) || (yawoffset < 0 && lastcamyaw >= 0)) && yawmillis < spectvyawtime)
-                        yawspeed *= float(yawmillis)/float(spectvyawtime);
-                    else
-                    {
-                        lastcamyawmillis = lastmillis;
-                        lastcamyaw = yawoffset;
-                    }
-                    if(((pitchoffset > 0 && lastcampitch <= 0) || (pitchoffset < 0 && lastcampitch >= 0)) && pitchmillis < spectvpitchtime)
-                        pitchspeed *= float(pitchmillis)/float(spectvpitchtime);
-                    else
-                    {
-                        lastcampitchmillis = lastmillis;
-                        lastcampitch = yawoffset;
-                    }
-                    scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, speed*yawspeed*spectvyawspeed, speed*pitchspeed*spectvpitchspeed, spectvrotate);
-                }
-                else
-                {
-                    camera1->yaw = camera1->aimyaw;
-                    camera1->pitch = camera1->aimpitch;
-                }
+                camera1->yaw = camera1->aimyaw;
+                camera1->pitch = camera1->aimpitch;
             }
-            if(cam->type == cament::AFFINITY && followdist > 0)
-            {
-                vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
-                physics::movecamera(camera1, dir, followdist, 1.0f);
-            }
-            camera1->resetinterp();
         }
-        else setvar(isspec ? "specmode" : "waitmode", 0, true);
+        if(cam->type == cament::AFFINITY && followdist > 0)
+        {
+            vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
+            physics::movecamera(camera1, dir, followdist, 1.0f);
+        }
+        camera1->resetinterp();
+        return true;
     }
 
     void checkcamera()
@@ -1975,18 +1945,20 @@ namespace game
             camera1->vel = vec(0, 0, 0);
             camera1->move = camera1->strafe = 0;
         }
-        if(tvmode()) cameratv();
-        else if(focus->state == CS_DEAD)
+        if(!cameratv())
         {
-            deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
-            camera1->aimyaw = camera1->yaw;
-            camera1->aimpitch = camera1->pitch;
-        }
-        else if(focus->state >= CS_SPECTATOR)
-        {
-            camera1->move = player1->move;
-            camera1->strafe = player1->strafe;
-            physics::move(camera1, 10, true);
+            if(focus->state == CS_DEAD)
+            {
+                deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
+                camera1->aimyaw = camera1->yaw;
+                camera1->aimpitch = camera1->pitch;
+            }
+            else if(focus->state >= CS_SPECTATOR)
+            {
+                camera1->move = player1->move;
+                camera1->strafe = player1->strafe;
+                physics::move(camera1, 10, true);
+            }
         }
         if(focus->state == CS_SPECTATOR)
         {
