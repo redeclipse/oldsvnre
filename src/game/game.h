@@ -1087,10 +1087,10 @@ struct cament
     vector<cament *> visible;
     cament *moveto;
 
-    cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
-    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
-    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), o(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
-    ~cament() {}
+    cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); visible.shrink(0); }
+    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); visible.shrink(0); }
+    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), o(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); visible.shrink(0); }
+    ~cament() { visible.shrink(0); }
 
     void reset(bool update = false)
     {
