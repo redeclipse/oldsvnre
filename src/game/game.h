@@ -1109,7 +1109,7 @@ struct cament
         if(a->score > b->score) return false;
         if(a->dist < b->dist) return true;
         if(a->dist > b->dist) return false;
-        return false;
+        return !rnd(2);
     }
 
     vec pos(float amt = 0)
