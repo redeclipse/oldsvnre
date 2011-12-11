@@ -231,7 +231,7 @@ namespace ai
         if(game::intermission) { loopv(game::players) if(game::players[i] && game::players[i]->ai) game::players[i]->stopmoving(true); }
         else // fixed rate logic done out-of-sequence at 1 frame per second for each ai
         {
-            if(totalmillis-updatemillis > 1000)
+            if(totalmillis-updatemillis > 250)
             {
                 avoid();
                 if(multiplayer(false)) { aiforcegun = -1; aicampaign = aipassive = 0; }
@@ -946,6 +946,43 @@ namespace ai
         return false;
     }
 
+    bool checkroute(gameent *d)
+    {
+        if(d->lastnode < 0 || d->ai->route.empty()) return false;
+        int start = d->ai->route.find(d->lastnode);
+        if(!waypoints.inrange(start)) start = closenode(d, false);
+        if(!waypoints.inrange(start)) start = closenode(d, true);
+        if(!waypoints.inrange(start)) return false;
+        if(start < 3) return false; // route length is too short now
+        int count = min(start, NUMPREVNODES);
+        loopj(count)
+        {
+            int pos = start-j, node = d->ai->route[pos];
+            if(obstacles.find(node, d)) // something is in the way, try to remap around it
+            {
+                int amt = pos-1;
+                if(amt < 3) return false; // route length is too short from this point
+                loopirev(amt)
+                {
+                    int targ = d->ai->route[i];
+                    if(!obstacles.find(targ, d))
+                    {
+                        int begin = amt-i;
+                        static vector<int> remap; remap.setsize(0);
+                        loop(retry, 2) if(route(d, node, targ, remap, obstacles, retry))
+                        {
+                            while(d->ai->route.length() > begin) d->ai->route.pop();
+                            loopvk(remap) d->ai->route.add(remap[k]);
+                            return true;
+                        }
+                        return false; // we failed
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     bool hunt(gameent *d, aistate &b, int retries = 0)
     {
         if(!d->ai->route.empty() && d->lastnode >= 0)
@@ -1043,12 +1080,16 @@ namespace ai
             d->ai->lasthunt = lastmillis;
             if(aistyle[d->aitype].canmove) d->ai->dontmove = true;
         }
-        else if(hunt(d, b))
+        else
         {
-            game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
-            d->ai->lasthunt = lastmillis;
+            checkroute(d);
+            if(hunt(d, b))
+            {
+                game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
+                d->ai->lasthunt = lastmillis;
+            }
+            else idle = d->ai->dontmove = true;
         }
-        else idle = d->ai->dontmove = true;
 
         bool enemyok = false, locked = false, melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
         gameent *e = game::getclient(d->ai->enemy);
@@ -1458,7 +1499,7 @@ namespace ai
         {
             projent *p = projs::projs[i];
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT && WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale))
-                obstacles.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale)*p->lifesize)+2);
+                obstacles.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale)*p->lifesize)*1.25f+2);
         }
         loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
         {
