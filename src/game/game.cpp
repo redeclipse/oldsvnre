@@ -1730,13 +1730,19 @@ namespace game
         float foglevel = float(fog*2/3);
         c->reset(true);
         if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
-        loopj(c->player ? 1 : 2)
+        loopj(c->player ? 1 : (update ? 2 : 4))
         {
-            loopv(cameras) if(cameras[i].type != cament::ENTITY && c != &cameras[i])
+            loopv(cameras) if(c != &cameras[i])
             {
                 cament &f = cameras[i];
                 switch(f.type)
                 {
+                    case cament::ENTITY:
+                    {
+                        if(j < 2 || !entities::ents.inrange(f.id)) continue;
+                        if(j < 3 && entities::ents[f.id]->type != WEAPON) continue;
+                        break;
+                    }
                     case cament::PLAYER:
                     {
                         if(!f.player || f.player->state != CS_ALIVE || (c->player && f.player && c->player == f.player)) continue;
@@ -1748,31 +1754,27 @@ namespace game
                 float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
                 if(dist >= c->mindist && dist <= fogdist && raycubelos(pos, from, trg))
                 {
-                    bool hassight = update;
-                    if(j) hassight = true;
+                    bool hassight = false;
+                    if(j && !c->cansee) hassight = true; // rejigger and get a direction
                     else
                     {
                         float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
-                        if(!c->player && update)
+                        if(!c->player && (update || j > 0))
                         {
                             vec dir = from;
                             if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
                             dir.sub(pos).normalize();
                             vectoyawpitch(dir, yaw, pitch);
                         }
-                        if(!hassight)
-                        {
-                            float x = fmod(fabs(asin((from.z-pos.z)/dist)/RAD-pitch), 360);
-                            float y = fmod(fabs(-atan2(from.x-pos.x, from.y-pos.y)/RAD-yaw), 360);
-                            if(min(x, 360-x) <= curfov && min(y, 360-y) <= fovy) hassight = true;
-                        }
+                        float x = fmod(fabs(asin((from.z-pos.z)/dist)/RAD-pitch), 360);
+                        float y = fmod(fabs(-atan2(from.x-pos.x, from.y-pos.y)/RAD-yaw), 360);
+                        if(min(x, 360-x) <= curfov && min(y, 360-y) <= fovy) hassight = true;
                     }
                     if(hassight)
                     {
                         c->cansee++;
                         c->dir.add(f.o);
                         c->score += dist;
-                        //if(c->cansee >= cament::TRACKMAX) break;
                     }
                 }
             }
