@@ -75,7 +75,7 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec pos = f.pos(), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
+            vec pos = f.pos(false), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             float area = 3, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
@@ -213,7 +213,7 @@ namespace bomber
             if(!entities::ents.inrange(f.ent)) continue;
             int pri = isbomberaffinity(f) ? 1 : 0;
             if(f.owner || f.droptime) pri++;
-            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius/2;
+            vec pos = f.pos(false); pos.z += enttype[AFFINITY].radius/2;
             cameras.add(cament(pos, cament::AFFINITY, i, pri));
         }
     }
@@ -238,7 +238,7 @@ namespace bomber
                     bomberstate::flag &f = st.flags[c.id];
                     int pri = isbomberaffinity(f) ? 1 : 0;
                     if(f.owner || f.droptime) pri++;
-                    c.o = f.pos(); c.o.z += enttype[AFFINITY].radius/2;
+                    c.o = f.pos(false); c.o.z += enttype[AFFINITY].radius/2;
                     c.pri = pri;
                     if(f.owner) c.player = f.owner;
                 }

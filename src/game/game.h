@@ -163,7 +163,7 @@ enttypes enttype[] = {
     {
         DUMMY1,         1,          48,     0,      EU_NONE,    4,
             0, 0,
-            false,  false,  false,
+            true,   false,  false,
                 "dummy1",       { "" }
     },
     {
@@ -1119,7 +1119,7 @@ struct cament
     vec pos(float amt = 0)
     {
         vec v = o;
-        if(amt > 0 && moveto) v.add(vec(moveto->o).sub(o).mul(amt));
+        if(amt > 0 && moveto) v.add(vec(moveto->o).sub(o).mul(min(amt, 1.f)));
         return v;
     }
 };

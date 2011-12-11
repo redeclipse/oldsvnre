@@ -79,8 +79,8 @@ namespace game
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvspeed, 0, 0.35f, 1000);
-    FVAR(IDF_PERSIST, spectvpitch, 0, 0.65f, 1000);
+    FVAR(IDF_PERSIST, spectvspeed, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, spectvpitch, 0, 0.75f, 1000);
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
