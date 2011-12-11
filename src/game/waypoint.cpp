@@ -492,7 +492,7 @@ namespace ai
 				d->lastnode = to;
 			}
 		}
-		else d->lastnode = closestwaypoint(v, WAYPOINTRADIUS*2, false, d);
+		else d->lastnode = closestwaypoint(v, CLOSEDIST, false, d);
     }
 
     void navigate(gameent *d)

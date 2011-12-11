@@ -27,7 +27,7 @@ namespace game
         if(connected() && maptime > 0 && !intermission) musicdone(true);
     }
     VARF(IDF_PERSIST, musictype, 0, 1, 5, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done
-    VARF(IDF_PERSIST, musicedit, 0, 4, 5, stopmapmusic()); // same as above for editmode
+    VARF(IDF_PERSIST, musicedit, 0, 0, 5, stopmapmusic()); // same as above for editmode
     SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
@@ -2009,7 +2009,7 @@ namespace game
                 RUNWORLD("on_start");
                 return;
             }
-            else
+            else if(!nosound && mastervol && musicvol)
             {
                 int type = m_edit(gamemode) ? musicedit : musictype;
                 if(type && !playingmusic())
