@@ -211,10 +211,8 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            int pri = isbomberaffinity(f) ? 1 : 0;
-            if(f.owner || f.droptime) pri++;
             vec pos = f.pos(false); pos.z += enttype[AFFINITY].radius/2;
-            cameras.add(cament(pos, cament::AFFINITY, i, pri));
+            cameras.add(cament(pos, cament::AFFINITY, i));
         }
     }
 
@@ -222,24 +220,13 @@ namespace bomber
     {
         switch(c.type)
         {
-            case cament::PLAYER:
-            {
-                if(c.player) loopv(st.flags)
-                {
-                    bomberstate::flag &f = st.flags[i];
-                    if(f.owner == c.player) c.pri += c.player->team == game::player1->team ? 2 : 1;
-                }
-                break;
-            }
             case cament::AFFINITY:
             {
                 if(st.flags.inrange(c.id))
                 {
                     bomberstate::flag &f = st.flags[c.id];
-                    int pri = isbomberaffinity(f) ? 1 : 0;
-                    if(f.owner || f.droptime) pri++;
-                    c.o = f.pos(false); c.o.z += enttype[AFFINITY].radius/2;
-                    c.pri = pri;
+                    c.o = f.pos(false);
+                    c.o.z += enttype[AFFINITY].radius/2;
                     if(f.owner) c.player = f.owner;
                 }
                 break;
@@ -611,30 +598,33 @@ namespace bomber
             }
             if(home)
             {
-                bool guard = false;
-                if(f.owner || f.droptime || targets.empty()) guard = true;
-                else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
-                { // see if we can relieve someone who only has a piece of crap
-                    gameent *t;
-                    loopvk(targets) if((t = game::getclient(targets[k])))
-                    {
-                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < WEAP_OFFSET))
+                if(!m_duel(game::gamemode, game::mutators))
+                {
+                    bool guard = false;
+                    if(f.owner || f.droptime || targets.empty()) guard = true;
+                    else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
+                    { // see if we can relieve someone who only has a piece of crap
+                        gameent *t;
+                        loopvk(targets) if((t = game::getclient(targets[k])))
                         {
-                            guard = true;
-                            break;
+                            if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < WEAP_OFFSET))
+                            {
+                                guard = true;
+                                break;
+                            }
                         }
                     }
-                }
-                if(guard)
-                { // defend the flag
-                    ai::interest &n = interests.add();
-                    n.state = ai::AI_S_DEFEND;
-                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
-                    n.target = j;
-                    n.targtype = ai::AI_T_AFFINITY;
-                    n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
-                    n.tolerance = 0.25f;
-                    n.team = true;
+                    if(guard)
+                    { // defend the flag
+                        ai::interest &n = interests.add();
+                        n.state = ai::AI_S_DEFEND;
+                        n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
+                        n.target = j;
+                        n.targtype = ai::AI_T_AFFINITY;
+                        n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
+                        n.tolerance = 0.25f;
+                        n.team = true;
+                    }
                 }
             }
             else if(isbomberaffinity(f))

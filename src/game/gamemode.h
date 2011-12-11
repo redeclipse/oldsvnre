@@ -66,7 +66,7 @@ gametypes gametype[] = {
             G_M_NONE, G_M_NONE, G_M_NONE
         },
         "deathmatch",                       { "", "", "" },
-        "just shoot to kill and earn points by fragging", { "", "", "" },
+        "shoot to kill and earn points by fragging", { "", "", "" },
     },
     {
         G_CAPTURE,      G_M_TEAM,
@@ -77,7 +77,7 @@ gametypes gametype[] = {
             G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP3
         },
         "capture-the-flag",                 { "return", "defend", "protect" },
-        "take the enemy flag and return it to the base", { "dropped flags must be carried back to base by team members", "dropped flags can't be picked up by team members", "protect the flag and hold the enemy flag to score" },
+        "take the enemy flag and return it to the base", { "dropped flags must be carried back to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
     },
     {
         G_DEFEND,       G_M_TEAM,
@@ -88,14 +88,14 @@ gametypes gametype[] = {
             G_M_NONE
         },
         "defend-the-flag",                  { "quick", "conquer", "" },
-        "secure and defend flags to get points", { "flags secure quicker", "round ends when all flags are secured", "" },
+        "secure and defend flags to earn points", { "flags secure quicker than normal", "match ends when all flags are secured", "" },
     },
     {
         G_BOMBER,       G_M_NONE,
         {
             G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
-            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
-            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
+            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1,
+            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP2,
             G_M_NONE
         },
         "bomber-ball",                      { "basket", "hold", "" },
@@ -130,12 +130,12 @@ mutstypes mutstype[] = {
     {
         G_M_MEDIEVAL,   G_M_MEDIEVAL,       G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_MEDIEVAL|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "medieval",
-        "spawn only with swords"
+        "everyone spawns only with swords"
     },
     {
         G_M_BALLISTIC,  G_M_BALLISTIC,      G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_SURVIVOR|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "ballistic",
-        "spawn only with rockets"
+        "everyone spawns only with rockets"
     },
     {
         G_M_DUEL,       G_M_DUEL,           G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_DUEL|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
@@ -155,7 +155,7 @@ mutstypes mutstype[] = {
     {
         G_M_ONSLAUGHT,  G_M_ONSLAUGHT,      G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
         "onslaught",
-        "waves of enemies fill the battle field"
+        "waves of enemies fill the battle arena"
     },
     {
         G_M_HOVER,      G_M_HOVER,          G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_HOVER|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
