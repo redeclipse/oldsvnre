@@ -55,6 +55,8 @@ struct sound
     bool valid() { return chan >= 0 && playing(); }
 };
 
+extern bool nosound;
+extern int mastervol, soundvol, musicvol;
 extern vector<soundslot> gamesounds, mapsounds;
 extern vector<sound> sounds;
 

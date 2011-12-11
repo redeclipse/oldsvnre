@@ -26,8 +26,8 @@ struct avisegmentinfo
     stream::offset offset, videoindexoffset, soundindexoffset;
     int firstindex;
     uint videoindexsize, soundindexsize, indexframes, videoframes, soundframes;
-    
-    avisegmentinfo() {}   
+
+    avisegmentinfo() {}
     avisegmentinfo(stream::offset offset, int firstindex) : offset(offset), videoindexoffset(0), soundindexoffset(0), firstindex(firstindex), videoindexsize(0), soundindexsize(0), indexframes(0), videoframes(0), soundframes(0) {}
 };
 
@@ -101,7 +101,7 @@ struct aviwriter
         if(size & 1) { f->putchar(0x00); totalsize++; }
         endchunk();
     }
-        
+
     void writechunk(const char *fcc, const void *data, uint len) // simplify startchunk()/endchunk() to avoid f->seek()
     {
         f->write(fcc, 4);
@@ -179,7 +179,6 @@ struct aviwriter
         path(filename);
         if(!strrchr(filename, '.')) concatstring(filename, ".avi");
 
-        extern bool nosound; // sound.cpp
         if(sound && !nosound)
         {
             Mix_QuerySpec(&soundfrequency, &soundformat, &soundchannels);
@@ -652,8 +651,8 @@ struct aviwriter
         for(int i = seg.firstindex; i < index.length(); i++)
         {
             aviindexentry &e = index[i];
-            if(e.type) soundframes++; 
-            else 
+            if(e.type) soundframes++;
+            else
             {
                 if(i == seg.firstindex || e.offset != index[i-1].offset)
                     videoframes++;
@@ -724,7 +723,7 @@ struct aviwriter
 
     bool nextsegment()
     {
-        if(segments.length()) 
+        if(segments.length())
         {
             if(segments.length() >= MAX_SUPER_INDEX) return false;
             flushsegment();
@@ -734,7 +733,7 @@ struct aviwriter
         segments.add(avisegmentinfo(chunkoffsets[chunkdepth], index.length()));
         return true;
     }
-  
+
     bool writevideoframe(const uchar *pixels, uint srcw, uint srch, int format, uint frame)
     {
         if(frame < videoframes) return true;
@@ -919,7 +918,7 @@ namespace recorder
     void soundencoder(void *udata, Uint8 *stream, int len) // callback occurs on a separate thread
     {
         SDL_LockMutex(soundlock);
-        if(soundbuffers.full()) 
+        if(soundbuffers.full())
         {
             if(movieminquality >= 1) state = REC_TOOSLOW;
         }

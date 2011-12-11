@@ -950,9 +950,9 @@ namespace ai
     {
         if(d->lastnode < 0 || d->ai->route.empty()) return false;
         int start = d->ai->route.find(d->lastnode);
-        if(!waypoints.inrange(start)) start = closenode(d, false);
-        if(!waypoints.inrange(start)) start = closenode(d, true);
-        if(!waypoints.inrange(start)) return false;
+        if(!d->ai->route.inrange(start)) start = closenode(d, false);
+        if(!d->ai->route.inrange(start)) start = closenode(d, true);
+        if(!d->ai->route.inrange(start)) return false;
         if(start < 3) return false; // route length is too short now
         int count = min(start, NUMPREVNODES);
         loopj(count)
@@ -969,7 +969,7 @@ namespace ai
                     {
                         int begin = amt-i;
                         static vector<int> remap; remap.setsize(0);
-                        loop(retry, 2) if(route(d, node, targ, remap, obstacles, retry))
+                        loop(retry, 2) if(route(d, d->lastnode, targ, remap, obstacles, retry))
                         {
                             while(d->ai->route.length() > begin) d->ai->route.pop();
                             loopvk(remap) d->ai->route.add(remap[k]);
