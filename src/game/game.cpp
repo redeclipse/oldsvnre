@@ -1356,6 +1356,7 @@ namespace game
         ai::clearwaypoints(true);
         intermission = false;
         maptime = hud::lastnewgame = 0;
+        cameras.shrink(0);
         projs::reset();
         physics::reset();
         resetworld();
@@ -1724,55 +1725,63 @@ namespace game
         float foglevel = float(fog*2/3);
         c->reset(true);
         if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
-        loopv(cameras) if(cameras[i].type != cament::ENTITY && c != &cameras[i])
+        loopj(c->player ? 1 : 2)
         {
-            cament &f = cameras[i];
-            switch(f.type)
+            loopv(cameras) if(cameras[i].type != cament::ENTITY && c != &cameras[i])
             {
-                case cament::PLAYER:
+                cament &f = cameras[i];
+                switch(f.type)
                 {
-                    if(!f.player || f.player->state != CS_ALIVE || (c->player && f.player && c->player == f.player)) continue;
-                    break;
+                    case cament::PLAYER:
+                    {
+                        if(!f.player || f.player->state != CS_ALIVE || (c->player && f.player && c->player == f.player)) continue;
+                        break;
+                    }
+                    default: break;
                 }
-                default: break;
+                vec trg, from = f.o;
+                float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
+                if(dist >= c->mindist && dist <= fogdist && raycubelos(pos, from, trg))
+                {
+                    bool hassight = update;
+                    if(j) hassight = true;
+                    else
+                    {
+                        float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
+                        if(!c->player && update)
+                        {
+                            vec dir = from;
+                            if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
+                            dir.sub(pos).normalize();
+                            vectoyawpitch(dir, yaw, pitch);
+                        }
+                        if(!hassight)
+                        {
+                            float x = fmod(fabs(asin((from.z-pos.z)/dist)/RAD-pitch), 360);
+                            float y = fmod(fabs(-atan2(from.x-pos.x, from.y-pos.y)/RAD-yaw), 360);
+                            if(min(x, 360-x) <= curfov && min(y, 360-y) <= fovy) hassight = true;
+                        }
+                    }
+                    if(hassight)
+                    {
+                        c->cansee++;
+                        c->dir.add(f.o);
+                        c->score += dist;
+                        //if(c->cansee >= cament::TRACKMAX) break;
+                    }
+                }
             }
-            vec trg, from = f.o;
-            float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
-            if(dist >= c->mindist && dist <= fogdist && raycubelos(pos, from, trg))
+            if(c->cansee > 0)
             {
-                float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
-                if(!c->player && update)
+                if(c->cansee > 1)
                 {
-                    vec dir = from;
-                    if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
-                    dir.sub(pos).normalize();
-                    vectoyawpitch(dir, yaw, pitch);
+                    c->dir.div(c->cansee);
+                    c->score /= c->cansee;
                 }
-                bool hassight = update;
-                if(!hassight)
-                {
-                    float x = fmod(fabs(asin((from.z-pos.z)/dist)/RAD-pitch), 360);
-                    float y = fmod(fabs(-atan2(from.x-pos.x, from.y-pos.y)/RAD-yaw), 360);
-                    if(min(x, 360-x) <= curfov && min(y, 360-y) <= fovy) hassight = true;
-                }
-                if(hassight)
-                {
-                    c->cansee++;
-                    c->dir.add(f.o);
-                    c->score += dist;
-                    //if(c->cansee >= cament::TRACKMAX) break;
-                }
+                if(c->player) c->cansee++;
+                return true;
             }
-        }
-        if(c->cansee > 0)
-        {
-            if(c->cansee > 1)
-            {
-                c->dir.div(c->cansee);
-                c->score /= c->cansee;
-            }
-            if(c->player) c->cansee++;
-            return true;
+            c->reset(true);
         }
         c->dir = c->olddir;
         return false;
