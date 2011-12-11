@@ -163,29 +163,32 @@ namespace capture
         return sy;
     }
 
-    void checkcams(vector<cament> &cameras)
+    void checkcams(vector<cament *> &cameras)
     {
         loopv(st.flags) // flags/bases
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            vec pos = f.pos(); pos.z += enttype[AFFINITY].radius*2/3;
-            cameras.add(cament(pos, cament::AFFINITY, i));
+            cament *c = cameras.add(new cament);
+            c->o = f.pos();
+            c->o.z += enttype[AFFINITY].radius*2/3;
+            c->type = cament::AFFINITY;
+            c->id = i;
         }
     }
 
-    void updatecam(cament &c)
+    void updatecam(cament *c)
     {
-        switch(c.type)
+        switch(c->type)
         {
             case cament::AFFINITY:
             {
-                if(st.flags.inrange(c.id))
+                if(st.flags.inrange(c->id))
                 {
-                    capturestate::flag &f = st.flags[c.id];
-                    c.o = f.pos();
-                    c.o.z += enttype[AFFINITY].radius*2/3;
-                    if(f.owner) c.player = f.owner;
+                    capturestate::flag &f = st.flags[c->id];
+                    c->o = f.pos();
+                    c->o.z += enttype[AFFINITY].radius*2/3;
+                    if(f.owner) c->player = f.owner;
                 }
                 break;
             }

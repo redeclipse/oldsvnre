@@ -1087,10 +1087,8 @@ struct cament
     vector<cament *> visible;
     cament *moveto;
 
-    cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); visible.shrink(0); }
-    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); visible.shrink(0); }
-    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), o(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); visible.shrink(0); }
-    ~cament() { visible.shrink(0); }
+    cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
+    ~cament() {}
 
     void reset(bool update = false)
     {
@@ -1100,17 +1098,17 @@ struct cament
         score = 0;
     }
 
-    static bool camsort(const cament &a, const cament &b)
+    static bool camsort(const cament *a, const cament *b)
     {
-        if(a.ignore) return false;
-        if(a.score > 0 && b.score <= 0) return true;
-        if(a.score <= 0 && b.score > 0) return false;
-        if(a.cansee > b.cansee) return true;
-        if(a.cansee < b.cansee) return false;
-        if(a.score < b.score) return true;
-        if(a.score > b.score) return false;
-        if(a.dist < b.dist) return true;
-        if(a.dist > b.dist) return false;
+        if(a->ignore) return false;
+        if(a->score > 0 && b->score <= 0) return true;
+        if(a->score <= 0 && b->score > 0) return false;
+        if(a->cansee > b->cansee) return true;
+        if(a->cansee < b->cansee) return false;
+        if(a->score < b->score) return true;
+        if(a->score > b->score) return false;
+        if(a->dist < b->dist) return true;
+        if(a->dist > b->dist) return false;
         return false;
     }
 
@@ -1243,7 +1241,7 @@ namespace game
     };
     extern avatarent avatarmodel;
 
-    extern vector<cament> cameras;
+    extern vector<cament *> cameras;
     extern int numwaiting();
     extern gameent *newclient(int cn);
     extern gameent *getclient(int cn);
