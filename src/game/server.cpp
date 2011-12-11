@@ -924,7 +924,6 @@ namespace server
         static string mtname; mtname[0] = 0;
         loopi(G_M_NUM) if(muts&mutstype[i].type)
         {
-            if(muts&G_M_MULTI && mutstype[i].type == G_M_TEAM) continue;
             if(type == 4 || type == 5)
             {
                 if(m_capture(mode) && m_gsp3(mode, muts)) break;

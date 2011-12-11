@@ -79,7 +79,7 @@ namespace game
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvrotate, 0, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawspeed, 0, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchspeed, 0, 1, 1000);
     VAR(IDF_PERSIST, spectvyawtime, 1000, 1000, VAR_MAX);
