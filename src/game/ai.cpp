@@ -385,8 +385,11 @@ namespace ai
     {
         if(e && !aipassive && targetable(d, e))
         {
-            if(pursue >= (b.targtype != AI_T_AFFINITY ? 1 : 2) && waypoints.inrange(d->lastnode))
-                d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
+            if(pursue && (pursue%2) == (b.targtype != AI_T_AFFINITY ? 1 : 0) && waypoints.inrange(d->lastnode) && waypoints.inrange(e->lastnode))
+            {
+                if(makeroute(d, b, e->lastnode)) d->ai->switchstate(b, AI_S_PURSUE, AI_T_ACTOR, e->clientnum);
+                else if(pursue >= 3) return false; // can't pursue
+            }
             if(d->ai->enemy != e->clientnum)
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
@@ -537,15 +540,14 @@ namespace ai
             int q = interests.length()-1;
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
-            bool proceed = true;
             if(m_fight(game::gamemode) && d->aitype == AI_BOT)
             {
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);
                 int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
-                if(others >= int(ceilf(members*n.tolerance))) proceed = false;
+                if(others >= int(ceilf(members*n.tolerance))) continue;
             }
-            if(proceed && (!aistyle[d->aitype].canmove || makeroute(d, b, n.node)))
+            if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
             {
                 d->ai->switchstate(b, n.state, n.targtype, n.target);
                 return true;
@@ -698,11 +700,11 @@ namespace ai
             }
         }
         if(check(d, b) || find(d, b)) return 1;
-        if(target(d, b, 2, false, d->ai->suspended && d->aitype >= AI_START ? maxdist : 0.f)) return 1;
+        if(target(d, b, 4, false, d->ai->suspended && d->aitype >= AI_START ? maxdist : 0.f)) return 1;
 
         if(!d->ai->suspended)
         {
-            if(target(d, b, 2, true)) return 1;
+            if(target(d, b, 4, true)) return 1;
             if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
             {
                 d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
