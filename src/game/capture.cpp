@@ -50,25 +50,20 @@ namespace capture
                     pos = f.pos();
                     dir = vec(pos).sub(camera1->o);
                     int interval = lastmillis%500;
-                    if(interval >= 300 || interval <= 200) fade *= clamp(interval >= 300 ? 1.f-((interval-300)/200.f) : interval/200.f, 0.f, 1.f);
+                    if(interval >= 300 || interval <= 200)
+                        fade *= clamp(interval >= 300 ? 1.f-((interval-300)/200.f) : interval/200.f, 0.f, 1.f);
                 }
                 else
                 {
                     pos = f.spawnloc;
                     dir = vec(pos).sub(camera1->o);
-                    float dist = dir.magnitude(), diff = dist <= hud::radarrange() ? clamp(1.f-(dist/hud::radarrange()), 0.f, 1.f) : 0.f;
                     if(iscapturehome(f, game::focus->team) && !m_gsp3(game::gamemode, game::mutators) && !hasflags.empty())
                     {
-                        fade += (1.f-fade)*diff;
                         size *= 1.25f;
                         tex = hud::arrowtex;
                         arrow = true;
                     }
-                    else if(!(f.base&BASE_FLAG) || f.owner || f.droptime)
-                    {
-                        fade += (1.f-fade)*diff;
-                        if(f.base&BASE_FLAG) tex = hud::alerttex;
-                    }
+                    else if(f.base&BASE_FLAG && (f.owner || f.droptime)) tex = hud::alerttex;
                 }
                 if(hud::radaraffinitynames > (arrow ? 0 : 1)) hud::drawblip(tex, arrow ? 3 : 2, w, h, size, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour, "little", "\f[%d]%s", TEAM(f.team, colour), k ? "flag" : "base");
                 else hud::drawblip(tex, arrow ? 3 : 2, w, h, hud::radaraffinitysize, fade, arrow ? -1-hud::radarstyle : hud::radarstyle, arrow ? dir : pos, colour);
@@ -140,14 +135,12 @@ namespace capture
             if(headsup || f.lastowner == game::focus)
             {
                 int millis = lastmillis-f.interptime, colour = TEAM(f.team, colour);
-                float skew = headsup ? hud::inventoryskew : 0.f, fade = blend*hud::inventoryblend;
+                float skew = headsup ? hud::inventoryskew : 0.f;
                 vec c = vec::hexcolor(colour);
                 if(f.owner || f.droptime)
                 {
                     if(f.owner == game::focus)
                     {
-                        float pc = (millis%1000)/500.f, amt = pc > 1 ? 2.f-pc : pc;
-                        fade += (1.f-fade)*amt;
                         if(millis <= 1000) skew += (1.f-skew)*clamp(float(millis)/1000.f, 0.f, 1.f);
                         else skew = 1; // override it
                     }
@@ -156,15 +149,15 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, fade, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured by" : "\fytaken by") : (f.droptime ? "\fcdropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured by" : "\fytaken by") : (f.droptime ? "\fcdropped" : ""));
                 if((f.base&BASE_FLAG) && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     int sx = x-int(s*skew);
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                    if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, fade*0.25f, skew);
-                    hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, fade, skew, "super", "%d%%", int(wait*100.f));
+                    if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
+                    hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "super", "%d%%", int(wait*100.f));
                 }
-                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", fade, "\fs%s\fS", game::colorname(f.owner));
+                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;
