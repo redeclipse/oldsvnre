@@ -1608,9 +1608,9 @@ namespace projs
             {
                 if(!proj.lastbounce || proj.movement >= 1)
                 {
-                    float yaw = proj.yaw, pitch = proj.pitch;
+                    float yaw = proj.yaw, pitch = proj.pitch, speed = diff*secs;
                     vectoyawpitch(vec(proj.vel).normalize(), yaw, pitch);
-                    game::scaleyawpitch(proj.yaw, proj.pitch, yaw, pitch, diff*secs);
+                    game::scaleyawpitch(proj.yaw, proj.pitch, yaw, pitch, speed, speed);
                     vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
                     if(proj.vel.dot2(axis) >= 0) { proj.roll -= diff; if(proj.roll < -180) proj.roll = 180 - fmod(180 - proj.roll, 360); }
                     else { proj.roll += diff; if(proj.roll > 180) proj.roll = fmod(proj.roll + 180, 360) - 180; }

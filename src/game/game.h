@@ -1263,7 +1263,7 @@ namespace game
     extern void fixrange(float &yaw, float &pitch);
     extern void fixfullrange(float &yaw, float &pitch, float &roll, bool full);
     extern void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch);
-    extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float frame = 1, float scale = 1);
+    extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float yawspeed = 1, float pitchspeed = 1, float rotate = 0);
     extern bool allowmove(physent *d);
     extern int mousestyle();
     extern int deadzone();

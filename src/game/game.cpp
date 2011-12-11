@@ -79,8 +79,11 @@ namespace game
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
-    FVAR(IDF_PERSIST, spectvspeed, 0, 0.5f, 1000);
-    FVAR(IDF_PERSIST, spectvpitch, 0, 0.75f, 1000);
+    FVAR(IDF_PERSIST, spectvrotate, 0, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, spectvyawspeed, 0, 1, 1000);
+    FVAR(IDF_PERSIST, spectvpitchspeed, 0, 1, 1000);
+    VAR(IDF_PERSIST, spectvyawtime, 1000, 1000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvpitchtime, 1000, 1000, VAR_MAX);
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
@@ -1625,11 +1628,12 @@ namespace game
         pitch = asin((pos.z-from.z)/dist)/RAD;
     }
 
-    void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float frame, float scale)
+    void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float yawspeed, float pitchspeed, float rotate)
     {
         if(yaw < targyaw-180.0f) yaw += 360.0f;
         if(yaw > targyaw+180.0f) yaw -= 360.0f;
-        float offyaw = fabs(targyaw-yaw)*frame, offpitch = fabs(targpitch-pitch)*frame*scale;
+        float offyaw = (rotate < 0 ? fabs(rotate) : (rotate > 0 ? min(float(fabs(targyaw-yaw)), rotate) : fabs(targyaw-yaw)))*yawspeed,
+            offpitch = (rotate < 0 ? fabs(rotate) : (rotate > 0 ? min(float(fabs(targpitch-pitch)), rotate) : fabs(targpitch-pitch)))*pitchspeed;
         if(targyaw > yaw)
         {
             yaw += offyaw;
@@ -1662,7 +1666,8 @@ namespace game
             {
                 vec dir = vec(a->headpos(-a->height*0.5f)).sub(camera1->o).normalize();
                 vectoyawpitch(dir, camera1->aimyaw, camera1->aimpitch);
-                if(deathcamspeed > 0) scaleyawpitch(yaw, pitch, camera1->aimyaw, camera1->aimpitch, (float(curtime)/1000.f)*deathcamspeed, 4.f);
+                float speed = (float(curtime)/1000.f)*deathcamspeed;
+                if(deathcamspeed > 0) scaleyawpitch(yaw, pitch, camera1->aimyaw, camera1->aimpitch, speed, speed*4.f);
                 else { yaw = camera1->aimyaw; pitch = camera1->aimpitch; }
             }
         }
@@ -1802,6 +1807,8 @@ namespace game
         return pos;
     }
 
+    float lastcamyaw = 0, lastcampitch = 0;
+    int lastcamyawmillis = 0, lastcampitchmillis = 0;
     void cameratv()
     {
         bool isspec = player1->state == CS_SPECTATOR, regen = !lasttvmillis || totalmillis-lasttvmillis >= 100;
@@ -1887,7 +1894,8 @@ namespace game
                 if(cam->type == cament::ENTITY && !cam->visible.empty())
                     cam->moveto = cam->visible[rnd(cam->visible.length())];
                 else cam->moveto = NULL;
-                amt = 0;
+                amt = lastcamyaw = lastcampitch = 0;
+                lastcamyawmillis = lastcampitchmillis = lastmillis;
             }
             else if(renew) renew = false;
             camera1->o = cam->pos(amt);
@@ -1900,9 +1908,35 @@ namespace game
             else
             {
                 vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
-                if(!renew && spectvspeed > 0)
-                    scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, (float(curtime)/1000.f)*spectvspeed, spectvpitch);
-                else { camera1->yaw = camera1->aimyaw; camera1->pitch = camera1->aimpitch; }
+                if(!renew && spectvyawspeed > 0)
+                {
+                    float oldyaw = camera1->yaw;
+                    if(oldyaw < camera1->aimyaw-180.0f) oldyaw += 360.0f;
+                    if(oldyaw > camera1->aimyaw+180.0f) oldyaw -= 360.0f;
+                    float speed = float(curtime)/1000.f, yawspeed = 1, pitchspeed = 1,
+                        yawoffset = camera1->aimyaw-oldyaw, pitchoffset = camera1->aimpitch-camera1->pitch;
+                    int yawmillis = lastmillis-lastcamyawmillis, pitchmillis = lastmillis-lastcampitchmillis;;
+                    if(((yawoffset > 0 && lastcamyaw <= 0) || (yawoffset < 0 && lastcamyaw >= 0)) && yawmillis < spectvyawtime)
+                        yawspeed *= float(yawmillis)/float(spectvyawtime);
+                    else
+                    {
+                        lastcamyawmillis = lastmillis;
+                        lastcamyaw = yawoffset;
+                    }
+                    if(((pitchoffset > 0 && lastcampitch <= 0) || (pitchoffset < 0 && lastcampitch >= 0)) && pitchmillis < spectvpitchtime)
+                        pitchspeed *= float(pitchmillis)/float(spectvpitchtime);
+                    else
+                    {
+                        lastcampitchmillis = lastmillis;
+                        lastcampitch = yawoffset;
+                    }
+                    scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, speed*yawspeed*spectvyawspeed, speed*pitchspeed*spectvpitchspeed, spectvrotate);
+                }
+                else
+                {
+                    camera1->yaw = camera1->aimyaw;
+                    camera1->pitch = camera1->aimpitch;
+                }
             }
             if(cam->type == cament::AFFINITY && followdist > 0)
             {

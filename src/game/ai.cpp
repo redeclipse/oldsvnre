@@ -1131,7 +1131,7 @@ namespace ai
                         frame *= 2;
                         if(d->aitype == AI_BOT) locked = true;
                     }
-                    game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
+                    game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, frame*sskew);
                     if(insight || quick)
                     {
                         bool shoot = canshoot(d, e, alt);
@@ -1183,7 +1183,7 @@ namespace ai
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         d->aimyaw = d->ai->targyaw;
         d->aimpitch = d->ai->targpitch;
-        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame*0.25f, 1.f);
+        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame*0.25f, frame*0.25f);
 
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
         if(d->aitype == AI_BOT)
