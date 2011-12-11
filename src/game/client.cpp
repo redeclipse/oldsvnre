@@ -1475,7 +1475,7 @@ namespace client
                         d->setinfo(text, colour);
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game", game::colorname(d, text, "", false));
                         if(needclipboard >= 0) needclipboard++;
-                        game::cameras.shrink(0);
+                        game::cameras.deletecontents();
                     }
                     int team = clamp(getint(p), int(TEAM_NEUTRAL), int(TEAM_ENEMY));
                     if(d == game::focus && d->team != team) hud::lastteam = 0;

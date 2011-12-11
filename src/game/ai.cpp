@@ -189,7 +189,7 @@ namespace ai
                 if(showaiinfo > 1) conoutft(CON_EVENT, "\fg%s assigned to %s at skill %d", game::colorname(d, name), m, sk);
                 else conoutft(CON_EVENT, "\fg%s joined the game", game::colorname(d, name), m, sk);
             }
-            game::cameras.shrink(0);
+            game::cameras.deletecontents();
             resetthisguy = true;
         }
         else
@@ -597,13 +597,13 @@ namespace ai
         }
     }
 
-    void setup(gameent *d, bool tryreset = false, int ent = -1)
+    void setup(gameent *d, int ent = -1)
     {
         d->aientity = ent;
         if(d->ai)
         {
             d->ai->clearsetup();
-            d->ai->reset(tryreset);
+            d->ai->reset(true);
             d->ai->lastrun = lastmillis;
             if(d->aitype >= AI_START)
             {
@@ -626,7 +626,7 @@ namespace ai
 
     void spawned(gameent *d, int ent)
     {
-        if(d->ai) setup(d, false, ent);
+        if(d->ai) setup(d, ent);
     }
 
     void killed(gameent *d, gameent *e)
@@ -1078,7 +1078,8 @@ namespace ai
         if(idle || !aistyle[d->aitype].canmove)
         {
             d->ai->lasthunt = lastmillis;
-            if(aistyle[d->aitype].canmove) d->ai->dontmove = true;
+            d->ai->dontmove = true;
+            d->ai->spot = vec(0, 0, 0);
         }
         else
         {
@@ -1088,7 +1089,11 @@ namespace ai
                 game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
                 d->ai->lasthunt = lastmillis;
             }
-            else idle = d->ai->dontmove = true;
+            else
+            {
+                idle = d->ai->dontmove = true;
+                d->ai->spot = vec(0, 0, 0);
+            }
         }
 
         bool enemyok = false, locked = false, melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
@@ -1520,7 +1525,6 @@ namespace ai
         // the state stack works like a chain of commands, certain commands simply replace each other
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
-        if(d->ai->state.empty()) setup(d, false, d->aientity);
         bool cleannext = false, parse = run && waypoints.inrange(d->lastnode);
         loopvrev(d->ai->state)
         {
@@ -1578,7 +1582,8 @@ namespace ai
             logic(d, c, parse);
             break;
         }
-        if(d->ai->trywipe) d->ai->wipe();
+        if(d->ai->state.empty()) setup(d, d->aientity);
+        else if(d->ai->trywipe) d->ai->wipe();
         d->ai->lastrun = lastmillis;
     }
 

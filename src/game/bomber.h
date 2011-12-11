@@ -199,7 +199,7 @@ namespace bomber
     extern bool aipursue(gameent *d, ai::aistate &b);
     extern void removeplayer(gameent *d);
     extern vec pulsecolour();
-    extern void checkcams(vector<cament> &cameras);
-    extern void updatecam(cament &c);
+    extern void checkcams(vector<cament *> &cameras);
+    extern void updatecam(cament *c);
 }
 #endif
