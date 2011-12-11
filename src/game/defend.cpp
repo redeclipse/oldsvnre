@@ -50,7 +50,7 @@ namespace defend
                     defendstate::flag &f = st.flags[c.id];
                     int pri = f.owner == game::player1->team ? 1 : 0;
                     if(f.owner == game::player1->team && f.enemy) pri++;
-                    c.pos = f.o; c.pos.z += enttype[AFFINITY].radius*2/3;
+                    c.o = f.o; c.o.z += enttype[AFFINITY].radius*2/3;
                     c.pri = pri;
                 }
                 break;

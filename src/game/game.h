@@ -1080,14 +1080,16 @@ struct cament
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
     int type, id, pri, cansee;
-    vec pos, dir, olddir;
+    vec o, dir, olddir;
     float dist, mindist, maxdist, score;
     gameent *player;
     bool current, ignore;
+    vector<cament *> visible;
+    cament *moveto;
 
-    cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false) { reset(); }
-    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false) { reset(); }
-    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), pos(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false) { reset(); }
+    cament() : type(-1), id(-1), pri(0), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament(int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament(vec &v, int t, int i, float f = 1e16f, gameent *d = NULL) : type(t), id(i), pri(0), o(v), dist(f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(d), current(false), ignore(false), moveto(NULL) { reset(); }
     ~cament() {}
 
     void reset(bool update = false)
@@ -1112,6 +1114,13 @@ struct cament
         if(a.dist < b.dist) return true;
         if(a.dist > b.dist) return false;
         return false;
+    }
+
+    vec pos(float amt = 0)
+    {
+        vec v = o;
+        if(amt > 0 && moveto) v.add(vec(moveto->o).sub(o).mul(amt));
+        return v;
     }
 };
 
