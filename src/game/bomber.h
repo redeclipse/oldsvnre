@@ -48,19 +48,20 @@ struct bomberstate
         }
 
 #ifndef GAMESERVER
-        vec &pos()
+        vec &pos(bool render = true)
         {
             if(owner)
             {
-                if(lastmillis != interpmillis)
+                if(render && lastmillis != interpmillis)
                 {
                     float yaw = 360-((lastmillis/2)%360), off = (lastmillis%1000)/500.f;
                     vecfromyawpitch(yaw, 0, 1, 0, interppos);
                     interppos.normalize().mul(owner->radius+4).add(owner->headpos(-owner->height/2));
                     interppos.z += owner->height*(off > 1 ?  2-off : off);
                     interpmillis = lastmillis;
+                    return interppos;
                 }
-                return interppos;
+                else return owner->waist;
             }
             if(droptime) return proj ? proj->o : droploc;
             return spawnloc;
