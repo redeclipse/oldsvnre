@@ -265,7 +265,7 @@ namespace hud
     FVAR(IDF_PERSIST, plasmaclipskew, 0, 0.85f, 1000);
     FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 1000);
 
-    VAR(IDF_PERSIST, showradar, 0, 2, 2);
+    VAR(IDF_PERSIST, showradar, 0, 1, 2);
     VAR(IDF_PERSIST, radarstyle, 0, 1, 2); // 0 = compass-sectional, 1 = compass-distance, 2 = right-corner-positional
     FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
     TVAR(IDF_PERSIST, radarcornertex, "<grey>textures/radar", 3);
@@ -2193,7 +2193,7 @@ namespace hud
             if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
             if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
         }
-        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : !third && chkcond(showradar, game::tvmode())))
+        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : chkcond(showradar, game::tvmode())))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
         if(teamhurttime && game::focus == game::player1 && lastmillis-game::player1->lastteamhit <=  teamhurttime)
