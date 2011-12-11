@@ -1719,7 +1719,7 @@ namespace game
         return false;
     }
 
-    bool camupdate(cament *c, bool update = false)
+    bool camupdate(cament *c, const vec &pos, bool update = false)
     {
         float foglevel = float(fog*2/3);
         c->reset(true);
@@ -1736,29 +1736,29 @@ namespace game
                 }
                 default: break;
             }
-            vec trg, pos = f.pos;
-            float dist = c->pos.dist(pos), fogdist = min(c->maxdist, foglevel);
-            if(dist >= c->mindist && dist <= fogdist && raycubelos(c->pos, pos, trg))
+            vec trg, from = f.o;
+            float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
+            if(dist >= c->mindist && dist <= fogdist && raycubelos(pos, from, trg))
             {
                 float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
                 if(!c->player && update)
                 {
-                    vec dir = pos;
+                    vec dir = from;
                     if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
-                    dir.sub(c->pos).normalize();
+                    dir.sub(pos).normalize();
                     vectoyawpitch(dir, yaw, pitch);
                 }
                 bool hassight = update;
                 if(!hassight)
                 {
-                    float x = fmod(fabs(asin((pos.z-c->pos.z)/dist)/RAD-pitch), 360);
-                    float y = fmod(fabs(-atan2(pos.x-c->pos.x, pos.y-c->pos.y)/RAD-yaw), 360);
+                    float x = fmod(fabs(asin((from.z-pos.z)/dist)/RAD-pitch), 360);
+                    float y = fmod(fabs(-atan2(from.x-pos.x, from.y-pos.y)/RAD-yaw), 360);
                     if(min(x, 360-x) <= curfov && min(y, 360-y) <= fovy) hassight = true;
                 }
                 if(hassight)
                 {
                     c->cansee++;
-                    c->dir.add(f.pos);
+                    c->dir.add(f.o);
                     c->score += dist;
                     //if(c->cansee >= cament::TRACKMAX) break;
                 }
@@ -1805,8 +1805,11 @@ namespace game
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
                 cament &c = cameras.add(cament(e.o, cament::ENTITY, i, camera1->o.dist(e.o)));
-                if(enttype[e.type].radius) c.pos.z += enttype[e.type].radius;
+                c.o.z += max(enttype[e.type].radius, 2);
             }
+            vec trg;
+            loopv(cameras) loopvj(cameras) if(i != j && raycubelos(cameras[i].o, cameras[j].o, trg))
+                cameras[i].visible.add(&cameras[j]);
             gameent *d = NULL;
             loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
@@ -1823,7 +1826,7 @@ namespace game
             {
                 if(cameras[i].player || ((cameras[i].player = (gameent *)iterdynents(cameras[i].id))))
                 {
-                    cameras[i].pos = camerapos(cameras[i].player);
+                    cameras[i].o = camerapos(cameras[i].player);
                     vecfromyawpitch(cameras[i].player->yaw, cameras[i].player->pitch, 1, 0, cameras[i].dir);
                     cameras[i].pri = m_team(gamemode, mutators) && cameras[i].player && cameras[i].player->team == player1->team ? 1 : 0;
                 }
@@ -1843,16 +1846,18 @@ namespace game
         }
         if(!cameras.empty())
         {
-            bool force = spectvmaxtime && lastmillis-lasttvchg >= spectvmaxtime,
+            int millis = lasttvchg ? lastmillis-lasttvchg : 0;
+            bool force = spectvmaxtime && millis >= spectvmaxtime,
                  renew = force || !lasttvcam || lastmillis-lasttvcam >= spectvtime,
-                 override = !lasttvchg || lastmillis-lasttvchg >= spectvmintime;
+                 override = !lasttvchg || millis >= spectvmintime;
+            float amt = float(millis)/float(spectvmaxtime);
             cament *cam = &cameras[0];
             camrefresh(cam);
             int lasttype = cam->type, lastid = cam->id;
-            bool updated = camupdate(cam);
+            bool updated = camupdate(cam, cam->pos(amt));
             if(renew || (!updated && override))
             {
-                loopv(cameras) if(!camupdate(&cameras[i], true)) cameras[i].reset();
+                loopv(cameras) if(!camupdate(&cameras[i], cameras[i].o, true)) cameras[i].reset();
                 if(!updated && override) renew = force = true;
             }
             if(renew)
@@ -1875,9 +1880,13 @@ namespace game
             {
                 lasttvchg = lastmillis;
                 if(!renew) renew = true;
+                if(cam->type == cament::ENTITY && !cam->visible.empty())
+                    cam->moveto = cam->visible[rnd(cam->visible.length())];
+                else cam->moveto = NULL;
+                amt = 0;
             }
             else if(renew) renew = false;
-            camera1->o = cam->pos;
+            camera1->o = cam->pos(amt);
             if(focus != player1)
             {
                 camera1->yaw = camera1->aimyaw = focus->yaw;

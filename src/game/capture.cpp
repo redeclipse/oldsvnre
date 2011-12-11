@@ -196,7 +196,7 @@ namespace capture
                     capturestate::flag &f = st.flags[c.id];
                     int pri = f.team == game::player1->team ? 1 : 0;
                     if(f.owner || f.droptime) pri++;
-                    c.pos = f.pos(); c.pos.z += enttype[AFFINITY].radius*2/3;
+                    c.o = f.pos(); c.o.z += enttype[AFFINITY].radius*2/3;
                     c.pri = pri;
                     if(f.owner) c.player = f.owner;
                 }

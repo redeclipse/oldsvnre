@@ -238,7 +238,7 @@ namespace bomber
                     bomberstate::flag &f = st.flags[c.id];
                     int pri = isbomberaffinity(f) ? 1 : 0;
                     if(f.owner || f.droptime) pri++;
-                    c.pos = f.pos(); c.pos.z += enttype[AFFINITY].radius/2;
+                    c.o = f.pos(); c.o.z += enttype[AFFINITY].radius/2;
                     c.pri = pri;
                     if(f.owner) c.player = f.owner;
                 }
