@@ -3083,7 +3083,7 @@ namespace server
                 givepoints(target, -pointvalue);
             else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
             target->state.deaths++;
-            dropitems(target);
+            dropitems(target, aistyle[target->state.aitype].living ? 2 : 3);
             static vector<int> dmglog; dmglog.setsize(0);
             gethistory(target, actor, gamemillis, dmglog, true, 1);
             sendf(-1, 1, "ri9iv", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
@@ -3112,7 +3112,7 @@ namespace server
         }
         else givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;
-        dropitems(ci);
+        dropitems(ci, aistyle[ci->state.aitype].living ? 2 : 3);
         if(GAME(burntime) && (flags&HIT_MELT || flags&HIT_BURN))
         {
             ci->state.lastburn = ci->state.lastburntime = gamemillis;
