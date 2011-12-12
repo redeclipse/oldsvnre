@@ -2189,39 +2189,34 @@ namespace server
     struct droplist { int weap, ent, value; };
     void dropitems(clientinfo *ci, int level = 2, int weap = -1)
     {
-        if(ci->state.aitype >= AI_START) ci->state.weapreset(false);
-        else
+        servstate &ts = ci->state;
+        vector<droplist> drop;
+        int sweap = m_weapon(gamemode, mutators);
+        if(level == 3 || (level == 2 && GAME(kamikaze) && (GAME(kamikaze) > 2 || (ts.hasweap(WEAP_GRENADE, sweap) && (GAME(kamikaze) > 1 || ts.weapselect == WEAP_GRENADE)))))
         {
-            servstate &ts = ci->state;
-            vector<droplist> drop;
-            int sweap = m_weapon(gamemode, mutators);
-            if(level == 3 || (level == 2 && GAME(kamikaze) && (GAME(kamikaze) > 2 || (ts.hasweap(WEAP_GRENADE, sweap) && (GAME(kamikaze) > 1 || ts.weapselect == WEAP_GRENADE)))))
-            {
-                ci->state.weapshots[WEAP_GRENADE][0].add(1);
-                droplist &d = drop.add();
-                d.weap = WEAP_GRENADE;
-                d.ent = d.value = -1;
-                takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
-            }
-            if(level)
-            {
-                loopi(WEAP_MAX) if(i != sweap && ts.hasweap(i, sweap) && sents.inrange(ts.entid[i]))
-                {
-                    if(isweap(weap) && i != weap) continue;
-                    setspawn(ts.entid[i], false);
-                    droplist &d = drop.add();
-                    d.weap = i;
-                    d.ent = ts.entid[i];
-                    d.value = ts.ammo[i];
-                    ts.dropped.add(d.ent, d.value);
-                    ts.entid[i] = ts.ammo[i] = -1;
-                    ts.setweapstate(i, WEAP_S_JAM, GAME(weaponjamtime), gamemillis);
-                }
-            }
-            if(level && !drop.empty())
-                sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
-            //ts.weapreset(false);
+            ci->state.weapshots[WEAP_GRENADE][0].add(1);
+            droplist &d = drop.add();
+            d.weap = WEAP_GRENADE;
+            d.ent = d.value = -1;
+            takeammo(ci, WEAP_GRENADE, WEAP2(WEAP_GRENADE, sub, false));
         }
+        if(level)
+        {
+            loopi(WEAP_MAX) if(i != sweap && ts.hasweap(i, sweap) && sents.inrange(ts.entid[i]))
+            {
+                if(isweap(weap) && i != weap) continue;
+                setspawn(ts.entid[i], false);
+                droplist &d = drop.add();
+                d.weap = i;
+                d.ent = ts.entid[i];
+                d.value = ts.ammo[i];
+                ts.dropped.add(d.ent, d.value);
+                ts.entid[i] = ts.ammo[i] = -1;
+                ts.setweapstate(i, WEAP_S_JAM, GAME(weaponjamtime), gamemillis);
+            }
+        }
+        if(level && !drop.empty())
+            sendf(-1, 1, "ri3iv", N_DROP, ci->clientnum, -1, drop.length(), drop.length()*sizeof(droplist)/sizeof(int), drop.getbuf());
     }
 
     void connected(clientinfo *ci);
