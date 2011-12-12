@@ -617,7 +617,7 @@ namespace game
 
     float spawnfade(gameent *d)
     {
-        int len = d->aitype >= AI_START && aistyle[d->aitype].canmove ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : m_delay(gamemode, mutators);
+        int len = d->aitype >= AI_START ? (aistyle[d->aitype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : INT_MAX-1) : 500) : m_delay(gamemode, mutators);
         if(len > 1000)
         {
             int interval = min(len/3, ragdolleffect), over = max(len-interval, 1), millis = lastmillis-d->lastdeath;
@@ -1241,12 +1241,12 @@ namespace game
             if(showobitdists && d != actor) announcef(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
             else announcef(anc, target, d, "\fw%s", d->obit);
         }
-        if(gibscale > 0)
+        if(aistyle[d->aitype].living && gibscale > 0)
         {
             vec pos = d->headpos(-d->height*0.5f);
             int gib = clamp(max(damage,5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
             if(d->obliterated) amt *= 3;
-            loopi(amt) projs::create(pos, pos, true, d, aistyle[d->aitype].living ? PRJ_GIBS : PRJ_DEBRIS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
+            loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
         if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
         {
@@ -1778,6 +1778,7 @@ namespace game
                 if(c->player) c->cansee++;
                 return true;
             }
+            c->dir = c->olddir;
             c->reset(true);
         }
         c->dir = c->olddir;
