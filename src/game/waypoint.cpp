@@ -500,7 +500,7 @@ namespace ai
         if(d->state != CS_ALIVE) { d->lastnode = -1; return; }
         vec v(d->feetpos());
         bool dropping = shoulddrop(d) && !clipped(v);
-        float dist = dropping ? WAYPOINTRADIUS : (d->ai ? WAYPOINTRADIUS : SIGHTMIN);
+        float dist = dropping ? WAYPOINTRADIUS : CLOSEDIST;
         int curnode = closestwaypoint(v, dist, false, d), prevnode = d->lastnode;
         if(!waypoints.inrange(curnode) && dropping) curnode = addwaypoint(v);
         if(waypoints.inrange(curnode))
@@ -513,8 +513,8 @@ namespace ai
             d->lastnode = curnode;
             if(d->ai && waypoints.inrange(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);
         }
-        else if(!waypoints.inrange(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > SIGHTMIN*SIGHTMIN)
-			d->lastnode = closestwaypoint(v, SIGHTMAX, false, d);
+        else if(!waypoints.inrange(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > CLOSEDIST*CLOSEDIST)
+			d->lastnode = closestwaypoint(v, CLOSEDIST*2, false, d);
     }
 
     void navigate()
@@ -586,7 +586,7 @@ namespace ai
     }
 
 
-    const int MAXWAYPOINTRADIUS = (WAYPOINTRADIUS*3)*(WAYPOINTRADIUS*3);
+    //const int MAXWAYPOINTRADIUS = (WAYPOINTRADIUS*3)*(WAYPOINTRADIUS*3);
     bool cleanwaypoints()
     {
         int cleared = 0;
@@ -599,11 +599,11 @@ namespace ai
                 w.links[1] = 0xFFFF;
                 cleared++;
             }
-            else loopj(MAXWAYPOINTLINKS) if(w.links[j] && waypoints.inrange(w.links[j]))
-            {
-                waypoint &v = waypoints[w.links[j]];
-                if(w.o.squaredist(v.o) > MAXWAYPOINTRADIUS) w.links[j] = 0;
-            }
+            //else loopj(MAXWAYPOINTLINKS) if(w.links[j] && waypoints.inrange(w.links[j]))
+            //{
+            //    waypoint &v = waypoints[w.links[j]];
+            //    if(w.o.squaredist(v.o) > MAXWAYPOINTRADIUS) w.links[j] = 0;
+            //}
         }
         if(cleared)
         {

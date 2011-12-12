@@ -1017,10 +1017,10 @@ namespace ai
     void jumpto(gameent *d, aistate &b, const vec &pos, bool locked)
     {
         vec off = vec(pos).sub(d->feetpos());
-        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->physstate == PHYS_FALL && !physics::liquidcheck(d) && !d->onladder, air = d->timeinair > 350 && !d->turnside,
-            impulse = air && physics::canimpulse(d, 1, false) && d->timeinair > 700, jet = air && physics::allowhover(d),
-            jumper = (locked || sequenced || impulse || jet || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)) && (!offground || impulse || jet),
-            jump = jumper && (jet || lastmillis >= d->ai->jumpseed);
+        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !physics::liquidcheck(d) && !d->onladder,
+            impulse = d->timeinair > 500 && !d->turnside && physics::canimpulse(d, 1, false), jet = d->timeinair > 250 && !d->turnside && physics::allowhover(d),
+            jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
+            jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
             vec old = d->o;
@@ -1045,9 +1045,10 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
+        #if 0 // kick interferes with jumping when against a wall
         if(!sequenced)
         {
-            if(air && physics::canimpulse(d, 3, true) && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)))
+            if(d->timeinair > 250 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, 3, true))
                 d->action[AC_SPECIAL] = true;
             else if(!aipassive && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
             {
@@ -1055,6 +1056,7 @@ namespace ai
                 d->ai->lastmelee = lastmillis;
             }
         }
+        #endif
     }
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
