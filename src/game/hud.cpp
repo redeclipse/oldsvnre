@@ -305,7 +305,7 @@ namespace hud
     VAR(IDF_PERSIST, radaritemtime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, radaritemnames, 0, 0, 2);
     VAR(IDF_PERSIST, radarplayers, 0, 2, 2);
-    VAR(IDF_PERSIST, radarplayerfilter, 0, 0, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit/tv
+    VAR(IDF_PERSIST, radarplayerfilter, 0, 0, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit
     VAR(IDF_PERSIST, radarplayernames, 0, 0, 2);
     VAR(IDF_PERSIST, radarplayereffects, 0, 1, 1);
     VAR(IDF_PERSIST, radaraffinity, 0, 2, 2);
@@ -1416,7 +1416,7 @@ namespace hud
             else if(d->state != CS_EDITING) return;
             loopi(2)
             {
-                if(!i && chkcond(radarplayernames, game::tvmode()))
+                if(!i && chkcond(radarplayernames, !game::tvmode()))
                     drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i], "tiny", "%s", game::colorname(d, NULL, "", false));
                 else drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i]);
             }
@@ -1452,7 +1452,7 @@ namespace hud
             if(game::focus->state != CS_EDITING && !insel && inspawn > 0.f)
                 fade = radaritemspawn ? 1.f-inspawn : fade+((1.f-fade)*(1.f-inspawn));
             if(insel) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "tiny", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
-            else if(chkcond(radaritemnames, game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "tiny", "%s", entities::entinfo(type, attr, false));
+            else if(chkcond(radaritemnames, !game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "tiny", "%s", entities::entinfo(type, attr, false));
             else drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour);
         }
     }
@@ -1554,14 +1554,14 @@ namespace hud
             glColor4f(gr*radartexbright, gg*radartexbright, gb*radartexbright, radartexblend);
             drawsized(w-s*2, 0, s*2);
         }
-        if(chkcond(radaritems, game::tvmode()) || m_edit(game::gamemode)) drawentblips(w, h, blend*radarblend); // 2
-        if(chkcond(radaraffinity, game::tvmode())) // 3
+        if(chkcond(radaritems, !game::tvmode()) || m_edit(game::gamemode)) drawentblips(w, h, blend*radarblend); // 2
+        if(chkcond(radaraffinity, !game::tvmode())) // 3
         {
             if(m_capture(game::gamemode)) capture::drawblips(w, h, blend*radarblend);
             else if(m_defend(game::gamemode)) defend::drawblips(w, h, blend);
             else if(m_bomber(game::gamemode)) bomber::drawblips(w, h, blend*radarblend);
         }
-        if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode) || game::tvmode())) // 4
+        if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
             gameent *d = NULL;
             int numdyns = game::numdynents();
@@ -2193,7 +2193,7 @@ namespace hud
             if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
             if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
         }
-        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : chkcond(showradar, game::tvmode())))
+        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : chkcond(showradar, !game::tvmode())))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
         if(teamhurttime && game::focus == game::player1 && lastmillis-game::player1->lastteamhit <=  teamhurttime)
