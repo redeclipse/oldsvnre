@@ -1087,7 +1087,7 @@ namespace ai
         }
         else
         {
-            checkroute(d);
+            //checkroute(d);
             if(hunt(d, b))
             {
                 game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
