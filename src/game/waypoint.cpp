@@ -197,7 +197,7 @@ namespace ai
 
 	static inline bool allowuse(gameent *d, int n, bool force = true)
 	{
-		if(!d || !d->ai || force || (!d->ai->hasprevnode(n) && !obstacles.find(n, d))) return true;
+		if(!d || !d->ai || force || !obstacles.find(n, d)) return true;
 		return false;
 	}
 

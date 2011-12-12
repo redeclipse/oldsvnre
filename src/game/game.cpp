@@ -1727,6 +1727,7 @@ namespace game
         if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
         loopj(c->player ? 1 : 2)
         {
+            int players = c->player ? 1 : 0;
             loopv(cameras) if(c != cameras[i])
             {
                 cament *cam = cameras[i];
@@ -1762,6 +1763,7 @@ namespace game
                     }
                     if(hassight)
                     {
+                        if(cam->type == cament::PLAYER) players++;
                         c->cansee++;
                         c->dir.add(cam->o);
                         c->score += dist;
@@ -1776,7 +1778,7 @@ namespace game
                     c->score /= c->cansee;
                 }
                 if(c->player) c->cansee++;
-                return true;
+                if(players || j) return players!=0;
             }
             c->dir = c->olddir;
             c->reset(true);

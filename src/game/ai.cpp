@@ -882,35 +882,39 @@ namespace ai
         return 0;
     }
 
-    int closenode(gameent *d, bool retry = false)
+    int closenode(gameent *d)
     {
         vec pos = d->feetpos();
         int node = -1;
         float mindist = CLOSEDIST*CLOSEDIST;
-        loopv(d->ai->route) if(d->lastnode != d->ai->route[i] && waypoints.inrange(d->ai->route[i]))
+        loopk(2)
         {
-            vec epos = waypoints[d->ai->route[i]].o;
-            int entid = obstacles.remap(d, d->ai->route[i], epos, retry);
-            if(waypoints.inrange(entid) && (retry || entid == d->ai->route[i] || !d->ai->hasprevnode(entid)))
+            loopv(d->ai->route) if(d->lastnode != d->ai->route[i] && waypoints.inrange(d->ai->route[i]))
             {
-                float dist = epos.squaredist(pos);
-                if(dist < mindist)
+                vec epos = waypoints[d->ai->route[i]].o;
+                int entid = obstacles.remap(d, d->ai->route[i], epos, k!=0);
+                if(waypoints.inrange(entid))
                 {
-                    node = i;
-                    mindist = dist;
+                    float dist = epos.squaredist(pos);
+                    if(dist < mindist)
+                    {
+                        node = i;
+                        mindist = dist;
+                    }
                 }
             }
+            if(node >= 0) break;
         }
         return node;
     }
 
-    bool wpspot(gameent *d, int n, bool retry = false)
+    bool wpspot(gameent *d, int n)
     {
-        if(waypoints.inrange(n))
+        if(waypoints.inrange(n)) loopk(2)
         {
             vec epos = waypoints[n].o;
-            int entid = obstacles.remap(d, n, epos, retry);
-            if(waypoints.inrange(entid) && (retry || entid == n || !d->ai->hasprevnode(entid)))
+            int entid = obstacles.remap(d, n, epos, k!=0);
+            if(waypoints.inrange(entid))
             {
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = d->feetpos().z;
                 d->ai->spot = epos;
@@ -921,29 +925,29 @@ namespace ai
         return false;
     }
 
-    bool anynode(gameent *d, aistate &b, bool retry = false)
+    bool anynode(gameent *d, aistate &b)
     {
-        if(waypoints.inrange(d->lastnode))
+        loopk(2)
         {
             waypoint &w = waypoints[d->lastnode];
             static vector<int> anyremap; anyremap.setsize(0);
+            d->ai->clear(k ? true : false);
             if(w.haslinks())
             {
-                loopi(MAXWAYPOINTLINKS) if(w.links[i] && waypoints.inrange(w.links[i]) && (retry || !d->ai->hasprevnode(w.links[i])))
+                loopi(MAXWAYPOINTLINKS) if(w.links[i] && waypoints.inrange(w.links[i]))
                     anyremap.add(w.links[i]);
             }
             while(!anyremap.empty())
             {
                 int r = rnd(anyremap.length()), t = anyremap[r];
-                if(wpspot(d, t, retry))
+                if(wpspot(d, t))
                 {
                     d->ai->route.add(t);
-                    d->ai->route.add(d->lastnode);
+                    if(waypoints.inrange(d->lastnode)) d->ai->route.add(d->lastnode);
                     return true;
                 }
                 anyremap.remove(r);
             }
-            if(!retry) return anynode(d, b, true);
         }
         return false;
     }
@@ -952,22 +956,21 @@ namespace ai
     {
         if(d->lastnode < 0 || d->ai->route.empty()) return false;
         int start = d->ai->route.find(d->lastnode);
-        if(!d->ai->route.inrange(start)) start = closenode(d, false);
-        if(!d->ai->route.inrange(start)) start = closenode(d, true);
+        if(!d->ai->route.inrange(start)) start = closenode(d);
         if(!d->ai->route.inrange(start)) return false;
         if(start < 3) return false; // route length is too short now
         int count = min(start, NUMPREVNODES);
         loopj(count)
         {
             int pos = start-j, node = d->ai->route[pos];
-            if(obstacles.find(node, d)) // something is in the way, try to remap around it
+            if(d->ai->hasprevnode(node) || obstacles.find(node, d)) // something is in the way, try to remap around it
             {
                 int amt = pos-1;
                 if(amt < 3) return false; // route length is too short from this point
                 loopirev(amt)
                 {
                     int targ = d->ai->route[i];
-                    if(!obstacles.find(targ, d))
+                    if(!d->ai->hasprevnode(targ) && !obstacles.find(targ, d))
                     {
                         int begin = amt-i;
                         static vector<int> remap; remap.setsize(0);
@@ -985,33 +988,30 @@ namespace ai
         return false;
     }
 
-    bool hunt(gameent *d, aistate &b, int retries = 0)
+    bool hunt(gameent *d, aistate &b, bool retry = false)
     {
         if(!d->ai->route.empty() && d->lastnode >= 0)
         {
-            int n = !(retries%2) ? d->ai->route.find(d->lastnode) : closenode(d, retries >= 2);
-            if(!(retries%2) && d->ai->route.inrange(n))
+            int n = retry ? closenode(d) : d->ai->route.find(d->lastnode);
+            if(!retry && d->ai->route.inrange(n))
             {
                 while(d->ai->route.length() > n+1) d->ai->route.pop(); // waka-waka-waka-waka
                 if(!n)
                 {
-                    if(wpspot(d, d->ai->route[n], retries >= 2))
+                    if(wpspot(d, d->ai->route[n]))
                     {
                         d->ai->clear(true);
                         return true;
                     }
-                    if(retries <= 2) return hunt(d, b, retries+1); // try again
+                    if(!retry) return hunt(d, b, true); // try again
                 }
                 else n--; // otherwise, we want the next in line
             }
-            if(d->ai->route.inrange(n) && wpspot(d, d->ai->route[n], retries >= 2)) return true;
-            if(retries <= 2) return hunt(d, b, retries+1); // try again
+            if(d->ai->route.inrange(n) && wpspot(d, d->ai->route[n])) return true;
+            if(!retry) return hunt(d, b, true); // try again
         }
         b.override = false;
-        d->ai->clear(false);
-        if(anynode(d, b)) return true;
-        d->ai->clear(true);
-        return anynode(d, b, true);
+        return anynode(d, b);
     }
 
     void jumpto(gameent *d, aistate &b, const vec &pos, bool locked)
