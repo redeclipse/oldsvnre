@@ -506,12 +506,12 @@ game/server.o: game/team.h game/ai.h game/vars.h game/capture.h game/defend.h
 game/server.o: game/bomber.h game/auth.h game/capturemode.h game/defendmode.h
 game/server.o: game/bombermode.h game/duelmut.h game/aiman.h game/extinfo.h
 game/waypoint.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
-game/waypoint.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
-game/waypoint.o: shared/igame.h engine/irc.h engine/sound.h engine/world.h
-game/waypoint.o: engine/octa.h engine/lightmap.h engine/bih.h engine/texture.h
-game/waypoint.o: engine/model.h engine/varray.h game/weapons.h game/gamemode.h
-game/waypoint.o: game/team.h game/ai.h game/vars.h game/capture.h
-game/waypoint.o: game/defend.h game/bomber.h
+game/waypoint.o: shared/command.h shared/geom.h shared/ents.h
+game/waypoint.o: shared/iengine.h shared/igame.h engine/irc.h engine/sound.h
+game/waypoint.o: engine/world.h engine/octa.h engine/lightmap.h engine/bih.h
+game/waypoint.o: engine/texture.h engine/model.h engine/varray.h
+game/waypoint.o: game/weapons.h game/gamemode.h game/team.h game/ai.h
+game/waypoint.o: game/vars.h game/capture.h game/defend.h game/bomber.h
 game/weapons.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/weapons.o: shared/command.h shared/geom.h shared/ents.h shared/iengine.h
 game/weapons.o: shared/igame.h engine/irc.h engine/sound.h engine/world.h
