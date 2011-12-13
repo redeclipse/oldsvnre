@@ -343,32 +343,31 @@ namespace game
 
     void followswitch(int n)
     {
-        follow += n;
-        int numdyns = numdynents();
-        #define checkfollow \
-            if(follow >= numdyns) follow = 0; \
-            else if(follow < 0) follow = numdyns-1;
-        checkfollow;
-        while(true)
+        if(!tvmode())
         {
-            gameent *d = (gameent *)iterdynents(follow);
-            if(!d || d->aitype >= AI_START)
+            follow += n;
+            int numdyns = numdynents();
+            #define checkfollow \
+                if(follow >= numdyns) follow = 0; \
+                else if(follow < 0) follow = numdyns-1;
+            checkfollow;
+            while(true)
             {
-                follow += clamp(n, -1, 1);
-                checkfollow;
+                gameent *d = (gameent *)iterdynents(follow);
+                if(!d || d->aitype >= AI_START)
+                {
+                    follow += clamp(n, -1, 1);
+                    checkfollow;
+                }
+                else break;
             }
-            else break;
         }
     }
     ICOMMAND(0, followdelta, "i", (int *n), followswitch(*n ? *n : 1));
 
     bool allowmove(physent *d)
     {
-        if(d == player1)
-        {
-            //if(hud::hasinput(true, false)) return false;
-            if(tvmode()) return false;
-        }
+        if(d == player1 && tvmode()) return false;
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             if(d->state == CS_DEAD || d->state >= CS_SPECTATOR || intermission)
