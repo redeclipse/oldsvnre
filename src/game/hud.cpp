@@ -105,13 +105,13 @@ namespace hud
     TVAR(IDF_PERSIST, inventorytex, "<grey>textures/inventory", 3);
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
 
-    VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, healthtone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, impulsetone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, healthtone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, impulsetone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, crosshairtone, -CTONE_MAX, 0, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, noticestone, -CTONE_MAX, 0, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, clipstone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, radartone, -CTONE_MAX, -CTONE_TEAMED-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, clipstone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, radartone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
 
     VAR(IDF_PERSIST, teamhurttime, 0, 2500, VAR_MAX);
     VAR(IDF_PERSIST, teamhurtdist, 0, 0, VAR_MAX);
