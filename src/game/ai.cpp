@@ -694,6 +694,7 @@ namespace ai
 
     int dowait(gameent *d, aistate &b)
     {
+        d->ai->clear(true); // ensure they're clean
         if(d->ai->suspended)
         {
             if(!m_campaign(game::gamemode) && d->aitype == AI_BOT) d->ai->unsuspend();
@@ -984,10 +985,10 @@ namespace ai
     {
         if(d->ai->route.empty() || !d->ai->route.inrange(n)) return false;
         if(n < 3) return false; // route length is too short
-        int w = d->ai->route[n], c = min(n, NUMPREVNODES);
+        int w = waypoints.inrange(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(n-1, NUMPREVNODES);
         loopj(c) // check ahead to see if we need to go around something
         {
-            int p = n-j, v = d->ai->route[p];
+            int p = n-j-1, v = d->ai->route[p];
             if(d->ai->hasprevnode(v) || obstacles.find(v, d)) // something is in the way, try to remap around it
             {
                 int m = p-1;
@@ -997,17 +998,17 @@ namespace ai
                     int t = d->ai->route[i];
                     if(!d->ai->hasprevnode(t) && !obstacles.find(t, d))
                     {
-                        int b = m-i;
                         static vector<int> remap; remap.setsize(0);
                         if(route(d, w, t, remap, obstacles))
                         { // kill what we don't want and put the remap in
-                            while(d->ai->route.length() > b) d->ai->route.pop();
+                            while(d->ai->route.length() > i) d->ai->route.pop();
                             loopvk(remap) d->ai->route.add(remap[k]);
                             return true;
                         }
                         return false; // we failed
                     }
                 }
+                return false;
             }
         }
         return false;
@@ -1033,8 +1034,8 @@ namespace ai
                 else
                 {
                     while(d->ai->route.length() > n+1) d->ai->route.pop(); // waka-waka-waka-waka
-                    n--;
-                    if(d->ai->route.inrange(n) && wpspot(d, d->ai->route[n])) return true;
+                    int m = n-1;
+                    if(d->ai->route.inrange(m) && wpspot(d, d->ai->route[m])) return true;
                 }
             }
         }
@@ -1073,7 +1074,6 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
-        #if 0 // kick interferes with jumping when against a wall
         if(!sequenced)
         {
             if(d->timeinair > 250 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, 3, true))
@@ -1084,7 +1084,6 @@ namespace ai
                 d->ai->lastmelee = lastmillis;
             }
         }
-        #endif
     }
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
@@ -1599,12 +1598,6 @@ namespace ai
                             case -1: i = d->ai->state.length()-1; break;
                         }
                         continue; // shouldn't interfere
-                    }
-                    else
-                    {
-                        c.millis = lastmillis;
-                        c.override = false;
-                        cleannext = false;
                     }
                 }
                 else if(d->ai->suspended) d->ai->unsuspend();
