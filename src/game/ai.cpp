@@ -11,7 +11,7 @@ namespace ai
     };
 
 
-    VAR(0, aidebug, 0, 0, 6);
+    VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
     VAR(0, aicampaign, 0, 0, 1);
@@ -984,7 +984,8 @@ namespace ai
     bool checkroute(gameent *d, int n)
     {
         if(d->ai->route.empty() || !d->ai->route.inrange(n)) return false;
-        if(n < 3) return false; // route length is too short
+        int last = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
+        if(last < 500 || n < 3) return false; // route length is too short
         int w = waypoints.inrange(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(n-1, NUMPREVNODES);
         loopj(c) // check ahead to see if we need to go around something
         {
@@ -1424,7 +1425,7 @@ namespace ai
                     case 4: d->ai->reset(false); break;
                     case 5: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
-                if(aidebug >= 5 && dbgfocus(d))
+                if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s blocked %dms sequence %d", game::colorname(d), d->ai->blocktime, d->ai->blockseq);
             }
         }
@@ -1445,7 +1446,7 @@ namespace ai
                     case 4: d->ai->reset(false); break;
                     case 5: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
-                if(aidebug >= 5 && dbgfocus(d))
+                if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s targeted %d too long %dms sequence %d", game::colorname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
             }
         }
@@ -1468,7 +1469,7 @@ namespace ai
                     case 2: d->ai->reset(false); break;
                     case 3: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
-                if(aidebug >= 5 && dbgfocus(d))
+                if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s hunting %dms sequence %d", game::colorname(d), millis, d->ai->huntseq);
             }
         }
@@ -1531,7 +1532,7 @@ namespace ai
         {
             projent *p = projs::projs[i];
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT && WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale))
-                obstacles.avoidnear(p, p->o, (WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale)*p->lifesize)*1.25f+2);
+                obstacles.avoidnear(p, p->o, WEAPEX(p->weap, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale));
         }
         loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
         {
@@ -1627,7 +1628,7 @@ namespace ai
             }
             last = i;
         }
-        if(aidebug > 4)
+        if(aidebug >= 5)
         {
             vec fr = vec(d->feetpos()).add(vec(0, 0, amt));
             if(d->ai->spot != vec(0, 0, 0)) part_trace(fr, vec(d->ai->spot).add(vec(0, 0, 0.1f)), 1, 1, 1, 0x00FFFF);
@@ -1656,7 +1657,7 @@ namespace ai
 
     void render()
     {
-        if(aidebug > 1)
+        if(aidebug >= 2)
         {
             int amt[2] = { 0, 0 };
             loopv(game::players) if(game::players[i] && dbgfocus(game::players[i])) amt[0]++;
@@ -1667,9 +1668,9 @@ namespace ai
                 pos.z += 3;
                 bool top = true;
                 amt[1]++;
-                if(aidebug > 3 && rendernormally && aistyle[d->aitype].canmove)
+                if(aidebug >= 4 && rendernormally && aistyle[d->aitype].canmove)
                     drawroute(d, 4.f*(float(amt[1])/float(amt[0])));
-                if(aidebug > 2)
+                if(aidebug >= 3)
                 {
                     defformatstring(q)("node: %d route: %d (%d)",
                         d->lastnode,
@@ -1692,11 +1693,11 @@ namespace ai
                     pos.z += 2;
                     if(top)
                     {
-                        if(aidebug > 2) top = false;
+                        if(aidebug >= 3) top = false;
                         else break;
                     }
                 }
-                if(aidebug > 2)
+                if(aidebug >= 3)
                 {
                     if(isweap(d->ai->weappref))
                     {
@@ -1728,7 +1729,7 @@ namespace ai
                 }
             }
         }
-        if(showwaypoints || aidebug > 5)
+        if(showwaypoints || aidebug >= 7)
         {
             vector<int> close;
             int len = waypoints.length();

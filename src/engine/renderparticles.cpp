@@ -1421,7 +1421,7 @@ void part_dir(const vec &o, float yaw, float pitch, float length, float size, fl
     if(!canaddparticles()) return;
 
     vec v; vecfromyawpitch(yaw, pitch, 1, 0, v); v.normalize();
-    part_line(o, vec(v).mul(length+1.f).add(o), size, blend, fade, color);
+    part_line(o, vec(v).mul(length).add(o), size, blend, fade, color);
     if(interval)
     {
         int count = int(length/float(interval));
@@ -1432,7 +1432,7 @@ void part_dir(const vec &o, float yaw, float pitch, float length, float size, fl
             part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
         }
     }
-    part_triangle(vec(v).mul(length).add(o), yaw, pitch, size, blend, fade, color, fill);
+    part_triangle(vec(v).mul(length-size).add(o), yaw, pitch, size, blend, fade, color, fill);
 }
 
 void part_trace(const vec &o, const vec &v, float size, float blend, int fade, int color, int interval, bool fill)
@@ -1451,7 +1451,7 @@ void part_trace(const vec &o, const vec &v, float size, float blend, int fade, i
             part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
         }
     }
-    part_triangle(v, yaw, pitch, size, blend, fade, color, fill);
+    part_triangle(vec(v).sub(vec(dir).mul(size)), yaw, pitch, size, blend, fade, color, fill);
 }
 
 void part_ellipse(const vec &o, const vec &v, float size, float blend, int fade, int color, int axis, bool fill, int type)
