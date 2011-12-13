@@ -1451,7 +1451,7 @@ void part_trace(const vec &o, const vec &v, float size, float blend, int fade, i
             part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
         }
     }
-    else part_triangle(o, yaw, pitch, size, blend, fade, color, fill);
+    part_triangle(v, yaw, pitch, size, blend, fade, color, fill);
 }
 
 void part_ellipse(const vec &o, const vec &v, float size, float blend, int fade, int color, int axis, bool fill, int type)
