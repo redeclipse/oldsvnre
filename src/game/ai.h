@@ -44,6 +44,7 @@ namespace ai
     const int MAXWAYPOINTLINKS  = 6;
     const int WAYPOINTRADIUS    = 16;
 
+    const float MINWPDIST       = 8.f;     // is on top of
     const float CLOSEDIST       = 32.f;    // is close
     const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
@@ -89,7 +90,7 @@ namespace ai
     };
     extern vector<oldwaypoint> oldwaypoints;
 
-    extern int closestwaypoint(const vec &pos, float mindist, bool links, gameent *d = NULL);
+    extern int closestwaypoint(const vec &pos, float mindist, bool links);
     extern void findwaypointswithin(const vec &pos, float mindist, float maxdist, vector<int> &results);
 	extern void inferwaypoints(gameent *d, const vec &o, const vec &v, float mindist = ai::CLOSEDIST);
 
@@ -239,7 +240,7 @@ namespace ai
 
         aistate &switchstate(aistate &b, int t, int r = -1, int v = -1)
         {
-            if(b.type == t && b.targtype == r)
+            if((b.type == t && b.targtype == r) || (b.type == AI_S_INTEREST && b.targtype == AI_T_NODE))
             {
                 b.millis = lastmillis;
                 b.target = v;
@@ -258,7 +259,7 @@ namespace ai
     extern float viewfieldx(int x = 101);
     extern float viewfieldy(int x = 101);
 
-    extern bool targetable(gameent *d, gameent *e);
+    extern bool targetable(gameent *d, gameent *e, bool solid = false);
     extern bool cansee(gameent *d, vec &x, vec &y, bool force = false, vec &targ = aitarget);
     extern bool altfire(gameent *d, gameent *e);
     extern int owner(gameent *d);
