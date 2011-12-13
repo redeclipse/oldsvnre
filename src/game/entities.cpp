@@ -4,14 +4,17 @@ namespace entities
     vector<extentity *> ents;
     int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0;
 
-    VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
-    VAR(IDF_PERSIST, showentinfo, 0, 2, 5);
     VAR(IDF_PERSIST, showentnoisy, 0, 0, 2);
-    VAR(IDF_PERSIST, showentdir, 0, 2, 3); // 0 = off, 1 = only selected, 2 = always when editing, 3 = always in editmode
-    VAR(IDF_PERSIST, showentradius, 0, 1, 3);
-    VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
+    VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
+    VAR(IDF_PERSIST, showentinfo, 0, 2, 5);
+
+    VAR(IDF_PERSIST, showentdir, 0, 1, 3); // 0 = off, 1 = only selected, 2 = always when editing, 3 = always in editmode
+    VAR(IDF_PERSIST, showentradius, 0, 1, 3);
+    VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
+    VAR(IDF_PERSIST, showentinterval, 0, 32, VAR_MAX);
+    FVAR(IDF_PERSIST, showentsize, 0, 2, FVAR_MAX);
 
     vector<extentity *> &getents() { return ents; }
     int lastent(int type) { return lastenttype[type]; }
@@ -1647,7 +1650,7 @@ namespace entities
                     both = true;
                     break;
                 }
-                part_trace(e.o, f.o, 1, 1, 1, both ? 0xAA44CC : 0x660088);
+                part_trace(e.o, f.o, showentsize, 1, 1, both ? 0xFF8822 : 0xFF2222, showentinterval);
             }
         }
     }
@@ -1660,39 +1663,39 @@ namespace entities
     void renderentshow(gameentity &e, int idx, int level)
     {
         if(e.o.squaredist(camera1->o) > maxparticledistance*maxparticledistance) return;
-        #define entdirpart(o,yaw,pitch,size,fade,colour) { vec pos = o; part_dir(pos, yaw, pitch, size, 1, fade, colour); pos.z -= 0.1f; part_dir(pos, yaw, pitch, size, 1, fade, 0x000000); }
+        #define entdirpart(o,yaw,pitch,length,fade,colour) part_dir(o, yaw, pitch, length, showentsize, 1, fade, colour, showentinterval);
         if(showentradius >= level)
         {
             switch(e.type)
             {
                 case PLAYERSTART:
                 {
-                    part_radius(vec(e.o).add(vec(0, 0, game::player1->zradius/2)), vec(game::player1->xradius, game::player1->yradius, game::player1->zradius/2), 1, 1, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
+                    part_radius(vec(e.o).add(vec(0, 0, game::player1->zradius/2)), vec(game::player1->xradius, game::player1->yradius, game::player1->zradius/2), showentsize, 1, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
                     break;
                 }
                 case ACTOR:
                 {
-                    part_radius(vec(e.o).add(vec(0, 0, aistyle[e.attrs[0]].height/2)), vec(aistyle[e.attrs[0]].xradius, aistyle[e.attrs[0]].height/2), 1, 1, 1, 0x888888);
-                    part_radius(e.o, vec(ai::ALERTMAX, ai::ALERTMAX, ai::ALERTMAX), 1, 1, 1, 0x888888);
+                    part_radius(vec(e.o).add(vec(0, 0, aistyle[e.attrs[0]].height/2)), vec(aistyle[e.attrs[0]].xradius, aistyle[e.attrs[0]].height/2), showentsize, 1, 1, 0x888888);
+                    part_radius(e.o, vec(ai::ALERTMAX, ai::ALERTMAX, ai::ALERTMAX), showentsize, 1, 1, 0x888888);
                     break;
                 }
                 case MAPSOUND:
                 {
-                    part_radius(e.o, vec(e.attrs[1], e.attrs[1], e.attrs[1]), 1, 1, 1, 0x00FFFF);
-                    part_radius(e.o, vec(e.attrs[2], e.attrs[2], e.attrs[2]), 1, 1, 1, 0x00FFFF);
+                    part_radius(e.o, vec(e.attrs[1], e.attrs[1], e.attrs[1]), showentsize, 1, 1, 0x00FFFF);
+                    part_radius(e.o, vec(e.attrs[2], e.attrs[2], e.attrs[2]), showentsize, 1, 1, 0x00FFFF);
                     break;
                 }
                 case ENVMAP:
                 {
                     int s = e.attrs[0] ? clamp(e.attrs[0], 0, 10000) : envmapradius;
-                    part_radius(e.o, vec(s, s, s), 1, 1, 1, 0x00FFFF);
+                    part_radius(e.o, vec(s, s, s), showentsize, 1, 1, 0x00FFFF);
                     break;
                 }
                 case LIGHT:
                 {
                     int s = e.attrs[0] ? e.attrs[0] : hdr.worldsize,
                         colour = ((e.attrs[1])<<16)|((e.attrs[2])<<8)|(e.attrs[3]);
-                    part_radius(e.o, vec(s, s, s), 1, 1, 1, colour);
+                    part_radius(e.o, vec(s, s, s), showentsize, 1, 1, colour);
                     break;
                 }
                 case LIGHTFX:
@@ -1705,7 +1708,7 @@ namespace entities
                         vec dir = vec(e.o).sub(f.o).normalize();
                         float angle = max(1, min(90, int(e.attrs[1])));
                         int colour = ((f.attrs[1]/2)<<16)|((f.attrs[2]/2)<<8)|(f.attrs[3]/2);
-                        part_cone(f.o, dir, radius, angle, 1, 1, 1, colour);
+                        part_cone(f.o, dir, radius, angle, showentsize, 1, 1, colour);
                         break;
                     }
                     break;
@@ -1728,9 +1731,9 @@ namespace entities
                 case AFFINITY:
                 {
                     float radius = (float)enttype[e.type].radius;
-                    part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, TEAM(e.attrs[0], colour));
+                    part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, TEAM(e.attrs[0], colour));
                     radius = radius*2/3; // capture pickup dist
-                    part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, TEAM(e.attrs[0], colour));
+                    part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, TEAM(e.attrs[0], colour));
                     break;
                 }
                 default:
@@ -1738,9 +1741,9 @@ namespace entities
                     float radius = (float)enttype[e.type].radius;
                     if((e.type == TRIGGER || e.type == TELEPORT || e.type == PUSHER || e.type == CHECKPOINT) && e.attrs[e.type == CHECKPOINT ? 0 : 3])
                         radius = (float)e.attrs[e.type == CHECKPOINT ? 0 : 3];
-                    if(radius > 0.f) part_radius(e.o, vec(radius, radius, radius), 1, 1, 1, 0x00FFFF);
+                    if(radius > 0.f) part_radius(e.o, vec(radius, radius, radius), showentsize, 1, 1, 0x00FFFF);
                     if(e.type == PUSHER && e.attrs[4] && e.attrs[4] < e.attrs[3])
-                        part_radius(e.o, vec(e.attrs[4], e.attrs[4], e.attrs[4]), 1, 1, 1, 0x00FFFF);
+                        part_radius(e.o, vec(e.attrs[4], e.attrs[4], e.attrs[4]), showentsize, 1, 1, 0x00FFFF);
                     break;
                 }
             }

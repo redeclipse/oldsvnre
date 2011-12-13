@@ -291,8 +291,8 @@ extern void part_portal(const vec &o, float size, float blend = 1, float yaw = 0
 extern void part_icon(const vec &o, Texture *tex, float size = 2, float blend = 1, int grav = 0, int collide = 0, int fade = 1, int color = 0xFFFFFF, float start = 0, float length = 1, physent *pl = NULL);
 extern void part_line(const vec &o, const vec &v, float size = 1, float blend = 1, int fade = 1, int color = 0xFFFFFF, int type = PART_LINE);
 extern void part_triangle(const vec &o, float yaw, float pitch, float size = 1, float blend = 1, int fade = 1, int color = 0xFFFFFF, bool fill = true, int type = PART_TRIANGLE);
-extern void part_dir(const vec &o, float yaw, float pitch, float size = 1, float blend = 1, int fade = 1, int color = 0x0000FF, bool fill = true);
-extern void part_trace(const vec &o, const vec &v, float size = 1, float blend = 1, int fade = 1, int color = 0xFFFFFF, bool fill = true);
+extern void part_dir(const vec &o, float yaw, float pitch, float length = 1, float size = 1, float blend = 1, int fade = 1, int color = 0x0000FF, int interval = 0, bool fill = true);
+extern void part_trace(const vec &o, const vec &v, float size = 1, float blend = 1, int fade = 1, int color = 0xFFFFFF, int interval = 0, bool fill = true);
 extern void part_ellipse(const vec &o, const vec &v, float size = 1, float blend = 1, int fade = 1, int color = 0xFFFFFF, int axis = 0, bool fill = false, int type = PART_ELLIPSE);
 extern void part_radius(const vec &o, const vec &v, float size = 1, float blend = 1, int fade = 1, int color = 0x00FFFF, bool fill = false);
 extern void part_cone(const vec &o, const vec &dir, float radius, float angle = 0.f, float size = 1, float blend = 1, int fade = 1, int color = 0x00FFFF, bool fill = false, int type = PART_CONE);
