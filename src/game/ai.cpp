@@ -4,12 +4,6 @@ namespace ai
     avoidset obstacles, wpavoid;
     int updatemillis = 0, iteration = 0, itermillis = 0;
     vec aitarget(0, 0, 0);
-    const char *stnames[AI_S_MAX] = {
-        "wait", "defend", "pursue", "interest"
-    }, *sttypes[AI_T_MAX+1] = {
-        "none", "node", "actor", "affinity", "entity", "drop"
-    };
-
 
     VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
@@ -1048,9 +1042,10 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !physics::liquidcheck(d) && !d->onladder,
-            impulse = d->timeinair > 500 && !d->turnside && physics::canimpulse(d, 1, false), jet = d->timeinair > 250 && !d->turnside && physics::allowhover(d),
-            jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
-            jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
+             impulse = d->timeinair > 500 && !d->turnside && physics::canimpulse(d, 1, false),
+             jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::allowhover(d),
+             jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
+             jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
         {
             vec old = d->o;
@@ -1075,7 +1070,7 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
-        if(!sequenced)
+        if(!sequenced && !d->onladder)
         {
             if(d->timeinair > 250 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, 3, true))
                 d->action[AC_SPECIAL] = true;
@@ -1655,6 +1650,11 @@ namespace ai
         }
     }
 
+    const char *stnames[AI_S_MAX] = {
+        "wait", "defend", "pursue", "interest"
+    }, *sttypes[AI_T_MAX+1] = {
+        "none", "node", "actor", "affinity", "entity", "drop"
+    };
     void render()
     {
         if(aidebug >= 2)
