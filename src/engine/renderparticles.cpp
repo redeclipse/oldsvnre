@@ -1416,21 +1416,42 @@ void part_triangle(const vec &o, float yaw, float pitch, float size, float blend
     p->addtriangle(o, yaw, pitch, fade, color, size, blend, fill);
 }
 
-void part_dir(const vec &o, float yaw, float pitch, float size, float blend, int fade, int color, bool fill)
+void part_dir(const vec &o, float yaw, float pitch, float length, float size, float blend, int fade, int color, int interval, bool fill)
 {
     if(!canaddparticles()) return;
 
     vec v; vecfromyawpitch(yaw, pitch, 1, 0, v); v.normalize();
-    part_line(o, vec(v).mul(size+1.f).add(o), 1.f, blend, fade, color);
-    part_triangle(vec(v).mul(size).add(o), yaw, pitch, 1.f, blend, fade, color, fill);
+    part_line(o, vec(v).mul(length+1.f).add(o), size, blend, fade, color);
+    if(interval)
+    {
+        int count = int(length/float(interval));
+        vec q = o;
+        loopi(count)
+        {
+            q.add(vec(v).mul(interval));
+            part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
+        }
+    }
+    part_triangle(vec(v).mul(length).add(o), yaw, pitch, size, blend, fade, color, fill);
 }
 
-void part_trace(const vec &o, const vec &v, float size, float blend, int fade, int color, bool fill)
+void part_trace(const vec &o, const vec &v, float size, float blend, int fade, int color, int interval, bool fill)
 {
-    part_line(o, v, 1.f, blend, fade, color);
+    part_line(o, v, size, blend, fade, color);
     float yaw, pitch;
-    vectoyawpitch(vec(v).sub(o).normalize(), yaw, pitch);
-    part_triangle(o, yaw, pitch, size, blend, fade, color, fill);
+    vec dir = vec(v).sub(o).normalize();
+    vectoyawpitch(dir, yaw, pitch);
+    if(interval)
+    {
+        int count = int(v.dist(o)/float(interval));
+        vec q = o;
+        loopi(count)
+        {
+            q.add(vec(dir).mul(interval));
+            part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
+        }
+    }
+    else part_triangle(o, yaw, pitch, size, blend, fade, color, fill);
 }
 
 void part_ellipse(const vec &o, const vec &v, float size, float blend, int fade, int color, int axis, bool fill, int type)

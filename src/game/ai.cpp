@@ -410,7 +410,7 @@ namespace ai
         {
             vec ep = getaimpos(d, e, altfire(d, e));
             float dist = ep.squaredist(dp);
-            if(d->dominating.find(e)) dist *= 0.5f;
+            if(d->dominating.find(e)) dist *= 0.5f; // REVENGE
             if((!t || dist < tp.squaredist(dp)) && ((mindist > 0 && dist <= mindist) || force || cansee(d, dp, ep, d->aitype >= AI_START)))
             {
                 t = e;
@@ -495,6 +495,12 @@ namespace ai
         }
     }
 
+    const char *stnames[AI_S_MAX] = {
+        "wait", "defend", "pursue", "interest"
+    }, *sttypes[AI_T_MAX+1] = {
+        "none", "node", "actor", "affinity", "entity", "drop"
+    };
+
     bool find(gameent *d, aistate &b)
     {
         static vector<interest> interests; interests.setsize(0);
@@ -540,7 +546,7 @@ namespace ai
             int q = interests.length()-1;
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
-            if(m_fight(game::gamemode) && d->aitype == AI_BOT)
+            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);
@@ -925,28 +931,32 @@ namespace ai
         return false;
     }
 
+    int randomlink(int n)
+    {
+        if(waypoints.inrange(n) && waypoints[n].haslinks())
+        {
+            waypoint &w = waypoints[n];
+            static vector<int> linkmap; linkmap.setsize(0);
+            loopi(MAXWAYPOINTLINKS) if(w.links[i] && waypoints.inrange(w.links[i]))
+                linkmap.add(w.links[i]);
+            if(!linkmap.empty()) return linkmap[rnd(linkmap.length())];
+        }
+        return -1;
+    }
+
     bool anynode(gameent *d, aistate &b)
     {
         loopk(2)
         {
-            waypoint &w = waypoints[d->lastnode];
-            static vector<int> anyremap; anyremap.setsize(0);
             d->ai->clear(k ? true : false);
-            if(w.haslinks())
+            int n = randomlink(d->lastnode);
+            if(wpspot(d, n))
             {
-                loopi(MAXWAYPOINTLINKS) if(w.links[i] && waypoints.inrange(w.links[i]))
-                    anyremap.add(w.links[i]);
-            }
-            while(!anyremap.empty())
-            {
-                int r = rnd(anyremap.length()), t = anyremap[r];
-                if(wpspot(d, t))
-                {
-                    d->ai->route.add(t);
-                    if(waypoints.inrange(d->lastnode)) d->ai->route.add(d->lastnode);
-                    return true;
-                }
-                anyremap.remove(r);
+                int t = randomlink(n);
+                if(waypoints.inrange(t)) d->ai->route.add(t);
+                d->ai->route.add(n);
+                if(waypoints.inrange(d->lastnode)) d->ai->route.add(d->lastnode);
+                return true;
             }
         }
         return false;
@@ -1000,7 +1010,7 @@ namespace ai
                 {
                     if(wpspot(d, d->ai->route[n]))
                     {
-                        d->ai->clear(true);
+                        d->ai->clear(false);
                         return true;
                     }
                     if(!retry) return hunt(d, b, true); // try again
@@ -1591,36 +1601,7 @@ namespace ai
         d->ai->lastrun = lastmillis;
     }
 
-    void drawstate(gameent *d, aistate &b, bool top, int above)
-    {
-        const char *bnames[AI_S_MAX] = {
-            "wait", "defend", "pursue", "interest"
-        }, *btypes[AI_T_MAX+1] = {
-            "none", "node", "actor", "affinity", "entity", "drop"
-        };
-        mkstring(s);
-        if(top)
-        {
-            formatstring(s)("<default>\fg%s (%s) %s:%d (%d[%d])",
-                bnames[b.type],
-                hud::timetostr(lastmillis-b.millis),
-                btypes[b.targtype+1], b.target,
-                !d->ai->route.empty() ? d->ai->route[0] : -1,
-                d->ai->route.length()
-            );
-        }
-        else
-        {
-            formatstring(s)("<sub>\fy%s (%d) %s:%d",
-                bnames[b.type],
-                hud::timetostr(lastmillis-b.millis),
-                btypes[b.targtype+1], b.target
-            );
-        }
-        if(s[0]) part_textcopy(vec(d->abovehead()).add(vec(0, 0, above)), s);
-     }
-
-    void drawroute(gameent *d, aistate &b, float amt)
+    void drawroute(gameent *d, float amt)
     {
         int colour = game::getcolour(d, game::playerdisplaytone), last = -1;
         loopvrev(d->ai->route)
@@ -1653,7 +1634,7 @@ namespace ai
                 if(waypoints.inrange(d->ai->prevnodes[i]))
                 {
                     vec dr = vec(waypoints[d->ai->prevnodes[i]].o).add(vec(0, 0, amt));
-                    part_trace(dr, fr, 1, 1, 1, 0x663300);
+                    part_trace(dr, fr, 1, 1, 1, 0x884400);
                     fr = dr;
                 }
             }
@@ -1669,15 +1650,33 @@ namespace ai
             loopv(game::players) if(game::players[i] && game::players[i]->state == CS_ALIVE && dbgfocus(game::players[i]))
             {
                 gameent *d = game::players[i];
+                vec pos = d->abovehead();
+                pos.z += 3;
                 bool top = true;
-                int above = 0;
                 amt[1]++;
+                if(aidebug > 3 && rendernormally && aistyle[d->aitype].canmove)
+                    drawroute(d, 4.f*(float(amt[1])/float(amt[0])));
+                if(aidebug > 2)
+                {
+                    defformatstring(q)("node: %d route: %d (%d)",
+                        d->lastnode,
+                        !d->ai->route.empty() ? d->ai->route[0] : -1,
+                        d->ai->route.length()
+                    );
+                    part_textcopy(pos, q);
+                    pos.z += 2;
+                }
                 loopvrev(d->ai->state)
                 {
                     aistate &b = d->ai->state[i];
-                    drawstate(d, b, top, above += 2);
-                    if(aidebug > 3 && top && rendernormally && b.type != AI_S_WAIT && aistyle[d->aitype].canmove)
-                        drawroute(d, b, 4.f*(float(amt[1])/float(amt[0])));
+                    defformatstring(s)("%s%s (%s) %s:%d",
+                        top ? "<default>\fg" : "<sub>\fy",
+                        stnames[b.type],
+                        hud::timetostr(lastmillis-b.millis),
+                        sttypes[b.targtype+1], b.target
+                    );
+                    part_textcopy(pos, s);
+                    pos.z += 2;
                     if(top)
                     {
                         if(aidebug > 2) top = false;
@@ -1687,9 +1686,16 @@ namespace ai
                 if(aidebug > 2)
                 {
                     if(isweap(d->ai->weappref))
-                        part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), WEAP(d->ai->weappref, name));
+                    {
+                        part_textcopy(pos, WEAP(d->ai->weappref, name));
+                        pos.z += 2;
+                    }
                     gameent *e = game::getclient(d->ai->enemy);
-                    if(e) part_textcopy(vec(d->abovehead()).add(vec(0, 0, above += 2)), game::colorname(e, NULL, "<default>"));
+                    if(e)
+                    {
+                        part_textcopy(pos, game::colorname(e, NULL, "<default>"));
+                        pos.z += 2;
+                    }
                 }
             }
             if(aidebug >= 4 && !m_edit(game::gamemode))
