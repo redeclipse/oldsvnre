@@ -191,7 +191,7 @@ namespace ai
         lastwpcache = waypoints.length();
 
 		wpavoid.clear();
-		loopv(waypoints) if(waypoints[i].weight < 0) wpavoid.avoidnear(NULL, waypoints[i].o, WAYPOINTRADIUS);
+		loopv(waypoints) if(waypoints[i].weight < 0) wpavoid.avoidnear(NULL, waypoints[i].o.z + WAYPOINTRADIUS, waypoints[i].o, WAYPOINTRADIUS);
     }
 
     struct wpcachestack
@@ -306,16 +306,16 @@ namespace ai
         for(int i = lastwpcache; i < waypoints.length(); i++) { CHECKWITHIN(i); }
     }
 
-    void avoidset::avoidnear(dynent *d, const vec &pos, float limit)
+    void avoidset::avoidnear(void *owner, float above, const vec &pos, float limit)
     {
-        if(waypoints.empty()) return;
+        if(ai::waypoints.empty()) return;
         if(clearedwpcaches) buildwpcache();
 
         float limit2 = limit*limit;
         #define CHECKNEAR(index) do { \
             int n = (index); \
             const waypoint &w = ai::waypoints[n]; \
-            if(w.o.squaredist(pos) < limit2) add(d, n); \
+            if(w.o.squaredist(pos) < limit2) add(owner, above, n); \
         } while(0)
         wpcachenode *curnode;
         loop(which, NUMWPCACHES) for(curnode = &wpcaches[which].nodes[0], wpcachestack.setsize(0);;)
@@ -353,6 +353,54 @@ namespace ai
             curnode = wpcachestack.pop();
         }
         for(int i = lastwpcache; i < waypoints.length(); i++) { CHECKNEAR(i); }
+    }
+
+    int avoidset::remap(gameent *d, int n, vec &pos, bool retry)
+    {
+        if(!obstacles.empty())
+        {
+            int cur = 0;
+            loopv(obstacles)
+            {
+                obstacle &ob = obstacles[i];
+                int next = cur + ob.numwaypoints;
+                if(ob.owner != d)
+                {
+                    for(; cur < next; cur++) if(waypoints[cur] == n)
+                    {
+                        if(ob.above < 0) return retry ? n : -1;
+                        vec above(pos.x, pos.y, ob.above);
+                        if(above.z-d->o.z >= ai::JUMPMAX)
+                            return retry ? n : -1; // too much scotty
+                        int node = closestwaypoint(above, ai::SIGHTMIN, true);
+                        if(ai::iswaypoint(node) && node != n)
+                        { // try to reroute above their head?
+                            if(!find(node, d))
+                            {
+                                pos = ai::waypoints[node].o;
+                                return node;
+                            }
+                            else return retry ? n : -1;
+                        }
+                        else
+                        {
+                            vec old = d->o;
+                            d->o = vec(above).add(vec(0, 0, d->height));
+                            bool col = collide(d, vec(0, 0, 1));
+                            d->o = old;
+                            if(col)
+                            {
+                                pos = above;
+                                return n;
+                            }
+                            else return retry ? n : -1;
+                        }
+                    }
+                }
+                cur = next;
+            }
+        }
+        return n;
     }
 
     static inline float heapscore(waypoint *q) { return q->score(); }
