@@ -44,7 +44,7 @@ namespace ai
     const int MAXWAYPOINTLINKS  = 6;
     const int WAYPOINTRADIUS    = 16;
 
-    const float MINWPDIST       = 8.f;     // is on top of
+    const float MINWPDIST       = 4.f;     // is on top of
     const float CLOSEDIST       = 32.f;    // is close
     const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
@@ -74,10 +74,7 @@ namespace ai
 			return -1;
 		}
 
-		bool haslinks()
-		{
-            return links[0]!=0;
-		}
+		bool haslinks() { return links[0]!=0; }
     };
     extern vector<waypoint> waypoints;
 
@@ -90,14 +87,85 @@ namespace ai
     extern vector<oldwaypoint> oldwaypoints;
 
     extern int showwaypoints, dropwaypoints;
-
-    extern void startmap(const char *name, const char *reqname, bool empty);
-
+    extern bool iswaypoint(int n);
     extern int closestwaypoint(const vec &pos, float mindist, bool links);
     extern void findwaypointswithin(const vec &pos, float mindist, float maxdist, vector<int> &results);
 	extern void inferwaypoints(gameent *d, const vec &o, const vec &v, float mindist = ai::CLOSEDIST);
 
-    struct avoidset;
+    struct avoidset
+    {
+        struct obstacle
+        {
+            void *owner;
+            int numwaypoints;
+            float above;
+
+            obstacle(void *owner, float above = -1) : owner(owner), numwaypoints(0), above(above) {}
+        };
+
+        vector<obstacle> obstacles;
+        vector<int> waypoints;
+
+        void clear()
+        {
+            obstacles.setsize(0);
+            waypoints.setsize(0);
+        }
+
+        void add(void *owner, float above)
+        {
+            obstacles.add(obstacle(owner, above));
+        }
+
+        void add(void *owner, float above, int wp)
+        {
+            if(obstacles.empty() || owner != &obstacles.last().owner) add(owner, above);
+            obstacles.last().numwaypoints++;
+            waypoints.add(wp);
+        }
+
+		void add(avoidset &avoid)
+		{
+			waypoints.put(avoid.waypoints.getbuf(), avoid.waypoints.length());
+			loopv(avoid.obstacles)
+			{
+				obstacle &o = avoid.obstacles[i];
+				if(obstacles.empty() || o.owner != &obstacles.last().owner) add(o.owner, o.above);
+				obstacles.last().numwaypoints += o.numwaypoints;
+			}
+		}
+
+        void avoidnear(void *owner, float above, const vec &pos, float limit);
+
+        #define loopavoid(v, d, body) \
+            if(!(v).obstacles.empty()) \
+            { \
+                int cur = 0; \
+                loopv((v).obstacles) \
+                { \
+                    const ai::avoidset::obstacle &ob = (v).obstacles[i]; \
+                    int next = cur + ob.numwaypoints; \
+                    if(ob.owner != d) \
+                    { \
+                        for(; cur < next; cur++) \
+                        { \
+                            int wp = (v).waypoints[cur]; \
+                            body; \
+                        } \
+                    } \
+                    cur = next; \
+                } \
+            }
+
+        bool find(int n, gameent *d) const
+        {
+            loopavoid(*this, d, { if(wp == n) return true; });
+            return false;
+        }
+
+        int remap(gameent *d, int n, vec &pos, bool retry = false);
+    };
+
     extern bool route(gameent *d, int node, int goal, vector<int> &route, const avoidset &obstacles, int retries = 0);
     extern void navigate();
     extern void clearwaypoints(bool full = false);
@@ -260,6 +328,8 @@ namespace ai
     extern avoidset obstacles, wpavoid;
     extern vec aitarget;
     extern int aidebug, aideadfade, showaiinfo;
+
+    extern void startmap(const char *name, const char *reqname, bool empty);
 
     extern float viewdist(int x = 101);
     extern float viewfieldx(int x = 101);
