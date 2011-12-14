@@ -960,8 +960,12 @@ namespace ai
         {
             waypoint &w = waypoints[n];
             static vector<int> linkmap; linkmap.setsize(0);
-            loopi(MAXWAYPOINTLINKS) if(w.links[i] && w.links[i] != n && waypoints.inrange(w.links[i]) && !d->ai->hasprevnode(w.links[i]))
-                linkmap.add(w.links[i]);
+            loopi(MAXWAYPOINTLINKS) 
+            {
+                if(!w.links[i]) break;
+                if(w.links[i] != n && waypoints.inrange(w.links[i]) && !d->ai->hasprevnode(w.links[i]))
+                    linkmap.add(w.links[i]);
+            }
             if(!linkmap.empty()) return linkmap[rnd(linkmap.length())];
         }
         return -1;
@@ -1754,7 +1758,7 @@ namespace ai
                 loopj(MAXWAYPOINTLINKS)
                 {
                      int link = w.links[j];
-                     if(!link) continue;
+                     if(!link) break;
                      waypoint &v = waypoints[link];
                      bool both = false;
                      loopk(MAXWAYPOINTLINKS) if(v.links[k] == idx) { both = true; break; }
