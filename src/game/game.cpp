@@ -1805,7 +1805,7 @@ namespace game
         if(!tvmode(false)) return false;
         if(cameras.empty())
         {
-            loopv(entities::ents) if(!enttype[entities::ents[i]->type].noisy && entities::ents[i]->type != MAPMODEL)
+            loopv(entities::ents) if(entities::ents[i]->type != MAPMODEL)
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
                 cament *c = cameras.add(new cament);

@@ -4,7 +4,6 @@ namespace entities
     vector<extentity *> ents;
     int lastenttype[MAXENTTYPES], lastusetype[EU_MAX], numactors = 0;
 
-    VAR(IDF_PERSIST, showentnoisy, 0, 0, 2);
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
@@ -641,9 +640,13 @@ namespace entities
             putint(p, i);
             putint(p, int(e.type));
             putint(p, e.attrs.length());
-            putint(p, e.kin.length());
             loopvj(e.attrs) putint(p, e.attrs[j]);
-            loopvj(e.kin) putint(p, e.kin[j]);
+            if(enttype[e.type].syncpos) loopj(3) putint(p, int(e.o[j]*DMF));
+            if(enttype[e.type].synckin)
+            {
+                putint(p, e.kin.length());
+                loopvj(e.kin) putint(p, e.kin[j]);
+            }
         }
     }
 
@@ -684,7 +687,7 @@ namespace entities
 
     bool cansee(extentity &e)
     {
-        return (showentinfo || game::player1->state == CS_EDITING) && (!enttype[e.type].noisy || showentnoisy >= 2 || (showentnoisy && game::player1->state == CS_EDITING));
+        return showentinfo || game::player1->state == CS_EDITING;
     }
 
     void fixentity(int n, bool recurse, bool create)
@@ -1616,11 +1619,11 @@ namespace entities
             if(enttype[e.type].usetype == EU_ITEM || e.type == TRIGGER)
             {
                 setspawn(i, 0);
-                if(e.type == TRIGGER) // find shared kin
+                if(enttype[e.type].synckin) // find shared kin
                 {
                     loopvj(e.links) if(ents.inrange(e.links[j]))
                     {
-                        loopvk(ents) if(ents[k]->type == TRIGGER && ents[k]->links.find(e.links[j]) >= 0)
+                        loopvk(ents) if(ents[k]->type == e.type && ents[k]->links.find(e.links[j]) >= 0)
                         {
                             gameentity &f = *(gameentity *)ents[k];
                             if(e.kin.find(k) < 0) e.kin.add(k);

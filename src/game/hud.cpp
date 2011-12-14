@@ -323,7 +323,6 @@ namespace hud
 
     VAR(IDF_PERSIST, showeditradar, 0, 1, 1);
     VAR(IDF_PERSIST, editradardist, 0, 128, VAR_MAX); // 0 = use radardist
-    VAR(IDF_PERSIST, editradarnoisy, 0, 1, 2);
 
     VAR(IDF_PERSIST, motionblurfx, 0, 1, 2); // 0 = off, 1 = on, 2 = override
     FVAR(IDF_PERSIST, motionblurmin, 0, 0.0f, 1); // minimum
@@ -1428,7 +1427,6 @@ namespace hud
         if(type > NOTUSED && type < MAXENTTYPES && ((enttype[type].usetype == EU_ITEM && spawned) || game::focus->state == CS_EDITING))
         {
             float inspawn = radaritemtime && spawned && lastspawn && lastmillis-lastspawn <= radaritemtime ? float(lastmillis-lastspawn)/float(radaritemtime) : 0.f;
-            if(enttype[type].noisy && (game::focus->state != CS_EDITING || !editradarnoisy || (editradarnoisy < 2 && !insel))) return;
             if(game::focus->state != CS_EDITING && radaritemspawn && (enttype[type].usetype != EU_ITEM || inspawn <= 0.f)) return;
             vec dir = vec(o).sub(camera1->o);
             float dist = dir.magnitude();

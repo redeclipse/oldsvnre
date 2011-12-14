@@ -741,7 +741,7 @@ namespace ai
                 case AI_T_NODE:
                 {
                     if(check(d, b)) return 1;
-                    if(waypoints.inrange(b.target))
+                    if(iswaypoint(b.target))
                         return defense(d, b, waypoints[b.target].o) ? 1 : 0;
                     break;
                 }
@@ -789,7 +789,7 @@ namespace ai
                 {
                     if(check(d, b) || find(d, b)) return 1;
                     if(target(d, b, 4, true)) return 1;
-                    if(waypoints.inrange(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
+                    if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
                         return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
                     break;
                 }
@@ -860,7 +860,7 @@ namespace ai
                 case AI_T_NODE:
                 {
                     if(check(d, b)) return 1;
-                    if(waypoints.inrange(b.target))
+                    if(iswaypoint(b.target))
                         return defense(d, b, waypoints[b.target].o) ? 1 : 0;
                     break;
                 }
@@ -917,11 +917,11 @@ namespace ai
         float mindist = CLOSEDIST*CLOSEDIST;
         loopk(2)
         {
-            loopv(d->ai->route) if(waypoints.inrange(d->ai->route[i]))
+            loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
             {
                 vec epos = waypoints[d->ai->route[i]].o;
                 int entid = obstacles.remap(d, d->ai->route[i], epos, k!=0);
-                if(waypoints.inrange(entid))
+                if(iswaypoint(entid))
                 {
                     float dist = epos.squaredist(pos);
                     if(dist < mindist)
@@ -938,11 +938,11 @@ namespace ai
 
     int wpspot(gameent *d, int n)
     {
-        if(waypoints.inrange(n)) loopk(2)
+        if(iswaypoint(n)) loopk(2)
         {
             vec epos = waypoints[n].o;
             int entid = obstacles.remap(d, n, epos, k!=0);
-            if(waypoints.inrange(entid))
+            if(iswaypoint(entid))
             {
                 vec feet = d->feetpos();
                 if(!aistyle[d->aitype].canjump && epos.z-d->feetpos().z >= JUMPMIN) epos.z = feet.z;
@@ -956,14 +956,14 @@ namespace ai
 
     int randomlink(gameent *d, int n)
     {
-        if(waypoints.inrange(n) && waypoints[n].haslinks())
+        if(iswaypoint(n) && waypoints[n].haslinks())
         {
             waypoint &w = waypoints[n];
             static vector<int> linkmap; linkmap.setsize(0);
-            loopi(MAXWAYPOINTLINKS) 
+            loopi(MAXWAYPOINTLINKS)
             {
                 if(!w.links[i]) break;
-                if(w.links[i] != n && waypoints.inrange(w.links[i]) && !d->ai->hasprevnode(w.links[i]))
+                if(w.links[i] != n && iswaypoint(w.links[i]) && !d->ai->hasprevnode(w.links[i]))
                     linkmap.add(w.links[i]);
             }
             if(!linkmap.empty()) return linkmap[rnd(linkmap.length())];
@@ -973,7 +973,7 @@ namespace ai
 
     bool anynode(gameent *d, aistate &b, int len = NUMPREVNODES)
     {
-        if(waypoints.inrange(d->lastnode)) loopk(2)
+        if(iswaypoint(d->lastnode)) loopk(2)
         {
             d->ai->clear(k ? true : false);
             int n = randomlink(d, d->lastnode);
@@ -993,7 +993,8 @@ namespace ai
         if(d->ai->route.empty() || !d->ai->route.inrange(n)) return false;
         int last = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
         if(last < 500 || n < 3) return false; // route length is too short
-        int w = waypoints.inrange(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(n-1, NUMPREVNODES);
+        d->ai->lastcheck = lastmillis;
+        int w = iswaypoint(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(n-1, NUMPREVNODES);
         loopj(c) // check ahead to see if we need to go around something
         {
             int p = n-j-1, v = d->ai->route[p];
@@ -1427,7 +1428,7 @@ namespace ai
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2: case 3:
-                        if(waypoints.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                        if(iswaypoint(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
                     case 4: d->ai->reset(false); break;
@@ -1448,7 +1449,7 @@ namespace ai
                 switch(d->ai->targseq)
                 {
                     case 1: case 2: case 3:
-                        if(waypoints.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                        if(iswaypoint(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
                     case 4: d->ai->reset(false); break;
@@ -1626,7 +1627,7 @@ namespace ai
             if(d->ai->route.inrange(last))
             {
                 int index = d->ai->route[i], prev = d->ai->route[last];
-                if(waypoints.inrange(index) && waypoints.inrange(prev))
+                if(iswaypoint(index) && iswaypoint(prev))
                 {
                     waypoint &w = waypoints[index], &v = waypoints[prev];
                     vec fr = v.o, dr = w.o;
@@ -1640,12 +1641,12 @@ namespace ai
         {
             vec fr = vec(d->feetpos()).add(vec(0, 0, amt));
             if(d->ai->spot != vec(0, 0, 0)) part_trace(fr, vec(d->ai->spot).add(vec(0, 0, 0.1f)), 1, 1, 1, 0x00FFFF);
-            if(waypoints.inrange(d->ai->targnode))
+            if(iswaypoint(d->ai->targnode))
             {
                 vec dr = vec(waypoints[d->ai->targnode].o).add(vec(0, 0, amt));
                 part_trace(fr, dr, 1, 1, 1, 0xFF00FF);
             }
-            if(waypoints.inrange(d->lastnode))
+            if(iswaypoint(d->lastnode))
             {
                 vec dr = vec(waypoints[d->lastnode].o).add(vec(0, 0, amt));
                 part_trace(fr, dr, 1, 1, 1, 0xFFFF00);
@@ -1653,7 +1654,7 @@ namespace ai
             }
             loopi(NUMPREVNODES)
             {
-                if(waypoints.inrange(d->ai->prevnodes[i]))
+                if(iswaypoint(d->ai->prevnodes[i]))
                 {
                     vec dr = vec(waypoints[d->ai->prevnodes[i]].o).add(vec(0, 0, amt));
                     part_trace(dr, fr, 1, 1, 1, 0x884400);
@@ -1735,7 +1736,7 @@ namespace ai
                     for(; cur < next; cur++)
                     {
                         int ent = obstacles.waypoints[cur];
-                        if(waypoints.inrange(ent))
+                        if(iswaypoint(ent))
                             part_create(PART_EDIT, 1, waypoints[ent].o, 0xFF6600, 1.5f);
                     }
                     cur = next;
@@ -1765,7 +1766,7 @@ namespace ai
                      part_trace(w.o, v.o, 1, 1, 1, both ? 0xAA44CC : 0x660088);
                 }
             }
-            if(game::player1->state == CS_ALIVE && waypoints.inrange(game::player1->lastnode))
+            if(game::player1->state == CS_ALIVE && iswaypoint(game::player1->lastnode))
                 part_trace(game::player1->feetpos(), waypoints[game::player1->lastnode].o, 1, 1, 1, 0xFFFF00);
         }
     }
