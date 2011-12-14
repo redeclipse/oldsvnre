@@ -814,6 +814,7 @@ void resetmap(bool empty)
     clearsleep();
     cancelsel();
     pruneundos();
+    clearmapcrc();
     entities::clearents();
     game::resetmap(empty);
 }
