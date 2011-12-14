@@ -9,8 +9,6 @@ namespace ai
     vector<waypoint> waypoints;
     vector<oldwaypoint> oldwaypoints;
 
-    bool iswaypoint(int n) { return n && waypoints.inrange(n); }
-
     bool clipped(const vec &o)
     {
         int material = lookupmaterial(o), clipmat = material&MATF_CLIP;
