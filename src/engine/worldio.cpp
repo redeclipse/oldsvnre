@@ -1081,6 +1081,7 @@ ICOMMAND(0, savemap, "s", (char *mname), save_world(*mname ? (istempname(mname) 
 static uint mapcrc = 0;
 
 uint getmapcrc() { return mapcrc; }
+void clearmapcrc() { mapcrc = 0; }
 
 static void sanevars()
 {

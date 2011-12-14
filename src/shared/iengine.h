@@ -345,6 +345,7 @@ extern void setnames(const char *fname, int type);
 extern bool load_world(const char *mname, bool temp = false);
 extern void save_world(const char *mname, bool nodata = false, bool forcesave = false);
 extern uint getmapcrc();
+extern void clearmapcrc();
 
 // physics
 extern bool ellipsecollide(physent *d, const vec &dir, const vec &o, const vec &center, float yaw, float xr, float yr, float hi, float lo);
