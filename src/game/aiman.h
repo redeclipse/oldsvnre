@@ -255,19 +255,35 @@ namespace aiman
         else clearai(1);
     }
 
+    const float MAXSPAWNDIST = 512.f;
+    const float MINSPAWNDIST = 64.f;
     void checkenemies()
     {
         if(GAME(enemybalance) && m_enemies(gamemode, mutators))
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[4] == triggerid || !sents[j].attrs[4]) && m_check(sents[j].attrs[3], gamemode))
             {
+                bool allow = !m_campaign(gamemode);
+                if(!allow)
+                {
+                    loopv(clients) if(clients[i]->state.aitype < AI_START)
+                    {
+                        float dist = clients[i]->state.o.dist(sents[j].o);
+                        if(dist <= MAXSPAWNDIST) allow = true;
+                        else if(allow && dist <= MINSPAWNDIST)
+                        {
+                            allow = false;
+                            break;
+                        }
+                    }
+                }
                 int count = 0;
                 loopvrev(clients) if(clients[i]->state.aientity == j)
                 {
                     count++;
-                    if(count > GAME(enemybalance)) deleteai(clients[i]);
+                    if(!allow || count > GAME(enemybalance)) deleteai(clients[i]);
                 }
-                if(count < GAME(enemybalance))
+                if(allow && count < GAME(enemybalance))
                 {
                     int amt = GAME(enemybalance)-count;
                     loopk(amt) addai(sents[j].attrs[0]+AI_START, j, -1);

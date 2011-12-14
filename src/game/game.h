@@ -53,7 +53,7 @@ struct enttypes
 {
     int type,           priority, links,    radius, usetype,    numattrs,
             canlink, reclink;
-    bool    noisy,  syncs,  resyncs;
+    bool    noisy,  syncs,  resyncs,    syncpos,    synckin;
     const char *name,           *attrs[11];
 };
 #ifdef GAMESERVER
@@ -61,115 +61,115 @@ enttypes enttype[] = {
     {
         NOTUSED,        -1,         0,      0,      EU_NONE,    0,
             0, 0,
-            true,   false,  false,
+            true,   false,  false,      false,      false,
                 "none",         { "" }
     },
     {
         LIGHT,          1,          59,     0,      EU_NONE,    4,
             (1<<LIGHTFX), (1<<LIGHTFX),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "light",        { "radius", "red",      "green",    "blue"  }
     },
     {
         MAPMODEL,       1,          58,     0,      EU_NONE,    9,
             (1<<TRIGGER), (1<<TRIGGER),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
     {
         PLAYERSTART,    1,          59,     0,      EU_NONE,    5,
             0, 0,
-            false,  true,  false,
+            false,  true,  false,      false,      false,
                 "playerstart",  { "team",   "yaw",      "pitch",    "mode",     "id" }
     },
     {
         ENVMAP,         1,          0,      0,      EU_NONE,    3,
             0, 0,
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "envmap",       { "radius", "size", "blur" }
     },
     {
         PARTICLES,      1,          59,     0,      EU_NONE,    11,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<TRIGGER)|(1<<PUSHER),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
     },
     {
         MAPSOUND,       1,          58,     0,      EU_NONE,    5,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<TRIGGER)|(1<<PUSHER),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
     },
     {
         LIGHTFX,        1,          1,      0,      EU_NONE,    5,
             (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
             (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
     {
         SUNLIGHT,       1,          160,    0,      EU_NONE,    6,
             0, 0,
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
     },
     {
         WEAPON,         2,          59,     24,     EU_ITEM,    4,
             0, 0,
-            false,  true,   true,
+            false,  true,   true,      false,      false,
                 "weapon",       { "type",   "flags",    "mode",     "id" }
     },
     {
         TELEPORT,       1,          50,     12,     EU_AUTO,    8,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex" }
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    9,
             (1<<AFFINITY), 0,
-            false,  true,   false,
+            false,  true,   false,      true,       false,
                 "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed",    "scale" }
     },
     {
         TRIGGER,        1,          58,     16,     EU_AUTO,    6,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,  true,   true,
+            false,  true,   true,       false,      true,
                 "trigger",      { "id",     "type",     "action",   "radius",   "state",    "mode" }
     },
     {
         PUSHER,         1,          58,     12,     EU_AUTO,    6,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
         AFFINITY,       1,          48,     36,     EU_NONE,    5,
             (1<<AFFINITY), 0,
-            false,  false,  false,
+            false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
     },
     {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    6,
             0, 0,
-            false,  true,   false,
+            false,  true,   false,      false,      false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "mode",     "id",       "type" }
     },
     {
         DUMMY1,         1,          48,     0,      EU_NONE,    4,
             0, 0,
-            true,   false,  false,
+            true,   false,  false,      false,      false,
                 "dummy1",       { "" }
     },
     {
         DUMMY2,       0,          1,      16,     EU_NONE,    2,
             (1<<DUMMY2), 0,
-            true,   false,  false,
+            true,   false,  false,      false,      false,
                 "dummy2",     { "" }
     }
 };
@@ -1305,6 +1305,8 @@ namespace entities
 
 namespace ai
 {
+    extern bool iswaypoint(int n);
+
     struct avoidset
     {
         struct obstacle
@@ -1411,7 +1413,7 @@ namespace ai
                             if(above.z-d->o.z >= ai::JUMPMAX)
                                 return retry ? n : -1; // too much scotty
                             int node = ai::closestwaypoint(above, ai::CLOSEDIST, true);
-                            if(ai::waypoints.inrange(node) && node != n)
+                            if(iswaypoint(node) && node != n)
                             { // try to reroute above their head?
                                 if(!find(node, d))
                                 {

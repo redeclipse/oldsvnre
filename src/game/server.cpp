@@ -5,16 +5,18 @@ namespace server
 {
     struct srventity
     {
+        vec o;
         int type;
         bool spawned;
         int millis, last;
         attrvector attrs, kin;
 
-        srventity() : type(NOTUSED), spawned(false), millis(0), last(0) { reset(); }
+        srventity() :  o(0, 0, 0), type(NOTUSED),spawned(false), millis(0), last(0) { reset(); }
         ~srventity() { reset(); }
 
         void reset()
         {
+            o = vec(0, 0, 0);
             attrs.shrink(0);
             kin.shrink(0);
         }
@@ -4636,8 +4638,8 @@ namespace server
                     int n, np = getint(p);
                     while((n = getint(p)) != -1)
                     {
-                        int type = getint(p), numattr = getint(p), numkin = getint(p);
-                        if(p.overread() || type < 0 || type >= MAXENTTYPES || n < 0 || n >= MAXENTS || numattr < 0 || numattr > MAXENTATTRS || numkin < 0 || numkin > MAXENTKIN) break;
+                        int type = getint(p), numattr = getint(p);
+                        if(p.overread() || type < 0 || type >= MAXENTTYPES || n < 0 || n >= MAXENTS || numattr < 0 || numattr > MAXENTATTRS) break;
                         if(!hasgameinfo && enttype[type].syncs)
                         {
                             while(sents.length() <= n) sents.add();
@@ -4647,13 +4649,23 @@ namespace server
                             sents[n].millis = gamemillis;
                             sents[n].attrs.add(0, max(5, numattr));
                             loopk(numattr) { if(p.overread()) break; sents[n].attrs[k] = getint(p); }
-                            sents[n].kin.add(0, numkin);
-                            loopk(numkin) { if(p.overread()) break; sents[n].kin[k] = getint(p); }
+                            if(enttype[type].syncpos) loopj(3) { if(p.overread()) break; sents[n].o[j] = getint(p)/DMF; }
+                            if(enttype[type].synckin)
+                            {
+                                int numkin = getint(p);
+                                sents[n].kin.add(0, numkin);
+                                loopk(numkin) { if(p.overread()) break; sents[n].kin[k] = getint(p); }
+                            }
                         }
                         else
                         {
                             loopk(numattr) { if(p.overread()) break; getint(p); }
-                            loopk(numkin) { if(p.overread()) break; getint(p); }
+                            if(enttype[type].syncpos) loopj(3) { if(p.overread()) break; getint(p); }
+                            if(enttype[type].synckin)
+                            {
+                                int numkin = getint(p);
+                                loopk(numkin) { if(p.overread()) break; getint(p); }
+                            }
                         }
                     }
                     if(!hasgameinfo) setupgameinfo(np);

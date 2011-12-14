@@ -9,6 +9,8 @@ namespace ai
     vector<waypoint> waypoints;
     vector<oldwaypoint> oldwaypoints;
 
+    bool iswaypoint(int n) { return n && waypoints.inrange(n); }
+
     bool clipped(const vec &o)
     {
         int material = lookupmaterial(o), clipmat = material&MATF_CLIP;
@@ -172,7 +174,7 @@ namespace ai
     void clearwpcache(bool full = true)
 	{
         loopi(NUMWPCACHES) if(full || invalidatedwpcaches&(1<<i)) { wpcaches[i].clear(); clearedwpcaches |= 1<<i; }
-        if(full || invalidatedwpcaches == (1<<NUMWPCACHES)-1) 
+        if(full || invalidatedwpcaches == (1<<NUMWPCACHES)-1)
         {
             numinvalidatewpcaches = 0;
             lastwpcache = 0;
@@ -202,6 +204,7 @@ namespace ai
 
     int closestwaypoint(const vec &pos, float mindist, bool links)
     {
+        if(waypoints.empty()) return -1;
         if(clearedwpcaches) buildwpcache();
 
         #define CHECKCLOSEST(index) do { \
@@ -255,6 +258,7 @@ namespace ai
 
     void findwaypointswithin(const vec &pos, float mindist, float maxdist, vector<int> &results)
     {
+        if(waypoints.empty()) return;
         if(clearedwpcaches) buildwpcache();
 
         float mindist2 = mindist*mindist, maxdist2 = maxdist*maxdist;
@@ -304,6 +308,7 @@ namespace ai
 
     void avoidset::avoidnear(dynent *d, const vec &pos, float limit)
     {
+        if(waypoints.empty()) return;
         if(clearedwpcaches) buildwpcache();
 
         float limit2 = limit*limit;
@@ -354,7 +359,7 @@ namespace ai
 
     bool route(gameent *d, int node, int goal, vector<int> &route, const avoidset &obstacles, int retries)
     {
-        if(!waypoints.inrange(node) || !waypoints.inrange(goal) || goal == node || !waypoints[node].haslinks())
+        if(waypoints.empty() || !iswaypoint(node) || !iswaypoint(goal) || goal == node || !waypoints[node].haslinks())
             return false;
 
         static ushort routeid = 1;
@@ -368,7 +373,7 @@ namespace ai
 
         if(d)
         {
-            if(retries <= 1 && d->ai) loopi(NUMPREVNODES) if(d->ai->prevnodes[i] != node && waypoints.inrange(d->ai->prevnodes[i]))
+            if(retries <= 1 && d->ai) loopi(NUMPREVNODES) if(d->ai->prevnodes[i] != node && iswaypoint(d->ai->prevnodes[i]))
             {
                 waypoints[d->ai->prevnodes[i]].route = routeid;
                 waypoints[d->ai->prevnodes[i]].curscore = -1;
@@ -378,7 +383,7 @@ namespace ai
 			{
 				loopavoid(obstacles, d,
 				{
-					if(waypoints.inrange(wp) && wp != node && wp != goal && waypoints[node].find(wp) < 0 && waypoints[goal].find(wp) < 0)
+					if(iswaypoint(wp) && wp != node && wp != goal && waypoints[node].find(wp) < 0 && waypoints[goal].find(wp) < 0)
 					{
 						waypoints[wp].route = routeid;
 						waypoints[wp].curscore = -1;
@@ -405,7 +410,7 @@ namespace ai
             {
                 int link = m.links[i];
                 if(!link) break;
-                if(waypoints.inrange(link) && (link == node || link == goal || waypoints[link].haslinks()))
+                if(iswaypoint(link) && (link == node || link == goal || waypoints[link].haslinks()))
                 {
                     waypoint &n = waypoints[link];
                     int weight = max(n.weight, 1);
@@ -446,8 +451,7 @@ namespace ai
     {
         if(waypoints.length() > MAXWAYPOINTS) return -1;
         int n = waypoints.length();
-        waypoint &w = waypoints.add(waypoint(o, weight >= 0 ? weight : getweight(o)));
-        conoutf("dropped waypoint at %.2f,%.2f,%.2f with weight %d", w.o.x, w.o.y, w.o.z, w.weight);
+        waypoints.add(waypoint(o, weight >= 0 ? weight : getweight(o)));
         return n;
     }
 
@@ -479,13 +483,13 @@ namespace ai
     	if(shoulddrop(d) && !clipped(o) && !clipped(v))
     	{
 			int from = closestwaypoint(o, mindist, false), to = closestwaypoint(v, mindist, false);
-			if(!waypoints.inrange(from)) from = addwaypoint(o);
-			if(!waypoints.inrange(to)) to = addwaypoint(v);
-			if(d->lastnode != from && waypoints.inrange(d->lastnode) && waypoints.inrange(from))
+			if(!iswaypoint(from)) from = addwaypoint(o);
+			if(!iswaypoint(to)) to = addwaypoint(v);
+			if(d->lastnode != from && iswaypoint(d->lastnode) && iswaypoint(from))
 				linkwaypoint(waypoints[d->lastnode], from);
-			if(waypoints.inrange(to))
+			if(iswaypoint(to))
 			{
-				if(from != to && waypoints.inrange(from) && waypoints.inrange(to))
+				if(from != to && iswaypoint(from) && iswaypoint(to))
 					linkwaypoint(waypoints[from], to);
 				d->lastnode = to;
 			}
@@ -500,18 +504,18 @@ namespace ai
         bool dropping = shoulddrop(d) && !clipped(v);
         float dist = dropping ? WAYPOINTRADIUS : CLOSEDIST;
         int curnode = closestwaypoint(v, dist, false), prevnode = d->lastnode;
-        if(!waypoints.inrange(curnode) && dropping) curnode = addwaypoint(v);
-        if(waypoints.inrange(curnode))
+        if(!iswaypoint(curnode) && dropping) curnode = addwaypoint(v);
+        if(iswaypoint(curnode))
         {
-            if(dropping && d->lastnode != curnode && waypoints.inrange(d->lastnode))
+            if(dropping && d->lastnode != curnode && iswaypoint(d->lastnode))
             {
                 linkwaypoint(waypoints[d->lastnode], curnode);
                 if(!d->timeinair) linkwaypoint(waypoints[curnode], d->lastnode);
             }
             d->lastnode = curnode;
-            if(d->ai && waypoints.inrange(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);
+            if(d->ai && iswaypoint(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);
         }
-        else if(!waypoints.inrange(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > dist*dist)
+        else if(!iswaypoint(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > dist*dist)
 			d->lastnode = closestwaypoint(v, dist*2, false);
     }
 
@@ -573,8 +577,9 @@ namespace ai
                     }
                 }
             }
+            return false;
         }
-        return false;
+        return true;
     }
 
     bool cleanwaypoints()
@@ -589,13 +594,20 @@ namespace ai
                 w.links[1] = 0xFFFF;
                 cleared++;
             }
-            //else loopk(MAXWAYPOINTLINKS)
-            //{
-            //    int link = w.links[k];
-            //    if(!link) continue;
-            //    waypoint &v = waypoints[link];
-            //    if(!checkteleport(w.o, v.o)) w.links[k] = 0;
-            //}
+            else loopk(MAXWAYPOINTLINKS)
+            {
+                int link = w.links[k];
+                if(!link) continue;
+                waypoint &v = waypoints[link];
+                if(!checkteleport(w.o, v.o))
+                {
+                    int highest = MAXWAYPOINTLINKS-1;
+                    loopj(MAXWAYPOINTLINKS) if(!w.links[j]) { highest = j-1; break; }
+                    w.links[k] = w.links[highest];
+                    w.links[highest] = 0;
+                    k--;
+                }
+            }
         }
         if(cleared)
         {
@@ -642,9 +654,9 @@ namespace ai
             o.z = f->getlil<float>();
             waypoint &w = waypoints.add(waypoint(o, getweight(o)));
             int numlinks = f->getchar(), k = 0;
-            loopi(numlinks) 
+            loopi(numlinks)
             {
-                if((w.links[k] = f->getlil<ushort>())) 
+                if((w.links[k] = f->getlil<ushort>()))
                 {
                     if(++k >= MAXWAYPOINTLINKS) break;
                 }
@@ -705,9 +717,9 @@ namespace ai
             }
             waypoint &w = waypoints.add(waypoint(v.o, getweight(v.o)));
             int k = 0;
-            loopvj(v.links) 
+            loopvj(v.links)
             {
-                if((w.links[k] = v.links[j])) 
+                if((w.links[k] = v.links[j]))
                 {
                     if(++k >= MAXWAYPOINTLINKS) break;
                 }
