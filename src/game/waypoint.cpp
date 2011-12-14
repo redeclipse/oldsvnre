@@ -551,6 +551,7 @@ namespace ai
                 if(!link) break;
                 if((w.links[k] = remap[link])) k++;
             }
+            if(k < MAXWAYPOINTLINKS) w.links[k] = 0;
             total++;
         }
         waypoints.setsize(total);
@@ -704,10 +705,12 @@ namespace ai
             }
             waypoint &w = waypoints.add(waypoint(v.o, getweight(v.o)));
             int k = 0;
-            loopvj(v.links) if(v.links[j]) 
+            loopvj(v.links) 
             {
-                w.links[k++] = v.links[j];
-                if(k >= MAXWAYPOINTLINKS) break;
+                if((w.links[k] = v.links[j])) 
+                {
+                    if(++k >= MAXWAYPOINTLINKS) break;
+                }
             }
         }
         conoutf("imported %d waypoints from the map file", oldwaypoints.length());
