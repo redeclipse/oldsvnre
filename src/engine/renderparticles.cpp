@@ -836,7 +836,7 @@ struct trisprimitiverenderer : listrenderer<trisprimitive>
         vecfromyawpitch(yaw, pitch, -1, 1, dir[1]);
         vecfromyawpitch(yaw, pitch, -1, -1, dir[2]);
 
-        trisprimitive *p = (trisprimitive *)listrenderer<trisprimitive>::addpart(dir[0].mul(size*2.f).add(o), vec(0, 0, 0), fade, color, size, blend);
+        trisprimitive *p = (trisprimitive *)listrenderer<trisprimitive>::addpart(dir[0].mul(size*2).add(o), vec(0, 0, 0), fade, color, size, blend);
         p->value[0] = dir[1];
         p->value[1] = dir[2];
         p->fill = fill;
@@ -1432,7 +1432,7 @@ void part_dir(const vec &o, float yaw, float pitch, float length, float size, fl
             part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
         }
     }
-    part_triangle(vec(v).mul(length-size).add(o), yaw, pitch, size, blend, fade, color, fill);
+    part_triangle(vec(v).mul(length-size*2).add(o), yaw, pitch, size, blend, fade, color, fill);
 }
 
 void part_trace(const vec &o, const vec &v, float size, float blend, int fade, int color, int interval, bool fill)
@@ -1451,7 +1451,7 @@ void part_trace(const vec &o, const vec &v, float size, float blend, int fade, i
             part_triangle(q, yaw, pitch, size, blend, fade, color, fill);
         }
     }
-    part_triangle(vec(v).sub(vec(dir).mul(size)), yaw, pitch, size, blend, fade, color, fill);
+    part_triangle(vec(v).sub(vec(dir).mul(size*2)), yaw, pitch, size, blend, fade, color, fill);
 }
 
 void part_ellipse(const vec &o, const vec &v, float size, float blend, int fade, int color, int axis, bool fill, int type)

@@ -201,8 +201,8 @@ namespace ai
 
         #define CHECKCLOSEST(branch) do { \
             int n = curnode->childindex(branch); \
-            const waypoint &w = waypoints[n]; \
-            if(!links || w.links[0]) \
+            waypoint &w = waypoints[n]; \
+            if(!links || w.haslinks()) \
             { \
                 float dist = w.o.squaredist(pos); \
                 if(dist < mindist*mindist) { closest = n; mindist = sqrtf(dist); } \
@@ -346,7 +346,7 @@ namespace ai
 
     bool route(gameent *d, int node, int goal, vector<int> &route, const avoidset &obstacles, int retries)
     {
-        if(!waypoints.inrange(node) || !waypoints.inrange(goal) || goal == node || !waypoints[node].links[0])
+        if(!waypoints.inrange(node) || !waypoints.inrange(goal) || goal == node || !waypoints[node].haslinks())
             return false;
 
         static ushort routeid = 1;
@@ -396,8 +396,8 @@ namespace ai
             loopi(MAXWAYPOINTLINKS)
             {
                 int link = m.links[i];
-                if(!link) break;
-                if(waypoints.inrange(link) && (link == node || link == goal || waypoints[link].links[0]))
+                if(!link) continue;
+                if(waypoints.inrange(link) && (link == node || link == goal || waypoints[link].haslinks()))
                 {
                     waypoint &n = waypoints[link];
                     int weight = max(n.weight, 1);
@@ -431,13 +431,15 @@ namespace ai
         return !route.empty();
     }
 
-    VAR(0, dropwaypoints, 0, 0, 1);
+    string loadedwaypoints = "";
+    VARF(0, dropwaypoints, 0, 0, 1, if(dropwaypoints) getwaypoints());
 
     int addwaypoint(const vec &o, int weight = -1)
     {
         if(waypoints.length() > MAXWAYPOINTS) return -1;
         int n = waypoints.length();
-        waypoints.add(waypoint(o, weight >= 0 ? weight : getweight(o)));
+        waypoint &w = waypoints.add(waypoint(o, weight >= 0 ? weight : getweight(o)));
+        conoutf("dropped waypoint at %.2f,%.2f,%.2f with weight %d", w.o.x, w.o.y, w.o.z, w.weight);
         return n;
     }
 
@@ -450,8 +452,6 @@ namespace ai
         }
         a.links[rnd(MAXWAYPOINTLINKS)] = n;
     }
-
-    string loadedwaypoints = "";
 
     static inline bool shouldnavigate()
     {
@@ -503,17 +503,17 @@ namespace ai
             d->lastnode = curnode;
             if(d->ai && waypoints.inrange(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);
         }
-        else if(!waypoints.inrange(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > CLOSEDIST*CLOSEDIST)
-			d->lastnode = closestwaypoint(v, CLOSEDIST*2, false);
+        else if(!waypoints.inrange(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > dist*dist)
+			d->lastnode = closestwaypoint(v, dist*2, false);
     }
 
     void navigate()
     {
     	if(shouldnavigate())
     	{
-			loopv(players) if(players[i]) navigate(players[i]);
+    	    navigate(game::player1);
+    	    loopv(players) if(players[i]) navigate(players[i]);
     	}
-
         if(invalidatedwpcaches) clearwpcache(false);
     }
 
@@ -521,62 +521,51 @@ namespace ai
     {
         waypoints.setsize(0);
         clearwpcache();
-        if(full)
-        {
-            loadedwaypoints[0] = '\0';
-            dropwaypoints = 0;
-        }
+        if(full) loadedwaypoints[0] = '\0';
     }
     ICOMMAND(0, clearwaypoints, "", (), clearwaypoints());
-
-    bool unlinkwaypoint(waypoint &w, int link)
-    {
-        int found = -1, highest = MAXWAYPOINTLINKS-1;
-        loopi(MAXWAYPOINTLINKS)
-        {
-            if(w.links[i] == link) { found = -1; }
-            if(!w.links[i]) { highest = i-1; break; }
-        }
-        if(found < 0) return false;
-        w.links[found] = w.links[highest];
-        w.links[highest] = 0;
-        return true;
-    }
-
-    bool relinkwaypoint(waypoint &w, int olink, int nlink)
-    {
-        loopi(MAXWAYPOINTLINKS)
-        {
-            if(!w.links[i]) break;
-            if(w.links[i] == olink) { w.links[i] = nlink; return true; }
-        }
-        return false;
-    }
 
     void remapwaypoints()
     {
         vector<ushort> remap;
+        vector<waypoint> wplist;
         int total = 0;
-        loopv(waypoints) remap.add(waypoints[i].links[1] == 0xFFFF ? 0 : total++);
+        loopv(waypoints) remap.add(waypoints[i].links[0] == 0xFFFF ? 0 : total++);
         total = 0;
         loopvj(waypoints)
         {
-            if(waypoints[j].links[1] == 0xFFFF) continue;
-            waypoint &w = waypoints[total];
-            if(j != total) w = waypoints[j];
+            if(waypoints[j].links[0] == 0xFFFF) continue;
+            waypoint &w = wplist.add(waypoints[j]);
             loopi(MAXWAYPOINTLINKS)
             {
                 int link = w.links[i];
-                if(!link) break;
+                if(!link) continue;
                 w.links[i] = remap[link];
             }
-            total++;
         }
-        waypoints.setsize(total);
+        waypoints = wplist;
     }
 
+    bool checkteleport(const vec &o, const vec &v)
+    {
+        if(o.dist(v) > CLOSEDIST)
+        {
+            loopi(entities::lastenttype[TELEPORT]) if(entities::ents[i]->type == TELEPORT)
+            {
+                gameentity &e = *(gameentity *)entities::ents[i];
+                if(o.dist(e.o) < (e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+CLOSEDIST)
+                {
+                    loopvj(e.links) if(entities::ents.inrange(e.links[j]) && entities::ents[e.links[j]]->type == TELEPORT)
+                    {
+                        gameentity &f = *(gameentity *)entities::ents[e.links[j]];
+                        if(v.dist(f.o) < (f.attrs[3] ? f.attrs[3] : enttype[f.type].radius)+CLOSEDIST) return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
-    //const int MAXWAYPOINTRADIUS = (WAYPOINTRADIUS*3)*(WAYPOINTRADIUS*3);
     bool cleanwaypoints()
     {
         int cleared = 0;
@@ -585,14 +574,15 @@ namespace ai
             waypoint &w = waypoints[i];
             if(clipped(w.o))
             {
-                w.links[0] = 0;
-                w.links[1] = 0xFFFF;
+                w.links[0] = 0xFFFF;
                 cleared++;
             }
-            //else loopj(MAXWAYPOINTLINKS) if(w.links[j] && waypoints.inrange(w.links[j]))
+            //else loopk(MAXWAYPOINTLINKS)
             //{
-            //    waypoint &v = waypoints[w.links[j]];
-            //    if(w.o.squaredist(v.o) > MAXWAYPOINTRADIUS) w.links[j] = 0;
+            //    int link = w.links[k];
+            //    if(!link) continue;
+            //    waypoint &v = waypoints[link];
+            //    if(!checkteleport(w.o, v.o)) w.links[k] = 0;
             //}
         }
         if(cleared)
@@ -649,7 +639,7 @@ namespace ai
         if(!cleanwaypoints()) clearwpcache();
         return true;
     }
-    ICOMMAND(0, loadwaypoints, "s", (char *mname), if(!loadwaypoints(true, mname)) importwaypoints());
+    ICOMMAND(0, loadwaypoints, "s", (char *mname), getwaypoints(true, mname));
 
     void savewaypoints(bool force, const char *mname)
     {
@@ -669,7 +659,7 @@ namespace ai
             f->putlil<float>(w.o.y);
             f->putlil<float>(w.o.z);
             int numlinks = 0;
-            loopj(MAXWAYPOINTLINKS) { if(!w.links[j]) break; numlinks++; }
+            loopj(MAXWAYPOINTLINKS) { if(!w.links[j]) continue; numlinks++; }
             f->putchar(numlinks);
             loopj(numlinks) f->putlil<ushort>(w.links[j]);
         }
@@ -680,9 +670,11 @@ namespace ai
 
     ICOMMAND(0, savewaypoints, "s", (char *mname), savewaypoints(true, mname));
 
-    void importwaypoints()
+    bool importwaypoints()
     {
-        if(oldwaypoints.empty()) return;
+        if(oldwaypoints.empty()) return false;
+        string wptname;
+        if(getwaypointfile(mapname, wptname)) copystring(loadedwaypoints, wptname);
         waypoints.setsize(0);
         waypoints.add(vec(0, 0, 0));
         loopv(oldwaypoints)
@@ -700,6 +692,13 @@ namespace ai
         conoutf("imported %d waypoints from the map file", oldwaypoints.length());
         oldwaypoints.setsize(0);
         if(!cleanwaypoints()) clearwpcache();
+        return true;
+    }
+
+    bool getwaypoints(bool force, const char *mname, bool check)
+    {
+        if(check && loadedwaypoints[0]) return false;
+        return loadwaypoints(force, mname) || importwaypoints();
     }
 
     void delselwaypoints()
@@ -712,8 +711,7 @@ namespace ai
             waypoint &w = waypoints[i];
             if(w.o.x >= o.x && w.o.x <= s.x && w.o.y >= o.y && w.o.y <= s.y && w.o.z >= o.z && w.o.z <= s.z)
             {
-                w.links[0] = 0;
-                w.links[1] = 0xFFFF;
+                w.links[0] = 0xFFFF;
                 cleared++;
             }
         }

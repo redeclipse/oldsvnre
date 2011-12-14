@@ -90,6 +90,10 @@ namespace ai
     };
     extern vector<oldwaypoint> oldwaypoints;
 
+    extern int showwaypoints, dropwaypoints;
+
+    extern void startmap(const char *name, const char *reqname, bool empty);
+
     extern int closestwaypoint(const vec &pos, float mindist, bool links);
     extern void findwaypointswithin(const vec &pos, float mindist, float maxdist, vector<int> &results);
 	extern void inferwaypoints(gameent *d, const vec &o, const vec &v, float mindist = ai::CLOSEDIST);
@@ -100,7 +104,8 @@ namespace ai
     extern void clearwaypoints(bool full = false);
     extern bool loadwaypoints(bool force = false, const char *mname = NULL);
     extern void savewaypoints(bool force = false, const char *mname = NULL);
-    extern void importwaypoints();
+    extern bool importwaypoints();
+    extern bool getwaypoints(bool force = false, const char *mname = NULL, bool check = true);
 
     // ai state information for the owner client
     enum
