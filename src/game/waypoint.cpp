@@ -396,7 +396,7 @@ namespace ai
             loopi(MAXWAYPOINTLINKS)
             {
                 int link = m.links[i];
-                if(!link) continue;
+                if(!link) break;
                 if(waypoints.inrange(link) && (link == node || link == goal || waypoints[link].haslinks()))
                 {
                     waypoint &n = waypoints[link];
@@ -528,22 +528,24 @@ namespace ai
     void remapwaypoints()
     {
         vector<ushort> remap;
-        vector<waypoint> wplist;
         int total = 0;
-        loopv(waypoints) remap.add(waypoints[i].links[0] == 0xFFFF ? 0 : total++);
+        loopv(waypoints) remap.add(waypoints[i].links[1] == 0xFFFF ? 0 : total++);
         total = 0;
         loopvj(waypoints)
         {
-            if(waypoints[j].links[0] == 0xFFFF) continue;
-            waypoint &w = wplist.add(waypoints[j]);
+            if(waypoints[j].links[1] == 0xFFFF) continue;
+            waypoint &w = waypoints[total];
+            if(j != total) w = waypoints[j];
+            int k = 0;
             loopi(MAXWAYPOINTLINKS)
             {
                 int link = w.links[i];
-                if(!link) continue;
-                w.links[i] = remap[link];
+                if(!link) break;
+                if((w.links[k] = remap[link])) k++;
             }
+            total++;
         }
-        waypoints = wplist;
+        waypoints.setsize(total);
     }
 
     bool checkteleport(const vec &o, const vec &v)
@@ -574,7 +576,8 @@ namespace ai
             waypoint &w = waypoints[i];
             if(clipped(w.o))
             {
-                w.links[0] = 0xFFFF;
+                w.links[0] = 0;
+                w.links[1] = 0xFFFF;
                 cleared++;
             }
             //else loopk(MAXWAYPOINTLINKS)
@@ -629,8 +632,14 @@ namespace ai
             o.y = f->getlil<float>();
             o.z = f->getlil<float>();
             waypoint &w = waypoints.add(waypoint(o, getweight(o)));
-            int numlinks = clamp(f->getchar(), 0, MAXWAYPOINTLINKS);
-            loopi(numlinks) w.links[i] = f->getlil<ushort>();
+            int numlinks = f->getchar(), k = 0;
+            loopi(numlinks) 
+            {
+                if((w.links[k] = f->getlil<ushort>())) 
+                {
+                    if(++k >= MAXWAYPOINTLINKS) break;
+                }
+            }
         }
 
         delete f;
@@ -659,7 +668,7 @@ namespace ai
             f->putlil<float>(w.o.y);
             f->putlil<float>(w.o.z);
             int numlinks = 0;
-            loopj(MAXWAYPOINTLINKS) { if(!w.links[j]) continue; numlinks++; }
+            loopj(MAXWAYPOINTLINKS) { if(!w.links[j]) break; numlinks++; }
             f->putchar(numlinks);
             loopj(numlinks) f->putlil<ushort>(w.links[j]);
         }
@@ -686,8 +695,12 @@ namespace ai
                 break;
             }
             waypoint &w = waypoints.add(waypoint(v.o, getweight(v.o)));
-            int numlinks = clamp(v.links.length(), 0, MAXWAYPOINTLINKS);
-            loopj(numlinks) w.links[j] = v.links[j];
+            int k = 0;
+            loopvj(v.links) if(v.links[j]) 
+            {
+                w.links[k++] = v.links[j];
+                if(k >= MAXWAYPOINTLINKS) break;
+            }
         }
         conoutf("imported %d waypoints from the map file", oldwaypoints.length());
         oldwaypoints.setsize(0);
@@ -711,7 +724,8 @@ namespace ai
             waypoint &w = waypoints[i];
             if(w.o.x >= o.x && w.o.x <= s.x && w.o.y >= o.y && w.o.y <= s.y && w.o.z >= o.z && w.o.z <= s.z)
             {
-                w.links[0] = 0xFFFF;
+                w.links[0] = 0;
+                w.links[1] = 0xFFFF;
                 cleared++;
             }
         }

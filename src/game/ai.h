@@ -76,8 +76,7 @@ namespace ai
 
 		bool haslinks()
 		{
-		    loopi(MAXWAYPOINTLINKS) if(links[i]) return true;
-		    return false;
+            return links[0]!=0;
 		}
     };
     extern vector<waypoint> waypoints;
