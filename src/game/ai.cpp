@@ -11,13 +11,22 @@ namespace ai
     VAR(0, aicampaign, 0, 0, 1);
     VAR(0, aipassive, 0, 0, 1);
 
-    VAR(0, showwaypoints, 0, 0, 1);
+    VARF(0, showwaypoints, 0, 0, 1, if(showwaypoints) getwaypoints());
+    VAR(0, showwaypointsdrop, 0, 1, 1);
     VAR(0, showwaypointsradius, 0, 256, VAR_MAX);
 
     VAR(IDF_PERSIST, aideadfade, 0, 10000, VAR_MAX);
     VAR(IDF_PERSIST, showaiinfo, 0, 0, 2); // 0/1 = shows/hides bot join/parts, 2 = show more verbose info
 
+    bool passive() { return aipassive || m_edit(game::gamemode); }
     bool dbgfocus(gameent *d)  { return d->ai && (!aidebugfocus || d == game::focus || (aidebugfocus != 2 && !game::focus->ai)); }
+
+    void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
+    {
+        ai::savewaypoints();
+        ai::clearwaypoints(true);
+        showwaypoints = dropwaypoints = 0;
+    }
 
     float viewdist(int x) { return x <= 100 ? clamp((SIGHTMIN+(SIGHTMAX-SIGHTMIN))/100.f*float(x), float(SIGHTMIN), max(float(fog), SIGHTMIN)) : max(float(fog), SIGHTMIN); }
     float viewfieldx(int x) { return x <= 100 ? clamp((VIEWMIN+(VIEWMAX-VIEWMIN))/100.f*float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX); }
@@ -56,7 +65,7 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e, bool solid)
     {
-        if(e && d != e && !m_edit(game::gamemode) && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
+        if(e && d != e && !passive() && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
         {
             int dt = owner(d), et = owner(e);
             if(dt == TEAM_ENEMY && et == TEAM_ENEMY) return false;
@@ -173,7 +182,7 @@ namespace ai
 
     void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl)
     {
-        if(!loadwaypoints()) importwaypoints();
+        getwaypoints();
 
         gameent *o = game::newclient(on);
         bool resetthisguy = false;
@@ -379,7 +388,8 @@ namespace ai
 
     bool violence(gameent *d, aistate &b, gameent *e, int pursue)
     {
-        if(e && !aipassive && targetable(d, e))
+        if(passive()) return false;
+        if(e && targetable(d, e))
         {
             if(pursue)
             {
@@ -399,7 +409,7 @@ namespace ai
 
     bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f)
     {
-        if(aipassive) return false;
+        if(passive()) return false;
         static vector<gameent *> hastried; hastried.setsize(0);
         vec dp = d->headpos();
         int numdyns = game::numdynents();
@@ -507,7 +517,7 @@ namespace ai
         static vector<interest> interests; interests.setsize(0);
         if(d->aitype == AI_BOT)
         {
-            if(!aipassive)
+            if(!passive())
             {
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
@@ -649,7 +659,7 @@ namespace ai
 
     void itemspawned(int ent, int spawned)
     {
-        if(!aipassive && m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned > 0)
+        if(!passive() && m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned > 0)
         {
             int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, entities::ents[ent]->attrs[0], sweap);
             loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT)
@@ -869,7 +879,7 @@ namespace ai
 
                 case AI_T_ACTOR:
                 {
-                    if(aipassive) return 0;
+                    if(passive()) return 0;
                     //if(check(d, b)) return 1;
                     gameent *e = game::getclient(b.target);
                     if(e && e->state == CS_ALIVE)
@@ -944,31 +954,30 @@ namespace ai
         return 0;
     }
 
-    int randomlink(gameent *d, int n, bool any)
+    int randomlink(gameent *d, int n)
     {
         if(waypoints.inrange(n) && waypoints[n].haslinks())
         {
             waypoint &w = waypoints[n];
             static vector<int> linkmap; linkmap.setsize(0);
-            loopi(MAXWAYPOINTLINKS) if(w.links[i] && w.links[i] != n && waypoints.inrange(w.links[i]) && (any || !d->ai->hasprevnode(w.links[i])))
+            loopi(MAXWAYPOINTLINKS) if(w.links[i] && w.links[i] != n && waypoints.inrange(w.links[i]) && !d->ai->hasprevnode(w.links[i]))
                 linkmap.add(w.links[i]);
             if(!linkmap.empty()) return linkmap[rnd(linkmap.length())];
         }
         return -1;
     }
 
-    bool anynode(gameent *d, aistate &b)
+    bool anynode(gameent *d, aistate &b, int len = NUMPREVNODES)
     {
         if(waypoints.inrange(d->lastnode)) loopk(2)
         {
             d->ai->clear(k ? true : false);
-            int n = randomlink(d, d->lastnode, k!=0);
+            int n = randomlink(d, d->lastnode);
             if(wpspot(d, n))
             {
-                int t = randomlink(d, n, k!=0);
-                if(waypoints.inrange(t)) d->ai->route.add(t);
                 d->ai->route.add(n);
                 d->ai->route.add(d->lastnode);
+                loopi(len) d->ai->route.insert(0, n = randomlink(d, n));
                 return true;
             }
         }
@@ -1074,7 +1083,7 @@ namespace ai
         {
             if(d->timeinair > 250 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, 3, true))
                 d->action[AC_SPECIAL] = true;
-            else if(!aipassive && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
+            else if(!passive() && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
             {
                 d->action[AC_SPECIAL] = true;
                 d->ai->lastmelee = lastmillis;
@@ -1084,7 +1093,7 @@ namespace ai
 
     bool lockon(gameent *d, gameent *e, float maxdist, bool check)
     {
-        if(!aipassive && check && !d->blocked)
+        if(!passive() && check && !d->blocked)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1121,7 +1130,7 @@ namespace ai
 
         bool enemyok = false, locked = false, melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
         gameent *e = game::getclient(d->ai->enemy);
-        if(!aipassive)
+        if(!passive())
         {
             if(!(enemyok = e && targetable(d, e, true)) || d->skill >= 50)
             {
@@ -1712,7 +1721,7 @@ namespace ai
                     }
                 }
             }
-            if(aidebug >= 4 && !m_edit(game::gamemode))
+            if(aidebug >= 4)
             {
                 int cur = 0;
                 loopv(obstacles.obstacles)
@@ -1729,7 +1738,7 @@ namespace ai
                 }
             }
         }
-        if(showwaypoints || aidebug >= 7)
+        if(showwaypoints || (dropwaypoints && showwaypointsdrop) || aidebug >= 7)
         {
             vector<int> close;
             int len = waypoints.length();
@@ -1745,13 +1754,15 @@ namespace ai
                 loopj(MAXWAYPOINTLINKS)
                 {
                      int link = w.links[j];
-                     if(!link) break;
+                     if(!link) continue;
                      waypoint &v = waypoints[link];
                      bool both = false;
                      loopk(MAXWAYPOINTLINKS) if(v.links[k] == idx) { both = true; break; }
                      part_trace(w.o, v.o, 1, 1, 1, both ? 0xAA44CC : 0x660088);
                 }
             }
+            if(game::player1->state == CS_ALIVE && waypoints.inrange(game::player1->lastnode))
+                part_trace(game::player1->feetpos(), waypoints[game::player1->lastnode].o, 1, 1, 1, 0xFFFF00);
         }
     }
 

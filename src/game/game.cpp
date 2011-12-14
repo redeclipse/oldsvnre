@@ -267,7 +267,7 @@ namespace game
     void addsway(gameent *d)
     {
         float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
-        if(d->physstate >= PHYS_SLOPE || d->onladder || d->turnside)
+        if(d->state == CS_ALIVE && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside))
         {
             swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
             swaydist += swayspeed*curtime/1000.0f;
@@ -296,7 +296,7 @@ namespace game
         swaydir.mul(k);
         vec inertia = vec(d->vel).add(d->falling);
         float speedscale = max(inertia.magnitude(), speed);
-        if(speedscale > 0) swaydir.add(vec(inertia).mul((1-k)/(15*speedscale)));
+        if(d->state == CS_ALIVE && speedscale > 0) swaydir.add(vec(inertia).mul((1-k)/(15*speedscale)));
         swaypush.mul(pow(0.5f, curtime/25.0f));
     }
 
@@ -1352,8 +1352,7 @@ namespace game
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
-        ai::savewaypoints();
-        ai::clearwaypoints(true);
+        ai::startmap(name, reqname, empty);
         intermission = false;
         maptime = hud::lastnewgame = 0;
         cameras.deletecontents();

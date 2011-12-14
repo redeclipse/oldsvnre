@@ -17,15 +17,13 @@ namespace physics
     FVAR(IDF_PERSIST, floatspeed, 1e-4f, 100, 1000);
     FVAR(IDF_PERSIST, floatcurb, 0, 3.f, 1000);
 
-    FVAR(IDF_PERSIST, impulseroll, 0, 15, 90);
-    FVAR(IDF_PERSIST, impulsetolerance, 0, 3, 6);
-
     VAR(IDF_PERSIST, physframetime, 5, 5, 20);
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
 
     FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum angle to switch between wall kick and run
     VAR(IDF_PERSIST, impulsemethod, 0, 3, 3); // determines which impulse method to use, 0 = none, 1 = power jump, 2 = power slide, 3 = both
     VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = impulse jump, 2 = impulse dash, 3 = both
+    FVAR(IDF_PERSIST, impulseroll, 0, 15, 90);
 
     VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
@@ -759,7 +757,7 @@ namespace physics
             if(melee) { dash = onfloor; pulse = !onfloor; }
             else if(!power)
             {
-                if(!d->ai && onfloor) dash = impulseaction&2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
+                if(onfloor) dash = impulseaction&2 && d->action[AC_DASH] && (!d->impulse[IM_TIME] || lastmillis-d->impulse[IM_TIME] > impulsedashdelay);
                 else pulse = ((d->ai || impulseaction&1) && d->action[AC_JUMP]) || ((d->ai || impulseaction&2) && d->action[AC_DASH]);
             }
             if(power || dash || pulse)

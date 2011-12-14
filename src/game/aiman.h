@@ -190,11 +190,12 @@ namespace aiman
             if(ci->state.aitype == AI_BOT && ++numbots >= GAME(botlimit)) shiftai(ci, -1);
         }
 
-        int balance = 0;
+        int balance = 0, people = numclients(-1, true, -1);
         if(m_campaign(gamemode)) balance = GAME(campaignplayers); // campaigns strictly obeys nplayers
+        else if(m_edit(gamemode)) balance = GAME(botoffset);
         else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
         {
-            int numt = numteams(gamemode, mutators), people = numclients(-1, true, -1);
+            int numt = numteams(gamemode, mutators);
             switch(GAME(botbalance))
             {
                 case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : nplayers); break; // use distributed numplayers
@@ -221,7 +222,11 @@ namespace aiman
                             else balance++;
                         }
                     }
-                    if(m_team(gamemode, mutators) && balance%numt) balance += numt-(balance%numt);
+                    if(m_team(gamemode, mutators))
+                    {
+                        int offt = balance%numt;
+                        if(offt) balance += numt-offt;
+                    }
                 }
                 else balance = max(people*numt, numt); // humans vs. bots, just directly balance
                 loopvrev(clients)
@@ -238,10 +243,10 @@ namespace aiman
                     }
                 }
             }
-            int bots = balance-people;
-            if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
             balance += GAME(botoffset);
         }
+        int bots = balance-people;
+        if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
         if(balance > 0)
         {
             while(numclients(-1, true, AI_BOT) < balance) if(!addai(AI_BOT, -1, -1)) break;
@@ -280,7 +285,7 @@ namespace aiman
 
     void checkai()
     {
-        if(m_play(gamemode) && numclients())
+        if(!m_demo(gamemode) && numclients())
         {
             if(hasgameinfo && !interm)
             {
