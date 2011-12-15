@@ -98,12 +98,9 @@ GVAR(0, bleeddelay, 0, 1000, VAR_MAX);
 GVAR(0, bleeddamage, 0, 3, VAR_MAX);
 
 GVAR(0, regendelay, 0, 3000, VAR_MAX); // regen after no damage for this long
-GVAR(0, regenguard, 0, 1000, VAR_MAX); // regen this often when guarding an affinity
 GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating normally
 GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
 GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
-GVAR(0, regenextra, 0, 2, VAR_MAX); // add this to regen when influenced by affinity
-GVAR(0, regenaffinity, 0, 1, 2); // 0 = off, 1 = only guarding, 2 = also while carrying
 
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
@@ -157,12 +154,24 @@ GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
+GVAR(0, capturebuffdelay, 0, 1000, VAR_MAX); // buffed when guarding, and for this long after
+GFVAR(0, capturebuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
+GFVAR(0, capturebuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
+GVAR(0, captureregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
+GVAR(0, captureregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
+GVAR(0, captureregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, defendinterval, 0, 50, VAR_MAX);
 GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
+GVAR(0, defendbuffdelay, 0, 1000, VAR_MAX); // buffed when guarding, and for this long after
+GFVAR(0, defendbuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
+GFVAR(0, defendbuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
+GVAR(0, defendregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
+GVAR(0, defendregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
+GVAR(0, defendregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(0, bomberlimit, 0, 0, VAR_MAX); // finish when score is this or more (non-hold)
 GVAR(0, bomberholdlimit, 0, 0, VAR_MAX); // finish when score is this or more (hold)
@@ -188,6 +197,12 @@ GFVAR(0, bomberwaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, bomberweight, FVAR_MIN, 150, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 50, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
+GVAR(0, bomberbuffdelay, 0, 1000, VAR_MAX); // buffed when guarding, and for this long after
+GFVAR(0, bomberbuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
+GFVAR(0, bomberbuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
+GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
+GVAR(0, bomberregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
+GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
 GVAR(0, skillmin, 1, 50, 101);

@@ -1312,9 +1312,9 @@ namespace client
 
                 case N_SPHY: // simple phys events
                 {
-                    int lcn = getint(p), st = getint(p), param = st == SPHY_POWER ? getint(p) : 0;
+                    int lcn = getint(p), st = getint(p), param = st == SPHY_POWER || st == SPHY_BUFF ? getint(p) : 0;
                     gameent *t = game::getclient(lcn);
-                    if(t && (st == SPHY_EXTINGUISH || (t != game::player1 && !t->ai))) switch(st)
+                    if(t && (st == SPHY_EXTINGUISH || st == SPHY_BUFF || (t != game::player1 && !t->ai))) switch(st)
                     {
                         case SPHY_JUMP:
                         {
@@ -1339,6 +1339,7 @@ namespace client
                             part_create(PART_SMOKE, 500, t->feetpos(t->height/2), 0xAAAAAA, t->radius*4, 1, -10);
                             break;
                         }
+                        case SPHY_BUFF: t->lastbuff = param ? lastmillis : 0; break;
                         default: break;
                     }
                     break;

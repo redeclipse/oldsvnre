@@ -198,30 +198,30 @@ struct captureservmode : capturestate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(hasflaginfo)
+        if(!hasflaginfo || !GAME(captureregenbuff) || !ci->state.lastbuff) return;
+        if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
+        if(ci->state.lastregen && GAME(captureregendelay)) delay = GAME(captureregendelay);
+        if(GAME(captureregenextra)) amt += GAME(captureregenextra);
+    }
+
+    void checkclient(clientinfo *ci)
+    {
+        if(!hasflaginfo || ci->state.state != CS_ALIVE) return;
+        if(GAME(capturebuffdelay)) loopv(flags)
         {
-            if(m_gsp2(gamemode, mutators)) loopv(flags)
+            flag &f = flags[i];
+            if(f.team != ci->team || (f.owner >= 0 && f.owner != ci->clientnum) || f.droptime) continue;
+            if(ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2)
             {
-                flag &f = flags[i];
-                if(f.team == ci->team && f.owner < 0 && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2.f)
-                {
-                    if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
-                    if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
-                    if(GAME(regenextra)) amt += GAME(regenextra);
-                    return;
-                }
+                if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
+                ci->state.lastbuff = gamemillis;
+                return;
             }
-            if(GAME(regenaffinity)) loopv(flags)
-            {
-                flag &f = flags[i];
-                if((f.team == ci->team && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f) || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
-                {
-                    if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
-                    if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
-                    if(GAME(regenextra)) amt += GAME(regenextra);
-                    return;
-                }
-            }
+        }
+        if(ci->state.lastbuff && (!GAME(capturebuffdelay) || gamemillis-ci->state.lastbuff > GAME(capturebuffdelay)))
+        {
+            ci->state.lastbuff = 0;
+            sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
         }
     }
 

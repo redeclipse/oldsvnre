@@ -404,6 +404,7 @@ namespace server
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
         virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
+        virtual void checkclient(clientinfo *ci) {}
     };
 
     vector<srventity> sents;
@@ -3125,7 +3126,7 @@ namespace server
         gs.lastdeath = gamemillis;
     }
 
-    int calcdamage(int weap, int &flags, int radial, float size, float dist, float scale, bool self)
+    int calcdamage(clientinfo *actor, clientinfo *target, int weap, int &flags, int radial, float size, float dist, float scale, bool self)
     {
         flags &= ~HIT_SFLAGS;
         if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
@@ -3133,6 +3134,22 @@ namespace server
         float skew = GAME(damagescale)*clamp(scale, 0.f, 1.f);
         if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+
+        if(m_capture(gamemode) && GAME(capturebuffdelay))
+        {
+            if(actor->state.lastbuff) skew *= GAME(capturebuffdamage);
+            if(target->state.lastbuff) skew /= GAME(capturebuffshield);
+        }
+        else if(m_defend(gamemode) && GAME(defendbuffdelay))
+        {
+            if(actor->state.lastbuff) skew *= GAME(defendbuffdamage);
+            if(target->state.lastbuff) skew /= GAME(defendbuffshield);
+        }
+        else if(m_bomber(gamemode) && GAME(bomberbuffdelay))
+        {
+            if(actor->state.lastbuff) skew *= GAME(bomberbuffdamage);
+            if(target->state.lastbuff) skew /= GAME(bomberbuffshield);
+        }
         if(!(flags&HIT_HEAD))
         {
             if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
@@ -3201,7 +3218,7 @@ namespace server
                     float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
-                        int damage = calcdamage(weap, hflags, radial, size, dist, skew, ci == target);
+                        int damage = calcdamage(ci, target, weap, hflags, radial, size, dist, skew, ci == target);
                         if(damage) dodamage(target, ci, damage, weap, hflags, h.dir);
                         else if(GAME(serverdebug) >= 2)
                             srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] determined zero damage", weap, id, i, h.target);
@@ -3633,6 +3650,8 @@ namespace server
         loopv(clients) if(clients[i]->name[0] && clients[i]->online)
         {
             clientinfo *ci = clients[i];
+            if(smode) smode->checkclient(ci);
+            mutate(smuts, mut->checkclient(ci));
             if(ci->state.state == CS_ALIVE)
             {
                 if(ci->state.burning(gamemillis, GAME(burntime)))
@@ -4211,6 +4230,7 @@ namespace server
                 case N_SPHY:
                 {
                     int lcn = getint(p), idx = getint(p);
+                    if(idx >= SPHY_SERVER) break; // clients can't send this
                     if(idx == SPHY_POWER) getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;

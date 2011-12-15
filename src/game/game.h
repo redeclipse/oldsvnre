@@ -321,7 +321,7 @@ enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, S
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
 enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_HOVER, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_DASH, IM_T_MELEE, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_MELEE };
-enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, SPHY_SKATE, SPHY_POWER, SPHY_EXTINGUISH, SPHY_MAX };
+enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, SPHY_SKATE, SPHY_POWER, SPHY_EXTINGUISH, SPHY_BUFF, SPHY_MAX, SPHY_SERVER = SPHY_BUFF };
 
 #define CROUCHHEIGHT 0.7f
 #define PHYSMILLIS 250
@@ -334,10 +334,10 @@ struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX], colour;
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime;
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime, lastbuff;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : colour(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0),
+    gamestate() : colour(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
@@ -487,7 +487,7 @@ struct gamestate
 
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastburn = lastburntime = lastbleed = lastbleedtime = 0;
+        lastdeath = lastpain = lastregen = lastburn = lastburntime = lastbleed = lastbleedtime = lastbuff = 0;
         lastrespawn = -1;
     }
 

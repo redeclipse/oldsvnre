@@ -110,11 +110,13 @@ namespace game
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
     VAR(IDF_PERSIST, aboveheadicons, 0, 3, 3);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
-    FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 3, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
+
+    FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
+
     VAR(IDF_PERSIST, eventiconfade, 500, 5000, VAR_MAX);
     VAR(IDF_PERSIST, eventiconshort, 500, 3000, VAR_MAX);
     VAR(IDF_PERSIST, eventiconcrit, 500, 2000, VAR_MAX);
