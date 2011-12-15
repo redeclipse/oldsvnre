@@ -150,7 +150,7 @@ enttypes enttype[] = {
     },
     {
         AFFINITY,       1,          48,     36,     EU_NONE,    5,
-            (1<<AFFINITY), 0,
+            0, 0,
             false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
     },

@@ -1,6 +1,3 @@
-#define iscapturehome(a,b)  ((a.base&BASE_HOME) && (a.team == b || a.team == TEAM_NEUTRAL))
-#define iscaptureaffinity(a,b)  ((a.base&BASE_FLAG) && (a.team == b || a.team == TEAM_NEUTRAL))
-
 #ifdef GAMESERVER
 #define capturedelay (m_gsp2(gamemode, mutators) ? GAME(capturedefenddelay) : GAME(captureresetdelay))
 #define capturestate captureservstate
@@ -12,7 +9,7 @@ struct capturestate
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, droptime, taketime, base;
+        int team, droptime, taketime;
 #ifdef GAMESERVER
         int owner, lastowner;
         vector<int> votes;
@@ -33,7 +30,6 @@ struct capturestate
         {
             inertia = vec(0, 0, 0);
             droploc = spawnloc = vec(-1, -1, -1);
-            base = BASE_NONE;
 #ifdef GAMESERVER
             owner = lastowner = -1;
             votes.shrink(0);
@@ -62,16 +58,19 @@ struct capturestate
         flags.shrink(0);
     }
 
-    int addaffinity(const vec &o, int team, int base = BASE_NONE, int i = -1)
+#ifdef GAMESERVER
+    void addaffinity(const vec &o, int team)
+#else
+    void addaffinity(const vec &o, int team, int ent)
+#endif
     {
-        int x = i < 0 ? flags.length() : i;
-        while(!flags.inrange(x)) flags.add();
-        flag &f = flags[x];
+        flag &f = flags.add();
         f.reset();
         f.team = team;
         f.spawnloc = o;
-        f.base = base;
-        return x;
+#ifndef GAMESERVER
+        f.ent = ent;
+#endif
     }
 #ifndef GAMESERVER
     void interp(int i, int t)

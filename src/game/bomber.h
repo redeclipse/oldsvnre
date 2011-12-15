@@ -78,15 +78,19 @@ struct bomberstate
         flags.shrink(0);
     }
 
-    int addaffinity(const vec &o, int team, int i = -1)
+#ifdef GAMESERVER
+    void addaffinity(const vec &o, int team)
+#else
+    void addaffinity(const vec &o, int team, int ent)
+#endif
     {
-        int x = i < 0 ? flags.length() : i;
-        while(!flags.inrange(x)) flags.add();
-        flag &f = flags[x];
+        flag &f = flags.add();
         f.reset();
         f.team = team;
         f.spawnloc = o;
-        return x;
+#ifndef GAMESERVER
+        f.ent = ent;
+#endif
     }
 #ifndef GAMESERVER
     void interp(int i, int t)

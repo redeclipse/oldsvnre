@@ -308,33 +308,12 @@ namespace bomber
 
     void setup()
     {
-        #define setupaddaffinity(a,b) \
-        { \
-            index = st.addaffinity(entities::ents[a]->o, entities::ents[a]->attrs[0]); \
-            if(st.flags.inrange(index)) st.flags[index].ent = a; \
-            else continue; \
-        }
-        #define setupchkaffinity(a,b) \
-        { \
-            if(entities::ents[a]->type != AFFINITY || !m_check(entities::ents[a]->attrs[3], game::gamemode) || !isteam(game::gamemode, game::mutators, entities::ents[a]->attrs[0], TEAM_NEUTRAL)) \
-                continue; \
-            else \
-            { \
-                int already = -1; \
-                loopvk(st.flags) if(st.flags[k].ent == a) \
-                { \
-                    already = k; \
-                    break; \
-                } \
-                if(st.flags.inrange(already)) b; \
-            } \
-        }
-        int index = -1;
-        loopv(entities::ents)
+        loopv(entities::ents) if(entities::ents[i]->type == AFFINITY)
         {
-            setupchkaffinity(i, { continue; });
-            if(isteam(game::gamemode, game::mutators, entities::ents[i]->attrs[0], TEAM_NEUTRAL)) // not linked and is a team flag
-                setupaddaffinity(i, entities::ents[i]->attrs[0]); // add as both
+            gameentity &e = *(gameentity *)entities::ents[i];
+            if(!m_check(e.attrs[3], game::gamemode) || !isteam(game::gamemode, game::mutators, e.attrs[0], TEAM_NEUTRAL))
+                continue;
+            st.addaffinity(e.o, e.attrs[0], i);
         }
     }
 

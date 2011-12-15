@@ -183,7 +183,8 @@ namespace hud
     FVAR(IDF_PERSIST, cursorblend, 0, 1, 1);
 
     TVAR(IDF_PERSIST, zoomcrosshairtex, "crosshairs/cross-01", 3);
-    FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.575f, 1000);
+    FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.3f, 1000);
+    FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
@@ -827,7 +828,7 @@ namespace hud
     void drawpointer(int w, int h, int index)
     {
         int cs = int((index == POINTER_GUI ? cursorsize : crosshairsize)*hudsize);
-        float fade = (index == POINTER_GUI ? cursorblend : crosshairblend)*hudblend;
+        float fade = index == POINTER_GUI ? cursorblend : crosshairblend;
         vec c(1, 1, 1);
         if(game::focus->state == CS_ALIVE && index >= POINTER_HAIR)
         {
@@ -838,6 +839,7 @@ namespace hud
                 float amt = frame <= zoomtime ? clamp(float(frame)/float(zoomtime), 0.f, 1.f) : 1.f;
                 if(!game::zooming) amt = 1.f-amt;
                 cs += int(off*amt);
+                fade += (zoomcrosshairblend-fade)*amt;
             }
             if(crosshairtone) skewcolour(c.r, c.g, c.b, crosshairtone);
             int heal = m_health(game::gamemode, game::mutators);
@@ -859,7 +861,7 @@ namespace hud
         {
             int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f), ss = int(crosshairsize*hudsize),
                 sx = game::mousestyle() != 1 ? cx : nx, sy = game::mousestyle() != 1 ? cy : ny;
-            drawpointertex(getpointer(index, game::focus->weapselect), sx-cs/2, sy-cs/2, cs, c.r, c.g, c.b, fade);
+            drawpointertex(getpointer(index, game::focus->weapselect), sx-cs/2, sy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
             if(index > POINTER_GUI)
             {
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
@@ -873,7 +875,7 @@ namespace hud
                     drawpointertex(getpointer(POINTER_HIT, game::focus->weapselect), sx-ss/2, sy-ss/2, ss, c.r, c.g, c.b, crosshairblend*hudblend);
             }
         }
-        else drawpointertex(getpointer(index, game::focus->weapselect), cx, cy, cs, c.r, c.g, c.b, fade);
+        else drawpointertex(getpointer(index, game::focus->weapselect), cx, cy, cs, c.r, c.g, c.b, fade*hudblend);
     }
 
     void drawpointers(int w, int h)
