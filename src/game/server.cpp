@@ -646,16 +646,16 @@ namespace server
     #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2ss", N_COMMAND, -1, &((const char *)#a)[3], #b); } }
     #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2ss", N_COMMAND, -1, &((const char *)#a)[3], #b); } }
 
-    void eastereggs()
-    {
-        if(GAME(alloweastereggs))
-        {
-            time_t ct = time(NULL); // current time
-            struct tm *lt = localtime(&ct);
-            int month = lt->tm_mon+1, mday = lt->tm_mday; //, day = lt->tm_wday+1
-            if(GAME(alloweastereggs) >= 2 && month == 4 && mday == 1) setmod(sv_returningfire, 1);
-        }
-    }
+    //void eastereggs()
+    //{
+    //    if(GAME(alloweastereggs))
+    //    {
+    //        time_t ct = time(NULL); // current time
+    //        struct tm *lt = localtime(&ct);
+    //        int month = lt->tm_mon+1, mday = lt->tm_mday; //, day = lt->tm_wday+1
+    //        if(GAME(alloweastereggs) >= 2 && month == 4 && mday == 1) setmod(sv_returningfire, 1);
+    //    }
+    //}
 
     int numgamevars = 0, numgamemods = 0;
     void resetgamevars(bool flush)
@@ -697,7 +697,7 @@ namespace server
 #else
         execfile("servexec.cfg", false);
 #endif
-        eastereggs();
+        //eastereggs();
     }
 
     const char *pickmap(const char *suggest, int mode, int muts)

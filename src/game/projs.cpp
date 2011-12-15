@@ -1484,13 +1484,7 @@ namespace projs
         }
         else if(proj.projtype == PRJ_SHOT && proj.escaped && proj.owner)
         {
-            if(returningfire && lastmillis-proj.spawntime >= min(WEAP2(proj.weap, time, proj.flags&HIT_ALT)/3, 100))
-            {
-                if(!proj.stuck) proj.stuck = false;
-                vec targ = vec(proj.owner->feetpos(proj.owner->height/2)).sub(proj.o).normalize();
-                if(!targ.iszero()) proj.vel = vec(targ).mul(max(proj.vel.magnitude(), physics::movevelocity(&proj)));
-            }
-            else if(proj.owner->state == CS_ALIVE && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
+            if(proj.owner->state == CS_ALIVE && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
             {
                 vec targ(0, 0, 0), dir = vec(proj.vel).normalize();
                 switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))

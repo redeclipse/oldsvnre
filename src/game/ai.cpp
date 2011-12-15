@@ -578,38 +578,18 @@ namespace ai
         {
             if(d->ai && (d->aitype >= AI_START || hithurts(flags) || !game::getclient(d->ai->enemy))) // see if this ai is interested in a grudge
             {
-                d->ai->unsuspend();
                 aistate &b = d->ai->getstate();
                 violence(d, b, e, d->aitype != AI_BOT || weaptype[d->weapselect].melee ? 1 : 0);
             }
-            if(d->aitype >= AI_START && e->aitype < AI_START) // alert the horde
+            static vector<int> targets; // check if one of our ai is defending them
+            targets.setsize(0);
+            if(checkothers(targets, d, AI_S_DEFEND, AI_T_ACTOR, d->clientnum, true))
             {
-                gameent *t = NULL;
-                vec dp = d->headpos();
-                float maxdist = ALERTMAX*ALERTMAX;
-                int numdyns = game::numdynents();
-                loopi(numdyns) if((t = (gameent *)game::iterdynents(i)) && t != d && t->ai && t->state == CS_ALIVE && t->aitype >= AI_START && t->ai->suspended && targetable(t, e))
+                gameent *t;
+                loopv(targets) if((t = game::getclient(targets[i])) && t->ai && t->aitype == AI_BOT && (hithurts(flags) || !game::getclient(t->ai->enemy)))
                 {
-                    vec tp = t->headpos();
-                    if(cansee(t, tp, dp, d->aitype >= AI_START) || tp.squaredist(dp) <= maxdist)
-                    {
-                        aistate &c = t->ai->getstate();
-                        violence(t, c, e, 1);
-                    }
-                }
-            }
-            else
-            {
-                static vector<int> targets; // check if one of our ai is defending them
-                targets.setsize(0);
-                if(checkothers(targets, d, AI_S_DEFEND, AI_T_ACTOR, d->clientnum, true))
-                {
-                    gameent *t;
-                    loopv(targets) if((t = game::getclient(targets[i])) && t->ai && t->aitype == AI_BOT && (hithurts(flags) || !game::getclient(t->ai->enemy)) && !t->ai->suspended)
-                    {
-                        aistate &c = t->ai->getstate();
-                        violence(t, c, e, weaptype[d->weapselect].melee ? 1 : 0);
-                    }
+                    aistate &c = t->ai->getstate();
+                    violence(t, c, e, weaptype[d->weapselect].melee ? 1 : 0);
                 }
             }
         }
@@ -636,7 +616,6 @@ namespace ai
                 else if(aiforcegun >= 0 && aiforcegun < WEAP_MAX) d->ai->weappref = aiforcegun;
                 else d->ai->weappref = rnd(WEAP_MAX-WEAP_OFFSET)+WEAP_OFFSET;
             }
-            d->ai->suspended = true;
             vec dp = d->headpos();
             findorientation(dp, d->yaw, d->pitch, d->ai->target);
         }
@@ -649,11 +628,7 @@ namespace ai
 
     void killed(gameent *d, gameent *e)
     {
-        if(d->ai)
-        {
-            d->ai->reset();
-            if(d->aitype >= AI_START) d->ai->suspended = true;
-        }
+        if(d->ai) d->ai->reset(true);
     }
 
     void itemspawned(int ent, int spawned)
@@ -698,212 +673,185 @@ namespace ai
     int dowait(gameent *d, aistate &b)
     {
         d->ai->clear(true); // ensure they're clean
-        if(d->ai->suspended)
-        {
-            if(!m_campaign(game::gamemode) && d->aitype == AI_BOT) d->ai->unsuspend();
-            else // bots idle until a human is around
-            {
-                gameent *t = NULL;
-                int numdyns = game::numdynents();
-                loopi(numdyns) if((t = (gameent *)game::iterdynents(i)) && t != d && t->aitype < AI_START)
-                {
-                    if(d->aitype == AI_BOT ? (t->state != CS_SPECTATOR && t->aitype == AI_NONE) : (t->state == CS_ALIVE && d->o.squaredist(t->o) <= ALERTMAX*ALERTMAX))
-                    {
-                        d->ai->unsuspend();
-                        break;
-                    }
-                }
-            }
-        }
         if(check(d, b) || find(d, b)) return 1;
-        if(target(d, b, 4, false, d->ai->suspended && d->aitype >= AI_START ? ALERTMAX*ALERTMAX : 0.f)) return 1;
-        if(!d->ai->suspended)
+        if(target(d, b, 4, false)) return 1;
+        if(target(d, b, 4, true)) return 1;
+        if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
         {
-            if(target(d, b, 4, true)) return 1;
-            if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
-            {
-                d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
-                return 1;
-            }
-            d->ai->suspended = true; // fine then..
-            d->ai->clean(true);
+            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
+            return 1;
         }
+        d->ai->clean(true);
         return 0; // but don't pop the state
     }
 
     int dodefense(gameent *d, aistate &b)
     {
-        if(!d->ai->suspended && d->state == CS_ALIVE)
+        if(d->state != CS_ALIVE) return 0;
+        switch(b.targtype)
         {
-            switch(b.targtype)
+            case AI_T_NODE:
             {
-                case AI_T_NODE:
-                {
-                    if(check(d, b)) return 1;
-                    if(iswaypoint(b.target))
-                        return defense(d, b, waypoints[b.target].o) ? 1 : 0;
-                    break;
-                }
-                case AI_T_ENTITY:
-                {
-                    if(check(d, b)) return 1;
-                    if(entities::ents.inrange(b.target))
-                    {
-                        gameentity &e = *(gameentity *)entities::ents[b.target];
-                        return defense(d, b, e.o) ? 1 : 0;
-                    }
-                    break;
-                }
-                case AI_T_AFFINITY:
-                {
-                    if(m_campaign(game::gamemode))
-                    {
-                        if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
-                    }
-                    else if(m_capture(game::gamemode)) return capture::aidefense(d, b) ? 1 : 0;
-                    else if(m_defend(game::gamemode)) return defend::aidefense(d, b) ? 1 : 0;
-                    else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b) ? 1 : 0;
-                    break;
-                }
-                case AI_T_ACTOR:
-                {
-                    if(check(d, b)) return 1;
-                    gameent *e = game::getclient(b.target);
-                    if(e && e->state == CS_ALIVE) return defense(d, b, e->feetpos()) ? 1 : 0;
-                    break;
-                }
-                default: break;
+                if(check(d, b)) return 1;
+                if(iswaypoint(b.target))
+                    return defense(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
             }
+            case AI_T_ENTITY:
+            {
+                if(check(d, b)) return 1;
+                if(entities::ents.inrange(b.target))
+                {
+                    gameentity &e = *(gameentity *)entities::ents[b.target];
+                    return defense(d, b, e.o) ? 1 : 0;
+                }
+                break;
+            }
+            case AI_T_AFFINITY:
+            {
+                if(m_campaign(game::gamemode))
+                {
+                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                }
+                else if(m_capture(game::gamemode)) return capture::aidefense(d, b) ? 1 : 0;
+                else if(m_defend(game::gamemode)) return defend::aidefense(d, b) ? 1 : 0;
+                else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b) ? 1 : 0;
+                break;
+            }
+            case AI_T_ACTOR:
+            {
+                if(check(d, b)) return 1;
+                gameent *e = game::getclient(b.target);
+                if(e && e->state == CS_ALIVE) return defense(d, b, e->feetpos()) ? 1 : 0;
+                break;
+            }
+            default: break;
         }
         return 0;
     }
 
     int dointerest(gameent *d, aistate &b)
     {
-        if(!d->ai->suspended && d->state == CS_ALIVE && aistyle[d->aitype].canmove)
+        if(d->state != CS_ALIVE || !aistyle[d->aitype].canmove) return 0;
+        switch(b.targtype)
         {
-            switch(b.targtype)
+            case AI_T_NODE: // this is like a wait state without sitting still..
             {
-                case AI_T_NODE: // this is like a wait state without sitting still..
-                {
-                    if(check(d, b) || find(d, b)) return 1;
-                    if(target(d, b, 4, true)) return 1;
-                    if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
-                        return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
-                    break;
-                }
-                case AI_T_ENTITY:
-                {
-                    if(entities::ents.inrange(b.target))
-                    {
-                        gameentity &e = *(gameentity *)entities::ents[b.target];
-                        if(enttype[e.type].usetype != EU_ITEM) return 0;
-                        int sweap = m_weapon(game::gamemode, game::mutators),
-                            attr = w_attr(game::gamemode, e.attrs[0], sweap);
-                        switch(e.type)
-                        {
-                            case WEAPON:
-                            {
-                                if(!e.spawned || !wantsweap(d, attr)) return 0;
-                                //float guard = enttype[e.type].radius;
-                                //if(d->feetpos().squaredist(e.o) <= guard*guard)
-                                //    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
-                                //else b.idle = -1;
-                                break;
-                            }
-                            default: break;
-                        }
-                        return makeroute(d, b, e.o) ? 1 : 0;
-                    }
-                    break;
-                }
-                case AI_T_DROP:
-                {
-                    loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_ENT && projs::projs[j]->ready() && projs::projs[j]->id == b.target)
-                    {
-                        projent &proj = *projs::projs[j];
-                        if(!entities::ents.inrange(proj.id) || enttype[entities::ents[proj.id]->type].usetype != EU_ITEM) return 0;
-                        gameentity &e = *(gameentity *)entities::ents[proj.id];
-                        int sweap = m_weapon(game::gamemode, game::mutators),
-                            attr = w_attr(game::gamemode, e.attrs[0], sweap);
-                        switch(e.type)
-                        {
-                            case WEAPON:
-                            {
-                                if(!wantsweap(d, attr) || proj.owner == d) return 0;
-                                //float guard = enttype[e.type].radius;
-                                //if(d->feetpos().squaredist(e.o) <= guard*guard)
-                                //    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
-                                //else b.idle = -1;
-                                break;
-                            }
-                            default: break;
-                        }
-                        return makeroute(d, b, proj.o) ? 1 : 0;
-                        break;
-                    }
-                    break;
-                }
-                default: break;
+                if(check(d, b) || find(d, b)) return 1;
+                if(target(d, b, 4, true)) return 1;
+                if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
+                    return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
             }
+            case AI_T_ENTITY:
+            {
+                if(entities::ents.inrange(b.target))
+                {
+                    gameentity &e = *(gameentity *)entities::ents[b.target];
+                    if(enttype[e.type].usetype != EU_ITEM) return 0;
+                    int sweap = m_weapon(game::gamemode, game::mutators),
+                        attr = w_attr(game::gamemode, e.attrs[0], sweap);
+                    switch(e.type)
+                    {
+                        case WEAPON:
+                        {
+                            if(!e.spawned || !wantsweap(d, attr)) return 0;
+                            //float guard = enttype[e.type].radius;
+                            //if(d->feetpos().squaredist(e.o) <= guard*guard)
+                            //    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+                            //else b.idle = -1;
+                            break;
+                        }
+                        default: break;
+                    }
+                    return makeroute(d, b, e.o) ? 1 : 0;
+                }
+                break;
+            }
+            case AI_T_DROP:
+            {
+                loopvj(projs::projs) if(projs::projs[j]->projtype == PRJ_ENT && projs::projs[j]->ready() && projs::projs[j]->id == b.target)
+                {
+                    projent &proj = *projs::projs[j];
+                    if(!entities::ents.inrange(proj.id) || enttype[entities::ents[proj.id]->type].usetype != EU_ITEM) return 0;
+                    gameentity &e = *(gameentity *)entities::ents[proj.id];
+                    int sweap = m_weapon(game::gamemode, game::mutators),
+                        attr = w_attr(game::gamemode, e.attrs[0], sweap);
+                    switch(e.type)
+                    {
+                        case WEAPON:
+                        {
+                            if(!wantsweap(d, attr) || proj.owner == d) return 0;
+                            //float guard = enttype[e.type].radius;
+                            //if(d->feetpos().squaredist(e.o) <= guard*guard)
+                            //    b.idle = enemy(d, b, e.o, guard*4, weaptype[d->weapselect].melee ? 1 : 0, false) ? 2 : 1;
+                            //else b.idle = -1;
+                            break;
+                        }
+                        default: break;
+                    }
+                    return makeroute(d, b, proj.o) ? 1 : 0;
+                    break;
+                }
+                break;
+            }
+            default: break;
         }
         return 0;
     }
 
     int dopursue(gameent *d, aistate &b)
     {
-        if(!d->ai->suspended && d->state == CS_ALIVE)
+        if(d->state != CS_ALIVE) return 0;
+        switch(b.targtype)
         {
-            switch(b.targtype)
+            case AI_T_NODE:
             {
-                case AI_T_NODE:
-                {
-                    if(check(d, b)) return 1;
-                    if(iswaypoint(b.target))
-                        return defense(d, b, waypoints[b.target].o) ? 1 : 0;
-                    break;
-                }
-                case AI_T_AFFINITY:
-                {
-                    if(m_campaign(game::gamemode))
-                    {
-                        if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
-                    }
-                    else if(m_capture(game::gamemode)) return capture::aipursue(d, b) ? 1 : 0;
-                    else if(m_defend(game::gamemode)) return defend::aipursue(d, b) ? 1 : 0;
-                    else if(m_bomber(game::gamemode)) return bomber::aipursue(d, b) ? 1 : 0;
-                    break;
-                }
-
-                case AI_T_ACTOR:
-                {
-                    if(passive()) return 0;
-                    //if(check(d, b)) return 1;
-                    gameent *e = game::getclient(b.target);
-                    if(e && e->state == CS_ALIVE)
-                    {
-                        bool alt = altfire(d, e);
-                        if(aistyle[d->aitype].canmove)
-                        {
-                            float mindist = weapmindist(d->weapselect, alt);
-                            if(!weaptype[d->weapselect].melee) mindist = min(mindist, CLOSEDIST);
-                            return patrol(d, b, e->feetpos(), mindist, d->ai->views[2]) ? 1 : 0;
-                        }
-                        else
-                        {
-                            vec dp = d->headpos(), ep = getaimpos(d, e, alt);
-                            if(cansee(d, dp, ep, d->aitype >= AI_START) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
-                            {
-                                b.idle = -1;
-                                return 1;
-                            }
-                            return 0;
-                        }
-                    }
-                    break;
-                }
-                default: break;
+                if(check(d, b)) return 1;
+                if(iswaypoint(b.target))
+                    return defense(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
             }
+            case AI_T_AFFINITY:
+            {
+                if(m_campaign(game::gamemode))
+                {
+                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                }
+                else if(m_capture(game::gamemode)) return capture::aipursue(d, b) ? 1 : 0;
+                else if(m_defend(game::gamemode)) return defend::aipursue(d, b) ? 1 : 0;
+                else if(m_bomber(game::gamemode)) return bomber::aipursue(d, b) ? 1 : 0;
+                break;
+            }
+
+            case AI_T_ACTOR:
+            {
+                if(passive()) return 0;
+                //if(check(d, b)) return 1;
+                gameent *e = game::getclient(b.target);
+                if(e && e->state == CS_ALIVE)
+                {
+                    bool alt = altfire(d, e);
+                    if(aistyle[d->aitype].canmove)
+                    {
+                        float mindist = weapmindist(d->weapselect, alt);
+                        if(!weaptype[d->weapselect].melee) mindist = min(mindist, CLOSEDIST);
+                        return patrol(d, b, e->feetpos(), mindist, d->ai->views[2]) ? 1 : 0;
+                    }
+                    else
+                    {
+                        vec dp = d->headpos(), ep = getaimpos(d, e, alt);
+                        if(cansee(d, dp, ep, d->aitype >= AI_START) || (e->clientnum == d->ai->enemy && d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+1000))
+                        {
+                            b.idle = -1;
+                            return 1;
+                        }
+                        return 0;
+                    }
+                }
+                break;
+            }
+            default: break;
         }
         return 0;
     }
@@ -1113,7 +1061,7 @@ namespace ai
         if(!aistyle[d->aitype].canstrafe && d->skill <= 100) frame *= 2;
         vec dp = d->headpos();
 
-        bool idle = b.idle == 1 || (stupify && stupify <= skmod) || d->ai->suspended;
+        bool idle = b.idle == 1 || (stupify && stupify <= skmod);
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
         if(idle || !aistyle[d->aitype].canmove)
         {
@@ -1483,11 +1431,9 @@ namespace ai
         }
     }
 
-    #define issuspended(a) (a->ai->suspended || a->speedscale == 0)
-
     void logic(gameent *d, aistate &b)
     {
-        if(!issuspended(d))
+        if(d->speedscale != 0)
         {
             if(d->state != CS_ALIVE || !game::allowmove(d)) d->stopmoving(true);
             else
@@ -1507,7 +1453,7 @@ namespace ai
             if(d->ragdoll) cleanragdoll(d);
             if(d->state == CS_ALIVE && !game::intermission)
             {
-                if(!issuspended(d))
+                if(d->speedscale != 0)
                 {
                     bool ladder = d->onladder;
                     physics::move(d, 1, true);
@@ -1613,7 +1559,6 @@ namespace ai
                         continue; // shouldn't interfere
                     }
                 }
-                else if(d->ai->suspended) d->ai->unsuspend();
             }
             logic(d, c);
             break;

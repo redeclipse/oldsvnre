@@ -181,40 +181,31 @@ namespace physics
 
     bool issolid(physent *d, physent *e, bool esc, bool impact)
     {
-        bool projectile = false, actor = false;
-        if(e) switch(e->type)
+        if(e && e->type == ENT_PROJ)
         {
-            case ENT_PLAYER: case ENT_AI: if(((gameent *)e)->aitype > AI_NONE) actor = true; break;
-            case ENT_PROJ:
+            if(d->state != CS_ALIVE) return false;
+            projent *p = (projent *)e;
+            if(d->type == ENT_PLAYER || d->type == ENT_AI)
             {
-                projectile = true;
-                if(d->state != CS_ALIVE) return false;
-                projent *p = (projent *)e;
-                if(d->type == ENT_PLAYER || d->type == ENT_AI)
-                {
-                    if(impact && (p->hit == d || !(p->projcollide&HIT_PLAYER))) return false;
-                    if(p->owner == d && ((!returningfire && !(p->projcollide&COLLIDE_OWNER)) || (esc && !p->escaped))) return false;
-                }
-                else if(d->type == ENT_PROJ)
-                {
-                    projent *q = (projent *)d;
-                    if(p->projtype == PRJ_SHOT && q->projtype == PRJ_SHOT)
-                    {
-                        if(p->projcollide&IMPACT_SHOTS && q->projcollide&COLLIDE_SHOTS) return true;
-                    }
-                    return false;
-                }
-                else return false;
-                break;
+                if(impact && (p->hit == d || !(p->projcollide&HIT_PLAYER))) return false;
+                if(p->owner == d && (!(p->projcollide&COLLIDE_OWNER) || (esc && !p->escaped))) return false;
             }
-            default: break;
+            else if(d->type == ENT_PROJ)
+            {
+                projent *q = (projent *)d;
+                if(p->projtype == PRJ_SHOT && q->projtype == PRJ_SHOT)
+                {
+                    if(p->projcollide&IMPACT_SHOTS && q->projcollide&COLLIDE_SHOTS) return true;
+                }
+                return false;
+            }
+            else return false;
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             if(d->state == CS_ALIVE)
             {
                 gameent *f = (gameent *)d;
-                if(!projectile && !actor && f->aitype >= AI_START && f->ai && f->ai->suspended) return false;
                 if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
                 return true;
             }

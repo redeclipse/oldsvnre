@@ -314,6 +314,3 @@ GVAR(0, spreebonus, 0, 1, VAR_MAX);
 GVAR(0, dominatecount, 0, 5, VAR_MAX);
 GVAR(0, dominatepoints, 0, 1, VAR_MAX);
 GVAR(0, revengepoints, 0, 1, VAR_MAX);
-
-GVAR(0, alloweastereggs, 0, 1, 2); // 0 = off, 1 = on, 2 = extended (annoying ones)
-GVAR(0, returningfire, 0, 0, 1); // 0 = off, 1 = on
