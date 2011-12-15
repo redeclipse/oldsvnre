@@ -181,7 +181,7 @@ namespace hud
     FVAR(IDF_PERSIST, cursorblend, 0, 1, 1);
 
     TVAR(IDF_PERSIST, zoomcrosshairtex, "crosshairs/cross-01", 3);
-    FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.3f, 1000);
+    FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);

@@ -291,18 +291,19 @@ struct bomberservmode : bomberstate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE) return;
-        if(GAME(bomberbuffdelay)) loopv(flags)
+        #define bomberbuff1 (GAME(bomberbuffing)&1 && isbomberhome(f, ci->team) && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2)
+        #define bomberbuff2 (GAME(bomberbuffing)&2 && isbomberaffinity(f) && f.owner == ci->clientnum)
+        if(GAME(bomberbuffing)) loopv(flags)
         {
             flag &f = flags[i];
-            if(!isbomberhome(f, ci->team) || !f.enabled) continue;
-            if(ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2)
+            if(f.enabled && (bomberbuff1 || bomberbuff2))
             {
                 if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
                 ci->state.lastbuff = gamemillis;
                 return;
             }
         }
-        if(ci->state.lastbuff && (!GAME(bomberbuffdelay) || gamemillis-ci->state.lastbuff > GAME(bomberbuffdelay)))
+        if(ci->state.lastbuff && (!GAME(bomberbuffing) || gamemillis-ci->state.lastbuff > GAME(bomberbuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);

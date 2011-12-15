@@ -27,9 +27,9 @@ GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath blink cargo center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost hinder keystone lab linear longestyard mist nova panic processing spacetech stone testchamber tranquility tribal ubik venus warp wet");
 
 GSVAR(IDF_ADMIN, mainmaps, "bath blink cargo center darkness deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, capturemaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, capturemaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone linear mist nova panic stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
-GSVAR(IDF_ADMIN, bombermaps, "bath cargo center deadsimple deli depot dropzone echo forge foundation futuresport tranquility venus");
+GSVAR(IDF_ADMIN, bombermaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo forge foundation futuresport ghost linear mist nova stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
@@ -154,7 +154,8 @@ GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
-GVAR(0, capturebuffdelay, 0, 1000, VAR_MAX); // buffed when guarding, and for this long after
+GVAR(0, capturebuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when carrying
+GVAR(0, capturebuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, capturebuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, capturebuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
 GVAR(0, captureregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
@@ -166,7 +167,8 @@ GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, defendinterval, 0, 50, VAR_MAX);
 GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
-GVAR(0, defendbuffdelay, 0, 1000, VAR_MAX); // buffed when guarding, and for this long after
+GVAR(0, defendbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing
+GVAR(0, defendbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, defendbuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, defendbuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
 GVAR(0, defendregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed
@@ -197,7 +199,8 @@ GFVAR(0, bomberwaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
 GFVAR(0, bomberweight, FVAR_MIN, 150, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 50, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
-GVAR(0, bomberbuffdelay, 0, 1000, VAR_MAX); // buffed when guarding, and for this long after
+GVAR(0, bomberbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing
+GVAR(0, bomberbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, bomberbuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, bomberbuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
 GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buffed

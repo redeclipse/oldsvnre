@@ -1008,8 +1008,8 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !physics::liquidcheck(d) && !d->onladder,
-             impulse = d->timeinair > 500 && !d->turnside && physics::canimpulse(d, 1, false),
-             jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::allowhover(d),
+             impulse = d->timeinair > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, 1, false),
+             jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::canhover(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
