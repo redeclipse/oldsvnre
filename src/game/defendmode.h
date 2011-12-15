@@ -206,18 +206,19 @@ struct defendservmode : defendstate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE) return;
-        if(GAME(defendbuffdelay)) loopv(flags)
+        #define defendbuff1 (GAME(defendbuffing)&1 && b.owner == ci->team && !b.enemy)
+        #define defendbuff2 (GAME(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && b.enemy == ci->team)
+        if(GAME(defendbuffing)) loopv(flags)
         {
             flag &b = flags[i];
-            if(b.owner != ci->team || b.enemy) continue;
-            if(insideaffinity(b, ci->state.o, 2))
+            if((defendbuff1 || defendbuff2) && insideaffinity(b, ci->state.o, 2))
             {
                 if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
                 ci->state.lastbuff = gamemillis;
                 return;
             }
         }
-        if(ci->state.lastbuff && (!GAME(defendbuffdelay) || gamemillis-ci->state.lastbuff > GAME(defendbuffdelay)))
+        if(ci->state.lastbuff && (!GAME(defendbuffing) || gamemillis-ci->state.lastbuff > GAME(defendbuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
