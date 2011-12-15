@@ -236,14 +236,13 @@ namespace ai
             lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd,
             lastpusher, lastpushtime, lastmelee;
         float targyaw, targpitch, views[3], aimrnd[3];
-        bool suspended, dontmove, tryreset, trywipe;
+        bool dontmove, tryreset, trywipe;
 
         aiinfo()
         {
             clearsetup();
             reset();
             loopk(3) views[k] = aimrnd[k] = 0.f;
-            suspended = true;
         }
         ~aiinfo() {}
 
@@ -280,7 +279,6 @@ namespace ai
         }
 
         void reset(bool tryit = false) { wipe(tryit); clean(tryit); }
-        void unsuspend() { suspended = false; clean(false); }
 
         bool hasprevnode(int n) const
         {

@@ -1039,14 +1039,14 @@ namespace client
         int numdyns = game::numdynents();
         loopi(numdyns) if((d = (gameent *)game::iterdynents(i)))
         {
-            if((d == game::player1 || (d->ai && !d->ai->suspended)) && (d->state == CS_ALIVE || d->state == CS_EDITING))
+            if((d == game::player1 || d->ai) && (d->state == CS_ALIVE || d->state == CS_EDITING))
             {
                 packetbuf q(100);
                 sendposition(d, q);
                 for(int j = i+1; j < numdyns; j++)
                 {
                     gameent *e = (gameent *)game::iterdynents(j);
-                    if(e && (e == game::player1 || (e->ai && !e->ai->suspended)) && (e->state == CS_ALIVE || e->state == CS_EDITING))
+                    if(e && (e == game::player1 || e->ai) && (e->state == CS_ALIVE || e->state == CS_EDITING))
                         sendposition(e, q);
                 }
                 sendclientpacket(q.finalize(), 0);
