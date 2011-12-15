@@ -106,8 +106,6 @@ namespace hud
     TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
 
     VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, healthtone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
-    VAR(IDF_PERSIST|IDF_HEX, impulsetone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, crosshairtone, -CTONE_MAX, 0, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, noticestone, -CTONE_MAX, 0, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, clipstone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
@@ -229,8 +227,9 @@ namespace hud
     VAR(IDF_PERSIST, inventorytrial, 0, 2, 2);
     VAR(IDF_PERSIST, inventorystatus, 0, 3, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
 
-    VAR(IDF_PERSIST, inventoryresidual, 0, 1, 1);
-    VAR(IDF_PERSIST, residualflash, 0, 1, 1);
+    VAR(IDF_PERSIST, inventoryalert, 0, 1, 1);
+    VAR(IDF_PERSIST, alertflash, 0, 1, 1);
+    TVAR(IDF_PERSIST, buffedtex, "<grey>textures/alertbuff", 3);
     TVAR(IDF_PERSIST, burningtex, "<grey>textures/alertburn", 3);
     TVAR(IDF_PERSIST, bleedingtex, "<grey>textures/alertbleed", 3);
 
@@ -845,8 +844,8 @@ namespace hud
             int heal = m_health(game::gamemode, game::mutators);
             if(crosshairflash && game::focus->state == CS_ALIVE && game::focus->health < heal)
             {
-                int timestep = totalmillis%1000;
-                float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
+                int millis = lastmillis%1000;
+                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*clamp(float(heal-game::focus->health)/float(heal), 0.f, 1.f);
                 flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
             }
             if(crosshairthrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime)
@@ -1618,8 +1617,8 @@ namespace hud
             if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
             if(pulse)
             {
-                int timestep = totalmillis%1000;
-                float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*(float(heal-game::focus->health)/float(heal)), 0.f, 1.f);
+                int millis = lastmillis%1000;
+                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*clamp(float(heal-game::focus->health)/float(heal), 0.f, 1.f);
                 flashcolourf(gr, gg, gb, gf, 1.f, 0.f, 0.f, 1.f, amt);
                 glow += int(s*inventoryglow*amt);
             }
@@ -1820,8 +1819,8 @@ namespace hud
             if(tone) skewcolour(gr, gg, gb, tone);
             if(pulse > 0)
             {
-                int timestep = totalmillis%1000;
-                float skew = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*pulse, 0.f, 1.f);
+                int millis = lastmillis%1000;
+                float skew = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
                 flashcolourf(gr, gg, gb, gf, type ? 0.5f : 1.f, 0.f, type ? 0.5f : 0.f, 1.f, skew);
                 glow += int(w*bgglow*skew);
             }
@@ -1889,12 +1888,12 @@ namespace hud
                 float pulse = healthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = healththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
-                    sy += drawbar(x, y, width, size, 0, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, healthtone, healthbgglow, healthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*healththrob);
+                    sy += drawbar(x, y, width, size, 0, healthbartop, healthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, healthbgglow, healthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*healththrob);
                 float gr = 1, gg = 1, gb = 1;
                 if(pulse > 0)
                 {
-                    int timestep = totalmillis%1000;
-                    float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f), 0.f, 1.f)*pulse;
+                    int millis = lastmillis%1000;
+                    float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
                     flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                 }
                 pushfont("super");
@@ -1917,7 +1916,7 @@ namespace hud
             {
                 float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                 if(inventoryimpulse == 2)
-                    sy += drawbar(x, y-sy, width, size, 1, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, impulsetone, impulsebgglow, impulsebgblend, impulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
+                    sy += drawbar(x, y-sy, width, size, 1, impulsebartop, impulsebarbottom, fade, amt, impulsetex, impulsebgtex, inventorytone, impulsebgglow, impulsebgblend, impulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
                 else
                 {
                     pushfont("emphasis");
@@ -1930,21 +1929,29 @@ namespace hud
                     popfont();
                 }
             }
-            if(inventoryresidual)
+            if(inventoryalert)
             {
+                if(game::focus->lastbuff)
+                {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+                    if(alertflash)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 0.f, 0.75f, 1.f, amt);
+                    }
+                    sy += drawitem(buffedtex, x, y-sy, width, false, true, gr, gg, gb, fade*inventoryblend);
+                }
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
                 {
                     float gr = 1, gg = 1, gb = 1;
                     if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                    if(residualflash)
+                    if(alertflash)
                     {
-                        int millis = lastmillis-game::focus->lastbleedtime, delay = bleeddelay;
-                        if(millis <= delay)
-                        {
-                            delay /= 2;
-                            float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                            flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
-                        }
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
                     sy += drawitem(bleedingtex, x, y-sy, width, false, true, gr, gg, gb, fade*inventoryblend);
                 }
@@ -1952,15 +1959,11 @@ namespace hud
                 {
                     float gr = 1, gg = 1, gb = 1;
                     if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                    if(residualflash)
+                    if(alertflash)
                     {
-                        int millis = lastmillis-game::focus->lastburntime, delay = burndelay;
-                        if(millis <= delay)
-                        {
-                            delay /= 2;
-                            float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                            flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
-                        }
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
                     }
                     sy += drawitem(burningtex, x, y-sy, width, false, true, gr, gg, gb, fade*inventoryblend);
                 }

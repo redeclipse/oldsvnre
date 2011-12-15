@@ -197,16 +197,30 @@ struct defendservmode : defendstate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(hasflaginfo && GAME(regenaffinity)) loopv(flags)
+        if(!hasflaginfo || !GAME(defendregenbuff) || !ci->state.lastbuff) return;
+        if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
+        if(ci->state.lastregen && GAME(defendregendelay)) delay = GAME(defendregendelay);
+        if(GAME(defendregenextra)) amt += GAME(defendregenextra);
+    }
+
+    void checkclient(clientinfo *ci)
+    {
+        if(!hasflaginfo || ci->state.state != CS_ALIVE) return;
+        if(GAME(defendbuffdelay)) loopv(flags)
         {
             flag &b = flags[i];
-            if(b.owner == ci->team && !b.enemy && insideaffinity(b, ci->state.o, 2.f))
+            if(b.owner != ci->team || b.enemy) continue;
+            if(insideaffinity(b, ci->state.o, 2))
             {
-                if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
-                if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
-                if(GAME(regenextra)) amt += GAME(regenextra);
+                if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
+                ci->state.lastbuff = gamemillis;
                 return;
             }
+        }
+        if(ci->state.lastbuff && (!GAME(defendbuffdelay) || gamemillis-ci->state.lastbuff > GAME(defendbuffdelay)))
+        {
+            ci->state.lastbuff = 0;
+            sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
         }
     }
 
