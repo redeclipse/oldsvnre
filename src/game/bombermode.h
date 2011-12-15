@@ -306,7 +306,7 @@ struct bomberservmode : bomberstate, servmode
                 int team = getint(p);
                 vec o;
                 loopk(3) o[k] = getint(p)/DMF;
-                if(!hasflaginfo) addaffinity(o, team, i);
+                if(!hasflaginfo) addaffinity(o, team);
             }
             hasflaginfo = true;
         }

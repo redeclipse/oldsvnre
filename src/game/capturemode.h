@@ -70,7 +70,7 @@ struct captureservmode : capturestate, servmode
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(iscapturehome(f, ci->team) && (f.owner < 0 || (m_gsp1(gamemode, mutators) && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
+                if(f.team == ci->team && (f.owner < 0 || (m_gsp1(gamemode, mutators) && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     capturestate::returnaffinity(i, gamemillis);
                     givepoints(ci, GAME(capturepoints));
@@ -100,7 +100,7 @@ struct captureservmode : capturestate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team || ci->state.aitype >= AI_START) return;
         flag &f = flags[i];
-        if(!(f.base&BASE_FLAG) || f.owner >= 0 || (f.team == ci->team && !m_gsp3(gamemode, mutators) && (m_gsp2(gamemode, mutators) || !f.droptime))) return;
+        if(f.owner >= 0 || (f.team == ci->team && !m_gsp3(gamemode, mutators) && (m_gsp2(gamemode, mutators) || !f.droptime))) return;
         if(f.lastowner == ci->clientnum && f.droptime && (GAME(capturepickupdelay) < 0 || lastmillis-f.droptime <= GAME(capturepickupdelay))) return;
         if(!m_gsp(gamemode, mutators) && f.team == ci->team)
         {
@@ -120,7 +120,7 @@ struct captureservmode : capturestate, servmode
     {
         if(!hasflaginfo || !flags.inrange(i) || ci->state.ownernum >= 0) return;
         flag &f = flags[i];
-        if(!(f.base&BASE_FLAG) || f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
+        if(f.owner >= 0 || !f.droptime || f.votes.find(ci->clientnum) >= 0) return;
         f.votes.add(ci->clientnum);
         if(f.votes.length() >= numclients()/2)
         {
@@ -165,7 +165,7 @@ struct captureservmode : capturestate, servmode
             else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= capturedelay)
             {
                 capturestate::returnaffinity(i, gamemillis);
-                loopvk(clients) if(iscaptureaffinity(f, clients[k]->team)) givepoints(clients[k], -GAME(capturepenalty));
+                loopvk(clients) if(f.team == clients[k]->team) givepoints(clients[k], -GAME(capturepenalty));
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
             }
         }
@@ -179,7 +179,6 @@ struct captureservmode : capturestate, servmode
         {
             flag &f = flags[i];
             putint(p, f.team);
-            putint(p, f.base);
             putint(p, f.owner);
             if(f.owner<0)
             {
@@ -204,7 +203,7 @@ struct captureservmode : capturestate, servmode
             if(m_gsp2(gamemode, mutators)) loopv(flags)
             {
                 flag &f = flags[i];
-                if(iscaptureaffinity(f, ci->team) && f.owner < 0 && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2.f)
+                if(f.team == ci->team && f.owner < 0 && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2.f)
                 {
                     if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
                     if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
@@ -215,7 +214,7 @@ struct captureservmode : capturestate, servmode
             if(GAME(regenaffinity)) loopv(flags)
             {
                 flag &f = flags[i];
-                if((iscapturehome(f, ci->team) && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f) || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
+                if((f.team == ci->team && f.owner < 0 && !f.droptime && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2.f) || (GAME(regenaffinity) == 2 && f.owner == ci->clientnum))
                 {
                     if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators)*GAME(maxhealth)), total);
                     if(ci->state.lastregen && GAME(regenguard)) delay = GAME(regenguard);
@@ -233,10 +232,10 @@ struct captureservmode : capturestate, servmode
         {
             loopi(numflags)
             {
-                int team = getint(p), base = getint(p);
+                int team = getint(p);
                 vec o;
                 loopk(3) o[k] = getint(p)/DMF;
-                if(!hasflaginfo) addaffinity(o, team, base, i);
+                if(!hasflaginfo) addaffinity(o, team);
             }
             hasflaginfo = true;
         }
