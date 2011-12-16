@@ -1008,8 +1008,8 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !physics::liquidcheck(d) && !d->onladder,
-             impulse = d->timeinair > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, 1, false),
              jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::canhover(d),
+             impulse = d->timeinair > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, 1, false) && !physics::hover(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1076,7 +1076,7 @@ namespace ai
         }
         else if(hunt(d, b))
         {
-            game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height)), d->ai->targyaw, d->ai->targpitch);
+            game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height/2)), d->ai->targyaw, d->ai->targpitch);
             d->ai->lasthunt = lastmillis;
         }
         else
@@ -1369,6 +1369,40 @@ namespace ai
         return busy >= 1;
     }
 
+    bool transport(gameent *d, bool find = false)
+    {
+        vec pos = d->feetpos();
+        static vector<int> candidates; candidates.setsize(0);
+        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, physics::hover(d) ? HOVERDIST : RETRYDIST, candidates);
+        if(find ? !candidates.empty() : !d->ai->route.empty()) loopk(2)
+        {
+            int best = -1;
+            float dist = 1e16f;
+            loopv(find ? candidates: d->ai->route)
+            {
+                int n = find ? candidates[i] : d->ai->route[i];
+                if((k || (!d->ai->hasprevnode(n) && n != d->lastnode)) && !obstacles.find(n, d))
+                {
+                    float v = waypoints[n].o.squaredist(pos);
+                    if(!iswaypoint(best) || v < dist)
+                    {
+                        best = n;
+                        dist = v;
+                    }
+                }
+            }
+            if(iswaypoint(best))
+            {
+                d->o = waypoints[best].o;
+                d->o.z += d->height;
+                d->resetinterp();
+                return true;
+            }
+        }
+        if(!find) return transport(d, true);
+        return false;
+    }
+
     void timeouts(gameent *d, aistate &b)
     {
         if(d->blocked)
@@ -1379,12 +1413,12 @@ namespace ai
                 d->ai->blockseq++;
                 switch(d->ai->blockseq)
                 {
-                    case 1: case 2: case 3:
+                    case 1: case 2:
                         if(iswaypoint(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
-                    case 4: d->ai->reset(false); break;
-                    case 5: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    case 3: if(!transport(d)) d->ai->reset(false); break;
+                    case 4: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
                 if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s blocked %dms sequence %d", game::colorname(d), d->ai->blocktime, d->ai->blockseq);
@@ -1400,12 +1434,12 @@ namespace ai
                 d->ai->targseq++;
                 switch(d->ai->targseq)
                 {
-                    case 1: case 2: case 3:
+                    case 1: case 2:
                         if(iswaypoint(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
-                    case 4: d->ai->reset(false); break;
-                    case 5: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    case 3: if(!transport(d)) d->ai->reset(false); break;
+                    case 4: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
                 if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s targeted %d too long %dms sequence %d", game::colorname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
@@ -1427,7 +1461,7 @@ namespace ai
                 switch(d->ai->huntseq)
                 {
                     case 1: d->ai->clear(false); break;
-                    case 2: d->ai->reset(false); break;
+                    case 2: if(!transport(d)) d->ai->reset(false); break;
                     case 3: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
                 }
                 if(aidebug >= 6 && dbgfocus(d))
