@@ -2424,6 +2424,15 @@ namespace game
             }
             else e->light.material[2] = bvec(255, 255, 255);
             e->light.effect = vec(0, 0, 0);
+            if(d->lastbuff)
+            {
+                flags |= MDL_LIGHTFX;
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
+                vec col = vec(0.f, 0.75f, 1.f).mul(amt);
+                e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
+                e->light.effect.max(col);
+            }
             if(burntime && d->burning(lastmillis, burntime))
             {
                 flags |= MDL_LIGHTFX;
@@ -2433,16 +2442,12 @@ namespace game
             }
             if(bleedtime && d->bleeding(lastmillis, bleedtime))
             {
-                int millis = lastmillis-d->lastbleedtime, delay = min(bleeddelay, 500);
-                if(millis <= delay)
-                {
-                    flags |= MDL_LIGHTFX;
-                    delay /= 2;
-                    float amt = millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay));
-                    vec col = vec(1, 0.2f, 0.2f).mul(amt);
-                    e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
-                    e->light.effect.max(col);
-                }
+                flags |= MDL_LIGHTFX;
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                vec col = vec(1, 0.2f, 0.2f).mul(amt);
+                e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
+                e->light.effect.max(col);
             }
         }
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
