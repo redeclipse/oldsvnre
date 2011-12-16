@@ -2431,7 +2431,7 @@ namespace game
                 float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
                 vec col = vec(0.f, 0.75f, 1.f).mul(amt);
                 e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
-                e->light.effect.max(col);
+                //e->light.effect.max(col);
             }
             if(burntime && d->burning(lastmillis, burntime))
             {
