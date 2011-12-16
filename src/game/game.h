@@ -645,7 +645,7 @@ extern const char * const animnames[];
 
 struct eventicon
 {
-    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, FIRSTBLOOD, WEAPON, AFFINITY, TOTAL, SORTED = AFFINITY, VERBOSE = WEAPON };
+    enum { SPREE = 0, MULTIKILL, HEADSHOT, CRITICAL, DOMINATE, REVENGE, FIRSTBLOOD, WEAPON, AFFINITY, TOTAL, SORTED = WEAPON, VERBOSE = WEAPON };
     int type, millis, fade, length, value;
 };
 
