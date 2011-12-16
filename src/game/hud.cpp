@@ -29,7 +29,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
     VAR(IDF_PERSIST, shownotices, 0, 3, 4);
-    VAR(IDF_PERSIST, showevents, 0, 2, 3);
+    VAR(IDF_PERSIST, showevents, 0, 3, 7);
 
     VAR(IDF_PERSIST, showfps, 0, 1, 3);
     VAR(IDF_PERSIST, showstats, 0, 1, 2);
@@ -2285,7 +2285,8 @@ namespace hud
             int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
             loopv(game::focus->icons)
             {
-                if(game::focus->icons[i].type >= eventicon::SORTED && 2+(game::focus->icons[i].type-eventicon::SORTED) > showevents) break;
+                if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) break;
+                if(game::focus->icons[i].type == eventicon::WEAPON && !(showevents&4)) break;
                 if(game::focus->icons[i].type == eventicon::CRITICAL && !game::focus->icons[i].value) continue;
                 int millis = lastmillis-game::focus->icons[i].millis;
                 if(millis <= game::focus->icons[i].fade)
