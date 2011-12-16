@@ -1,22 +1,32 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreFoundation/CFBundle.h>
 
-// -- copied from tools.h -- including the full file introduces too many problems
-#define MAXSTRLEN 512
-typedef char string[MAXSTRLEN];
-inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN) { strncpy(d, s, len); d[len-1] = 0; return d; }
-inline char *concatstring(char *d, const char *s) { size_t len = strlen(d); return copystring(d+len, s, MAXSTRLEN-len); }
-// --
-
-void mac_pasteconsole(char *commandbuf)
-{   
+char *mac_pasteconsole(int *cblen)
+{
     NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
     NSString *type = [pasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if (type != nil) {
+    if(type != nil)
+    {
         NSString *contents = [pasteboard stringForType:type];
-        if (contents != nil)
-            concatstring(commandbuf, [contents lossyCString]);
+        if(contents != nil)
+        {
+            NSUInteger len = [contents lengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1; // 10.4+
+            if(len > 1)
+            {
+                char *buf = (char *)malloc(len);
+                if(buf)
+                {
+                    if([contents getCString:buf maxLength:len encoding:NSUTF8StringEncoding]) // 10.4+
+                    {
+                        *cblen = len;
+                        return buf;
+                    }
+                    free(buf);
+                }
+            }
+        }
     }
+    return NULL;
 }
 
 /*
