@@ -524,7 +524,7 @@ namespace entities
                                     execlink(d, teleports[r], true);
                                     d->resetair();
                                     teleported = true;
-                                    ai::inferwaypoints(d, e.o, f.o, 16.f);
+                                    ai::inferwaypoints(d, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
                                     break;
                                 }
                                 teleports.remove(r); // must've really sucked, try another one

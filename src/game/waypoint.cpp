@@ -370,7 +370,7 @@ namespace ai
                         vec above(pos.x, pos.y, ob.above);
                         if(above.z-d->o.z >= ai::JUMPMAX)
                             return retry ? n : -1; // too much scotty
-                        int node = closestwaypoint(above, ai::SIGHTMIN, true);
+                        int node = closestwaypoint(above, ai::CLOSEDIST, true);
                         if(ai::iswaypoint(node) && node != n)
                         { // try to reroute above their head?
                             if(!find(node, d))
@@ -562,7 +562,10 @@ namespace ai
             if(d->ai && iswaypoint(prevnode) && d->lastnode != prevnode) d->ai->addprevnode(prevnode);
         }
         else if(!iswaypoint(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > dist*dist)
-			d->lastnode = closestwaypoint(v, dist*2, false);
+        {
+            dist = physics::hover(d) ? HOVERDIST : 2; // workaround
+			d->lastnode = closestwaypoint(v, dist, false);
+        }
     }
 
     void navigate()

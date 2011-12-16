@@ -860,13 +860,13 @@ namespace ai
     {
         vec pos = d->feetpos();
         int node = -1;
-        float mindist = WAYPOINTRADIUS*WAYPOINTRADIUS;
-        loopk(3)
+        float mindist = CLOSEDIST*CLOSEDIST;
+        loopk(4)
         {
             loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
             {
                 vec epos = waypoints[d->ai->route[i]].o;
-                int entid = obstacles.remap(d, d->ai->route[i], epos, k==2);
+                int entid = obstacles.remap(d, d->ai->route[i], epos, k==3);
                 if(iswaypoint(entid))
                 {
                     float dist = epos.squaredist(pos);
@@ -878,7 +878,7 @@ namespace ai
                 }
             }
             if(node >= 0) break;
-            if(!k) mindist = CLOSEDIST*CLOSEDIST;
+            if(!k) mindist = physics::hover(d) ? HOVERDIST*HOVERDIST : RETRYDIST*RETRYDIST;
         }
         return node;
     }
