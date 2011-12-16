@@ -149,7 +149,7 @@ enttypes enttype[] = {
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        AFFINITY,       1,          48,     36,     EU_NONE,    5,
+        AFFINITY,       1,          48,     32,     EU_NONE,    5,
             0, 0,
             false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
