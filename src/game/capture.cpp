@@ -149,7 +149,8 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured by" : "\fytaken by") : (f.droptime ? "\fcdropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured" : "\fytaken") : (f.droptime ? "\fcdropped" : ""));
+                hud::drawitem(hud::teamtex(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
                     int sx = x-int(s*skew);
@@ -239,7 +240,7 @@ namespace capture
                     part_textcopy(above, info, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
                     above.z += 1.5f;
                 }
-                const char *info = f.owner ? (f.team == f.owner->team ? "<super>\fgsecured by" : "<super>\fytaken by") : "<super>\fcdropped";
+                const char *info = f.owner ? (f.team == f.owner->team ? "<super>\fgsecured" : "<super>\fytaken") : "<super>\fcdropped";
                 part_text(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
             }
         }
