@@ -108,7 +108,7 @@ namespace game
     VAR(IDF_PERSIST, aboveheadstatus, 0, 1, 1);
     VAR(IDF_PERSIST, aboveheadteam, 0, 1, 2);
     VAR(IDF_PERSIST, aboveheaddamage, 0, 0, 1);
-    VAR(IDF_PERSIST, aboveheadicons, 0, 3, 3);
+    VAR(IDF_PERSIST, aboveheadicons, 0, 5, 7);
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
@@ -2493,7 +2493,8 @@ namespace game
         }
         if(aboveheadicons && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
         {
-            if(d->icons[i].type >= eventicon::SORTED && 2+(d->icons[i].type-eventicon::SORTED) > aboveheadicons) break;
+            if(d->icons[i].type == eventicon::AFFINITY && !(aboveheadicons&2)) break;
+            if(d->icons[i].type == eventicon::WEAPON && !(aboveheadicons&4)) break;
             if(d->icons[i].type == eventicon::CRITICAL && d->icons[i].value) continue;
             int millis = lastmillis-d->icons[i].millis;
             if(millis <= d->icons[i].fade)
@@ -2514,9 +2515,10 @@ namespace game
                                 {
                                     bvec pcol = bvec::fromcolor(bomber::pulsecolour());
                                     colour = (pcol.x<<16)|(pcol.y<<8)|pcol.z;
+                                    size *= 0.75f;
                                 }
                                 else colour = TEAM(d->icons[i].value, colour);
-                                // fall-through
+                                // fall through
                             default: nudge *= 1.5f; break;
                         }
                     }
