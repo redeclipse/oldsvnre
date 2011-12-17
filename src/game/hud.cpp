@@ -1733,8 +1733,8 @@ namespace hud
                 defformatstring(s)("%s%d", i ? " " : "", e.attrs[i]);
                 concatstring(attrstr, s);
             }
-            if(attrstr[0]) drawitemsubtext(x, y-int(s/3*skew), s, TEXT_RIGHT_UP, skew, "default", fade*inventoryblend, "%s", attrstr);
-            drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "default", fade*inventoryblend, "%s", entities::entinfo(e.type, e.attrs, true));
+            if(attrstr[0]) drawitemsubtext(x, y-int(s/3*skew), s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", attrstr);
+            drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", entities::entinfo(e.type, e.attrs, true));
             return ty;
         }
         return 0;
@@ -1974,7 +1974,7 @@ namespace hud
             const char *state = "", *tex = "";
             switch(game::player1->state)
             {
-                case CS_EDITING: state = "EDIT"; break;
+                case CS_EDITING: state = "EDIT"; tex = modeeditingtex; break;
                 case CS_SPECTATOR: state = "SPEC"; tex = spectex; break;
                 case CS_WAITING: state = "WAIT"; tex = waittex; break;
                 case CS_DEAD: state = "DEAD"; tex = deadtex; break;
@@ -1986,7 +1986,12 @@ namespace hud
                 sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
-            if(inventorystatus&2 && *tex) sy += drawitem(tex, x, y-sy, width, false, true, 1.f, 1.f, 1.f, fade, 1.f);
+            if(inventorystatus&2 && *tex)
+            {
+                float r = 1, g = 1, b = 1;
+                if(inventorytone) skewcolour(r, g, b, inventorytone);
+                sy += drawitem(tex, x, y-sy, width, false, true, r, g, b, fade, 1.f);
+            }
         }
         return sy;
     }
