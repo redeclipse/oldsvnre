@@ -10,6 +10,7 @@ Movement & Weapons:
  * Zoomlock disabled for rifle
  * Added weapon stun effect which impedes movement for a certain time
  * Made the carrier of the flag/bomb move slower
+ * Regeneration, damage and shield buffs for defending flags/goals
 Audio & Visuals:
  * Ingame music
  * New sounds for pistol, SMG, grenade, sword, player death, hit/bleed, etc.
