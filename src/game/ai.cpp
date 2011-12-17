@@ -407,31 +407,53 @@ namespace ai
         return false;
     }
 
+
+    struct targcache
+    {
+        gameent *d;
+        vec pos;
+        bool targ, see, tried;
+        float dist;
+
+        targcache() : d(NULL), pos(0, 0, 0), targ(false), see(false), tried(false), dist(0) {}
+        ~targcache() {}
+    };
     bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f)
     {
         if(passive()) return false;
-        static vector<gameent *> hastried; hastried.setsize(0);
+        static vector<targcache> targets; targets.setsize(0);
         vec dp = d->headpos();
         int numdyns = game::numdynents();
         while(true)
         {
-            float dist = 1e16f;
-            gameent *t = NULL, *e = NULL;
-            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d && hastried.find(e) < 0 && targetable(d, e))
+            targcache *t = NULL;
+            if(targets.empty())
             {
-                vec ep = getaimpos(d, e, altfire(d, e));
-                float v = ep.squaredist(dp);
-                if(d->dominating.find(e)) v *= 0.5f; // REVENGE
-                if((!t || v < dist) && (mindist <= 0 || v <= mindist) && (force || cansee(d, dp, ep, d->aitype >= AI_START)))
+                gameent *e = NULL;
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e != d)
                 {
-                    t = e;
-                    dist = v;
+                    targcache &c = targets.add();
+                    c.d = e;
+                    if(!(c.targ = targetable(d, e))) continue;
+                    c.pos = getaimpos(d, e, altfire(d, e));
+                    c.dist = c.pos.squaredist(dp);
+                    if(d->dominating.find(c.d) >= 0) c.dist *= 0.5f; // REVENGE
+                    if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist))
+                    {
+                        if(!(c.see = force || cansee(d, dp, c.pos, d->aitype >= AI_START))) continue;
+                        t = &c;
+                    }
                 }
+            }
+            else loopv(targets) if(!targets[i].tried && targets[i].targ && targets[i].see)
+            {
+                targcache &c = targets[i];
+                if((!t || c.dist < t->dist) && (mindist <= 0 || c.dist <= mindist)) t = &c;
             }
             if(t)
             {
-                if(violence(d, b, t, pursue)) return true;
-                hastried.add(t);
+                if(violence(d, b, t->d, pursue)) return true;
+                t->tried = true;
             }
             else break;
         }
@@ -861,12 +883,13 @@ namespace ai
         vec pos = d->feetpos();
         int node = -1;
         float mindist = CLOSEDIST*CLOSEDIST;
-        loopk(4)
+        loopk(5)
         {
             loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
             {
-                vec epos = waypoints[d->ai->route[i]].o;
-                int entid = obstacles.remap(d, d->ai->route[i], epos, k==3);
+                int entid = d->ai->route[i];
+                vec epos = waypoints[entid].o;
+                if(k) entid = obstacles.remap(d, d->ai->route[i], epos, k==4);
                 if(iswaypoint(entid))
                 {
                     float dist = epos.squaredist(pos);
@@ -878,7 +901,7 @@ namespace ai
                 }
             }
             if(node >= 0) break;
-            if(!k) mindist = physics::hover(d) ? HOVERDIST*HOVERDIST : RETRYDIST*RETRYDIST;
+            if(k == 1) mindist = physics::hover(d) ? HOVERDIST*HOVERDIST : RETRYDIST*RETRYDIST;
         }
         return node;
     }
