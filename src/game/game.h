@@ -332,12 +332,12 @@ enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, S
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, ammo[WEAP_MAX], entid[WEAP_MAX], colour;
+    int health, ammo[WEAP_MAX], entid[WEAP_MAX], colour, model;
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime, lastbuff;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 
-    gamestate() : colour(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
+    gamestate() : colour(0), model(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loopj(2) loadweap[j] = -1;
@@ -613,7 +613,12 @@ struct actitem
     actitem() : type(ITEM_ENT), target(-1), score(0) {}
     ~actitem() {}
 };
+#define NUMPLAYERMODELS 2
 #ifdef GAMEWORLD
+const char *playermodels[NUMPLAYERMODELS][2] = {
+    { "actors/player/male",     "actors/player/male/hwep" },
+    { "actors/player/female",   "actors/player/female/hwep" }
+};
 const char * const animnames[] =
 {
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
@@ -641,6 +646,7 @@ const char * const animnames[] =
 };
 #else
 extern const char * const animnames[];
+extern const char *playermodels[NUMPLAYERMODELS][2];
 #endif
 
 struct eventicon
@@ -995,10 +1001,11 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setinfo(const char *n = NULL, int col = 0)
+    void setinfo(const char *n = NULL, int col = 0, int mdl = 0)
     {
         if(n && *n) copystring(name, n, MAXNAMELEN+1); else name[0] = 0;
         colour = max(col, 0);
+        model = mdl;
     }
 
     void addstun(int weap, int millis, int delay, float scale)

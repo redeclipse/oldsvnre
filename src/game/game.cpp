@@ -2269,8 +2269,9 @@ namespace game
 
     void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-        int type = clamp(d->aitype, 0, AI_MAX-1);
-        const char *mdl = third ? aistyle[type].tpmdl : aistyle[type].fpmdl;
+        const char *mdl = playermodels[0][third ? 0 : 1];
+        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : 1];
+        else  mdl = playermodels[d->model%NUMPLAYERMODELS][third ? 0 : 1];
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
         if(!third && firstpersonsway && !intermission)

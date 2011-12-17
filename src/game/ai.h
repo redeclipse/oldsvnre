@@ -5,7 +5,7 @@ struct aistyles
     int type,           weap,           health;
     float   xradius,    yradius,    height,     weight,     speed,      scale;
     bool    canmove,    canstrafe,  canjump,    cancrouch,  useweap,    living,     hitbox;
-    const char  *name,      *tpmdl,              *fpmdl;
+    const char  *name,      *playermodel[2];
 };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
@@ -13,25 +13,25 @@ aistyles aistyle[] = {
         AI_NONE,         -1,             0,
             3,          3,          15,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "player",   "actors/player",     "actors/player/hwep"
+                "player",   { "actors/player/male",     "actors/player/male/hwep" }
     },
     {
         AI_BOT,         -1,             0,
             3,          3,          15,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "bot",      "actors/player",     "actors/player/hwep"
+                "bot",      { "actors/player/male",     "actors/player/male/hwep" }
     },
     {
         AI_TURRET,      WEAP_SMG,       100,
             4.75,       4.75,       8.75,       150,        1,          1,
             false,      false,      false,      false,      false,      false,      false,
-                "turret",   "actors/turret",     "actors/player/hwep"
+                "turret",   { "actors/turret",          "actors/player/hwep" }
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,
             3,          3,          16,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
-                "grunt",    "actors/grunt",      "actors/player/hwep"
+                "grunt",    { "actors/grunt",           "actors/player/hwep" }
     },
 };
 #else
@@ -344,7 +344,7 @@ namespace ai
     extern bool altfire(gameent *d, gameent *e);
     extern int owner(gameent *d);
 
-    extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl);
+    extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md);
 
     extern bool badhealth(gameent *d);
     extern int checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false, int *members = NULL);

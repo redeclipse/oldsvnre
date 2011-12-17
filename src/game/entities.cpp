@@ -264,13 +264,13 @@ namespace entities
         switch(type)
         {
             case AFFINITY: return "flag";
-            case PLAYERSTART: return aistyle[AI_BOT].tpmdl;
+            case PLAYERSTART: return playermodels[0][0];
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: return aistyle[clamp(attr[0]+AI_START, int(AI_START), int(AI_MAX-1))].tpmdl;
+            case ACTOR: return aistyle[clamp(attr[0]+AI_START, int(AI_START), int(AI_MAX-1))].playermodel[0];
             default: break;
         }
         return "";
