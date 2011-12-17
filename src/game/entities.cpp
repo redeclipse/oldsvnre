@@ -7,7 +7,7 @@ namespace entities
     VAR(IDF_PERSIST, showlighting, 0, 0, 1);
     VAR(IDF_PERSIST, showentmodels, 0, 1, 2);
     VAR(IDF_PERSIST, showentdescs, 0, 2, 3);
-    VAR(IDF_PERSIST, showentinfo, 0, 2, 5);
+    VAR(IDF_PERSIST, showentinfo, 0, 21, 127);
 
     VAR(IDF_PERSIST, showentdir, 0, 1, 3); // 0 = off, 1 = only selected, 2 = always when editing, 3 = always in editmode
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
@@ -685,9 +685,12 @@ namespace entities
         memset(lastusetype, 0, sizeof(lastusetype));
     }
 
-    bool cansee(extentity &e)
+    bool cansee(int n)
     {
-        return showentinfo || game::player1->state == CS_EDITING;
+        if(game::player1->state != CS_EDITING && !(showentinfo&64)) return false;
+        if(!ents.inrange(n)) return false;
+        if(ents[n]->type == NOTUSED && (n != enthover && entgroup.find(n) < 0)) return false;
+        return true;
     }
 
     void fixentity(int n, bool recurse, bool create)
@@ -1933,8 +1936,8 @@ namespace entities
 
         vec off(0, 0, 2.f), pos(o);
         if(enttype[e.type].usetype == EU_ITEM) pos.add(off);
-        bool edit = m_edit(game::gamemode) && cansee(e), isedit = edit && game::player1->state == CS_EDITING,
-                hasent = isedit && idx >= 0 && (entgroup.find(idx) >= 0 || enthover == idx);
+        bool edit = m_edit(game::gamemode) && cansee(idx), isedit = edit && game::player1->state == CS_EDITING,
+                hasent = isedit && idx >= 0 && (enthover == idx || entgroup.find(idx) >= 0);
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
@@ -1943,7 +1946,7 @@ namespace entities
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
             part_create(PART_HINT_BOLD_SOFT, 1, o, colour, radius, fluc*skew);
         }
-        if(isedit ? (showentinfo >= (hasent ? 2 : 3)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
+        if(isedit ? (showentinfo&(hasent ? 1 : 2)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
             const char *itxt = entinfo(e.type, e.attrs, isedit);
             if(itxt && *itxt)
@@ -1955,32 +1958,32 @@ namespace entities
         if(edit)
         {
             part_create(hasent ? PART_EDIT_ONTOP : PART_EDIT, 1, o, hasent ? 0xAA22FF : 0x441188, hasent ? 2.f : 1.f);
-            if(showentinfo >= (isedit ? 2 : 4))
+            if(showentinfo&(hasent ? 4 : 8))
             {
                 defformatstring(s)("<super>%s%s (%d)", hasent ? "\fp" : "\fv", enttype[e.type].name, idx >= 0 ? idx : 0);
                 part_textcopy(pos.add(off), s, hasent ? PART_TEXT_ONTOP : PART_TEXT);
-                if(showentinfo >= (isedit ? (hasent ? 2 : 3) : 5)) loopk(enttype[e.type].numattrs)
+            }
+            if(showentinfo&(hasent ? 16 : 32)) loopk(enttype[e.type].numattrs)
+            {
+                const char *attrname = enttype[e.type].attrs[k];
+                if(e.type == PARTICLES && k) switch(e.attrs[0])
                 {
-                    const char *attrname = enttype[e.type].attrs[k];
-                    if(e.type == PARTICLES && k) switch(e.attrs[0])
-                    {
-                        case 0: switch(k) { case 1: attrname = "length"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "palette"; break; case 6: attrname = "palindex"; break; default: attrname = ""; } break;
-                        case 1: switch(k) { case 1: attrname = "dir"; break; default: attrname = ""; } break;
-                        case 2: switch(k) { case 1: attrname = "dir"; break; default: attrname = ""; } break;
-                        case 3: switch(k) { case 1: attrname = "size"; break; case 2: attrname = "colour"; break; case 3: attrname = "palette"; break; case 4: attrname = "palindex"; break; default: attrname = ""; } break;
-                        case 4: case 7: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "palette"; break; case 7: attrname = "palindex"; break; default: attrname = ""; break; } break;
-                        case 8: case 9: case 10: case 11: case 12: case 13: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "decal"; break; case 7: attrname = "gravity"; break; case 8: attrname = "velocity"; break; case 9: attrname = "palette"; break; case 10: attrname = "palindex"; break; default: attrname = ""; break; } break;
-                        case 14: case 15: switch(k) { case 1: attrname = "radius"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "gravity"; break; case 7: attrname = "velocity"; break; case 8: attrname = "palette"; break; case 9: attrname = "palindex"; break; default: attrname = ""; } break;
-                        case 6: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "colour2"; break; case 4: attrname = "palette1"; break; case 5: attrname = "palindex1"; break; case 6: attrname = "palette2"; break; case 7: attrname = "palindex2"; break; default: attrname = ""; } break;
-                        case 5: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "palette"; break; case 4: attrname = "palindex"; break; default: attrname = ""; } break;
-                        case 32: case 33: case 34: case 35: switch(k) { case 1: attrname = "red"; break; case 2: attrname = "green"; break; case 3: attrname = "blue"; break; default: attrname = ""; } break;
-                        default: attrname = ""; break;
-                    }
-                    if(attrname && *attrname)
-                    {
-                        formatstring(s)("%s%s:%d", hasent ? "\fw" : "\fd", attrname, e.attrs[k]);
-                        part_textcopy(pos.add(off), s, hasent ? PART_TEXT_ONTOP : PART_TEXT);
-                    }
+                    case 0: switch(k) { case 1: attrname = "length"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "palette"; break; case 6: attrname = "palindex"; break; default: attrname = ""; } break;
+                    case 1: switch(k) { case 1: attrname = "dir"; break; default: attrname = ""; } break;
+                    case 2: switch(k) { case 1: attrname = "dir"; break; default: attrname = ""; } break;
+                    case 3: switch(k) { case 1: attrname = "size"; break; case 2: attrname = "colour"; break; case 3: attrname = "palette"; break; case 4: attrname = "palindex"; break; default: attrname = ""; } break;
+                    case 4: case 7: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "palette"; break; case 7: attrname = "palindex"; break; default: attrname = ""; break; } break;
+                    case 8: case 9: case 10: case 11: case 12: case 13: switch(k) { case 1: attrname = "dir"; break; case 2: attrname = "length"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "decal"; break; case 7: attrname = "gravity"; break; case 8: attrname = "velocity"; break; case 9: attrname = "palette"; break; case 10: attrname = "palindex"; break; default: attrname = ""; break; } break;
+                    case 14: case 15: switch(k) { case 1: attrname = "radius"; break; case 2: attrname = "height"; break; case 3: attrname = "colour"; break; case 4: attrname = "fade"; break; case 5: attrname = "size"; break; case 6: attrname = "gravity"; break; case 7: attrname = "velocity"; break; case 8: attrname = "palette"; break; case 9: attrname = "palindex"; break; default: attrname = ""; } break;
+                    case 6: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "colour2"; break; case 4: attrname = "palette1"; break; case 5: attrname = "palindex1"; break; case 6: attrname = "palette2"; break; case 7: attrname = "palindex2"; break; default: attrname = ""; } break;
+                    case 5: switch(k) { case 1: attrname = "amt"; break; case 2: attrname = "colour"; break; case 3: attrname = "palette"; break; case 4: attrname = "palindex"; break; default: attrname = ""; } break;
+                    case 32: case 33: case 34: case 35: switch(k) { case 1: attrname = "red"; break; case 2: attrname = "green"; break; case 3: attrname = "blue"; break; default: attrname = ""; } break;
+                    default: attrname = ""; break;
+                }
+                if(attrname && *attrname)
+                {
+                    defformatstring(s)("%s%s:%d", hasent ? "\fw" : "\fd", attrname, e.attrs[k]);
+                    part_textcopy(pos.add(off), s, hasent ? PART_TEXT_ONTOP : PART_TEXT);
                 }
             }
         }
