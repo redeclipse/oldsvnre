@@ -1894,7 +1894,7 @@ namespace game
                 mcams.put(cameras.getbuf(), cameras.length());
                 while(mcams.length())
                 {
-                    cament *mcam = cameras.removeunordered(rnd(mcams.length()));
+                    cament *mcam = mcams.removeunordered(rnd(mcams.length()));
                     if(mcam->type == cament::ENTITY)
                     {
                         vec ray = vec(mcam->o).sub(cam->o);
