@@ -17,9 +17,11 @@ Audio & Visuals:
  * HUD revamp
  * View bobbing
  * New font "Play", extended character support
+ * Female variation of player model (set in profile)
 Maps:
  * Ares, new map
  * Cargo, new map
+ * Colony, new map
  * Dutility, revamped
 Modes & Mutators:
  * League mutator removed
