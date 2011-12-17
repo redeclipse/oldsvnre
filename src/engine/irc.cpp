@@ -175,7 +175,7 @@ int ircrecv(ircnet *n)
             case '\v': case '\f': n->input[n->inputlen+i] = ' '; break;
         }
         n->inputlen += len;
-
+#if 0 // broken
         int carry = 0, decoded = decodeutf8(&n->input[n->inputcarry], &n->input[n->inputcarry], n->inputlen - n->inputcarry, &carry);
         if(carry > decoded)
         {
@@ -184,6 +184,9 @@ int ircrecv(ircnet *n)
         }
         n->inputcarry += decoded;
         total += decoded;
+#else
+        total += len;
+#endif
     }
     return total;
 }

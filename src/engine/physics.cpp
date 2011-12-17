@@ -150,7 +150,8 @@ static float disttoent(octaentities *oc, octaentities *last, const vec &o, const
             loopv(oc->type) \
                 if(!last || last->type.find(oc->type[i])<0) \
                 { \
-                    extentity &e = *ents[oc->type[i]]; \
+                    int n = oc->type[i]; \
+                    extentity &e = *ents[n]; \
                     if(!e.inoctanode || &e==t) continue; \
                     func; \
                     if(f<dist && f>0) { \
@@ -164,19 +165,19 @@ static float disttoent(octaentities *oc, octaentities *last, const vec &o, const
 
     entintersect(RAY_POLY, mapmodels, {
         if((mode&RAY_ENTS)!=RAY_ENTS) mapmodelskip;
-        if((mode&RAY_ENTS)==RAY_ENTS && !entities::cansee(e)) continue;
+        if((mode&RAY_ENTS)==RAY_ENTS && !entities::cansee(n)) continue;
         orient = 0; // FIXME, not set
         if(!mmintersect(e, o, ray, radius, mode, f)) continue;
     });
 
     entintersect(RAY_ENTS, other,
-        if((mode&RAY_ENTS)==RAY_ENTS && !entities::cansee(e)) continue;
+        if((mode&RAY_ENTS)==RAY_ENTS && !entities::cansee(n)) continue;
         entselectionbox(e, eo, es);
         if(!rayrectintersect(eo, es, o, ray, f, orient)) continue;
     );
 
     entintersect(RAY_ENTS, mapmodels,
-        if((mode&RAY_ENTS)==RAY_ENTS && !entities::cansee(e)) continue;
+        if((mode&RAY_ENTS)==RAY_ENTS && !entities::cansee(n)) continue;
         entselectionbox(e, eo, es);
         if(!rayrectintersect(eo, es, o, ray, f, orient)) continue;
     );
@@ -858,7 +859,7 @@ static inline bool clampcollide(const clipplanes &p, const E &entvol, const plan
     }
     return false;
 }
-    
+
 template<class E>
 static bool fuzzycollideplanes(physent *d, const vec &dir, float cutoff, cube &c, const ivec &co, int size) // collide with deformed cube geometry
 {
