@@ -1090,7 +1090,6 @@ struct cament
     float dist, mindist, maxdist, score;
     gameent *player;
     bool current, ignore;
-    vector<cament *> visible;
     cament *moveto;
 
     cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
