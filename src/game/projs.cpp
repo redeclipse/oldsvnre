@@ -71,34 +71,36 @@ namespace projs
             flags |= HIT_WAVE;
         }
 
-        float skew = damagescale*clamp(scale, 0.f, 1.f);
-        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-        else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
-
-        if(m_capture(game::gamemode) && capturebuffdelay)
+        float skew = 1;
+        if(!m_insta(game::gamemode, game::mutators))
         {
-            if(actor->lastbuff) skew *= capturebuffdamage;
-            if(target->lastbuff) skew /= capturebuffshield;
+            skew *= clamp(scale, 0.f, 1.f)*damagescale;
+            if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+            else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+            if(m_capture(game::gamemode) && capturebuffdelay)
+            {
+                if(actor->lastbuff) skew *= capturebuffdamage;
+                if(target->lastbuff) skew /= capturebuffshield;
+            }
+            else if(m_defend(game::gamemode) && defendbuffdelay)
+            {
+                if(actor->lastbuff) skew *= defendbuffdamage;
+                if(target->lastbuff) skew /= defendbuffshield;
+            }
+            else if(m_bomber(game::gamemode) && bomberbuffdelay)
+            {
+                if(actor->lastbuff) skew *= bomberbuffdamage;
+                if(target->lastbuff) skew /= bomberbuffshield;
+            }
+            if(!(flags&HIT_HEAD))
+            {
+                if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
+                else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
+                else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
+                else skew = 0;
+            }
+            if(actor == target) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
         }
-        else if(m_defend(game::gamemode) && defendbuffdelay)
-        {
-            if(actor->lastbuff) skew *= defendbuffdamage;
-            if(target->lastbuff) skew /= defendbuffshield;
-        }
-        else if(m_bomber(game::gamemode) && bomberbuffdelay)
-        {
-            if(actor->lastbuff) skew *= bomberbuffdamage;
-            if(target->lastbuff) skew /= bomberbuffshield;
-        }
-        if(!(flags&HIT_HEAD))
-        {
-            if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
-            else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
-            else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
-            else skew = 0;
-        }
-        if(actor == target) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
-
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
     }
 
