@@ -121,7 +121,7 @@ bool setfont(const char *name)
     return true;
 }
 
-float text_widthf(const char *str, int flags) 
+float text_widthf(const char *str, int flags)
 {
     float width, height;
     text_boundsf(str, width, height, -1, flags);
@@ -133,7 +133,7 @@ float text_widthf(const char *str, int flags)
 void tabify(const char *str, int *numtabs)
 {
     int tw = max(*numtabs, 0)*FONTTAB-1, tabs = 0;
-    for(float w = text_widthf(str); w <= tw; w = TEXTTAB(w)) ++tabs; 
+    for(float w = text_widthf(str); w <= tw; w = TEXTTAB(w)) ++tabs;
     int len = strlen(str);
     char *tstr = newstring(len + tabs);
     memcpy(tstr, str, len);
@@ -223,8 +223,23 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
 }
 
 #define FONTX ((FONTH*9)/8)
+static const char *gettexvar(const char *var)
+{
+    ident *id = getident(var);
+    if(!id) return "";
+    switch(id->type)
+    {
+        case ID_VAR: return intstr(*id->storage.i);
+        case ID_FVAR: return floatstr(*id->storage.f);
+        case ID_SVAR: return *id->storage.s;
+        case ID_ALIAS: return id->getstr();
+        default: return "";
+    }
+}
 static float draw_icon(Texture *&tex, const char *name, float x, float y, float scale)
 {
+    if(!name && !*name) return 0;
+    if(*name == '$') name = gettexvar(++name);
     Texture *t = textureload(name, 3);
     if(!t) return 0;
     if(tex != t)
@@ -243,6 +258,7 @@ static float draw_icon(Texture *&tex, const char *name, float x, float y, float 
 
 static float icon_width(const char *name, float scale)
 {
+    if(*name == '$') name = gettexvar(++name);
     Texture *t = textureload(name, 3);
     if(t) return (t->w*scale*FONTX)/t->h;
     return 0;

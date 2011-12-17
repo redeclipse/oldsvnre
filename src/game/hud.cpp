@@ -84,11 +84,11 @@ namespace hud
     VAR(IDF_PERSIST, teamnotices, 0, 2, 2);
     VAR(IDF_PERSIST, teamnoticedelay, 0, 2500, VAR_MAX);
 
-    TVAR(IDF_PERSIST, neutraltex, "<grey>textures/team", 3);
-    TVAR(IDF_PERSIST, alphatex, "<grey>textures/teamalpha", 3);
-    TVAR(IDF_PERSIST, omegatex, "<grey>textures/teamomega", 3);
-    TVAR(IDF_PERSIST, kappatex, "<grey>textures/teamkappa", 3);
-    TVAR(IDF_PERSIST, sigmatex, "<grey>textures/teamsigma", 3);
+    TVAR(IDF_PERSIST, teamtex, "<grey>textures/team", 3);
+    TVAR(IDF_PERSIST, teamalphatex, "<grey>textures/teamalpha", 3);
+    TVAR(IDF_PERSIST, teamomegatex, "<grey>textures/teamomega", 3);
+    TVAR(IDF_PERSIST, teamkappatex, "<grey>textures/teamkappa", 3);
+    TVAR(IDF_PERSIST, teamsigmatex, "<grey>textures/teamsigma", 3);
     TVAR(IDF_PERSIST, playertex, "<grey>textures/player", 3);
     TVAR(IDF_PERSIST, deadtex, "<grey>textures/dead", 3);
     TVAR(IDF_PERSIST, dominatingtex, "<grey>textures/dominating", 3);
@@ -1042,7 +1042,7 @@ namespace hud
                             if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                             else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         }
-                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), hud::teamtex(target->team), TEAM(target->team, name));
+                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), hud::teamtexname(target->team), TEAM(target->team, name));
                     }
                 }
             }
@@ -1657,9 +1657,9 @@ namespace hud
         return sy;
     }
 
-    const char *teamtex(int team)
+    const char *teamtexname(int team)
     {
-        const char *teamtexs[TEAM_MAX] = { neutraltex, alphatex, omegatex, kappatex, sigmatex, neutraltex };
+        const char *teamtexs[TEAM_MAX] = { teamtex, teamalphatex, teamomegatex, teamkappatex, teamsigmatex, teamtex };
         return teamtexs[team];
     }
 

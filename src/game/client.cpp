@@ -189,7 +189,7 @@ namespace client
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
     ICOMMAND(0, getcolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
-    ICOMMAND(0, getteamicon, "", (), result(hud::teamtex(game::player1->team)));
+    ICOMMAND(0, getteamicon, "", (), result(hud::teamtexname(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
 
     const char *getname() { return game::player1->name; }
@@ -2017,7 +2017,7 @@ namespace client
                     {
                         w->team = tn;
                         //if(game::showplayerinfo && w->aitype == AI_NONE)
-                        //    conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(w->team, colour), hud::teamtex(w->team), TEAM(w->team, name));
+                        //    conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(w->team, colour), hud::teamtexname(w->team), TEAM(w->team, name));
                         if(w == game::focus) hud::lastteam = 0;
                     }
                     break;

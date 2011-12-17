@@ -1454,13 +1454,13 @@ namespace game
                 if(mix)
                 {
                     int r1 = (col>>16), g1 = ((col>>8)&0xFF), b1 = (col&0xFF),
-                        c = TEAM(ai::owner(d), colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF);
+                        c = TEAM(d->team, colour), r2 = (c>>16), g2 = ((c>>8)&0xFF), b2 = (c&0xFF);
                     col = (clamp((r1/2)+(r2/2), 0, 255)<<16)|(clamp((g1/2)+(g2/2), 0, 255)<<8)|clamp((b1/2)+(b2/2), 0, 255);
                 }
                 return col;
             }
         }
-        return TEAM(ai::owner(d), colour);
+        return TEAM(d->team, colour);
     }
 
     int getcolour(gameent *d, int level)
@@ -2476,7 +2476,7 @@ namespace game
             {
                 if(d->conopen) t = textureload(hud::chattex, 3);
                 else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
-                    t = textureload(hud::teamtex(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
+                    t = textureload(hud::teamtexname(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
                 else
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
