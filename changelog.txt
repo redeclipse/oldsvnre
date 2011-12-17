@@ -1,5 +1,5 @@
 Red Eclipse 1.2
-Movement & Weapons:
+Gameplay:
  * Powerjump removed, powerlaunch added, use by jumping whilst powersliding
  * Impulse moves now disregard cost and scale depending on available energy
  * Plasma primary damage increased
@@ -28,9 +28,9 @@ Modes & Mutators:
 Modding:
  * New map editing menu, available via [F3]
  * cube2font tool for generating game fonts
-Server:
+Misc:
+ * AI waypoints separated out from ents, overall major AI improvements
  * Split apart kick and ban commands so users can be removed without a ban
-Legal:
  * Copyright cleanup, new trademark policy
 Additional Fixed Bugs:
  * #30 Use RE_DIR=$(dirname $0) in launch script
