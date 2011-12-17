@@ -3131,24 +3131,27 @@ namespace server
         flags &= ~HIT_SFLAGS;
         if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
 
-        float skew = GAME(damagescale)*clamp(scale, 0.f, 1.f);
-        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-        else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
-
-        if(m_capture(gamemode) && GAME(capturebuffdelay))
+        float skew = 1;
+        if(!m_insta(gamemode, mutators))
         {
-            if(actor->state.lastbuff) skew *= GAME(capturebuffdamage);
-            if(target->state.lastbuff) skew /= GAME(capturebuffshield);
-        }
-        else if(m_defend(gamemode) && GAME(defendbuffdelay))
-        {
-            if(actor->state.lastbuff) skew *= GAME(defendbuffdamage);
-            if(target->state.lastbuff) skew /= GAME(defendbuffshield);
-        }
-        else if(m_bomber(gamemode) && GAME(bomberbuffdelay))
-        {
-            if(actor->state.lastbuff) skew *= GAME(bomberbuffdamage);
-            if(target->state.lastbuff) skew /= GAME(bomberbuffshield);
+            skew *= clamp(scale, 0.f, 1.f)*GAME(damagescale);
+            if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+            else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+            if(m_capture(gamemode) && GAME(capturebuffdelay))
+            {
+                if(actor->state.lastbuff) skew *= GAME(capturebuffdamage);
+                if(target->state.lastbuff) skew /= GAME(capturebuffshield);
+            }
+            else if(m_defend(gamemode) && GAME(defendbuffdelay))
+            {
+                if(actor->state.lastbuff) skew *= GAME(defendbuffdamage);
+                if(target->state.lastbuff) skew /= GAME(defendbuffshield);
+            }
+            else if(m_bomber(gamemode) && GAME(bomberbuffdelay))
+            {
+                if(actor->state.lastbuff) skew *= GAME(bomberbuffdamage);
+                if(target->state.lastbuff) skew /= GAME(bomberbuffshield);
+            }
         }
         if(!(flags&HIT_HEAD))
         {
