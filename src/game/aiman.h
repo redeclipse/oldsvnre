@@ -73,6 +73,7 @@ namespace aiman
                 clients.add(ci);
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
+                ci->state.model = rnd(INT_MAX-1);
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? TEAM_NEUTRAL : TEAM_ENEMY;
@@ -121,7 +122,7 @@ namespace aiman
         else if(ci->state.aireinit >= 1)
         {
             if(ci->state.aireinit == 2) loopk(WEAP_MAX) loopj(2) ci->state.weapshots[k][j].reset();
-            sendf(-1, 1, "ri6si2", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour);
+            sendf(-1, 1, "ri6si3", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model);
             if(ci->state.aireinit == 2)
             {
                 waiting(ci, 1, 2);

@@ -180,7 +180,7 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl)
+    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md)
     {
         getwaypoints();
 
@@ -220,6 +220,7 @@ namespace ai
         d->skill = sk;
         d->team = tm;
         d->colour = cl;
+        d->model = md;
 
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)
@@ -1771,8 +1772,8 @@ namespace ai
     {
         loopi(AI_TOTAL)
         {
-            loadmodel(aistyle[i+AI_START].tpmdl, -1, true);
-            loadmodel(aistyle[i+AI_START].fpmdl, -1, true);
+            loadmodel(aistyle[i+AI_START].playermodel[0], -1, true);
+            loadmodel(aistyle[i+AI_START].playermodel[1], -1, true);
         }
     }
 }

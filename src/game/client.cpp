@@ -188,24 +188,25 @@ namespace client
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
     ICOMMAND(0, getcolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
+    ICOMMAND(0, getmodel, "", (), intret(game::player1->model));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtexname(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
 
     const char *getname() { return game::player1->name; }
 
-    void setplayerinfo(const char *name, int col)
+    void setplayerinfo(const char *name, int col, int mdl)
     {
         if(name[0])
         {
             string text;
             filtertext(text, name);
-            game::player1->setinfo(text, col >= 0 ? col : game::player1->colour);
-            addmsg(N_SETPLAYERINFO, "rsi", game::player1->name, game::player1->colour);
+            game::player1->setinfo(text, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model);
+            addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
         }
         if(initing == NOT_INITING) conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
     }
-    ICOMMAND(0, setinfo, "si", (char *s, int *m), setplayerinfo(s, *m));
+    ICOMMAND(0, setinfo, "sii", (char *s, int *c, int *m), setplayerinfo(s, *c, *m));
 
     int teamname(const char *team)
     {
@@ -250,7 +251,7 @@ namespace client
 
     void writeclientinfo(stream *f)
     {
-        f->printf("setinfo \"%s\" 0x%06x\n\n", game::player1->name, game::player1->colour);
+        f->printf("setinfo \"%s\" 0x%06x %d\n\n", game::player1->name, game::player1->colour, game::player1->model);
     }
 
     bool allowedittoggle(bool edit)
@@ -955,6 +956,7 @@ namespace client
         putint(p, N_CONNECT);
         sendstring(game::player1->name, p);
         putint(p, game::player1->colour);
+        putint(p, game::player1->model);
         mkstring(hash);
         if(connectpass[0])
         {
@@ -1427,7 +1429,7 @@ namespace client
                 case N_SETPLAYERINFO:
                 {
                     getstring(text, p);
-                    int colour = getint(p);
+                    int colour = getint(p), model = getint(p);
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
@@ -1435,12 +1437,12 @@ namespace client
                     {
                         string oldname, newname;
                         copystring(oldname, game::colorname(d));
-                        d->setinfo(text, colour);
+                        d->setinfo(text, colour, model);
                         copystring(newname, game::colorname(d));
                         if(game::showplayerinfo && !isignored(d->clientnum))
                             conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    else d->setinfo(text, colour);
+                    else d->setinfo(text, colour, model);
                     break;
                 }
 
@@ -1455,7 +1457,7 @@ namespace client
                         break;
                     }
                     getstring(text, p);
-                    int colour = getint(p);
+                    int colour = getint(p), model = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
                     if(d->name[0])        // already connected
@@ -1464,16 +1466,16 @@ namespace client
                         {
                             string oldname, newname;
                             copystring(oldname, game::colorname(d, NULL, "", false));
-                            d->setinfo(text, colour);
+                            d->setinfo(text, colour, model);
                             copystring(newname, game::colorname(d, text));
                             if(game::showplayerinfo && !isignored(d->clientnum))
                                 conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                         }
-                        else d->setinfo(text, colour);
+                        else d->setinfo(text, colour, model);
                     }
                     else                    // new client
                     {
-                        d->setinfo(text, colour);
+                        d->setinfo(text, colour, model);
                         if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game", game::colorname(d, text, "", false));
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.deletecontents();
@@ -2202,10 +2204,10 @@ namespace client
                 {
                     int bn = getint(p), on = getint(p), at = getint(p), et = getint(p), sk = clamp(getint(p), 1, 101);
                     getstring(text, p);
-                    int tm = getint(p), cl = getint(p);
+                    int tm = getint(p), cl = getint(p), md = getint(p);
                     gameent *b = game::newclient(bn);
                     if(!b) break;
-                    ai::init(b, at, et, on, sk, bn, text, tm, cl);
+                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md);
                     break;
                 }
 

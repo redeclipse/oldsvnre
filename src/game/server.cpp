@@ -2704,6 +2704,7 @@ namespace server
                 sendstring(ci->name, p);
                 putint(p, ci->team);
                 putint(p, ci->state.colour);
+                putint(p, ci->state.model);
             }
         }
         else
@@ -2712,6 +2713,7 @@ namespace server
             putint(p, ci->clientnum);
             sendstring(ci->name, p);
             putint(p, ci->state.colour);
+            putint(p, ci->state.model);
             putint(p, ci->team);
         }
     }
@@ -4104,6 +4106,7 @@ namespace server
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->state.colour = max(getint(p), 0);
+                    ci->state.model = max(getint(p), 0);
 
                     string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
@@ -4612,12 +4615,14 @@ namespace server
                     defformatstring(oldname)("%s", colorname(ci));
                     getstring(text, p);
                     ci->state.colour = max(getint(p), 0);
+                    ci->state.model = max(getint(p), 0);
                     if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     copystring(ci->name, text, MAXNAMELEN+1);
                     relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
+                    QUEUE_INT(ci->state.model);
                     break;
                 }
 
