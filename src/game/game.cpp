@@ -1807,23 +1807,16 @@ namespace game
         if(!tvmode(false)) return false;
         if(cameras.empty())
         {
-            loopv(entities::ents) if(entities::ents[i]->type != MAPMODEL)
+            loopv(entities::ents)
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
+                if(e.type!=PLAYERSTART && e.type<WEAPON) continue;
+                //if(e.type==MAPMODEL) continue;
                 cament *c = cameras.add(new cament);
                 c->o = e.o;
                 c->o.z += max(enttype[e.type].radius, 2);
                 c->type = cament::ENTITY;
                 c->id = i;
-            }
-            vec trg;
-            loopv(cameras) loopvj(cameras) if(i != j && cameras[i]->visible.find(cameras[j]) < 0)
-            {
-                if(raycubelos(cameras[i]->o, cameras[j]->o, trg))
-                {
-                    cameras[i]->visible.add(cameras[j]);
-                    cameras[j]->visible.add(cameras[i]);
-                }
             }
             gameent *d = NULL;
             int numdyns = numdynents();
@@ -1893,9 +1886,28 @@ namespace game
         {
             lasttvchg = lastmillis;
             if(!renew) renew = true;
-            if(cam->type == cament::ENTITY && !cam->visible.empty())
-                cam->moveto = cam->visible[rnd(cam->visible.length())];
-            else cam->moveto = NULL;
+            cam->moveto = NULL;
+            if(cam->type == cament::ENTITY)
+            {
+                vector<cament *> mcams;
+                mcams.reserve(cameras.length());
+                mcams.put(cameras.getbuf(), cameras.length());
+                while(mcams.length())
+                {
+                    cament *mcam = cameras.removeunordered(rnd(mcams.length()));
+                    if(mcam->type == cament::ENTITY)
+                    {
+                        vec ray = vec(mcam->o).sub(cam->o);
+                        float mag = ray.magnitude();
+                        ray.mul(1.0f/mag);
+                        if(raycube(cam->o, ray, mag, RAY_CLIPMAT|RAY_POLY) >= mag)
+                        {
+                            cam->moveto = mcam;
+                            break;
+                        }
+                    }
+                }
+            }
             amt = 0;
         }
         else if(renew) renew = false;
