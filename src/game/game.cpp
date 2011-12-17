@@ -2409,16 +2409,19 @@ namespace game
             e->light.material[1] = bvec(getcolour(d, playerundertone));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
             {
+                int ammo = d->ammo[d->weapselect], maxammo = WEAP(d->weapselect, max);
                 float scale = 1;
                 switch(d->weapstate[d->weapselect])
                 {
                     case WEAP_S_RELOAD:
                     {
                         int millis = lastmillis-d->weaplast[d->weapselect], check = d->weapwait[d->weapselect]/2;
-                        scale = millis >= check ? (millis-check)/float(check) : 0.f;
+                        scale = millis >= check ? float(millis-check)/check : 0.f;
+                        if(d->weapload[d->weapselect] > 0)
+                            scale = max(scale, float(ammo - d->weapload[d->weapselect])/maxammo);
                         break;
                     }
-                    default: scale = d->ammo[d->weapselect]/float(WEAP(d->weapselect, max)); break;
+                    default: scale = float(ammo)/maxammo; break;
                 }
                 uchar wepmat = uchar(255*scale);
                 e->light.material[2] = bvec(wepmat, wepmat, wepmat);
