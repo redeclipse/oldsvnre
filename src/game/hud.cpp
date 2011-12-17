@@ -1939,7 +1939,7 @@ namespace hud
                     {
                         int millis = lastmillis%1000;
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
-                        flashcolour(gr, gg, gb, 0.f, 0.75f, 1.f, amt);
+                        flashcolour(gr, gg, gb, 0.25f, 1.f, 1.f, amt);
                     }
                     sy += drawitem(buffedtex, x, y-sy, width, false, true, gr, gg, gb, fade*inventoryblend);
                 }
