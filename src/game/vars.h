@@ -28,13 +28,13 @@ GSVAR(IDF_ADMIN, allowmaps, "alphacampaign bath blink cargo center darkness dawn
 
 GSVAR(IDF_ADMIN, mainmaps, "bath blink cargo center darkness deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation futuresport ghost keystone lab linear longestyard mist nova panic processing spacetech stone tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone linear mist nova panic stone tranquility tribal venus warp wet");
-GSVAR(IDF_ADMIN, defendmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, defendmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo forge foundation futuresport ghost linear mist nova stone tranquility tribal venus warp wet");
-GSVAR(IDF_ADMIN, holdmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal venus warp wet");
+GSVAR(IDF_ADMIN, holdmaps, "bath cargo center darkness deadsimple deli depot dropzone dutility echo facility forge foundation futuresport ghost keystone lab linear mist nova panic processing stone tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
-GSVAR(IDF_ADMIN, multimaps, "deadsimple depot"); // applies to modes which *require* multi spawns (ctf/bb)
+GSVAR(IDF_ADMIN, multimaps, "deadsimple depot warp"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dropzone dutility echo longestyard panic");
 GSVAR(IDF_ADMIN, hovermaps, "alphacampaign cargo center darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost keystone linear longestyard mist nova spacetech testchamber tranquility tribal ubik venus warp");
 
