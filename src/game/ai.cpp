@@ -1200,7 +1200,7 @@ namespace ai
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
         d->aimyaw = d->ai->targyaw;
         d->aimpitch = d->ai->targpitch;
-        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame*0.25f, frame*0.25f);
+        if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
         if(d->aitype == AI_BOT)
@@ -1519,7 +1519,7 @@ namespace ai
                 {
                     bool ladder = d->onladder;
                     physics::move(d, 1, true);
-                    if(aistyle[d->aitype].canmove && !b.idle) timeouts(d, b);
+                    if(aistyle[d->aitype].canmove && !b.idle && b.type != AI_S_WAIT) timeouts(d, b);
                     if(!ladder && d->onladder) d->ai->jumpseed = lastmillis;
                     entities::checkitems(d);
                 }
