@@ -1,0 +1,55 @@
+Red Eclipse 1.2
+Movement & Weapons:
+ * Powerjump removed, powerlaunch added, use by jumping whilst powersliding
+ * Impulse moves now disregard cost and scale depending on available energy
+ * Plasma primary damage increased
+ * Plasma secondary fire travels faster if charged for a short time
+ * Flamer primary & burn damage reduced
+ * SMG rate of fire decreased
+ * Sticky grenade can now stick to player
+ * Zoomlock disabled for rifle
+ * Added weapon stun effect which impedes movement for a certain time
+ * Made the carrier of the flag/bomb move slower
+Audio & Visuals:
+ * Ingame music
+ * New sounds for pistol, SMG, grenade, sword, player death, hit/bleed, etc.
+ * HUD revamp
+ * View bobbing
+ * New font "Play", extended character support
+Maps:
+ * Ares, new map
+ * Cargo, new map
+ * Dutility, revamped
+Modes & Mutators:
+ * League mutator removed
+ * Instagib-vampire combination disabled
+ * Multi-team mutator re-added
+Modding:
+ * New map editing menu, available via [F3]
+ * cube2font tool for generating game fonts
+Server:
+ * Split apart kick and ban commands so users can be removed without a ban
+Legal:
+ * Copyright cleanup, new trademark policy
+Additional Fixed Bugs:
+ * #30 Use RE_DIR=$(dirname $0) in launch script
+ * #31 Changing weapon name breaks the entry in Variables GUI
+ * #32 Floating/Infinite Flight Bug
+ * #33 random weapon selection in arena not working
+ * #35 /firstpersondist (exploit)
+ * #37 Player color (skew towards team color)
+ * #38 Tweaking hit sounds for shotgun/flak bleed
+ * #39 teampersist crashes server
+ * #40 dedicated server demo recording is broken
+ * #42 Plasma Blue-Ball-of-Death sticking to Ragdoll
+ * #44 Entity Radius Broken in Edit Mode
+ * #47 Create "extraplayers" variable to replace INSERT/DELETE behaviour
+ * #53 can't drop flag in ctf-protect
+ * #60 Live Support does not work correctly
+ * #65 Clicking the Red Eclipse icon on map selection without selecting a map
+       produces an error message
+ * #66 Winning a conquer defend-the-flag match yields an insanely high score
+ * #69 Edit mode segfault
+ * #70 Temporarily missing sound for Flamer primary fire after reload
+ * #74 better Link line colors
+ * #77 Constant health bonus given in CTF
