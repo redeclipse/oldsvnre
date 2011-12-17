@@ -1743,7 +1743,7 @@ namespace game
                 }
                 vec trg, from = cam->o;
                 float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
-                if(dist >= c->mindist && dist <= fogdist && raycubelos(pos, from, trg))
+                if(dist >= c->mindist && dist <= fogdist)
                 {
                     bool hassight = false;
                     if(j && !c->cansee) hassight = true; // rejigger and get a direction
@@ -1761,7 +1761,7 @@ namespace game
                         float y = fmod(fabs(-atan2(from.x-pos.x, from.y-pos.y)/RAD-yaw), 360);
                         if(min(x, 360-x) <= curfov && min(y, 360-y) <= fovy) hassight = true;
                     }
-                    if(hassight)
+                    if(hassight && raycubelos(pos, from, trg))
                     {
                         if(cam->type == cament::PLAYER) players++;
                         c->cansee++;
