@@ -366,7 +366,11 @@ namespace hud
         g.pushfont(numgroups>1 ? "little" : "default");
         loopk(numgroups)
         {
-            if((k%2)==0) g.pushlist(); // horizontal
+            if((k%2)==0)
+            {
+                if(k) g.space(1);
+                g.pushlist(); // horizontal
+            }
 
             scoregroup &sg = *groups[k];
             int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333,
