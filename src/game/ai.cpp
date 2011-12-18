@@ -1055,7 +1055,7 @@ namespace ai
         if(jump)
         {
             if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
-            int seed = (111-d->skill)*(locked || impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
+            int seed = (111-d->skill)*(impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
@@ -1213,34 +1213,6 @@ namespace ai
                 else if(b.idle == -1 && !d->ai->dontmove)
                     wantsrun = (d->action[AC_SPRINT] || !d->actiontime[AC_SPRINT] || lastmillis-d->actiontime[AC_SPRINT] > PHYSMILLIS*2);
             }
-
-            if(d->ai->lastpusher >= 0 && d->physstate == PHYS_FALL && lastmillis-d->ai->lastpushtime < (skmod/10)*250)
-            {
-                float offyaw, offpitch;
-                vec v = vec(d->vel).normalize();
-                vectoyawpitch(v, offyaw, offpitch);
-                offyaw -= d->aimyaw;
-                if(offyaw > 180) offyaw -= 360;
-                else if(offyaw < -180) offyaw += 360;
-                offpitch -= d->aimpitch;
-                if(fabs(offyaw)+fabs(offpitch) >= 135)
-                {
-                    wantsrun = false;
-                    d->ai->lastpusher = -1;
-                    d->ai->lastpushtime = 0;
-                }
-                else
-                {
-                    d->ai->dontmove = true;
-                    wantsrun = false;
-                }
-            }
-            else
-            {
-                d->ai->lastpusher = -1;
-                d->ai->lastpushtime = 0;
-            }
-
             if(d->action[AC_SPRINT] != wantsrun)
                 if((d->action[AC_SPRINT] = !d->action[AC_SPRINT]) == true) d->actiontime[AC_SPRINT] = lastmillis;
         }

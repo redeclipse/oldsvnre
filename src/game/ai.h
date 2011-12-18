@@ -235,8 +235,7 @@ namespace ai
         vector<int> route;
         vec target, spot;
         int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
-            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd,
-            lastpusher, lastpushtime, lastmelee;
+            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, lastmelee;
         float targyaw, targpitch, views[3], aimrnd[3];
         bool dontmove, tryreset, trywipe;
 
@@ -251,10 +250,10 @@ namespace ai
         void clearsetup()
         {
             spot = target = vec(0, 0, 0);
-            lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = lastpushtime = lastmelee = 0;
+            lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = lastmelee = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
-            weappref = targnode = targlast = enemy = lastpusher = -1;
+            weappref = targnode = targlast = enemy = -1;
         }
 
         void clear(bool prev = false)
