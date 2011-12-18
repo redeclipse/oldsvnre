@@ -579,8 +579,8 @@ struct guient
     virtual void strut(float size = 1) = 0;
     virtual void space(float size = 1) = 0;
     virtual void spring(int weight = 1) = 0;
-    virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = 0) = 0;
-    virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = 0) = 0;
+    virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED) = 0;
+    virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED) = 0;
 };
 
 struct guicb

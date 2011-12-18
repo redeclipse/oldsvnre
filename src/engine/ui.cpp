@@ -446,7 +446,7 @@ struct gui : guient
                 else if(editing)
                 {
                     fieldmode = FIELDCOMMIT;
-                    e->mode = EDITORFOCUSED;
+                    //e->mode = EDITORFOCUSED;
                 }
             }
             if(hit && editing && (mouseaction[0]&GUI_PRESSED)!=0 && fieldtype==FIELDEDIT)
