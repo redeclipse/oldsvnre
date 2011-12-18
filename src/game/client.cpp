@@ -204,7 +204,7 @@ namespace client
             game::player1->setinfo(text, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model);
             addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
         }
-        if(initing == NOT_INITING) conoutft(CON_INFO, "your name is: %s", *game::player1->name ? game::colorname(game::player1) : "<not set>");
+        if(initing == NOT_INITING) conoutft(CON_INFO, "your are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playermodels[game::player1->model%NUMPLAYERMODELS][2]);
     }
     ICOMMAND(0, setinfo, "sii", (char *s, int *c, int *m), setplayerinfo(s, *c, *m));
 
@@ -1440,7 +1440,7 @@ namespace client
                         d->setinfo(text, colour, model);
                         copystring(newname, game::colorname(d));
                         if(game::showplayerinfo && !isignored(d->clientnum))
-                            conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
+                            conoutft(CON_EVENT, "\fm%s is now known as %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", oldname, newname, d->colour, d->colour, playermodels[d->model%NUMPLAYERMODELS][2]);
                     }
                     else d->setinfo(text, colour, model);
                     break;
@@ -1469,14 +1469,14 @@ namespace client
                             d->setinfo(text, colour, model);
                             copystring(newname, game::colorname(d, text));
                             if(game::showplayerinfo && !isignored(d->clientnum))
-                                conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
+                                conoutft(CON_EVENT, "\fm%s is now known as %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", oldname, newname, d->colour, d->colour, playermodels[d->model%NUMPLAYERMODELS][2]);
                         }
                         else d->setinfo(text, colour, model);
                     }
                     else                    // new client
                     {
                         d->setinfo(text, colour, model);
-                        if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game", game::colorname(d, text, "", false));
+                        if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", game::colorname(d, text, "", false), d->colour, d->colour, playermodels[d->model%NUMPLAYERMODELS][2]);
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.deletecontents();
                     }
