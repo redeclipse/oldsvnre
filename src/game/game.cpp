@@ -1810,7 +1810,7 @@ namespace game
             loopv(entities::ents)
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
-                if(e.type!=PLAYERSTART && e.type<WEAPON) continue;
+                if(e.type!=PLAYERSTART && e.type!=LIGHT && e.type<MAPSOUND) continue;
                 //if(e.type==MAPMODEL) continue;
                 cament *c = cameras.add(new cament);
                 c->o = e.o;
