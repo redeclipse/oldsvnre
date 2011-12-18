@@ -18,6 +18,7 @@ Audio & Visuals:
  * View bobbing
  * New font "Play", extended character support
  * Female variation of player model (set in profile)
+ * Added visible counter and warning for imminent explosion in Bomber ball
 Maps:
  * Ares, new map
  * Cargo, new map
@@ -29,11 +30,13 @@ Modes & Mutators:
  * Multi-team mutator re-added
 Modding:
  * New map editing menu, available via [F3]
- * cube2font tool for generating game fonts
+ * Editing mode has been made more obvious to the user
+ * cube2font tool for generating game fonts, including documentation
 Misc:
  * AI waypoints separated out from ents, overall major AI improvements
  * Split apart kick and ban commands so users can be removed without a ban
  * Copyright cleanup, new trademark policy
+ * *roff manpages for *nix systems
 Additional Fixed Bugs:
  * #30 Use RE_DIR=$(dirname $0) in launch script
  * #31 Changing weapon name breaks the entry in Variables GUI
@@ -56,3 +59,4 @@ Additional Fixed Bugs:
  * #70 Temporarily missing sound for Flamer primary fire after reload
  * #74 better Link line colors
  * #77 Constant health bonus given in CTF
+ * #81 Killing the opponent team in Survivor CTF/BB does not yield you a point
