@@ -549,9 +549,9 @@ void localconnect(bool force)
         c.peer = NULL;
         copystring(c.hostname, "localhost");
         conoutf("\fglocal client %d connected", c.num);
+        connectedlocally = true;
         client::gameconnect(false);
         server::clientconnect(c.num, 0, true);
-        connectedlocally = true;
     }
 }
 
