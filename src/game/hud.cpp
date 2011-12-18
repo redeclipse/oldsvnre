@@ -1120,11 +1120,19 @@ namespace hud
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
             pushfont("little");
             ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
-            if(shownotices >= 2)
+            if(!m_edit(game::gamemode) && shownotices >= 2)
             {
                 SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
                 ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
             }
+            popfont();
+        }
+
+        if(m_edit(game::gamemode))
+        {
+            SEARCHBINDCACHE(editkey)("edittoggle", 1);
+            pushfont("little");
+            ty += draw_textx("Press \fs\fc%s\fS to %s editmode", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
             popfont();
         }
 
