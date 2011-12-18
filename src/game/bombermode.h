@@ -51,7 +51,7 @@ struct bomberservmode : bomberstate, servmode
             if(alive <= 1) return;
         }
         bombertime = gamemillis+GAME(bomberdelay);
-        if(!m_duke(gamemode, mutators)) loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j), true, true);
+        loopvj(sents) if(enttype[sents[j].type].usetype == EU_ITEM) setspawn(j, hasitem(j), true, true);
     }
 
     void died(clientinfo *ci, clientinfo *actor)
@@ -89,7 +89,7 @@ struct bomberservmode : bomberstate, servmode
         {
             loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
             {
-                if((GAME(bomberreset) >= 2 || clients[j]->team == ci->team) && (clients[j]->state.state == CS_ALIVE || !m_duke(gamemode, mutators)))
+                if((GAME(bomberreset) >= 2 || clients[j]->team == ci->team) && clients[j]->state.state == CS_ALIVE)
                     waiting(clients[j], 0, 3);
             }
             bombertime = -1;
