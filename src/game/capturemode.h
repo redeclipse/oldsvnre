@@ -79,11 +79,6 @@ struct captureservmode : capturestate, servmode
                         ci->state.gscore++;
                         int score = addscore(ci->team);
                         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
-                        if(m_duke(gamemode, mutators))
-                        {
-                            loopvj(clients) if(clients[j]->state.aitype < AI_START && clients[j]->state.state == CS_ALIVE && clients[j]->team == flags[i].team)
-                                waiting(clients[j], 0, 3);
-                        }
                         if(GAME(capturelimit) && score >= GAME(capturelimit))
                         {
                             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
