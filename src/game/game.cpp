@@ -2445,8 +2445,10 @@ namespace game
                 flags |= MDL_LIGHTFX;
                 int millis = lastmillis%1000;
                 float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
-                vec col = vec(0.25f, 1.f, 1.f).mul(amt);
-                e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
+                flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(64), uchar(255), uchar(255), amt);
+                flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 0.25f, 1.f, 1.f, amt);
+                //vec col = vec(0.25f, 1.f, 1.f).mul(amt);
+                //e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
                 //e->light.effect.max(col);
             }
             if(burntime && d->burning(lastmillis, burntime))
@@ -2461,9 +2463,11 @@ namespace game
                 flags |= MDL_LIGHTFX;
                 int millis = lastmillis%1000;
                 float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
-                vec col = vec(1, 0.2f, 0.2f).mul(amt);
-                e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
-                e->light.effect.max(col);
+                flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(255), uchar(52), uchar(52), amt);
+                flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 0.2f, 0.2f, amt);
+                //vec col = vec(1, 0.2f, 0.2f).mul(amt);
+                //e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
+                //e->light.effect.max(col);
             }
         }
         rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);

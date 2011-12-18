@@ -578,6 +578,21 @@ namespace server
 }
 
 #if !defined(GAMESERVER) && !defined(STANDALONE)
+template<class T> inline void flashcolour(T &r, T &g, T &b, T br, T bg, T bb, float amt)
+{
+    r += (br-r)*amt;
+    g += (bg-g)*amt;
+    b += (bb-b)*amt;
+}
+
+template<class T> inline void flashcolourf(T &r, T &g, T &b, T &f, T br, T bg, T bb, T bf, float amt)
+{
+    r += (br-r)*amt;
+    g += (bg-g)*amt;
+    b += (bb-b)*amt;
+    f += (bf-f)*amt;
+}
+
 struct gameentity : extentity
 {
     int schan;
