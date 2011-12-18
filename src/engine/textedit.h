@@ -151,7 +151,7 @@ struct editor
 
     int scrolly; // vertical scroll offset
 
-    bool linewrap, keepsfocus;
+    bool linewrap;
     int pixelwidth; // required for up/down/hit/draw/bounds
     int pixelheight; // -1 for variable sized, i.e. from bounds()
 
@@ -697,7 +697,7 @@ static editor *useeditor(const char *name, int mode, bool focus, const char *ini
 ICOMMAND(0, textlist, "", (), // @DEBUG return list of all the editors
     vector<char> s;
     loopv(editors)
-    { 
+    {
         if(i > 0) s.put(", ", 2);
         s.put(editors[i]->name, strlen(editors[i]->name));
     }
