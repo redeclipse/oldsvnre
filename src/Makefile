@@ -171,10 +171,12 @@ ifneq (,$(STRIP))
 endif
 
 install-client: client
-	cp reclient ../bin/reclient$(PLATFORM_SUFFIX)
+	install -d ../bin
+	install -m 755 reclient ../bin/reclient$(PLATFORM_SUFFIX)
 
 install-server: server
-	cp reserver ../bin/reserver$(PLATFORM_SUFFIX)
+	install -d ../bin
+	install -m 755 reserver ../bin/reserver$(PLATFORM_SUFFIX)
 
 shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
@@ -182,6 +184,9 @@ shared/cube2font.o: shared/cube2font.c
 cube2font: shared/cube2font.o
 	$(CXX) $(CXXFLAGS) -o cube2font shared/cube2font.o `freetype-config --libs` -lz -lpng
 
+install-cube2font: cube2font
+	install -d ../bin
+	install -m 755 cube2font ../bin/cube2font
 endif
 
 install: install-client install-server
