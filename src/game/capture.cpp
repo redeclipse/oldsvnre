@@ -155,6 +155,12 @@ namespace capture
                 {
                     int sx = x-int(s*skew);
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
+                    if(wait > 0.75f)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
+                    }
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "super", "%d%%", int(wait*100.f));
                 }
