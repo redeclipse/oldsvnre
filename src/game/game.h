@@ -615,9 +615,9 @@ struct actitem
 };
 #define NUMPLAYERMODELS 2
 #ifdef GAMEWORLD
-const char *playermodels[NUMPLAYERMODELS][2] = {
-    { "actors/player/male",     "actors/player/male/hwep" },
-    { "actors/player/female",   "actors/player/female/hwep" }
+const char *playermodels[NUMPLAYERMODELS][3] = {
+    { "actors/player/male",     "actors/player/male/hwep",      "male" },
+    { "actors/player/female",   "actors/player/female/hwep",    "female" }
 };
 const char * const animnames[] =
 {
@@ -646,7 +646,7 @@ const char * const animnames[] =
 };
 #else
 extern const char * const animnames[];
-extern const char *playermodels[NUMPLAYERMODELS][2];
+extern const char *playermodels[NUMPLAYERMODELS][3];
 #endif
 
 struct eventicon
