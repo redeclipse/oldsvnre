@@ -37,6 +37,7 @@ Modding:
  * New map editing menu, available via [F3]
  * Editing mode has been made more obvious to the user
  * cube2font tool for generating game fonts, including documentation
+ * Ability to add a second cloudlayer with the envlayer command
 Misc:
  * AI waypoints separated out from ents, overall major AI improvements
  * Split apart kick and ban commands so users can be removed without a ban
