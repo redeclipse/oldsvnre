@@ -1,6 +1,7 @@
 Red Eclipse 1.2
 Gameplay:
- * Powerjump removed, replaced with "impulse launch", use by jumping whilst powersliding
+ * Powerjump removed, replaced with "impulse launch", use by jumping whilst
+   powersliding
  * Impulse moves now disregard cost and scale depending on available energy
  * Plasma primary damage increased
  * Plasma secondary fire travels faster if charged for a short time
@@ -10,7 +11,8 @@ Gameplay:
  * Zoomlock disabled for rifle
  * Added weapon stun effect which impedes movement for a certain time
  * Made the carrier of the flag/bomb move slower
- * Regeneration, damage and shield buffs for defending flags/goals
+ * New "buff" system for flag/goal defenders: increases regeneration. damage,
+   and shielding
 Audio & Visuals:
  * Ingame music
  * New sounds for pistol, SMG, grenade, sword, player death, hit/bleed, etc.
@@ -19,7 +21,6 @@ Audio & Visuals:
  * New font "Play", extended character support
  * Female variation of player model (set in profile)
  * Added visible counter and warning for imminent explosion in Bomber ball
- * New "buff" system for flag/goal defenders: increases regeneration. damage, and shielding
 Maps:
  * Ares, new map
  * Cargo, new map
