@@ -1,6 +1,6 @@
 Red Eclipse 1.2
 Gameplay:
- * Powerjump removed, powerlaunch added, use by jumping whilst powersliding
+ * Powerjump removed, replaced with "impulse launch", use by jumping whilst powersliding
  * Impulse moves now disregard cost and scale depending on available energy
  * Plasma primary damage increased
  * Plasma secondary fire travels faster if charged for a short time
@@ -19,6 +19,7 @@ Audio & Visuals:
  * New font "Play", extended character support
  * Female variation of player model (set in profile)
  * Added visible counter and warning for imminent explosion in Bomber ball
+ * New "buff" system for flag/goal defenders: increases regeneration. damage, and shielding
 Maps:
  * Ares, new map
  * Cargo, new map
@@ -49,7 +50,7 @@ Additional Fixed Bugs:
  * #40 dedicated server demo recording is broken
  * #42 Plasma Blue-Ball-of-Death sticking to Ragdoll
  * #44 Entity Radius Broken in Edit Mode
- * #47 Create "extraplayers" variable to replace INSERT/DELETE behaviour
+ * #47 Create "botoffset" variable to replace INSERT/DELETE behaviour
  * #53 can't drop flag in ctf-protect
  * #60 Live Support does not work correctly
  * #65 Clicking the Red Eclipse icon on map selection without selecting a map
@@ -58,5 +59,4 @@ Additional Fixed Bugs:
  * #69 Edit mode segfault
  * #70 Temporarily missing sound for Flamer primary fire after reload
  * #74 better Link line colors
- * #77 Constant health bonus given in CTF
  * #81 Killing the opponent team in Survivor CTF/BB does not yield you a point
