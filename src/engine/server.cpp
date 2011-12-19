@@ -1431,7 +1431,7 @@ void setlocations(bool wanthome)
 void writecfg()
 {
 #ifndef STANDALONE
-    stream *f = openutf8file("config.cfg", "wb");
+    stream *f = openutf8file("config.cfg", "w");
     if(!f) return;
     client::writeclientinfo(f);
     vector<ident *> ids;
