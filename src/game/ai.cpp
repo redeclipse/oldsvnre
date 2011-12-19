@@ -1365,16 +1365,16 @@ namespace ai
         return busy >= 1;
     }
 
-    bool transport(gameent *d, bool find = false)
+    bool transport(gameent *d, int find = 0)
     {
         vec pos = d->feetpos();
         static vector<int> candidates; candidates.setsize(0);
-        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, physics::hover(d) ? HOVERDIST : RETRYDIST, candidates);
+        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, (physics::hover(d) ? HOVERDIST : RETRYDIST)*find, candidates);
         if(find ? !candidates.empty() : !d->ai->route.empty()) loopk(2)
         {
             int best = -1;
             float dist = 1e16f;
-            loopv(find ? candidates: d->ai->route)
+            loopv(find ? candidates : d->ai->route)
             {
                 int n = find ? candidates[i] : d->ai->route[i];
                 if((k || (!d->ai->hasprevnode(n) && n != d->lastnode)) && !obstacles.find(n, d))
@@ -1395,7 +1395,7 @@ namespace ai
                 return true;
             }
         }
-        if(!find) return transport(d, true);
+        if(find <= 1) return transport(d, find+1);
         return false;
     }
 
@@ -1490,11 +1490,9 @@ namespace ai
             {
                 if(d->speedscale != 0)
                 {
-                    bool ladder = d->onladder;
                     physics::move(d, 1, true);
-                    if(aistyle[d->aitype].canmove && !b.idle && b.type != AI_S_WAIT) timeouts(d, b);
-                    if(!ladder && d->onladder) d->ai->jumpseed = lastmillis;
                     entities::checkitems(d);
+                    if(aistyle[d->aitype].canmove && !b.idle) timeouts(d, b);
                 }
                 else
                 {
