@@ -1,8 +1,9 @@
 Red Eclipse 1.2
 Gameplay:
  * Powerjump removed, replaced with "impulse launch", use by jumping whilst
-   powersliding
+   "impulse sliding"
  * Impulse moves now disregard cost and scale depending on available energy
+ * Special melee actions now require an impulse move beforehand
  * Plasma primary damage increased
  * Plasma secondary fire travels faster if charged for a short time
  * Flamer primary & burn damage reduced
@@ -11,7 +12,7 @@ Gameplay:
  * Zoomlock disabled for rifle
  * Added weapon stun effect which impedes movement for a certain time
  * Made the carrier of the flag/bomb move slower
- * New "buff" system for flag/goal defenders: increases regeneration. damage,
+ * New "buff" system for flag/goal defenders: increases regeneration, damage,
    and shielding
 Audio & Visuals:
  * Ingame music
@@ -26,10 +27,12 @@ Maps:
  * Cargo, new map
  * Colony, new map
  * Dutility, revamped
+ * Tower, re-added and revamped
 Modes & Mutators:
  * League mutator removed
  * Instagib-vampire combination disabled
  * Multi-team mutator re-added
+ * Jetpack mutator re-added
 Modding:
  * New map editing menu, available via [F3]
  * Editing mode has been made more obvious to the user
