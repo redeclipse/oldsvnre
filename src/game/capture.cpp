@@ -157,8 +157,8 @@ namespace capture
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
                     if(wait > 0.5f)
                     {
-                        int millis = lastmillis%1000;
-                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
+                        int delay = int(250*(1.f/wait)), millis = lastmillis%(delay*2);
+                        float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                         flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
                     }
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
@@ -221,8 +221,8 @@ namespace capture
             light->effect = vec::hexcolor(TEAM(f.team, colour));
             if(wait > 0.5f)
             {
-                int millis = lastmillis%1000;
-                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
+                int delay = int(250*(1.f/wait)), millis = lastmillis%(delay*2);
+                float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                 flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
             }
             light->material[0] = bvec::fromcolor(light->effect);
@@ -283,8 +283,8 @@ namespace capture
             light->effect = vec::hexcolor(TEAM(f.team, colour));
             if(wait > 0.5f)
             {
-                int millis = lastmillis%1000;
-                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
+                int delay = int(250*(1.f/wait)), millis = lastmillis%(delay*2);
+                float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                 flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
             }
             light->material[0] = bvec::fromcolor(light->effect);
