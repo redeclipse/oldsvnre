@@ -158,7 +158,7 @@ namespace capture
                     if(wait > 0.5f)
                     {
                         int millis = lastmillis%1000;
-                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
+                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
                         flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
                     }
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
@@ -222,7 +222,7 @@ namespace capture
             if(wait > 0.5f)
             {
                 int millis = lastmillis%1000;
-                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
+                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
                 flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
             }
             light->material[0] = bvec::fromcolor(light->effect);
@@ -284,7 +284,7 @@ namespace capture
             if(wait > 0.5f)
             {
                 int millis = lastmillis%1000;
-                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
+                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
                 flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
             }
             light->material[0] = bvec::fromcolor(light->effect);
