@@ -152,10 +152,10 @@ namespace bomber
             {
                 int sx = x-int(s*skew);
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f);
-                if(wait > 0.75f)
+                if(wait > 0.5f)
                 {
                     int millis = lastmillis%1000;
-                    float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                    float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
                     flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
                 }
                 if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, colour.r, colour.g, colour.b, blend*hud::inventoryblend*0.25f, skew);
@@ -249,9 +249,15 @@ namespace bomber
                 {
                     if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
                     entitylight *light = &entities::ents[f.ent]->light;
-                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/4)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0;
+                    float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/4)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0,
+                          wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : ((f.owner && bombercarrytime) ? clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f) : 0.f);
                     int interval = lastmillis%1000;
                     light->effect = pulsecolour();
+                    if(wait > 0.5f)
+                    {
+                        float amt = (interval <= 500 ? interval/500.f : 1.f-((interval-500)/500.f))*((wait-0.5f)*2);
+                        flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
+                    }
                     light->material[0] = bvec::fromcolor(light->effect);
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
@@ -260,7 +266,6 @@ namespace bomber
                     if(f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/4*trans+2.5f;
-                        float wait = clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f);
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
                         part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);

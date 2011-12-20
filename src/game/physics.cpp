@@ -913,7 +913,7 @@ namespace physics
                         regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
                     }
                 }
-                if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && ((d->action[AC_SPECIAL] && d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay) || sliding(d, true)))
+                if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && ((d->action[AC_SPECIAL] && (!impulsemeleestyle || (d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay))) || sliding(d, true)))
                 {
                     vec oldpos = d->o, dir;
                     vecfromyawpitch(d->aimyaw, 0, 1, 0, dir);
