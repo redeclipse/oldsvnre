@@ -155,10 +155,10 @@ namespace capture
                 {
                     int sx = x-int(s*skew);
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                    if(wait > 0.75f)
+                    if(wait > 0.5f)
                     {
                         int millis = lastmillis%1000;
-                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
                         flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
                     }
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
@@ -209,7 +209,7 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float trans = 0.f;
+            float trans = 0.f, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f);
             if(!f.owner && !f.droptime)
             {
                 int millis = lastmillis-f.interptime;
@@ -218,7 +218,15 @@ namespace capture
             }
             else trans = 0.5f;
             entitylight *light = &entities::ents[f.ent]->light;
-            light->material[0] = bvec(TEAM(f.team, colour));
+            light->effect = vec::hexcolor(TEAM(f.team, colour));
+            if(wait > 0.5f)
+            {
+                int millis = lastmillis%1000;
+                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
+                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
+            }
+            light->material[0] = bvec::fromcolor(light->effect);
+            int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             vec above(f.spawnloc);
             if(trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             above.z += enttype[AFFINITY].radius/2+2.5f;
@@ -230,10 +238,9 @@ namespace capture
             }
             if((m_gsp(game::gamemode, game::mutators) && f.droptime) || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
             {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, TEAM(f.team, colour), (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, TEAM(f.team, colour));
-                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, TEAM(f.team, colour), 0, wait);
+                part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
+                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);
                 above.z += 1.f;
                 defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
                 above.z += 2.5f;
@@ -264,7 +271,7 @@ namespace capture
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || (!f.owner && !f.droptime)) continue;
             vec above(f.pos());
-            float yaw = 0;
+            float yaw = 0, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f);
             if(f.owner) yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
             else
             {
@@ -272,10 +279,16 @@ namespace capture
                 if(f.proj) above.z -= f.proj->height;
             }
             while(yaw >= 360.f) yaw -= 360.f;
-            int interval = lastmillis%1000;
             entitylight *light = &f.light;
-            light->material[0] = bvec(TEAM(f.team, colour));
-            light->effect = vec::hexcolor(TEAM(f.team, colour)).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
+            light->effect = vec::hexcolor(TEAM(f.team, colour));
+            if(wait > 0.5f)
+            {
+                int millis = lastmillis%1000;
+                float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
+                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
+            }
+            light->material[0] = bvec::fromcolor(light->effect);
+            int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
             above.z += enttype[AFFINITY].radius*2/3;
             if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
@@ -285,9 +298,9 @@ namespace capture
             if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
             {
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, TEAM(f.team, colour), (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, TEAM(f.team, colour));
-                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, TEAM(f.team, colour), 0, wait);
+                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
                 above.z += 0.5f;
                 defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
                 above.z += 2.5f;
