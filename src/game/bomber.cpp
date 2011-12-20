@@ -155,7 +155,7 @@ namespace bomber
                 if(wait > 0.5f)
                 {
                     int millis = lastmillis%1000;
-                    float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*((wait-0.5f)*2);
+                    float amt = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*wait;
                     flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
                 }
                 if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, colour.r, colour.g, colour.b, blend*hud::inventoryblend*0.25f, skew);
@@ -255,7 +255,7 @@ namespace bomber
                     light->effect = pulsecolour();
                     if(wait > 0.5f)
                     {
-                        float amt = (interval <= 500 ? interval/500.f : 1.f-((interval-500)/500.f))*((wait-0.5f)*2);
+                        float amt = (interval <= 500 ? interval/500.f : 1.f-((interval-500)/500.f))*wait;
                         flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
                     }
                     light->material[0] = bvec::fromcolor(light->effect);

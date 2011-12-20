@@ -1128,7 +1128,7 @@ namespace hud
             popfont();
         }
 
-        if(m_edit(game::gamemode))
+        if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
         {
             SEARCHBINDCACHE(editkey)("edittoggle", 1);
             pushfont("little");
