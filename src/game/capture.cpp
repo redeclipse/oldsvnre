@@ -229,7 +229,7 @@ namespace capture
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             vec above(f.spawnloc);
             if(trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
-            above.z += enttype[AFFINITY].radius/2+2.5f;
+            above.z += enttype[AFFINITY].radius*2/3;
             if(!f.owner && !f.droptime)
             {
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));
