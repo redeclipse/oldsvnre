@@ -113,6 +113,7 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
+    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 4, 1000);
 
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
@@ -2016,8 +2017,8 @@ namespace game
     {
         lastcamera = 0;
         zoomset(false, 0);
-        checkcamera();
         if(!focus) focus = player1;
+        checkcamera();
         camera1->o = camerapos(focus);
         camera1->yaw = focus->yaw;
         camera1->pitch = focus->pitch;
@@ -2170,14 +2171,10 @@ namespace game
         checkcamera();
         if(!client::waiting())
         {
-            if(!lastcamera)
+            if(!lastcamera && mousestyle() == 2 && focus->state != CS_WAITING && focus->state != CS_SPECTATOR)
             {
-                cameras.deletecontents();
-                if(mousestyle() == 2 && focus->state != CS_WAITING && focus->state != CS_SPECTATOR)
-                {
-                    camera1->yaw = focus->aimyaw = focus->yaw;
-                    camera1->pitch = focus->aimpitch = focus->pitch;
-                }
+                camera1->yaw = focus->aimyaw = focus->yaw;
+                camera1->pitch = focus->aimpitch = focus->pitch;
             }
 
             bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1 && !tvmode(), bob = false;

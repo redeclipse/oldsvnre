@@ -1247,7 +1247,7 @@ namespace game
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow,
             playerovertone, playerundertone, playerdisplaytone, playereffecttone;
-    extern float bloodscale, debrisscale;
+    extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
     extern string clientmap;

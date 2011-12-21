@@ -1722,7 +1722,7 @@ namespace client
                         {
                             vec pos = vec(e.o).add(vec(0, 0, 4));
                             const char *texname = entities::showentdescs >= 2 ? hud::itemtex(e.type, attr) : NULL;
-                            if(texname && *texname) part_icon(pos, textureload(texname, 3), 2, 1, -10, 0, game::eventiconfade, colour);
+                            if(texname && *texname) part_icon(pos, textureload(texname, 3), game::aboveitemiconsize, 1, -10, 0, game::eventiconfade, colour);
                             else
                             {
                                 const char *item = entities::entinfo(e.type, e.attrs, 0);
