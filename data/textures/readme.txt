@@ -9,7 +9,7 @@ In the absence of an explicit license, content is considered to be covered by
 
 lava.jpg
     Created by RaZgRiZ Made with Filter Forge II Beta 3
-    Licensed publicly for everyone to use and modify as long as the author is credited for the original work.
+    Licensed publicly for everyone to use, modify and distribute as long as the author is credited for the original work.
 
 emblem.png, logo.png
     Created by Luckystrike-Rx
