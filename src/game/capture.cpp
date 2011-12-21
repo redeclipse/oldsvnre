@@ -159,7 +159,7 @@ namespace capture
                     {
                         int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
                         float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                        flashcolour(c.r, c.g, c.b, 1.f, 0.f, 0.f, amt);
+                        flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
                     }
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "super", "%d%%", int(wait*100.f));
@@ -223,7 +223,7 @@ namespace capture
             {
                 int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
+                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 1.f, 1.f, amt);
             }
             light->material[0] = bvec::fromcolor(light->effect);
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
@@ -285,7 +285,7 @@ namespace capture
             {
                 int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
+                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 1.f, 1.f, amt);
             }
             light->material[0] = bvec::fromcolor(light->effect);
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);

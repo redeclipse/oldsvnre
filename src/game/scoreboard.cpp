@@ -162,7 +162,7 @@ namespace hud
                     {
                         int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                         if(m_defend(game::gamemode) && sg.total == INT_MAX)
-                            game::announcef(anc, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS team secured all flags", TEAM(sg.team, colour), TEAM(sg.team, name));
+                            game::announcef(anc, CON_MESG, game::player1, "\fwteam \fs\f[%d]%s\fS secured all flags", TEAM(sg.team, colour), TEAM(sg.team, name));
                         else
                         {
                             if(numgroups > 1 && sg.total == groups[1]->total)
@@ -179,7 +179,7 @@ namespace hud
                                 }
                                 game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS tied %s with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, sg.total);
                             }
-                            else game::announcef(anc, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS team won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
+                            else game::announcef(anc, CON_MESG, game::player1, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
                         }
                     }
                     else
