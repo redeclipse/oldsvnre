@@ -75,7 +75,7 @@ namespace defend
                 formatstring(b.info)("<super>\fs\f[%d]\f(%s)%s\fS", TEAM(defend, colour), hud::teamtexname(defend), TEAM(defend, name));
             }
             vec above = b.o;
-            above.z += enttype[AFFINITY].radius/2+2.5f;
+            above.z += enttype[AFFINITY].radius*2/3;
             part_text(above, b.info);
             above.z += 2.5f;
             if(b.enemy)
