@@ -154,7 +154,7 @@ namespace bomber
                 float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f);
                 if(wait > 0.5f)
                 {
-                    int delay = int(250*(1.f/wait)), millis = lastmillis%(delay*2);
+                    int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
                     float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                     flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
                 }
@@ -255,7 +255,7 @@ namespace bomber
                     light->effect = pulsecolour();
                     if(wait > 0.5f)
                     {
-                        int delay = int(250*(1.f/wait)), millis = lastmillis%(delay*2);
+                        int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
                         float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                         flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
                     }
