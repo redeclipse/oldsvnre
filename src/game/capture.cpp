@@ -157,9 +157,9 @@ namespace capture
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
                     if(wait > 0.5f)
                     {
-                        int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
+                        int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
                         float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                        flashcolour(c.r, c.g, c.b, 1.f, 1.f, 1.f, amt);
+                        flashcolour(c.r, c.g, c.b, 0.65f, 0.65f, 0.65f, amt);
                     }
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "super", "%d%%", int(wait*100.f));
@@ -221,11 +221,11 @@ namespace capture
             light->effect = vec::hexcolor(TEAM(f.team, colour));
             if(wait > 0.5f)
             {
-                int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
+                int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 1.f, 1.f, amt);
+                flashcolour(light->effect.r, light->effect.g, light->effect.b, 0.65f, 0.65f, 0.65f, amt);
             }
-            light->material[0] = bvec::fromcolor(light->effect);
+            light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             vec above(f.spawnloc);
             if(trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
@@ -283,11 +283,11 @@ namespace capture
             light->effect = vec::hexcolor(TEAM(f.team, colour));
             if(wait > 0.5f)
             {
-                int delay = wait > 0.75f ? 250 : 500, millis = lastmillis%(delay*2);
+                int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 1.f, 1.f, amt);
+                flashcolour(light->effect.r, light->effect.g, light->effect.b, 0.65f, 0.65f, 0.65f, amt);
             }
-            light->material[0] = bvec::fromcolor(light->effect);
+            light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
             above.z += enttype[AFFINITY].radius*2/3;
