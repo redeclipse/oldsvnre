@@ -154,7 +154,7 @@ GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
-GVAR(0, capturebuffing, 0, 1, 15); // buffed; 0 = off, &1 = when guarding/secured, &2 = when carrying enemy, &4 = also defending secured, &8 = also defending enemy carrier
+GVAR(0, capturebuffing, 0, 5, 15); // buffed; 0 = off, &1 = when guarding/secured, &2 = when carrying enemy, &4 = also defending secured, &8 = also defending enemy carrier
 GVAR(0, capturebuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, capturebuffarea, FVAR_NONZERO, 3, FVAR_MAX); // multiply affinity radius by this much for buff
 GFVAR(0, capturebuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
