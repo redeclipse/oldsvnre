@@ -1627,7 +1627,7 @@ namespace hud
             if(font && *font) pushfont(font);
             int tx = int((left ? (x+w+(FONTW*skew)) : (x-w-(FONTW*skew)))*(1.f/skew)), ty = int((y-s+s/2-(FONTH/2*skew))*(1.f/skew));
             defvformatstring(str, text, text);
-            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY, -1, -1, str);
+            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), (left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY)|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
             glPopMatrix();
         }
@@ -1642,7 +1642,7 @@ namespace hud
         if(font && *font) pushfont(font);
         int sy = int(FONTH*skew), tx = int(x*(1.f/skew)), ty = int((y-size/32)*(1.f/skew)), ti = int(255.f*blend);
         defvformatstring(str, text, text);
-        draw_textx("%s", tx, ty, 255, 255, 255, ti, align, -1, -1, str);
+        draw_textx("%s", tx, ty, 255, 255, 255, ti, align|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
         glPopMatrix();
         return sy;
@@ -1723,8 +1723,10 @@ namespace hud
                 concatstring(attrstr, s);
             }
             const char *itext = itemtex(e.type, e.attrs[0]);
-            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew);
-            drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s (%d)\n%s\n%s", enttype[e.type].name, n, entities::entinfo(e.type, e.attrs, true), attrstr);
+            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew),
+                qy = drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", attrstr);
+            qy += drawitemsubtext(x, y-qy, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", entities::entinfo(e.type, e.attrs, true));
+            qy += drawitemsubtext(x, y-qy, s, TEXT_RIGHT_UP, skew, "default", fade*inventoryblend, "%s (%d)", enttype[e.type].name, n);
             return ty;
         }
         return 0;
