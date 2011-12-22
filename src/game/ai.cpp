@@ -1414,7 +1414,10 @@ namespace ai
                         d->ai->clear(false);
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
-                    case 4: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    case 4: default:
+                        if(b.type != AI_S_WAIT) { game::suicide(d, HIT_LOST); return; } // this is our last resort..
+                        else d->ai->blockseq = 0; // waiting, so just try again..
+                        break;
                 }
                 if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s blocked %dms sequence %d", game::colorname(d), d->ai->blocktime, d->ai->blockseq);
@@ -1435,7 +1438,10 @@ namespace ai
                         d->ai->clear(false);
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
-                    case 4: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    case 4: default:
+                        if(b.type != AI_S_WAIT) { game::suicide(d, HIT_LOST); return; } // this is our last resort..
+                        else d->ai->blockseq = 0; // waiting, so just try again..
+                        break;
                 }
                 if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s targeted %d too long %dms sequence %d", game::colorname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
@@ -1458,7 +1464,10 @@ namespace ai
                 {
                     case 1: d->ai->clear(false); break;
                     case 2: if(!transport(d)) d->ai->reset(false); break;
-                    case 3: default: game::suicide(d, HIT_LOST); return; break; // this is our last resort..
+                    case 3: default:
+                        if(b.type != AI_S_WAIT) { game::suicide(d, HIT_LOST); return; } // this is our last resort..
+                        else d->ai->blockseq = 0; // waiting, so just try again..
+                        break;
                 }
                 if(aidebug >= 6 && dbgfocus(d))
                     conoutf("%s hunting %dms sequence %d", game::colorname(d), millis, d->ai->huntseq);
