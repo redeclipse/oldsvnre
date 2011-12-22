@@ -233,7 +233,7 @@ namespace defend
 
     void sendaffinity(packetbuf &p)
     {
-        putint(p, N_AFFIN);
+        putint(p, N_SETUPAFFIN);
         putint(p, st.flags.length());
         loopv(st.flags)
         {

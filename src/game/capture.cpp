@@ -485,7 +485,7 @@ namespace capture
                 {
                     f.inertia = f.proj->vel;
                     f.movetime = totalmillis;
-                    client::addmsg(N_AFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
+                    client::addmsg(N_MOVEAFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
                 }
             }
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;

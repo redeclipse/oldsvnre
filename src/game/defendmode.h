@@ -102,7 +102,7 @@ struct defendservmode : defendstate, servmode
 
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)
     {
-        putint(p, N_AFFIN);
+        putint(p, N_SETUPAFFIN);
         putint(p, flags.length());
         loopv(flags)
         {
