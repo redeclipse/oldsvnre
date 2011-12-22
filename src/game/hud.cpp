@@ -1625,9 +1625,9 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (x+w) : x)*(1.f/skew)), ty = int((y-s+s/32)*(1.f/skew));
+            int tx = int((left ? (x+w+(FONTW*skew)) : (x-w-(FONTW*skew)))*(1.f/skew)), ty = int((y-s+s/2-(FONTH/2*skew))*(1.f/skew));
             defvformatstring(str, text, text);
-            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), TEXT_RIGHT_JUSTIFY, -1, -1, str);
+            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY, -1, -1, str);
             if(font && *font) popfont();
             glPopMatrix();
         }
@@ -1716,16 +1716,15 @@ namespace hud
         if(entities::ents.inrange(n))
         {
             gameentity &e = *(gameentity *)entities::ents[n];
-            const char *itext = itemtex(e.type, e.attrs[0]);
-            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew, "default", "%s (%d)", enttype[e.type].name, n);
-            mkstring(attrstr);
+            string attrstr; attrstr[0] = 0;
             loopi(enttype[e.type].numattrs)
             {
                 defformatstring(s)("%s%d", i ? " " : "", e.attrs[i]);
                 concatstring(attrstr, s);
             }
-            if(attrstr[0]) drawitemsubtext(x, y-int(s/3*skew), s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", attrstr);
-            drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", entities::entinfo(e.type, e.attrs, true));
+            const char *itext = itemtex(e.type, e.attrs[0]);
+            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew);
+            drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s (%d)\n%s\n%s", enttype[e.type].name, n, entities::entinfo(e.type, e.attrs, true), attrstr);
             return ty;
         }
         return 0;

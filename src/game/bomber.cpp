@@ -147,7 +147,9 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend*hud::inventoryblend, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured" : "\fytaken") : (f.droptime ? "\fcdropped" : ""));
+            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend*hud::inventoryblend, skew);
+            if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s\n\fs%s\fS", game::colorname(f.owner), f.owner->team == f.team ? "\fgsecured" : "\fytaken");
+            else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.droptime ? "\fcdropped" : "");
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);
@@ -192,7 +194,6 @@ namespace bomber
                         }
                     }
                 }
-                hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;

@@ -113,7 +113,7 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
-    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 4, 1000);
+    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 3, 1000);
 
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);

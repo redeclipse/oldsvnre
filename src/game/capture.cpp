@@ -149,8 +149,10 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "reduced", f.owner ? (f.team == f.owner->team ? "\fgsecured" : "\fytaken") : (f.droptime ? "\fcdropped" : ""));
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
                 hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
+                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s\n\fs%s\fS", game::colorname(f.owner), f.owner->team == f.team ? "\fgsecured" : "\fytaken");
+                else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.droptime ? "\fcdropped" : "");
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
                     int sx = x-int(s*skew);
