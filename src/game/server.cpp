@@ -4714,11 +4714,22 @@ namespace server
                     QUEUE_MSG;
                     break;
 
-                case N_AFFIN:
-                    if(smode==&capturemode) capturemode.moveaffinity(ci, p);
-                    else if(smode==&defendmode) defendmode.parseaffinity(p);
-                    else if(smode==&bombermode) bombermode.moveaffinity(ci, p);
+                case N_SETUPAFFIN:
+                    if(smode==&defendmode) defendmode.parseaffinity(p);
                     break;
+
+                case N_MOVEAFFIN:
+                {
+                    int cn = getint(p), id = getint(p);
+                    vec o, inertia;
+                    loopi(3) o[i] = getint(p)/DMF;
+                    loopi(3) inertia[i] = getint(p)/DMF;
+                    clientinfo *cp = (clientinfo *)getinfo(cn);
+                    if(!cp || !hasclient(cp, ci)) break;
+                    if(smode==&capturemode) capturemode.moveaffinity(cp, cn, id, o, inertia);
+                    else if(smode==&bombermode) bombermode.moveaffinity(cp, cn, id, o, inertia);
+                    break;
+                }
 
                 case N_TAKEAFFIN:
                 {

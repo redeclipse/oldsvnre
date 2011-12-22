@@ -223,21 +223,16 @@ struct captureservmode : capturestate, servmode
         }
     }
 
-    void moveaffinity(clientinfo *ci, ucharbuf &p)
+    void moveaffinity(clientinfo *ci, int cn, int id, const vec &o, const vec &inertia = vec(0, 0, 0))
     {
-        int cn = getint(p), id = getint(p);
-        clientinfo *cp = (clientinfo *)getinfo(cn);
-        vec drop, vel;
-        loopi(3) drop[i] = getint(p)/DMF;
-        loopi(3) vel[i] = getint(p)/DMF;
-        if(!flags.inrange(id) || !cp || !hasclient(cp, ci)) return;
+        if(!flags.inrange(id)) return;
         flag &f = flags[id];
         if(!f.droptime || f.owner >= 0) return;
         clientinfo *co = f.lastowner >= 0 ? (clientinfo *)getinfo(f.lastowner) : NULL;
-        if(!co || co->clientnum != cp->clientnum) return;
-        f.droploc = drop;
-        f.inertia = vel;
-        //sendf(-1, 1, "ri9", N_AFFIN, cp->clientnum, id, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
+        if(!co || co->clientnum != ci->clientnum) return;
+        f.droploc = o;
+        f.inertia = inertia;
+        //sendf(-1, 1, "ri9", N_MOVEAFFIN, ci->clientnum, id, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
     }
 
     void parseaffinity(ucharbuf &p)

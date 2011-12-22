@@ -2033,7 +2033,7 @@ namespace client
                     break;
                 }
 
-                case N_AFFIN:
+                case N_SETUPAFFIN:
                 {
                     if(m_defend(game::gamemode)) defend::parseaffinity(p);
                     break;
