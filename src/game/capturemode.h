@@ -202,8 +202,8 @@ struct captureservmode : capturestate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define capturebuffx(a) (GAME(capturebuffing)&a && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= enttype[AFFINITY].radius*2)
-        #define capturebuff1    (GAME(capturebuffing)&1 && f.team == ci->team && (owner ? (owner->clientnum == ci->clientnum || capturebuffx(4)): ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2))
+        #define capturebuffx(a) (GAME(capturebuffing)&a && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= enttype[AFFINITY].radius*GAME(capturebuffarea))
+        #define capturebuff1    (GAME(capturebuffing)&1 && f.team == ci->team && (owner ? (owner->clientnum == ci->clientnum || capturebuffx(4)): (!f.droptime || m_gsp2(gamemode, mutators)) && ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*GAME(capturebuffarea)))
         #define capturebuff2    (GAME(capturebuffing)&2 && f.team != ci->team && owner && (owner->clientnum == ci->clientnum || capturebuffx(8)))
         if(GAME(capturebuffing)) loopv(flags)
         {
