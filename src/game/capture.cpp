@@ -151,7 +151,11 @@ namespace capture
                 int oldy = y-sy;
                 sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
                 hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
-                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s\n\fs%s\fS", game::colorname(f.owner), f.owner->team == f.team ? "\fgsecured" : "\fytaken");
+                if(f.owner)
+                {
+                   int qy = hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.owner->team == f.team ? "\fgsecured" : "\fytaken");
+                   hud::drawitemsubtext(x, oldy-qy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", game::colorname(f.owner));
+                }
                 else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.droptime ? "\fcdropped" : "");
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
@@ -166,7 +170,6 @@ namespace capture
                     if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew, "super", "%d%%", int(wait*100.f));
                 }
-                if(f.owner) hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "\fs%s\fS", game::colorname(f.owner));
             }
         }
         return sy;
