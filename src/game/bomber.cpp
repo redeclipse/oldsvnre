@@ -333,7 +333,7 @@ namespace bomber
         hud::teamscore(team).total = total;
     }
 
-    void parseaffinity(ucharbuf &p, bool commit)
+    void parseaffinity(ucharbuf &p)
     {
         int numflags = getint(p);
         loopi(numflags)
@@ -349,7 +349,7 @@ namespace bomber
                     loopk(3) inertia[k] = getint(p)/DMF;
                 }
             }
-            if(commit && st.flags.inrange(i))
+            if(st.flags.inrange(i))
             {
                 bomberstate::flag &f = st.flags[i];
                 f.team = team;
@@ -476,7 +476,16 @@ namespace bomber
                 }
                 continue;
             }
-            else if(f.droptime) f.droploc = f.pos();
+            else if(f.droptime)
+            {
+                f.droploc = f.pos();
+                if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
+                {
+                    f.inertia = f.proj->vel;
+                    f.movetime = totalmillis;
+                    client::addmsg(N_AFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
+                }
+            }
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
             if(f.lastowner == d && f.droptime && (bomberpickupdelay < 0 || lastmillis-f.droptime <= bomberpickupdelay)) continue;
             if(o.dist(f.pos()) <= enttype[AFFINITY].radius/2)

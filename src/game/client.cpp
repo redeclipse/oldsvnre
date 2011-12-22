@@ -2035,12 +2035,7 @@ namespace client
 
                 case N_AFFIN:
                 {
-                    int numflags = getint(p);
-                    loopi(numflags)
-                    {
-                        int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
-                        defend::st.initaffinity(i, kin, owner, enemy, converted);
-                    }
+                    if(m_defend(game::gamemode)) defend::parseaffinity(p);
                     break;
                 }
 
@@ -2093,8 +2088,8 @@ namespace client
 
                 case N_INITAFFIN:
                 {
-                    if(m_capture(game::gamemode)) capture::parseaffinity(p, m_capture(game::gamemode));
-                    else if(m_bomber(game::gamemode)) bomber::parseaffinity(p, m_bomber(game::gamemode));
+                    if(m_capture(game::gamemode)) capture::parseaffinity(p);
+                    else if(m_bomber(game::gamemode)) bomber::parseaffinity(p);
                     break;
                 }
 

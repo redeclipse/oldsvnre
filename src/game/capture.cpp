@@ -357,7 +357,7 @@ namespace capture
         hud::teamscore(team).total = total;
     }
 
-    void parseaffinity(ucharbuf &p, bool commit)
+    void parseaffinity(ucharbuf &p)
     {
         int numflags = getint(p);
         loopi(numflags)
@@ -373,7 +373,7 @@ namespace capture
                     loopk(3) inertia[k] = getint(p)/DMF;
                 }
             }
-            if(commit && st.flags.inrange(i))
+            if(st.flags.inrange(i))
             {
                 capturestate::flag &f = st.flags[i];
                 f.team = team;
@@ -478,7 +478,16 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || f.owner) continue;
-            if(f.droptime) f.droploc = f.pos();
+            if(f.droptime)
+            {
+                f.droploc = f.pos();
+                if(f.lastowner && (f.lastowner == game::player1 || f.lastowner->ai) && f.proj && (!f.movetime || totalmillis-f.movetime >= 40))
+                {
+                    f.inertia = f.proj->vel;
+                    f.movetime = totalmillis;
+                    client::addmsg(N_AFFIN, "ri8", f.lastowner->clientnum, i, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
+                }
+            }
             if(f.pickuptime && lastmillis-f.pickuptime <= 1000) continue;
             if(f.team == d->team && !m_gsp3(game::gamemode, game::mutators) && (m_gsp2(game::gamemode, game::mutators) || !f.droptime)) continue;
             if(f.lastowner == d && f.droptime && (capturepickupdelay < 0 || lastmillis-f.droptime <= capturepickupdelay))

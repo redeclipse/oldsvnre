@@ -154,7 +154,7 @@ GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
 GFVAR(0, capturethreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
-GVAR(0, capturebuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when carrying
+GVAR(0, capturebuffing, 0, 1, 15); // buffed; 0 = off, &1 = when guarding/secured, &2 = when carrying enemy, &4 = also defending secured, &8 = also defending enemy carrier
 GVAR(0, capturebuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, capturebuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, capturebuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed
@@ -167,7 +167,8 @@ GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, defendinterval, 0, 50, VAR_MAX);
 GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
-GVAR(0, defendbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing
+GVAR(0, defendbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = even when enemies are present
+GFVAR(0, defendbuffoccupy, 0, 0.5f, 1); // for defendbuffing&4, must be occupied this much before passing
 GVAR(0, defendbuffdelay, 0, 1000, VAR_MAX); // buffed for this long after leaving
 GFVAR(0, defendbuffdamage, 1, 2, FVAR_MAX); // multiply outgoing damage by this much when buffed
 GFVAR(0, defendbuffshield, 1, 2, FVAR_MAX); // divide incoming damage by this much when buffed

@@ -19,7 +19,7 @@ struct bomberstate
         gameent *owner, *lastowner;
         projent *proj;
         entitylight light;
-        int ent, interptime, pickuptime, inittime, interpmillis;
+        int ent, interptime, pickuptime, movetime, inittime, interpmillis;
         vec interppos;
 #endif
 
@@ -39,7 +39,7 @@ struct bomberstate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            interptime = pickuptime = inittime = interpmillis = 0;
+            interptime = pickuptime = movetime = inittime = interpmillis = 0;
             interppos = vec(-1, -1, -1);
 #endif
             team = TEAM_NEUTRAL;
@@ -129,7 +129,7 @@ struct bomberstate
         f.votes.shrink(0);
         f.lastowner = owner;
 #else
-        f.pickuptime = 0;
+        f.pickuptime = f.movetime = 0;
         if(!f.inittime) f.inittime = t;
         (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
         destroy(i);
@@ -149,6 +149,7 @@ struct bomberstate
         f.votes.shrink(0);
 #else
         f.pickuptime = 0;
+        f.movetime = t;
         if(!f.inittime) f.inittime = t;
         f.owner = NULL;
         destroy(i);
@@ -166,7 +167,7 @@ struct bomberstate
         f.owner = -1;
         f.votes.shrink(0);
 #else
-        f.pickuptime = f.inittime = 0;
+        f.pickuptime = f.inittime = f.movetime = 0;
         f.owner = NULL;
         destroy(i);
         interp(i, t);
@@ -181,7 +182,8 @@ namespace bomber
     extern bool carryaffinity(gameent *d);
     extern bool dropaffinity(gameent *d);
     extern void sendaffinity(packetbuf &p);
-    extern void parseaffinity(ucharbuf &p, bool commit);
+    extern void parseaffinity(ucharbuf &p);
+    extern void initaffinity(ucharbuf &p);
     extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target = -1);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void takeaffinity(gameent *d, int i);
