@@ -245,6 +245,16 @@ namespace defend
         }
     }
 
+    void parseaffinity(ucharbuf &p)
+    {
+        int numflags = getint(p);
+        loopi(numflags)
+        {
+            int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
+            st.initaffinity(i, kin, owner, enemy, converted);
+        }
+    }
+
     void updateaffinity(int i, int owner, int enemy, int converted)
     {
         if(!st.flags.inrange(i)) return;

@@ -165,6 +165,7 @@ namespace defend
 {
     extern defendstate st;
     extern void sendaffinity(packetbuf &p);
+    extern void parseaffinity(ucharbuf &p);
     extern void updateaffinity(int i, int owner, int enemy, int converted);
     extern void setscore(int team, int total);
     extern void reset();

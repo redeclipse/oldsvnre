@@ -17,7 +17,7 @@ struct capturestate
         gameent *owner, *lastowner;
         projent *proj;
         entitylight light;
-        int ent, interptime, pickuptime;
+        int ent, interptime, pickuptime, movetime;
 #endif
 
         flag()
@@ -36,7 +36,7 @@ struct capturestate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            interptime = pickuptime = 0;
+            interptime = pickuptime = movetime = 0;
 #endif
             team = TEAM_NEUTRAL;
             taketime = droptime = 0;
@@ -109,7 +109,7 @@ struct capturestate
         f.votes.shrink(0);
         f.lastowner = owner;
 #else
-        f.pickuptime = 0;
+        f.pickuptime = f.movetime = 0;
         (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
         if(f.proj)
         {
@@ -133,6 +133,7 @@ struct capturestate
         f.votes.shrink(0);
 #else
         f.pickuptime = 0;
+        f.movetime = t;
         f.owner = NULL;
         destroy(i);
         create(i);
@@ -148,7 +149,7 @@ struct capturestate
         f.owner = -1;
         f.votes.shrink(0);
 #else
-        f.pickuptime = 0;
+        f.pickuptime = f.movetime = 0;
         f.owner = NULL;
         destroy(i);
         interp(i, t);
@@ -163,7 +164,7 @@ namespace capture
     extern bool carryaffinity(gameent *d);
     extern bool dropaffinity(gameent *d);
     extern void sendaffinity(packetbuf &p);
-    extern void parseaffinity(ucharbuf &p, bool commit);
+    extern void parseaffinity(ucharbuf &p);
     extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target = -1);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void returnaffinity(gameent *d, int i);

@@ -202,11 +202,13 @@ struct captureservmode : capturestate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define capturebuff1 (GAME(capturebuffing)&1 && f.team == ci->team && !f.droptime && ((f.owner < 0 && ci->state.o.dist(f.spawnloc) <= enttype[AFFINITY].radius*2) || f.owner == ci->clientnum))
-        #define capturebuff2 (GAME(capturebuffing)&2 && f.owner == ci->clientnum)
+        #define capturebuffx(a) (GAME(capturebuffing)&a && owner && owner->team == ci->team && ci->state.o.dist(owner->state.o) <= enttype[AFFINITY].radius*2)
+        #define capturebuff1    (GAME(capturebuffing)&1 && f.team == ci->team && (owner ? (owner->clientnum == ci->clientnum || capturebuffx(4)): ci->state.o.dist(f.droptime ? f.droploc : f.spawnloc) <= enttype[AFFINITY].radius*2))
+        #define capturebuff2    (GAME(capturebuffing)&2 && f.team != ci->team && owner && (owner->clientnum == ci->clientnum || capturebuffx(8)))
         if(GAME(capturebuffing)) loopv(flags)
         {
             flag &f = flags[i];
+            clientinfo *owner = f.owner >= 0 ? (clientinfo *)getinfo(f.owner) : NULL;
             if(capturebuff1 || capturebuff2)
             {
                 if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
@@ -219,6 +221,23 @@ struct captureservmode : capturestate, servmode
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);
         }
+    }
+
+    void moveaffinity(clientinfo *ci, ucharbuf &p)
+    {
+        int cn = getint(p), id = getint(p);
+        clientinfo *cp = (clientinfo *)getinfo(cn);
+        vec drop, vel;
+        loopi(3) drop[i] = getint(p)/DMF;
+        loopi(3) vel[i] = getint(p)/DMF;
+        if(!flags.inrange(id) || !cp || !hasclient(cp, ci)) return;
+        flag &f = flags[id];
+        if(!f.droptime || f.owner >= 0) return;
+        clientinfo *co = f.lastowner >= 0 ? (clientinfo *)getinfo(f.lastowner) : NULL;
+        if(!co || co->clientnum != cp->clientnum) return;
+        f.droploc = drop;
+        f.inertia = vel;
+        //sendf(-1, 1, "ri9", N_AFFIN, cp->clientnum, id, int(f.droploc.x*DMF), int(f.droploc.y*DMF), int(f.droploc.z*DMF), int(f.inertia.x*DMF), int(f.inertia.y*DMF), int(f.inertia.z*DMF));
     }
 
     void parseaffinity(ucharbuf &p)

@@ -206,8 +206,9 @@ struct defendservmode : defendstate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define defendbuff1 (GAME(defendbuffing)&1 && b.owner == ci->team && !b.enemy)
-        #define defendbuff2 (GAME(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && b.enemy == ci->team)
+        #define defendbuff4 (GAME(defendbuffing)&4 && b.occupied(m_gsp1(gamemode, mutators), GAME(defendoccupy) >= GAME(defendbuffoccupy)))
+        #define defendbuff1 (GAME(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
+        #define defendbuff2 (GAME(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && (b.enemy == ci->team || defendbuff4))
         if(GAME(defendbuffing)) loopv(flags)
         {
             flag &b = flags[i];

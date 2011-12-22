@@ -4715,7 +4715,9 @@ namespace server
                     break;
 
                 case N_AFFIN:
-                    if(smode==&defendmode) defendmode.parseaffinity(p);
+                    if(smode==&capturemode) capturemode.moveaffinity(ci, p);
+                    else if(smode==&defendmode) defendmode.parseaffinity(p);
+                    else if(smode==&bombermode) bombermode.moveaffinity(ci, p);
                     break;
 
                 case N_TAKEAFFIN:
