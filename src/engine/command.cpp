@@ -268,7 +268,7 @@ ident *newident(const char *name, int flags)
     ident *id = idents.access(name);
     if(!id)
     {
-        if(isinteger(name)) 
+        if(isinteger(name))
         {
             debugcode("number %s is not a valid identifier name", name);
             return dummyident;
@@ -329,7 +329,7 @@ static void setalias(const char *name, tagval &v)
     ident *id = idents.access(name);
     if(id)
     {
-        if(id->type == ID_ALIAS) 
+        if(id->type == ID_ALIAS)
         {
             if(id->index < MAXARGS) setarg(*id, v); else setalias(*id, v);
         }
@@ -339,7 +339,7 @@ static void setalias(const char *name, tagval &v)
             freearg(v);
         }
     }
-    else if(isinteger(name)) 
+    else if(isinteger(name))
     {
         debugcode("cannot alias number %s", name);
         freearg(v);
@@ -1245,7 +1245,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
             delete[] idname;
         }
     endstatement:
-        if(more) while(compilearg(code, p, VAL_ANY)) code.add(CODE_POP); 
+        if(more) while(compilearg(code, p, VAL_ANY)) code.add(CODE_POP);
         p += strcspn(p, ")];/\n\0");
         int c = *p++;
         switch(c)
@@ -1333,7 +1333,7 @@ static const uint *runcode(const uint *code, tagval &result)
             case CODE_NOP: continue;
             case CODE_POP:
                 freearg(args[--numargs]);
-                continue;        
+                continue;
             case CODE_ENTER:
                 code = runcode(code, args[numargs++]);
                 continue;
@@ -2199,7 +2199,7 @@ void sublist(char *s, int *start, char *count)
         elementskip;
         if(!*s) break;
     }
-    commandret->setstr(newstring(e, s - e)); 
+    commandret->setstr(newstring(e, s - e));
 }
 
 void getalias_(char *s)
@@ -2463,6 +2463,15 @@ char *strreplace(const char *s, const char *oldval, const char *newval)
 }
 
 ICOMMAND(0, strreplace, "sss", (char *s, char *o, char *n), commandret->setstr(strreplace(s, o, n)));
+
+void nonworld(uint *contents)
+{
+    int oldflags = identflags;
+    identflags &= ~IDF_WORLD;
+    execute(contents);
+    identflags = oldflags;
+}
+COMMAND(0, nonworld, "e");
 
 struct sleepcmd
 {
