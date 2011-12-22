@@ -26,6 +26,7 @@ Maps:
  * Ares, new map
  * Cargo, new map
  * Colony, new map
+ * Isolation, new map
  * Dutility, revamped
  * Tower, re-added and revamped
 Modes & Mutators:
