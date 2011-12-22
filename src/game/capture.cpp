@@ -455,7 +455,7 @@ namespace capture
         }
         else affinityeffect(goal, d->team, f.pos(), f.spawnloc, 3, "CAPTURED");
         hud::teamscore(d->team).total = score;
-        game::announcef(S_V_FLAGSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s scored the \fs\f[%d]%s\fS flag for \fs\f[%d]%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.taketime));
+        game::announcef(S_V_FLAGSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s scored the \fs\f[%d]%s\fS flag for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
     }
 
