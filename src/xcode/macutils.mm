@@ -6,16 +6,40 @@ typedef char string[MAXSTRLEN];
 inline char *s_strncpy(char *d, const char *s, size_t m) { strncpy(d, s, m); d[m-1] = 0; return d; };
 inline char *s_strcpy(char *d, const char *s, size_t m = MAXSTRLEN) { return s_strncpy(d, s, m); }
 inline char *s_strcat(char *d, const char *s) { size_t n = strlen(d); return s_strncpy(d+n, s, MAXSTRLEN-n); };
+#ifndef NSUInteger
+#if __LP64__ || TARGET_OS_EMBEDDED || TARGET_OS_IPHONE || TARGET_OS_WIN32 || NS_BUILD_32_LIKE_64
+typedef unsigned long NSUInteger;
+#else
+typedef unsigned int NSUInteger;
+#endif
+#endif
 
-void mac_pasteconsole(char *commandbuf)
-{	
+char *mac_pasteconsole(int *cblen)
+{
     NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
     NSString *type = [pasteboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
-    if (type != nil) {
+    if(type != nil)
+    {
         NSString *contents = [pasteboard stringForType:type];
-        if (contents != nil)
-			s_strcat(commandbuf, [contents cStringUsingEncoding:NSASCIIStringEncoding]); // 10.4+
+        if(contents != nil)
+        {
+            NSUInteger len = [contents lengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1; // 10.4+
+            if(len > 1)
+            {
+                char *buf = (char *)malloc(len);
+                if(buf)
+                {
+                    if([contents getCString:buf maxLength:len encoding:NSUTF8StringEncoding]) // 10.4+
+                    {
+                        *cblen = len;
+                        return buf;
+                    }
+                    free(buf);
+                }
+            }
+        }
     }
+    return NULL;
 }
 
 /*
