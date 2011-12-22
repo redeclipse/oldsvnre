@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3E06CDDB14A30E1300F89530 /* compass.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDD614A30E1300F89530 /* compass.h */; };
+		3E06CDDC14A30E1300F89530 /* gamemode.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDD714A30E1300F89530 /* gamemode.h */; };
+		3E06CDDD14A30E1300F89530 /* team.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDD814A30E1300F89530 /* team.h */; };
+		3E06CDDE14A30E1300F89530 /* waypoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E06CDD914A30E1300F89530 /* waypoint.cpp */; };
+		3E06CDDF14A30E1300F89530 /* weapons.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDDA14A30E1300F89530 /* weapons.h */; };
 		3E2522471255C29D003F3F5E /* scoreboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E2522461255C29D003F3F5E /* scoreboard.cpp */; };
 		3E469E9811E05C2B00873F83 /* bomber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E469E9511E05C2B00873F83 /* bomber.cpp */; };
 		3E469E9911E05C2B00873F83 /* bomber.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E469E9611E05C2B00873F83 /* bomber.h */; };
@@ -131,6 +136,11 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		3E06CDD614A30E1300F89530 /* compass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compass.h; sourceTree = "<group>"; };
+		3E06CDD714A30E1300F89530 /* gamemode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gamemode.h; sourceTree = "<group>"; };
+		3E06CDD814A30E1300F89530 /* team.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = team.h; sourceTree = "<group>"; };
+		3E06CDD914A30E1300F89530 /* waypoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = waypoint.cpp; sourceTree = "<group>"; };
+		3E06CDDA14A30E1300F89530 /* weapons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weapons.h; sourceTree = "<group>"; };
 		3E2522461255C29D003F3F5E /* scoreboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scoreboard.cpp; sourceTree = "<group>"; };
 		3E469E9511E05C2B00873F83 /* bomber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bomber.cpp; sourceTree = "<group>"; };
 		3E469E9611E05C2B00873F83 /* bomber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bomber.h; sourceTree = "<group>"; };
@@ -467,6 +477,11 @@
 		D16A83350F130E9500EABB1F /* game */ = {
 			isa = PBXGroup;
 			children = (
+				3E06CDD614A30E1300F89530 /* compass.h */,
+				3E06CDD714A30E1300F89530 /* gamemode.h */,
+				3E06CDD814A30E1300F89530 /* team.h */,
+				3E06CDD914A30E1300F89530 /* waypoint.cpp */,
+				3E06CDDA14A30E1300F89530 /* weapons.h */,
 				3E2522461255C29D003F3F5E /* scoreboard.cpp */,
 				3E469E9711E05C2B00873F83 /* bombermode.h */,
 				3E469E9611E05C2B00873F83 /* bomber.h */,
@@ -551,6 +566,10 @@
 				D11B5A6B10CBB500003F0098 /* mpr.h in Headers */,
 				3E469E9911E05C2B00873F83 /* bomber.h in Headers */,
 				3E469E9A11E05C2B00873F83 /* bombermode.h in Headers */,
+				3E06CDDB14A30E1300F89530 /* compass.h in Headers */,
+				3E06CDDC14A30E1300F89530 /* gamemode.h in Headers */,
+				3E06CDDD14A30E1300F89530 /* team.h in Headers */,
+				3E06CDDF14A30E1300F89530 /* weapons.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -674,6 +693,7 @@
 				D11B5A8410CBB637003F0098 /* zip.cpp in Sources */,
 				3E469E9811E05C2B00873F83 /* bomber.cpp in Sources */,
 				3E2522471255C29D003F3F5E /* scoreboard.cpp in Sources */,
+				3E06CDDE14A30E1300F89530 /* waypoint.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -847,9 +867,7 @@
 				INSTALL_PATH = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
-				OTHER_LDFLAGS = (
-					"-no_compact_linkedit",
-				);
+				OTHER_LDFLAGS = "-no_compact_linkedit";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
