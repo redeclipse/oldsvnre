@@ -1,18 +1,11 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreFoundation/CFBundle.h>
 
-#define MAXSTRLEN 512 // must be at least 512 bytes to comply with rfc1459
+// -- copied from tools.h -- including the full file introduces too many problems
+#define MAXSTRLEN 512
 typedef char string[MAXSTRLEN];
-inline char *s_strncpy(char *d, const char *s, size_t m) { strncpy(d, s, m); d[m-1] = 0; return d; };
-inline char *s_strcpy(char *d, const char *s, size_t m = MAXSTRLEN) { return s_strncpy(d, s, m); }
-inline char *s_strcat(char *d, const char *s) { size_t n = strlen(d); return s_strncpy(d+n, s, MAXSTRLEN-n); };
-#ifndef NSUInteger
-#if __LP64__ || TARGET_OS_EMBEDDED || TARGET_OS_IPHONE || TARGET_OS_WIN32 || NS_BUILD_32_LIKE_64
-typedef unsigned long NSUInteger;
-#else
-typedef unsigned int NSUInteger;
-#endif
-#endif
+inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN) { strncpy(d, s, len); d[len-1] = 0; return d; }
+// --
 
 char *mac_pasteconsole(int *cblen)
 {
@@ -23,7 +16,7 @@ char *mac_pasteconsole(int *cblen)
         NSString *contents = [pasteboard stringForType:type];
         if(contents != nil)
         {
-            NSUInteger len = [contents lengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1; // 10.4+
+            int len = (int)[contents lengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1; // 10.4+
             if(len > 1)
             {
                 char *buf = (char *)malloc(len);
@@ -64,14 +57,14 @@ const char *mac_personaldir() {
         path = [(NSURL *)url path];
         CFRelease(url);
     }
-    return path ? s_strcpy(dir, [path fileSystemRepresentation]) : NULL;
+    return path ? copystring(dir, [path fileSystemRepresentation]) : NULL;
 }
 
 const char *mac_sauerbratendir() {
     static string dir;
     NSString *path = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"sauerbraten"];
     if(path) path = [path stringByAppendingPathComponent:@"Contents/gamedata"];
-    return path ? s_strcpy(dir, [path fileSystemRepresentation]) : NULL;
+    return path ? copystring(dir, [path fileSystemRepresentation]) : NULL;
 }
 
 const char *mac_resourcedir(const char *what)
