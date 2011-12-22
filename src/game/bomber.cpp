@@ -432,7 +432,7 @@ namespace bomber
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "EXPLODED");
         destroyaffinity(g.spawnloc);
         hud::teamscore(d->team).total = score;
-        game::announcef(S_V_BOMBSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs\f[%d]%s\fS base for \fs\f[%d]%s\fS team (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.inittime));
+        game::announcef(S_V_BOMBSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs\f[%d]%s\fS base for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
 
