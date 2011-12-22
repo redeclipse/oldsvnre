@@ -504,7 +504,7 @@ namespace game
                          powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
                          reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD;
                     float amt = last ? clamp(float(lastmillis-d->weaplast[d->weapselect])/d->weapwait[d->weapselect], 0.f, 1.f) : 0.f;
-                    if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
+                    if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                     {
                         float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                         adddynlight(d->ejectpos(d->weapselect), 16*scale, pulsecolour(d), 0, 0, DL_KEEP);
@@ -2686,7 +2686,7 @@ namespace game
                      secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
                 int colour = WEAPPCOL(d, d->weapselect, partcol, secondary);
-                if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f))
+                if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                     part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.5f*scale, min(0.65f*scale, 0.8f), 0, 0);
