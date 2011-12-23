@@ -379,34 +379,38 @@ namespace hud
     TVAR(IDF_PERSIST, modeexperttex, "<grey>textures/modeexpert.png", 3);
     TVAR(IDF_PERSIST, moderesizetex, "<grey>textures/moderesize.png", 3);
 
-    void modetexs(int g, int m, bool implied, vector<char> &list)
+    void modetexs(int g, int m, bool before, bool implied, vector<char> &list)
     {
         server::modecheck(g, m);
         #define ADDMODE(s) { list.put(s, strlen(s)); list.add(' '); }
-        if(m_edit(g)) ADDMODE(modeeditingtex)
-        else if(m_campaign(g)) ADDMODE(modecampaigntex)
-        else if(m_trial(g)) ADDMODE(modetimetrialtex)
-        else if(m_capture(g))
-        {
-            if(m_gsp1(g, m)) ADDMODE(modecapturereturntex)
-            else if(m_gsp2(g, m)) ADDMODE(modecapturedefendtex)
-            else if(m_gsp3(g, m)) ADDMODE(modecaptureprotecttex)
-            else ADDMODE(modecapturetex)
+        #define ADDMODEICON \
+        { \
+            if(m_edit(g)) ADDMODE(modeeditingtex) \
+            else if(m_campaign(g)) ADDMODE(modecampaigntex) \
+            else if(m_trial(g)) ADDMODE(modetimetrialtex) \
+            else if(m_capture(g)) \
+            { \
+                if(m_gsp1(g, m)) ADDMODE(modecapturereturntex) \
+                else if(m_gsp2(g, m)) ADDMODE(modecapturedefendtex) \
+                else if(m_gsp3(g, m)) ADDMODE(modecaptureprotecttex) \
+                else ADDMODE(modecapturetex) \
+            } \
+            else if(m_defend(g)) \
+            { \
+                if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
+                else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex) \
+                else ADDMODE(modedefendtex) \
+            } \
+            else if(m_bomber(g)) \
+            { \
+                if(m_gsp1(g, m)) ADDMODE(modebomberbaskettex) \
+                else if(m_gsp2(g, m)) ADDMODE(modebomberholdtex) \
+                else ADDMODE(modebombertex) \
+            } \
+            else ADDMODE(modedeathmatchtex) \
         }
-        else if(m_defend(g))
-        {
-            if(m_gsp1(g, m)) ADDMODE(modedefendquicktex)
-            else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex)
-            else ADDMODE(modedefendtex)
-        }
-        else if(m_bomber(g))
-        {
-            if(m_gsp1(g, m)) ADDMODE(modebomberbaskettex)
-            else if(m_gsp2(g, m)) ADDMODE(modebomberholdtex)
-            else ADDMODE(modebombertex)
-        }
-        else ADDMODE(modedeathmatchtex)
 
+        if(before) ADDMODEICON
         if(m_multi(g, m) && (implied || !(m_implied(g, m)&G_M_MULTI))) ADDMODE(modemultitex)
         if(m_team(g, m) && (implied || !(m_implied(g, m)&G_M_TEAM))) ADDMODE(modeteamtex)
         if(m_insta(g, m) && (implied || !(m_implied(g, m)&G_M_INSTA))) ADDMODE(modeinstatex)
@@ -421,9 +425,10 @@ namespace hud
         if(m_vampire(g, m) && (implied || !(m_implied(g, m)&G_M_VAMPIRE))) ADDMODE(modevampiretex)
         if(m_expert(g, m) && (implied || !(m_implied(g, m)&G_M_EXPERT))) ADDMODE(modeexperttex)
         if(m_resize(g, m) && (implied || !(m_implied(g, m)&G_M_RESIZE))) ADDMODE(moderesizetex)
+        if(!before) ADDMODEICON
     }
 
-    ICOMMAND(0, modetexlist, "iii", (int *g, int *m, int *p), vector<char> list; modetexs(*g, *m, *p!=0, list); result(list.getbuf()));
+    ICOMMAND(0, modetexlist, "iiii", (int *g, int *m, int *b, int *p), vector<char> list; modetexs(*g, *m, *b!=0, *p!=0, list); result(list.getbuf()));
 
     bool needminimap() { return true; }
 
