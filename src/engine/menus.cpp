@@ -24,7 +24,7 @@ struct menu : guicb
         cgui = &g;
         cmenu = this;
         guipasses = passes;
-        if(!passes && strcmp(name, "loading")) world = (identflags&IDF_WORLD)!=0;
+        if(!passes) world = (identflags&IDF_WORLD)!=0;
         if(initscript)
         {
             if(world && passes) { WITHWORLD(execute(initscript)); }
