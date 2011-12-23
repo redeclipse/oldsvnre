@@ -68,16 +68,19 @@ namespace defend
             if(light->millis != lastmillis) light->material[0] = bvec::fromcolor(skewcolour(b.owner, b.enemy, occupy));
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
-                formatstring(b.info)("<super>\fs\f[%d]\f(%s)%s\fS vs. \fs\f[%d]\f(%s)%s\fS", TEAM(b.owner, colour), hud::teamtexname(b.owner), TEAM(b.owner, name), TEAM(b.enemy, colour), hud::teamtexname(b.enemy), TEAM(b.enemy, name));
+                formatstring(b.info)("\fs\f[%d]\f(%s)%s\fS vs. \fs\f[%d]\f(%s)%s\fS", TEAM(b.owner, colour), hud::teamtexname(b.owner), TEAM(b.owner, name), TEAM(b.enemy, colour), hud::teamtexname(b.enemy), TEAM(b.enemy, name));
             else
             {
                 int defend = b.owner ? b.owner : b.enemy;
-                formatstring(b.info)("<super>\fs\f[%d]\f(%s)%s\fS", TEAM(defend, colour), hud::teamtexname(defend), TEAM(defend, name));
+                formatstring(b.info)("\fs\f[%d]\f(%s)%s\fS", TEAM(defend, colour), hud::teamtexname(defend), TEAM(defend, name));
             }
             vec above = b.o;
             above.z += enttype[AFFINITY].radius*2/3;
+            defformatstring(name)("<huge>%s", b.name);
+            part_textcopy(above, name);
+            above.z += 2.f;
             part_text(above, b.info);
-            above.z += 2.5f;
+            above.z += 3.f;
             if(b.enemy)
             {
                 part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z), (totalmillis%1000)/1000.f, 0.1f);
@@ -155,7 +158,6 @@ namespace defend
             bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.owner == game::focus->team || st.flags.length() == 1);
             if(headsup || f.hasflag || millis <= 1000)
             {
-                int prevsy = sy;
                 float skew = headsup ? hud::inventoryskew : 0.f,
                     occupy = f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1)*defendoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
                 vec c = vec::hexcolor(TEAM(f.owner, colour)), c1 = c;
@@ -167,15 +169,17 @@ namespace defend
                 }
                 if(f.hasflag) skew += (millis <= 1000 ? clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew) : 1.f-skew);
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
-                sy += hud::drawitem(hud::flagtex, x, y-sy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
+                int oldy = y-sy;
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend*hud::inventoryblend, skew);
                 if(f.enemy)
                 {
                     int sx = x-int(s*skew);
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
-                    hud::drawprogress(sx, y-prevsy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, blend*hud::inventoryblend*0.25f, skew);
-                    hud::drawprogress(sx, y-prevsy, 0, occupy, s, false, c2.r, c2.g, c2.b, blend*hud::inventoryblend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
+                    hud::drawprogress(sx, oldy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, blend*hud::inventoryblend*0.25f, skew);
+                    hud::drawprogress(sx, oldy, 0, occupy, s, false, c2.r, c2.g, c2.b, blend*hud::inventoryblend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
                 }
-                if(f.owner) hud::drawitem(hud::teamtexname(f.owner), x, y-prevsy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, blend*hud::inventoryblend, skew);
+                if(f.owner) hud::drawitem(hud::teamtexname(f.owner), x, oldy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, blend*hud::inventoryblend, skew);
+                hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.name);
             }
         }
         return sy;
@@ -267,7 +271,7 @@ namespace defend
                 int numdyns = game::numdynents();
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
-                game::announcef(S_V_FLAGSECURED, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs\f[%d]%s\fS secured %s", TEAM(owner, colour), TEAM(owner, name), b.name);
+                game::announcef(S_V_FLAGSECURED, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs\f[%d]%s\fS secured \fw%s", TEAM(owner, colour), TEAM(owner, name), b.name);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeSECURED", PART_TEXT, game::eventiconfade, TEAM(owner, colour), 3, 1, -10);
                 if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(owner, colour)).mul(2.f), 500, 250);
             }
@@ -278,7 +282,7 @@ namespace defend
             int numdyns = game::numdynents();
             loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                 if((d = e) == game::focus) break;
-            game::announcef(S_V_FLAGOVERTHROWN, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs\f[%d]%s\fS overthrew %s", TEAM(enemy, colour), TEAM(enemy, name), b.name);
+            game::announcef(S_V_FLAGOVERTHROWN, d == game::focus ? CON_SELF : CON_INFO, d, "\fateam \fs\f[%d]%s\fS overthrew \fw%s", TEAM(enemy, colour), TEAM(enemy, name), b.name);
             part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeOVERTHROWN", PART_TEXT, game::eventiconfade, TEAM(enemy, colour), 3, 1, -10);
             if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(enemy, colour)).mul(2.f), 500, 250);
         }
