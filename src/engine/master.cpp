@@ -1,16 +1,5 @@
 #include "engine.h"
-
-#include <sys/types.h>
 #include <enet/time.h>
-
-#ifdef WIN32
-#include <winerror.h>
-#ifndef ENOTCONN
-    #define ENOTCONN WSAENOTCONN
-#endif
-#else
-#include <errno.h>
-#endif
 
 #define MASTER_LIMIT 4096
 #define CLIENT_TIME (60*1000)

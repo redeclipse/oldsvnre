@@ -118,7 +118,7 @@ void converttext(char *dst, const char *src)
             }
             continue;
         }
-        if(iscubeprint(c) || isspace(c)) *dst++ = c;
+        if(iscubeprint(c) || iscubespace(c)) *dst++ = c;
     }
     *dst = '\0';
 }
@@ -596,7 +596,7 @@ void ircparse(ircnet *n)
     {
         bool full = false;
         int numargs = 0, g = 0;
-        while(isspace(*p)) { if(++p >= end) goto cleanup; }
+        while(iscubespace(*p)) { if(++p >= end) goto cleanup; }
         start = p;
         if(*p == ':') { g = 1; ++p; }
         for(;;)

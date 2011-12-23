@@ -291,7 +291,7 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
             }
             continue;
         }
-        if(iscubeprint(c) || (isspace(c) && whitespace))
+        if(iscubeprint(c) || (iscubespace(c) && whitespace))
         {
             *dst++ = c;
             if(!--len) break;
@@ -303,21 +303,22 @@ ICOMMAND(0, filter, "siii", (char *s, int *a, int *b, int *c), string d; filtert
 
 const char *escapetext(const char *src, bool quoteonly)
 {
-    static string escbuf = ""; char *dst = (char *)&escbuf;
+    static vector<char> dst;
+    dst.setsize(0);
     for(int c = *src; c; c = *++src)
     {
         if(!quoteonly)
         {
-            if(c=='\f') { *dst++ = '^'; *dst++ = 'f'; continue; }
-            if(c=='\n') { *dst++ = '^'; *dst++ = 'n'; continue; }
-            if(c=='\t') { *dst++ = '^'; *dst++ = 't'; continue; }
+            if(c=='\f') { dst.add('^'); dst.add('f'); continue; }
+            if(c=='\n') { dst.add('^'); dst.add('n'); continue; }
+            if(c=='\t') { dst.add('^'); dst.add('t'); continue; }
         }
-        if(c=='\n') { *dst++ = ' '; continue; }
-        if(c=='\"') { *dst++ = '^'; *dst++ = '\"'; continue; }
-        if(iscubeprint(c) || isspace(c)) *dst++ = c;
+        if(c=='\n') { dst.add(' '); continue; }
+        if(c=='\"') { dst.add('^'); dst.add('\"'); continue; }
+        if(iscubeprint(c) || iscubespace(c)) dst.add(c);
     }
-    *dst = '\0';
-    return escbuf;
+    dst.add('\0');
+    return dst.getbuf();
 }
 ICOMMAND(0, escape, "si", (const char *s, int *a, int *b, int *c), result(escapetext(s, *a==0)));
 
@@ -672,9 +673,9 @@ void processmasterinput()
         *end++ = '\0';
 
         const char *args = input;
-        while(args < end && !isspace(*args)) args++;
+        while(args < end && !iscubespace(*args)) args++;
         int cmdlen = args - input;
-        while(args < end && isspace(*args)) args++;
+        while(args < end && iscubespace(*args)) args++;
 
         server::processmasterinput(input, cmdlen, args);
 
