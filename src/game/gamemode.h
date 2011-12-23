@@ -205,7 +205,7 @@ extern mutstypes mutstype[];
 
 #define m_game(a)           (a > -1 && a < G_MAX)
 #define m_check(a,b)        (!a || (a < 0 ? -a != b : a == b))
-#define m_local(a)          ((a == G_DEMO) || (a == G_CAMPAIGN))
+#define m_local(a)          (a == G_DEMO)
 
 #define m_demo(a)           (a == G_DEMO)
 #define m_edit(a)           (a == G_EDITMODE)
