@@ -236,7 +236,7 @@ namespace hud
         g.image(NULL, 6, true);
         g.space(2);
         g.pushlist();
-        g.space(1);
+        g.space(0.25f);
         g.pushfont("default");
         if(*maptitle) g.textf("%s", 0xFFFFFF, NULL, 0, maptitle);
         else g.textf("(%s)", 0xFFFFFF, NULL, 0, mapname);
@@ -244,7 +244,7 @@ namespace hud
         if(*mapauthor)
         {
             g.pushlist();
-            g.space(3);
+            g.space(2);
             g.pushfont("reduced");
             g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor);
             g.popfont();
@@ -281,12 +281,11 @@ namespace hud
             g.popfont();
             g.poplist();
         }
-
         if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
         {
             int sdelay = m_delay(game::gamemode, game::mutators), delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
             const char *msg = game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait";
-            g.space(1);
+            g.space(0.5f);
             g.pushlist();
             g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
             if(shownotices >= 2)
@@ -334,7 +333,7 @@ namespace hud
         }
         else if(game::player1->state == CS_ALIVE)
         {
-            g.space(1);
+            g.space(0.5f);
             g.pushfont("reduced");
             if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
             else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
@@ -345,7 +344,7 @@ namespace hud
         }
         else if(game::player1->state == CS_SPECTATOR)
         {
-            g.space(1);
+            g.space(0.5f);
             g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
             g.pushfont("little");
@@ -376,13 +375,13 @@ namespace hud
         g.poplist();
         g.poplist();
         g.poplist();
-        g.space(1);
-        g.pushfont(numgroups>1 ? "little" : "default");
+        g.space(0.5f);
+        g.pushfont(numgroups>1 ? "little" : "reduced");
         loopk(numgroups)
         {
             if((k%2)==0)
             {
-                if(k) g.space(1);
+                if(k) g.space(0.5f);
                 g.pushlist(); // horizontal
             }
 
@@ -441,17 +440,16 @@ namespace hud
 
             g.pushlist();
             g.pushlist();
-            g.text(" name ", fgcolor);
+            g.text("name ", fgcolor);
             g.poplist();
-            loopscoregroup(g.pushlist(); g.textf(" %s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)); g.poplist());
+            loopscoregroup(g.pushlist(); g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false)); g.poplist());
             g.poplist();
 
             if(showpoints)
             {
                 g.pushlist();
-                g.strut(6);
                 g.text("points ", fgcolor);
-                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->points));
+                loopscoregroup(g.textf("%d ", 0xFFFFFF, NULL, 0, o->points));
                 g.poplist();
             }
 
@@ -460,13 +458,11 @@ namespace hud
                 g.pushlist();
                 if(m_trial(game::gamemode))
                 {
-                    g.strut(10);
-                    g.text("best lap", fgcolor);
-                    loopscoregroup(g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"));
+                    g.text("best ", fgcolor);
+                    loopscoregroup(g.textf("%s ", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"));
                 }
                 else
                 {
-                    g.strut(5);
                     g.text("frags ", fgcolor);
                     loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->frags));
                 }
@@ -476,10 +472,9 @@ namespace hud
             if(showpj)
             {
                 g.pushlist();
-                g.strut(4);
                 g.text("pj ", fgcolor);
                 loopscoregroup({
-                    g.textf("%d", 0xFFFFFF, NULL, 0, o->plag);
+                    g.textf("%d ", 0xFFFFFF, NULL, 0, o->plag);
                 });
                 g.poplist();
             }
@@ -487,28 +482,25 @@ namespace hud
             if(showping)
             {
                 g.pushlist();
-                g.strut(4);
                 g.text("ping ", fgcolor);
-                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->ping));
+                loopscoregroup(g.textf("%d ", 0xFFFFFF, NULL, 0, o->ping));
                 g.poplist();
             }
 
             if(showclientnum || game::player1->privilege>=PRIV_MASTER)
             {
                 g.pushlist();
-                g.strut(3);
                 g.text("cn ", fgcolor);
-                loopscoregroup(g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum));
+                loopscoregroup(g.textf("%d ", 0xFFFFFF, NULL, 0, o->clientnum));
                 g.poplist();
             }
 
             if(showskills)
             {
                 g.pushlist();
-                g.strut(3);
                 g.text("sk ", fgcolor);
                 loopscoregroup({
-                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
+                    if(o->aitype > AI_NONE) g.textf("%d ", 0xFFFFFF, NULL, 0, o->skill);
                     else g.space(1);
                 });
                 g.poplist();
@@ -517,10 +509,9 @@ namespace hud
             if(showownernum)
             {
                 g.pushlist();
-                g.strut(3);
-                g.text("on", fgcolor);
+                g.text("on ", fgcolor);
                 loopscoregroup({
-                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
+                    if(o->aitype > AI_NONE) g.textf("%d ", 0xFFFFFF, NULL, 0, o->ownernum);
                     else g.space(1);
                 });
                 g.poplist();
@@ -535,13 +526,13 @@ namespace hud
             g.poplist(); // horizontal
             g.poplist(); // vertical
 
-            if(k+1<numgroups && (k+1)%2) g.space(2);
+            if(k+1<numgroups && (k+1)%2) g.space(1);
             else g.poplist(); // horizontal
         }
         g.popfont();
         if(showspectators && spectators.length())
         {
-            g.space(1);
+            g.space(0.5f);
             g.pushfont("little");
             g.pushlist();
             g.pushlist();
@@ -550,7 +541,7 @@ namespace hud
             loopv(spectators)
             {
                 gameent *o = spectators[i];
-                int bgcol = o==game::player1 && highlightscore ? 0x888888 : 0;
+                int bgcol = o==game::player1 && highlightscore ? 0x666666 : 0;
                 if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x226622 : 0x666622;
                 if((i%count)==0)
                 {
@@ -560,14 +551,10 @@ namespace hud
                 g.pushlist();
                 if(bgcol) g.background(bgcol);
                 if(showclientnum || game::player1->privilege>=PRIV_MASTER)
-                    g.textf("%s (%d)", 0x888888, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false), o->clientnum);
-                else g.textf("%s", 0x888888, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false));
+                    g.textf("%s (%d) ", 0x666666, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false), o->clientnum);
+                else g.textf("%s ", 0x666666, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false));
                 g.poplist();
-                if((i+1)%count)
-                {
-                    if(i+1<spectators.length()) g.space(1);
-                }
-                else if(pushed)
+                if(!((i+1)%count) && pushed)
                 {
                     g.poplist();
                     pushed = false;
@@ -581,8 +568,8 @@ namespace hud
         if(m_play(game::gamemode) && game::player1->state != CS_SPECTATOR && (game::intermission || showscoresinfo))
         {
             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
-            g.space(1);
-            g.pushfont("default");
+            g.space(0.5f);
+            g.pushfont("reduced");
             g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                 game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                 game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
