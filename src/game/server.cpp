@@ -2330,7 +2330,9 @@ namespace server
         if(smode) smode->reset(false);
         mutate(smuts, mut->reset(false));
 
+#ifndef STANDALONE
         if(m_local(gamemode)) kicknonlocalclients(DISC_PRIVATE);
+#endif
         loopv(clients) clients[i]->mapchange(true);
         loopv(clients)
         {
