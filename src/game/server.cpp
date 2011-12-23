@@ -1815,7 +1815,7 @@ namespace server
         demofile &d = demos.add();
         time_t t = time(NULL);
         char *timestr = ctime(&t), *trim = timestr + strlen(timestr);
-        while(trim>timestr && isspace(*--trim)) *trim = '\0';
+        while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
         formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, gamename(gamemode, mutators), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
         srvoutf(4, "demo \"%s\" recorded", d.info);
         d.data = new uchar[len];
