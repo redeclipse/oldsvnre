@@ -2437,7 +2437,7 @@ namespace game
             }
             else e->light.material[2] = bvec(255, 255, 255);
             e->light.effect = vec(0, 0, 0);
-            if(d->lastbuff)
+            if(d->state == CS_ALIVE && d->lastbuff)
             {
                 flags |= MDL_LIGHTFX;
                 int millis = lastmillis%1000;
@@ -2455,7 +2455,7 @@ namespace game
                 e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
                 e->light.effect.max(col);
             }
-            if(bleedtime && d->bleeding(lastmillis, bleedtime))
+            if(d->state == CS_ALIVE && bleedtime && d->bleeding(lastmillis, bleedtime))
             {
                 flags |= MDL_LIGHTFX;
                 int millis = lastmillis%1000;
