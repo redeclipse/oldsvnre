@@ -996,7 +996,8 @@ namespace server
                 if(i < 0) continue;
                 if(muts&mutstype[i].type) loopj(G_M_NUM)
                 {
-                    if(mutstype[i].mutators && !(mutstype[i].mutators&mutstype[j].type) && (muts&mutstype[j].type))
+                    int mutators = (muts&G_M_INSTA) ? GAME(instagibfilter) : mutstype[i].mutators;
+                    if(mutators && !(mutators&mutstype[j].type) && (muts&mutstype[j].type))
                     {
                         implied = m_implied(mode, muts);
                         if(trying && (trying&mutstype[j].type) && !(implied&mutstype[i].type))
