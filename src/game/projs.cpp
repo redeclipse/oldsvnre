@@ -893,11 +893,9 @@ namespace projs
         {
             vec kick;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, kick);
-            kick.normalize().mul(-WEAP2(weap, kickpush, flags&HIT_ALT));
+            kick.normalize().mul(-WEAP2(weap, kickpush, flags&HIT_ALT)*skew);
             if(!kick.iszero())
             {
-                if(WEAP2(weap, power, flags&HIT_ALT) && WEAP2(weap, cooked, flags&HIT_ALT) == 1)
-                    kick.mul(skew);
                 if(d == game::focus) game::swaypush.add(vec(kick).mul(kickpushsway));
                 float kickmod = kickpushscale;
                 if(d == game::player1 && WEAP(weap, zooms) && game::inzoom()) kickmod *= kickpushzoom;
