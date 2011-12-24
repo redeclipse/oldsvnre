@@ -115,9 +115,10 @@ struct bomberservmode : bomberstate, servmode
 
     void moved(clientinfo *ci, const vec &oldpos, const vec &newpos)
     {
-        if(!hasflaginfo || ci->state.aitype >= AI_START || !m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) return;
+        if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         if(GAME(bomberthreshold) > 0 && oldpos.dist(newpos) >= GAME(bomberthreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
+        if(!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) return;
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
@@ -239,14 +240,12 @@ struct bomberservmode : bomberstate, servmode
                     dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
                     if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && GAME(bomberholdpenalty))
                     {
-                        int total = 0;
-                        givepoints(ci, 0-GAME(bomberholdpenalty));
-                        if(m_team(gamemode, mutators))
+                        givepoints(ci, -GAME(bomberholdpenalty));
+                        if(m_team(gamemode, mutators) && m_gsp2(gamemode, mutators))
                         {
-                            total = addscore(ci->team, 0-GAME(bomberholdpenalty));
+                            int total = addscore(ci->team, -GAME(bomberholdpenalty));
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
                         }
-                        else total = ci->state.points;
                     }
                 }
                 continue;
