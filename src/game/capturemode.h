@@ -160,7 +160,6 @@ struct captureservmode : capturestate, servmode
             else if(f.owner < 0 && f.droptime && gamemillis-f.droptime >= capturedelay)
             {
                 capturestate::returnaffinity(i, gamemillis);
-                loopvk(clients) if(f.team == clients[k]->team) givepoints(clients[k], -GAME(capturepenalty));
                 sendf(-1, 1, "ri3", N_RESETAFFIN, i, 2);
             }
         }

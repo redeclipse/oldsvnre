@@ -1100,7 +1100,8 @@ namespace ai
         }
         else if(hunt(d, b))
         {
-            game::getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->height/2)), d->ai->targyaw, d->ai->targpitch);
+            vec fp = d->feetpos();
+            game::getyawpitch(fp, d->ai->spot, d->ai->targyaw, d->ai->targpitch);
             d->ai->lasthunt = lastmillis;
         }
         else

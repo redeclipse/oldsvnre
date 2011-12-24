@@ -112,8 +112,9 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4, 1000);
-    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 3, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4.f, 1000);
+    FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3.f, 1000);
+    FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 1000);
 
     FVAR(IDF_PERSIST, aboveheadsmooth, 0, 0.5f, 1);
     VAR(IDF_PERSIST, aboveheadsmoothmillis, 1, 200, 10000);
@@ -2524,24 +2525,25 @@ namespace game
                 {
                     int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
                     float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
-                          size = aboveheadiconsize*skew, fade = blend*skew, nudge = size*2/3;
+                          size = skew, fade = blend*skew, nudge = size*2/3;
                     if(d->icons[i].type >= eventicon::SORTED)
                     {
+                        size *= aboveheadiconsize;
                         switch(d->icons[i].type)
                         {
-                            case eventicon::WEAPON: colour = WEAP(d->icons[i].value, colour); size = size*2/3; nudge = size; break;
+                            case eventicon::WEAPON: colour = WEAP(d->icons[i].value, colour); nudge = size; break;
                             case eventicon::AFFINITY:
                                 if(m_bomber(gamemode))
                                 {
                                     bvec pcol = bvec::fromcolor(bomber::pulsecolour());
                                     colour = (pcol.x<<16)|(pcol.y<<8)|pcol.z;
-                                    size *= 0.75f;
                                 }
                                 else colour = TEAM(d->icons[i].value, colour);
                                 // fall through
                             default: nudge *= 1.5f; break;
                         }
                     }
+                    else size *= aboveheadeventsize;
                     pos.z += nudge;
                     part_icon(pos, t, size, fade, 0, 0, 1, colour);
                     pos.z += nudge;
