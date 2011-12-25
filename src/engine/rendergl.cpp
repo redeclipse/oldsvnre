@@ -770,13 +770,32 @@ void vecfromcursor(float x, float y, float z, vec &dir)
     (dir = dir1).sub(dir2).normalize();
 }
 
-void vectocursor(vec &v, float &x, float &y, float &z)
+bool vectocursor(const vec &v, float &x, float &y, float &z, float clampxy)
 {
-    vec screenpos = mvpmatrix.perspectivetransform(v);
+    vec4 clippos;
+    mvpmatrix.transform(v, clippos);
+    if(clippos.z <= -clippos.w) 
+    {
+        x = y = z = 0;
+        return false;
+    }
 
+    vec screenpos = vec(clippos).div(clippos.w);
     x = screenpos.x*0.5f + 0.5f;
     y = 0.5f - screenpos.y*0.5f;
     z = screenpos.z*0.5f + 0.5f;
+
+    bool inside = true;
+    if(clampxy >= 0)
+    {
+        if(x <= 0-clampxy) { y += (0-clampxy-x)*(0.5-y)/(0.5-x); x = 0-clampxy; inside = false; }
+        else if(x >= 1+clampxy) { y += (1+clampxy-x)*(0.5-y)/(0.5-x); x = 1+clampxy; inside = false; }
+        if(y <= 0-clampxy) { x += (0-clampxy-y)*(0.5-x)/(0.5-y); y = 0-clampxy; inside = false; }
+        else if(y >= 1+clampxy) { x += (1+clampxy-y)*(0.5-x)/(0.5-y); y = 1+clampxy; inside = false; }
+    }
+    if(z <= 0) { z = 0; inside = false; }
+    else if(z >= 1) { z = 1; inside = false; }
+    return inside;
 }
 
 extern const glmatrixf viewmatrix(vec4(-1, 0, 0, 0), vec4(0, 0, 1, 0), vec4(0, -1, 0, 0));
