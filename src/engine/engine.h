@@ -287,7 +287,7 @@ extern void gl_init(int w, int h, int bpp, int depth, int fsaa);
 extern void cleangl();
 
 extern void vecfromcursor(float x, float y, float z, vec &dir);
-extern void vectocursor(vec &v, float &x, float &y, float &z);
+extern bool vectocursor(const vec &v, float &x, float &y, float &z, float clampxy = -1);
 extern void findorientation(vec &o, float yaw, float pitch, vec &pos);
 extern void rendergame();
 extern void renderavatar(bool early);

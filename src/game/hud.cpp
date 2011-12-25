@@ -1308,11 +1308,8 @@ namespace hud
         vec loc(0, 0, 0);
         if(style == 2)
         {
-            float vx = fmod(fabs(asin((pos.z-camera1->o.z)/camera1->o.dist(pos))/RAD-camera1->pitch), 360),
-                  vy = fmod(fabs(-atan2(pos.x-camera1->o.x, pos.y-camera1->o.y)/RAD-camera1->yaw), 360);
-            if(min(vx, 360-vx) <= curfov && min(vy, 360-vy) <= fovy)
+            if(vectocursor(pos, loc.x, loc.y, loc.z))
             {
-                vectocursor(pos, loc.x, loc.y, loc.z);
                 loc.x *= hudwidth;
                 loc.y *= hudsize;
             }
@@ -2261,9 +2258,11 @@ namespace hud
                     hasbound = true;
                 }
                 float cx = 0.5f, cy = 0.5f, cz = 1;
-                vectocursor(game::players[i]->o, cx, cy, cz);
-                int s = int(teamhurtsize*w), sx = int(cx*w-s), sy = int(cy*h-s);
-                hud::drawsized(sx, sy, s*2);
+                if(vectocursor(game::players[i]->o, cx, cy, cz))
+                {
+                    int s = int(teamhurtsize*w), sx = int(cx*w-s), sy = int(cy*h-s);
+                    hud::drawsized(sx, sy, s*2);
+                }
             }
         }
 

@@ -172,15 +172,14 @@ namespace bomber
                 if(f.owner == game::focus && m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
                 {
                     gameent *e = game::getclient(findtarget(f.owner));
-                    if(e)
+                    float cx = 0.5f, cy = 0.5f, cz = 1;
+                    if(e && vectocursor(e->headpos(), cx, cy, cz))
                     {
-                        vec pos = e->headpos();
                         int interval = lastmillis%500;
-                        float cx = 0.5f, cy = 0.5f, cz = 1, rp = 1, gp = 1, bp = 1,
+                        float rp = 1, gp = 1, bp = 1,
                               sp = interval >= 250 ? (500-interval)/250.f : interval/250.f,
                               sq = max(sp, 0.5f);
                         hud::colourskew(rp, gp, bp, sp);
-                        vectocursor(pos, cx, cy, cz);
                         int sx = int(cx*hud::hudwidth-s*sq), sy = int(cy*hud::hudsize-s*sq), ss = int(s*2*sq);
                         Texture *t = textureload(hud::indicatortex, 3);
                         if(t && t != notexture)
