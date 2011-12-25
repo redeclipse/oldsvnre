@@ -1405,7 +1405,7 @@ namespace hud
         }
     }
 
-    void drawplayerblip(gameent *d, int w, int h, float blend)
+    void drawplayerblip(gameent *d, int w, int h, int style, float blend)
     {
         vec dir = vec(d->o).sub(camera1->o);
         float dist = dir.magnitude();
@@ -1443,8 +1443,8 @@ namespace hud
             loopi(2)
             {
                 if(!i && chkcond(radarplayernames, !game::tvmode()))
-                    drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i], "tiny", "%s", game::colorname(d, NULL, "", false));
-                else drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), radarstyle, d->o, colour[i]);
+                    drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", game::colorname(d, NULL, "", false));
+                else drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i]);
             }
         }
     }
@@ -1599,7 +1599,7 @@ namespace hud
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
             gameent *d = NULL;
-            int numdyns = game::numdynents();
+            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1;
             loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
             {
                 switch(radarplayerfilter)
@@ -1608,7 +1608,7 @@ namespace hud
                     case 1: if(m_team(game::gamemode, game::mutators) && d->team == game::focus->team) continue; break;
                     case 2: if(m_team(game::gamemode, game::mutators) && d->team != game::focus->team) continue; break;
                 }
-                drawplayerblip(d, w, h, blend*radarblend);
+                drawplayerblip(d, w, h, style, blend*radarblend);
             }
         }
         if(radardamage) drawdamageblips(w, h, blend*radarblend); // 5+

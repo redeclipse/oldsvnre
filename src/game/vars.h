@@ -68,7 +68,7 @@ GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, us
 GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if numplayers >= this
 GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
 
-GVAR(0, maxcarry, 1, 2, WEAP_CARRY);
+GVAR(0, maxcarry, 1, 2, WEAP_MAX-1);
 GVAR(0, spawnrotate, 0, 4, VAR_MAX); // 0 = let client decide, 1 = sequence, 2+ = random
 GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
 GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);

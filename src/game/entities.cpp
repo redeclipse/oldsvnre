@@ -13,6 +13,7 @@ namespace entities
     VAR(IDF_PERSIST, showentradius, 0, 1, 3);
     VAR(IDF_PERSIST, showentlinks, 0, 1, 3);
     VAR(IDF_PERSIST, showentinterval, 0, 32, VAR_MAX);
+    VAR(IDF_PERSIST, showentdist, 0, 256, VAR_MAX);
     FVAR(IDF_PERSIST, showentsize, 0, 2, FVAR_MAX);
 
     vector<extentity *> &getents() { return ents; }
@@ -1663,7 +1664,7 @@ namespace entities
 
     void renderentshow(gameentity &e, int idx, int level)
     {
-        if(e.o.squaredist(camera1->o) > maxparticledistance*maxparticledistance) return;
+        if(e.o.squaredist(camera1->o) > showentdist*showentdist) return;
         #define entdirpart(o,yaw,pitch,length,fade,colour) part_dir(o, yaw, pitch, length, showentsize, 1, fade, colour, showentinterval);
         if(showentradius >= level)
         {
@@ -1788,6 +1789,7 @@ namespace entities
 
     void renderentlight(gameentity &e)
     {
+        if(e.o.squaredist(camera1->o) > showentdist*showentdist) return;
         adddynlight(vec(e.o), float(e.attrs[0] ? e.attrs[0] : hdr.worldsize)*0.75f, vec(e.attrs[1], e.attrs[2], e.attrs[3]).div(383.f), 0, 0, DL_KEEP);
     }
 
@@ -1860,7 +1862,7 @@ namespace entities
                         float fade = 1, yaw = 0, pitch = 0, size = 1;
                         if(!active)
                         {
-                            if(showentmodels < (e.type == PLAYERSTART || e.type == ACTOR ? 2 : 1)) continue;
+                            if(showentmodels <= (e.type == PLAYERSTART || e.type == ACTOR ? 1 : 0)) continue;
                             if(e.type == AFFINITY || e.type == PLAYERSTART)
                             {
                                 yaw = e.attrs[1]+(e.type == PLAYERSTART ? 90 : 0);
@@ -1932,8 +1934,10 @@ namespace entities
         vec off(0, 0, 2.f), pos(o);
         if(enttype[e.type].usetype == EU_ITEM) pos.add(off);
         bool edit = m_edit(game::gamemode) && cansee(idx), isedit = edit && game::player1->state == CS_EDITING,
-                hasent = isedit && idx >= 0 && (enthover == idx || entgroup.find(idx) >= 0);
-        int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
+             hasent = isedit && idx >= 0 && (enthover == idx || entgroup.find(idx) >= 0),
+             hashover = isedit && idx >= 0 && enthover == idx;
+        int sweap = m_weapon(game::gamemode, game::mutators),
+            attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
@@ -1947,16 +1951,16 @@ namespace entities
             if(itxt && *itxt)
             {
                 defformatstring(ds)("<emphasis>%s", itxt);
-                part_textcopy(pos.add(off), ds, hasent ? PART_TEXT_ONTOP : PART_TEXT, 1, 0xFFFFFF);
+                part_textcopy(pos.add(off), ds, hashover ? PART_TEXT_ONTOP : PART_TEXT, 1, 0xFFFFFF);
             }
         }
         if(edit)
         {
-            part_create(hasent ? PART_EDIT_ONTOP : PART_EDIT, 1, o, hasent ? 0xAA22FF : 0x441188, hasent ? 2.f : 1.f);
+            part_create(hashover ? PART_EDIT_ONTOP : PART_EDIT, 1, o, hashover ? 0xAA22FF : 0x441188, hashover ? 2.f : 1.f);
             if(showentinfo&(hasent ? 4 : 8))
             {
-                defformatstring(s)("<super>%s%s (%d)", hasent ? "\fp" : "\fv", enttype[e.type].name, idx >= 0 ? idx : 0);
-                part_textcopy(pos.add(off), s, hasent ? PART_TEXT_ONTOP : PART_TEXT);
+                defformatstring(s)("<super>%s%s (%d)", hashover ? "\fp" : "\fv", enttype[e.type].name, idx >= 0 ? idx : 0);
+                part_textcopy(pos.add(off), s, hashover ? PART_TEXT_ONTOP : PART_TEXT);
             }
             if(showentinfo&(hasent ? 16 : 32)) loopk(enttype[e.type].numattrs)
             {
@@ -1977,8 +1981,8 @@ namespace entities
                 }
                 if(attrname && *attrname)
                 {
-                    defformatstring(s)("%s%s:%d", hasent ? "\fw" : "\fd", attrname, e.attrs[k]);
-                    part_textcopy(pos.add(off), s, hasent ? PART_TEXT_ONTOP : PART_TEXT);
+                    defformatstring(s)("%s%s:%d", hashover ? "\fw" : "\fd", attrname, e.attrs[k]);
+                    part_textcopy(pos.add(off), s, hashover ? PART_TEXT_ONTOP : PART_TEXT);
                 }
             }
         }
