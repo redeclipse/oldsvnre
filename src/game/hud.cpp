@@ -2310,7 +2310,7 @@ namespace hud
                         vec c = vec::hexcolor(colour);
                         glColor4f(c.r, c.g, c.b, fade);
                         drawtexture(tx-width/2, ty-size, width, size);
-                        ty -= game::focus->icons[i].type < eventicon::AFFINITY ? int(size*2/3) : int(size);
+                        ty -= game::focus->icons[i].type < eventicon::SORTED ? int(size*2/3) : int(size);
                     }
                 }
             }

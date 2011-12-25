@@ -949,11 +949,10 @@ namespace server
             mode = G_DEATHMATCH;
             muts = m_implied(mode, 0);
         }
-        #define modecheckreset(a) { if(muts && ++count < G_M_NUM*(G_M_GSN+5)) { i = -1; a; } else { muts = 0; i = G_M_NUM; break; } }
         if(!gametype[mode].mutators[0]) muts = G_M_NONE;
         else
         {
-            int count = 0, implied = m_implied(mode, muts);
+            int implied = m_implied(mode, muts);
             if(implied) muts |= implied;
             loopi(G_M_GSN)
             {
@@ -964,61 +963,79 @@ namespace server
                     trying &= ~m;
                 }
             }
-            if(muts) loopi(G_M_NUM)
+            loop(r, G_M_NUM)
             {
-                if(trying && !(gametype[mode].mutators[0]&mutstype[i].type) && (trying&mutstype[i].type))
-                    trying &= ~mutstype[i].type;
-                if(!(gametype[mode].mutators[0]&mutstype[i].type) && (muts&mutstype[i].type))
+                if(!muts) break;
+                bool changed = false;
+                loopi(G_M_NUM)
                 {
-                    muts &= ~mutstype[i].type;
-                    trying &= ~mutstype[i].type;
-                    modecheckreset(continue);
-                }
-                loopj(G_M_GSN)
-                {
-                    if(!gametype[mode].mutators[j+1]) continue;
-                    int m = 1<<(j+G_M_GSP);
-                    if(!(muts&m)) continue;
-                    loopk(G_M_GSN)
+                    if(trying && !(gametype[mode].mutators[0]&mutstype[i].type) && (trying&mutstype[i].type))
                     {
-                        if(!gametype[mode].mutators[k+1]) continue;
-                        int n = 1<<(k+G_M_GSP);
-                        if(!(muts&n)) continue;
-                        if(trying && (trying&m) && !(gametype[mode].mutators[k+1]&m))
-                        {
-                            muts &= ~n;
-                            trying &= ~n;
-                            modecheckreset(break);
-                        }
+                        trying &= ~mutstype[i].type;
+                        changed = true;
+                        break;
                     }
-                    if(i < 0) break;
-                }
-                if(i < 0) continue;
-                if(muts&mutstype[i].type) loopj(G_M_NUM)
-                {
-                    int mutators = (muts&G_M_INSTA) ? GAME(instagibfilter) : mutstype[i].mutators;
-                    if(mutators && !(mutators&mutstype[j].type) && (muts&mutstype[j].type))
+                    if(!(gametype[mode].mutators[0]&mutstype[i].type) && (muts&mutstype[i].type))
                     {
-                        implied = m_implied(mode, muts);
-                        if(trying && (trying&mutstype[j].type) && !(implied&mutstype[i].type))
-                        {
-                            muts &= ~mutstype[i].type;
-                            trying &= ~mutstype[i].type;
-                        }
-                        else
-                        {
-                            muts &= ~mutstype[j].type;
-                            trying &= ~mutstype[j].type;
-                        }
-                        modecheckreset(break);
+                        muts &= ~mutstype[i].type;
+                        trying &= ~mutstype[i].type;
+                        changed = true;
+                        break;
                     }
-                    int implying = m_doimply(mode, muts, i);
-                    if(implying && (implying&mutstype[j].type) && !(muts&mutstype[j].type))
+                    loopj(G_M_GSN)
                     {
-                        muts |= mutstype[j].type;
-                        modecheckreset(break);
+                        if(!gametype[mode].mutators[j+1]) continue;
+                        int m = 1<<(j+G_M_GSP);
+                        if(!(muts&m)) continue;
+                        loopk(G_M_GSN)
+                        {
+                            if(!gametype[mode].mutators[k+1]) continue;
+                            int n = 1<<(k+G_M_GSP);
+                            if(!(muts&n)) continue;
+                            if(trying && (trying&m) && !(gametype[mode].mutators[k+1]&m))
+                            {
+                                muts &= ~n;
+                                trying &= ~n;
+                                changed = true;
+                                break;
+                            }
+                        }
+                        if(changed) break;
+                    }
+                    if(changed) break;
+                    if(muts&mutstype[i].type)
+                    {
+                        int mutators = mutstype[i].type != G_M_INSTA ? mutstype[i].mutators : GAME(instagibfilter);
+                        loopj(G_M_NUM)
+                        {
+                            if(mutators && !(mutators&mutstype[j].type) && (muts&mutstype[j].type))
+                            {
+                                implied = m_implied(mode, muts);
+                                if(trying && (trying&mutstype[j].type) && !(implied&mutstype[i].type))
+                                {
+                                    muts &= ~mutstype[i].type;
+                                    trying &= ~mutstype[i].type;
+                                }
+                                else
+                                {
+                                    muts &= ~mutstype[j].type;
+                                    trying &= ~mutstype[j].type;
+                                }
+                                changed = true;
+                                break;
+                            }
+                            int implying = m_doimply(mode, muts, i);
+                            if(implying && (implying&mutstype[j].type) && !(muts&mutstype[j].type))
+                            {
+                                muts |= mutstype[j].type;
+                                changed = true;
+                                break;
+                            }
+                        }
+                        if(changed) break;
                     }
                 }
+                if(!changed) break;
             }
         }
     }
@@ -1064,14 +1081,10 @@ namespace server
                 int num = rnd(G_M_NUM+1);
                 if(num) loopi(num) if(GAME(rotatemuts) == 1 || !rnd(GAME(rotatemuts)))
                 {
-                    int rmut = rnd(G_M_NUM+1);
-                    if(rmut)
-                    {
-                        int smut = 1<<(rmut-1);
-                        if(GAME(rotatemutsfilter) && !(GAME(rotatemutsfilter)&smut)) continue;
-                        muts |= smut;
-                        modecheck(mode, muts, smut);
-                    }
+                    int rmut = 1<<rnd(G_M_NUM);
+                    if(GAME(rotatemutsfilter) && !(GAME(rotatemutsfilter)&rmut)) continue;
+                    muts |= rmut;
+                    modecheck(mode, muts, rmut);
                 }
             }
         }
