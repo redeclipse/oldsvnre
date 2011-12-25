@@ -186,7 +186,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
-    VAR(IDF_PERSIST, inventoryammo, 0, 1, 2);
+    VAR(IDF_PERSIST, inventoryammo, 0, 1, 3);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
@@ -266,7 +266,7 @@ namespace hud
     FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
-    VAR(IDF_PERSIST, radarstyle, 0, 1, 2); // 0 = compass-sectional, 1 = compass-distance, 2 = right-corner-positional
+    VAR(IDF_PERSIST, radarstyle, 0, 1, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
     FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
     TVAR(IDF_PERSIST, radarcornertex, "<grey>textures/radar", 3);
     TVAR(IDF_PERSIST, bliptex, "<grey>textures/blip", 3);
@@ -284,7 +284,8 @@ namespace hud
     FVAR(IDF_PERSIST, radarplayersize, 0, 0.4f, 1000);
     FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarblipsize, 0, 0.5f, 1000);
+    FVAR(IDF_PERSIST, radarblipsize, 0, 0.25f, 1000);
+    FVAR(IDF_PERSIST, radarbliprotate, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
     FVAR(IDF_PERSIST, radaritemblend, 0, 1, 1);
@@ -322,7 +323,8 @@ namespace hud
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
     VAR(IDF_PERSIST, showeditradar, 0, 1, 1);
-    VAR(IDF_PERSIST, editradardist, 0, 128, VAR_MAX); // 0 = use radardist
+    VAR(IDF_PERSIST, editradarstyle, 0, 2, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
+    VAR(IDF_PERSIST, editradardist, 0, 0, VAR_MAX); // 0 = use world size
 
     VAR(IDF_PERSIST, motionblurfx, 0, 1, 2); // 0 = off, 1 = on, 2 = override
     FVAR(IDF_PERSIST, motionblurmin, 0, 0.0f, 1); // minimum
@@ -910,7 +912,7 @@ namespace hud
     {
         if(game::focus != game::player1)
         {
-            if(game::thirdpersonview(true) && game::aboveheadnames > 1) return false;
+            if(game::thirdpersonview(true) && game::aboveheadnames >= 2) return false;
             return true;
         }
         return false;
@@ -1282,8 +1284,8 @@ namespace hud
         if(game::focus->state == CS_EDITING) return editradardist ? editradardist : getworldsize();
         switch(radarstyle)
         {
-            case 2: return radarcornerdist ? radarcornerdist : getworldsize();
-            case 1: case 0: case -1: default: return radardist ? radardist : getworldsize();
+            case 3: return radarcornerdist ? radarcornerdist : getworldsize();
+            case 2: case 1: case 0: case -1: default: return radardist ? radardist : getworldsize();
         }
         return getworldsize();
     }
@@ -1303,60 +1305,88 @@ namespace hud
             dist = clamp(dir.magnitude()/hud::radarrange(), 0.f, 1.f);
         }
         dir.rotate_around_z(-camera1->yaw*RAD).normalize();
-        float yaw = -atan2(dir.x, dir.y)/RAD, x = sinf(RAD*yaw), y = -cosf(RAD*yaw),
-            size = max(w, h)/2, ts = size*(radarstyle == 2 ? radarcornersize : radarsize),
-                tp = ts*s, tq = tp*0.5f, tx = 0, ty = 0, tr = 0;
-        switch(style)
+        vec loc(0, 0, 0);
+        if(style == 2)
         {
-            case 2:
+            float vx = fmod(fabs(asin((pos.z-camera1->o.z)/camera1->o.dist(pos))/RAD-camera1->pitch), 360),
+                  vy = fmod(fabs(-atan2(pos.x-camera1->o.x, pos.y-camera1->o.y)/RAD-camera1->yaw), 360);
+            if(min(vx, 360-vx) <= curfov && min(vy, 360-vy) <= fovy)
             {
-                ts = size*radarcorner;
-                tx = w-ts;
-                ty = ts;
-                ts -= ts*radarcorneroffset;
-                tr = ts*dist;
-                break;
+                vectocursor(pos, loc.x, loc.y, loc.z);
+                loc.x *= hudwidth;
+                loc.y *= hudsize;
             }
-            case 1:
-            {
-                tx = w/2;
-                ty = h/2;
-                tr = (size*radaroffset)+(ts*4*dist);
-                break;
-            }
-            case 0: default:
-            {
-                tx = w/2;
-                ty = h/2;
-                tr = (size*radaroffset)+(ts*area);
-                break;
-            }
+            else return; // can't render things we can't point at
         }
-        vec loc(tr*x, tr*y, 0);
-        if(radarstyle != 2 && radaraspect != 0 && w != h)
+        float yaw = -atan2(dir.x, dir.y)/RAD, x = sinf(RAD*yaw), y = -cosf(RAD*yaw), size = max(w, h)/2,
+              ts = size*(style != 3 ? radarsize : radarcornersize), tp = ts*s, tq = tp*0.5f;
+        if(style != 2)
         {
-            if(w > h) loc.x *= (float(w)/float(h))*radaraspect;
-            else loc.y *= (float(h)/float(w))*radaraspect;
+            float tx = 0, ty = 0, tr = 0;
+            switch(style)
+            {
+                case 3:
+                {
+                    ts = size*radarcorner;
+                    tx = w-ts;
+                    ty = ts;
+                    ts -= ts*radarcorneroffset;
+                    tr = ts*dist;
+                    break;
+                }
+                case 1:
+                {
+                    tx = w/2;
+                    ty = h/2;
+                    tr = (size*radaroffset)+(ts*4*dist);
+                    break;
+                }
+                case 0: default:
+                {
+                    tx = w/2;
+                    ty = h/2;
+                    tr = (size*radaroffset)+(ts*area);
+                    break;
+                }
+            }
+            loc.x = tr*x;
+            loc.y = tr*y;
+            if(style != 3 && radaraspect != 0 && w != h)
+            {
+                if(w > h) loc.x *= (float(w)/float(h))*radaraspect;
+                else loc.y *= (float(h)/float(w))*radaraspect;
+            }
+            loc.x += tx;
+            loc.y += ty;
         }
-        loc.x += tx; loc.y += ty;
         glColor4f(colour.x, colour.y, colour.z, blend);
         Texture *t = textureload(tex, 3);
         if(t)
         {
             glBindTexture(GL_TEXTURE_2D, t->id);
             glBegin(GL_TRIANGLE_STRIP);
-            loopk(4)
+            if(style != 2 && radarbliprotate)
             {
-                vec norm;
-                switch(k)
+                loopk(4)
                 {
-                    case 0: vecfromyawpitch(yaw, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
-                    case 1: vecfromyawpitch(yaw, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
-                    case 2: vecfromyawpitch(yaw, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
-                    case 3: vecfromyawpitch(yaw, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                    vec norm;
+                    switch(k)
+                    {
+                        case 0: vecfromyawpitch(yaw, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
+                        case 1: vecfromyawpitch(yaw, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
+                        case 2: vecfromyawpitch(yaw, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
+                        case 3: vecfromyawpitch(yaw, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                    }
+                    norm.normalize().mul(tq).add(loc);
+                    glVertex2f(norm.x, norm.y);
                 }
-                norm.normalize().mul(tq).add(loc);
-                glVertex2f(norm.x, norm.y);
+            }
+            else
+            {
+                glTexCoord2f(0, 1); glVertex2f(loc.x - tq, loc.y + tq);
+                glTexCoord2f(1, 1); glVertex2f(loc.x + tq, loc.y + tq);
+                glTexCoord2f(0, 0); glVertex2f(loc.x - tq, loc.y - tq);
+                glTexCoord2f(1, 0); glVertex2f(loc.x + tq, loc.y - tq);
             }
             glEnd();
         }
@@ -1443,12 +1473,22 @@ namespace hud
                 fade *= radaritemblend;
                 size = radaritemsize;
             }
-            else fade *= radarblipblend;
+            else
+            {
+                tex = itemtex(type, attr[0]);
+                if(!tex || !*tex) tex = bliptex;
+                else size = radaritemsize;
+                fade *= radarblipblend;
+            }
+            int style = editradarstyle;
             if(game::focus->state != CS_EDITING && !insel && inspawn > 0.f)
+            {
                 fade = radaritemspawn ? 1.f-inspawn : fade+((1.f-fade)*(1.f-inspawn));
-            if(insel) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "tiny", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
-            else if(chkcond(radaritemnames, !game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour, "tiny", "%s", entities::entinfo(type, attr, false));
-            else drawblip(tex, 0, w, h, size, fade*blend, radarstyle, o, colour);
+                style = radarstyle;
+            }
+            if(insel) drawblip(tex, 0, w, h, size, fade*blend, style, o, colour, "tiny", "%s %s", enttype[type].name, entities::entinfo(type, attr, insel));
+            else if(chkcond(radaritemnames, !game::tvmode())) drawblip(tex, 0, w, h, size, fade*blend, style, o, colour, "tiny", "%s", entities::entinfo(type, attr, false));
+            else drawblip(tex, 0, w, h, size, fade*blend, style, o, colour);
         }
     }
 
@@ -1527,7 +1567,7 @@ namespace hud
 
     void drawradar(int w, int h, float blend)
     {
-        if(radarstyle == 2)
+        if(radarstyle == 3)
         {
             vec pos = vec(camera1->o).sub(minimapcenter).mul(minimapscale).add(0.5f), dir;
             vecfromyawpitch(camera1->yaw, 0, 1, 0, dir);
@@ -1663,6 +1703,8 @@ namespace hud
     {
         switch(type)
         {
+            case PLAYERSTART: return playertex; break;
+            case AFFINITY: return flagtex; break;
             case WEAPON:
             {
                 const char *weaptexs[WEAP_MAX] = {
@@ -1765,10 +1807,10 @@ namespace hud
                     if(inventorycolour) c.mul(vec::hexcolor(WEAP(i, colour)));
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
                     int oldy = y-sy;
-                    if(inventoryammo && (instate || inventoryammo > 1) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
+                    if(inventoryammo >= 2 && (instate || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
                     else sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew);
-                    if(inventoryweapids && (instate || inventoryweapids > 1))
+                    if(inventoryweapids && (instate || inventoryweapids >= 2))
                     {
                         static string weapids[WEAP_MAX];
                         static int lastweapids = -1;
@@ -2035,10 +2077,10 @@ namespace hud
             case 1:
             {
                 int cm = edge;
-                if(radarstyle == 2) cm += int(max(w, h)/2*radarcorner*2);
+                if(radarstyle == 3) cm += int(max(w, h)/2*radarcorner*2);
                 if(!texpaneltimer)
                 {
-                    cy[i] -= showfps || showstats > (m_edit(game::gamemode) ? 0 : 1) ? cs/2 : cs/16;
+                    cy[i] -= showfps || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? cs/2 : cs/16;
                     if(lastnewgame)
                     {
                         if(!game::intermission) lastnewgame = 0;
@@ -2198,7 +2240,7 @@ namespace hud
             if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
             if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
         }
-        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar > 0 : chkcond(showradar, !game::tvmode())))
+        if(!hasinput() && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode())))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
         if(teamhurttime && game::focus == game::player1 && lastmillis-game::player1->lastteamhit <=  teamhurttime)
@@ -2256,7 +2298,7 @@ namespace hud
                     default: break;
                 }
             }
-            if(showstats > (m_edit(game::gamemode) ? 0 : 1))
+            if(showstats >= (m_edit(game::gamemode) ? 1 : 2))
             {
                 by -= draw_textx("ond:%d va:%d gl:%d(%d) oq:%d", bx, by, 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, allocnodes*8, allocva, curstats[4], curstats[5], curstats[6]);
                 by -= draw_textx("wtr:%dk(%d%%) wvt:%dk(%d%%) evt:%dk eva:%dk", bx, by, 255, 255, 255, bf, TEXT_RIGHT_UP, -1, bs, wtris/1024, curstats[0], wverts/1024, curstats[1], curstats[2], curstats[3]);
@@ -2406,7 +2448,7 @@ namespace hud
         {
             drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
             if(showconsole >= 2 && ((!noview && !progressing) || forceprogress))
-                drawconsole(2, hudwidth, hudheight, br+gap*2, by, showfps > 1 || showstats > (m_edit(game::gamemode) ? 0 : 1) ? bs-gap*4 : (bs-gap*4)*2, consolefade);
+                drawconsole(2, hudwidth, hudheight, br+gap*2, by, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? bs-gap*4 : (bs-gap*4)*2, consolefade);
         }
 
         glDisable(GL_BLEND);
