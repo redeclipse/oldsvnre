@@ -112,7 +112,7 @@ namespace game
     FVAR(IDF_PERSIST, aboveheadblend, 0.f, 1, 1.f);
     FVAR(IDF_PERSIST, aboveheadnamesize, 0, 2, 1000);
     FVAR(IDF_PERSIST, aboveheadstatussize, 0, 2, 1000);
-    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 4.f, 1000);
+    FVAR(IDF_PERSIST, aboveheadiconsize, 0, 3.f, 1000);
     FVAR(IDF_PERSIST, aboveheadeventsize, 0, 3.f, 1000);
     FVAR(IDF_PERSIST, aboveitemiconsize, 0, 2.5f, 1000);
 
@@ -2509,7 +2509,7 @@ namespace game
             {
                 pos.z += aboveheadstatussize/2;
                 part_icon(pos, t, aboveheadstatussize, blend, 0, 0, 1, colour);
-                pos.z += aboveheadstatussize/2+0.25f;
+                pos.z += aboveheadstatussize/2+0.5f;
             }
         }
         if(aboveheadicons && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
@@ -2525,13 +2525,13 @@ namespace game
                 {
                     int olen = min(d->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;
                     float skew = millis < ilen ? millis/float(ilen) : (millis > d->icons[i].fade-olen ? (d->icons[i].fade-millis)/float(olen) : 1.f),
-                          size = skew, fade = blend*skew, nudge = size*2/3;
+                          size = skew, fade = blend*skew;
                     if(d->icons[i].type >= eventicon::SORTED)
                     {
                         size *= aboveheadiconsize;
                         switch(d->icons[i].type)
                         {
-                            case eventicon::WEAPON: colour = WEAP(d->icons[i].value, colour); nudge = size; break;
+                            case eventicon::WEAPON: colour = WEAP(d->icons[i].value, colour); break;
                             case eventicon::AFFINITY:
                                 if(m_bomber(gamemode))
                                 {
@@ -2539,14 +2539,15 @@ namespace game
                                     colour = (pcol.x<<16)|(pcol.y<<8)|pcol.z;
                                 }
                                 else colour = TEAM(d->icons[i].value, colour);
-                                // fall through
-                            default: nudge *= 1.5f; break;
+                                break;
+                            default: break;
                         }
                     }
                     else size *= aboveheadeventsize;
-                    pos.z += nudge;
+                    pos.z += size/2;
                     part_icon(pos, t, size, fade, 0, 0, 1, colour);
-                    pos.z += nudge;
+                    pos.z += size/2;
+                    if(d->icons[i].type < eventicon::SORTED) pos.z += 0.5f;
                 }
             }
         }
