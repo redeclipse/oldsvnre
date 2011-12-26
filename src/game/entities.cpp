@@ -1974,7 +1974,7 @@ namespace entities
         if(enttype[e.type].usetype == EU_ITEM) pos.add(off);
         bool edit = m_edit(game::gamemode) && cansee(idx), isedit = edit && game::player1->state == CS_EDITING,
              hasent = isedit && idx >= 0 && (enthover == idx || entgroup.find(idx) >= 0),
-             hashover = isedit && idx >= 0 && enthover == idx;
+             hastop = hasent && e.o.squaredist(camera1->o) <= showentdist*showentdist;
         int sweap = m_weapon(game::gamemode, game::mutators),
             attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
@@ -1982,7 +1982,8 @@ namespace entities
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
-            part_create(PART_HINT_BOLD_SOFT, 1, o, colour, radius, fluc*skew);
+            //part_create(PART_HINT_BOLD_SOFT, 1, o, colour, radius, fluc*skew);
+            part_explosion(o, radius, PART_SHOCKWAVE, 1, colour, 1.f, fluc*skew*0.125f);
         }
         if(isedit ? (showentinfo&(hasent ? 1 : 2)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
@@ -1990,16 +1991,16 @@ namespace entities
             if(itxt && *itxt)
             {
                 defformatstring(ds)("<emphasis>%s", itxt);
-                part_textcopy(pos.add(off), ds, hashover ? PART_TEXT_ONTOP : PART_TEXT, 1, 0xFFFFFF);
+                part_textcopy(pos.add(off), ds, hastop ? PART_TEXT_ONTOP : PART_TEXT, 1, 0xFFFFFF);
             }
         }
         if(edit)
         {
-            part_create(hashover ? PART_EDIT_ONTOP : PART_EDIT, 1, o, hashover ? 0xAA22FF : 0x441188, hashover ? 2.f : 1.f);
+            part_create(hastop ? PART_EDIT_ONTOP : PART_EDIT, 1, o, hastop ? 0xAA22FF : 0x441188, hastop ? 2.f : 1.f);
             if(showentinfo&(hasent ? 4 : 8))
             {
-                defformatstring(s)("<super>%s%s (%d)", hashover ? "\fp" : "\fv", enttype[e.type].name, idx >= 0 ? idx : 0);
-                part_textcopy(pos.add(off), s, hashover ? PART_TEXT_ONTOP : PART_TEXT);
+                defformatstring(s)("<super>%s%s (%d)", hastop ? "\fp" : "\fv", enttype[e.type].name, idx >= 0 ? idx : 0);
+                part_textcopy(pos.add(off), s, hastop ? PART_TEXT_ONTOP : PART_TEXT);
             }
             if(showentinfo&(hasent ? 16 : 32)) loopk(enttype[e.type].numattrs)
             {
@@ -2020,8 +2021,8 @@ namespace entities
                 }
                 if(attrname && *attrname)
                 {
-                    defformatstring(s)("%s%s:%d", hashover ? "\fw" : "\fd", attrname, e.attrs[k]);
-                    part_textcopy(pos.add(off), s, hashover ? PART_TEXT_ONTOP : PART_TEXT);
+                    defformatstring(s)("%s%s:%d", hastop ? "\fw" : "\fa", attrname, e.attrs[k]);
+                    part_textcopy(pos.add(off), s, hastop ? PART_TEXT_ONTOP : PART_TEXT);
                 }
             }
         }

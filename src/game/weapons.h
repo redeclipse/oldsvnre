@@ -226,7 +226,7 @@ WEAPON(sword,       0x2222EE,       0x2222EE,       0x2222EE,       0x2222EE,   
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|COLLIDE_CONT,
     WEAP_SWORD
 );
-WEAPON(shotgun,     0x888800,       0x888800,       0x888800,       0x888800,       0x888800,
+WEAPON(shotgun,     0x999900,       0x999900,       0x999900,       0x999900,       0x999900,
     2,      8,      1,      2,      500,    900,    750,    15,     4,      1250,   250,    0,      0,      25,     25,
     0,      0,      400,    5000,
     0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      4,      2,      16,     0,      0,      0,
@@ -236,7 +236,7 @@ WEAPON(shotgun,     0x888800,       0x888800,       0x888800,       0x888800,   
     2,      2,      0,      0,      0,      0,      0,      0,      0,      2,      1,      1,      0,      0,      0,
     2,      0,      0,      0,      100,    50,     50,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0.05f,  0.75f,  2,      2,      0,      250,    1,      1,
-    30,     60,     200,    100,    1,      0.5f,   256,    512,    0.75f,  0.5f,   25,     15,     1,      1.5f,   0.5f,   0.25f,
+    30,     60,     200,    100,    1,      0.5f,   256,    512,    0.65f,  0.45f,  25,     15,     1,      1.5f,   0.5f,   0.25f,
     2,      256,    2,      10,     10,     1,      1,
     0,      0,      0.8f,   0.9f,   0.6f,   0.7f,   0.3f,   0.4f,   0.5f,   0.5f,
     1,      1,      1,      0.2f,   1,      1.5f,   0,      0,      8,      8,      1,      1,      25,     25,
@@ -244,7 +244,7 @@ WEAPON(shotgun,     0x888800,       0x888800,       0x888800,       0x888800,   
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     WEAP_SHOTGUN
 );
-WEAPON(smg,         0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,
+WEAPON(smg,         0xFF4400,       0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,
     40,     40,     1,      4,      100,    300,    1500,   22,     4,      2500,   350,    0,      0,      25,     25,
     0,      0,      800,    150,
     0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      3,      6,      0,      0,      0,      0,
@@ -262,7 +262,7 @@ WEAPON(smg,         0xDD6600,       0xDD6600,       0xDD6600,       0xDD6600,   
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     WEAP_SMG
 );
-WEAPON(flamer,      0xEE2222,       -1,             -1,             -1,             -1,
+WEAPON(flamer,      0xFF2222,       -1,             -1,             -1,             -1,
     25,     25,     1,      5,      100,    500,    2000,   5,      5,      300,    150,    0,      0,      0,      25,
     0,      500,    250,    250,
     0,      25,     0,      0,      200,    200,    16,     16,     1,      1,      5,      5,      0,      0,      0,      0,
@@ -334,7 +334,7 @@ WEAPON(grenade,     0x119911,       -1,             -1,             0x981808,   
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS,
     WEAP_GRENADE
 );
-WEAPON(rocket,      0xBB3300,       -1,             -1,              0x981808,      0x981808,
+WEAPON(rocket,      0xAA3300,       -1,             -1,              0x981808,      0x981808,
     1,      1,      1,      1,      1000,   1000,   1500,   150,     150,   1000,   250,    0,      0,      0,      0,
     2000,   2000,   5000,   5000,
     0,      0,      0,      0,      200,    200,    100,    100,     1,     1,      1,      1,      0,      0,      0,      0,
@@ -378,13 +378,13 @@ weaptypes weaptype[] =
     {
             ANIM_SWORD,         S_SWORD,    1,
             true,       true,       true,       false,
-            { 0, 0 },               15,         0,
+            { 0, 0 },               12,         0,
             "sword",    "weapons/sword/item",       "weapons/sword/vwep", "weapons/sword/hwep",    "",                     ""
     },
     {
             ANIM_SHOTGUN,       S_SHOTGUN,  10,
             false,      false,      true,       true,
-            { 0, 0 },               9,          0.45f,
+            { 0, 0 },               10,         0.45f,
             "shotgun",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projs/shell"
     },
     {
@@ -396,7 +396,7 @@ weaptypes weaptype[] =
     {
             ANIM_FLAMER,        S_FLAMER,   1,
             false,      false,      true,       true,
-            { 0, 0 },               9,          0,
+            { 0, 0 },               10,         0,
             "flamer",   "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
     },
     {
@@ -408,7 +408,7 @@ weaptypes weaptype[] =
     {
             ANIM_RIFLE,         S_RIFLE,    1,
             false,      false,      true,       false,
-            { 0, 0 },               9,          0,
+            { 0, 0 },               10,         0,
             "rifle",    "weapons/rifle/item",       "weapons/rifle/vwep", "weapons/rifle/hwep",      "",                     ""
     },
     {
@@ -420,7 +420,7 @@ weaptypes weaptype[] =
     {
             ANIM_ROCKET,        S_ROCKET,   1,
             false,      false,      true,      false,
-            { 0, 0 },               9,          0,
+            { 0, 0 },               8,          0,
             "rocket",   "weapons/rocket/item",       "weapons/rocket/vwep", "weapons/rocket/hwep",     "weapons/rocket/proj",  ""
     }
 };
