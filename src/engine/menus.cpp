@@ -557,8 +557,8 @@ void newgui(char *name, char *contents, char *initscript)
     else
     {
         DELETEA(m->header);
-        DELETEA(m->contents);
-        DELETEA(m->initscript);
+        freecode(m->contents);
+        freecode(m->initscript);
     }
     m->contents = contents && contents[0] ? compilecode(contents) : NULL;
     m->initscript = initscript && initscript[0] ? compilecode(initscript) : NULL;
@@ -575,7 +575,7 @@ void guimodify(char *name, char *contents)
 {
     menu *m = menus.access(name);
     if(!m) return;
-    if(m->contents) delete[] m->contents;
+    freecode(m->contents);
     m->contents = contents && contents[0] ? compilecode(contents) : NULL;
 }
 

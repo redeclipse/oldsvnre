@@ -598,7 +598,7 @@ namespace client
 #if 0 // these shouldn't get here
                     string s;
                     formatstring(s)("%s %s", cmd, arg);
-                    char *ret = executeret(s);
+                    char *ret = executestr(s);
                     if(ret)
                     {
                         conoutft(CON_EVENT, "\fc%s: %s", cmd, ret);

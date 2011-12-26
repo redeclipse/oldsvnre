@@ -4,7 +4,8 @@ enum { VAL_NULL = 0, VAL_INT, VAL_FLOAT, VAL_STR, VAL_ANY, VAL_CODE, VAL_MACRO, 
 
 enum
 {
-    CODE_NOP = 0,
+    CODE_START = 0,
+    CODE_OFFSET,
     CODE_POP,
     CODE_ENTER,
     CODE_EXIT,
@@ -193,6 +194,8 @@ static inline bool htcmp(const char *key, const ident &id) { return !strcmp(key,
 extern hashset<ident> idents;
 
 extern void addident(ident *id);
+
+extern tagval *commandret;
 extern const char *intstr(int v);
 extern void intret(int v);
 extern const char *floatstr(float v);
@@ -286,9 +289,12 @@ extern ident *writeident(const char *name, int flags = 0);
 extern bool addcommand(const char *name, identfun fun, const char *narg, int flags = IDF_COMPLETE);
 
 extern uint *compilecode(const char *p);
-extern void executeret(const uint *code, tagval &result);
-extern void executeret(const char *p, tagval &result);
-extern char *executeret(const char *p);
+extern void keepcode(uint *p);
+extern void freecode(uint *p);
+extern void executeret(const uint *code, tagval &result = *commandret);
+extern void executeret(const char *p, tagval &result = *commandret);
+extern char *executestr(const uint *code);
+extern char *executestr(const char *p);
 extern int execute(const uint *code);
 extern int execute(const char *p);
 extern int execute(const char *p, bool nonworld);
@@ -321,12 +327,13 @@ extern void clearsleep(bool clearworlds = true);
 #define COMMAND(flags, name, nargs) COMMANDN(flags, name, name, nargs)
 
 // anonymous inline commands, uses nasty template trick with line numbers to keep names unique
-#define _ICOMMAND(flags, cmdname, name, nargs, proto, b) template<int N> struct cmdname; template<> struct cmdname<__LINE__> { static bool init; static void run proto; }; bool cmdname<__LINE__>::init = addcommand(name, (identfun)cmdname<__LINE__>::run, nargs, flags|IDF_COMPLETE); void cmdname<__LINE__>::run proto \
+#define ICOMMANDNS(flags, name, cmdname, nargs, proto, b) template<int N> struct cmdname; template<> struct cmdname<__LINE__> { static bool init; static void run proto; }; bool cmdname<__LINE__>::init = addcommand(name, (identfun)cmdname<__LINE__>::run, nargs, flags|IDF_COMPLETE); void cmdname<__LINE__>::run proto \
     { b; }
+#define ICOMMANDN(flags, name, cmdname, nargs, proto, b) ICOMMANDNS(flags, #name, cmdname, nargs, proto, b)
 #define ICOMMANDNAME(name) _icmd_##name
-#define ICOMMAND(flags, name, nargs, proto, b) _ICOMMAND(flags, ICOMMANDNAME(name), #name, nargs, proto, b)
+#define ICOMMAND(flags, name, nargs, proto, b) ICOMMANDN(flags, name, ICOMMANDNAME(name), nargs, proto, b)
 #define ICOMMANDSNAME _icmds_
-#define ICOMMANDS(flags, name, nargs, proto, b) _ICOMMAND(flags, ICOMMANDSNAME, name, nargs, proto, b)
+#define ICOMMANDS(flags, name, nargs, proto, b) ICOMMANDNS(flags, name, ICOMMANDSNAME, nargs, proto, b)
 
 #define _VAR(name, global, min, cur, max, flags) int global = variable(#name, min, cur, max, &global, NULL, flags|IDF_COMPLETE)
 #define VARN(flags, name, global, min, cur, max) _VAR(name, global, min, cur, max, flags)

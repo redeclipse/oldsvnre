@@ -2473,7 +2473,7 @@ namespace server
                     string s;
                     if(nargs <= 1 || !arg) formatstring(s)("%s", cmd);
                     else formatstring(s)("%s %s", cmd, arg);
-                    char *ret = executeret(s);
+                    char *ret = executestr(s);
                     if(ret)
                     {
                         if(*ret) conoutft(CON_MESG, "\fc%s returned %s", cmd, ret);
@@ -2566,7 +2566,7 @@ namespace server
                     string s;
                     if(nargs <= 1 || !arg) formatstring(s)("sv_%s", cmd);
                     else formatstring(s)("sv_%s %s", cmd, arg);
-                    char *ret = executeret(s);
+                    char *ret = executestr(s);
                     if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), cmd, ret);
                     else srvoutf(-3, "\fc%s executed %s", colorname(ci), cmd);
                     if(ret) delete[] ret;
