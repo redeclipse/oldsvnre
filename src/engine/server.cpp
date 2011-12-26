@@ -886,6 +886,9 @@ int updatetimer(bool limit)
         curtime = elapsed + timeerr;
         timeerr = 0;
     }
+#ifndef STANDALONE
+    if(limit && curtime > 1000) curtime = 1000;
+#endif
     lastmillis += curtime;
     totalmillis = millis;
     static int lastsec = 0;
