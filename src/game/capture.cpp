@@ -339,7 +339,7 @@ namespace capture
         loopv(entities::ents) if(entities::ents[i]->type == AFFINITY)
         {
             gameentity &e = *(gameentity *)entities::ents[i];
-            if(!m_check(e.attrs[3], game::gamemode) || !isteam(game::gamemode, game::mutators, e.attrs[0], TEAM_FIRST))
+            if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], TEAM_FIRST))
                 continue;
             st.addaffinity(e.o, e.attrs[0], i);
         }

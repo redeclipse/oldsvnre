@@ -637,7 +637,7 @@ namespace game
         if(d->aitype > AI_NONE)
         {
             bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
-            if(hasent && entities::ents[d->aientity]->attrs[8] > 0) total *= (entities::ents[d->aientity]->attrs[8]/100.f)*enemyscale;
+            if(hasent && entities::ents[d->aientity]->attrs[9] > 0) total *= (entities::ents[d->aientity]->attrs[9]/100.f)*enemyscale;
             else total *= aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].scale*(d->aitype >= AI_START ? enemyscale : botscale);
         }
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
@@ -685,7 +685,7 @@ namespace game
         if(d->aitype > AI_NONE)
         {
             bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
-            if(hasent && entities::ents[d->aientity]->attrs[7] > 0) d->speedscale *= entities::ents[d->aientity]->attrs[7]*enemyspeed;
+            if(hasent && entities::ents[d->aientity]->attrs[8] > 0) d->speedscale *= entities::ents[d->aientity]->attrs[8]*enemyspeed;
             else d->speedscale *= d->aitype >= AI_START ? enemyspeed : botspeed;
         }
 

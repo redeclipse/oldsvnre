@@ -177,7 +177,7 @@ namespace hud
                                     }
                                     else break;
                                 }
-                                game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS tied %s with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, sg.total);
+                                game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, sg.total);
                             }
                             else game::announcef(anc, CON_MESG, game::player1, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
                         }
@@ -199,7 +199,7 @@ namespace hud
                                     }
                                     else break;
                                 }
-                                game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw%s tied %s with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                                game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                             }
                             else game::announcef(anc, CON_MESG, game::player1, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                         }
@@ -217,7 +217,7 @@ namespace hud
                                     }
                                     else break;
                                 }
-                                game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw%s tied %s with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), winner, sg.players[0]->points);
+                                game::announcef(S_V_DRAW, CON_MESG, game::player1, "\fw%s tied %swith a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), winner, sg.players[0]->points);
                             }
                             else game::announcef(anc, CON_MESG, game::player1, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->points);
                         }

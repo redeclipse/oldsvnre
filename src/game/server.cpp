@@ -1334,7 +1334,7 @@ namespace server
                     case 2: if(m_limited(gamemode, mutators)) return false;
                     case 3: default: break;
                 }
-                if((sents[i].attrs[3] > 0 && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[2], gamemode)) return false;
+                if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators)) return false;
                 break;
             }
             default: break;
@@ -1373,7 +1373,7 @@ namespace server
         int sweap = m_weapon(gamemode, mutators);
         loopv(sents)
         {
-            if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
+            if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
                 sents[i].millis += m_campaign(gamemode) ? 50 : GAME(enemyspawndelay);
                 switch(GAME(enemyspawnstyle) == 3 ? rnd(2)+1 : GAME(enemyspawnstyle))
@@ -1416,7 +1416,7 @@ namespace server
         loopi(TRIGGERIDS+1) triggers[i].reset(i);
         if(update)
         {
-            loopv(sents) if(sents[i].type == TRIGGER && sents[i].attrs[4] >= 2 && sents[i].attrs[0] >= 0 && sents[i].attrs[0] <= TRIGGERIDS+1 && m_check(sents[i].attrs[5], gamemode))
+            loopv(sents) if(sents[i].type == TRIGGER && sents[i].attrs[4] >= 2 && sents[i].attrs[0] >= 0 && sents[i].attrs[0] <= TRIGGERIDS+1 && m_check(sents[i].attrs[5], sents[i].attrs[6], gamemode, mutators))
                 triggers[sents[i].attrs[0]].ents.add(i);
         }
         else triggerid = 0;
@@ -1478,7 +1478,7 @@ namespace server
             {
                 loopk(3)
                 {
-                    loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
+                    loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                     {
                         if(!k && !isteam(gamemode, mutators, sents[i].attrs[0], TEAM_FIRST)) continue;
                         else if(k == 1 && sents[i].attrs[0] == TEAM_NEUTRAL) continue;
@@ -1500,7 +1500,7 @@ namespace server
             }
             else
             { // use all neutral spawns
-                loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == TEAM_NEUTRAL && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
+                loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == TEAM_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
                     spawns[TEAM_NEUTRAL].add(i);
                     totalspawns++;
@@ -1508,7 +1508,7 @@ namespace server
             }
             if(!totalspawns)
             { // use all spawns
-                loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[3], gamemode))
+                loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
                     spawns[TEAM_NEUTRAL].add(i);
                     totalspawns++;
@@ -1601,10 +1601,10 @@ namespace server
         if(ci->state.aitype >= AI_START)
         {
             bool hasent = sents.inrange(ci->state.aientity) && sents[ci->state.aientity].type == ACTOR;
-            weap = hasent && sents[ci->state.aientity].attrs[5] > 0 ? sents[ci->state.aientity].attrs[5]-1 : aistyle[ci->state.aitype].weap;
+            weap = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6]-1 : aistyle[ci->state.aitype].weap;
             if(!m_insta(gamemode, mutators))
             {
-                int heal = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6] : aistyle[ci->state.aitype].health,
+                int heal = hasent && sents[ci->state.aientity].attrs[7] > 0 ? sents[ci->state.aientity].attrs[7] : aistyle[ci->state.aitype].health,
                     amt = heal/2+rnd(heal);
                 health = GAME(enemystrength) != 1 ? max(int(amt*GAME(enemystrength)), 1) : amt;
             }
@@ -4504,9 +4504,9 @@ namespace server
                     {
                         if(sents[ent].type == CHECKPOINT)
                         {
-                            if(cp->state.cpnodes.find(ent) < 0 && (sents[ent].attrs[4] == triggerid || !sents[ent].attrs[4]) && m_check(sents[ent].attrs[3], gamemode))
+                            if(cp->state.cpnodes.find(ent) < 0 && (sents[ent].attrs[5] == triggerid || !sents[ent].attrs[5]) && m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators))
                             {
-                                if(m_trial(gamemode)) switch(sents[ent].attrs[5])
+                                if(m_trial(gamemode)) switch(sents[ent].attrs[6])
                                 {
                                     case CP_LAST: case CP_FINISH:
                                     {
@@ -4514,7 +4514,7 @@ namespace server
                                         if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
                                         {
                                             cp->state.cptime = laptime;
-                                            if(sents[ent].attrs[5] == CP_FINISH) { cp->state.cpmillis = -gamemillis; waiting(cp, 0, 0); }
+                                            if(sents[ent].attrs[6] == CP_FINISH) { cp->state.cpmillis = -gamemillis; waiting(cp, 0, 0); }
                                         }
                                         sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, laptime, cp->state.cptime);
                                         if(m_team(gamemode, mutators))
@@ -4527,7 +4527,7 @@ namespace server
                                             }
                                         }
                                     }
-                                    case CP_RESPAWN: if(sents[ent].attrs[5] == CP_RESPAWN && cp->state.cpmillis) break;
+                                    case CP_RESPAWN: if(sents[ent].attrs[6] == CP_RESPAWN && cp->state.cpmillis) break;
                                     case CP_START:
                                     {
                                         cp->state.cpmillis = gamemillis;

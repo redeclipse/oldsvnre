@@ -32,9 +32,35 @@ namespace entities
     const char *entinfo(int type, attrvector &attr, bool full, bool icon)
     {
         static string entinfostr; entinfostr[0] = 0;
-        #define addentinfo(s) if(*(s)) { \
+        #define addentinfo(s) if(*(s)) \
+        { \
             if(entinfostr[0]) concatstring(entinfostr, ", "); \
             concatstring(entinfostr, s); \
+        }
+        #define addmodeinfo(a,b) \
+        { \
+            if(a) \
+            { \
+                int mode = a < 0 ? 0-a : a; \
+                loopi(G_MAX-G_PLAY) if(mode&(1<<i)) \
+                { \
+                    string ds; \
+                    if(a<0) formatstring(ds)("not %s", gametype[i+G_PLAY].name); \
+                    else formatstring(ds)("%s", gametype[i+G_PLAY].name); \
+                    addentinfo(ds); \
+                } \
+            } \
+            if(b) \
+            { \
+                int muts = b < 0 ? 0-b : b; \
+                loopi(G_M_NUM) if(muts&(1<<i)) \
+                { \
+                    string ds; \
+                    if(b<0) formatstring(ds)("not %s", mutstype[i].name); \
+                    else formatstring(ds)("%s", mutstype[i].name); \
+                    addentinfo(ds); \
+                } \
+            } \
         }
         switch(type)
         {
@@ -119,15 +145,9 @@ namespace entities
                 else
                 {
                     const char *cpnames[CP_MAX+1] = { "respawn", "start", "finish", "last", "" };
-                    addentinfo(cpnames[attr[5] < 0 || attr[5] >= CP_MAX ? CP_MAX : attr[5]]);
+                    addentinfo(cpnames[attr[6] < 0 || attr[6] >= CP_MAX ? CP_MAX : attr[6]]);
                 }
-                if(attr[3] && attr[3] > -G_MAX && attr[3] < G_MAX)
-                {
-                    string ds;
-                    if(attr[3]<0) formatstring(ds)("not %s", gametype[-attr[3]].name);
-                    else formatstring(ds)("%s", gametype[attr[3]].name);
-                    addentinfo(ds);
-                }
+                addmodeinfo(attr[3], attr[4]);
                 break;
             }
             case LIGHTFX:
@@ -147,14 +167,8 @@ namespace entities
                 if(full && attr[0] >= 0 && attr[0] < AI_TOTAL)
                 {
                     addentinfo(aistyle[attr[0]+AI_START].name);
-                    if(attr[3] && attr[3] > -G_MAX && attr[3] < G_MAX)
-                    {
-                        string ds;
-                        if(attr[3]<0) formatstring(ds)("not %s", gametype[-attr[3]].name);
-                        else formatstring(ds)("%s", gametype[attr[3]].name);
-                        addentinfo(ds);
-                    }
-                    addentinfo(WEAP(attr[5] > 0 && attr[5] <= WEAP_MAX ? attr[5]-1 : aistyle[attr[0]+AI_START].weap, name));
+                    addmodeinfo(attr[3], attr[4]);
+                    addentinfo(WEAP(attr[6] > 0 && attr[6] <= WEAP_MAX ? attr[6]-1 : aistyle[attr[0]+AI_START].weap, name));
                 }
                 break;
             }
@@ -167,13 +181,7 @@ namespace entities
                     addentinfo(str);
                     if(full)
                     {
-                        if(attr[2] && attr[2] > -G_MAX && attr[2] < G_MAX)
-                        {
-                            string ds;
-                            if(attr[2]<0) formatstring(ds)("not %s", gametype[-attr[2]].name);
-                            else formatstring(ds)("%s", gametype[attr[2]].name);
-                            addentinfo(ds);
-                        }
+                        addmodeinfo(attr[2], attr[3]);
                         if(attr[1]&WEAP_F_FORCED) addentinfo("forced");
                     }
                 }
@@ -222,13 +230,7 @@ namespace entities
                     addentinfo(actnames[attr[2] < 0 || attr[2] >= TA_MAX ? TA_MAX : attr[2]]);
                     if(attr[4] >= 2) addentinfo(attr[4] ? "routed" : "inert");
                     addentinfo(attr[4]%2 ? "on" : "off");
-                    if(attr[5] && attr[5] > -G_MAX && attr[5] < G_MAX)
-                    {
-                        string ds;
-                        if(attr[5]<0) formatstring(ds)("not %s", gametype[-attr[5]].name);
-                        else formatstring(ds)("%s", gametype[attr[5]].name);
-                        addentinfo(ds);
-                    }
+                    addmodeinfo(attr[5], attr[6]);
                 }
                 break;
             }
@@ -422,7 +424,7 @@ namespace entities
     void runtrigger(int n, gameent *d, bool act = true)
     {
         gameentity &e = *(gameentity *)ents[n];
-        if(m_check(e.attrs[5], game::gamemode) && lastmillis-e.lastuse >= triggertime(e)/2)
+        if(m_check(e.attrs[5], e.attrs[6], game::gamemode, game::mutators) && lastmillis-e.lastuse >= triggertime(e)/2)
         {
             e.lastuse = lastmillis;
             switch(e.attrs[1])
@@ -575,12 +577,12 @@ namespace entities
                 }
                 case CHECKPOINT:
                 {
-                    if(!m_check(e.attrs[3], game::gamemode) || !m_checkpoint(game::gamemode)) break;
+                    if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode)) break;
                     if(d->checkpoint != n)
                     {
                         client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
                         d->checkpoint = n;
-                        if(!d->cpmillis || e.attrs[5] == CP_START) d->cpmillis = lastmillis;
+                        if(!d->cpmillis || e.attrs[6] == CP_START) d->cpmillis = lastmillis;
                     }
                 }
             } break;
@@ -765,8 +767,6 @@ namespace entities
                     while(e.attrs[0] < 0) e.attrs[0] += TRIGGERIDS+1;
                     while(e.attrs[0] > TRIGGERIDS) e.attrs[0] -= TRIGGERIDS+1;
                 }
-                while(e.attrs[5] <= -G_MAX) e.attrs[5] += G_MAX*2;
-                while(e.attrs[5] >= G_MAX) e.attrs[5] -= G_MAX*2;
                 loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
                 {
                     ents[e.links[i]]->lastemit = e.lastemit;
@@ -778,8 +778,6 @@ namespace entities
                 if(create && (e.attrs[0] < WEAP_OFFSET || e.attrs[0] >= WEAP_MAX)) e.attrs[0] = WEAP_OFFSET; // don't be stupid when creating the entity
                 while(e.attrs[0] < WEAP_OFFSET) e.attrs[0] += WEAP_MAX-WEAP_OFFSET; // don't allow superimposed weaps
                 while(e.attrs[0] >= WEAP_MAX) e.attrs[0] -= WEAP_MAX-WEAP_OFFSET;
-                while(e.attrs[2] <= -G_MAX) e.attrs[2] += G_MAX*2;
-                while(e.attrs[2] >= G_MAX) e.attrs[2] -= G_MAX*2;
                 break;
             case PLAYERSTART:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
@@ -789,12 +787,10 @@ namespace entities
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
-                while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
-                while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
                 if(e.type == CHECKPOINT)
                 {
-                    while(e.attrs[5] < 0) e.attrs[5] += CP_MAX;
-                    while(e.attrs[5] >= CP_MAX) e.attrs[5] -= CP_MAX;
+                    while(e.attrs[6] < 0) e.attrs[6] += CP_MAX;
+                    while(e.attrs[6] >= CP_MAX) e.attrs[6] -= CP_MAX;
                 }
                 break;
             case ACTOR:
@@ -805,15 +801,13 @@ namespace entities
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
-                while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
-                while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
-                while(e.attrs[4] < 0) e.attrs[4] += TRIGGERIDS;
-                while(e.attrs[4] >= TRIGGERIDS) e.attrs[4] -= TRIGGERIDS;
-                while(e.attrs[5] < 0) e.attrs[5] += WEAP_MAX+1; // allow any weapon
-                while(e.attrs[5] > WEAP_MAX) e.attrs[5] -= WEAP_MAX+1;
-                if(e.attrs[6] < 0) e.attrs[6] = 0;
+                while(e.attrs[5] < 0) e.attrs[5] += TRIGGERIDS;
+                while(e.attrs[5] >= TRIGGERIDS) e.attrs[5] -= TRIGGERIDS;
+                while(e.attrs[6] < 0) e.attrs[6] += WEAP_MAX+1; // allow any weapon
+                while(e.attrs[6] > WEAP_MAX) e.attrs[6] -= WEAP_MAX+1;
                 if(e.attrs[7] < 0) e.attrs[7] = 0;
                 if(e.attrs[8] < 0) e.attrs[8] = 0;
+                if(e.attrs[9] < 0) e.attrs[9] = 0;
                 break;
             case AFFINITY:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
@@ -822,8 +816,6 @@ namespace entities
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
-                while(e.attrs[3] <= -G_MAX) e.attrs[3] += G_MAX*2;
-                while(e.attrs[3] >= G_MAX) e.attrs[3] -= G_MAX*2;
                 break;
             case TELEPORT:
                 while(e.attrs[0] < -1) e.attrs[0] += 361;
@@ -928,10 +920,11 @@ namespace entities
                 switch(k)
                 {
                     case 0: if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
-                                loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && ents[i]->attrs[0] == d->team && m_check(ents[i]->attrs[3], game::gamemode)) spawns.add(i);
+                                loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && ents[i]->attrs[0] == d->team && m_check(ents[i]->attrs[3], ents[i]->attrs[4], game::gamemode, game::mutators))
+                                    spawns.add(i);
                             break;
-                    case 1: case 2: loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && (k == 2 || m_check(ents[i]->attrs[3], game::gamemode))) spawns.add(i); break;
-                    case 3: loopi(lastenttype[WEAPON]) if(ents[i]->type == WEAPON && m_check(ents[i]->attrs[2], game::gamemode)) spawns.add(i); break;
+                    case 1: case 2: loopi(lastenttype[PLAYERSTART]) if(ents[i]->type == PLAYERSTART && (k == 2 || m_check(ents[i]->attrs[3], ents[i]->attrs[4], game::gamemode, game::mutators))) spawns.add(i); break;
+                    case 3: loopi(lastenttype[WEAPON]) if(ents[i]->type == WEAPON && m_check(ents[i]->attrs[2], ents[i]->attrs[3], game::gamemode, game::mutators)) spawns.add(i); break;
                     default: break;
                 }
                 while(!spawns.empty())
@@ -1391,6 +1384,12 @@ namespace entities
         }
     }
 
+    void checkmodes(int &attr)
+    {
+        if(attr > 0) attr = (1<<(attr-G_PLAY));
+        else if(attr < 0) attr = 0-(1<<((0-attr)-G_PLAY));
+    }
+
     void updateoldentities(int mtype, int mver, int gver)
     {
         loopvj(ents)
@@ -1431,6 +1430,12 @@ namespace entities
                             if(e.attrs[3] != -5) e.attrs[3]--;
                             else e.attrs[3]++;
                         }
+                    }
+                    if(mtype == MAP_MAPZ && gver <= 213)
+                    {
+                        e.attrs[5] = e.attrs[4];
+                        e.attrs[4] = 0;
+                        checkmodes(e.attrs[3]);
                     }
                     break;
                 }
@@ -1488,11 +1493,18 @@ namespace entities
                         if(e.attrs[0] < WEAP_OFFSET) e.attrs[0] = 8; // cleanup for fixentity
                     }
                     if(mtype == MAP_MAPZ && gver <= 163) e.attrs[0]++; // add in sword
+                    if(mtype == MAP_MAPZ && gver <= 213)
+                    {
+                        e.attrs[4] = e.attrs[3];
+                        e.attrs[3] = 0;
+                        checkmodes(e.attrs[2]);
+                    }
                     break;
                 }
                 case TRIGGER:
                 {
                     if(mtype == MAP_MAPZ && gver <= 158) e.attrs[4] = 0;
+                    if(mtype == MAP_MAPZ && gver <= 213) checkmodes(e.attrs[5]);
                     break;
                 }
                 case PUSHER:
@@ -1522,6 +1534,12 @@ namespace entities
                     }
                     if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_MULTI) e.attrs[0] = TEAM_NEUTRAL;
                     checkyawmode(e, mtype, mver, gver, 1, 3);
+                    if(mtype == MAP_MAPZ && gver <= 213)
+                    {
+                        e.attrs[5] = e.attrs[4];
+                        e.attrs[4] = 0;
+                        checkmodes(e.attrs[3]);
+                    }
                     break;
                 }
                 case ACTOR:
@@ -1538,9 +1556,30 @@ namespace entities
                         }
                     }
                     checkyawmode(e, mtype, mver, gver, 1, 3);
+                    if(mtype == MAP_MAPZ && gver <= 213)
+                    {
+                        e.attrs[9] = e.attrs[8];
+                        e.attrs[8] = e.attrs[7];
+                        e.attrs[7] = e.attrs[6];
+                        e.attrs[6] = e.attrs[5];
+                        e.attrs[5] = e.attrs[4];
+                        e.attrs[4] = 0;
+                        checkmodes(e.attrs[4]);
+                    }
                     break;
                 }
-                case CHECKPOINT: checkyawmode(e, mtype, mver, gver, 1, 3); break;
+                case CHECKPOINT:
+                {
+                    checkyawmode(e, mtype, mver, gver, 1, 3);
+                    if(mtype == MAP_MAPZ && gver <= 213)
+                    {
+                        e.attrs[6] = e.attrs[5];
+                        e.attrs[5] = e.attrs[4];
+                        e.attrs[4] = 0;
+                        checkmodes(e.attrs[3]);
+                    }
+                    break;
+                }
                 default: break;
             }
         }
@@ -1579,15 +1618,15 @@ namespace entities
                 e.o = ents[i]->o;
                 e.attrs.add(0, max(5, enttype[ACTOR].numattrs));
                 e.attrs[0] = (i%5 != 4 ? AI_GRUNT : AI_TURRET)-1;
-                e.attrs[5] = (i/5)%(WEAP_MAX+1);
+                e.attrs[6] = (i/5)%(WEAP_MAX+1);
                 if(e.attrs[0] == AI_TURRET && e.attrs[5] == WEAP_MELEE) e.attrs[5] = WEAP_SMG;
                 switch(ents[i]->type)
                 {
                     case PLAYERSTART:
-                        loopj(4) e.attrs[j+1] = ents[i]->attrs[j+1]; // yaw, pitch, mode, id
+                        loopj(5) e.attrs[j+1] = ents[i]->attrs[j+1]; // yaw, pitch, mode, muts, id
                         break;
                     case WEAPON:
-                        loopj(2) e.attrs[j+3] = ents[i]->attrs[j+2]; // mode, id
+                        loopj(3) e.attrs[j+3] = ents[i]->attrs[j+2]; // mode, muts, id
                     default:
                         e.attrs[1] = (i%8)*45;
                         break;
@@ -1672,7 +1711,7 @@ namespace entities
             {
                 case PLAYERSTART:
                 {
-                    part_radius(vec(e.o).add(vec(0, 0, game::player1->zradius/2)), vec(game::player1->xradius, game::player1->yradius, game::player1->zradius/2), showentsize, 1, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
+                    part_radius(vec(e.o).add(vec(0, 0, game::player1->zradius/2)), vec(game::player1->xradius, game::player1->yradius, game::player1->zradius/2), showentsize, 1, 1, TEAM(e.attrs[0], colour));
                     break;
                 }
                 case ACTOR:
@@ -1873,9 +1912,9 @@ namespace entities
                             {
                                 yaw = e.attrs[1]+90;
                                 pitch = e.attrs[2];
-                                int weap = e.attrs[5] > 0 ? e.attrs[5]-1 : aistyle[e.attrs[0]].weap;
+                                int weap = e.attrs[6] > 0 ? e.attrs[6]-1 : aistyle[e.attrs[0]].weap;
                                 if(isweap(weap)) colour = WEAP(weap, colour);
-                                size = e.attrs[8] > 0 ? e.attrs[8]/100.f : aistyle[e.attrs[0]].scale;
+                                size = e.attrs[9] > 0 ? e.attrs[9]/100.f : aistyle[e.attrs[0]].scale;
                             }
                             fade = 0.5f;
                         }

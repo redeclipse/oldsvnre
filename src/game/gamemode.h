@@ -184,17 +184,17 @@ mutstypes mutstype[] = {
     },
     {
         G_M_GSP1,       G_M_GSP1,           G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
-        "",
+        "gsp1",
         ""
     },
     {
         G_M_GSP2,       G_M_GSP2,           G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
-        "",
+        "gsp2",
         ""
     },
     {
         G_M_GSP3,       G_M_GSP3,           G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_DUEL|G_M_SURVIVOR|G_M_ARENA|G_M_ONSLAUGHT|G_M_HOVER|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2|G_M_GSP3,
-        "",
+        "gsp3",
         ""
     },
 };
@@ -204,7 +204,7 @@ extern mutstypes mutstype[];
 #endif
 
 #define m_game(a)           (a > -1 && a < G_MAX)
-#define m_check(a,b)        (!a || (a < 0 ? -a != b : a == b))
+#define m_check(a,b,c,d)    ((!a || (a < 0 ? !((0-a)&(1<<(c-G_PLAY))) : a&(1<<(c-G_PLAY)))) && (!b || (b < 0 ? !((0-b)&d) : b&d)))
 #define m_local(a)          (a == G_DEMO)
 
 #define m_demo(a)           (a == G_DEMO)

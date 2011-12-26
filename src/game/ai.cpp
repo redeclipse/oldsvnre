@@ -628,8 +628,8 @@ namespace ai
             d->ai->lastrun = lastmillis;
             if(d->aitype >= AI_START)
             {
-                if(entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[5] > 0)
-                    d->ai->weappref = entities::ents[d->aientity]->attrs[5]-1;
+                if(entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[6] > 0)
+                    d->ai->weappref = entities::ents[d->aientity]->attrs[6]-1;
                 else d->ai->weappref = aistyle[d->aitype].weap;
                 if(!isweap(d->ai->weappref)) d->ai->weappref = rnd(WEAP_MAX-1)+1;
             }

@@ -195,7 +195,7 @@ namespace defend
         loopv(entities::ents)
         {
             extentity *e = entities::ents[i];
-            if(e->type != AFFINITY || !m_check(e->attrs[3], game::gamemode)) continue;
+            if(e->type != AFFINITY || !m_check(e->attrs[3], e->attrs[4], game::gamemode, game::mutators)) continue;
             int team = e->attrs[0];
             switch(defendflags)
             {
