@@ -530,7 +530,7 @@ void drawskybox(int farplane, bool limited)
 
     if(clampsky) glDepthRange(1, 1);
 
-    bool blendsky = !skybox[0] || !sky[0] || sky[0]->bpp == 2 || sky[0]->bpp == 4;
+    bool blendsky = !skybox[0] || !sky[0] || sky[0]->type&Texture::ALPHA;
 
     if((!glaring || skybgglare) && blendsky)
     {
