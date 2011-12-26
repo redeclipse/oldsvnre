@@ -1982,10 +1982,7 @@ namespace entities
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
-            //part_create(PART_HINT_BOLD_SOFT, 1, o, colour, radius, fluc*skew);
-            vec vcol = vec::hexcolor(colour).mul(128);
-            int icol = (int(vcol.x)<<16)|(int(vcol.y)<<8)|int(vcol.z);
-            part_explosion(o, radius, PART_SHOCKWAVE, 1, icol, 1.f, fluc*skew*0.125f);
+            part_create(PART_HINT_BOLD_SOFT, 1, o, colour, radius, fluc*skew);
         }
         if(isedit ? (showentinfo&(hasent ? 1 : 2)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
