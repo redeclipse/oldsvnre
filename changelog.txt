@@ -22,23 +22,28 @@ Audio & Visuals:
  * New font "Play", extended character support
  * Female variation of player model (set in profile)
  * Added visible counter and warning for imminent explosion in Bomber ball
+ * New 'radarstyle' option displaying absolute positions
 Maps:
  * Ares, new map
  * Cargo, new map
  * Colony, new map
  * Isolation, new map
+ * Purge, new time trial map
  * Dutility, revamped
  * Tower, re-added and revamped
+ * Error, added AI waypoints
 Modes & Mutators:
  * League mutator removed
  * Instagib-vampire combination disabled
  * Multi-team mutator re-added
  * Jetpack mutator re-added
+ * 'instagibfilter' variable: disallow certain mutators combining with instagib
 Modding:
  * New map editing menu, available via [F3]
  * Editing mode has been made more obvious to the user
  * cube2font tool for generating game fonts, including documentation
  * Ability to add a second cloudlayer with the envlayer command
+ * Ability to specify bitwise modes and mutators on entities that check them
 Misc:
  * AI waypoints separated out from ents, overall major AI improvements
  * Split apart kick and ban commands so users can be removed without a ban
