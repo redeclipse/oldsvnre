@@ -41,7 +41,6 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfollow, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonaiming, 0, 1, 1);
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
-    FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
@@ -154,6 +153,8 @@ namespace game
     VAR(IDF_PERSIST, playerundertone, -1, CTONE_TMIX, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_MIXED, CTONE_MAX-1);
     VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAMED, CTONE_MAX-1);
+    FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
+    VAR(IDF_PERSIST, forceplayermodel, 0, 0, NUMPLAYERMODELS);
 
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
     ICOMMAND(0, mutators, "", (), intret(mutators));
@@ -2279,9 +2280,9 @@ namespace game
 
     void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-        const char *mdl = playermodels[0][third ? 0 : 1];
+        const char *mdl = playermodels[forceplayermodel ? forceplayermodel-1 : 0][third ? 0 : 1];
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : 1];
-        else  mdl = playermodels[d->model%NUMPLAYERMODELS][third ? 0 : 1];
+        else if(!forceplayermodel) mdl = playermodels[d->model%NUMPLAYERMODELS][third ? 0 : 1];
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
         if(!third && firstpersonsway && !intermission)
