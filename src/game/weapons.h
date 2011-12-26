@@ -244,7 +244,7 @@ WEAPON(shotgun,     0x999900,       0x999900,       0x999900,       0x999900,   
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     WEAP_SHOTGUN
 );
-WEAPON(smg,         0xFF4400,       0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,
+WEAPON(smg,         0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,
     40,     40,     1,      4,      100,    300,    1500,   22,     4,      2500,   350,    0,      0,      25,     25,
     0,      0,      800,    150,
     0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      3,      6,      0,      0,      0,      0,
