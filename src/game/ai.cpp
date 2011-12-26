@@ -1052,10 +1052,14 @@ namespace ai
                 }
             }
         }
-        if(jump)
+        if(d->action[AC_JUMP] != jump)
         {
-            if((d->action[AC_JUMP] = jump) != false) d->actiontime[AC_JUMP] = lastmillis;
-            int seed = (111-d->skill)*(impulse || jet ? 1 : (d->onladder || d->inliquid ? 3 : 5));
+            d->action[AC_JUMP] = jump;
+            d->actiontime[AC_JUMP] = lastmillis;
+        }
+        if(jumper && d->action[AC_JUMP])
+        {
+            int seed = (111-d->skill)*(d->onladder || d->inliquid ? 3 : 5);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
