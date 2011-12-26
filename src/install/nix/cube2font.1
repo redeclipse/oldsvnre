@@ -68,13 +68,15 @@ Height of generated texes.
 .TP
 .I spacewidth
 .br
-Width of the standard space character size when rendered ingame, defaults to half of
+Width of the standard space character size when rendered ingame, defaults to a third of
 .I spaceheight
 if omitted or set to 0.
 .TP
 .I spaceheight
 .br
-Height of the vertical character separation when rendered ingame, defaults to 72 if omitted or set to 0. This value will make the rendered characters scale to fit.
+Height of the vertical character separation when rendered ingame, defaults to the maximum vertical character range if omitted or set to 0. This value is normally larger than
+.IR charheight ,
+since it takes into account characters extending outsite the 'em' box. This value will make the rendered characters scale to fit.
 .TP
 .I texdir
 .br
@@ -86,7 +88,7 @@ Sets the font directory path in the config file.
 .RS 4
 Generates a font named
 .B play
-with a 4 pixel black border, an additional 15 pixels of space around characters, one pixel of extra spacing at both sides when displayed ingame, a character size of 54x54 pixels, a tex size of 512x512 pixels, a 24 pixels wide standard space character, a 72 pixels high standard vertical line separation, and the font path set as
+with a 4 pixel black border, an additional 15 pixels of space around characters, one pixel of extra spacing at both sides when displayed ingame, a character size of 54x54 pixels, a tex size of 512x512 pixels, a 23 pixels wide standard space character, a 71 pixels high standard vertical line separation, and the font path set as
 .B fonts/
 .PP
 This would normally generate the files
