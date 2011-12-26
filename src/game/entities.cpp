@@ -265,7 +265,7 @@ namespace entities
         switch(type)
         {
             case AFFINITY: return "flag";
-            case PLAYERSTART: return playermodels[0][0];
+            case PLAYERSTART: return playermodels[game::forceplayermodel ? game::forceplayermodel-1 : 0][0];
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);

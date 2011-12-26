@@ -1246,7 +1246,7 @@ namespace game
             lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow,
-            playerovertone, playerundertone, playerdisplaytone, playereffecttone;
+            playerovertone, playerundertone, playerdisplaytone, playereffecttone, forceplayermodel;
     extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
