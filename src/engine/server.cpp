@@ -328,14 +328,64 @@ ENetHost *serverhost = NULL;
 int laststatus = 0;
 ENetSocket pongsock = ENET_SOCKET_NULL, lansock = ENET_SOCKET_NULL;
 
+int localclients = 0, nonlocalclients = 0;
+
+bool hasnonlocalclients() { return nonlocalclients!=0; }
+bool haslocalclients() { return localclients!=0; }
+
+void delclient(int n)
+{
+    if(!clients.inrange(n)) return;
+    clientdata *c = clients[n];
+    switch(c->type)
+    {
+        case ST_TCPIP: nonlocalclients--; if(c->peer) c->peer->data = NULL; break;
+        case ST_LOCAL: localclients--; break;
+        case ST_EMPTY: return;
+    }
+    c->type = ST_EMPTY;
+    c->peer = NULL;
+    if(c->info)
+    {
+        server::deleteinfo(c->info);
+        c->info = NULL;
+    }
+}
+
+int addclient(int type)
+{
+    clientdata *c = NULL;
+    loopv(clients) if(clients[i]->type==ST_EMPTY)
+    {
+        c = clients[i];
+        break;
+    }
+    if(!c)
+    {
+        c = new clientdata;
+        c->num = clients.length();
+        clients.add(c);
+    }
+    c->info = server::newinfo();
+    c->type = type;
+    switch(type)
+    {
+        case ST_TCPIP: nonlocalclients++; break;
+        case ST_LOCAL: localclients++; break;
+    }
+    return c->num;
+}
+
 void cleanupserver()
 {
     server::shutdown();
     if(serverhost) enet_host_destroy(serverhost);
     serverhost = NULL;
+
     if(pongsock != ENET_SOCKET_NULL) enet_socket_destroy(pongsock);
     if(lansock != ENET_SOCKET_NULL) enet_socket_destroy(lansock);
     pongsock = lansock = ENET_SOCKET_NULL;
+
 #ifdef IRC
     irccleanup();
 #endif
@@ -481,10 +531,7 @@ void disconnect_client(int n, int reason)
     if(clients[n]->type!=ST_TCPIP) return;
     enet_peer_disconnect(clients[n]->peer, reason);
     server::clientdisconnect(n, false, reason);
-    clients[n]->type = ST_EMPTY;
-    clients[n]->peer->data = NULL;
-    server::deleteinfo(clients[n]->info);
-    clients[n]->info = NULL;
+    delclient(n);
 }
 
 void kicknonlocalclients(int reason)
@@ -506,39 +553,9 @@ void localclienttoserver(int chan, ENetPacket *packet)
     if(c) process(packet, c->num, chan);
 }
 
-void delclient(int n)
-{
-    if(clients.inrange(n))
-    {
-        if(clients[n]->type==ST_TCPIP) clients[n]->peer->data = NULL;
-        clients[n]->type = ST_EMPTY;
-        server::deleteinfo(clients[n]->info);
-        clients[n]->info = NULL;
-    }
-}
-
-int addclient(int type)
-{
-    int n = -1;
-    loopv(clients) if(clients[i]->type==ST_EMPTY)
-    {
-        n = i;
-        break;
-    }
-    if(!clients.inrange(n))
-    {
-        clientdata *c = new clientdata;
-        n = c->num = clients.length();
-        clients.add(c);
-    }
-    clients[n]->info = server::newinfo();
-    clients[n]->type = type;
-    return n;
-}
-
 #ifndef STANDALONE
 VAR(IDF_PERSIST, autoconnect, 0, 0, 1);
-extern bool connectedlocally;
+
 void localconnect(bool force)
 {
     if(!connected() && (force || autoconnect))
@@ -550,7 +567,6 @@ void localconnect(bool force)
         c.peer = NULL;
         copystring(c.hostname, "localhost");
         conoutf("\fglocal client %d connected", c.num);
-        connectedlocally = true;
         client::gameconnect(false);
         server::clientconnect(c.num, 0, true);
     }
@@ -562,10 +578,7 @@ void localdisconnect()
     {
         clientdata &c = *clients[i];
         server::clientdisconnect(c.num, true);
-        c.type = ST_EMPTY;
-        server::deleteinfo(c.info);
-        c.info = NULL;
-        connectedlocally = false;
+        delclient(c.num);
     }
 }
 #endif
@@ -829,10 +842,7 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
                 clientdata *c = (clientdata *)event.peer->data;
                 if(!c) break;
                 server::clientdisconnect(c->num);
-                c->type = ST_EMPTY;
-                event.peer->data = NULL;
-                server::deleteinfo(c->info);
-                c->info = NULL;
+                delclient(c->num);
                 break;
             }
             default:
@@ -879,7 +889,6 @@ int updatetimer(bool limit)
         int scaledtime = elapsed*timescale + timeerr;
         curtime = scaledtime/100;
         timeerr = scaledtime%100;
-        if(curtime>200) curtime = 200;
     }
     else
     {
@@ -887,7 +896,7 @@ int updatetimer(bool limit)
         timeerr = 0;
     }
 #ifndef STANDALONE
-    if(limit && curtime > 1000) curtime = 1000;
+    if(limit && curtime > 200 && !connected(false, false) && !hasnonlocalclients()) curtime = 200;
 #endif
     lastmillis += curtime;
     totalmillis = millis;

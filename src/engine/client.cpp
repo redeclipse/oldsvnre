@@ -5,7 +5,6 @@
 ENetHost *clienthost = NULL;
 ENetPeer *curpeer = NULL, *connpeer = NULL;
 int connmillis = 0, connattempts = 0, discmillis = 0;
-bool connectedlocally = false;
 
 bool multiplayer(bool msg)
 {
@@ -38,7 +37,7 @@ void throttle()
 
 bool connected(bool attempt, bool local)
 {
-    return curpeer || (attempt && connpeer) || (local && connectedlocally);
+    return curpeer || (attempt && connpeer) || (local && haslocalclients());
 }
 
 void abortconnect(bool msg)
@@ -62,7 +61,7 @@ void connectfail()
 void trydisconnect()
 {
     if(connpeer) abortconnect();
-    else if(curpeer || connectedlocally)
+    else if(curpeer || haslocalclients())
     {
         if(verbose) conoutft(CON_MESG, "\faattempting to disconnect...");
         disconnect(0, !discmillis);
@@ -124,7 +123,7 @@ void connectserv(const char *name, int port, const char *password)
 void disconnect(int onlyclean, int async)
 {
     bool cleanup = onlyclean!=0;
-    if(curpeer || connectedlocally)
+    if(curpeer || haslocalclients())
     {
         if(curpeer)
         {
