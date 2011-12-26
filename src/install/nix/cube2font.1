@@ -1,12 +1,16 @@
-.TH CUBE2FONT 1 "2011-12-05" "" "cube2font Manual"
+.TH CUBE2FONT 1 "2011-12-26" "" "cube2font Manual"
 .SH NAME
 cube2font \- Utility program designed to create font bitmaps for Cube Engine games
 .SH SYNOPSIS
+.nh
 .B cube2font
-.I infile outfile border pad offset advance charwidth charheight texwidth texheight
-[
-.I spacewidth spaceheight texdir
-]
+.I infile
+.IR outborder [: inborder ]
+.I pad offset advance charwidth charheight texwidth texheight
+.RI [ spacewidth
+.I spaceheight
+.IR texdir]
+.hy
 .SH DESCRIPTION
 cube2font is a utility program designed to create font bitmaps for Cube Engine games, it works by taking a Truetype font and building it into a set of coordinates in an image. cube2font is an improved version of the previous TTF2Font, supporting a much larger range of characters.
 .PP
@@ -20,9 +24,13 @@ Path to input file in truetype format.
 .I outfile
 Sets the font name in the config file, and is also used as an output filename template: A number and the .png extension will be appended to the texes, and a .cfg extension to the coordinate file.
 .TP
-.I border
+.I outborder
 .br
-Size of black border around each character on the texes.
+Size of black outside border around each character on the texes.
+.TP
+.I inborder
+.br
+Size of black border between the elements inside each character.
 .TP
 .I pad
 .br
@@ -72,28 +80,33 @@ Height of the vertical character separation when rendered ingame, defaults to 72
 .br
 Sets the font directory path in the config file.
 .SH EXAMPLES
-.B cube2font Play-Bold.ttf large 3 14 1 1 56 56 512 512 0 0 fonts/
+.nf
+.B cube2font Play-Bold.ttf play 4 15 1 1 54 54 512 512 0 0 fonts/
+.fi
 .RS 4
 Generates a font named
-.B large
-with a 3 pixel black border, an additional 14 pixels of space around characters, one pixel of extra spacing at both sides when displayed ingame, a character size of 56x56 pixels, a tex size of 512x512 pixels, a 24 pixels wide standard space character, a 72 pixels high standard vertical line separation, and the font path set as
+.B play
+with a 4 pixel black border, an additional 15 pixels of space around characters, one pixel of extra spacing at both sides when displayed ingame, a character size of 54x54 pixels, a tex size of 512x512 pixels, a 24 pixels wide standard space character, a 72 pixels high standard vertical line separation, and the font path set as
 .B fonts/
 .PP
 This would normally generate the files
 .br
-.B large.cfg
+.B play.cfg
 .br
-.B large0.png
+.B play0.png
 .br
-.B large1.png
+.B play1.png
 .br
-.B large2.png
-.br
+.B play2.png
+.PP
+The above values are used for the base font in the cube2 game Red Eclipse.
 .RE
 .PP
-.B cube2font Play-Bold.ttf small 3 15 1 1 40 40 512 512 0 0 fonts/
+.nf
+.B cube2font default.ttf default 3 19 1 1 49 49 512 512 32 64 packages/fonts/
+.fi
 .RS 4
-Generates a smaller font.
+This generates the default font for the cube2 game Sauerbraten.
 .SH AUTHORS
 cube2font was created by Lee "eihrul" Salzman.
 .PP
