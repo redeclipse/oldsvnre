@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         213
+#define GAMEVERSION         214
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -77,10 +77,10 @@ enttypes enttype[] = {
                 "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
     {
-        PLAYERSTART,    1,          59,     0,      EU_NONE,    5,
+        PLAYERSTART,    1,          59,     0,      EU_NONE,    6,
             0, 0,
             false,  true,  false,      false,      false,
-                "playerstart",  { "team",   "yaw",      "pitch",    "mode",     "id" }
+                "playerstart",  { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
         ENVMAP,         1,          0,      0,      EU_NONE,    3,
@@ -116,10 +116,10 @@ enttypes enttype[] = {
                 "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
     },
     {
-        WEAPON,         2,          59,     24,     EU_ITEM,    4,
+        WEAPON,         2,          59,     24,     EU_ITEM,    5,
             0, 0,
             false,  true,   true,      false,      false,
-                "weapon",       { "type",   "flags",    "mode",     "id" }
+                "weapon",       { "type",   "flags",    "modes",    "muts",     "id" }
     },
     {
         TELEPORT,       1,          50,     12,     EU_AUTO,    8,
@@ -129,17 +129,17 @@ enttypes enttype[] = {
                 "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex" }
     },
     {
-        ACTOR,          1,          59,     0,      EU_NONE,    9,
+        ACTOR,          1,          59,     0,      EU_NONE,    10,
             (1<<AFFINITY), 0,
             false,  true,   false,      true,       false,
-                "actor",        { "type",   "yaw",      "pitch",    "mode",     "id",       "weap",     "health",   "speed",    "scale" }
+                "actor",        { "type",   "yaw",      "pitch",    "modes",    "muts",     "id",       "weap",     "health",   "speed",    "scale" }
     },
     {
-        TRIGGER,        1,          58,     16,     EU_AUTO,    6,
+        TRIGGER,        1,          58,     16,     EU_AUTO,    7,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  true,   true,       false,      true,
-                "trigger",      { "id",     "type",     "action",   "radius",   "state",    "mode" }
+                "trigger",      { "id",     "type",     "action",   "radius",   "state",    "modes",    "muts" }
     },
     {
         PUSHER,         1,          58,     12,     EU_AUTO,    6,
@@ -149,16 +149,16 @@ enttypes enttype[] = {
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        AFFINITY,       1,          48,     32,     EU_NONE,    5,
+        AFFINITY,       1,          48,     32,     EU_NONE,    6,
             0, 0,
             false,  false,  false,      false,      false,
-                "affinity",     { "team",   "yaw",      "pitch",    "mode",     "id" }
+                "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        CHECKPOINT,     1,          48,     16,     EU_AUTO,    6,
+        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,
             0, 0,
             false,  true,   false,      false,      false,
-                "checkpoint",   { "radius", "yaw",      "pitch",    "mode",     "id",       "type" }
+                "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
     {
         DUMMY1,         1,          48,     0,      EU_NONE,    4,
