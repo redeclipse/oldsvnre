@@ -2433,7 +2433,7 @@ ICOMMAND(0, maxf, "V", (tagval *args, int numargs),
     loopi(numargs - 1) val = max(val, args[i].getfloat());
     floatret(val);
 });
-ICOMMAND(0, round, "fi", (float *a, int *b),
+ICOMMAND(0, precf, "fi", (float *a, int *b),
 {
     defformatstring(format)("%%.%df", max(*b, 0));
     defformatstring(retval)(format, *a);
