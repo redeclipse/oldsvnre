@@ -199,7 +199,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
     FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, inventoryscoreshrink, 0, 0.15f, 1);
-    FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.6f, 1);
+    FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventoryglowblend, 0, 1, 1);
@@ -1812,21 +1812,18 @@ namespace hud
                         static string weapids[WEAP_MAX];
                         static int lastweapids = -1;
                         int n = weapons::slot(game::focus, i);
-                        if(isweap(n))
+                        if(lastweapids != changedkeys)
                         {
-                            if(lastweapids != changedkeys)
+                            loopj(WEAP_MAX)
                             {
-                                loopj(WEAP_MAX)
-                                {
-                                    defformatstring(action)("weapon %d", j);
-                                    const char *actkey = searchbind(action, 0);
-                                    if(actkey && *actkey) copystring(weapids[j], actkey);
-                                    else formatstring(weapids[j])("%d", j);
-                                }
-                                lastweapids = changedkeys;
+                                defformatstring(action)("weapon %d", weapons::slot(game::focus, j));
+                                const char *actkey = searchbind(action, 0);
+                                if(actkey && *actkey) copystring(weapids[j], actkey);
+                                else formatstring(weapids[j])("%d", j);
                             }
-                            drawitemsubtext(x, oldy, size, TEXT_RIGHT_UP, skew, "reduced", fade, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, weapids[n]);
+                            lastweapids = changedkeys;
                         }
+                        drawitemsubtext(x, oldy, size, TEXT_RIGHT_UP, skew, "reduced", fade, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, weapids[n]);
                     }
                 }
             }
