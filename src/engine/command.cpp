@@ -1923,7 +1923,7 @@ bool validatealias(const char *s)
         case '/': if(s[1] == '/') return false; break;
         case '\f': return false;
     }
-    if(braks || parens) return false;
+    if(braks || parens || curly) return false;
     return true;
 }
 
