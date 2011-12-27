@@ -732,7 +732,17 @@ namespace capture
         {
             capturestate::flag &f = st.flags[b.target];
             b.idle = -1;
-            if(f.team == ai::owner(d) && !m_gsp3(game::gamemode, game::mutators))
+            if(f.team != ai::owner(d))
+            {
+                if(f.owner)
+                {
+                    if(d == f.owner) return aihomerun(d, b);
+                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
+                    else return ai::defense(d, b, f.pos());
+                }
+                return ai::makeroute(d, b, f.pos());
+            }
+            else if(!m_gsp3(game::gamemode, game::mutators))
             {
                 static vector<int> hasflags; hasflags.setsize(0);
                 loopv(st.flags)
@@ -741,19 +751,7 @@ namespace capture
                     if(g.owner == d) hasflags.add(i);
                 }
                 if(!hasflags.empty()) return ai::makeroute(d, b, f.owner == d ? f.spawnloc : f.pos());
-                else if(f.team != ai::owner(d)) return false;
             }
-            if(f.team == ai::owner(d))
-            {
-                if(f.owner)
-                {
-                    if(d == f.owner) return aihomerun(d, b);
-                    else if(ai::owner(d) != ai::owner(f.owner)) return ai::violence(d, b, f.owner, 4);
-                    else return ai::defense(d, b, f.pos());
-                }
-                else return ai::makeroute(d, b, f.pos());
-            }
-            else return ai::makeroute(d, b, f.pos());
         }
         return false;
     }

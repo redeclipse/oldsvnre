@@ -1064,11 +1064,11 @@ namespace ai
             seed *= 100; if(b.idle) seed *= 10;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
         }
-        if(!sequenced && !d->onladder)
+        if(!sequenced && !d->onladder && d->timeinair)
         {
-            if(d->timeinair > 250 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, 3, true))
+            if(d->timeinair > 300 && !d->turnside && (d->skill >= 100 || !rnd(101-d->skill)) && physics::canimpulse(d, 3, true))
                 d->action[AC_SPECIAL] = true;
-            else if(!passive() && !weaptype[d->weapselect].melee && locked && lastmillis-d->ai->lastmelee >= (201-d->skill)*5)
+            else if(!passive() && lastmillis-d->ai->lastmelee >= (201-d->skill)*5 && d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)) && (!impulsemeleestyle || (d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)))
             {
                 d->action[AC_SPECIAL] = true;
                 d->ai->lastmelee = lastmillis;
@@ -1114,7 +1114,7 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        bool enemyok = false, locked = false, melee = weaptype[d->weapselect].melee || d->aitype == AI_BOT;
+        bool enemyok = false, locked = false;
         gameent *e = game::getclient(d->ai->enemy);
         if(!passive())
         {
@@ -1147,12 +1147,12 @@ namespace ai
                 if(idle || insight || hasseen || quick)
                 {
                     float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
-                    if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16, melee))
+                    if(insight && lockon(d, e, aistyle[d->aitype].canstrafe ? 32 : 16, weaptype[d->weapselect].melee))
                     {
                         d->ai->targyaw = yaw;
                         d->ai->targpitch = pitch;
                         frame *= 2;
-                        if(d->aitype == AI_BOT) locked = true;
+                        locked = true;
                     }
                     game::scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, frame*sskew);
                     if(insight || quick)
@@ -1251,7 +1251,7 @@ namespace ai
             d->strafe = ad.strafe;
             d->aimyaw -= ad.offset;
         }
-        if(!aistyle[d->aitype].canstrafe && d->move && enemyok && lockon(d, e, 8, melee)) d->move = 0;
+        if(!aistyle[d->aitype].canstrafe && d->move && enemyok && lockon(d, e, 8, weaptype[d->weapselect].melee)) d->move = 0;
         game::fixrange(d->aimyaw, d->aimpitch);
         findorientation(dp, d->yaw, d->pitch, d->ai->target);
         return result;
