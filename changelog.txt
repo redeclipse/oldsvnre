@@ -50,6 +50,7 @@ Misc:
  * Copyright cleanup, new trademark policy
  * *roff manpages for *nix systems
 Additional Fixed Bugs:
+ * #8 AI performance issues
  * #30 Use RE_DIR=$(dirname $0) in launch script
  * #31 Changing weapon name breaks the entry in Variables GUI
  * #32 Floating/Infinite Flight Bug
@@ -60,8 +61,10 @@ Additional Fixed Bugs:
  * #39 teampersist crashes server
  * #40 dedicated server demo recording is broken
  * #42 Plasma Blue-Ball-of-Death sticking to Ragdoll
+ * #43 Create lower poly weapon models for item and vwep version
  * #44 Entity Radius Broken in Edit Mode
  * #47 Create "botoffset" variable to replace INSERT/DELETE behaviour
+ * #50 Use "aiclip" on common areas where bots can't travel
  * #53 can't drop flag in ctf-protect
  * #60 Live Support does not work correctly
  * #65 Clicking the Red Eclipse icon on map selection without selecting a map
