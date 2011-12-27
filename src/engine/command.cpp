@@ -258,9 +258,15 @@ ICOMMAND(0, push, "rte", (ident *id, tagval *v, uint *code),
     poparg(*id);
 });
 
-static inline bool isinteger(const char *c)
+static inline bool isnumber(const char *s)
 {
-    return isdigit(c[0]) || ((c[0]=='+' || c[0]=='-' || c[0]=='.') && isdigit(c[1]));
+    if(isdigit(s[0])) return true;
+    else switch(s[0])
+    {
+        case '+': case '-': return isdigit(s[1]) || (s[1] == '.' && isdigit(s[2]));
+        case '.': return isdigit(s[1]);
+        default: return false;
+    }
 }
 
 ident *newident(const char *name, int flags)
@@ -268,7 +274,7 @@ ident *newident(const char *name, int flags)
     ident *id = idents.access(name);
     if(!id)
     {
-        if(isinteger(name))
+        if(isnumber(name))
         {
             debugcode("number %s is not a valid identifier name", name);
             return dummyident;
@@ -339,7 +345,7 @@ static void setalias(const char *name, tagval &v)
             freearg(v);
         }
     }
-    else if(isinteger(name))
+    else if(isnumber(name))
     {
         debugcode("cannot alias number %s", name);
         freearg(v);
@@ -1180,7 +1186,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
             id = idents.access(idname);
             if(!id || id->flags&IDF_REWRITE)
             {
-                if(!isinteger(idname)) { compilestr(code, idname, idlen); delete[] idname; goto noid; }
+                if(!isnumber(idname)) { compilestr(code, idname, idlen); delete[] idname; goto noid; }
                 char *end = idname;
                 int val = int(strtol(idname, &end, 0));
                 if(*end) compilestr(code, idname, idlen);
@@ -1715,7 +1721,7 @@ static const uint *runcode(const uint *code, tagval &result)
                 if(!id || id->flags&IDF_REWRITE)
                 {
                 noid:
-                    if(isinteger(args[0].s)) goto litval;
+                    if(isnumber(args[0].s)) goto litval;
                     if(!id || id->flags&IDF_REWRITE)
                     {
                         if(server::rewritecommand(id, args, numargs)) goto forceresult;
@@ -1779,7 +1785,7 @@ static const uint *runcode(const uint *code, tagval &result)
                             int val = forceint(args[1]);
                             if(id->flags&IDF_HEX && numargs > 2)
                             {
-                                val = (val << 16) | forceint(args[2]);
+                                val = (val << 16) | (forceint(args[2])<<8);
                                 if(numargs > 3) val |= forceint(args[3]);
                             }
                             setvarchecked(id, val);
@@ -1868,6 +1874,64 @@ int execute(const char *p, bool nonworld)
     int result = execute(p);
     if(nonworld) identflags = oldflags;
     return result;
+}
+
+static inline bool getbool(const char *s)
+{
+    switch(s[0])
+    {
+        case '+': case '-': 
+            switch(s[1])
+            {
+                case '0': break;
+                case '.': return !isdigit(s[2]) || parsefloat(s) != 0;
+                default: return true;
+            }
+            // fall through
+        case '0':
+        {      
+            char *end;
+            int val = strtol((char *)s, &end, 0);
+            if(val) return true;
+            switch(*end)
+            {
+                case 'e': case '.': return parsefloat(s) != 0;
+                default: return false;
+            }
+        }
+        case '.': return !isdigit(s[1]) || parsefloat(s) != 0;
+        case '\0': return false;
+        default: return true;
+    }
+}
+
+static inline bool getbool(const tagval &v)
+{
+    switch(v.type)
+    {
+        case VAL_FLOAT: return v.f!=0;
+        case VAL_INT: return v.i!=0;
+        case VAL_STR: case VAL_MACRO: return getbool(v.s);
+        default: return false;
+    }
+}
+
+bool executebool(const uint *code)
+{
+    tagval result;
+    runcode(code, result);
+    bool b = getbool(result);
+    freearg(result);
+    return b;
+}
+
+bool executebool(const char *p)
+{
+    tagval result;
+    executeret(p, result);
+    bool b = getbool(result);
+    freearg(result);
+    return b;
 }
 
 bool execfile(const char *cfgfile, bool msg, bool nonworld)
@@ -1960,18 +2024,6 @@ void floatret(float v)
 #undef ICOMMANDNAME
 #define ICOMMANDNAME(name) _stdcmd
 
-static inline bool getbool(const tagval &v)
-{
-    switch(v.type)
-    {
-        case VAL_NULL: return false;
-        case VAL_FLOAT: return v.f!=0;
-        case VAL_INT: return v.i!=0;
-        case VAL_STR: case VAL_MACRO: return v.s[0] && (!isinteger(v.s) || parseint(v.s));
-        default: return false;
-    }
-}
-
 ICOMMAND(0, do, "e", (uint *body), executeret(body, *commandret));
 ICOMMAND(0, if, "tee", (tagval *cond, uint *t, uint *f), executeret(getbool(*cond) ? t : f, *commandret));
 ICOMMAND(0, ?, "ttt", (tagval *cond, tagval *t, tagval *f), result(*(getbool(*cond) ? t : f)));
@@ -2014,12 +2066,12 @@ ICOMMAND(0, loopwhile, "riee", (ident *id, int *n, uint *cond, uint *body),
     loopi(*n)
     {
         setiter(*id, i, stack);
-        if(!execute(cond)) break;
+        if(!executebool(cond)) break;
         execute(body);
     }
     poparg(*id);
 });
-ICOMMAND(0, while, "ee", (uint *cond, uint *body), while(execute(cond)) execute(body));
+ICOMMAND(0, while, "ee", (uint *cond, uint *body), while(executebool(cond)) execute(body));
 ICOMMAND(0, loopconcat, "rie", (ident *id, int *n, uint *body),
 {
     if(*n <= 0 || id->type!=ID_ALIAS) return;
@@ -2300,7 +2352,7 @@ void looplist(ident *id, const char *list, const uint *body, bool search)
             pusharg(*id, t, stack);
             id->flags &= ~IDF_UNKNOWN;
         }
-        if(execute(body) && search) { intret(n-1); break; }
+        if(executebool(body) && search) { intret(n-1); break; }
     }
     if(n) poparg(*id);
 }
@@ -2393,15 +2445,23 @@ ICOMMAND(0, <<, "ii", (int *a, int *b), intret(*a << *b));
 ICOMMAND(0, >>, "ii", (int *a, int *b), intret(*a >> *b));
 ICOMMAND(0, &&, "e1V", (tagval *args, int numargs),
 {
-    int val = 1;
-    loopi(numargs) { val = execute(args[i].code); if(!val) break; }
-    intret(val);
+    if(!numargs) intret(1);
+    else loopi(numargs)
+    {
+        if(i) freearg(*commandret);
+        executeret(args[i].code, *commandret);
+        if(!getbool(*commandret)) break;
+    }
 });
 ICOMMAND(0, ||, "e1V", (tagval *args, int numargs),
 {
-    int val = 0;
-    loopi(numargs) { val = execute(args[i].code); if(val) break; }
-    intret(val);
+    if(!numargs) intret(0);
+    else loopi(numargs)
+    {
+        if(i) freearg(*commandret);
+        executeret(args[i].code, *commandret);
+        if(getbool(*commandret)) break;
+    }
 });
 
 ICOMMAND(0, div, "ii", (int *a, int *b), intret(*b ? *a / *b : 0));
@@ -2455,7 +2515,7 @@ ICOMMAND(0, cond, "ee2V", (tagval *args, int numargs),
 {
     for(int i = 0; i < numargs; i += 2)
     {
-        if(execute(args[i].code))
+        if(executebool(args[i].code))
         {
             if(i+1 < numargs) executeret(args[i+1].code, *commandret);
             break;
