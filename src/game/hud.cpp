@@ -1816,7 +1816,7 @@ namespace hud
                         {
                             loopj(WEAP_MAX)
                             {
-                                defformatstring(action)("weapon %d", weapons::slot(game::focus, j));
+                                defformatstring(action)("weapon %d", j);
                                 const char *actkey = searchbind(action, 0);
                                 if(actkey && *actkey) copystring(weapids[j], actkey);
                                 else formatstring(weapids[j])("%d", j);
