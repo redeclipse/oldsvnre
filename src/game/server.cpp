@@ -3120,10 +3120,14 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags)) { return; });
         }
         ci->state.spree = 0;
-        if(!flags && m_trial(gamemode))
+        if(m_trial(gamemode))
         {
-            ci->state.cpmillis = 0;
-            ci->state.cpnodes.shrink(0);
+            if(!flags || ci->state.cpnodes.length() == 1) // reset if suicided or hasn't reached another checkpoint yet
+            {
+                ci->state.cpmillis = 0;
+                ci->state.cpnodes.shrink(0);
+                sendf(-1, 1, "ri4", N_CHECKPOINT, ci->clientnum, -1, 0);
+            }
         }
         else givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;

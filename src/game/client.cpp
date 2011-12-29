@@ -2065,13 +2065,21 @@ namespace client
                     int tn = getint(p), laptime = getint(p), besttime = getint(p);
                     gameent *t = game::getclient(tn);
                     if(!t) break;
-                    t->cplast = laptime;
-                    t->cptime = besttime;
-                    t->cpmillis = t->impulse[IM_METER] = 0;
-                    if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
+                    if(laptime >= 0)
                     {
-                        defformatstring(best)("%s", hud::timetostr(besttime));
-                        conoutft(t != game::focus ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
+                        t->cplast = laptime;
+                        t->cptime = besttime;
+                        t->cpmillis = t->impulse[IM_METER] = 0;
+                        if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
+                        {
+                            defformatstring(best)("%s", hud::timetostr(besttime));
+                            conoutft(t != game::focus ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
+                        }
+                    }
+                    else
+                    {
+                        t->checkpoint = -1;
+                        t->cpmillis = 0;
                     }
                 }
 

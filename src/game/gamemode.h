@@ -221,7 +221,7 @@ extern mutstypes mutstype[];
 #define m_fight(a)          (a >= G_FIGHT)
 
 #define m_implied(a,b)      (gametype[a].implied|((b&G_M_MULTI) || (a == G_BOMBER && !((b|gametype[a].implied)&G_M_GSP2)) ? G_M_TEAM : G_M_NONE))
-#define m_doimply(a,b,c)    (gametype[a].implied|mutstype[c].implied|(a == G_BOMBER && !((b|gametype[a].implied|mutstype[c].implied)&G_M_GSP2) ? G_M_TEAM : G_M_NONE))
+#define m_doimply(a,b,c)    (gametype[a].implied|mutstype[c].implied|((b&G_M_MULTI) || (a == G_BOMBER && !((b|gametype[a].implied|mutstype[c].implied)&G_M_GSP2)) ? G_M_TEAM : G_M_NONE))
 
 #define m_multi(a,b)        ((b&G_M_MULTI) || (m_implied(a,b)&G_M_MULTI))
 #define m_team(a,b)         ((b&G_M_TEAM) || (m_implied(a,b)&G_M_TEAM))
@@ -248,7 +248,7 @@ extern mutstypes mutstype[];
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
-#define m_scores(a)         (a >= G_EDITMODE && a <= G_DEATHMATCH)
+#define m_scores(a)         (m_dm(a))
 #define m_checkpoint(a)     (m_campaign(a) || m_trial(a))
 #define m_sweaps(a,b)       (m_medieval(a, b) || m_ballistic(a, b) || m_arena(a, b))
 
