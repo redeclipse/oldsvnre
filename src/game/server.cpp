@@ -1547,39 +1547,33 @@ namespace server
             if(totalspawns && GAME(spawnrotate))
             {
                 int cycle = -1, team = m_fight(gamemode) && m_team(gamemode, mutators) && !spawns[ci->team].ents.empty() ? ci->team : TEAM_NEUTRAL;
-                if(!spawns[team].ents.empty())
+                if(!spawns[team].ents.empty()) switch(GAME(spawnrotate))
                 {
-                    switch(min(GAME(spawnrotate), 2))
+                    case 2:
                     {
-                        case 2:
+                        static vector<int> lowest; lowest.setsize(0);
+                        loopv(spawns[team].cycle) if(lowest.empty() || spawns[team].cycle[i] <= spawns[team].cycle[lowest[0]])
                         {
-                            if(spawns[team].cycle.length() >= max(GAME(spawnrotate), nplayers/2))
-                            {
-                                static vector<int> lowest; lowest.setsize(0);
-                                loopv(spawns[team].cycle) if(lowest.empty() || spawns[team].cycle[i] <= spawns[team].cycle[lowest[0]])
-                                {
-                                    if(!lowest.empty() && spawns[team].cycle[i] < spawns[team].cycle[lowest[0]]) lowest.setsize(0);
-                                    lowest.add(i);
-                                }
-                                if(!lowest.empty())
-                                {
-                                    int r = lowest.length() > 1 ? rnd(lowest.length()) : 0, n = lowest[r];
-                                    spawns[team].cycle[n]++;
-                                    spawns[team].spawncycle = cycle = n;
-                                    break;
-                                }
-                            }
-                            // fall through if this fails..
+                            if(!lowest.empty() && spawns[team].cycle[i] < spawns[team].cycle[lowest[0]]) lowest.setsize(0);
+                            lowest.add(i);
                         }
-                        case 1: default:
+                        if(!lowest.empty())
                         {
-                            if(++spawns[team].spawncycle >= spawns[team].ents.length()) spawns[team].spawncycle = 0;
-                            cycle = spawns[team].spawncycle;
+                            int r = lowest.length() > 1 ? rnd(lowest.length()) : 0, n = lowest[r];
+                            spawns[team].cycle[n]++;
+                            spawns[team].spawncycle = cycle = n;
                             break;
                         }
+                        // fall through if this fails..
                     }
-                    if(spawns[team].ents.inrange(cycle)) return spawns[team].ents[cycle];
+                    case 1: default:
+                    {
+                        if(++spawns[team].spawncycle >= spawns[team].ents.length()) spawns[team].spawncycle = 0;
+                        cycle = spawns[team].spawncycle;
+                        break;
+                    }
                 }
+                if(spawns[team].ents.inrange(cycle)) return spawns[team].ents[cycle];
             }
         }
         return -1;
