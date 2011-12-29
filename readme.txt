@@ -104,6 +104,9 @@ Developers
 
  "SkiingPenguins" - Artist
     Skyboxes
+	
+ "fluxord" - Artist
+	Crosshairs
 
  Stefan Norman and Peter McInerney - Hosting
     Master and Game server hosting
