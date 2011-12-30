@@ -1773,7 +1773,7 @@ struct skelmodel : animmodel
             SEARCHCACHE(MAXBLENDCACHE, blendcacheentry, blendcache, )
         }
 
-        void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p)
+        void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p, modelattach *attached)
         {
             bool norms = false, tangents = false;
             loopv(p->skins)
@@ -1793,7 +1793,7 @@ struct skelmodel : animmodel
                     loopv(meshes)
                     {
                         skelmesh *m = (skelmesh *)meshes[i];
-                        p->skins[i].bind(m, as);
+                        p->skins[i].bind(m, as, attached);
                         m->render(as, p->skins[i], *vbocache);
                     }
                 }
@@ -1842,7 +1842,7 @@ struct skelmodel : animmodel
                 loopv(meshes)
                 {
                     skelmesh *m = (skelmesh *)meshes[i];
-                    p->skins[i].bind(m, as);
+                    p->skins[i].bind(m, as, attached);
                     if(skel->usegpuskel) skel->setgpubones(sc, bc, vblends);
                     m->render(as, p->skins[i], vc);
                 }
