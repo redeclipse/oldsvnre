@@ -638,7 +638,7 @@ namespace hud
     }
     ICOMMAND(0, getpointer, "ii", (int *i, int *j), result(getpointer(*i, *j)));
 
-    void drawindicator(int weap, int x, int y, int s, bool secondary)
+    void drawindicator(int weap, int x, int y, float s, bool secondary)
     {
         int millis = lastmillis-game::focus->weaplast[weap];
         float r = 1, g = 1, b = 1, amt = 0;

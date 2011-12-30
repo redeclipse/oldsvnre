@@ -369,12 +369,13 @@ struct modelattach
 {
     const char *tag, *name;
     int anim, basetime;
+    float transparent, sizescale;
     vec *pos;
     model *m;
 
-    modelattach() : tag(NULL), name(NULL), anim(-1), basetime(0), pos(NULL), m(NULL) {}
-    modelattach(const char *tag, const char *name, int anim = -1, int basetime = 0) : tag(tag), name(name), anim(anim), basetime(basetime), pos(NULL), m(NULL) {}
-    modelattach(const char *tag, vec *pos) : tag(tag), name(NULL), anim(-1), basetime(0), pos(pos), m(NULL) {}
+    modelattach() : tag(NULL), name(NULL), anim(-1), basetime(0), transparent(-1), sizescale(-1), pos(NULL), m(NULL) {}
+    modelattach(const char *tag, const char *name, int anim = -1, int basetime = 0, float transparent = -1, float sizescale = -1) : tag(tag), name(name), anim(anim), basetime(basetime), transparent(transparent), sizescale(sizescale), pos(NULL), m(NULL) {}
+    modelattach(const char *tag, vec *pos) : tag(tag), name(NULL), anim(-1), basetime(0), transparent(-1), sizescale(-1), pos(pos), m(NULL) {}
 };
 
 extern void startmodelbatches();

@@ -86,7 +86,7 @@ struct animmodel : model
         bool normals() { return renderpath!=R_FIXEDFUNCTION || (lightmodels && !fullbright) || envmapped() || bumpmapped(); }
         bool tangents() { return bumpmapped(); }
 
-        void setuptmus(const animstate *as, bool masked)
+        void setuptmus(const animstate *as, bool masked, float trans)
         {
             if(fullbright)
             {
@@ -131,13 +131,13 @@ struct animmodel : model
                 }
                 else if(enableoverbright) disableoverbright();
             }
-            if(fullbright) glColor4f(matcolor.x*fullbright, matcolor.y*fullbright, matcolor.z*fullbright, transparent);
+            if(fullbright) glColor4f(matcolor.x*fullbright, matcolor.y*fullbright, matcolor.z*fullbright, trans);
             else if(lightmodels)
             {
-                GLfloat material[4] = { matcolor.x, matcolor.y, matcolor.z, transparent };
+                GLfloat material[4] = { matcolor.x, matcolor.y, matcolor.z, trans };
                 glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material);
             }
-            else glColor4f(matcolor.x*color.x, matcolor.y*color.y, matcolor.z*color.z, transparent);
+            else glColor4f(matcolor.x*color.x, matcolor.y*color.y, matcolor.z*color.z, trans);
             if(lightmodels && !fullbright)
             {
                 float ambientk = min(max(ambient, mincolor)*0.75f, 1.0f),
@@ -153,11 +153,11 @@ struct animmodel : model
             }
         }
 
-        void setshaderparams(mesh *m, const animstate *as, bool masked)
+        void setshaderparams(mesh *m, const animstate *as, bool masked, float trans)
         {
             if(fullbright)
             {
-                glColor4f(fullbright/2, fullbright/2, fullbright/2, transparent);
+                glColor4f(fullbright/2, fullbright/2, fullbright/2, trans);
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, 0, 0, 2);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, 0, 0, 2);
             }
@@ -167,7 +167,7 @@ struct animmodel : model
                       bias = max(mincolor-1.0f, 0.2f), scale = 0.5f*max(0.8f-bias, 0.0f), 
                       minshade = scale*max(ambient, mincolor);
                 vec color = vec(lightcolor).max(mincolor);
-                glColor4f(color.x, color.y, color.z, transparent);
+                glColor4f(color.x, color.y, color.z, trans);
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, scale - minshade, scale, minshade + bias);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, scale - minshade, scale, minshade + bias);
             }
@@ -237,7 +237,7 @@ struct animmodel : model
             m->setshader(loadshader(envmaptmu>=0 && envmapmax>0, masked));
         }
 
-        void bind(mesh *b, const animstate *as)
+        void bind(mesh *b, const animstate *as, modelattach *attached)
         {
             if(!cullface && enablecullface) { glDisable(GL_CULL_FACE); enablecullface = false; }
             else if(cullface && !enablecullface) { glEnable(GL_CULL_FACE); enablecullface = true; }
@@ -254,16 +254,17 @@ struct animmodel : model
                 else /*if(as->cur.anim&ANIM_SHADOW)*/ SETMODELSHADER(b, notexturemodel); // this shader also gets used with color mask disabled
                 return;
             }
+            float trans = attached && attached->transparent >= 0 ? attached->transparent : transparent;
             Texture *s = bumpmapped() && unlittex ? unlittex : tex,
                     *m = masks->type&Texture::STUB ? notexture : masks,
                     *n = bumpmapped() ? normalmap : NULL;
             if((renderpath==R_FIXEDFUNCTION || !lightmodels) &&
                !glowmodels && (!envmapmodels || envmaptmu<0 || envmapmax<=0))
                 m = notexture;
-            if(renderpath==R_FIXEDFUNCTION) setuptmus(as, m!=notexture);
+            if(renderpath==R_FIXEDFUNCTION) setuptmus(as, m!=notexture, trans);
             else
             {
-                setshaderparams(b, as, m!=notexture);
+                setshaderparams(b, as, m!=notexture, trans);
                 setshader(b, as, m!=notexture);
             }
             if(s!=lasttex)
@@ -279,6 +280,12 @@ struct animmodel : model
                 glBindTexture(GL_TEXTURE_2D, n->id);
                 glActiveTexture_(GL_TEXTURE0_ARB);
             }
+            if(trans < 1 && !enablealphablend)
+            {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                enablealphablend = true;
+            }
             if(s->type&Texture::ALPHA)
             {
                 if(alphablend)
@@ -290,7 +297,7 @@ struct animmodel : model
                         enablealphablend = true;
                     }
                 }
-                else if(enablealphablend) { glDisable(GL_BLEND); enablealphablend = false; }
+                else if(enablealphablend && trans>=1) { glDisable(GL_BLEND); enablealphablend = false; }
                 if(alphatest>0)
                 {
                     if(!enablealphatest) { glEnable(GL_ALPHA_TEST); enablealphatest = true; }
@@ -305,7 +312,7 @@ struct animmodel : model
             else
             {
                 if(enablealphatest) { glDisable(GL_ALPHA_TEST); enablealphatest = false; }
-                if(enablealphablend && transparent>=1) { glDisable(GL_BLEND); enablealphablend = false; }
+                if(enablealphablend && trans>=1) { glDisable(GL_BLEND); enablealphablend = false; }
             }
             if(m!=lastmasks && m!=notexture)
             {
@@ -524,7 +531,7 @@ struct animmodel : model
         int clipframes(int i, int n) const { return min(n, totalframes() - i); }
 
         virtual void cleanup() {}
-        virtual void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p) {}
+        virtual void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p, modelattach *attached) {}
     };
 
     virtual meshgroup *loadmeshes(char *name, va_list args) { return NULL; }
@@ -549,10 +556,10 @@ struct animmodel : model
         part *p;
         int tag, anim, basetime;
         vec translate;
-        vec *pos;
+        modelattach *attached;
         glmatrixf matrix;
 
-        linkedpart() : p(NULL), tag(-1), anim(-1), basetime(0), translate(0, 0, 0), pos(NULL) {}
+        linkedpart() : p(NULL), tag(-1), anim(-1), basetime(0), translate(0, 0, 0), attached(NULL) {}
     };
 
     struct part
@@ -611,12 +618,12 @@ struct animmodel : model
             }
         }
 
-        bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), int anim = -1, int basetime = 0, vec *pos = NULL)
+        bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), int anim = -1, int basetime = 0, modelattach *attached = NULL)
         {
             int i = meshes ? meshes->findtag(tag) : -1;
             if(i<0)
             {
-                loopv(links) if(links[i].p && links[i].p->link(p, tag, translate, anim, basetime, pos)) return true;
+                loopv(links) if(links[i].p && links[i].p->link(p, tag, translate, anim, basetime, attached)) return true;
                 return false;
             }
             linkedpart &l = links.add();
@@ -625,7 +632,7 @@ struct animmodel : model
             l.anim = anim;
             l.basetime = basetime;
             l.translate = translate;
-            l.pos = pos;
+            l.attached = attached;
             return true;
         }
 
@@ -759,13 +766,13 @@ struct animmodel : model
             return true;
         }
 
-        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d)
+        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d, modelattach *attached)
         {
             animstate as[MAXANIMPARTS];
-            render(anim, basetime, basetime2, pitch, axis, forward, d, as);
+            render(anim, basetime, basetime2, pitch, axis, forward, d, attached, as);
         }
 
-        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d, animstate *as)
+        void render(int anim, int basetime, int basetime2, float pitch, const vec &axis, const vec &forward, dynent *d, modelattach *attached, animstate *as)
         {
             if(!(anim&ANIM_REUSE)) loopi(numanimparts)
             {
@@ -801,7 +808,7 @@ struct animmodel : model
             }
             matrixstack[matrixpos].transposedtransformnormal(forward, oforward);
 
-            float resize = model->scale*sizescale;
+            float resize = model->scale * (attached && attached->sizescale >= 0 ? attached->sizescale : sizescale);
             if(!(anim&ANIM_NORENDER))
             {
                 glPushMatrix();
@@ -830,7 +837,7 @@ struct animmodel : model
                 }
             }
 
-            meshes->render(as, pitch, oaxis, oforward, d, this);
+            meshes->render(as, pitch, oaxis, oforward, d, this, attached);
 
             if(!(anim&ANIM_NORENDER))
             {
@@ -847,7 +854,7 @@ struct animmodel : model
                     matrixpos++;
                     matrixstack[matrixpos].mul(matrixstack[matrixpos-1], link.matrix);
 
-                    if(link.pos) *link.pos = matrixstack[matrixpos].gettranslation();
+                    if(link.attached && link.attached->pos) *link.attached->pos = matrixstack[matrixpos].gettranslation();
 
                     if(!link.p)
                     {
@@ -862,7 +869,7 @@ struct animmodel : model
                         nbasetime = link.basetime;
                         nbasetime2 = 0;
                     }
-                    link.p->render(nanim, nbasetime, nbasetime2, pitch, axis, forward, d);
+                    link.p->render(nanim, nbasetime, nbasetime2, pitch, axis, forward, d, link.attached);
 
                     matrixpos--;
                 }
@@ -912,14 +919,14 @@ struct animmodel : model
                 animmodel *m = (animmodel *)a[i].m;
                 if(!m || !m->loaded)
                 {
-                    if(a[i].pos) link(NULL, a[i].tag, vec(0, 0, 0), 0, 0, a[i].pos);
+                    if(a[i].pos) link(NULL, a[i].tag, vec(0, 0, 0), 0, 0, &a[i]);
                     continue;
                 }
                 part *p = m->parts[0];
                 switch(linktype(m))
                 {
                     case LINK_TAG:
-                        p->index = link(p, a[i].tag, vec(0, 0, 0), a[i].anim, a[i].basetime, a[i].pos) ? index : -1;
+                        p->index = link(p, a[i].tag, vec(0, 0, 0), a[i].anim, a[i].basetime, &a[i]) ? index : -1;
                         break;
 
                     case LINK_COOP:
@@ -934,7 +941,7 @@ struct animmodel : model
         }
 
         animstate as[MAXANIMPARTS];
-        parts[0]->render(anim, basetime, basetime2, pitch, axis, forward, d, as);
+        parts[0]->render(anim, basetime, basetime2, pitch, axis, forward, d, NULL, as);
 
         if(a) for(int i = numtags-1; i >= 0; i--)
         {
@@ -953,12 +960,12 @@ struct animmodel : model
                     break;
 
                 case LINK_COOP:
-                    p->render(anim, basetime, basetime2, pitch, axis, forward, d);
+                    p->render(anim, basetime, basetime2, pitch, axis, forward, d, &a[i]);
                     p->index = 0;
                     break;
 
                 case LINK_REUSE:
-                    p->render(anim | ANIM_REUSE, basetime, basetime2, pitch, axis, forward, d, as);
+                    p->render(anim | ANIM_REUSE, basetime, basetime2, pitch, axis, forward, d, &a[i], as);
                     break;
             }
         }
@@ -1056,13 +1063,6 @@ struct animmodel : model
 
                 glDepthFunc(GL_LEQUAL);
             }
-
-            if(!enablealphablend)
-            {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                enablealphablend = true;
-            }
         }
 
         render(anim, basetime, basetime2, pitch, axis, forward, d, a);
@@ -1135,10 +1135,10 @@ struct animmodel : model
         return bih;
     }
 
-    bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), int anim = -1, int basetime = 0, vec *pos = NULL)
+    bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), int anim = -1, int basetime = 0, modelattach *attached = NULL)
     {
         if(parts.empty()) return false;
-        return parts[0]->link(p, tag, translate, anim, basetime, pos);
+        return parts[0]->link(p, tag, translate, anim, basetime, attached);
     }
 
     bool unlink(part *p)

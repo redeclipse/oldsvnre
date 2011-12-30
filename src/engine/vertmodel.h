@@ -527,7 +527,7 @@ struct vertmodel : animmodel
             else DELETEA(vdata);
         }
 
-        void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p)
+        void render(const animstate *as, float pitch, const vec &axis, const vec &forward, dynent *d, part *p, modelattach *attached)
         {
             if(as->cur.anim&ANIM_NORENDER)
             {
@@ -579,7 +579,7 @@ struct vertmodel : animmodel
             loopv(meshes)
             {
                 vertmesh *m = (vertmesh *)meshes[i];
-                p->skins[i].bind(m, as);
+                p->skins[i].bind(m, as, attached);
                 m->render(as, p->skins[i], *vc);
             }
             
