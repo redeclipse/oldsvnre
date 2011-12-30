@@ -2237,14 +2237,14 @@ namespace hud
         if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
-        if(teamhurttime && game::focus == game::player1 && lastmillis-game::player1->lastteamhit <=  teamhurttime)
+        if(teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
         {
             vec targ;
             bool hasbound = false;
             int dist = teamhurtdist ? teamhurtdist : getworldsize();
             loopv(game::players) if(game::players[i] && game::players[i]->team == game::player1->team)
             {
-                if(lastmillis-game::players[i]->lastteamhit > teamhurttime) continue;
+                if(game::players[i]->lastteamhit < 0 || lastmillis-game::players[i]->lastteamhit > teamhurttime) continue;
                 if(!getsight(camera1->o, camera1->yaw, camera1->pitch, game::players[i]->o, targ, dist, curfov, fovy)) continue;
                 if(!hasbound)
                 {
