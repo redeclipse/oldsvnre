@@ -864,9 +864,9 @@ struct gameent : dynent, gamestate
     void clearstate(int gamemode = 0, int mutators = 0)
     {
         loopi(IM_MAX) impulse[i] = 0;
-        cplast = lasthit = lastteamhit = lastkill = quake = turnmillis = turnside = spree = 0;
+        cplast = lasthit = lastkill = quake = turnmillis = turnside = spree = 0;
         turnroll = turnyaw = 0;
-        lastflag = respawned = suicided = lastnode = -1;
+        lastteamhit = lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
         obliterated = false;
         setscale(1, 0, true, gamemode, mutators);
