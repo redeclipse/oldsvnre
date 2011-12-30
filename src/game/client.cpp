@@ -662,7 +662,7 @@ namespace client
     {
         game::gamemode = gamemode;
         game::mutators = mutators;
-        server::modecheck(game::gamemode, game::mutators);
+        modecheck(game::gamemode, game::mutators);
         game::nextmode = game::gamemode;
         game::nextmuts = game::mutators;
         game::timeremaining = -1;

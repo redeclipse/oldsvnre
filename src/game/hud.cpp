@@ -383,7 +383,7 @@ namespace hud
 
     void modetexs(int g, int m, bool before, bool implied, vector<char> &list)
     {
-        server::modecheck(g, m);
+        modecheck(g, m);
         #define ADDMODE(s) { list.put(s, strlen(s)); list.add(' '); }
         #define ADDMODEICON \
         { \
