@@ -22,7 +22,6 @@ namespace hud
         scores.shrink(0);
     }
 
-    struct sline { string s; };
     struct scoregroup : score
     {
         vector<gameent *> players;
@@ -31,7 +30,7 @@ namespace hud
     vector<gameent *> spectators;
 
     VAR(IDF_PERSIST, autoshowscores, 0, 2, 3); // 1 = when dead, 2 = also in spectv, 3 = and in waittv too
-    VAR(IDF_PERSIST, showscoresdelay, 0, 0, VAR_MAX); // otherwise use a static timespan
+    VAR(IDF_PERSIST, showscoresdelay, 0, 0, VAR_MAX); // otherwise use respawn delay
     VAR(IDF_PERSIST, showscoresinfo, 0, 1, 1);
     VAR(IDF_PERSIST, highlightscore, 0, 1, 1);
 
@@ -55,7 +54,7 @@ namespace hud
             if(game::tvmode()) return true;
             else if(game::player1->state == CS_DEAD)
             {
-                int delay = !showscoresdelay ? m_delay(game::gamemode, game::mutators) : showscoresdelay;
+                int delay = showscoresdelay ? showscoresdelay : m_delay(game::gamemode, game::mutators);
                 if(!delay || lastmillis-game::player1->lastdeath > delay) return true;
             }
         }
