@@ -372,55 +372,55 @@ weaptypes weaptype[] =
     {
             ANIM_PISTOL,        S_PISTOL,   10,
             false,      false,      true,       true,
-            { 0, 0 },               5,          0.35f,
+            { 0, 0 },               8,          0.35f,
             "pistol",   "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projs/cartridge"
     },
     {
             ANIM_SWORD,         S_SWORD,    1,
             true,       true,       true,       false,
-            { 0, 0 },               12,         0,
+            { 0, 0 },               14,         0,
             "sword",    "weapons/sword/item",       "weapons/sword/vwep", "weapons/sword/hwep",    "",                     ""
     },
     {
             ANIM_SHOTGUN,       S_SHOTGUN,  10,
             false,      false,      true,       true,
-            { 0, 0 },               10,         0.45f,
+            { 0, 0 },               12,         0.45f,
             "shotgun",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projs/shell"
     },
     {
             ANIM_SMG,           S_SMG,      20,
             false,      false,      true,       true,
-            { 0, 0 },               7,          0.35f,
+            { 0, 0 },               10,         0.35f,
             "smg",      "weapons/smg/item",         "weapons/smg/vwep", "weapons/smg/hwep",        "",                     "projs/cartridge"
     },
     {
             ANIM_FLAMER,        S_FLAMER,   1,
             false,      false,      true,       true,
-            { 0, 0 },               10,         0,
+            { 0, 0 },               12,         0,
             "flamer",   "weapons/flamer/item",      "weapons/flamer/vwep", "weapons/flamer/hwep",     "",                     ""
     },
     {
             ANIM_PLASMA,        S_PLASMA,   1,
             false,      false,      true,       false,
-            { 0, 0 },               8,          0,
+            { 0, 0 },               10,         0,
             "plasma",   "weapons/plasma/item",      "weapons/plasma/vwep", "weapons/plasma/hwep",     "",                     ""
     },
     {
             ANIM_RIFLE,         S_RIFLE,    1,
             false,      false,      true,       false,
-            { 0, 0 },               10,         0,
+            { 0, 0 },               12,         0,
             "rifle",    "weapons/rifle/item",       "weapons/rifle/vwep", "weapons/rifle/hwep",      "",                     ""
     },
     {
             ANIM_GRENADE,       S_GRENADE,  1,
             false,      false,      false,      false,
-            { 0.0625f, 0.0625f },   5,          0,
+            { 0.0625f, 0.0625f },   6,          0,
             "grenade",  "weapons/grenade/item",     "weapons/grenade/vwep", "weapons/grenade/hwep",    "weapons/grenade/proj", ""
     },
     {
             ANIM_ROCKET,        S_ROCKET,   1,
             false,      false,      true,      false,
-            { 0, 0 },               8,          0,
+            { 0, 0 },               10,          0,
             "rocket",   "weapons/rocket/item",       "weapons/rocket/vwep", "weapons/rocket/hwep",     "weapons/rocket/proj",  ""
     }
 };

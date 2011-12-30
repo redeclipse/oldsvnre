@@ -329,6 +329,104 @@ enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, S
 #include "ai.h"
 #include "vars.h"
 
+static inline void modecheck(int &mode, int &muts, int trying = 0)
+{
+    if(!m_game(mode))
+    {
+        mode = G_DEATHMATCH;
+        muts = m_implied(mode, 0);
+    }
+    if(!gametype[mode].mutators[0]) muts = G_M_NONE;
+    else
+    {
+        int implied = m_implied(mode, muts);
+        if(implied) muts |= implied;
+        loopi(G_M_GSN)
+        {
+            int m = 1<<(i+G_M_GSP);
+            if(!(gametype[mode].mutators[0]&m))
+            {
+                muts &= ~m;
+                trying &= ~m;
+            }
+        }
+        loop(r, G_M_NUM)
+        {
+            if(!muts) break;
+            bool changed = false;
+            loopi(G_M_NUM)
+            {
+                if(trying && !(gametype[mode].mutators[0]&mutstype[i].type) && (trying&mutstype[i].type))
+                {
+                    trying &= ~mutstype[i].type;
+                    changed = true;
+                    break;
+                }
+                if(!(gametype[mode].mutators[0]&mutstype[i].type) && (muts&mutstype[i].type))
+                {
+                    muts &= ~mutstype[i].type;
+                    trying &= ~mutstype[i].type;
+                    changed = true;
+                    break;
+                }
+                loopj(G_M_GSN)
+                {
+                    if(!gametype[mode].mutators[j+1]) continue;
+                    int m = 1<<(j+G_M_GSP);
+                    if(!(muts&m)) continue;
+                    loopk(G_M_GSN)
+                    {
+                        if(!gametype[mode].mutators[k+1]) continue;
+                        int n = 1<<(k+G_M_GSP);
+                        if(!(muts&n)) continue;
+                        if(trying && (trying&m) && !(gametype[mode].mutators[k+1]&m))
+                        {
+                            muts &= ~n;
+                            trying &= ~n;
+                            changed = true;
+                            break;
+                        }
+                    }
+                    if(changed) break;
+                }
+                if(changed) break;
+                if(muts&mutstype[i].type)
+                {
+                    int mutators = mutstype[i].type != G_M_INSTA ? mutstype[i].mutators : GAME(instagibfilter);
+                    loopj(G_M_NUM)
+                    {
+                        if(mutators && !(mutators&mutstype[j].type) && (muts&mutstype[j].type))
+                        {
+                            implied = m_implied(mode, muts);
+                            if(trying && (trying&mutstype[j].type) && !(implied&mutstype[i].type))
+                            {
+                                muts &= ~mutstype[i].type;
+                                trying &= ~mutstype[i].type;
+                            }
+                            else
+                            {
+                                muts &= ~mutstype[j].type;
+                                trying &= ~mutstype[j].type;
+                            }
+                            changed = true;
+                            break;
+                        }
+                        int implying = m_doimply(mode, muts, i);
+                        if(implying && (implying&mutstype[j].type) && !(muts&mutstype[j].type))
+                        {
+                            muts |= mutstype[j].type;
+                            changed = true;
+                            break;
+                        }
+                    }
+                    if(changed) break;
+                }
+            }
+            if(!changed) break;
+        }
+    }
+}
+
 // inherited by gameent and server clients
 struct gamestate
 {
@@ -575,6 +673,7 @@ namespace server
     extern void stopdemo();
     extern void hashpassword(int cn, int sessionid, const char *pwd, char *result, int maxlen = MAXSTRLEN);
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
+    extern const char *gamename(int mode, int muts, int compact = 0);
 }
 
 #if !defined(GAMESERVER) && !defined(STANDALONE)
