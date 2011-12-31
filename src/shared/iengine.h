@@ -22,7 +22,7 @@ extern void logoutf(const char *fmt, ...);
 #define _dbg_ fprintf(stderr, "%s:%d\n", __FILE__, __LINE__);
 #endif
 
-struct generic { const char *name; uchar id; };
+struct namemap { const char *name; uchar id; };
 
 extern void lightent(extentity &e, float height = 8);
 extern void lightreaching(const vec &target, vec &color, vec &dir, bool fast = false, extentity *e = 0, float ambient = 0.4f);

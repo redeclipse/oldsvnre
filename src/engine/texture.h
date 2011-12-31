@@ -597,7 +597,7 @@ struct Slot
     {
         int type;
         Texture *t;
-        string lname, name;
+        string name;
         int combined;
     };
 
@@ -708,7 +708,7 @@ extern void resettextures();
 extern void setshader(char *name);
 extern void setshaderparam(const char *name, int type, int n, float x, float y, float z, float w);
 extern int findtexturetype(char *name, bool tryint = false);
-extern const char *findtexturename(int type);
+extern const char *findtexturetypename(int type);
 extern void texture(char *type, char *name, int *rot, int *xoffet, int *yoffset, float *scale);
 extern void updatetextures();
 extern void preloadtextures();
