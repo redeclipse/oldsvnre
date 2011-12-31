@@ -280,6 +280,7 @@ struct gui : guient
 
     bool ishit(int w, int h, int x = curx, int y = cury)
     {
+        if(passthrough) return false;
         if(mergelist >= 0 && curdepth >= mergedepth && lists[mergelist].mouse[0]) return true;
         if(ishorizontal()) h = ysize;
         else w = xsize;
