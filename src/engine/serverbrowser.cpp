@@ -543,7 +543,7 @@ void writeservercfg()
     loopv(servers)
     {
         serverinfo *s = servers[i];
-        f->printf("addserver %s %d\n", s->name, s->port);
+        f->printf("addserver %s %d\n", escapeid(s->name), s->port);
     }
     delete f;
 }

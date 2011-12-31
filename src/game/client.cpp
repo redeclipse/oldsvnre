@@ -139,8 +139,7 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i);
-                    f->printf("\n");
+                    f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X\n" : "%s 0x%X\n") : "%s %d\n"), id.name, *id.storage.i);
                     break;
                 case ID_FVAR:
                     if(*id.storage.f == id.def.f)
@@ -149,8 +148,7 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf("%s %s", id.name, floatstr(*id.storage.f));
-                    f->printf("\n");
+                    f->printf("%s %s\n", id.name, floatstr(*id.storage.f));
                     break;
                 case ID_SVAR:
                     if(!strcmp(*id.storage.s, id.def.s))
@@ -159,9 +157,7 @@ namespace client
                         else break;
                     }
                     if(server) f->printf("sv_");
-                    f->printf("%s ", id.name);
-                    writeescapedstring(f, *id.storage.s);
-                    f->printf("\n");
+                    f->printf("%s %s\n", id.name, escapestring(*id.storage.s));
                     break;
             }
         }
@@ -251,7 +247,7 @@ namespace client
 
     void writeclientinfo(stream *f)
     {
-        f->printf("setinfo \"%s\" 0x%06x %d\n\n", game::player1->name, game::player1->colour, game::player1->model);
+        f->printf("setinfo %s 0x%06x %d\n\n", escapestring(game::player1->name), game::player1->colour, game::player1->model);
     }
 
     bool allowedittoggle(bool edit)
