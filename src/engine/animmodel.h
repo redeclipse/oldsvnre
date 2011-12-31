@@ -849,7 +849,7 @@ struct animmodel : model
                 loopv(links)
                 {
                     linkedpart &link = links[i];
-                    link.matrix.transformedtranslate(links[i].translate, model->scale);
+                    link.matrix.transformedtranslate(links[i].translate, resize);
 
                     matrixpos++;
                     matrixstack[matrixpos].mul(matrixstack[matrixpos-1], link.matrix);
