@@ -1189,7 +1189,7 @@ struct skelmodel : animmodel
             n.mul(m, t);
         }
 
-        void calctags(part *p, skelcacheentry *sc = NULL)
+        void calctags(part *p, modelattach *attached, skelcacheentry *sc = NULL)
         {
             loopv(p->links) 
             {
@@ -1202,10 +1202,11 @@ struct skelmodel : animmodel
                     int interpindex = bones[t.bone].interpindex;
                     m.mul(usematskel ? sc->mdata[interpindex] : sc->bdata[interpindex], matrix3x4(m));
                 }
+                float resize = p->model->scale * (attached && attached->sizescale >= 0 ? attached->sizescale : sizescale);
                 l.matrix = m;
-                l.matrix[12] = (l.matrix[12] + p->translate.x) * p->model->scale * sizescale;
-                l.matrix[13] = (l.matrix[13] + p->translate.y) * p->model->scale * sizescale;
-                l.matrix[14] = (l.matrix[14] + p->translate.z) * p->model->scale * sizescale;
+                l.matrix[12] = (l.matrix[12] + p->translate.x) * resize;
+                l.matrix[13] = (l.matrix[13] + p->translate.y) * resize;
+                l.matrix[14] = (l.matrix[14] + p->translate.z) * resize;
             }
         }
 
@@ -1797,7 +1798,7 @@ struct skelmodel : animmodel
                         m->render(as, p->skins[i], *vbocache);
                     }
                 }
-                skel->calctags(p);
+                skel->calctags(p, attached);
                 return;
             }
 
@@ -1848,7 +1849,7 @@ struct skelmodel : animmodel
                 }
             }
 
-            skel->calctags(p, &sc);
+            skel->calctags(p, attached, &sc);
 
             if(as->cur.anim&ANIM_RAGDOLL && skel->ragdoll && !d->ragdoll)
             {

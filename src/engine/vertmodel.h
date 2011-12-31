@@ -365,7 +365,7 @@ struct vertmodel : animmodel
             n.translate(m.transformnormal(p->translate).mul(p->model->scale));
         }
 
-        void calctagmatrix(part *p, int i, const animstate &as, glmatrixf &matrix)
+        void calctagmatrix(part *p, int i, const animstate &as, modelattach *attached, glmatrixf &matrix)
         {
             const matrix3x4 &tag1 = tags[as.cur.fr1*numtags + i].transform,
                             &tag2 = tags[as.cur.fr2*numtags + i].transform;
@@ -379,10 +379,11 @@ struct vertmodel : animmodel
                 tagp.lerp(tag1p, tag2p, as.prev.t);
                 tag.lerp(tagp, tag, as.interp);
             }
+            float resize = p->model->scale * (attached && attached->sizescale >= 0 ? attached->sizescale : sizescale);
             matrix = glmatrixf(tag);
-            matrix[12] = (matrix[12] + p->translate.x) * p->model->scale * sizescale;
-            matrix[13] = (matrix[13] + p->translate.y) * p->model->scale * sizescale;
-            matrix[14] = (matrix[14] + p->translate.z) * p->model->scale * sizescale;
+            matrix[12] = (matrix[12] + p->translate.x) * resize;
+            matrix[13] = (matrix[13] + p->translate.y) * resize;
+            matrix[14] = (matrix[14] + p->translate.z) * resize;
         }
 
         void genvbo(bool norms, bool tangents, vbocacheentry &vc)
@@ -531,7 +532,7 @@ struct vertmodel : animmodel
         {
             if(as->cur.anim&ANIM_NORENDER)
             {
-                loopv(p->links) calctagmatrix(p, p->links[i].tag, *as, p->links[i].matrix);
+                loopv(p->links) calctagmatrix(p, p->links[i].tag, *as, attached, p->links[i].matrix);
                 return;
             }
 
@@ -583,7 +584,7 @@ struct vertmodel : animmodel
                 m->render(as, p->skins[i], *vc);
             }
             
-            loopv(p->links) calctagmatrix(p, p->links[i].tag, *as, p->links[i].matrix);
+            loopv(p->links) calctagmatrix(p, p->links[i].tag, *as, attached, p->links[i].matrix);
         }
     };
 
