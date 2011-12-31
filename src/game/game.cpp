@@ -2667,7 +2667,7 @@ namespace game
         const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         bool hasweapon = showweap && *weapmdl;
         modelattach a[11]; int ai = 0;
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
+        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction, -1, 1); // we could probably animate this too now..
         if(rendernormally && (early || d != focus))
         {
             const char *muzzle = "tag_weapon";
