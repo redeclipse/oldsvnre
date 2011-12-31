@@ -2,12 +2,12 @@
 
 #include "engine.h"
 
-generic mapexts[] = {
+namemap mapexts[] = {
     { ".mpz", MAP_MAPZ },
     { ".ogz", MAP_OCTA },
 };
 
-generic mapdirs[] = {
+namemap mapdirs[] = {
     { "maps", MAP_MAPZ },
     { "base", MAP_OCTA },
 };
@@ -746,10 +746,10 @@ void saveslotconfig(stream *h, Slot &s, int index)
     loopvj(s.sts)
     {
         h->printf("texture");
-        if(index >= 0) h->printf(" %s", escapestring(findtexturename(s.sts[j].type)));
-        else if(!j) h->printf(" %s", escapestring(findmaterialname(-index)));
+        if(index >= 0) h->printf(" %s", findtexturetypename(s.sts[j].type));
+        else if(!j) h->printf(" %s", findmaterialname(-index));
         else h->printf(" 1");
-        h->printf(" %s", escapestring(s.sts[j].lname));
+        h->printf(" %s", escapestring(s.sts[j].name));
         if(!j)
         {
             h->printf(" %d %d %d %f",

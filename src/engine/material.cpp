@@ -142,7 +142,7 @@ static void drawmaterial(const materialsurface &m, float offset)
     }
 }
 
-generic materials[] =
+namemap materials[] =
 {
     {"air", MAT_AIR},
     {"water", MAT_WATER},

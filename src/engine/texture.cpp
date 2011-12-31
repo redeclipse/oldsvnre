@@ -1718,7 +1718,7 @@ ICOMMAND(0, fixinsidefaces, "i", (int *tex),
     allchanged();
 });
 
-generic textypes[] =
+namemap textypes[] =
 {
     {"c", TEX_DIFFUSE},
     {"u", TEX_UNKNOWN},
@@ -1736,7 +1736,7 @@ int findtexturetype(char *name, bool tryint)
     return tryint && isnumeric(*name) ? atoi(name) : -1;
 }
 
-const char *findtexturename(int type)
+const char *findtexturetypename(int type)
 {
     loopi(sizeof(textypes)/sizeof(textypes[0])) if(textypes[i].id == type) { return textypes[i].name; }
     return NULL;
@@ -1759,7 +1759,6 @@ void texture(char *type, char *name, int *rot, int *xoffset, int *yoffset, float
     st.type = tnum;
     st.combined = -1;
     st.t = NULL;
-    copystring(st.lname, name);
     copystring(st.name, name);
     if(tnum==TEX_DIFFUSE)
     {
@@ -2038,8 +2037,7 @@ static void addname(vector<char> &key, Slot &slot, Slot::Tex &t, bool combined =
 {
     if(combined) key.add('&');
     if(prefix) { while(*prefix) key.add(*prefix++); }
-    defformatstring(tname)("%s", t.name);
-    for(const char *s = tname; *s; key.add(*s++));
+    for(const char *s = t.name; *s; key.add(*s++));
 }
 
 static void texcombine(Slot &s, int index, Slot::Tex &t, bool forceload = false)

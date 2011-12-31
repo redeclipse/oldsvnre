@@ -258,7 +258,7 @@ ICOMMAND(0, push, "rte", (ident *id, tagval *v, uint *code),
     poparg(*id);
 });
 
-static inline bool isnumber(const char *s)
+static inline bool checknumber(const char *s)
 {
     if(isdigit(s[0])) return true;
     else switch(s[0])
@@ -274,7 +274,7 @@ ident *newident(const char *name, int flags)
     ident *id = idents.access(name);
     if(!id)
     {
-        if(isnumber(name))
+        if(checknumber(name))
         {
             debugcode("number %s is not a valid identifier name", name);
             return dummyident;
@@ -345,7 +345,7 @@ static void setalias(const char *name, tagval &v)
             freearg(v);
         }
     }
-    else if(isnumber(name))
+    else if(checknumber(name))
     {
         debugcode("cannot alias number %s", name);
         freearg(v);
@@ -1186,7 +1186,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
             id = idents.access(idname);
             if(!id || id->flags&IDF_REWRITE)
             {
-                if(!isnumber(idname)) { compilestr(code, idname, idlen); delete[] idname; goto noid; }
+                if(!checknumber(idname)) { compilestr(code, idname, idlen); delete[] idname; goto noid; }
                 char *end = idname;
                 int val = int(strtol(idname, &end, 0));
                 if(*end) compilestr(code, idname, idlen);
@@ -1721,7 +1721,7 @@ static const uint *runcode(const uint *code, tagval &result)
                 if(!id || id->flags&IDF_REWRITE)
                 {
                 noid:
-                    if(isnumber(args[0].s)) goto litval;
+                    if(checknumber(args[0].s)) goto litval;
                     if(!id || id->flags&IDF_REWRITE)
                     {
                         if(server::rewritecommand(id, args, numargs)) goto forceresult;
