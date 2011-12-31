@@ -309,17 +309,17 @@ extern const char *getalias(const char *name);
 extern int identflags;
 extern bool interactive;
 
+extern const char *escapestring(const char *s);
+extern const char *escapeid(const char *s);
+static inline const char *escapeid(ident &id) { return escapeid(id.name); }
+extern bool validateblock(const char *s);
 extern char *parsetext(const char *&p);
-extern void writeescapedstring(stream *f, const char *s);
-extern bool validatealias(const char *s);
 extern void explodelist(const char *s, vector<char *> &elems);
 extern int listlen(const char *s);
 extern char *indexlist(const char *s, int pos);
 extern int pointlist(const char *s, int pos, int &len);
 extern int checklist(const char *word, int size, const char *list);
 extern char *shrinklist(const char *list, const char *limit, int failover);
-
-extern void writeescapedstring(stream *f, const char *s);
 
 extern void checksleep(int millis);
 extern void clearsleep(bool clearworlds = true);

@@ -678,7 +678,8 @@ void writebinds(stream *f)
             keym &km = *binds[i];
             if(km.persist[j] && *km.actions[j])
             {
-                f->printf("%s \"%s\" [%s]\n", cmds[j], km.name, km.actions[j]);
+                if(validateblock(km.actions[j])) f->printf("%s %s [%s]\n", cmds[j], escapestring(km.name), km.actions[j]);
+                else f->printf("%s %s %s\n", cmds[j], escapestring(km.name), escapestring(km.actions[j]));
                 found = true;
             }
         }
@@ -885,8 +886,12 @@ void writecompletions(stream *f)
     {
         char *k = cmds[i];
         filesval *v = completions[k];
-        if(v->type==FILES_LIST) f->printf("    listcomplete \"%s\" [%s]\n", k, v->dir);
-        else f->printf("    complete \"%s\" \"%s\" \"%s\"\n", k, v->dir, v->ext ? v->ext : "*");
+        if(v->type==FILES_LIST)
+        {
+            if(validateblock(v->dir)) f->printf("    listcomplete %s [%s]\n", escapeid(k), v->dir);
+            else f->printf("    listcomplete %s %s\n", escapeid(k), escapestring(v->dir));
+        }
+        else f->printf("    complete %s %s %s\n", escapeid(k), escapestring(v->dir), escapestring(v->ext ? v->ext : "*"));
     }
 }
 

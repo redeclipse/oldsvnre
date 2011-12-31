@@ -629,7 +629,7 @@ const char *parsestring(const char *p)
     return p;
 }
 
-int escapestring(char *dst, const char *src, const char *end)
+int unescapestring(char *dst, const char *src, const char *end)
 {
     char *start = dst;
     while(src < end)
@@ -722,7 +722,7 @@ static inline char *cutstring(const char *&p, int &len)
     p++;
     const char *end = parsestring(p);
     char *s = newstring(end - p);
-    len = escapestring(s, p, end);
+    len = unescapestring(s, p, end);
     s[len] = '\0';
     p = end;
     if(*p=='\"') p++;
@@ -747,22 +747,22 @@ char *parsetext(const char *&p)
 
 static inline char *cutword(const char *&p, int &len)
 {
+    const int maxbrak = 100;
+    static char brakstack[maxbrak];
+    int brakdepth = 0;
     const char *word = p;
-    for(int parens = 0, braks = 0, curly = 0;;)
+    for(;; p++)
     {
-        p += strcspn(p, "/;()[]{} \t\r\n\0");
+        p += strcspn(p, "\"/;()[]{} \t\r\n\0");
         switch(p[0])
         {
-            case ';': case ' ': case '\t': case '\r': case '\n': case '\0': goto done;
+            case '"': case ';': case ' ': case '\t': case '\r': case '\n': case '\0': goto done;
             case '/': if(p[1] == '/') goto done; break;
-            case '(': parens++; break;
-            case ')': if(--parens < 0) goto done; break;
-            case '[': braks++; break;
-            case ']': if(--braks < 0) goto done; break;
-            case '{': curly++; break;
-            case '}': if(--curly < 0) goto done; break;
+            case '[': case '{': case '(': if(brakdepth >= maxbrak) goto done; brakstack[brakdepth++] = p[0]; break;
+            case ']': if(brakdepth <= 0 || brakstack[--brakdepth] != '[') goto done; break;
+            case '}': if(brakdepth <= 0 || brakstack[--brakdepth] != '{') goto done; break;
+            case ')': if(brakdepth <= 0 || brakstack[--brakdepth] != '(') goto done; break;
         }
-        p++;
     }
 done:
     len = p-word;
@@ -1958,37 +1958,49 @@ bool execfile(const char *cfgfile, bool msg, bool nonworld)
     return true;
 }
 
-void writeescapedstring(stream *f, const char *s)
+const char *escapestring(const char *s)
 {
-    f->putchar('"');
+    static vector<char> strbuf[3];
+    static int stridx = 0;
+    stridx = (stridx + 1)%3;
+    vector<char> &buf = strbuf[stridx];
+    buf.setsize(0);
+    buf.add('"');
     for(; *s; s++) switch(*s)
     {
-        case '\n': f->write("^n", 2); break;
-        case '\t': f->write("^t", 2); break;
-        case '\f': f->write("^f", 2); break;
-        case '"': f->write("^\"", 2); break;
-        default: f->putchar(*s); break;
+        case '\n': buf.put("^n", 2); break;
+        case '\t': buf.put("^t", 2); break;
+        case '\f': buf.put("^f", 2); break;
+        case '"': buf.put("^\"", 2); break;
+        case '^': buf.put("^^", 2); break;
+        default: buf.add(*s); break;
     }
-    f->putchar('"');
+    buf.put("\"\0", 2);
+    return buf.getbuf();
 }
 
-bool validatealias(const char *s)
+const char *escapeid(const char *s)
 {
-    int parens = 0, braks = 0, curly = 0;
+    const char *end = s + strcspn(s, "\"/;()[]{} \f\t\r\n\0");
+    return *end ? escapestring(s) : s;
+}
+
+bool validateblock(const char *s)
+{
+    const int maxbrak = 100;
+    static char brakstack[maxbrak];
+    int brakdepth = 0;
     for(; *s; s++) switch(*s)
     {
-        case '(': parens++; break;
-        case ')': if(!parens) return false; parens--; break;
-        case '[': braks++; break;
-        case ']': if(!braks) return false; braks--; break;
-        case '{': curly++; break;
-        case '}': if(!curly) return false; curly--; break;
+        case '[': case '{': case '(': if(brakdepth >= maxbrak) return false; brakstack[brakdepth++] = *s; break;
+        case ']': if(brakdepth <= 0 || brakstack[--brakdepth] != '[') return false; break;
+        case '}': if(brakdepth <= 0 || brakstack[--brakdepth] != '{') return false; break;
+        case ')': if(brakdepth <= 0 || brakstack[--brakdepth] != '(') return false; break;
         case '"': s = parsestring(s + 1); if(*s != '"') return false; break;
         case '/': if(s[1] == '/') return false; break;
         case '\f': return false;
     }
-    if(braks || parens || curly) return false;
-    return true;
+    return brakdepth == 0;
 }
 
 // below the commands that implement a small imperative language. thanks to the semantics of

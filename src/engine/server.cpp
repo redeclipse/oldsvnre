@@ -1457,13 +1457,13 @@ void writecfg()
         bool saved = false;
         if(id.flags&IDF_PERSIST) switch(id.type)
         {
-            case ID_VAR: if(*id.storage.i != id.def.i) { found = saved = true; f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), id.name, *id.storage.i); } break;
-            case ID_FVAR: if(*id.storage.f != id.def.f) { found = saved = true; f->printf("%s %s", id.name, floatstr(*id.storage.f)); } break;
-            case ID_SVAR: if(strcmp(*id.storage.s, id.def.s)) { found = saved = true; f->printf("%s ", id.name); writeescapedstring(f, *id.storage.s); } break;
+            case ID_VAR: if(*id.storage.i != id.def.i) { found = saved = true; f->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "%s 0x%.6X" : "%s 0x%X") : "%s %d"), escapeid(id), *id.storage.i); } break;
+            case ID_FVAR: if(*id.storage.f != id.def.f) { found = saved = true; f->printf("%s %s", escapeid(id), floatstr(*id.storage.f)); } break;
+            case ID_SVAR: if(strcmp(*id.storage.s, id.def.s)) { found = saved = true; f->printf("%s %s", escapeid(id), escapestring(*id.storage.s)); } break;
         }
         if(saved)
         {
-            if(!(id.flags&IDF_COMPLETE)) f->printf("; setcomplete \"%s\" 0\n", id.name);
+            if(!(id.flags&IDF_COMPLETE)) f->printf("; setcomplete %s 0\n", escapeid(id));
             else f->printf("\n");
         }
     }
@@ -1481,8 +1481,8 @@ void writecfg()
                 if(str[0])
                 {
                     found = saved = true;
-                    if(validatealias(str)) f->printf("\"%s\" = [%s]", id.name, str);
-                    else { f->printf("\"%s\" = ", id.name); writeescapedstring(f, str); }
+                    if(validateblock(str)) f->printf("%s = [%s]", escapeid(id), str);
+                    else f->printf("%s = %s", escapeid(id), escapestring(str));
                 }
             }
             break;

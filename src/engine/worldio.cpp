@@ -731,12 +731,12 @@ void saveslotconfig(stream *h, Slot &s, int index)
     {
         if(s.shader)
         {
-            h->printf("setshader %s\n", s.shader->name);
+            h->printf("setshader %s\n", escapeid(s.shader->name));
         }
         loopvj(s.params)
         {
             h->printf("set%sparam", s.params[j].type == SHPARAM_LOOKUP ? "shader" : (s.params[j].type == SHPARAM_UNIFORM ? "uniform" : (s.params[j].type == SHPARAM_PIXEL ? "pixel" : "vertex")));
-            if(s.params[j].type == SHPARAM_LOOKUP || s.params[j].type == SHPARAM_UNIFORM) h->printf(" \"%s\"", s.params[j].name);
+            if(s.params[j].type == SHPARAM_LOOKUP || s.params[j].type == SHPARAM_UNIFORM) h->printf(" %s", escapeid(s.params[j].name));
             else h->printf(" %d", s.params[j].index);
             loopk(4) h->printf(" %f", s.params[j].val[k]);
             if(s.params[j].palette > 0 || s.params[j].palindex > 0) h->printf(" %d %d", s.params[j].palette, s.params[j].palindex);
@@ -746,10 +746,10 @@ void saveslotconfig(stream *h, Slot &s, int index)
     loopvj(s.sts)
     {
         h->printf("texture");
-        if(index >= 0) h->printf(" %s", findtexturename(s.sts[j].type));
-        else if(!j) h->printf(" %s", findmaterialname(-index));
+        if(index >= 0) h->printf(" %s", escapestring(findtexturename(s.sts[j].type)));
+        else if(!j) h->printf(" %s", escapestring(findmaterialname(-index)));
         else h->printf(" 1");
-        h->printf(" \"%s\"", s.sts[j].lname);
+        h->printf(" %s", escapestring(s.sts[j].lname));
         if(!j)
         {
             h->printf(" %d %d %d %f",
@@ -764,7 +764,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
             h->printf("texscroll %f %f\n", s.variants->scrollS * 1000.0f, s.variants->scrollT * 1000.0f);
         if(s.variants->layer != 0)
         {
-            if(s.layermaskname) h->printf("texlayer %d \"%s\" %d %f\n", s.variants->layer, s.layermaskname, s.layermaskmode, s.layermaskscale);
+            if(s.layermaskname) h->printf("texlayer %d %s %d %f\n", s.variants->layer, escapestring(s.layermaskname), s.layermaskmode, s.layermaskscale);
             else h->printf("texlayer %d\n", s.variants->layer);
         }
         if(s.variants->alphafront != DEFAULT_ALPHA_FRONT || s.variants->alphaback != DEFAULT_ALPHA_BACK)
@@ -774,7 +774,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
         if(s.variants->palette > 0 || s.variants->palindex > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
         if(s.texgrass)
         {
-            h->printf("texgrass \"%s\"\n", s.texgrass);
+            h->printf("texgrass %s\n", escapestring(s.texgrass));
             if(s.grasscolor != vec(0, 0, 0))
                 h->printf("texgrasscolor %f %f %f\n", s.grasscolor.x, s.grasscolor.y, s.grasscolor.z);
             if(s.grassblend > 0) h->printf("texgrassblend %f\n", s.grassblend);
@@ -806,9 +806,9 @@ void save_config(char *mname)
         ident &id = *ids[i];
         if(id.flags&IDF_WORLD) switch(id.type)
         {
-            case ID_VAR: h->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "// %s 0x%.6X\n" : "// %s 0x%X\n") : "// %s %d\n"), id.name, *id.storage.i); vars++;break;
-            case ID_FVAR: h->printf("// %s %s\n", id.name, floatstr(*id.storage.f)); vars++; break;
-            case ID_SVAR: h->printf("// %s ", id.name); writeescapedstring(h, *id.storage.s); h->putchar('\n'); vars++; break;
+            case ID_VAR: h->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "// %s 0x%.6X\n" : "// %s 0x%X\n") : "// %s %d\n"), escapeid(id), *id.storage.i); vars++;break;
+            case ID_FVAR: h->printf("// %s %s\n", escapeid(id), floatstr(*id.storage.f)); vars++; break;
+            case ID_SVAR: h->printf("// %s %s\n", escapeid(id), escapestring(*id.storage.s)); vars++; break;
             default: break;
         }
     }
@@ -825,8 +825,8 @@ void save_config(char *mname)
             if(str[0])
             {
                 aliases++;
-                if(validatealias(str)) h->printf("\"%s\" = [%s]\n", id.name, str);
-                else { h->printf("\"%s\" = ", id.name); writeescapedstring(h, str); }
+                if(validateblock(str)) h->printf("%s = [%s]\n", escapeid(id), str);
+                else h->printf("%s = %s\n", escapeid(id), escapestring(str));
             }
         }
     }
@@ -856,7 +856,7 @@ void save_config(char *mname)
     loopv(mapmodels)
     {
         if(verbose) progress(float(i)/float(mapmodels.length()), "saving mapmodel slots...");
-        h->printf("mmodel \"%s\"\n", mapmodels[i].name);
+        h->printf("mmodel %s\n", escapestring(mapmodels[i].name));
     }
     if(mapmodels.length()) h->printf("\n");
     if(verbose) conoutf("\fasaved %d mapmodel slots", mapmodels.length());
@@ -864,7 +864,7 @@ void save_config(char *mname)
     loopv(mapsounds)
     {
         if(verbose) progress(float(i)/float(mapsounds.length()), "saving mapsound slots...");
-        h->printf("mapsound \"%s\"", mapsounds[i].name);
+        h->printf("mapsound %s", escapestring(mapsounds[i].name));
         if((mapsounds[i].vol > 0 && mapsounds[i].vol < 255) || mapsounds[i].maxrad > 0 || mapsounds[i].minrad >= 0)
             h->printf(" %d", mapsounds[i].vol);
         if(mapsounds[i].maxrad > 0 || mapsounds[i].minrad >= 0) h->printf(" %d", mapsounds[i].maxrad);
