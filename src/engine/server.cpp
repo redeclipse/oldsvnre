@@ -299,7 +299,12 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
     }
     *dst = '\0';
 }
-ICOMMAND(0, filter, "siii", (char *s, int *a, int *b, int *c), string d; filtertext(d, s, *a==0, *b==0, *c==0); result(d));
+ICOMMAND(0, filter, "siii", (char *s, int *a, int *b, int *c), 
+{
+    char *d = newstring(s);
+    filtertext(d, s, *a==0, *b==0, *c==0);
+    stringret(d);
+});
 
 const char *escapetext(const char *src, bool quoteonly)
 {
@@ -307,14 +312,19 @@ const char *escapetext(const char *src, bool quoteonly)
     dst.setsize(0);
     for(int c = *src; c; c = *++src)
     {
-        if(!quoteonly)
+        if(!quoteonly) switch(c)
         {
-            if(c=='\f') { dst.add('^'); dst.add('f'); continue; }
-            if(c=='\n') { dst.add('^'); dst.add('n'); continue; }
-            if(c=='\t') { dst.add('^'); dst.add('t'); continue; }
+        case '\n': dst.put("^n", 2); continue;
+        case '\f': dst.put("^f", 2); continue;
+        case '\t': dst.put("^t", 2); continue;
         }
-        if(c=='\n') { dst.add(' '); continue; }
-        if(c=='\"') { dst.add('^'); dst.add('\"'); continue; }
+        switch(c)
+        {
+        case '\v': case '\r': continue;
+        case '\n': dst.add(' '); continue;
+        case '"': dst.put("^\"", 2); continue;
+        case '^': dst.put("^^", 2); continue;
+        }
         if(iscubeprint(c) || iscubespace(c)) dst.add(c);
     }
     dst.add('\0');

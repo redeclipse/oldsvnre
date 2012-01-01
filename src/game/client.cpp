@@ -557,7 +557,9 @@ namespace client
             defformatstring(fn)("%s", escapetext(game::colorname(d)));
             defformatstring(ft)("%s", escapetext(text));
             defformatstring(fs)("%s", escapetext(s));
-            defformatstring(act)("%s %d %d \"%s\" \"%s\" \"%s\"", flags&SAY_ACTION ? "on_action" : "on_text", d->clientnum, flags&SAY_TEAM ? 1 : 0, fn, ft, fs);
+            defformatstring(act)("%s %d %d %s %s %s", 
+                flags&SAY_ACTION ? "on_action" : "on_text", d->clientnum, flags&SAY_TEAM ? 1 : 0, 
+                escapestring(game::colorname(d)), escapestring(text), escapestring(s));
             int ret = execute(act);
             if(ret > 0) snd = ret;
         }

@@ -317,8 +317,8 @@ extern char *parsetext(const char *&p);
 extern void explodelist(const char *s, vector<char *> &elems);
 extern int listlen(const char *s);
 extern char *indexlist(const char *s, int pos);
-extern int pointlist(const char *s, int pos, int &len);
-extern int checklist(const char *word, int size, const char *list);
+extern const char *indexlist(const char *s, int pos, int &len);
+extern int listincludes(const char *list, const char *needl, int needlelen);
 extern char *shrinklist(const char *list, const char *limit, int failover);
 
 extern void checksleep(int millis);
