@@ -157,7 +157,7 @@ struct listrenderer : partrenderer
     {
     }
 
-    virtual void cleanup(T *p)
+    virtual void killpart(T *p)
     {
     }
 
@@ -167,7 +167,7 @@ struct listrenderer : partrenderer
         T *p = list;
         for(;;)
         {
-            cleanup(p);
+            killpart(p);
             if(p->next) p = p->next;
             else break;
         }
@@ -263,7 +263,7 @@ struct listrenderer : partrenderer
             //remove
             *prev = p->next;
             p->next = parempty;
-            cleanup(p);
+            killpart(p);
             parempty = p;
         }
 
@@ -292,7 +292,7 @@ struct textrenderer : sharedlistrenderer
     {
     }
 
-    void cleanup(sharedlistparticle *p)
+    void killpart(sharedlistparticle *p)
     {
         if(p->text && p->flags&1) delete[] p->text;
     }

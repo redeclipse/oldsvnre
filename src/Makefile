@@ -126,8 +126,8 @@ clean-server:
 	@rm -fv $(SERVER_OBJS) reserver
 
 %.h.gch: %.h
-	$(CXX) $(CXXFLAGS) -o $@.tmp $(subst .h.gch,.h,$@)
-	$(MV) $@.tmp $@
+	$(CXX) $(CXXFLAGS) -o tmp.$@ $(subst .h.gch,.h,$@)
+	$(MV) tmp.$@ $@
 
 %-standalone.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $(subst -standalone.o,.cpp,$@)

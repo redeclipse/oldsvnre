@@ -94,7 +94,6 @@ static inline T clamp(T a, T b, T c)
 #define loopl(m) loop(l,m)
 #define loopirev(v) for(int i = v-1; i>=0; i--)
 
-
 #define DELETEP(p) if(p) { delete   p; p = 0; }
 #define DELETEA(p) if(p) { delete[] p; p = 0; }
 
@@ -206,7 +205,7 @@ struct databuf
     void put(const T *vals, int numvals)
     {
         if(maxlen-len<numvals) flags |= OVERWROTE;
-        memcpy(&buf[len], vals, min(maxlen-len, numvals)*sizeof(T));
+        memcpy(&buf[len], (const void *)vals, min(maxlen-len, numvals)*sizeof(T));
         len += min(maxlen-len, numvals);
     }
 
@@ -214,7 +213,7 @@ struct databuf
     {
         int read = min(maxlen-len, numvals);
         if(read<numvals) flags |= OVERREAD;
-        memcpy(vals, &buf[len], read*sizeof(T));
+        memcpy(vals, (void *)&buf[len], read*sizeof(T));
         len += read;
         return read;
     }
@@ -454,7 +453,7 @@ template <class T> struct vector
         else
         {
             growbuf(ulen+v.ulen);
-            if(v.ulen) memcpy(&buf[ulen], v.buf, v.ulen*sizeof(T));
+            if(v.ulen) memcpy(&buf[ulen], (void  *)v.buf, v.ulen*sizeof(T));
             ulen += v.ulen;
             v.ulen = 0;
         }
@@ -502,7 +501,7 @@ template <class T> struct vector
         uchar *newbuf = new uchar[alen*sizeof(T)];
         if(olen > 0)
         {
-            memcpy(newbuf, buf, olen*sizeof(T));
+            memcpy(newbuf, (void *)buf, olen*sizeof(T));
             delete[] (uchar *)buf;
         }
         buf = (T *)newbuf;
@@ -1137,19 +1136,6 @@ inline char *newstring(size_t l) { return new char[l+1]; }
 inline char *newstring(const char *s, size_t l) { return copystring(newstring(l), s, l+1); }
 inline char *newstring(const char *s) { return newstring(s, strlen(s));          }
 inline char *newstringbuf(const char *s) { return newstring(s, MAXSTRLEN-1);       }
-
-inline void itoa(char *s, int i) { formatstring(s)("%d", i); }
-inline char *exchangestr(char *o, const char *n) { delete[] o; return newstring(n); }
-inline char *expandstr(char *o, const char *n, char *delimit = " ")
-{
-    int len = strlen(o)+strlen(n)+strlen(delimit)+1;
-    char *q = new char[len];
-    copystring(q, o, len);
-    if(*delimit) concatstring(q, delimit);
-    concatstring(q, n);
-    delete[] o;
-    return q;
-}
 
 #if defined(WIN32) && !defined(__GNUC__)
 #ifdef _DEBUG
