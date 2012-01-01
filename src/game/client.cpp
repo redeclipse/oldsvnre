@@ -92,21 +92,26 @@ namespace client
         }
     }
 
-    void getvotes(int vote, int player)
+    void getvotes(int vote, int prop, int idx)
     {
-        if(!vote) intret(mapvotes.length());
-        else
+        if(vote < 0) intret(mapvotes.length());
+        else if(mapvotes.inrange(vote))
         {
-            mkstring(text); vote--; player--;
-            if(mapvotes.inrange(vote))
+            mapvote &v = mapvotes[vote];
+            if(prop < 0) intret(4);
+            else switch(prop)
             {
-                if(mapvotes[vote].players.inrange(player)) formatstring(text)("%d", mapvotes[vote].players[player]->clientnum);
-                else formatstring(text)("%d %d %d \"%s\"", mapvotes[vote].players.length(), mapvotes[vote].mode, mapvotes[vote].muts, escapetext(mapvotes[vote].map));
+                case 0:
+                    if(idx < 0) intret(v.players.length());
+                    else if(v.players.inrange(idx)) intret(v.players[idx]->clientnum);
+                    break;
+                case 1: intret(v.mode); break;
+                case 2: intret(v.muts); break;
+                case 3: result(v.map); break;
             }
-            result(text);
         }
     }
-    ICOMMAND(0, getvote, "ii", (int *num, int *player), getvotes(*num, *player));
+    ICOMMAND(0, getvote, "iiiN", (int *vote, int *prop, int *idx, int *numargs), getvotes(*numargs >= 1 ? *vote : -1, *numargs >= 2 ? *prop : -1, *numargs >= 3 ? *idx : -1));
 
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
     string authname = "", authkey = "";
@@ -182,7 +187,7 @@ namespace client
     });
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
-    ICOMMAND(0, getname, "", (), result(escapetext(game::player1->name)));
+    ICOMMAND(0, getname, "", (), result(game::player1->name));
     ICOMMAND(0, getcolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
     ICOMMAND(0, getmodel, "", (), intret(game::player1->model));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
@@ -200,9 +205,9 @@ namespace client
             game::player1->setinfo(text, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model);
             addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
         }
-        if(initing == NOT_INITING) conoutft(CON_INFO, "your are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playermodels[game::player1->model%NUMPLAYERMODELS][2]);
+        if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playermodels[game::player1->model%NUMPLAYERMODELS][2]);
     }
-    ICOMMAND(0, setinfo, "sii", (char *s, int *c, int *m), setplayerinfo(s, *c, *m));
+    ICOMMAND(0, setinfo, "siiN", (char *s, int *c, int *m, int *numargs), setplayerinfo(s, *numargs >= 2 ? *c : -1, *numargs >= 3 ? *m : -1));
 
     int teamname(const char *team)
     {
@@ -275,7 +280,7 @@ namespace client
         if(colour && d) return game::colorname(d);
         return d ? d->name : "";
     }
-    ICOMMAND(0, getclientname, "ii", (int *cn, int *colour), result(escapetext(getclientname(*cn, *colour))));
+    ICOMMAND(0, getclientname, "ii", (int *cn, int *colour), result(getclientname(*cn, *colour)));
 
     int getclientteam(int cn)
     {
@@ -2259,7 +2264,7 @@ namespace client
 
     void resetserversort()
     {
-        defformatstring(val)("[%d %d %d]", SINFO_STATUS, SINFO_NUMPLRS, SINFO_PING);
+        defformatstring(val)("%d %d %d", SINFO_STATUS, SINFO_NUMPLRS, SINFO_PING);
         setsvarchecked(getident("serversort"), val);
     }
     ICOMMAND(0, serversortreset, "", (), resetserversort());
@@ -2405,45 +2410,38 @@ namespace client
         }
     }
 
-    void getservers(int server, int prop)
+    void getservers(int server, int prop, int idx)
     {
-        mkstring(text); server--;
-        if(servers.inrange(server))
+        if(server < 0) intret(servers.length());
+        else if(servers.inrange(server))
         {
             serverinfo *si = servers[server];
-            switch(prop)
+            if(prop < 0) intret(3);
+            else switch(prop)
             {
-                default: copystring(text, "0"); break;
                 case 0:
-                {
-                    defformatstring(sn)("%s", escapetext(si->name));
-                    defformatstring(sd)("%s", escapetext(si->sdesc));
-                    defformatstring(sm)("%s", escapetext(si->map));
-                    formatstring(text)("%d \"%s\" %d \"%s\" \"%s\" %d %d", serverstat(si), sn, si->port, sd, sm, si->numplayers, si->ping);
+                    if(idx < 0) intret(7);
+                    else switch(idx)
+                    {
+                        case 0: intret(serverstat(si)); break;
+                        case 1: result(si->name); break;
+                        case 2: intret(si->port); break;
+                        case 3: result(si->sdesc); break;
+                        case 4: result(si->map); break;
+                        case 5: intret(si->numplayers); break;
+                        case 6: intret(si->ping); break;
+                    }
                     break;
-                }
                 case 1:
-                {
-                    loopv(si->attr)
-                    {
-                        defformatstring(s)("%s%d", *text ? " " : "", si->attr[i]);
-                        concatstring(text, s);
-                    }
+                    if(idx < 0) intret(si->attr.length());
+                    else if(si->attr.inrange(idx)) intret(si->attr[idx]);
                     break;
-                }
                 case 2:
-                {
-                    loopv(si->players)
-                    {
-                        defformatstring(s)("%s\"%s\"", text[0] ? " " : "", escapetext(si->players[i]));
-                        concatstring(text, s);
-                    }
+                    if(idx < 0) intret(si->players.length());
+                    else if(si->players.inrange(idx)) result(si->players[idx]);
                     break;
-                }
             }
         }
-        else formatstring(text)("%d", servers.length());
-        result(text);
     }
-    ICOMMAND(0, getserver, "ii", (int *server, int *prop), getservers(*server, *prop));
+    ICOMMAND(0, getserver, "iiiN", (int *server, int *prop, int *idx, int *numargs), getservers(*numargs >= 1 ? *server : -1, *numargs >= 2 ? *prop : -1, *numargs >= 3 ? *idx : -1));
 }

@@ -2284,6 +2284,14 @@ void getalias_(char *s)
 
 ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n!=0));
 COMMAND(0, at, "si");
+ICOMMAND(0, escape, "s", (char *s), result(escapestring(s)));
+ICOMMAND(0, unescape, "s", (char *s),
+{
+    int len = strlen(s);
+    char *d = newstring(len);
+    d[unescapestring(d, s, &s[len])] = '\0';
+    stringret(d);
+});
 COMMAND(0, substr, "siiN");
 COMMAND(0, sublist, "siiN");
 ICOMMAND(0, listlen, "s", (char *s), intret(listlen(s)));

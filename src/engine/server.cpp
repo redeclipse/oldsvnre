@@ -299,38 +299,12 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
     }
     *dst = '\0';
 }
-ICOMMAND(0, filter, "siii", (char *s, int *a, int *b, int *c), 
+ICOMMAND(0, filter, "siiiN", (char *s, int *a, int *b, int *c, int *numargs), 
 {
     char *d = newstring(s);
-    filtertext(d, s, *a==0, *b==0, *c==0);
+    filtertext(d, s, *numargs >= 2 ? *a>0 : true, *numargs >= 3 ? *b>0 : true, *numargs >= 4 ? *c>0 : true);
     stringret(d);
 });
-
-const char *escapetext(const char *src, bool quoteonly)
-{
-    static vector<char> dst;
-    dst.setsize(0);
-    for(int c = *src; c; c = *++src)
-    {
-        if(!quoteonly) switch(c)
-        {
-        case '\n': dst.put("^n", 2); continue;
-        case '\f': dst.put("^f", 2); continue;
-        case '\t': dst.put("^t", 2); continue;
-        }
-        switch(c)
-        {
-        case '\v': case '\r': continue;
-        case '\n': dst.add(' '); continue;
-        case '"': dst.put("^\"", 2); continue;
-        case '^': dst.put("^^", 2); continue;
-        }
-        if(iscubeprint(c) || iscubespace(c)) dst.add(c);
-    }
-    dst.add('\0');
-    return dst.getbuf();
-}
-ICOMMAND(0, escape, "si", (const char *s, int *a, int *b, int *c), result(escapetext(s, *a==0)));
 
 vector<clientdata *> clients;
 
