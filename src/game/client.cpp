@@ -176,11 +176,30 @@ namespace client
 
     VAR(IDF_PERSIST, colourchat, 0, 1, 1);
     VAR(IDF_PERSIST, showlaptimes, 0, 2, 3); // 0 = off, 1 = only player, 2 = +humans, 3 = +bots
-    vector<int> serversortstyles;
-    SVARF(IDF_PERSIST, serversort, "",
+
+    const char *defaultserversort()
     {
+        static string vals;
+        formatstring(vals)("%d %d %d", SINFO_STATUS, SINFO_NUMPLRS, SINFO_PING);
+        return vals;
+    }
+
+    void resetserversort()
+    {
+        setsvarchecked(getident("serversort"), defaultserversort());
+    }
+    ICOMMAND(0, serversortreset, "", (), resetserversort());
+
+    vector<int> serversortstyles;
+    SVARF(IDF_PERSIST, serversort, defaultserversort(),
+    {
+        if(!serversort[0] || serversort[0] == '[')
+        {
+            delete[] serversort;
+            serversort = newstring(defaultserversort());
+        }
         vector<char *> styles;
-        explodelist(serversort[0] == '[' ? serversort + 1 : serversort, styles);
+        explodelist(serversort, styles);
         serversortstyles.setsize(0);
         loopi(min(styles.length(), int(SINFO_MAX))) serversortstyles.add(parseint(styles[i]));
         styles.deletearrays();
@@ -2262,17 +2281,8 @@ namespace client
         return SSTAT_UNKNOWN;
     }
 
-    void resetserversort()
-    {
-        defformatstring(val)("%d %d %d", SINFO_STATUS, SINFO_NUMPLRS, SINFO_PING);
-        setsvarchecked(getident("serversort"), val);
-    }
-    ICOMMAND(0, serversortreset, "", (), resetserversort());
-
     int servercompare(serverinfo *a, serverinfo *b)
     {
-        if(!serversort || !*serversort) resetserversort();
-
         int ac = 0, bc = 0;
         if(a->address.host == ENET_HOST_ANY || a->ping >= serverinfo::WAITING || a->attr.empty()) ac = -1;
         else
