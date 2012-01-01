@@ -1982,7 +1982,9 @@ namespace entities
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {
             float radius = max(((e.type == WEAPON ? weaptype[attr].halo : enttype[e.type].radius*0.5f)+(fluc*0.5f))*skew, 0.125f);
-            part_create(PART_HINT_BOLD_SOFT, 1, vec(o).sub(camera1->o).rescale(radius/2).add(o), colour, radius, fluc*skew);
+            vec offset = vec(o).sub(camera1->o).rescale(radius/2);
+            offset.z = max(offset.z, -1.0f);
+            part_create(PART_HINT_BOLD_SOFT, 1, offset.add(o), colour, radius, fluc*skew);
         }
         if(isedit ? (showentinfo&(hasent ? 1 : 2)) : (enttype[e.type].usetype == EU_ITEM && active && showentdescs >= 3))
         {
