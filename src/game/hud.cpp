@@ -430,7 +430,13 @@ namespace hud
         if(!before) ADDMODEICON
     }
 
-    ICOMMAND(0, modetexlist, "iiii", (int *g, int *m, int *b, int *p), vector<char> list; modetexs(*g, *m, *b!=0, *p!=0, list); result(list.getbuf()));
+    ICOMMAND(0, modetexlist, "iiii", (int *g, int *m, int *b, int *p), 
+    {
+        vector<char> list; 
+        modetexs(*g, *m, *b!=0, *p!=0, list); 
+        list.add('\0');
+        result(list.getbuf());
+    });
 
     bool needminimap() { return true; }
 
