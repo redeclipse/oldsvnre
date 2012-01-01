@@ -180,7 +180,7 @@ namespace client
     SVARF(IDF_PERSIST, serversort, "",
     {
         vector<char *> styles;
-        explodelist(serversort, styles);
+        explodelist(serversort[0] == '[' ? serversort + 1 : serversort, styles);
         serversortstyles.setsize(0);
         loopi(min(styles.length(), int(SINFO_MAX))) serversortstyles.add(parseint(styles[i]));
         styles.deletearrays();
