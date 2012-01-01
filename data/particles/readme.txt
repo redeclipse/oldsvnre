@@ -10,6 +10,7 @@ entity.png, lightning.png, hint.png, mflare.png, sflare.png, spark.png
 
 blood.png, fire.png
     Created by FischKopF, source: http://www.quadropolis.us/node/2693
+    Uploaded explicitly as "Public Domain", with the additional comment:
     "Feel free to edit, claim it's yours, use it in own projects"
 
 muzzle.png, plasma.png, spark.png
