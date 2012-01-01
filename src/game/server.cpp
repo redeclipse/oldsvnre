@@ -1002,7 +1002,7 @@ namespace server
                 int n = listlen(list), p = -1, c = -1;
                 if(*chosen)
                 {
-                    p = checklist(chosen, strlen(chosen), list);
+                    p = listincludes(list, chosen, strlen(chosen));
                     if(p >= 0 && rotate == 1) c = p >= 0 && p < n-1 ? p+1 : 0;
                 }
                 if(c < 0)
@@ -1012,8 +1012,9 @@ namespace server
                 }
                 if(c >= 0)
                 {
-                    int len = 0, pos = pointlist(list, c, len);
-                    if(len > 0) copystring(chosen, list+pos, len+1);
+                    int len = 0;
+                    const char *elem = indexlist(list, c, len);
+                    if(len > 0) copystring(chosen, elem, len+1);
                 }
                 DELETEA(list);
             }
@@ -1880,7 +1881,7 @@ namespace server
             }
             if(list)
             {
-                if(checklist(reqmap, strlen(reqmap), list) < 0 && !haspriv(ci, GAME(mapslock)%2 ? PRIV_MASTER : PRIV_ADMIN, "select maps not in the rotation"))
+                if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, GAME(mapslock)%2 ? PRIV_MASTER : PRIV_ADMIN, "select maps not in the rotation"))
                 {
                     DELETEA(list);
                     return;
