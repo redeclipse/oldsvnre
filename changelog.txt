@@ -74,3 +74,4 @@ Additional Fixed Bugs:
  * #70 Temporarily missing sound for Flamer primary fire after reload
  * #74 better Link line colors
  * #81 Killing the opponent team in Survivor CTF/BB does not yield you a point
+
