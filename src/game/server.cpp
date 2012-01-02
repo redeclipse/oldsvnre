@@ -1906,10 +1906,10 @@ namespace server
         checkvotes();
     }
 
-    savedscore &findscore(clientinfo *ci, bool insert)
+    savedscore *findscore(clientinfo *ci, bool insert)
     {
         uint ip = getclientip(ci->clientnum);
-        if(!ip) return *(savedscore *)0;
+        if(!ip) return 0;
         if(!insert)
         {
             loopv(clients)
@@ -1921,20 +1921,20 @@ namespace server
                     oi->state.lasttimeplayed = lastmillis;
                     static savedscore curscore;
                     curscore.save(oi->state);
-                    return curscore;
+                    return &curscore;
                 }
             }
         }
         loopv(savedscores)
         {
             savedscore &sc = savedscores[i];
-            if(sc.ip == ip && !strcmp(sc.name, ci->name)) return sc;
+            if(sc.ip == ip && !strcmp(sc.name, ci->name)) return &sc;
         }
-        if(!insert) return *(savedscore *)0;
+        if(!insert) return 0;
         savedscore &sc = savedscores.add();
         sc.ip = ip;
         copystring(sc.name, ci->name);
-        return sc;
+        return &sc;
     }
 
     void givepoints(clientinfo *ci, int points)
@@ -1952,8 +1952,8 @@ namespace server
 
     void savescore(clientinfo *ci)
     {
-        savedscore &sc = findscore(ci, true);
-        if(&sc) sc.save(ci->state);
+        savedscore *sc = findscore(ci, true);
+        if(sc) sc->save(ci->state);
     }
 
     void setteam(clientinfo *ci, int team, bool reset = true, bool info = false)
@@ -2575,10 +2575,10 @@ namespace server
 
     bool restorescore(clientinfo *ci)
     {
-        savedscore &sc = findscore(ci, false);
-        if(&sc)
+        savedscore *sc = findscore(ci, false);
+        if(sc)
         {
-            sc.restore(ci->state);
+            sc->restore(ci->state);
             return true;
         }
         return false;
