@@ -86,15 +86,15 @@ namespace capture
     {
         if(game::player1->state == CS_ALIVE && hud::shownotices >= 3)
         {
-            static vector<int> hasflags, takenflags, droppedflags;
-            hasflags.setsize(0); takenflags.setsize(0); droppedflags.setsize(0);
+            static vector<int> hasflags, taken, droppedflags;
+            hasflags.setsize(0); taken.setsize(0); droppedflags.setsize(0);
             loopv(st.flags)
             {
                 capturestate::flag &f = st.flags[i];
                 if(f.owner == game::player1) hasflags.add(i);
                 else if(f.team == game::player1->team)
                 {
-                    if(f.owner && f.owner->team != game::player1->team) takenflags.add(i);
+                    if(f.owner && f.owner->team != game::player1->team) taken.add(i);
                     else if(f.droptime) droppedflags.add(i);
                 }
             }
@@ -110,10 +110,10 @@ namespace capture
                 popfont();
             }
             pushfont("default");
-            if(!takenflags.empty())
+            if(!taken.empty())
             {
-                char *str = buildflagstr(takenflags, takenflags.length() <= 3);
-                ty += draw_textx("%s taken: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, takenflags.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
+                char *str = buildflagstr(taken, taken.length() <= 3);
+                ty += draw_textx("%s taken: \fs%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, taken.length() == 1 ? "Flag" : "Flags", str)*hud::noticescale;
             }
             if(!droppedflags.empty())
             {
@@ -550,28 +550,28 @@ namespace capture
     {
         if(d->aitype == AI_BOT)
         {
-            static vector<int> hasflags, takenflags;
-            hasflags.setsize(0);
-            takenflags.setsize(0);
+            static vector<int> taken; taken.setsize(0);
             loopv(st.flags)
             {
                 capturestate::flag &g = st.flags[i];
-                if(g.owner == d) hasflags.add(i);
+                if(g.owner == d)
+                {
+                    if(!m_gsp3(game::gamemode, game::mutators)) return aihomerun(d, b);
+                }
                 else if(g.team == ai::owner(d) && (m_gsp3(game::gamemode, game::mutators) || (g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime))
-                    takenflags.add(i);
+                    taken.add(i);
             }
-            if(!hasflags.empty() && !m_gsp3(game::gamemode, game::mutators)) return aihomerun(d, b);
             if(!ai::badhealth(d))
             {
-                while(!takenflags.empty())
+                while(!taken.empty())
                 {
-                    int flag = takenflags.length() > 2 ? rnd(takenflags.length()) : 0;
-                    if(ai::makeroute(d, b, st.flags[takenflags[flag]].pos()))
+                    int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
+                    if(ai::makeroute(d, b, st.flags[taken[flag]].pos()))
                     {
-                        d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, takenflags[flag]);
+                        d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
                         return true;
                     }
-                    else takenflags.remove(flag);
+                    else taken.remove(flag);
                 }
             }
         }
@@ -666,16 +666,7 @@ namespace capture
     bool aidefense(gameent *d, ai::aistate &b)
     {
         if(!m_gsp3(game::gamemode, game::mutators) && d->aitype == AI_BOT)
-        {
-            static vector<int> hasflags;
-            hasflags.setsize(0);
-            loopv(st.flags)
-            {
-                capturestate::flag &g = st.flags[i];
-                if(g.owner == d) hasflags.add(i);
-            }
-            if(!hasflags.empty()) return aihomerun(d, b);
-        }
+            loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
         if(st.flags.inrange(b.target))
         {
             capturestate::flag &f = st.flags[b.target];
@@ -743,15 +734,7 @@ namespace capture
                 return ai::makeroute(d, b, f.pos());
             }
             else if(!m_gsp3(game::gamemode, game::mutators))
-            {
-                static vector<int> hasflags; hasflags.setsize(0);
-                loopv(st.flags)
-                {
-                    capturestate::flag &g = st.flags[i];
-                    if(g.owner == d) hasflags.add(i);
-                }
-                if(!hasflags.empty()) return ai::makeroute(d, b, f.owner == d ? f.spawnloc : f.pos());
-            }
+                loopv(st.flags) if(st.flags[i].owner == d) return ai::makeroute(d, b, f.owner == d ? f.spawnloc : f.pos());
         }
         return false;
     }
