@@ -855,8 +855,8 @@ struct gui : guient
 };
 
 Texture *gui::overlaytex = NULL, *gui::slidertex = NULL;
-TVARN(IDF_PERSIST, guioverlaytex, "textures/guioverlay", gui::overlaytex, 0);
-TVARN(IDF_PERSIST, guislidertex, "textures/guislider", gui::slidertex, 0);
+TVARN(IDF_PERSIST|IDF_PRELOAD, guioverlaytex, "textures/guioverlay", gui::overlaytex, 0);
+TVARN(IDF_PERSIST|IDF_PRELOAD, guislidertex, "textures/guislider", gui::slidertex, 0);
 
 vector<gui::list> gui::lists;
 float gui::basescale, gui::maxscale = 1, gui::hitx, gui::hity;

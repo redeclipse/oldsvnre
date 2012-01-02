@@ -797,7 +797,7 @@ void updatetextures()
 void preloadtextures(int flags)
 {
     enumerate(idents, ident, id, {
-        if(id.type == ID_SVAR && (id.flags & IDF_TEXTURE) && (id.flags&(IDF_NOPRELOAD|IDF_GAMEPRELOAD)) == flags)
+        if(id.type == ID_SVAR && (id.flags & IDF_TEXTURE) && (id.flags&(IDF_PRELOAD|IDF_GAMEPRELOAD)) == flags)
             id.changed();
     });
 }

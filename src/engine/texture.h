@@ -711,7 +711,7 @@ extern int findtexturetype(char *name, bool tryint = false);
 extern const char *findtexturetypename(int type);
 extern void texture(char *type, char *name, int *rot, int *xoffet, int *yoffset, float *scale);
 extern void updatetextures();
-extern void preloadtextures(int flags = 0);
+extern void preloadtextures(int flags = IDF_PRELOAD);
 
 struct cubemapside
 {
