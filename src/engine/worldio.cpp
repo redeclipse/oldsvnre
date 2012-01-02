@@ -1685,6 +1685,8 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             initlights();
             allchanged(true);
 
+            preloadtextures(IDF_GAMEPRELOAD);
+
             progress(0, "starting world...");
             game::startmap(mapname, mname);
             maploading = 0;

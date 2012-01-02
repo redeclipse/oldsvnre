@@ -794,10 +794,10 @@ void updatetextures()
     loopv(animtextures) updatetexture(animtextures[i]);
 }
 
-void preloadtextures()
+void preloadtextures(int flags)
 {
     enumerate(idents, ident, id, {
-        if(id.type == ID_SVAR && (id.flags & IDF_TEXTURE))
+        if(id.type == ID_SVAR && (id.flags & IDF_TEXTURE) && (id.flags&(IDF_NOPRELOAD|IDF_GAMEPRELOAD)) == flags)
             id.changed();
     });
 }

@@ -711,7 +711,7 @@ extern int findtexturetype(char *name, bool tryint = false);
 extern const char *findtexturetypename(int type);
 extern void texture(char *type, char *name, int *rot, int *xoffet, int *yoffset, float *scale);
 extern void updatetextures();
-extern void preloadtextures();
+extern void preloadtextures(int flags = 0);
 
 struct cubemapside
 {
@@ -772,9 +772,9 @@ extern void setuptmu(int n, const char *rgbfunc = NULL, const char *alphafunc = 
 extern void setupblurkernel(int radius, float sigma, float *weights, float *offsets);
 extern void setblurshader(int pass, int size, int radius, float *weights, float *offsets, GLenum target = GL_TEXTURE_2D);
 
-#define _TVAR(f, n, c, m) _SVARF(n, n, c, { if(n[0]) textureload(n, m, true); }, f|IDF_TEXTURE)
+#define _TVAR(f, n, c, m) _SVARF(n, n, c, { if(initing==NOT_INITING && n[0]) textureload(n, m, true); }, f|IDF_TEXTURE)
 #define TVAR(f, n, c, m)  _TVAR(f, n, c, m)
-#define _TVARN(f, n, c, t, m) _SVARF(n, n, c, { t = n[0] ? textureload(n, m, true) : notexture; }, f|IDF_TEXTURE)
+#define _TVARN(f, n, c, t, m) _SVARF(n, n, c, { if(initing==NOT_INITING) t = n[0] ? textureload(n, m, true) : notexture; }, f|IDF_TEXTURE)
 #define TVARN(f, n, c, t, m) _TVARN(f, n, c, t, m)
 #define TVARC(f, n, c, t, m) Texture *##t; _TVARN(f, n, c, t, m)
 
