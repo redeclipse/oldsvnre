@@ -343,7 +343,7 @@ namespace entities
                 if(overlapsbox(pos, zrad, xyrad, e.o, radius, radius))
                 {
                     actitem &t = actitems.add();
-                    t.type = ITEM_ENT;
+                    t.type = actitem::ENT;
                     t.target = n;
                     t.score = pos.squaredist(e.o);
                 }
@@ -406,7 +406,7 @@ namespace entities
             if(!overlapsbox(m, eye, d->radius, proj.o, enttype[ents[proj.id]->type].radius, enttype[ents[proj.id]->type].radius))
                 continue;
             actitem &t = actitems.add();
-            t.type = ITEM_PROJ;
+            t.type = actitem::PROJ;
             t.target = i;
             t.score = m.squaredist(proj.o);
         }
@@ -602,13 +602,13 @@ namespace entities
                 int ent = -1;
                 switch(t.type)
                 {
-                    case ITEM_ENT:
+                    case actitem::ENT:
                     {
                         if(!ents.inrange(t.target)) break;
                         ent = t.target;
                         break;
                     }
-                    case ITEM_PROJ:
+                    case actitem::PROJ:
                     {
                         if(!projs::projs.inrange(t.target)) break;
                         projent &proj = *projs::projs[t.target];

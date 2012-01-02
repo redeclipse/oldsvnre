@@ -718,13 +718,13 @@ enum
     ST_ALL      = ST_CAMERA|ST_CURSOR|ST_GAME|ST_SPAWNS,
 };
 
-enum { ITEM_ENT = 0, ITEM_PROJ, ITEM_MAX };
 struct actitem
 {
+    enum { ENT = 0, PROJ };
     int type, target;
     float score;
 
-    actitem() : type(ITEM_ENT), target(-1), score(0) {}
+    actitem() : type(ENT), target(-1), score(0) {}
     ~actitem() {}
 };
 #define NUMPLAYERMODELS 2

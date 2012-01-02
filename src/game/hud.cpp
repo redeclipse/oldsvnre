@@ -1062,13 +1062,13 @@ namespace hud
                         int ent = -1;
                         switch(t.type)
                         {
-                            case ITEM_ENT:
+                            case actitem::ENT:
                             {
                                 if(!entities::ents.inrange(t.target)) break;
                                 ent = t.target;
                                 break;
                             }
-                            case ITEM_PROJ:
+                            case actitem::PROJ:
                             {
                                 if(!projs::projs.inrange(t.target)) break;
                                 projent &proj = *projs::projs[t.target];

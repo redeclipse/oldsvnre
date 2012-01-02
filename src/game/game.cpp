@@ -2521,7 +2521,7 @@ namespace game
             {
                 pos.z += aboveheadstatussize/2;
                 part_icon(pos, t, aboveheadstatussize, blend, 0, 0, 1, colour);
-                pos.z += aboveheadstatussize/2+0.5f;
+                pos.z += aboveheadstatussize/2+1;
             }
         }
         if(aboveheadicons && d->state != CS_EDITING && d->state != CS_SPECTATOR) loopv(d->icons)
@@ -2559,7 +2559,7 @@ namespace game
                     pos.z += size/2;
                     part_icon(pos, t, size, fade, 0, 0, 1, colour);
                     pos.z += size/2;
-                    if(d->icons[i].type < eventicon::SORTED) pos.z += 0.5f;
+                    if(d->icons[i].type >= eventicon::SORTED) pos.z += 1;
                 }
             }
         }
