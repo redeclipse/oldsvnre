@@ -539,27 +539,24 @@ namespace bomber
     {
         if(d->aitype == AI_BOT)
         {
-            static vector<int> hasbombs, takenflags;
-            hasbombs.setsize(0);
-            takenflags.setsize(0);
+            static vector<int> taken; taken.setsize(0);
             loopv(st.flags)
             {
                 bomberstate::flag &g = st.flags[i];
-                if(g.owner == d) hasbombs.add(i);
-                else if((g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime) takenflags.add(i);
+                if(g.owner == d) return aihomerun(d, b);
+                else if((g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime) taken.add(i);
             }
-            if(!hasbombs.empty()) return aihomerun(d, b);
             if(!ai::badhealth(d))
             {
-                while(!takenflags.empty())
+                while(!taken.empty())
                 {
-                    int flag = takenflags.length() > 2 ? rnd(takenflags.length()) : 0;
-                    if(ai::makeroute(d, b, st.flags[takenflags[flag]].pos()))
+                    int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
+                    if(ai::makeroute(d, b, st.flags[taken[flag]].pos()))
                     {
-                        d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, takenflags[flag]);
+                        d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
                         return true;
                     }
-                    else takenflags.remove(flag);
+                    else taken.remove(flag);
                 }
             }
         }
@@ -656,16 +653,7 @@ namespace bomber
     bool aidefense(gameent *d, ai::aistate &b)
     {
         if(d->aitype == AI_BOT)
-        {
-            static vector<int> hasbombs;
-            hasbombs.setsize(0);
-            loopv(st.flags)
-            {
-                bomberstate::flag &g = st.flags[i];
-                if(isbomberaffinity(g) && g.owner == d) hasbombs.add(i);
-            }
-            if(!hasbombs.empty()) return aihomerun(d, b);
-        }
+            loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
         if(st.flags.inrange(b.target))
         {
             bomberstate::flag &f = st.flags[b.target];
@@ -734,16 +722,7 @@ namespace bomber
                 return ai::makeroute(d, b, f.pos());
             }
             else if(isbombertarg(f, ai::owner(d)))
-            {
-                static vector<int> hasbombs;
-                hasbombs.setsize(0);
-                loopv(st.flags)
-                {
-                    bomberstate::flag &g = st.flags[i];
-                    if(g.owner == d) hasbombs.add(i);
-                }
-                if(!hasbombs.empty()) return ai::makeroute(d, b, f.pos());
-            }
+                loopv(st.flags) if(st.flags[i].owner == d) return ai::makeroute(d, b, f.pos());
         }
         return false;
     }
