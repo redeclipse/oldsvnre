@@ -359,10 +359,11 @@ namespace defend
                 {
                     gameent *e = NULL;
                     int numdyns = game::numdynents();
+                    float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
                     loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
                         vec ep = e->feetpos();
-                        if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4)))
+                        if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= mindist)
                             targets.add(e->clientnum);
                     }
                 }
