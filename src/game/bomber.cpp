@@ -546,18 +546,15 @@ namespace bomber
                 if(g.owner == d) return aihomerun(d, b);
                 else if((g.owner && ai::owner(g.owner) != ai::owner(d)) || g.droptime) taken.add(i);
             }
-            if(!ai::badhealth(d))
+            if(!ai::badhealth(d)) while(!taken.empty())
             {
-                while(!taken.empty())
+                int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
+                if(ai::makeroute(d, b, st.flags[taken[flag]].pos()))
                 {
-                    int flag = taken.length() > 2 ? rnd(taken.length()) : 0;
-                    if(ai::makeroute(d, b, st.flags[taken[flag]].pos()))
-                    {
-                        d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
-                        return true;
-                    }
-                    else taken.remove(flag);
+                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, taken[flag]);
+                    return true;
                 }
+                else taken.remove(flag);
             }
         }
         return false;
@@ -579,42 +576,39 @@ namespace bomber
             {
                 gameent *e = NULL;
                 int numdyns = game::numdynents();
+                float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                 {
-                    vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4) || f.owner == e))
+                    if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                         targets.add(e->clientnum);
                 }
             }
             if(home)
             {
-                if(!m_duel(game::gamemode, game::mutators))
-                {
-                    bool guard = false;
-                    if(f.owner || f.droptime || targets.empty()) guard = true;
-                    else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
-                    { // see if we can relieve someone who only has a piece of crap
-                        gameent *t;
-                        loopvk(targets) if((t = game::getclient(targets[k])))
+                bool guard = false;
+                if(f.owner || f.droptime || targets.empty()) guard = true;
+                else if(d->hasweap(d->ai->weappref, m_weapon(game::gamemode, game::mutators)))
+                { // see if we can relieve someone who only has a piece of crap
+                    gameent *t;
+                    loopvk(targets) if((t = game::getclient(targets[k])))
+                    {
+                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < WEAP_OFFSET))
                         {
-                            if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < WEAP_OFFSET))
-                            {
-                                guard = true;
-                                break;
-                            }
+                            guard = true;
+                            break;
                         }
                     }
-                    if(guard)
-                    { // defend the flag
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_DEFEND;
-                        n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_AFFINITY;
-                        n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
-                        n.tolerance = 0.25f;
-                        n.team = true;
-                    }
+                }
+                if(guard)
+                { // defend the flag
+                    ai::interest &n = interests.add();
+                    n.state = ai::AI_S_DEFEND;
+                    n.node = ai::closestwaypoint(f.pos(), ai::CLOSEDIST, true);
+                    n.target = j;
+                    n.targtype = ai::AI_T_AFFINITY;
+                    n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
+                    n.tolerance = 0.25f;
+                    n.team = true;
                 }
             }
             else if(isbomberaffinity(f))
@@ -670,10 +664,10 @@ namespace bomber
                     ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
                     gameent *e = NULL;
                     int numdyns = game::numdynents();
+                    float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
                     loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
                     {
-                        vec ep = e->feetpos();
-                        if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (enttype[AFFINITY].radius*enttype[AFFINITY].radius*4) || f.owner == e))
+                        if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                             targets.add(e->clientnum);
                     }
                     if(!targets.empty())
@@ -688,7 +682,7 @@ namespace bomber
                     }
                 }
                 vec pos = d->feetpos();
-                float mindist = float(enttype[AFFINITY].radius*enttype[AFFINITY].radius*8);
+                float mindist = enttype[AFFINITY].radius*8; mindist *= mindist;
                 loopv(st.flags)
                 { // get out of the way of the returnee!
                     bomberstate::flag &g = st.flags[i];
