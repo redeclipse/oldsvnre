@@ -84,26 +84,26 @@ namespace hud
     VAR(IDF_PERSIST, teamnotices, 0, 2, 2);
     VAR(IDF_PERSIST, teamnoticedelay, 0, 2500, VAR_MAX);
 
-    TVAR(IDF_PERSIST, teamtex, "<grey>textures/team", 3);
-    TVAR(IDF_PERSIST, teamalphatex, "<grey>textures/teamalpha", 3);
-    TVAR(IDF_PERSIST, teamomegatex, "<grey>textures/teamomega", 3);
-    TVAR(IDF_PERSIST, teamkappatex, "<grey>textures/teamkappa", 3);
-    TVAR(IDF_PERSIST, teamsigmatex, "<grey>textures/teamsigma", 3);
-    TVAR(IDF_PERSIST, playertex, "<grey>textures/player", 3);
-    TVAR(IDF_PERSIST, deadtex, "<grey>textures/dead", 3);
-    TVAR(IDF_PERSIST, dominatingtex, "<grey>textures/dominating", 3);
-    TVAR(IDF_PERSIST, dominatedtex, "<grey>textures/dominated", 3);
-    TVAR(IDF_PERSIST, inputtex, "textures/menu", 3);
-    TVAR(IDF_PERSIST, waittex, "<grey>textures/wait", 3);
-    TVAR(IDF_PERSIST, spectex, "<grey>textures/spec", 3);
-    TVAR(IDF_PERSIST, chattex, "<grey>textures/chat", 3);
-    TVAR(IDF_PERSIST, healthtex, "<grey>textures/health", 3);
-    TVAR(IDF_PERSIST, healthbgtex, "<grey>textures/healthbg", 3);
-    TVAR(IDF_PERSIST, impulsetex, "<grey>textures/impulse", 3);
-    TVAR(IDF_PERSIST, impulsebgtex, "<grey>textures/impulsebg", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamtex, "<grey>textures/team", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamalphatex, "<grey>textures/teamalpha", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamomegatex, "<grey>textures/teamomega", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamkappatex, "<grey>textures/teamkappa", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamsigmatex, "<grey>textures/teamsigma", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, playertex, "<grey>textures/player", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, deadtex, "<grey>textures/dead", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatingtex, "<grey>textures/dominating", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatedtex, "<grey>textures/dominated", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inputtex, "textures/menu", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, waittex, "<grey>textures/wait", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spectex, "<grey>textures/spec", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, chattex, "<grey>textures/chat", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthtex, "<grey>textures/health", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthbgtex, "<grey>textures/healthbg", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsetex, "<grey>textures/impulse", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsebgtex, "<grey>textures/impulsebg", 3);
     TVAR(IDF_PERSIST, progresstex, "<grey>textures/progress", 3);
-    TVAR(IDF_PERSIST, inventorytex, "<grey>textures/inventory", 3);
-    TVAR(IDF_PERSIST, warningtex, "<grey>textures/warning", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorytex, "<grey>textures/inventory", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, warningtex, "<grey>textures/warning", 3);
 
     VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, crosshairtone, -CTONE_MAX, 0, 0xFFFFFF);
@@ -126,17 +126,17 @@ namespace hud
 
     VAR(IDF_PERSIST, showdamage, 0, 2, 2); // 1 shows just damage texture, 2 blends as well
     VAR(IDF_PERSIST, damagefade, 0, 0, 1);
-    TVAR(IDF_PERSIST, damagetex, "<grey>textures/damage", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, damagetex, "<grey>textures/damage", 3);
     FVAR(IDF_PERSIST, damageblend, 0, 1, 1);
     FVAR(IDF_PERSIST, damageskew, 0, 0.25f, 1);
-    TVAR(IDF_PERSIST, burntex, "<grey>textures/burn", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, burntex, "<grey>textures/burn", 3);
     FVAR(IDF_PERSIST, burnblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
     FVAR(IDF_PERSIST, indicatorblend, 0, 1, 1);
-    TVAR(IDF_PERSIST, indicatortex, "<grey>textures/progress", 3);
-    TVAR(IDF_PERSIST, zoomtex, "textures/zoom", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, indicatortex, "<grey>textures/progress", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, zoomtex, "textures/zoom", 3);
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
     VAR(IDF_PERSIST, crosshairweapons, 0, 0, 2); // 0 = off, 1 = crosshair-specific weapons, 2 = also appy colour
@@ -149,38 +149,38 @@ namespace hud
     TVAR(IDF_PERSIST, pointertex, "textures/pointer", 3);
     TVAR(IDF_PERSIST, guicursortex, "textures/cursor", 3);
 
-    TVAR(IDF_PERSIST, crosshairtex, "crosshairs/cross-01", 3);
-    TVAR(IDF_PERSIST, hithairtex, "crosshairs/cross-01-hit", 3);
-    TVAR(IDF_PERSIST, meleecrosshairtex, "crosshairs/triangle-02", 3);
-    TVAR(IDF_PERSIST, meleehithairtex, "crosshairs/triangle-02-hit", 3);
-    TVAR(IDF_PERSIST, pistolcrosshairtex, "crosshairs/cross-01", 3);
-    TVAR(IDF_PERSIST, pistolhithairtex, "crosshairs/cross-01-hit", 3);
-    TVAR(IDF_PERSIST, swordcrosshairtex, "crosshairs/simple-02", 3);
-    TVAR(IDF_PERSIST, swordhithairtex, "crosshairs/simple-02-hit", 3);
-    TVAR(IDF_PERSIST, shotguncrosshairtex, "crosshairs/cross-02", 3);
-    TVAR(IDF_PERSIST, shotgunhithairtex, "crosshairs/cross-02-hit", 3);
-    TVAR(IDF_PERSIST, smgcrosshairtex, "crosshairs/simple-03", 3);
-    TVAR(IDF_PERSIST, smghithairtex, "crosshairs/simple-03-hit", 3);
-    TVAR(IDF_PERSIST, plasmacrosshairtex, "crosshairs/circle-03", 3);
-    TVAR(IDF_PERSIST, plasmahithairtex, "crosshairs/circle-03-hit", 3);
-    TVAR(IDF_PERSIST, flamercrosshairtex, "crosshairs/circle-04", 3);
-    TVAR(IDF_PERSIST, flamerhithairtex, "crosshairs/circle-04-hit", 3);
-    TVAR(IDF_PERSIST, riflecrosshairtex, "crosshairs/simple-01", 3);
-    TVAR(IDF_PERSIST, riflehithairtex, "crosshairs/simple-01-hit", 3);
-    TVAR(IDF_PERSIST, grenadecrosshairtex, "crosshairs/circle-02", 3);
-    TVAR(IDF_PERSIST, grenadehithairtex, "crosshairs/circle-02-hit", 3);
-    TVAR(IDF_PERSIST, rocketcrosshairtex, "crosshairs/circle-01", 3);
-    TVAR(IDF_PERSIST, rockethithairtex, "crosshairs/circle-01-hit", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, crosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, hithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, meleecrosshairtex, "crosshairs/triangle-02", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, meleehithairtex, "crosshairs/triangle-02-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, pistolcrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, pistolhithairtex, "crosshairs/cross-01-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, swordcrosshairtex, "crosshairs/simple-02", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, swordhithairtex, "crosshairs/simple-02-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, shotguncrosshairtex, "crosshairs/cross-02", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, shotgunhithairtex, "crosshairs/cross-02-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, smgcrosshairtex, "crosshairs/simple-03", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, smghithairtex, "crosshairs/simple-03-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, plasmacrosshairtex, "crosshairs/circle-03", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, plasmahithairtex, "crosshairs/circle-03-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, flamercrosshairtex, "crosshairs/circle-04", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, flamerhithairtex, "crosshairs/circle-04-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, riflecrosshairtex, "crosshairs/simple-01", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, riflehithairtex, "crosshairs/simple-01-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, grenadecrosshairtex, "crosshairs/circle-02", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, grenadehithairtex, "crosshairs/circle-02-hit", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, rocketcrosshairtex, "crosshairs/circle-01", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, rockethithairtex, "crosshairs/circle-01-hit", 3);
 
-    TVAR(IDF_PERSIST, editcursortex, "crosshairs/cross-01", 3);
-    TVAR(IDF_PERSIST, speccursortex, "crosshairs/cross-01", 3);
-    TVAR(IDF_PERSIST, tvcursortex, "", 3);
-    TVAR(IDF_PERSIST, teamcrosshairtex, "", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, editcursortex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, speccursortex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, tvcursortex, "", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamcrosshairtex, "", 3);
     VAR(IDF_PERSIST, cursorstyle, 0, 0, 1); // 0 = top left tracking, 1 = center
     FVAR(IDF_PERSIST, cursorsize, 0, 0.025f, 1000);
     FVAR(IDF_PERSIST, cursorblend, 0, 1, 1);
 
-    TVAR(IDF_PERSIST, zoomcrosshairtex, "crosshairs/cross-01", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, zoomcrosshairtex, "crosshairs/cross-01", 3);
     FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
@@ -229,33 +229,33 @@ namespace hud
 
     VAR(IDF_PERSIST, inventoryalert, 0, 1, 1);
     VAR(IDF_PERSIST, alertflash, 0, 1, 1);
-    TVAR(IDF_PERSIST, buffedtex, "<grey>textures/alertbuff", 3);
-    TVAR(IDF_PERSIST, burningtex, "<grey>textures/alertburn", 3);
-    TVAR(IDF_PERSIST, bleedingtex, "<grey>textures/alertbleed", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, buffedtex, "<grey>textures/alertbuff", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, burningtex, "<grey>textures/alertburn", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bleedingtex, "<grey>textures/alertbleed", 3);
 
-    TVAR(IDF_PERSIST, meleetex, "<grey>textures/melee", 3);
-    TVAR(IDF_PERSIST, pistoltex, "<grey>textures/pistol", 3);
-    TVAR(IDF_PERSIST, swordtex, "<grey>textures/sword", 3);
-    TVAR(IDF_PERSIST, shotguntex, "<grey>textures/shotgun", 3);
-    TVAR(IDF_PERSIST, smgtex, "<grey>textures/smg", 3);
-    TVAR(IDF_PERSIST, grenadetex, "<grey>textures/grenade", 3);
-    TVAR(IDF_PERSIST, rockettex, "<grey>textures/rocket", 3);
-    TVAR(IDF_PERSIST, flamertex, "<grey>textures/flamer", 3);
-    TVAR(IDF_PERSIST, plasmatex, "<grey>textures/plasma", 3);
-    TVAR(IDF_PERSIST, rifletex, "<grey>textures/rifle", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, meleetex, "<grey>textures/melee", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, pistoltex, "<grey>textures/pistol", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, swordtex, "<grey>textures/sword", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shotguntex, "<grey>textures/shotgun", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, smgtex, "<grey>textures/smg", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, grenadetex, "<grey>textures/grenade", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, rockettex, "<grey>textures/rocket", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flamertex, "<grey>textures/flamer", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, plasmatex, "<grey>textures/plasma", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, rifletex, "<grey>textures/rifle", 3);
 
     VAR(IDF_PERSIST, showclips, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
     FVAR(IDF_PERSIST, clipblend, 0, 1, 1000);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
-    TVAR(IDF_PERSIST, pistolcliptex, "<grey>textures/pistolclip", 3);
-    TVAR(IDF_PERSIST, shotguncliptex, "<grey>textures/shotgunclip", 3);
-    TVAR(IDF_PERSIST, smgcliptex, "<grey>textures/smgclip", 3);
-    TVAR(IDF_PERSIST, grenadecliptex, "<grey>textures/grenadeclip", 3);
-    TVAR(IDF_PERSIST, rocketcliptex, "<grey>textures/rocketclip", 3);
-    TVAR(IDF_PERSIST, flamercliptex, "<grey>textures/flamerclip", 3);
-    TVAR(IDF_PERSIST, plasmacliptex, "<grey>textures/plasmaclip", 3);
-    TVAR(IDF_PERSIST, riflecliptex, "<grey>textures/rifleclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, pistolcliptex, "<grey>textures/pistolclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shotguncliptex, "<grey>textures/shotgunclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, smgcliptex, "<grey>textures/smgclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, grenadecliptex, "<grey>textures/grenadeclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, rocketcliptex, "<grey>textures/rocketclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flamercliptex, "<grey>textures/flamerclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, plasmacliptex, "<grey>textures/plasmaclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, riflecliptex, "<grey>textures/rifleclip", 3);
     FVAR(IDF_PERSIST, pistolclipskew, 0, 0.85f, 1000);
     FVAR(IDF_PERSIST, shotgunclipskew, 0, 1, 1000);
     FVAR(IDF_PERSIST, smgclipskew, 0, 0.85f, 1000);
@@ -268,16 +268,16 @@ namespace hud
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
     VAR(IDF_PERSIST, radarstyle, 0, 1, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
     FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
-    TVAR(IDF_PERSIST, radarcornertex, "<grey>textures/radar", 3);
-    TVAR(IDF_PERSIST, bliptex, "<grey>textures/blip", 3);
-    TVAR(IDF_PERSIST, playerbliptex, "<grey>textures/blip", 3);
-    TVAR(IDF_PERSIST, flagtex, "<grey>textures/flag", 3);
-    TVAR(IDF_PERSIST, bombtex, "<grey>textures/bomb", 3);
-    TVAR(IDF_PERSIST, arrowtex, "<grey>textures/arrow", 3);
-    TVAR(IDF_PERSIST, alerttex, "<grey>textures/alert", 3);
-    TVAR(IDF_PERSIST, questiontex, "<grey>textures/question", 3);
-    TVAR(IDF_PERSIST, hurttex, "<grey>textures/hurt", 3);
-    TVAR(IDF_PERSIST, hinttex, "<grey>textures/hint", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, radarcornertex, "<grey>textures/radar", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bliptex, "<grey>textures/blip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, playerbliptex, "<grey>textures/blip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtex, "<grey>textures/flag", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtex, "<grey>textures/bomb", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowtex, "<grey>textures/arrow", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, alerttex, "<grey>textures/alert", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, questiontex, "<grey>textures/question", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, hurttex, "<grey>textures/hurt", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, hinttex, "<grey>textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerhintblend, 0, 1, 1);
@@ -335,51 +335,51 @@ namespace hud
     TVAR(IDF_PERSIST, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST, badgetex, "textures/cube2badge", 3);
 
-    TVAR(IDF_PERSIST, spree1tex, "textures/carnage", 3);
-    TVAR(IDF_PERSIST, spree2tex, "textures/slaughter", 3);
-    TVAR(IDF_PERSIST, spree3tex, "textures/massacre", 3);
-    TVAR(IDF_PERSIST, spree4tex, "textures/bloodbath", 3);
-    TVAR(IDF_PERSIST, multi1tex, "textures/double", 3);
-    TVAR(IDF_PERSIST, multi2tex, "textures/triple", 3);
-    TVAR(IDF_PERSIST, multi3tex, "textures/multi", 3);
-    TVAR(IDF_PERSIST, headshottex, "textures/headshot", 3);
-    TVAR(IDF_PERSIST, criticaltex, "textures/critical", 3);
-    TVAR(IDF_PERSIST, dominatetex, "textures/dominate", 3);
-    TVAR(IDF_PERSIST, revengetex, "textures/revenge", 3);
-    TVAR(IDF_PERSIST, firstbloodtex, "textures/firstblood", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree1tex, "textures/carnage", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree2tex, "textures/slaughter", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree3tex, "textures/massacre", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree4tex, "textures/bloodbath", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi1tex, "textures/double", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi2tex, "textures/triple", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi3tex, "textures/multi", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, headshottex, "textures/headshot", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, criticaltex, "textures/critical", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatetex, "textures/dominate", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, revengetex, "textures/revenge", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/firstblood", 3);
 
-    TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
-    TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
-    TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modedeathmatch.png", 3);
-    TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modetimetrial.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modeeditingtex, "<grey>textures/modeediting.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modecampaigntex, "<grey>textures/modecampaign.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modedeathmatchtex, "<grey>textures/modedeathmatch.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modetimetrialtex, "<grey>textures/modetimetrial.png", 3);
 
-    TVAR(IDF_PERSIST, modecapturetex, "<grey>textures/modecapture.png", 3);
-    TVAR(IDF_PERSIST, modecapturereturntex, "<grey>textures/modecapturereturn.png", 3);
-    TVAR(IDF_PERSIST, modecapturedefendtex, "<grey>textures/modecapturedefend.png", 3);
-    TVAR(IDF_PERSIST, modecaptureprotecttex, "<grey>textures/modecaptureprotect.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modecapturetex, "<grey>textures/modecapture.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modecapturereturntex, "<grey>textures/modecapturereturn.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modecapturedefendtex, "<grey>textures/modecapturedefend.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modecaptureprotecttex, "<grey>textures/modecaptureprotect.png", 3);
 
-    TVAR(IDF_PERSIST, modedefendtex, "<grey>textures/modedefend.png", 3);
-    TVAR(IDF_PERSIST, modedefendquicktex, "<grey>textures/modedefendquick.png", 3);
-    TVAR(IDF_PERSIST, modedefendconquertex, "<grey>textures/modedefendconquer.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modedefendtex, "<grey>textures/modedefend.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modedefendquicktex, "<grey>textures/modedefendquick.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modedefendconquertex, "<grey>textures/modedefendconquer.png", 3);
 
-    TVAR(IDF_PERSIST, modebombertex, "<grey>textures/modebomber.png", 3);
-    TVAR(IDF_PERSIST, modebomberbaskettex, "<grey>textures/modebomberbasket.png", 3);
-    TVAR(IDF_PERSIST, modebomberholdtex, "<grey>textures/modebomberhold.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modebombertex, "<grey>textures/modebomber.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modebomberbaskettex, "<grey>textures/modebomberbasket.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modebomberholdtex, "<grey>textures/modebomberhold.png", 3);
 
-    TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modemulti.png", 3);
-    TVAR(IDF_PERSIST, modeteamtex, "<grey>textures/modeteam.png", 3);
-    TVAR(IDF_PERSIST, modeinstatex, "<grey>textures/modeinsta.png", 3);
-    TVAR(IDF_PERSIST, modemedievaltex, "<grey>textures/modemedieval.png", 3);
-    TVAR(IDF_PERSIST, modeballistictex, "<grey>textures/modeballistic.png", 3);
-    TVAR(IDF_PERSIST, modedueltex, "<grey>textures/modeduel.png", 3);
-    TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modesurvivor.png", 3);
-    TVAR(IDF_PERSIST, modearenatex, "<grey>textures/modearena.png", 3);
-    TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modeonslaught.png", 3);
-    TVAR(IDF_PERSIST, modehovertex, "<grey>textures/modehover.png", 3);
-    TVAR(IDF_PERSIST, modejetpacktex, "<grey>textures/modejetpack.png", 3);
-    TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modevampire.png", 3);
-    TVAR(IDF_PERSIST, modeexperttex, "<grey>textures/modeexpert.png", 3);
-    TVAR(IDF_PERSIST, moderesizetex, "<grey>textures/moderesize.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modemultitex, "<grey>textures/modemulti.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modeteamtex, "<grey>textures/modeteam.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modeinstatex, "<grey>textures/modeinsta.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modemedievaltex, "<grey>textures/modemedieval.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modeballistictex, "<grey>textures/modeballistic.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modedueltex, "<grey>textures/modeduel.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modesurvivortex, "<grey>textures/modesurvivor.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modearenatex, "<grey>textures/modearena.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modeonslaughttex, "<grey>textures/modeonslaught.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modehovertex, "<grey>textures/modehover.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modejetpacktex, "<grey>textures/modejetpack.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modevampiretex, "<grey>textures/modevampire.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, modeexperttex, "<grey>textures/modeexpert.png", 3);
+    TVAR(IDF_PERSIST|IDF_NOPRELOAD, moderesizetex, "<grey>textures/moderesize.png", 3);
 
     void modetexs(int g, int m, bool before, bool implied, vector<char> &list)
     {
