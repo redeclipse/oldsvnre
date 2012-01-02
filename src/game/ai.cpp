@@ -1541,13 +1541,13 @@ namespace ai
         }
         loopi(entities::lastenttype[MAPMODEL]) if(entities::ents[i]->type == MAPMODEL && !entities::ents[i]->links.empty() && !entities::ents[i]->spawned)
         {
-            mapmodelinfo &mmi = getmminfo(entities::ents[i]->attrs[0]);
-            if(!&mmi) continue;
+            mapmodelinfo *mmi = getmminfo(entities::ents[i]->attrs[0]);
+            if(!mmi) continue;
             vec center, radius;
-            mmi.m->collisionbox(0, center, radius);
+            mmi->m->collisionbox(0, center, radius);
             if(entities::ents[i]->attrs[4]) { center.mul(entities::ents[i]->attrs[4]/100.f); radius.mul(entities::ents[i]->attrs[4]/100.f); }
-            if(!mmi.m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]));
-            float limit = WAYPOINTRADIUS+(max(radius.x, max(radius.y, radius.z))*mmi.m->height);
+            if(!mmi->m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]));
+            float limit = WAYPOINTRADIUS+(max(radius.x, max(radius.y, radius.z))*mmi->m->height);
             vec pos = entities::ents[i]->o; pos.z += limit*0.5f;
             obstacles.avoidnear(NULL, pos.z + limit*0.5f, pos, limit);
         }

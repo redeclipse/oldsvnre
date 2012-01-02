@@ -405,8 +405,8 @@ void rendermapmodel(extentity &e)
         anim = (mmanimoverride<0 ? ANIM_ALL : mmanimoverride)|ANIM_LOOP;
         basetime = 0;
     }
-    mapmodelinfo &mmi = getmminfo(e.attrs[0]);
-    if(&mmi)
+    mapmodelinfo *mmi = getmminfo(e.attrs[0]);
+    if(mmi)
     {
         if(e.attrs[7] || e.attrs[8])
         {
@@ -415,7 +415,7 @@ void rendermapmodel(extentity &e)
             e.light.material[0] = bvec::fromcolor(r);
         }
         else e.light.material[0] = e.attrs[6] ? bvec(e.attrs[6]) : bvec(255, 255, 255);
-        rendermodel(&e.light, mmi.name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
+        rendermodel(&e.light, mmi->name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
     }
 }
 

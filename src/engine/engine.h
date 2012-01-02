@@ -615,7 +615,7 @@ extern void resetmapmodels();
 extern bool matchanim(const char *name, const char *pattern);
 extern void loadskin(const char *dir, const char *altdir, Texture *&skin, Texture *&masks);
 extern model *loadmodel(const char *name, int i = -1, bool msg = false);
-extern mapmodelinfo &getmminfo(int i);
+extern mapmodelinfo *getmminfo(int i);
 extern void startmodelquery(occludequery *query);
 extern void endmodelquery();
 extern void preloadmodelshaders();
