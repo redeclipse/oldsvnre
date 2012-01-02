@@ -360,7 +360,7 @@ void mapmodelcompat(int *rad, int *h, int *tex, char *name, char *shadow)
 
 void resetmapmodels() { mapmodels.shrink(0); }
 
-mapmodelinfo &getmminfo(int i) { return mapmodels.inrange(i) ? mapmodels[i] : *(mapmodelinfo *)0; }
+mapmodelinfo *getmminfo(int i) { return mapmodels.inrange(i) ? &mapmodels[i] : 0; }
 
 COMMAND(0, mmodel, "s");
 COMMANDN(0, mapmodel, mapmodelcompat, "iiiss");
@@ -395,11 +395,11 @@ void preloadusedmapmodels(bool msg, bool bih)
     {
         loadprogress = float(i+1)/mapmodels.length();
         int mmindex = mapmodels[i];
-        mapmodelinfo &mmi = getmminfo(mmindex);
-        if(!&mmi) conoutf("\frcould not find map model: %d", mmindex);
+        mapmodelinfo *mmi = getmminfo(mmindex);
+        if(!mmi) conoutf("\frcould not find map model: %d", mmindex);
         else if(!loadmodel(NULL, mmindex, true))
-            conoutf("\frcould not load model: %s", mmi.name);
-        else if(mmi.m && bih) mmi.m->preloadBIH();
+            conoutf("\frcould not load model: %s", mmi->name);
+        else if(mmi->m && bih) mmi->m->preloadBIH();
     }
     loadprogress = 0;
 }
