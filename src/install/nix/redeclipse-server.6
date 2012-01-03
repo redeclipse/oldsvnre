@@ -1,8 +1,8 @@
 .TH REDECLIPSE-SERVER 6 2011-12-10 "Red Eclipse 1.2" "Red Eclipse Manual"
 .SH NAME
-server.sh \- script to launch the server for the Red Eclipse FPS game
+redeclipse-server \- script to launch the server for the Red Eclipse FPS game
 .SH SYNOPSIS
-.B ./server.sh
+.B redeclipse-server
 [
 .BI \-h homedir
 ]
@@ -54,13 +54,15 @@ server.sh \- script to launch the server for the Red Eclipse FPS game
 .SH DESCRIPTION
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
-.B server.sh
-is a script which executes the Red Eclipse dedicated server located in the
-.I bin
-subdirectory (relative to the location of server.sh) It will accept any additional options.
+.B redeclipse-server
+is a script which executes
+.BR redeclipse-server
+from the
+.I @LIBEXECDIR@/redeclipse
+directory, it will accept any additional options.
 .PP
-The recommended way to change the settings of the server is to create and edit the files servexec.cfg and servinit.cfg files in your home directory. Examples are available in the directory
-.IR data/examples
+The recommended way to change the settings of the server is to create and edit the files servexec.cfg and servinit.cfg files in your home directory. Examples are available in
+.IR @DOCDIR@/redeclipse/examples/
 .SH OPTIONS
 .TP
 .BI \-h homedir
@@ -71,7 +73,9 @@ This is where servinit.cfg and servexec.cfg are read from, it defaults to $HOME/
 .BI \-p packagedir
 Includes the data files found in
 .IR packagedir .
-Can be used for adding additional mods. Packages will be loaded in the order specified. By default redeclipse-server only inludes data files in the working directory and in the subdirecory
+Can be used for adding additional mods. Packages will be loaded in the order specified. By default redeclipse-server only inludes data files in the working directory
+.I @DATADIR@/redeclipse/data
+and in the subdirecory
 .I temp
 of the home directory.
 .TP
@@ -138,11 +142,11 @@ Users must know the password before they can connect.
 .B \-\-help
 Display this manpage
 .SH EXAMPLES
-.B ./server.sh -p$HOME/mod/data -ss0 -slbath -sPpass
+.B redeclipse-server -p$HOME/mod/data -ss0 -slbath -sPpass
 .RS 4
 Loads data from an additional directory, sets the server type to local (LAN), sets the default map to "bath" and sets the admin password to "pass"
 .RE
-.B ./server.sh -h$HOME/redeclipse-server_configs/
+.B redeclipse-server -h$HOME/redeclipse-server_configs/
 .RS 4
 Reads and writes the configuration files to the specified directory instead of $HOME/.redeclipse/
 .RE
