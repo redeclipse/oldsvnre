@@ -49,6 +49,7 @@ Misc:
  * Split apart kick and ban commands so users can be removed without a ban
  * Copyright cleanup, new trademark policy
  * *roff manpages for *nix systems
+ * system-install make target for packaging convenience
 Additional Fixed Bugs:
  * #8 AI performance issues
  * #30 Use RE_DIR=$(dirname $0) in launch script
