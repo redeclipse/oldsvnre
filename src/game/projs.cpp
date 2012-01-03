@@ -484,6 +484,7 @@ namespace projs
                 break;
             }
         }
+        #if 0 // old failsafe
         if(init)
         {
             vec orig = proj.o;
@@ -494,6 +495,7 @@ namespace projs
                 proj.o = orig;
             }
         }
+        #endif
     }
 
     void updatetargets(projent &proj, int style = 0)
