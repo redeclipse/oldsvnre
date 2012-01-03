@@ -1502,8 +1502,12 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     f->read(&e, sizeof(entbase));
                     lilswap(&e.o.x, 3);
                     int numattr = f->getlil<int>();
-                    e.attrs.add(0, max(5, numattr));
-                    loopk(numattr) e.attrs[k] = f->getlil<int>();
+                    e.attrs.add(0, clamp(numattr, 5, MAXENTATTRS));
+                    loopk(numattr) 
+                    {
+                        int val = f->getlil<int>();
+                        if(e.attrs.inrange(k)) e.attrs[k] = val;
+                    }
                 }
                 if((maptype == MAP_OCTA && hdr.version <= 27) || (maptype == MAP_MAPZ && hdr.version <= 31)) e.attrs[4] = 0; // init ever-present attr5
                 if(maptype == MAP_OCTA) f->seek(eif, SEEK_CUR);

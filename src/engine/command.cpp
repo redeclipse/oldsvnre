@@ -2226,10 +2226,10 @@ static bool parselist(const char *&s, const char *&start = liststart, const char
     return true;
 }
 
-void explodelist(const char *s, vector<char *> &elems)
+void explodelist(const char *s, vector<char *> &elems, int limit)
 {
     const char *start, *end;
-    while(parselist(s, start, end))
+    while((limit < 0 || elems.length() < limit) && parselist(s, start, end))
         elems.add(newstring(start, end-start));
 }
 

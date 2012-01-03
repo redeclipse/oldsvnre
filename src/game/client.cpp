@@ -199,9 +199,9 @@ namespace client
             serversort = newstring(defaultserversort());
         }
         vector<char *> styles;
-        explodelist(serversort, styles);
+        explodelist(serversort, styles, SINFO_MAX);
         serversortstyles.setsize(0);
-        loopi(min(styles.length(), int(SINFO_MAX))) serversortstyles.add(parseint(styles[i]));
+        loopv(styles) serversortstyles.add(parseint(styles[i]));
         styles.deletearrays();
     });
 
@@ -1894,8 +1894,12 @@ namespace client
                     float x = getint(p)/DMF, y = getint(p)/DMF, z = getint(p)/DMF;
                     int type = getint(p), numattrs = getint(p);
                     attrvector attrs;
-                    attrs.add(0, numattrs);
-                    loopk(numattrs) attrs[k] = getint(p);
+                    attrs.add(0, min(numattrs, MAXENTATTRS));
+                    loopk(numattrs)
+                    {
+                        int val = getint(p);
+                        if(attrs.inrange(k)) attrs[k] = val;
+                    }
                     mpeditent(i, vec(x, y, z), type, attrs, false);
                     entities::setspawn(i, 0);
                     break;

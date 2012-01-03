@@ -583,8 +583,8 @@ extentity *newentity(bool local, const vec &o, int type, attrvector &attrs)
 {
     extentity &e = *entities::newent();
     e.o = o;
-    e.attrs.add(0, max(5, attrs.length()) - e.attrs.length());
-    loopv(attrs) e.attrs[i] = attrs[i];
+    e.attrs.add(0, clamp(attrs.length(), 5, MAXENTATTRS) - e.attrs.length());
+    loopi(min(attrs.length(), e.attrs.length())) e.attrs[i] = attrs[i];
     e.type = type;
     e.spawned = false;
     e.inoctanode = false;
@@ -612,18 +612,12 @@ void newentity(int type, attrvector &attrs)
 
 void entattrs(const char *str, attrvector &attrs)
 {
-    int num = listlen(str);
+    static vector<char *> buf;
+    explodelist(str, buf, MAXENTATTRS);
     attrs.setsize(0);
-    attrs.add(0, num);
-    loopk(num)
-    {
-        char *a = indexlist(str, k);
-        if(a)
-        {
-            attrs[k] = parseint(a);
-            delete[] a;
-        }
-    }
+    attrs.add(0, buf.length());
+    loopv(buf) attrs[i] = parseint(buf[i]);
+    buf.deletearrays();
 }
 
 void newent(char *what, char *attr)
@@ -705,19 +699,23 @@ void entset(char *what, char *attr)
 {
     if(noentedit()) return;
     int type = entities::findtype(what);
+    if(type == ET_EMPTY)
+    {
+        conoutft(CON_MESG, "\frunknown entity type \"%s\"", what);
+        return;
+    }
     attrvector attrs;
     entattrs(attr, attrs);
     groupedit({
         e.type = type;
-        e.attrs.add(0, max(5, attrs.length()) - e.attrs.length());
-        loopvk(attrs) e.attrs[k] = attrs[k];
+        e.attrs.add(0, clamp(attrs.length(), 5, MAXENTATTRS) - e.attrs.length());
+        loopk(min(attrs.length(), e.attrs.length())) e.attrs[k] = attrs[k];
     });
 }
 
 ICOMMAND(0, enthavesel,"", (), addimplicit(intret(entgroup.length())));
 ICOMMAND(0, entselect, "e", (uint *body), if(!noentedit()) addgroup(e.type != ET_EMPTY && entgroup.find(n)<0 && executebool(body)));
 ICOMMAND(0, entloop, "e", (uint *body), if(!noentedit()) addimplicit(groupeditloop(((void)e, execute(body)))));
-ICOMMAND(0, enttype, "s", (char *s), entfocus(efocus, intret((!*s || !strcmp(s, entities::findname(e.type))))));
 ICOMMAND(0, insel, "", (), entfocus(efocus, intret(pointinsel(sel, e.o))));
 ICOMMAND(0, entget, "", (), entfocus(efocus, {
     defformatstring(s)("%s", entities::findname(e.type));
@@ -731,6 +729,41 @@ ICOMMAND(0, entget, "", (), entfocus(efocus, {
 ICOMMAND(0, entindex, "", (), intret(efocus));
 COMMAND(0, entset, "ss");
 
+void enttype(char *what, int *numargs)
+{
+    if(*numargs >= 1)
+    {
+        int type = entities::findtype(what);
+        if(type == ET_EMPTY) 
+        {
+            conoutft(CON_MESG, "\frunknown entity type \"%s\"", what);
+            return;
+        }
+        groupedit(e.type = type);
+    }
+    else entfocus(efocus,
+    {
+        result(entities::findname(e.type));
+    })
+}
+
+void entattr(int *attr, int *val, int *numargs)
+{
+    if(*numargs >= 2)
+    {
+        if(*attr >= 0 && *attr < MAXENTATTRS)
+            groupedit({
+                if(e.attrs.length() <= *attr) e.attrs.add(0, *attr + 1 - e.attrs.length());
+                e.attrs[*attr] = *val;
+            });
+    }
+    else entfocus(efocus,
+        if(e.attrs.inrange(*attr)) intret(e.attrs[*attr]);
+    );
+}
+
+COMMAND(0, enttype, "sN");
+COMMAND(0, entattr, "iiN");
 
 int findentity(int type, int index, vector<int> &attr)
 {
@@ -953,8 +986,8 @@ void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local)
         removeentity(i);
         e.type = type;
         e.o = o;
-        e.attrs.add(0, max(5, attr.length()) - e.attrs.length());
-        loopvk(attr) e.attrs[k] = attr[k];
+        e.attrs.add(0, max(5, min(attr.length(), MAXENTATTRS)) - e.attrs.length());
+        loopk(min(attr.length(), e.attrs.length())) e.attrs[k] = attr[k];
         addentity(i);
     }
 }
