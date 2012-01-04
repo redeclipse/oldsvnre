@@ -150,9 +150,13 @@ namespace capture
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
                 sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend, skew);
-                hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend, skew);
-                if(f.owner || f.droptime)
-                    hud::drawitemsubtext(x, oldy, -s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
+                if(f.owner)
+                {
+                    vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
+                    hud::drawitem(hud::flagtakentex, x, oldy, int(s*0.5f), false, false, c2.r, c2.g, c2.b, blend, skew);
+                }
+                else if(f.droptime) hud::drawitem(hud::flagdroptex, x, oldy, int(s*0.5f), false, false, 0.25f, 1.f, 1.f, blend, skew);
+                else hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend, skew);
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
                     int sx = x-int(s*skew);
@@ -231,25 +235,21 @@ namespace capture
             vec above(f.spawnloc);
             if(trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
             above.z += enttype[AFFINITY].radius*2/3;
-            if(!f.owner && !f.droptime)
-            {
-                defformatstring(info)("<super>%s flag", TEAM(f.team, name));
-                part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
-                above.z += 2.5f;
-            }
+            defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
+            part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
+            above.z += 2.5f;
+            if(f.owner) part_icon(above, textureload(hud::flagtakentex, 3), 2, 1, 0, 0, 1, TEAM(f.owner->team, colour));
+            else if(f.droptime) part_icon(above, textureload(hud::flagdroptex, 3), 2, 1, 0, 0, 1, 0x28FFFF);
+            else part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
+            above.z += 2.5f;
             if((m_gsp(game::gamemode, game::mutators) && f.droptime) || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
             {
-                part_icon(above, textureload(hud::progresstex, 3), 3, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);
+                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
+                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
                 above.z += 1.f;
-                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
-                above.z += 2.5f;
-            }
-            if(f.owner || f.droptime)
-            {
-                defformatstring(info)("<super>%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
-                part_textcopy(above, info, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
+                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                above.z += 1.5f;
             }
         }
         static vector<int> numflags, iterflags; // dropped/owned
