@@ -659,7 +659,7 @@ namespace client
                 default: return;
             }
             if(d || verbose >= 2)
-                conoutft(CON_EVENT, "\fc%s set %s to %s", d ? game::colorname(d) : "the server", cmd, val);
+                conoutft(CON_EVENT, "\fc%s set %s to %s", d ? game::colorname(d) : (connected(false) ? "the server" : "you"), cmd, val);
         }
         else if(verbose) conoutft(CON_EVENT, "\fr%s sent unknown command: %s", d ? game::colorname(d) : "the server", cmd);
     }
@@ -676,7 +676,7 @@ namespace client
             defformatstring(scmd)("sv_%s", cmd);
             if(server::servcmd(nargs, scmd, arg))
             {
-                parsecommand(NULL, cmd, arg);
+                if(nargs > 1 && arg) parsecommand(NULL, cmd, arg);
                 return true;
             }
         }

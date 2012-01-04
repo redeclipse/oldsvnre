@@ -46,7 +46,7 @@ GSVAR(IDF_ADMIN, largemaps, "blink cargo center colony dawn deadsimple deathtrap
 GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
-GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_IGN].mutators, G_M_ALL, sv_instagibfilter &= ~G_M_VAMPIRE; sv_instagibfilter |= G_M_INSTA, instagibfilter &= ~G_M_VAMPIRE; instagibfilter |= G_M_INSTA);
+GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_IGN].mutators&~G_M_ARENA, mutstype[G_M_IGN].mutators, sv_instagibfilter &= ~G_M_VAMPIRE; sv_instagibfilter |= G_M_INSTA, instagibfilter &= ~G_M_VAMPIRE; instagibfilter |= G_M_INSTA);
 
 GVAR(IDF_ADMIN, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players

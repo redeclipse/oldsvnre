@@ -1244,8 +1244,9 @@ namespace hud
             {
                 loopvj(conlines) if(type ? conlines[j].type >= (confilter && !full ? CON_LO : 0) && conlines[j].type <= CON_HI : conlines[j].type >= (confilter && !full ? CON_LO : 0))
                 {
-                    int len = !full && conlines[j].type < CON_IMPORTANT ? contime/2 : contime;
-                    if(conskip ? j>=conskip-1 || j>=conlines.length()-numl : full || totalmillis-conlines[j].reftime <= len+confade)
+                    int len = conlines[j].type >= CON_CHAT ? (!full && conlines[j].type > CON_CHAT ? chatcontime/2 : chatcontime) : (!full && conlines[j].type < CON_IMPORTANT ? contime/2 : contime),
+                        fadelen = conlines[j].type >= CON_CHAT ? chatconfade : confade;
+                    if(conskip ? j>=conskip-1 || j>=conlines.length()-numl : full || totalmillis-conlines[j].reftime <= len+fadelen)
                     {
                         if(refs.length() >= numl)
                         {
@@ -1253,11 +1254,15 @@ namespace hud
                             {
                                 if(full) break;
                                 bool found = false;
-                                loopvrev(refs) if(conlines[refs[i]].reftime+(conlines[refs[i]].type < CON_IMPORTANT ? contime/2 : contime) < conlines[j].reftime+len)
+                                loopvrev(refs)
                                 {
-                                    refs.remove(i);
-                                    found = true;
-                                    break;
+                                    int check = conlines[refs[i]].type >= CON_CHAT ? (!full && conlines[refs[i]].type > CON_CHAT ? chatcontime/2 : chatcontime) : (!full && conlines[refs[i]].type < CON_IMPORTANT ? contime/2 : contime);
+                                    if(conlines[refs[i]].reftime+check < conlines[j].reftime+len)
+                                    {
+                                        refs.remove(i);
+                                        found = true;
+                                        break;
+                                    }
                                 }
                                 if(!found) continue;
                             }
@@ -2459,8 +2464,8 @@ namespace hud
         }
         if(UI::ready && showconsole && showhud)
         {
-            drawconsole(showconsole >= 2 ? 1 : 0, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
-            if(showconsole >= 2 && ((!noview && !progressing) || forceprogress))
+            drawconsole(showconsole < 2 || (noview && (!progressing || forceprogress)) ? 0 : 1, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
+            if(showconsole >= 2 && !noview)
                 drawconsole(2, hudwidth, hudheight, br+gap*2, by, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? bs-gap*4 : (bs-gap*4)*2, consolefade);
         }
 
