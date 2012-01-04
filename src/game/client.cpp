@@ -578,8 +578,8 @@ namespace client
         ident *wid = idents.access(flags&SAY_ACTION ? "on_action" : "on_text");
         if(wid && wid->type == ID_ALIAS && wid->getstr()[0])
         {
-            defformatstring(act)("%s %d %d %s %s %s", 
-                flags&SAY_ACTION ? "on_action" : "on_text", d->clientnum, flags&SAY_TEAM ? 1 : 0, 
+            defformatstring(act)("%s %d %d %s %s %s",
+                flags&SAY_ACTION ? "on_action" : "on_text", d->clientnum, flags&SAY_TEAM ? 1 : 0,
                 escapestring(game::colorname(d)), escapestring(text), escapestring(s));
             int ret = execute(act);
             if(ret > 0) snd = ret;
@@ -2307,13 +2307,13 @@ namespace client
         if(ac > bc) return -1;
         if(ac < bc) return 1;
 
-        #define retcp(c) { int cv = (c); if(cv) { return cv; } }
+        #define retcp(c) { int cv = (c); if(cv) { return reverse ? -cv : cv; } }
         #define retsw(c,d,e) { \
             int cv = (c), dv = (d); \
             if(cv != dv) \
             { \
-                if((e)) { return cv > dv ? 1 : -1; } \
-                else { return cv < dv ? 1 : -1; } \
+                if((e) != reverse ? cv < dv : cv > dv) return -1; \
+                if((e) != reverse ? cv > dv : cv < dv) return 1; \
             } \
         }
 
@@ -2321,12 +2321,11 @@ namespace client
         {
             int style = serversortstyles[i];
             serverinfo *aa = a, *ab = b;
-
+            bool reverse = false;
             if(style < 0)
             {
                 style = 0-style;
-                aa = b;
-                ab = a;
+                reverse = true;
             }
 
             switch(style)
