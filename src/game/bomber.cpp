@@ -147,13 +147,13 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend*hud::inventoryblend, skew);
+            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend, skew);
             if(f.owner)
             {
-               int qy = hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.owner->team == f.team ? "\fgsecured" : "\fytaken");
-               hud::drawitemsubtext(x, oldy-qy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", game::colorname(f.owner));
+               int qy = hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner->team == f.team ? "\fgsecured" : "\fytaken");
+               hud::drawitemsubtext(x, oldy-qy, s, false, skew, "reduced", blend, "%s", game::colorname(f.owner));
             }
-            else hud::drawitemsubtext(x, oldy, s, TEXT_RIGHT_UP, skew, "reduced", blend*hud::inventoryblend, "%s", f.droptime ? "\fcdropped" : "");
+            else hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.droptime ? "\fcdropped" : "");
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);
@@ -164,8 +164,8 @@ namespace bomber
                     float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                     flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
                 }
-                if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, colour.r, colour.g, colour.b, blend*hud::inventoryblend*0.25f, skew);
-                hud::drawprogress(sx, oldy, 0, wait, s, false, colour.r, colour.g, colour.b, blend*hud::inventoryblend, skew, "super", "%d%%", int(wait*100.f));
+                if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, colour.r, colour.g, colour.b, blend*0.25f, skew);
+                hud::drawprogress(sx, oldy, 0, wait, s, false, colour.r, colour.g, colour.b, blend, skew, "super", "%d%%", int(wait*100.f));
             }
             if(f.owner)
             {
