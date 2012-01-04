@@ -484,18 +484,6 @@ namespace projs
                 break;
             }
         }
-        #if 0 // old failsafe
-        if(init)
-        {
-            vec orig = proj.o;
-            loopi(100)
-            {
-                if(i) proj.o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f));
-                if(collide(&proj) && !inside && (!hitplayer || !physics::issolid(hitplayer, &proj))) break;
-                proj.o = orig;
-            }
-        }
-        #endif
     }
 
     void updatetargets(projent &proj, int style = 0)
@@ -728,15 +716,38 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(!proj.child && proj.projtype == PRJ_SHOT && proj.owner && !weaptype[proj.weap].traced)
+        switch(proj.projtype)
         {
-            vec eyedir = vec(proj.o).sub(proj.owner->o);
-            float eyedist = eyedir.magnitude();
-            if(eyedist >= 1e-3f)
+            case PRJ_SHOT:
             {
-                eyedir.div(eyedist);
-                float blocked = pltracecollide(&proj, proj.owner->o, eyedir, eyedist);
-                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-0.1f).add(proj.owner->o);
+                if(proj.child || weaptype[proj.weap].traced || !proj.owner) break;
+                vec eyedir = vec(proj.o).sub(proj.owner->o);
+                float eyedist = eyedir.magnitude();
+                if(eyedist >= 1e-3f)
+                {
+                    eyedir.div(eyedist);
+                    float blocked = pltracecollide(&proj, proj.owner->o, eyedir, eyedist);
+                    if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-0.1f).add(proj.owner->o);
+                }
+                break;
+            }
+            default:
+            {
+                vec orig = proj.o;
+                loopi(100)
+                {
+                    if(i) proj.o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f));
+                    if(!collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_PLAYER) || inside)
+                    {
+                        if(hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
+                        {
+                            proj.o = orig;
+                            continue;
+                        }
+                    }
+                    break;
+                }
+                break;
             }
         }
         proj.resetinterp();
