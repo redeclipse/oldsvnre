@@ -149,7 +149,7 @@ namespace bomber
             int oldy = y-sy;
             sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend, skew);
             if(f.owner || f.droptime)
-                hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
+                hud::drawitemsubtext(x, oldy, -s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);

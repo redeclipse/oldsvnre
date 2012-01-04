@@ -204,6 +204,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventorybgblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, inventorysuboffset, 0, 0.2f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -1701,9 +1702,14 @@ namespace hud
         glPushMatrix();
         glScalef(skew, skew, 1);
         if(font && *font) pushfont(font);
-        int sy = int(FONTH*skew), tx = int((left ? (x+(FONTW*skew*0.5f)) : (x-(FONTW*skew*0.5f)))*(1.f/skew)), ty = int((y-size/32)*(1.f/skew)), ti = int(255.f*blend);
+        int sy = int(FONTH*skew),
+            tx = int((left ? (x+(FONTW*skew*0.5f)) : (x-(FONTW*skew*0.5f)))*(1.f/skew)),
+            ty = int(y*(1.f/skew)), ti = int(255.f*blend);
+        if(size > 0) ty += int(size-FONTH);
+        else if(size < 0) ty -= int((0-size)+(size*inventorysuboffset));
+        else ty -= FONTH;
         defvformatstring(str, text, text);
-        draw_textx("%s", tx, ty, 255, 255, 255, ti, (left ? TEXT_LEFT_UP : TEXT_RIGHT_UP)|TEXT_NO_INDENT, -1, -1, str);
+        draw_textx("%s", tx, ty, 255, 255, 255, ti, (left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY)|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
         glPopMatrix();
         return sy;
@@ -1787,9 +1793,9 @@ namespace hud
             }
             const char *itext = itemtex(e.type, e.attrs[0]);
             int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade, skew),
-                qy = drawitemsubtext(x, y, s, false, skew, "reduced", fade, "%s", attrstr);
-            qy += drawitemsubtext(x, y-qy, s, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
-            qy += drawitemsubtext(x, y-qy, s, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
+                qy = drawitemsubtext(x, y, 0, false, skew, "reduced", fade, "%s", attrstr);
+            qy += drawitemsubtext(x, y-qy, 0, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
+            qy += drawitemsubtext(x, y-qy, 0, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
             return ty;
         }
         return 0;
@@ -1841,7 +1847,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemsubtext(x, oldy, size, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        drawitemsubtext(x, oldy, 0, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }

@@ -152,7 +152,7 @@ namespace capture
                 sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend, skew);
                 hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend, skew);
                 if(f.owner || f.droptime)
-                    hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
+                    hud::drawitemsubtext(x, oldy, -s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
                     int sx = x-int(s*skew);
