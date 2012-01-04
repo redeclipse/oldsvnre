@@ -592,7 +592,7 @@ namespace hud
         if(m_defend(game::gamemode) && score == INT_MAX)
             hud::drawitem(icon, x, y+size, s, inventoryscorebg!=0, false, c.r, c.g, c.b, fade, skew, "huge", "%sWIN", col);
         else hud::drawitem(icon, x, y+size, s, inventoryscorebg!=0, false, c.r, c.g, c.b, fade, skew, "huge", "%s%d", col, score);
-        hud::drawitemsubtext(x, y+size, s, TEXT_RIGHT_UP, skew, "default", fade, "\f[%d]%s", colour, name);
+        hud::drawitemsubtext(x, y+size, s, false, skew, "default", fade, "\f[%d]%s", colour, name);
         return size;
     }
 

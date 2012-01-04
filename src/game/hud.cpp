@@ -203,7 +203,7 @@ namespace hud
 
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, inventorybgblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventorybgblend, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -216,7 +216,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryhealthbartop, 0, 0.09375f, 1); // starts from this offset
     FVAR(IDF_PERSIST, inventoryhealthbarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, inventoryhealthbgglow, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, inventoryhealthbgblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryhealthbgblend, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, inventoryimpulse, 0, 2, 2); // 0 = off, 1 = text, 2 = bar
     VAR(IDF_PERSIST, inventoryimpulseflash, 0, 1, 1);
@@ -224,7 +224,7 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryimpulsebartop, 0, 0.171875f, 1); // starts from this offset
     FVAR(IDF_PERSIST, inventoryimpulsebarbottom, 0, 0.0859375f, 1); // ends at this offset
     FVAR(IDF_PERSIST, inventoryimpulsebgglow, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, inventoryimpulsebgblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryimpulsebgblend, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, inventoryvelocity, 0, 0, 2);
     FVAR(IDF_PERSIST, inventoryvelocityblend, 0, 1, 1);
@@ -232,10 +232,11 @@ namespace hud
     FVAR(IDF_PERSIST, inventorytrialblend, 0, 1, 1);
     VAR(IDF_PERSIST, inventorystatus, 0, 3, 3); // 0 = off, 1 = text, 2 = icon, 3 = icon + tex
     FVAR(IDF_PERSIST, inventorystatusblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventorystatusiconblend, 0, 0.5f, 1);
 
     VAR(IDF_PERSIST, inventoryalert, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventoryalertblend, 0, 1, 1);
-    VAR(IDF_PERSIST, alertflash, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryalertblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, inventoryalertflash, 0, 1, 1);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, buffedtex, "<grey>textures/alertbuff", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, burningtex, "<grey>textures/alertburn", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bleedingtex, "<grey>textures/alertbleed", 3);
@@ -1680,7 +1681,7 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (x+w+(FONTW*skew)) : (x-w-(FONTW*skew)))*(1.f/skew)), ty = int((y-s+s/2-(FONTH/2*skew))*(1.f/skew));
+            int tx = int((left ? (x+w+(FONTW*skew*0.5f)) : (x-w-(FONTW*skew*0.5f)))*(1.f/skew)), ty = int((y-s+s/2-(FONTH/2*skew))*(1.f/skew));
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), (left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY)|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
@@ -1689,15 +1690,15 @@ namespace hud
         return sy;
     }
 
-    int drawitemsubtext(int x, int y, float size, int align, float skew, const char *font, float blend, const char *text, ...)
+    int drawitemsubtext(int x, int y, float size, bool left, float skew, const char *font, float blend, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
         glPushMatrix();
         glScalef(skew, skew, 1);
         if(font && *font) pushfont(font);
-        int sy = int(FONTH*skew), tx = int(x*(1.f/skew)), ty = int((y-size/32)*(1.f/skew)), ti = int(255.f*blend);
+        int sy = int(FONTH*skew), tx = int((left ? (x+(FONTW*skew*0.5f)) : (x-(FONTW*skew*0.5f)))*(1.f/skew)), ty = int((y-size/32)*(1.f/skew)), ti = int(255.f*blend);
         defvformatstring(str, text, text);
-        draw_textx("%s", tx, ty, 255, 255, 255, ti, align|TEXT_NO_INDENT, -1, -1, str);
+        draw_textx("%s", tx, ty, 255, 255, 255, ti, (left ? TEXT_LEFT_UP : TEXT_RIGHT_UP)|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
         glPopMatrix();
         return sy;
@@ -1780,10 +1781,10 @@ namespace hud
                 concatstring(attrstr, s);
             }
             const char *itext = itemtex(e.type, e.attrs[0]);
-            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade*inventoryblend, skew),
-                qy = drawitemsubtext(x, y, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", attrstr);
-            qy += drawitemsubtext(x, y-qy, s, TEXT_RIGHT_UP, skew, "reduced", fade*inventoryblend, "%s", entities::entinfo(e.type, e.attrs, true));
-            qy += drawitemsubtext(x, y-qy, s, TEXT_RIGHT_UP, skew, "default", fade*inventoryblend, "%s (%d)", enttype[e.type].name, n);
+            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade, skew),
+                qy = drawitemsubtext(x, y, s, false, skew, "reduced", fade, "%s", attrstr);
+            qy += drawitemsubtext(x, y-qy, s, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
+            qy += drawitemsubtext(x, y-qy, s, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
             return ty;
         }
         return 0;
@@ -1803,7 +1804,7 @@ namespace hud
                 loopi(WEAP_MAX) if((i != WEAP_MELEE || sweap == WEAP_MELEE || game::focus->weapselect == WEAP_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
                 {
                     if(y-sy-s < m) break;
-                    float fade = blend*inventoryblend, size = s, skew = 0.f;
+                    float size = s, skew = 0.f;
                     if((game::focus->weapstate[i] == WEAP_S_SWITCH || game::focus->weapstate[i] == WEAP_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
                     {
                         float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
@@ -1817,8 +1818,8 @@ namespace hud
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
                     int oldy = y-sy;
                     if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
-                    else sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew);
+                        sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", game::focus->ammo[i]);
+                    else sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, blend, skew);
                     if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                     {
                         static string weapids[WEAP_MAX];
@@ -1835,7 +1836,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemsubtext(x, oldy, size, TEXT_RIGHT_UP, skew, "reduced", fade, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        drawitemsubtext(x, oldy, size, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }
@@ -1982,7 +1983,7 @@ namespace hud
                 {
                     float gr = 1, gg = 1, gb = 1;
                     if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                    if(alertflash)
+                    if(inventoryalertflash)
                     {
                         int millis = lastmillis%1000;
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
@@ -1994,7 +1995,7 @@ namespace hud
                 {
                     float gr = 1, gg = 1, gb = 1;
                     if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                    if(alertflash)
+                    if(inventoryalertflash)
                     {
                         int millis = lastmillis%1000;
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
@@ -2006,7 +2007,7 @@ namespace hud
                 {
                     float gr = 1, gg = 1, gb = 1;
                     if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
-                    if(alertflash)
+                    if(inventoryalertflash)
                     {
                         int millis = lastmillis%1000;
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
@@ -2031,7 +2032,7 @@ namespace hud
             {
                 sy -= x/2;
                 pushfont("emphasis");
-                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1, state);
+                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*inventorystatusiconblend*255), TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
             if(inventorystatus&2 && *tex)
@@ -2073,14 +2074,15 @@ namespace hud
     void drawinventory(int w, int h, int edge, float blend)
     {
         pushfont("console");
+        float fade = blend*inventoryblend;
         int cx[2] = { edge, w-edge }, cy[2] = { h-edge, h-edge }, cs = int(inventorysize*w), cr = cs/8, cc = 0;
         popfont();
         loopi(2) switch(i)
         {
             case 0: default:
             {
-                if((cc = drawhealth(cx[i], cy[i], cs, blend)) > 0) cy[i] -= cc+cr;
-                if((cc = drawtimer(cx[i], cy[i], cs, blend)) > 0) cy[i] -= cc+cr;
+                if((cc = drawhealth(cx[i], cy[i], cs, fade)) > 0) cy[i] -= cc+cr;
+                if((cc = drawtimer(cx[i], cy[i], cs, fade)) > 0) cy[i] -= cc+cr;
                 break;
             }
             case 1:
@@ -2102,18 +2104,18 @@ namespace hud
                             else if(amt > 0.5f) col = "\fc";
                             else if(amt > 0.25f) col = "\fy";
                             else col = "\fo";
-                            drawprogress(cx[i], cm+cs, 0, 1, cs, false, 1, 1, 1, blend*inventoryblend*0.25f, 1);
-                            cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, blend*inventoryblend, 1, "default", "%s%d", col, int(millis/1000.f));
+                            drawprogress(cx[i], cm+cs, 0, 1, cs, false, 1, 1, 1, fade*0.25f, 1);
+                            cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, fade, 1, "default", "%s%d", col, int(millis/1000.f));
                         }
                     }
-                    else if(!m_edit(game::gamemode) && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, blend)) > 0)) cm += cc+cr;
+                    else if(!m_edit(game::gamemode) && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade)) > 0)) cm += cc+cr;
 
-                    if((cc = drawselection(cx[i], cy[i], cs, cm, blend)) > 0) cy[i] -= cc+cr;
+                    if((cc = drawselection(cx[i], cy[i], cs, cm, fade)) > 0) cy[i] -= cc+cr;
                     if(inventorygame)
                     {
-                        if(m_capture(game::gamemode) && ((cc = capture::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
-                        else if(m_defend(game::gamemode) && ((cc = defend::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
-                        else if(m_bomber(game::gamemode) && ((cc = bomber::drawinventory(cx[i], cy[i], cs, cm, blend)) > 0)) cy[i] -= cc+cr;
+                        if(m_capture(game::gamemode) && ((cc = capture::drawinventory(cx[i], cy[i], cs, cm, fade)) > 0)) cy[i] -= cc+cr;
+                        else if(m_defend(game::gamemode) && ((cc = defend::drawinventory(cx[i], cy[i], cs, cm, fade)) > 0)) cy[i] -= cc+cr;
+                        else if(m_bomber(game::gamemode) && ((cc = bomber::drawinventory(cx[i], cy[i], cs, cm, fade)) > 0)) cy[i] -= cc+cr;
                     }
                 }
                 break;
