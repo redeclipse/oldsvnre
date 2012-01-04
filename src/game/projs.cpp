@@ -744,20 +744,25 @@ namespace projs
                         {
                             case 9: case 8: case 7: case 6: case 5: case 4:
                             {
-                                proj.o.add(vec(dir).rotate_around_z(iter*18*RAD).mul(maxrad*((step%2)+1)));
+                                float off = step <= 5 ? step-3 : (step >= 8 ? 3 : 2);
+                                proj.o.add(vec(dir).rotate_around_z(iter*18*RAD).mul(maxrad*off));
                                 if(step <= 5) break;
                             }
                             case 3: case 2:
                             {
-                                float off = 1;
-                                if(step <= 3) off = (iter >= 10 ? 9-iter : iter+1)/(10.f*(step-1));
+                                float off = 0;
+                                if(step <= 3)
+                                {
+                                    off = (iter >= 10 ? 9-iter : iter+1)/10.f;
+                                    if(step == 3) off += (iter >= 10 ? -1.f : 1.f);
+                                }
                                 else off = step%2 != 0 ? 0-(((step-1)/2)-1) : (step/2)-1;
                                 proj.o.z += maxrad*off;
                                 break;
                             }
                             case 1: case 0: default:
                             {
-                                proj.o.add(vec(dir).mul(maxrad*(iter+1)));
+                                proj.o.add(vec(dir).mul(maxrad*(iter+1)*(step+1)));
                                 break;
                             }
                         }
