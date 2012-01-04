@@ -191,7 +191,7 @@ namespace hud
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
     VAR(IDF_PERSIST, inventoryscorebg, 0, 0, 1);
-    VAR(IDF_PERSIST, inventoryweapids, 0, 1, 2);
+    VAR(IDF_PERSIST, inventoryweapids, 0, 2, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
     FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
@@ -430,10 +430,10 @@ namespace hud
         if(!before) ADDMODEICON
     }
 
-    ICOMMAND(0, modetexlist, "iiii", (int *g, int *m, int *b, int *p), 
+    ICOMMAND(0, modetexlist, "iiii", (int *g, int *m, int *b, int *p),
     {
-        vector<char> list; 
-        modetexs(*g, *m, *b!=0, *p!=0, list); 
+        vector<char> list;
+        modetexs(*g, *m, *b!=0, *p!=0, list);
         list.add('\0');
         result(list.getbuf());
     });
@@ -1793,7 +1793,7 @@ namespace hud
                     meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, rockettex
                 };
                 int sweap = m_weapon(game::gamemode, game::mutators);
-                loopi(WEAP_MAX) if((i != WEAP_MELEE || sweap == WEAP_MELEE || game::focus->weapselect == WEAP_MELEE || !inventoryhidemelee) && (game::focus->hasweap(i, sweap) || i == game::focus->weapselect || lastmillis-game::focus->weaplast[i] < game::focus->weapwait[i]))
+                loopi(WEAP_MAX) if((i != WEAP_MELEE || sweap == WEAP_MELEE || game::focus->weapselect == WEAP_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
                 {
                     if(y-sy-s < m) break;
                     float fade = blend*inventoryblend, size = s, skew = 0.f;
@@ -1805,15 +1805,14 @@ namespace hud
                     }
                     else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
                     else continue;
-                    bool instate = (i == game::focus->weapselect || game::focus->weapstate[i] != WEAP_S_USE);
                     vec c(1, 1, 1);
                     if(inventorycolour) c.mul(vec::hexcolor(WEAP(i, colour)));
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
                     int oldy = y-sy;
-                    if(inventoryammo >= 2 && (instate || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
+                    if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew, "super", "%d", game::focus->ammo[i]);
                     else sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, fade, skew);
-                    if(inventoryweapids && (instate || inventoryweapids >= 2))
+                    if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                     {
                         static string weapids[WEAP_MAX];
                         static int lastweapids = -1;
@@ -1829,7 +1828,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemsubtext(x, oldy, size, TEXT_RIGHT_UP, skew, "reduced", fade, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, weapids[n]);
+                        drawitemsubtext(x, oldy, size, TEXT_RIGHT_UP, skew, "reduced", fade, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }

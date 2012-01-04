@@ -442,7 +442,7 @@ struct gamestate
     }
     ~gamestate() {}
 
-    int hasweap(int weap, int sweap, int level = 0, int exclude = -1)
+    bool hasweap(int weap, int sweap, int level = 0, int exclude = -1)
     {
         if(isweap(weap) && weap != exclude)
         {
@@ -457,6 +457,11 @@ struct gamestate
             }
         }
         return false;
+    }
+
+    bool holdweap(int weap, int sweap, int millis)
+    {
+        return weap == weapselect || millis-weaplast[weap] < weapwait[weap] || hasweap(weap, sweap);
     }
 
     int bestweap(int sweap, bool last = false)
