@@ -148,12 +148,8 @@ namespace bomber
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
             sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend, skew);
-            if(f.owner)
-            {
-               int qy = hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner->team == f.team ? "\fgsecured" : "\fytaken");
-               hud::drawitemsubtext(x, oldy-qy, s, false, skew, "reduced", blend, "%s", game::colorname(f.owner));
-            }
-            else hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.droptime ? "\fcdropped" : "");
+            if(f.owner || f.droptime)
+                hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);

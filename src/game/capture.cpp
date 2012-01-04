@@ -151,12 +151,8 @@ namespace capture
                 int oldy = y-sy;
                 sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend, skew);
                 hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend, skew);
-                if(f.owner)
-                {
-                   int qy = hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner->team == f.team ? "\fgsecured" : "\fytaken");
-                   hud::drawitemsubtext(x, oldy-qy, s, false, skew, "reduced", blend, "%s", game::colorname(f.owner));
-                }
-                else hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.droptime ? "\fcdropped" : "");
+                if(f.owner || f.droptime)
+                    hud::drawitemsubtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
                     int sx = x-int(s*skew);
@@ -252,14 +248,8 @@ namespace capture
             }
             if(f.owner || f.droptime)
             {
-                if(f.owner)
-                {
-                    defformatstring(info)("<emphasis>%s", game::colorname(f.owner));
-                    part_textcopy(above, info, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
-                    above.z += 1.5f;
-                }
-                const char *info = f.owner ? (f.team == f.owner->team ? "<super>\fgsecured" : "<super>\fytaken") : "<super>\fcdropped";
-                part_text(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
+                defformatstring(info)("<super>%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
+                part_textcopy(above, info, PART_TEXT, 1, 0xFFFFFF, 2, max(trans, 0.5f));
             }
         }
         static vector<int> numflags, iterflags; // dropped/owned
