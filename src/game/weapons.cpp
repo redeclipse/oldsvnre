@@ -15,13 +15,13 @@ namespace weapons
 
     int slot(gameent *d, int n, bool back)
     {
-        if(d && weapselectslot && n != WEAP_MELEE)
+        if(d && weapselectslot)
         {
             int p = m_weapon(game::gamemode, game::mutators), w = 0;
-            loopi(WEAP_MAX-1) if(d->hasweap(i+1, p))
+            loopi(WEAP_MAX) if(d->holdweap(i, p, lastmillis))
             {
+                if(n == (back ? w : i)) return back ? i : w;
                 w++;
-                if(n == (back ? w : i+1)) return back ? i+1 : w;
             }
             return -1;
         }
