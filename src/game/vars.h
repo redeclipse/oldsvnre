@@ -34,7 +34,7 @@ GSVAR(IDF_ADMIN, holdmaps, "bath cargo center colony darkness deadsimple deli de
 GSVAR(IDF_ADMIN, trialmaps, "hinder purge testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
-GSVAR(IDF_ADMIN, multimaps, "deadsimple depot warp isolation"); // applies to modes which *require* multi spawns (ctf/bb)
+GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone warp isolation"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo ghost longestyard stone panic wet");
 GSVAR(IDF_ADMIN, hovermaps, "alphacampaign cargo center colony darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost isolation keystone linear longestyard mist nova spacetech testchamber tower tranquility tribal ubik venus warp");
 
