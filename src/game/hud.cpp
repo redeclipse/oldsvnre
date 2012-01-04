@@ -185,7 +185,6 @@ namespace hud
     FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
-    VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 3);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
@@ -194,7 +193,6 @@ namespace hud
     VAR(IDF_PERSIST, inventoryweapids, 0, 2, 2);
     VAR(IDF_PERSIST, inventorycolour, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryflash, 0, 0, 1);
-    FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventorysize, 0, 0.06f, 1000);
     FVAR(IDF_PERSIST, inventoryskew, 1e-4f, 0.65f, 1000);
     FVAR(IDF_PERSIST, inventoryscoresize, 0, 0.65f, 1);
@@ -202,7 +200,10 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, inventoryglowblend, 0, 1, 1);
+
+    VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, inventorybgblend, 0, 1, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -1652,7 +1653,7 @@ namespace hud
         {
             int glow = int(s*inventorybgsize);
             sy += glow;
-            float gr = 1, gb = 1, gg = 1, gf = game::focus->state == CS_ALIVE && game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : inventoryglowblend;
+            float gr = 1, gb = 1, gg = 1, gf = fade*inventorybgblend;
             if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
             if(pulse)
             {
@@ -1853,7 +1854,7 @@ namespace hud
         if(*bgtex)
         {
             int glow = 0;
-            float gr = 1, gg = 1, gb = 1, gf = blend;
+            float gr = 1, gg = 1, gb = 1, gf = fade*blend;
             if(tone) skewcolour(gr, gg, gb, tone);
             if(pulse > 0)
             {
@@ -1919,7 +1920,6 @@ namespace hud
         int size = s+s/2, width = s-s/4, sy = 0;
         if(game::focus->state == CS_ALIVE)
         {
-            fade *= game::focus->lastspawn && lastmillis-game::focus->lastspawn <= 1000 ? (lastmillis-game::focus->lastspawn)/2000.f : 1.f;
             if(inventoryhealth && (!m_trial(game::gamemode) || trialdamage))
             {
                 int heal = m_health(game::gamemode, game::mutators);
