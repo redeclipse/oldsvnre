@@ -733,10 +733,35 @@ namespace projs
             }
             default:
             {
-                vec orig = proj.o;
-                loopi(100)
+                vec orig = proj.o, dir = vec(proj.vel).normalize();
+                float maxrad = max(proj.xradius, proj.yradius);
+                loopi(181)
                 {
-                    if(i) proj.o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f));
+                    if(i)
+                    {
+                        int iter = (i-1)%20, step = (i-1-iter)/20;
+                        switch(step)
+                        {
+                            case 9: case 8: case 7: case 6: case 5: case 4:
+                            {
+                                proj.o.add(vec(dir).rotate_around_z(iter*18*RAD).mul(maxrad*((step%2)+1)));
+                                if(step <= 5) break;
+                            }
+                            case 3: case 2:
+                            {
+                                float off = 1;
+                                if(step <= 3) off = (iter >= 10 ? 9-iter : iter+1)/(10.f*(step-1));
+                                else off = step%2 != 0 ? 0-(((step-1)/2)-1) : (step/2)-1;
+                                proj.o.z += maxrad*off;
+                                break;
+                            }
+                            case 1: case 0: default:
+                            {
+                                proj.o.add(vec(dir).mul(maxrad*(iter+1)));
+                                break;
+                            }
+                        }
+                    }
                     if(!collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_PLAYER) || inside)
                     {
                         if(hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
@@ -1149,7 +1174,9 @@ namespace projs
                 bool moving = proj.movement >= 1;
                 if(moving && lastmillis-proj.lasteffect >= 25)
                 {
-                    part_create(PART_SMOKE, 150, proj.o, 0xFFFFFF, max(proj.xradius, proj.yradius)*1.5f, 0.75f, -10);
+                    vec o(proj.o);
+                    if(m_capture(game::gamemode)) o.z -= proj.zradius/2;
+                    part_create(PART_SMOKE, 150, o, 0xFFFFFF, max(proj.xradius, proj.yradius)*1.5f, 0.75f, -10);
                     proj.lasteffect = lastmillis - (lastmillis%100);
                 }
             }
