@@ -38,9 +38,9 @@ system-install-client: client
 	install -m755 reclient $(libexecdir)/redeclipse/redeclipse
 	install -m755 install/nix/redeclipse.am \
 		$(gamesbindir)/redeclipse
-	sed -e 's,@LIBEXECDIR@,$(libexecdir),' \
-		-e 's,@DATADIR@,$(datadir),' \
-		-e 's,@DOCDIR@,$(docdir),' \
+	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),' \
+		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),' \
+		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),' \
 		-i $(gamesbindir)/redeclipse
 
 system-install-server: server
@@ -49,9 +49,9 @@ system-install-server: server
 	install -m755 reserver $(libexecdir)/redeclipse/redeclipse-server
 	install -m755 install/nix/redeclipse-server.am \
 		$(gamesbindir)/redeclipse-server
-	sed -e 's,@LIBEXECDIR@,$(libexecdir),' \
-		-e 's,@DATADIR@,$(datadir),' \
-		-e 's,@DOCDIR@,$(docdir),' \
+	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),' \
+		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),' \
+		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),' \
 		-i $(gamesbindir)/redeclipse-server
 
 system-install-data:
@@ -65,14 +65,14 @@ system-install-data:
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
 	install -d $(docdir)/redeclipse
-	sed -e 's,@LIBEXECDIR@,$(libexecdir),' \
-		-e 's,@DATADIR@,$(datadir),' \
-		-e 's,@DOCDIR@,$(docdir),' \
+	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),' \
+		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),' \
+		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),' \
 		install/nix/redeclipse.6.am | \
 		$(GZIP) -9 -c > $(mandir)/man6/redeclipse.6.gz
-	sed -e 's,@LIBEXECDIR@,$(libexecdir),' \
-		-e 's,@DATADIR@,$(datadir),' \
-		-e 's,@DOCDIR@,$(docdir),' \
+	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),' \
+		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),' \
+		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),' \
 		install/nix/redeclipse-server.6.am | \
 		$(GZIP) -9 -c > $(mandir)/man6/redeclipse-server.6.gz
 	cp -r ../data/examples $(docdir)/redeclipse/examples
