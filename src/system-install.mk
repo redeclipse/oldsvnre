@@ -83,14 +83,15 @@ system-install-menus: icons
 	install -d $(icondir)/48x48/apps
 	install -d $(icondir)/64x64/apps
 	install -d $(icondir)/128x128/apps
-	install install/nix/redeclipse.desktop $(menudir)/redeclipse.desktop
-	install install/nix/redeclipse_x32.png \
+	install -m644 install/nix/redeclipse.desktop \
+		$(menudir)/redeclipse.desktop
+	install -m644 install/nix/redeclipse_x32.png \
 		$(icondir)/32x32/apps/redeclipse.png
-	install install/nix/redeclipse_x48.png \
+	install -m644 install/nix/redeclipse_x48.png \
 		$(icondir)/48x48/apps/redeclipse.png
-	install install/nix/redeclipse_x64.png \
+	install -m644 install/nix/redeclipse_x64.png \
 		$(icondir)/64x64/apps/redeclipse.png
-	install install/nix/redeclipse_x128.png \
+	install -m644 install/nix/redeclipse_x128.png \
 		$(icondir)/128x128/apps/redeclipse.png
 
 system-install-cube2font: system-install-cube2font-docs
