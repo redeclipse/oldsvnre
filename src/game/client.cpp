@@ -191,6 +191,7 @@ namespace client
     ICOMMAND(0, serversortreset, "", (), resetserversort());
 
     vector<int> serversortstyles;
+    void updateserversort();
     SVARF(IDF_PERSIST, serversort, defaultserversort(),
     {
         if(!serversort[0] || serversort[0] == '[')
@@ -198,12 +199,17 @@ namespace client
             delete[] serversort;
             serversort = newstring(defaultserversort());
         }
+        updateserversort();
+    });
+
+    void updateserversort()
+    {
         vector<char *> styles;
         explodelist(serversort, styles, SINFO_MAX);
         serversortstyles.setsize(0);
         loopv(styles) serversortstyles.add(parseint(styles[i]));
         styles.deletearrays();
-    });
+    }
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getname, "", (), result(game::player1->name));
@@ -2317,6 +2323,7 @@ namespace client
             } \
         }
 
+        if(serversortstyles.empty()) updateserversort();
         loopv(serversortstyles)
         {
             int style = serversortstyles[i];
