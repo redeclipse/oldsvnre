@@ -104,6 +104,16 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_PRELOAD, progresstex, "<grey>textures/progress", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorytex, "<grey>textures/inventory", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, warningtex, "<grey>textures/warning", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtex, "<grey>textures/flag", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtex, "<grey>textures/bomb", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowtex, "<grey>textures/arrow", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, alerttex, "<grey>textures/alert", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, questiontex, "<grey>textures/question", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagdroptex, "<grey>textures/flagdrop", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtakentex, "<grey>textures/flagtaken", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombdroptex, "<grey>textures/bombdrop", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtakentex, "<grey>textures/bombtaken", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, attacktex, "<grey>textures/attack", 3);
 
     VAR(IDF_PERSIST|IDF_HEX, inventorytone, -CTONE_MAX, -CTONE_TEAM-1, 0xFFFFFF);
     VAR(IDF_PERSIST|IDF_HEX, crosshairtone, -CTONE_MAX, 0, 0xFFFFFF);
@@ -204,7 +214,6 @@ namespace hud
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
     FVAR(IDF_PERSIST, inventorybgblend, 0, 0.5f, 1);
-    FVAR(IDF_PERSIST, inventorysuboffset, 0, 0.2f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -280,11 +289,6 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, radarcornertex, "<grey>textures/radar", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bliptex, "<grey>textures/blip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, playerbliptex, "<grey>textures/blip", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtex, "<grey>textures/flag", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtex, "<grey>textures/bomb", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, arrowtex, "<grey>textures/arrow", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, alerttex, "<grey>textures/alert", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, questiontex, "<grey>textures/question", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, hurttex, "<grey>textures/hurt", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, hinttex, "<grey>textures/hint", 3);
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
@@ -1696,20 +1700,17 @@ namespace hud
         return sy;
     }
 
-    int drawitemsubtext(int x, int y, float size, bool left, float skew, const char *font, float blend, const char *text, ...)
+    int drawitemsubtext(int x, int y, bool left, float skew, const char *font, float blend, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
         glPushMatrix();
         glScalef(skew, skew, 1);
         if(font && *font) pushfont(font);
-        int sy = int(FONTH*skew),
+        int sy = int(FONTH*skew), tj = left ? TEXT_LEFT_UP : TEXT_RIGHT_UP,
             tx = int((left ? (x+(FONTW*skew*0.5f)) : (x-(FONTW*skew*0.5f)))*(1.f/skew)),
             ty = int(y*(1.f/skew)), ti = int(255.f*blend);
-        if(size > 0) ty += int(size-FONTH);
-        else if(size < 0) ty -= int((0-size)+(size*inventorysuboffset));
-        else ty -= FONTH;
         defvformatstring(str, text, text);
-        draw_textx("%s", tx, ty, 255, 255, 255, ti, (left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY)|TEXT_NO_INDENT, -1, -1, str);
+        draw_textx("%s", tx, ty, 255, 255, 255, ti, tj|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
         glPopMatrix();
         return sy;
@@ -1793,9 +1794,9 @@ namespace hud
             }
             const char *itext = itemtex(e.type, e.attrs[0]);
             int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade, skew),
-                qy = drawitemsubtext(x, y, 0, false, skew, "reduced", fade, "%s", attrstr);
-            qy += drawitemsubtext(x, y-qy, 0, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
-            qy += drawitemsubtext(x, y-qy, 0, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
+                qy = drawitemsubtext(x, y, false, skew, "reduced", fade, "%s", attrstr);
+            qy += drawitemsubtext(x, y-qy, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
+            qy += drawitemsubtext(x, y-qy, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
             return ty;
         }
         return 0;
@@ -1847,7 +1848,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemsubtext(x, oldy, 0, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        drawitemsubtext(x, oldy, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }

@@ -148,8 +148,12 @@ namespace bomber
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
             sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend, skew);
-            if(f.owner || f.droptime)
-                hud::drawitemsubtext(x, oldy, -s, false, skew, "reduced", blend, "%s", f.owner ? game::colorname(f.owner) : "\fcdropped");
+            if(f.owner)
+            {
+                vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
+                hud::drawitem(hud::bombtakentex, x, oldy, int(s*0.5f), false, false, c2.r, c2.g, c2.b, blend, skew);
+            }
+            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, int(s*0.5f), false, false, 0.25f, 1.f, 1.f, blend, skew);
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);
@@ -267,11 +271,11 @@ namespace bomber
                     if(f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/4*trans+2.5f;
-                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, max(trans, 0.5f), 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
-                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f)*0.25f, 0, 0, 1, pcolour);
-                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, max(trans, 0.5f), 0, 0, 1, pcolour, 0, wait);
+                        part_icon(above, textureload(hud::progresstex, 3), 3*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, 0.25f, 0, 0, 1, pcolour);
+                        part_icon(above, textureload(hud::progresstex, 3), 2*trans, 1, 0, 0, 1, pcolour, 0, wait);
                         above.z += 1.f;
-                        defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, max(trans, 0.5f));
+                        defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, 1);
                     }
                 }
                 else if(!m_gsp2(game::gamemode, game::mutators))
@@ -280,7 +284,7 @@ namespace bomber
                     part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.65f);
                     above.z += enttype[AFFINITY].radius*trans+2.5f;
                     defformatstring(info)("<super>%s goal", TEAM(f.team, name));
-                    part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, max(trans, 0.5f));
+                    part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
                 }
             }
         }

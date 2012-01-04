@@ -177,9 +177,11 @@ namespace defend
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
                     hud::drawprogress(sx, oldy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, blend*0.25f, skew);
                     hud::drawprogress(sx, oldy, 0, occupy, s, false, c2.r, c2.g, c2.b, blend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
+                    hud::drawitem(hud::attacktex, x, oldy, int(s*0.5f), false, false, c2.r, c2.g, c2.b, blend, skew);
                 }
-                if(f.owner) hud::drawitem(hud::teamtexname(f.owner), x, oldy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, blend, skew);
-                hud::drawitemsubtext(x, oldy, -s, false, skew, "reduced", blend, "%s", f.name);
+                else if(f.owner)
+                    hud::drawitem(hud::teamtexname(f.owner), x, oldy, int(s*0.5f), false, false, c1.r, c1.g, c1.b, blend, skew);
+                //hud::drawitemsubtext(x, oldy, false, skew, "reduced", blend, "%s", f.name);
             }
         }
         return sy;
