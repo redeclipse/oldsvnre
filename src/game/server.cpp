@@ -1937,12 +1937,12 @@ namespace server
         return &sc;
     }
 
-    void givepoints(clientinfo *ci, int points)
+    void givepoints(clientinfo *ci, int points, bool team = true)
     {
         ci->state.score += points;
         ci->state.points += points;
         sendf(-1, 1, "ri4", N_POINTS, ci->clientnum, points, ci->state.points);
-        if(m_scores(gamemode) && m_team(gamemode, mutators))
+        if(team && m_scores(gamemode) && m_team(gamemode, mutators))
         {
             score &ts = teamscore(ci->team);
             ts.total += points;
@@ -2816,7 +2816,7 @@ namespace server
             if(assist)
             {
                 log.add(assist->clientnum);
-                if(points) givepoints(assist, points);
+                if(points && !m_duke(gamemode, mutators)) givepoints(assist, points);
             }
         }
         if(clear) target->state.damagelog.shrink(0);
@@ -2980,9 +2980,12 @@ namespace server
                     }
                 }
             }
-            if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START)
-                givepoints(target, -pointvalue);
-            else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
+            if(pointvalue && !m_duke(gamemode, mutators))
+            {
+                if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START)
+                    givepoints(target, -pointvalue);
+                else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
+            }
             target->state.deaths++;
             dropitems(target, aistyle[target->state.aitype].living ? 2 : 3);
             static vector<int> dmglog; dmglog.setsize(0);
@@ -3015,7 +3018,7 @@ namespace server
                 sendf(-1, 1, "ri4", N_CHECKPOINT, ci->clientnum, -1, 0);
             }
         }
-        else givepoints(ci, smode ? smode->points(ci, ci) : -1);
+        else givepoints(ci, smode ? smode->points(ci, ci) : -1); // also in duel/survivor to penalise suicide
         ci->state.deaths++;
         dropitems(ci, aistyle[ci->state.aitype].living ? 2 : 3);
         if(GAME(burntime) && (flags&HIT_MELT || flags&HIT_BURN))

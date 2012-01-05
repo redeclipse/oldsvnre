@@ -121,7 +121,7 @@ struct duelservmode : servmode
             {
                 vector<clientinfo *> alive;
                 loopv(clients) if(clients[i]->state.aitype < AI_START)
-                    queue(clients[i], !m_team(gamemode, mutators) && clients[i]->state.state == CS_ALIVE, (m_duel(gamemode, mutators) && m_team(gamemode, mutators)) || GAME(duelreset) || clients[i]->state.state != CS_ALIVE, true);
+                    queue(clients[i], clients[i]->state.state == CS_ALIVE, GAME(duelreset) || clients[i]->state.state != CS_ALIVE, true);
                 allowed.shrink(0); playing.shrink(0);
                 if(!duelqueue.empty())
                 {
@@ -198,13 +198,18 @@ struct duelservmode : servmode
                             if(!cleanup)
                             {
                                 srvmsgf(-1, "\fyteam \fs\f[%d]%s\fS are the victors", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
+                                bool teampoints = true;
                                 loopv(playing)
                                 {
                                     if(playing[i]->team == alive[0]->team)
                                     {
                                         if(allowbroadcast(playing[i]->clientnum))
                                             ancmsgft(playing[i]->clientnum, S_V_YOUWIN, -1, "");
-                                        givepoints(playing[i], playing.length());
+                                        if(alive.find(playing[i]) >= 0)
+                                        {
+                                            givepoints(playing[i], 1, teampoints);
+                                            teampoints = false;
+                                        }
                                     }
                                     else if(allowbroadcast(playing[i]->clientnum))
                                         ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
@@ -241,7 +246,7 @@ struct duelservmode : servmode
                                     {
                                         if(allowbroadcast(playing[i]->clientnum))
                                             ancmsgft(playing[i]->clientnum, S_V_YOUWIN, -1, "");
-                                        givepoints(playing[i], playing.length());
+                                        givepoints(playing[i], 1);
                                     }
                                     else if(allowbroadcast(playing[i]->clientnum))
                                         ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");

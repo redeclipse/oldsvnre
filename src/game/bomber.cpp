@@ -151,9 +151,9 @@ namespace bomber
             if(f.owner)
             {
                 vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
-                hud::drawitem(hud::bombtakentex, x, oldy, s, 0.5f, false, false, c2.r, c2.g, c2.b, blend, skew);
+                hud::drawitem(hud::bombtakentex, x, oldy, s, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
             }
-            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, false, false, 0.25f, 1.f, 1.f, blend, skew);
+            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);

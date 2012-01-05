@@ -1667,7 +1667,7 @@ namespace hud
         float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
         int heal = m_health(game::gamemode, game::mutators), sy = int(s), cx = x, cy = y, cs = int(s), cw = int(w);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
-        if(bg && inventorybg)
+        if(bg && sub == 0 && inventorybg)
         {
             int glow = 0;
             float gr = 1, gb = 1, gg = 1, gf = fade*inventorybgblend;
@@ -1683,7 +1683,7 @@ namespace hud
             glColor4f(gr, gg, gb, fade*gf);
             drawtexture(left ? cx-glow : cx-cw-glow, cy-cs-glow, cs+glow*2, cw+glow*2, left);
         }
-        if((bg || sub > 0) && inventorybg)
+        if(bg && inventorybg)
         {
             int co = int(cs*inventorybgskew), cp = int(cw*inventorybgskew);
             if(sub == 0) sy -= int(cs*inventorybgspace*skew);
