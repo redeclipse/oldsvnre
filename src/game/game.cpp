@@ -2688,7 +2688,7 @@ namespace game
                 a[ai++] = modelattach("tag_bjet", &d->jet[2]);
             }
         }
-        renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
+        renderclient(d, third, trans, third ? size : 1, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
     }
 
     void rendercheck(gameent *d)
