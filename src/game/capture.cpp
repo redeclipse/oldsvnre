@@ -149,14 +149,14 @@ namespace capture
                 }
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, true, false, c.r, c.g, c.b, blend, skew);
+                sy += hud::drawitem(hud::flagtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew);
                 if(f.owner)
                 {
                     vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
-                    hud::drawitem(hud::flagtakentex, x, oldy, int(s*0.5f), false, false, c2.r, c2.g, c2.b, blend, skew);
+                    hud::drawitem(hud::flagtakentex, x, oldy, s, 0.5f, false, false, c2.r, c2.g, c2.b, blend, skew);
                 }
-                else if(f.droptime) hud::drawitem(hud::flagdroptex, x, oldy, int(s*0.5f), false, false, 0.25f, 1.f, 1.f, blend, skew);
-                else hud::drawitem(hud::teamtexname(f.team), x, oldy, int(s*0.5f), false, false, c.r, c.g, c.b, blend, skew);
+                else if(f.droptime) hud::drawitem(hud::flagdroptex, x, oldy, s, 0.5f, false, false, 0.25f, 1.f, 1.f, blend, skew);
+                else hud::drawitem(hud::teamtexname(f.team), x, oldy, s, 0.5f, false, false, c.r, c.g, c.b, blend, skew);
                 if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
                 {
                     int sx = x-int(s*skew);

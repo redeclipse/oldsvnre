@@ -762,7 +762,7 @@ namespace projs
                             }
                             case 1: case 0: default:
                             {
-                                proj.o.add(vec(dir).mul(maxrad*(iter+1)*(step+1)));
+                                proj.o.add(vec(dir).mul(maxrad*(iter+1)*(step ? 1 : -1)));
                                 break;
                             }
                         }
