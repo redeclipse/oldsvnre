@@ -213,7 +213,7 @@ namespace hud
 
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
-    FVAR(IDF_PERSIST, inventorybgblend, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, inventorybgblend, 0, 0.25f, 1);
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
