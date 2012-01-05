@@ -1732,7 +1732,9 @@ namespace projs
             if(proj.lifetime < 0) proj.lifetime = 0;
             return false;
         }
-        vec to(proj.to), ray = vec(proj.to).sub(proj.from).mul(WEAP2(proj.weap, trace, proj.flags&HIT_ALT));
+        float scale = WEAP2(proj.weap, trace, proj.flags&HIT_ALT);
+        if(proj.owner) scale *= 1.f/proj.owner->curscale;
+        vec to(proj.to), ray = vec(proj.to).sub(proj.from).mul(scale);
         float maxdist = ray.magnitude();
         if(maxdist <= 0) return 1; // not moving anywhere, so assume still alive since it was already alive
         ray.mul(1/maxdist);
