@@ -147,13 +147,13 @@ namespace bomber
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
             int oldy = y-sy;
-            sy += hud::drawitem(hud::bombtex, x, oldy, s, true, false, colour.x, colour.y, colour.z, blend, skew);
+            sy += hud::drawitem(hud::bombtex, x, oldy, s, 0, true, false, colour.x, colour.y, colour.z, blend, skew);
             if(f.owner)
             {
                 vec c2 = vec::hexcolor(TEAM(f.owner->team, colour));
-                hud::drawitem(hud::bombtakentex, x, oldy, int(s*0.5f), false, false, c2.r, c2.g, c2.b, blend, skew);
+                hud::drawitem(hud::bombtakentex, x, oldy, s, 0.5f, false, false, c2.r, c2.g, c2.b, blend, skew);
             }
-            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, int(s*0.5f), false, false, 0.25f, 1.f, 1.f, blend, skew);
+            else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, false, false, 0.25f, 1.f, 1.f, blend, skew);
             if(f.droptime || (f.owner && bombercarrytime))
             {
                 int sx = x-int(s*skew);

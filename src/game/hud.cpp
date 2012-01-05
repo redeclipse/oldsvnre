@@ -1660,7 +1660,7 @@ namespace hud
         return int(s);
     }
 
-    int drawitem(const char *tex, int x, int y, float size, bool bg, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
+    int drawitem(const char *tex, int x, int y, float size, float sub, bool bg, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
@@ -1683,14 +1683,21 @@ namespace hud
             glColor4f(gr, gg, gb, fade*gf);
             drawtexture(left ? cx-glow : cx-cw-glow, cy-cs-glow, cs+glow*2, cw+glow*2, left);
         }
-        if(inventorybg)
+        if((bg || sub > 0) && inventorybg)
         {
-            int co = int(cs*inventorybgskew);
-            sy -= int(cs*inventorybgspace*skew);
-            cx += left ? co/2 : -co/2;
+            int co = int(cs*inventorybgskew), cp = int(cw*inventorybgskew);
+            if(sub == 0) sy -= int(cs*inventorybgspace*skew);
+            cx += left ? cp/2 : -cp/2;
             cy -= co/2;
             cs -= co;
-            cw -= int(cw*inventorybgskew);
+            cw -= cp;
+        }
+        if(sub > 0)
+        {
+            int co = int(cs*sub);
+            sy -= cs-co;
+            cs = co;
+            cw = int(cw*sub);
         }
         glColor4f(cr, cg, cb, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
@@ -1700,24 +1707,32 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (cx+cw+(FONTW*skew*0.5f)) : (cx-cw-(FONTW*skew*0.5f)))*(1.f/skew)), ty = int((cy-cs+cs/2-(FONTH/2*skew))*(1.f/skew));
+            int tx = int((left ? (cx+cw+(FONTW*skew*0.5f)) : (cx-cw-(FONTW*skew*0.5f)))*(1.f/skew)),
+                ty = int((cy-cs+cs/2-(FONTH/2*skew))*(1.f/skew)), tj = left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY;
             defvformatstring(str, text, text);
-            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), (left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY)|TEXT_NO_INDENT, -1, -1, str);
+            draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), tj|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
             glPopMatrix();
         }
         return sy;
     }
 
-    int drawitemsubtext(int x, int y, bool left, float skew, const char *font, float blend, const char *text, ...)
+    int drawitemtext(int x, int y, float size, bool left, float skew, const char *font, float blend, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
         glPushMatrix();
         glScalef(skew, skew, 1);
         if(font && *font) pushfont(font);
+        int cx = x, cy = y;
+        if(inventorybg && size > 0)
+        {
+            int cs = int(size*skew), co = int(cs*inventorybgskew);
+            cx += left ? co/2 : -co/2;
+            cy -= co/2;
+        }
         int sy = int(FONTH*skew), tj = left ? TEXT_LEFT_UP : TEXT_RIGHT_UP,
-            tx = int((left ? (x+(FONTW*skew*0.5f)) : (x-(FONTW*skew*0.5f)))*(1.f/skew)),
-            ty = int((y-(FONTH*skew*0.5f))*(1.f/skew)), ti = int(255.f*blend);
+            tx = int((left ? (cx+(FONTW*skew*0.5f)) : (cx-(FONTW*skew*0.5f)))*(1.f/skew)),
+            ty = int(cy*(1.f/skew)), ti = int(255.f*blend);
         defvformatstring(str, text, text);
         draw_textx("%s", tx, ty, 255, 255, 255, ti, tj|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
@@ -1802,10 +1817,10 @@ namespace hud
                 concatstring(attrstr, s);
             }
             const char *itext = itemtex(e.type, e.attrs[0]);
-            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, true, false, 1.f, 1.f, 1.f, fade, skew),
-                qy = drawitemsubtext(x, y, false, skew, "reduced", fade, "%s", attrstr);
-            qy += drawitemsubtext(x, y-qy, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
-            qy += drawitemsubtext(x, y-qy, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
+            int ty = drawitem(itext && *itext ? itext : "textures/blank", x, y, s, 0, true, false, 1.f, 1.f, 1.f, fade, skew),
+                qy = drawitemtext(x, y, s, false, skew, "reduced", fade, "%s", attrstr);
+            qy += drawitemtext(x, y-qy, s, false, skew, "reduced", fade, "%s", entities::entinfo(e.type, e.attrs, true));
+            qy += drawitemtext(x, y-qy, s, false, skew, "default", fade, "%s (%d)", enttype[e.type].name, n);
             return ty;
         }
         return 0;
@@ -1839,8 +1854,8 @@ namespace hud
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
                     int oldy = y-sy;
                     if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", game::focus->ammo[i]);
-                    else sy += drawitem(hudtexs[i], x, y-sy, size, true, false, c.r, c.g, c.b, blend, skew);
+                        sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", game::focus->ammo[i]);
+                    else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
                     if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                     {
                         static string weapids[WEAP_MAX];
@@ -1857,7 +1872,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemsubtext(x, oldy, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        drawitemtext(x, oldy, size, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }
@@ -2010,7 +2025,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
                     }
-                    sy += drawitem(buffedtex, x, y-sy, width, false, true, gr, gg, gb, fade);
+                    sy += drawitem(buffedtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
                 {
@@ -2022,7 +2037,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 0.f, 0.f, amt);
                     }
-                    sy += drawitem(bleedingtex, x, y-sy, width, false, true, gr, gg, gb, fade);
+                    sy += drawitem(bleedingtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
                 if(burntime && game::focus->burning(lastmillis, burntime))
                 {
@@ -2034,7 +2049,7 @@ namespace hud
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                         flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
                     }
-                    sy += drawitem(burningtex, x, y-sy, width, false, true, gr, gg, gb, fade);
+                    sy += drawitem(burningtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
             }
         }
@@ -2059,7 +2074,7 @@ namespace hud
             {
                 float r = 1, g = 1, b = 1;
                 if(inventorytone) skewcolour(r, g, b, inventorytone);
-                sy += drawitem(tex, x, y-sy, width, false, true, r, g, b, blend*inventorystatusiconblend, 1.f);
+                sy += drawitem(tex, x, y-sy, width, 0, false, true, r, g, b, blend*inventorystatusiconblend, 1.f);
             }
         }
         return sy;
