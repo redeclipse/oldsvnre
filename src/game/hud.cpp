@@ -2031,7 +2031,6 @@ namespace hud
         }
         else
         {
-            float fade = blend*inventorystatusblend;
             const char *state = "", *tex = "";
             switch(game::player1->state)
             {
@@ -2044,14 +2043,14 @@ namespace hud
             {
                 sy -= x/2;
                 pushfont("emphasis");
-                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(fade*inventorystatusiconblend*255), TEXT_CENTER_UP, -1, -1, state);
+                sy += draw_textx("%s", x+width/2, y-sy, 255, 255, 255, int(blend*inventorystatusblend*255), TEXT_CENTER_UP, -1, -1, state);
                 popfont();
             }
             if(inventorystatus&2 && *tex)
             {
                 float r = 1, g = 1, b = 1;
                 if(inventorytone) skewcolour(r, g, b, inventorytone);
-                sy += drawitem(tex, x, y-sy, width, false, true, r, g, b, fade, 1.f);
+                sy += drawitem(tex, x, y-sy, width, false, true, r, g, b, blend*inventorystatusiconblend, 1.f);
             }
         }
         return sy;
