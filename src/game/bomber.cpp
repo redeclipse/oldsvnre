@@ -283,8 +283,10 @@ namespace bomber
                     part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
                     part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.65f);
                     above.z += enttype[AFFINITY].radius*trans+2.5f;
-                    defformatstring(info)("<super>%s goal", TEAM(f.team, name));
+                    defformatstring(info)("<super>%s base", TEAM(f.team, name));
                     part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
+                    above.z += 2.5f;
+                    part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
                 }
             }
         }

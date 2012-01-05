@@ -212,8 +212,9 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.05f, 1);
 
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
-    FVAR(IDF_PERSIST, inventorybgsize, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, inventorybgskew, 0, 0.05f, 1); // skew items inside by this much
     FVAR(IDF_PERSIST, inventorybgblend, 0, 0.25f, 1);
+    FVAR(IDF_PERSIST, inventorybgspace, 0, 0.05f, 1); // for aligning diagonals
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -1664,12 +1665,11 @@ namespace hud
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
         float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
-        int heal = m_health(game::gamemode, game::mutators), sy = int(s);
+        int heal = m_health(game::gamemode, game::mutators), sy = int(s), cx = x, cy = y, cs = int(s), cw = int(w);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
         if(bg && inventorybg)
         {
-            int glow = int(s*inventorybgsize);
-            sy += glow;
+            int glow = 0;
             float gr = 1, gb = 1, gg = 1, gf = fade*inventorybgblend;
             if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
             if(pulse)
@@ -1681,17 +1681,26 @@ namespace hud
             }
             settexture(inventorytex, 3);
             glColor4f(gr, gg, gb, fade*gf);
-            drawtexture(left ? x-glow : x-w-glow, y-s-glow, s+glow*2, w+glow*2, left);
+            drawtexture(left ? cx-glow : cx-cw-glow, cy-cs-glow, cs+glow*2, cw+glow*2, left);
+        }
+        if(inventorybg)
+        {
+            int co = int(cs*inventorybgskew);
+            sy -= int(cs*inventorybgspace*skew);
+            cx += left ? co/2 : -co/2;
+            cy -= co/2;
+            cs -= co;
+            cw -= int(cw*inventorybgskew);
         }
         glColor4f(cr, cg, cb, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
-        drawtexture(left ? x : x-w, y-s, s, w);
+        drawtexture(left ? cx : cx-cw, cy-cs, cs, cw);
         if(text && *text)
         {
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (x+w+(FONTW*skew*0.5f)) : (x-w-(FONTW*skew*0.5f)))*(1.f/skew)), ty = int((y-s+s/2-(FONTH/2*skew))*(1.f/skew));
+            int tx = int((left ? (cx+cw+(FONTW*skew*0.5f)) : (cx-cw-(FONTW*skew*0.5f)))*(1.f/skew)), ty = int((cy-cs+cs/2-(FONTH/2*skew))*(1.f/skew));
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), (left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY)|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
@@ -1708,7 +1717,7 @@ namespace hud
         if(font && *font) pushfont(font);
         int sy = int(FONTH*skew), tj = left ? TEXT_LEFT_UP : TEXT_RIGHT_UP,
             tx = int((left ? (x+(FONTW*skew*0.5f)) : (x-(FONTW*skew*0.5f)))*(1.f/skew)),
-            ty = int(y*(1.f/skew)), ti = int(255.f*blend);
+            ty = int((y-(FONTH*skew*0.5f))*(1.f/skew)), ti = int(255.f*blend);
         defvformatstring(str, text, text);
         draw_textx("%s", tx, ty, 255, 255, 255, ti, tj|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
@@ -2086,7 +2095,7 @@ namespace hud
     {
         pushfont("console");
         float fade = blend*inventoryblend;
-        int cx[2] = { edge, w-edge }, cy[2] = { h-edge, h-edge }, cs = int(inventorysize*w), cr = cs/8, cc = 0;
+        int cx[2] = { edge, w-edge }, cy[2] = { h-edge, h-edge }, cs = int(inventorysize*w), cr = edge/2, cc = 0;
         popfont();
         loopi(2) switch(i)
         {
