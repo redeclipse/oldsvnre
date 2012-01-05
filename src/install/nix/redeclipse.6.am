@@ -1,8 +1,8 @@
 .TH REDECLIPSE 6 2011-12-10 "Red Eclipse 1.2" "Red Eclipse Manual"
 .SH NAME
-redeclipse \- script to launch the Red Eclipse FPS game client
+@REDECLIPSE@ \- script to launch the Red Eclipse FPS game client
 .SH SYNOPSIS
-.B redeclipse
+.B @REDECLIPSE@
 [
 .BI \-dw width
 ]
@@ -66,11 +66,11 @@ redeclipse \- script to launch the Red Eclipse FPS game client
 .SH DESCRIPTION
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
-.B redeclipse
+.B @REDECLIPSE@
 is a script which executes
-.BR redeclipse
+.BR @REDECLIPSE@
 from the
-.I @LIBEXECDIR@/redeclipse
+.I @LIBEXECDIR@/@REDECLIPSE@
 directory using the "\-r" option, it will accept any additional options.
 .PP
 The recommended way to change the settings of the client are to edit the
@@ -79,8 +79,8 @@ and
 .I init.cfg
 files in the home directory.
 .PP
-The redeclipse client starts a local loopback server upon launch which it uses to connect to for singleplayer, hence many of the server options are accepted by the redeclipse binary as well (see
-.BR redeclipse-server (6)).
+The @REDECLIPSE@ client starts a local loopback server upon launch which it uses to connect to for singleplayer, hence many of the server options are accepted by the @REDECLIPSE@ binary as well (see
+.BR @REDECLIPSE@-server (6)).
 To edit the specific settings related to the loopback server, use the
 .I localexec.cfg
 and
@@ -150,13 +150,13 @@ Enables or disables kid mode, which reduces blood and death effects somewhat. 1 
 .BI \-h homedir
 Sets your home directory to
 .IR homedir .
-Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to $HOME/.redeclipse/
+Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to $HOME/.@REDECLIPSE@/
 .TP
 .BI \-p packagedir
 Includes the data files found in
 .IR packagedir .
-Can be used for adding additional mods. Packages will be loaded in the order specified. By default redeclipse only inludes data files in its working directory
-.IR @DATADIR@/redeclipse/data/ ,
+Can be used for adding additional mods. Packages will be loaded in the order specified. By default @REDECLIPSE@ only inludes data files in its working directory
+.IR @DATADIR@/@REDECLIPSE@/data/ ,
 and in the
 .I temp
 subdirectory of the home directory.
@@ -193,15 +193,15 @@ Output log to
 Display this manpage
 .SH EXAMPLES
 .PP
-.B redeclipse -p$HOME/mod/data
+.B @REDECLIPSE@ -p$HOME/mod/data
 .RS 4
 Load data from an additional directory.
 .RE
-.B redeclipse -h$HOME/redeclipse_configs/
+.B @REDECLIPSE@ -h$HOME/@REDECLIPSE@_configs/
 .RS 4
-Reads and writes the configuration files to the specified directory instead of $HOME/.redeclipse/
+Reads and writes the configuration files to the specified directory instead of $HOME/.@REDECLIPSE@/
 .RE
-.B redeclipse -x"mode 7; trialweapon 0; map hinder"
+.B @REDECLIPSE@ -x"mode 7; trialweapon 0; map hinder"
 .RS 4
 Sets game mode to time trial, trialmode weapon to empty hands, and starts a game on the map "hinder".
 .RE
@@ -212,4 +212,4 @@ This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com> 
 .SH HISTORY
 Red Eclipse was forked as a continuation of the game Bloodfrontier, which in turn was based on the Cube2 engine and the Sauerbraten game. Red Eclipse and Sauerbraten are now developed in parallel.
 .SH "SEE ALSO"
-.BR redeclipse-server (6).
+.BR @REDECLIPSE@-server (6).

@@ -1,8 +1,8 @@
 .TH REDECLIPSE-SERVER 6 2011-12-10 "Red Eclipse 1.2" "Red Eclipse Manual"
 .SH NAME
-redeclipse-server \- script to launch the server for the Red Eclipse FPS game
+@REDECLIPSE@-server \- script to launch the server for the Red Eclipse FPS game
 .SH SYNOPSIS
-.B redeclipse-server
+.B @REDECLIPSE@-server
 [
 .BI \-h homedir
 ]
@@ -54,27 +54,27 @@ redeclipse-server \- script to launch the server for the Red Eclipse FPS game
 .SH DESCRIPTION
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
-.B redeclipse-server
+.B @REDECLIPSE@-server
 is a script which executes
-.BR redeclipse-server
+.BR @REDECLIPSE@-server
 from the
-.I @LIBEXECDIR@/redeclipse
+.I @LIBEXECDIR@/@REDECLIPSE@
 directory, it will accept any additional options.
 .PP
 The recommended way to change the settings of the server is to create and edit the files servexec.cfg and servinit.cfg files in your home directory. Examples are available in
-.IR @DOCDIR@/redeclipse/examples/
+.IR @DOCDIR@/@REDECLIPSE@/examples/
 .SH OPTIONS
 .TP
 .BI \-h homedir
 Sets your home directory to
 .IR homedir .
-This is where servinit.cfg and servexec.cfg are read from, it defaults to $HOME/.redeclipse/
+This is where servinit.cfg and servexec.cfg are read from, it defaults to $HOME/.@REDECLIPSE@/
 .TP
 .BI \-p packagedir
 Includes the data files found in
 .IR packagedir .
-Can be used for adding additional mods. Packages will be loaded in the order specified. By default redeclipse-server only inludes data files in the working directory
-.I @DATADIR@/redeclipse/data
+Can be used for adding additional mods. Packages will be loaded in the order specified. By default @REDECLIPSE@-server only inludes data files in the working directory
+.I @DATADIR@/@REDECLIPSE@/data
 and in the subdirecory
 .I temp
 of the home directory.
@@ -142,13 +142,13 @@ Users must know the password before they can connect.
 .B \-\-help
 Display this manpage
 .SH EXAMPLES
-.B redeclipse-server -p$HOME/mod/data -ss0 -slbath -sPpass
+.B @REDECLIPSE@-server -p$HOME/mod/data -ss0 -slbath -sPpass
 .RS 4
 Loads data from an additional directory, sets the server type to local (LAN), sets the default map to "bath" and sets the admin password to "pass"
 .RE
-.B redeclipse-server -h$HOME/redeclipse-server_configs/
+.B @REDECLIPSE@-server -h$HOME/@REDECLIPSE@-server_configs/
 .RS 4
-Reads and writes the configuration files to the specified directory instead of $HOME/.redeclipse/
+Reads and writes the configuration files to the specified directory instead of $HOME/.@REDECLIPSE@/
 .RE
 .SH AUTHORS
 Red Eclipse's main developers are Quinton "quin" Reeves and Lee "eihrul" Salzman
@@ -157,4 +157,4 @@ This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com> 
 .SH HISTORY
 Red Eclipse was forked as a continuation of the game Bloodfrontier, which in turn was based on the Cube2 engine and the Sauerbraten game. Red Eclipse and Sauerbraten are now developed in parallel.
 .SH "SEE ALSO"
-.BR redeclipse (6)
+.BR @REDECLIPSE@ (6)
