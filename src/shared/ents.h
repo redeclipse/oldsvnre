@@ -185,6 +185,8 @@ struct animinterpinfo // used for animation blending of animated characters
     void *lastmodel;
 
     animinterpinfo() : lastswitch(-1), lastmodel(NULL) {}
+
+    void reset() { lastswitch = -1; }
 };
 
 #define MAXANIMPARTS 2
@@ -211,6 +213,12 @@ struct dynent : physent                         // animated characters, or chara
         extern void cleanragdoll(dynent *d);
         if(ragdoll) cleanragdoll(this);
 #endif
+    }
+
+    void reset()
+    {
+        physent::reset();
+        loopi(MAXANIMPARTS) animinterp[i].reset();
     }
 
     void normalize_yaw(float angle)
