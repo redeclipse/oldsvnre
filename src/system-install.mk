@@ -63,8 +63,8 @@ system-install-data:
 	install -d $(libexecdir)/$(redeclipse)
 	cp -r ../data $(datadir)/$(redeclipse)/data
 	@rm -rv $(datadir)/$(redeclipse)/data/examples
-	ln -s $$(readlink -f $(datadir))/$(redeclipse)/data \
-		$$(readlink -f $(libexecdir))/$(redeclipse)/data
+	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(redeclipse)/data \
+		$(libexecdir)/$(redeclipse)/data
 
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
