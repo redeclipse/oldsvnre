@@ -1,6 +1,6 @@
 Name "RedEclipse"
 
-OutFile "redeclipse_1.1_win32.exe"
+OutFile "redeclipse_1.2_win32.exe"
 
 InstallDir "$PROGRAMFILES\Red Eclipse"
 
