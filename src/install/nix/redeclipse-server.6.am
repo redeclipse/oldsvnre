@@ -48,7 +48,7 @@
 [
 .BI \-sk joinpass
 ]
-]
+[
 .B \-\-help
 ]
 .SH DESCRIPTION
@@ -139,6 +139,7 @@ Sets the admin password to
 Sets the join password to
 .IR joinpass .
 Users must know the password before they can connect.
+.TP
 .B \-\-help
 Display this manpage
 .SH EXAMPLES
