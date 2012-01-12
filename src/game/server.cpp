@@ -1718,7 +1718,7 @@ namespace server
         lilswap(stamp, 3);
         demorecord->write(stamp, sizeof(stamp));
         demorecord->write(data, len);
-        if(democord->rawtell() >= MAXDEMOSIZE) enddemorecord();
+        if(demorecord->rawtell() >= MAXDEMOSIZE) enddemorecord();
     }
 
     void recordpacket(int chan, void *data, int len)
