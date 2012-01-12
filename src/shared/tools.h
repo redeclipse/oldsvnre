@@ -730,7 +730,7 @@ template <class T> struct smallvector
     { 
         ASSERT(i<=len); 
         if(i >= len) return;
-        for(int j = i; j < len; j++) buf[j].~T();
+        if(isclass<T>::yes) for(int j = i; j < len; j++) buf[j].~T();
         growbuf(i);
     }
 

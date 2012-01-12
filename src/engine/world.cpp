@@ -579,8 +579,9 @@ void dropent()
     groupedit(dropentity(e));
 }
 
-extentity *newentity(bool local, const vec &o, int type, attrvector &attrs)
+extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs)
 {
+    if(entities::getents().length() >= MAXENTS) { conoutft(CON_MESG, "\frtoo many entities"); return NULL; }
     extentity &e = *entities::newent();
     e.o = o;
     e.attrs.add(0, clamp(attrs.length(), 5, MAXENTATTRS) - e.attrs.length());
@@ -599,9 +600,21 @@ extentity *newentity(bool local, const vec &o, int type, attrvector &attrs)
     return &e;
 }
 
-void newentity(int type, attrvector &attrs)
+void newentity(const vec &v, int type, const attrvector &attrs)
+{
+    extentity *t = newentity(true, v, type, attrs);
+    if(!t) return;
+    int i = entities::getents().length()-1;
+    t->type = ET_EMPTY;
+    enttoggle(i);
+    makeundoent();
+    entedit(i, e.type = type);
+}
+
+void newentity(int type, const attrvector &attrs)
 {
     extentity *t = newentity(true, camera1->o, type, attrs);
+    if(!t) return;
     dropentity(*t);
     int i = entities::getents().length()-1;
     t->type = ET_EMPTY;
@@ -654,6 +667,7 @@ void entpaste()
         vec o(c.o);
         o.mul(m).add(sel.o.tovec());
         extentity *e = newentity(true, o, ET_EMPTY, c.attrs);
+        if(!e) continue;
         loopvk(c.links) e->links.add(c.links[k]);
         entadd(++last);
     }
@@ -693,7 +707,6 @@ void entlink()
     else conoutft(CON_MESG, "\frmore than one entity must be selected to link");
 }
 COMMAND(0, entlink, "");
-
 
 void entset(char *what, char *attr)
 {
@@ -974,11 +987,12 @@ ICOMMAND(0, mapsize, "", (void),
 
 void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local)
 {
+    if(i < 0 || i >= MAXENTS) return;
     if(entities::getents().length()<=i)
     {
         while(entities::getents().length()<i) entities::getents().add(entities::newent())->type = ET_EMPTY;
-        newentity(local, o, type, attr);
-        addentity(i);
+        if(newentity(local, o, type, attr))
+            addentity(i);
     }
     else
     {
@@ -992,12 +1006,3 @@ void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local)
     }
 }
 
-void newentity(vec &v, int type, attrvector &attrs)
-{
-    extentity *t = newentity(true, v, type, attrs);
-    int i = entities::getents().length()-1;
-    t->type = ET_EMPTY;
-    enttoggle(i);
-    makeundoent();
-    entedit(i, e.type = type);
-}
