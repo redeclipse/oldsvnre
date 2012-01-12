@@ -1568,20 +1568,6 @@ namespace server
         relayf(abs(r), "%s", str);
     }
 
-    void writedemo(int chan, void *data, int len)
-    {
-        if(!demorecord) return;
-        int stamp[3] = { gamemillis, chan, len };
-        lilswap(stamp, 3);
-        demorecord->write(stamp, sizeof(stamp));
-        demorecord->write(data, len);
-    }
-
-    void recordpacket(int chan, void *data, int len)
-    {
-        writedemo(chan, data, len);
-    }
-
     void listdemos(int cn)
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
@@ -1706,7 +1692,7 @@ namespace server
 
         if(!demotmp) return;
 
-        int len = (int)min(demotmp->size(), stream::offset(MAXDEMOSIZE));
+        int len = (int)min(demotmp->size(), stream::offset(MAXDEMOSIZE + 0x10000));
         if(demos.length()>=MAXDEMOS)
         {
             delete[] demos[0].data;
@@ -1723,6 +1709,21 @@ namespace server
         demotmp->seek(0, SEEK_SET);
         demotmp->read(d.data, len);
         DELETEP(demotmp);
+    }
+
+    void writedemo(int chan, void *data, int len)
+    {
+        if(!demorecord) return;
+        int stamp[3] = { gamemillis, chan, len };
+        lilswap(stamp, 3);
+        demorecord->write(stamp, sizeof(stamp));
+        demorecord->write(data, len);
+        if(democord->rawtell() >= MAXDEMOSIZE) enddemorecord();
+    }
+
+    void recordpacket(int chan, void *data, int len)
+    {
+        writedemo(chan, data, len);
     }
 
     void setupdemorecord()
