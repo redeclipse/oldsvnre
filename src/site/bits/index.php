@@ -1,7 +1,7 @@
 <?php
-    $app['releasever'] = "v1.1 (Supernova Edition)";
-    $app['releasedate'] = "24th July 2011";
-    $app['releasefile'] = "redeclipse_1.1";
+    $app['releasever'] = "v1.2 (Cosmic Edition)";
+    $app['releasedate'] = "7th January 2012";
+    $app['releasefile'] = "redeclipse_1.2";
     $app['background'] = "/bits/background_01.jpg";
     $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
@@ -101,21 +101,39 @@
                 });
             }); 
         </script>
+
     </head>
     <body style="background: url(/bits/bg2.jpg) no-repeat center top, #282828 url(/bits/bg1.jpg) repeat-x" bgcolor="#333">
-        <div id="container">
+		<div id="fb-root"></div>
+		<script>
+				(function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) return;
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+				fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));
+		</script>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        <script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+		<div id="container">
             <div id="banner"><a href="<?php echo $app['bannerurl']; ?>"><?php echo $app['banner']; ?></a></div>
             <div id="links"><?php echo $app['navbar']; ?></div>
             <div id="header">
-                <a href="/home"><img src="/bits/lightbox-blank.gif" alt="Red Eclipse" width="450" height="143" border="0" align="left" title="Red Eclipse" /></a>
-				<a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
+                <a href="/home"><img src="/bits/lightbox-blank.gif" alt="Red Eclipse" width="450" height="143" border="0" align="left" title="Red Eclipse" /></a><a href="http://www.cubeengine.com/"><img src="/bits/lightbox-blank.gif" alt="Built on Cube Engine 2" width="150" height="143" border="0" align="right" title="Built on Cube Engine 2" /></a>
             </div>
             <div id="video">
                 <div id="main">
                     <h1>Red Eclipse</h1><h2>&nbsp;&nbsp;&nbsp;&nbsp;a Free and Open Source FPS</h2>
                     <h3>Available for Windows, Linux/BSD and Mac OSX</h3>
-                    <h3>Parkour, impulse boosts &amp; dashing, and power jumps</h3>
-                    <h3>Favourite gamemodes with tons of mutators and variables</h3>
+                    <h3>Parkour, impulse boosts, dashing, and other tricks</h3>
+                    <h3>Favourite gamemodes with an array of mutators and variables</h3>
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
                     <p id="digidist">or use <a href="/desura">Desura</a>, a free digital distribution application for Windows/Linux</p>
@@ -183,6 +201,9 @@
                         }
                     } ?>
                 </ul>
+				<div class="fb-like" data-href="http://www.redeclipse.net/" data-send="true" data-layout="button_count" data-width="132" data-show-faces="true" data-colorscheme="dark"></div>
+				<a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a><br/>
+				<g:plusone size="medium" annotation="bubble" width="90"></g:plusone>
             </div>
             <div class="endrightblock">&nbsp;</div>
             <div id="footer">
