@@ -38,6 +38,7 @@ h4 { font: bold 21px Trebuchet MS, Arial, Helvetica, sans-serif; color: #FFFFFF;
 .rightblock a { color: #FFFFFF; text-decoration: none; float: left; }
 .rightblock a:visited { color: #FFFFFF; text-decoration: none; }
 .rightblock a:hover { color: #CCCCCC; text-decoration: none; }
+.rightblock iframe { margin-bottom: 4px;}
 .endrightblock { background: url(/bits/sprite.png) 0px -1290px; margin: 0px; padding: 0px; float: right; width: 250px; height: 20px; clear: right; }
 .rightblock form { margin: 10px 0px 0px; }
 .leftcol { margin: 10px 10px 0px 12px; padding: 0px; float: left; width: 330px; font: 14px/18px Arial, Helvetica, sans-serif; color: #a5a5a5; }
