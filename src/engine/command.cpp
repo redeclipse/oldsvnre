@@ -272,7 +272,7 @@ static inline void popalias(ident &id)
     if(id.type == ID_ALIAS && id.index >= MAXARGS) poparg(id);
 }
 
-ICOMMAND(local, "L", (), {});
+ICOMMAND(0, local, "L", (), {});
 
 static inline bool checknumber(const char *s)
 {
