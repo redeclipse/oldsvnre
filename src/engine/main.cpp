@@ -5,10 +5,14 @@
 #include <signal.h>
 
 SDL_Surface *screen = NULL;
+
+#ifdef FAKESHOWCURSOR
 SDL_Cursor *scursor = NULL, *ncursor = NULL;
+#endif
 
 void showcursor(bool show)
 {
+#ifdef FAKESHOWCURSOR
     if(show)
     {
         if(scursor) SDL_FreeCursor(scursor);
@@ -17,6 +21,7 @@ void showcursor(bool show)
     }
     else
     {
+        if(!ncursor) ncursor = SDL_GetCursor();
         if(!scursor)
         {
             Uint8 sd[1] = { 0 };
@@ -26,6 +31,9 @@ void showcursor(bool show)
 
         SDL_SetCursor(scursor);
     }
+#else
+    SDL_ShowCursor(show ? 1 : 0)
+#endif
 }
 
 void setcaption(const char *text)
@@ -889,7 +897,7 @@ int main(int argc, char **argv)
     setupscreen(usedcolorbits, useddepthbits, usedfsaa);
 
     conoutf("loading video misc..");
-    ncursor = SDL_GetCursor();
+#ifdef 
     showcursor(false);
     setscreensaver(false);
     keyrepeat(false);
