@@ -32,7 +32,7 @@ void showcursor(bool show)
         SDL_SetCursor(scursor);
     }
 #else
-    SDL_ShowCursor(show ? 1 : 0)
+    SDL_ShowCursor(show ? 1 : 0);
 #endif
 }
 
@@ -85,7 +85,10 @@ void cleanup()
 #endif
     setscreensaver(true);
     showcursor(true);
+#ifdef FAKESHOWCURSOR
     if(scursor) SDL_FreeCursor(scursor);
+    scursor = ncursor = NULL;
+#endif
     SDL_WM_GrabInput(SDL_GRAB_OFF);
     cleargamma();
     freeocta(worldroot);
@@ -897,7 +900,6 @@ int main(int argc, char **argv)
     setupscreen(usedcolorbits, useddepthbits, usedfsaa);
 
     conoutf("loading video misc..");
-#ifdef 
     showcursor(false);
     setscreensaver(false);
     keyrepeat(false);
