@@ -277,7 +277,6 @@
 					<Add option="-s" />
 					<Add library="freetype" />
 					<Add library="zdll" />
-					<Add library="png" />
 					<Add directory="lib" />
 				</Linker>
 			</Target>
