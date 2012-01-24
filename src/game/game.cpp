@@ -2509,7 +2509,7 @@ namespace game
                 if(d->conopen) t = textureload(hud::chattex, 3);
                 else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
                     t = textureload(hud::teamtexname(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
-                else
+                else if(!m_team(gamemode, mutators) || d->team != focus->team)
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);

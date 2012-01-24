@@ -1434,7 +1434,7 @@ namespace hud
         if(dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
-                 dominated = radarplayereffects && d->dominated.find(game::focus) >= 0;
+                 dominated = radarplayereffects && (!m_team(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0;
             vec colour[2];
             if(burning) colour[0] = game::burncolour(d);
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
