@@ -412,7 +412,7 @@ namespace hud
             loopscoregroup({
                 const char *status = hud::playertex;
                 if(o->state == CS_DEAD || o->state == CS_WAITING) status = hud::deadtex;
-                else if(o->state == CS_ALIVE)
+                else if(o->state == CS_ALIVE && (!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
                 {
                     if(o->dominating.find(game::focus) >= 0) status = hud::dominatingtex;
                     else if(o->dominated.find(game::focus) >= 0) status = hud::dominatedtex;
