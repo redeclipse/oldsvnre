@@ -118,4 +118,4 @@ Supporters
  Cameron "Rhubarb" Dawdy, Christopher "paroneayea" Webber,
  Mark "xtort-" Doodeman, Vadim Peretokin, Taiyo Rawle, "CD Xbow",
  "FearFighter", Daniel "Imerion" Eriksson, Furor, Gaming Tilt,
- Nick "Fatal_Glory" Watts
+ Nick "Fatal_Glory" Watts, Robert Winkler
