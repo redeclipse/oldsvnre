@@ -649,7 +649,7 @@ namespace game
         {
             bool hasent = d->aitype >= AI_START && entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR;
             if(hasent && entities::ents[d->aientity]->attrs[9] > 0) total *= (entities::ents[d->aientity]->attrs[9]/100.f)*enemyscale;
-            else total *= aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].scale*(d->aitype >= AI_START ? enemyscale : botscale);
+            else total *= aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].scale*(d->aitype >= AI_START ? enemyscale : botscale);
         }
         if(d->state != CS_SPECTATOR && d->state != CS_EDITING)
         {
@@ -701,7 +701,7 @@ namespace game
         }
 
         float offset = d->height; d->o.z -= d->height;
-        if(aistyle[clamp(d->aitype, int(AI_BOT), int(AI_MAX-1))].cancrouch)
+        if(aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
             float crouchoff = 1.f-CROUCHHEIGHT;
@@ -715,7 +715,6 @@ namespace game
                     vec dir;
                     vecfromyawpitch(d->yaw, 0, d->move, d->strafe, dir);
                     d->o.add(dir);
-                    if(!collide(d, vec(0, 0, 1), 0.f, false)) break;
                 }
                 loopi(10)
                 {
