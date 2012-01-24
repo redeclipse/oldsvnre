@@ -152,7 +152,7 @@ static void writelog(FILE *file, const char *fmt, va_list args)
 void localservertoclient(int chan, ENetPacket *packet) {}
 VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
 #else
-VAR(0, servertype, 0, 1, 3); // 0: local only, 1: private, 2: public, 3: dedicated
+VAR(0, servertype, 0, 0, 3); // 0: local only, 1: private, 2: public, 3: dedicated
 #endif
 VAR(0, serveruprate, 0, 0, VAR_MAX);
 VAR(0, serverport, 1, RE_SERVER_PORT, VAR_MAX);
