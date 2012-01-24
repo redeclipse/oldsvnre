@@ -152,7 +152,7 @@ static void writelog(FILE *file, const char *fmt, va_list args)
 void localservertoclient(int chan, ENetPacket *packet) {}
 VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
 #else
-VAR(0, servertype, 0, 0, 3); // 0: local only, 1: private, 2: public, 3: dedicated
+VARF(0, servertype, 0, 0, 3, changeservertype()); // 0: local only, 1: private, 2: public, 3: dedicated
 #endif
 VAR(0, serveruprate, 0, 0, VAR_MAX);
 VAR(0, serverport, 1, RE_SERVER_PORT, VAR_MAX);
@@ -360,15 +360,20 @@ int addclient(int type)
     return c->num;
 }
 
-void cleanupserver()
+void cleanupserversockets()
 {
-    server::shutdown();
     if(serverhost) enet_host_destroy(serverhost);
     serverhost = NULL;
 
     if(pongsock != ENET_SOCKET_NULL) enet_socket_destroy(pongsock);
     if(lansock != ENET_SOCKET_NULL) enet_socket_destroy(lansock);
     pongsock = lansock = ENET_SOCKET_NULL;
+}
+
+void cleanupserver()
+{
+    server::shutdown();
+    cleanupserversockets();
 
 #ifdef IRC
     irccleanup();
@@ -1200,50 +1205,48 @@ void serverloop()
     exit(EXIT_SUCCESS);
 }
 
-void setupserver()
+int setupserversockets()
 {
-    server::changemap(load && *load ? load : NULL);
+    if(!servertype || (serverhost && pongsock != ENET_SOCKET_NULL)) return servertype;
 
-    if(!servertype) return;
-
-#ifdef MASTERSERVER
-    setupmaster();
-#endif
-
-    conoutf("init: server (%s:%d)", *serverip ? serverip : "*", serverport);
     ENetAddress address = { ENET_HOST_ANY, serverport };
     if(*serverip)
     {
         if(enet_address_set_host(&address, serverip) < 0) conoutf("\frWARNING: server address not resolved");
         else serveraddress.host = address.host;
     }
-    serverhost = enet_host_create(&address, server::reserveclients(), server::numchannels(), 0, serveruprate);
+
     if(!serverhost)
     {
-        conoutf("\frcould not create server socket");
+        serverhost = enet_host_create(&address, server::reserveclients(), server::numchannels(), 0, serveruprate);
+        if(!serverhost)
+        {
+            conoutf("\frcould not create server socket");
 #ifndef STANDALONE
-        setvar("servertype", 0);
+            setvar("servertype", 0);
 #endif
-        return;
+            return servertype;
+        }
+        loopi(server::reserveclients()) serverhost->peers[i].data = NULL;
     }
-    loopi(server::reserveclients()) serverhost->peers[i].data = NULL;
 
-    address.port = serverport+1;
-    pongsock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
-    if(pongsock != ENET_SOCKET_NULL && enet_socket_bind(pongsock, &address) < 0)
-    {
-        enet_socket_destroy(pongsock);
-        pongsock = ENET_SOCKET_NULL;
-    }
     if(pongsock == ENET_SOCKET_NULL)
     {
-        conoutf("\frcould not create server info socket, publicity disabled");
+        address.port = serverport+1;
+        pongsock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
+        if(pongsock != ENET_SOCKET_NULL && enet_socket_bind(pongsock, &address) < 0)
+        {
+            enet_socket_destroy(pongsock);
+            pongsock = ENET_SOCKET_NULL;
+        }
+        if(pongsock == ENET_SOCKET_NULL)
+        {
+            conoutf("\frcould not create server info socket, publicity disabled");
 #ifndef STANDALONE
-        setvar("servertype", 1);
+            setvar("servertype", 1);
 #endif
-    }
-    else
-    {
+            return servertype;
+        }
         enet_socket_set_option(pongsock, ENET_SOCKOPT_NONBLOCK, 1);
 
         address.port = RE_LAN_PORT;
@@ -1257,7 +1260,32 @@ void setupserver()
         else enet_socket_set_option(lansock, ENET_SOCKOPT_NONBLOCK, 1);
     }
 
-    if(verbose) conoutf("\fggame server started");
+    return servertype;
+}
+
+void changeservertype()
+{
+    if(!servertype)
+    {
+        kicknonlocalclients(DISC_PRIVATE);
+        cleanupserversockets();
+    }
+    else setupserversockets();
+}
+
+void setupserver()
+{
+    server::changemap(load && *load ? load : NULL);
+
+    if(!servertype) return;
+
+#ifdef MASTERSERVER
+    setupmaster();
+#endif
+
+    conoutf("init: server (%s:%d)", *serverip ? serverip : "*", serverport);
+
+    if(setupserversockets() && verbose) conoutf("\fggame server started");
 
 #ifndef STANDALONE
     if(servertype >= 3) serverloop();
