@@ -3,7 +3,7 @@ In the absence of an explicit license, content is considered to be covered by
     obey individual licensing criteria. This does not apply to the Red Eclipse
     logo or other trademarks unique to the project.
 
-    Red Eclipse, Copyright (C) 2009-2011 Red Eclipse Team
+    Red Eclipse, Copyright (C) 2009-2012 Red Eclipse Team
     Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
     http://creativecommons.org/licenses/by-sa/3.0/
 
@@ -13,6 +13,6 @@ lava.jpg
 
 emblem.png, logo.png
     Created by Luckystrike-Rx
-	Copyright (C) 2009-2011 Red Eclipse Team
+	Copyright (C) 2009-2012 Red Eclipse Team
 	Creative Commons Attribution ShareAlike 3.0 License (CC-BY-SA)
 	In addition covered by "THE RED ECLIPSE MARK POLICY" (see trademark.txt included with this distribution)
