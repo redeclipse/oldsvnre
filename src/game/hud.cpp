@@ -1326,7 +1326,7 @@ namespace hud
         }
         else
         {
-            dir = vec(pos).sub(camera1->o);
+            dir = style ? vec(pos).sub(camera1->o) : pos;
             dist = clamp(dir.magnitude()/hud::radarrange(), 0.f, 1.f);
         }
         dir.rotate_around_z(-camera1->yaw*RAD).normalize();
@@ -1552,21 +1552,19 @@ namespace hud
         {
             damageloc &d = damagelocs[i];
             int millis = lastmillis-d.outtime;
-            if(millis >= radardamagetime+radardamagefade) { damagelocs.remove(i--); continue; }
+            if(millis >= radardamagetime+radardamagefade || d.dir.iszero()) { damagelocs.remove(i--); continue; }
             if(game::focus->state != CS_SPECTATOR && game::focus->state != CS_EDITING)
             {
                 float amt = millis >= radardamagetime ? 1.f-(float(millis-radardamagetime)/float(radardamagefade)) : float(millis)/float(radardamagetime),
                     range = clamp(max(d.damage, radardamagemin)/float(max(radardamagemax-radardamagemin, 1)), radardamagemin/100.f, 1.f),
                     fade = clamp(radardamageblend*blend, min(radardamageblend*radardamagemin/100.f, 1.f), radardamageblend)*amt,
                     size = clamp(range*radardamagesize, min(radardamagesize*radardamagemin/100.f, 1.f), radardamagesize)*amt;
-                vec dir = d.dir;
-                if(dir.iszero()) vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, dir);
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, dir, d.colour, "tiny", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour, "tiny", "%s +%d", a ? game::colorname(a) : "?", d.damage);
                 }
-                else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, dir, d.colour);
+                else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour);
             }
         }
         if(radardamage >= 2)
