@@ -3,7 +3,7 @@
 #RE_DATA=~/redeclipse
 #RE_DATA=/usr/local/redeclipse
 #RE_DATA=.
-RE_DATA=$(dirname $0)
+RE_DATA="$(cd "$(dirname "$0")" && pwd)"
 
 # RE_BIN should refer to the directory in which Red Eclipse executable files are placed.
 RE_BIN=${RE_DATA}/bin
@@ -58,14 +58,14 @@ fi
 
 if [ -x ${RE_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ]
 then
-    cd ${RE_DATA}
+    cd ${RE_DATA} || exit 1
     exec ${RE_BIN}/reclient${SYSTEM_SUFFIX}${MACHINE_SUFFIX} ${RE_OPTIONS} "$@"
 else
     echo "Your platform does not have a pre-compiled Red Eclipse client."
     echo -n "Would you like to build one now? [Yn] "
     read CC
     if [ "${CC}" != "n" ]; then
-        cd ${RE_DATA}/src
+        cd ${RE_DATA}/src || exit 1
         make clean install
         echo "Build complete, please try running the script again."
     else
