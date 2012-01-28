@@ -1463,7 +1463,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
 {
     if(pass==RENDERPASS_LIGHTMAP || pass==RENDERPASS_COLOR || pass==RENDERPASS_ENVMAP || pass==RENDERPASS_DYNLIGHT)
     {
-        GLuint diffusetex = blankgeom ? blanktexture->id : (slot.sts.empty() ? notexture->id : slot.sts[0].t->id);
+        GLuint diffusetex = blankgeom && editmode ? blanktexture->id : (slot.sts.empty() ? notexture->id : slot.sts[0].t->id);
         if(cur.textures[cur.diffusetmu]!=diffusetex)
             glBindTexture(GL_TEXTURE_2D, cur.textures[cur.diffusetmu] = diffusetex);
     }
