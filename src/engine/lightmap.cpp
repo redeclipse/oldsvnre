@@ -2230,7 +2230,7 @@ void setfullbrightlevel(int fullbrightlevel)
     initlights();
 }
 
-VARF(0, fullbright, 0, 0, 1, initlights());
+VARF(0, fullbright, 0, 0, 1, if(lightmaptexs.length()) initlights());
 VARF(IDF_PERSIST, fullbrightlevel, 0, 128, 255, setfullbrightlevel(fullbrightlevel));
 
 vector<LightMapTexture> lightmaptexs;
@@ -2581,7 +2581,7 @@ void updateentlighting()
 
 void initlights()
 {
-    if(nolights || fullbright || lightmaps.empty())
+    if(nolights || (fullbright && editmode) || lightmaps.empty())
     {
         clearlights();
         return;
@@ -2640,7 +2640,7 @@ static inline void fastsunlight(const vec &o, float tolerance, uchar *slight, in
 
 void lightreaching(const vec &target, vec &color, vec &dir, bool fast, extentity *t, float ambient)
 {
-    if(nolights || fullbright || lightmaps.empty())
+    if(nolights || (fullbright && editmode) || lightmaps.empty())
     {
         color = vec(1, 1, 1);
         dir = vec(0, 0, 1);
