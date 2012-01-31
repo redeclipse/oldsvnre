@@ -10,9 +10,10 @@ Modes & Mutators:
 Modding:
 
 Misc:
+* SDL 1.2.15
 
 Additional Fixed Bugs:
-
+* #103 [minor] Revenge-seeking remains after team-change
 
 
 Red Eclipse 1.2
