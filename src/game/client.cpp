@@ -1874,15 +1874,15 @@ namespace client
                     ivec moveo;
                     switch(type)
                     {
-                        case N_EDITF: dir = getint(p); mode = getint(p); mpeditface(dir, mode, s, false); break;
-                        case N_EDITT: tex = getint(p); allfaces = getint(p); mpedittex(tex, allfaces, s, false); break;
-                        case N_EDITM: mat = getint(p); mpeditmat(mat, s, false); break;
-                        case N_FLIP: mpflip(s, false); break;
-                        case N_COPY: if(d) mpcopy(d->edit, s, false); break;
-                        case N_PASTE: if(d) mppaste(d->edit, s, false); break;
-                        case N_ROTATE: dir = getint(p); mprotate(dir, s, false); break;
-                        case N_REPLACE: tex = getint(p); newtex = getint(p); mpreplacetex(tex, newtex, s, false); break;
-                        case N_DELCUBE: mpdelcube(s, false); break;
+                        case N_EDITF: dir = getint(p); mode = getint(p); if(s.validate()) mpeditface(dir, mode, s, false); break;
+                        case N_EDITT: tex = getint(p); allfaces = getint(p); if(s.validate()) mpedittex(tex, allfaces, s, false); break;
+                        case N_EDITM: mat = getint(p); if(s.validate()) mpeditmat(mat, s, false); break;
+                        case N_FLIP: if(s.validate()) mpflip(s, false); break;
+                        case N_COPY: if(d && s.validate()) mpcopy(d->edit, s, false); break;
+                        case N_PASTE: if(d && s.validate()) mppaste(d->edit, s, false); break;
+                        case N_ROTATE: dir = getint(p); if(s.validate()) mprotate(dir, s, false); break;
+                        case N_REPLACE: tex = getint(p); newtex = getint(p); if(s.validate()) mpreplacetex(tex, newtex, s, false); break;
+                        case N_DELCUBE: if(s.validate()) mpdelcube(s, false); break;
                     }
                     break;
                 }

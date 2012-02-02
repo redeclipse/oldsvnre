@@ -39,6 +39,14 @@ struct Texture;
 
 extern void settexture(const char *name, int clamp = 0);
 
+// world
+extern bool emptymap(int factor, bool force = false, char *mname = NULL, bool nocfg = false);
+extern bool enlargemap(bool force);
+extern int findentity(int type, int index, vector<int> &attr);
+extern void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local = true);
+extern int getworldsize();
+extern int getmapversion();
+
 // octaedit
 
 enum { EDIT_FACE = 0, EDIT_TEX, EDIT_MAT, EDIT_FLIP, EDIT_COPY, EDIT_PASTE, EDIT_ROTATE, EDIT_REPLACE, EDIT_DELCUBE, EDIT_REMIP };
@@ -53,6 +61,15 @@ struct selinfo
     int size() const    { return s.x*s.y*s.z; }
     int us(int d) const { return s[d]*grid; }
     bool operator==(const selinfo &sel) const { return o==sel.o && s==sel.s && grid==sel.grid && orient==sel.orient; }
+    bool validate()
+    {
+        int worldsize = getworldsize();
+        if(grid <= 0 || grid >= worldsize) return false;
+        s.x = clamp(s.x, 0, (worldsize - o.x)/grid);
+        s.y = clamp(s.y, 0, (worldsize - o.y)/grid);
+        s.z = clamp(s.z, 0, (worldsize - o.z)/grid);
+        return true;
+    }
 };
 
 struct editinfo;
@@ -111,14 +128,6 @@ struct bindlist
 // menus
 extern void newgui(char *name, char *contents, char *initscript = NULL);
 extern void showgui(const char *name, int tab = 0);
-
-// world
-extern bool emptymap(int factor, bool force = false, char *mname = NULL, bool nocfg = false);
-extern bool enlargemap(bool force);
-extern int findentity(int type, int index, vector<int> &attr);
-extern void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local = true);
-extern int getworldsize();
-extern int getmapversion();
 
 // main
 struct igame;
