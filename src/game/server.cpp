@@ -3019,7 +3019,7 @@ namespace server
                 sendf(-1, 1, "ri4", N_CHECKPOINT, ci->clientnum, -1, 0);
             }
         }
-        else givepoints(ci, smode ? smode->points(ci, ci) : -1); // also in duel/survivor to penalise suicide
+        else if(!m_duke(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;
         dropitems(ci, aistyle[ci->state.aitype].living ? 2 : 3);
         if(GAME(burntime) && (flags&HIT_MELT || flags&HIT_BURN))
