@@ -193,7 +193,7 @@ install: install-client install-server
 
 depend:
 	makedepend -Y -Ishared -Iengine -Igame -DINTERFACE -DIRC -DMASTERSERVER $(subst .o,.cpp,$(CLIENT_OBJS))
-	makedepend -a -o-standalone.o -Y -Ishared -Iengine -Igame -DINTERFACE -DIRC -DMASTERSERVER $(subst -standalone.o,.cpp,$(SERVER_OBJS))
+	makedepend -a -o-standalone.o -Y -Ishared -Iengine -Igame -DSTANDALONE -DINTERFACE -DIRC -DMASTERSERVER $(subst -standalone.o,.cpp,$(SERVER_OBJS))
 	makedepend -a -o.h.gch -Y -Ishared -Iengine -Igame -DINTERFACE -DIRC -DMASTERSERVER $(subst .h.gch,.h,$(CLIENT_PCH))
 
 all: client server
@@ -542,38 +542,28 @@ shared/tools-standalone.o: shared/igame.h
 engine/command-standalone.o: engine/engine.h shared/cube.h shared/tools.h
 engine/command-standalone.o: shared/command.h shared/geom.h shared/ents.h
 engine/command-standalone.o: shared/iengine.h shared/igame.h engine/irc.h
-engine/command-standalone.o: engine/sound.h engine/world.h engine/octa.h
-engine/command-standalone.o: engine/lightmap.h engine/bih.h engine/texture.h
-engine/command-standalone.o: engine/model.h engine/varray.h
+engine/command-standalone.o: engine/sound.h
 engine/irc-standalone.o: engine/engine.h shared/cube.h shared/tools.h
 engine/irc-standalone.o: shared/command.h shared/geom.h shared/ents.h
 engine/irc-standalone.o: shared/iengine.h shared/igame.h engine/irc.h
-engine/irc-standalone.o: engine/sound.h engine/world.h engine/octa.h
-engine/irc-standalone.o: engine/lightmap.h engine/bih.h engine/texture.h
-engine/irc-standalone.o: engine/model.h engine/varray.h
+engine/irc-standalone.o: engine/sound.h
 engine/master-standalone.o: engine/engine.h shared/cube.h shared/tools.h
 engine/master-standalone.o: shared/command.h shared/geom.h shared/ents.h
 engine/master-standalone.o: shared/iengine.h shared/igame.h engine/irc.h
-engine/master-standalone.o: engine/sound.h engine/world.h engine/octa.h
-engine/master-standalone.o: engine/lightmap.h engine/bih.h engine/texture.h
-engine/master-standalone.o: engine/model.h engine/varray.h
+engine/master-standalone.o: engine/sound.h
 engine/server-standalone.o: engine/engine.h shared/cube.h shared/tools.h
 engine/server-standalone.o: shared/command.h shared/geom.h shared/ents.h
 engine/server-standalone.o: shared/iengine.h shared/igame.h engine/irc.h
-engine/server-standalone.o: engine/sound.h engine/world.h engine/octa.h
-engine/server-standalone.o: engine/lightmap.h engine/bih.h engine/texture.h
-engine/server-standalone.o: engine/model.h engine/varray.h
+engine/server-standalone.o: engine/sound.h
 game/server-standalone.o: game/game.h engine/engine.h shared/cube.h
 game/server-standalone.o: shared/tools.h shared/command.h shared/geom.h
 game/server-standalone.o: shared/ents.h shared/iengine.h shared/igame.h
-game/server-standalone.o: engine/irc.h engine/sound.h engine/world.h
-game/server-standalone.o: engine/octa.h engine/lightmap.h engine/bih.h
-game/server-standalone.o: engine/texture.h engine/model.h engine/varray.h
-game/server-standalone.o: game/weapons.h game/gamemode.h game/team.h
-game/server-standalone.o: game/ai.h game/vars.h game/capture.h game/defend.h
-game/server-standalone.o: game/bomber.h game/auth.h game/capturemode.h
-game/server-standalone.o: game/defendmode.h game/bombermode.h game/duelmut.h
-game/server-standalone.o: game/aiman.h game/extinfo.h
+game/server-standalone.o: engine/irc.h engine/sound.h game/weapons.h
+game/server-standalone.o: game/gamemode.h game/team.h game/ai.h game/vars.h
+game/server-standalone.o: game/capture.h game/defend.h game/bomber.h
+game/server-standalone.o: game/auth.h game/capturemode.h game/defendmode.h
+game/server-standalone.o: game/bombermode.h game/duelmut.h game/aiman.h
+game/server-standalone.o: game/extinfo.h
 
 shared/cube.h.gch: shared/tools.h shared/command.h shared/geom.h
 shared/cube.h.gch: shared/ents.h shared/iengine.h shared/igame.h
