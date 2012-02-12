@@ -8,7 +8,7 @@
 .OP \-v\fR{0..4}
 .OP \-x\fR\(dqcommand(s)\(dq
 .OP \-o\fRsauerdir
-.OP \-ss\fRservertype
+.OP \-ss\fR{0..3}
 .OP \-g\fRlogfile
 .OP \-su\fRserveruprate
 .OP \-si\fRserverip

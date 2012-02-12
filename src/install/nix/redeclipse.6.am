@@ -21,6 +21,7 @@
 .OP \-o\fRsauerdir
 .OP \-sm\fRservermaster
 .OP \-sa\fRservermasterport
+.OP \-ss\fR{0..3}
 .OP \-g\fRlogfile
 .OP \-\-help
 .SH DESCRIPTION
@@ -139,11 +140,14 @@ Sets the path to your Sauerbraten directory. If Red Eclipse can find your Sauerb
 .BI \-sm servermaster
 Connects to
 .I servermaster
-to get the list of available servers. May also use this setting if the local client server is configured to be public?
+to get the list of available servers.
 .TP
 .BI \-sa servermasterport
 Contacts the master server using port
 .IR servermasterport .
+.TP
+.BI \-ss {0..3}
+Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) redeclipse will act similarly to redeclipse-server and not start the GUI.
 .TP
 .BI \-g logfile
 Output log to
