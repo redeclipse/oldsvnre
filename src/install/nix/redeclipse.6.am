@@ -2,67 +2,27 @@
 .SH NAME
 @REDECLIPSE@ \- script to launch the Red Eclipse FPS game client
 .SH SYNOPSIS
-.B @REDECLIPSE@
-[
-.BI \-dw width
-]
-[
-.BI \-dh height
-]
-[
-.BI \-dd depth
-]
-[
-.BI \-dc depth
-]
-[
-.BI \-da samples
-]
-[
-.BR \-dv {0|1}
-]
-[
-.BR \-df {0|1}
-]
-[
-.BI \-ds bits
-]
-[
-.BR \-du {0..3}
-]
-[
-.BR \-k {0|1}
-]
-[
-.BI \-h homedir
-]
-[
-.BI \-p packagedir
-]
-[
-.BR \-v {0..4}
-]
-[
-.BI \-r scriptname
-]
-[
-.BI \-x \(dqcommand(s)\(dq
-]
-[
-.BI \-o sauerdir
-]
-[
-.BI \-sm servermaster
-]
-[
-.BI \-sa servermasterport
-]
-[
-.BI \-g logfile
-]
-[
-.B \-\-help
-]
+.SY @REDECLIPSE@
+.OP \-dw\fRwidth
+.OP \-dh\fRheight
+.OP \-dd\fRdepth
+.OP \-dc\fRdepth
+.OP \-da\fRsamples
+.OP \-dv\fR{0|1}
+.OP \-df\fR{0|1}
+.OP \-ds\fRbits
+.OP \-du\fR{0..3}
+.OP \-k\fR{0|1}
+.OP \-h\fRhomedir
+.OP \-p\fRpackagedir
+.OP \-v\fR{0..4}
+.OP \-r\fRscriptname
+.OP \-x\fR\(dqcommand(s)\(dq
+.OP \-o\fRsauerdir
+.OP \-sm\fRservermaster
+.OP \-sa\fRservermasterport
+.OP \-g\fRlogfile
+.OP \-\-help
 .SH DESCRIPTION
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
