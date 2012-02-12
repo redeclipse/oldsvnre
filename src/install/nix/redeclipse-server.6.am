@@ -1,4 +1,4 @@
-.TH REDECLIPSE-SERVER 6 2011-12-10 "Red Eclipse 1.2" "Red Eclipse Manual"
+.TH REDECLIPSE-SERVER 6 2012-02-13 "Red Eclipse 1.2" "Red Eclipse Manual"
 .SH NAME
 @REDECLIPSE@-server \- script to launch the server for the Red Eclipse FPS game
 .SH SYNOPSIS
@@ -16,7 +16,7 @@
 .OP \-sa\fRservermasterport
 .OP \-sl\fRdefaultmap
 .OP \-sp\fRserverport
-.OP \-sP adminpass
+.OP \-sP\fRadminpass
 .OP \-sk\fRjoinpass
 .OP \-\-help
 .SH DESCRIPTION
