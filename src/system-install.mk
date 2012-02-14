@@ -1,4 +1,4 @@
-GZIP=gzip
+GZIPPER=gzip
 
 ICONS= \
 	install/nix/redeclipse_x32.png \
@@ -74,13 +74,13 @@ system-install-docs: $(MANPAGES)
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@REDECLIPSE@,$(redeclipse),g' \
 		install/nix/redeclipse.6.am | \
-		$(GZIP) -9 -c > $(mandir)/man6/$(redeclipse).6.gz
+		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(redeclipse).6.gz
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@REDECLIPSE@,$(redeclipse),g' \
 		install/nix/redeclipse-server.6.am | \
-		$(GZIP) -9 -c > $(mandir)/man6/$(redeclipse)-server.6.gz
+		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(redeclipse)-server.6.gz
 	cp -r ../data/examples $(docdir)/$(redeclipse)/examples
 
 system-install-menus: icons
@@ -110,7 +110,7 @@ system-install-cube2font: system-install-cube2font-docs
 
 system-install-cube2font-docs: install/nix/cube2font.1
 	install -d $(mandir)/man1
-	$(GZIP) -9 -c < install/nix/cube2font.1 \
+	$(GZIPPER) -9 -n -c < install/nix/cube2font.1 \
 		> $(mandir)/man1/cube2font.1.gz
 
 system-install: system-install-client system-install-server system-install-data system-install-docs system-install-menus
