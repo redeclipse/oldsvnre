@@ -1,4 +1,4 @@
-.TH REDECLIPSE-SERVER 6 2012-02-13 "Red Eclipse 1.2" "Red Eclipse Manual"
+.TH REDECLIPSE-SERVER 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
 .SH NAME
 @REDECLIPSE@-server \- script to launch the server for the Red Eclipse FPS game
 .SH SYNOPSIS
@@ -36,7 +36,8 @@ The recommended way to change the settings of the server is to create and edit t
 .BI \-h homedir
 Sets your home directory to
 .IR homedir .
-This is where servinit.cfg and servexec.cfg are read from, it defaults to $HOME/.@REDECLIPSE@/
+This is where servinit.cfg and servexec.cfg are read from, it defaults to
+.IR $HOME/.@REDECLIPSE@/ .
 .TP
 .BI \-p packagedir
 Includes the data files found in
@@ -63,6 +64,8 @@ Sets server type. 0 for local only, 1 for private, 2 for public, 3 for dedicated
 .BI \-g logfile
 Output log to
 .IR logfile .
+Path is set relative to
+.IR $HOME/.@REDECLIPSE@/ .
 .TP
 .BI \-su serveruprate
 Sets upstream rate to
@@ -113,12 +116,13 @@ Loads data from an additional directory, sets the server type to local (LAN), se
 .RE
 .B @REDECLIPSE@-server -h$HOME/@REDECLIPSE@-server_configs/
 .RS 4
-Reads and writes the configuration files to the specified directory instead of $HOME/.@REDECLIPSE@/
+Reads and writes the configuration files to the specified directory instead of
+.IR $HOME/.@REDECLIPSE@/ .
 .RE
 .SH AUTHORS
 Red Eclipse's main developers are Quinton "quin" Reeves and Lee "eihrul" Salzman
 .PP
-This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com> for the Debian project (and may be used by others).
+This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com>
 .SH HISTORY
 Red Eclipse was forked as a continuation of the game Bloodfrontier, which in turn was based on the Cube2 engine and the Sauerbraten game. Red Eclipse and Sauerbraten are now developed in parallel.
 .SH "SEE ALSO"
