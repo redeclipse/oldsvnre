@@ -1,4 +1,4 @@
-.TH REDECLIPSE 6 2012-02-13 "Red Eclipse 1.2" "Red Eclipse Manual"
+.TH REDECLIPSE 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
 .SH NAME
 @REDECLIPSE@ \- script to launch the Red Eclipse FPS game client
 .SH SYNOPSIS
@@ -32,7 +32,9 @@ is a script which executes
 .BR @REDECLIPSE@
 from the
 .I @LIBEXECDIR@/@REDECLIPSE@
-directory using the "\-r" option, it will accept any additional options.
+directory using the
+.B \-r
+option, it will accept any additional options.
 .PP
 The recommended way to change the settings of the client are to edit the
 .I config.cfg
@@ -111,7 +113,8 @@ Enables or disables kid mode, which reduces blood and death effects somewhat. 1 
 .BI \-h homedir
 Sets your home directory to
 .IR homedir .
-Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to $HOME/.@REDECLIPSE@/
+Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to
+.IR $HOME/.@REDECLIPSE@/ .
 .TP
 .BI \-p packagedir
 Includes the data files found in
@@ -152,6 +155,8 @@ Sets the server type of the local server. 0 for local only, 1 for private, 2 for
 .BI \-g logfile
 Output log to
 .IR logfile .
+Path is set relative to
+.IR $HOME/.@REDECLIPSE@/ .
 .TP
 .B \-\-help
 Display this manpage
@@ -163,7 +168,8 @@ Load data from an additional directory.
 .RE
 .B @REDECLIPSE@ -h$HOME/@REDECLIPSE@_configs/
 .RS 4
-Reads and writes the configuration files to the specified directory instead of $HOME/.@REDECLIPSE@/
+Reads and writes the configuration files to the specified directory instead of
+.IR $HOME/.@REDECLIPSE@/ .
 .RE
 .B @REDECLIPSE@ -x"mode 7; trialweapon 0; map hinder"
 .RS 4
@@ -172,7 +178,7 @@ Sets game mode to time trial, trialmode weapon to empty hands, and starts a game
 .SH AUTHORS
 Red Eclipse's main developers are Quinton "quin" Reeves and Lee "eihrul" Salzman
 .PP
-This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com> for the Debian project (and may be used by others).
+This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com>
 .SH HISTORY
 Red Eclipse was forked as a continuation of the game Bloodfrontier, which in turn was based on the Cube2 engine and the Sauerbraten game. Red Eclipse and Sauerbraten are now developed in parallel.
 .SH "SEE ALSO"
