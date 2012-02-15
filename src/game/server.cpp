@@ -11,7 +11,7 @@ namespace server
         int millis, last;
         attrvector attrs, kin;
 
-        srventity() :  o(0, 0, 0), type(NOTUSED),spawned(false), millis(0), last(0) { reset(); }
+        srventity() :  o(0, 0, 0), type(NOTUSED), spawned(false), millis(0), last(0) { reset(); }
         ~srventity() { reset(); }
 
         void reset()

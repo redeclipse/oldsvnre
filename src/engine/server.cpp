@@ -132,7 +132,7 @@ void conoutf(const char *s, ...)
     conoutft(0, "%s", sf);
 }
 
-VAR(IDF_PERSIST, verbose, 0, 0, 6);
+VAR(0, verbose, 0, 0, 6);
 
 static void writelog(FILE *file, const char *fmt, va_list args)
 {
@@ -299,7 +299,7 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
     }
     *dst = '\0';
 }
-ICOMMAND(0, filter, "siiiN", (char *s, int *a, int *b, int *c, int *numargs), 
+ICOMMAND(0, filter, "siiiN", (char *s, int *a, int *b, int *c, int *numargs),
 {
     char *d = newstring(s);
     filtertext(d, s, *numargs >= 2 ? *a>0 : true, *numargs >= 3 ? *b>0 : true, *numargs >= 4 ? *c>0 : true);
