@@ -16,7 +16,6 @@
 .OP \-h\fRhomedir
 .OP \-p\fRpackagedir
 .OP \-v\fR{0..4}
-.OP \-r\fRscriptname
 .OP \-x\fR\(dqcommand(s)\(dq
 .OP \-o\fRsauerdir
 .OP \-sm\fRservermaster
@@ -32,9 +31,7 @@ is a script which executes
 .BR @REDECLIPSE@
 from the
 .I @LIBEXECDIR@/@REDECLIPSE@
-directory using the
-.B \-r
-option, it will accept any additional options.
+directory, it will accept any additional options.
 .PP
 The recommended way to change the settings of the client are to edit the
 .I config.cfg
@@ -130,16 +127,6 @@ Sets verbosity. This affects how much information is printed to the console. 0 i
 .IP
 This configuration is stored in init.cfg
 .TP
-.BI \-r scriptname
-Executes the specified init script before OpenGL and various libraries are initialized. Path is set relative to
-.I homedir
-and will only use a custom
-.I homedir
-if used after the
-.B \-h
-option. Defaults to executing
-.IR $HOME/.@REDECLIPSE@/init.cfg .
-.TP
 .BI \-x "\(dqcommand 1; command 2; ...\(dq"
 .
 Executes a list of commands once Red Eclipse has started up.
@@ -163,12 +150,7 @@ Sets the server type of the local server. 0 for local only, 1 for private, 2 for
 Output log to
 .IR logfile .
 Path is set relative to
-.I homedir
-and will only use a custom
-.I homedir
-if used after the
-.B \-h
-option.
+.IR homedir .
 .TP
 .B \-\-help
 Display this manpage
