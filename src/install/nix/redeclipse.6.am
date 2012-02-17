@@ -138,7 +138,7 @@ and will only use a custom
 if used after the
 .B \-h
 option. Defaults to executing
-.IR $HOME/.redeclipse/init.cfg .
+.IR $HOME/.@REDECLIPSE@/init.cfg .
 .TP
 .BI \-x "\(dqcommand 1; command 2; ...\(dq"
 .
@@ -157,7 +157,7 @@ Contacts the master server using port
 .IR servermasterport .
 .TP
 .BI \-ss {0..3}
-Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) redeclipse will act similarly to redeclipse-server and not start the GUI.
+Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) @REDECLIPSE@ will act similarly to @REDECLIPSE@-server and not start the GUI.
 .TP
 .BI \-g logfile
 Output log to
