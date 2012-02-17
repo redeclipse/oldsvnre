@@ -173,7 +173,6 @@ void reloadsignal(int signum)
 }
 
 int initing = NOT_INITING;
-static bool restoredinits = false;
 
 bool initwarning(const char *desc, int level, int type)
 {
@@ -202,7 +201,6 @@ VARF(0, vsync, -1, -1, 1, initwarning("vertical sync"));
 
 void writeinitcfg()
 {
-    if(!restoredinits) return;
     stream *f = openutf8file("init.cfg", "w");
     if(!f) return;
     f->printf("// automatically written on exit, DO NOT MODIFY\n// modify settings in game\n");
@@ -835,17 +833,20 @@ int main(int argc, char **argv)
 
     char *initscript = NULL;
     initing = INIT_RESET;
-    bool hashome = findarg(argc, argv, "-h"), hasinit = findarg(argc, argv, "-r");
-    if(!hashome && !hasinit)
-    {
-        execfile("init.cfg", false);
-        restoredinits = hasinit = true;
-    }
     for(int i = 1; i<argc; i++)
     {
         if(argv[i][0]=='-') switch(argv[i][1])
         {
-            case 'r': execfile(argv[i][2] ? &argv[i][2] : "init.cfg", false); restoredinits = hasinit = true; break;
+            case 'h': serveroption(argv[i]); break;
+        }
+    }
+    execfile("init.cfg", false);
+    for(int i = 1; i<argc; i++)
+    {
+        if(argv[i][0]=='-') switch(argv[i][1])
+        {
+            case 'h': /* parsed first */ break;
+            case 'r': /* compat, ignore */ break;
             case 'd':
             {
                 switch(argv[i][2])
@@ -874,11 +875,6 @@ int main(int argc, char **argv)
             case 'x': initscript = &argv[i][2]; break;
             default:
                 if(!serveroption(argv[i])) gameargs.add(argv[i]);
-                else if(argv[i][1] == 'h' && !hasinit)
-                {
-                    execfile("init.cfg", false);
-                    restoredinits = hasinit = true;
-                }
                 break;
         }
         else gameargs.add(argv[i]);
