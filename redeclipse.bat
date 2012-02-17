@@ -2,7 +2,7 @@
 
 rem set SDL_VIDEO_WINDOW_POS=0,0
 set RE_DIR=.
-set RE_OPTIONS=-glog.txt -r
+set RE_OPTIONS=-glog.txt
 
 IF EXIST bin\reclient.exe (
     start bin\reclient.exe %RE_OPTIONS% %* 
