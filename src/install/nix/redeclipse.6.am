@@ -131,7 +131,14 @@ Sets verbosity. This affects how much information is printed to the console. 0 i
 This configuration is stored in init.cfg
 .TP
 .BI \-r scriptname
-Executes the specified init script before OpenGL and various libraries are initialized. If no file specified, executes init.cfg in the home directory.
+Executes the specified init script before OpenGL and various libraries are initialized. Path is set relative to
+.I homedir
+and will only use a custom
+.I homedir
+if used after the
+.B \-h
+option. Defaults to executing
+.IR $HOME/.redeclipse/init.cfg .
 .TP
 .BI \-x "\(dqcommand 1; command 2; ...\(dq"
 .
@@ -156,7 +163,12 @@ Sets the server type of the local server. 0 for local only, 1 for private, 2 for
 Output log to
 .IR logfile .
 Path is set relative to
-.IR $HOME/.@REDECLIPSE@/ .
+.I homedir
+and will only use a custom
+.I homedir
+if used after the
+.B \-h
+option.
 .TP
 .B \-\-help
 Display this manpage
