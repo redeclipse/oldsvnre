@@ -65,12 +65,7 @@ Sets server type. 0 for local only, 1 for private, 2 for public, 3 for dedicated
 Output log to
 .IR logfile .
 Path is set relative to
-.I homedir
-and will only use a custom
-.I homedir
-if used after the
-.B \-h
-option.
+.IR homedir .
 .TP
 .BI \-su serveruprate
 Sets upstream rate to
