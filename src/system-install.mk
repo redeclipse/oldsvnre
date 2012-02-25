@@ -1,6 +1,7 @@
 GZIPPER=gzip
 
 ICONS= \
+	install/nix/redeclipse_x16.png \
 	install/nix/redeclipse_x32.png \
 	install/nix/redeclipse_x48.png \
 	install/nix/redeclipse_x64.png \
@@ -19,11 +20,14 @@ mandir=$(DESTDIR)$(prefix)/share/man
 menudir=$(DESTDIR)$(prefix)/share/applications
 icondir=$(DESTDIR)$(prefix)/share/icons/hicolor
 
-install/nix/redeclipse_x32.png: redeclipse.ico
+install/nix/redeclipse_x16.png: redeclipse.ico
 	convert 'redeclipse.ico[0]' $@
 
-install/nix/redeclipse_x48.png: redeclipse.ico
+install/nix/redeclipse_x32.png: redeclipse.ico
 	convert 'redeclipse.ico[1]' $@
+
+install/nix/redeclipse_x48.png: redeclipse.ico
+	convert 'redeclipse.ico[2]' -resize 48x48 $@
 
 install/nix/redeclipse_x64.png: redeclipse.ico
 	convert 'redeclipse.ico[2]' $@
@@ -85,6 +89,7 @@ system-install-docs: $(MANPAGES)
 
 system-install-menus: icons
 	install -d $(menudir)
+	install -d $(icondir)/16x16/apps
 	install -d $(icondir)/32x32/apps
 	install -d $(icondir)/48x48/apps
 	install -d $(icondir)/64x64/apps
@@ -95,6 +100,8 @@ system-install-menus: icons
 		-e 's,@REDECLIPSE@,$(redeclipse),g' \
 		install/nix/redeclipse.desktop.am > \
 		$(menudir)/$(redeclipse).desktop
+	install -m644 install/nix/redeclipse_x16.png \
+		$(icondir)/16x16/apps/$(redeclipse).png
 	install -m644 install/nix/redeclipse_x32.png \
 		$(icondir)/32x32/apps/$(redeclipse).png
 	install -m644 install/nix/redeclipse_x48.png \
@@ -134,6 +141,7 @@ system-uninstall-docs:
 
 system-uninstall-menus:
 	@rm -fv $(menudir)/$(redeclipse).desktop
+	@rm -fv $(icondir)/16x16/apps/$(redeclipse).png
 	@rm -fv $(icondir)/32x32/apps/$(redeclipse).png
 	@rm -fv $(icondir)/48x48/apps/$(redeclipse).png
 	@rm -fv $(icondir)/64x64/apps/$(redeclipse).png
