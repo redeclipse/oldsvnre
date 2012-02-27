@@ -4806,6 +4806,11 @@ namespace server
                 {
                     int val = getint(p);
                     if(!haspriv(ci, restrictdemos ? PRIV_ADMIN : PRIV_MASTER, "record demos")) break;
+                    if(!maxdemos || !maxdemosize) 
+                    {
+                        srvmsgft(ci->clientnum, CON_EVENT, "\frthe server has disabled demo recording"); 
+                        break;
+                    }
                     demonextmatch = val!=0;
                     srvoutf(4, "\fodemo recording is \fs\fc%s\fS for next match", demonextmatch ? "enabled" : "disabled");
                     break;
