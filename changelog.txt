@@ -13,7 +13,7 @@ Modding:
 * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
 
 Misc:
-* Now possible to allow demo recording for masters (/restrictdemo 0)
+* Now possible to allow demo recording for masters (/restrictdemos 0)
 * SDL 1.2.15
 
 Additional Fixed Bugs:
