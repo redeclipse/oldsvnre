@@ -262,6 +262,7 @@ struct bomberservmode : bomberstate, servmode
         {
             flag &f = flags[i];
             putint(p, f.team);
+            putint(p, f.enabled ? 1 : 0);
             putint(p, f.owner);
             if(f.owner<0)
             {
@@ -276,6 +277,12 @@ struct bomberservmode : bomberstate, servmode
                     putint(p, int(f.inertia.z*DMF));
                 }
             }
+        }
+        loopv(clients)
+        {
+            clientinfo *oi = clients[i];
+            if(!oi->connected || oi->clientnum == ci->clientnum || !oi->state.lastbuff) continue;
+            sendf(ci->clientnum, 1, "ri4", N_SPHY, oi->clientnum, SPHY_BUFF, 1);
         }
     }
 

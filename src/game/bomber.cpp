@@ -344,7 +344,7 @@ namespace bomber
         int numflags = getint(p);
         loopi(numflags)
         {
-            int team = getint(p), owner = getint(p), dropped = 0;
+            int team = getint(p), enabled = getint(p), owner = getint(p), dropped = 0;
             vec droploc(0, 0, 0), inertia(0, 0, 0);
             if(owner < 0)
             {
@@ -359,6 +359,7 @@ namespace bomber
             {
                 bomberstate::flag &f = st.flags[i];
                 f.team = team;
+                f.enabled = enabled ? 1 : 0;
                 if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
                 else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
             }
