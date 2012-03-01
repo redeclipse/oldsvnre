@@ -180,7 +180,7 @@ namespace client
     const char *defaultserversort()
     {
         static string vals;
-        formatstring(vals)("%d %d %d", SINFO_STATUS, SINFO_NUMPLRS, SINFO_PING);
+        formatstring(vals)("%d %d", SINFO_NUMPLRS, SINFO_PING);
         return vals;
     }
 

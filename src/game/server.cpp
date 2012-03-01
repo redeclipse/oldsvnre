@@ -368,7 +368,7 @@ namespace server
     VAR(0, maxdemos, 0, 5, 25);
     VAR(0, maxdemosize, 0, 16, 64);
     VAR(0, restrictdemos, 0, 1, 1);
- 
+
     bool demonextmatch = false;
     stream *demotmp = NULL, *demorecord = NULL, *demoplayback = NULL;
     int nextplayback = 0, triggerid = 0;
@@ -1341,7 +1341,7 @@ namespace server
 
     struct spawn
     {
-        int spawncycle;
+        int spawncycle, lastused;
         vector<int> ents;
         vector<int> cycle;
 
@@ -1353,6 +1353,7 @@ namespace server
             ents.shrink(0);
             cycle.shrink(0);
             spawncycle = 0;
+            lastused = -1;
         }
         void add(int n)
         {
@@ -1448,6 +1449,7 @@ namespace server
                         static vector<int> lowest; lowest.setsize(0);
                         loopv(spawns[team].cycle) if(lowest.empty() || spawns[team].cycle[i] <= spawns[team].cycle[lowest[0]])
                         {
+                            if(spawns[team].cycle.length() > 1 && cycle == i) continue; // avoid using this one again straight away
                             if(!lowest.empty() && spawns[team].cycle[i] < spawns[team].cycle[lowest[0]]) lowest.setsize(0);
                             lowest.add(i);
                         }
@@ -1467,7 +1469,11 @@ namespace server
                         break;
                     }
                 }
-                if(spawns[team].ents.inrange(cycle)) return spawns[team].ents[cycle];
+                if(spawns[team].ents.inrange(cycle))
+                {
+                    spawns[team].lastused = cycle;
+                    return spawns[team].ents[cycle];
+                }
             }
         }
         return -1;
@@ -4806,9 +4812,9 @@ namespace server
                 {
                     int val = getint(p);
                     if(!haspriv(ci, restrictdemos ? PRIV_ADMIN : PRIV_MASTER, "record demos")) break;
-                    if(!maxdemos || !maxdemosize) 
+                    if(!maxdemos || !maxdemosize)
                     {
-                        srvmsgft(ci->clientnum, CON_EVENT, "\frthe server has disabled demo recording"); 
+                        srvmsgft(ci->clientnum, CON_EVENT, "\frthe server has disabled demo recording");
                         break;
                     }
                     demonextmatch = val!=0;

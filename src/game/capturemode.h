@@ -188,6 +188,12 @@ struct captureservmode : capturestate, servmode
                 }
             }
         }
+        loopv(clients)
+        {
+            clientinfo *oi = clients[i];
+            if(!oi->connected || oi->clientnum == ci->clientnum || !oi->state.lastbuff) continue;
+            sendf(ci->clientnum, 1, "ri4", N_SPHY, oi->clientnum, SPHY_BUFF, 1);
+        }
     }
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)

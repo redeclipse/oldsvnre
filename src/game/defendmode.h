@@ -112,6 +112,12 @@ struct defendservmode : defendstate, servmode
             putint(p, b.owner);
             putint(p, b.enemy);
         }
+        loopv(clients)
+        {
+            clientinfo *oi = clients[i];
+            if(!oi->connected || oi->clientnum == ci->clientnum || !oi->state.lastbuff) continue;
+            sendf(ci->clientnum, 1, "ri4", N_SPHY, oi->clientnum, SPHY_BUFF, 1);
+        }
     }
 
     void winner(int team, int score)
