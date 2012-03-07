@@ -588,6 +588,7 @@ extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs
         loopv(ents) if(ents[i]->type == ET_EMPTY) { idx = i; break; }
         if(idx < 0 && ents.length() >= MAXENTS) { conoutft(CON_MESG, "\frtoo many entities"); return NULL; }
     }
+    else while(ents.length() < idx) ents.add(entities::newent())->type = ET_EMPTY;
     extentity &e = *entities::newent();
     e.o = o;
     e.attrs.add(0, clamp(attrs.length(), 5, MAXENTATTRS) - e.attrs.length());
@@ -597,7 +598,7 @@ extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs
     e.inoctanode = false;
     e.light.color = vec(1, 1, 1);
     e.light.dir = vec(0, 0, 1);
-    if(idx >= 0) { entities::deleteent(ents[idx]); ents[idx] = &e; }
+    if(ents.inrange(idx)) { entities::deleteent(ents[idx]); ents[idx] = &e; }
     else { idx = ents.length(); ents.add(&e); }
     if(local) entities::fixentity(idx, true, true);
     return &e;
@@ -994,7 +995,6 @@ void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local)
     vector<extentity *> &ents = entities::getents();
     if(ents.length()<=i)
     {
-        while(ents.length()<i) ents.add(entities::newent())->type = ET_EMPTY;
         if(newentity(local, o, type, attr, i))
             addentity(i);
     }
