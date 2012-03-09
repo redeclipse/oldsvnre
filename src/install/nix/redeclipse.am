@@ -7,6 +7,6 @@ do
     fi
 done
 
-RE_OPTIONS="-r"
+RE_OPTIONS=""
 cd @LIBEXECDIR@/@REDECLIPSE@ || exit 1
 exec ./@REDECLIPSE@ ${RE_OPTIONS} ${1+"$@"}
