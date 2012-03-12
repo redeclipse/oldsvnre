@@ -2662,9 +2662,14 @@ void lightreaching(const vec &target, vec &color, vec &dir, bool fast, extentity
         if(e.attrs[0] && mag >= float(e.attrs[0]))
             continue;
 
-        ray.div(mag);
-        if(shadowray(e.o, ray, mag, RAY_SHADOW | RAY_POLY, t) < mag)
-            continue;
+        if(mag < 1e-4f) ray = vec(0, 0, -1);
+        else
+        {
+            ray.div(mag); 
+            if(shadowray(e.o, ray, mag, RAY_SHADOW | RAY_POLY, t) < mag)
+                continue;
+        }
+
         float intensity = 1;
         if(e.attrs[0])
             intensity -= mag / float(e.attrs[0]);
@@ -2693,12 +2698,9 @@ void lightreaching(const vec &target, vec &color, vec &dir, bool fast, extentity
             else continue;
         }
 
-        color.add(vec(e.attrs[1], e.attrs[2], e.attrs[3]).div(255).mul(intensity));
-
-        intensity *= e.attrs[1]*e.attrs[2]*e.attrs[3];
-
-        if(fabs(mag)<1e-3) dir.add(vec(0, 0, 1));
-        else dir.add(vec(e.o).sub(target).mul(intensity/mag));
+        vec lightcol = vec(e.attr2, e.attr3, e.attr4).mul(1.0f/255);
+        color.add(vec(lightcol).mul(intensity));
+        dir.add(vec(ray).mul(-intensity*lightcol.x*lightcol.y*lightcol.z));
     }
 
     vec slight(0, 0, 0);
