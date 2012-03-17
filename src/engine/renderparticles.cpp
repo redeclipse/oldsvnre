@@ -111,15 +111,19 @@ struct partrenderer
             }
             if(p->collide && p->o.z < p->val && lastpass)
             {
-                vec surface;
-                float floorz = rayfloor(vec(p->o.x, p->o.y, p->val), surface, RAY_CLIPMAT, COLLIDERADIUS);
-                float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - rayfloor(vec(p->o.x, p->o.y, p->val), surface, RAY_CLIPMAT, COLLIDERADIUS);
-                if(p->o.z >= collidez+COLLIDEERROR) p->val = collidez+COLLIDEERROR;
-                else
+                if(p->collide >= 0)
                 {
-                    adddecal(p->collide, vec(p->o.x, p->o.y, collidez), vec(o).sub(p->o).normalize(), 2*size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                    blend = 0;
+                    vec surface;
+                    float floorz = rayfloor(vec(p->o.x, p->o.y, p->val), surface, RAY_CLIPMAT, COLLIDERADIUS);
+                    float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - floorz;
+                    if(p->o.z >= collidez+COLLIDEERROR) p->val = collidez+COLLIDEERROR;
+                    else
+                    {
+                        adddecal(p->collide, vec(p->o.x, p->o.y, collidez), vec(o).sub(p->o).normalize(), 2*size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                        blend = 0;
+                    }
                 }
+                else blend = 0;
             }
             else p->m.add(vec(p->o).sub(o));
         }
@@ -1261,7 +1265,7 @@ void splash(int type, int color, float radius, int num, int fade, const vec &p, 
 {
     if(camera1->o.dist(p) > maxparticledistance) return;
 #if 0
-    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + COLLIDEERROR : -1;
+    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (collide >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
     loopi(num)
@@ -1493,6 +1497,7 @@ static inline vec offsetvec(vec o, int dir, int dist)
  * 12..14 plane volume
  * 15..20 line volume, i.e. wall
  * 21 sphere
+ * 24..26 flat plane
  * +32 to inverse direction
  */
 void regularshape(int type, float radius, int color, int dir, int num, int fade, const vec &p, float size, float blend, int grav, int collide, float vel)
@@ -1553,18 +1558,27 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
             from = to;
             to[(dir+2)%3] += radius;
         }
-        else //sphere
+        else if(dir < 24) //sphere
         {
             to = vec(PI2*float(rnd(1000))/1000.0, PI*float(rnd(1000)-500)/1000.0).mul(radius);
             to.add(p);
             from = p;
         }
+        else if(dir < 27) // flat plane
+        {
+            to[dir%3] = float(rndscale(radius)-0.5f*radius);
+            to[(dir+1)%3] = float(rndscale(radius)-0.5f*radius);
+            to[(dir+2)%3] = 0.0;
+            to.add(p);
+            from = to;
+        }
+        else from = to = p;
+
+        if(inv) swap(from, to);
 
         if(taper)
         {
-            vec o = inv ? to : from;
-            o.sub(camera1->o);
-            float dist = clamp(sqrtf(o.x*o.x + o.y*o.y)/maxparticledistance, 0.0f, 1.0f);
+            float dist = clamp(from.dist2(camera1->o) / maxparticledistance, 0.0f, 1.0f);
             if(dist > 0.2f)
             {
                 dist = 1 - (dist - 0.2f)/0.8f;
@@ -1573,13 +1587,13 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
         }
 
         if(flare)
-            newparticle(inv?to:from, inv?from:to, rnd(fade*3)+1, type, color, size, blend, grav, collide);
+            newparticle(from, to, rnd(fade*3)+1, type, color, size, blend, grav, collide);
         else
         {
-            vec d = vec(to).sub(from).normalize().mul(inv ? -vel : vel);
-            particle *np = newparticle(inv?to:from, d, rnd(fade*3)+1, type, color, size, blend, grav, collide);
+            vec d = vec(to).sub(from).rescale(vel);
+            particle *np = newparticle(from, d, rnd(fade*3)+1, type, color, size, blend, grav, collide);
             if(np->collide)
-                np->val = (inv ? to.z : from.z) - raycube(inv ? to : from, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + COLLIDEERROR;
+                np->val = from.z - raycube(from, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (np->collide >= 0 ? COLLIDEERROR : 0);
         }
     }
 }
@@ -1590,7 +1604,7 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
 
     float s = size*min(radius, height);
     vec v(0, 0, min(1.0f, height)*vel);
-    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + COLLIDEERROR : -1;
+    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (collide >= 0 ? COLLIDEERROR : 0) : -1;
     loopi(density)
     {
         vec q = vec(p).add(vec(rndscale(radius*2.f)-radius, rndscale(radius*2.f)-radius, 0));
