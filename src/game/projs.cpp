@@ -536,6 +536,7 @@ namespace projs
             {
                 if(!kidmode)
                 {
+                    proj.collidetype = COLLIDE_AABB;
                     proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                     proj.lifesize = 1.5f-(rnd(100)/100.f);
                     if(proj.owner)
@@ -572,6 +573,7 @@ namespace projs
             }
             case PRJ_DEBRIS:
             {
+                proj.collidetype = COLLIDE_AABB;
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
                 switch(rnd(4))
