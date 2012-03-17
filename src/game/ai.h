@@ -126,7 +126,7 @@ namespace ai
 
         void add(void *owner, float above, int wp)
         {
-            if(obstacles.empty() || owner != &obstacles.last().owner) add(owner, above);
+            if(obstacles.empty() || owner != obstacles.last().owner) add(owner, above);
             obstacles.last().numwaypoints++;
             waypoints.add(wp);
         }
@@ -137,7 +137,7 @@ namespace ai
 			loopv(avoid.obstacles)
 			{
 				obstacle &o = avoid.obstacles[i];
-				if(obstacles.empty() || o.owner != &obstacles.last().owner) add(o.owner, o.above);
+				if(obstacles.empty() || o.owner != obstacles.last().owner) add(o.owner, o.above);
 				obstacles.last().numwaypoints += o.numwaypoints;
 			}
 		}
