@@ -1566,8 +1566,8 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
         }
         else if(dir < 27) // flat plane
         {
-            to[dir%3] = float(rndscale(radius)-0.5f*radius);
-            to[(dir+1)%3] = float(rndscale(radius)-0.5f*radius);
+            to[dir%3] = float(rndscale(2*radius)-radius);
+            to[(dir+1)%3] = float(rndscale(2*radius)-radius);
             to[(dir+2)%3] = 0.0;
             to.add(p);
             from = to;
