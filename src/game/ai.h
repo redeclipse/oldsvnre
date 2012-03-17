@@ -48,6 +48,7 @@ namespace ai
     const float CLOSEDIST       = 32.f;    // is close
     const float RETRYDIST       = 64.f;    // is close when retrying
     const float HOVERDIST       = 128.f;   // close when hovering
+    const float FARDIST         = 256.f;   // too far to remap close
     const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
     const float SIGHTMIN        = 128.f;   // minimum line of sight

@@ -882,29 +882,26 @@ namespace ai
     int closenode(gameent *d)
     {
         vec pos = d->feetpos();
-        int node = -1;
-        float mindist = CLOSEDIST*CLOSEDIST;
-        loopk(5)
+        int node1 = -1, node2 = -1, node3 = -1;
+        float mindist1 = CLOSEDIST*CLOSEDIST, mindist2 = physics::hover(d) ? HOVERDIST*HOVERDIST : RETRYDIST*RETRYDIST, mindist3 = mindist2;
+        loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
         {
-            loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
+            vec epos = waypoints[d->ai->route[i]].o;
+            float dist = epos.squaredist(pos);
+            if(dist > FARDIST*FARDIST) continue;
+            if(dist < mindist1) { node1 = i; mindist1 = dist; }
+            else
             {
-                int entid = d->ai->route[i];
-                vec epos = waypoints[entid].o;
-                if(k) entid = obstacles.remap(d, d->ai->route[i], epos, k==4);
-                if(iswaypoint(entid))
+                int entid = obstacles.remap(d, d->ai->route[i], epos);
+                if(entid >= 0)
                 {
-                    float dist = epos.squaredist(pos);
-                    if(dist < mindist)
-                    {
-                        node = i;
-                        mindist = dist;
-                    }
+                    if(entid != i) dist = epos.squaredist(pos);
+                    if(dist < mindist2) { node2 = i; mindist2 = dist; }
                 }
+                else if(dist < mindist3) { node3 = i; mindist3 = dist; }
             }
-            if(node >= 0) break;
-            if(k == 1) mindist = physics::hover(d) ? HOVERDIST*HOVERDIST : RETRYDIST*RETRYDIST;
         }
-        return node;
+        return node1 >= 0 ? node1 : (node2 >= 0 ? node2 : node3);
     }
 
     int wpspot(gameent *d, int n, bool check = false)
