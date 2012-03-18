@@ -1248,7 +1248,7 @@ particle *newparticle(const vec &o, const vec &d, int fade, int type, int color,
 void create(int type, int color, int fade, const vec &p, float size, float blend, int grav, int collide, physent *pl)
 {
     if(camera1->o.dist(p) > maxparticledistance) return;
-    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + COLLIDEERROR : -1;
+    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), collide >= 0 ? COLLIDERADIUS : max(p.z, 0.0f), RAY_CLIPMAT) + (collide >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
     int f = fmin + rnd(fmax); //help deallocater by using fade distribution rather than random
@@ -1593,7 +1593,7 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
             vec d = vec(to).sub(from).rescale(vel);
             particle *np = newparticle(from, d, rnd(fade*3)+1, type, color, size, blend, grav, collide);
             if(np->collide)
-                np->val = from.z - raycube(from, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (np->collide >= 0 ? COLLIDEERROR : 0);
+                np->val = from.z - raycube(from, vec(0, 0, -1), np->collide >= 0 ? COLLIDERADIUS : max(from.z, 0.0f), RAY_CLIPMAT) + (np->collide >= 0 ? COLLIDEERROR : 0);
         }
     }
 }
@@ -1604,7 +1604,7 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
 
     float s = size*min(radius, height);
     vec v(0, 0, min(1.0f, height)*vel);
-    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (collide >= 0 ? COLLIDEERROR : 0) : -1;
+    float collidez = collide ? p.z - raycube(p, vec(0, 0, -1), collide >= 0 ? COLLIDERADIUS : max(p.z, 0.0f), RAY_CLIPMAT) + (collide >= 0 ? COLLIDEERROR : 0) : -1;
     loopi(density)
     {
         vec q = vec(p).add(vec(rndscale(radius*2.f)-radius, rndscale(radius*2.f)-radius, 0));
