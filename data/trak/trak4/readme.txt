@@ -19,6 +19,7 @@ Yan 'Method' Ostretsov : http://www.methodonline.com/
 Opactiy.us: http://www.opacity.us/
 
 Some source material is borrowed from cgtextures.com. Specifically, the kitchen and kitchen1.tga files. Also, cheers, to keres for providing the wood base texture for those two textures.
+NOTE: These textures have been removed in Red Eclipse
 ------------------
 
 The pack is released under the terms of CC-by 3.0.
