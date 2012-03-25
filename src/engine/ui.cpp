@@ -193,6 +193,7 @@ struct gui : guient
 
     int poplist()
     {
+        if(!lists.inrange(curlist)) return 0;
         list &l = lists[curlist];
         if(layoutpass)
         {
@@ -202,7 +203,7 @@ struct gui : guient
         curlist = l.parent;
         curdepth--;
         if(mergelist >= 0 && curdepth < mergedepth) mergelist = mergedepth = -1;
-        if(curlist >= 0)
+        if(lists.inrange(curlist))
         {
             int w = xsize, h = ysize;
             if(ishorizontal()) cury -= h; else curx -= w;
