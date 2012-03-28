@@ -109,8 +109,6 @@ Sets the admin password to
 Sets the maximum number of clients to
 .IR maxclients .
 
-.SS Master server options
-
 .TP
 .BI \-sl defaultmap
 Sets default map to
@@ -120,12 +118,6 @@ Sets default map to
 .BI \-x "\(dqcommand 1; command 2; ...\(dq"
 .
 Executes a list of commands once the Red Eclipse server has started up.
-
-.TP
-.BR \-mp masterport
-Binds the master server to the host port
-.IR masterport ,
-defaults to 28800.
 
 .SS Server connection options
 
@@ -170,6 +162,12 @@ Binds the master server to the host address
 .IR masterip .
 Only needed for machines with more than one interface, defaults to
 .IR localhost .
+
+.TP
+.BR \-mp masterport
+Binds the master server to the host port
+.IR masterport ,
+defaults to 28800.
 
 .SS General options
 
