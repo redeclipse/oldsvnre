@@ -1,29 +1,45 @@
 .TH REDECLIPSE 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
+
+
 .SH NAME
+
 @REDECLIPSE@ \- script to launch the Red Eclipse FPS game client
+
+
 .SH SYNOPSIS
+
 .SY @REDECLIPSE@
-.OP \-dw\fRwidth
-.OP \-dh\fRheight
-.OP \-dd\fRdepth
-.OP \-dc\fRdepth
-.OP \-da\fRsamples
-.OP \-dv\fR{0|1}
-.OP \-df\fR{0|1}
-.OP \-ds\fRbits
-.OP \-du\fR{0..3}
-.OP \-k\fR{0|1}
+'\" Filesystem options
 .OP \-h\fRhomedir
 .OP \-p\fRpackagedir
-.OP \-v\fR{0..4}
-.OP \-x\fR\(dqcommand(s)\(dq
 .OP \-o\fRsauerdir
+.OP \-g\fRlogfile
+
+'\" Video options
+.OP \-df\fR{0|1}
+.OP \-dw\fRwidth
+.OP \-dh\fRheight
+.OP \-du\fR{0..3}
+.OP \-dv\fR{0|1}
+.OP \-da\fRsamples
+.OP \-dc\fRdepth
+.OP \-dd\fRdepth
+.OP \-ds\fRbits
+
+'\" General options
+.OP \-x\fR\(dqcommand(s)\(dq
+.OP \-k\fR{0|1}
+.OP \-v\fR{0..4}
+.OP \-\-help
+
+'\" Server options
+.OP \-ss\fR{0..3}
 .OP \-sm\fRservermaster
 .OP \-sa\fRservermasterport
-.OP \-ss\fR{0..3}
-.OP \-g\fRlogfile
-.OP \-\-help
+
+
 .SH DESCRIPTION
+
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
 .B @REDECLIPSE@
@@ -31,7 +47,7 @@ is a script which executes the
 .BR @REDECLIPSE@
 binary from the
 .I @LIBEXECDIR@/@REDECLIPSE@
-directory, it will accept any additional options.
+directory.
 .PP
 The recommended way to change the settings of the client are to edit the
 .I config.cfg
@@ -46,9 +62,53 @@ To edit the specific settings related to the loopback server, use the
 and
 .I localinit.cfg
 files in the home directory.
+
+
 .SH CAVEATS
+
 Many of these options will, if used, be permanently saved in the init.cfg file.
+
+
 .SH OPTIONS
+
+.SS Filesystem options
+
+.TP
+.BI \-h homedir
+Sets your home directory to
+.IR homedir .
+Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to
+.IR $HOME/.@REDECLIPSE@/ .
+
+.TP
+.BI \-p packagedir
+Includes the data files found in
+.IR packagedir .
+Can be used for adding additional mods. Packages will be loaded in the order specified. By default @REDECLIPSE@ only includes data files in its working directory
+.IR @DATADIR@/@REDECLIPSE@/data/ ,
+and in the
+.I temp
+subdirectory of the home directory.
+
+.TP
+.BI \-o sauerdir
+Sets the path to your Sauerbraten directory. If Red Eclipse can find your Sauerbraten directory, you can load and play Sauerbraten maps from withing Red Eclipse.
+
+.TP
+.BI \-g logfile
+Output log to
+.IR logfile .
+Path is set relative to
+.IR homedir .
+
+.SS Video options
+
+.TP
+.BR \-df {0|1}
+Turns fullscreen mode on or off. 0 to disable, 1 to enable. Defaults to 1.
+.IP
+This configuration is stored in init.cfg
+
 .TP
 .BI \-dw width
 Sets screen width to
@@ -56,6 +116,7 @@ Sets screen width to
 If height not specified, also sets height to 3/4 of width. min is 320.
 .IP
 This configuration is stored in init.cfg
+
 .TP
 .BI \-dh height
 Sets screen height to
@@ -63,18 +124,19 @@ Sets screen height to
 If width not specified, also sets width to 4/3 of height. min is 320.
 .IP
 This configuration is stored in init.cfg
+
 .TP
-.BI \-dd depth
-Sets z-buffer depth to
-.IR depth .
+.BR \-du {0..3}
+Set shader quality. 0 for none, 1 for shaders with fastest quality, max is 3. Defaults to 1 where hardware supports it.
 .IP
 This configuration is stored in init.cfg
+
 .TP
-.BI \-dc depth
-Sets colour depth (bits per pixel) to
-.IR depth .
+.BR \-dv {0|1}
+Turns vertical sync on or off. 0 to disable, 1 to enable. Defaults to 0.
 .IP
 This configuration is stored in init.cfg
+
 .TP
 .BI \-da samples
 Sets full-scene anti-aliasing (FSAA) to
@@ -82,98 +144,99 @@ Sets full-scene anti-aliasing (FSAA) to
 samples.
 .IP
 This configuration is stored in init.cfg
+
 .TP
-.BR \-dv {0|1}
-Turns vertical sync on or off. 0 to disable, 1 to enable. Defaults to 0.
+.BI \-dc depth
+Sets colour depth (bits per pixel) to
+.IR depth .
 .IP
 This configuration is stored in init.cfg
-.TP
-.BR \-df {0|1}
-Turns fullscreen mode on or off. 0 to disable, 1 to enable. Defaults to 1.
-.IP
-This configuration is stored in init.cfg
+
 .TP
 .BI \-ds bits
 Sets stencil buffer bits to
 .IR bits .
 .IP
 This configuration is stored in init.cfg
+
 .TP
-.BR \-du {0..3}
-Set shader quality. 0 for none, 1 for shaders with fastest quality, max is 3. Defaults to 1 where hardware supports it.
+.BI \-dd depth
+Sets z-buffer depth to
+.IR depth .
 .IP
 This configuration is stored in init.cfg
+
+.SS General options
+
+.TP
+.BI \-x "\(dqcommand 1; command 2; ...\(dq"
+.
+Executes a list of commands once Red Eclipse has started up.
+
 .TP
 .BR \-k {0|1}
 Enables or disables kid mode, which reduces blood and death effects somewhat. 1 enables reduced gore, defaults to 0.
-.TP
-.BI \-h homedir
-Sets your home directory to
-.IR homedir .
-Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to
-.IR $HOME/.@REDECLIPSE@/ .
-.TP
-.BI \-p packagedir
-Includes the data files found in
-.IR packagedir .
-Can be used for adding additional mods. Packages will be loaded in the order specified. By default @REDECLIPSE@ only inludes data files in its working directory
-.IR @DATADIR@/@REDECLIPSE@/data/ ,
-and in the
-.I temp
-subdirectory of the home directory.
+
 .TP
 .BR \-v {0..4}
 Sets verbosity. This affects how much information is printed to the console. 0 is the least verbose, 4 is the most verbose, defaults to 0.
 .IP
 This configuration is stored in init.cfg
+
 .TP
-.BI \-x "\(dqcommand 1; command 2; ...\(dq"
-.
-Executes a list of commands once Red Eclipse has started up.
+.B \-\-help
+Display this manpage
+
+.SS Server options
+
 .TP
-.BI \-o sauerdir
-Sets the path to your Sauerbraten directory. If Red Eclipse can find your Sauerbraten directory, you can load and play Sauerbraten maps from withing Red Eclipse.
+.BI \-ss {0..3}
+Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) @REDECLIPSE@ will act similarly to @REDECLIPSE@-server and not start the GUI.
+
 .TP
 .BI \-sm servermaster
 Connects to
 .I servermaster
-to get the list of available servers.
+to get the list of available servers, defaults to play.redeclipse.net.
+
 .TP
 .BI \-sa servermasterport
 Contacts the master server using port
-.IR servermasterport .
-.TP
-.BI \-ss {0..3}
-Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) @REDECLIPSE@ will act similarly to @REDECLIPSE@-server and not start the GUI.
-.TP
-.BI \-g logfile
-Output log to
-.IR logfile .
-Path is set relative to
-.IR homedir .
-.TP
-.B \-\-help
-Display this manpage
+.IR servermasterport ,
+defaults to 28800.
+
+
 .SH EXAMPLES
-.PP
+
 .B @REDECLIPSE@ -p$HOME/mod/data
 .RS 4
 Load data from an additional directory.
 .RE
+
 .B @REDECLIPSE@ -h$HOME/@REDECLIPSE@_configs/
 .RS 4
 Reads and writes the configuration files to the specified directory instead of
 .IR $HOME/.@REDECLIPSE@/ .
 .RE
+
 .B @REDECLIPSE@ -x"mode 7; trialweapon 0; map hinder"
 .RS 4
 Sets game mode to time trial, trialmode weapon to empty hands, and starts a game on the map "hinder".
 .RE
+
+
 .SH AUTHORS
+
 Red Eclipse's main developers are Quinton "quin" Reeves and Lee "eihrul" Salzman
 .PP
 This manual page was written by Martin Erik Werner <martinerikwerner@gmail.com>
+
+
 .SH HISTORY
+
 Red Eclipse was forked as a continuation of the game Bloodfrontier, which in turn was based on the Cube2 engine and the Sauerbraten game. Red Eclipse and Sauerbraten are now developed in parallel.
+
+
 .SH "SEE ALSO"
+
 .BR @REDECLIPSE@-server (6).
