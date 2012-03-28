@@ -108,6 +108,7 @@ Sets the admin password to
 .BI \-sc maxclients
 Sets the maximum number of clients to
 .IR maxclients .
+
 .SS Master server options
 
 .TP
