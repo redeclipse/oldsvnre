@@ -146,9 +146,11 @@ defaults to 28800.
 
 .TP
 .BI \-su serveruprate
-Sets upstream rate to
+Caps upstream rate to
 .IR serveruprate .
-Do not set this unless you know what you are doing, it should normally be left out.
+Once the cap is hit it will likely cause major connection glitching and disconnects. Use
+.I maxclients
+for bandwitch limiting instead.
 
 .SS Master server options
 
