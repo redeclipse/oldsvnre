@@ -579,13 +579,15 @@ void dropent()
     groupedit(dropentity(e));
 }
 
+static int keepents = 0;
+
 extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs, int &idx)
 {
     vector<extentity *> &ents = entities::getents();
     if(local)
     {
         idx = -1;
-        loopv(ents) if(ents[i]->type == ET_EMPTY) { idx = i; break; }
+        for(int i = keepents; i < ents.length(); i++)  if(ents[i]->type == ET_EMPTY) { idx = i; break; }
         if(idx < 0 && ents.length() >= MAXENTS) { conoutft(CON_MESG, "\frtoo many entities"); return NULL; }
     }
     else while(ents.length() < idx) ents.add(entities::newent())->type = ET_EMPTY;
@@ -674,7 +676,9 @@ void entpaste()
         if(!e) continue;
         loopvk(c.links) e->links.add(c.links[k]);
         entadd(idx);
+        keepents = max(keepents, idx+1);
     }
+    keepents = 0;
     int j = 0;
     groupeditundo(e.type = entcopybuf[j++].type;);
 }
