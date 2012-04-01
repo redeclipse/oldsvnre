@@ -1062,11 +1062,6 @@
 			<Option target="client-dbg" />
 			<Option target="client-prof" />
 		</Unit>
-		<Unit filename="include\wincompat.h">
-			<Option target="client" />
-			<Option target="client-dbg" />
-			<Option target="client-prof" />
-		</Unit>
 		<Unit filename="include\zconf.h">
 			<Option target="client" />
 			<Option target="client-dbg" />
