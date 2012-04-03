@@ -11,13 +11,19 @@ Modes & Mutators:
 
 Modding:
 * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
+* Removed kitchen and kitchen1 textures from trak4 (unused)
 
 Misc:
 * Now possible to allow demo recording for masters (/restrictdemos 0)
 * SDL 1.2.15
+* Remove "-r" command-line option
 
 Additional Fixed Bugs:
 * #103 [minor] Revenge-seeking remains after team-change
+* #112 Fix server browser sorting full servers to the bottom
+* #115 When joining mid-match, bomber-ball affinities aren't enabled
+* #128 Buff state not properly synchronised
+* #129 Spawn rotation problems
 
 
 Red Eclipse 1.2
