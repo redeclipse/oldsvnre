@@ -952,18 +952,18 @@ namespace server
             if(GAME(rotatemode))
             {
                 int num = 0;
-                loopi(G_MAX) if((1<<i)&GAME(rotatemodefilter)) num++;
+                loopi(G_MAX) if(GAME(rotatemodefilter)&(1<<i)) num++;
                 if(!num) mode = rnd(G_RAND)+G_FIGHT;
                 else
                 {
                     int r = num > 1 ? rnd(num) : 0, n = 0;
-                    loopi(G_MAX) if((1<<i)&GAME(rotatemodefilter))
+                    loopi(G_MAX) if(GAME(rotatemodefilter)&(1<<i))
                     {
                         if(n != r) n++;
                         else { mode = i; break; }
                     }
                 }
-                if(!mode || !((1<<mode)&GAME(rotatemodefilter))) mode = rnd(G_RAND)+G_FIGHT;
+                if(!mode || !(GAME(rotatemodefilter)&(1<<mode))) mode = rnd(G_RAND)+G_FIGHT;
             }
         }
         if(muts < 0)
