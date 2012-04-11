@@ -2154,29 +2154,31 @@ namespace server
         setteam(ci, TEAM_NEUTRAL, false, true);
     }
 
+    enum { ALST_FIRST = 0, ALST_TRY, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
+
     bool allowstate(clientinfo *ci, int n)
     {
         if(!ci) return false;
         bool isai = ci->state.aitype >= AI_BOT;
         switch(n)
         {
-            case 0: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
-            case 1: // try spawn
+            case ALST_FIRST: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
+            case ALST_TRY: // try spawn
             {
                 if(!isai && ((ci->wantsmap && !ci->failedmap) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR))) return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 break;
             }
-            case 2: // spawn
+            case ALST_SPAWN: // spawn
             {
                 if(ci->state.state != CS_DEAD && ci->state.state != CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 break;
             }
-            case 3: return !isai; // spec
-            case 5: if(ci->state.state != CS_EDITING) return false;
-            case 4: // edit on/off
+            case ALST_SPEC: return !isai; // spec
+            case ALST_WALK: if(ci->state.state != CS_EDITING) return false;
+            case ALST_EDIT: // edit on/off
             {
                 if(isai || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR)) return false;
                 break;
@@ -2256,7 +2258,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(allowstate(ci, 0))
+            if(allowstate(ci, ALST_FIRST))
             {
                 ci->state.state = CS_DEAD;
                 waiting(ci, 2, 1);
@@ -4183,7 +4185,11 @@ namespace server
                 {
                     int val = getint(p);
                     if(!ci || ci->state.aitype > AI_NONE) break;
-                    if(!allowstate(ci, val ? 4 : 5) && !haspriv(ci, PRIV_MASTER, "unspectate and edit")) { spectator(ci); break; }
+                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, PRIV_MASTER, val ? "enter editmode" : "exit editmode"))
+                    {
+                        spectator(ci);
+                        break;
+                    }
                     ci->state.editspawn(gamemode, mutators);
                     if(val)
                     {
@@ -4231,7 +4237,7 @@ namespace server
                 {
                     int lcn = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || !allowstate(cp, 1)) break;
+                    if(!hasclient(cp, ci) || !allowstate(cp, ALST_TRY)) break;
                     if(!ci->clientmap[0] && !ci->mapcrc)
                     {
                         ci->mapcrc = -1;
@@ -4277,7 +4283,7 @@ namespace server
                 {
                     int lcn = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || !allowstate(cp, 2)) break;
+                    if(!hasclient(cp, ci) || !allowstate(cp, ALST_SPAWN)) break;
                     cp->state.lastrespawn = -1;
                     cp->state.state = CS_ALIVE;
                     if(smode) smode->spawned(cp);
@@ -4792,7 +4798,8 @@ namespace server
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
                     if(!cp || cp->state.aitype > AI_NONE) break;
-                    if((sn != sender || !allowstate(cp, val ? 3 : 1)) && !haspriv(ci, PRIV_MASTER, sn != sender ? "spectate others" : "unspectate")) break;
+                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, PRIV_MASTER, sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
+                        break;
                     spectate(cp, val);
                     break;
                 }
