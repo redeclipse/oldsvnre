@@ -29,18 +29,22 @@ basis.
 * The gameplay of the server must not grant an undue or unfair advantage to any
   party.
   - "Humans vs Zombies" is fine, as long as it rotates roles in a fair manner.
-  - Giving a single player double life permanently is not allowed.
+  - Giving a single player double life permanently is not permitted.
 
 * If the gameplay of the server is modified substantially this must be
   indicated clearly, preferably through the use of "servermotd".
 
 * If the source code of the server is modified substantially you must contact
-  the Red Eclipse Team to check that the changes are allowed.
+  the Red Eclipse Team to check that the changes are permitted.
 
 * The server must honour the auth system, allowing global bans and admit admin
   access by the Red Eclipse Team, or moderators assigned by them.
 
 * The server must not advertise or otherwise spam messages excessively.
+
+* Failure to follow these guidelines may result in the immediate ban and
+  removal of the server in question from listing on the master server, without
+  warning.
 
 
     Guidelines for Users
@@ -49,16 +53,35 @@ basis.
   - Cussing is fine, so long as it doesn't involve bigotry (racist, religious,
     or sexually derogatory [gender or orientation] remarks).
   - Intentionally killing team mates or scoring for an opposing team is not
-    allowed.
-  - Flooding or spamming is not permitted.
+    permitted.
+  - Cheating, flooding and/or spamming is not permitted.
 
 * Whilst playing on a server connected to the master server, players should
-  follow the direction and cautions of anyone who claims access with auth.
-  - "user identified as handle and claimed admin/master"
-  - Failure to adhere to a request by a moderator can result in an immediate
-    ban, without warning, possibly from all Red Eclipse servers.
+  follow the direction and/or cautions of anyone who has master/admin access.
 
-    
+* Failure to adhere to a request by a moderator can result in an immediate ban,
+  without warning, possibly from the master server and all Red Eclipse servers
+  listed on it.
+
+
+    Guidelines for Moderators
+
+* Moderators must act in a fair and impartial manner, employing the "warn, then
+  kick, then ban" approach, unless there is an emergency or immediate need.
+
+* The use of kick and/or ban must only be used when a user violates sections of
+  this document. If in doubt, moderators should seek the advice of their peers
+  (other players and/or moderators) before proceeding with disciplinary action.
+
+* If a moderator believes that any behaviour not covered by these rules should
+  result in disciplinary action, and they have the support of their peers, they
+  should contact the Red Eclipse Team immediately to propose an amendment to
+  this document.
+  
+* Failure by a moderator to follow or uphold these rules may result in their
+  access being immediately revoked, without warning.
+
+
     Attribution
 
 This text is Copyright (C) 2011-2012, the Red Eclipse Team
