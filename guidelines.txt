@@ -37,10 +37,14 @@ basis.
 * If the source code of the server is modified substantially you must contact
   the Red Eclipse Team to check that the changes are permitted.
 
-* The server must honour the auth system, allowing global bans and admit admin
-  access by the Red Eclipse Team, or moderators assigned by them.
+* The server must honour the auth system, allowing global bans and grant the
+  correct access by the Red Eclipse Team, or moderators assigned by them.
 
 * The server must not advertise or otherwise spam messages excessively.
+
+* The owner of a server may outline their own rules, specific to their server.
+  - These rules may not revoke any part of this document.
+  - These rules must not make any unreasonable or illegal demands.
 
 * Failure to follow these guidelines may result in the immediate ban and
   removal of the server in question from listing on the master server, without
@@ -56,12 +60,15 @@ basis.
     permitted.
   - Cheating, flooding and/or spamming is not permitted.
 
-* Whilst playing on a server connected to the master server, players should
-  follow the direction and/or cautions of anyone who has master/admin access.
+* The owner of a server may outline their own rules, specific to their server.
+  - Players on a server with additional rules must follow said rules unless the
+    demands are unreasonable, illegal, or revoke part of this document.
+  - If any part of the rules supplied by a server violate this document, then
+    all rules supplied by the server are considered to be null and void.
 
-* Failure to adhere to a request by a moderator can result in an immediate ban,
-  without warning, possibly from the master server and all Red Eclipse servers
-  listed on it.
+* Failure to adhere to a request by a moderator to follow the rules can result
+  in an immediate ban, without warning, possibly from the master server and
+  all Red Eclipse servers listed on it.
 
 
     Guidelines for Moderators
