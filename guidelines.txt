@@ -42,6 +42,11 @@ basis.
 
 * The server must not advertise or otherwise spam messages excessively.
 
+* The server must not have a name that is offensive or send any messages that
+  could be interpreted as offensive.
+  - Offensive language covers things such as bigotry (racist, religious, or
+    sexually derogatory [gender or orientation] remarks)
+
 * The owner of a server may outline their own rules, specific to their server.
   - These rules may not revoke any part of this document.
   - These rules must not make any unreasonable or illegal demands.
