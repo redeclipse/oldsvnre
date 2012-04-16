@@ -143,8 +143,8 @@ namespace game
     VAR(IDF_PERSIST, debrisfade, 1, 5000, VAR_MAX);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, VAR_MAX);
-    VAR(IDF_PERSIST, burnfade, 100, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, burnblend, 0.25f, 0.5f, 1);
+    VAR(IDF_PERSIST, onfirefade, 100, 200, VAR_MAX);
+    FVAR(IDF_PERSIST, onfireblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
     VAR(IDF_PERSIST, impulsefade, 0, 200, VAR_MAX);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
@@ -2768,7 +2768,7 @@ namespace game
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL, max(burnfade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*burnblend, -10, 0);
+                regular_part_create(PART_FIREBALL, max(onfirefade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*onfireblend, -10, 0);
             }
         }
     }

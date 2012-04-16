@@ -1033,8 +1033,7 @@ namespace projs
                     }
                     case WEAP_FLAMER:
                     {
-                        float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifespan*proj.curscale*scale, blend = clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*(0.6f+(rnd(40)/100.f));
+                        float size = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*1.25f*proj.lifesize*proj.curscale, blend = clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*(0.6f+(rnd(40)/100.f));
                         if(projfirehint && notrayspam(proj.weap, proj.flags&HIT_ALT, 5))
                             part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, 0x120228), size*projfirehintsize, blend*projhintblend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
@@ -1111,17 +1110,16 @@ namespace projs
                     }
                     case WEAP_PLASMA:
                     {
-                        float scale = lastmillis-proj.spawntime <= proj.lifemillis/10 ? (lastmillis-proj.spawntime)/float(proj.lifemillis/10) : 1,
-                            expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize*scale);
+                        float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
                             part_explosion(proj.o, expl, PART_SHOCKBALL, 1, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 1, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
                         }
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale*scale, 0.5f);
-                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale*scale, 0.5f);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale*scale, 0.5f*projhintblend);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.5f);
+                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale, 0.5f);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend);
                         break;
                     }
                     case WEAP_RIFLE:
