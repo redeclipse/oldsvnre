@@ -83,16 +83,18 @@ basis.
 * Moderators must act in a fair and impartial manner, employing the "warn, then
   kick, then ban" approach, unless there is an emergency or immediate need.
 
-* The use of kick and/or ban must only be used when a user violates sections of
-  this document. If in doubt, moderators should seek the advice of their peers
-  (other players and/or moderators) before proceeding with disciplinary action.
+* The use of kick and/or ban should only be used when a user violates sections
+  of this document. If in doubt, moderators should seek the advice of their
+  peers (other players and/or moderators) before proceeding with disciplinary
+  action. A moderator may kick and/or ban for other reasons if there is due
+  cause to do so.
 
-* If a moderator believes that any behaviour not covered by these rules should
-  result in disciplinary action, and they have the support of their peers, they
-  should contact the Red Eclipse Team immediately to propose an amendment to
-  this document.
+* If a moderator believes that any behaviour not covered by this document
+  should result in disciplinary action, and they have the support of their
+  peers, they should contact the Red Eclipse Team immediately to propose an
+  amendment.
   
-* Failure by a moderator to follow or uphold these rules may result in their
+* Failure by a moderator to follow or uphold the rules may result in their
   access being immediately revoked, without warning.
 
 
