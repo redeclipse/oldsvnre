@@ -190,10 +190,6 @@ Display this manpage
 .SS Server options
 
 .TP
-.BI \-ss {0..3}
-Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) @REDECLIPSE@ will act similarly to @REDECLIPSE@-server and not start the GUI.
-
-.TP
 .BI \-sm servermaster
 Connects to
 .I servermaster
