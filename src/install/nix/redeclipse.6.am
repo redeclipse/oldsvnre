@@ -33,7 +33,6 @@
 .OP \-\-help
 
 '\" Server options
-.OP \-ss\fR{0..3}
 .OP \-sm\fRservermaster
 .OP \-sa\fRservermasterport
 
