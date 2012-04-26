@@ -40,7 +40,7 @@ struct duelservmode : servmode
                 duelqueue.insert(0, ci);
             }
             else if(n < 0) duelqueue.add(ci);
-            if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, 1);
+            if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
             if(!clean) position(ci, false);
         }
     }
@@ -134,7 +134,7 @@ struct duelservmode : servmode
                         clientinfo *ci = duelqueue[i];
                         if(ci->state.state != CS_ALIVE)
                         {
-                            if(ci->state.state != CS_WAITING) waiting(ci, 0, 1);
+                            if(ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
                             if(ci->state.aitype < AI_START && m_duel(gamemode, mutators) && m_team(gamemode, mutators))
                             {
                                 bool skip = false;
@@ -149,7 +149,6 @@ struct duelservmode : servmode
                             ci->state.lastregen = gamemillis;
                             ci->state.lastburn = ci->state.lastburntime = ci->state.lastbleed = ci->state.lastbleedtime = 0;
                             sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, 0); // amt = 0 regens impulse
-                            dropitems(ci, 1);
                         }
                         alive.add(ci);
                         playing.add(ci);

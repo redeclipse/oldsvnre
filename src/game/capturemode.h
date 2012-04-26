@@ -21,7 +21,7 @@ struct captureservmode : capturestate, servmode
         {
             dir.x = -sinf(RAD*ci->state.yaw);
             dir.y = cosf(RAD*ci->state.yaw);
-            dir.x = rnd(101)/100.f;
+            dir.z = 0;
             olddir = dir.normalize().mul(max(dir.magnitude(), 1.f));
         }
         loopv(flags) if(flags[i].owner == ci->clientnum)

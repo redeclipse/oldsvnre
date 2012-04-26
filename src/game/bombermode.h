@@ -90,7 +90,7 @@ struct bomberservmode : bomberstate, servmode
             loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
             {
                 if((GAME(bomberreset) >= 2 || clients[j]->team == ci->team) && clients[j]->state.state == CS_ALIVE)
-                    waiting(clients[j], 0, 3);
+                    waiting(clients[j], 0, DROP_EXPIRE);
             }
             bombertime = -1;
         }
