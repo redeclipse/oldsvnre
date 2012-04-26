@@ -718,68 +718,15 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        switch(proj.projtype)
+        if((proj.projtype != PRJ_SHOT || weaptype[proj.weap].traced) && proj.owner && !proj.child)
         {
-            case PRJ_SHOT:
+            vec eyedir = vec(proj.o).sub(proj.owner->o);
+            float eyedist = eyedir.magnitude();
+            if(eyedist >= 1e-3f)
             {
-                if(proj.child || weaptype[proj.weap].traced || !proj.owner) break;
-                vec eyedir = vec(proj.o).sub(proj.owner->o);
-                float eyedist = eyedir.magnitude();
-                if(eyedist >= 1e-3f)
-                {
-                    eyedir.div(eyedist);
-                    float blocked = pltracecollide(&proj, proj.owner->o, eyedir, eyedist);
-                    if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-0.1f).add(proj.owner->o);
-                }
-                break;
-            }
-            default:
-            {
-                vec orig = proj.o, dir = vec(proj.vel).normalize();
-                float maxrad = max(proj.xradius, proj.yradius);
-                loopi(181)
-                {
-                    if(i)
-                    {
-                        int iter = (i-1)%20, step = (i-1-iter)/20;
-                        switch(step)
-                        {
-                            case 9: case 8: case 7: case 6: case 5: case 4:
-                            {
-                                float off = step <= 5 ? step-3 : (step >= 8 ? 3 : 2);
-                                proj.o.add(vec(dir).rotate_around_z(iter*18*RAD).mul(maxrad*off));
-                                if(step <= 5) break;
-                            }
-                            case 3: case 2:
-                            {
-                                float off = 0;
-                                if(step <= 3)
-                                {
-                                    off = (iter >= 10 ? 9-iter : iter+1)/10.f;
-                                    if(step == 3) off += (iter >= 10 ? -1.f : 1.f);
-                                }
-                                else off = step%2 != 0 ? 0-(((step-1)/2)-1) : (step/2)-1;
-                                proj.o.z += maxrad*off;
-                                break;
-                            }
-                            case 1: case 0: default:
-                            {
-                                proj.o.add(vec(dir).mul(maxrad*(iter+1)*(step ? 1 : -1)));
-                                break;
-                            }
-                        }
-                    }
-                    if(!collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_PLAYER) || inside)
-                    {
-                        if(hitplayer ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
-                        {
-                            proj.o = orig;
-                            continue;
-                        }
-                    }
-                    break;
-                }
-                break;
+                eyedir.div(eyedist);
+                float blocked = pltracecollide(&proj, proj.owner->o, eyedir, eyedist);
+                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-0.1f).add(proj.owner->o);
             }
         }
         proj.resetinterp();
