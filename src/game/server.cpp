@@ -4565,11 +4565,7 @@ namespace server
                     int team = getint(p);
                     if(((ci->state.state == CS_SPECTATOR || ci->state.state == CS_EDITING) && team != TEAM_NEUTRAL) || !isteam(gamemode, mutators, team, TEAM_FIRST) || ci->state.aitype >= AI_START)
                         team = chooseteam(ci, team);
-                    if(ci->team != team)
-                    {
-                        setteam(ci, team);
-                        sendf(-1, 1, "ri3", N_SETTEAM, sender, team);
-                    }
+                    if(ci->team != team) setteam(ci, team, true, true);
                     break;
                 }
 

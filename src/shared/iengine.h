@@ -66,7 +66,7 @@ struct selinfo
         int worldsize = getworldsize();
         if(grid <= 0 || grid >= worldsize) return false;
         if(o.x >= worldsize || o.y >= worldsize || o.z >= worldsize) return false;
-        if(o.x < 0) { s.x -= (grid - 1 - o.x)/grid; o.x = 0; } 
+        if(o.x < 0) { s.x -= (grid - 1 - o.x)/grid; o.x = 0; }
         if(o.y < 0) { s.y -= (grid - 1 - o.y)/grid; o.y = 0; }
         if(o.z < 0) { s.z -= (grid - 1 - o.z)/grid; o.z = 0; }
         s.x = clamp(s.x, 0, (worldsize - o.x)/grid);
@@ -540,6 +540,7 @@ extern void gets2c();
 
 // crypto
 extern void genprivkey(const char *seed, vector<char> &privstr, vector<char> &pubstr);
+extern void genpubkey(const char *privstr, vector<char> &pubstr);
 extern bool hashstring(const char *str, char *result, int maxlen);
 extern void answerchallenge(const char *privstr, const char *challenge, vector<char> &answerstr);
 extern void *parsepubkey(const char *pubstr);

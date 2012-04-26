@@ -265,7 +265,6 @@ namespace client
                 if(t != game::player1->team)
                 {
                     if(game::player1->team != t) hud::lastteam = 0;
-                    game::player1->team = t;
                     addmsg(N_SWITCHTEAM, "ri", game::player1->team);
                 }
             }

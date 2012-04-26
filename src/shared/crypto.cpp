@@ -148,7 +148,7 @@ namespace tiger
         compress((chunk *)temp, val.chunks);
         if(!*(const uchar *)&islittleendian)
         {
-            loopk(3) 
+            loopk(3)
             {
                 uchar *c = &val.bytes[k*sizeof(chunk)];
                 loopl(sizeof(chunk)/2) swap(c[l], c[sizeof(chunk)-1-l]);
@@ -753,6 +753,18 @@ void genprivkey(const char *seed, vector<char> &privstr, vector<char> &pubstr)
     pubstr.add('\0');
 }
 
+void genpubkey(const char *privstr, vector<char> &pubstr)
+{
+    gfint privkey;
+    privkey.parse(privstr);
+
+    ecjacobian c(ecjacobian::base);
+    c.mul(privkey);
+    c.normalize();
+    c.print(pubstr);
+    pubstr.add('\0');
+}
+
 bool hashstring(const char *str, char *result, int maxlen)
 {
     tiger::hashval hv;
@@ -811,7 +823,7 @@ void *genchallenge(void *pubkey, const void *seed, int seedlen, vector<char> &ch
 
     secret.print(challengestr);
     challengestr.add('\0');
-   
+
     return new gfield(answer.x);
 }
 
