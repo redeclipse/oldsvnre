@@ -190,23 +190,23 @@ namespace aiman
             if(ci->state.aitype == AI_BOT && ++numbots >= GAME(botlimit)) shiftai(ci, -1);
         }
 
-        int balance = 0, people = numclients(-1, true, -1);
+        int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
         if(m_campaign(gamemode)) balance = GAME(campaignplayers); // campaigns strictly obeys nplayers
         else if(m_edit(gamemode)) balance = GAME(botoffset);
         else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
         {
-            int numt = numteams(gamemode, mutators);
             switch(GAME(botbalance))
             {
                 case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : nplayers); break; // use distributed numplayers
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : GAME(botbalance)); break; // balance to at least this
             }
+            balance += GAME(botoffset)*numt;
             if(m_team(gamemode, mutators) && (balance > 0 || GAME(teambalance) == 3))
             { // skew this if teams are unbalanced
                 if(GAME(teambalance) != 3)
                 {
-                    int plrs[TEAM_TOTAL] = {0}, highest = -1;
+                    int plrs[TEAM_TOTAL] = {0}, highest = -1; // we do this because humans can unbalance in odd ways
                     loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
                     {
                         int team = clients[i]->team-TEAM_FIRST;
@@ -222,28 +222,9 @@ namespace aiman
                             else balance++;
                         }
                     }
-                    if(m_team(gamemode, mutators))
-                    {
-                        int offt = balance%numt;
-                        if(offt) balance += numt-offt;
-                    }
                 }
                 else balance = max(people*numt, numt); // humans vs. bots, just directly balance
-                loopvrev(clients)
-                {
-                    clientinfo *ci = clients[i];
-                    if(ci->state.aitype == AI_BOT && ci->state.ownernum >= 0)
-                    {
-                        if(numclients(-1, true, AI_BOT) > balance) shiftai(ci, -1);
-                        else
-                        {
-                            int teamb = chooseteam(ci, ci->team);
-                            if(ci->team != teamb) setteam(ci, teamb, true, true);
-                        }
-                    }
-                }
             }
-            balance += GAME(botoffset);
         }
         int bots = balance-people;
         if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
@@ -251,6 +232,15 @@ namespace aiman
         {
             while(numclients(-1, true, AI_BOT) < balance) if(!addai(AI_BOT, -1, -1)) break;
             while(numclients(-1, true, AI_BOT) > balance) if(!delai(AI_BOT)) break;
+            if(m_team(gamemode, mutators)) loopvrev(clients)
+            {
+                clientinfo *ci = clients[i];
+                if(ci->state.aitype == AI_BOT && ci->state.ownernum >= 0)
+                {
+                    int teamb = chooseteam(ci, ci->team);
+                    if(ci->team != teamb) setteam(ci, teamb, true, true);
+                }
+            }
         }
         else clearai(1);
     }
