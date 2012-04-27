@@ -1,7 +1,7 @@
 #ifdef GAMESERVER
 struct duelservmode : servmode
 {
-    int duelround, dueltime, duelcheck, dueldeath;
+    int duelround, dueltime, duelcheck, dueldeath, duelwinner, duelwins;
     vector<clientinfo *> duelqueue, allowed, playing;
 
     duelservmode() {}
@@ -48,6 +48,11 @@ struct duelservmode : servmode
     void entergame(clientinfo *ci) { queue(ci); }
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
+        if(duelwinner == ci->clientnum)
+        {
+            duelwinner = -1;
+            duelwins = 0;
+        }
         duelqueue.removeobj(ci);
         allowed.removeobj(ci);
         playing.removeobj(ci);
@@ -55,14 +60,14 @@ struct duelservmode : servmode
 
     bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush)
     {
-        if(dueltime && target->state.aitype < AI_START) return false;
+        if(dueltime >= 0 && target->state.aitype < AI_START) return false;
         return true;
     }
 
     bool canspawn(clientinfo *ci, bool tryspawn = false)
     {
         if(allowed.find(ci) >= 0 || ci->state.aitype >= AI_START) return true;
-        if(tryspawn) queue(ci, false, duelround > 0 || duelqueue.length() > 1);
+        if(tryspawn && dueltime < 0 && dueldeath < 0) queue(ci, false, duelround > 0 || duelqueue.length() > 1);
         return false; // you spawn when we want you to buddy
     }
 
@@ -95,7 +100,7 @@ struct duelservmode : servmode
 
     void clear()
     {
-        duelcheck = dueldeath = 0;
+        duelcheck = dueldeath = -1;
         dueltime = gamemillis+GAME(duellimit);
         playing.shrink(0);
     }
@@ -103,7 +108,7 @@ struct duelservmode : servmode
     void update()
     {
         if(interm || !hasgameinfo || numclients(-1, true, AI_BOT) <= 1) return;
-
+        #if 0
         if(dueltime < 0)
         {
             if(duelqueue.length() >= 2) clear();
@@ -114,20 +119,45 @@ struct duelservmode : servmode
             }
         }
         else cleanup();
-
-        if(dueltime)
+        #else
+        cleanup();
+        #endif
+        if(dueltime >= 0)
         {
             if(gamemillis >= dueltime)
             {
-                vector<clientinfo *> alive;
+                bool resetwinner = false;
+                if(m_duel(gamemode, mutators) && GAME(duelcycle)&(m_team(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
+                {
+                    clientinfo *ci = (clientinfo *)getinfo(duelwinner);
+                    if(ci)
+                    {
+                        int numwins = GAME(duelcycles), numplrs = 0;
+                        loopv(clients)
+                            if(clients[i]->state.aitype < AI_START && clients[i]->state.state != CS_SPECTATOR && clients[i]->team == ci->team)
+                                numplrs++;
+                        if(numplrs > (m_team(gamemode, mutators) ? 1 : 2))
+                        {
+                            if(!numwins) numwins = numplrs;
+                            if(duelwins >= numwins) resetwinner = true;
+                        }
+                    }
+                    else
+                    {
+                        duelwinner = -1;
+                        duelwins = 0;
+                    }
+                }
                 loopv(clients) if(clients[i]->state.aitype < AI_START)
-                    queue(clients[i], clients[i]->state.state == CS_ALIVE, GAME(duelreset) || clients[i]->state.state != CS_ALIVE, true);
-                allowed.shrink(0); playing.shrink(0);
+                    queue(clients[i], !resetwinner && clients[i]->state.state == CS_ALIVE, resetwinner || GAME(duelreset) || clients[i]->state.state != CS_ALIVE, true);
+                allowed.shrink(0);
+                playing.shrink(0);
                 if(!duelqueue.empty())
                 {
                     if(smode) smode->layout();
                     mutate(smuts, mut->layout());
                     loopv(clients) if(clients[i]->state.aitype < AI_START) position(clients[i], true);
+                    vector<clientinfo *> alive;
                     loopv(duelqueue)
                     {
                         if(m_duel(gamemode, mutators) && alive.length() >= 2) break;
@@ -165,19 +195,19 @@ struct duelservmode : servmode
                         formatstring(fight)("\fwsurvivor, round \fs\fr#%d\fS", duelround);
                     loopv(playing) if(allowbroadcast(playing[i]->clientnum))
                         ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
-                    dueltime = dueldeath = 0;
-                    duelcheck = gamemillis;
+                    dueltime = dueldeath = -1;
+                    duelcheck = gamemillis+5000;
                 }
             }
         }
-        else
+        else if(duelround > 0)
         {
             bool cleanup = false;
             vector<clientinfo *> alive;
             loopv(clients)
                 if(clients[i]->state.aitype < AI_START && clients[i]->state.state == CS_ALIVE && clients[i]->state.aitype < AI_START)
                     alive.add(clients[i]);
-            if(!allowed.empty() && duelcheck && gamemillis-duelcheck >= 5000) loopvrev(allowed)
+            if(!allowed.empty() && duelcheck >= 0 && gamemillis >= duelcheck) loopvrev(allowed)
             {
                 if(alive.find(allowed[i]) < 0) spectator(allowed[i]);
                 allowed.remove(i);
@@ -191,8 +221,8 @@ struct duelservmode : servmode
                     loopv(alive) if(i && alive[i]->team != alive[i-1]->team) { found = true; break; }
                     if(!found)
                     {
-                        if(!dueldeath) dueldeath = gamemillis;
-                        else if(gamemillis-dueldeath > DEATHMILLIS)
+                        if(dueldeath < 0) dueldeath = gamemillis+DEATHMILLIS;
+                        else if(gamemillis >= dueldeath)
                         {
                             if(!cleanup)
                             {
@@ -227,18 +257,30 @@ struct duelservmode : servmode
                             srvmsgf(-1, "\fyeveryone died, \fzoyepic fail");
                             loopv(playing) if(allowbroadcast(playing[i]->clientnum))
                                 ancmsgft(playing[i]->clientnum, S_V_DRAW, -1, "");
+                            duelwinner = -1;
+                            duelwins = 0;
                         }
                         clear();
                         break;
                     }
                     case 1:
                     {
-                        if(!dueldeath) dueldeath = gamemillis;
-                        else if(gamemillis-dueldeath > DEATHMILLIS)
+                        if(dueldeath < 0) dueldeath = gamemillis+DEATHMILLIS;
+                        else if(gamemillis >= dueldeath)
                         {
                             if(!cleanup)
                             {
-                                srvmsgf(-1, "\fy%s was the victor", colorname(alive[0]));
+                                if(duelwinner != alive[0]->clientnum)
+                                {
+                                    duelwinner = alive[0]->clientnum;
+                                    duelwins = 1;
+                                    srvmsgf(-1, "\fy%s was the victor", colorname(alive[0]));
+                                }
+                                else
+                                {
+                                    duelwins++;
+                                    srvmsgf(-1, "\fy%s was the victor (\fs\fc%d\fS in a row)", colorname(alive[0]), duelwins);
+                                }
                                 loopv(playing)
                                 {
                                     if(playing[i] == alive[0])
@@ -263,8 +305,8 @@ struct duelservmode : servmode
 
     void reset(bool empty)
     {
-        duelround = duelcheck = dueldeath = 0;
-        dueltime = -1;
+        duelround = duelwins = 0;
+        dueltime = duelcheck = dueldeath = duelwinner = -1;
         allowed.shrink(0);
         duelqueue.shrink(0);
         playing.shrink(0);
