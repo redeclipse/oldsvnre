@@ -4,19 +4,23 @@ Gameplay:
 
 Audio & Visuals:
 * Corrected icon size for x32 and x48 versions
+* track_11, track_12, new music
 
 Maps:
+Institute, new map
 
 Modes & Mutators:
 
 Modding:
 * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
 * Removed kitchen and kitchen1 textures from trak4 (unused)
+* arid2, new skybox
 
 Misc:
 * Now possible to allow demo recording for masters (/restrictdemos 0)
 * SDL 1.2.15
 * Remove "-r" command-line option
+* Added server hosting and player guidelines for the master server
 
 Additional Fixed Bugs:
 * #103 [minor] Revenge-seeking remains after team-change
@@ -24,6 +28,12 @@ Additional Fixed Bugs:
 * #115 When joining mid-match, bomber-ball affinities aren't enabled
 * #128 Buff state not properly synchronised
 * #129 Spawn rotation problems
+* #136 Arena-expert and submodes are bugged (rocket & grenade select issues)
+* #132 venus geom errors
+* #135 ghost geom errors
+* #117 Team-duel problems (force cycle team member after 3 wins)
+* #113 Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
+
 
 
 Red Eclipse 1.2
