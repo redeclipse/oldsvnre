@@ -63,7 +63,7 @@ void setupmaster()
     if(masterserver)
     {
         conoutf("init: master (%s:%d)", *masterip ? masterip : "*", masterport);
-        ENetAddress address = { ENET_HOST_ANY,  masterport };
+        ENetAddress address = { ENET_HOST_ANY, enet_uint16(masterport) };
         if(*masterip && enet_address_set_host(&address, masterip) < 0) fatal("failed to resolve master address: %s", masterip);
         if((mastersocket = enet_socket_create(ENET_SOCKET_TYPE_STREAM)) == ENET_SOCKET_NULL) fatal("failed to create master server socket");
         if(enet_socket_set_option(mastersocket, ENET_SOCKOPT_REUSEADDR, 1) < 0) fatal("failed to set master server socket option");
@@ -155,7 +155,7 @@ void reqauth(masterclient &c, uint id, char *name)
     a.user = u;
     a.reqtime = totalmillis;
     a.id = id;
-    uint seed[3] = { starttime, totalmillis, randomMT() };
+    uint seed[3] = { uint(starttime), uint(totalmillis), randomMT() };
     static vector<char> buf;
     buf.setsize(0);
     a.answer = genchallenge(u->pubkey, seed, sizeof(seed), buf);
@@ -353,7 +353,7 @@ void checkmaster()
                 ENetBuffer buf;
                 buf.data = (void *)ping;
                 buf.dataLength = sizeof(ping);
-                ENetAddress addr = { c.address.host, c.port+1 };
+                ENetAddress addr = { c.address.host, enet_uint16(c.port+1) };
                 c.numpings++;
                 c.lastping = totalmillis ? totalmillis : 1;
                 enet_socket_send(pingsocket, &addr, &buf, 1);

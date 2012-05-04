@@ -27,7 +27,7 @@ void ircestablish(ircnet *n)
         }
     }
 
-    ENetAddress address = { ENET_HOST_ANY,  n->port };
+    ENetAddress address = { ENET_HOST_ANY, enet_uint16(n->port) };
     if(*n->ip && enet_address_set_host(&address, n->ip) < 0) conoutf("failed to bind address: %s", n->ip);
     n->sock = enet_socket_create(ENET_SOCKET_TYPE_STREAM);
     if(n->sock != ENET_SOCKET_NULL && *n->ip && enet_socket_bind(n->sock, &address) < 0)

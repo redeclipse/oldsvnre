@@ -1209,7 +1209,7 @@ int setupserversockets()
 {
     if(!servertype || (serverhost && pongsock != ENET_SOCKET_NULL)) return servertype;
 
-    ENetAddress address = { ENET_HOST_ANY, serverport };
+    ENetAddress address = { ENET_HOST_ANY, enet_uint16(serverport) };
     if(*serverip)
     {
         if(enet_address_set_host(&address, serverip) < 0) conoutf("\frWARNING: server address not resolved");
