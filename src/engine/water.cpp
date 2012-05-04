@@ -578,7 +578,7 @@ void renderwater()
 
     glDisable(GL_CULL_FACE);
 
-    uchar wcol[3] = { watercolour>>16, (watercolour>>8)&0xFF, watercolour&0xFF };
+    uchar wcol[3] = { uchar(watercolour>>16), uchar((watercolour>>8)&0xFF), uchar(watercolour&0xFF) };
     glColor3ubv(wcol);
 
     MSlot &s = lookupmaterialslot(MAT_WATER);
