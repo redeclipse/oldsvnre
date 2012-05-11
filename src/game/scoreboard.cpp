@@ -336,6 +336,7 @@ namespace hud
             g.pushfont("reduced");
             if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
             else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
+            else if(m_trial(game::gamemode)) g.textf("Time-trial", 0xFFFFFF, NULL, 0);
             else if(m_team(game::gamemode, game::mutators))
                 g.textf("Play for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtexname(game::player1->team), TEAM(game::player1->team, name));
             else g.textf("Free for All Deathmatch", 0xFFFFFF, NULL, 0);
