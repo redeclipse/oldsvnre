@@ -262,11 +262,7 @@ namespace client
             if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) && game::player1->state != CS_SPECTATOR && game::player1->state != CS_EDITING)
             {
                 int t = teamname(team);
-                if(t != game::player1->team)
-                {
-                    if(game::player1->team != t) hud::lastteam = 0;
-                    addmsg(N_SWITCHTEAM, "ri", game::player1->team);
-                }
+                if(t != game::player1->team) addmsg(N_SWITCHTEAM, "ri", t);
             }
             else conoutft(CON_INFO, "\frcan only change teams when actually playing in team games");
         }
