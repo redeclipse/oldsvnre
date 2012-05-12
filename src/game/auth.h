@@ -39,12 +39,12 @@ namespace auth
         if(!ci) return false;
         else if(!connectedmaster())
         {
-            srvmsgft(ci->clientnum, CON_EVENT, "\fYnot connected to master server");
+            srvmsgft(ci->clientnum, CON_EVENT, "\founable to verify, not connected to master server");
             return false;
         }
         else if(ci->authreq)
         {
-            srvmsgft(ci->clientnum, CON_EVENT, "\fYwaiting for previous attempt..");
+            srvmsgft(ci->clientnum, CON_EVENT, "\foplease wait, still processing previous attempt..");
             return true;
         }
         filtertext(ci->authname, user, true, true, false, 100);
