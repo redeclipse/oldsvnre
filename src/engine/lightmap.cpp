@@ -2775,9 +2775,8 @@ const extentity *brightestlight(const vec &target, const vec &dir)
             if(ents.inrange(slight))
             {
                 const extentity &spotlight = *ents[slight];
-                vec spot(vec(spotlight.o).sub(e.o).normalize());
-                float maxatten = 1-cosf(max(1, min(90, int(spotlight.attrs[1])))*RAD);
-                float spotatten = 1-(1-ray.dot(spot))/maxatten;
+                vec spot = vec(spotlight.o).sub(e.o).normalize();
+                float maxatten = sincos360[clamp(int(spotlight.attrs[1]), 1, 89)].x, spotatten = (ray.dot(spot) - maxatten) / (1 - maxatten);
                 if(spotatten <= 0) continue;
                 intensity *= spotatten;
             }
