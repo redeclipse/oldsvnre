@@ -2606,9 +2606,17 @@ ICOMMAND(0, cond, "ee2V", (tagval *args, int numargs),
 {
     for(int i = 0; i < numargs; i += 2)
     {
-        if(executebool(args[i].code))
+        if(i+1 < numargs)
         {
-            if(i+1 < numargs) executeret(args[i+1].code, *commandret);
+            if(executebool(args[i].code))
+            {
+                executeret(args[i+1].code, *commandret);
+                break;
+            }
+        }
+        else
+        {
+            executeret(args[i].code, *commandret);
             break;
         }
     }
