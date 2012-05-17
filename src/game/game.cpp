@@ -2316,7 +2316,7 @@ namespace game
             {
                 if(physics::hover(d))
                 {
-                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(gamemode, mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && (!impulsemeleestyle || (d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)))
+                    if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2337,7 +2337,7 @@ namespace game
                 {
                     basetime2 = d->impulse[IM_TIME];
                     if(d->impulse[IM_TYPE] == IM_T_KICK) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
-                    else if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(gamemode, mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && (!impulsemeleestyle || (d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)))
+                    else if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
@@ -2356,7 +2356,7 @@ namespace game
                 {
                     if(d->impulse[IM_JUMP] && d->timeinair) basetime2 = d->impulse[IM_JUMP];
                     else if(d->timeinair) basetime2 = lastmillis-d->timeinair;
-                    if(d->canshoot(WEAP_MELEE, HIT_ALT, m_weapon(gamemode, mutators), lastmillis, (1<<WEAP_S_RELOAD)) && d->action[AC_SPECIAL] && (!impulsemeleestyle || (d->impulse[IM_TYPE] && lastmillis-d->impulse[IM_TIME] <= impulsemeleedelay)))
+                    if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->actiontime[AC_SPECIAL];
