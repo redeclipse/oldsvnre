@@ -1147,6 +1147,14 @@ struct gameent : dynent, gamestate
         }
         return stun;
     }
+
+    bool canmelee(int sweap, int millis, bool check = false, bool slide = false)
+    {
+        if(check && !action[AC_SPECIAL] && !slide) return false;
+        if(impulsemeleechain && (!impulse[IM_TYPE] || millis-impulse[IM_TIME] > impulsemeleechain)) return false;
+        if(!canshoot(WEAP_MELEE, HIT_ALT, sweap, millis, (1<<WEAP_S_RELOAD))) return false;
+        return true;
+    }
 };
 
 enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ_MAX };
