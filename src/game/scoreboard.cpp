@@ -334,12 +334,20 @@ namespace hud
         {
             g.space(0.5f);
             g.pushfont("reduced");
-            if(m_edit(game::gamemode)) g.textf("Map Editing", 0xFFFFFF, NULL, 0);
-            else if(m_campaign(game::gamemode)) g.textf("Campaign", 0xFFFFFF, NULL, 0);
-            else if(m_trial(game::gamemode)) g.textf("Time-trial", 0xFFFFFF, NULL, 0);
-            else if(m_team(game::gamemode, game::mutators))
-                g.textf("Play for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtexname(game::player1->team), TEAM(game::player1->team, name));
-            else g.textf("Free for All Deathmatch", 0xFFFFFF, NULL, 0);
+
+            // In two cases, the main mode-description is not applicable
+            if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // bomber-ball hold
+                g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
+            else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // ctf protect
+                g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
+            else
+                g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
+
+            if(m_team(game::gamemode, game::mutators))
+                g.textf("playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtexname(game::player1->team), TEAM(game::player1->team, name));
+            else
+                g.textf("free-for-all", 0xFFFFFF, NULL, 0);
+
             g.popfont();
         }
         else if(game::player1->state == CS_SPECTATOR)
