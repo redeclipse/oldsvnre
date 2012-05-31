@@ -4,15 +4,15 @@
 #include "cube.h"
 
 #define RE_VER_MAJOR        1
-#define RE_VER_MINOR        2
+#define RE_VER_MINOR        3
 #define RE_VER_PATCH        0
-#define RE_VER_STR          "1.2"
+#define RE_VER_STR          "1.3"
 #define RE_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
 #define RE_VER              RE_VER_MAKE(RE_VER_MAJOR, RE_VER_MINOR, RE_VER_PATCH)
 #define RE_VERSION          (RE_VER_MAJOR*100)+(RE_VER_MINOR*10)+RE_VER_PATCH
 
 #define RE_NAME            "Red Eclipse"
-#define RE_RELEASE         "Cosmic Edition"
+#define RE_RELEASE         "Development"
 #define RE_URL             "www.redeclipse.net"
 #ifdef WIN32
 #define RE_PLATFORM        "win"
@@ -21,6 +21,7 @@
 #else
 #define RE_PLATFORM        "nix"
 #endif
+#define RE_ARCH             (8*sizeof(void *))
 
 #define RE_LAN_PORT        28799
 #define RE_MASTER_PORT     28800
