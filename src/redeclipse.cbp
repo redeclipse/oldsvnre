@@ -28,6 +28,8 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -70,6 +72,8 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fsigned-char" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -111,6 +115,8 @@
 					<Add option="-pg" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -148,12 +154,14 @@
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
+					<Add option="-fomit-frame-pointer" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
-					<Add option="-fomit-frame-pointer" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DMASTERSERVER" />
 					<Add option="-DIRC" />
@@ -165,6 +173,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-mwindows" />
 					<Add option="-m32" />
 					<Add library="zlib1" />
 					<Add library="enet" />
@@ -190,6 +199,8 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fsigned-char" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DMASTERSERVER" />
 					<Add option="-DIRC" />
@@ -200,6 +211,7 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
+					<Add option="-mwindows" />
 					<Add option="-m32" />
 					<Add library="zlib1" />
 					<Add library="enet" />
@@ -229,6 +241,8 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-mwindows" />
+					<Add option="-m64" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -271,6 +285,8 @@
 					<Add option="-pg" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
+					<Add option="-mwindows" />
+					<Add option="-m64" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -313,6 +329,8 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fsigned-char" />
+					<Add option="-mwindows" />
+					<Add option="-m64" />
 					<Add option="-DINTERFACE" />
 					<Add option="-DIRC" />
 					<Add directory="shared" />
@@ -355,6 +373,8 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-mwindows" />
+					<Add option="-m64" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DMASTERSERVER" />
 					<Add option="-DIRC" />
@@ -366,6 +386,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-mwindows" />
 					<Add option="-m64" />
 					<Add library="zlib1" />
 					<Add library="enet" />
@@ -391,6 +412,8 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fsigned-char" />
+					<Add option="-mwindows" />
+					<Add option="-m64" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DMASTERSERVER" />
 					<Add option="-DIRC" />
@@ -401,6 +424,7 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
+					<Add option="-mwindows" />
 					<Add option="-m64" />
 					<Add library="zlib1" />
 					<Add library="enet" />
@@ -437,12 +461,14 @@
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
+					<Add option="-fomit-frame-pointer" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
-					<Add option="-fomit-frame-pointer" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DGENKEY" />
 					<Add directory="shared" />
@@ -453,6 +479,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-mwindows" />
 					<Add option="-m32" />
 					<Add library="zlib1" />
 					<Add directory="..\bin" />
@@ -478,6 +505,8 @@
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
+					<Add option="-mwindows" />
+					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
 					<Add option="-DGENKEY" />
 					<Add directory="shared" />
@@ -488,6 +517,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-mwindows" />
 					<Add option="-m32" />
 					<Add library="freetype" />
 					<Add library="zlib1" />
