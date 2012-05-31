@@ -48,6 +48,8 @@ system-install-client: client
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@REDECLIPSE@,$(redeclipse),g' \
 		-i $(gamesbindir)/$(redeclipse)
+	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(redeclipse)/data \
+		$(libexecdir)/$(redeclipse)/data
 
 system-install-server: server
 	install -d $(libexecdir)/$(redeclipse)
@@ -64,11 +66,8 @@ system-install-server: server
 
 system-install-data:
 	install -d $(datadir)/$(redeclipse)
-	install -d $(libexecdir)/$(redeclipse)
 	cp -r ../data $(datadir)/$(redeclipse)/data
 	@rm -rv $(datadir)/$(redeclipse)/data/examples
-	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(redeclipse)/data \
-		$(libexecdir)/$(redeclipse)/data
 
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
@@ -124,6 +123,7 @@ system-install: system-install-client system-install-server system-install-data 
 
 system-uninstall-client:
 	@rm -fv $(libexecdir)/$(redeclipse)/$(redeclipse)
+	@rm -fv $(libexecdir)/$(redeclipse)/data
 	@rm -fv $(gamesbindir)/$(redeclipse)
 
 system-uninstall-server:
@@ -132,7 +132,6 @@ system-uninstall-server:
 
 system-uninstall-data:
 	rm -rf $(datadir)/$(redeclipse)/data
-	@rm -fv $(libexecdir)/$(redeclipse)/data
 
 system-uninstall-docs:
 	@rm -rfv $(docdir)/$(redeclipse)/examples
