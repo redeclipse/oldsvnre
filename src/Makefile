@@ -17,9 +17,16 @@ endif
 MV=mv
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
+ifneq (,$(findstring 64,$(PLATFORM)))
+WINLIB=lib64
+WINBIN=../bin64
+else
+WINLIB=lib
+WINBIN=../bin
+endif
 WINDRES= windres
 CLIENT_INCLUDES= -DINTERFACE -DIRC $(INCLUDES) -Iinclude
-CLIENT_LIBS= -mwindows -static-libgcc -static-libstdc++ -Llib -lSDL -lSDL_image -lSDL_mixer -lzdll -lopengl32 -lenet -lws2_32 -lwinmm
+CLIENT_LIBS= -mwindows -static-libgcc -static-libstdc++ -L$(WINBIN) -L$(WINLIB) -lSDL -lSDL_image -lSDL_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
 else
 CLIENT_INCLUDES= -DINTERFACE -DIRC $(INCLUDES) -I/usr/X11R6/include `sdl-config --cflags`
 CLIENT_LIBS= -Lenet/.libs -lenet -L/usr/X11R6/lib -lX11 `sdl-config --libs` -lSDL_image -lSDL_mixer -lz -lGL
@@ -90,7 +97,7 @@ CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 SERVER_INCLUDES= -DSTANDALONE -DMASTERSERVER -DIRC $(INCLUDES) -Iinclude
-SERVER_LIBS= -mwindows -Llib -lzdll -lenet -lws2_32 -lwinmm
+SERVER_LIBS= -mwindows -static-libgcc -static-libstdc++ -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
 else
 SERVER_INCLUDES= -DSTANDALONE -DMASTERSERVER -DIRC $(INCLUDES)
 SERVER_LIBS= -Lenet/.libs -lenet -lz
@@ -142,11 +149,11 @@ $(SERVER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
 	$(WINDRES) -i redeclipse.rc -J rc -o redeclipse.res -O coff 
-	$(CXX) $(CXXFLAGS) -o ../bin/reclient.exe redeclipse.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/reclient.exe redeclipse.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
 	$(WINDRES) -i redeclipse.rc -J rc -o redeclipse.res -O coff 
-	$(CXX) $(CXXFLAGS) -o ../bin/reserver.exe redeclipse.res $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/reserver.exe redeclipse.res $(SERVER_OBJS) $(SERVER_LIBS)
 
 install-client: client
 ifneq (,$(STRIP))
