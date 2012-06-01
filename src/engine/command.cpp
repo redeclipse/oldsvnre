@@ -2141,9 +2141,9 @@ ICOMMAND(0, loopwhile, "riee", (ident *id, int *n, uint *cond, uint *body),
     poparg(*id);
 });
 ICOMMAND(0, while, "ee", (uint *cond, uint *body), while(executebool(cond)) execute(body));
-ICOMMAND(0, loopconcat, "rie", (ident *id, int *n, uint *body),
+
+char *loopconc(ident *id, int n, uint *body, bool space)
 {
-    if(*n <= 0 || id->type!=ID_ALIAS) return;
     identstack stack;
     vector<char> s;
     loopi(*n)
@@ -2153,13 +2153,23 @@ ICOMMAND(0, loopconcat, "rie", (ident *id, int *n, uint *body),
         executeret(body, v);
         const char *vstr = v.getstr();
         int len = strlen(vstr);
-        if(!s.empty()) s.add(' ');
+        if(space && !s.empty()) s.add(' ');
         s.put(vstr, len);
         freearg(v);
     }
     poparg(*id);
     s.add('\0');
-    commandret->setstr(newstring(s.getbuf(), s.length()-1));
+    return newstring(s.getbuf(), s.length()-1);
+}
+
+ICOMMAND(0, loopconcat, "rie", (ident *id, int *n, uint *body),
+{
+    if(*n > 0 && id->type==ID_ALIAS) commandret->setstr(loopconc(id, *n, body, true));
+});
+
+ICOMMAND(0, loopconcatword, "rie", (ident *id, int *n, uint *body),
+{
+    if(*n > 0 && id->type==ID_ALIAS) commandret->setstr(loopconc(id, *n, body, false));
 });
 
 void concat(tagval *v, int n)
