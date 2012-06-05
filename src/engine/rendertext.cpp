@@ -337,10 +337,10 @@ static float icon_width(const char *name, float scale)
                     if(i-j > 16) break;\
                     if(!curfont->chars.inrange(c-curfont->charoffset)) break;\
                     float cw = scale*curfont->chars[c-curfont->charoffset].advance;\
-                    if(cw <= 0 || w + cw >= maxwidth) break; \
+                    if(cw <= 0 || w + cw > maxwidth) break; \
                     w += cw;\
                 }\
-                if(x + w >= maxwidth && j!=0) { TEXTLINE(j-1) TEXTALIGN }\
+                if(x + w > maxwidth && j!=0) { TEXTLINE(j-1) TEXTALIGN }\
                 TEXTWORD\
             }\
             else { TEXTCHAR(i) }\
