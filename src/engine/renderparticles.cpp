@@ -1513,8 +1513,9 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
         vec to, from;
         if(dir < 12)
         {
-            float a = PI2*float(rnd(1000))/1000.0;
-            to[dir%3] = sinf(a)*radius;
+            const vec2 &sc = sincos360[rnd(360)];
+            to[dir%3] = sc.y*radius;
+            to[(dir+1)%3] = sc.x*radius;
             to[(dir+1)%3] = cosf(a)*radius;
             to[(dir+2)%3] = 0.0;
             to.add(p);
