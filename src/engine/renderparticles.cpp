@@ -1516,7 +1516,6 @@ void regularshape(int type, float radius, int color, int dir, int num, int fade,
             const vec2 &sc = sincos360[rnd(360)];
             to[dir%3] = sc.y*radius;
             to[(dir+1)%3] = sc.x*radius;
-            to[(dir+1)%3] = cosf(a)*radius;
             to[(dir+2)%3] = 0.0;
             to.add(p);
             if(dir < 3) //circle
