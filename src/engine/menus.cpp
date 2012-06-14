@@ -462,7 +462,7 @@ void guinameslider(char *var, char *names, char *list, char *onchange, int *reve
     delete[] label;
 }
 
-void guicheckbox(char *name, char *var, float *on, int *off, char *onchange, int *colour)
+void guicheckbox(char *name, char *var, float *on, float *off, char *onchange, int *colour)
 {
     bool enabled = getfval(var) != *off, two = getvarmax(var) == 2, next = two && getfval(var) == 1.0f;
     if(cgui && cgui->button(name, *colour ? *colour : 0xFFFFFF, enabled ? (two && !next ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, enabled ? false : true)&GUI_UP)
