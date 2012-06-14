@@ -485,13 +485,23 @@ int getvarmax(const char *name)
 }
 float getfvarmin(const char *name)
 {
-    _GETVAR(id, ID_FVAR, name, 0);
-    return id->minvalf;
+    ident *id = idents.access(name);
+    if(id) switch(id->type)
+    {
+        case ID_VAR: return id->minval;
+        case ID_FVAR: return id->minvalf;
+    }
+    return retval;
 }
 float getfvarmax(const char *name)
 {
-    _GETVAR(id, ID_FVAR, name, 0);
-    return id->maxvalf;
+    ident *id = idents.access(name); 
+    if(id) switch(id->type) 
+    { 
+        case ID_VAR: return id->maxval; 
+        case ID_FVAR: return id->maxvalf; 
+    } 
+    return retval;
 }
 int getvardef(const char *name)
 {
