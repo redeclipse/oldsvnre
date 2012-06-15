@@ -491,7 +491,7 @@ float getfvarmin(const char *name)
         case ID_VAR: return id->minval;
         case ID_FVAR: return id->minvalf;
     }
-    return retval;
+    return 0;
 }
 float getfvarmax(const char *name)
 {
@@ -501,7 +501,7 @@ float getfvarmax(const char *name)
         case ID_VAR: return id->maxval; 
         case ID_FVAR: return id->maxvalf; 
     } 
-    return retval;
+    return 0;
 }
 int getvardef(const char *name)
 {

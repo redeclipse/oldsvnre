@@ -282,6 +282,8 @@ extern int getvar(const char *name);
 extern int getvarmin(const char *name);
 extern int getvarmax(const char *name);
 extern int getvardef(const char *name);
+extern float getfvarmin(const char *name);
+extern float getfvarmax(const char *name);
 extern bool identexists(const char *name);
 extern ident *getident(const char *name);
 extern ident *newident(const char *name, int flags = 0);
