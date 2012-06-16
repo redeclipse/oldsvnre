@@ -1,6 +1,7 @@
 Red Eclipse 1.3
 Gameplay:
 * Rocket launcher now spawns in instagib
+* Melee no longer requires an impulse action before (back to 1.1 behaviour)
 
 Audio & Visuals:
 * Corrected icon size for x32 and x48 versions
@@ -8,6 +9,7 @@ Audio & Visuals:
 
 Maps:
 Institute, new map
+Biolytic, new map
 
 Modes & Mutators:
 
@@ -21,6 +23,8 @@ Misc:
 * SDL 1.2.15
 * Remove "-r" command-line option
 * Added server hosting and player guidelines for the master server
+* Enet 1.3.4
+* 64bit builds for Windows
 
 Additional Fixed Bugs:
 * #103 [minor] Revenge-seeking remains after team-change
