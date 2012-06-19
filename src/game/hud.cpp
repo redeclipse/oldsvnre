@@ -1096,19 +1096,24 @@ namespace hud
                             extentity &e = *entities::ents[ent];
                             if(enttype[e.type].usetype == EU_ITEM)
                             {
-                                int drop = -1, sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
+                                int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
                                 if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_ALL))
                                 {
-                                    if(e.type == WEAPON && w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
-                                        drop = target->drop(sweap);
-                                    if(isweap(drop))
+                                    if(e.type == WEAPON)
                                     {
-                                        static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
-                                        attrs[0] = drop;
-                                        defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
-                                        ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
+                                        int drop = -1;
+                                        if(w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
+                                            drop = target->drop(sweap);
+                                        if(isweap(drop))
+                                        {
+                                            static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
+                                            attrs[0] = drop;
+                                            defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
+                                            ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
+                                        }
+                                        else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                     }
-                                    else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                    else ty += draw_textx("Press \fs\fc%s\fS to use \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                     break;
                                 }
                             }

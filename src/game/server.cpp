@@ -1695,8 +1695,8 @@ namespace server
         else
         {
             lilswap(&hdr.version, 2);
-            if(hdr.version!=DEMO_VERSION) formatstring(msg)("demo \"%s\" requires %s version of Red Eclipse", file, hdr.version<DEMO_VERSION ? "an older" : "a newer");
-            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("demo \"%s\" requires %s version of Red Eclipse", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer");
+            if(hdr.version!=DEMO_VERSION) formatstring(msg)("demo \"%s\" requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", RE_NAME);
+            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("demo \"%s\" requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", RE_NAME);
         }
         if(msg[0])
         {

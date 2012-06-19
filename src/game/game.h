@@ -629,11 +629,11 @@ struct gamestate
                 loopj(2)
                 {
                     aweap[j] = loadweap[j];
-                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= WEAP_ITEM || (j && aweap[0] == aweap[1]))
+                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= WEAP_ITEM || hasweap(aweap[j], sweap))
                     {
                         aweap[j] = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // random
                         int iters = 0;
-                        while(++iters < 10 && ((j && aweap[0] == aweap[1]) || WEAP(aweap[j], allowed) <= (m_duke(gamemode, mutators) ? 1 : 0)))
+                        while(++iters < 10 && (hasweap(aweap[j], sweap) || WEAP(aweap[j], allowed) <= (m_duke(gamemode, mutators) ? 1 : 0)))
                         {
                             if(++aweap[j] >= WEAP_ITEM) aweap[j] = WEAP_OFFSET;
                         }
