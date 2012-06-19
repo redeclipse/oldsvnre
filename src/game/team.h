@@ -20,14 +20,14 @@ TEAMS(enemy, 0x999999);
 
 #ifdef GAMESERVER
 #define TEAMDEF(proto,name)     proto *sv_team_stat_##name[] = { &sv_teamneutral##name, &sv_teamalpha##name, &sv_teamomega##name, &sv_teamkappa##name, &sv_teamsigma##name, &sv_teamenemy##name };
-#define TEAM(team,name)         (*sv_team_stat_##name[team])
+#define TEAM(id,name)           (*sv_team_stat_##name[id])
 #else
 #ifdef GAMEWORLD
 #define TEAMDEF(proto,name)     proto *team_stat_##name[] = { &teamneutral##name, &teamalpha##name, &teamomega##name, &teamkappa##name, &teamsigma##name, &teamenemy##name };
 #else
 #define TEAMDEF(proto,name)     extern proto *team_stat_##name[];
 #endif
-#define TEAM(team,name)         (*team_stat_##name[team])
+#define TEAM(id,name)           (*team_stat_##name[id])
 #endif
 TEAMDEF(char *, name);
 TEAMDEF(int, colour);

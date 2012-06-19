@@ -11,22 +11,23 @@
 #define RE_VER              RE_VER_MAKE(RE_VER_MAJOR, RE_VER_MINOR, RE_VER_PATCH)
 #define RE_VERSION          (RE_VER_MAJOR*100)+(RE_VER_MINOR*10)+RE_VER_PATCH
 
-#define RE_NAME            "Red Eclipse"
-#define RE_RELEASE         "Development"
-#define RE_URL             "www.redeclipse.net"
+#define RE_NAME             "Red Eclipse"
+#define RE_UNAME            "redeclipse"
+#define RE_RELEASE          "Development"
+#define RE_URL              "www.redeclipse.net"
 #ifdef WIN32
-#define RE_PLATFORM        "win"
+#define RE_PLATFORM         "win"
 #elif defined(__APPLE__)
-#define RE_PLATFORM        "mac"
+#define RE_PLATFORM         "mac"
 #else
-#define RE_PLATFORM        "nix"
+#define RE_PLATFORM         "nix"
 #endif
 #define RE_ARCH             (8*sizeof(void *))
 
-#define RE_LAN_PORT        28799
-#define RE_MASTER_PORT     28800
-#define RE_SERVER_PORT     28801
-#define RE_MASTER_HOST     "play.redeclipse.net"
+#define RE_LAN_PORT         28799
+#define RE_MASTER_PORT      28800
+#define RE_SERVER_PORT      28801
+#define RE_MASTER_HOST      "play.redeclipse.net"
 
 #ifdef IRC
 #include "irc.h"

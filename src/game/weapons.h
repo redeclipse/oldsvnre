@@ -170,8 +170,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  fscale1 fscale2 fsprd1  fsprd2  frel1   frel2   fffwd1  fffwd2  foff1   foff2   fskew1  fskew2  fmsp1   fmsp2
 //  flakcollide1
 //  flakcollide2
-//  ltraits
-//  lhealth lweight lspeed  lscale
+//  parttype
 WEAPON(melee,       0xEEEEEE,       0xEEEE22,       0xEEEE22,       -1,             -1,
     1,      1,      0,      0,      250,    500,    50,     30,     40,     0,      0,      0,      0,      0,      0,
     0,      0,      100,    100,

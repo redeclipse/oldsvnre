@@ -1173,7 +1173,8 @@ void logoutfv(const char *fmt, va_list args)
 void serverloop()
 {
 #ifdef WIN32
-    setupwindow("Red Eclipse server");
+    defformatstring(cap)("%s server", RE_NAME);
+    setupwindow(cap);
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 #endif
     conoutf("\fgdedicated server started, waiting for clients...");
@@ -1413,7 +1414,7 @@ void setlocations(bool wanthome)
 {
 #if defined(__APPLE__)
     extern const char *mac_resourcedir(const char *what);
-    const char *dir = mac_resourcedir("data"); // ./redeclipse.app/Contents/Resources
+    const char *dir = mac_resourcedir("data"); // ./blah.app/Contents/Resources
     conoutf("attempting to use resources in: %s", dir);
     defformatstring(resource)("%s/defaults.cfg", dir);
     if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
@@ -1427,7 +1428,7 @@ void setlocations(bool wanthome)
         mkstring(dir);
         if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, dir) == S_OK)
         {
-            defformatstring(s)("%s\\My Games\\Red Eclipse", dir);
+            defformatstring(s)("%s\\My Games\\%s", dir, RE_NAME);
             sethomedir(s);
             return;
         }
@@ -1436,7 +1437,7 @@ void setlocations(bool wanthome)
         const char *dir = mac_personaldir(); // typically  /Users/<name>/Application Support/
         if(dir && *dir)
         {
-            defformatstring(s)("%s/redeclipse", dir);
+            defformatstring(s)("%s/%s", dir, RE_UNAME);
             sethomedir(s);
             return;
         }
@@ -1444,7 +1445,7 @@ void setlocations(bool wanthome)
         const char *dir = getenv("HOME");
         if(dir && *dir)
         {
-            defformatstring(s)("%s/.redeclipse", dir);
+            defformatstring(s)("%s/.%s", dir, RE_UNAME);
             sethomedir(s);
             return;
         }
@@ -1561,7 +1562,8 @@ void fatal(const char *s, ...)    // failure exit
 #endif
             enet_deinitialize();
 #ifdef WIN32
-            MessageBox(NULL, msg, "Red Eclipse: Error", MB_OK|MB_SYSTEMMODAL);
+            defformatstring(cap)("%s: Error", RE_NAME);
+            MessageBox(NULL, msg, cap, MB_OK|MB_SYSTEMMODAL);
 #endif
         }
     }
