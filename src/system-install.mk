@@ -90,6 +90,7 @@ system-install-docs: $(MANPAGES)
 		install/nix/$(appname)-server.6.am | \
 		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname)-server.6.gz
 	cp -r ../data/examples $(docdir)/$(appname)/examples
+	cp ../guidlines.txt $(docdir)/$(appname)/guidelines.txt
 
 system-install-menus: icons
 	install -d $(menudir)
