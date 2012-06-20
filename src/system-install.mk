@@ -1,4 +1,6 @@
 appname=redeclipse
+appclient=reclient
+appserver=reserver
 prefix=/usr/local
 games=
 gamesbin=/bin
@@ -40,7 +42,7 @@ icons: $(ICONS)
 system-install-client: client
 	install -d $(libexecdir)/$(appname)
 	install -d $(gamesbindir)
-	install -m755 reclient $(libexecdir)/$(appname)/$(appname)
+	install -m755 $(appclient) $(libexecdir)/$(appname)/$(appname)
 	install -m755 install/nix/$(appname).am \
 		$(gamesbindir)/$(appname)
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
@@ -54,7 +56,7 @@ system-install-client: client
 system-install-server: server
 	install -d $(libexecdir)/$(appname)
 	install -d $(gamesbindir)
-	install -m755 reserver \
+	install -m755 $(appserver) \
 		$(libexecdir)/$(appname)/$(appname)-server
 	install -m755 install/nix/$(appname)-server.am \
 		$(gamesbindir)/$(appname)-server
