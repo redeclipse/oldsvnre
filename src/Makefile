@@ -1,3 +1,7 @@
+APPNAME=redeclipse
+APPCLIENT=reclient
+APPSERVER=reserver
+
 #CXXFLAGS= -ggdb3
 CXXFLAGS= -O3 -fomit-frame-pointer
 override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
@@ -127,10 +131,10 @@ clean-enet: enet/Makefile
 clean: clean-client clean-server
 
 clean-client:
-	@rm -fv $(CLIENT_PCH) $(CLIENT_OBJS) reclient
+	@rm -fv $(CLIENT_PCH) $(CLIENT_OBJS) $(APPCLIENT)
 
 clean-server:
-	@rm -fv $(SERVER_OBJS) reserver
+	@rm -fv $(SERVER_OBJS) $(APPSERVER)
 
 %.h.gch: %.h
 	$(CXX) $(CXXFLAGS) -o $(subst .h.gch,.tmp.h.gch,$@) $(subst .h.gch,.h,$@)
@@ -148,42 +152,42 @@ $(SERVER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
-	$(WINDRES) -i redeclipse.rc -J rc -o redeclipse.res -O coff 
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/reclient.exe redeclipse.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff 
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/$(APPCLIENT).exe $(APPNAME).res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
-	$(WINDRES) -i redeclipse.rc -J rc -o redeclipse.res -O coff 
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/reserver.exe redeclipse.res $(SERVER_OBJS) $(SERVER_LIBS)
+	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff 
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/$(APPSERVER).exe $(APPNAME).res $(SERVER_OBJS) $(SERVER_LIBS)
 
 install-client: client
 ifneq (,$(STRIP))
-	$(STRIP) ../bin/reclient.exe
+	$(STRIP) ../bin/$(APPCLIENT).exe
 endif
 
 install-server: server
 ifneq (,$(STRIP))
-	$(STRIP) ../bin/reserver.exe
+	$(STRIP) ../bin/$(APPSERVER).exe
 endif
 else
 client: libenet $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o reclient $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(APPCLIENT) $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(STRIP))
-	$(STRIP) reclient
+	$(STRIP) $(APPCLIENT)
 endif
 
 server: libenet $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o reserver $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(APPSERVER) $(SERVER_OBJS) $(SERVER_LIBS)
 ifneq (,$(STRIP))
-	$(STRIP) reserver
+	$(STRIP) $(APPSERVER)
 endif
 
 install-client: client
 	install -d ../bin
-	install -m 755 reclient ../bin/reclient$(PLATFORM_SUFFIX)
+	install -m 755 $(APPCLIENT) ../bin/$(APPCLIENT)$(PLATFORM_SUFFIX)
 
 install-server: server
 	install -d ../bin
-	install -m 755 reserver ../bin/reserver$(PLATFORM_SUFFIX)
+	install -m 755 $(APPSERVER) ../bin/$(APPSERVER)$(PLATFORM_SUFFIX)
 
 shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
