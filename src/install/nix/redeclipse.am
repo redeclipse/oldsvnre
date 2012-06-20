@@ -3,10 +3,10 @@ for arg
 do
     if [ "$arg" = --help ]
     then
-       exec man @REDECLIPSE@
+       exec man @APPNAME@
     fi
 done
 
 RE_OPTIONS=""
-cd @LIBEXECDIR@/@REDECLIPSE@ || exit 1
-exec ./@REDECLIPSE@ ${RE_OPTIONS} ${1+"$@"}
+cd @LIBEXECDIR@/@APPNAME@ || exit 1
+exec ./@APPNAME@ ${RE_OPTIONS} ${1+"$@"}

@@ -1,6 +1,7 @@
-appname=redeclipse
-appclient=reclient
-appserver=reserver
+appname=$(APPNAME)
+cappname=$(shell echo $(appname) | sed 's,\(.*\),\U\1,')# Uppercase
+appclient=$(APPCLIENT)
+appserver=$(APPSERVER)
 prefix=/usr/local
 games=
 gamesbin=/bin
@@ -48,7 +49,7 @@ system-install-client: client
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@$(appname)@,$(appname),g' \
+		-e 's,@APPNAME@,$(appname),g' \
 		-i $(gamesbindir)/$(appname)
 	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/data \
 		$(libexecdir)/$(appname)/data
@@ -63,7 +64,7 @@ system-install-server: server
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@$(appname)@,$(appname),g' \
+		-e 's,@APPNAME@,$(appname),g' \
 		-i $(gamesbindir)/$(appname)-server
 
 system-install-data:
@@ -77,13 +78,15 @@ system-install-docs: $(MANPAGES)
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@$(appname)@,$(appname),g' \
+		-e 's,@APPNAME@,$(appname),g' \
+		-e 's,@CAPPNAME@,$(cappname),g' \
 		install/nix/$(appname).6.am | \
 		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname).6.gz
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@$(appname)@,$(appname),g' \
+		-e 's,@APPNAME@,$(appname),g' \
+		-e 's,@CAPPNAME@,$(cappname),g' \
 		install/nix/$(appname)-server.6.am | \
 		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname)-server.6.gz
 	cp -r ../data/examples $(docdir)/$(appname)/examples
@@ -98,7 +101,7 @@ system-install-menus: icons
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
-		-e 's,@$(appname)@,$(appname),g' \
+		-e 's,@APPNAME@,$(appname),g' \
 		install/nix/$(appname).desktop.am > \
 		$(menudir)/$(appname).desktop
 	install -m644 install/nix/$(appname)_x16.png \

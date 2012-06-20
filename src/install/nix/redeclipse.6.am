@@ -1,14 +1,14 @@
-.TH REDECLIPSE 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
+.TH @CAPPNAME@ 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
 
 
 .SH NAME
 
-@REDECLIPSE@ \- script to launch the Red Eclipse FPS game client
+@APPNAME@ \- script to launch the Red Eclipse FPS game client
 
 
 .SH SYNOPSIS
 
-.SY @REDECLIPSE@
+.SY @APPNAME@
 '\" Filesystem options
 .OP \-h\fRhomedir
 .OP \-p\fRpackagedir
@@ -41,11 +41,11 @@
 
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
-.B @REDECLIPSE@
+.B @APPNAME@
 is a script which executes the
-.BR @REDECLIPSE@
+.BR @APPNAME@
 binary from the
-.I @LIBEXECDIR@/@REDECLIPSE@
+.I @LIBEXECDIR@/@APPNAME@
 directory.
 .PP
 The recommended way to change the settings of the client are to edit the
@@ -54,8 +54,8 @@ and
 .I init.cfg
 files in the home directory.
 .PP
-The @REDECLIPSE@ client starts a local loopback server upon launch which it uses to connect to for singleplayer, hence many of the server options are accepted by the @REDECLIPSE@ binary as well (see
-.BR @REDECLIPSE@-server (6)).
+The @APPNAME@ client starts a local loopback server upon launch which it uses to connect to for singleplayer, hence many of the server options are accepted by the @APPNAME@ binary as well (see
+.BR @APPNAME@-server (6)).
 To edit the specific settings related to the loopback server, use the
 .I localexec.cfg
 and
@@ -77,14 +77,14 @@ Many of these options will, if used, be permanently saved in the init.cfg file.
 Sets your home directory to
 .IR homedir .
 Red Eclipse will look for files in this directory in addition the normal installation directory. All user files will be written to the home directory. Defaults to
-.IR $HOME/.@REDECLIPSE@/ .
+.IR $HOME/.@APPNAME@/ .
 
 .TP
 .BI \-p packagedir
 Includes the data files found in
 .IR packagedir .
-Can be used for adding additional mods. Packages will be loaded in the order specified. By default @REDECLIPSE@ only includes data files in its working directory
-.IR @DATADIR@/@REDECLIPSE@/data/ ,
+Can be used for adding additional mods. Packages will be loaded in the order specified. By default @APPNAME@ only includes data files in its working directory
+.IR @DATADIR@/@APPNAME@/data/ ,
 and in the
 .I temp
 subdirectory of the home directory.
@@ -203,18 +203,18 @@ defaults to 28800.
 
 .SH EXAMPLES
 
-.B @REDECLIPSE@ -p$HOME/mod/data
+.B @APPNAME@ -p$HOME/mod/data
 .RS 4
 Load data from an additional directory.
 .RE
 
-.B @REDECLIPSE@ -h$HOME/@REDECLIPSE@_configs/
+.B @APPNAME@ -h$HOME/@APPNAME@_configs/
 .RS 4
 Reads and writes the configuration files to the specified directory instead of
-.IR $HOME/.@REDECLIPSE@/ .
+.IR $HOME/.@APPNAME@/ .
 .RE
 
-.B @REDECLIPSE@ -x"mode 7; trialweapon 0; map hinder"
+.B @APPNAME@ -x"mode 7; trialweapon 0; map hinder"
 .RS 4
 Sets game mode to time trial, trialmode weapon to empty hands, and starts a game on the map "hinder".
 .RE
@@ -234,4 +234,4 @@ Red Eclipse was forked as a continuation of the game Bloodfrontier, which in tur
 
 .SH "SEE ALSO"
 
-.BR @REDECLIPSE@-server (6).
+.BR @APPNAME@-server (6).
