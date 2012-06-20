@@ -1,4 +1,5 @@
 appname=$(APPNAME)
+appsrcname=$(appname)
 cappname=$(shell echo $(appname) | sed 's,\(.*\),\U\1,')# Uppercase
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
@@ -17,26 +18,26 @@ icondir=$(DESTDIR)$(prefix)/share/icons/hicolor
 GZIPPER=gzip
 
 ICONS= \
-	install/nix/$(appname)_x16.png \
-	install/nix/$(appname)_x32.png \
-	install/nix/$(appname)_x48.png \
-	install/nix/$(appname)_x64.png \
-	install/nix/$(appname)_x128.png
+	install/nix/$(appsrcname)_x16.png \
+	install/nix/$(appsrcname)_x32.png \
+	install/nix/$(appsrcname)_x48.png \
+	install/nix/$(appsrcname)_x64.png \
+	install/nix/$(appsrcname)_x128.png
 
-install/nix/$(appname)_x16.png: $(appname).ico
-	convert '$(appname).ico[0]' $@
+install/nix/$(appsrcname)_x16.png: $(appsrcname).ico
+	convert '$(appsrcname).ico[0]' $@
 
-install/nix/$(appname)_x32.png: $(appname).ico
-	convert '$(appname).ico[1]' $@
+install/nix/$(appsrcname)_x32.png: $(appsrcname).ico
+	convert '$(appsrcname).ico[1]' $@
 
-install/nix/$(appname)_x48.png: $(appname).ico
-	convert '$(appname).ico[2]' -resize 48x48 $@
+install/nix/$(appsrcname)_x48.png: $(appsrcname).ico
+	convert '$(appsrcname).ico[2]' -resize 48x48 $@
 
-install/nix/$(appname)_x64.png: $(appname).ico
-	convert '$(appname).ico[2]' $@
+install/nix/$(appsrcname)_x64.png: $(appsrcname).ico
+	convert '$(appsrcname).ico[2]' $@
 
-install/nix/$(appname)_x128.png: $(appname).ico
-	convert '$(appname).ico[3]' $@
+install/nix/$(appsrcname)_x128.png: $(appsrcname).ico
+	convert '$(appsrcname).ico[3]' $@
 
 icons: $(ICONS)
 
@@ -44,7 +45,7 @@ system-install-client: client
 	install -d $(libexecdir)/$(appname)
 	install -d $(gamesbindir)
 	install -m755 $(appclient) $(libexecdir)/$(appname)/$(appname)
-	install -m755 install/nix/$(appname).am \
+	install -m755 install/nix/$(appsrcname).am \
 		$(gamesbindir)/$(appname)
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
@@ -59,7 +60,7 @@ system-install-server: server
 	install -d $(gamesbindir)
 	install -m755 $(appserver) \
 		$(libexecdir)/$(appname)/$(appname)-server
-	install -m755 install/nix/$(appname)-server.am \
+	install -m755 install/nix/$(appsrcname)-server.am \
 		$(gamesbindir)/$(appname)-server
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
@@ -80,17 +81,17 @@ system-install-docs: $(MANPAGES)
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
 		-e 's,@CAPPNAME@,$(cappname),g' \
-		install/nix/$(appname).6.am | \
+		install/nix/$(appsrcname).6.am | \
 		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname).6.gz
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
 		-e 's,@CAPPNAME@,$(cappname),g' \
-		install/nix/$(appname)-server.6.am | \
+		install/nix/$(appsrcname)-server.6.am | \
 		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname)-server.6.gz
 	cp -r ../data/examples $(docdir)/$(appname)/examples
-	cp ../guidlines.txt $(docdir)/$(appname)/guidelines.txt
+	cp ../guidelines.txt $(docdir)/$(appname)/guidelines.txt
 
 system-install-menus: icons
 	install -d $(menudir)
@@ -103,17 +104,17 @@ system-install-menus: icons
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
-		install/nix/$(appname).desktop.am > \
+		install/nix/$(appsrcname).desktop.am > \
 		$(menudir)/$(appname).desktop
-	install -m644 install/nix/$(appname)_x16.png \
+	install -m644 install/nix/$(appsrcname)_x16.png \
 		$(icondir)/16x16/apps/$(appname).png
-	install -m644 install/nix/$(appname)_x32.png \
+	install -m644 install/nix/$(appsrcname)_x32.png \
 		$(icondir)/32x32/apps/$(appname).png
-	install -m644 install/nix/$(appname)_x48.png \
+	install -m644 install/nix/$(appsrcname)_x48.png \
 		$(icondir)/48x48/apps/$(appname).png
-	install -m644 install/nix/$(appname)_x64.png \
+	install -m644 install/nix/$(appsrcname)_x64.png \
 		$(icondir)/64x64/apps/$(appname).png
-	install -m644 install/nix/$(appname)_x128.png \
+	install -m644 install/nix/$(appsrcname)_x128.png \
 		$(icondir)/128x128/apps/$(appname).png
 
 system-install-cube2font: system-install-cube2font-docs
