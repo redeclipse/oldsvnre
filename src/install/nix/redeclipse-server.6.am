@@ -1,14 +1,14 @@
-.TH REDECLIPSE-SERVER 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
+.TH @CAPPNAME@-SERVER 6 2012-02-14 "Red Eclipse 1.2" "Red Eclipse Manual"
 
 
 .SH NAME
 
-@REDECLIPSE@-server \- script to launch the server for the Red Eclipse FPS game
+@APPNAME@-server \- script to launch the server for the Red Eclipse FPS game
 
 
 .SH SYNOPSIS
 
-.SY @REDECLIPSE@-server
+.SY @APPNAME@-server
 '\"Filesystem options
 .OP \-h\fRhomedir
 .OP \-p\fRpackagedir
@@ -43,15 +43,15 @@
 
 Red Eclipse is a single-player and multi-player first-person ego-shooter, built as a total conversion of Cube Engine 2, which lends itself toward a balanced gameplay, with a general theme of agility in a variety of environments.
 .PP
-.B @REDECLIPSE@-server
+.B @APPNAME@-server
 is a script which executes the
-.BR @REDECLIPSE@-server
+.BR @APPNAME@-server
 binary from the
-.I @LIBEXECDIR@/@REDECLIPSE@
+.I @LIBEXECDIR@/@APPNAME@
 directory.
 .PP
 The recommended way to change the settings of the server is to create and edit the files servexec.cfg and servinit.cfg files in your home directory. Examples are available in
-.IR @DOCDIR@/@REDECLIPSE@/examples/
+.IR @DOCDIR@/@APPNAME@/examples/
 
 
 .SH OPTIONS
@@ -63,15 +63,15 @@ The recommended way to change the settings of the server is to create and edit t
 Sets your home directory to
 .IR homedir .
 This is where servinit.cfg and servexec.cfg are read from, it defaults to
-.IR $HOME/.@REDECLIPSE@/ .
+.IR $HOME/.@APPNAME@/ .
 .TP
 
 .TP
 .BI \-p packagedir
 Includes the data files found in
 .IR packagedir .
-Can be used for adding additional maps that may be distributed to clients. By default @REDECLIPSE@-server only includes data files in the working directory
-.I @DATADIR@/@REDECLIPSE@/data
+Can be used for adding additional maps that may be distributed to clients. By default @APPNAME@-server only includes data files in the working directory
+.I @DATADIR@/@APPNAME@/data
 and in the subdirecory
 .I temp
 of the home directory.
@@ -184,15 +184,15 @@ Sets verbosity. This affects how much information is printed to the console. 0 i
 
 .SH EXAMPLES
 
-.B @REDECLIPSE@-server -p$HOME/mod/data -ss0 -slbath -sPpass
+.B @APPNAME@-server -p$HOME/mod/data -ss0 -slbath -sPpass
 .RS 4
 Loads data from an additional directory, sets the server type to local (LAN), sets the default map to "bath" and sets the admin password to "pass"
 .RE
 
-.B @REDECLIPSE@-server -h$HOME/@REDECLIPSE@-server_configs/
+.B @APPNAME@-server -h$HOME/@APPNAME@-server_configs/
 .RS 4
 Reads and writes the configuration files to the specified directory instead of
-.IR $HOME/.@REDECLIPSE@/ .
+.IR $HOME/.@APPNAME@/ .
 .RE
 
 
@@ -210,4 +210,4 @@ Red Eclipse was forked as a continuation of the game Bloodfrontier, which in tur
 
 .SH "SEE ALSO"
 
-.BR @REDECLIPSE@ (6)
+.BR @APPNAME@ (6)
