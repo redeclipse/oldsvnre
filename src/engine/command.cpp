@@ -919,7 +919,7 @@ static inline void compileval(vector<uint> &code, int wordtype, char *word, int 
 
 static bool compileword(vector<uint> &code, const char *&p, int wordtype, char *&word, int &wordlen);
 
-static bool compilelookup(vector<uint> &code, const char *&p, int ltype)
+static void compilelookup(vector<uint> &code, const char *&p, int ltype)
 {
     char *lookup = NULL;
     int lookuplen = 0;
@@ -927,15 +927,15 @@ static bool compilelookup(vector<uint> &code, const char *&p, int ltype)
     {
         case '(':
         case '[':
-            if(!compileword(code, p, VAL_STR, lookup, lookuplen)) return false;
+            if(!compileword(code, p, VAL_STR, lookup, lookuplen)) goto invalid;
             break;
         case '$':
-            if(!compilelookup(code, p, VAL_STR)) return false;
+            compilelookup(code, p, VAL_STR);
             break;
         default:
         {
             lookup = cutword(p, lookuplen);
-            if(!lookup) return false;
+            if(!lookup) goto invalid;
             ident *id = newident(lookup, IDF_UNKNOWN);
             if(id) switch(id->type)
             {
@@ -956,8 +956,13 @@ done:
         case VAL_CODE: code.add(CODE_COMPILE); break;
         case VAL_IDENT: code.add(CODE_IDENTU); break;
     }
-
-    return true;
+    return;
+invalid:
+    switch(ltype)
+    {
+        case VAL_NULL: case VAL_ANY: compilenull(code); break;
+        default: compileval(code, ltype, NULL, 0); break;
+    }
 }
 
 static bool compileblockstr(vector<uint> &code, const char *str, const char *end, bool macro)
@@ -1016,7 +1021,7 @@ static bool compileblocksub(vector<uint> &code, const char *&p)
         {
             const char *start = p;
             while(iscubealnum(*p) || *p=='_') p++;
-            if(p <= start) return false;
+            if(p <= start) return false; 
             char *lookup = newstring(start, p-start);
             ident *id = newident(lookup, IDF_UNKNOWN);
             if(id) switch(id->type)
@@ -1036,7 +1041,7 @@ static bool compileblocksub(vector<uint> &code, const char *&p)
     return true;
 }
 
-static bool compileblock(vector<uint> &code, const char *&p, int wordtype)
+static void compileblock(vector<uint> &code, const char *&p, int wordtype)
 {
     const char *line = p, *start = p;
     int concs = 0;
@@ -1049,7 +1054,7 @@ static bool compileblock(vector<uint> &code, const char *&p, int wordtype)
             case '\0':
                 debugcode(debugline(line, "\frmissing \"]\""));
                 p--;
-                return false;
+                goto done;
             case '\"':
                 p = parsestring(p);
                 if(*p=='\"') p++;
@@ -1080,6 +1085,7 @@ static bool compileblock(vector<uint> &code, const char *&p, int wordtype)
             }
         }
     }
+done:
     if(p-1 > start)
     {
         if(!concs) switch(wordtype)
@@ -1093,14 +1099,14 @@ static bool compileblock(vector<uint> &code, const char *&p, int wordtype)
                 compilestatements(code, p, VAL_ANY, ']');
                 code.add(CODE_EXIT);
                 code[inst] |= uint(code.length() - (inst + 1))<<8;
-                return true;
+                return;
             }
             case VAL_IDENT:
             {
                 char *name = newstring(start, p-1-start);
                 compileident(code, name);
                 delete[] name;
-                return true;
+                return;
             }
         }
         compileblockstr(code, start, p-1, concs > 0);
@@ -1126,7 +1132,6 @@ static bool compileblock(vector<uint> &code, const char *&p, int wordtype)
             }
             break;
     }
-    return true;
 }
 
 static bool compileword(vector<uint> &code, const char *&p, int wordtype, char *&word, int &wordlen)
@@ -1135,7 +1140,7 @@ static bool compileword(vector<uint> &code, const char *&p, int wordtype, char *
     switch(*p)
     {
         case '\"': word = cutstring(p, wordlen); break;
-        case '$': return compilelookup(code, p, wordtype);
+        case '$': compilelookup(code, p, wordtype); return true;
         case '(':
             p++;
             code.add(CODE_ENTER);
@@ -1149,7 +1154,8 @@ static bool compileword(vector<uint> &code, const char *&p, int wordtype, char *
             return true;
         case '[':
             p++;
-            return compileblock(code, p, wordtype);
+            compileblock(code, p, wordtype);
+            return true;
         default: word = cutword(p, wordlen); break;
     }
     return word!=NULL;
