@@ -527,9 +527,9 @@
 			</Target>
 		</Build>
 		<VirtualTargets>
+			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="32 bit" targets="client32;server32;" />
 			<Add alias="64 bit" targets="client64;server64;" />
-			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="Tools" targets="cube2font;genkey;" />
 		</VirtualTargets>
 		<Unit filename="engine\animmodel.h">
