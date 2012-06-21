@@ -12,6 +12,7 @@ Institute, new map
 Biolytic, new map
 
 Modes & Mutators:
+* Hover mutator removed
 
 Modding:
 * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
