@@ -389,7 +389,6 @@ namespace hud
     TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modesurvivor.png", 3);
     TVAR(IDF_PERSIST, modearenatex, "<grey>textures/modearena.png", 3);
     TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modeonslaught.png", 3);
-    TVAR(IDF_PERSIST, modehovertex, "<grey>textures/modehover.png", 3);
     TVAR(IDF_PERSIST, modejetpacktex, "<grey>textures/modejetpack.png", 3);
     TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modevampire.png", 3);
     TVAR(IDF_PERSIST, modeexperttex, "<grey>textures/modeexpert.png", 3);
@@ -436,7 +435,6 @@ namespace hud
         if(m_survivor(g, m) && (implied || !(m_implied(g, m)&G_M_SURVIVOR))) ADDMODE(modesurvivortex)
         if(m_arena(g, m) && (implied || !(m_implied(g, m)&G_M_ARENA))) ADDMODE(modearenatex)
         if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
-        if(m_hover(g, m) && (implied || !(m_implied(g, m)&G_M_HOVER))) ADDMODE(modehovertex)
         if(m_jetpack(g, m) && (implied || !(m_implied(g, m)&G_M_JETPACK))) ADDMODE(modejetpacktex)
         if(m_vampire(g, m) && (implied || !(m_implied(g, m)&G_M_VAMPIRE))) ADDMODE(modevampiretex)
         if(m_expert(g, m) && (implied || !(m_implied(g, m)&G_M_EXPERT))) ADDMODE(modeexperttex)
@@ -517,7 +515,7 @@ namespace hud
                     amt += 0.25f+(float((lastmillis-game::focus->lastbleed)%bleeddelay)/float(bleeddelay))*0.35f;
                 if(game::focus->turnside || game::focus->impulse[IM_JUMP])
                     amt += game::focus->turnside ? 0.125f : 0.25f;
-                if(physics::hover(game::focus)) amt += 0.125f;
+                if(physics::jetpack(game::focus)) amt += 0.125f;
                 break;
             }
             case 2: amt += motionbluramt; break;

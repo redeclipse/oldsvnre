@@ -36,7 +36,7 @@ GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone warp isolation"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo ghost longestyard stone panic wet");
-GSVAR(IDF_ADMIN, hovermaps, "alphacampaign cargo center colony darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost isolation keystone linear longestyard mist nova spacetech testchamber tower tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign cargo center colony darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation futuresport ghost isolation keystone linear longestyard mist nova spacetech testchamber tower tranquility tribal ubik venus warp");
 
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple dutility echo ghost longestyard stone panic wet");
 GSVAR(IDF_ADMIN, mediummaps, "blink cargo center colony darkness deadsimple deathtrap deli dropzone echo error facility forge foundation futuresport ghost isolation keystone lab linear mist nova panic processing spacetech stone tower tranquility tribal ubik venus warp wet");
@@ -245,16 +245,16 @@ GFVAR(0, slidecurbscale, 0, 1, FVAR_MAX);
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier
 GFVAR(0, movesprint, FVAR_NONZERO, 1.6f, FVAR_MAX); // sprinting modifier
-GFVAR(0, movehover, FVAR_NONZERO, 1.6f, FVAR_MAX); // hover modifier
+GFVAR(0, movejet, FVAR_NONZERO, 1.6f, FVAR_MAX); // jetpack modifier
 GFVAR(0, movestraight, FVAR_NONZERO, 1.2f, FVAR_MAX); // non-strafe modifier
 GFVAR(0, movestrafe, FVAR_NONZERO, 1, FVAR_MAX); // strafe modifier
 GFVAR(0, moveinair, FVAR_NONZERO, 0.9f, FVAR_MAX); // in-air modifier
 GFVAR(0, movestepup, FVAR_NONZERO, 0.95f, FVAR_MAX); // step-up modifier
 GFVAR(0, movestepdown, FVAR_NONZERO, 1.15f, FVAR_MAX); // step-down modifier
 
-GVAR(0, hoverdelay, 0, 250, VAR_MAX); // minimum time between hover
-GFVAR(0, hoverheight, 0, 128, FVAR_MAX); // hover maximum height off ground
-GFVAR(0, hoverdecay, 1, 15, FVAR_MAX); // decay rate of one unit per this many ms
+GVAR(0, jetdelay, 0, 250, VAR_MAX); // minimum time between jetpack
+GFVAR(0, jetheight, 0, 0, FVAR_MAX); // jetpack maximum height off ground
+GFVAR(0, jetdecay, 1, 15, FVAR_MAX); // decay rate of one unit per this many ms
 
 GFVAR(0, jumpspeed, FVAR_NONZERO, 110, FVAR_MAX); // extra velocity to add when jumping
 GFVAR(0, impulsespeed, FVAR_NONZERO, 90, FVAR_MAX); // extra velocity to add when impulsing
@@ -283,11 +283,11 @@ GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited,
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
-GFVAR(0, impulsehover, 0, 0.5f, FVAR_MAX); // hover impulse meter depletion
+GFVAR(0, impulsejet, 0, 0.5f, FVAR_MAX); // jetpack impulse meter depletion
 GFVAR(0, impulseregen, 0, 4.f, FVAR_MAX); // impulse regen multiplier
 GFVAR(0, impulseregencrouch, 0, 2, FVAR_MAX); // impulse regen crouch modifier
 GFVAR(0, impulseregensprint, 0, 0.75f, FVAR_MAX); // impulse regen sprinting modifier
-GFVAR(0, impulseregenhover, 0, 1.5f, FVAR_MAX); // impulse regen hover modifier
+GFVAR(0, impulseregenjet, 0, 1.5f, FVAR_MAX); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
 GVAR(0, impulseregendelay, 0, 250, VAR_MAX); // delay before impulse regens

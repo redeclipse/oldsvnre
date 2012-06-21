@@ -31,18 +31,18 @@ namespace physics
 
     int physsteps = 0, lastphysframe = 0, lastmove = 0, lastdirmove = 0, laststrafe = 0, lastdirstrafe = 0, lastcrouch = 0, lastsprint = 0;
 
-    #define ishover       (PHYS(gravity) == 0 || m_hover(game::gamemode, game::mutators) || m_jetpack(game::gamemode, game::mutators))
-    bool allowhover(physent *d, bool fly)
+    #define isjetpack (PHYS(gravity) == 0 || m_jetpack(game::gamemode, game::mutators))
+    bool allowjet(physent *d, bool fly)
     {
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
-           return ishover ? (fly ? m_jetpack(game::gamemode, game::mutators) || PHYS(gravity) == 0 : true) : false;
+           return isjetpack ? (fly ? m_jetpack(game::gamemode, game::mutators) || PHYS(gravity) == 0 : true) : false;
         return false;
     }
 
     bool allowimpulse(physent *d, int level)
     {
         if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
-            return impulseallowed >= level && (impulsestyle || allowhover(d));
+            return impulseallowed >= level && (impulsestyle || allowjet(d));
         return false;
     }
 
@@ -62,12 +62,12 @@ namespace physics
         return false;
     }
 
-    bool canhover(physent *d)
+    bool canjet(physent *d)
     {
-        if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && allowhover(d))
+        if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && allowjet(d))
         {
             gameent *e = (gameent *)d;
-            if(e->physstate == PHYS_FALL && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > hoverdelay) && e->aitype < AI_START)
+            if(e->physstate == PHYS_FALL && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay) && e->aitype < AI_START)
                 return true;
         }
         return false;
@@ -224,14 +224,14 @@ namespace physics
         return false;
     }
 
-    bool hover(physent *d)
+    bool jetpack(physent *d)
     {
-        if(canhover(d))
+        if(canjet(d))
         {
             gameent *e = (gameent *)d;
             if(e->action[AC_JUMP])
             {
-                e->impulse[IM_HOVER] = lastmillis;
+                e->impulse[IM_JET] = lastmillis;
                 return true;
             }
         }
@@ -339,7 +339,7 @@ namespace physics
                 default: break;
             }
             if(sprinting(e, false)) vel *= movesprint;
-            if(hover(e)) vel *= movehover;
+            if(jetpack(e)) vel *= movejet;
             if(carryaffinity(e))
             {
                 if(m_capture(game::gamemode)) vel *= capturecarryspeed;
@@ -380,7 +380,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || hover(d) || PHYS(gravity) == 0) return true;
+        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
         return false;
     }
 
@@ -732,7 +732,7 @@ namespace physics
     {
         if(impulseregen > 0 && (!impulseregendelay || lastmillis-d->impulse[IM_REGEN] >= impulseregendelay))
         {
-            if(impulseregenjetdelay && d->impulse[IM_HOVER] && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_HOVER] < impulseregenjetdelay))
+            if(impulseregenjetdelay && d->impulse[IM_JET] && (impulseregenjetdelay < 0 || lastmillis-d->impulse[IM_JET] < impulseregenjetdelay))
                 return false;
             return true;
         }
@@ -780,7 +780,7 @@ namespace physics
                     (d->vel = dir.normalize()).mul(force);
                     if(power) d->vel.z += jumpvel(d, true);
                     d->doimpulse(cost, melee ? IM_T_MELEE : (dash ? IM_T_DASH : IM_T_BOOST), lastmillis);
-                    if(!allowhover(d)) d->action[AC_JUMP] = false;
+                    if(!allowjet(d)) d->action[AC_JUMP] = false;
                     if(power || pulse) onfloor = false;
                     client::addmsg(N_SPHY, "ri2", d->clientnum, melee ? SPHY_MELEE : (dash ? SPHY_DASH : SPHY_BOOST));
                     game::impulseeffect(d);
@@ -799,7 +799,7 @@ namespace physics
         }
         else if(game::allowmove(d))
         {
-            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = hover(d);
+            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
 
             if(impulsemeter && millis)
             {
@@ -817,9 +817,9 @@ namespace physics
                 }
                 if(jetting)
                 {
-                    if(allowhover(d) && impulsehover > 0)
+                    if(allowjet(d) && impulsejet > 0)
                     {
-                        int len = int(ceilf(millis*impulsehover));
+                        int len = int(ceilf(millis*impulsejet));
                         if(len > 0 && impchk)
                         {
                             d->impulse[IM_METER] += len;
@@ -839,7 +839,7 @@ namespace physics
                             if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
                             else collect = false; \
                         }
-                    impulsemod(allowhover(d), impulseregenhover);
+                    impulsemod(allowjet(d), impulseregenjet);
                     impulsemod(sprint, impulseregensprint);
                     impulsemod(d->move || d->strafe, impulseregenmove);
                     impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
@@ -856,14 +856,14 @@ namespace physics
                 }
             }
 
-            if(allowhover(d) && jetting)
+            if(allowjet(d) && jetting)
             {
-                if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/hoverdecay));
-                else if(m_hover(game::gamemode, game::mutators) && hoverheight > 0)
+                if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/jetdecay));
+                else if(jetheight > 0)
                 {
                     vec v(0, 0, -1);
-                    float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-hoverheight;
-                    if(d->o.z-floor >= hoverheight) m.z = min(m.z, 0-(millis/hoverdecay));
+                    float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-jetheight;
+                    if(d->o.z-floor >= jetheight) m.z = min(m.z, 0-(millis/jetdecay));
                 }
             }
 
@@ -906,7 +906,7 @@ namespace physics
                         }
                         d->resetphys();
                         d->impulse[IM_JUMP] = lastmillis;
-                        if(allowhover(d) && !allowimpulse(d)) d->doimpulse(0, IM_T_BOOST, lastmillis);
+                        if(allowjet(d) && !allowimpulse(d)) d->doimpulse(0, IM_T_BOOST, lastmillis);
                         d->action[AC_JUMP] = onfloor = false;
                         client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
                         playsound(S_JUMP, d->o, d);
@@ -1038,7 +1038,7 @@ namespace physics
             if((pl->type != ENT_PLAYER && pl->type != ENT_AI) || !((gameent *)pl)->turnside)
                 m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
         }
-        else if(hover(pl) && m.iszero()) m = vec(0, 0, 1);
+        else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
     }
 
     void modifyvelocity(physent *pl, bool local, bool floating, int millis)
@@ -1176,7 +1176,7 @@ namespace physics
         {
             updatematerial(pl, local, floating);
             modifyvelocity(pl, local, floating, millis);
-            jetting = hover(pl);
+            jetting = jetpack(pl);
             if(!floating && !sticktospecial(pl) && !pl->onladder && !jetting)
                 modifygravity(pl, millis); // apply gravity
             else pl->resetphys();
@@ -1206,7 +1206,7 @@ namespace physics
             loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
             if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
             {
-                if(local && jetting && !hover(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
+                if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
                 if(!pl->timeinair)
                 {
                     if(local && impulsemethod&2 && timeinair >= impulsedelay && pl->move == 1 && allowimpulse(pl, 1) && ((gameent *)pl)->action[AC_CROUCH])

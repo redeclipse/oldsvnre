@@ -883,7 +883,7 @@ namespace ai
     {
         vec pos = d->feetpos();
         int node1 = -1, node2 = -1, node3 = -1;
-        float mindist1 = CLOSEDIST*CLOSEDIST, mindist2 = physics::hover(d) ? HOVERDIST*HOVERDIST : RETRYDIST*RETRYDIST, mindist3 = mindist2;
+        float mindist1 = CLOSEDIST*CLOSEDIST, mindist2 = physics::jetpack(d) ? JETDIST*JETDIST : RETRYDIST*RETRYDIST, mindist3 = mindist2;
         loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
         {
             vec epos = waypoints[d->ai->route[i]].o;
@@ -1029,8 +1029,8 @@ namespace ai
     {
         vec off = vec(pos).sub(d->feetpos());
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !physics::liquidcheck(d) && !d->onladder,
-             jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::canhover(d),
-             impulse = d->timeinair > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, 1, false) && !physics::hover(d),
+             jet = d->timeinair > 250 && !d->turnside && off.z >= JUMPMIN && physics::canjet(d),
+             impulse = d->timeinair > 500 && !d->turnside && off.z >= JUMPMIN && physics::canimpulse(d, 1, false) && !physics::jetpack(d),
              jumper = !offground && (locked || sequenced || off.z >= JUMPMIN || (d->aitype == AI_BOT && lastmillis >= d->ai->jumprand)),
              jump = (impulse || jet || jumper) && (jet || lastmillis >= d->ai->jumpseed);
         if(jump)
@@ -1371,7 +1371,7 @@ namespace ai
     {
         vec pos = d->feetpos();
         static vector<int> candidates; candidates.setsize(0);
-        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, (physics::hover(d) ? HOVERDIST : RETRYDIST)*find, candidates);
+        if(find) findwaypointswithin(pos, WAYPOINTRADIUS, (physics::jetpack(d) ? JETDIST : RETRYDIST)*find, candidates);
         if(find ? !candidates.empty() : !d->ai->route.empty()) loopk(2)
         {
             int best = -1;
