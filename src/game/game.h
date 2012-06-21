@@ -17,7 +17,7 @@
 
 enum
 {
-    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_HOVER, S_LAND, S_PAIN, S_DEATH,
+    S_JUMP = S_GAMESPECIFIC, S_IMPULSE, S_JET, S_LAND, S_PAIN, S_DEATH,
     S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNLAVA, S_BURNING,
     S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
@@ -183,7 +183,7 @@ enum
     ANIM_JUMP_FORWARD, ANIM_JUMP_BACKWARD, ANIM_JUMP_LEFT, ANIM_JUMP_RIGHT, ANIM_JUMP,
     ANIM_IMPULSE_FORWARD, ANIM_IMPULSE_BACKWARD, ANIM_IMPULSE_LEFT, ANIM_IMPULSE_RIGHT,
     ANIM_DASH_FORWARD, ANIM_DASH_BACKWARD, ANIM_DASH_LEFT, ANIM_DASH_RIGHT, ANIM_DASH_UP,
-    ANIM_HOVER_FORWARD, ANIM_HOVER_BACKWARD, ANIM_HOVER_LEFT, ANIM_HOVER_RIGHT, ANIM_HOVER_UP,
+    ANIM_JET_FORWARD, ANIM_JET_BACKWARD, ANIM_JET_LEFT, ANIM_JET_RIGHT, ANIM_JET_UP,
     ANIM_WALL_RUN_LEFT, ANIM_WALL_RUN_RIGHT, ANIM_WALL_JUMP, ANIM_POWERSLIDE, ANIM_FLYKICK,
     ANIM_SINK, ANIM_EDIT, ANIM_WIN, ANIM_LOSE,
     ANIM_CROUCH, ANIM_CRAWL_FORWARD, ANIM_CRAWL_BACKWARD, ANIM_CRAWL_LEFT, ANIM_CRAWL_RIGHT,
@@ -319,7 +319,7 @@ enum { SINFO_NONE = 0, SINFO_STATUS, SINFO_NAME, SINFO_PORT, SINFO_QPORT, SINFO_
 enum { SSTAT_OPEN = 0, SSTAT_LOCKED, SSTAT_PRIVATE, SSTAT_FULL, SSTAT_UNKNOWN, SSTAT_MAX };
 
 enum { AC_ATTACK = 0, AC_ALTERNATE, AC_RELOAD, AC_USE, AC_JUMP, AC_SPRINT, AC_CROUCH, AC_SPECIAL, AC_DROP, AC_AFFINITY, AC_TOTAL, AC_DASH = AC_TOTAL, AC_MAX };
-enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_HOVER, IM_MAX };
+enum { IM_METER = 0, IM_TYPE, IM_TIME, IM_REGEN, IM_COUNT, IM_COLLECT, IM_SLIP, IM_SLIDE, IM_JUMP, IM_JET, IM_MAX };
 enum { IM_T_NONE = 0, IM_T_BOOST, IM_T_DASH, IM_T_MELEE, IM_T_KICK, IM_T_SKATE, IM_T_MAX, IM_T_WALL = IM_T_MELEE };
 enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, SPHY_SKATE, SPHY_POWER, SPHY_EXTINGUISH, SPHY_BUFF, SPHY_MAX, SPHY_SERVER = SPHY_BUFF };
 
@@ -745,7 +745,7 @@ const char * const animnames[] =
     "jump forward", "jump backward", "jump left", "jump right", "jump",
     "impulse forward", "impulse backward", "impulse left", "impulse right",
     "dash forward", "dash backward", "dash left", "dash right", "dash up",
-    "hover forward", "hover backward", "hover left", "hover right", "hover up",
+    "jet forward", "jet backward", "jet left", "jet right", "jet up",
     "wall run left", "wall run right", "wall jump", "power slide", "fly kick",
     "sink", "edit", "win", "lose",
     "crouch", "crawl forward", "crawl backward", "crawl left", "crawl right",
@@ -1067,7 +1067,7 @@ struct gameent : dynent, gamestate
 
     void resetjump()
     {
-        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = impulse[IM_HOVER] = 0;
+        timeinair = turnside = impulse[IM_COUNT] = impulse[IM_TYPE] = impulse[IM_JUMP] = impulse[IM_JET] = 0;
     }
 
     void resetair()
@@ -1269,13 +1269,13 @@ namespace physics
     extern int smoothmove, smoothdist, sprintstyle;
     extern bool carryaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
-    extern bool allowhover(physent *d = NULL, bool fly = false);
+    extern bool allowjet(physent *d = NULL, bool fly = false);
     extern bool allowimpulse(physent *d, int level = 2);
-    extern bool hover(physent *d);
+    extern bool jetpack(physent *d);
     extern bool sliding(physent *d, bool power = false);
     extern bool sprinting(physent *d, bool turn = true);
     extern bool canimpulse(physent *d, int level = 2, bool kick = false);
-    extern bool canhover(physent *d);
+    extern bool canjet(physent *d);
     extern bool movecamera(physent *pl, const vec &dir, float dist, float stepdist);
     extern void smoothplayer(gameent *d, int res, bool local);
     extern void update();

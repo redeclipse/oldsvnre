@@ -563,7 +563,7 @@ namespace ai
         }
         else if(!iswaypoint(d->lastnode) || waypoints[d->lastnode].o.squaredist(v) > dist*dist)
         {
-            dist = physics::hover(d) ? HOVERDIST : RETRYDIST; // workaround
+            dist = physics::jetpack(d) ? JETDIST : RETRYDIST; // workaround
 			d->lastnode = closestwaypoint(v, dist, false);
         }
     }

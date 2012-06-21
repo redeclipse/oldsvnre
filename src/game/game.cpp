@@ -607,7 +607,7 @@ namespace game
                         sounds[d->jschan].vol = min((lastmillis-sounds[d->jschan].millis)*2, 255);
                         sounds[d->jschan].ends = lastmillis+250;
                     }
-                    else playsound(S_HOVER, d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
+                    else playsound(S_JET, d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
                     if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
@@ -790,7 +790,7 @@ namespace game
         }
         else if(issound(d->fschan)) removesound(d->fschan);
         if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->resetbleeding();
-        if(issound(d->jschan) && !physics::hover(d))
+        if(issound(d->jschan) && !physics::jetpack(d))
         {
             if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
             else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/250.f)));
@@ -2314,7 +2314,7 @@ namespace game
         {
             if(secondary && allowmove(d) && aistyle[d->aitype].canmove)
             {
-                if(physics::hover(d))
+                if(physics::jetpack(d))
                 {
                     if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
                     {
@@ -2326,10 +2326,10 @@ namespace game
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
                         basetime2 = d->impulse[IM_TIME];
                     }
-                    else if(d->move>0) anim |= (ANIM_HOVER_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_HOVER_LEFT : ANIM_HOVER_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->move<0) anim |= (ANIM_HOVER_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else anim |= (ANIM_HOVER_UP|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->move>0) anim |= (ANIM_JET_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_JET_LEFT : ANIM_JET_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else if(d->move<0) anim |= (ANIM_JET_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
+                    else anim |= (ANIM_JET_UP|ANIM_LOOP)<<ANIM_SECONDARY;
                 }
                 else if(physics::liquidcheck(d) && d->physstate <= PHYS_FALL)
                     anim |= ((d->move || d->strafe || d->vel.z+d->falling.z>0 ? int(ANIM_SWIM) : int(ANIM_SINK))|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2759,7 +2759,7 @@ namespace game
                     }
                 }
                 if(d->turnside || d->impulse[IM_JUMP] || physics::sliding(d)) impulseeffect(d, 1);
-                if(physics::hover(d)) impulseeffect(d, 2);
+                if(physics::jetpack(d)) impulseeffect(d, 2);
             }
             if(burntime && d->burning(lastmillis, burntime))
             {

@@ -6,18 +6,13 @@ struct duelservmode : servmode
 
     duelservmode() {}
 
-    void position(clientinfo *ci, bool clean)
+    void position(clientinfo *ci)
     {
         if(allowbroadcast(ci->clientnum) && ci->state.aitype < AI_START)
         {
             int n = duelqueue.find(ci);
             if(n >= 0)
             {
-                if(clean)
-                {
-                    n -= GAME(duelreset) ? 2 : 1;
-                    if(n < 0) return;
-                }
                 if(m_survivor(gamemode, mutators))
                     srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are now \fs\fzgyqueued\fS for your \fs\fgnext match\fS");
                 else
@@ -41,7 +36,7 @@ struct duelservmode : servmode
             }
             else if(n < 0) duelqueue.add(ci);
             if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
-            if(!clean) position(ci, false);
+            if(!clean) position(ci);
         }
     }
 
@@ -154,9 +149,6 @@ struct duelservmode : servmode
                 playing.shrink(0);
                 if(!duelqueue.empty())
                 {
-                    if(smode) smode->layout();
-                    mutate(smuts, mut->layout());
-                    loopv(clients) if(clients[i]->state.aitype < AI_START) position(clients[i], true);
                     vector<clientinfo *> alive;
                     loopv(duelqueue)
                     {
@@ -183,20 +175,26 @@ struct duelservmode : servmode
                         alive.add(ci);
                         playing.add(ci);
                     }
-                    duelround++;
-                    string fight;
-                    if(m_duel(gamemode, mutators))
+                    if(alive.length() >= 2)
                     {
-                        defformatstring(namea)("%s", colorname(alive[0]));
-                        defformatstring(nameb)("%s", colorname(alive[1]));
-                        formatstring(fight)("\fwduel between %s and %s, round \fs\fr#%d\fS", namea, nameb, duelround);
+                        if(smode) smode->layout();
+                        mutate(smuts, mut->layout());
+                        loopv(clients) if(clients[i]->state.aitype < AI_START) position(clients[i]);
+                        duelround++;
+                        string fight;
+                        if(m_duel(gamemode, mutators))
+                        {
+                            defformatstring(namea)("%s", colorname(alive[0]));
+                            defformatstring(nameb)("%s", colorname(alive[1]));
+                            formatstring(fight)("\fwduel between %s and %s, round \fs\fr#%d\fS", namea, nameb, duelround);
+                        }
+                        else if(m_survivor(gamemode, mutators))
+                            formatstring(fight)("\fwsurvivor, round \fs\fr#%d\fS", duelround);
+                        loopv(playing) if(allowbroadcast(playing[i]->clientnum))
+                            ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
+                        dueltime = dueldeath = -1;
+                        duelcheck = gamemillis+5000;
                     }
-                    else if(m_survivor(gamemode, mutators))
-                        formatstring(fight)("\fwsurvivor, round \fs\fr#%d\fS", duelround);
-                    loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                        ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
-                    dueltime = dueldeath = -1;
-                    duelcheck = gamemillis+5000;
                 }
             }
         }
@@ -306,10 +304,11 @@ struct duelservmode : servmode
     void reset(bool empty)
     {
         duelround = duelwins = 0;
-        dueltime = duelcheck = dueldeath = duelwinner = -1;
+        duelwinner = -1;
         allowed.shrink(0);
         duelqueue.shrink(0);
         playing.shrink(0);
+        clear();
     }
 } duelmutator;
 #endif
