@@ -1,5 +1,5 @@
 appname=$(APPNAME)
-appsrcname=$(appname)
+appsrcname=$(APPNAME)
 cappname=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
