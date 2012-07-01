@@ -26,6 +26,7 @@ Misc:
 * Added server hosting and player guidelines for the master server
 * Enet 1.3.4
 * 64bit builds for Windows
+* Use APP/app* variables for name abstraction (simplifies forking/install renaming)
 
 Additional Fixed Bugs:
 * #103 [minor] Revenge-seeking remains after team-change
@@ -38,6 +39,7 @@ Additional Fixed Bugs:
 * #135 ghost geom errors
 * #117 Team-duel problems (force cycle team member after 3 wins)
 * #113 Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
+* #154 Fix darkness omega bb-goal to be at same position as alpha
 
 
 
