@@ -9,6 +9,7 @@ I would like to know where and in what games my skyboxes are used.
 If you do use them, please send me an email. I'd love to play whatever game you put them in.
 
 This license applies to the following:
+arid2
 barren
 divine
 harmony
