@@ -329,6 +329,7 @@ namespace hud
                 }
                 g.popfont();
             }
+            else g.poplist();
         }
         else if(game::player1->state == CS_ALIVE)
         {
