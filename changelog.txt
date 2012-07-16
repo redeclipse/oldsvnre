@@ -40,7 +40,7 @@ Additional Fixed Bugs:
 * #117 Team-duel problems (force cycle team member after 3 wins)
 * #113 Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
 * #154 Fix darkness omega bb-goal to be at same position as alpha
-
+* #158 Possibility to miss first checkpoint on testchamber
 
 
 Red Eclipse 1.2
