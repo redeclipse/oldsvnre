@@ -1120,7 +1120,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             lilswap(&newhdr.version, 2);
 
             clearworldvars();
-            if(strncmp(newhdr.head, "MAPZ", 4) == 0 || strncmp(newhdr.head, "BFGZ", 4) == 0)
+            if(memcmp(newhdr.head, "MAPZ", 4) == 0 || memcmp(newhdr.head, "BFGZ", 4) == 0)
             {
                 // this check removed below due to breakage: (size_t)newhdr.headersize > sizeof(chdr) || f->read(&chdr.worldsize, newhdr.headersize-sizeof(binary))!=newhdr.headersize-(int)sizeof(binary)
                 #define MAPZCOMPAT(ver) \
@@ -1289,7 +1289,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     samegame = false;
                 }
             }
-            else if(strncmp(newhdr.head, "OCTA", 4) == 0)
+            else if(memcmp(newhdr.head, "OCTA", 4) == 0)
             {
                 octa ohdr;
                 memcpy(&ohdr, &newhdr, sizeof(binary));
