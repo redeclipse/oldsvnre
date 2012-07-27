@@ -710,12 +710,12 @@ namespace client
     {
         ucharbuf p(data, len);
         int type = getint(p);
-        data += p.length();
-        len -= p.length();
         switch(type)
         {
             case N_SENDDEMO:
             {
+                data += p.length();
+                len -= p.length();
                 defformatstring(fname)("%d.dmo", totalmillis);
                 stream *demo = openfile(fname, "wb");
                 if(!demo) return;
@@ -725,22 +725,21 @@ namespace client
                 break;
             }
 
-            case N_SENDMAPCONFIG:
-            case N_SENDMAPSHOT:
             case N_SENDMAPFILE:
             {
-                const char *reqmap = mapname, *reqext = "xxx";
-                if(type == N_SENDMAPCONFIG) reqext = "cfg";
-                else if(type == N_SENDMAPSHOT) reqext = "png";
-                else if(type == N_SENDMAPFILE) reqext = "mpz";
+                int filetype = getint(p);
+                data += p.length();
+                len -= p.length();
+                if(filetype < 0 || filetype >= SENDMAP_MAX) break;
+                const char *reqmap = mapname;
                 if(!reqmap || !*reqmap) reqmap = "maps/untitled";
                 defformatstring(reqfile)(strstr(reqmap, "temp/")==reqmap || strstr(reqmap, "temp\\")==reqmap ? "%s" : "temp/%s", reqmap);
-                defformatstring(reqfext)("%s.%s", reqfile, reqext);
+                defformatstring(reqfext)("%s.%s", reqfile, sendmaptypes[filetype]);
                 stream *f = openfile(reqfext, "wb");
                 if(!f)
                 {
                     conoutft(CON_MESG, "\frfailed to open map file: %s", reqfext);
-                    return;
+                    break;
                 }
                 gettingmap = true;
                 f->write(data, len);
@@ -748,7 +747,6 @@ namespace client
                 break;
             }
         }
-        return;
     }
     ICOMMAND(0, getmap, "", (), if(multiplayer(false)) addmsg(N_GETMAP, "r"));
 
@@ -812,27 +810,19 @@ namespace client
         if(!reqmap || !*reqmap) reqmap = "maps/untitled";
         bool edit = m_edit(game::gamemode);
         defformatstring(reqfile)("%s%s", edit ? "temp/" : "", reqmap);
-        loopi(3)
+        loopi(SENDMAP_MAX)
         {
-            string reqfext;
-            switch(i)
+            defformatstring(reqfext)("%s.%s", reqfile, sendmaptypes[i]);
+            if(!i && edit)
             {
-                case 2: formatstring(reqfext)("%s.cfg", reqfile); break;
-                case 1: formatstring(reqfext)("%s.png", reqfile); break;
-                case 0: default:
-                    formatstring(reqfext)("%s.mpz", reqfile);
-                    if(edit)
-                    {
-                        save_world(reqfile, edit, true);
-                        setnames(reqmap, MAP_MAPZ);
-                    }
-                    break;
+                save_world(reqfile, edit, true);
+                setnames(reqmap, MAP_MAPZ);
             }
             stream *f = openfile(reqfext, "rb");
             if(f)
             {
                 conoutft(CON_MESG, "\fgtransmitting file: %s", reqfext);
-                sendfile(-1, 2, f, "ri", N_SENDMAPFILE+i);
+                sendfile(-1, 2, f, "ri2", N_SENDMAPFILE, i);
                 if(needclipboard >= 0) needclipboard++;
                 delete f;
             }

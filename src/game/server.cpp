@@ -351,7 +351,7 @@ namespace server
     enet_uint32 lastsend = 0;
     int mastermode = MM_OPEN;
     bool masterupdate = false, mapsending = false, shouldcheckvotes = false;
-    stream *mapdata[3] = { NULL, NULL, NULL };
+    stream *mapdata[SENDMAP_MAX] = { NULL };
     vector<clientinfo *> clients, connects;
     vector<worldstate *> worldstates;
     bool reliablemessages = false;
@@ -2226,26 +2226,19 @@ namespace server
 
         const char *reqmap = name && *name ? name : pickmap(smapname, gamemode, mutators);
 #ifdef STANDALONE // interferes with savemap on clients, in which case we can just use the auto-request
-        loopi(3)
+        loopi(SENDMAP_MAX)
         {
             if(mapdata[i]) DELETEP(mapdata[i]);
-            const char *reqext = "xxx";
-            switch(i)
-            {
-                case 2: reqext = "cfg"; break;
-                case 1: reqext = "png"; break;
-                default: case 0: reqext = "mpz"; break;
-            }
             defformatstring(reqfile)(strstr(reqmap, "maps/")==reqmap || strstr(reqmap, "maps\\")==reqmap ? "%s" : "maps/%s", reqmap);
-            defformatstring(reqfext)("%s.%s", reqfile, reqext);
-            if(!(mapdata[i] = openfile(reqfext, "rb")) && !i)
+            defformatstring(reqfext)("%s.%s", reqfile, sendmaptypes[i]);
+            if(!(mapdata[i] = openfile(reqfext, "rb")) && i < SENDMAP_PNG)
             {
-                loopk(3) if(mapdata[k]) DELETEP(mapdata[k]);
+                loopk(SENDMAP_MAX) if(mapdata[k]) DELETEP(mapdata[k]);
                 break;
             }
         }
 #else
-        loopi(3) if(mapdata[i]) DELETEP(mapdata[i]);
+        loopi(SENDMAP_MAX) if(mapdata[i]) DELETEP(mapdata[i]);
 #endif
         copystring(smapname, reqmap);
 
@@ -2683,7 +2676,7 @@ namespace server
         if(!ci) putint(p, 0);
         else if(!ci->online && m_edit(gamemode) && numclients(ci->clientnum))
         {
-            loopi(3) if(mapdata[i]) DELETEP(mapdata[i]);
+            loopi(SENDMAP_MAX) if(mapdata[i]) DELETEP(mapdata[i]);
             ci->wantsmap = true;
             if(!mapsending)
             {
@@ -3818,20 +3811,19 @@ namespace server
         sendqueryreply(p);
     }
 
-    const char *tempmapfile[3] = { "mapdata", "mapshot", "mapconf" };
+    const char *tempmapfile[SENDMAP_MAX] = { "mapmpz", "mappng", "mapcfg", "mapwpt", "maptxt" };
     bool receivefile(int sender, uchar *data, int len)
     {
         clientinfo *ci = (clientinfo *)getinfo(sender);
         ucharbuf p(data, len);
-        int type = getint(p), n = 0;
+        int type = getint(p), n = getint(p);
         data += p.length();
         len -= p.length();
-        switch(type)
+        if(type != N_SENDMAPFILE) return false;
+        if(n < 0 || n >= SENDMAP_MAX)
         {
-            case N_SENDMAPFILE: case N_SENDMAPSHOT: case N_SENDMAPCONFIG:
-                n = type-N_SENDMAPFILE;
-                break;
-            default: srvmsgf(sender, "bad map file type %d"); return false;
+            srvmsgf(sender, "bad map file type %d");
+            return false;
         }
         if(mapdata[n])
         {
@@ -4945,16 +4937,16 @@ namespace server
                     }
                     if(!mapsending)
                     {
-                        if(mapdata[0] && mapdata[1] && mapdata[2])
+                        if(mapdata[0] && mapdata[1])
                         {
                             srvmsgft(ci->clientnum, CON_EVENT, "sending map, please wait..");
-                            loopk(3) if(mapdata[k]) sendfile(sender, 2, mapdata[k], "ri", N_SENDMAPFILE+k);
+                            loopk(SENDMAP_MAX) if(mapdata[k]) sendfile(sender, 2, mapdata[k], "ri2", N_SENDMAPFILE, k);
                             sendwelcome(ci);
                             ci->needclipboard = totalmillis ? totalmillis : 1;
                         }
                         else if(best)
                         {
-                            loopk(3) if(mapdata[k]) DELETEP(mapdata[k]);
+                            loopk(SENDMAP_MAX) if(mapdata[k]) DELETEP(mapdata[k]);
                             srvmsgft(ci->clientnum, CON_EVENT, "map is being requested, please wait..");
                             sendf(best->clientnum, 1, "ri", N_GETMAP);
                             mapsending = true;
