@@ -10,6 +10,11 @@ Audio & Visuals:
 Maps:
 Institute, new map
 Biolytic, new map
+Ares, updated to version 1.9
+Conflict, new map
+Fourplex, new map
+Starlibido, new map
+mapname.wpt and mapname.txt is now included when sending a map
 
 Modes & Mutators:
 * Hover mutator removed
