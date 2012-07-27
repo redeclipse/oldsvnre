@@ -848,12 +848,11 @@ static bool unpackblock(block3 *&b, B &buf)
     lilswap(&hdr.grid, 1);
     lilswap(&hdr.orient, 1);
     if(hdr.size() > (1<<20)) return false;
-    e->copy = (block3 *)new uchar[sizeof(block3)+hdr.size()*sizeof(cube)];
-    block3 &b = *e->copy;
-    b = hdr;
-    cube *c = b.c();
-    memset(c, 0, b.size()*sizeof(cube));
-    loopi(b.size()) unpackcube(c[i], buf);
+    b = (block3 *)new uchar[sizeof(block3)+hdr.size()*sizeof(cube)];
+    *b = hdr;
+    cube *c = b->c();
+    memset(c, 0, b->size()*sizeof(cube));
+    loopi(b->size()) unpackcube(c[i], buf);
     return true;
 }
 
@@ -947,7 +946,7 @@ COMMAND(0, delbrush, "s");
 
 void savebrush(char *name)
 {
-    if(!name[0] || noedit(true) || (nompedit && multiplayer())) return;
+    if(!name[0] || noedit(true) || multiplayer()) return;
     octabrush *b = octabrushes.access(name);
     if(!b)
     {
@@ -960,14 +959,14 @@ void savebrush(char *name)
     defformatstring(filename)(strpbrk(name, "/\\") ? "%s.obr" : "brush/%s.obr", name);
     path(filename);
     stream *f = opengzfile(filename, "wb");
-    if(!f) { conoutf(CON_ERROR, "could not write brush to %s", filename); return; }
+    if(!f) { conoutf("\frcould not write brush to %s", filename); return; }
     octabrushheader hdr;
     memcpy(hdr.magic, "OEBR", 4);
     hdr.version = 0;
     lilswap(&hdr.version, 1);
     f->write(&hdr, sizeof(hdr));
     streambuf<uchar> s(f);
-    if(!packblock(*b->copy, s)) { delete f; conoutf(CON_ERROR, "could not pack brush %s", filename); return; } 
+    if(!packblock(*b->copy, s)) { delete f; conoutf("\frcould not pack brush %s", filename); return; } 
     delete f;
     conoutf("wrote brush file %s", filename);
 }
@@ -985,21 +984,21 @@ void pasteblock(block3 &b, selinfo &sel)
 
 void pastebrush(char *name)
 {
-    if(!name[0] || noedit() || (nompedit && multiplayer())) return;
+    if(!name[0] || noedit() || multiplayer()) return;
     octabrush *b = octabrushes.access(name);
     if(!b)
     {
         defformatstring(filename)(strpbrk(name, "/\\") ? "%s.obr" : "brush/%s.obr", name);
         path(filename);
         stream *f = opengzfile(filename, "rb");
-        if(!f) { conoutf(CON_ERROR, "could not read brush %s", filename); return; }
+        if(!f) { conoutf("\frcould not read brush %s", filename); return; }
         octabrushheader hdr;
-        if(f->read(&hdr, sizeof(hdr)) != sizeof(octabrushheader) || memcmp(hdr.magic, "OEBR", 4)) { delete f; conoutf(CON_ERROR, "brush %s has malformatted header", filename); return; }
+        if(f->read(&hdr, sizeof(hdr)) != sizeof(octabrushheader) || memcmp(hdr.magic, "OEBR", 4)) { delete f; conoutf("\frbrush %s has malformatted header", filename); return; }
         lilswap(&hdr.version, 1);
-        if(hdr.version != 0) { delete f; conoutf(CON_ERROR, "brush %s uses unsupported version", filename); return; }
+        if(hdr.version != 0) { delete f; conoutf("\frbrush %s uses unsupported version", filename); return; }
         streambuf<uchar> s(f);
         block3 *copy = NULL;
-        if(!unpackblock(copy, s)) { delete f; conoutf(CON_ERROR, "could not unpack brush %s", filename); return; }
+        if(!unpackblock(copy, s)) { delete f; conoutf("\frcould not unpack brush %s", filename); return; }
         delete f;
         b = &octabrushes[name];
         b->name = newstring(name);
