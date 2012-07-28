@@ -1,57 +1,57 @@
-Red Eclipse 1.3
+= Red Eclipse 1.3 =
 Gameplay:
-* Rocket launcher now spawns in instagib
-* Melee no longer requires an impulse action before (back to 1.1 behaviour)
+ * Rocket launcher now spawns in instagib
+ * Melee no longer requires an impulse action before (back to 1.1 behaviour)
 
 Audio & Visuals:
-* Corrected icon size for x32 and x48 versions
-* track_11, track_12, new music
+ * Corrected icon size for x32 and x48 versions
+ * track_11, track_12, new music
 
 Maps:
-Institute, new map
-Biolytic, new map
-Ares, updated to version 1.9
-Conflict, new map
-Fourplex, new map
-Starlibido, new map
-mapname.wpt and mapname.txt is now included when sending a map
+ * Institute, new map
+ * Biolytic, new map
+ * Ares, updated to version 1.9
+ * Conflict, new map
+ * Fourplex, new map
+ * Starlibido, new map
+ * Industrual, new map
+ * mapname.wpt and mapname.txt is now included when sending a map
 
 Modes & Mutators:
-* Hover mutator removed
+ * Hover mutator removed
 
 Modding:
-* Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
-* Removed kitchen and kitchen1 textures from trak4 (unused)
-* arid2, new skybox
+ * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
+ * Removed kitchen and kitchen1 textures from trak4 (unused)
+ * arid2, new skybox
 
 Misc:
-* Now possible to allow demo recording for masters (/restrictdemos 0)
-* SDL 1.2.15
-* Remove "-r" command-line option
-* Added server hosting and player guidelines for the master server
-* Enet 1.3.4
-* 64bit builds for Windows
-* Use APP/app* variables for name abstraction (simplifies forking/install renaming)
+ * Now possible to allow demo recording for masters (/restrictdemos 0)
+ * SDL 1.2.15
+ * Remove "-r" command-line option
+ * Added server hosting and player guidelines for the master server
+ * Enet 1.3.4
+ * 64bit builds for Windows
+ * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
 
 Additional Fixed Bugs:
-* #103 [minor] Revenge-seeking remains after team-change
-* #112 Fix server browser sorting full servers to the bottom
-* #115 When joining mid-match, bomber-ball affinities aren't enabled
-* #128 Buff state not properly synchronised
-* #129 Spawn rotation problems
-* #136 Arena-expert and submodes are bugged (rocket & grenade select issues)
-* #132 venus geom errors
-* #135 ghost geom errors
-* #117 Team-duel problems (force cycle team member after 3 wins)
-* #113 Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
-* #154 Fix darkness omega bb-goal to be at same position as alpha
-* #158 Possibility to miss first checkpoint on testchamber
+ * #103 [minor] Revenge-seeking remains after team-change
+ * #112 Fix server browser sorting full servers to the bottom
+ * #115 When joining mid-match, bomber-ball affinities aren't enabled
+ * #128 Buff state not properly synchronised
+ * #129 Spawn rotation problems
+ * #136 Arena-expert and submodes are bugged (rocket & grenade select issues)
+ * #132 venus geom errors
+ * #135 ghost geom errors
+ * #117 Team-duel problems (force cycle team member after 3 wins)
+ * #113 Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
+ * #154 Fix darkness omega bb-goal to be at same position as alpha
+ * #158 Possibility to miss first checkpoint on testchamber
+ * #161 Include waypoints and text file with sendmap
 
-
-Red Eclipse 1.2
+= Red Eclipse 1.2 =
 Gameplay:
- * Powerjump removed, replaced with "impulse launch", use by jumping whilst
-   "impulse sliding"
+ * Powerjump removed, replaced with "impulse launch", use by jumping whilst "impulse sliding"
  * Impulse moves now disregard cost and scale depending on available energy
  * Special melee actions now require an impulse move beforehand
  * Plasma primary damage increased
@@ -62,8 +62,8 @@ Gameplay:
  * Zoomlock disabled for rifle
  * Added weapon stun effect which impedes movement for a certain time
  * Made the carrier of the flag/bomb move slower
- * New "buff" system for flag/goal defenders: increases regeneration, damage,
-   and shielding
+ * New "buff" system for flag/goal defenders: increases regeneration, damage, and shielding
+
 Audio & Visuals:
  * New weapon model for pistol
  * Ingame music
@@ -74,6 +74,7 @@ Audio & Visuals:
  * Female variation of player model (set in profile)
  * Added visible counter and warning for imminent explosion in Bomber ball
  * New 'radarstyle' option displaying absolute positions
+
 Maps:
  * Ares, new map
  * Cargo, new map
@@ -83,24 +84,28 @@ Maps:
  * Dutility, revamped
  * Tower, re-added and revamped
  * Error, added AI waypoints
+
 Modes & Mutators:
  * League mutator removed
  * Instagib-vampire combination disabled
  * Multi-team mutator re-added
  * Jetpack mutator re-added
  * 'instagibfilter' variable: disallow certain mutators combining with instagib
+
 Modding:
  * New map editing menu, available via [F3]
  * Editing mode has been made more obvious to the user
  * cube2font tool for generating game fonts, including documentation
  * Ability to add a second cloudlayer with the envlayer command
  * Ability to specify bitwise modes and mutators on entities that check them
+
 Misc:
  * AI waypoints separated out from ents, overall major AI improvements
  * Split apart kick and ban commands so users can be removed without a ban
  * Copyright cleanup, new trademark policy
  * *roff manpages for *nix systems
  * system-install make target for packaging convenience
+
 Additional Fixed Bugs:
  * #8 AI performance issues
  * #30 Use RE_DIR=$(dirname $0) in launch script
@@ -119,11 +124,9 @@ Additional Fixed Bugs:
  * #50 Use "aiclip" on common areas where bots can't travel
  * #53 can't drop flag in ctf-protect
  * #60 Live Support does not work correctly
- * #65 Clicking the Red Eclipse icon on map selection without selecting a map
-       produces an error message
+ * #65 Clicking the Red Eclipse icon on map selection without selecting a map produces an error message
  * #66 Winning a conquer defend-the-flag match yields an insanely high score
  * #69 Edit mode segfault
  * #70 Temporarily missing sound for Flamer primary fire after reload
  * #74 better Link line colors
  * #81 Killing the opponent team in Survivor CTF/BB does not yield you a point
-
