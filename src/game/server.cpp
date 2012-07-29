@@ -3515,13 +3515,15 @@ namespace server
         {
             case TRIGGER:
             {
-                if(sents[i].attrs[1] == TR_LINK && sents[i].spawned && gamemillis >= sents[i].millis && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]))
+                if(sents[i].attrs[1] == TR_LINK && sents[i].spawned && gamemillis >= sents[i].millis && (sents[i].attrs[4] == triggerid || !sents[i].attrs[4]) && m_check(sents[i].attrs[5], sents[i].attrs[6], gamemode, mutators))
                 {
                     sents[i].spawned = false;
                     sents[i].millis = gamemillis+(triggertime(i)*2);
                     sendf(-1, 1, "ri3", N_TRIGGER, i, 0);
                     loopvj(sents[i].kin) if(sents.inrange(sents[i].kin[j]))
                     {
+                        if(sents[sents[i].kin[j]].type == TRIGGER && !m_check(sents[sents[i].kin[j]].attrs[5], sents[sents[i].kin[j]].attrs[6], gamemode, mutators))
+                            continue;
                         sents[sents[i].kin[j]].spawned = sents[i].spawned;
                         sents[sents[i].kin[j]].millis = sents[i].millis;
                     }
@@ -4462,7 +4464,7 @@ namespace server
                         else if(sents[ent].type == TRIGGER)
                         {
                             bool commit = false, kin = false;
-                            if(sents[ent].attrs[4] == triggerid || !sents[ent].attrs[4]) switch(sents[ent].attrs[1])
+                            if((sents[ent].attrs[4] == triggerid || !sents[ent].attrs[4]) && m_check(sents[ent].attrs[5], sents[ent].attrs[6], gamemode, mutators)) switch(sents[ent].attrs[1])
                             {
                                 case TR_TOGGLE:
                                 {
@@ -4500,6 +4502,8 @@ namespace server
                             if(commit) sendf(-1, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
                             if(kin) loopvj(sents[ent].kin) if(sents.inrange(sents[ent].kin[j]))
                             {
+                                if(sents[sents[ent].kin[j]].type == TRIGGER && !m_check(sents[sents[ent].kin[j]].attrs[5], sents[sents[ent].kin[j]].attrs[6], gamemode, mutators))
+                                    continue;
                                 sents[sents[ent].kin[j]].spawned = sents[ent].spawned;
                                 sents[sents[ent].kin[j]].millis = sents[ent].millis;
                             }
