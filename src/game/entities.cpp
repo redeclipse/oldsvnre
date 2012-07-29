@@ -337,8 +337,8 @@ namespace entities
                 float radius = enttype[e.type].radius;
                 switch(e.type)
                 {
-                case TRIGGER: case TELEPORT: case PUSHER: if(e.attrs[3] > 0) radius = e.attrs[3]; break;
-                case CHECKPOINT: if(e.attrs[0] > 0) radius = e.attrs[0]; break;
+                    case TRIGGER: case TELEPORT: case PUSHER: if(e.attrs[3] > 0) radius = e.attrs[3]; break;
+                    case CHECKPOINT: if(e.attrs[0] > 0) radius = e.attrs[0]; break;
                 }
                 if(overlapsbox(pos, zrad, xyrad, e.o, radius, radius))
                 {
@@ -421,10 +421,26 @@ namespace entities
     gameent *trigger = NULL;
     ICOMMAND(0, triggerclientnum, "", (), intret(trigger ? trigger->clientnum : -1));
 
+    bool cantrigger(gameentity &e, bool check = false)
+    {
+        switch(e.type)
+        {
+            case TRIGGER:
+            {
+                if(!m_check(e.attrs[5], e.attrs[6], game::gamemode, game::mutators)) return false;
+                if(check && lastmillis-e.lastuse < triggertime(e)/2) return false;
+                return true;
+                break;
+            }
+            default: return true; break;
+        }
+        return false;
+    }
+
     void runtrigger(int n, gameent *d, bool act = true)
     {
         gameentity &e = *(gameentity *)ents[n];
-        if(m_check(e.attrs[5], e.attrs[6], game::gamemode, game::mutators) && lastmillis-e.lastuse >= triggertime(e)/2)
+        if(cantrigger(e, true))
         {
             e.lastuse = lastmillis;
             switch(e.attrs[1])
@@ -655,7 +671,7 @@ namespace entities
             gameentity &e = *(gameentity *)ents[n];
             bool on = m%2, spawned = e.spawned;
             if((e.spawned = on) == true) e.lastspawn = lastmillis;
-            if(e.type == TRIGGER)
+            if(e.type == TRIGGER && cantrigger(e))
             {
                 if((m >= 2 || e.lastemit <= 0 || e.spawned != spawned) && (e.attrs[1] == TR_TOGGLE || e.attrs[1] == TR_LINK || e.attrs[1] == TR_ONCE))
                 {
@@ -664,6 +680,7 @@ namespace entities
                     loopv(e.kin) if(ents.inrange(e.kin[i]))
                     {
                         gameentity &f = *(gameentity *)ents[e.kin[i]];
+                        if(!cantrigger(f)) continue;
                         f.spawned = e.spawned; f.lastemit = e.lastemit;
                         execlink(NULL, e.kin[i], false, n);
                     }
@@ -733,10 +750,12 @@ namespace entities
             case MAPSOUND:
             case LIGHTFX:
             {
-                loopv(e.links) if(ents.inrange(e.links[i]) && ents[e.links[i]]->type == TRIGGER)
+                loopv(e.links) if(ents.inrange(e.links[i]))
                 {
-                    e.lastemit = ents[e.links[i]]->lastemit;
-                    e.spawned = TRIGSTATE(ents[e.links[i]]->spawned, ents[e.links[i]]->attrs[4]);
+                    gameentity &f = *(gameentity *)ents[e.links[i]];
+                    if(f.type != TRIGGER || !cantrigger(f)) continue;
+                    e.lastemit = f.lastemit;
+                    e.spawned = TRIGSTATE(f.spawned, f.attrs[4]);
                     break;
                 }
                 break;
@@ -767,7 +786,7 @@ namespace entities
                     while(e.attrs[0] < 0) e.attrs[0] += TRIGGERIDS+1;
                     while(e.attrs[0] > TRIGGERIDS) e.attrs[0] -= TRIGGERIDS+1;
                 }
-                loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
+                if(cantrigger(e)) loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
                 {
                     ents[e.links[i]]->lastemit = e.lastemit;
                     ents[e.links[i]]->spawned = TRIGSTATE(e.spawned, e.attrs[4]);
@@ -848,38 +867,41 @@ namespace entities
     {
         if(ents.inrange(index) && maylink(ents[index]->type))
         {
+            gameentity &e = *(gameentity *)ents[index];
+            if(e.type == TRIGGER && !cantrigger(e)) return;
             bool commit = false;
             int numents = max(lastenttype[MAPMODEL], max(lastenttype[LIGHTFX], max(lastenttype[PARTICLES], lastenttype[MAPSOUND])));
             loopi(numents) if(ents[i]->links.find(index) >= 0)
             {
+                gameentity &f = *(gameentity *)ents[i];
                 if(ents.inrange(ignore) && ents[ignore]->links.find(index) >= 0) continue;
-                bool both = ents[index]->links.find(i) >= 0;
-                switch(ents[i]->type)
+                bool both = e.links.find(i) >= 0;
+                switch(f.type)
                 {
                     case MAPMODEL:
                     {
-                        ents[i]->lastemit = ents[index]->lastemit;
-                        if(ents[index]->type == TRIGGER) ents[i]->spawned = TRIGSTATE(ents[index]->spawned, ents[index]->attrs[4]);
+                        f.lastemit = e.lastemit;
+                        if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
                         break;
                     }
                     case LIGHTFX:
                     case PARTICLES:
                     {
-                        ents[i]->lastemit = ents[index]->lastemit;
-                        if(ents[index]->type == TRIGGER) ents[i]->spawned = TRIGSTATE(ents[index]->spawned, ents[index]->attrs[4]);
+                        f.lastemit = e.lastemit;
+                        if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
                         else if(local) commit = true;
                         break;
                     }
                     case MAPSOUND:
                     {
-                        ents[i]->lastemit = ents[index]->lastemit;
-                        if(ents[index]->type == TRIGGER) ents[i]->spawned = TRIGSTATE(ents[index]->spawned, ents[index]->attrs[4]);
+                        f.lastemit = e.lastemit;
+                        if(e.type == TRIGGER) f.spawned = TRIGSTATE(e.spawned, e.attrs[4]);
                         else if(local) commit = true;
-                        if(mapsounds.inrange(ents[i]->attrs[0]) && !issound(((gameentity *)ents[i])->schan))
+                        if(mapsounds.inrange(f.attrs[0]) && !issound(((gameentity *)ents[i])->schan))
                         {
                             int flags = SND_MAP;
-                            loopk(SND_LAST)  if(ents[i]->attrs[4]&(1<<k)) flags |= 1<<k;
-                            playsound(ents[i]->attrs[0], both ? ents[i]->o : ents[index]->o, NULL, flags, ents[i]->attrs[3], ents[i]->attrs[1], ents[i]->attrs[2], &((gameentity *)ents[i])->schan);
+                            loopk(SND_LAST)  if(f.attrs[4]&(1<<k)) flags |= 1<<k;
+                            playsound(f.attrs[0], both ? f.o : e.o, NULL, flags, f.attrs[3], f.attrs[1], f.attrs[2], &((gameentity *)ents[i])->schan);
                         }
                         break;
                     }
