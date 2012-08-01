@@ -170,13 +170,13 @@ ifneq (,$(STRIP))
 endif
 else
 client: libenet $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o $(APPCLIENT) $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(APPCLIENT) $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(STRIP))
 	$(STRIP) $(APPCLIENT)
 endif
 
 server: libenet $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o $(APPSERVER) $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(APPSERVER) $(SERVER_OBJS) $(SERVER_LIBS)
 ifneq (,$(STRIP))
 	$(STRIP) $(APPSERVER)
 endif
@@ -193,7 +193,7 @@ shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
 
 cube2font: shared/cube2font.o
-	$(CXX) $(CXXFLAGS) -o cube2font shared/cube2font.o `freetype-config --libs` -lz
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o cube2font shared/cube2font.o `freetype-config --libs` -lz
 
 install-cube2font: cube2font
 	install -d ../bin
