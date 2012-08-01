@@ -15,8 +15,6 @@ mandir=$(DESTDIR)$(prefix)/share/man
 menudir=$(DESTDIR)$(prefix)/share/applications
 icondir=$(DESTDIR)$(prefix)/share/icons/hicolor
 
-GZIPPER=gzip
-
 ICONS= \
 	install/nix/$(appsrcname)_x16.png \
 	install/nix/$(appsrcname)_x32.png \
@@ -82,14 +80,14 @@ system-install-docs: $(MANPAGES)
 		-e 's,@APPNAME@,$(appname),g' \
 		-e 's,@CAPPNAME@,$(cappname),g' \
 		install/nix/$(appsrcname).6.am | \
-		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname).6.gz
+		gzip -9 -n -c > $(mandir)/man6/$(appname).6.gz
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
 		-e 's,@CAPPNAME@,$(cappname),g' \
 		install/nix/$(appsrcname)-server.6.am | \
-		$(GZIPPER) -9 -n -c > $(mandir)/man6/$(appname)-server.6.gz
+		gzip -9 -n -c > $(mandir)/man6/$(appname)-server.6.gz
 	cp -r ../data/examples $(docdir)/$(appname)/examples
 	cp ../guidelines.txt $(docdir)/$(appname)/guidelines.txt
 
@@ -123,7 +121,7 @@ system-install-cube2font: system-install-cube2font-docs
 
 system-install-cube2font-docs: install/nix/cube2font.1
 	install -d $(mandir)/man1
-	$(GZIPPER) -9 -n -c < install/nix/cube2font.1 \
+	gzip -9 -n -c < install/nix/cube2font.1 \
 		> $(mandir)/man1/cube2font.1.gz
 
 system-install: system-install-client system-install-server system-install-data system-install-docs system-install-menus
