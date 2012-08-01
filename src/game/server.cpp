@@ -4958,11 +4958,7 @@ namespace server
                         else
                         {
                             sendf(-1, 1, "ri", N_FAILMAP);
-                            loopv(clients)
-                            {
-                                clientinfo *ci = clients[i];
-                                ci->failedmap = false;
-                            }
+                            loopv(clients) clients[i]->failedmap = false;
                         }
                     }
                     else srvmsgft(ci->clientnum, CON_EVENT, "map is being uploaded, please be patient..");

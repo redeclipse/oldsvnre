@@ -296,13 +296,13 @@ void pasteundoents(undoblock *u)
     undoent *ue = u->ents();
     int *attrs = u->attrs();
     loopi(u->numents)
-        entedit(ue[i].i, 
-        { 
-            e.type = ue[i].type; 
-            e.o = ue[i].o; 
+        entedit(ue[i].i,
+        {
+            e.type = ue[i].type;
+            e.o = ue[i].o;
             if(e.attrs.length() < ue[i].numattrs) e.attrs.add(0, ue[i].numattrs - e.attrs.length());
             else if(e.attrs.length() > ue[i].numattrs) e.attrs.setsize(ue[i].numattrs);
-            loopk(ue[i].numattrs) e.attrs[k] = *attrs++; 
+            loopk(ue[i].numattrs) e.attrs[k] = *attrs++;
         });
 }
 
@@ -755,7 +755,7 @@ void enttype(char *what, int *numargs)
     if(*numargs >= 1)
     {
         int type = entities::findtype(what);
-        if(type == ET_EMPTY) 
+        if(type == ET_EMPTY)
         {
             conoutft(CON_MESG, "\frunknown entity type \"%s\"", what);
             return;
@@ -785,6 +785,17 @@ void entattr(int *attr, int *val, int *numargs)
 
 COMMAND(0, enttype, "sN");
 COMMAND(0, entattr, "iiN");
+
+void entprop(int *attr, int *val)
+{
+    if(*attr >= 0 && *attr < MAXENTATTRS)
+        groupedit({
+            if(e.attrs.length() <= *attr) e.attrs.add(0, *attr + 1 - e.attrs.length());
+            e.attrs[*attr] += *val;
+        });
+}
+
+COMMAND(0, entprop, "ii");
 
 int findentity(int type, int index, vector<int> &attr)
 {
@@ -968,9 +979,9 @@ void shrinkmap()
     cube *root = worldroot[octant].children;
     worldroot[octant].children = NULL;
     freeocta(worldroot);
-    worldroot = root; 
+    worldroot = root;
     worldscale--;
-    hdr.worldsize /= 2; 
+    hdr.worldsize /= 2;
 
     ivec offset(octant, 0, 0, 0, hdr.worldsize);
     vector<extentity *> &ents = entities::getents();
