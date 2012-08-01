@@ -210,6 +210,7 @@ depend:
 all: client server
 
 include system-install.mk
+include dist.mk
 
 engine/engine.h.gch: shared/cube.h.gch
 game/game.h.gch: shared/cube.h.gch engine/engine.h.gch
