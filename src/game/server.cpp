@@ -1564,7 +1564,7 @@ namespace server
         }
         gs.spawnstate(gamemode, mutators, weap, health);
         int spawn = pickspawn(ci);
-        sendf(ci->clientnum, 1, "ri9v", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.health, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0]);
+        sendf(ci->clientnum, 1, "ri9iv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0]);
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
 
@@ -1574,6 +1574,7 @@ namespace server
         putint(p, gs.state);
         putint(p, gs.points);
         putint(p, gs.frags);
+        putint(p, gs.deaths);
         putint(p, gs.health);
         putint(p, gs.cptime);
         putint(p, gs.weapselect);
@@ -2611,7 +2612,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri8vi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.health, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0], -1);
+        sendf(-1, 1, "ri9vi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0], -1);
     }
 
     void putinitclient(clientinfo *ci, packetbuf &p)
@@ -3014,7 +3015,7 @@ namespace server
             dropitems(target, aistyle[target->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
             static vector<int> dmglog; dmglog.setsize(0);
             gethistory(target, actor, gamemillis, dmglog, true, 1);
-            sendf(-1, 1, "ri9iv", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
+            sendf(-1, 1, "ri9i2v", N_DIED, target->clientnum, target->state.deaths, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
             target->position.setsize(0);
             if(smode) smode->died(target, actor);
             mutate(smuts, mut->died(target, actor));
@@ -3052,7 +3053,7 @@ namespace server
         }
         static vector<int> dmglog; dmglog.setsize(0);
         gethistory(ci, ci, gamemillis, dmglog, true, 1);
-        sendf(-1, 1, "ri9iv", N_DIED, ci->clientnum, ci->clientnum, ci->state.frags, 0, 0, -1, flags, ci->state.health, dmglog.length(), dmglog.length(), dmglog.getbuf());
+        sendf(-1, 1, "ri9i2v", N_DIED, ci->clientnum, ci->state.deaths, ci->clientnum, ci->state.frags, 0, 0, -1, flags, ci->state.health, dmglog.length(), dmglog.length(), dmglog.getbuf());
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
         mutate(smuts, mut->died(ci, NULL));
