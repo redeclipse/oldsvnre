@@ -14,7 +14,7 @@ Maps:
  * Conflict, new map
  * Fourplex, new map
  * Starlibido, new map
- * Industrual, new map
+ * Industrial, new map
  * mapname.wpt and mapname.txt is now included when sending a map
 
 Modes & Mutators:
@@ -30,9 +30,10 @@ Misc:
  * SDL 1.2.15
  * Remove "-r" command-line option
  * Added server hosting and player guidelines for the master server
- * Enet 1.3.4
+ * Enet 1.3.5
  * 64bit builds for Windows
  * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
+ * *nix icons stored as PNG, no ImageMagick needed in system-install process
 
 Additional Fixed Bugs:
  * #103 [minor] Revenge-seeking remains after team-change
@@ -48,6 +49,7 @@ Additional Fixed Bugs:
  * #154 Fix darkness omega bb-goal to be at same position as alpha
  * #158 Possibility to miss first checkpoint on testchamber
  * #161 Include waypoints and text file with sendmap
+ * #164 - synchronise death count in resume/frag messages
 
 = Red Eclipse 1.2 =
 Gameplay:
