@@ -350,7 +350,7 @@ namespace ai
             if(wpcachestack.empty()) break;
             curnode = wpcachestack.pop();
         }
-        for(int i = lastwpcache; i < waypoints.length(); i++) { CHECKNEAR(i); }
+        for(int i = lastwpcache; i < ai::waypoints.length(); i++) { CHECKNEAR(i); }
     }
 
     int avoidset::remap(gameent *d, int n, vec &pos, bool retry)
