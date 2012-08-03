@@ -14,13 +14,15 @@ docdir=$(DESTDIR)$(prefix)/share/doc
 mandir=$(DESTDIR)$(prefix)/share/man
 menudir=$(DESTDIR)$(prefix)/share/applications
 icondir=$(DESTDIR)$(prefix)/share/icons/hicolor
+pixmapdir=$(DESTDIR)$(prefix)/share/pixmaps
 
 ICONS= \
 	install/nix/$(appsrcname)_x16.png \
 	install/nix/$(appsrcname)_x32.png \
 	install/nix/$(appsrcname)_x48.png \
 	install/nix/$(appsrcname)_x64.png \
-	install/nix/$(appsrcname)_x128.png
+	install/nix/$(appsrcname)_x128.png \
+	install/nix/$(appsrcname)_x32.xpm
 
 install/nix/$(appsrcname)_x16.png: $(appsrcname).ico
 	convert '$(appsrcname).ico[0]' $@
@@ -36,6 +38,9 @@ install/nix/$(appsrcname)_x64.png: $(appsrcname).ico
 
 install/nix/$(appsrcname)_x128.png: $(appsrcname).ico
 	convert '$(appsrcname).ico[3]' $@
+
+install/nix/$(appsrcname)_x32.xpm: $(appsrcname).ico
+	convert '$(appsrcname).ico[1]' $@
 
 icons: $(ICONS)
 
@@ -98,6 +103,7 @@ system-install-menus: icons
 	install -d $(icondir)/48x48/apps
 	install -d $(icondir)/64x64/apps
 	install -d $(icondir)/128x128/apps
+	install -d $(pixmapdir)
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
@@ -114,6 +120,8 @@ system-install-menus: icons
 		$(icondir)/64x64/apps/$(appname).png
 	install -m644 install/nix/$(appsrcname)_x128.png \
 		$(icondir)/128x128/apps/$(appname).png
+	install -m644 install/nix/$(appsrcname)_x32.xpm \
+		$(pixmapdir)/$(appname).xpm
 
 system-install-cube2font: system-install-cube2font-docs
 	install -d $(bindir)
