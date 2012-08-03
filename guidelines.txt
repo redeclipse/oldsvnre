@@ -93,7 +93,7 @@ basis.
   should result in disciplinary action, and they have the support of their
   peers, they should contact the Red Eclipse Team immediately to propose an
   amendment.
-  
+
 * Failure by a moderator to follow or uphold the rules may result in their
   access being immediately revoked, without warning.
 
