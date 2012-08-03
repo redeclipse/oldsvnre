@@ -86,7 +86,7 @@ Developers
 
  Derek "Favorito" Ponicki - Artist
     Maps, Textures, Design and Testing
- 
+
  Jeroen "appleflap" Boukens - Collaborator
     Textures, Design and Testing
 
@@ -104,7 +104,7 @@ Developers
 
  "SkiingPenguins" - Artist
     Skyboxes
-	
+
  "fluxord" - Artist
 	Crosshairs
 
@@ -112,7 +112,7 @@ Developers
     Master and Game server hosting
 
 Supporters
- 
+
  "w00p|dazza", Corey "c0rdawg" Maher, Rob "Lloir" Shannon
  Henrik "ahven" Pihl, Robert "Homicidal" Crane, Wayne Bennett,
  Cameron "Rhubarb" Dawdy, Christopher "paroneayea" Webber,
