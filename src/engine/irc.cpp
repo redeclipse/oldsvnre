@@ -96,7 +96,7 @@ void converttext(char *dst, const char *src)
                 const char *end = strchr(src, c == '[' ? ']' : ')');
                 src += end ? end-src : strlen(src);
             }
-            else if(c == 's') { if(colorpos < (int)sizeof(colorstack)) colorpos++; continue; }
+            else if(c == 's') { if(colorpos < (int)sizeof(colorstack)-1) colorpos++; continue; }
             else if(c == 'S') { if(colorpos > 0) --colorpos; c = colorstack[colorpos]; }
             int oldcolor = colorstack[colorpos]; colorstack[colorpos] = c;
             switch(c)
