@@ -79,7 +79,7 @@ namespace auth
         if(paused)
         {
             int others = 0;
-            loopv(clients) if(clients[i]->privilege >= (GAME(varslock) >= 2 ? PRIV_ADMIN : PRIV_MASTER) || clients[i]->local) others++;
+            loopv(clients) if(clients[i]->privilege >= PRIV_ADMIN || clients[i]->local) others++;
             if(!others) setpause(false);
         }
     }
