@@ -156,6 +156,10 @@ namespace game
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, NUMPLAYERMODELS);
 
+    VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
+    VAR(IDF_PERSIST, favloadweap1, -1, -1, WEAP_MAX-1);
+    VAR(IDF_PERSIST, favloadweap2, -1, -1, WEAP_MAX-1);
+
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
     ICOMMAND(0, mutators, "", (), intret(mutators));
 
@@ -391,33 +395,6 @@ namespace game
         }
         return true;
     }
-
-    void chooseloadweap(gameent *d, const char *a, const char *b)
-    {
-        if(m_arena(gamemode, mutators))
-        {
-            loopj(2)
-            {
-                const char *s = j ? b : a;
-                if(*s >= '0' && *s <= '9') d->loadweap[j] = parseint(s);
-                else loopi(WEAP_MAX) if(!strcasecmp(WEAP(i, name), s))
-                {
-                    d->loadweap[j] = i;
-                    break;
-                }
-                if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
-            }
-            client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
-            conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
-                WEAP(d->loadweap[0] != WEAP_MELEE ? d->loadweap[0] : WEAP_MELEE, colour), (d->loadweap[0] != WEAP_MELEE ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex), (d->loadweap[0] != WEAP_MELEE ? WEAP(d->loadweap[0], name) : "random"),
-                WEAP(d->loadweap[1] != WEAP_MELEE ? d->loadweap[1] : WEAP_MELEE, colour), (d->loadweap[1] != WEAP_MELEE ? hud::itemtex(WEAPON, d->loadweap[1]) : hud::questiontex), (d->loadweap[1] != WEAP_MELEE ? WEAP(d->loadweap[1], name) : "random")
-            );
-        }
-        else conoutft(CON_MESG, "\foweapon selection is only available in arena");
-    }
-    ICOMMAND(0, loadweap, "ss", (char *a, char *b), chooseloadweap(player1, a, b));
-    ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap[*n!=0 ? 1 : 0]));
-    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && WEAP(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
 
     void respawn(gameent *d)
     {
@@ -1365,6 +1342,35 @@ namespace game
         if(!empty) smartmusic(true, false);
     }
 
+    int lookupweap(const char *a)
+    {
+        if(*a >= '0' && *a <= '9') return parseint(a);
+        else loopi(WEAP_MAX) if(!strcasecmp(WEAP(i, name), a)) return i;
+        return -1;
+    }
+
+    void chooseloadweap(gameent *d, int a, int b, bool saved = false)
+    {
+        if(m_arena(gamemode, mutators))
+        {
+            loopj(2)
+            {
+                d->loadweap[j] = (j ? b : a);
+                if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
+                if(d == game::player1) (j ? favloadweap2 : favloadweap1) = d->loadweap[j];
+            }
+            client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
+            conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
+                WEAP(d->loadweap[0] != WEAP_MELEE ? d->loadweap[0] : WEAP_MELEE, colour), (d->loadweap[0] != WEAP_MELEE ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex), (d->loadweap[0] != WEAP_MELEE ? WEAP(d->loadweap[0], name) : "random"),
+                WEAP(d->loadweap[1] != WEAP_MELEE ? d->loadweap[1] : WEAP_MELEE, colour), (d->loadweap[1] != WEAP_MELEE ? hud::itemtex(WEAPON, d->loadweap[1]) : hud::questiontex), (d->loadweap[1] != WEAP_MELEE ? WEAP(d->loadweap[1], name) : "random")
+            );
+        }
+        else conoutft(CON_MESG, "\foweapon selection is only available in arena");
+    }
+    ICOMMAND(0, loadweap, "ssi", (char *a, char *b, int *n), chooseloadweap(player1, lookupweap(a), lookupweap(b), *n!=0));
+    ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap[*n!=0 ? 1 : 0]));
+    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && WEAP(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
+
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
         ai::startmap(name, reqname, empty);
@@ -1385,6 +1391,8 @@ namespace game
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
             d->mapchange(lastmillis, m_health(gamemode, mutators));
+        if(m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
+            chooseloadweap(game::player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
         if(!empty) client::sendinfo = client::sendcrc = true;
