@@ -16,7 +16,8 @@ GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when emp
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
 
-GVARF(IDF_ADMIN, gamespeed, 1, 100, 10000, timescale = sv_gamespeed, timescale = gamespeed);
+GVARF(0, gamespeed, 1, 100, 10000, timescale = sv_gamespeed, timescale = gamespeed);
+GVAR(IDF_ADMIN, gamespeedlock, 0, 3, 4); // 0 = off, 1 = master, 2 = auth, 3 = admin, 4 = nobody
 GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepaused);
 
 GSVAR(IDF_ADMIN, defaultmap, "");

@@ -2386,12 +2386,12 @@ namespace server
                 case ID_COMMAND:
                 {
                     string s;
-                    if(nargs <= 1 || !arg) formatstring(s)("%s", cmd);
-                    else formatstring(s)("%s %s", cmd, arg);
+                    if(nargs <= 1 || !arg) formatstring(s)("%s", id->name);
+                    else formatstring(s)("%s %s", id->name, arg);
                     char *ret = executestr(s);
                     if(ret)
                     {
-                        if(*ret) conoutft(CON_MESG, "\fc%s returned %s", cmd, ret);
+                        if(*ret) conoutft(CON_MESG, "\fc%s returned %s", id->name, ret);
                         delete[] ret;
                     }
                     return true;
@@ -2400,12 +2400,12 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
+                        conoutft(CON_MESG, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", id->name, *id->storage.i);
                         return true;
                     }
                     if(id->maxval < id->minval)
                     {
-                        conoutft(CON_MESG, "\frcannot override variable: %s", cmd);
+                        conoutft(CON_MESG, "\frcannot override variable: %s", id->name);
                         return true;
                     }
                     int ret = parseint(arg);
@@ -2414,7 +2414,7 @@ namespace server
                         conoutft(CON_MESG,
                             id->flags&IDF_HEX ?
                                     (id->minval <= 255 ? "\frvalid range for %s is %d..0x%X" : "\frvalid range for %s is 0x%X..0x%X") :
-                                    "\frvalid range for %s is %d..%d", cmd, id->minval, id->maxval);
+                                    "\frvalid range for %s is %d..%d", id->name, id->minval, id->maxval);
                         return true;
                     }
                     checkvar(id, arg);
@@ -2427,13 +2427,13 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, "\fc%s = %s", cmd, floatstr(*id->storage.f));
+                        conoutft(CON_MESG, "\fc%s = %s", id->name, floatstr(*id->storage.f));
                         return true;
                     }
                     float ret = parsefloat(arg);
                     if(ret < id->minvalf || ret > id->maxvalf)
                     {
-                        conoutft(CON_MESG, "\frvalid range for %s is %s..%s", cmd, floatstr(id->minvalf), floatstr(id->maxvalf));
+                        conoutft(CON_MESG, "\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
                         return true;
                     }
                     checkvar(id, arg);
@@ -2446,7 +2446,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", cmd, *id->storage.s);
+                        conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", id->name, *id->storage.s);
                         return true;
                     }
                     checkvar(id, arg);
@@ -2473,17 +2473,18 @@ namespace server
         {
             mkstring(val);
             int locked = max(id->flags&IDF_ADMIN ? 3 : 0, GAME(varslock));
+            if(!strcmp(id->name, "gamespeed") && GAME(gamespeedlock) > locked) locked = GAME(gamespeedlock);
             switch(id->type)
             {
                 case ID_COMMAND:
                 {
                     if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "execute commands")) return;
                     string s;
-                    if(nargs <= 1 || !arg) formatstring(s)("sv_%s", cmd);
-                    else formatstring(s)("sv_%s %s", cmd, arg);
+                    if(nargs <= 1 || !arg) formatstring(s)("sv_%s", id->name);
+                    else formatstring(s)("sv_%s %s", id->name, arg);
                     char *ret = executestr(s);
-                    if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), cmd, ret);
-                    else srvoutf(-3, "\fc%s executed %s", colorname(ci), cmd);
+                    if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), id->name, ret);
+                    else srvoutf(-3, "\fc%s executed %s", colorname(ci), id->name);
                     if(ret) delete[] ret;
                     return;
                 }
@@ -2491,7 +2492,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", cmd, *id->storage.i);
+                        srvmsgf(ci->clientnum, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", id->name, *id->storage.i);
                         return;
                     }
                     else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change variables"))
@@ -2502,7 +2503,7 @@ namespace server
                     }
                     if(id->maxval < id->minval)
                     {
-                        srvmsgf(ci->clientnum, "\frcannot override variable: %s", cmd);
+                        srvmsgf(ci->clientnum, "\frcannot override variable: %s", id->name);
                         return;
                     }
                     int ret = parseint(arg);
@@ -2511,7 +2512,7 @@ namespace server
                         srvmsgf(ci->clientnum,
                             id->flags&IDF_HEX ?
                                 (id->minval <= 255 ? "\frvalid range for %s is %d..0x%X" : "\frvalid range for %s is 0x%X..0x%X") :
-                                "\frvalid range for %s is %d..%d", cmd, id->minval, id->maxval);
+                                "\frvalid range for %s is %d..%d", id->name, id->minval, id->maxval);
                         return;
                     }
                     checkvar(id, arg);
@@ -2524,7 +2525,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, "\fc%s = %s", cmd, floatstr(*id->storage.f));
+                        srvmsgf(ci->clientnum, "\fc%s = %s", id->name, floatstr(*id->storage.f));
                         return;
                     }
                     else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change variables"))
@@ -2536,7 +2537,7 @@ namespace server
                     float ret = parsefloat(arg);
                     if(ret < id->minvalf || ret > id->maxvalf)
                     {
-                        srvmsgf(ci->clientnum, "\frvalid range for %s is %s..%s", cmd, floatstr(id->minvalf), floatstr(id->maxvalf));
+                        srvmsgf(ci->clientnum, "\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
                         return;
                     }
                     checkvar(id, arg);
@@ -2549,7 +2550,7 @@ namespace server
                 {
                     if(nargs <= 1 || !arg)
                     {
-                        srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", cmd, *id->storage.s);
+                        srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", id->name, *id->storage.s);
                         return;
                     }
                     else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change variables"))
@@ -2570,7 +2571,7 @@ namespace server
             sendf(-1, 1, "ri2ss", N_COMMAND, ci->clientnum, &id->name[3], val);
             relayf(3, "\fc%s set %s to %s", colorname(ci), &id->name[3], val);
         }
-        else srvmsgf(ci->clientnum, "\frunknown command: %s", cmd);
+        else srvmsgf(ci->clientnum, "\frunknown command: %s", id->name);
     }
 
     bool rewritecommand(ident *id, tagval *args, int numargs)
