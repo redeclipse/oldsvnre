@@ -355,6 +355,7 @@ namespace bomber
                     loopk(3) inertia[k] = getint(p)/DMF;
                 }
             }
+            if(p.overread()) break;
             if(st.flags.inrange(i))
             {
                 bomberstate::flag &f = st.flags[i];

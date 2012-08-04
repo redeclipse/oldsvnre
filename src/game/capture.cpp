@@ -368,6 +368,7 @@ namespace capture
                     loopk(3) inertia[k] = getint(p)/DMF;
                 }
             }
+            if(p.overread()) break;
             if(st.flags.inrange(i))
             {
                 capturestate::flag &f = st.flags[i];
