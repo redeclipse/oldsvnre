@@ -80,7 +80,7 @@ VAR(0, ircfilter, 0, 1, 2);
 void converttext(char *dst, const char *src)
 {
     int colorpos = 0; char colorstack[10];
-    loopi(10) colorstack[i] = 'u'; //indicate user color
+    memset(colorstack, 'u', sizeof(colorstack)); //indicate user color
     for(int c = *src; c; c = *++src)
     {
         if(c == '\f')
@@ -96,8 +96,8 @@ void converttext(char *dst, const char *src)
                 const char *end = strchr(src, c == '[' ? ']' : ')');
                 src += end ? end-src : strlen(src);
             }
-            else if(c == 's') { colorpos++; continue; }
-            else if(c == 'S') { c = colorstack[--colorpos]; }
+            else if(c == 's') { if(colorpos < (int)sizeof(colorstack)) colorpos++; continue; }
+            else if(c == 'S') { if(colorpos > 0) --colorpos; c = colorstack[colorpos]; }
             int oldcolor = colorstack[colorpos]; colorstack[colorpos] = c;
             switch(c)
             {

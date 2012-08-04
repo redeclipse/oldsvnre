@@ -257,6 +257,7 @@ namespace defend
         loopi(numflags)
         {
             int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
+            if(p.overread()) break;
             st.initaffinity(i, kin, owner, enemy, converted);
         }
     }
