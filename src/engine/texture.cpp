@@ -1440,7 +1440,15 @@ int compactvslots(bool cull)
     compactedvslots = 0;
     compactvslotsprogress = 0;
     loopv(vslots) vslots[i]->index = -1;
-    if(!cull)
+    if(cull)
+    {
+        if(slots.inrange(DEFAULT_SKY))
+        {
+            slots[DEFAULT_SKY]->variants->index = compactedvslots++;
+            assignvslotlayer(*slots[DEFAULT_SKY]->variants); 
+        }
+    }
+    else
     {
         loopv(slots) slots[i]->variants->index = compactedvslots++;
         loopv(slots) assignvslotlayer(*slots[i]->variants);
