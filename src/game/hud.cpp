@@ -1150,6 +1150,11 @@ namespace hud
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
             pushfont("little");
             ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
+            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) && shownotices >= 2)
+            {
+                SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                ty += draw_textx("Press \fs\fc%s\fS to join a team", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
+            }
             if(!m_edit(game::gamemode) && shownotices >= 2)
             {
                 SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);

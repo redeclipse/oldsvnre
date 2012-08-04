@@ -4574,9 +4574,16 @@ namespace server
                 case N_SWITCHTEAM:
                 {
                     int team = getint(p);
-                    if(((ci->state.state == CS_SPECTATOR || ci->state.state == CS_EDITING) && team != TEAM_NEUTRAL) || !isteam(gamemode, mutators, team, TEAM_FIRST) || ci->state.aitype >= AI_START)
-                        team = chooseteam(ci, team);
-                    if(ci->team != team) setteam(ci, team, true, true);
+                    if(!isteam(gamemode, mutators, team, TEAM_FIRST) || ci->state.aitype >= AI_START || team == ci->team) break;
+                    bool reset = true;
+                    if(ci->state.state == CS_SPECTATOR)
+                    {
+                        if(!allowstate(ci, ALST_TRY) && !haspriv(ci, GAME(speclock)+PRIV_MASTER, "exit spectator"))
+                            break;
+                        spectate(ci, false);
+                        reset = false;
+                    }
+                    setteam(ci, team, reset, true);
                     break;
                 }
 
@@ -4816,8 +4823,8 @@ namespace server
                     int who = getint(p), team = getint(p);
                     if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_MASTER, "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
-                    if(!cp || !m_team(gamemode, mutators) || !m_fight(gamemode) || cp->state.aitype >= AI_START) break;
-                    if(cp->state.state == CS_SPECTATOR || cp->state.state == CS_EDITING || !isteam(gamemode, mutators, team, TEAM_FIRST)) break;
+                    if(!cp || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
+                    if(cp->state.state == CS_SPECTATOR || !isteam(gamemode, mutators, team, TEAM_FIRST)) break;
                     setteam(cp, team, true, true);
                     break;
                 }
