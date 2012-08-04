@@ -38,7 +38,6 @@ struct score
     score() {}
     score(int s, int n) : team(s), total(n) {}
 };
-enum { BASE_NONE = 0, BASE_HOME = 1<<0, BASE_FLAG = 1<<1, BASE_BOTH = BASE_HOME|BASE_FLAG };
 
 #define numteams(a,b)   (m_fight(a) && m_team(a,b) ? (m_multi(a,b) ? TEAM_TOTAL : TEAM_NUM) : 1)
 #define teamcount(a,b)  (m_fight(a) && m_team(a,b) ? (m_multi(a,b) ? TEAM_ALL : TEAM_COUNT) : 1)
