@@ -3,7 +3,11 @@ GVAR(IDF_ADMIN, serverclients, 1, 16, MAXCLIENTS);
 GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
+
 GVAR(IDF_ADMIN, automaster, 0, 0, 1);
+GVAR(IDF_ADMIN, speclock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
+GVAR(IDF_ADMIN, kicklock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
+GVAR(IDF_ADMIN, banlock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
@@ -43,16 +47,16 @@ GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink cargo center colony conflict d
 GSVAR(IDF_ADMIN, largemaps, "ares biolytic blink cargo center colony dawn deadsimple deathtrap deli depot error facility forge foundation futuresport ghost industrial isolation lab linear mist nova processing spacetech tower tranquility tribal ubik venus warp");
 
 
-GVAR(IDF_ADMIN, modelock, 0, 3, 5); // 0 = off, 1 = master only (+1 admin only), 3 = master can only set limited mode and higher (+1 admin), 5 = no mode selection
+GVAR(IDF_ADMIN, modelock, 0, 5, 7); // 0 = off, 1-3 = master/auth/admin only, 4-6 = master/auth/admin can only set limited mode and higher, 7 = no mode selection
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
 GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_IGN].mutators&~G_M_ARENA, mutstype[G_M_IGN].mutators, sv_instagibfilter &= ~G_M_VAMPIRE; sv_instagibfilter |= G_M_INSTA, instagibfilter &= ~G_M_VAMPIRE; instagibfilter |= G_M_INSTA);
 
 GVAR(IDF_ADMIN, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
-GVAR(IDF_ADMIN, mapslock, 0, 3, 5); // 0 = off, 1 = master can select non-allow maps (+1 admin), 3 = master can select non-rotation maps (+1 admin), 5 = no map selection
-GVAR(IDF_ADMIN, varslock, 0, 1, 3); // 0 = off, 1 = master, 2 = admin only, 3 = nobody
-GVAR(IDF_ADMIN, votelock, 0, 1, 5); // 0 = off, 1 = master can select same game (+1 admin), 3 = master only can vote (+1 admin), 5 = no voting
+GVAR(IDF_ADMIN, mapslock, 0, 5, 7); // 0 = off, 1-3 = master/auth/admin can select non-allow maps, 4-6 = master/auth/admin can select non-rotation maps, 7 = no map selection
+GVAR(IDF_ADMIN, varslock, 0, 2, 4); // 0 = off, 1 = master, 2 = auth, 3 = admin, 4 = nobody
+GVAR(IDF_ADMIN, votelock, 0, 2, 7); // 0 = off, 1-3 = master/auth/admin can select same game, 4 = master/auth/admin only can vote, 7 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
 GFVAR(IDF_ADMIN, votethreshold, 0, 0.5f, 1); // auto-pass votes when this many agree
 
