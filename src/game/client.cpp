@@ -259,7 +259,7 @@ namespace client
     {
         if(team[0])
         {
-            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) && game::player1->state != CS_SPECTATOR && game::player1->state != CS_EDITING)
+            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 int t = teamname(team);
                 if(t != game::player1->team) addmsg(N_SWITCHTEAM, "ri", t);
