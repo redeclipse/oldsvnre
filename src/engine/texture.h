@@ -563,8 +563,8 @@ struct VSlot
     }
 
     vec getcolorscale() const { return palette || palindex ? vec(colorscale).mul(game::getpalette(palette, palindex)) : colorscale; }
-    vec getglowcolor() const 
-    { 
+    vec getglowcolor() const
+    {
         if(glowcolor)
         {
             vec c(glowcolor->val);
@@ -573,8 +573,8 @@ struct VSlot
         }
         return vec(1, 1, 1);
     }
-    vec getpulseglowcolor() const 
-    { 
+    vec getpulseglowcolor() const
+    {
         if(pulseglowcolor)
         {
             vec c(pulseglowcolor->val);
@@ -704,7 +704,7 @@ extern bool loadimage(const char *name, ImageData &image);
 extern bool loaddds(const char *filename, ImageData &image);
 
 extern void resetmaterials();
-extern void resettextures();
+extern void resettextures(int n = 0);
 extern void setshader(char *name);
 extern void setshaderparam(const char *name, int type, int n, float x, float y, float z, float w);
 extern int findtexturetype(char *name, bool tryint = false);

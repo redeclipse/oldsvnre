@@ -134,9 +134,9 @@ static void reorients3tc(GLenum format, int blocksize, int w, int h, uchar *src,
             if(normals)
             {
                 ushort ncolor1 = color1, ncolor2 = color2;
-                if(flipx) 
-                { 
-                    ncolor1 = (ncolor1 & ~0xF800) | (0xF800 - (ncolor1 & 0xF800)); 
+                if(flipx)
+                {
+                    ncolor1 = (ncolor1 & ~0xF800) | (0xF800 - (ncolor1 & 0xF800));
                     ncolor2 = (ncolor2 & ~0xF800) | (0xF800 - (ncolor2 & 0xF800));
                 }
                 if(flipy)
@@ -1358,19 +1358,20 @@ MSlot materialslots[MATF_VOLUME+1];
 Slot dummyslot;
 VSlot dummyvslot(&dummyslot);
 
-void resettextures()
+void resettextures(int n)
 {
     resetslotshader();
-    loopv(slots)
+    int limit = clamp(n, 0, slots.length());
+    for(int i = limit; i < slots.length(); i++)
     {
         Slot *s = slots[i];
         for(VSlot *vs = s->variants; vs; vs = vs->next) vs->slot = &dummyslot;
         delete s;
     }
-    slots.shrink(0);
+    slots.setsize(limit);
 }
 
-ICOMMAND(0, texturereset, "", (void), if(editmode || identflags&IDF_WORLD) resettextures(););
+ICOMMAND(0, texturereset, "i", (int *n), if(editmode || identflags&IDF_WORLD) resettextures(*n););
 
 void resetmaterials()
 {
@@ -2433,7 +2434,7 @@ Texture *cubemaploadwildcard(Texture *t, const char *name, bool mipit, bool msg,
         t->bpp = formatsize(format);
         t->type |= Texture::COMPRESSED;
     }
-    else 
+    else
     {
         format = texformat(surface[0].bpp);
         t->bpp = surface[0].bpp;
