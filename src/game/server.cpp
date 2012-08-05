@@ -1913,63 +1913,77 @@ namespace server
 
     void vote(const char *reqmap, int &reqmode, int &reqmuts, int sender)
     {
-        clientinfo *ci = (clientinfo *)getinfo(sender); modecheck(reqmode, reqmuts);
+        clientinfo *ci = (clientinfo *)getinfo(sender);
+        modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
-        if(GAME(modelock) == 7 && GAME(mapslock) == 7 && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
-        else switch(GAME(votelock))
-        {
-            case 1: case 2: case 3: if(!m_edit(reqmode) && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock)-1+PRIV_MASTER, "vote for the same map again")) return; break;
-            case 4: case 5: case 6: if(!haspriv(ci, GAME(votelock)-4+PRIV_MASTER, "vote for a new game")) return; break;
-            case 7: if(!haspriv(ci, PRIV_MAX, "vote for a new game")) return; break;
-            case 0: default: break;
-        }
-        bool hasveto = haspriv(ci, PRIV_MASTER) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
+        bool hasvote = false, hasveto = haspriv(ci, PRIV_MASTER) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
         if(!hasveto)
         {
             if(ci->lastvote && totalmillis-ci->lastvote <= GAME(votewait)) return;
             if(ci->modevote == reqmode && ci->mutsvote == reqmuts && !strcmp(ci->mapvote, reqmap)) return;
         }
-        if(m_local(reqmode) && !ci->local)
+        loopv(clients)
         {
-            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
-            return;
-        }
-        switch(GAME(modelock))
-        {
-            case 1: case 2: case 3: if(!haspriv(ci, GAME(modelock)-1+PRIV_MASTER, "change game modes")) return; break;
-            case 4: case 5: case 6: if((!((1<<reqmode)&GAME(modelockfilter)) || !mutscmp(reqmuts, GAME(mutslockfilter))) && !haspriv(ci, GAME(modelock)-4+PRIV_MASTER, "change to a locked game mode")) return; break;
-            case 7: if(!haspriv(ci, PRIV_MAX, "change game modes")) return; break;
-            case 0: default: break;
-        }
-        if(reqmode != G_EDITMODE && GAME(mapslock))
-        {
-            char *list = NULL;
-            int level = GAME(mapslock);
-            switch(GAME(mapslock))
+            clientinfo *oi = clients[i];
+            if(oi->state.aitype > AI_NONE || !oi->mapvote[0] || ci == oi) continue;
+            if(!strcmp(oi->mapvote, reqmap) && oi->modevote == reqmode && oi->mutsvote == reqmuts)
             {
-                case 1: case 2: case 3:
-                {
-                    list = newstring(GAME(allowmaps));
-                    mapcull(list, reqmode, reqmuts, numclients());
-                    break;
-                }
-                case 4: case 5: case 6:
-                {
-                    level -= 3;
-                    maplist(list, reqmode, reqmuts, numclients());
-                    break;
-                }
-                case 7: if(!haspriv(ci, PRIV_MAX, "select a map to play")) return; level -= 6; break;
+                hasvote = true;
+                break;
+            }
+        }
+        if(!hasvote)
+        {
+            if(GAME(modelock) == 7 && GAME(mapslock) == 7 && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
+            else switch(GAME(votelock))
+            {
+                case 1: case 2: case 3: if(!m_edit(reqmode) && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock)-1+PRIV_MASTER, "vote for the same map again")) return; break;
+                case 4: case 5: case 6: if(!haspriv(ci, GAME(votelock)-4+PRIV_MASTER, "vote for a new game")) return; break;
+                case 7: if(!haspriv(ci, PRIV_MAX, "vote for a new game")) return; break;
                 case 0: default: break;
             }
-            if(list)
+            if(m_local(reqmode) && !ci->local)
             {
-                if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, level-1+PRIV_MASTER, "select maps not in the rotation"))
+                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you must be a local client to start a %s game", gametype[reqmode].name);
+                return;
+            }
+            switch(GAME(modelock))
+            {
+                case 1: case 2: case 3: if(!haspriv(ci, GAME(modelock)-1+PRIV_MASTER, "change game modes")) return; break;
+                case 4: case 5: case 6: if((!((1<<reqmode)&GAME(modelockfilter)) || !mutscmp(reqmuts, GAME(mutslockfilter))) && !haspriv(ci, GAME(modelock)-4+PRIV_MASTER, "change to a locked game mode")) return; break;
+                case 7: if(!haspriv(ci, PRIV_MAX, "change game modes")) return; break;
+                case 0: default: break;
+            }
+            if(reqmode != G_EDITMODE && GAME(mapslock))
+            {
+                char *list = NULL;
+                int level = GAME(mapslock);
+                switch(GAME(mapslock))
                 {
-                    DELETEA(list);
-                    return;
+                    case 1: case 2: case 3:
+                    {
+                        list = newstring(GAME(allowmaps));
+                        mapcull(list, reqmode, reqmuts, numclients());
+                        break;
+                    }
+                    case 4: case 5: case 6:
+                    {
+                        level -= 3;
+                        maplist(list, reqmode, reqmuts, numclients());
+                        break;
+                    }
+                    case 7: if(!haspriv(ci, PRIV_MAX, "select a map to play")) return; level -= 6; break;
+                    case 0: default: break;
                 }
-                DELETEA(list);
+                if(list)
+                {
+                    if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, level-1+PRIV_MASTER, "select maps not in the rotation"))
+                    {
+                        DELETEA(list);
+                        return;
+                    }
+                    DELETEA(list);
+                }
             }
         }
         copystring(ci->mapvote, reqmap);
