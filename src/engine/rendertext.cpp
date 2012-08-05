@@ -1,6 +1,6 @@
 #include "engine.h"
 
-VAR(IDF_PERSIST, blinkingtext, 0, 1, 1);
+VAR(IDF_PERSIST, blinkingtext, 0, 250, VAR_MAX);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -269,7 +269,7 @@ static float icon_width(const char *name, float scale)
     if(g[h] == 'z' && g[h+1]) \
     { \
         h++; \
-        bool alt = blinkingtext && totalmillis%500 > 250; \
+        bool alt = blinkingtext && totalmillis%(blinkingtext*2) > blinkingtext; \
         TEXTCOLOR(h); \
         if(g[h+1]) \
         { \

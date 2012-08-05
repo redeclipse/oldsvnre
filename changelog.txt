@@ -35,21 +35,23 @@ Misc:
  * 64bit builds for Windows
  * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
  * *nix icons stored as PNG/XPM, no ImageMagick needed in system-install process
+ * Show player count on server browser
+ * Allow players to cast votes for ones made by an admin which conflict with a lock control
 
 Additional Fixed Bugs:
- * #103 [minor] Revenge-seeking remains after team-change
- * #112 Fix server browser sorting full servers to the bottom
- * #115 When joining mid-match, bomber-ball affinities aren't enabled
- * #128 Buff state not properly synchronised
- * #129 Spawn rotation problems
- * #136 Arena-expert and submodes are bugged (rocket & grenade select issues)
- * #132 venus geom errors
- * #135 ghost geom errors
- * #117 Team-duel problems (force cycle team member after 3 wins)
- * #113 Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
- * #154 Fix darkness omega bb-goal to be at same position as alpha
- * #158 Possibility to miss first checkpoint on testchamber
- * #161 Include waypoints and text file with sendmap
+ * #103 - [minor] Revenge-seeking remains after team-change
+ * #112 - Fix server browser sorting full servers to the bottom
+ * #115 - When joining mid-match, bomber-ball affinities aren't enabled
+ * #128 - Buff state not properly synchronised
+ * #129 - Spawn rotation problems
+ * #136 - Arena-expert and submodes are bugged (rocket & grenade select issues)
+ * #132 - venus geom errors
+ * #135 - ghost geom errors
+ * #117 - Team-duel problems (force cycle team member after 3 wins)
+ * #113 - Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
+ * #154 - Fix darkness omega bb-goal to be at same position as alpha
+ * #158 - Possibility to miss first checkpoint on testchamber
+ * #161 - Include waypoints and text file with sendmap
  * #164 - synchronise death count in resume/frag messages
  * #165 - ghost clipping (disable odd sniper spot)
  * #163 - added ability to lock spec/kick/ban to specific access levels, applied same logic to other lock variables
@@ -115,26 +117,26 @@ Misc:
  * system-install make target for packaging convenience
 
 Additional Fixed Bugs:
- * #8 AI performance issues
- * #30 Use RE_DIR=$(dirname $0) in launch script
- * #31 Changing weapon name breaks the entry in Variables GUI
- * #32 Floating/Infinite Flight Bug
- * #33 random weapon selection in arena not working
- * #35 /firstpersondist (exploit)
- * #37 Player color (skew towards team color)
- * #38 Tweaking hit sounds for shotgun/flak bleed
- * #39 teampersist crashes server
- * #40 dedicated server demo recording is broken
- * #42 Plasma Blue-Ball-of-Death sticking to Ragdoll
- * #43 Create lower poly weapon models for item and vwep version
- * #44 Entity Radius Broken in Edit Mode
- * #47 Create "botoffset" variable to replace INSERT/DELETE behaviour
- * #50 Use "aiclip" on common areas where bots can't travel
- * #53 can't drop flag in ctf-protect
- * #60 Live Support does not work correctly
- * #65 Clicking the Red Eclipse icon on map selection without selecting a map produces an error message
- * #66 Winning a conquer defend-the-flag match yields an insanely high score
- * #69 Edit mode segfault
- * #70 Temporarily missing sound for Flamer primary fire after reload
- * #74 better Link line colors
- * #81 Killing the opponent team in Survivor CTF/BB does not yield you a point
+ * #8 - AI performance issues
+ * #30 - Use RE_DIR=$(dirname $0) in launch script
+ * #31 - Changing weapon name breaks the entry in Variables GUI
+ * #32 - Floating/Infinite Flight Bug
+ * #33 - random weapon selection in arena not working
+ * #35 - /firstpersondist (exploit)
+ * #37 - Player color (skew towards team color)
+ * #38 - Tweaking hit sounds for shotgun/flak bleed
+ * #39 - teampersist crashes server
+ * #40 - dedicated server demo recording is broken
+ * #42 - Plasma Blue-Ball-of-Death sticking to Ragdoll
+ * #43 - Create lower poly weapon models for item and vwep version
+ * #44 - Entity Radius Broken in Edit Mode
+ * #47 - Create "botoffset" variable to replace INSERT/DELETE behaviour
+ * #50 - Use "aiclip" on common areas where bots can't travel
+ * #53 - can't drop flag in ctf-protect
+ * #60 - Live Support does not work correctly
+ * #65 - Clicking the Red Eclipse icon on map selection without selecting a map produces an error message
+ * #66 - Winning a conquer defend-the-flag match yields an insanely high score
+ * #69 - Edit mode segfault
+ * #70 - Temporarily missing sound for Flamer primary fire after reload
+ * #74 - better Link line colors
+ * #81 - Killing the opponent team in Survivor CTF/BB does not yield you a point
