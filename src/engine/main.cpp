@@ -789,13 +789,9 @@ SVAR(0, progresstext, "");
 FVAR(0, progressamt, 0, 0, 1);
 FVAR(0, progresspart, 0, 0, 1);
 
-int lastprogress = 0;
-
 void progress(float bar1, const char *text1, float bar2, const char *text2)
 {
-    if(progressing || !inbetweenframes) return;
-    if(!lastprogress) { lastprogress = totalmillis; return; }
-    else if(totalmillis-lastprogress > 0) return;
+    if(progressing || !inbetweenframes || envmapping) return;
     clientkeepalive();
 
     #ifdef __APPLE__
@@ -1021,7 +1017,6 @@ int main(int argc, char **argv)
             if(!minimized)
             {
                 inbetweenframes = renderedframe = false;
-                lastprogress = 0;
                 gl_drawframe(screen->w, screen->h);
                 renderedframe = true;
                 swapbuffers();
