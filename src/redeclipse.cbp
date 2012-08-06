@@ -15,7 +15,7 @@
 				<Option deps_output=".deps\client" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-hhome -r -df0 -dw800 -dh600" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -61,7 +61,7 @@
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-hhome -r -df0 -dw800 -dh600" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -104,7 +104,7 @@
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-hhome -rinit.cfg -du0 -df0 -dw640 -dh600" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -228,7 +228,7 @@
 				<Option deps_output=".deps\client" />
 				<Option type="0" />
 				<Option compiler="gnu_gcc_compiler_for_64bit" />
-				<Option parameters="-hhome -r -df0 -dw800 -dh600" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -274,7 +274,7 @@
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gnu_gcc_compiler_for_64bit" />
-				<Option parameters="-hhome -rinit.cfg -du0 -df0 -dw640 -dh600" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -318,7 +318,7 @@
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gnu_gcc_compiler_for_64bit" />
-				<Option parameters="-hhome -r -df0 -dw800 -dh600" />
+				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -527,9 +527,9 @@
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="32 bit" targets="client32;server32;" />
 			<Add alias="64 bit" targets="client64;server64;" />
+			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="Tools" targets="cube2font;genkey;" />
 		</VirtualTargets>
 		<Unit filename="engine\animmodel.h">
