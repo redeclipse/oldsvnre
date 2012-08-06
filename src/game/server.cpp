@@ -801,7 +801,11 @@ namespace server
         changemap();
     }
 
-    void start() { cleanup(true); }
+    void start()
+    {
+        cleanup(true);
+    }
+
     void shutdown()
     {
         srvmsgft(-1, CON_EVENT, "\fyserver shutdown in progress..");
@@ -976,7 +980,6 @@ namespace server
         return mdname;
     }
     ICOMMAND(0, modedesc, "iii", (int *g, int *m, int *c), result(modedesc(*g, *m, *c)));
-    VAR(0, maxmodes, G_MAX-1, G_MAX-1, -G_MAX-1);
 
     const char *mutsdesc(int mode, int muts, int type)
     {
@@ -1001,7 +1004,6 @@ namespace server
         return mtname;
     }
     ICOMMAND(0, mutsdesc, "iii", (int *g, int *m, int *c), result(mutsdesc(*g, *m, *c)));
-    VAR(0, maxmuts, G_M_NUM, G_M_NUM, -G_M_NUM);
 
     void changemode(int &mode, int &muts)
     {
@@ -1833,6 +1835,11 @@ namespace server
     {
         setpause(false);
         if(demorecord) enddemorecord();
+        if(sv_botoffset != 0)
+        {
+            setvar("sv_botoffset", 0, true);
+            sendf(-1, 1, "ri2ss", N_COMMAND, -1, "botoffset", "0");
+        }
         if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetvarsonend) >= 2) resetgamevars(true);
         if(GAME(resetbansonend) >= 2) resetbans();
