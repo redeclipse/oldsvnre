@@ -78,7 +78,8 @@ enttypes enttype[] = {
     },
     {
         PLAYERSTART,    1,          59,     0,      EU_NONE,    6,
-            0, 0,
+            (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  true,  false,      false,      false,
                 "playerstart",  { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
@@ -90,22 +91,22 @@ enttypes enttype[] = {
     },
     {
         PARTICLES,      1,          59,     0,      EU_NONE,    11,
-            (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
-            (1<<TRIGGER)|(1<<PUSHER),
+            (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
+            (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             false,  false,  false,      false,      false,
                 "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
     },
     {
         MAPSOUND,       1,          58,     0,      EU_NONE,    5,
-            (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
-            (1<<TRIGGER)|(1<<PUSHER),
+            (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
+            (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             false,  false,  false,      false,      false,
                 "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
     },
     {
         LIGHTFX,        1,          1,      0,      EU_NONE,    5,
-            (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER),
-            (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER),
+            (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
+            (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             false,  false,  false,      false,      false,
                 "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
@@ -150,13 +151,15 @@ enttypes enttype[] = {
     },
     {
         AFFINITY,       1,          48,     32,     EU_NONE,    6,
-            0, 0,
+            (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,
-            0, 0,
+            (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  true,   false,      false,      false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },

@@ -1558,6 +1558,8 @@ namespace client
                             regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
                         }
                     }
+                    if(f->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
+                        entities::execlink(f, ent, false);
                     ai::spawned(f, ent);
                     if(f == game::focus) game::resetcamera();
                     f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
@@ -2078,19 +2080,24 @@ namespace client
 
                 case N_CHECKPOINT:
                 {
-                    int tn = getint(p), laptime = getint(p), besttime = getint(p);
+                    int tn = getint(p), ent = getint(p), laptime = getint(p), besttime = getint(p);
                     gameent *t = game::getclient(tn);
                     if(!t) break;
-                    if(laptime >= 0)
+                    if(ent >= 0)
                     {
-                        t->cplast = laptime;
-                        t->cptime = besttime;
-                        t->cpmillis = t->impulse[IM_METER] = 0;
-                        if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
+                        if(laptime >= 0)
                         {
-                            defformatstring(best)("%s", hud::timetostr(besttime));
-                            conoutft(t != game::focus ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
+                            t->cplast = laptime;
+                            t->cptime = besttime;
+                            t->cpmillis = t->impulse[IM_METER] = 0;
+                            if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
+                            {
+                                defformatstring(best)("%s", hud::timetostr(besttime));
+                                conoutft(t != game::focus ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
+                            }
                         }
+                        if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
+                            entities::execlink(t, ent, false);
                     }
                     else
                     {

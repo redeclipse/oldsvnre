@@ -923,6 +923,7 @@ namespace server
             case 0: return RE_VERSION;
             case 1: return GAMEVERSION;
             case 2: case 3: return version[n%2];
+            default: break;
         }
         return 0;
     }
@@ -3067,7 +3068,7 @@ namespace server
             {
                 ci->state.cpmillis = 0;
                 ci->state.cpnodes.shrink(0);
-                sendf(-1, 1, "ri4", N_CHECKPOINT, ci->clientnum, -1, 0);
+                sendf(-1, 1, "ri5", N_CHECKPOINT, ci->clientnum, -1, -1, 0);
             }
         }
         else if(!m_duke(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
@@ -4467,7 +4468,7 @@ namespace server
                                             cp->state.cptime = laptime;
                                             if(sents[ent].attrs[6] == CP_FINISH) { cp->state.cpmillis = -gamemillis; waiting(cp); }
                                         }
-                                        sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, laptime, cp->state.cptime);
+                                        sendf(-1, 1, "ri5", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime);
                                         if(m_team(gamemode, mutators))
                                         {
                                             score &ts = teamscore(cp->team);
@@ -4481,6 +4482,7 @@ namespace server
                                     case CP_RESPAWN: if(sents[ent].attrs[6] == CP_RESPAWN && cp->state.cpmillis) break;
                                     case CP_START:
                                     {
+                                        sendf(-1, 1, "ri5", N_CHECKPOINT, cp->clientnum, ent, -1, 0);
                                         cp->state.cpmillis = gamemillis;
                                         cp->state.cpnodes.shrink(0);
                                     }
