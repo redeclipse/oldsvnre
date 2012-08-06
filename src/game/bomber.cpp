@@ -424,10 +424,14 @@ namespace bomber
         if(f.enabled && value)
         {
             destroyaffinity(f.pos());
-            if(value == 2 && isbomberaffinity(f))
+            if(isbomberaffinity(f))
             {
-                affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
-                game::announcef(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
+                if(value == 2)
+                {
+                    affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
+                    game::announcef(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
+                }
+                entities::execlink(NULL, f.ent, false);
             }
         }
         st.returnaffinity(i, lastmillis, value!=0);
@@ -439,6 +443,8 @@ namespace bomber
         bomberstate::flag &f = st.flags[relay], &g = st.flags[goal];
         affinityeffect(goal, d->team, g.spawnloc, f.spawnloc, 3, "DESTROYED");
         destroyaffinity(g.spawnloc);
+        entities::execlink(NULL, f.ent, false);
+        entities::execlink(NULL, g.ent, false);
         hud::teamscore(d->team).total = score;
         game::announcef(S_V_BOMBSCORE, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s destroyed the \fs\f[%d]%s\fS base for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
@@ -455,6 +461,7 @@ namespace bomber
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
             game::announcef(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
+            entities::execlink(NULL, f.ent, false);
         }
         st.takeaffinity(i, d, lastmillis);
     }
