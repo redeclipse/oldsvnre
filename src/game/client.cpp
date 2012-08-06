@@ -316,6 +316,13 @@ namespace client
     }
     ICOMMAND(0, ismaster, "i", (int *cn), intret(ismaster(*cn) ? 1 : 0));
 
+    bool isauth(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d && d->privilege >= PRIV_AUTH;
+    }
+    ICOMMAND(0, isauth, "i", (int *cn), intret(isauth(*cn) ? 1 : 0));
+
     bool isadmin(int cn)
     {
         gameent *d = game::getclient(cn);
