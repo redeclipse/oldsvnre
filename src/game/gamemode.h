@@ -291,3 +291,47 @@ extern mutstypes mutstype[];
     else a = newstring(GAME(allowmaps)); \
     if(GAME(mapsfilter)) mapcull(a, b, c, d); \
 }
+
+#ifdef GAMESERVER
+SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-the-flag bomber-ball time-trial");
+SVAR(0, modeidxname, "demo editing campaign deathmatch capture defend bomber trial");
+VAR(0, modeidxdemo, -1, G_DEMO, 1);
+VAR(0, modeidxediting, -1, G_EDITMODE, 1);
+VAR(0, modeidxcampaign, -1, G_CAMPAIGN, 1);
+VAR(0, modeidxdeathmatch, -1, G_DEATHMATCH, 1);
+VAR(0, modeidxcapture, -1, G_CAPTURE, 1);
+VAR(0, modeidxdefend, -1, G_DEFEND, 1);
+VAR(0, modeidxbomber, -1, G_BOMBER, 1);
+VAR(0, modeidxtrial, -1, G_TRIAL, 1);
+VAR(0, modeidxstart, -1, G_START, 1);
+VAR(0, modeidxplay, -1, G_PLAY, 1);
+VAR(0, modeidxfight, -1, G_FIGHT, 1);
+VAR(0, modeidxrand, -1, G_RAND, 1);
+VAR(0, modeidxnever, -1, G_NEVER, 1);
+VAR(0, modeidxlimit, -1, G_LIMIT, 1);
+VAR(0, modeidxall, -1, G_ALL, 1);
+VAR(0, modeidxnum, -1, G_MAX, 1);
+SVAR(0, mutsname, "multi teamplay instagib medieval ballistic duel survivor arena onslaught jetpack vampire expert resize");
+SVAR(0, mutsidxname, "multi team instagib medieval ballistic duel survivor arena onslaught jetpack vampire expert resize");
+VAR(0, mutsidxmulti, -1, G_M_MULTI, 1);
+VAR(0, mutsidxteam, -1, G_M_TEAM, 1);
+VAR(0, mutsidxinstagib, -1, G_M_INSTA, 1);
+VAR(0, mutsidxmedieval, -1, G_M_MEDIEVAL, 1);
+VAR(0, mutsidxballistic, -1, G_M_BALLISTIC, 1);
+VAR(0, mutsidxduel, -1, G_M_DUEL, 1);
+VAR(0, mutsidxsurvivor, -1, G_M_SURVIVOR, 1);
+VAR(0, mutsidxarena, -1, G_M_ARENA, 1);
+VAR(0, mutsidxonslaught, -1, G_M_ONSLAUGHT, 1);
+VAR(0, mutsidxjetpack, -1, G_M_JETPACK, 1);
+VAR(0, mutsidxvampire, -1, G_M_VAMPIRE, 1);
+VAR(0, mutsidxexpert, -1, G_M_EXPERT, 1);
+VAR(0, mutsidxresize, -1, G_M_RESIZE, 1);
+VAR(0, mutsidxgsp1, -1, G_M_GSP1, 1);
+VAR(0, mutsidxgsp2, -1, G_M_GSP2, 1);
+VAR(0, mutsidxgsp3, -1, G_M_GSP3, 1);
+VAR(0, mutsidxall, -1, G_M_ALL, 1);
+VAR(0, mutsidxfilter, -1, G_M_FILTER, 1);
+VAR(0, mutsidxgsn, -1, G_M_GSN, 1);
+VAR(0, mutsidxgsp, -1, G_M_GSP, 1);
+VAR(0, mutsidxnum, -1, G_M_NUM, 1);
+#endif
