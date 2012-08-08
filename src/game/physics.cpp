@@ -963,10 +963,18 @@ namespace physics
                         {
                             float space = d->height+d->aboveeye, m = min(impulsevaultmin, impulsevaultmax), n = max(impulsevaultmin, impulsevaultmax);
                             d->o.add(dir);
-                            d->o.z += space*m;
-                            if(!collide(d, dir))
+                            if(onfloor)
                             {
-                                d->o.z += space*n-space*m;
+                                d->o.z += space*m;
+                                if(!collide(d, dir))
+                                {
+                                    d->o.z += space*n-space*m;
+                                    if(collide(d, dir) || hitplayer) vault = true;
+                                }
+                            }
+                            else
+                            {
+                                d->o.z += space*n;
                                 if(collide(d, dir) || hitplayer) vault = true;
                             }
                             d->o = oldpos;
