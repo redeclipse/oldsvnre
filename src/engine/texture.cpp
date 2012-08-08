@@ -1446,7 +1446,7 @@ int compactvslots(bool cull)
         if(slots.inrange(DEFAULT_SKY))
         {
             slots[DEFAULT_SKY]->variants->index = compactedvslots++;
-            assignvslotlayer(*slots[DEFAULT_SKY]->variants); 
+            assignvslotlayer(*slots[DEFAULT_SKY]->variants);
         }
     }
     else
@@ -1580,6 +1580,7 @@ static void propagatevslot(VSlot &dst, const VSlot &src, int diff, bool edit = f
         dst.palette = src.palette;
         dst.palindex = src.palindex;
     }
+    if(diff & (1<<VSLOT_COAST)) dst.coastscale = src.coastscale;
 }
 
 static void propagatevslot(VSlot *root, int changed)
@@ -1642,6 +1643,7 @@ static void mergevslot(VSlot &dst, const VSlot &src, int diff, Slot *slot = NULL
         dst.palette = src.palette;
         dst.palindex = src.palindex;
     }
+    if(diff & (1<<VSLOT_COAST)) dst.coastscale = src.coastscale;
 }
 
 void mergevslot(VSlot &dst, const VSlot &src, const VSlot &delta)
@@ -1690,6 +1692,7 @@ static bool comparevslot(const VSlot &dst, const VSlot &src, int diff)
     if(diff & (1<<VSLOT_ALPHA) && (dst.alphafront != src.alphafront || dst.alphaback != src.alphaback)) return false;
     if(diff & (1<<VSLOT_COLOR) && dst.colorscale != src.colorscale) return false;
     if(diff & (1<<VSLOT_PALETTE) && (dst.palette != src.palette || dst.palindex != src.palindex)) return false;
+    if(diff & (1<<VSLOT_COAST) && dst.coastscale != src.coastscale) return false;
     return true;
 }
 
@@ -1944,6 +1947,15 @@ void texcolor(float *r, float *g, float *b)
     propagatevslot(s.variants, 1<<VSLOT_COLOR);
 }
 COMMAND(0, texcolor, "fff");
+
+void texcoastscale(float *value)
+{
+    if(slots.empty()) return;
+    Slot &s = *slots.last();
+    s.variants->coastscale = clamp(*value, 0.f, 1000.f);
+    propagatevslot(s.variants, 1<<VSLOT_COAST);
+}
+COMMAND(0, texcoastscale, "f");
 
 void texpalette(int *p, int *x)
 {

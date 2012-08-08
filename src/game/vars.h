@@ -238,14 +238,14 @@ GFVAR(0, gravityforce, -1, -1, FVAR_MAX);
 GFVAR(0, gravityscale, 0, 1, FVAR_MAX);
 GFVAR(0, liquidspeedforce, -1, -1, 1);
 GFVAR(0, liquidspeedscale, 0, 1, FVAR_MAX);
-GFVAR(0, liquidcurbforce, -1, -1, FVAR_MAX);
-GFVAR(0, liquidcurbscale, 0, 1, FVAR_MAX);
-GFVAR(0, floorcurbforce, -1, -1, FVAR_MAX);
-GFVAR(0, floorcurbscale, 0, 1, FVAR_MAX);
-GFVAR(0, aircurbforce, -1, -1, FVAR_MAX);
-GFVAR(0, aircurbscale, 0, 1, FVAR_MAX);
-GFVAR(0, slidecurbforce, -1, -1, FVAR_MAX);
-GFVAR(0, slidecurbscale, 0, 1, FVAR_MAX);
+GFVAR(0, liquidcoastforce, -1, -1, FVAR_MAX);
+GFVAR(0, liquidcoastscale, 0, 1, FVAR_MAX);
+GFVAR(0, floorcoastforce, -1, -1, FVAR_MAX);
+GFVAR(0, floorcoastscale, 0, 1, FVAR_MAX);
+GFVAR(0, aircoastforce, -1, -1, FVAR_MAX);
+GFVAR(0, aircoastscale, 0, 1, FVAR_MAX);
+GFVAR(0, slidecoastforce, -1, -1, FVAR_MAX);
+GFVAR(0, slidecoastscale, 0, 1, FVAR_MAX);
 
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier

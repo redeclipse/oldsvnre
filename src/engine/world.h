@@ -6,7 +6,7 @@ enum                            // hardcoded texture numbers
 };
 
 #define OCTAVERSION 32          // diverged at ver 25
-#define MAPVERSION 41           // bump if map format changes, see worldio.cpp
+#define MAPVERSION 42           // bump if map format changes, see worldio.cpp
 
 struct binary
 {
@@ -136,6 +136,6 @@ enum
 
 struct vertexff { vec pos; bvec norm; uchar reserved; float u, v; float lmu, lmv; };
 struct vertex { vec pos; bvec norm; uchar reserved; float u, v; short lmu, lmv; bvec tangent; uchar bitangent; };
- 
+
 #define VTXSIZE (renderpath==R_FIXEDFUNCTION ? sizeof(vertexff) : sizeof(vertex))
 

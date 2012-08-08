@@ -1860,6 +1860,16 @@ void vpalette(int *p, int *x)
 }
 COMMAND(0, vpalette, "ii");
 
+void vcoastscale(float *value)
+{
+    if(noedit() || multiplayer()) return;
+    VSlot ds;
+    ds.changed = 1<<VSLOT_COAST;
+    ds.coastscale = clamp(*value, 0.f, 1000.f);
+    mpeditvslot(ds, allfaces, sel, true);
+}
+COMMAND(0, vcoastscale, "fff");
+
 void vreset()
 {
     if(noedit() || multiplayer()) return;

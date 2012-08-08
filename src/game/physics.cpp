@@ -3,10 +3,10 @@ namespace physics
 {
     FVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
     FVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
-    FVAR(IDF_WORLD, liquidcurb, 0, 10.f, 1000);
-    FVAR(IDF_WORLD, floorcurb, 0, 5.f, 1000);
-    FVAR(IDF_WORLD, aircurb, 0, 25.f, 1000);
-    FVAR(IDF_WORLD, slidecurb, 0, 40.f, 1000);
+    FVAR(IDF_WORLD, liquidcoast, 0, 10.f, 1000);
+    FVAR(IDF_WORLD, floorcoast, 0, 5.f, 1000);
+    FVAR(IDF_WORLD, aircoast, 0, 25.f, 1000);
+    FVAR(IDF_WORLD, slidecoast, 0, 40.f, 1000);
 
     FVAR(IDF_WORLD, stairheight, 0, 4.1f, 1000);
     FVAR(IDF_WORLD, floorz, 0, 0.867f, 1);
@@ -15,7 +15,7 @@ namespace physics
     FVAR(IDF_WORLD, stepspeed, 1e-4f, 1.f, 1000);
 
     FVAR(IDF_PERSIST, floatspeed, 1e-4f, 100, 1000);
-    FVAR(IDF_PERSIST, floatcurb, 0, 3.f, 1000);
+    FVAR(IDF_PERSIST, floatcoast, 0, 3.f, 1000);
 
     VAR(IDF_PERSIST, physframetime, 5, 5, 20);
     VAR(IDF_PERSIST, physinterp, 0, 1, 1);
@@ -1061,6 +1061,11 @@ namespace physics
         else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
     }
 
+    float coastscale(const vec &o)
+    {
+        return lookupvslot(lookupcube(int(o.x), int(o.y), int(o.z)).texture[0], false).coastscale;
+    }
+
     void modifyvelocity(physent *pl, bool local, bool floating, int millis)
     {
         vec m(0, 0, 0);
@@ -1077,15 +1082,15 @@ namespace physics
         }
         modifymovement(pl, m, local, floating, wantsmove, millis);
         m.mul(movevelocity(pl, floating));
-        float fric = PHYS(floorcurb);
-        if(floating || pl->type == ENT_CAMERA) fric = floatcurb;
+        float scale = coastscale(pl->feetpos(-1)), coast = PHYS(floorcoast)*scale;
+        if(floating || pl->type == ENT_CAMERA) coast = floatcoast;
         else
         {
             bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
-            float curb = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecurb) : PHYS(floorcurb)) : PHYS(aircurb);
-            fric = pl->inliquid ? liquidmerge(pl, curb, PHYS(liquidcurb)) : curb;
+            float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*scale : PHYS(aircoast);
+            coast = pl->inliquid ? liquidmerge(pl, c, PHYS(liquidcoast)) : c;
         }
-        pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/fric, 0.0f), millis/20.0f));
+        pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/coast, 0.0f), millis/20.0f));
     }
 
     void modifygravity(physent *pl, int curtime)
@@ -1107,9 +1112,9 @@ namespace physics
         else pl->falling = g;
         if(liquidcheck(pl) || pl->physstate >= PHYS_SLOPE)
         {
-            float fric = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircurb), PHYS(liquidcurb)) : PHYS(floorcurb),
+            float coast = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-1)),
                   c = liquidcheck(pl) ? 1.0f : clamp((pl->floor.z - slopez)/(floorz-slopez), 0.0f, 1.0f);
-            pl->falling.mul(pow(max(1.0f - c/fric, 0.0f), curtime/20.0f));
+            pl->falling.mul(pow(max(1.0f - c/coast, 0.0f), curtime/20.0f));
         }
     }
 
