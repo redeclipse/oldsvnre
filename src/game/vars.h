@@ -271,6 +271,7 @@ GFVAR(0, impulsedash, 0, 1.2f, FVAR_MAX); // dashing/powerslide modifier
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
 GFVAR(0, impulseparkour, 0, 1, FVAR_MAX); // parkour modifier
 GFVAR(0, impulseparkourkick, 0, 1.3f, FVAR_MAX); // parkour kick modifier
+GFVAR(0, impulseparkourvault, 0, 1.3f, FVAR_MAX); // parkour vault modifier
 GFVAR(0, impulseparkournorm, 0, 0.5f, FVAR_MAX); // minimum parkour surface z normal
 GVAR(0, impulseallowed, 0, 3, 3); // impulse allowed; 0 = off, 1 = dash/boost only, 2 = dash/boost and sprint, 3 = all mechanics including parkour
 GVAR(0, impulsestyle, 0, 1, 3); // impulse style; 0 = off, 1 = touch and count, 2 = count only, 3 = freestyle
@@ -280,6 +281,8 @@ GVAR(0, impulseslide, 0, 750, VAR_MAX); // time before powerslides end
 GVAR(0, impulsedelay, 0, 250, VAR_MAX); // minimum time between boosts
 GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/powerslides
 GVAR(0, impulsekickdelay, 0, 350, VAR_MAX); // minimum time between wall kicks/climbs
+GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage of height for vault
+GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
 
 GFVAR(0, impulsemelee, 0, 0.75f, FVAR_MAX); // melee modifier
 GVAR(0, impulsemeleechain, 0, 0, VAR_MAX); // impulse melee style; 0 = any time, 1+ = only this long after an impulse in ms

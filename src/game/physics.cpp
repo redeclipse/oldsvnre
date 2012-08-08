@@ -945,33 +945,46 @@ namespace physics
                     if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
                     if(!move && !strafe) continue;
                     vecfromyawpitch(d->aimyaw, 0, move, strafe, dir);
-                    d->o.add(dir.normalize());
+                    dir.normalize();
+                    d->o.add(dir);
                     bool collided = collide(d, dir);
                     d->o = oldpos;
                     if(collided || hitplayer || wall.iszero()) continue;
-                    wall.normalize();
-                    if(fabs(wall.z) <= impulseparkournorm)
+                    vec face = vec(wall).normalize();
+                    if(fabs(face.z) <= impulseparkournorm)
                     {
-                        bool parkour = d->action[AC_SPECIAL] && canimpulse(d, 3, true) && !onfloor && !d->onladder;
+                        bool cankick = d->action[AC_SPECIAL] && canimpulse(d, 3, true), parkour = cankick && !onfloor && !d->onladder;
                         float yaw = 0, pitch = 0;
-                        vectoyawpitch(wall, yaw, pitch);
+                        vectoyawpitch(face, yaw, pitch);
                         float off = yaw-d->aimyaw;
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
-                        if(!d->turnside && parkour && impulsekick > 0 && fabs(off) >= impulsekick)
+                        bool iskick = impulsekick > 0 && fabs(off) >= impulsekick, vault = false;
+                        if(cankick && iskick)
                         {
-                            if(!d->impulse[IM_TIME] || d->impulse[IM_TYPE] != IM_T_KICK || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
+                            float space = d->height+d->aboveeye, m = min(impulsevaultmin, impulsevaultmax), n = max(impulsevaultmin, impulsevaultmax);
+                            d->o.add(dir);
+                            d->o.z += space*m;
+                            if(!collide(d, dir))
+                            {
+                                d->o.z += space*n-space*m;
+                                if(collide(d, dir) || hitplayer) vault = true;
+                            }
+                            d->o = oldpos;
+                        }
+                        if(!d->turnside && (parkour || vault) && iskick)
+                        {
+                            if(!d->impulse[IM_TIME] || (d->impulse[IM_TYPE] != IM_T_KICK && d->impulse[IM_TYPE] != IM_T_VAULT) || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
                             {
                                 int cost = impulsecost;
-                                float mag = impulsevelocity(d, impulseparkourkick, cost);
+                                float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost);
                                 if(mag > 0)
                                 {
-                                    vecfromyawpitch(d->aimyaw, fabs(d->aimpitch), 1, 0, dir);
-                                    (d->vel = dir.normalize()).reflect(wall).normalize().mul(mag);
-                                    d->doimpulse(cost, IM_T_KICK, lastmillis);
+                                    vecfromyawpitch(d->aimyaw, vault ? 90.f : fabs(d->aimpitch), 1, 0, dir);
+                                    (d->vel = dir.normalize()).reflect(face).normalize().mul(mag);
+                                    d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
                                     d->turnmillis = PHYSMILLIS;
                                     d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                                    //d->action[AC_SPECIAL] = false;
-                                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
+                                    client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
                                     game::impulseeffect(d);
                                 }
                             }
@@ -995,7 +1008,6 @@ namespace physics
                                     if(off > 180) off -= 360;
                                     else if(off < -180) off += 360;
                                     d->doimpulse(cost, IM_T_SKATE, lastmillis);
-                                    //d->action[AC_SPECIAL] = false;
                                     d->turnmillis = PHYSMILLIS;
                                     d->turnside = side; d->turnyaw = off;
                                     d->turnroll = (impulseroll*d->turnside)-d->roll;
