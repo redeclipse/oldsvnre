@@ -958,6 +958,7 @@ namespace hud
             ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname);
             popfont();
         }
+        if(game::intermission) ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
 
         if(game::player1->state == CS_SPECTATOR)
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
