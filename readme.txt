@@ -90,6 +90,10 @@ Developers
  Jeroen "appleflap" Boukens - Collaborator
     Textures, Design and Testing
 
+ Martin "arand" Werner - Collaborator
+    Documentation, Legal Drafting, Cross-Distribution Support, 
+    Open Source Compliance Checks, and much more.
+
  Mike "mikeplus64" Ledger - Artist
     Maps, Models, Weapons, Textures, HUD, Design and Testing
 
