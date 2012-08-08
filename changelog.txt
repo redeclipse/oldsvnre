@@ -2,10 +2,12 @@
 Gameplay:
  * Rocket launcher now spawns in instagib
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
+ * New "impulse vaulting" movement ((press Q next to an obstacle to use it to propel yourself upward)
 
 Audio & Visuals:
  * Corrected icon size for x32 and x48 versions
  * track_11, track_12, new music
+ * Show player count on server browser
 
 Maps:
  * Institute, new map
@@ -15,28 +17,35 @@ Maps:
  * Fourplex, new map
  * Starlibido, new map
  * Industrial, new map
- * mapname.wpt and mapname.txt is now included when sending a map
+ * Oneiroi, new map
+ * Pumpstation, new map
 
 Modes & Mutators:
  * Hover mutator removed
  * Added "gamespeedlock" to independently allow servers to unlock "gamespeed" (still checks varslock though)
+ * Added {mode,muts}idxname variables for mode and mutator values
 
 Modding:
  * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
  * Removed kitchen and kitchen1 textures from trak4 (unused)
  * arid2, new skybox
+ * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
+
+Multiplayer & Servers:
+ * Now possible to allow demo recording for masters (/restrictdemos 0)
+ * Added server hosting and player guidelines for the master server
+ * mapname.wpt and mapname.txt is now included when sending a map
+ * Allow players to cast votes for ones made by an admin which conflict with a lock control
+ * Added ability to lock spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
 
 Misc:
- * Now possible to allow demo recording for masters (/restrictdemos 0)
  * SDL 1.2.15
  * Remove "-r" command-line option
- * Added server hosting and player guidelines for the master server
  * Enet 1.3.5
  * 64bit builds for Windows
  * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
  * *nix icons stored as PNG/XPM, no ImageMagick needed in system-install process
- * Show player count on server browser
- * Allow players to cast votes for ones made by an admin which conflict with a lock control
+ * Added ability to save and automatically use arena loadouts
 
 Additional Fixed Bugs:
  * #103 - [minor] Revenge-seeking remains after team-change
@@ -51,13 +60,11 @@ Additional Fixed Bugs:
  * #113 - Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
  * #154 - Fix darkness omega bb-goal to be at same position as alpha
  * #158 - Possibility to miss first checkpoint on testchamber
- * #161 - Include waypoints and text file with sendmap
  * #164 - synchronise death count in resume/frag messages
  * #165 - ghost clipping (disable odd sniper spot)
- * #163 - added ability to lock spec/kick/ban to specific access levels, applied same logic to other lock variables
  * #148 - replaced tabs on texture gui with scrolling pages
  * #141 - can select a team while in spectator to join the game on a specific team
- * #166 - ability to save and automatically use arena loadouts
+
 
 = Red Eclipse 1.2 =
 Gameplay:
