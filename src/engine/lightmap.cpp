@@ -1497,7 +1497,7 @@ static lightmapinfo *setupsurfaces(lightmapworker *w, lightmaptask &task)
                     numlitverts += numverts;
                 }
             }
-            else if(!flataxisface(c, i)) convex = faceconvexity(verts, numverts);
+            else if(!flataxisface(c, i)) convex = faceconvexity(verts, numverts, size);
         }
         else
         {
