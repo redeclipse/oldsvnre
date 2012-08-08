@@ -513,6 +513,7 @@ enum
     VSLOT_ALPHA,
     VSLOT_COLOR,
     VSLOT_PALETTE,
+    VSLOT_COAST,
     VSLOT_NUM
 };
 
@@ -537,6 +538,7 @@ struct VSlot
     ShaderParam *glowcolor, *pulseglowcolor;
     vec envscale;
     int skipped;
+    float coastscale;
 
     VSlot(Slot *slot = NULL, int index = -1) : slot(slot), next(NULL), index(index), changed(0), skipped(0)
     {
@@ -560,6 +562,7 @@ struct VSlot
         pulseglowspeed = 0;
         glowcolor = pulseglowcolor = NULL;
         envscale = vec(0, 0, 0);
+        coastscale = 1;
     }
 
     vec getcolorscale() const { return palette || palindex ? vec(colorscale).mul(game::getpalette(palette, palindex)) : colorscale; }

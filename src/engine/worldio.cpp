@@ -618,6 +618,7 @@ void savevslot(stream *f, VSlot &vs, int prev)
         f->putlil<int>(vs.palette);
         f->putlil<int>(vs.palindex);
     }
+    if(vs.changed & (1<<VSLOT_COAST)) f->putlil<float>(vs.coastscale);
 }
 
 void savevslots(stream *f, int numvslots)
@@ -700,6 +701,7 @@ void loadvslot(stream *f, VSlot &vs, int changed)
         vs.palette = f->getlil<int>();
         vs.palindex = f->getlil<int>();
     }
+    if(vs.changed & (1<<VSLOT_COAST)) vs.coastscale = f->getlil<float>();
 }
 
 void loadvslots(stream *f, int numvslots)
@@ -772,6 +774,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
         if(s.variants->colorscale != vec(1, 1, 1))
             h->printf("texcolor %f %f %f\n", s.variants->colorscale.x, s.variants->colorscale.y, s.variants->colorscale.z);
         if(s.variants->palette > 0 || s.variants->palindex > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
+        if(s.variants->coastscale >= 0.f) h->printf("texcoastscale %f\n", s.variants->coastscale);
         if(s.texgrass)
         {
             h->printf("texgrass %s\n", escapestring(s.texgrass));
@@ -1217,6 +1220,14 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                             string name;
                             f->read(name, len+1);
                             if(hdr.version <= 34 && !strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
+                            if(hdr.version <= 41)
+                            {
+                                if(!strcmp(name, "liquidcurb")) copystring(name, "liquidcoast");
+                                else if(!strcmp(name, "floorcurb")) copystring(name, "floorcoast");
+                                else if(!strcmp(name, "aircurb")) copystring(name, "aircoast");
+                                else if(!strcmp(name, "slidecurb")) copystring(name, "slidecoast");
+                                else if(!strcmp(name, "floatcurb")) copystring(name, "floatcoast");
+                            }
                             ident *id = idents.access(name);
                             bool proceed = true;
                             int type = hdr.version >= 28 ? f->getlil<int>()+(hdr.version >= 29 ? 0 : 1) : (id ? id->type : ID_VAR);

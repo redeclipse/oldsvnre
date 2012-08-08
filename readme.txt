@@ -103,7 +103,7 @@ Developers
  Jeff "Architect" Cope - Collaborator
     Design and Testing
 
- Slawek "Q009" Blauciak - Artist
+ Slawek "VibrantWave" Blauciak - Artist
     Ambient Sounds
 
  "SkiingPenguins" - Artist
