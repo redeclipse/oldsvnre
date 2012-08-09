@@ -61,10 +61,10 @@ namespace auth
             privilege = ci->privilege = flags;
             if(authed)
             {
-                if(ci->privilege > PRIV_USER) srvoutf(-2, "\fy%s identified as \fs\fc%s\fS and claimed \fs\fc%s\fS", colorname(ci), ci->authname, privname(privilege));
-                else srvoutf(-2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
+                if(ci->privilege > PRIV_USER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS and claimed \fs\fc%s\fS", colorname(ci), ci->authname, privname(privilege));
+                else srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
             }
-            else srvoutf(-2, "\fy%s claimed \fs\fc%s\fS", colorname(ci), privname(privilege));
+            else srvoutforce(ci, -2, "\fy%s claimed \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
         else
         {
@@ -73,7 +73,7 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_MASTER || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            srvoutf(-2, "\fy%s relinquished \fs\fc%s\fS", colorname(ci), privname(privilege));
+            srvoutforce(ci, -2, "\fy%s relinquished \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
         masterupdate = true;
         if(paused)
