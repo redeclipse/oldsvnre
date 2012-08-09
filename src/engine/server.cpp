@@ -92,7 +92,7 @@ void setlogfile(const char *fname)
     if(fname && fname[0])
     {
         fname = copypath(fname, true);
-        if(fname[0] != PATHDIV && fname[0] != '.') fname = findfile(fname, "w");
+        if(fname[0] != PATHDIV && (fname[0] != '.' || fname[1] != '.')) fname = findfile(fname, "w");
         if(fname) logfile = fopen(fname, "w");
     }
     setvbuf(logfile ? logfile : stdout, NULL, _IOLBF, BUFSIZ);
