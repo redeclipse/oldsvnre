@@ -47,7 +47,7 @@ namespace weapons
         if(!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, WEAP_S_FILTER))
         {
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-            playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+            playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, 0, -1, -1, -1, &d->wschan);
             d->weapswitch(weap, lastmillis, weaponswitchdelay);
             return true;
         }
@@ -73,7 +73,7 @@ namespace weapons
             d->ammo[weap] = min(ammo, WEAP(weap, max));
             if(doact)
             {
-                playsound(WEAPSND(weap, S_W_RELOAD), d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+                playsound(WEAPSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
                 d->setweapstate(weap, WEAP_S_RELOAD, WEAP(weap, rdelay), lastmillis);
             }
             return true;

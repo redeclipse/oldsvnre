@@ -593,7 +593,7 @@ namespace client
             if(ret > 0) snd = ret;
         }
         conoutft(CON_CHAT, "%s", s);
-        if(snd >= 0 && !issound(d->cschan)) playsound(snd, d->o, d, d == game::focus ? SND_FORCED : (snd != S_CHAT ? 0 : SND_DIRECT), -1, -1, -1, &d->cschan);
+        if(snd >= 0 && !issound(d->cschan)) playsound(snd, d->o, d, snd != S_CHAT ? 0 : SND_DIRECT, -1, -1, -1, &d->cschan);
     }
 
     void toserver(int flags, char *text)
@@ -1699,7 +1699,7 @@ namespace client
                     if(isweap(weap) && target)
                     {
                         target->weapswitch(weap, lastmillis, weaponswitchdelay);
-                        playsound(WEAPSND(weap, S_W_SWITCH), target->o, target, target == game::focus ? SND_FORCED : 0, -1, -1, -1, &target->wschan);
+                        playsound(WEAPSND(weap, S_W_SWITCH), target->o, target, 0, -1, -1, -1, &target->wschan);
                     }
                     break;
                 }

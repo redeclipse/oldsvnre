@@ -1242,7 +1242,7 @@ namespace physics
                     if(timeinair >= PHYSMILLIS*2 && mag >= 20)
                     {
                         int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
-                        playsound(S_LAND, pl->o, pl, pl == game::focus ? SND_FORCED : 0, vol);
+                        playsound(S_LAND, pl->o, pl, 0, vol);
                     }
                 }
             }
