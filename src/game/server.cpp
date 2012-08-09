@@ -1639,6 +1639,15 @@ namespace server
         relayf(abs(r), "%s", str);
     }
 
+    void srvoutforce(clientinfo *ci, int r, const char *s, ...)
+    {
+        defvformatstring(str, s, s);
+        srvmsgf(r >= 0 ? -1 : -2, "%s", str);
+        if(!allowbroadcast(ci->clientnum))
+            sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, r >= 0 ? CON_MESG : CON_EVENT, str);
+        relayf(abs(r), "%s", str);
+    }
+
     void listdemos(int cn)
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);

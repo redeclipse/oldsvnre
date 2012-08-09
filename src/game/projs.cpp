@@ -1113,11 +1113,11 @@ namespace projs
             case PRJ_EJECT:
             {
                 if(isweap(proj.weap) && ejecthint)
-                    part_create(PART_HINT, 1, proj.o, WEAP(proj.weap, colour), max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f);
+                    part_create(PART_HINT, 1, proj.o, WEAP(proj.weap, colour), max(proj.xradius, proj.yradius)*1.25f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f);
                 bool moving = proj.movement >= 1;
                 if(moving && lastmillis-proj.lasteffect >= 100)
                 {
-                    part_create(PART_SMOKE, 75, proj.o, 0x222222, max(proj.xradius, proj.yradius)*1.75f, clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f, -3);
+                    part_create(PART_SMOKE, 75, proj.o, 0x222222, max(proj.xradius, proj.yradius), clamp(1.f-proj.lifespan, 0.1f, 1.f)*0.35f, -3);
                     proj.lasteffect = lastmillis - (lastmillis%100);
                 }
             }
