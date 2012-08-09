@@ -16,7 +16,7 @@ struct captureservmode : capturestate, servmode
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         int numflags = 0, iterflags = 0;
         loopv(flags) if(flags[i].owner == ci->clientnum) numflags++;
-        vec dir = inertia, olddir = dir;
+        vec dir = inertia, olddir = dir, v = o; v.z += 1;
         if(numflags > 1 && dir.iszero())
         {
             dir.x = -sinf(RAD*ci->state.yaw);
@@ -32,9 +32,9 @@ struct captureservmode : capturestate, servmode
                 dir = vec(olddir).rotate_around_z(yaw*RAD);
                 iterflags++;
             }
-            ivec p(vec(o).mul(DMF)), q(vec(dir).mul(DMF));
+            ivec p(vec(v).mul(DMF)), q(vec(dir).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, -1, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            capturestate::dropaffinity(i, o, dir, gamemillis);
+            capturestate::dropaffinity(i, v, dir, gamemillis);
         }
     }
 
