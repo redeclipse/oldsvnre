@@ -4017,7 +4017,7 @@ namespace server
 
     bool sendpackets(bool force)
     {
-        if(clients.empty()) return false;
+        if(clients.empty() || (!hasnonlocalclients() && !demorecord)) return false;
         enet_uint32 millis = enet_time_get()-lastsend;
         if(millis<40 && !force) return false;
         bool flush = buildworldstate();
@@ -4123,8 +4123,14 @@ namespace server
             return;
         }
         if(p.packet->flags&ENET_PACKET_FLAG_RELIABLE) reliablemessages = true;
-        #define QUEUE_MSG { while(curmsg<p.length()) ci->messages.add(p.buf[curmsg++]); }
-        #define QUEUE_BUF(body) { curmsg = p.length(); body; }
+        #define QUEUE_MSG { if(ci && (!ci->local || demorecord || hasnonlocalclients())) while(curmsg<p.length()) ci->messages.add(p.buf[curmsg++]); }
+        #define QUEUE_BUF(body) { \
+            if(ci && (!ci->local || demorecord || hasnonlocalclients())) \
+            { \
+                curmsg = p.length(); \
+                { body; } \
+            } \
+        }
         #define QUEUE_INT(n) QUEUE_BUF(putint(ci->messages, n))
         #define QUEUE_UINT(n) QUEUE_BUF(putuint(ci->messages, n))
         #define QUEUE_FLT(n) QUEUE_BUF(putfloat(ci->messages, n))
@@ -4191,7 +4197,7 @@ namespace server
                         cp->state.yaw = yaw;
                         cp->state.pitch = pitch;
                         cp->state.roll = roll;
-                        if(cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING)
+                        if((!ci->local || demorecord || hasnonlocalclients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
                         {
                             cp->position.setsize(0);
                             while(curmsg<p.length()) cp->position.add(p.buf[curmsg++]);
