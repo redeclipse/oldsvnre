@@ -1644,7 +1644,7 @@ namespace server
         defvformatstring(str, s, s);
         srvmsgf(r >= 0 ? -1 : -2, "%s", str);
         if(!allowbroadcast(ci->clientnum))
-            sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, r >= 0 ? CON_MESG : CON_EVENT, str);
+            sendf(ci->clientnum, 1, "ri2s", N_SERVMSG, r >= 0 ? int(CON_MESG) : int(CON_EVENT), str);
         relayf(abs(r), "%s", str);
     }
 
