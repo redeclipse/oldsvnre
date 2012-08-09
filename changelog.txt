@@ -3,6 +3,7 @@ Gameplay:
  * Rocket launcher now spawns in instagib
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
  * New "impulse vaulting" movement ((press Q next to an obstacle to use it to propel yourself upward)
+ * Flamer range and spread drastically reduced
 
 Audio & Visuals:
  * Corrected icon size for x32 and x48 versions
@@ -30,6 +31,7 @@ Modding:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
  * arid2, new skybox
  * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
+ * Added texture based slippery physics (textcoastscale and vcoastscale, sets as a scale of floorcoast/slidecoast, only works on top facing textures)
 
 Multiplayer & Servers:
  * Now possible to allow demo recording for masters (/restrictdemos 0)
@@ -57,13 +59,16 @@ Additional Fixed Bugs:
  * #132 - venus geom errors
  * #135 - ghost geom errors
  * #117 - Team-duel problems (force cycle team member after 3 wins)
- * #113 - Botbalance isues (breaks if teambalance = 2 or team imbalance is > 1)
+ * #113 - Botbalance issues (breaks if teambalance = 2 or team imbalance is > 1)
  * #154 - Fix darkness omega bb-goal to be at same position as alpha
  * #158 - Possibility to miss first checkpoint on testchamber
  * #164 - synchronise death count in resume/frag messages
  * #165 - ghost clipping (disable odd sniper spot)
  * #148 - replaced tabs on texture gui with scrolling pages
  * #141 - can select a team while in spectator to join the game on a specific team
+ * #126 - Looping focus-oriented sounds persist after target change (new camerapos code takes care of attenuation already)
+ * #130 - Auth Identification Announcements (printed such that it is visible to the authing user)
+ * #120 - -g option does not work with absolute paths
 
 
 = Red Eclipse 1.2 =
