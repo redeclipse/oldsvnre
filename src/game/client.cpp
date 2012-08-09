@@ -1388,11 +1388,11 @@ namespace client
                 case N_COMMAND:
                 {
                     int lcn = getint(p);
-                    gameent *f = game::getclient(lcn);
+                    gameent *f = lcn >= 0 ? game::getclient(lcn) : NULL;
                     string cmd;
                     getstring(cmd, p);
                     getstring(text, p);
-                    parsecommand(f ? f : NULL, cmd, text);
+                    parsecommand(f, cmd, text);
                     break;
                 }
 

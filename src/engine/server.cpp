@@ -784,7 +784,11 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
 {
     server::serverupdate();
 
-    if(!serverhost) return;
+    if(!serverhost) 
+    {
+        server::sendpackets();
+        return;
+    }
 
     flushmasteroutput();
     checkserversockets();
