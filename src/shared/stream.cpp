@@ -148,12 +148,12 @@ int encodeutf8(uchar *dstbuf, int dstlen, uchar *srcbuf, int srclen, int *carry)
         {
             if(dst >= dstend) goto done;
             uchar *end = min(srcend, &src[dstend-dst]);
-            do 
-            { 
-                *dst++ = uni; 
-                if(++src >= end) goto done; 
-                uni = cube2uni(*src); 
-            } 
+            do
+            {
+                *dst++ = uni;
+                if(++src >= end) goto done;
+                uni = cube2uni(*src);
+            }
             while(uni <= 0x7F);
         }
         if(uni <= 0x7FF) { if(dst + 2 > dstend) goto done; *dst++ = 0xC0 | (uni>>6); goto uni2; }
@@ -168,7 +168,7 @@ int encodeutf8(uchar *dstbuf, int dstlen, uchar *srcbuf, int srclen, int *carry)
     uni3: *dst++ = 0x80 | ((uni>>6)&0x3F);
     uni2: *dst++ = 0x80 | (uni&0x3F);
     uni1:;
-    } 
+    }
     while(++src < srcend);
 
 done:
@@ -274,7 +274,7 @@ char *makerelpath(const char *dir, const char *file, const char *prefix, const c
     return tmp;
 }
 
-char *path(char *s)
+char *path(char *s, bool simple)
 {
     for(char *curpart = s;;)
     {
@@ -287,7 +287,7 @@ char *path(char *s)
             curpart = file+1;
         }
         for(char *t = curpart; (t = strpbrk(t, "/\\")); *t++ = PATHDIV);
-        for(char *prevdir = NULL, *curdir = curpart;;)
+        if(!simple) for(char *prevdir = NULL, *curdir = curpart;;)
         {
             prevdir = curdir[0]==PATHDIV ? curdir+1 : curdir;
             curdir = strchr(prevdir, PATHDIV);
@@ -314,11 +314,11 @@ char *path(char *s)
     return s;
 }
 
-char *path(const char *s, bool copy)
+char *copypath(const char *s, bool simple)
 {
     static string tmp;
     copystring(tmp, s);
-    path(tmp);
+    path(tmp, simple);
     return tmp;
 }
 
@@ -603,20 +603,20 @@ struct filestream : stream
     }
 
     bool end() { return feof(file)!=0; }
-    offset tell() 
-    { 
+    offset tell()
+    {
 #ifdef WIN32
 #ifdef __GNUC__
         return ftello64(file);
 #else
-        return _ftelli64(file);       
+        return _ftelli64(file);
 #endif
 #else
-        return ftello(file); 
+        return ftello(file);
 #endif
     }
-    bool seek(offset pos, int whence) 
-    { 
+    bool seek(offset pos, int whence)
+    {
 #ifdef WIN32
 #ifdef __GNUC__
         return fseeko64(file, pos, whence) >= 0;
@@ -948,7 +948,7 @@ struct utf8stream : stream
     offset pos;
     int bufread, bufcarry, buflen;
     bool reading, writing, autoclose;
-    uchar buf[BUFSIZE]; 
+    uchar buf[BUFSIZE];
 
     utf8stream() : file(NULL), pos(0), bufread(0), bufcarry(0), buflen(0), reading(false), writing(false), autoclose(false)
     {
@@ -975,10 +975,10 @@ struct utf8stream : stream
     {
         int n = file->read(buf, 3);
         if(n == 3 && buf[0] == 0xEF && buf[1] == 0xBB && buf[2] == 0xBF) return true;
-        buflen = n; 
+        buflen = n;
         return false;
     }
-            
+
     bool open(stream *f, const char *mode, bool needclose)
     {
         if(file) return false;
@@ -988,16 +988,16 @@ struct utf8stream : stream
             else if(*mode=='w') { writing = true; break; }
         }
         if(!reading && !writing) return false;
-       
+
         autoclose = needclose;
         file = f;
-       
-        if(reading) checkheader();
- 
-        return true;
-    } 
 
-    void finishreading() 
+        if(reading) checkheader();
+
+        return true;
+    }
+
+    void finishreading()
     {
         if(!reading) return;
     }
@@ -1035,14 +1035,14 @@ struct utf8stream : stream
             return !off;
         }
         else if(whence == SEEK_CUR) off += pos;
-       
+
         if(off >= pos) off -= pos;
         else if(off < 0 || !file->seek(0, SEEK_SET)) return false;
         else
         {
             bufread = bufcarry = buflen = 0;
             pos = 0;
-            checkheader(); 
+            checkheader();
         }
 
         uchar skip[512];
@@ -1052,7 +1052,7 @@ struct utf8stream : stream
             if(read(skip, skipped) != skipped) { stopreading(); return false; }
             off -= skipped;
         }
-        
+
         return true;
     }
 
@@ -1082,7 +1082,7 @@ struct utf8stream : stream
             if(bufread >= bufcarry) { if(readbuf(BUFSIZE)) continue; stopreading(); if(!next) return false; break; }
             int n = min(len - next, bufcarry - bufread);
             uchar *endline = (uchar *)memchr(&buf[bufread], '\n', n);
-            if(endline) { n = endline+1 - &buf[bufread]; len = next + n; } 
+            if(endline) { n = endline+1 - &buf[bufread]; len = next + n; }
             memcpy(&((uchar *)dst)[next], &buf[bufread], n);
             next += n;
             bufread += n;
@@ -1166,7 +1166,7 @@ char *loadfile(const char *fn, int *size, bool utf8)
         if(f->read(buf, 3) != 3) { delete f; delete[] buf; return NULL; }
         if(((uchar *)buf)[0] == 0xEF && ((uchar *)buf)[1] == 0xBB && ((uchar *)buf)[2] == 0xBF) len -= 3;
         else offset += 3;
-    } 
+    }
     int rlen = f->read(&buf[offset], len-offset);
     delete f;
     if(rlen != len-offset) { delete[] buf; return NULL; }
