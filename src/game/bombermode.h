@@ -16,12 +16,12 @@ struct bomberservmode : bomberstate, servmode
     void dropaffinity(clientinfo *ci, const vec &o, const vec &inertia = vec(0, 0, 0), int target = -1)
     {
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
-        vec n = inertia.iszero() ? vec(0, 0, GAME(bomberspeed)/10.f) : inertia;
+        vec n = inertia.iszero() ? vec(0, 0, GAME(bomberspeed)/10.f) : inertia, v = o; v.z += 1;
         loopv(flags) if(flags[i].owner == ci->clientnum)
         {
-            ivec p(vec(o).mul(DMF)), q(vec(n).mul(DMF));
+            ivec p(vec(v).mul(DMF)), q(vec(n).mul(DMF));
             sendf(-1, 1, "ri3i7", N_DROPAFFIN, ci->clientnum, target, i, p.x, p.y, p.z, q.x, q.y, q.z);
-            bomberstate::dropaffinity(i, o, n, gamemillis);
+            bomberstate::dropaffinity(i, v, n, gamemillis);
         }
     }
 

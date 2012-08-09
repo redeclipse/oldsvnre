@@ -13,8 +13,8 @@ namespace capture
     {
         if(m_capture(game::gamemode) && carryaffinity(d) && d->action[AC_AFFINITY])
         {
-            vec inertia = vec(d->vel).add(d->falling);
-            client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(d->o.x*DMF), int(d->o.y*DMF), int(d->o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
+            vec o = d->feetpos(1), inertia = vec(d->vel).add(d->falling);
+            client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, -1, int(o.x*DMF), int(o.y*DMF), int(o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_AFFINITY] = false;
             d->actiontime[AC_AFFINITY] = 0;
             return true;
@@ -392,7 +392,7 @@ namespace capture
         loopv(st.flags) if(st.flags[i].owner == d)
         {
             capturestate::flag &f = st.flags[i];
-            st.dropaffinity(i, f.owner->o, f.owner->vel, lastmillis);
+            st.dropaffinity(i, f.owner->feetpos(1), f.owner->vel, lastmillis);
         }
     }
 
