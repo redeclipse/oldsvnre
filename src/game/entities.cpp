@@ -309,7 +309,7 @@ namespace entities
             }
         }
         d->useitem(n, e.type, attr, c, sweap, lastmillis, weaponswitchdelay);
-        playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, d == game::focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+        playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, 0, -1, -1, -1, &d->wschan);
         if(game::dynlighteffects) adddynlight(d->headpos(-d->height/2), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
         if(ents.inrange(r) && ents[r]->type == WEAPON)
         {

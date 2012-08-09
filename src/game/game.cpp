@@ -332,7 +332,7 @@ namespace game
         if(idx >= 0)
         {
             physent *t = !d || d == focus ? camera1 : d;
-            playsound(idx, t->o, t, (t == camera1 ? SND_FORCED : SND_DIRECT)|SND_NOCULL, -1, -1, -1, d ? &d->aschan : NULL);
+            playsound(idx, t->o, t, SND_DIRECT|SND_NOCULL, -1, -1, -1, d ? &d->aschan : NULL);
         }
     }
     void announcef(int idx, int targ, gameent *d, const char *msg, ...)
@@ -584,7 +584,7 @@ namespace game
                         sounds[d->jschan].vol = min((lastmillis-sounds[d->jschan].millis)*2, 255);
                         sounds[d->jschan].ends = lastmillis+250;
                     }
-                    else playsound(S_JET, d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
+                    else playsound(S_JET, d->o, d, SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
                     if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
                 }
             }
@@ -735,7 +735,7 @@ namespace game
             if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
             {
                 if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
-                    playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, d == focus ? SND_FORCED : 0, -1, -1, -1, &d->wschan);
+                    playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, 0, -1, -1, -1, &d->wschan);
             }
             if(d->state != CS_ALIVE || timeexpired)
                 d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
@@ -754,7 +754,7 @@ namespace game
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
                 }
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
-                else playsound(WEAPSND2(d->weapselect, secondary, S_W_POWER), d->o, d, (d == focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->pschan);
+                else playsound(WEAPSND2(d->weapselect, secondary, S_W_POWER), d->o, d, SND_LOOP, vol, -1, -1, &d->pschan);
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);
@@ -793,7 +793,7 @@ namespace game
         if(burntime && hithurts(flags) && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
         {
             d->lastburntime = lastmillis;
-            if(!issound(d->fschan)) playsound(S_BURNING, d->o, d, SND_LOOP, d != focus ? 128 : 224, -1, -1, &d->fschan);
+            if(!issound(d->fschan)) playsound(S_BURNING, d->o, d, SND_LOOP, -1, -1, -1, &d->fschan);
             if(isweap(weap)) d->lastburn = lastmillis;
             else return true;
         }
@@ -833,7 +833,7 @@ namespace game
             if(flags&CRIT)
             {
                 if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
-                    playsound(S_CRITICAL, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
+                    playsound(S_CRITICAL, d->o, d, SND_DIRECT);
             }
             else
             {
@@ -844,7 +844,7 @@ namespace game
                     if(flags&BURN) snd = S_BURNED;
                     else if(flags&BLEED) snd = S_BLEED;
                     else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                    if(snd >= 0) playsound(snd, d->o, d, d == focus ? SND_FORCED : SND_DIRECT);
+                    if(snd >= 0) playsound(snd, d->o, d, SND_DIRECT);
                 }
                 if(aboveheaddamage)
                 {

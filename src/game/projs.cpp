@@ -823,7 +823,7 @@ namespace projs
                 {
                     int ends = lastmillis+WEAP2(weap, adelay, flags&HIT_ALT)+PHYSMILLIS;
                     if(issound(d->wschan) && sounds[d->wschan].slotnum == slot) sounds[d->wschan].ends = ends;
-                    else playsound(slot, d->o, d, (d == game::focus ? SND_FORCED : 0)|SND_LOOP, vol, -1, -1, &d->wschan, ends);
+                    else playsound(slot, d->o, d, SND_LOOP, vol, -1, -1, &d->wschan, ends);
                 }
                 else if(!WEAP2(weap, time, flags&HIT_ALT) || life)
                 {
@@ -832,7 +832,7 @@ namespace projs
                         sounds[d->wschan].hook = NULL;
                         d->wschan = -1;
                     }
-                    playsound(slot, d->o, d, d == game::focus ? SND_FORCED : 0, vol, -1, -1, &d->wschan);
+                    playsound(slot, d->o, d, 0, vol, -1, -1, &d->wschan);
                 }
             }
         }
