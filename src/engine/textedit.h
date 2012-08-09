@@ -727,13 +727,13 @@ TEXTCOMMAND(textmode, "i", (int *m), // (1= keep while focused, 2= keep while us
     else intret(top->mode);
 );
 TEXTCOMMAND(textsave, "s", (char *file),  // saves the topmost (filename is optional)
-    if(*file) top->setfile(path(file, true));
+    if(*file) top->setfile(copypath(file));
     top->save();
 );
 TEXTCOMMAND(textload, "s", (char *file), // loads into the topmost editor, returns filename if no args
     if(*file)
     {
-        top->setfile(path(file, true));
+        top->setfile(copypath(file));
         top->load();
     }
     else if(top->filename) result(top->filename);
@@ -744,7 +744,7 @@ TEXTCOMMAND(textinit, "sss", (char *name, char *file, char *initval), // loads i
     loopv(editors) if(!strcmp(editors[i]->name, name)) { e = editors[i]; break; }
     if(e && e->rendered && !e->filename && *file && (e->lines.empty() || (e->lines.length() == 1 && !strcmp(e->lines[0].text, initval))))
     {
-        e->setfile(path(file, true));
+        e->setfile(copypath(file));
         e->load();
     }
 });

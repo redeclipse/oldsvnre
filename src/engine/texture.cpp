@@ -2734,7 +2734,7 @@ bool reloadtexture(Texture *t)
 
 void reloadtex(char *name)
 {
-    Texture *t = textures.access(path(name, true));
+    Texture *t = textures.access(copypath(name));
     if(!t) { conoutf("\frtexture %s is not loaded", name); return; }
     if(t->type&Texture::TRANSIENT) { conoutf("\frcan't reload transient texture %s", name); return; }
     DELETEA(t->alphamask);

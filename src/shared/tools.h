@@ -485,7 +485,7 @@ template <class T> struct vector
     bool inbuf(const T *e) const { return e >= buf && e < &buf[ulen]; }
 
     template<class F>
-    void sort(F fun, int i = 0, int n = -1) 
+    void sort(F fun, int i = 0, int n = -1)
     {
         quicksort(&buf[i], n < 0 ? ulen-i : n, fun);
     }
@@ -679,7 +679,7 @@ template <class T> struct smallvector
     {
         shrink(0);
         growbuf(v.length());
-        loopv(v) buf[i] = v[i]; 
+        loopv(v) buf[i] = v[i];
         return *this;
     }
 
@@ -726,29 +726,29 @@ template <class T> struct smallvector
         memcpy(&buf[len-n], v, n*sizeof(T));
     }
 
-    void shrink(int i)         
-    { 
-        ASSERT(i<=len); 
+    void shrink(int i)
+    {
+        ASSERT(i<=len);
         if(i >= len) return;
         if(isclass<T>::yes) for(int j = i; j < len; j++) buf[j].~T();
         growbuf(i);
     }
 
-    void setsize(int i) 
-    { 
-        ASSERT(i<=len); 
+    void setsize(int i)
+    {
+        ASSERT(i<=len);
         if(i >= len) return;
         growbuf(i);
     }
 
-    void deletecontents() 
-    { 
+    void deletecontents()
+    {
         for(int i = 0; i < len; i++) delete buf[i];
         setsize(0);
     }
 
-    void deletearrays() 
-    { 
+    void deletearrays()
+    {
         for(int i = 0; i < len; i++) delete[] buf[i];
         setsize(0);
     }
@@ -1003,7 +1003,7 @@ template<class K, class T> struct hashtable : hashset<hashtableentry<K, T> >
     const T &find(const K &key, const T &notfound)
     {
         HTFIND(key, c->elem.data, notfound);
-    }   
+    }
 
     static inline chain *getnext(void *i) { return ((chain *)i)->next; }
     static inline K &getkey(void *i) { return ((chain *)i)->elem.key; }
@@ -1202,7 +1202,7 @@ struct stream
 #else
     typedef off_t offset;
 #endif
-    
+
     virtual ~stream() {}
     virtual void close() = 0;
     virtual bool end() = 0;
@@ -1221,7 +1221,7 @@ struct stream
     virtual int printf(const char *fmt, ...);
     virtual uint getcrc() { return 0; }
 
-    template<class T> int put(const T *v, int n) { return write(v, n*sizeof(T))/sizeof(T); } 
+    template<class T> int put(const T *v, int n) { return write(v, n*sizeof(T))/sizeof(T); }
     template<class T> bool put(T n) { return write(&n, sizeof(n)) == sizeof(n); }
     template<class T> bool putlil(T n) { return put<T>(lilswap(n)); }
     template<class T> bool putbig(T n) { return put<T>(bigswap(n)); }
@@ -1242,11 +1242,11 @@ struct streambuf
     stream *s;
 
     streambuf(stream *s) : s(s) {}
-    
+
     T get() { return s->get<T>(); }
     int get(T *vals, int numvals) { return s->get(vals, numvals); }
     void put(const T &val) { s->put(&val, 1); }
-    void put(const T *vals, int numvals) { s->put(vals, numvals); } 
+    void put(const T *vals, int numvals) { s->put(vals, numvals); }
     int length() { return s->size(); }
 };
 
@@ -1283,8 +1283,8 @@ extern int encodeutf8(uchar *dstbuf, int dstlen, uchar *srcbuf, int srclen, int 
 
 extern char *makerelpath(const char *dir, const char *file, const char *prefix = NULL, const char *cmd = NULL);
 extern char *makefile(const char *s, const char *e = "", int revision = 0, int start = 1, bool store = false, bool skip = false);
-extern char *path(char *s);
-extern char *path(const char *s, bool copy);
+extern char *path(char *s, bool simple = false);
+extern char *copypath(const char *s, bool simple = false);
 extern const char *parentdir(const char *directory);
 extern bool fileexists(const char *path, const char *mode);
 extern bool createdir(const char *path);
