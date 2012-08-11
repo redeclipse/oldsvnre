@@ -12,8 +12,10 @@
     * Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
     * This notice may not be removed or altered from any source distribution. 
 
-"dusk01" by Pieter Verhoeven
-    CC-BY-SA 3.0 license.
-
 "skyhigh" by Pieter Verhoeven
     CC-BY-SA 3.0 license.
+
+"interstellar", "miramar", and "stormydays" by Jockum "hipshot" Skoglund
+    hipshot@zfight.com / www.zfight.com
+    Downloaded from http://opengameart.org/content/interstellar-skybox
+    CC-BY 3.0 (Modify however you like, just cred me for my work, maybe link to my page)
