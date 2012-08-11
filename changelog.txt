@@ -3,7 +3,9 @@ Gameplay:
  * Rocket launcher now spawns in instagib
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
  * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
- * Flamer range and size drastically reduced
+ * Flamer primary and secondary range and size drastically reduced, secondary fire lifetime of particles increased
+ * Pistol secondary now fires twice as many particles, with more spread, less damage and increased intervals
+ * SMG secondary now fires with longer range, half the spread and increased intervals
 
 Audio & Visuals:
  * Corrected icon size for x32 and x48 versions
@@ -20,6 +22,7 @@ Maps:
  * Industrial, new map
  * Oneiroi, new map
  * Pumpstation, new map
+ * Dawn, removed
 
 Modes & Mutators:
  * Hover mutator removed
@@ -29,7 +32,7 @@ Modes & Mutators:
 Modding:
  * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
  * Removed kitchen and kitchen1 textures from trak4 (unused)
- * arid2, new skybox
+ * arid2, interstellar, miramar, stormydays - new skyboxes
  * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
  * Added texture based slippery physics (textcoastscale and vcoastscale, sets as a scale of floorcoast/slidecoast, only works on top facing textures)
 
@@ -69,6 +72,8 @@ Additional Fixed Bugs:
  * #126 - Looping focus-oriented sounds persist after target change (new camerapos code takes care of attenuation already)
  * #130 - Auth Identification Announcements (printed such that it is visible to the authing user)
  * #120 - -g option does not work with absolute paths
+ * #177 - (roughly) predict time remaining in server list
+ * #102 - Some flat geometry walls acts as crouch-entrance
 
 
 = Red Eclipse 1.2 =
