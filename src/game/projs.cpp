@@ -732,7 +732,7 @@ namespace projs
         proj.resetinterp();
     }
 
-    projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int flags, float scale, bool child, projent *parent)
+    projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int value, int flags, float scale, bool child, projent *parent)
     {
         projent &proj = *new projent;
         proj.o = proj.from = from;
@@ -757,6 +757,7 @@ namespace projs
         else
         {
             proj.weap = weap;
+            proj.value = value;
             if(child)
             {
                 proj.child = true;
@@ -779,21 +780,21 @@ namespace projs
         return &proj;
     }
 
-    void drop(gameent *d, int g, int n, int v, bool local, int c, int w)
+    void drop(gameent *d, int weap, int ent, int ammo, int reloads, bool local, int index, int targ)
     {
-        if(g >= WEAP_OFFSET && isweap(g))
+        if(weap >= WEAP_OFFSET && isweap(weap))
         {
-            if(v >= 0)
+            if(ammo >= 0)
             {
-                if(entities::ents.inrange(n))
-                    create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(g), w_spawn(g), 1, 1, n, v, c);
-                d->ammo[g] = -1;
-                if(w >= 0) d->setweapstate(g, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
-                else d->setweapstate(g, WEAP_S_JAM, weaponjamtime, lastmillis);
+                if(entities::ents.inrange(ent))
+                    create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(weap), w_spawn(weap), 1, 1, ent, ammo, reloads, index);
+                d->ammo[weap] = d->reloads[weap] = -1;
+                if(targ >= 0) d->setweapstate(weap, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
+                else if(targ == -2) d->setweapstate(weap, WEAP_S_JAM, weaponjamtime, lastmillis);
             }
-            else if(g == WEAP_GRENADE)
-                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 1, WEAP2(g, time, false), 1, 1, 1, g);
-            d->entid[g] = -1;
+            else if(weap == WEAP_GRENADE)
+                create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 1, WEAP2(weap, time, false), 1, 1, 1, weap);
+            d->entid[weap] = -1;
         }
     }
 
@@ -872,9 +873,9 @@ namespace projs
         }
 
         loopv(shots)
-            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), delay, speed, shots[i].id, weap, flags, skew);
+            create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), WEAP2(weap, time, flags&HIT_ALT), delay, speed, shots[i].id, weap, -1, flags, skew);
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(offset, 1, WEAP2(weap, sub, flags&HIT_ALT)))
-            create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, flags);
+            create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
         if(d->aitype >= AI_BOT && d->skill <= 100 && (!WEAP2(weap, fullauto, flags&HIT_ALT) || adelay >= PHYSMILLIS))
             adelay += int(ceilf(adelay*(10.f/d->skill)));

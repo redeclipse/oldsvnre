@@ -292,37 +292,37 @@ namespace entities
         }
     }
 
-    void useeffects(gameent *d, int n, int c, bool s, int g, int r, int v)
+    void useeffects(gameent *d, int ent, int ammoamt, int reloadamt, bool spawn, int weap, int drop, int ammo, int reloads)
     {
-        gameentity &e = *(gameentity *)ents[n];
+        gameentity &e = *(gameentity *)ents[ent];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
             colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF;
         if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
-        if(isweap(g))
+        if(isweap(weap))
         {
-            d->setweapstate(g, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
-            d->ammo[g] = -1;
-            if(d->weapselect != g)
+            d->setweapstate(weap, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
+            d->ammo[weap] = d->reloads[weap] = -1;
+            if(d->weapselect != weap)
             {
                 d->lastweap = d->weapselect;
-                d->weapselect = g;
+                d->weapselect = weap;
             }
         }
-        d->useitem(n, e.type, attr, c, sweap, lastmillis, weaponswitchdelay);
+        d->useitem(ent, e.type, attr, ammoamt, reloadamt, sweap, lastmillis, weaponswitchdelay);
         playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, 0, -1, -1, -1, &d->wschan);
         if(game::dynlighteffects) adddynlight(d->headpos(-d->height/2), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
-        if(ents.inrange(r) && ents[r]->type == WEAPON)
+        if(ents.inrange(drop) && ents[drop]->type == WEAPON)
         {
-            gameentity &f = *(gameentity *)ents[r];
+            gameentity &f = *(gameentity *)ents[drop];
             attr = w_attr(game::gamemode, f.attrs[0], sweap);
-            if(isweap(attr)) projs::drop(d, attr, r, v, d == game::player1 || d->ai, 0, g);
+            if(isweap(attr)) projs::drop(d, attr, drop, ammo, reloads, d == game::player1 || d->ai, 0, weap);
         }
-        if(e.spawned != s)
+        if(e.spawned != spawn)
         {
-            e.spawned = s;
+            e.spawned = spawn;
             e.lastuse = lastmillis;
         }
-        checkspawns(n);
+        checkspawns(ent);
     }
 
     static inline void collateents(octaentities &oe, const vec &pos, float xyrad, float zrad, vector<actitem> &actitems)
