@@ -2655,8 +2655,7 @@ namespace game
                     }
                     case WEAP_S_RELOAD:
                     {
-                        if(!d->hasweap(weap, m_weapon(gamemode, mutators)) || (!w_reload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
-                            showweap = false;
+                        if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;// || (!d->canreload(weap, m_weapon(gamemode, mutators)) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
                         weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
                         break;
                     }

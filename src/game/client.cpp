@@ -1139,6 +1139,7 @@ namespace client
             d->weapreset(false);
             getint(p);
             loopi(WEAP_MAX) getint(p);
+            loopi(WEAP_MAX) getint(p);
         }
         else
         {
@@ -1146,6 +1147,7 @@ namespace client
             int weap = getint(p);
             d->lastweap = d->weapselect = isweap(weap) ? weap : WEAP_MELEE;
             loopi(WEAP_MAX) d->ammo[i] = getint(p);
+            loopi(WEAP_MAX) d->reloads[i] = getint(p);
         }
     }
 
@@ -1630,10 +1632,10 @@ namespace client
 
                 case N_RELOAD:
                 {
-                    int trg = getint(p), weap = getint(p), amt = getint(p), ammo = getint(p);
+                    int trg = getint(p), weap = getint(p), amt = getint(p), ammo = getint(p), reloads = getint(p);
                     gameent *target = game::getclient(trg);
                     if(!target || !isweap(weap)) break;
-                    weapons::weapreload(target, weap, amt, ammo, false);
+                    weapons::weapreload(target, weap, amt, ammo, reloads, false);
                     break;
                 }
 
@@ -1693,8 +1695,8 @@ namespace client
                     bool local = target && (target == game::player1 || target->ai);
                     if(ds) loopj(ds)
                     {
-                        int gs = getint(p), drop = getint(p), value = getint(p);
-                        if(target) projs::drop(target, gs, drop, value, local, j, weap);
+                        int gs = getint(p), drop = getint(p), ammo = getint(p), reloads = getint(p);
+                        if(target) projs::drop(target, gs, drop, ammo, reloads, local, j, weap);
                     }
                     if(isweap(weap) && target)
                     {
@@ -1770,12 +1772,12 @@ namespace client
 
                 case N_ITEMACC:
                 { // uses a specific drop so the client knows what to replace
-                    int lcn = getint(p), ent = getint(p), amt = getint(p), spawn = getint(p), weap = getint(p),
-                        drop = getint(p), value = getint(p);
+                    int lcn = getint(p), ent = getint(p), ammoamt = getint(p), reloadamt = getint(p), spawn = getint(p),
+                        weap = getint(p), drop = getint(p), ammo = getint(p), reloads = getint(p);
                     gameent *target = game::getclient(lcn);
                     if(!target) break;
                     if(entities::ents.inrange(ent) && enttype[entities::ents[ent]->type].usetype == EU_ITEM)
-                        entities::useeffects(target, ent, amt, spawn, weap, drop, value);
+                        entities::useeffects(target, ent, ammoamt, reloadamt, spawn, weap, drop, ammo, reloads);
                     break;
                 }
 

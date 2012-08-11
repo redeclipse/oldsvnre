@@ -31,6 +31,7 @@ namespace weapons
     ICOMMAND(0, weapslot, "i", (int *o), intret(slot(game::player1, *o >= 0 ? *o : game::player1->weapselect))); // -1 = weapselect slot
     ICOMMAND(0, weapselect, "", (), intret(game::player1->weapselect));
     ICOMMAND(0, ammo, "i", (int *n), intret(isweap(*n) ? game::player1->ammo[*n] : -1));
+    ICOMMAND(0, reloads, "i", (int *n), intret(isweap(*n) ? game::player1->reloads[*n] : -1));
     ICOMMAND(0, hasweap, "ii", (int *n, int *o), intret(isweap(*n) && game::player1->hasweap(*n, *o) ? 1 : 0));
     ICOMMAND(0, getweap, "ii", (int *n, int *o), {
         if(isweap(*n)) switch(*o)
@@ -42,9 +43,9 @@ namespace weapons
         }
     });
 
-    bool weapselect(gameent *d, int weap, bool local)
+    bool weapselect(gameent *d, int weap, bool local, int filter)
     {
-        if(!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, WEAP_S_FILTER))
+        if(!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, filter))
         {
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, 0, -1, -1, -1, &d->wschan);
@@ -54,7 +55,7 @@ namespace weapons
         return false;
     }
 
-    bool weapreload(gameent *d, int weap, int load, int ammo, bool local)
+    bool weapreload(gameent *d, int weap, int load, int ammo, int reloads, bool local)
     {
         if(!local || d->canreload(weap, m_weapon(game::gamemode, game::mutators), lastmillis))
         {
@@ -64,6 +65,7 @@ namespace weapons
                 client::addmsg(N_RELOAD, "ri3", d->clientnum, lastmillis-game::maptime, weap);
                 int oldammo = d->ammo[weap];
                 ammo = min(max(d->ammo[weap], 0) + WEAP(weap, add), WEAP(weap, max));
+                reloads = max(d->reloads[weap], 0) + 1;
                 load = ammo-oldammo;
                 doact = true;
             }
@@ -71,6 +73,7 @@ namespace weapons
             else if(load < 0 && d->ammo[weap] < ammo) return false; // because we've already gone ahead..
             d->weapload[weap] = load;
             d->ammo[weap] = min(ammo, WEAP(weap, max));
+            d->reloads[weap] = max(reloads, 0);
             if(doact)
             {
                 playsound(WEAPSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
@@ -144,7 +147,7 @@ namespace weapons
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT))
+        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators)))
         {
             bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT),
                  noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
@@ -157,7 +160,7 @@ namespace weapons
     void checkweapons(gameent *d)
     {
         int sweap = m_weapon(game::gamemode, game::mutators);
-        if(!d->hasweap(d->weapselect, sweap)) weapselect(d, d->bestweap(sweap, true));
+        if(!d->hasweap(d->weapselect, sweap)) weapselect(d, d->bestweap(sweap, true), true, (1<<WEAP_S_RELOAD));
         else if(d->action[AC_RELOAD] || autoreload(d)) weapreload(d, d->weapselect);
         else if(d->action[AC_DROP]) weapdrop(d, d->weapselect);
     }
