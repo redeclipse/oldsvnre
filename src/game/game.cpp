@@ -581,7 +581,7 @@ namespace game
                 {
                     if(issound(d->jschan))
                     {
-                        sounds[d->jschan].vol = min((lastmillis-sounds[d->jschan].millis)*2, 255);
+                        sounds[d->jschan].vol = min(lastmillis-sounds[d->jschan].millis, 255);
                         sounds[d->jschan].ends = lastmillis+250;
                     }
                     else playsound(S_JET, d->o, d, SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
@@ -767,9 +767,14 @@ namespace game
         }
         else if(issound(d->fschan)) removesound(d->fschan);
         if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->resetbleeding();
-        if(issound(d->jschan) && !physics::jetpack(d))
+        if(issound(d->jschan))
         {
-            if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
+            if(physics::jetpack(d))
+            {
+                sounds[d->jschan].vol = min(lastmillis-sounds[d->jschan].millis, 255);
+                sounds[d->jschan].ends = lastmillis+250;
+            }
+            else if(sounds[d->jschan].ends < lastmillis) removesound(d->jschan);
             else sounds[d->jschan].vol = int(ceilf(255*(float(sounds[d->jschan].ends-lastmillis)/250.f)));
         }
         loopv(d->icons) if(lastmillis-d->icons[i].millis > d->icons[i].fade) d->icons.remove(i--);

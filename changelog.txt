@@ -2,8 +2,8 @@
 Gameplay:
  * Rocket launcher now spawns in instagib
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
- * New "impulse vaulting" movement ((press Q next to an obstacle to use it to propel yourself upward)
- * Flamer range and spread drastically reduced
+ * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
+ * Flamer range and size drastically reduced
 
 Audio & Visuals:
  * Corrected icon size for x32 and x48 versions
