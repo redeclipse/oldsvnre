@@ -403,7 +403,7 @@ struct hline
     {
         return strcmp(commandbuf, buf) ||
                (commandaction ? !action || strcmp(commandaction, action) : action!=NULL) ||
-               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) || 
+               (commandicon ? !icon || strcmp(commandicon, icon) : icon!=NULL) ||
                commandcolour != colour ||
                commandflags != flags;
     }
@@ -851,26 +851,25 @@ void complete(char *s, const char *cmdprefix)
     else lastcomplete[0] = '\0';
 }
 
-void setcompletion(const char *s, bool on)
+void setidflag(const char *s, const char *v, int flag, const char *msg, bool alias)
 {
     ident *id = idents.access(s);
-    if(!id) conoutf("\frcompletion of %s failed as it does not exist", s);
+    if(!id || (alias && id->type != ID_ALIAS)) conoutf("\fradding %s of %s failed as it is not an alias", msg, s);
     else
     {
-        if(on && !(id->flags&IDF_COMPLETE)) id->flags |= IDF_COMPLETE;
-        else if(!on && id->flags&IDF_COMPLETE) id->flags &= ~IDF_COMPLETE;
+        bool on = false;
+        if(isnumeric(*v)) on = atoi(v) != 0;
+        else if(!strcasecmp("false", v)) on = false;
+        else if(!strcasecmp("true", v)) on = true;
+        else if(!strcasecmp("on", v)) on = true;
+        else if(!strcasecmp("off", v)) on = false;
+        if(on && !(id->flags&flag)) id->flags |= flag;
+        else if(!on && id->flags&flag) id->flags &= ~flag;
     }
 }
 
-ICOMMAND(0, setcomplete, "ss", (char *s, char *t), {
-    bool on = false;
-    if(isnumeric(*t)) on = atoi(t) != 0;
-    else if(!strcasecmp("false", t)) on = false;
-    else if(!strcasecmp("true", t)) on = true;
-    else if(!strcasecmp("on", t)) on = true;
-    else if(!strcasecmp("off", t)) on = false;
-    setcompletion(s, on);
-});
+ICOMMAND(0, setcomplete, "ss", (char *s, char *t), setidflag(s, t, IDF_COMPLETE, "complete", false));
+ICOMMAND(0, setpersist, "ss", (char *s, char *t), setidflag(s, t, IDF_PERSIST, "persist", true));
 
 static inline bool sortcompletions(const char *x, const char *y)
 {

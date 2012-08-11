@@ -784,7 +784,7 @@ void serverslice(uint timeout)  // main server update, called from main loop in 
 {
     server::serverupdate();
 
-    if(!serverhost) 
+    if(!serverhost)
     {
         server::sendpackets();
         return;
@@ -1481,8 +1481,8 @@ void writecfg()
         }
         if(saved)
         {
-            if(!(id.flags&IDF_COMPLETE)) f->printf("; setcomplete %s 0\n", escapeid(id));
-            else f->printf("\n");
+            if(!(id.flags&IDF_COMPLETE)) f->printf("; setcomplete %s 0", escapeid(id));
+            f->printf("\n");
         }
     }
     if(found) f->printf("\n");
@@ -1496,7 +1496,7 @@ void writecfg()
             case ID_ALIAS:
             {
                 const char *str = id.getstr();
-                if(str[0])
+                //if(str[0])
                 {
                     found = saved = true;
                     if(validateblock(str)) f->printf("%s = [%s]", escapeid(id), str);
@@ -1507,8 +1507,9 @@ void writecfg()
         }
         if(saved)
         {
-            if(id.flags&IDF_COMPLETE) f->printf("; setcomplete \"%s\" 1\n", id.name);
-            else f->printf("\n");
+            f->printf("; setpersist \"%s\" 1", id.name);
+            if(id.flags&IDF_COMPLETE) f->printf("; setcomplete \"%s\" 1", id.name);
+            f->printf("\n");
         }
     }
     if(found) f->printf("\n");
