@@ -928,7 +928,8 @@ namespace physics
                         if(d->turnside)
                         {
                             d->turnmillis = PHYSMILLIS;
-                            d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                            d->turnside = 0;
+                            d->turnyaw = d->turnroll = 0;
                         }
                     }
                 }

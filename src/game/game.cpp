@@ -678,25 +678,26 @@ namespace game
         }
 
         float offset = d->height; d->o.z -= d->height;
-        if(aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].cancrouch)
+        if(d->state == CS_ALIVE && aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
-            float crouchoff = 1.f-CROUCHHEIGHT;
+            float crouchoff = 1.f-CROUCHHEIGHT, zoff = d->zradius*crouchoff, zrad = d->zradius-zoff, frac = zoff/10.f;
+            vec old = d->o;
             if(!crouching) loopk(2)
             {
-                vec old = d->o;
-                float zoff = d->zradius*crouchoff, zrad = d->zradius-zoff, frac = zoff/10.f;
                 d->o.z += zrad;
+                d->height = zrad;
                 if(k)
                 {
                     vec dir;
                     vecfromyawpitch(d->yaw, 0, d->move, d->strafe, dir);
-                    d->o.add(dir);
+                    d->o.add(dir.normalize().mul(2));
                 }
-                loopi(10)
+                if(collide(d, vec(0, 0, 0), 0, false)) loopi(10)
                 {
                     d->o.z += frac;
-                    if(!collide(d, vec(0, 0, 1), 0.f, false))
+                    d->height += frac;
+                    if(!collide(d, vec(0, 0, 0), 0, false))
                     {
                         crouching = true;
                         break;
