@@ -2441,7 +2441,7 @@ namespace client
             else switch(prop)
             {
                 case 0:
-                    if(idx < 0) intret(7);
+                    if(idx < 0) intret(8);
                     else switch(idx)
                     {
                         case 0: intret(serverstat(si)); break;
@@ -2451,6 +2451,7 @@ namespace client
                         case 4: result(si->map); break;
                         case 5: intret(si->numplayers); break;
                         case 6: intret(si->ping); break;
+                        case 7: intret(si->lastinfo); break;
                     }
                     break;
                 case 1:

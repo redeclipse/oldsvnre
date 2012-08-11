@@ -393,6 +393,7 @@ void checkpings()
         ucharbuf p(ping, len);
         int millis = getint(p), rtt = clamp(totalmillis - millis, 0, min(serverdecay*1000, totalmillis));
         if(millis >= lastreset && rtt < serverdecay*1000) si->addping(rtt, millis);
+        si->lastinfo = totalmillis;
         si->numplayers = getint(p);
         int numattr = getint(p);
         si->attr.shrink(0);

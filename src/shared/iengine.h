@@ -469,7 +469,7 @@ struct serverinfo
     string name;
     string map;
     string sdesc;
-    int numplayers, lastping, nextping, ping, resolved, port, priority;
+    int numplayers, lastping, lastinfo, nextping, ping, resolved, port, priority;
     int pings[MAXPINGS];
     vector<int> attr;
     vector<char *> players;
@@ -490,7 +490,7 @@ struct serverinfo
         ping = WAITING;
         loopk(MAXPINGS) pings[k] = WAITING;
         nextping = 0;
-        lastping = -1;
+        lastping = lastinfo = -1;
     }
 
     void cleanup()
@@ -503,7 +503,7 @@ struct serverinfo
 
     void reset()
     {
-        lastping = -1;
+        lastping = lastinfo = -1;
     }
 
     void checkdecay(int decay)
