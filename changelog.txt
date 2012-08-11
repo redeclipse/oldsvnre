@@ -3,14 +3,9 @@ Gameplay:
  * Rocket launcher now spawns in instagib
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
  * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
- * Flamer primary and secondary range and size drastically reduced, secondary fire lifetime of particles increased
- * Pistol secondary now fires twice as many particles, with more spread, less damage and increased intervals
- * SMG secondary now fires with longer range, half the spread and increased intervals
-
-Audio & Visuals:
- * Corrected icon size for x32 and x48 versions
- * track_11, track_12, new music
- * Show player count on server browser
+ * Flamer primary and secondary range and size reduced, secondary fire lifetime of particles increased
+ * Pistol secondary now fires twice as many particles, with more spread, less damage and longer intervals
+ * SMG secondary now fires with longer range, half the spread and longer intervals
 
 Maps:
  * Institute, new map
@@ -24,14 +19,21 @@ Maps:
  * Pumpstation, new map
  * Dawn, removed
 
+Interface & Menus:
+ * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
+ * Added ability to save and automatically use arena loadouts
+ * Show player count on server browser
+ * Several new international keycodes are now bind-able as WORLD_{0..95}
+ * Added ability to mark map favourites (pinned to top of map list)
+
 Modes & Mutators:
  * Hover mutator removed
  * Added "gamespeedlock" to independently allow servers to unlock "gamespeed" (still checks varslock though)
  * Added {mode,muts}idxname variables for mode and mutator values
 
-Modding:
- * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
+Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
+ * track_11, track_12, new music
  * arid2, interstellar, miramar, stormydays - new skyboxes
  * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
  * Added texture based slippery physics (textcoastscale and vcoastscale, sets as a scale of floorcoast/slidecoast, only works on top facing textures)
@@ -44,13 +46,13 @@ Multiplayer & Servers:
  * Added ability to lock spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
 
 Misc:
+ * Corrected icon size for x32 and x48 versions
  * SDL 1.2.15
  * Remove "-r" command-line option
  * Enet 1.3.5
  * 64bit builds for Windows
  * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
  * *nix icons stored as PNG/XPM, no ImageMagick needed in system-install process
- * Added ability to save and automatically use arena loadouts
 
 Additional Fixed Bugs:
  * #103 - [minor] Revenge-seeking remains after team-change
