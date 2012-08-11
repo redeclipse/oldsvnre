@@ -260,7 +260,7 @@ ICOMMAND(0, push, "rte", (ident *id, tagval *v, uint *code),
 
 static inline void pushalias(ident &id, identstack &stack)
 {
-    if(id.type == ID_ALIAS && id.index >= MAXARGS) 
+    if(id.type == ID_ALIAS && id.index >= MAXARGS)
     {
         pusharg(id, nullval, stack);
         id.flags &= ~IDF_UNKNOWN;
@@ -340,7 +340,7 @@ static inline void setalias(ident &id, tagval &v)
     if(id.valtype == VAL_STR) delete[] id.val.s;
     id.setval(v);
     cleancode(id);
-    id.flags = (id.flags & (identflags|IDF_WORLD)) | identflags;
+    id.flags = (id.flags & (identflags|IDF_WORLD)) | (id.flags & (identflags|IDF_PERSIST)) | identflags;
 #ifndef STANDALONE
     if(id.flags&IDF_WORLD) client::editvar(&id, interactive && !(identflags&IDF_WORLD));
 #endif
@@ -495,12 +495,12 @@ float getfvarmin(const char *name)
 }
 float getfvarmax(const char *name)
 {
-    ident *id = idents.access(name); 
-    if(id) switch(id->type) 
-    { 
-        case ID_VAR: return id->maxval; 
-        case ID_FVAR: return id->maxvalf; 
-    } 
+    ident *id = idents.access(name);
+    if(id) switch(id->type)
+    {
+        case ID_VAR: return id->maxval;
+        case ID_FVAR: return id->maxvalf;
+    }
     return 0;
 }
 int getvardef(const char *name)
@@ -1021,7 +1021,7 @@ static bool compileblocksub(vector<uint> &code, const char *&p)
         {
             const char *start = p;
             while(iscubealnum(*p) || *p=='_') p++;
-            if(p <= start) return false; 
+            if(p <= start) return false;
             char *lookup = newstring(start, p-start);
             ident *id = newident(lookup, IDF_UNKNOWN);
             if(id) switch(id->type)
@@ -1264,10 +1264,10 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
                     case 'C': comtype = CODE_COMC; if(more) while(numargs < MAXARGS && (more = compilearg(code, p, VAL_ANY))) numargs++; numargs = 1; goto endfmt;
                     case 'V': comtype = CODE_COMV; if(more) while(numargs < MAXARGS && (more = compilearg(code, p, VAL_ANY))) numargs++; numargs = 2; goto endfmt;
                     case '1': case '2': case '3': case '4': if(more) { fmt -= *fmt-'0'+1; rep = true; } break;
-                    case 'L': 
-                        if(more) while(numargs < MAXARGS && (more = compilearg(code, p, VAL_IDENT))) numargs++; 
-                        if(more) while((more = compilearg(code, p, VAL_ANY))) code.add(CODE_POP); 
-                        code.add(CODE_LOCAL); 
+                    case 'L':
+                        if(more) while(numargs < MAXARGS && (more = compilearg(code, p, VAL_IDENT))) numargs++;
+                        if(more) while((more = compilearg(code, p, VAL_ANY))) code.add(CODE_POP);
+                        code.add(CODE_LOCAL);
                         goto endcmd;
                     }
                 endfmt:
@@ -1365,7 +1365,7 @@ void freecode(uint *code)
 {
     if(!code) return;
     switch(*code&CODE_OP_MASK)
-    {   
+    {
         case CODE_START:
             *code -= 0x100;
             if(int(*code) < 0x100) delete[] code;
@@ -1454,7 +1454,7 @@ static const uint *runcode(const uint *code, tagval &result)
                 loopi(numargs) popalias(*args[i].id);
                 goto exit;
             }
-        
+
             case CODE_MACRO:
             {
                 uint len = op>>8;
@@ -1954,7 +1954,7 @@ static inline bool getbool(const char *s)
 {
     switch(s[0])
     {
-        case '+': case '-': 
+        case '+': case '-':
             switch(s[1])
             {
                 case '0': break;
@@ -1963,7 +1963,7 @@ static inline bool getbool(const char *s)
             }
             // fall through
         case '0':
-        {      
+        {
             char *end;
             int val = strtol((char *)s, &end, 0);
             if(val) return true;
@@ -2413,7 +2413,7 @@ void prettylist(const char *s, const char *conj)
             }
             p.add(' ');
         }
-    } 
+    }
     p.add('\0');
     result(p.getbuf());
 }
