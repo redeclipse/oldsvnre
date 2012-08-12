@@ -687,8 +687,12 @@ namespace projs
             }
             default: break;
         }
-        if(proj.projtype != PRJ_SHOT) updatebb(proj, true);
-        if(!proj.child && (proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced))
+        if(proj.projtype != PRJ_SHOT)
+        {
+            updatebb(proj, true);
+            proj.o.z += proj.projtype != PRJ_ENT ? proj.zradius : proj.zradius/2;
+        }
+        if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
         {
             vec dir = vec(proj.to).sub(proj.o);
             float maxdist = dir.magnitude();
@@ -697,7 +701,7 @@ namespace projs
                 dir.mul(1/maxdist);
                 if(proj.projtype != PRJ_EJECT) vectoyawpitch(dir, proj.yaw, proj.pitch);
             }
-            else if(proj.owner)
+            else if(!proj.child && proj.owner)
             {
                 if(proj.projtype != PRJ_EJECT)
                 {
@@ -718,15 +722,16 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if((proj.projtype != PRJ_SHOT || weaptype[proj.weap].traced) && proj.owner && !proj.child)
+        if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced) loopk(2)
         {
-            vec eyedir = vec(proj.o).sub(proj.owner->o);
+            if(!k && (!proj.owner || proj.child)) continue;
+            vec loc = k ? vec(proj.o).sub(proj.vel) : proj.owner->o, eyedir = vec(proj.o).sub(loc);
             float eyedist = eyedir.magnitude();
             if(eyedist >= 1e-3f)
             {
                 eyedir.div(eyedist);
-                float blocked = pltracecollide(&proj, proj.owner->o, eyedir, eyedist);
-                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-0.1f).add(proj.owner->o);
+                float blocked = pltracecollide(&proj, loc, eyedir, eyedist);
+                if(blocked >= 0) { proj.o = vec(eyedir).mul(blocked-0.1f).add(loc); break; }
             }
         }
         proj.resetinterp();
