@@ -137,6 +137,8 @@ namespace game
     VAR(IDF_PERSIST, playreloadnotify, 0, 3, 15);
 
     VAR(IDF_PERSIST, deathanim, 0, 2, 2); // 0 = hide player when dead, 1 = old death animation, 2 = ragdolls
+    VAR(IDF_PERSIST, deathfade, 0, 1, 1); // 0 = don't fade out dead players, 1 = fade them out
+    VAR(IDF_PERSIST, deathscale, 0, 1, 1); // 0 = don't scale out dead players, 1 = scale them out
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
     VAR(IDF_PERSIST, bloodfade, 1, 3000, VAR_MAX);
     VAR(IDF_PERSIST, bloodsize, 1, 50, 1000);
@@ -663,7 +665,7 @@ namespace game
                 }
                 total *= clamp(amtscale, minscale, maxresizescale);
             }
-            if(d->state == CS_DEAD || d->state == CS_WAITING) total *= spawnfade(d);
+            if(deathscale && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         }
         return total;
     }
@@ -671,7 +673,7 @@ namespace game
     float opacity(gameent *d, bool third = true)
     {
         float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
-        if(d->state == CS_DEAD || d->state == CS_WAITING) total *= spawnfade(d);
+        if(deathfade && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {
             if(d == focus && d->weapselect == WEAP_MELEE && !thirdpersonview(true)) return 0; // hack
