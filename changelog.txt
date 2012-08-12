@@ -18,11 +18,17 @@ Maps:
  * Oneiroi, new map
  * Pumpstation, new map
  * Dawn, removed
+ * Neodrive, new map
+
+Visuals:
+ * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
+ * Replace "ragdolls" var with "deathanim" and add new ragdoll animation
 
 Interface & Menus:
  * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
  * Added ability to save and automatically use arena loadouts
  * Show player count on server browser
+ * Show unresponsive servers (bottom of server list)
  * Several new international keycodes are now bind-able as WORLD_{0..95}
  * Added ability to mark map favourites (pinned to top of map list)
 
@@ -30,6 +36,7 @@ Modes & Mutators:
  * Hover mutator removed
  * Added "gamespeedlock" to independently allow servers to unlock "gamespeed" (still checks varslock though)
  * Added {mode,muts}idxname variables for mode and mutator values
+ * Added server variable "<weap>reloads" now defines the number of times a weapon can reload (-1 = infinite, 0 = never, 1+ = count)
 
 Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
@@ -45,7 +52,7 @@ Multiplayer & Servers:
  * Allow players to cast votes for ones made by an admin which conflict with a lock control
  * Added ability to lock spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
 
-Misc:
+Core & Install:
  * Corrected icon size for x32 and x48 versions
  * SDL 1.2.15
  * Remove "-r" command-line option
