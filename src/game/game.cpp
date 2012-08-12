@@ -136,7 +136,7 @@ namespace game
     VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
     VAR(IDF_PERSIST, playreloadnotify, 0, 3, 15);
 
-    VAR(IDF_PERSIST, ragdolls, 0, 1, 1);
+    VAR(IDF_PERSIST, deathanim, 0, 2, 2); // 0 = hide player when dead, 1 = old death animation, 2 = ragdolls
     FVAR(IDF_PERSIST, bloodscale, 0, 1, 1000);
     VAR(IDF_PERSIST, bloodfade, 1, 3000, VAR_MAX);
     VAR(IDF_PERSIST, bloodsize, 1, 50, 1000);
@@ -2451,7 +2451,7 @@ namespace game
 
         if(third && testanims && d == focus) yaw = 0; else yaw += 90;
 
-        if(d->ragdoll && (!ragdolls || (anim&ANIM_INDEX)!=ANIM_DYING)) cleanragdoll(d);
+        if(d->ragdoll && (deathanim!=2 || (anim&ANIM_INDEX)!=ANIM_DYING)) cleanragdoll(d);
 
         if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
@@ -2623,15 +2623,21 @@ namespace game
             showweap = false;
             animflags = ANIM_DYING|ANIM_NOPITCH;
             lastaction = d->lastpain;
-            if(ragdolls)
+            switch(deathanim)
             {
-                if(!validragdoll(d, lastaction)) animflags |= ANIM_RAGDOLL;
-            }
-            else
-            {
-                int t = lastmillis-lastaction;
-                if(t < 0) return;
-                if(t > 1000) animflags = ANIM_DEAD|ANIM_LOOP|ANIM_NOPITCH;
+                case 0: return;
+                case 1:
+                {
+                    int t = lastmillis-lastaction;
+                    if(t < 0) return;
+                    if(t > 1000) animflags = ANIM_DEAD|ANIM_LOOP|ANIM_NOPITCH;
+                    break;
+                }
+                case 2:
+                {
+                    if(!validragdoll(d, lastaction)) animflags |= ANIM_RAGDOLL;
+                    break;
+                }
             }
         }
         else if(d->state == CS_EDITING)
