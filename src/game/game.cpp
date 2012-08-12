@@ -48,6 +48,7 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersondist, 0, 25, 1000);
 
     VAR(0, follow, 0, 0, VAR_MAX);
+    VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
     FVAR(IDF_PERSIST, followdist, 0, 25, 1000);
 
@@ -81,6 +82,7 @@ namespace game
     FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
     FVAR(IDF_PERSIST, spectvyawspeed, 0, 1, 1000);
     FVAR(IDF_PERSIST, spectvpitchspeed, 0, 1, 1000);
+    VAR(IDF_PERSIST, spectvdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
@@ -179,6 +181,18 @@ namespace game
 
     const char *gametitle() { return connected() ? server::gamename(gamemode, mutators) : "ready"; }
     const char *gametext() { return connected() ? mapname : "not connected"; }
+
+    bool allowspec(gameent *d, int level)
+    {
+        if(d->state == CS_SPECTATOR || ((d->state == CS_DEAD || d->state == CS_WAITING) && !d->lastdeath)) return false;
+        switch(level)
+        {
+            case 0: if(d->state != CS_ALIVE) return false; break;
+            case 1: if(m_duke(gamemode, mutators) && d->state != CS_ALIVE) return false; break;
+            case 2: break;
+        }
+        return true;
+    }
 
     bool thirdpersonview(bool viewonly)
     {
@@ -361,29 +375,38 @@ namespace game
     ICOMMAND(0, specmodeswitch, "", (), specmode = specmode ? 0 : 1; hud::showscores(false); follow = 0);
     ICOMMAND(0, waitmodeswitch, "", (), waitmode = waitmode ? 0 : (m_duke(gamemode, mutators) ? 1 : 2); hud::showscores(false); follow = 0);
 
-    void followswitch(int n)
+    bool followswitch(int n, bool other = false)
     {
         if(!tvmode())
         {
-            follow += n;
+            follow = max(follow, 0)+n;
             int numdyns = numdynents();
             #define checkfollow \
                 if(follow >= numdyns) follow = 0; \
                 else if(follow < 0) follow = numdyns-1;
+            #define addfollow \
+            { \
+                follow += clamp(n, -1, 1); \
+                checkfollow; \
+            }
             checkfollow;
-            while(true)
+            loopi(numdyns)
             {
                 gameent *d = (gameent *)iterdynents(follow);
-                if(!d || d->aitype >= AI_START)
+                if(!d) addfollow
+                else if(d == player1)
                 {
-                    follow += clamp(n, -1, 1);
-                    checkfollow;
+                    if(other) addfollow
+                    else return true;
                 }
-                else break;
+                else if(d->aitype >= AI_START || !allowspec(d, followdead)) addfollow
+                else return true;
             }
         }
+        follow = -1;
+        return false;
     }
-    ICOMMAND(0, followdelta, "i", (int *n), followswitch(*n ? *n : 1));
+    ICOMMAND(0, followdelta, "ii", (int *n, int *o), followswitch(*n!=0 ? *n : 1, *o!=0));
 
     bool allowmove(physent *d)
     {
@@ -1751,7 +1774,7 @@ namespace game
     {
         float foglevel = float(fog*2/3);
         c->reset(true);
-        if(c->player && (c->player->state == CS_DEAD || c->player->state == CS_WAITING) && !c->player->lastdeath) return false;
+        if(c->player && !allowspec(c->player, spectvdead)) return false;
         loopj(c->player ? 1 : 2)
         {
             int players = c->player ? 1 : 0;
@@ -2112,7 +2135,7 @@ namespace game
             int numdyns = numdynents();
             loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL)
             {
-                if(d->state != CS_SPECTATOR && allow && i == follow)
+                if(i == follow && (d == player1 || (allow && allowspec(d, followdead))))
                 {
                     if(focus != d)
                     {
@@ -2140,8 +2163,12 @@ namespace game
             }
             if((!found || !allow) && focus != player1)
             {
-                focus = player1;
-                resetcamera();
+                if(!allow || follow < 0 || !followswitch(1, true))
+                {
+                    focus = player1;
+                    follow = -1;
+                    resetcamera();
+                }
             }
             if(allowmove(player1)) cameraplayer();
             else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
