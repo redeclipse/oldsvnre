@@ -2162,6 +2162,7 @@ void mpeditmat(int matid, selinfo &sel, bool local)
     uchar matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : 0xFF);
     if(isclipped(matid&MATF_VOLUME)) matid |= MAT_CLIP;
     if(isdeadly(matid&MATF_VOLUME)) matid |= MAT_DEATH;
+    if(local && matid&MAT_GLASS) conoutft(CON_SELF, "\fzoyWARNING\fw - quin hates glass material, think about using alpha instead");
     loopselxyz(setmat(c, matid, matmask));
 }
 
