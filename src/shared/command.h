@@ -128,39 +128,40 @@ struct ident
     identfun fun; // ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND
     identval def;
     int flags, index;
+    char *desc, *usage;
 
     ident() {}
     // ID_VAR
     ident(int t, const char *n, int m, int c, int x, int *s, void *f = NULL, int flags = IDF_COMPLETE)
-        : type(t), name(n), minval(m), maxval(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0))
+        : type(t), name(n), minval(m), maxval(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0)), desc(NULL), usage(NULL)
     { def.i = c; storage.i = s; }
     // ID_FVAR
     ident(int t, const char *n, float m, float c, float x, float *s, void *f = NULL, int flags = IDF_COMPLETE)
-        : type(t), name(n), minvalf(m), maxvalf(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0))
+        : type(t), name(n), minvalf(m), maxvalf(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0)), desc(NULL), usage(NULL)
     { def.f = c; storage.f = s; }
     // ID_SVAR
     ident(int t, const char *n, char *c, char **s, void *f = NULL, int flags = IDF_COMPLETE)
-        : type(t), name(n), fun((identfun)f), flags(flags)
+        : type(t), name(n), fun((identfun)f), flags(flags), desc(NULL), usage(NULL)
     { def.s = c; storage.s = s; }
     // ID_ALIAS
     ident(int t, const char *n, char *a, int flags)
-        : type(t), name(n), valtype(VAL_STR), code(NULL), stack(NULL), flags(flags)
+        : type(t), name(n), valtype(VAL_STR), code(NULL), stack(NULL), flags(flags), desc(NULL), usage(NULL)
     { val.s = a; }
     ident(int t, const char *n, int a, int flags)
-        : type(t), name(n), valtype(VAL_INT), code(NULL), stack(NULL), flags(flags)
+        : type(t), name(n), valtype(VAL_INT), code(NULL), stack(NULL), flags(flags), desc(NULL), usage(NULL)
     { val.i = a; }
     ident(int t, const char *n, float a, int flags)
-        : type(t), name(n), valtype(VAL_FLOAT), code(NULL), stack(NULL), flags(flags)
+        : type(t), name(n), valtype(VAL_FLOAT), code(NULL), stack(NULL), flags(flags), desc(NULL), usage(NULL)
     { val.f = a; }
     ident(int t, const char *n, int flags)
-        : type(t), name(n), valtype(VAL_NULL), code(NULL), stack(NULL), flags(flags)
+        : type(t), name(n), valtype(VAL_NULL), code(NULL), stack(NULL), flags(flags), desc(NULL), usage(NULL)
     {}
     ident(int t, const char *n, const tagval &v, int flags)
-        : type(t), name(n), valtype(v.type), code(NULL), stack(NULL), flags(flags)
+        : type(t), name(n), valtype(v.type), code(NULL), stack(NULL), flags(flags), desc(NULL), usage(NULL)
     { val = v; }
     // ID_COMMAND
     ident(int t, const char *n, const char *args, uint argmask, void *f = NULL, int flags = IDF_COMPLETE)
-        : type(t), name(n), args(args), argmask(argmask), fun((identfun)f), flags(flags)
+        : type(t), name(n), args(args), argmask(argmask), fun((identfun)f), flags(flags), desc(NULL), usage(NULL)
     {}
 
     void changed() { if(fun) fun(); }
