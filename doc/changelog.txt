@@ -32,7 +32,7 @@ Interface & Menus:
  * Show unresponsive servers (bottom of server list)
  * Several new international keycodes are now bind-able as WORLD_{0..95}
  * Added ability to mark map favourites (pinned to top of map list)
- * Added on-screen help for commands/vars/tec. (work in progress, only for small set of commands)
+ * Added on-screen help for commands/vars/etc. (work in progress)
 
 Modes & Mutators:
  * Hover mutator removed
