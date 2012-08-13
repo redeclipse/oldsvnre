@@ -74,7 +74,6 @@ system-install-server: server
 system-install-data:
 	install -d $(datadir)/$(appname)
 	cp -r ../data $(datadir)/$(appname)/data
-	@rm -rv $(datadir)/$(appname)/data/examples
 
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
@@ -84,17 +83,17 @@ system-install-docs: $(MANPAGES)
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
 		-e 's,@CAPPNAME@,$(cappname),g' \
-		install/nix/$(appsrcname).6.am | \
+		../doc/man/$(appsrcname).6.am | \
 		gzip -9 -n -c > $(mandir)/man6/$(appname).6.gz
 	sed -e 's,@LIBEXECDIR@,$(patsubst $(DESTDIR)%,%,$(libexecdir)),g' \
 		-e 's,@DATADIR@,$(patsubst $(DESTDIR)%,%,$(datadir)),g' \
 		-e 's,@DOCDIR@,$(patsubst $(DESTDIR)%,%,$(docdir)),g' \
 		-e 's,@APPNAME@,$(appname),g' \
 		-e 's,@CAPPNAME@,$(cappname),g' \
-		install/nix/$(appsrcname)-server.6.am | \
+		../doc/man/$(appsrcname)-server.6.am | \
 		gzip -9 -n -c > $(mandir)/man6/$(appname)-server.6.gz
-	cp -r ../data/examples $(docdir)/$(appname)/examples
-	cp ../guidelines.txt $(docdir)/$(appname)/guidelines.txt
+	cp -r ../doc/examples $(docdir)/$(appname)/examples
+	cp ../doc/guidelines.txt $(docdir)/$(appname)/guidelines.txt
 
 system-install-menus: icons
 	install -d $(menudir)
@@ -129,7 +128,7 @@ system-install-cube2font: system-install-cube2font-docs
 
 system-install-cube2font-docs: install/nix/cube2font.1
 	install -d $(mandir)/man1
-	gzip -9 -n -c < install/nix/cube2font.1 \
+	gzip -9 -n -c < ../doc/man/cube2font.1 \
 		> $(mandir)/man1/cube2font.1.gz
 
 system-install: system-install-client system-install-server system-install-data system-install-docs system-install-menus
