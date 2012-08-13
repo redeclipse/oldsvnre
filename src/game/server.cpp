@@ -2110,6 +2110,17 @@ namespace server
         ~teamcheck() {}
     };
 
+    bool allowteam(clientinfo *ci, int team, int first = TEAM_FIRST)
+    {
+        if(isteam(gamemode, mutators, team, first))
+        {
+            if(GAME(teambalance) != 3) return true;
+            else if(ci->state.aitype > AI_NONE) return team != TEAM_ALPHA;
+            else return team == TEAM_ALPHA;
+        }
+        return false;
+    }
+
     int chooseteam(clientinfo *ci, int suggest = -1)
     {
         if(ci->state.aitype >= AI_START) return TEAM_ENEMY;
@@ -2120,7 +2131,7 @@ namespace server
                 { suggest, ci->team, ci->lastteam },
                 { suggest, ci->lastteam, ci->team }
             };
-            loopi(3) if(isteam(gamemode, mutators, teams[GAME(teampersist)][i], TEAM_FIRST))
+            loopi(3) if(allowteam(ci, teams[GAME(teampersist)][i], TEAM_FIRST))
             {
                 team = teams[GAME(teampersist)][i];
                 if(GAME(teampersist) == 2) return team;
@@ -3523,7 +3534,7 @@ namespace server
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_arena(gamemode, mutators)) chkloadweap(ci);
-        if(doteam && (doteam == 2 || !isteam(gamemode, mutators, ci->team, TEAM_FIRST)))
+        if(doteam && (doteam == 2 || !allowteam(ci, ci->team, TEAM_FIRST)))
             setteam(ci, chooseteam(ci), false, true);
     }
 
@@ -4623,7 +4634,8 @@ namespace server
                 case N_SWITCHTEAM:
                 {
                     int team = getint(p);
-                    if(!isteam(gamemode, mutators, team, TEAM_FIRST) || ci->state.aitype >= AI_START || team == ci->team) break;
+                    if(!allowteam(ci, team, TEAM_FIRST)) team = chooseteam(ci);
+                    if(!m_team(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
                     bool reset = true;
                     if(ci->state.state == CS_SPECTATOR)
                     {
@@ -4873,7 +4885,7 @@ namespace server
                     if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_MASTER, "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
-                    if(cp->state.state == CS_SPECTATOR || !isteam(gamemode, mutators, team, TEAM_FIRST)) break;
+                    if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, TEAM_FIRST)) break;
                     setteam(cp, team, true, true);
                     break;
                 }

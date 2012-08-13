@@ -201,7 +201,6 @@ namespace aiman
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : GAME(botbalance)); break; // balance to at least this
             }
-            balance += GAME(botoffset)*numt;
             if(m_team(gamemode, mutators) && (balance > 0 || GAME(teambalance) == 3))
             { // skew this if teams are unbalanced
                 if(GAME(teambalance) != 3)
@@ -223,8 +222,14 @@ namespace aiman
                         }
                     }
                 }
-                else balance = max(people*numt, numt); // humans vs. bots, just directly balance
+                else
+                {
+                    // humans vs. bots, just directly balance
+                    balance = max(people*numt, numt);
+                    numt--; // filter out the human team
+                }
             }
+            balance += GAME(botoffset)*numt;
         }
         int bots = balance-people;
         if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);

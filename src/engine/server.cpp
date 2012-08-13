@@ -1319,7 +1319,8 @@ void initgame()
 }
 
 VAR(0, hasoctapaks, 1, 0, 0); // mega hack; try to find Cube 2, done after our own data so as to not clobber stuff
-SVAR(IDF_PERSIST, octadir, "");//, if(!hasoctapaks) trytofindocta(false););
+SVAR(IDF_PERSIST, octadir, "");
+//, if(!hasoctapaks) trytofindocta(false););
 
 bool serveroption(char *opt)
 {
