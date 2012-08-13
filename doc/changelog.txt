@@ -18,7 +18,8 @@ Maps:
  * Oneiroi, new map
  * Pumpstation, new map
  * Dawn, removed
- * Neodrive, new map
+ * Neodrive, new time-trial map
+ * Hawk, new time-trial map
 
 Visuals:
  * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
@@ -31,6 +32,7 @@ Interface & Menus:
  * Show unresponsive servers (bottom of server list)
  * Several new international keycodes are now bind-able as WORLD_{0..95}
  * Added ability to mark map favourites (pinned to top of map list)
+ * Added on-screen help for commands/vars/tec. (work in progress, only for small set of commands)
 
 Modes & Mutators:
  * Hover mutator removed
@@ -60,6 +62,7 @@ Core & Install:
  * 64bit builds for Windows
  * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
  * *nix icons stored as PNG/XPM, no ImageMagick needed in system-install process
+ * all-licenses.txt added, exhaustive copyright/license breakdown
 
 Additional Fixed Bugs:
  * #103 - [minor] Revenge-seeking remains after team-change
