@@ -854,7 +854,7 @@ void complete(char *s, const char *cmdprefix)
 void setidflag(const char *s, const char *v, int flag, const char *msg, bool alias)
 {
     ident *id = idents.access(s);
-    if(!id || (alias && id->type != ID_ALIAS)) conoutf("\fradding %s of %s failed as it is not an alias", msg, s);
+    if(!id || (alias && id->type != ID_ALIAS)) conoutf("\fradding %s of %s failed as it is not available", msg, s);
     else
     {
         bool on = false;
@@ -870,6 +870,20 @@ void setidflag(const char *s, const char *v, int flag, const char *msg, bool ali
 
 ICOMMAND(0, setcomplete, "ss", (char *s, char *t), setidflag(s, t, IDF_COMPLETE, "complete", false));
 ICOMMAND(0, setpersist, "ss", (char *s, char *t), setidflag(s, t, IDF_PERSIST, "persist", true));
+
+void setiddesc(const char *s, const char *v, const char *u)
+{
+    ident *id = idents.access(s);
+    if(!id) conoutf("\fradding description of %s failed as it is not available", s);
+    else
+    {
+        DELETEA(id->desc);
+        if(v && *v) id->desc = newstring(v);
+        DELETEA(id->usage);
+        if(u && *u) id->usage = newstring(u);
+    }
+}
+ICOMMAND(0, setdesc, "sss", (char *s, char *t, char *u), setiddesc(s, t, u));
 
 static inline bool sortcompletions(const char *x, const char *y)
 {
