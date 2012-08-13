@@ -29,7 +29,8 @@ basis.
 * The gameplay of the server must not grant an undue or unfair advantage to any
   party.
   - "Humans vs Zombies" is fine, as long as it rotates roles in a fair manner.
-  - Giving a single player double life permanently is not permitted.
+  - Giving one player double the health of other players permanently is not
+    permitted.
 
 * If the gameplay of the server is modified substantially this must be
   indicated clearly, preferably through the use of "servermotd".
