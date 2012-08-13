@@ -47,7 +47,7 @@ Files: data/maps/fourplex* data/maps/pumpstation* data/maps/starlibido*
 Copyright: 2012 D.a.M.i.E.n. <daymeenn@gmail.com>,
 License: CC-BY-SA-3.0
 
-Files: data/maps/neodrive*
+Files: data/maps/neodrive* data/maps/hawk*
 Copyright: 2012, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
 
