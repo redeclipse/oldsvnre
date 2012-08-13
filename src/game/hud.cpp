@@ -1371,7 +1371,7 @@ namespace hud
                             if(id->desc)
                                 z += draw_textx("\fa%s", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->desc);
                             if(id->usage)
-                                z += draw_textx("usage: \fa%s", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->usage);
+                                z += draw_textx("usage: \fa/%s %s", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->name, id->usage);
                             popfont();
                         }
                     }
