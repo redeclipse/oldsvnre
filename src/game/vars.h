@@ -29,14 +29,14 @@ GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the c
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign ares bath biolytic blink cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hinder industrial institute isolation keystone lab linear longestyard mist neodrive nova panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "alphacampaign ares bath biolytic blink cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone lab linear longestyard mist neodrive nova panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
 
 GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deathtrap deli depot dropzone dutility echo error foundation fourplex futuresport ghost industrial institute isolation keystone linear longestyard mist nova panic processing pumpstation spacetech starlibido stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone linear mist nova panic pumpstation stone tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation futuresport fourplex ghost industrial isolation linear mist nova pumpstation stone tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial isolation keystone linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, trialmaps, "hinder neodrive purge testchamber");
+GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
 GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
