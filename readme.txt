@@ -1,125 +1,146 @@
-Red Eclipse is a Free and Open Source game, using SDL and OpenGL which
-    allows it to be ported to many platforms; you can download it for both PC
-    (Windows, Linux, BSD) and Mac. You can also obtain it through our
-    subversion repository and live on the bleeding edge of development.
+= Red Eclipse =
 
-About the Project
+* A Free and Open Source First Person Shooter
+* Available for Windows, Linux/BSD and Mac OSX
+* Parkour, impulse boosts, dashing, and other tricks
+* Favourite gamemodes with an array of mutators and variables
+* Builtin editor lets you create your own maps cooperatively online
+* Free Download from http://www.redeclipse.net/
 
-  The game is a single-player and multi-player first-person ego-shooter, built as
-    a total conversion of Cube Engine 2, which lends itself toward a balanced
-    gameplay, completely at the control of map makers, while maintaining a
-    general theme of agility in a low gravity environment. In a true open
-    source "by the people for the people" nature, it tries to work closely with
-    the gaming and open source communities to provide a better overall
-    experience, taking all sorts of feedback from your average player, to your
-    seasoned developer, aiming to create a story-driven game environment that
-    is flexible, fun, easy to use, and pleasing to the eye.
+= About =
 
-  Among the features are all the builtin (online and cooperative) editing,
-    scripting, and rendering capabilities of the amazing Cube Engine 2, in
-    addition to in-house work which does, or endeavours to include and extend
-    upon:
+Red Eclipse is a single-player and multi-player first-person ego-shooter,
+built as a total conversion of Cube Engine 2, which lends itself toward a
+balanced gameplay, completely at the control of map makers, while
+maintaining a general theme of agility in a variety of environments.
+For more information, please see our Wiki or Forum.
 
-    * Unique, original, and fun gameplay, storyline, theme, artwork, and content.
-        Pushing the boundaries of open source first person gaming.
-    * More configurable, providing an extensive range of world variables for
-        mappers and game variables for players/admin to control every aspect.
-    * Play plain ol' deathmatch, instagib, ctf, duel, lms, or use the select
-        range of mutators and myriad of variables to create your own.
-    * Item domination and dropping, fight for your lives over a great range of
-        weapons, each with its own distinct personality, pros, and cons.
-    * Strong artificial intelligence (A.I. or "Bots") capable of participating
-        within all modes of its deathmatch environment, even online.
-    * Improved editing displays and capabilities, with automatic map package
-        creation and online transfers completely transparent to the user.
-    * Enhanced engine systems, with extra goodies like stereoscopic or anaglyph
-        view modes, and unique mouse settings.
-    * The main adventure component of Red Eclipse will always be Free and
-        Open Source Software, and you can contribute to it too.
+Wiki: http://www.redeclipse.net/wiki
+Forum: http://www.redeclipse.net/forum
 
-Get Involved
+The project is a Free and Open Source game, built on Cube Engine 2 using SDL
+and OpenGL which allows it to be ported to many platforms; you can download
+a package for Windows, Linux/BSD, Mac OSX, or grab a development copy from
+our Subversion repository and live on the bleeding edge.
 
-  You're encouraged to help the project by joining in with the rest of the
-    community to make a better project! You can do this by participating
-    in our Community, or using the SVN (Subversion) repository, and reporting
-    any issues, ideas, suggestions, or comments you might have. If you are
-    feeling particularly generous, you can donate and help support our
-    development efforts!
+Download: http://www.redeclipse.net/download
+Subversion: http://www.redeclipse.net/devel
 
-  We chat via IRC in the channel #redeclipse on irc.freenode.net,
-    if you don't have an IRC client you can use http://www.redeclipse.net/chat
-    You can use this service to talk directly to the Red Eclipse developers
-    and supporters, whether you just want to have a chat, report a problem, or
-    make a suggestion, this is the best place to do it.
+In a true open source by the people for the people nature, we try to work
+closely with the gaming and open source communities to provide a better
+overall experience, aiming to create a game environment that is fun and easy
+to play, while still having elements to master.
 
-Open Source
+If you think you might have something to contribute to the game or
+community, please feel free to drop by our Chat or Forums and talk to us
+directly. We try to maintain a standard of friendly behaviour in our
+community, so don't be afraid to speak up and have your say in building this
+game for us all :)
 
-  The project is Free and Open Source meaning that you can both use it for free,
-    and you can be apart of it by contributing in whatever way you can. These
-    are people who have helped shape Red Eclipse into what you see today,
-    and they are regular people just like you who volunteer their time or
-    donate in the spirit of making a really cool game, your name could be here
-    too.
+= Support Us =
 
-Developers
+Red Eclipse is developed by volunteers, and you get it free of charge; your
+donations go toward ongoing costs which keep this project alive.
 
- Quinton "Quin" Reeves - Lead Developer
-    Gameplay and AI Code/Design, Community Management
+Donate: http://www.redeclipse.net/donate
 
- Lee "Eihrul" Salzman - Lead Programmer / Advisor
-    Cube 2 Backports, Support, Speed Improvements, Encouragement
+= Get Involved =
 
- Kevin "Hirato" Meyer - Timmy
-    Development Assistance, Design and Testing
+You're encouraged to help the project by joining in with the rest of the
+community to make a better project! You can do this by participating
+in our Community, or using the SVN (Subversion) repository, and reporting
+any issues, ideas, suggestions, or comments you might have. If you are
+feeling particularly generous, you can donate and help support our
+development efforts!
 
- Joshua L. "Verbalshadow" Blocher - Artist
-    Some source artwork, Design and Testing
+We chat via IRC in the channel #redeclipse on irc.freenode.net,
+if you don't have an IRC client you can use http://www.redeclipse.net/chat
+You can use this service to talk directly to the Red Eclipse developers
+and supporters, whether you just want to have a chat, report a problem, or
+make a suggestion, this is the best place to do it.
 
- Kurt "Kurtis84" Kessler - Artist
-    Textures, Design and Testing
+= Open Source =
 
- "LuckystrikeRx" - Artist
-    Maps, Textures, Models, Weapons, Design and Testing, Website
+The project is Free and Open Source meaning that you can both use it for
+free, and you can be apart of it by contributing in whatever way you can.
+These are people who have helped shape Red Eclipse into what you see today,
+and they are regular people just like you who volunteer their time or
+donate in the spirit of making a really cool game, your name could be here
+too.
 
- Jonathan "W!ck3d" Roels - Artist
-    Maps, Textures, Design and Testing
+== Developers ==
 
- Derek "Favorito" Ponicki - Artist
-    Maps, Textures, Design and Testing
+* Quinton "Quin" Reeves - Lead Developer
+    - Gameplay and AI Code/Design, Community Management
 
- Jeroen "appleflap" Boukens - Collaborator
-    Textures, Design and Testing
+* Lee "Eihrul" Salzman - Lead Programmer / Advisor
+    - Cube 2 Backports, Support, Speed Improvements, Encouragement
 
- Martin "arand" Werner - Collaborator
-    Documentation, Legal Drafting, Cross-Distribution Support, 
-    Open Source Compliance Checks, and much more.
+* Kevin "Hirato" Meyer - Timmy
+    - Development Assistance, Design and Testing
 
- Mike "mikeplus64" Ledger - Artist
-    Maps, Models, Weapons, Textures, HUD, Design and Testing
+* Joshua L. "Verbalshadow" Blocher - Artist
+    - Some source artwork, Design and Testing
 
- Derek "JoJo" Stegall - Artist
-    Maps, Models, Textures, HUD, Sound FX, Design and Testing
+* Kurt "Kurtis84" Kessler - Artist
+    - Textures, Design and Testing
 
- Jeff "Architect" Cope - Collaborator
-    Design and Testing
+* "LuckystrikeRx" - Artist
+    - Maps, Textures, Models, Weapons, Design and Testing, Website
 
- Slawek "VibrantWave" Blauciak - Artist
-    Ambient Sounds
+* Jonathan "W!ck3d" Roels - Artist
+    - Maps, Textures, Design and Testing
 
- "SkiingPenguins" - Artist
-    Skyboxes
+* Derek "Favorito" Ponicki - Artist
+    - Maps, Textures, Design and Testing
 
- "fluxord" - Artist
-	Crosshairs
+* Jeroen "appleflap" Boukens - Collaborator
+    - Textures, Design and Testing
 
- Stefan Norman and Peter McInerney - Hosting
-    Master and Game server hosting
+* Martin "arand" Werner - Collaborator
+    - Documentation, Legal Drafting, Cross-Distribution Support, 
+        Open Source Compliance Checks, and much more.
 
-Supporters
+* Mike "mikeplus64" Ledger - Artist
+    - Maps, Models, Weapons, Textures, HUD, Design and Testing
 
- "w00p|dazza", Corey "c0rdawg" Maher, Rob "Lloir" Shannon
- Henrik "ahven" Pihl, Robert "Homicidal" Crane, Wayne Bennett,
- Cameron "Rhubarb" Dawdy, Christopher "paroneayea" Webber,
- Mark "xtort-" Doodeman, Vadim Peretokin, Taiyo Rawle, "CD Xbow",
- "FearFighter", Daniel "Imerion" Eriksson, Furor, Gaming Tilt,
- Nick "Fatal_Glory" Watts, Robert Winkler, "fbt", Eddie "skedz4u" Webb
+* Derek "JoJo" Stegall - Artist
+    - Maps, Models, Textures, HUD, Sound FX, Design and Testing
+
+* Jeff "Architect" Cope - Collaborator
+    - Design and Testing
+
+* Slawek "VibrantWave" Blauciak - Artist
+    - Ambient Sounds
+
+* "SkiingPenguins" - Artist
+    - Skyboxes
+
+* "fluxord" - Artist
+    - Crosshairs
+
+* Stefan Norman and Peter McInerney - Hosting
+    - Master and Game server hosting
+
+== Supporters ==
+
+* "w00p|dazza"
+* Corey "c0rdawg" Maher
+* Rob "Lloir" Shannon
+* Henrik "ahven" Pihl
+* Robert "Homicidal" Crane
+* Wayne Bennett
+* Cameron "Rhubarb" Dawdy
+* Christopher "paroneayea" Webber
+* Mark "xtort-" Doodeman
+* Vadim Peretokin
+* Taiyo Rawle
+* "CD Xbow"
+* "FearFighter"
+* Daniel "Imerion" Eriksson
+* Furor
+* Gaming Tilt
+* Nick "Fatal_Glory" Watts
+* Robert Winkler
+* "fbt"
+* Eddie "skedz4u" Webb
