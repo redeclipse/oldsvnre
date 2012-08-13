@@ -45,3 +45,13 @@ dist-clean:
 	rm -f ../$(tarname).bz2
 	rm -f ../$(tarname).xz
 
+../doc/cube2font.txt: ../doc/man/cube2font.1
+	MANWIDTH=80 man --no-justification --no-hyphenation \
+		../doc/man/cube2font.1 \
+		| col -b > ../doc/cube2font.txt ;\
+	echo "\nThis text file was automatically generated from cube2font.1\n\
+	Please do not edit it manually." \
+		>> ../doc/cube2font.txt
+
+cube2font-txt: ../doc/cube2font.txt
+
