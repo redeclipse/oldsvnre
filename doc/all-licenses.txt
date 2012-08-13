@@ -15,7 +15,7 @@ Copyright: 2009-2012, Quinton Reeves, Lee Salzman
            Robert Pointon, Quinton Reeves
 License: Zlib
 
-Files: trademark.txt
+Files: doc/trademark.txt
 Copyright: 2011, The Document Foundation
            2006-2008, Software Freedom Law Center, Inc.
            2011-2012, Red Eclipse Team
@@ -26,12 +26,12 @@ Copyright: 2011, Red Eclipse Team
 License: CC-BY-SA-3.0 and Mark-Policy
 
 Files: src/system-install.mk src/dist.mk src/install/nix/redeclipse.am
-       src/install/nix/redeclipse.desktop.am data/examples/*
+       src/install/nix/redeclipse.desktop.am doc/examples/*
 Copyright: 2012, Red Eclipse Team
 License: Zlib
 
-Files: src/install/nix/cube2font.1 src/install/nix/redeclipse.6.am
-       src/install/nix/redeclipse-server.6.am
+Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
+       doc/man/redeclipse-server.6.am
 Copyright: 2011-2012, Martin Erik "arand" Werner <martinerikwerner@gmail.com>
 License: ZLib
 
