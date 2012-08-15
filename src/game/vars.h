@@ -27,9 +27,8 @@ GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
 GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_NEVER, rotatemodefilter &= ~G_NEVER); // modes not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
-GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
-GSVAR(IDF_ADMIN, allowmaps, "alphacampaign ares bath biolytic blink cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone lab linear longestyard mist neodrive nova panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "ares bath biolytic blink cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone lab linear longestyard mist neodrive nova panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
 
 GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deathtrap deli depot dropzone dutility echo error foundation fourplex futuresport ghost industrial institute isolation keystone linear longestyard mist nova panic processing pumpstation spacetech starlibido stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone linear mist nova panic pumpstation stone tribal venus warp wet");
@@ -37,11 +36,10 @@ GSVAR(IDF_ADMIN, defendmaps, "ares bath biolytic cargo center colony conflict da
 GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation futuresport fourplex ghost industrial isolation linear mist nova pumpstation stone tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial isolation keystone linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
-GSVAR(IDF_ADMIN, campaignmaps, "alphacampaign");
 
 GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
-GSVAR(IDF_ADMIN, jetpackmaps, "alphacampaign ares biolytic cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation fourplex futuresport ghost isolation keystone linear longestyard mist nova pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation fourplex futuresport ghost isolation keystone linear longestyard mist nova pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
 
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
 GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink cargo center colony conflict darkness deadsimple deathtrap deli dropzone echo error facility forge foundation fourplex futuresport ghost industrial institute isolation keystone lab linear mist nova panic processing pumpstation spacetech starlibido stone tower tranquility tribal ubik venus warp wet");
@@ -51,7 +49,7 @@ GSVAR(IDF_ADMIN, largemaps, "ares biolytic blink cargo center colony dawn deadsi
 GVAR(IDF_ADMIN, modelock, 0, 5, 7); // 0 = off, 1-3 = master/auth/admin only, 4-6 = master/auth/admin can only set limited mode and higher, 7 = no mode selection
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
-GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_IGN].mutators&~G_M_ARENA, mutstype[G_M_IGN].mutators, sv_instagibfilter &= ~G_M_VAMPIRE; sv_instagibfilter |= G_M_INSTA, instagibfilter &= ~G_M_VAMPIRE; instagibfilter |= G_M_INSTA);
+GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_ARENA), mutstype[G_M_INSTA].mutators, sv_instagibfilter &= ~(1<<G_M_VAMPIRE); sv_instagibfilter |= (1<<G_M_INSTA), instagibfilter &= ~(1<<G_M_VAMPIRE); instagibfilter |= (1<<G_M_INSTA));
 
 GVAR(IDF_ADMIN, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
@@ -139,7 +137,7 @@ GVAR(0, duelcycles, 0, 3, VAR_MAX); // maximum wins in a row before force-cyclin
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
 GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
-GVAR(0, teambalance, 0, 1, 3); // 0 = off, 1 = by number then rank, 2 = by rank then number, 3 = humans vs. ai
+GVAR(0, teambalance, 0, 1, 2); // 0 = off, 1 = by number then rank, 2 = by rank then number
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
 
@@ -220,14 +218,19 @@ GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the goal
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
-GVAR(0, skillmin, 1, 50, 101);
-GVAR(0, skillmax, 1, 75, 101);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
+GVAR(0, botskillmin, 1, 50, 101);
+GVAR(0, botskillmax, 1, 75, 101);
 GVAR(0, botlimit, 0, 16, VAR_MAX);
 GVAR(0, botoffset, VAR_MIN, 0, VAR_MAX);
 GFVAR(0, botspeed, 0, 1, FVAR_MAX);
 GFVAR(0, botscale, FVAR_NONZERO, 1, FVAR_MAX);
-GVAR(0, enemybalance, 0, 1, 3);
+GVAR(0, coopbalance, 1, 2, VAR_MAX);
+GVAR(0, coopskillmin, 1, 70, 101);
+GVAR(0, coopskillmax, 1, 90, 101);
+GVAR(0, enemybalance, 1, 1, 3);
+GVAR(0, enemyskillmin, 1, 70, 101);
+GVAR(0, enemyskillmax, 1, 90, 101);
 GVAR(0, enemyspawntime, 1, 30000, VAR_MAX); // when enemies respawn
 GVAR(0, enemyspawndelay, 0, 1000, VAR_MAX); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both

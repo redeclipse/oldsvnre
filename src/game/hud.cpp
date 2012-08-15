@@ -363,7 +363,6 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/firstblood", 3);
 
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
-    TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modedeathmatch.png", 3);
     TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modetimetrial.png", 3);
 
@@ -382,6 +381,7 @@ namespace hud
 
     TVAR(IDF_PERSIST, modemultitex, "<grey>textures/modemulti.png", 3);
     TVAR(IDF_PERSIST, modeteamtex, "<grey>textures/modeteam.png", 3);
+    TVAR(IDF_PERSIST, modecooptex, "<grey>textures/modecoop.png", 3);
     TVAR(IDF_PERSIST, modeinstatex, "<grey>textures/modeinsta.png", 3);
     TVAR(IDF_PERSIST, modemedievaltex, "<grey>textures/modemedieval.png", 3);
     TVAR(IDF_PERSIST, modeballistictex, "<grey>textures/modeballistic.png", 3);
@@ -401,7 +401,6 @@ namespace hud
         #define ADDMODEICON \
         { \
             if(m_edit(g)) ADDMODE(modeeditingtex) \
-            else if(m_campaign(g)) ADDMODE(modecampaigntex) \
             else if(m_trial(g)) ADDMODE(modetimetrialtex) \
             else if(m_capture(g)) \
             { \
@@ -426,19 +425,20 @@ namespace hud
         }
 
         if(before) ADDMODEICON
-        if(m_multi(g, m) && (implied || !(m_implied(g, m)&G_M_MULTI))) ADDMODE(modemultitex)
-        if(m_team(g, m) && (implied || !(m_implied(g, m)&G_M_TEAM))) ADDMODE(modeteamtex)
-        if(m_insta(g, m) && (implied || !(m_implied(g, m)&G_M_INSTA))) ADDMODE(modeinstatex)
-        if(m_medieval(g, m) && (implied || !(m_implied(g, m)&G_M_MEDIEVAL))) ADDMODE(modemedievaltex)
-        if(m_ballistic(g, m) && (implied || !(m_implied(g, m)&G_M_BALLISTIC))) ADDMODE(modeballistictex)
-        if(m_duel(g, m) && (implied || !(m_implied(g, m)&G_M_DUEL))) ADDMODE(modedueltex)
-        if(m_survivor(g, m) && (implied || !(m_implied(g, m)&G_M_SURVIVOR))) ADDMODE(modesurvivortex)
-        if(m_arena(g, m) && (implied || !(m_implied(g, m)&G_M_ARENA))) ADDMODE(modearenatex)
-        if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&G_M_ONSLAUGHT))) ADDMODE(modeonslaughttex)
-        if(m_jetpack(g, m) && (implied || !(m_implied(g, m)&G_M_JETPACK))) ADDMODE(modejetpacktex)
-        if(m_vampire(g, m) && (implied || !(m_implied(g, m)&G_M_VAMPIRE))) ADDMODE(modevampiretex)
-        if(m_expert(g, m) && (implied || !(m_implied(g, m)&G_M_EXPERT))) ADDMODE(modeexperttex)
-        if(m_resize(g, m) && (implied || !(m_implied(g, m)&G_M_RESIZE))) ADDMODE(moderesizetex)
+        if(m_multi(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MULTI)))) ADDMODE(modemultitex)
+        if(m_team(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_TEAM)))) ADDMODE(modeteamtex)
+        if(m_coop(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_COOP)))) ADDMODE(modecooptex)
+        if(m_insta(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_INSTA)))) ADDMODE(modeinstatex)
+        if(m_medieval(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MEDIEVAL)))) ADDMODE(modemedievaltex)
+        if(m_ballistic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_BALLISTIC)))) ADDMODE(modeballistictex)
+        if(m_duel(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_DUEL)))) ADDMODE(modedueltex)
+        if(m_survivor(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
+        if(m_arena(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_ARENA)))) ADDMODE(modearenatex)
+        if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
+        if(m_jetpack(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_JETPACK)))) ADDMODE(modejetpacktex)
+        if(m_vampire(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
+        if(m_expert(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_EXPERT)))) ADDMODE(modeexperttex)
+        if(m_resize(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_RESIZE)))) ADDMODE(moderesizetex)
         if(!before) ADDMODEICON
     }
 
@@ -980,7 +980,7 @@ namespace hud
             if(shownotices >= 2)
             {
                 SEARCHBINDCACHE(attackkey)("action 0", 0);
-                if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                if(delay || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
                     pushfont("reduced");
                     if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
@@ -1045,8 +1045,7 @@ namespace hud
                     if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
                     if(totalmillis-lastteam <= teamnoticedelay)
                     {
-                        if(m_campaign(game::gamemode)) ty += draw_textx("Campaign Mission", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        else if(!m_team(game::gamemode, game::mutators))
+                        if(!m_team(game::gamemode, game::mutators))
                         {
                             if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                             else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);

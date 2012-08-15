@@ -151,8 +151,7 @@ namespace hud
             scoreson = on;
             if(m_play(game::gamemode) && interm)
             {
-                if(m_campaign(game::gamemode)) game::announcef(S_V_MCOMPLETE, CON_MESG, game::player1, "\fwmission completed");
-                else if(m_fight(game::gamemode) && !m_trial(game::gamemode))
+                if(m_fight(game::gamemode) && !m_trial(game::gamemode))
                 {
                     int numgroups = groupplayers();
                     if(!numgroups) return;
@@ -292,7 +291,7 @@ namespace hud
                 g.space(1);
                 SEARCHBINDCACHE(attackkey)("action 0", 0);
                 g.pushfont("little");
-                if(delay || m_campaign(game::gamemode) || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                if(delay || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
                     if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
                     else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, hud::timetostr(delay, -1));

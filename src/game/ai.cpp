@@ -8,7 +8,6 @@ namespace ai
     VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
-    VAR(0, aicampaign, 0, 0, 1);
     VAR(0, aipassive, 0, 0, 1);
 
     VARF(0, showwaypoints, 0, 0, 1, if(showwaypoints) getwaypoints());
@@ -244,7 +243,7 @@ namespace ai
             if(totalmillis-updatemillis > 1000)
             {
                 avoid();
-                if(multiplayer(false)) { aiforcegun = -1; aicampaign = aipassive = 0; }
+                if(multiplayer(false)) { aiforcegun = -1; aipassive = 0; }
                 updatemillis = totalmillis;
             }
             if(!iteration && totalmillis-itermillis > 1000)
@@ -543,26 +542,13 @@ namespace ai
             {
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
-                if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, m_campaign(game::gamemode));
+                if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, false);
             }
             if(m_fight(game::gamemode))
             {
                 if(m_capture(game::gamemode)) capture::aifind(d, b, interests);
                 else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
                 else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
-            }
-            if(m_campaign(game::gamemode) && aicampaign)
-            {
-                loopi(entities::lastent(TRIGGER)) if(entities::ents[i]->type == TRIGGER && entities::ents[i]->attrs[1] == TR_EXIT)
-                {
-                    interest &n = interests.add();
-                    n.state = AI_S_PURSUE;
-                    n.target = i;
-                    n.node = closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
-                    n.targtype = AI_T_AFFINITY;
-                    n.score = -1;
-                    n.tolerance = 1;
-                }
             }
         }
         else if(entities::ents.inrange(d->aientity)) loopv(entities::ents[d->aientity]->links)
@@ -584,6 +570,7 @@ namespace ai
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);
                 int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
+                if(n.state == AI_S_DEFEND && members == 1) continue;
                 if(others >= int(ceilf(members*n.tolerance))) continue;
             }
             if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
@@ -732,11 +719,7 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
-                if(m_campaign(game::gamemode))
-                {
-                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
-                }
-                else if(m_capture(game::gamemode)) return capture::aidefense(d, b) ? 1 : 0;
+                if(m_capture(game::gamemode)) return capture::aidefense(d, b) ? 1 : 0;
                 else if(m_defend(game::gamemode)) return defend::aidefense(d, b) ? 1 : 0;
                 else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b) ? 1 : 0;
                 break;
@@ -837,11 +820,7 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
-                if(m_campaign(game::gamemode))
-                {
-                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
-                }
-                else if(m_capture(game::gamemode)) return capture::aipursue(d, b) ? 1 : 0;
+                if(m_capture(game::gamemode)) return capture::aipursue(d, b) ? 1 : 0;
                 else if(m_defend(game::gamemode)) return defend::aipursue(d, b) ? 1 : 0;
                 else if(m_bomber(game::gamemode)) return bomber::aipursue(d, b) ? 1 : 0;
                 break;
