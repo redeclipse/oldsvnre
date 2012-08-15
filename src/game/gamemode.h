@@ -93,13 +93,12 @@ gametypes gametype[] = {
     {
         G_BOMBER,       G_M_NONE,
         {
-            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1|G_M_GSP2,
             G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1,
-            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP2,
-            G_M_NONE
+            G_M_MULTI|G_M_TEAM|G_M_INSTA|G_M_ARENA|G_M_MEDIEVAL|G_M_BALLISTIC|G_M_ONSLAUGHT|G_M_JETPACK|G_M_VAMPIRE|G_M_EXPERT|G_M_RESIZE|G_M_GSP1,
+            G_M_NONE, G_M_NONE
         },
-        "bomber-ball",                      { "basket", "hold", "" },
-        "take the bomb to the enemy goal before it blows up", { "the bomb may be thrown into the goal", "hold the bomb as long as possible to score points", "" },
+        "bomber-ball",                      { "hold", "", "" },
+        "get the bomb into the enemy goal to score", { "hold the bomb as long as possible to score points", "", "" },
     },
     {
         G_TRIAL,        G_M_NONE,

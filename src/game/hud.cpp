@@ -418,8 +418,8 @@ namespace hud
             } \
             else if(m_bomber(g)) \
             { \
-                if(m_gsp1(g, m)) ADDMODE(modebomberbaskettex) \
-                else if(m_gsp2(g, m)) ADDMODE(modebomberholdtex) \
+                if(GAME(bomberbasket)) ADDMODE(modebomberbaskettex) \
+                else if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
                 else ADDMODE(modebombertex) \
             } \
             else ADDMODE(modedeathmatchtex) \
