@@ -1604,6 +1604,34 @@ namespace entities
                 }
                 default: break;
             }
+            if(gver <= 216 && enttype[e.type].modesattr > 0) // mode/mutator array updates
+            {
+                int attr = enttype[e.type].modesattr;
+                if(e.attrs[attr])
+                {
+                    bool neg = e.attrs[attr] < 0;
+                    int value = neg ? 0-e.attrs[attr] : e.attrs[attr];
+                    value &= ~(1<<2);
+                    loopi(5)
+                    {
+                        int mode = i+3, bit = 1<<mode, next = 1<<(mode-1);
+                        if(value&bit) { value &= ~bit; value |= next; }
+                    }
+                    e.attrs[attr] = neg ? 0-value : value;
+                }
+                attr++; // mutators
+                if(e.attrs[attr])
+                {
+                    bool neg = e.attrs[attr] < 0;
+                    int value = neg ? 0-e.attrs[attr] : e.attrs[attr];
+                    loopirev(14)
+                    {
+                        int mut = i+2, bit = 1<<mut, next = 1<<(mut+1);
+                        if(value&bit) { value &= ~bit; value |= next; }
+                    }
+                    e.attrs[attr] = neg ? 0-value : value;
+                }
+            }
         }
     }
 

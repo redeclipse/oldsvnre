@@ -193,8 +193,8 @@ struct bomberservmode : bomberstate, servmode
                 if(!candidates[TEAM_NEUTRAL].empty() && !m_gsp2(gamemode, mutators))
                 {
                     srvmsgf(-1, "\fzoythis map does have enough goals, switching on hold mutator");
-                    sendf(-1, 1, "risi3", N_MAPCHANGE, smapname, 0, gamemode, mutators|G_M_GSP2);
-                    changemap(smapname, gamemode, mutators|G_M_GSP2);
+                    sendf(-1, 1, "risi3", N_MAPCHANGE, smapname, 0, gamemode, mutators|(1<<G_M_GSP1));
+                    changemap(smapname, gamemode, mutators|(1<<G_M_GSP1));
                     return;
                 }
                 hasflaginfo = false;

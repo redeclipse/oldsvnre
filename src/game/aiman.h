@@ -1,7 +1,8 @@
 // server-side ai manager
 namespace aiman
 {
-    int oldteambalance = -1, oldskillmin = -1, oldskillmax = -1, oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0;
+    int oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
+        oldbotbalance = -2, oldcoopbalance = -1, oldbotlimit = -1, oldbotoffset = 0;
 
     int findaiclient(int exclude)
     {
@@ -35,6 +36,29 @@ namespace aiman
         return -1;
     }
 
+    void getskillrange(int type, int &m, int &n)
+    {
+        switch(type)
+        {
+            case AI_BOT:
+                if(m_coop(gamemode, mutators))
+                {
+                    m = max(GAME(coopskillmax), GAME(coopskillmin));
+                    n = min(GAME(coopskillmin), m);
+                }
+                else
+                {
+                    m = max(GAME(botskillmax), GAME(botskillmin));
+                    n = min(GAME(botskillmin), m);
+                }
+                break;
+            default:
+                m = max(GAME(enemyskillmax), GAME(enemyskillmin));
+                n = min(GAME(enemyskillmin), m);
+                break;
+        }
+    }
+
     bool addai(int type, int ent, int skill)
     {
         int numbots = 0;
@@ -62,7 +86,8 @@ namespace aiman
             clientinfo *ci = (clientinfo *)getinfo(cn);
             if(ci)
             {
-                int s = skill, m = max(GAME(skillmax), GAME(skillmin)), n = min(GAME(skillmin), m);
+                int s = skill, m = 100, n = 1;
+                getskillrange(type, m, n);
                 if(skill > m || skill < n) s = (m != n ? rnd(m-n) + n + 1 : m);
                 ci->clientnum = cn;
                 ci->state.ownernum = findaiclient();
@@ -177,22 +202,25 @@ namespace aiman
 
     void checksetup()
     {
-        int m = max(GAME(skillmax), GAME(skillmin)), n = min(GAME(skillmin), m), numbots = 0;
+        int m = 100, n = 1, numbots = 0;
         loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum >= 0)
         {
             clientinfo *ci = clients[i];
-            int o = clamp(m, 1, 101), p = clamp(n, 1, 101);
-            if(ci->state.skill > o || ci->state.skill < p)
+            getskillrange(clients[i]->state.aitype, m, n);
+            if(ci->state.skill > m || ci->state.skill < n)
             { // needs re-skilling
-                ci->state.skill = (o != p ? rnd(o-p) + p + 1 : o);
+                ci->state.skill = (m != n ? rnd(m-n) + n + 1 : m);
                 if(!ci->state.aireinit) ci->state.aireinit = 1;
             }
             if(ci->state.aitype == AI_BOT && ++numbots >= GAME(botlimit)) shiftai(ci, -1);
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
-        if(m_campaign(gamemode)) balance = GAME(campaignplayers); // campaigns strictly obeys nplayers
-        else if(m_edit(gamemode)) balance = GAME(botoffset);
+        if(m_coop(gamemode, mutators))
+        {
+            numt--; // filter out the human team
+            balance = people+max(people*numt*GAME(coopbalance), 0);
+        }
         else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
         {
             switch(GAME(botbalance))
@@ -201,36 +229,27 @@ namespace aiman
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : GAME(botbalance)); break; // balance to at least this
             }
-            if(m_team(gamemode, mutators) && (balance > 0 || GAME(teambalance) == 3))
+            if(m_team(gamemode, mutators) && balance > 0)
             { // skew this if teams are unbalanced
-                if(GAME(teambalance) != 3)
+                int plrs[TEAM_TOTAL] = {0}, highest = -1; // we do this because humans can unbalance in odd ways
+                loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
                 {
-                    int plrs[TEAM_TOTAL] = {0}, highest = -1; // we do this because humans can unbalance in odd ways
-                    loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
-                    {
-                        int team = clients[i]->team-TEAM_FIRST;
-                        plrs[team]++;
-                        if(highest < 0 || plrs[team] > plrs[highest]) highest = team;
-                    }
-                    if(highest >= 0)
-                    {
-                        int bots = balance-people;
-                        loopi(numt) if(i != highest && plrs[i] < plrs[highest]) loopj(plrs[highest]-plrs[i])
-                        {
-                            if(bots > 0) bots--;
-                            else balance++;
-                        }
-                    }
+                    int team = clients[i]->team-TEAM_FIRST;
+                    plrs[team]++;
+                    if(highest < 0 || plrs[team] > plrs[highest]) highest = team;
                 }
-                else
+                if(highest >= 0)
                 {
-                    // humans vs. bots, just directly balance
-                    balance = max(people*numt, numt);
-                    numt--; // filter out the human team
+                    int bots = balance-people;
+                    loopi(numt) if(i != highest && plrs[i] < plrs[highest]) loopj(plrs[highest]-plrs[i])
+                    {
+                        if(bots > 0) bots--;
+                        else balance++;
+                    }
                 }
             }
-            balance += GAME(botoffset)*numt;
         }
+        balance += GAME(botoffset)*numt;
         int bots = balance-people;
         if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
         if(balance > 0)
@@ -254,31 +273,17 @@ namespace aiman
     const float MINSPAWNDIST = 64.f;
     void checkenemies()
     {
-        if(GAME(enemybalance) && m_enemies(gamemode, mutators))
+        if(m_enemies(gamemode, mutators))
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
-                bool allow = !m_campaign(gamemode);
-                if(!allow)
-                {
-                    loopv(clients) if(clients[i]->state.aitype < AI_START)
-                    {
-                        float dist = clients[i]->state.o.dist(sents[j].o);
-                        if(dist <= MAXSPAWNDIST) allow = true;
-                        else if(allow && dist <= MINSPAWNDIST)
-                        {
-                            allow = false;
-                            break;
-                        }
-                    }
-                }
                 int count = 0;
                 loopvrev(clients) if(clients[i]->state.aientity == j)
                 {
                     count++;
-                    if(!allow || count > GAME(enemybalance)) deleteai(clients[i]);
+                    if(count > GAME(enemybalance)) deleteai(clients[i]);
                 }
-                if(allow && count < GAME(enemybalance))
+                if(count < GAME(enemybalance))
                 {
                     int amt = GAME(enemybalance)-count;
                     loopk(amt) addai(sents[j].attrs[0]+AI_START, j, -1);
@@ -301,10 +306,14 @@ namespace aiman
             if(hasgameinfo && !interm)
             {
                 #define checkold(n) if(old##n != GAME(n)) { dorefresh = 1; old##n = GAME(n); }
-                checkold(teambalance);
-                checkold(skillmin);
-                checkold(skillmax);
+                checkold(botskillmin);
+                checkold(botskillmax);
+                checkold(coopskillmin);
+                checkold(coopskillmax);
+                checkold(enemyskillmin);
+                checkold(enemyskillmax);
                 checkold(botbalance);
+                checkold(coopbalance);
                 checkold(botlimit);
                 checkold(botoffset);
                 if(dorefresh)

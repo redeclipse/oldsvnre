@@ -4,7 +4,7 @@
 #include "engine.h"
 
 #define GAMEID              "fps"
-#define GAMEVERSION         216
+#define GAMEVERSION         217
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -28,7 +28,7 @@ enum
     S_V_SPREE, S_V_SPREE2, S_V_SPREE3, S_V_SPREE4,
     S_V_MULTI, S_V_MULTI2, S_V_MULTI3,
     S_V_REVENGE, S_V_DOMINATE, S_V_FIRSTBLOOD,
-    S_V_YOUWIN, S_V_YOULOSE, S_V_DRAW, S_V_MCOMPLETE,
+    S_V_YOUWIN, S_V_YOULOSE, S_V_DRAW,
     S_V_FRAGGED,
     S_GAME
 };
@@ -51,7 +51,7 @@ enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
 
 struct enttypes
 {
-    int type,           priority, links,    radius, usetype,    numattrs,
+    int type,           priority, links,    radius, usetype,    numattrs,   modesattr,
             canlink, reclink;
     bool    noisy,  syncs,  resyncs,    syncpos,    synckin;
     const char *name,           *attrs[11];
@@ -59,118 +59,118 @@ struct enttypes
 #ifdef GAMESERVER
 enttypes enttype[] = {
     {
-        NOTUSED,        -1,         0,      0,      EU_NONE,    0,
+        NOTUSED,        -1,         0,      0,      EU_NONE,    0,          -1,
             0, 0,
             true,   false,  false,      false,      false,
                 "none",         { "" }
     },
     {
-        LIGHT,          1,          59,     0,      EU_NONE,    4,
+        LIGHT,          1,          59,     0,      EU_NONE,    4,          -1,
             (1<<LIGHTFX), (1<<LIGHTFX),
             false,  false,  false,      false,      false,
                 "light",        { "radius", "red",      "green",    "blue"  }
     },
     {
-        MAPMODEL,       1,          58,     0,      EU_NONE,    9,
+        MAPMODEL,       1,          58,     0,      EU_NONE,    9,          -1,
             (1<<TRIGGER), (1<<TRIGGER),
             false,  false,  false,      false,      false,
                 "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
     {
-        PLAYERSTART,    1,          59,     0,      EU_NONE,    6,
+        PLAYERSTART,    1,          59,     0,      EU_NONE,    6,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  true,  false,      false,      false,
                 "playerstart",  { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        ENVMAP,         1,          0,      0,      EU_NONE,    3,
+        ENVMAP,         1,          0,      0,      EU_NONE,    3,          -1,
             0, 0,
             false,  false,  false,      false,      false,
                 "envmap",       { "radius", "size", "blur" }
     },
     {
-        PARTICLES,      1,          59,     0,      EU_NONE,    11,
+        PARTICLES,      1,          59,     0,      EU_NONE,    11,         -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             false,  false,  false,      false,      false,
                 "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
     },
     {
-        MAPSOUND,       1,          58,     0,      EU_NONE,    5,
+        MAPSOUND,       1,          58,     0,      EU_NONE,    5,          -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             false,  false,  false,      false,      false,
                 "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
     },
     {
-        LIGHTFX,        1,          1,      0,      EU_NONE,    5,
+        LIGHTFX,        1,          1,      0,      EU_NONE,    5,          -1,
             (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             false,  false,  false,      false,      false,
                 "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
     {
-        SUNLIGHT,       1,          160,    0,      EU_NONE,    6,
+        SUNLIGHT,       1,          160,    0,      EU_NONE,    6,          -1,
             0, 0,
             false,  false,  false,      false,      false,
                 "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
     },
     {
-        WEAPON,         2,          59,     24,     EU_ITEM,    5,
+        WEAPON,         2,          59,     24,     EU_ITEM,    5,          2,
             0, 0,
             false,  true,   true,      false,      false,
                 "weapon",       { "type",   "flags",    "modes",    "muts",     "id" }
     },
     {
-        TELEPORT,       1,          50,     12,     EU_AUTO,    8,
+        TELEPORT,       1,          50,     12,     EU_AUTO,    8,          -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,      false,      false,
                 "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex" }
     },
     {
-        ACTOR,          1,          59,     0,      EU_NONE,    10,
+        ACTOR,          1,          59,     0,      EU_NONE,    10,         3,
             (1<<AFFINITY), 0,
             false,  true,   false,      true,       false,
                 "actor",        { "type",   "yaw",      "pitch",    "modes",    "muts",     "id",       "weap",     "health",   "speed",    "scale" }
     },
     {
-        TRIGGER,        1,          58,     16,     EU_AUTO,    7,
+        TRIGGER,        1,          58,     16,     EU_AUTO,    7,          5,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  true,   true,       false,      true,
                 "trigger",      { "id",     "type",     "action",   "radius",   "state",    "modes",    "muts" }
     },
     {
-        PUSHER,         1,          58,     12,     EU_AUTO,    6,
+        PUSHER,         1,          58,     12,     EU_AUTO,    6,          -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,      false,      false,
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        AFFINITY,       1,          48,     32,     EU_NONE,    6,
+        AFFINITY,       1,          48,     32,     EU_NONE,    6,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
-        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,
+        CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  true,   false,      false,      false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
     {
-        DUMMY1,         1,          48,     0,      EU_NONE,    4,
+        DUMMY1,         1,          48,     0,      EU_NONE,    4,          -1,
             0, 0,
             true,   false,  false,      false,      false,
                 "dummy1",       { "" }
     },
     {
-        DUMMY2,       0,          1,      16,     EU_NONE,    2,
+        DUMMY2,         0,          1,      16,     EU_NONE,    2,          -1,
             (1<<DUMMY2), 0,
             true,   false,  false,      false,      false,
                 "dummy2",     { "" }
@@ -346,7 +346,7 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
         mode = G_DEATHMATCH;
         muts = m_implied(mode, 0);
     }
-    if(!gametype[mode].mutators[0]) muts = G_M_NONE;
+    if(!gametype[mode].mutators[0]) muts = 0;
     else
     {
         int implied = m_implied(mode, muts);
@@ -366,16 +366,16 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
             bool changed = false;
             loopi(G_M_NUM)
             {
-                if(trying && !(gametype[mode].mutators[0]&mutstype[i].type) && (trying&mutstype[i].type))
+                if(trying && !(gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (trying&(1<<mutstype[i].type)))
                 {
-                    trying &= ~mutstype[i].type;
+                    trying &= ~(1<<mutstype[i].type);
                     changed = true;
                     break;
                 }
-                if(!(gametype[mode].mutators[0]&mutstype[i].type) && (muts&mutstype[i].type))
+                if(!(gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)))
                 {
-                    muts &= ~mutstype[i].type;
-                    trying &= ~mutstype[i].type;
+                    muts &= ~(1<<mutstype[i].type);
+                    trying &= ~(1<<mutstype[i].type);
                     changed = true;
                     break;
                 }
@@ -400,31 +400,31 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
                     if(changed) break;
                 }
                 if(changed) break;
-                if(muts&mutstype[i].type)
+                if(muts&(1<<mutstype[i].type))
                 {
-                    int mutators = mutstype[i].type != G_M_INSTA ? mutstype[i].mutators : GAME(instagibfilter);
+                    int mutators = (1<<mutstype[i].type) != (1<<G_M_INSTA) ? mutstype[i].mutators : GAME(instagibfilter);
                     loopj(G_M_NUM)
                     {
-                        if(mutators && !(mutators&mutstype[j].type) && (muts&mutstype[j].type))
+                        if(mutators && !(mutators&(1<<mutstype[j].type)) && (muts&(1<<mutstype[j].type)))
                         {
                             implied = m_implied(mode, muts);
-                            if(trying && (trying&mutstype[j].type) && !(implied&mutstype[i].type))
+                            if(trying && (trying&(1<<mutstype[j].type)) && !(implied&(1<<mutstype[i].type)))
                             {
-                                muts &= ~mutstype[i].type;
-                                trying &= ~mutstype[i].type;
+                                muts &= ~(1<<mutstype[i].type);
+                                trying &= ~(1<<mutstype[i].type);
                             }
                             else
                             {
-                                muts &= ~mutstype[j].type;
-                                trying &= ~mutstype[j].type;
+                                muts &= ~(1<<mutstype[j].type);
+                                trying &= ~(1<<mutstype[j].type);
                             }
                             changed = true;
                             break;
                         }
                         int implying = m_doimply(mode, muts, i);
-                        if(implying && (implying&mutstype[j].type) && !(muts&mutstype[j].type))
+                        if(implying && (implying&(1<<mutstype[j].type)) && !(muts&(1<<mutstype[j].type)))
                         {
-                            muts |= mutstype[j].type;
+                            muts |= (1<<mutstype[j].type);
                             changed = true;
                             break;
                         }

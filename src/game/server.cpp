@@ -764,7 +764,7 @@ namespace server
     const char *pickmap(const char *suggest, int mode, int muts)
     {
         const char *map = GAME(defaultmap);
-        if(!map || !*map) map = choosemap(suggest, mode, muts, m_campaign(gamemode) ? 1 : GAME(maprotate));
+        if(!map || !*map) map = choosemap(suggest, mode, muts, GAME(maprotate));
         return map && *map ? map : "maps/untitled";
     }
 
@@ -917,6 +917,7 @@ namespace server
 
     const char *gameid() { return GAMEID; }
     ICOMMAND(0, gameid, "", (), result(gameid()));
+
     int getver(int n)
     {
         switch(n)
@@ -929,6 +930,7 @@ namespace server
         return 0;
     }
     ICOMMAND(0, getversion, "i", (int *a), intret(getver(*a)));
+
     const char *gamename(int mode, int muts, int compact)
     {
         if(!m_game(mode))
@@ -938,10 +940,10 @@ namespace server
         }
         static string gname;
         gname[0] = 0;
-        if(gametype[mode].mutators[0] && muts) loopi(G_M_NUM)
+        if(gametype[mode].mutators[0] && muts)
         {
             int implied = m_implied(mode, muts);
-            if((gametype[mode].mutators[0]&mutstype[i].type) && (muts&mutstype[i].type) && (!implied || !(implied&mutstype[i].type)))
+            loopi(G_M_NUM) if((gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)) && (!implied || !(implied&(1<<mutstype[i].type))))
             {
                 const char *mut = i < G_M_GSP ? mutstype[i].name : gametype[mode].gsp[i-G_M_GSP];
                 if(mut && *mut)
@@ -991,7 +993,7 @@ namespace server
             muts = m_implied(mode, 0);
         }
         static string mtname; mtname[0] = 0;
-        loopi(G_M_NUM) if(muts&mutstype[i].type)
+        loopi(G_M_NUM) if(muts&(1<<mutstype[i].type))
         {
             if(type == 4 || type == 5)
             {
@@ -1332,7 +1334,7 @@ namespace server
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
-                sents[i].millis += m_campaign(gamemode) ? 50 : GAME(enemyspawndelay);
+                sents[i].millis += GAME(enemyspawndelay);
                 switch(GAME(enemyspawnstyle) == 3 ? rnd(2)+1 : GAME(enemyspawnstyle))
                 {
                     case 1: actors.add(i); break;
@@ -1364,7 +1366,7 @@ namespace server
         if(!actors.empty())
         {
             sortrandomly(actors);
-            loopv(actors) sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : GAME(enemyspawndelay))*i;
+            loopv(actors) sents[actors[i]].millis += GAME(enemyspawndelay)*i;
         }
     }
 
@@ -2114,9 +2116,9 @@ namespace server
     {
         if(isteam(gamemode, mutators, team, first))
         {
-            if(GAME(teambalance) != 3) return true;
-            else if(ci->state.aitype > AI_NONE) return team != TEAM_ALPHA;
-            else return team == TEAM_ALPHA;
+            if(!m_coop(gamemode, mutators)) return true;
+            else if(ci->state.aitype > AI_NONE) return team == TEAM_ALPHA;
+            else return team != TEAM_ALPHA;
         }
         return false;
     }
@@ -2137,7 +2139,11 @@ namespace server
                 if(GAME(teampersist) == 2) return team;
                 break;
             }
-            if(balance < 3 && ci->state.aitype > AI_NONE) balance = 1;
+            if(ci->state.aitype > AI_NONE)
+            {
+                if(m_coop(gamemode, mutators)) return TEAM_ALPHA;
+                balance = 1;
+            }
             if(balance || team < 0)
             {
                 teamcheck teamchecks[TEAM_TOTAL];
@@ -2157,33 +2163,27 @@ namespace server
                     }
                 }
                 teamcheck *worst = &teamchecks[0];
-                if(balance != 3 || ci->state.aitype > AI_NONE)
+                loopi(numteams(gamemode, mutators))
                 {
-                    loopi(numteams(gamemode, mutators))
+                    if(!i && m_coop(gamemode, mutators))
                     {
-                        teamcheck &ts = teamchecks[i];
-                        switch(balance)
+                        worst = &teamchecks[1];
+                        continue;
+                    }
+                    teamcheck &ts = teamchecks[i];
+                    switch(balance)
+                    {
+                        case 2:
                         {
-                            case 2:
-                            {
-                                if(ts.score < worst->score || (ts.score == worst->score && ts.clients < worst->clients))
-                                    worst = &ts;
-                                break;
-                            }
-                            case 3:
-                            {
-                                if(!i)
-                                {
-                                    worst = &teamchecks[1];
-                                    break; // don't use team alpha for bots in this case
-                                }
-                            } // fall through
-                            case 1: default:
-                            {
-                                if(ts.clients < worst->clients || (ts.clients == worst->clients && ts.score < worst->score))
-                                    worst = &ts;
-                                break;
-                            }
+                            if(ts.score < worst->score || (ts.score == worst->score && ts.clients < worst->clients))
+                                worst = &ts;
+                            break;
+                        }
+                        case 1: default:
+                        {
+                            if(ts.clients < worst->clients || (ts.clients == worst->clients && ts.score < worst->score))
+                                worst = &ts;
+                            break;
                         }
                     }
                 }
@@ -2986,7 +2986,7 @@ namespace server
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
         if(realflags&HIT_KILL)
         {
-            bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode);
+            bool isai = target->state.aitype >= AI_START;
             int fragvalue = 1;
             if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
@@ -3006,7 +3006,7 @@ namespace server
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
-                if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
+                if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
                 {
                     firstblood = true;
                     style |= FRAG_FIRSTBLOOD;
@@ -3525,17 +3525,6 @@ namespace server
 
     void waiting(clientinfo *ci, int doteam, int drop, bool exclude)
     {
-        if(m_campaign(gamemode) && ci->state.cpnodes.empty())
-        {
-            int maxnodes = -1;
-            loopv(clients)
-            {
-                clientinfo *oi = clients[i];
-                if(oi->clientnum >= 0 && oi->name[0] && oi->state.aitype < AI_START && (!clients.inrange(maxnodes) || oi->state.cpnodes.length() > clients[maxnodes]->state.cpnodes.length()))
-                    maxnodes = i;
-            }
-            if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
-        }
         if(ci->state.state == CS_ALIVE)
         {
             if(drop) dropitems(ci, drop);
@@ -4572,11 +4561,8 @@ namespace server
                                 case TR_EXIT:
                                 {
                                     if(sents[ent].spawned) break;
-                                    if(m_campaign(gamemode))
-                                    {
-                                        sents[ent].spawned = true;
-                                        startintermission();
-                                    }
+                                    sents[ent].spawned = true;
+                                    startintermission();
                                 }
                             }
                             if(commit) sendf(-1, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);

@@ -2539,12 +2539,58 @@ ICOMMAND(0, loopfiles, "rsse", (ident *id, char *dir, char *ext, uint *body),
     if(files.length()) poparg(*id);
 });
 
-ICOMMAND(0, +, "ii", (int *a, int *b), intret(*a + *b));
-ICOMMAND(0, *, "ii", (int *a, int *b), intret(*a * *b));
-ICOMMAND(0, -, "ii", (int *a, int *b), intret(*a - *b));
-ICOMMAND(0, +f, "ff", (float *a, float *b), floatret(*a + *b));
-ICOMMAND(0, *f, "ff", (float *a, float *b), floatret(*a * *b));
-ICOMMAND(0, -f, "ff", (float *a, float *b), floatret(*a - *b));
+ICOMMAND(0, +, "V", (tagval *args, int numargs),
+{
+    int val = numargs > 0 ? args[0].getint() : 0;
+    loopi(numargs - 1) val += args[i + 1].getint();
+    intret(val);
+});
+ICOMMAND(0, -, "V", (tagval *args, int numargs),
+{
+    int val = numargs > 0 ? args[0].getint() : 0;
+    loopi(numargs - 1) val -= args[i + 1].getint();
+    intret(val);
+});
+ICOMMAND(0, *, "V", (tagval *args, int numargs),
+{
+    int val = numargs > 0 ? args[0].getint() : 0;
+    loopi(numargs - 1) val *= args[i + 1].getint();
+    intret(val);
+});
+ICOMMAND(0, div, "V", (tagval *args, int numargs),
+{
+    int val = numargs > 0 ? args[0].getint() : 0;
+    loopi(numargs - 1)
+        if(args[i + 1].getint() != 0) val /= args[i + 1].getint();
+        else val = 0;
+    intret(val);
+});
+ICOMMAND(0, +f, "V", (tagval *args, int numargs),
+{
+    float val = numargs > 0 ? args[0].getfloat() : 0;
+    loopi(numargs - 1) val += args[i + 1].getfloat();
+    floatret(val);
+});
+ICOMMAND(0, -f, "V", (tagval *args, int numargs),
+{
+    float val = numargs > 0 ? args[0].getfloat() : 0;
+    loopi(numargs - 1) val -= args[i + 1].getfloat();
+    floatret(val);
+});
+ICOMMAND(0, *f, "V", (tagval *args, int numargs),
+{
+    float val = numargs > 0 ? args[0].getfloat() : 0;
+    loopi(numargs - 1) val *= args[i + 1].getfloat();
+    floatret(val);
+});
+ICOMMAND(0, divf, "V", (tagval *args, int numargs),
+{
+    float val = numargs > 0 ? args[0].getfloat() : 0;
+    loopi(numargs - 1)
+        if(args[i + 1].getfloat() != 0) val /= args[i + 1].getfloat();
+        else val = 0;
+    floatret(val);
+});
 ICOMMAND(0, =, "ii", (int *a, int *b), intret((int)(*a == *b)));
 ICOMMAND(0, !=, "ii", (int *a, int *b), intret((int)(*a != *b)));
 ICOMMAND(0, <, "ii", (int *a, int *b), intret((int)(*a < *b)));
@@ -2588,9 +2634,7 @@ ICOMMAND(0, ||, "e1V", (tagval *args, int numargs),
     }
 });
 
-ICOMMAND(0, div, "ii", (int *a, int *b), intret(*b ? *a / *b : 0));
 ICOMMAND(0, mod, "ii", (int *a, int *b), intret(*b ? *a % *b : 0));
-ICOMMAND(0, divf, "ff", (float *a, float *b), floatret(*b ? *a / *b : 0));
 ICOMMAND(0, modf, "ff", (float *a, float *b), floatret(*b ? fmod(*a, *b) : 0));
 ICOMMAND(0, sin, "f", (float *a), floatret(sin(*a*RAD)));
 ICOMMAND(0, cos, "f", (float *a), floatret(cos(*a*RAD)));
