@@ -199,6 +199,7 @@ extern void addident(ident *id);
 
 extern tagval *commandret;
 extern const char *intstr(int v);
+extern const char *intstr(ident *id);
 extern void intret(int v);
 extern const char *floatstr(float v);
 extern void floatret(float v);

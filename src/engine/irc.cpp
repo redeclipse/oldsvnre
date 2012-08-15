@@ -125,7 +125,8 @@ void converttext(char *dst, const char *src)
 
 void ircoutf(int relay, const char *msg, ...)
 {
-    defvformatstring(src, msg, msg); mkstring(str);
+    defvformatstring(src, msg, msg);
+    mkstring(str);
     switch(ircfilter)
     {
         case 2: filtertext(str, src); break;

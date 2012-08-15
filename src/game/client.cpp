@@ -572,7 +572,8 @@ namespace client
 
     void saytext(gameent *d, int flags, char *text)
     {
-        filtertext(text, text, true, colourchat ? false : true); mkstring(s);
+        filtertext(text, text, true, colourchat ? false : true);
+        mkstring(s);
         defformatstring(m)("%s", game::colorname(d));
         if(flags&SAY_TEAM)
         {
@@ -616,21 +617,18 @@ namespace client
         ident *id = idents.access(cmd);
         if(id && id->flags&IDF_CLIENT)
         {
-            string val;
-            val[0] = 0;
+            const char *val = NULL;
             switch(id->type)
             {
                 case ID_COMMAND:
                 {
 #if 0 // these shouldn't get here
-                    string s;
-                    formatstring(s)("%s %s", cmd, arg);
+                    int slen = strlen(cmd)+strlen(arg);
+                    char *s = newstring(slen);
                     char *ret = executestr(s);
-                    if(ret)
-                    {
-                        conoutft(CON_EVENT, "\fc%s: %s", cmd, ret);
-                        delete[] ret;
-                    }
+                    delete[] s;
+                    if(ret) conoutft(CON_EVENT, "\fc%s: %s", cmd, ret);
+                    delete[] ret;
 #endif
                     return;
                 }
@@ -639,7 +637,7 @@ namespace client
                     int ret = parseint(arg);
                     *id->storage.i = ret;
                     id->changed();
-                    formatstring(val)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                    val = intstr(id);
                     break;
                 }
                 case ID_FVAR:
@@ -647,7 +645,7 @@ namespace client
                     float ret = parsefloat(arg);
                     *id->storage.f = ret;
                     id->changed();
-                    formatstring(val)("%s", floatstr(*id->storage.f));
+                    val = floatstr(*id->storage.f);
                     break;
                 }
                 case ID_SVAR:
@@ -655,12 +653,12 @@ namespace client
                     delete[] *id->storage.s;
                     *id->storage.s = newstring(arg);
                     id->changed();
-                    formatstring(val)("%s", *id->storage.s);
+                    val = *id->storage.s;
                     break;
                 }
                 default: return;
             }
-            if(d || verbose >= 2)
+            if((d || verbose >= 2) && val)
                 conoutft(CON_EVENT, "\fc%s set %s to %s", d ? game::colorname(d) : (connected(false) ? "the server" : "you"), cmd, val);
         }
         else if(verbose) conoutft(CON_EVENT, "\fr%s sent unknown command: %s", d ? game::colorname(d) : "the server", cmd);
@@ -670,7 +668,7 @@ namespace client
     {
         if(connected(false))
         {
-            addmsg(N_COMMAND, "ri2ss", game::player1->clientnum, nargs, cmd, arg);
+            addmsg(N_COMMAND, "ri2sis", game::player1->clientnum, nargs, cmd, strlen(arg), arg);
             return true;
         }
         else
@@ -887,10 +885,10 @@ namespace client
                     addmsg(N_EDITVAR, "risf", id->type, id->name, *id->storage.f);
                     break;
                 case ID_SVAR:
-                    addmsg(N_EDITVAR, "riss", id->type, id->name, *id->storage.s);
+                    addmsg(N_EDITVAR, "risis", id->type, id->name, strlen(*id->storage.s), *id->storage.s);
                     break;
                 case ID_ALIAS:
-                    addmsg(N_EDITVAR, "riss", id->type, id->name, id->getstr());
+                    addmsg(N_EDITVAR, "risis", id->type, id->name, strlen(id->getstr()), id->getstr());
                     break;
                 default: break;
             }
@@ -1391,10 +1389,12 @@ namespace client
                 {
                     int lcn = getint(p);
                     gameent *f = lcn >= 0 ? game::getclient(lcn) : NULL;
-                    string cmd;
-                    getstring(cmd, p);
                     getstring(text, p);
-                    parsecommand(f, cmd, text);
+                    int alen = getint(p);
+                    char *arg = newstring(alen);
+                    getstring(arg, p, alen+1);
+                    parsecommand(f, text, arg);
+                    delete[] arg;
                     break;
                 }
 
@@ -1798,8 +1798,7 @@ namespace client
                                 if(val > id->maxval) val = id->maxval;
                                 else if(val < id->minval) val = id->minval;
                                 setvar(text, val, true);
-                                defformatstring(str)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
-                                conoutft(CON_EVENT, "\fc%s set worldvar %s to %s", game::colorname(d), id->name, str);
+                                conoutft(CON_EVENT, "\fc%s set worldvar %s to %s", game::colorname(d), id->name, intstr(id));
                             }
                             break;
                         }
@@ -1817,24 +1816,28 @@ namespace client
                         }
                         case ID_SVAR:
                         {
-                            string val;
-                            getstring(val, p);
+                            int vlen = getint(p);
+                            char *val = newstring(vlen);
+                            getstring(val, p, vlen+1);
                             if(commit)
                             {
                                 setsvar(text, val, true);
                                 conoutft(CON_EVENT, "\fc%s set worldvar %s to %s", game::colorname(d), id->name, *id->storage.s);
                             }
+                            delete[] val;
                             break;
                         }
                         case ID_ALIAS:
                         {
-                            string val;
-                            getstring(val, p);
+                            int vlen = getint(p);
+                            char *val = newstring(vlen);
+                            getstring(val, p, vlen+1);
                             if(commit || !id) // set aliases anyway
                             {
                                 worldalias(text, val);
                                 conoutft(CON_EVENT, "\fc%s set worldalias %s to %s", game::colorname(d), text, val);
                             }
+                            delete[] val;
                             break;
                         }
                         default: break;
@@ -2262,7 +2265,8 @@ namespace client
 
                 default:
                 {
-                    neterr("type");
+                    defformatstring(err)("type (got %d)", type);
+                    neterr(err);
                     return;
                 }
             }

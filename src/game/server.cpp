@@ -705,8 +705,8 @@ namespace server
         return 0;
     }
 
-    #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2ss", N_COMMAND, -1, &((const char *)#a)[3], #b); } }
-    #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2ss", N_COMMAND, -1, &((const char *)#a)[3], #b); } }
+    #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &((const char *)#a)[3], strlen(#b), #b); } }
+    #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &((const char *)#a)[3], strlen(#b), #b); } }
 
     //void eastereggs()
     //{
@@ -722,36 +722,35 @@ namespace server
     int numgamevars = 0, numgamemods = 0;
     void resetgamevars(bool flush)
     {
-        string val;
         numgamevars = numgamemods = 0;
         enumerate(idents, ident, id, {
             if(id.flags&IDF_SERVER) // reset vars
             {
-                val[0] = 0;
+                const char *val = NULL;
                 numgamevars++;
                 switch(id.type)
                 {
                     case ID_VAR:
                     {
                         setvar(id.name, id.def.i, true);
-                        if(flush) formatstring(val)(id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id.storage.i);
+                        if(flush) val = intstr(&id);
                         break;
                     }
                     case ID_FVAR:
                     {
                         setfvar(id.name, id.def.f, true);
-                        if(flush) formatstring(val)("%f", *id.storage.f);
+                        if(flush) val = floatstr(*id.storage.f);
                         break;
                     }
                     case ID_SVAR:
                     {
                         setsvar(id.name, id.def.s && *id.def.s ? id.def.s : "", true);
-                        if(flush) formatstring(val)("%s", *id.storage.s);
+                        if(flush) val = *id.storage.s;
                         break;
                     }
                     default: break;
                 }
-                if(flush) sendf(-1, 1, "ri2ss", N_COMMAND, -1, &id.name[3], val);
+                if(flush && val) sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id.name[3], strlen(val), val);
             }
         });
 #ifndef STANDALONE
@@ -774,7 +773,7 @@ namespace server
         if(sv_gamepaused != (on ? 1 : 0))
         {
             setvar("sv_gamepaused", on ? 1 : 0, true);
-            sendf(-1, 1, "ri2ss", N_COMMAND, -1, "gamepaused", on ? "1" : "0");
+            sendf(-1, 1, "ri2sis", N_COMMAND, -1, "gamepaused", 1, on ? "1" : "0");
         }
     }
 
@@ -794,7 +793,7 @@ namespace server
         if(sv_botoffset != 0)
         {
             setvar("sv_botoffset", 0, true);
-            sendf(-1, 1, "ri2ss", N_COMMAND, -1, "botoffset", "0");
+            sendf(-1, 1, "ri2sis", N_COMMAND, -1, "botoffset", 1, "0");
         }
         if(GAME(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetbansonend)) resetbans();
@@ -910,7 +909,8 @@ namespace server
 
     bool cmppriv(clientinfo *ci, clientinfo *cp, const char *msg = NULL)
     {
-        mkstring(str); if(msg && *msg) formatstring(str)("%s %s", msg, colorname(cp));
+        mkstring(str);
+        if(msg && *msg) formatstring(str)("%s %s", msg, colorname(cp));
         if(haspriv(ci, cp->local ? PRIV_MAX : cp->privilege, str)) return true;
         return false;
     }
@@ -1850,7 +1850,7 @@ namespace server
         if(sv_botoffset != 0)
         {
             setvar("sv_botoffset", 0, true);
-            sendf(-1, 1, "ri2ss", N_COMMAND, -1, "botoffset", "0");
+            sendf(-1, 1, "ri2sis", N_COMMAND, -1, "botoffset", 1, "0");
         }
         if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetvarsonend) >= 2) resetgamevars(true);
@@ -2424,15 +2424,18 @@ namespace server
         ident *id = idents.access(cmd);
         if(id && id->flags&IDF_SERVER)
         {
-            static string scmdval; scmdval[0] = 0;
+            const char *val = NULL;
             switch(id->type)
             {
                 case ID_COMMAND:
                 {
-                    string s;
-                    if(nargs <= 1 || !arg) formatstring(s)("%s", id->name);
-                    else formatstring(s)("%s %s", id->name, arg);
+                    int slen = strlen(id->name);
+                    if(arg && nargs > 1) slen += strlen(arg)+1;
+                    char *s = newstring(slen);
+                    if(nargs <= 1 || !arg) formatstring(s)(slen, "%s", id->name);
+                    else formatstring(s)(slen, "%s %s", id->name, arg);
                     char *ret = executestr(s);
+                    delete[] s;
                     if(ret)
                     {
                         if(*ret) conoutft(CON_MESG, "\fc%s returned %s", id->name, ret);
@@ -2464,7 +2467,7 @@ namespace server
                     checkvar(id, arg);
                     *id->storage.i = ret;
                     id->changed();
-                    formatstring(scmdval)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                    val = intstr(id);
                     break;
                 }
                 case ID_FVAR:
@@ -2483,7 +2486,7 @@ namespace server
                     checkvar(id, arg);
                     *id->storage.f = ret;
                     id->changed();
-                    formatstring(scmdval)("%s", floatstr(*id->storage.f));
+                    val = floatstr(*id->storage.f);
                     break;
                 }
                 case ID_SVAR:
@@ -2497,13 +2500,16 @@ namespace server
                     delete[] *id->storage.s;
                     *id->storage.s = newstring(arg);
                     id->changed();
-                    formatstring(scmdval)("%s", *id->storage.s);
+                    val = *id->storage.s;
                     break;
                 }
                 default: return false;
             }
-            sendf(-1, 1, "ri2ss", N_COMMAND, -1, &id->name[3], scmdval);
-            arg = scmdval;
+            if(val)
+            {
+                sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id->name[3], strlen(val), val);
+                arg = val;
+            }
             return true;
         }
         return false; // parse will spit out "unknown command" in this case
@@ -2515,8 +2521,7 @@ namespace server
         ident *id = idents.access(cmdname);
         if(id && id->flags&IDF_SERVER)
         {
-            const char *name = &id->name[3];
-            mkstring(val);
+            const char *name = &id->name[3], *val = NULL;
             int locked = max(id->flags&IDF_ADMIN ? 3 : 0, GAME(varslock));
             if(!strcmp(id->name, "sv_gamespeed") && GAME(gamespeedlock) > locked) locked = GAME(gamespeedlock);
             switch(id->type)
@@ -2524,13 +2529,16 @@ namespace server
                 case ID_COMMAND:
                 {
                     if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "execute that command")) return;
-                    string s;
+                    int slen = strlen(id->name);
+                    if(arg && nargs > 1) slen += strlen(arg)+1;
+                    char *s = newstring(slen);
                     if(nargs <= 1 || !arg) formatstring(s)("%s", id->name);
                     else formatstring(s)("%s %s", id->name, arg);
                     char *ret = executestr(s);
+                    delete[] s;
                     if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), name, ret);
                     else srvoutf(-3, "\fc%s executed %s", colorname(ci), name);
-                    if(ret) delete[] ret;
+                    delete[] ret;
                     return;
                 }
                 case ID_VAR:
@@ -2542,8 +2550,8 @@ namespace server
                     }
                     else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change that variable"))
                     {
-                        formatstring(val)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
-                        sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, name, val);
+                        val = intstr(id);
+                        sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
                         return;
                     }
                     if(id->maxval < id->minval)
@@ -2563,7 +2571,7 @@ namespace server
                     checkvar(id, arg);
                     *id->storage.i = ret;
                     id->changed();
-                    formatstring(val)(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+                    val = intstr(id);
                     break;
                 }
                 case ID_FVAR:
@@ -2576,7 +2584,7 @@ namespace server
                     else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change that variable"))
                     {
                         formatstring(val)("%s", floatstr(*id->storage.f));
-                        sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, name, val);
+                        sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
                         return;
                     }
                     float ret = parsefloat(arg);
@@ -2588,7 +2596,7 @@ namespace server
                     checkvar(id, arg);
                     *id->storage.f = ret;
                     id->changed();
-                    formatstring(val)("%s", floatstr(*id->storage.f));
+                    val = floatstr(*id->storage.f);
                     break;
                 }
                 case ID_SVAR:
@@ -2600,21 +2608,24 @@ namespace server
                     }
                     else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change that variable"))
                     {
-                        formatstring(val)("%s", *id->storage.s);
-                        sendf(ci->clientnum, 1, "ri2ss", N_COMMAND, -1, name, val);
+                        val = *id->storage.s;
+                        sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
                         return;
                     }
                     checkvar(id, arg);
                     delete[] *id->storage.s;
                     *id->storage.s = newstring(arg);
                     id->changed();
-                    formatstring(val)("%s", *id->storage.s);
+                    val = *id->storage.s;
                     break;
                 }
                 default: return;
             }
-            sendf(-1, 1, "ri2ss", N_COMMAND, ci->clientnum, name, val);
-            relayf(3, "\fc%s set %s to %s", colorname(ci), name, val);
+            if(val)
+            {
+                sendf(-1, 1, "ri2sis", N_COMMAND, ci->clientnum, name, strlen(val), val);
+                relayf(3, "\fc%s set %s to %s", colorname(ci), name, val);
+            }
         }
         else srvmsgf(ci->clientnum, "\frunknown command: %s", cmd);
     }
@@ -2762,30 +2773,34 @@ namespace server
         enumerate(idents, ident, id, {
             if(id.flags&IDF_SERVER) // reset vars
             {
-                mkstring(val);
+                const char *val = NULL;
                 switch(id.type)
                 {
                     case ID_VAR:
                     {
-                        formatstring(val)(id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id.storage.i);
+                        val = intstr(&id);
                         break;
                     }
                     case ID_FVAR:
                     {
-                        formatstring(val)("%s", floatstr(*id.storage.f));
+                        val = floatstr(*id.storage.f);
                         break;
                     }
                     case ID_SVAR:
                     {
-                        formatstring(val)("%s", *id.storage.s);
+                        val = *id.storage.s;
                         break;
                     }
                     default: break;
                 }
-                putint(p, N_COMMAND);
-                putint(p, -1);
-                sendstring(&id.name[3], p);
-                sendstring(val, p);
+                if(val)
+                {
+                    putint(p, N_COMMAND);
+                    putint(p, -1);
+                    sendstring(&id.name[3], p);
+                    putint(p, strlen(val));
+                    sendstring(val, p);
+                }
             }
         });
 
@@ -2991,7 +3006,7 @@ namespace server
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
-                if(!firstblood && actor->state.aitype == AI_NONE && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
+                if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && (m_campaign(gamemode) ? target->state.aitype >= AI_START : target->state.aitype < AI_START))
                 {
                     firstblood = true;
                     style |= FRAG_FIRSTBLOOD;
@@ -4606,11 +4621,12 @@ namespace server
                 {
                     int lcn = getint(p), nargs = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    string cmd;
-                    getstring(cmd, p);
                     getstring(text, p);
-                    if(!hasclient(cp, ci)) break;
-                    parsecommand(cp, nargs, cmd, text);
+                    int alen = getint(p);
+                    char *arg = newstring(alen);
+                    getstring(arg, p, alen+1);
+                    if(hasclient(cp, ci)) parsecommand(cp, nargs, text, arg);
+                    delete[] arg;
                     break;
                 }
 
@@ -4965,7 +4981,12 @@ namespace server
                         {
                             case ID_VAR: getint(p); break;
                             case ID_FVAR: getfloat(p); break;
-                            case ID_SVAR: case ID_ALIAS: getstring(text, p); break;
+                            case ID_SVAR: case ID_ALIAS:
+                            {
+                                int vlen = getint(p);
+                                getstring(text, p, vlen+1);
+                                break;
+                            }
                             default: break;
                         }
                         break;
@@ -4992,10 +5013,13 @@ namespace server
                         case ID_SVAR:
                         case ID_ALIAS:
                         {
-                            string val;
-                            getstring(val, p);
+                            int vlen = getint(p);
+                            char *val = newstring(vlen);
+                            getstring(val, p, vlen+1);
                             relayf(3, "\fc%s set world%s %s to %s", colorname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
+                            QUEUE_INT(vlen);
                             QUEUE_STR(val);
+                            delete[] val;
                             break;
                         }
                         default: break;
