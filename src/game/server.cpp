@@ -705,8 +705,8 @@ namespace server
         return 0;
     }
 
-    #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &((const char *)#a)[3], strlen(#b), #b); } }
-    #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &((const char *)#a)[3], strlen(#b), #b); } }
+    #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
+    #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
 
     //void eastereggs()
     //{
@@ -2532,8 +2532,8 @@ namespace server
                     int slen = strlen(id->name);
                     if(arg && nargs > 1) slen += strlen(arg)+1;
                     char *s = newstring(slen);
-                    if(nargs <= 1 || !arg) formatstring(s)("%s", id->name);
-                    else formatstring(s)("%s %s", id->name, arg);
+                    if(nargs <= 1 || !arg) formatstring(s)(slen, "%s", id->name);
+                    else formatstring(s)(slen, "%s %s", id->name, arg);
                     char *ret = executestr(s);
                     delete[] s;
                     if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), name, ret);
@@ -4609,6 +4609,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     getstring(text, p);
                     int alen = getint(p);
+                    if(alen < 0 || alen > p.remaining()) break;
                     char *arg = newstring(alen);
                     getstring(arg, p, alen+1);
                     if(hasclient(cp, ci)) parsecommand(cp, nargs, text, arg);
@@ -4970,6 +4971,7 @@ namespace server
                             case ID_SVAR: case ID_ALIAS:
                             {
                                 int vlen = getint(p);
+                                if(vlen < 0 || vlen > p.remaining()) break;
                                 getstring(text, p, vlen+1);
                                 break;
                             }
@@ -5000,6 +5002,7 @@ namespace server
                         case ID_ALIAS:
                         {
                             int vlen = getint(p);
+                            if(vlen < 0 || vlen > p.remaining()) break;
                             char *val = newstring(vlen);
                             getstring(val, p, vlen+1);
                             relayf(3, "\fc%s set world%s %s to %s", colorname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
