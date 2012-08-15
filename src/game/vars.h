@@ -28,9 +28,9 @@ GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_
 GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
 
-GSVAR(IDF_ADMIN, allowmaps, "ares bath biolytic blink cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone lab linear longestyard mist neodrive nova panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "ares bath biolytic blink cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone lab linear longestyard mist neodrive nova oneiroi panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
 
-GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deathtrap deli depot dropzone dutility echo error foundation fourplex futuresport ghost industrial institute isolation keystone linear longestyard mist nova panic processing pumpstation spacetech starlibido stone tower tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deathtrap deli depot dropzone dutility echo error foundation fourplex futuresport ghost industrial institute isolation keystone linear longestyard mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone linear mist nova panic pumpstation stone tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation futuresport fourplex ghost industrial isolation linear mist nova pumpstation stone tower tribal venus warp wet");
@@ -39,10 +39,10 @@ GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
 
 GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
-GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation fourplex futuresport ghost isolation keystone linear longestyard mist nova pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation fourplex futuresport ghost isolation keystone linear longestyard mist nova oneiroi pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
 
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
-GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink cargo center colony conflict darkness deadsimple deathtrap deli dropzone echo error facility forge foundation fourplex futuresport ghost industrial institute isolation keystone lab linear mist nova panic processing pumpstation spacetech starlibido stone tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink cargo center colony conflict darkness deadsimple deathtrap deli dropzone echo error facility forge foundation fourplex futuresport ghost industrial institute isolation keystone lab linear mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, largemaps, "ares biolytic blink cargo center colony dawn deadsimple deathtrap deli depot error facility forge foundation futuresport ghost industrial isolation lab linear mist nova processing pumpstation spacetech tower tranquility tribal ubik venus warp");
 
 
