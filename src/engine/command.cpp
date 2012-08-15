@@ -2089,6 +2089,13 @@ const char *intstr(int v)
     return retbuf[retidx];
 }
 
+const char *intstr(ident *id)
+{
+    retidx = (retidx + 1)%3;
+    formatstring(retbuf[retidx])(id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "0x%.6X" : "0x%X") : "%d", *id->storage.i);
+    return retbuf[retidx];
+}
+
 void intret(int v)
 {
     commandret->setint(v);
@@ -2770,7 +2777,8 @@ ICOMMAND(0, getmillis, "i", (int *total), intret(*total ? totalmillis : lastmill
 
 void getvariable(int num)
 {
-    mkstring(text); num--;
+    mkstring(text);
+    num--;
     static vector<ident *> ids;
     static int lastupdate = 0;
     if(ids.empty() || !lastupdate || totalmillis-lastupdate >= 60000)

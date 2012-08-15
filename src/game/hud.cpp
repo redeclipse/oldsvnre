@@ -1341,30 +1341,35 @@ namespace hud
                                 }
                                 case ID_COMMAND:
                                 {
+                                    z += draw_textx("%scommand", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype);
                                     if(strlen(id->args))
-                                        z += draw_textx("%scommand -> \faargs: \fw%d \fa(\fw%s\fa)", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, strlen(id->args), id->args);
-                                    else z += draw_textx("%scommand -> \faargs: \fwnone", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype);
+                                        z += draw_textx("\faargs: \fw%d \fa(\fw%s\fa)", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), strlen(id->args), id->args);
+                                    else
+                                        z += draw_textx("\faargs: \fwnone", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW));
                                     break;
                                 }
                                 case ID_VAR:
                                 {
+                                    z += draw_textx("%sinteger", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype);
                                     if(id->flags&IDF_HEX)
                                     {
                                         if(id->maxval == 0xFFFFFF)
-                                            z += draw_textx("%sinteger -> \famin: \fw0x%.6X\fa, max: \fw0x%.6X\fa, default: \fw0x%.6X\fa, current: \fw0x%.6X", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, id->minval, id->maxval, id->def.i, *id->storage.i);
-                                        else z += draw_textx("%sinteger -> \famin: \fw0x%X\fa, max: \fw0x%X\fa, default: \fw0x%X\fa, current: \fw0x%X", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, id->minval, id->maxval, id->def.i, *id->storage.i);
+                                            z += draw_textx("\famin: \fw0x%.6X\fa, max: \fw0x%.6X\fa, default: \fw0x%.6X\fa, current: \fw0x%.6X", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->minval, id->maxval, id->def.i, *id->storage.i);
+                                        else z += draw_textx("\famin: \fw0x%X\fa, max: \fw0x%X\fa, default: \fw0x%X\fa, current: \fw0x%X", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->minval, id->maxval, id->def.i, *id->storage.i);
                                     }
-                                    else z += draw_textx("%sinteger -> \famin: \fw%d\fa, max: \fw%d\fa, default: \fw%d\fa, current: \fw%d", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, id->minval, id->maxval, id->def.i, *id->storage.i);
+                                    else z += draw_textx("\famin: \fw%d\fa, max: \fw%d\fa, default: \fw%d\fa, current: \fw%d", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->minval, id->maxval, id->def.i, *id->storage.i);
                                     break;
                                 }
                                 case ID_FVAR:
                                 {
-                                    z += draw_textx("%sfloat -> \famin: \fw%f\fa, max: \fw%f\fa, default: \fw%f\fa, current: \fw%f", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, id->minvalf, id->maxvalf, id->def.f, *id->storage.f);
+                                    z += draw_textx("%sfloat", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype);
+                                    z += draw_textx("\famin: \fw%f\fa, max: \fw%f\fa, default: \fw%f\fa, current: \fw%f", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->minvalf, id->maxvalf, id->def.f, *id->storage.f);
                                     break;
                                 }
                                 case ID_SVAR:
                                 {
-                                    z += draw_textx("%s%s -> \fadefault: \fw%s\fa, current: \fw%s", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, id->flags&IDF_TEXTURE ? "texture" : "string", id->def.s, *id->storage.s);
+                                    z += draw_textx("%s%s", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), idtype, id->flags&IDF_TEXTURE ? "texture" : "string");
+                                    z += draw_textx("\fadefault: \fw%s\fa, current: \fw%s", (concenter ? x+s/2-FONTW*3 : x), y+z, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, s-(FONTH+FONTW), id->def.s, *id->storage.s);
                                     break;
                                 }
                             }

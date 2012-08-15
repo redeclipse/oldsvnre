@@ -1365,7 +1365,9 @@ bool serveroption(char *opt)
 
 bool findoctadir(const char *name, bool fallback)
 {
-    mkstring(s); copystring(s, name); path(s);
+    mkstring(s);
+    copystring(s, name);
+    path(s);
     defformatstring(octadefs)("%s/data/default_map_settings.cfg", s);
     if(fileexists(findfile(octadefs, "r"), "r"))
     {

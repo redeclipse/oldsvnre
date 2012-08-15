@@ -3,7 +3,7 @@ enum
     WEAP_MELEE = 0, WEAP_PISTOL, WEAP_OFFSET, // end of unselectable weapon set
     WEAP_SWORD = WEAP_OFFSET, WEAP_SHOTGUN, WEAP_SMG, WEAP_FLAMER, WEAP_PLASMA, WEAP_RIFLE, WEAP_ITEM,
     WEAP_GRENADE = WEAP_ITEM, WEAP_ROCKET, // end of item weapon set
-    WEAP_MAX
+    WEAP_MAX, WEAP_LOADOUT = WEAP_ITEM-WEAP_OFFSET
 };
 #define isweap(a)       (a >= 0 && a < WEAP_MAX)
 
@@ -531,3 +531,21 @@ WEAPDEF2(float, flakskew);
 WEAPDEF2(float, flakminspeed);
 WEAPDEF2(int, flakcollide);
 WEAPDEF2(int, parttype);
+
+#ifdef GAMESERVER
+SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma rifle grenade rocket");
+VAR(0, weapidxmelee, -1, WEAP_MELEE, 1);
+VAR(0, weapidxpistol, -1, WEAP_PISTOL, 1);
+VAR(0, weapidxsword, -1, WEAP_SWORD, 1);
+VAR(0, weapidxshotgun, -1, WEAP_SHOTGUN, 1);
+VAR(0, weapidxsmg, -1, WEAP_SMG, 1);
+VAR(0, weapidxflamer, -1, WEAP_FLAMER, 1);
+VAR(0, weapidxplasma, -1, WEAP_PLASMA, 1);
+VAR(0, weapidxrifle, -1, WEAP_RIFLE, 1);
+VAR(0, weapidxgrenade, -1, WEAP_GRENADE, 1);
+VAR(0, weapidxrocket, -1, WEAP_ROCKET, 1);
+VAR(0, weapidxoffset, -1, WEAP_OFFSET, 1);
+VAR(0, weapidxitem, -1, WEAP_ITEM, 1);
+VAR(0, weapidxloadout, -1, WEAP_LOADOUT, 1);
+VAR(0, weapidxnum, -1, WEAP_MAX, 1);
+#endif

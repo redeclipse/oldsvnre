@@ -152,6 +152,13 @@ struct stringformatter
         vformatstring(buf, fmt, v);
         va_end(v);
     }
+    void operator()(int len, const char *fmt, ...)
+    {
+        va_list v;
+        va_start(v, fmt);
+        vformatstring(buf, fmt, v, len);
+        va_end(v);
+    }
 };
 
 #define formatstring(d) stringformatter((char *)d)
