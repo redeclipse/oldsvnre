@@ -156,7 +156,7 @@ struct stringformatter
     {
         va_list v;
         va_start(v, fmt);
-        vformatstring(buf, fmt, v, len);
+        vformatstring(buf, fmt, v, len+1);
         va_end(v);
     }
 };

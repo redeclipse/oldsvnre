@@ -623,8 +623,9 @@ namespace client
                 case ID_COMMAND:
                 {
 #if 0 // these shouldn't get here
-                    int slen = strlen(cmd)+strlen(arg);
-                    char *s = newstring(slen);
+                    int slen = strlen(cmd)+1+strlen(arg);
+                    char *s = newstring(slen+1);
+                    formatstring(s)(slen, "%s %s", cmd, arg);
                     char *ret = executestr(s);
                     delete[] s;
                     if(ret) conoutft(CON_EVENT, "\fc%s: %s", cmd, ret);
@@ -888,8 +889,11 @@ namespace client
                     addmsg(N_EDITVAR, "risis", id->type, id->name, strlen(*id->storage.s), *id->storage.s);
                     break;
                 case ID_ALIAS:
-                    addmsg(N_EDITVAR, "risis", id->type, id->name, strlen(id->getstr()), id->getstr());
+                {
+                    const char *s = id->getstr();
+                    addmsg(N_EDITVAR, "risis", id->type, id->name, strlen(s), s);
                     break;
+                }
                 default: break;
             }
         }
@@ -1391,6 +1395,7 @@ namespace client
                     gameent *f = lcn >= 0 ? game::getclient(lcn) : NULL;
                     getstring(text, p);
                     int alen = getint(p);
+                    if(alen < 0 || alen > p.remaining()) break;
                     char *arg = newstring(alen);
                     getstring(arg, p, alen+1);
                     parsecommand(f, text, arg);
@@ -1817,6 +1822,7 @@ namespace client
                         case ID_SVAR:
                         {
                             int vlen = getint(p);
+                            if(vlen < 0 || vlen > p.remaining()) break;
                             char *val = newstring(vlen);
                             getstring(val, p, vlen+1);
                             if(commit)
@@ -1830,6 +1836,7 @@ namespace client
                         case ID_ALIAS:
                         {
                             int vlen = getint(p);
+                            if(vlen < 0 || vlen > p.remaining()) break;
                             char *val = newstring(vlen);
                             getstring(val, p, vlen+1);
                             if(commit || !id) // set aliases anyway
