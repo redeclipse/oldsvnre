@@ -39,6 +39,7 @@ Modes & Mutators:
  * Added "gamespeedlock" to independently allow servers to unlock "gamespeed" (still checks varslock though)
  * Added {mode,muts}idxname variables for mode and mutator values
  * Added server variable "<weap>reloads" now defines the number of times a weapon can reload (-1 = infinite, 0 = never, 1+ = count)
+ * Bomber-ball basket (possible to score by throwing ball into goal) set as the default, moved from mutator to server-side variable (bomberbasket)
 
 Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
@@ -86,6 +87,7 @@ Additional Fixed Bugs:
  * #120 - -g option does not work with absolute paths
  * #177 - (roughly) predict time remaining in server list
  * #102 - Some flat geometry walls acts as crouch-entrance
+ * #189 - overcome MAXSTRLEN limitation in N_COMMAND/N_EDITVAR by dynamically allocating and transmitting arguments
 
 
 = Red Eclipse 1.2 =
