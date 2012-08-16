@@ -85,6 +85,14 @@ namespace server
         void process(clientinfo *ci);
     };
 
+    struct stickyevent : timedevent
+    {
+        int id, weap, flags, target;
+        ivec pos;
+        bool keepable() const { return true; }
+        void process(clientinfo *ci);
+    };
+
     struct suicideevent : gameevent
     {
         int flags;
@@ -3233,6 +3241,24 @@ namespace server
         }
     }
 
+    void stickyevent::process(clientinfo *ci)
+    {
+        servstate &gs = ci->state;
+        if(isweap(weap))
+        {
+            if(!gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
+            {
+                if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
+                return;
+            }
+            clientinfo *victim = (clientinfo *)getinfo(target);
+            if(victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators)))
+                sendf(-1, 1, "ri7x", N_STICKY, ci->clientnum, target, id, pos.x, pos.y, pos.z, ci->clientnum);
+            else if(GAME(serverdebug) >= 2)
+                srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
+        }
+    }
+
     bool weaponjam(clientinfo *ci, int millis, int weap, int load)
     {
         if(isweap(weap) && GAME(weaponjamming) && WEAP(weap, jamchance))
@@ -4444,7 +4470,7 @@ namespace server
                     break;
                 }
 
-                case N_DESTROY: // cn millis weap id radial hits
+                case N_DESTROY: // cn millis weap flags id radial hits
                 {
                     int lcn = getint(p), millis = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
@@ -4468,6 +4494,23 @@ namespace server
                         hit.dist = getint(p);
                         loopk(3) hit.dir[k] = getint(p);
                     }
+                    if(havecn) cp->events.add(ev);
+                    else delete ev;
+                    break;
+                }
+
+                case N_STICKY: // cn millis weap id flags target stickpos
+                {
+                    int lcn = getint(p), millis = getint(p);
+                    clientinfo *cp = (clientinfo *)getinfo(lcn);
+                    bool havecn = (cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum));
+                    stickyevent *ev = new stickyevent;
+                    ev->weap = getint(p);
+                    if(havecn) ev->millis = cp->getmillis(gamemillis, millis);
+                    ev->id = getint(p);
+                    ev->flags = getint(p);
+                    ev->target = getint(p);
+                    loopk(3) ev->pos[k] = getint(p);
                     if(havecn) cp->events.add(ev);
                     else delete ev;
                     break;

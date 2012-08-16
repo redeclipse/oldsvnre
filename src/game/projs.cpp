@@ -298,6 +298,17 @@ namespace projs
         }
     }
 
+    void sticky(gameent *d, int id, gameent *f, vec &pos)
+    {
+        loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
+        {
+            projs[i]->stuck = true;
+            projs[i]->stick = (gameent *)f;
+            projs[i]->stickpos = pos;
+            break;
+        }
+    }
+
     void reset()
     {
         collideprojs.setsize(0);
@@ -1405,6 +1416,9 @@ namespace projs
                     proj.stick = (gameent *)d;
                     proj.stickpos = vec(proj.o).sub(d->headpos(-d->height*0.5f));
                     proj.stickpos.rotate_around_z(-d->yaw*RAD);
+                    if(proj.owner && (proj.owner == game::player1 || proj.owner->ai))
+                        client::addmsg(N_STICKY, "ri9", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
+                                proj.stick->clientnum, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
                     return 1;
                 }
                 if(!hiteffect(proj, d, flags, proj.norm)) return 1;
@@ -1748,10 +1762,18 @@ namespace projs
                 }
                 if(proj.stuck && proj.stick)
                 {
-                    proj.o = proj.stickpos;
-                    proj.o.rotate_around_z(proj.stick->yaw*RAD);
-                    proj.o.add(proj.stick->headpos(-proj.stick->height*0.5f));
-                    proj.resetinterp();
+                    if(proj.stick->state != CS_ALIVE)
+                    {
+                        proj.stuck = false;
+                        proj.stick = NULL;
+                    }
+                    else
+                    {
+                        proj.o = proj.stickpos;
+                        proj.o.rotate_around_z(proj.stick->yaw*RAD);
+                        proj.o.add(proj.stick->headpos(-proj.stick->height*0.5f));
+                        proj.resetinterp();
+                    }
                 }
                 iter(proj);
                 if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)
