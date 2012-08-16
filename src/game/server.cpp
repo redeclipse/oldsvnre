@@ -4667,9 +4667,11 @@ namespace server
                     getstring(text, p);
                     ci->state.colour = max(getint(p), 0);
                     ci->state.model = max(getint(p), 0);
-                    if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
-                    copystring(ci->name, text, MAXNAMELEN+1);
+                    const char *namestr = text;
+                    while(*namestr && iscubespace(*namestr)) namestr++;
+                    if(!*namestr) namestr = copystring(text, "unnamed");
+                    copystring(ci->name, namestr, MAXNAMELEN+1);
                     relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
