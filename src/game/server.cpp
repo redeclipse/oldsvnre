@@ -4586,7 +4586,7 @@ namespace server
                                         sents[ent].spawned = !sents[ent].spawned;
                                         commit = kin = true;
                                     }
-                                    //else sendf(cp->clientnum, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
+                                    else sendf(cp->clientnum, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
                                     break;
                                 }
                                 case TR_ONCE: if(sents[ent].spawned) break;
@@ -4598,7 +4598,7 @@ namespace server
                                         sents[ent].spawned = true;
                                         commit = true;
                                     }
-                                    //else sendf(cp->clientnum, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
+                                    else sendf(cp->clientnum, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
                                     break;
                                 }
                                 case TR_EXIT:

@@ -447,8 +447,9 @@ namespace entities
             {
                 case TR_EXIT: if(d->aitype >= AI_BOT) break;
                 case TR_TOGGLE: case TR_LINK: case TR_ONCE:
-                { // wait for ack
+                {
                     client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
+                    setspawn(n, e.spawned ? 0 : 1);
                     break;
                 }
                 case TR_SCRIPT:
