@@ -226,9 +226,14 @@ namespace client
         if(name[0])
         {
             string text;
-            filtertext(text, name);
-            game::player1->setinfo(text, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model);
-            addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
+            filtertext(text, name, true, true, true, MAXNAMELEN);
+            const char *namestr = text;
+            while(*namestr && iscubespace(*namestr)) namestr++;
+            if(*namestr)
+            {
+                game::player1->setinfo(namestr, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model);
+                addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
+            }
         }
         if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playermodels[game::player1->model%NUMPLAYERMODELS][2]);
     }
@@ -1457,17 +1462,19 @@ namespace client
                     int colour = getint(p), model = getint(p);
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
-                    if(!text[0]) copystring(text, "unnamed");
-                    if(strcmp(d->name, text))
+                    const char *namestr = text;
+                    while(*namestr && iscubespace(*namestr)) namestr++;
+                    if(!*namestr) namestr = copystring(text, "unnamed");
+                    if(strcmp(d->name, namestr))
                     {
                         string oldname, newname;
                         copystring(oldname, game::colorname(d));
-                        d->setinfo(text, colour, model);
+                        d->setinfo(namestr, colour, model);
                         copystring(newname, game::colorname(d));
                         if(game::showplayerinfo && !isignored(d->clientnum))
                             conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    else d->setinfo(text, colour, model);
+                    else d->setinfo(namestr, colour, model);
                     break;
                 }
 
