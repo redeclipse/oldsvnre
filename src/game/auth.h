@@ -109,10 +109,10 @@ namespace auth
         }
         if(numclients() >= GAME(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
-        if(!ci->privilege && !checkipinfo(allows, ip))
+        if(!ci->privilege && !checkipinfo(control, ipinfo::ALLOW, ip))
         {
             if(mastermode >= MM_PRIVATE || serverpass[0]) return DISC_PRIVATE;
-            if(checkipinfo(bans, ip)) return DISC_IPBAN;
+            if(checkipinfo(control, ipinfo::BAN, ip)) return DISC_IPBAN;
         }
         return DISC_NONE;
     }
@@ -191,21 +191,20 @@ namespace auth
         else if(!strcmp(w[0], "failauth")) authfailed((uint)(atoi(w[1])));
         else if(!strcmp(w[0], "succauth")) authsucceeded((uint)(atoi(w[1])), w[2], w[3]);
         else if(!strcmp(w[0], "chalauth")) authchallenged((uint)(atoi(w[1])), w[2]);
-        else if(!strcmp(w[0], "ban") || !strcmp(w[0], "allow"))
+        else loopj(ipinfo::MAXTYPES) if(!strcmp(w[0], ipinfotypes[j]))
         {
-            ipinfo &p = (!strcmp(w[0], "ban") ? bans : allows).add();
+            ipinfo &p = control.add();
             p.ip = uint(atoi(w[1]));
             p.mask = uint(atoi(w[2]));
-            p.type = ipinfo::GLOBAL; // master info
+            p.type = j;
+            p.flag = ipinfo::GLOBAL; // master info
         }
-        //else if(w[0]) conoutf("authserv sent invalid command: %s", w[0]);
         loopj(numargs) if(w[j]) delete[] w[j];
     }
 
     void regserver()
     {
-        loopvrev(bans) if(bans[i].type == ipinfo::GLOBAL) bans.remove(i);
-        loopvrev(allows) if(allows[i].type == ipinfo::GLOBAL) allows.remove(i);
+        loopvrev(control) if(control[i].flag == ipinfo::GLOBAL) control.remove(i);
         conoutf("updating master server");
         requestmasterf("server %d\n", serverport);
         lastactivity = totalmillis;

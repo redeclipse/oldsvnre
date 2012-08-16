@@ -7,12 +7,18 @@ GSVAR(IDF_ADMIN, servermotd, "");
 GVAR(IDF_ADMIN, automaster, 0, 0, 1);
 GVAR(IDF_ADMIN, speclock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
 GVAR(IDF_ADMIN, kicklock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
+GVAR(IDF_ADMIN, allowlock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
 GVAR(IDF_ADMIN, banlock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
+GVAR(IDF_ADMIN, mutelock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
+GVAR(IDF_ADMIN, limitlock, 0, 1, 3); // 0 = master, 1 = auth, 2 = admin, 3 = nobody
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
 
+GVAR(IDF_ADMIN, resetallowsonend, 0, 1, 2); // reset allows on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetbansonend, 0, 1, 2); // reset bans on end (1: just when empty, 2: when matches end)
+GVAR(IDF_ADMIN, resetmutesonend, 0, 1, 2); // reset mutes on end (1: just when empty, 2: when matches end)
+GVAR(IDF_ADMIN, resetlimitsonend, 0, 1, 2); // reset limits on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just when empty, 2: when matches end)
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
 

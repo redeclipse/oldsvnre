@@ -397,14 +397,21 @@ namespace client
     }
     ICOMMAND(0, listclients, "i", (int *local), listclients(*local!=0));
 
-    void kickban(const char *arg, bool ban)
+    void control(const char *arg, int type)
     {
         int i = parseplayer(arg);
-        if(i>=0 && i!=game::player1->clientnum) addmsg(N_KICKBAN, "ri2", i, ban ? 1 : 0);
+        if(i >= 0) addmsg(N_CONTROL, "ri2", i, type);
     }
-    ICOMMAND(0, kick, "s", (char *s), kickban(s, false));
-    ICOMMAND(0, ban, "s", (char *s), kickban(s, true));
-    ICOMMAND(0, clearbans, "", (), addmsg(N_CLEARBANS, "r"));
+    ICOMMAND(0, kick, "s", (char *s), control(s, -1));
+    ICOMMAND(0, allow, "s", (char *s), control(s, ipinfo::ALLOW));
+    ICOMMAND(0, ban, "s", (char *s), control(s, ipinfo::BAN));
+    ICOMMAND(0, mute, "s", (char *s), control(s, ipinfo::MUTE));
+    ICOMMAND(0, limit, "s", (char *s), control(s, ipinfo::LIMIT));
+
+    ICOMMAND(0, clearallows, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::ALLOW));
+    ICOMMAND(0, clearbans, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::BAN));
+    ICOMMAND(0, clearmutes, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::MUTE));
+    ICOMMAND(0, clearlimits, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::LIMIT));
 
     vector<int> ignores;
     void ignore(int cn)
