@@ -810,7 +810,7 @@ bool vectocursor(const vec &v, float &x, float &y, float &z, float clampxy)
 {
     vec4 clippos;
     mvpmatrix.transform(v, clippos);
-    if(clippos.z <= -clippos.w) 
+    if(clippos.z <= -clippos.w)
     {
         x = y = z = 0;
         return false;
@@ -1905,7 +1905,7 @@ struct framebuffercopy
 };
 
 #define DTR 0.0174532925
-enum { VW_NORMAL = 0, VW_MAGIC, VW_STEREO, VW_STEREO_BLEND = VW_STEREO, VW_STEREO_BLEND_REDCYAN, VW_STEREO_AVG, VW_MAX, VW_STEREO_REDCYAN = VW_MAX };
+enum { VW_NORMAL = 0, VW_LEFTRIGHT, VW_CROSSEYED, VW_STEREO, VW_STEREO_BLEND = VW_STEREO, VW_STEREO_BLEND_REDCYAN, VW_STEREO_AVG, VW_MAX, VW_STEREO_REDCYAN = VW_MAX };
 enum { VP_LEFT, VP_RIGHT, VP_MAX, VP_CAMERA = VP_MAX };
 
 framebuffercopy views[VP_MAX];
@@ -1933,7 +1933,8 @@ bool needsview(int v, int targtype)
     switch(v)
     {
         case VW_NORMAL: return targtype == VP_CAMERA;
-        case VW_MAGIC: return targtype == VP_LEFT || targtype == VP_RIGHT;
+        case VW_LEFTRIGHT:
+        case VW_CROSSEYED: return targtype == VP_LEFT || targtype == VP_RIGHT;
         case VW_STEREO_BLEND:
         case VW_STEREO_BLEND_REDCYAN: return targtype >= VP_LEFT && targtype <= VP_CAMERA;
         case VW_STEREO_AVG:
@@ -1946,7 +1947,8 @@ bool copyview(int v, int targtype)
 {
     switch(v)
     {
-        case VW_MAGIC: return targtype == VP_LEFT || targtype == VP_RIGHT;
+        case VW_LEFTRIGHT:
+        case VW_CROSSEYED: return targtype == VP_LEFT || targtype == VP_RIGHT;
         case VW_STEREO_BLEND:
         case VW_STEREO_BLEND_REDCYAN: return targtype == VP_RIGHT;
         case VW_STEREO_AVG: return targtype == VP_LEFT;
@@ -2061,10 +2063,16 @@ void drawnoview()
     glColor3f(1.f, 1.f, 1.f);
     switch(viewtype)
     {
-        case VW_MAGIC:
+        case VW_LEFTRIGHT:
         {
             views[VP_LEFT].draw(0, 0, 0.5f, 1);
             views[VP_RIGHT].draw(0.5f, 0, 0.5f, 1);
+            break;
+        }
+        case VW_CROSSEYED:
+        {
+            views[VP_LEFT].draw(0.5f, 0, 0.5f, 1);
+            views[VP_RIGHT].draw(0, 0, 0.5f, 1);
             break;
         }
         case VW_STEREO_BLEND:
@@ -2344,10 +2352,16 @@ void gl_drawframe(int w, int h)
         glColor3f(1.f, 1.f, 1.f);
         switch(viewtype)
         {
-            case VW_MAGIC:
+            case VW_LEFTRIGHT:
             {
                 views[VP_LEFT].draw(0, 0, 0.5f, 1);
                 views[VP_RIGHT].draw(0.5f, 0, 0.5f, 1);
+                break;
+            }
+            case VW_CROSSEYED:
+            {
+                views[VP_LEFT].draw(0.5f, 0, 0.5f, 1);
+                views[VP_RIGHT].draw(0, 0, 0.5f, 1);
                 break;
             }
             case VW_STEREO_BLEND:
