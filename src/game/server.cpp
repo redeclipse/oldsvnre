@@ -787,12 +787,22 @@ namespace server
 
     void resetbans()
     {
-        loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY) bans.remove(i);
+        loopvrev(control) if(control[i].type == ipinfo::BAN && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
     }
 
     void resetallows()
     {
-        loopvrev(allows) if(allows[i].type == ipinfo::TEMPORARY) allows.remove(i);
+        loopvrev(control) if(control[i].type == ipinfo::ALLOW && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
+    }
+
+    void resetmutes()
+    {
+        loopvrev(control) if(control[i].type == ipinfo::MUTE && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
+    }
+
+    void resetlimits()
+    {
+        loopvrev(control) if(control[i].type == ipinfo::LIMIT && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
     }
 
     void cleanup(bool init = false)
@@ -805,6 +815,8 @@ namespace server
         }
         if(GAME(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetbansonend)) resetbans();
+        if(GAME(resetmutesonend)) resetmutes();
+        if(GAME(resetlimitsonend)) resetlimits();
         if(GAME(resetvarsonend) || init) resetgamevars(true);
         changemap();
     }
@@ -1865,6 +1877,8 @@ namespace server
         if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetvarsonend) >= 2) resetgamevars(true);
         if(GAME(resetbansonend) >= 2) resetbans();
+        if(GAME(resetmutesonend) >= 2) resetmutes();
+        if(GAME(resetlimitsonend) >= 2) resetlimits();
     }
 
     bool checkvotes(bool force = false)
@@ -3753,7 +3767,7 @@ namespace server
     void serverupdate()
     {
         loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
-        loopvrev(bans) if(bans[i].type == ipinfo::TEMPORARY && totalmillis-bans[i].time > 4*60*60000) bans.remove(i);
+        loopvrev(control) if(control[i].flag == ipinfo::TEMPORARY && totalmillis-control[i].time > 4*60*60000) control.remove(i);
 
         if(numclients())
         {
@@ -4124,9 +4138,11 @@ namespace server
                 case N_CONNECT:
                 {
                     getstring(text, p);
-                    if(!text[0]) copystring(text, "unnamed");
                     filtertext(text, text, true, true, true, MAXNAMELEN);
-                    copystring(ci->name, text, MAXNAMELEN+1);
+                    const char *namestr = text;
+                    while(*namestr && iscubespace(*namestr)) namestr++;
+                    if(!*namestr) namestr = copystring(text, "unnamed");
+                    copystring(ci->name, namestr, MAXNAMELEN+1);
                     ci->state.colour = max(getint(p), 0);
                     ci->state.model = max(getint(p), 0);
 
@@ -4628,6 +4644,8 @@ namespace server
                     getstring(text, p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
+                    uint ip = getclientip(cp->clientnum);
+                    if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, GAME(mutelock)+PRIV_MASTER, "send messages while muted")) break;
                     if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
                     loopv(clients)
                     {
@@ -4684,6 +4702,8 @@ namespace server
                     int team = getint(p);
                     if(!allowteam(ci, team, TEAM_FIRST)) team = chooseteam(ci);
                     if(!m_team(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
+                    uint ip = getclientip(ci->clientnum);
+                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, GAME(limitlock)+PRIV_MASTER, "change teams while limited")) break;
                     bool reset = true;
                     if(ci->state.state == CS_SPECTATOR)
                     {
@@ -4865,10 +4885,11 @@ namespace server
                             {
                                 loopv(clients)
                                 {
-                                    ipinfo &allow = allows.add();
+                                    ipinfo &allow = control.add();
                                     allow.time = totalmillis;
                                     allow.ip = getclientip(clients[i]->clientnum);
                                     allow.mask = 0xFFFFFFFF;
+                                    allow.type = ipinfo::ALLOW;
                                 }
                             }
                             srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mastermode));
@@ -4878,41 +4899,80 @@ namespace server
                     break;
                 }
 
-                case N_CLEARBANS:
+                case N_CLRCONTROL:
                 {
-                    if(haspriv(ci, PRIV_MASTER, "clear bans"))
+                    int value = getint(p);
+                    #define CONTROLSWITCH(x,y) \
+                        case x: \
+                        { \
+                            if(haspriv(ci, GAME(y##lock)+PRIV_MASTER, "clear " #y "s")) \
+                            { \
+                                resetallows(); \
+                                srvoutf(3, "cleared existing " #y "s"); \
+                            } \
+                            break; \
+                        }
+
+                    switch(value)
                     {
-                        resetbans();
-                        srvoutf(3, "cleared existing bans");
+                        CONTROLSWITCH(ipinfo::ALLOW, allow);
+                        CONTROLSWITCH(ipinfo::BAN, ban);
+                        CONTROLSWITCH(ipinfo::MUTE, mute);
+                        CONTROLSWITCH(ipinfo::LIMIT, limit);
+                        default: break;
                     }
+                    #undef CONTROLSWITCH
                     break;
                 }
 
-                case N_KICKBAN:
+                case N_CONTROL:
                 {
-                    int victim = getint(p);
-                    bool ban = getint(p) != 0;
-                    if(haspriv(ci, (ban ? GAME(banlock) : GAME(kicklock))+PRIV_MASTER, ban ? "ban people" : "kick people") && victim >= 0 && ci->clientnum != victim)
+                    int victim = getint(p), value = getint(p);
+                    #define CONTROLSWITCH(x,y) \
+                        case x: \
+                        { \
+                            if(haspriv(ci, GAME(y##lock)+PRIV_MASTER, #y " people") && victim >= 0) \
+                            { \
+                                clientinfo *cp = (clientinfo *)getinfo(victim); \
+                                if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, #y)) break; \
+                                uint ip = getclientip(cp->clientnum); \
+                                if(!ip) break; \
+                                if(checkipinfo(control, ipinfo::ALLOW, ip)) \
+                                { \
+                                    if(!haspriv(ci, PRIV_ADMIN, #y " protected people")) break; \
+                                    else if(value >= ipinfo::BAN) loopvrev(control) \
+                                        if(control[i].type == ipinfo::ALLOW && (ip & control[i].mask) == control[i].ip) \
+                                            control.remove(i); \
+                                } \
+                                copystring(text, colorname(ci)); \
+                                if(value >= 0) \
+                                { \
+                                    ipinfo &c = control.add(); \
+                                    c.time = totalmillis; \
+                                    c.ip = ip; \
+                                    c.mask = 0xFFFFFFFF; \
+                                    c.type = value; \
+                                    srvoutf(3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), text); \
+                                    if(value == ipinfo::BAN) disconnect_client(cp->clientnum, DISC_IPBAN); \
+                                } \
+                                else \
+                                { \
+                                    srvoutf(3, "%s has been kicked by %s", colorname(cp), text); \
+                                    disconnect_client(cp->clientnum, DISC_KICK); \
+                                } \
+                            } \
+                            break; \
+                        }
+                    switch(value)
                     {
-                        uint ip = getclientip(victim);
-                        if(!ip) break;
-                        clientinfo *cp = (clientinfo *)getinfo(victim);
-                        if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, ban ? "ban" : "kick")) break;
-                        if(checkipinfo(allows, ip))
-                        {
-                            if(!haspriv(ci, PRIV_ADMIN, ban ? "ban protected people" : "kick protected people")) break;
-                            else if(ban) loopvrev(allows) if((ip & allows[i].mask) == allows[i].ip) allows.remove(i);
-                        }
-                        if(ban)
-                        {
-                            ipinfo &ban = bans.add();
-                            ban.time = totalmillis;
-                            ban.ip = ip;
-                            ban.mask = 0xFFFFFFFF;
-                            disconnect_client(victim, DISC_IPBAN);
-                        }
-                        else disconnect_client(victim, DISC_KICK);
+                        CONTROLSWITCH(-1, kick);
+                        CONTROLSWITCH(ipinfo::ALLOW, allow);
+                        CONTROLSWITCH(ipinfo::BAN, ban);
+                        CONTROLSWITCH(ipinfo::MUTE, mute);
+                        CONTROLSWITCH(ipinfo::LIMIT, limit);
+                        default: break;
                     }
+                    #undef CONTROLSWITCH
                     break;
                 }
 
@@ -4932,7 +4992,7 @@ namespace server
                     int who = getint(p), team = getint(p);
                     if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_MASTER, "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
-                    if(!cp || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
+                    if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, TEAM_FIRST)) break;
                     setteam(cp, team, true, true);
                     break;

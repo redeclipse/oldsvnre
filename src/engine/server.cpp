@@ -27,8 +27,8 @@ char *gettime(char *format)
 }
 ICOMMAND(0, gettime, "s", (char *a), result(gettime(a)));
 
-vector<ipinfo> bans, allows;
-void addipinfo(vector<ipinfo> &info, const char *name)
+vector<ipinfo> control;
+void addipinfo(vector<ipinfo> &info, int type, const char *name)
 {
     union { uchar b[sizeof(enet_uint32)]; enet_uint32 i; } ip, mask;
     ip.i = 0;
@@ -45,11 +45,15 @@ void addipinfo(vector<ipinfo> &info, const char *name)
     ipinfo &p = info.add();
     p.ip = ip.i;
     p.mask = mask.i;
-    p.type = ipinfo::LOCAL;
+    p.type = clamp(type, 0, int(ipinfo::MAXTYPES)-1);
+    p.flag = ipinfo::LOCAL;
 }
-ICOMMAND(0, addban, "s", (char *name), addipinfo(bans, name));
-ICOMMAND(0, addallow, "s", (char *name), addipinfo(allows, name));
+ICOMMAND(0, addallow, "s", (char *name), addipinfo(control, ipinfo::ALLOW, name));
+ICOMMAND(0, addban, "s", (char *name), addipinfo(control, ipinfo::BAN, name));
+ICOMMAND(0, addmute, "s", (char *name), addipinfo(control, ipinfo::MUTE, name));
+ICOMMAND(0, addlimit, "s", (char *name), addipinfo(control, ipinfo::LIMIT, name));
 
+const char *ipinfotypes[ipinfo::MAXTYPES] = { "allow", "ban", "mute", "limit" };
 char *printipinfo(const ipinfo &info, char *buf)
 {
     static string ipinfobuf = ""; char *str = buf ? buf : (char *)&ipinfobuf;
@@ -57,6 +61,7 @@ char *printipinfo(const ipinfo &info, char *buf)
     ip.i = info.ip;
     mask.i = info.mask;
     int lastdigit = -1;
+    str += sprintf(str, "[%s] ", ipinfotypes[clamp(info.type, 0, int(ipinfo::MAXTYPES)-1)]);
     loopi(4) if(mask.b[i])
     {
         if(lastdigit >= 0) *str++ = '.';
@@ -67,9 +72,9 @@ char *printipinfo(const ipinfo &info, char *buf)
     return str;
 }
 
-bool checkipinfo(vector<ipinfo> &info, enet_uint32 ip)
+bool checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip)
 {
-    loopv(info) if((ip & info[i].mask) == info[i].ip) return true;
+    loopv(info) if(info[i].type == type && (ip & info[i].mask) == info[i].ip) return true;
     return false;
 }
 
@@ -383,8 +388,7 @@ void cleanupserver()
 
 void reloadserver()
 {
-    loopvrev(bans) if(bans[i].type == ipinfo::LOCAL) bans.remove(i);
-    loopvrev(allows) if(allows[i].type == ipinfo::LOCAL) allows.remove(i);
+    loopvrev(control) if(control[i].flag == ipinfo::LOCAL) control.remove(i);
 }
 
 void process(ENetPacket *packet, int sender, int chan);

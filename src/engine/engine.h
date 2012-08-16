@@ -50,17 +50,19 @@ enum { PACKAGEDIR_OCTA = 1<<0 };
 extern const char *disc_reasons[];
 struct ipinfo
 {
+    enum { ALLOW = 0, BAN, MUTE, LIMIT, MAXTYPES };
     enum { TEMPORARY = 0, LOCAL, GLOBAL };
     enet_uint32 ip, mask;
-    int type, time;
+    int type, flag, time;
 
-    ipinfo() : ip(0), mask(0), type(TEMPORARY), time(-1) {}
+    ipinfo() : ip(0), mask(0), type(-1), flag(TEMPORARY), time(-1) {}
     ~ipinfo() {}
 };
-extern vector<ipinfo> bans, allows;
-extern void addipinfo(vector<ipinfo> &info, const char *name);
+extern vector<ipinfo> control;
+extern const char *ipinfotypes[ipinfo::MAXTYPES];
+extern void addipinfo(vector<ipinfo> &info, int type, const char *name);
 extern char *printipinfo(const ipinfo &info, char *buf = NULL);
-extern bool checkipinfo(vector<ipinfo> &info, enet_uint32 ip);
+extern bool checkipinfo(vector<ipinfo> &info, int type, enet_uint32 ip);
 extern void writecfg();
 extern void rehash(bool reload = true);
 

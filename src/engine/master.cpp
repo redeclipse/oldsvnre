@@ -289,8 +289,8 @@ bool checkmasterclientinput(masterclient &c)
                 conoutf("master peer %s registered as a server",  c.name);
                 c.isserver = true;
             }
-            loopv(bans) if(bans[i].type == ipinfo::LOCAL) masteroutf(c, "ban %u %u\n", bans[i].ip, bans[i].mask);
-            loopv(allows) if(allows[i].type == ipinfo::LOCAL) masteroutf(c, "allow %u %u\n", allows[i].ip, allows[i].mask);
+            loopv(control) if(control[i].flag == ipinfo::LOCAL)
+                masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
             found = true;
         }
         if(!strcmp(w[0], "version") || !strcmp(w[0], "update"))
@@ -377,7 +377,7 @@ void checkmaster()
     {
         ENetAddress address;
         ENetSocket masterclientsocket = enet_socket_accept(mastersocket, &address);
-        if(masterclients.length() >= MASTER_LIMIT || (checkipinfo(bans, address.host) && !checkipinfo(allows, address.host)))
+        if(masterclients.length() >= MASTER_LIMIT || (checkipinfo(control, ipinfo::BAN, address.host) && !checkipinfo(control, ipinfo::ALLOW, address.host)))
             enet_socket_destroy(masterclientsocket);
         else if(masterclientsocket!=ENET_SOCKET_NULL)
         {
