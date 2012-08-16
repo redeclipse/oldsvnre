@@ -1618,6 +1618,16 @@ namespace client
                     break;
                 }
 
+                case N_STICKY:
+                {
+                    int scn = getint(p), tcn = getint(p), id = getint(p);
+                    vec pos(0, 0, 0);
+                    loopk(3) pos[k] = getint(p)/DMF;
+                    gameent *t = game::getclient(scn), *v = game::getclient(tcn);
+                    if(t && v) projs::sticky(t, id, v, pos);
+                    break;
+                }
+
                 case N_DAMAGE:
                 {
                     int tcn = getint(p),
