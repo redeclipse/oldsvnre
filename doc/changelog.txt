@@ -20,6 +20,9 @@ Maps:
  * Dawn, removed
  * Neodrive, new time-trial map
  * Hawk, new time-trial map
+ * Ubik, clip/water/door fixes
+ * Alphacampaign, removed
+ * Canals, new map
 
 Visuals:
  * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
@@ -33,6 +36,7 @@ Interface & Menus:
  * Several new international keycodes are now bind-able as WORLD_{0..95}
  * Added ability to mark map favourites (pinned to top of map list)
  * Added on-screen help for commands/vars/etc. (work in progress)
+ * Blank names are no longer possible
 
 Modes & Mutators:
  * Hover mutator removed
@@ -40,6 +44,7 @@ Modes & Mutators:
  * Added {mode,muts}idxname variables for mode and mutator values
  * Added server variable "<weap>reloads" now defines the number of times a weapon can reload (-1 = infinite, 0 = never, 1+ = count)
  * Bomber-ball basket (possible to score by throwing ball into goal) set as the default, moved from mutator to server-side variable (bomberbasket)
+ * Removed campaign and teambalance 3, replaced with new mutator 'coop' (humans vs bots)
 
 Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
@@ -54,6 +59,7 @@ Multiplayer & Servers:
  * mapname.wpt and mapname.txt is now included when sending a map
  * Allow players to cast votes for ones made by an admin which conflict with a lock control
  * Added ability to lock spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
+ * Expanded admin control (can now add allows, mute, and limit team changing)
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions
@@ -64,6 +70,7 @@ Core & Install:
  * Use APP/app* variables for name abstraction (simplifies forking/install renaming)
  * *nix icons stored as PNG/XPM, no ImageMagick needed in system-install process
  * all-licenses.txt added, exhaustive copyright/license breakdown
+ * Basic math commands in CubeScript now accepts multiple arguments
 
 Additional Fixed Bugs:
  * #103 - [minor] Revenge-seeking remains after team-change
@@ -88,6 +95,7 @@ Additional Fixed Bugs:
  * #177 - (roughly) predict time remaining in server list
  * #102 - Some flat geometry walls acts as crouch-entrance
  * #189 - overcome MAXSTRLEN limitation in N_COMMAND/N_EDITVAR by dynamically allocating and transmitting arguments
+ * #197 - synchronise sticky grenade offset position across the network
 
 
 = Red Eclipse 1.2 =
