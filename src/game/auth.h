@@ -61,10 +61,10 @@ namespace auth
             privilege = ci->privilege = flags;
             if(authed)
             {
-                if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS a \fs\fc%s\fS", colorname(ci), ci->authname, privname(privilege));
+                if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS with \fs\fc%s\fS privileges", colorname(ci), ci->authname, privname(privilege, false));
                 else srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
             }
-            else srvoutforce(ci, -2, "\fy%s was elevated to \fs\fc%s\fS", colorname(ci), privname(privilege));
+            else srvoutforce(ci, -2, "\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
         else
         {
