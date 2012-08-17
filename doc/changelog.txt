@@ -37,6 +37,7 @@ Interface & Menus:
  * Added ability to mark map favourites (pinned to top of map list)
  * Added on-screen help for commands/vars/etc. (work in progress)
  * Blank names are no longer possible
+ * Added Texture preview on hover in browser
 
 Modes & Mutators:
  * Hover mutator removed
