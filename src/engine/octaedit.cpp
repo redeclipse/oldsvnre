@@ -2038,6 +2038,13 @@ ICOMMAND(0, replace, "", (void), {
 });
 ICOMMAND(0, replaceall, "", (void), replacetex(););
 
+ICOMMAND(0, resettexmru, "", (void), {
+    int old = texmru.inrange(curtexindex) ? texmru[curtexindex] : -1;
+    texmru.shrink(0);
+    loopv(vslots) texmru.add(i);
+    curtexindex = texmru.find(old);
+});
+
 ////////// flip and rotate ///////////////
 uint dflip(uint face) { return face==F_EMPTY ? face : 0x88888888 - (((face&0xF0F0F0F0)>>4) | ((face&0x0F0F0F0F)<<4)); }
 uint cflip(uint face) { return ((face&0xFF00FF00)>>8) | ((face&0x00FF00FF)<<8); }
@@ -2177,6 +2184,7 @@ void editmat(char *name)
 COMMAND(0, editmat, "s");
 
 VAR(IDF_PERSIST, autoapplytexgui, 0, 1, 1);
+VAR(IDF_PERSIST, autopreviewtexgui, 0, 1, 1);
 VAR(IDF_PERSIST, autoclosetexgui, 0, 2, 2);
 
 VAR(IDF_PERSIST, thumbwidth, 0, 8, 1000);
@@ -2185,18 +2193,20 @@ VAR(IDF_PERSIST, thumbtime, 0, 25, 1000);
 FVAR(IDF_PERSIST, thumbsize, 0, 2, 25);
 
 static int lastthumbnail = 0;
-
+extern bool layoutpass;
 struct texturegui : guicb
 {
     bool menuon;
-    int menustart, menupage, menutex;
+    int menustart, menupage, menutex, rolltex;
 
-    texturegui() : menustart(-1), menutex(-1) {}
+    texturegui() : menustart(-1), menutex(-1), rolltex(-1) {}
 
     void gui(guient &g, bool firstpass)
     {
         extern VSlot dummyvslot;
-        int nextslot = menutex, numpages = max((texmru.length() + thumbwidth*thumbheight - 1)/(thumbwidth*thumbheight), 1)-1;
+        int curtex = menutex, numpages = max((texmru.length() + thumbwidth*thumbheight - 1)/(thumbwidth*thumbheight), 1)-1;
+        if(autopreviewtexgui && texmru.inrange(rolltex)) curtex = rolltex;
+        if(!layoutpass) rolltex = -1;
         if(menupage > numpages) menupage = numpages;
         else if(menupage < 0) menupage = 0;
         g.start(menustart, menuscale, NULL, true);
@@ -2205,14 +2215,17 @@ struct texturegui : guicb
         if(g.button("\fgauto apply", 0xFFFFFF, autoapplytexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autoapplytexgui ? false : true)&GUI_UP)
             autoapplytexgui = autoapplytexgui ? 0 : 1;
         g.space(2);
+        if(g.button("\fgauto preview", 0xFFFFFF, autopreviewtexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autopreviewtexgui ? false : true)&GUI_UP)
+            autopreviewtexgui = autopreviewtexgui ? 0 : 1;
+        g.space(2);
         if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, autoclosetexgui ? false : true)&GUI_UP)
             autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
         g.poplist();
         g.space(1);
         g.pushlist();
-        if(texmru.inrange(menutex))
+        if(texmru.inrange(curtex))
         {
-            VSlot &v = lookupvslot(texmru[menutex], false);
+            VSlot &v = lookupvslot(texmru[curtex], false);
             if(v.slot->sts.empty()) g.texture(dummyvslot, thumbheight*thumbsize, false);
             else if(!v.slot->loaded && !v.slot->thumbnail)
             {
@@ -2221,9 +2234,10 @@ struct texturegui : guicb
                 loadthumbnail(*v.slot);
                 lastthumbnail = totalmillis;
             }
-            if(g.texture(v, thumbheight*thumbsize, true)&GUI_UP)
+            int ret = g.texture(v, thumbheight*thumbsize, true);
+            if(ret&GUI_UP)
             {
-                edittex(texmru[menutex]);
+                edittex(texmru[curtex]);
                 if(autoclosetexgui) menuon = false;
             }
         }
@@ -2252,15 +2266,17 @@ struct texturegui : guicb
                         loadthumbnail(*v.slot);
                         lastthumbnail = totalmillis;
                     }
-                    if(g.texture(v, thumbsize, true)&GUI_UP && (v.slot->loaded || v.slot->thumbnail!=notexture))
+                    int ret = g.texture(v, thumbsize, true);
+                    if(ret&GUI_UP)
                     {
-                        nextslot = ti;
-                        if(autoapplytexgui)
+                        if(autoapplytexgui && (v.slot->loaded || v.slot->thumbnail!=notexture))
                         {
+                            menutex = ti;
                             edittex(texmru[ti]);
                             if(autoclosetexgui > 1) menuon = false;
                         }
                     }
+                    else if(ret&GUI_ROLLOVER) rolltex = ti;
                 }
                 else g.texture(dummyvslot, thumbsize, false); //create an empty space
             }
@@ -2274,14 +2290,13 @@ struct texturegui : guicb
         g.space(1);
         g.pushlist();
         g.space(1);
-        if(texmru.inrange(menutex))
+        if(texmru.inrange(curtex))
         {
-            VSlot &v = lookupvslot(texmru[menutex]);
-            g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, texmru[menutex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
+            VSlot &v = lookupvslot(texmru[curtex]);
+            g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, texmru[curtex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
         }
         else g.textf("no texture selected", 0x888888);
         g.poplist();
-        menutex = nextslot;
         g.end();
     }
 
@@ -2291,6 +2306,7 @@ struct texturegui : guicb
         {
             menustart = starttime();
             cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
+            rolltex = -1;
             if(texmru.length() > 0)
             {
                 if(!texmru.inrange(menutex = !isempty(c) ? texmru.find(c.texture[sel.orient]) : texmru.find(lasttex)))
