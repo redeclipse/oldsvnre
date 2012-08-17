@@ -26,8 +26,12 @@ Copyright: 2011, Red Eclipse Team
 License: CC-BY-SA-3.0 and Mark-Policy
 
 Files: src/system-install.mk src/dist.mk src/install/nix/redeclipse.am
-       src/install/nix/redeclipse.desktop.am doc/examples/*
-Copyright: 2012, Red Eclipse Team
+       src/install/nix/redeclipse.desktop.am
+Copyright: 2011-2012, Red Eclipse Team
+License: Zlib
+
+Files: doc/examples/*
+Copyright: 2011-2012, Red Eclipse Team
 License: Zlib
 
 Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
@@ -35,7 +39,9 @@ Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
 Copyright: 2011-2012, Martin Erik "arand" Werner <martinerikwerner@gmail.com>
 License: ZLib
 
-Files: data/maps/biolytic* data/maps/darkness* data/maps/mist* data/maps/nova* data/maps/panic* data/maps/oneiroi* data/maps/processing* data/maps/tranquility*
+Files: data/maps/biolytic* data/maps/darkness* data/maps/mist* data/maps/nova*
+       data/maps/panic* data/maps/oneiroi* data/maps/processing*
+       data/maps/tranquility*
 Copyright: 2009-2012, Derek "favorito" Ponicki <favorito.redeclipse@gmail.com>
 License: Zlib
 
@@ -154,7 +160,7 @@ Files: data/textures/lava.jpg
 Copyright: RaZgRiZ
 License:
  Created by RaZgRiZ Made with Filter Forge II Beta 3
- Licensed publicly for everyone to use, modifyi and distribute as long as the
+ Licensed publicly for everyone to use, modify and distribute as long as the
  author is credited for the original work.
 
 Files: data/textures/bloodbath.png data/textures/carnage.png
