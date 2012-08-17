@@ -358,7 +358,7 @@ namespace server
     bool maprequest = false, inovertime = false;
     enet_uint32 lastsend = 0;
     int mastermode = MM_OPEN;
-    bool masterupdate = false, mapsending = false, shouldcheckvotes = false;
+    bool privupdate = false, mapsending = false, shouldcheckvotes = false;
     stream *mapdata[SENDMAP_MAX] = { NULL };
     vector<clientinfo *> clients, connects;
     vector<worldstate *> worldstates;
@@ -871,16 +871,16 @@ namespace server
         }
     }
 
-    const char *privname(int type)
+    const char *privname(int type, bool prefix = true)
     {
         switch(type)
         {
-            case PRIV_ADMIN: return "admin";
-            case PRIV_AUTH: return "auth";
-            case PRIV_MASTER: return "master";
-            case PRIV_USER: return "user";
-            case PRIV_MAX: return "local";
-            default: return "alone";
+            case PRIV_ADMINISTRATOR: return prefix ? "an administrator" : "administrator";
+            case PRIV_MODERATOR: return prefix ? "a moderator" : "moderator";
+            case PRIV_HELPER: return prefix ? "a helper" : "helper";
+            case PRIV_PLAYER: return prefix ? "a player" : "player";
+            case PRIV_MAX: return prefix ? "connected locally" : "local";
+            default: return prefix ? "by yourself" : "alone";
         }
     }
 
@@ -921,9 +921,9 @@ namespace server
     bool haspriv(clientinfo *ci, int flag, const char *msg = NULL)
     {
         if(ci->local || ci->privilege >= flag) return true;
-        else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_MASTER && !numclients(ci->clientnum)) return true;
+        else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_HELPER && !numclients(ci->clientnum)) return true;
         else if(msg && *msg)
-            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need to be %s to %s", privname(flag), msg);
+            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag), msg);
         return false;
     }
 
@@ -1959,7 +1959,7 @@ namespace server
         clientinfo *ci = (clientinfo *)getinfo(sender);
         modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
-        bool hasvote = false, hasveto = haspriv(ci, PRIV_MASTER) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
+        bool hasvote = false, hasveto = haspriv(ci, PRIV_HELPER) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
         if(!hasveto)
         {
             if(ci->lastvote && totalmillis-ci->lastvote <= GAME(votewait)) return;
@@ -1980,8 +1980,8 @@ namespace server
             if(GAME(modelock) == 7 && GAME(mapslock) == 7 && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
             else switch(GAME(votelock))
             {
-                case 1: case 2: case 3: if(!m_edit(reqmode) && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock)-1+PRIV_MASTER, "vote for the same map again")) return; break;
-                case 4: case 5: case 6: if(!haspriv(ci, GAME(votelock)-4+PRIV_MASTER, "vote for a new game")) return; break;
+                case 1: case 2: case 3: if(!m_edit(reqmode) && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock)-1+PRIV_HELPER, "vote for the same map again")) return; break;
+                case 4: case 5: case 6: if(!haspriv(ci, GAME(votelock)-4+PRIV_HELPER, "vote for a new game")) return; break;
                 case 7: if(!haspriv(ci, PRIV_MAX, "vote for a new game")) return; break;
                 case 0: default: break;
             }
@@ -1992,8 +1992,8 @@ namespace server
             }
             switch(GAME(modelock))
             {
-                case 1: case 2: case 3: if(!haspriv(ci, GAME(modelock)-1+PRIV_MASTER, "change game modes")) return; break;
-                case 4: case 5: case 6: if((!((1<<reqmode)&GAME(modelockfilter)) || !mutscmp(reqmuts, GAME(mutslockfilter))) && !haspriv(ci, GAME(modelock)-4+PRIV_MASTER, "change to a locked game mode")) return; break;
+                case 1: case 2: case 3: if(!haspriv(ci, GAME(modelock)-1+PRIV_HELPER, "change game modes")) return; break;
+                case 4: case 5: case 6: if((!((1<<reqmode)&GAME(modelockfilter)) || !mutscmp(reqmuts, GAME(mutslockfilter))) && !haspriv(ci, GAME(modelock)-4+PRIV_HELPER, "change to a locked game mode")) return; break;
                 case 7: if(!haspriv(ci, PRIV_MAX, "change game modes")) return; break;
                 case 0: default: break;
             }
@@ -2020,7 +2020,7 @@ namespace server
                 }
                 if(list)
                 {
-                    if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, level-1+PRIV_MASTER, "select maps not in the rotation"))
+                    if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, level-1+PRIV_HELPER, "select maps not in the rotation"))
                     {
                         DELETEA(list);
                         return;
@@ -2550,7 +2550,7 @@ namespace server
             {
                 case ID_COMMAND:
                 {
-                    if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "execute that command")) return;
+                    if(locked && !haspriv(ci, locked-1+PRIV_HELPER, "execute that command")) return;
                     int slen = strlen(id->name);
                     if(arg && nargs > 1) slen += strlen(arg)+1;
                     char *s = newstring(slen);
@@ -2570,7 +2570,7 @@ namespace server
                         srvmsgf(ci->clientnum, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", name, *id->storage.i);
                         return;
                     }
-                    else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change that variable"))
+                    else if(locked && !haspriv(ci, locked-1+PRIV_HELPER, "change that variable"))
                     {
                         val = intstr(id);
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
@@ -2603,7 +2603,7 @@ namespace server
                         srvmsgf(ci->clientnum, "\fc%s = %s", name, floatstr(*id->storage.f));
                         return;
                     }
-                    else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change that variable"))
+                    else if(locked && !haspriv(ci, locked-1+PRIV_HELPER, "change that variable"))
                     {
                         formatstring(val)("%s", floatstr(*id->storage.f));
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
@@ -2628,7 +2628,7 @@ namespace server
                         srvmsgf(ci->clientnum, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", name, *id->storage.s);
                         return;
                     }
-                    else if(locked && !haspriv(ci, locked-1+PRIV_MASTER, "change that variable"))
+                    else if(locked && !haspriv(ci, locked-1+PRIV_HELPER, "change that variable"))
                     {
                         val = *id->storage.s;
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
@@ -3783,10 +3783,10 @@ namespace server
                 mutate(smuts, mut->update());
             }
 
-            if(masterupdate)
+            if(privupdate)
             {
-                loopv(clients) sendf(-1, 1, "ri3", N_CURRENTMASTER, clients[i]->clientnum, clients[i]->privilege);
-                masterupdate = false;
+                loopv(clients) sendf(-1, 1, "ri3", N_CURRENTPRIV, clients[i]->clientnum, clients[i]->privilege);
+                privupdate = false;
             }
 
             if(interm && totalmillis - interm >= 0) // wait then call for next map
@@ -3849,7 +3849,7 @@ namespace server
                     loopvk(clients[i]->state.fraglog) if(clients[i]->state.fraglog[k] == ci->clientnum)
                         clients[i]->state.fraglog.remove(k--);
                 }
-                if(ci->privilege) auth::setmaster(ci, false);
+                if(ci->privilege) auth::setprivilege(ci, false);
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
@@ -3963,7 +3963,7 @@ namespace server
         // only allow edit messages in coop-edit mode
         if(type >= N_EDITENT && type <= N_NEWMAP && (!m_edit(gamemode) || !ci || ci->state.state == CS_SPECTATOR)) return -1;
         // server only messages
-        static const int servtypes[] = { N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTMASTER, N_PONG, N_RESUME, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL };
+        static const int servtypes[] = { N_SERVERINIT, N_CLIENTINIT, N_WELCOME, N_NEWGAME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_SHOTFX, N_DIED, N_POINTS, N_SPAWNSTATE, N_ITEMACC, N_ITEMSPAWN, N_TICK, N_DISCONNECT, N_CURRENTPRIV, N_PONG, N_RESUME, N_SCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_REGEN, N_CLIENT, N_AUTHCHAL };
         if(ci)
         {
             loopi(sizeof(servtypes)/sizeof(int)) if(type == servtypes[i]) return -1;
@@ -4111,7 +4111,7 @@ namespace server
 
         ci->connected = true;
         ci->needclipboard = totalmillis ? totalmillis : 1;
-        masterupdate = true;
+        privupdate = true;
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
@@ -4299,7 +4299,7 @@ namespace server
                 {
                     int val = getint(p);
                     if(!ci || ci->state.aitype > AI_NONE) break;
-                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, PRIV_MASTER, val ? "enter editmode" : "exit editmode"))
+                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, PRIV_HELPER, val ? "enter editmode" : "exit editmode"))
                     {
                         spectator(ci);
                         break;
@@ -4645,7 +4645,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
                     uint ip = getclientip(cp->clientnum);
-                    if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, GAME(mutelock)+PRIV_MASTER, "send messages while muted")) break;
+                    if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, GAME(mutelock)+PRIV_HELPER, "send messages while muted")) break;
                     if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
                     loopv(clients)
                     {
@@ -4703,11 +4703,11 @@ namespace server
                     if(!allowteam(ci, team, TEAM_FIRST)) team = chooseteam(ci);
                     if(!m_team(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
                     uint ip = getclientip(ci->clientnum);
-                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, GAME(limitlock)+PRIV_MASTER, "change teams while limited")) break;
+                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, GAME(limitlock)+PRIV_HELPER, "change teams while limited")) break;
                     bool reset = true;
                     if(ci->state.state == CS_SPECTATOR)
                     {
-                        if(!allowstate(ci, ALST_TRY) && !haspriv(ci, GAME(speclock)+PRIV_MASTER, "exit spectator"))
+                        if(!allowstate(ci, ALST_TRY) && !haspriv(ci, GAME(speclock)+PRIV_HELPER, "exit spectator"))
                             break;
                         spectate(ci, false);
                         reset = false;
@@ -4875,9 +4875,9 @@ namespace server
                 case N_MASTERMODE:
                 {
                     int mm = getint(p);
-                    if(haspriv(ci, PRIV_MASTER, "change mastermode") && mm >= MM_OPEN && mm <= MM_PRIVATE)
+                    if(haspriv(ci, PRIV_HELPER, "change mastermode") && mm >= MM_OPEN && mm <= MM_PRIVATE)
                     {
-                        if(haspriv(ci, PRIV_ADMIN) || (mastermask()&(1<<mm)))
+                        if(haspriv(ci, PRIV_ADMINISTRATOR) || (mastermask()&(1<<mm)))
                         {
                             mastermode = mm;
                             resetallows();
@@ -4905,7 +4905,7 @@ namespace server
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
-                            if(haspriv(ci, GAME(y##lock)+PRIV_MASTER, "clear " #y "s")) \
+                            if(haspriv(ci, GAME(y##lock)+PRIV_HELPER, "clear " #y "s")) \
                             { \
                                 resetallows(); \
                                 srvoutf(3, "cleared existing " #y "s"); \
@@ -4931,7 +4931,7 @@ namespace server
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
-                            if(haspriv(ci, GAME(y##lock)+PRIV_MASTER, #y " people") && victim >= 0) \
+                            if(haspriv(ci, GAME(y##lock)+PRIV_HELPER, #y " people") && victim >= 0) \
                             { \
                                 clientinfo *cp = (clientinfo *)getinfo(victim); \
                                 if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, #y)) break; \
@@ -4939,7 +4939,7 @@ namespace server
                                 if(!ip) break; \
                                 if(checkipinfo(control, ipinfo::ALLOW, ip)) \
                                 { \
-                                    if(!haspriv(ci, PRIV_ADMIN, #y " protected people")) break; \
+                                    if(!haspriv(ci, PRIV_ADMINISTRATOR, #y " protected people")) break; \
                                     else if(value >= ipinfo::BAN) loopvrev(control) \
                                         if(control[i].type == ipinfo::ALLOW && (ip & control[i].mask) == control[i].ip) \
                                             control.remove(i); \
@@ -4981,7 +4981,7 @@ namespace server
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
                     if(!cp || cp->state.aitype > AI_NONE) break;
-                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, GAME(speclock)+PRIV_MASTER, sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
+                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, GAME(speclock)+PRIV_HELPER, sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
                     spectate(cp, val);
                     break;
@@ -4990,7 +4990,7 @@ namespace server
                 case N_SETTEAM:
                 {
                     int who = getint(p), team = getint(p);
-                    if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_MASTER, "change the team of others")) break;
+                    if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_HELPER, "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, TEAM_FIRST)) break;
@@ -5001,7 +5001,7 @@ namespace server
                 case N_RECORDDEMO:
                 {
                     int val = getint(p);
-                    if(!haspriv(ci, restrictdemos ? PRIV_ADMIN : PRIV_MASTER, "record demos")) break;
+                    if(!haspriv(ci, restrictdemos ? PRIV_ADMINISTRATOR : PRIV_HELPER, "record demos")) break;
                     if(!maxdemos || !maxdemosize)
                     {
                         srvmsgft(ci->clientnum, CON_EVENT, "\frthe server has disabled demo recording");
@@ -5014,7 +5014,7 @@ namespace server
 
                 case N_STOPDEMO:
                 {
-                    if(!haspriv(ci, restrictdemos ? PRIV_ADMIN : PRIV_MASTER, "stop demos")) break;
+                    if(!haspriv(ci, restrictdemos ? PRIV_ADMINISTRATOR : PRIV_HELPER, "stop demos")) break;
                     if(m_demo(gamemode)) enddemoplayback();
                     else enddemorecord();
                     break;
@@ -5023,7 +5023,7 @@ namespace server
                 case N_CLEARDEMOS:
                 {
                     int demo = getint(p);
-                    if(!haspriv(ci, restrictdemos ? PRIV_ADMIN : PRIV_MASTER, "clear demos")) break;
+                    if(!haspriv(ci, restrictdemos ? PRIV_ADMINISTRATOR : PRIV_HELPER, "clear demos")) break;
                     cleardemos(demo);
                     break;
                 }
@@ -5172,33 +5172,33 @@ namespace server
                     break;
                 }
 
-                case N_SETMASTER:
+                case N_SETPRIV:
                 {
                     int val = getint(p);
                     getstring(text, p);
                     if(val != 0)
                     {
                         if(adminpass[0] && (ci->local || (text[0] && checkpassword(ci, adminpass, text))))
-                            auth::setmaster(ci, true, PRIV_ADMIN);
-                        else if(ci->privilege <= PRIV_USER)
+                            auth::setprivilege(ci, true, PRIV_ADMINISTRATOR);
+                        else if(ci->privilege <= PRIV_PLAYER)
                         {
                             bool fail = false;
                             if(!(mastermask()&MM_AUTOAPPROVE) && !ci->privilege)
                             {
-                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need auth/admin access to gain master");
+                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need \fs\fcmoderator/administrator\fS access to \fs\fcelevate privileges\fS");
                                 fail = true;
                             }
-                            else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_MASTER)
+                            else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_HELPER)
                             {
-                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another master");
+                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another helper");
                                 fail = true;
                                 break;
                             }
-                            if(!fail) auth::setmaster(ci, true, PRIV_MASTER);
+                            if(!fail) auth::setprivilege(ci, true, PRIV_HELPER);
                         }
                     }
-                    else auth::setmaster(ci, false);
-                    break; // don't broadcast the master password
+                    else auth::setprivilege(ci, false);
+                    break; // don't broadcast the password
                 }
 
                 case N_ADDBOT: getint(p); break;
