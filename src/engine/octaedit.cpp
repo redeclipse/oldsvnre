@@ -2038,12 +2038,14 @@ ICOMMAND(0, replace, "", (void), {
 });
 ICOMMAND(0, replaceall, "", (void), replacetex(););
 
-ICOMMAND(0, resettexmru, "", (void), {
+void resettexmru()
+{
     int old = texmru.inrange(curtexindex) ? texmru[curtexindex] : -1;
     texmru.shrink(0);
     loopv(vslots) texmru.add(i);
     curtexindex = texmru.find(old);
-});
+}
+ICOMMAND(0, resettexmru, "", (void), resettexmru());
 
 ////////// flip and rotate ///////////////
 uint dflip(uint face) { return face==F_EMPTY ? face : 0x88888888 - (((face&0xF0F0F0F0)>>4) | ((face&0x0F0F0F0F)<<4)); }
@@ -2169,7 +2171,8 @@ void mpeditmat(int matid, selinfo &sel, bool local)
     uchar matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : 0xFF);
     if(isclipped(matid&MATF_VOLUME)) matid |= MAT_CLIP;
     if(isdeadly(matid&MATF_VOLUME)) matid |= MAT_DEATH;
-    if(local && matid&MAT_GLASS) conoutft(CON_SELF, "\fzoyWARNING\fw - quin hates glass material, think about using alpha instead");
+    if(local && (matid&MATF_VOLUME) == MAT_GLASS)
+        conoutft(CON_SELF, "\fzoyWARNING\fw - quin dislikes glass material: if seeing through this in unimportant, think about using alpha instead");
     loopselxyz(setmat(c, matid, matmask));
 }
 
@@ -2220,6 +2223,13 @@ struct texturegui : guicb
         g.space(2);
         if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, autoclosetexgui ? false : true)&GUI_UP)
             autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
+        g.space(2);
+        if(g.button("\foreset mru", 0xFFFFFF, NULL)&GUI_UP)
+        {
+            int old = texmru.inrange(menutex) ? texmru[menutex] : -1;
+            resettexmru();
+            curtex = menutex = rolltex = texmru.find(old);
+        }
         g.poplist();
         g.space(1);
         g.pushlist();
