@@ -39,7 +39,7 @@ Files: data/maps/biolytic* data/maps/darkness* data/maps/mist* data/maps/nova* d
 Copyright: 2009-2012, Derek "favorito" Ponicki <favorito.redeclipse@gmail.com>
 License: Zlib
 
-Files: data/maps/ares* data/maps/conflict*
+Files: data/maps/ares* data/maps/canals* data/maps/conflict*
 Copyright: 2011-2012, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
@@ -285,7 +285,7 @@ Comment:
  Special permission for relicensing under CC-BY-SA-3.0 have been granted by the
  author.
 
-Files: waterfall*.ogg
+Files: data/sounds/ambience/waterfall*.ogg
 Copyright: 2007, Tim "Corsica_S" Kahn
            <http://www.freesound.org/usersViewSingle.php?id=7037>
 License: CC-BY-SA-3.0
@@ -298,7 +298,7 @@ Comment:
  Special permission for relicensing under CC-BY-SA-3.0 have been granted by the
  author.
 
-Files: forest*.ogg cycadas.ogg
+Files: data/sounds/ambience/forest*.ogg data/sounds/ambience/cycadas.ogg
 Copyright: 2005, 2007, Dob "dobroide" Roide
            <http://www.freesound.org/usersViewSingle.php?id=8043>
 License: CC-BY-3.0
