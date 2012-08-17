@@ -52,7 +52,7 @@ namespace auth
         return true;
     }
 
-    void setmaster(clientinfo *ci, bool val, int flags = 0, bool authed = false)
+    void setprivilege(clientinfo *ci, bool val, int flags = 0, bool authed = false)
     {
         int privilege = ci->privilege;
         if(val)
@@ -61,25 +61,25 @@ namespace auth
             privilege = ci->privilege = flags;
             if(authed)
             {
-                if(ci->privilege > PRIV_USER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS and claimed \fs\fc%s\fS", colorname(ci), ci->authname, privname(privilege));
+                if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS a \fs\fc%s\fS", colorname(ci), ci->authname, privname(privilege));
                 else srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
             }
-            else srvoutforce(ci, -2, "\fy%s claimed \fs\fc%s\fS", colorname(ci), privname(privilege));
+            else srvoutforce(ci, -2, "\fy%s was elevated to \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
         else
         {
             if(!ci->privilege) return;
             ci->privilege = PRIV_NONE;
             int others = 0;
-            loopv(clients) if(clients[i]->privilege >= PRIV_MASTER || clients[i]->local) others++;
+            loopv(clients) if(clients[i]->privilege >= PRIV_HELPER || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            srvoutforce(ci, -2, "\fy%s relinquished \fs\fc%s\fS", colorname(ci), privname(privilege));
+            srvoutforce(ci, -2, "\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege));
         }
-        masterupdate = true;
+        privupdate = true;
         if(paused)
         {
             int others = 0;
-            loopv(clients) if(clients[i]->privilege >= PRIV_ADMIN || clients[i]->local) others++;
+            loopv(clients) if(clients[i]->privilege >= PRIV_ADMINISTRATOR || clients[i]->local) others++;
             if(!others) setpause(false);
         }
     }
@@ -88,7 +88,7 @@ namespace auth
     {
         if(ci->local) return DISC_NONE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(ci->privilege >= PRIV_AUTH) return DISC_NONE;
+        if(ci->privilege >= PRIV_MODERATOR) return DISC_NONE;
         if(*authname)
         {
             if(ci->connectauth) return DISC_NONE;
@@ -102,7 +102,7 @@ namespace auth
         {
             if(adminpass[0] && checkpassword(ci, adminpass, pwd))
             {
-                if(GAME(automaster)) setmaster(ci, true, PRIV_ADMIN);
+                if(GAME(autoprivilege)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
                 return DISC_NONE;
             }
             if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return DISC_NONE;
@@ -122,7 +122,7 @@ namespace auth
         clientinfo *ci = findauth(id);
         if(!ci) return;
         ci->authreq = ci->authname[0] = 0;
-        srvmsgft(ci->clientnum, CON_EVENT, "\fYauthority request failed, please check your credentials");
+        srvmsgft(ci->clientnum, CON_EVENT, "\foauthority request failed, please check your credentials");
         if(ci->connectauth)
         {
             ci->connectauth = false;
@@ -140,11 +140,12 @@ namespace auth
         int n = PRIV_NONE;
         for(const char *c = flags; *c; c++) switch(*c)
         {
-            case 'a': n = PRIV_ADMIN; break;
-            case 'm': n = PRIV_AUTH; break;
-            case 'u': n = PRIV_USER; break;
+            case 'a': n = PRIV_ADMINISTRATOR; break;
+            case 'm': n = PRIV_MODERATOR; break;
+            case 'h': n = PRIV_HELPER; break;
+            case 'u': n = PRIV_PLAYER; break;
         }
-        if(n > PRIV_NONE) setmaster(ci, true, n, true);
+        if(n > PRIV_NONE) setprivilege(ci, true, n, true);
         else ci->authname[0] = 0;
         if(ci->connectauth)
         {

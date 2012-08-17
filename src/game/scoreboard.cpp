@@ -427,7 +427,7 @@ namespace hud
                     else if(o->dominated.find(game::focus) >= 0) status = hud::dominatedtex;
                 }
                 int bgcol = o==game::player1 && highlightscore ? 0x999999 : 0;
-                if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x339933 : 0x999933;
+                if(o->privilege) bgcol |= o->privilege >= PRIV_ADMINISTRATOR ? 0x339933 : 0x999933;
                 g.pushlist();
                 if(bgcol) g.background(bgcol, 3);
                 g.pushlist();
@@ -495,7 +495,7 @@ namespace hud
                 g.poplist();
             }
 
-            if(showclientnum || game::player1->privilege>=PRIV_MASTER)
+            if(showclientnum || game::player1->privilege>=PRIV_HELPER)
             {
                 g.pushlist();
                 g.text("cn ", fgcolor);
@@ -550,7 +550,7 @@ namespace hud
             {
                 gameent *o = spectators[i];
                 int bgcol = o==game::player1 && highlightscore ? 0x666666 : 0;
-                if(o->privilege) bgcol |= o->privilege >= PRIV_ADMIN ? 0x226622 : 0x666622;
+                if(o->privilege) bgcol |= o->privilege >= PRIV_ADMINISTRATOR ? 0x226622 : 0x666622;
                 if((i%count)==0)
                 {
                     g.pushlist();
@@ -558,7 +558,7 @@ namespace hud
                 }
                 g.pushlist();
                 if(bgcol) g.background(bgcol);
-                if(showclientnum || game::player1->privilege>=PRIV_MASTER)
+                if(showclientnum || game::player1->privilege>=PRIV_HELPER)
                     g.textf("%s (%d) ", 0x666666, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false), o->clientnum);
                 else g.textf("%s ", 0x666666, hud::spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false));
                 g.poplist();

@@ -314,26 +314,26 @@ namespace client
     }
     ICOMMAND(0, getclientteam, "i", (int *cn), intret(getclientteam(*cn)));
 
-    bool ismaster(int cn)
+    bool ishelper(int cn)
     {
         gameent *d = game::getclient(cn);
-        return d && d->privilege >= PRIV_MASTER;
+        return d && d->privilege >= PRIV_HELPER;
     }
-    ICOMMAND(0, ismaster, "i", (int *cn), intret(ismaster(*cn) ? 1 : 0));
+    ICOMMAND(0, ishelper, "i", (int *cn), intret(ishelper(*cn) ? 1 : 0));
 
-    bool isauth(int cn)
+    bool ismoderator(int cn)
     {
         gameent *d = game::getclient(cn);
-        return d && d->privilege >= PRIV_AUTH;
+        return d && d->privilege >= PRIV_MODERATOR;
     }
-    ICOMMAND(0, isauth, "i", (int *cn), intret(isauth(*cn) ? 1 : 0));
+    ICOMMAND(0, ismoderator, "i", (int *cn), intret(ismoderator(*cn) ? 1 : 0));
 
-    bool isadmin(int cn)
+    bool isadministrator(int cn)
     {
         gameent *d = game::getclient(cn);
-        return d && d->privilege >= PRIV_ADMIN;
+        return d && d->privilege >= PRIV_ADMINISTRATOR;
     }
-    ICOMMAND(0, isadmin, "i", (int *cn), intret(isadmin(*cn) ? 1 : 0));
+    ICOMMAND(0, isadministrator, "i", (int *cn), intret(isadministrator(*cn) ? 1 : 0));
 
     bool isspectator(int cn)
     {
@@ -460,16 +460,16 @@ namespace client
     }
     COMMAND(0, hashpwd, "s");
 
-    void setmaster(const char *arg)
+    void setpriv(const char *arg)
     {
         if(!arg[0]) return;
         int val = 1;
         mkstring(hash);
         if(!arg[1] && isdigit(arg[0])) val = parseint(arg);
         else server::hashpassword(game::player1->clientnum, sessionid, arg, hash);
-        addmsg(N_SETMASTER, "ris", val, hash);
+        addmsg(N_SETPRIV, "ris", val, hash);
     }
-    COMMAND(0, setmaster, "s");
+    COMMAND(0, setpriv, "s");
 
     void tryauth()
     {
@@ -1998,7 +1998,7 @@ namespace client
                     break;
                 }
 
-                case N_CURRENTMASTER:
+                case N_CURRENTPRIV:
                 {
                     int mn = getint(p), priv = getint(p);
                     if(mn >= 0)
