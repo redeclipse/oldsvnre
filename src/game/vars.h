@@ -64,7 +64,7 @@ GVAR(IDF_ADMIN, mapslock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administr
 GVAR(IDF_ADMIN, varslock, 0, 2, 4); // 0 = off, 1 = helper, 2 = moderator, 3 = administrator, 4 = nobody
 GVAR(IDF_ADMIN, votelock, 0, 2, 7); // 0 = off, 1-3 = helper/moderator/administrator can select same game, 4 = helper/moderator/administrator only can vote, 7 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
-GFVAR(IDF_ADMIN, votethreshold, 0, 0.5f, 1); // auto-pass votes when this many agree
+GFVAR(IDF_ADMIN, votethreshold, 0, 0.75f, 1); // auto-pass votes when this many agree
 
 GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
 GVAR(IDF_ADMIN, mediummapmax, 0, 12, VAR_MAX); // maximum number of players for a medium map
@@ -178,8 +178,8 @@ GVAR(0, captureregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, defendlimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, defendpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, defendinterval, 0, 50, VAR_MAX);
-GVAR(0, defendoccupy, 0, 100, VAR_MAX); // points needed to occupy in regular games
-GVAR(0, defendking, 0, 25, VAR_MAX); // points needed to occupy in king of the hill
+GVAR(0, defendoccupy, 1, 100, VAR_MAX); // points needed to occupy in regular games
+GVAR(0, defendking, 1, 25, VAR_MAX); // points needed to occupy in king of the hill
 GVAR(0, defendflags, 0, 3, 3); // 0 = init all (neutral), 1 = init neutral and team only, 2 = init team only, 3 = init all (team + neutral + converted)
 GVAR(0, defendbuffing, 0, 1, 7); // buffed; 0 = off, &1 = when guarding, &2 = when securing, &4 = even when enemies are present
 GFVAR(0, defendbuffoccupy, 0, 0.5f, 1); // for defendbuffing&4, must be occupied this much before passing

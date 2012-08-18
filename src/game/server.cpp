@@ -1911,8 +1911,8 @@ namespace server
             else morethanone = 0;
             best = &votes[i];
         }
-        bool gotvotes = best && best->count >= min(max(int(maxvotes*GAME(votethreshold)), force ? 1 : 2), force ? 1 : maxvotes);
-        if(force && gotvotes && morethanone)
+        bool gotvotes = best && best->count >= int(maxvotes*GAME(votethreshold));
+        if(force && morethanone)
         {
             int r = rnd(morethanone+1), n = 0;
             loopv(votes) if(votes[i].count == best->count)
@@ -1921,10 +1921,10 @@ namespace server
                 else { best = &votes[i]; break; }
             }
         }
-        if(force || gotvotes)
+        if(force || (gotvotes && !maprequest))
         {
             endmatch();
-            if(gotvotes)
+            if(best)
             {
                 srvoutf(3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
                 sendf(-1, 1, "risi3", N_MAPCHANGE, best->map, 0, best->mode, best->muts);
@@ -3800,7 +3800,7 @@ namespace server
                 privupdate = false;
             }
 
-            if(interm && totalmillis - interm >= 0) // wait then call for next map
+            if(interm && totalmillis-interm >= 0) // wait then call for next map
             {
                 if(GAME(votelimit) && !maprequest && GAME(votelock) != 7 && GAME(modelock) != 7 && GAME(mapslock) != 7)
                 { // if they can't vote, no point in waiting for them to do so

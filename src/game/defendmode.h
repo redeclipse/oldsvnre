@@ -79,9 +79,12 @@ struct defendservmode : defendstate, servmode
             }
             else if(b.owner)
             {
-                b.securetime += t;
-                int score = b.securetime/GAME(defendinterval) - (b.securetime-t)/GAME(defendinterval);
-                if(score) addscore(i, b.owner, score);
+                if(!m_gsp3(gamemode, mutators) || b.owners)
+                {
+                    b.securetime += t;
+                    int score = b.securetime/GAME(defendinterval) - (b.securetime-t)/GAME(defendinterval);
+                    if(score) addscore(i, b.owner, score);
+                }
                 sendaffinity(i);
             }
         }
