@@ -39,8 +39,7 @@ namespace hud
     VAR(IDF_PERSIST, showpoints, 0, 1, 1);
     VAR(IDF_PERSIST, showscore, 0, 2, 2);
     VAR(IDF_PERSIST, showclientnum, 0, 1, 1);
-    VAR(IDF_PERSIST, showskills, 0, 1, 1);
-    VAR(IDF_PERSIST, showownernum, 0, 0, 1);
+    VAR(IDF_PERSIST, showbotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, showspectators, 0, 1, 1);
     VAR(IDF_PERSIST, showconnecting, 0, 0, 1);
     VAR(IDF_PERSIST, showhostname, 0, 0, 1);
@@ -504,7 +503,7 @@ namespace hud
                 g.poplist();
             }
 
-            if(showskills)
+            if(showbotinfo)
             {
                 g.pushlist();
                 g.text("sk ", fgcolor);
@@ -513,10 +512,6 @@ namespace hud
                     else g.space(1);
                 });
                 g.poplist();
-            }
-
-            if(showownernum)
-            {
                 g.pushlist();
                 g.text("on ", fgcolor);
                 loopscoregroup({
