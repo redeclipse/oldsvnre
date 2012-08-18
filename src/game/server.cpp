@@ -4897,10 +4897,10 @@ namespace server
                                 loopv(clients)
                                 {
                                     ipinfo &allow = control.add();
-                                    allow.time = totalmillis;
                                     allow.ip = getclientip(clients[i]->clientnum);
                                     allow.mask = 0xFFFFFFFF;
                                     allow.type = ipinfo::ALLOW;
+                                    allow.time = totalmillis ? totalmillis : 1;
                                 }
                             }
                             srvoutf(-3, "\fymastermode is now \fs\fc%d\fS (\fs\fc%s\fS)", mastermode, mastermodename(mastermode));
@@ -4959,10 +4959,10 @@ namespace server
                                 if(value >= 0) \
                                 { \
                                     ipinfo &c = control.add(); \
-                                    c.time = totalmillis; \
                                     c.ip = ip; \
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
+                                    c.time = totalmillis ? totalmillis : 1; \
                                     srvoutf(3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), text); \
                                     if(value == ipinfo::BAN) disconnect_client(cp->clientnum, DISC_IPBAN); \
                                 } \

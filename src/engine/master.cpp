@@ -37,11 +37,11 @@ struct masterclient
     char input[4096];
     vector<char> output;
     int inputpos, outputpos, port, numpings;
-    enet_uint32 lastping, lastpong, lastactivity;
+    enet_uint32 lastping, lastpong, lastactivity, lastpush;
     vector<authreq> authreqs;
     bool isserver, ishttp, listserver, shouldping, shouldpurge;
 
-    masterclient() : inputpos(0), outputpos(0), port(RE_SERVER_PORT), numpings(0), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
+    masterclient() : inputpos(0), outputpos(0), port(RE_SERVER_PORT), numpings(0), lastping(0), lastpong(0), lastactivity(0), lastpush(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
@@ -276,7 +276,7 @@ bool checkmasterclientinput(masterclient &c)
             if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
             c.shouldping = true;
             c.numpings = 0;
-            c.lastactivity = totalmillis ? totalmillis : 1;
+            c.lastactivity = c.lastpush = totalmillis ? totalmillis : 1;
             if(c.isserver)
             {
                 masteroutf(c, "echo \"server updated\"\n");
@@ -364,6 +364,12 @@ void checkmaster()
                 c.shouldping = false;
                 masteroutf(c, "echo \"failed pinging server\n");
             }
+        }
+        if(c.isserver)
+        {
+            loopv(control) if(control[i].flag == ipinfo::LOCAL && ENET_TIME_GREATER(control[i].time, c.lastpush))
+                masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
+            c.lastpush = totalmillis ? totalmillis : 1;
         }
         if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);
         else ENET_SOCKETSET_ADD(readset, c.socket);
