@@ -4939,6 +4939,7 @@ namespace server
                 case N_CONTROL:
                 {
                     int victim = getint(p), value = getint(p);
+                    getstring(text, p);
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
@@ -4955,7 +4956,8 @@ namespace server
                                         if(control[i].type == ipinfo::ALLOW && (ip & control[i].mask) == control[i].ip) \
                                             control.remove(i); \
                                 } \
-                                copystring(text, colorname(ci)); \
+                                string name; \
+                                copystring(name, colorname(ci)); \
                                 if(value >= 0) \
                                 { \
                                     ipinfo &c = control.add(); \
@@ -4963,12 +4965,14 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
-                                    srvoutf(3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), text); \
+                                    if(text[0]) srvoutf(3, "\fs\fc" #y "\fS added on %s by %s: %s", colorname(cp), name, text); \
+                                    else srvoutf(3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), name); \
                                     if(value == ipinfo::BAN) disconnect_client(cp->clientnum, DISC_IPBAN); \
                                 } \
                                 else \
                                 { \
-                                    srvoutf(3, "%s has been kicked by %s", colorname(cp), text); \
+                                    if(text[0]) srvoutf(3, "%s has been kicked by %s: %s", colorname(cp), name, text); \
+                                    else srvoutf(3, "%s has been kicked by %s", colorname(cp), name); \
                                     disconnect_client(cp->clientnum, DISC_KICK); \
                                 } \
                             } \
