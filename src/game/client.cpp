@@ -312,7 +312,7 @@ namespace client
         gameent *d = game::getclient(cn);
         return d ? d->hostname : "";
     }
-    ICOMMAND(0, getclienthost, "ii", (int *cn), result(getclienthost(*cn)));
+    ICOMMAND(0, getclienthost, "i", (int *cn), result(getclienthost(*cn)));
 
     int getclientteam(int cn)
     {
