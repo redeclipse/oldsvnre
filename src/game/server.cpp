@@ -358,7 +358,7 @@ namespace server
     bool maprequest = false, inovertime = false;
     enet_uint32 lastsend = 0;
     int mastermode = MM_OPEN;
-    bool privupdate = false, mapsending = false, shouldcheckvotes = false;
+    bool privupdate = false, updatecontrols = false, mapsending = false, shouldcheckvotes = false;
     stream *mapdata[SENDMAP_MAX] = { NULL };
     vector<clientinfo *> clients, connects;
     vector<worldstate *> worldstates;
@@ -2678,7 +2678,7 @@ namespace server
 
     void sendservinit(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri5", N_SERVERINIT, ci->clientnum, GAMEVERSION, ci->sessionid, serverpass[0] ? 1 : 0);
+        sendf(ci->clientnum, 1, "ri3si2", N_SERVERINIT, ci->clientnum, GAMEVERSION, gethostname(ci->clientnum), ci->sessionid, serverpass[0] ? 1 : 0);
     }
 
     bool restorescore(clientinfo *ci)
@@ -2720,6 +2720,7 @@ namespace server
         {
             putint(p, N_CLIENTINIT);
             putint(p, ci->clientnum);
+            sendstring(gethostname(ci->clientnum), p);
             sendstring(ci->name, p);
             putint(p, ci->state.colour);
             putint(p, ci->state.model);
@@ -3768,6 +3769,16 @@ namespace server
     {
         loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
         loopvrev(control) if(control[i].flag == ipinfo::TEMPORARY && totalmillis-control[i].time > 4*60*60000) control.remove(i);
+        if(updatecontrols)
+        {
+            loopv(clients)
+            {
+                uint ip = getclientip(clients[i]->clientnum);
+                if(ip && !clients[i]->privilege && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                    disconnect_client(clients[i]->clientnum, DISC_IPBAN);
+            }
+            updatecontrols = false;
+        }
 
         if(numclients())
         {

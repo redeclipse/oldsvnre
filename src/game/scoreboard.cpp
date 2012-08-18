@@ -43,6 +43,7 @@ namespace hud
     VAR(IDF_PERSIST, showownernum, 0, 0, 1);
     VAR(IDF_PERSIST, showspectators, 0, 1, 1);
     VAR(IDF_PERSIST, showconnecting, 0, 0, 1);
+    VAR(IDF_PERSIST, showhostname, 0, 0, 1);
 
     static bool scoreson = false, scoresoff = false, shownscores = false;
     static int menustart = 0, menulastpress = 0;
@@ -520,6 +521,17 @@ namespace hud
                 g.text("on ", fgcolor);
                 loopscoregroup({
                     if(o->aitype > AI_NONE) g.textf("%d ", 0xFFFFFF, NULL, 0, o->ownernum);
+                    else g.space(1);
+                });
+                g.poplist();
+            }
+
+            if(showhostname)
+            {
+                g.pushlist();
+                g.text("host ", fgcolor);
+                loopscoregroup({
+                    if(o->aitype == AI_NONE) g.textf("%s ", 0xFFFFFF, NULL, 0, o->hostname);
                     else g.space(1);
                 });
                 g.poplist();
