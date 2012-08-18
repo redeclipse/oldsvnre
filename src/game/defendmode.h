@@ -72,7 +72,7 @@ struct defendservmode : defendstate, servmode
             {
                 if(!b.owners || !b.enemies)
                 {
-                    int pts = b.occupy(b.enemy, GAME(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, GAME(defendoccupy), m_gsp1(gamemode, mutators));
+                    int pts = b.occupy(b.enemy, GAME(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, defendcount, defendinstant);
                     if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], GAME(defendpoints));
                 }
                 sendaffinity(i);
@@ -215,7 +215,7 @@ struct defendservmode : defendstate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define defendbuff4 (GAME(defendbuffing)&4 && b.occupied(m_gsp1(gamemode, mutators), GAME(defendoccupy) >= GAME(defendbuffoccupy)))
+        #define defendbuff4 (GAME(defendbuffing)&4 && b.occupied(defendinstant, defendcount >= GAME(defendbuffoccupy)))
         #define defendbuff1 (GAME(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
         #define defendbuff2 (GAME(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && (b.enemy == ci->team || defendbuff4))
         if(GAME(defendbuffing)) loopv(flags)

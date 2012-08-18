@@ -72,13 +72,13 @@ gametypes gametype[] = {
     {
         G_DEFEND,       (1<<G_M_TEAM),
         {
+            (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
             (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
-            0
+            (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
-        "defend-the-flag",                  { "quick", "conquer", "" },
-        "secure and defend flags to earn points", { "flags secure quicker than normal", "match ends when all flags are secured", "" },
+        "defend-the-flag",                  { "quick", "conquer", "king" },
+        "defend the flags to earn points", { "flags secure quicker than normal", "match ends when all flags are secured", "king of the hill with one flag" },
     },
     {
         G_BOMBER,       0,
@@ -294,7 +294,7 @@ extern mutstypes mutstype[];
 #define maplist(a,b,c,d) \
 { \
     if(m_capture(b)) a = newstring(GAME(capturemaps)); \
-    else if(m_defend(b)) a = newstring(GAME(defendmaps)); \
+    else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? GAME(kingmaps) : GAME(defendmaps)); \
     else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? GAME(holdmaps) : GAME(bombermaps)); \
     else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
     else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
