@@ -23,6 +23,7 @@ Maps:
  * Ubik, clip/water/door fixes
  * Alphacampaign, removed
  * Canals, new map
+ * Wet, tweaked obstacles
 
 Visuals:
  * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
@@ -61,6 +62,9 @@ Multiplayer & Servers:
  * Allow players to cast votes for ones made by an admin which conflict with a lock control
  * Added ability to lock spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
  * Expanded admin control (can now add allows, mute, and limit team changing)
+ * Renamed privileges: master->helper, auth->moderator
+ * Added ability to specify a ban/kick/etc. reason
+ * Added ability to get client hostname (/echo (gethostname <cn>) or /showhostname to show in player list)
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions
