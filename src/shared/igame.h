@@ -117,6 +117,7 @@ namespace game
 #endif
 namespace server
 {
+    extern bool updatecontrols;
     extern void start();
     extern void shutdown();
     extern void ancmsgft(int cn, int snd, int conlevel, const char *s, ...);

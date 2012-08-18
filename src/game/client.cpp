@@ -307,6 +307,13 @@ namespace client
     }
     ICOMMAND(0, getclientname, "ii", (int *cn, int *colour), result(getclientname(*cn, *colour)));
 
+    const char *getclienthost(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? d->hostname : "";
+    }
+    ICOMMAND(0, getclienthost, "ii", (int *cn), result(getclienthost(*cn)));
+
     int getclientteam(int cn)
     {
         gameent *d = game::getclient(cn);
@@ -1328,6 +1335,8 @@ namespace client
                         disconnect();
                         return;
                     }
+                    getstring(game::player1->hostname, p);
+                    if(!game::player1->hostname[0]) copystring(game::player1->hostname, "unknown");
                     sessionid = getint(p);
                     game::player1->clientnum = mycn;
                     if(getint(p)) conoutft(CON_MESG, "\frthe server is password protected");
@@ -1491,10 +1500,12 @@ namespace client
                     gameent *d = game::newclient(cn);
                     if(!d)
                     {
-                        getstring(text, p);
+                        loopi(2) getstring(text, p);
                         loopi(2) getint(p);
                         break;
                     }
+                    getstring(d->hostname, p);
+                    if(!d->hostname[0]) copystring(d->hostname, "unknown");
                     getstring(text, p);
                     int colour = getint(p), model = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
@@ -1508,14 +1519,14 @@ namespace client
                             d->setinfo(text, colour, model);
                             copystring(newname, game::colorname(d, text));
                             if(game::showplayerinfo && !isignored(d->clientnum))
-                                conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
+                                conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, newname);
                         }
                         else d->setinfo(text, colour, model);
                     }
                     else                    // new client
                     {
                         d->setinfo(text, colour, model);
-                        if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s has joined the game", game::colorname(d, text, "", false));
+                        if(game::showplayerinfo) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, text, "", false), d->hostname);
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.deletecontents();
                     }

@@ -47,6 +47,7 @@ void addipinfo(vector<ipinfo> &info, int type, const char *name)
     p.mask = mask.i;
     p.type = clamp(type, 0, int(ipinfo::MAXTYPES)-1);
     p.flag = ipinfo::LOCAL;
+    server::updatecontrols = true;
 }
 ICOMMAND(0, addallow, "s", (char *name), addipinfo(control, ipinfo::ALLOW, name));
 ICOMMAND(0, addban, "s", (char *name), addipinfo(control, ipinfo::BAN, name));

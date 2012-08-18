@@ -820,7 +820,7 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll, stunscale;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
-    string name, info, obit;
+    string hostname, name, info, obit;
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
@@ -829,6 +829,7 @@ struct gameent : dynent, gamestate
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
+        copystring(hostname, "unknown");
         name[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);

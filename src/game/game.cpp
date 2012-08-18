@@ -1333,7 +1333,7 @@ namespace game
         gameent *d = players[cn];
         if(!d) return;
         if(d->name[0] && showplayerinfo && (d->aitype == AI_NONE || ai::showaiinfo))
-            conoutft(CON_EVENT, "\fo%s left the game (%s)", colorname(d), reason >= 0 ? disc_reasons[reason] : "normal");
+            conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colorname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         int numdyns = numdynents();
         loopi(numdyns) if((e = (gameent *)iterdynents(i)))

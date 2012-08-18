@@ -221,6 +221,8 @@ namespace ai
         d->colour = cl;
         d->model = md;
 
+        formatstring(d->hostname)("bot#%d", d->ownernum);
+
         if(resetthisguy) projs::remove(d);
         if(d->ownernum >= 0 && game::player1->clientnum == d->ownernum)
         {
