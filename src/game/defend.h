@@ -1,6 +1,12 @@
 #ifdef GAMESERVER
-#define defendstate stfservstate
+    #define defendstate stfservstate
+    #define defendinstant (m_gsp1(gamemode, mutators) || m_gsp3(gamemode, mutators))
+    #define defendcount (m_gsp3(gamemode, mutators) ? GAME(defendking) : GAME(defendoccupy))
+#else
+    #define defendinstant (m_gsp1(game::gamemode, game::mutators) || m_gsp3(game::gamemode, game::mutators))
+    #define defendcount (m_gsp3(game::gamemode, game::mutators) ? GAME(defendking) : GAME(defendoccupy))
 #endif
+
 struct defendstate
 {
     struct flag

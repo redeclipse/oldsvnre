@@ -18,7 +18,7 @@ namespace defend
         vec colour = vec::hexcolor(TEAM(owner, colour));
         if(enemy)
         {
-            int team = owner && enemy && !m_gsp1(game::gamemode, game::mutators) ? TEAM_NEUTRAL : enemy;
+            int team = owner && enemy && !defendinstant ? TEAM_NEUTRAL : enemy;
             int timestep = totalmillis%1000;
             float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*occupy, 0.f, 1.f);
             colour.lerp(vec::hexcolor(TEAM(team, colour)), amt);
@@ -63,7 +63,7 @@ namespace defend
         {
             defendstate::flag &b = st.flags[i];
             if(!entities::ents.inrange(b.ent)) continue;
-            float occupy = b.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
+            float occupy = b.occupied(defendinstant, defendcount);
             entitylight *light = &entities::ents[b.ent]->light;
             if(light->millis != lastmillis) light->material[0] = bvec::fromcolor(skewcolour(b.owner, b.enemy, occupy));
             rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
@@ -104,7 +104,7 @@ namespace defend
         {
             defendstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
+            float occupy = f.occupied(defendinstant, defendcount);
             adddynlight(vec(f.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, skewcolour(f.owner, f.enemy, occupy), 0, 0, DL_KEEP);
         }
     }
@@ -114,7 +114,7 @@ namespace defend
         loopv(st.flags)
         {
             defendstate::flag &f = st.flags[i];
-            float occupy = f.occupied(m_gsp1(game::gamemode, game::mutators), defendoccupy);
+            float occupy = f.occupied(defendinstant, defendcount);
             vec colour = skewcolour(f.owner, f.enemy, occupy), dir = vec(f.o).sub(camera1->o);
             const char *tex = f.hasflag ? hud::arrowtex : (f.owner == game::focus->team && f.enemy ? hud::alerttex : hud::flagtex);
             float size = hud::radaraffinitysize*(f.hasflag ? 1.25f : 1);
@@ -136,7 +136,7 @@ namespace defend
             {
                 defendstate::flag &f = st.flags[i];
                 pushfont("emphasis");
-                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1) * defendoccupy), 0.f, 1.f) : 1.f;
+                float occupy = !f.owner || f.enemy ? clamp(f.converted/float((!defendinstant && f.owner ? 2 : 1) * defendcount), 0.f, 1.f) : 1.f;
                 bool overthrow = f.owner && f.enemy == game::player1->team;
                 ty += draw_textx("%s \fs\f[%d]\f(%s)\f(%s)\fS \fs%s%d%%\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, overthrow ? "Overthrow" : "Secure", TEAM(f.owner, colour), hud::teamtexname(f.owner), hud::flagtex, overthrow ? "\fy" : (occupy < 1.f ? "\fc" : "\fg"), int(occupy*100.f))*hud::noticescale;
                 popfont();
@@ -159,7 +159,7 @@ namespace defend
             if(headsup || f.hasflag || millis <= 1000)
             {
                 float skew = headsup ? hud::inventoryskew : 0.f,
-                    occupy = f.enemy ? clamp(f.converted/float((!m_gsp1(game::gamemode, game::mutators) && f.owner ? 2 : 1)*defendoccupy), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
+                    occupy = f.enemy ? clamp(f.converted/float((!defendinstant && f.owner ? 2 : 1)*defendcount), 0.f, 1.f) : (f.owner ? 1.f : 0.f);
                 vec c = vec::hexcolor(TEAM(f.owner, colour)), c1 = c;
                 if(f.enemy)
                 {
@@ -229,11 +229,39 @@ namespace defend
             b.reset();
         }
         int bases[TEAM_ALL] = {0};
+        bool hasteams = true;
         loopv(st.flags) bases[st.flags[i].kinship]++;
         loopi(numteams(game::gamemode, game::mutators)-1) if(bases[i+1] != bases[i+2])
         {
             loopvk(st.flags) st.flags[k].kinship = TEAM_NEUTRAL;
+            hasteams = false;
             break;
+        }
+        if(m_gsp3(game::gamemode, game::mutators))
+        {
+            vec average(0, 0, 0);
+            int count = 0;
+            loopv(st.flags) if(!hasteams || st.flags[i].kinship != TEAM_NEUTRAL)
+            {
+                average.add(st.flags[i].o);
+                count++;
+            }
+            int smallest = -1;
+            if(count)
+            {
+                average.div(count);
+                float dist = 1e16f, tdist = 1e16f;
+                loopv(st.flags) if(!st.flags.inrange(smallest) || (tdist = st.flags[i].o.dist(average)) < dist)
+                {
+                    smallest = i;
+                    dist = tdist;
+                }
+            }
+            if(!st.flags.inrange(smallest)) smallest = rnd(st.flags.length());
+            int ent = st.flags[smallest].ent;
+            copystring(st.flags[smallest].name, "flag");
+            st.flags[smallest].kinship = TEAM_NEUTRAL;
+            loopv(st.flags) if(st.flags[i].ent != ent) st.flags.remove(i--);
         }
     }
 
