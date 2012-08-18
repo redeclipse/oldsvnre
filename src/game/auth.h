@@ -199,6 +199,7 @@ namespace auth
             p.mask = uint(atoi(w[2]));
             p.type = j;
             p.flag = ipinfo::GLOBAL; // master info
+            p.time = totalmillis ? totalmillis : 1;
             updatecontrols = true;
         }
         loopj(numargs) if(w[j]) delete[] w[j];
