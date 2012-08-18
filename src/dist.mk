@@ -55,3 +55,19 @@ dist-clean:
 
 cube2font-txt: ../doc/cube2font.txt
 
+../doc/guidelines-wiki.txt: ../doc/guidelines.txt
+	awk 'BEGIN{ ORS="\n\n"; RS=""; FS="\n" } \
+		/^    / { print "===",substr($$0,5),"==="; next };1' \
+		../doc/guidelines.txt > ../doc/guidelines-wiki.txt
+	sed -e '1s,.*,== Guidelines for Connecting to the Red Eclipse Master Server ==,' \
+		-e 's,^\ \ -\ ,**\ ,' \
+		-e 's, <\([^>]*\)>,:\n\n\1,' \
+		-ne 'H;$$x;$$s/^\n//;$$s/\n   */ /g;$$p' \
+		-i ../doc/guidelines-wiki.txt
+	echo "\nThis text was automatically generated from guidelines.txt\n\
+Please edit only that file and regenerate this wiki text via:\n\
+ make guidelines-wiki" \
+		>> ../doc/guidelines-wiki.txt
+
+guidelines-wiki: ../doc/guidelines-wiki.txt
+
