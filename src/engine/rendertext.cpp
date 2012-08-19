@@ -127,6 +127,9 @@ float text_widthf(const char *str, int flags)
     text_boundsf(str, width, height, -1, flags);
     return width;
 }
+ICOMMAND(0, textwidth, "si", (char *s, int *f), floatret(text_widthf(s, *f)));
+ICOMMAND(0, fontwidth, "", (), intret(FONTW));
+ICOMMAND(0, fontheight, "", (), intret(FONTH));
 
 #define TEXTTAB(x) (max((int((x)/FONTTAB)+1.0f)*FONTTAB, (x) + FONTW))
 
