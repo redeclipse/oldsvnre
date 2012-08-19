@@ -913,13 +913,11 @@ namespace entities
         }
     }
 
-    bool tryspawn(dynent *d, const vec &o, short yaw, short pitch)
+    bool tryspawn(dynent *d, const vec &o, float yaw, float pitch)
     {
-        d->yaw = yaw;
-        d->pitch = pitch;
-        d->roll = 0;
-        d->o = vec(o).add(vec(0, 0, d->height+1));
-        game::fixrange(d->yaw, d->pitch);
+        game::fixfullrange(d->yaw = yaw, d->pitch = pitch, d->roll = 0);
+        d->o = vec(o).add(vec(0, 0, d->height+d->aboveeye));
+        d->resetinterp();
         return physics::entinmap(d, true);
     }
 
