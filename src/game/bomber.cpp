@@ -75,14 +75,14 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || hasbombs.find(i) >= 0 || !f.enabled) continue;
-            vec pos = f.pos(false), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
+            vec pos = f.pos(true), dir = vec(pos).sub(camera1->o), colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
             float area = 3, size = hud::radaraffinitysize;
             if(isbomberaffinity(f))
             {
                 area = 2;
                 if(!f.owner && !f.droptime)
                 {
-                    int millis = lastmillis-f.interptime;
+                    int millis = lastmillis-f.displaytime;
                     if(millis < 1000) size *= 1.f+(1-clamp(float(millis)/1000.f, 0.f, 1.f));
                 }
             }
@@ -132,7 +132,7 @@ namespace bomber
             if(y-sy-s < m) break;
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
-            int millis = lastmillis-f.interptime;
+            int millis = lastmillis-f.displaytime;
             vec colour = pulsecolour();
             float skew = hud::inventoryskew;
             if(f.owner || f.droptime)
@@ -209,7 +209,7 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
             cament *c = cameras.add(new cament);
-            c->o = f.pos(false);
+            c->o = f.pos(true);
             c->o.z += enttype[AFFINITY].radius/2;
             c->type = cament::AFFINITY;
             c->id = i;
@@ -225,7 +225,7 @@ namespace bomber
                 if(st.flags.inrange(c->id))
                 {
                     bomberstate::flag &f = st.flags[c->id];
-                    c->o = f.pos(false);
+                    c->o = f.pos(true);
                     c->o.z += enttype[AFFINITY].radius/2;
                     if(f.owner) c->player = f.owner;
                 }
@@ -240,11 +240,11 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled || (f.owner == game::focus && !game::thirdpersonview(true))) continue;
-            vec above(f.pos());
+            vec above(f.pos(true, true));
             float trans = isbomberaffinity(f) ? 1.f : 0.5f;
-            if(!isbomberaffinity(f) || (!f.droptime && !f.owner))
+            if(!isbomberaffinity(f) || !f.interptime) // || (!f.droptime && !f.owner))
             {
-                int millis = lastmillis-f.interptime;
+                int millis = lastmillis-f.displaytime;
                 if(millis <= 1000) trans *= float(millis)/1000.f;
             }
             if(trans > 0)
@@ -299,10 +299,10 @@ namespace bomber
             bomberstate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
             float trans = 1.f;
-            int millis = lastmillis-f.interptime;
+            int millis = lastmillis-f.displaytime;
             if(millis <= 1000) trans = float(millis)/1000.f;
             vec colour = isbomberaffinity(f) ? pulsecolour() : vec::hexcolor(TEAM(f.team, colour));
-            adddynlight(f.pos(), enttype[AFFINITY].radius*trans, colour, 0, 0, DL_KEEP);
+            adddynlight(f.pos(true, true), enttype[AFFINITY].radius*trans, colour, 0, 0, DL_KEEP);
         }
     }
 
@@ -421,20 +421,22 @@ namespace bomber
     {
         if(!st.flags.inrange(i)) return;
         bomberstate::flag &f = st.flags[i];
+        bool isreset = false;
         if(f.enabled && value)
         {
-            destroyaffinity(f.pos());
+            destroyaffinity(f.pos(true, true));
             if(isbomberaffinity(f))
             {
                 if(value == 2)
                 {
-                    affinityeffect(i, TEAM_NEUTRAL, f.pos(), f.spawnloc, 3, "RESET");
+                    affinityeffect(i, TEAM_NEUTRAL, f.pos(true, true), f.spawnloc, 3, "RESET");
                     game::announcef(S_V_BOMBRESET, CON_INFO, NULL, "\fathe \fs\fwbomb\fS has been reset");
+                    isreset = true;
                 }
                 entities::execlink(NULL, f.ent, false);
             }
         }
-        st.returnaffinity(i, lastmillis, value!=0);
+        st.returnaffinity(i, lastmillis, value!=0, isreset);
     }
 
     void scoreaffinity(gameent *d, int relay, int goal, int score)
@@ -459,7 +461,7 @@ namespace bomber
         playsound(S_CATCH, d->o, d);
         if(!f.droptime)
         {
-            affinityeffect(i, d->team, d->feetpos(), f.pos(), 1, "TAKEN");
+            affinityeffect(i, d->team, d->feetpos(), f.pos(true, true), 1, "TAKEN");
             game::announcef(S_V_BOMBPICKUP, d == game::focus ? CON_SELF : CON_INFO, d, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
             entities::execlink(NULL, f.ent, false);
         }

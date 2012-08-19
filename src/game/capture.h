@@ -17,7 +17,8 @@ struct capturestate
         gameent *owner, *lastowner;
         projent *proj;
         entitylight light;
-        int ent, interptime, pickuptime, movetime;
+        int ent, displaytime, pickuptime, movetime, viewtime, interptime;
+        vec viewpos, interppos;
 #endif
 
         flag()
@@ -36,18 +37,37 @@ struct capturestate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            interptime = pickuptime = movetime = 0;
+            displaytime = pickuptime = movetime = 0;
 #endif
             team = TEAM_NEUTRAL;
             taketime = droptime = 0;
         }
 
 #ifndef GAMESERVER
-        vec &pos()
+        vec &position()
         {
             if(owner) return owner->waist;
             if(droptime) return proj ? proj->o : droploc;
             return spawnloc;
+        }
+
+        vec &pos(bool view = false)
+        {
+            if(view)
+            {
+                if(totalmillis != viewtime)
+                {
+                    viewpos = position();
+                    if(interptime && lastmillis-interptime < 500)
+                    {
+                        float amt = (lastmillis-interptime)/500.f;
+                        viewpos = vec(interppos).add(vec(viewpos).sub(interppos).mul(amt));
+                    }
+                    viewtime = totalmillis;
+                }
+                return viewpos;
+            }
+            return position();
         }
 #endif
     };
@@ -76,7 +96,9 @@ struct capturestate
     void interp(int i, int t)
     {
         flag &f = flags[i];
-        f.interptime = f.interptime ? t-max(1000-(t-f.interptime), 0) : t;
+        f.displaytime = f.displaytime ? t-max(1000-(t-f.displaytime), 0) : t;
+        f.interptime = t;
+        f.interppos = f.position();
     }
 
     void destroy(int id)
@@ -102,6 +124,9 @@ struct capturestate
 #endif
     {
         flag &f = flags[i];
+#ifndef GAMESERVER
+        interp(i, t);
+#endif
         f.owner = owner;
         f.taketime = t;
         f.droptime = 0;
@@ -117,13 +142,15 @@ struct capturestate
             f.proj->lifetime = min(f.proj->lifetime, f.proj->fadetime);
         }
         destroy(i);
-        interp(i, t);
 #endif
     }
 
     void dropaffinity(int i, const vec &o, const vec &p, int t)
     {
         flag &f = flags[i];
+#ifndef GAMESERVER
+        interp(i, t);
+#endif
         f.droploc = o;
         f.inertia = p;
         f.droptime = t;
@@ -137,13 +164,15 @@ struct capturestate
         f.owner = NULL;
         destroy(i);
         create(i);
-        interp(i, t);
 #endif
     }
 
     void returnaffinity(int i, int t)
     {
         flag &f = flags[i];
+#ifndef GAMESERVER
+        interp(i, t);
+#endif
         f.droptime = f.taketime = 0;
 #ifdef GAMESERVER
         f.owner = -1;
@@ -152,7 +181,6 @@ struct capturestate
         f.pickuptime = f.movetime = 0;
         f.owner = NULL;
         destroy(i);
-        interp(i, t);
 #endif
     }
 };

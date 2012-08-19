@@ -19,8 +19,8 @@ struct bomberstate
         gameent *owner, *lastowner;
         projent *proj;
         entitylight light;
-        int ent, interptime, pickuptime, movetime, inittime, interpmillis;
-        vec interppos;
+        int ent, displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
+        vec viewpos, renderpos, interppos;
 #endif
 
         flag()
@@ -39,8 +39,8 @@ struct bomberstate
 #else
             owner = lastowner = NULL;
             proj = NULL;
-            interptime = pickuptime = movetime = inittime = interpmillis = 0;
-            interppos = vec(-1, -1, -1);
+            displaytime = pickuptime = movetime = inittime = viewtime = rendertime = 0;
+            viewpos = renderpos = vec(-1, -1, -1);
 #endif
             team = TEAM_NEUTRAL;
             taketime = droptime = 0;
@@ -48,26 +48,48 @@ struct bomberstate
         }
 
 #ifndef GAMESERVER
-        vec &pos(bool render = true)
+        vec &position(bool render = false)
         {
-            if(owner)
+            if(team == TEAM_NEUTRAL)
             {
-                if(render)
+                if(owner)
                 {
-                    if(lastmillis != interpmillis)
+                    if(render)
                     {
-                        float yaw = 360-((lastmillis/2)%360), off = (lastmillis%1000)/500.f;
-                        vecfromyawpitch(yaw, 0, 1, 0, interppos);
-                        interppos.normalize().mul(owner->radius+4).add(owner->headpos(-owner->height/2));
-                        interppos.z += owner->height*(off > 1 ?  2-off : off);
-                        interpmillis = lastmillis;
+                        if(totalmillis != rendertime)
+                        {
+                            float yaw = 360-((lastmillis/2)%360), off = (lastmillis%1000)/500.f;
+                            vecfromyawpitch(yaw, 0, 1, 0, renderpos);
+                            renderpos.normalize().mul(owner->radius+4).add(owner->headpos(-owner->height/2));
+                            renderpos.z += owner->height*(off > 1 ?  2-off : off);
+                            rendertime = totalmillis;
+                        }
+                        return renderpos;
                     }
-                    return interppos;
+                    else return owner->waist;
                 }
-                else return owner->waist;
+                if(droptime) return proj ? proj->o : droploc;
             }
-            if(droptime) return proj ? proj->o : droploc;
             return spawnloc;
+        }
+
+        vec &pos(bool view = false, bool render = false)
+        {
+            if(team == TEAM_NEUTRAL && view)
+            {
+                if(totalmillis != viewtime)
+                {
+                    viewpos = position(render);
+                    if(interptime && lastmillis-interptime < 500)
+                    {
+                        float amt = (lastmillis-interptime)/500.f;
+                        viewpos = vec(interppos).add(vec(viewpos).sub(interppos).mul(amt));
+                    }
+                    viewtime = totalmillis;
+                }
+                return viewpos;
+            }
+            return position(render);
         }
 #endif
     };
@@ -96,7 +118,9 @@ struct bomberstate
     void interp(int i, int t)
     {
         flag &f = flags[i];
-        f.interptime = f.interptime ? t-max(1000-(t-f.interptime), 0) : t;
+        f.displaytime = f.displaytime ? t-max(1000-(t-f.displaytime), 0) : t;
+        f.interptime = t;
+        f.interppos = f.position(true);
     }
 
     void destroy(int id)
@@ -122,6 +146,9 @@ struct bomberstate
 #endif
     {
         flag &f = flags[i];
+#ifndef GAMESERVER
+        interp(i, t);
+#endif
         f.owner = owner;
         f.taketime = t;
         f.droptime = 0;
@@ -133,13 +160,15 @@ struct bomberstate
         if(!f.inittime) f.inittime = t;
         (f.lastowner = owner)->addicon(eventicon::AFFINITY, t, game::eventiconfade, f.team);
         destroy(i);
-        interp(i, t);
 #endif
     }
 
     void dropaffinity(int i, const vec &o, const vec &p, int t, int target = -1)
     {
         flag &f = flags[i];
+#ifndef GAMESERVER
+        interp(i, t);
+#endif
         f.droploc = o;
         f.inertia = p;
         f.droptime = t;
@@ -154,13 +183,16 @@ struct bomberstate
         f.owner = NULL;
         destroy(i);
         create(i, target);
-        interp(i, t);
 #endif
     }
 
-    void returnaffinity(int i, int t, bool enabled)
+    void returnaffinity(int i, int t, bool enabled, bool isreset = false)
     {
         flag &f = flags[i];
+#ifndef GAMESERVER
+        interp(i, t);
+        if(!isreset) f.interptime = 0;
+#endif
         f.droptime = f.taketime = 0;
         f.enabled = enabled;
 #ifdef GAMESERVER
@@ -170,7 +202,6 @@ struct bomberstate
         f.pickuptime = f.inittime = f.movetime = 0;
         f.owner = NULL;
         destroy(i);
-        interp(i, t);
 #endif
     }
 };
