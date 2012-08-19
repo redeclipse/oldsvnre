@@ -1424,7 +1424,7 @@ namespace game
     extern void impulseeffect(gameent *d, int effect = 0);
     extern void suicide(gameent *d, int flags);
     extern void fixrange(float &yaw, float &pitch);
-    extern void fixfullrange(float &yaw, float &pitch, float &roll, bool full);
+    extern void fixfullrange(float &yaw, float &pitch, float &roll, bool full = false);
     extern void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch);
     extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float yawspeed = 1, float pitchspeed = 1, float rotate = 0);
     extern bool allowmove(physent *d);
@@ -1457,7 +1457,7 @@ namespace entities
     extern void putitems(packetbuf &p);
     extern void execlink(gameent *d, int index, bool local, int ignore = -1);
     extern void setspawn(int n, int m);
-    extern bool tryspawn(dynent *d, const vec &o, short yaw = 0, short pitch = 0);
+    extern bool tryspawn(dynent *d, const vec &o, float yaw = 0, float pitch = 0);
     extern void spawnplayer(gameent *d, int ent = -1, bool suicide = false);
     extern const char *entinfo(int type, attrvector &attr, bool full = false, bool icon = false);
     extern void useeffects(gameent *d, int ent, int ammoamt, int reloadamt, bool spawn, int weap, int drop, int ammo = -1, int reloads = -1);
