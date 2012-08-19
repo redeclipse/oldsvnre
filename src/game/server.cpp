@@ -3265,8 +3265,8 @@ namespace server
                 if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
                 return;
             }
-            clientinfo *victim = (clientinfo *)getinfo(target);
-            if(victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators)))
+            clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
+            if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
                 sendf(-1, 1, "ri7x", N_STICKY, ci->clientnum, target, id, pos.x, pos.y, pos.z, ci->clientnum);
             else if(GAME(serverdebug) >= 2)
                 srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);

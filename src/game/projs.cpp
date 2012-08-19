@@ -122,7 +122,7 @@ namespace projs
                 else dir = vec(0, 0, 1);
             }
         }
-        if(proj.owner && (proj.owner == game::player1 || proj.owner->ai))
+        if(proj.owner && proj.local)
         {
             int hflags = proj.flags|flags;
             float size = hflags&HIT_WAVE ? radial*WEAP(proj.weap, pusharea) : radial;
@@ -142,7 +142,7 @@ namespace projs
     {
         if(p->projtype == PRJ_SHOT && p->owner)
         {
-            if(game::player1 == p->owner || p->owner->ai) p->state = CS_DEAD;
+            if(p->local) p->state = CS_DEAD;
             else
             {
                 hitmsg &h = hits.add();
@@ -303,8 +303,9 @@ namespace projs
         loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
         {
             projs[i]->stuck = true;
-            projs[i]->stick = (gameent *)f;
+            projs[i]->stick = f ? (gameent *)f : NULL;
             projs[i]->stickpos = pos;
+            if(!f) projs[i]->o = pos;
             break;
         }
     }
@@ -1412,13 +1413,16 @@ namespace projs
                 proj.norm = vec(d->headpos(-d->height*0.5f)).sub(proj.o).normalize();
                 if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&COLLIDE_STICK)
                 {
-                    proj.stuck = true;
-                    proj.stick = (gameent *)d;
-                    proj.stickpos = vec(proj.o).sub(d->headpos(-d->height*0.5f));
-                    proj.stickpos.rotate_around_z(-d->yaw*RAD);
-                    if(proj.owner && (proj.owner == game::player1 || proj.owner->ai))
-                        client::addmsg(N_STICKY, "ri9", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
-                                proj.stick->clientnum, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
+                    if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
+                    {
+                        proj.stuck = true;
+                        proj.stick = (gameent *)d;
+                        proj.stickpos = vec(proj.o).sub(d->headpos(-d->height*0.5f));
+                        proj.stickpos.rotate_around_z(-d->yaw*RAD);
+                        if(proj.projtype == PRJ_SHOT)
+                            client::addmsg(N_STICKY, "ri9", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
+                                    proj.stick->clientnum, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
+                    }
                     return 1;
                 }
                 if(!hiteffect(proj, d, flags, proj.norm)) return 1;
@@ -1428,8 +1432,15 @@ namespace projs
                 proj.norm = norm;
                 if(proj.projcollide&IMPACT_GEOM && proj.projcollide&COLLIDE_STICK)
                 {
-                    proj.o.sub(vec(dir).mul(proj.radius*0.125f));
-                    proj.stuck = true;
+                    if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
+                    {
+                        proj.stuck = true;
+                        proj.stick = NULL;
+                        proj.stickpos = proj.o.sub(vec(dir).mul(proj.radius*0.125f));
+                        if(proj.projtype == PRJ_SHOT)
+                            client::addmsg(N_STICKY, "ri9", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
+                                    -1, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
+                    }
                     return 1;
                 }
             }
