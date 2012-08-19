@@ -1911,7 +1911,6 @@ namespace server
             else morethanone = 0;
             best = &votes[i];
         }
-        bool gotvotes = best && best->count >= int(maxvotes*GAME(votethreshold));
         if(force && morethanone)
         {
             int r = rnd(morethanone+1), n = 0;
@@ -1921,7 +1920,7 @@ namespace server
                 else { best = &votes[i]; break; }
             }
         }
-        if(force || (gotvotes && !maprequest))
+        if(force || (best && best->count >= int(maxvotes*GAME(votethreshold)) && !maprequest))
         {
             endmatch();
             if(best)
