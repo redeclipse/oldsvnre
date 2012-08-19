@@ -1083,7 +1083,7 @@ namespace physics
         }
         modifymovement(pl, m, local, floating, wantsmove, millis);
         m.mul(movevelocity(pl, floating));
-        float scale = coastscale(pl->feetpos(-1)), coast = PHYS(floorcoast)*scale;
+        float scale = coastscale(pl->feetpos(-2)), coast = PHYS(floorcoast)*scale;
         if(floating || pl->type == ENT_CAMERA) coast = floatcoast;
         else
         {
@@ -1113,7 +1113,7 @@ namespace physics
         else pl->falling = g;
         if(liquidcheck(pl) || pl->physstate >= PHYS_SLOPE)
         {
-            float coast = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-1)),
+            float coast = liquidcheck(pl) ? liquidmerge(pl, PHYS(aircoast), PHYS(liquidcoast)) : PHYS(floorcoast)*coastscale(pl->feetpos(-2)),
                   c = liquidcheck(pl) ? 1.0f : clamp((pl->floor.z - slopez)/(floorz-slopez), 0.0f, 1.0f);
             pl->falling.mul(pow(max(1.0f - c/coast, 0.0f), curtime/20.0f));
         }
