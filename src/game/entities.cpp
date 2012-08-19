@@ -1965,7 +1965,7 @@ namespace entities
                                 if(isweap(weap)) colour = WEAP(weap, colour);
                                 size = e.attrs[9] > 0 ? e.attrs[9]/100.f : aistyle[e.attrs[0]].scale;
                             }
-                            fade = 0.5f;
+                            //fade = 0.5f;
                         }
                         else if(e.spawned)
                         {
