@@ -77,17 +77,16 @@ struct bomberstate
         {
             if(team == TEAM_NEUTRAL && view)
             {
-                if(totalmillis != viewtime)
+                if(interptime && lastmillis-interptime < 500)
                 {
-                    viewpos = position(render);
-                    if(interptime && lastmillis-interptime < 500)
+                    if(totalmillis != viewtime)
                     {
                         float amt = (lastmillis-interptime)/500.f;
-                        viewpos = vec(interppos).add(vec(viewpos).sub(interppos).mul(amt));
+                        viewpos = vec(interppos).add(vec(position(render)).sub(interppos).mul(amt));
+                        viewtime = totalmillis;
                     }
-                    viewtime = totalmillis;
+                    return viewpos;
                 }
-                return viewpos;
             }
             return position(render);
         }

@@ -86,7 +86,7 @@ namespace bomber
                     if(millis < 1000) size *= 1.f+(1-clamp(float(millis)/1000.f, 0.f, 1.f));
                 }
             }
-            else if(!m_gsp2(game::gamemode, game::mutators))
+            else if(!m_gsp1(game::gamemode, game::mutators))
             {
                 area = 3;
                 if(isbombertarg(f, game::focus->team) && !hasbombs.empty()) size *= 1.25f;
@@ -278,7 +278,7 @@ namespace bomber
                         defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, pcolour, 2, 1);
                     }
                 }
-                else if(!m_gsp2(game::gamemode, game::mutators))
+                else if(!m_gsp1(game::gamemode, game::mutators))
                 {
                     part_explosion(above, enttype[AFFINITY].radius*trans, PART_SHOCKWAVE, 1, TEAM(f.team, colour), 1.f, trans*0.25f);
                     part_explosion(above, enttype[AFFINITY].radius/2*trans, PART_SHOCKBALL, 1, TEAM(f.team, colour), 1.f, trans*0.65f);
@@ -517,7 +517,7 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        if(m_team(game::gamemode, game::mutators) && !m_gsp2(game::gamemode, game::mutators))
+        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators))
         {
             int goal = -1;
             loopv(st.flags)
