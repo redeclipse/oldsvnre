@@ -259,7 +259,7 @@ namespace defend
             }
             if(!st.flags.inrange(smallest)) smallest = rnd(st.flags.length());
             int ent = st.flags[smallest].ent;
-            copystring(st.flags[smallest].name, "flag");
+            copystring(st.flags[smallest].name, "the flag");
             st.flags[smallest].kinship = TEAM_NEUTRAL;
             loopv(st.flags) if(st.flags[i].ent != ent) st.flags.remove(i--);
         }
@@ -411,7 +411,7 @@ namespace defend
                 }
                 else walk = 1;
             }
-            return ai::defense(d, b, f.o, !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*8), walk);
+            return ai::defense(d, b, f.o, !f.enemy || m_gsp3(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius), !f.enemy || m_gsp3(game::gamemode, game::mutators) ? ai::CLOSEDIST : float(enttype[AFFINITY].radius*walk*8), walk);
         }
         return false;
     }
