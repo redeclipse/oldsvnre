@@ -118,7 +118,7 @@ struct bomberservmode : bomberstate, servmode
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         if(GAME(bomberthreshold) > 0 && oldpos.dist(newpos) >= GAME(bomberthreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
-        if(!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) return;
+        if(!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) return;
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
@@ -177,7 +177,7 @@ struct bomberservmode : bomberstate, servmode
             int hasaffinity = 0;
             vector<int> candidates[TEAM_MAX];
             loopv(flags) candidates[flags[i].team].add(i);
-            int wants = m_gsp2(gamemode, mutators) ? 1 : teamcount(gamemode, mutators);
+            int wants = m_gsp1(gamemode, mutators) ? 1 : teamcount(gamemode, mutators);
             loopi(wants)
             {
                 int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
@@ -190,7 +190,7 @@ struct bomberservmode : bomberstate, servmode
             }
             if(hasaffinity < wants)
             {
-                if(!candidates[TEAM_NEUTRAL].empty() && !m_gsp2(gamemode, mutators))
+                if(!candidates[TEAM_NEUTRAL].empty() && !m_gsp1(gamemode, mutators))
                 {
                     srvmsgf(-1, "\fzoythis map does have enough goals, switching on hold mutator");
                     sendf(-1, 1, "risi3", N_MAPCHANGE, smapname, 0, gamemode, mutators|(1<<G_M_GSP1));
@@ -213,7 +213,7 @@ struct bomberservmode : bomberstate, servmode
             if(f.owner >= 0)
             {
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && t > 0)
+                if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && t > 0)
                 {
                     int score = GAME(bomberholdpoints)*t;
                     if(score)
@@ -238,10 +238,10 @@ struct bomberservmode : bomberstate, servmode
                     ci->state.weapshots[WEAP_GRENADE][0].add(1);
                     sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, WEAP_GRENADE, -1, -1, -1);
                     dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
-                    if((!m_team(gamemode, mutators) || m_gsp2(gamemode, mutators)) && GAME(bomberholdpenalty))
+                    if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && GAME(bomberholdpenalty))
                     {
                         givepoints(ci, -GAME(bomberholdpenalty));
-                        if(m_team(gamemode, mutators) && m_gsp2(gamemode, mutators))
+                        if(m_team(gamemode, mutators) && m_gsp1(gamemode, mutators))
                         {
                             int total = addscore(ci->team, -GAME(bomberholdpenalty));
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
