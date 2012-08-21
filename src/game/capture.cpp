@@ -214,16 +214,7 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float trans = 1.f, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f);
-            #if 0
-            if(!f.owner && !f.droptime)
-            {
-                int millis = lastmillis-f.displaytime;
-                if(millis <= 1000) trans += float(millis)/1000.f;
-                else trans = 1.f;
-            }
-            else trans = 0.5f;
-            #endif
+            float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f);
             entitylight *light = &entities::ents[f.ent]->light;
             light->effect = vec::hexcolor(TEAM(f.team, colour));
             if(wait > 0.5f)
@@ -234,7 +225,7 @@ namespace capture
             }
             light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
-            if(!f.owner && !f.droptime && trans > 0) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, trans);
+            if(!f.owner && !f.droptime) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             vec above(f.spawnloc);
             above.z += enttype[AFFINITY].radius*2/3;
             defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
@@ -311,13 +302,9 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             if(!entities::ents.inrange(f.ent)) continue;
-            float trans = 1.f;
-            if(!f.owner)
-            {
-                int millis = lastmillis-f.displaytime;
-                if(millis <= 1000) trans = float(millis)/1000.f;
-            }
-            adddynlight(vec(f.pos(true)).add(vec(0, 0, enttype[AFFINITY].radius/2*trans)), enttype[AFFINITY].radius*trans, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
+            if(f.owner || f.droptime)
+                adddynlight(vec(f.spawnloc).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
+            adddynlight(vec(f.pos(true)).add(vec(0, 0, enttype[AFFINITY].radius/2)), enttype[AFFINITY].radius, vec::hexcolor(TEAM(f.team, colour)), 0, 0, DL_KEEP);
         }
     }
 
