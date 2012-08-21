@@ -1505,17 +1505,23 @@ namespace physics
             loopi(x) \
             { \
                 if(i) { y; } \
-                if(collide(d) && !inside && (!avoidplayers || !hitplayer)) { d->resetinterp(); return true; } \
+                if(collide(d) && !inside && (!avoidplayers || !hitplayer)) \
+                { \
+                    d->resetinterp(); \
+                    return true; \
+                } \
                 d->o = orig; \
             } \
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            vec dir; vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
+            vec dir;
+            vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
             inmapchk(100, d->o.add(vec(dir).mul(i/10.f)));
         }
         inmapchk(100, d->o.add(vec((rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f, (rnd(21)-10)*i/10.f)));
-        d->o = orig; d->resetinterp();
+        d->o = orig;
+        d->resetinterp();
         return false;
     }
 

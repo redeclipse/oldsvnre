@@ -449,7 +449,7 @@ namespace entities
                 case TR_TOGGLE: case TR_LINK: case TR_ONCE:
                 {
                     client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
-                    setspawn(n, e.spawned ? 0 : 1);
+                    if(!e.spawned) setspawn(n, 1);
                     break;
                 }
                 case TR_SCRIPT:
@@ -917,7 +917,6 @@ namespace entities
     {
         game::fixfullrange(d->yaw = yaw, d->pitch = pitch, d->roll = 0);
         d->o = vec(o).add(vec(0, 0, d->height+d->aboveeye));
-        d->resetinterp();
         return physics::entinmap(d, true);
     }
 
