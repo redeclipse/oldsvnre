@@ -702,36 +702,35 @@ namespace game
             else d->speedscale *= d->aitype >= AI_START ? enemyspeed : botspeed;
         }
 
-        float offset = d->height; d->o.z -= d->height;
+        float offset = d->height;
+        d->o.z -= d->height;
         if(d->state == CS_ALIVE && aistyle[clamp(d->aitype, int(AI_NONE), int(AI_MAX-1))].cancrouch)
         {
             bool crouching = d->action[AC_CROUCH];
-            float crouchoff = 1.f-CROUCHHEIGHT, zoff = d->zradius*crouchoff, zrad = d->zradius-zoff, frac = zoff/10.f;
+            float crouchoff = 1.f-CROUCHHEIGHT, zrad = d->zradius-(d->zradius*crouchoff);
             vec old = d->o;
             if(!crouching) loopk(2)
             {
-                d->o.z += zrad;
-                d->height = zrad;
                 if(k)
                 {
                     vec dir;
                     vecfromyawpitch(d->yaw, 0, d->move, d->strafe, dir);
                     d->o.add(dir.normalize().mul(2));
                 }
-                if(collide(d, vec(0, 0, 0), 0, false)) loopi(10)
+                d->o.z += d->zradius;
+                d->height = d->zradius;
+                if(!collide(d, vec(0, 0, 1), 0, false) || inside)
                 {
-                    d->o.z += frac;
-                    d->height += frac;
-                    if(!collide(d, vec(0, 0, 0), 0, false))
-                    {
-                        crouching = true;
-                        break;
-                    }
+                    d->o.z -= d->zradius-zrad;
+                    d->height = zrad;
+                    if(collide(d, vec(0, 0, 1), 0, false) && !inside) crouching = true;
                 }
                 d->o = old;
+                d->height = offset;
                 if(crouching)
                 {
-                    if(d->actiontime[AC_CROUCH] >= 0) d->actiontime[AC_CROUCH] = max(PHYSMILLIS-(lastmillis-d->actiontime[AC_CROUCH]), 0)-lastmillis;
+                    if(d->actiontime[AC_CROUCH] >= 0)
+                        d->actiontime[AC_CROUCH] = max(PHYSMILLIS-(lastmillis-d->actiontime[AC_CROUCH]), 0)-lastmillis;
                     break;
                 }
                 else if(k && d->actiontime[AC_CROUCH] < 0)

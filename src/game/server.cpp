@@ -4614,7 +4614,6 @@ namespace server
                                         sents[ent].spawned = !sents[ent].spawned;
                                         commit = kin = true;
                                     }
-                                    else sendf(cp->clientnum, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
                                     break;
                                 }
                                 case TR_ONCE: if(sents[ent].spawned) break;
@@ -4626,7 +4625,6 @@ namespace server
                                         sents[ent].spawned = true;
                                         commit = true;
                                     }
-                                    else sendf(cp->clientnum, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
                                     break;
                                 }
                                 case TR_EXIT:
@@ -4636,7 +4634,7 @@ namespace server
                                     startintermission();
                                 }
                             }
-                            if(commit) sendf(-1, 1, "ri3", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0);
+                            if(commit) sendf(-1, 1, "ri3x", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0, cp->clientnum);
                             if(kin) loopvj(sents[ent].kin) if(sents.inrange(sents[ent].kin[j]))
                             {
                                 if(sents[sents[ent].kin[j]].type == TRIGGER && !m_check(sents[sents[ent].kin[j]].attrs[5], sents[sents[ent].kin[j]].attrs[6], gamemode, mutators))
