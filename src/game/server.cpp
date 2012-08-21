@@ -1922,7 +1922,18 @@ namespace server
                 else { best = &votes[i]; break; }
             }
         }
-        if(force || (best && best->count >= int(maxvotes*GAME(votethreshold)) && !maprequest))
+        bool passed = force;
+        if(!passed && best)
+        {
+            if(!maprequest) passed = best->count >= int(maxvotes*GAME(votethreshold));
+            else switch(GAME(voteinterm))
+            {
+                case 2: passed = best->count >= maxvotes; break;
+                case 1: passed = best->count >= int(maxvotes*GAME(votethreshold)); break;
+                case 0: default: break;
+            }
+        }
+        if(passed)
         {
             endmatch();
             if(best)

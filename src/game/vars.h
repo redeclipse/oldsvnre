@@ -69,6 +69,7 @@ GVAR(IDF_ADMIN, mapslock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administr
 GVAR(IDF_ADMIN, varslock, 0, 2, 4); // 0 = off, 1 = helper, 2 = moderator, 3 = administrator, 4 = nobody
 GVAR(IDF_ADMIN, votelock, 0, 2, 7); // 0 = off, 1-3 = helper/moderator/administrator can select same game, 4 = helper/moderator/administrator only can vote, 7 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
+GVAR(IDF_ADMIN, voteinterm, 0, 2, 2); // 0 = must wait entire time, 1 = passes if votethreshold is met, 2 = passes if unanimous
 GFVAR(IDF_ADMIN, votethreshold, 0, 0.75f, 1); // auto-pass votes when this many agree
 
 GVAR(IDF_ADMIN, smallmapmax, 0, 6, VAR_MAX); // maximum number of players for a small map
