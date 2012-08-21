@@ -303,9 +303,17 @@ namespace projs
         loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
         {
             projs[i]->stuck = true;
-            projs[i]->stick = f ? (gameent *)f : NULL;
             projs[i]->stickpos = pos;
-            if(!f) projs[i]->o = pos;
+            if(f)
+            {
+                projs[i]->stick = f;
+                projs[i]->vel = vec(f->vel).add(f->falling);
+            }
+            else
+            {
+                projs[i]->o = pos;
+                projs[i]->stick = NULL;
+            }
             break;
         }
     }
@@ -1783,6 +1791,7 @@ namespace projs
                         proj.o = proj.stickpos;
                         proj.o.rotate_around_z(proj.stick->yaw*RAD);
                         proj.o.add(proj.stick->headpos(-proj.stick->height*0.5f));
+                        proj.vel = vec(proj.stick->vel).add(proj.stick->falling);
                         proj.resetinterp();
                     }
                 }
