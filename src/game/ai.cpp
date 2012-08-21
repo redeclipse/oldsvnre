@@ -134,7 +134,7 @@ namespace ai
     vec getaimpos(gameent *d, gameent *e, bool alt)
     {
         vec o = e->headpos();
-        if(WEAP2(d->weapselect, radial, alt)) o.z -= e->height;
+        //if(WEAP2(d->weapselect, radial, alt)) o.z -= e->height;
         if(d->skill <= 100)
         {
             if(lastmillis >= d->ai->lastaimrnd)

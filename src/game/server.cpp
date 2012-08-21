@@ -166,11 +166,11 @@ namespace server
         int state;
         projectilestate dropped, weapshots[WEAP_MAX][2];
         int score, spree, crits, rewards, gscore, teamkills, shotdamage, damage, weapjams[WEAP_MAX];
-        int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost;
-        vector<int> fraglog, fragmillis, cpnodes;
+        int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost, chatwarns;
+        vector<int> fraglog, fragmillis, cpnodes, chatmillis;
         vector<dmghist> damagelog;
 
-        servstate() : state(CS_SPECTATOR), aireinit(0), lastburnowner(-1), lastbleedowner(-1) {}
+        servstate() : state(CS_SPECTATOR), aireinit(0), lastburnowner(-1), lastbleedowner(-1), chatwarns(0) {}
 
         bool isalive(int millis)
         {
@@ -209,7 +209,7 @@ namespace server
     {
         uint ip;
         string name;
-        int points, score, frags, spree, crits, rewards, gscore, timeplayed, deaths, teamkills, shotdamage, damage;
+        int points, score, frags, spree, crits, rewards, gscore, timeplayed, deaths, teamkills, shotdamage, damage, chatwarns;
 
         void save(servstate &gs)
         {
@@ -220,11 +220,12 @@ namespace server
             crits = gs.crits;
             rewards = gs.rewards;
             gscore = gs.gscore;
+            timeplayed = gs.timeplayed;
             deaths = gs.deaths;
             teamkills = gs.teamkills;
             shotdamage = gs.shotdamage;
             damage = gs.damage;
-            timeplayed = gs.timeplayed;
+            chatwarns = gs.chatwarns;
         }
 
         void restore(servstate &gs)
@@ -236,11 +237,12 @@ namespace server
             gs.crits = crits;
             gs.rewards = rewards;
             gs.gscore = gscore;
+            gs.timeplayed = timeplayed;
             gs.deaths = deaths;
             gs.teamkills = teamkills;
             gs.shotdamage = shotdamage;
             gs.damage = damage;
-            gs.timeplayed = timeplayed;
+            gs.chatwarns = chatwarns;
         }
 
         void mapchange()
@@ -4656,6 +4658,30 @@ namespace server
                     if(!hasclient(cp, ci)) break;
                     uint ip = getclientip(cp->clientnum);
                     if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, GAME(mutelock)+PRIV_HELPER, "send messages while muted")) break;
+                    if(GAME(floodlock))
+                    {
+                        int numlines = 0;
+                        loopvrev(cp->state.chatmillis)
+                        {
+                            if(totalmillis-cp->state.chatmillis[i] <= GAME(floodtime)) numlines++;
+                            else cp->state.chatmillis.remove(i);
+                        }
+                        if(numlines >= GAME(floodlines) && !haspriv(cp, GAME(floodlock)-1+PRIV_HELPER, "send too many messages consecutively"))
+                        {
+                            cp->state.chatwarns++;
+                            if(ip && GAME(floodmute) && cp->state.chatwarns >= GAME(floodmute) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, GAME(mutelock)+PRIV_HELPER))
+                            {
+                                ipinfo &c = control.add();
+                                c.ip = ip;
+                                c.mask = 0xFFFFFFFF;
+                                c.type = ipinfo::MUTE;
+                                c.time = totalmillis ? totalmillis : 1;
+                                srvoutf(3, "\fs\fcmute\fS added on %s: exceeded the number of allowed flood warnings", colorname(cp));
+                            }
+                            break;
+                        }
+                        cp->state.chatmillis.add(totalmillis);
+                    }
                     if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
                     loopv(clients)
                     {
