@@ -15,7 +15,7 @@ GVAR(IDF_ADMIN, limitlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administr
 GVAR(IDF_ADMIN, floodlock, 0, 3, 4); // 0 = no flood lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
 GVAR(IDF_ADMIN, floodtime, 250, 10000, VAR_MAX); // time span to check for floody messages
-GVAR(IDF_ADMIN, floodlines, 1, 3, VAR_MAX); // number of lines in aforementioned span before too many
+GVAR(IDF_ADMIN, floodlines, 1, 5, VAR_MAX); // number of lines in aforementioned span before too many
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
@@ -51,7 +51,7 @@ GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
 
 GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone2k warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
-GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic canals cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge foundation fourplex futuresport ghost isolation linear longestyard mist nova oneiroi pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
+GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic canals cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge fourplex futuresport ghost isolation linear longestyard mist nova oneiroi pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
 
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
 GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink canals cargo center colony conflict darkness deadsimple deathtrap deli dropzone echo error facility forge foundation fourplex futuresport ghost industrial institute isolation keystone2k lab linear mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tranquility tribal ubik venus warp wet");

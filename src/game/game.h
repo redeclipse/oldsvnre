@@ -154,7 +154,7 @@ enttypes enttype[] = {
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,      false,      false,
-                "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
+                "affinity",     { "team",   "yaw",      "rot",    "modes",    "muts",     "id" }
     },
     {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,

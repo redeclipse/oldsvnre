@@ -2573,7 +2573,7 @@ namespace hud
         }
         if(UI::ready && showconsole && showhud)
         {
-            drawconsole(showconsole < 2 || (noview && (!progressing || forceprogress)) ? 0 : 1, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
+            drawconsole(showconsole < 2 || noview ? 0 : 1, hudwidth, hudheight, gap, gap, hudwidth-gap*2, consolefade);
             if(showconsole >= 2 && !noview)
                 drawconsole(2, hudwidth, hudheight, br+gap*2, by, showfps >= 2 || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? bs-gap*4 : (bs-gap*4)*2, consolefade);
         }
