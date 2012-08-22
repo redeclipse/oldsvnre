@@ -102,7 +102,7 @@ namespace auth
         {
             if(adminpass[0] && checkpassword(ci, adminpass, pwd))
             {
-                if(GAME(autoprivilege)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
+                if(GAME(autoadmin)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
                 return DISC_NONE;
             }
             if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return DISC_NONE;

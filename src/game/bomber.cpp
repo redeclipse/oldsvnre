@@ -256,14 +256,14 @@ namespace bomber
                     float yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/4)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0,
                           wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : ((f.owner && bombercarrytime) ? clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f) : 0.f);
                     int interval = lastmillis%1000;
-                    light->effect = pulsecolour();
+                    vec effect = pulsecolour();
                     if(wait > 0.5f)
                     {
                         int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
                         float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                        flashcolour(light->effect.r, light->effect.g, light->effect.b, 1.f, 0.f, 0.f, amt);
+                        flashcolour(effect.r, effect.g, effect.b, 1.f, 0.f, 0.f, amt);
                     }
-                    light->material[0] = bvec::fromcolor(light->effect);
+                    light->material[0] = bvec::fromcolor(effect);
                     rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, trans);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
