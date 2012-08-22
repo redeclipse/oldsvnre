@@ -210,6 +210,15 @@ namespace capture
 
     void render()
     {
+        static vector<int> numflags, iterflags; // dropped/owned
+        loopv(numflags) numflags[i] = iterflags[i] = 0;
+        loopv(st.flags)
+        {
+            capturestate::flag &f = st.flags[i];
+            if(!entities::ents.inrange(f.ent) || !f.owner) continue;
+            while(numflags.length() <= f.owner->clientnum) { numflags.add(0); iterflags.add(0); }
+            numflags[f.owner->clientnum]++;
+        }
         loopv(st.flags) // flags/bases
         {
             capturestate::flag &f = st.flags[i];
@@ -225,73 +234,53 @@ namespace capture
             }
             light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
-            if(!f.owner && !f.droptime) rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
-            vec above(f.spawnloc);
-            above.z += enttype[AFFINITY].radius*2/3;
-            defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
-            part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
-            above.z += 2.5f;
-            if(f.owner) part_icon(above, textureload(hud::flagtakentex, 3), 2, 1, 0, 0, 1, TEAM(f.owner->team, colour));
-            else if(f.droptime) part_icon(above, textureload(hud::flagdroptex, 3), 2, 1, 0, 0, 1, 0x28FFFF);
-            else part_icon(above, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
-            above.z += 2.5f;
-            if((m_gsp(game::gamemode, game::mutators) && f.droptime) || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
-            {
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
-                above.z += 1.f;
-                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
-                above.z += 1.5f;
-            }
-        }
-        static vector<int> numflags, iterflags; // dropped/owned
-        loopv(numflags) numflags[i] = iterflags[i] = 0;
-        loopv(st.flags)
-        {
-            capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || !f.owner) continue;
-            while(numflags.length() <= f.owner->clientnum) { numflags.add(0); iterflags.add(0); }
-            numflags[f.owner->clientnum]++;
-        }
-        loopv(st.flags)
-        {
-            capturestate::flag &f = st.flags[i];
-            if(!entities::ents.inrange(f.ent) || (!f.owner && !f.droptime)) continue;
-            vec above(f.pos(true));
-            float yaw = 0, wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f);
-            if(f.owner) yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
+            if(!f.owner && !f.droptime)
+                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             else
             {
-                yaw = ((lastmillis/8)+(360/st.flags.length()*i))%360;
-                if(f.proj) above.z -= f.proj->height;
+                vec lac(f.pos(true));
+                float yaw = 0;
+                if(f.owner) yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
+                else
+                {
+                    yaw = ((lastmillis/8)+(360/st.flags.length()*i))%360;
+                    if(f.proj) lac.z -= f.proj->height;
+                }
+                while(yaw >= 360.f) yaw -= 360.f;
+                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
+                lac.z += enttype[AFFINITY].radius*2/3;
+                if(f.owner) { lac.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
+                defformatstring(info)("<super>%s flag", TEAM(f.team, name));
+                part_textcopy(lac, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
+                lac.z += 2.5f;
+                if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
+                {
+                    float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
+                    part_icon(lac, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                    part_icon(lac, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
+                    part_icon(lac, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
+                    lac.z += 0.5f;
+                    defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(lac, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                    lac.z += 2.5f;
+                }
             }
-            while(yaw >= 360.f) yaw -= 360.f;
-            entitylight *light = &f.light;
-            light->effect = vec::hexcolor(TEAM(f.team, colour));
-            if(wait > 0.5f)
+            vec loc(f.spawnloc);
+            loc.z += enttype[AFFINITY].radius*2/3;
+            defformatstring(info)("<super>%s %s", TEAM(f.team, name), !f.owner && !f.droptime ? "flag" : "base");
+            part_textcopy(loc, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
+            loc.z += 2.5f;
+            if(f.owner) part_icon(loc, textureload(hud::flagtakentex, 3), 2, 1, 0, 0, 1, TEAM(f.owner->team, colour));
+            else if(f.droptime) part_icon(loc, textureload(hud::flagdroptex, 3), 2, 1, 0, 0, 1, 0x28FFFF);
+            else part_icon(loc, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
+            loc.z += 2.5f;
+            if((m_gsp(game::gamemode, game::mutators) && f.droptime) || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
             {
-                int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
-                float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                flashcolour(light->effect.r, light->effect.g, light->effect.b, 0.65f, 0.65f, 0.65f, amt);
-            }
-            light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
-            int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
-            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
-            above.z += enttype[AFFINITY].radius*2/3;
-            if(f.owner) { above.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
-            defformatstring(info)("<super>%s flag", TEAM(f.team, name));
-            part_textcopy(above, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
-            above.z += 2.5f;
-            if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
-            {
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
-                part_icon(above, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
-                part_icon(above, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
-                above.z += 0.5f;
-                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(above, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
-                above.z += 2.5f;
+                part_icon(loc, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
+                part_icon(loc, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);
+                part_icon(loc, textureload(hud::progresstex, 3), 2, 1, 0, 0, 1, pcolour, 0, wait);
+                loc.z += 1.f;
+                defformatstring(str)("<huge>%d%%", int(wait*100.f)); part_textcopy(loc, str, PART_TEXT, 1, 0xFFFFFF, 2, 1);
+                loc.z += 1.5f;
             }
         }
     }
@@ -332,7 +321,8 @@ namespace capture
         {
             capturestate::flag &f = st.flags[i];
             putint(p, f.team);
-            loopk(3) putint(p, int(f.spawnloc[k]*DMF));
+            putint(p, f.ent);
+            loopj(3) putint(p, int(f.spawnloc[j]*DMF));
         }
     }
 
@@ -344,27 +334,29 @@ namespace capture
     void parseaffinity(ucharbuf &p)
     {
         int numflags = getint(p);
+        while(st.flags.length() > numflags) st.flags.pop();
         loopi(numflags)
         {
-            int team = getint(p), owner = getint(p), dropped = 0;
-            vec droploc(0, 0, 0), inertia(0, 0, 0);
+            int team = getint(p), ent = getint(p), owner = getint(p), dropped = 0;
+            vec spawnloc(0, 0, 0), droploc(0, 0, 0), inertia(0, 0, 0);
+            loopj(3) spawnloc[j] = getint(p)/DMF;
             if(owner < 0)
             {
                 dropped = getint(p);
                 if(dropped)
                 {
-                    loopk(3) droploc[k] = getint(p)/DMF;
-                    loopk(3) inertia[k] = getint(p)/DMF;
+                    loopj(3) droploc[j] = getint(p)/DMF;
+                    loopj(3) inertia[j] = getint(p)/DMF;
                 }
             }
             if(p.overread()) break;
-            if(st.flags.inrange(i))
-            {
-                capturestate::flag &f = st.flags[i];
-                f.team = team;
-                if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
-                else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
-            }
+            while(!st.flags.inrange(i)) st.flags.add();
+            capturestate::flag &f = st.flags[i];
+            f.team = team;
+            f.ent = ent;
+            f.spawnloc = spawnloc;
+            if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
+            else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
         }
     }
 

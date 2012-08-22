@@ -40,6 +40,7 @@ struct captureservmode : capturestate, servmode
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
+        if(!hasflaginfo) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
@@ -50,6 +51,7 @@ struct captureservmode : capturestate, servmode
 
     void died(clientinfo *ci, clientinfo *actor)
     {
+        if(!hasflaginfo) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
     }
 
@@ -165,26 +167,32 @@ struct captureservmode : capturestate, servmode
         }
     }
 
+    void sendaffinity()
+    {
+        packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+        initclient(NULL, p, false);
+        sendpacket(-1, 1, p.finalize());
+    }
+
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)
     {
+        if(!hasflaginfo) return;
         putint(p, N_INITAFFIN);
         putint(p, flags.length());
         loopv(flags)
         {
             flag &f = flags[i];
             putint(p, f.team);
+            putint(p, f.ent);
             putint(p, f.owner);
+            loopj(3) putint(p, int(f.spawnloc[j]*DMF));
             if(f.owner<0)
             {
                 putint(p, f.droptime);
                 if(f.droptime)
                 {
-                    putint(p, int(f.droploc.x*DMF));
-                    putint(p, int(f.droploc.y*DMF));
-                    putint(p, int(f.droploc.z*DMF));
-                    putint(p, int(f.inertia.x*DMF));
-                    putint(p, int(f.inertia.y*DMF));
-                    putint(p, int(f.inertia.z*DMF));
+                    loopj(3) putint(p, int(f.droploc[j]*DMF));
+                    loopj(3) putint(p, int(f.inertia[j]*DMF));
                 }
             }
         }
@@ -250,12 +258,17 @@ struct captureservmode : capturestate, servmode
         {
             loopi(numflags)
             {
-                int team = getint(p);
+                int team = getint(p), ent = getint(p);
                 vec o;
-                loopk(3) o[k] = getint(p)/DMF;
-                if(!hasflaginfo) addaffinity(o, team);
+                loopj(3) o[j] = getint(p)/DMF;
+                if(!hasflaginfo) addaffinity(o, team, ent);
             }
-            hasflaginfo = true;
+            if(!hasflaginfo)
+            {
+                hasflaginfo = true;
+                sendaffinity();
+                loopv(clients) if(clients[i]->state.state == CS_ALIVE) entergame(clients[i]);
+            }
         }
     }
 

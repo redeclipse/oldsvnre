@@ -105,15 +105,19 @@ struct defendservmode : defendstate, servmode
 
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)
     {
+        if(!hasflaginfo) return;
         putint(p, N_SETUPAFFIN);
         putint(p, flags.length());
         loopv(flags)
         {
             flag &b = flags[i];
             putint(p, b.kinship);
+            putint(p, b.ent);
             putint(p, b.converted);
             putint(p, b.owner);
             putint(p, b.enemy);
+            loopj(3) putint(p, int(b.o[j]*DMF));
+            sendstring(b.name, p);
         }
         loopv(clients)
         {
@@ -245,18 +249,18 @@ struct defendservmode : defendstate, servmode
         {
             loopi(numflags)
             {
-                int kin = getint(p);
+                int kin = getint(p), ent = getint(p);
                 vec o;
-                o.x = getint(p)/DMF;
-                o.y = getint(p)/DMF;
-                o.z = getint(p)/DMF;
-                if(!hasflaginfo) addaffinity(o, kin);
+                loopj(3) o[j] = getint(p)/DMF;
+                string name;
+                getstring(name, p);
+                if(!hasflaginfo) addaffinity(o, kin, ent, name);
             }
             if(!hasflaginfo)
             {
                 hasflaginfo = true;
                 sendaffinity();
-                loopv(clients) if(clients[i]->state.state==CS_ALIVE) entergame(clients[i]);
+                loopv(clients) if(clients[i]->state.state == CS_ALIVE) entergame(clients[i]);
             }
         }
     }

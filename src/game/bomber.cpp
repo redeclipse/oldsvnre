@@ -330,7 +330,8 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[i];
             putint(p, f.team);
-            loopk(3) putint(p, int(f.spawnloc[k]*DMF));
+            putint(p, f.ent);
+            loopj(3) putint(p, int(f.spawnloc[j]*DMF));
         }
     }
 
@@ -342,28 +343,30 @@ namespace bomber
     void parseaffinity(ucharbuf &p)
     {
         int numflags = getint(p);
+        while(st.flags.length() > numflags) st.flags.pop();
         loopi(numflags)
         {
-            int team = getint(p), enabled = getint(p), owner = getint(p), dropped = 0;
-            vec droploc(0, 0, 0), inertia(0, 0, 0);
+            int team = getint(p), ent = getint(p), enabled = getint(p), owner = getint(p), dropped = 0;
+            vec spawnloc(0, 0, 0), droploc(0, 0, 0), inertia(0, 0, 0);
+            loopj(3) spawnloc[j] = getint(p)/DMF;
             if(owner < 0)
             {
                 dropped = getint(p);
                 if(dropped)
                 {
-                    loopk(3) droploc[k] = getint(p)/DMF;
-                    loopk(3) inertia[k] = getint(p)/DMF;
+                    loopj(3) droploc[j] = getint(p)/DMF;
+                    loopj(3) inertia[j] = getint(p)/DMF;
                 }
             }
             if(p.overread()) break;
-            if(st.flags.inrange(i))
-            {
-                bomberstate::flag &f = st.flags[i];
-                f.team = team;
-                f.enabled = enabled ? 1 : 0;
-                if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
-                else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
-            }
+            while(!st.flags.inrange(i)) st.flags.add();
+            bomberstate::flag &f = st.flags[i];
+            f.team = team;
+            f.ent = ent;
+            f.enabled = enabled ? 1 : 0;
+            f.spawnloc = spawnloc;
+            if(owner >= 0) st.takeaffinity(i, game::getclient(owner), lastmillis);
+            else if(dropped) st.dropaffinity(i, droploc, inertia, lastmillis);
         }
     }
 
