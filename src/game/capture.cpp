@@ -235,19 +235,23 @@ namespace capture
             light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             if(!f.owner && !f.droptime)
-                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
+                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], 0, entities::ents[f.ent]->attrs[2], MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             else
             {
                 vec lac(f.pos(true));
-                float yaw = 0;
-                if(f.owner) yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
+                float yaw = 0, roll = 0;
+                if(f.owner)
+                {
+                    yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
+                    roll = f.owner->roll;
+                }
                 else
                 {
                     yaw = ((lastmillis/8)+(360/st.flags.length()*i))%360;
                     if(f.proj) lac.z -= f.proj->height;
                 }
                 while(yaw >= 360.f) yaw -= 360.f;
-                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, 0, 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
+                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, 0, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
                 lac.z += enttype[AFFINITY].radius*2/3;
                 if(f.owner) { lac.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));

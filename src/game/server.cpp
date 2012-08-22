@@ -453,14 +453,18 @@ namespace server
                 case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
                 case 2: case 3: default: break;
             }
-            if(!isweap(ci->state.loadweap[j]) && ci->state.aitype == AI_NONE)
+            if(!isweap(ci->state.loadweap[j]))
             {
-                if(request)
+                if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = WEAP_MELEE;
+                else
                 {
-                    if(isweap(aweap)) srvmsgft(ci->clientnum, CON_EVENT, "sorry, the \fs\f[%d]%s\fS is not available, please select a different weapon", WEAP(aweap, colour), WEAP(aweap, name));
-                    sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
+                    if(request)
+                    {
+                        if(isweap(aweap)) srvmsgft(ci->clientnum, CON_EVENT, "sorry, the \fs\f[%d]%s\fS is not available, please select a different weapon", WEAP(aweap, colour), WEAP(aweap, name));
+                        sendf(ci->clientnum, 1, "ri", N_LOADWEAP);
+                    }
+                    return false;
                 }
-                return false;
             }
         }
         return true;
