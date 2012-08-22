@@ -1388,7 +1388,7 @@ enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE
 namespace game
 {
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
-            lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showplayerinfo,
+            lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime, showpresence,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow,
             playerovertone, playerundertone, playerdisplaytone, playereffecttone, forceplayermodel;
