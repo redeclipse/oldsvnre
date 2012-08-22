@@ -4974,7 +4974,7 @@ namespace server
                     break;
                 }
 
-                case N_CONTROL:
+                case N_ADDCONTROL:
                 {
                     int victim = getint(p), value = getint(p);
                     getstring(text, p);

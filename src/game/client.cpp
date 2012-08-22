@@ -404,16 +404,16 @@ namespace client
     }
     ICOMMAND(0, listclients, "i", (int *local), listclients(*local!=0));
 
-    void control(const char *arg, int type, const char *msg)
+    void addcontrol(const char *arg, int type, const char *msg)
     {
         int i = parseplayer(arg);
-        if(i >= 0) addmsg(N_CONTROL, "ri2s", i, type, msg);
+        if(i >= 0) addmsg(N_ADDCONTROL, "ri2s", i, type, msg);
     }
-    ICOMMAND(0, kick, "ss", (char *s, char *m), control(s, -1, m));
-    ICOMMAND(0, allow, "ss", (char *s, char *m), control(s, ipinfo::ALLOW, m));
-    ICOMMAND(0, ban, "ss", (char *s, char *m), control(s, ipinfo::BAN, m));
-    ICOMMAND(0, mute, "ss", (char *s, char *m), control(s, ipinfo::MUTE, m));
-    ICOMMAND(0, limit, "ss", (char *s, char *m), control(s, ipinfo::LIMIT, m));
+    ICOMMAND(0, kick, "ss", (char *s, char *m), addcontrol(s, -1, m));
+    ICOMMAND(0, allow, "ss", (char *s, char *m), addcontrol(s, ipinfo::ALLOW, m));
+    ICOMMAND(0, ban, "ss", (char *s, char *m), addcontrol(s, ipinfo::BAN, m));
+    ICOMMAND(0, mute, "ss", (char *s, char *m), addcontrol(s, ipinfo::MUTE, m));
+    ICOMMAND(0, limit, "ss", (char *s, char *m), addcontrol(s, ipinfo::LIMIT, m));
 
     ICOMMAND(0, clearallows, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::ALLOW));
     ICOMMAND(0, clearbans, "", (), addmsg(N_CLRCONTROL, "ri", ipinfo::BAN));
