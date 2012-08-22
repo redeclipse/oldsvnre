@@ -12,11 +12,12 @@ struct defendstate
     struct flag
     {
         vec o;
-        int kinship, owner, enemy;
+        int kinship, ent, owner, enemy;
+        string name;
 #ifndef GAMESERVER
-        string name, info;
+        string info;
         bool hasflag;
-        int ent, lasthad;
+        int lasthad;
 #endif
         int owners, enemies, converted, securetime;
 
@@ -118,23 +119,28 @@ struct defendstate
         secured = 0;
     }
 
-    void addaffinity(const vec &o, int team)
+    void addaffinity(const vec &o, int team, int ent, const char *name)
     {
         flag &b = flags.add();
         b.o = o;
         b.kinship = team;
         b.reset();
+        b.ent = ent;
+        copystring(b.name, name);
     }
 
-    void initaffinity(int i, int kin, int owner, int enemy, int converted)
+    void initaffinity(int i, int kin, int ent, vec &o, int owner, int enemy, int converted, const char *name)
     {
         if(!flags.inrange(i)) return;
         flag &b = flags[i];
         b.kinship = kin;
         b.reset();
+        b.ent = ent;
+        b.o = o;
         b.owner = owner;
         b.enemy = enemy;
         b.converted = converted;
+        copystring(b.name, name);
     }
 
     bool hasaffinity(int team)

@@ -10,7 +10,7 @@ struct bomberstate
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, droptime, taketime;
+        int team, ent, droptime, taketime;
         bool enabled;
 #ifdef GAMESERVER
         int owner, lastowner;
@@ -18,8 +18,7 @@ struct bomberstate
 #else
         gameent *owner, *lastowner;
         projent *proj;
-        entitylight light;
-        int ent, displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
+        int displaytime, pickuptime, movetime, inittime, viewtime, rendertime, interptime;
         vec viewpos, renderpos, interppos;
 #endif
 
@@ -99,20 +98,15 @@ struct bomberstate
         flags.shrink(0);
     }
 
-#ifdef GAMESERVER
-    void addaffinity(const vec &o, int team)
-#else
     void addaffinity(const vec &o, int team, int ent)
-#endif
     {
         flag &f = flags.add();
         f.reset();
         f.team = team;
         f.spawnloc = o;
-#ifndef GAMESERVER
         f.ent = ent;
-#endif
     }
+
 #ifndef GAMESERVER
     void interp(int i, int t)
     {
@@ -138,6 +132,7 @@ struct bomberstate
         f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, bomberresetdelay, bomberresetdelay, 1, 1, id, target);
     }
 #endif
+
 #ifdef GAMESERVER
     void takeaffinity(int i, int owner, int t)
 #else
@@ -213,7 +208,6 @@ namespace bomber
     extern bool dropaffinity(gameent *d);
     extern void sendaffinity(packetbuf &p);
     extern void parseaffinity(ucharbuf &p);
-    extern void initaffinity(ucharbuf &p);
     extern void dropaffinity(gameent *d, int i, const vec &droploc, const vec &inertia, int target = -1);
     extern void scoreaffinity(gameent *d, int relay, int goal, int score);
     extern void takeaffinity(gameent *d, int i);

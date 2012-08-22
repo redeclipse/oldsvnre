@@ -9,15 +9,14 @@ struct capturestate
     struct flag
     {
         vec droploc, inertia, spawnloc;
-        int team, droptime, taketime;
+        int team, ent, droptime, taketime;
 #ifdef GAMESERVER
         int owner, lastowner;
         vector<int> votes;
 #else
         gameent *owner, *lastowner;
         projent *proj;
-        entitylight light;
-        int ent, displaytime, pickuptime, movetime, viewtime, interptime;
+        int displaytime, pickuptime, movetime, viewtime, interptime;
         vec viewpos, interppos;
 #endif
 
@@ -77,20 +76,15 @@ struct capturestate
         flags.shrink(0);
     }
 
-#ifdef GAMESERVER
-    void addaffinity(const vec &o, int team)
-#else
     void addaffinity(const vec &o, int team, int ent)
-#endif
     {
         flag &f = flags.add();
         f.reset();
         f.team = team;
         f.spawnloc = o;
-#ifndef GAMESERVER
         f.ent = ent;
-#endif
     }
+
 #ifndef GAMESERVER
     void interp(int i, int t)
     {
@@ -116,6 +110,7 @@ struct capturestate
         f.proj = projs::create(f.droploc, f.inertia, false, NULL, PRJ_AFFINITY, capturedelay, capturedelay, 1, 1, id);
     }
 #endif
+
 #ifdef GAMESERVER
     void takeaffinity(int i, int owner, int t)
 #else

@@ -273,20 +273,26 @@ namespace defend
         {
             defendstate::flag &b = st.flags[i];
             putint(p, b.kinship);
-            putint(p, int(b.o.x*DMF));
-            putint(p, int(b.o.y*DMF));
-            putint(p, int(b.o.z*DMF));
+            putint(p, b.ent);
+            loopj(3) putint(p, int(b.o[j]*DMF));
+            sendstring(b.name, p);
         }
     }
 
     void parseaffinity(ucharbuf &p)
     {
         int numflags = getint(p);
+        while(st.flags.length() > numflags) st.flags.pop();
         loopi(numflags)
         {
-            int kin = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
+            int kin = getint(p), ent = getint(p), converted = getint(p), owner = getint(p), enemy = getint(p);
+            vec o;
+            loopj(3) o[j] = getint(p)/DMF;
+            string name;
+            getstring(name, p);
             if(p.overread()) break;
-            st.initaffinity(i, kin, owner, enemy, converted);
+            while(!st.flags.inrange(i)) st.flags.add();
+            st.initaffinity(i, ent, kin, o, owner, enemy, converted, name);
         }
     }
 
