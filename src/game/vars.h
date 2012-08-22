@@ -4,7 +4,7 @@ GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
 GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 
-GVAR(IDF_ADMIN, autoprivilege, 0, 0, 1);
+GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
 GVAR(IDF_ADMIN, speclock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, kicklock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, allowlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
@@ -44,7 +44,7 @@ GSVAR(IDF_ADMIN, allowmaps, "ares bath biolytic blink canals cargo center colony
 GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deathtrap deli depot dropzone dutility echo error foundation fourplex futuresport ghost industrial institute isolation keystone2k linear longestyard mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone2k linear mist nova panic pumpstation stone tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone2k linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, kingmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple depot dropzone dutility echo fourplex futuresport industrial keystone2k linear nova processing stone tower tribal ubik venus");
+GSVAR(IDF_ADMIN, kingmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple depot dropzone dutility echo fourplex futuresport industrial keystone2k linear processing stone tower tribal ubik venus");
 GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation futuresport fourplex ghost industrial isolation linear mist nova pumpstation stone tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial isolation keystone2k linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");

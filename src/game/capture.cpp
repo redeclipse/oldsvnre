@@ -225,14 +225,14 @@ namespace capture
             if(!entities::ents.inrange(f.ent)) continue;
             float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : ((m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team) ? clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f) : 0.f);
             entitylight *light = &entities::ents[f.ent]->light;
-            light->effect = vec::hexcolor(TEAM(f.team, colour));
+            vec effect = vec::hexcolor(TEAM(f.team, colour));
             if(wait > 0.5f)
             {
                 int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
                 float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                flashcolour(light->effect.r, light->effect.g, light->effect.b, 0.65f, 0.65f, 0.65f, amt);
+                flashcolour(effect.r, effect.g, effect.b, 0.65f, 0.65f, 0.65f, amt);
             }
-            light->material[0] = bvec::fromcolor(vec::hexcolor(TEAM(f.team, colour)).max(light->effect));
+            light->material[0] = bvec::fromcolor(effect);
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             if(!f.owner && !f.droptime)
                 rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], 0, entities::ents[f.ent]->attrs[2], MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
