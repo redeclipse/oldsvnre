@@ -24,6 +24,8 @@ Maps:
  * Alphacampaign, removed
  * Canals, new map
  * Wet, tweaked obstacles
+ * Keystone, revamped as "Keystone2k"
+ * Isolation, added bomber-ball waypoints
 
 Visuals:
  * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
@@ -40,6 +42,7 @@ Interface & Menus:
  * Added on-screen help for commands/vars/etc. (work in progress)
  * Blank names are no longer possible
  * Added Texture preview on hover in browser
+ * Joins/leaves no longer shown when connecting/disconnecting
 
 Modes & Mutators:
  * Hover mutator removed
@@ -70,6 +73,8 @@ Multiplayer & Servers:
  * Added ability to get client hostname (/echo (gethostname <cn>) or /showhostname to show on scoreboard)
  * Increased threshold for auto-passing votes from 1/2 to 3/4
  * Intermission now waits full time before proceeding to the next map
+ * Added auto-mute on chat spam (warns on 3 lines per 10 seconds, mutes after 3 warns)
+ * Added selectable end-of-match voting style (/voteinterm)
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions
