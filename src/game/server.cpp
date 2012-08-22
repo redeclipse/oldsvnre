@@ -2261,7 +2261,9 @@ namespace server
             case ALST_FIRST: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
             case ALST_TRY: // try spawn
             {
-                if(!isai && ((ci->wantsmap && !ci->failedmap) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR))) return false;
+                uint ip = getclientip(ci->clientnum);
+                if(!isai && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
+                    return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
                 break;
@@ -2276,7 +2278,8 @@ namespace server
             case ALST_WALK: if(ci->state.state != CS_EDITING) return false;
             case ALST_EDIT: // edit on/off
             {
-                if(isai || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR)) return false;
+                uint ip = getclientip(ci->clientnum);
+                if(isai || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
                 break;
             }
             default: break;
@@ -2621,7 +2624,7 @@ namespace server
                     }
                     else if(locked && !haspriv(ci, locked-1+PRIV_HELPER, "change that variable"))
                     {
-                        formatstring(val)("%s", floatstr(*id->storage.f));
+                        val = floatstr(*id->storage.f);
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
                         return;
                     }
