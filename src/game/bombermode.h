@@ -289,8 +289,11 @@ struct bomberservmode : bomberstate, servmode
         loopv(clients)
         {
             clientinfo *oi = clients[i];
-            if(!oi->connected || oi->clientnum == ci->clientnum || !oi->state.lastbuff) continue;
-            sendf(ci->clientnum, 1, "ri4", N_SPHY, oi->clientnum, SPHY_BUFF, 1);
+            if(!oi->connected || (ci && oi->clientnum == ci->clientnum) || !oi->state.lastbuff) continue;
+            putint(p, N_SPHY);
+            putint(p, oi->clientnum);
+            putint(p, SPHY_BUFF);
+            putint(p, 1);
         }
     }
 
