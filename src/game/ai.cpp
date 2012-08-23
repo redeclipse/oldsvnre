@@ -1393,7 +1393,8 @@ namespace ai
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2:
-                        if(iswaypoint(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                        if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
+                            d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
@@ -1408,7 +1409,7 @@ namespace ai
         }
         else d->ai->blocktime = d->ai->blockseq = 0;
 
-        if(d->ai->targnode == d->ai->targlast)
+        if(d->ai->targnode == d->ai->targlast || d->ai->hasprevnode(d->ai->targnode))
         {
             d->ai->targtime += lastmillis-d->ai->lastrun;
             if(d->ai->targtime > (d->ai->targseq+1)*1000)
@@ -1417,7 +1418,8 @@ namespace ai
                 switch(d->ai->targseq)
                 {
                     case 1: case 2:
-                        if(iswaypoint(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
+                        if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
+                            d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
