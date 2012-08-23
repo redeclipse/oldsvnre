@@ -1681,10 +1681,15 @@ namespace hud
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
-            gameent *d = NULL;
-            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1;
+            gameent *d = NULL, *o = NULL;
+            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, numothers = 0;
             loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
             {
+                if(d->state == CS_ALIVE && (!m_team(game::gamemode, game::mutators) || d->team != game::focus->team))
+                {
+                    numothers++;
+                    o = d;
+                }
                 switch(radarplayerfilter)
                 {
                     case 0: case 3: default: break;
@@ -1693,6 +1698,8 @@ namespace hud
                 }
                 drawplayerblip(d, w, h, style, blend*radarblend);
             }
+            if(m_duke(game::gamemode, game::mutators) && o && numothers == 1)
+                hud::drawblip(arrowtex, 3, w, h, radarplayersize, blend*radarblend*radarplayerblend, style, o->o, vec::hexcolor(game::getcolour(o, game::playerovertone)), "tiny", game::colorname(o));
         }
         if(radardamage) drawdamageblips(w, h, blend*radarblend); // 5+
     }
