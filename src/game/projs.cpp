@@ -178,15 +178,15 @@ namespace projs
             switch(type)
             {
                 case WEAP_RIFLE:
-                    part_splash(PART_SPARK, 25, 500, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.125f, 1, 1, 0, 24, 20);
-                    part_create(PART_PLASMA, 500, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f, 0, 0);
-                    adddynlight(proj.o, expl*1.1f, vec::hexcolor(WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 250, 10);
+                    part_splash(PART_SPARK, 25, 500, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.125f, 1, 1, 0, 24, 20);
+                    part_create(PART_PLASMA, 500, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f, 0, 0);
+                    adddynlight(proj.o, expl*1.1f, vec::hexcolor(WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 250, 10);
                     break;
                 default:
                     if(weaptype[proj.weap].melee)
                     {
-                        part_flare(proj.o, proj.from, 500, type == WEAP_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
-                        part_create(PART_PLASMA, 500, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.5f);
+                        part_flare(proj.o, proj.from, 500, type == WEAP_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
+                        part_create(PART_PLASMA, 500, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.5f);
                     }
                     break;
             }
@@ -414,12 +414,12 @@ namespace projs
                 {
                     case WEAP_SWORD:
                     {
-                        part_splash(PART_SPARK, 25, 350, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
+                        part_splash(PART_SPARK, 25, 350, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
                         break;
                     }
                     case WEAP_SHOTGUN: case WEAP_SMG:
                     {
-                        part_splash(PART_SPARK, 10, 350, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
+                        part_splash(PART_SPARK, 10, 350, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 20)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
                         break;
                     }
@@ -882,7 +882,7 @@ namespace projs
         };
         if(WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
         {
-            int colour = WEAPPCOL(d, weap, partcol, flags&HIT_ALT);
+            int colour = WEAPHCOL(d, weap, partcol, flags&HIT_ALT);
             if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0x888888, 1, 0.25f, -20);
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
                 part_splash(weap == WEAP_FLAMER ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 15);
@@ -983,10 +983,10 @@ namespace projs
                 {
                     case WEAP_SWORD:
                     {
-                        part_flare(proj.from, proj.to, 1, PART_LIGHTNING_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 1);
+                        part_flare(proj.from, proj.to, 1, PART_LIGHTNING_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 1);
                         if(lastmillis-proj.lasteffect >= 25 && proj.effectpos.dist(proj.to) >= 0.5f)
                         {
-                            part_flare(proj.from, proj.to, 150, PART_LIGHTNING_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
+                            part_flare(proj.from, proj.to, 150, PART_LIGHTNING_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
                             proj.lasteffect = lastmillis - (lastmillis%25);
                             proj.effectpos = proj.to;
                         }
@@ -998,10 +998,10 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f));
-                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend);
-                            part_create(PART_PLASMA, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f));
-                            if(projhints) part_create(PART_HINT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f));
+                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend);
+                            part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f));
+                            if(projhints) part_create(PART_HINT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend);
                         }
                         break;
                     }
@@ -1012,19 +1012,19 @@ namespace projs
                             part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, 0x120228), size*projfirehintsize, blend*projhintblend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend, -5);
+                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend, -5);
                             proj.lasteffect = lastmillis - (lastmillis%(projtraildelay*2));
                         }
-                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend);
-                        if(proj.flags&HIT_ALT) part_create(PART_FIREBALL_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size*0.5f, blend);
+                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend);
+                        if(proj.flags&HIT_ALT) part_create(PART_FIREBALL_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size*0.5f, blend);
                         break;
                     }
                     case WEAP_GRENADE:
                     {
                         int interval = lastmillis%1000;
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f));
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f));
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
                             part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x888888, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), 0.75f, -10);
@@ -1036,11 +1036,11 @@ namespace projs
                     {
                         int interval = lastmillis%1000;
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)+fluc);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize+fluc, projhintblend);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)+fluc);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize+fluc, projhintblend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.85f, -5);
+                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.85f, -5);
                             part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x222222, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT), 1.f, -10);
                             proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                         }
@@ -1050,9 +1050,9 @@ namespace projs
                     {
                         if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                         {
-                            part_create(PART_PLASMA, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5*proj.curscale, 0.75f);
-                            part_create(PART_PLASMA, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*proj.curscale, 0.75f);
-                            if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*projhintsize*proj.curscale, 0.75f*projhintblend);
+                            part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5*proj.curscale, 0.75f);
+                            part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*proj.curscale, 0.75f);
+                            if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*projhintsize*proj.curscale, 0.75f*projhintblend);
                         }
                         else
                         {
@@ -1060,8 +1060,8 @@ namespace projs
                             if(size > 0)
                             {
                                 proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                                part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
-                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend);
+                                part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
+                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend);
                             }
                         }
                         break;
@@ -1072,12 +1072,12 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
-                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f));
+                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend);
                             if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                             {
-                                part_create(PART_PLASMA, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5.f, 0.75f);
-                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5.f*projhintsize*proj.curscale, 0.75f*projhintblend);
+                                part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5.f, 0.75f);
+                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5.f*projhintsize*proj.curscale, 0.75f*projhintblend);
                             }
                         }
                         break;
@@ -1087,13 +1087,13 @@ namespace projs
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
-                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 1.f, 0.95f);
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 1, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
+                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 1, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
                         }
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.5f);
-                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale, 0.5f);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.5f);
+                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale, 0.5f);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend);
                         break;
                     }
                     case WEAP_RIFLE:
@@ -1102,12 +1102,12 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
-                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
+                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend);
                             if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                             {
-                                part_create(PART_PLASMA, 1, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5, 0.5f);
-                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5*projhintsize*proj.curscale, projhintblend);
+                                part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5, 0.5f);
+                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5*projhintsize*proj.curscale, projhintblend);
                             }
                         }
                         break;
@@ -1192,14 +1192,14 @@ namespace projs
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 200, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
-                            part_splash(PART_SPARK, 15, 250, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
+                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 200, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
+                            part_splash(PART_SPARK, 15, 250, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 100, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
+                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 100, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
-                                adddynlight(proj.o, expl, vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 150, 10);
+                                adddynlight(proj.o, expl, vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 150, 10);
                             }
                         }
                         else if(notrayspam(proj.weap, proj.flags&HIT_ALT, 20)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
@@ -1215,15 +1215,15 @@ namespace projs
                         }
                         else
                         {
-                            part_create(PART_PLASMA_SOFT, projtraillength*(type != WEAP_ROCKET ? 2 : 3), proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), max(expl*0.5f, 0.5f), 0.5f); // corona
+                            part_create(PART_PLASMA_SOFT, projtraillength*(type != WEAP_ROCKET ? 2 : 3), proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), max(expl*0.5f, 0.5f), 0.5f); // corona
                             if(expl > 0)
                             {
                                 quake(proj.o, proj.weap, proj.flags, proj.curscale);
                                 int len = type != WEAP_ROCKET ? 500 : 750;
-                                part_explosion(proj.o, expl, PART_EXPLOSION, len, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 1);
-                                part_splash(PART_SPARK, 50, len*2, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.75f, 1, 1, 0, expl, 20);
+                                part_explosion(proj.o, expl, PART_EXPLOSION, len, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 1);
+                                part_splash(PART_SPARK, 50, len*2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.75f, 1, 1, 0, expl, 20);
                                 if(WEAP(proj.weap, pusharea) >= 1)
-                                    part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.5f*projhintblend);
+                                    part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.5f*projhintblend);
                             }
                             else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
@@ -1231,7 +1231,7 @@ namespace projs
                                 part_create(PART_SMOKE_LERP_SOFT, projtraillength*(type != WEAP_ROCKET ? 3 : 4), proj.o, 0x333333, expl*0.75f, 0.5f, -15);
                                 int debris = rnd(type != WEAP_ROCKET ? 5 : 10)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
                                 loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
-                                adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT))));
+                                adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT))));
                             }
                         }
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 3))
@@ -1242,29 +1242,29 @@ namespace projs
                                 loopi(type != WEAP_ROCKET ? 5 : 10)
                                 {
                                     vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
-                                    part_create(PART_FIREBALL_SOFT, projtraillength*(type != WEAP_ROCKET ? 2 : 3), to, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), expl*1.25f, 0.5f+(rnd(50)/100.f), -5);
+                                    part_create(PART_FIREBALL_SOFT, projtraillength*(type != WEAP_ROCKET ? 2 : 3), to, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), expl*1.25f, 0.5f+(rnd(50)/100.f), -5);
                                 }
                             }
                             adddecal(type == WEAP_FLAMER ? DECAL_SCORCH_SHORT : DECAL_SCORCH, proj.o, proj.norm, expl*0.5f);
-                            adddynlight(proj.o, expl, vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), type != WEAP_ROCKET ? 500 : 1000, 10);
+                            adddynlight(proj.o, expl, vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), type != WEAP_ROCKET ? 500 : 1000, 10);
                         }
                         break;
                     }
                     case WEAP_SHOTGUN: case WEAP_SMG:
                     {
                         vol = int(vol*(1.f-proj.lifespan));
-                        part_splash(PART_SPARK, type == WEAP_SHOTGUN ? 30 : 20, 250, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, 1, 1, 0, 16, 15);
+                        part_splash(PART_SPARK, type == WEAP_SHOTGUN ? 30 : 20, 250, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, 1, 1, 0, 16, 15);
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 250, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
+                            part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 250, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 125, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
+                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 125, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 10))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
-                                adddynlight(proj.o, expl, vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), proj.flags&HIT_ALT ? 300 : 100, 10);
+                                adddynlight(proj.o, expl, vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), proj.flags&HIT_ALT ? 300 : 100, 10);
                             }
                         }
                         break;
@@ -1276,19 +1276,19 @@ namespace projs
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_explosion(proj.o, expl, PART_SHOCKBALL, len, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, len, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
+                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
                         }
                         else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
-                        part_splash(PART_SPARK, 50, len*2, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 20);
-                        part_create(PART_PLASMA_SOFT, len, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.75f, 0.5f);
-                        part_create(PART_ELECTRIC_SOFT, len/2, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.375f);
-                        part_create(PART_SMOKE, len, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.35f, 0.35f, -30);
+                        part_splash(PART_SPARK, 50, len*2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 20);
+                        part_create(PART_PLASMA_SOFT, len, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.75f, 0.5f);
+                        part_create(PART_ELECTRIC_SOFT, len/2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.375f);
+                        part_create(PART_SMOKE, len, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.35f, 0.35f, -30);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                         {
-                            adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT))));
-                            adddynlight(proj.o, 1.1f*expl, vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), len, 10);
+                            adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT))));
+                            adddynlight(proj.o, 1.1f*expl, vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), len, 10);
                         }
                         break;
                     }
@@ -1302,20 +1302,20 @@ namespace projs
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_create(PART_PLASMA_SOFT, len, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f); // corona
-                            part_splash(PART_SPARK, 50, len*2, proj.o, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
-                            part_explosion(proj.o, expl, PART_SHOCKBALL, len, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
+                            part_create(PART_PLASMA_SOFT, len, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f); // corona
+                            part_splash(PART_SPARK, 50, len*2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, len, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
+                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                         }
                         else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
-                        part_flare(proj.to, proj.o, len, PART_FLARE, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
-                        if(projhints) part_flare(proj.to, proj.o, len, PART_FLARE, projhint(proj.owner, WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend);
+                        part_flare(proj.to, proj.o, len, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
+                        if(projhints) part_flare(proj.to, proj.o, len, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                         {
                             adddecal(DECAL_SCORCH, proj.o, proj.norm, max(expl, 2.f));
-                            adddecal(DECAL_ENERGY, proj.o, proj.norm, max(expl*0.5f, 1.f), bvec::fromcolor(vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT))));
-                            adddynlight(proj.o, 1.1f*expl, vec::hexcolor(WEAPPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), len, 10);
+                            adddecal(DECAL_ENERGY, proj.o, proj.norm, max(expl*0.5f, 1.f), bvec::fromcolor(vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT))));
+                            adddynlight(proj.o, 1.1f*expl, vec::hexcolor(WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), len, 10);
                         }
                         break;
                     }
@@ -1993,17 +1993,17 @@ namespace projs
             projent &proj = *projs[i];
             switch(WEAP2(proj.weap, parttype, proj.flags&HIT_ALT))
             {
-                case WEAP_SWORD: adddynlight(proj.o, 16, vec::hexcolor(WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT))); break;
+                case WEAP_SWORD: adddynlight(proj.o, 16, vec::hexcolor(WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT))); break;
                 case WEAP_PISTOL: case WEAP_SHOTGUN: case WEAP_SMG: case WEAP_RIFLE: if(proj.movement >= 1)
                 {
                     float size = clamp(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(64.f, min(min(WEAP2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from))));
-                    adddynlight(proj.o, 1.25f*size, vec::hexcolor(WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)));
+                    adddynlight(proj.o, 1.25f*size, vec::hexcolor(WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)));
                 } break;
                 case WEAP_PLASMA: case WEAP_FLAMER: case WEAP_GRENADE: case WEAP_ROCKET:
                 {
                     float size = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                     if(!size) size = WEAP2(proj.weap, partlen, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale;
-                    adddynlight(proj.o, 1.25f*size, vec::hexcolor(WEAPPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)));
+                    adddynlight(proj.o, 1.25f*size, vec::hexcolor(WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)));
                 } break;
                 default: break;
             }

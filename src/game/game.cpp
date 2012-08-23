@@ -517,42 +517,26 @@ namespace game
                 {
                     bool last = lastmillis-d->weaplast[d->weapselect] > 0,
                          powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
-                         reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD;
+                         reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
+                         secondary = physics::secondaryweap(d);
                     float amt = last ? clamp(float(lastmillis-d->weaplast[d->weapselect])/d->weapwait[d->weapselect], 0.f, 1.f) : 0.f;
+                    vec col = WEAPPCOL(d, d->weapselect, partcol, secondary);
                     if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                     {
                         float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                        adddynlight(d->ejectpos(d->weapselect), 16*scale, pulsecolour(d), 0, 0, DL_KEEP);
+                        adddynlight(d->ejectpos(d->weapselect), 16*scale, col, 0, 0, DL_KEEP);
                     }
                     if(d->weapselect == WEAP_SWORD || powering)
                     {
-                        static const struct powerdls {
-                            int type, colour;
-                            float radius;
-                        } powerdl[WEAP_MAX] = {
-                            { 0, 0, 0 }, // melee
-                            { 1, 0x997711, 16 }, // pistol
-                            { 1, 0x111177, 18 }, // sword
-                            { 1, 0x997700, 20 }, // shotgun
-                            { 2, 0xAA6600, 18 }, // smg
-                            { 2, 0x991111, 20 }, // flamer
-                            { 2, 0x116699, 24 }, // plasma
-                            { 1, 0x5511CC, 18 }, // rifle
-                            { 2, 0, 18 }, // grenades
-                            { 2, 0, 18 }, // rocket
+                        static float powerdl[WEAP_MAX] = {
+                            0, 16, 18, 20, 18, 20, 24, 18, 18, 18
                         };
-                        if(powerdl[d->weapselect].type)
+                        if(powerdl[d->weapselect] > 0)
                         {
-                            float thresh = max(amt, 0.25f), size = 4+powerdl[d->weapselect].radius*thresh;
-                            int span = max(WEAP2(d->weapselect, power, physics::secondaryweap(d))/4, 500),
-                                interval = lastmillis%span, part = span/2;
-                            if(interval)
-                                size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
-                            vec col;
-                            if(powerdl[d->weapselect].colour > 0) col = vec::hexcolor(powerdl[d->weapselect].colour).mul(thresh);
-                            else if(powerdl[d->weapselect].type != 2) col = pulsecolour(d).mul(thresh);
-                            else col = vec(max(1.f-amt,0.5f), 0.5f*max(1.f-amt,0.f), 0);
-                            adddynlight(d->muzzlepos(d->weapselect), size, col, 0, 0, DL_KEEP);
+                            float thresh = max(amt, 0.25f), size = 4+powerdl[d->weapselect]*thresh;
+                            int span = max(WEAP2(d->weapselect, power, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
+                            if(interval) size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
+                            adddynlight(d->muzzlepos(d->weapselect), size, vec(col).mul(thresh), 0, 0, DL_KEEP);
                         }
                     }
                 }
@@ -2749,7 +2733,7 @@ namespace game
                      reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
                      secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
-                int colour = WEAPPCOL(d, d->weapselect, partcol, secondary);
+                int colour = WEAPHCOL(d, d->weapselect, partcol, secondary);
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
