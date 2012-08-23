@@ -28,7 +28,7 @@ struct flare
     bool sparkle;
 };
 
-VAR(IDF_WORLD, flarelights, 0, 0, 1);
+VAR(IDF_PERSIST, flarelights, 0, 0, 1);
 VAR(IDF_PERSIST, flarecutoff, 0, 1000, 10000);
 VAR(IDF_PERSIST, flaresize, 20, 100, 500);
 

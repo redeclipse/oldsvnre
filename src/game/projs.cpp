@@ -754,7 +754,8 @@ namespace projs
                 if(blocked >= 0) { proj.o = vec(eyedir).mul(blocked-0.1f).add(loc); break; }
             }
         }
-        proj.resetinterp();
+        if(proj.projtype != PRJ_SHOT) physics::entinmap(&proj, true);
+        else proj.resetinterp();
     }
 
     projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int value, int flags, float scale, bool child, projent *parent)
