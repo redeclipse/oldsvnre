@@ -82,7 +82,7 @@ namespace hud
     VAR(IDF_PERSIST, noticetime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, obitnotices, 0, 2, 2);
     VAR(IDF_PERSIST, teamnotices, 0, 2, 2);
-    VAR(IDF_PERSIST, teamnoticedelay, 0, 2500, VAR_MAX);
+    VAR(IDF_PERSIST, teamnoticedelay, 0, 5000, VAR_MAX);
 
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamtex, "<grey>textures/team", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamalphatex, "<grey>textures/teamalpha", 3);
@@ -1036,24 +1036,6 @@ namespace hud
         }
         else if(target->state == CS_ALIVE)
         {
-            if(m_fight(game::gamemode) && target == game::player1 && teamnotices)
-            {
-                if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
-                    ty += draw_textx("\fzZyDon't shoot team mates", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                if(teamnotices >= 2)
-                {
-                    if(target->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
-                    if(totalmillis-lastteam <= teamnoticedelay)
-                    {
-                        if(!m_team(game::gamemode, game::mutators))
-                        {
-                            if(m_trial(game::gamemode)) ty += draw_textx("Time Trial", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                            else ty += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        }
-                        else ty += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(target->team, colour), hud::teamtexname(target->team), TEAM(target->team, name));
-                    }
-                }
-            }
             if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
             {
                 pushfont("reduced");
@@ -2448,12 +2430,40 @@ namespace hud
 
     void drawevents(float blend)
     {
-        if(game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
+        int to = 0;
+        if(game::focus->state == CS_ALIVE && m_fight(game::gamemode) && shownotices && game::focus == game::player1 && teamnotices)
+        {
+            glPushMatrix();
+            glScalef(noticescale, noticescale, 1);
+            pushfont("super");
+            int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
+                tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
+                tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
+            if(noticestone) skewcolour(tr, tg, tb, noticestone);
+            if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
+                to += draw_textx("\fzZyDon't shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+            if(teamnotices >= 2)
+            {
+                if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
+                if(totalmillis-lastteam <= teamnoticedelay)
+                {
+                    if(!m_team(game::gamemode, game::mutators))
+                    {
+                        if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                        else to += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    }
+                    else to += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), hud::teamtexname(game::focus->team), TEAM(game::focus->team, name));
+                }
+            }
+            popfont();
+            glPopMatrix();
+        }
+        if(showevents && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
             glPushMatrix();
             glScalef(eventscale, eventscale, 1);
             pushfont("emphasis");
-            int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/eventscale), tx = (hudwidth/2)*(1.f/eventscale);
+            int ty = (((hudheight/2)-int(hudheight/2*eventoffset)-(to*noticescale))*(1.f/eventscale)), tx = (hudwidth/2)*(1.f/eventscale);
             loopv(game::focus->icons)
             {
                 if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) break;
@@ -2569,7 +2579,7 @@ namespace hud
         else if(!client::waiting() && showhud && fade > 0)
         {
             drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
-            if(showevents && !hasinput(false)) drawevents(fade);
+            if(!client::waiting() && !hasinput(false) && !texpaneltimer) drawevents(fade);
         }
         if(UI::ready && showconsole && showhud)
         {
