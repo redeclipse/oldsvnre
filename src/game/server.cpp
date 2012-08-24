@@ -2254,7 +2254,7 @@ namespace server
 
     bool crclocked(clientinfo *ci)
     {
-        if(m_play(gamemode) && GAME(mapcrclock) && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, GAME(mapcrclock)-1+PRIV_HELPER))
+        if(m_play(gamemode) && GAME(mapcrclock) && ci->state.aitype == AI_NONE && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, GAME(mapcrclock)-1+PRIV_HELPER))
             return true;
         return false;
     }
@@ -2262,14 +2262,13 @@ namespace server
     bool allowstate(clientinfo *ci, int n)
     {
         if(!ci) return false;
-        bool isai = ci->state.aitype >= AI_BOT;
         switch(n)
         {
             case ALST_FIRST: if(ci->state.state == CS_SPECTATOR || gamemode >= G_EDITMODE) return false; // first spawn, falls through
             case ALST_TRY: // try spawn
             {
                 uint ip = getclientip(ci->clientnum);
-                if(!isai && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
+                if(ci->state.aitype == AI_NONE && mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))
                     return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
@@ -2283,12 +2282,12 @@ namespace server
                 if(crclocked(ci)) return false;
                 break;
             }
-            case ALST_SPEC: return !isai; // spec
+            case ALST_SPEC: return ci->state.aitype == AI_NONE; // spec
             case ALST_WALK: if(ci->state.state != CS_EDITING) return false;
             case ALST_EDIT: // edit on/off
             {
                 uint ip = getclientip(ci->clientnum);
-                if(isai || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
+                if(ci->state.aitype != AI_NONE || !m_edit(gamemode) || (mastermode >= MM_LOCKED && ci->state.state == CS_SPECTATOR && ip && !checkipinfo(control, ipinfo::ALLOW, ip))) return false;
                 break;
             }
             default: break;
@@ -3037,12 +3036,11 @@ namespace server
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
         if(realflags&HIT_KILL)
         {
-            bool isai = target->state.aitype >= AI_START;
             int fragvalue = 1;
             if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
-            int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
-            pointvalue *= isai ? GAME(enemybonus) : GAME(fragbonus);
+            int pointvalue = (smode && target->state.aitype < AI_START ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
+            pointvalue *= target->state.aitype >= AI_START ? GAME(enemybonus) : GAME(fragbonus);
             if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators) : m_health(gamemode, mutators)*3/2)))
                 style = FRAG_OBLITERATE;
             target->state.spree = 0;
