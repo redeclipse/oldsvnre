@@ -157,7 +157,7 @@ namespace capture
                 }
                 else if(f.droptime) hud::drawitem(hud::flagdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
                 else hud::drawitem(hud::teamtexname(f.team), x, oldy, s, 0.5f, true, false, c.r, c.g, c.b, blend, skew);
-                if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
+                if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     int sx = x-int(s*skew);
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
@@ -257,7 +257,7 @@ namespace capture
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));
                 part_textcopy(lac, info, PART_TEXT, 1, TEAM(f.team, colour), 2, 1);
                 lac.z += 2.5f;
-                if(f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
+                if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
                     part_icon(lac, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
@@ -277,7 +277,7 @@ namespace capture
             else if(f.droptime) part_icon(loc, textureload(hud::flagdroptex, 3), 2, 1, 0, 0, 1, 0x28FFFF);
             else part_icon(loc, textureload(hud::teamtexname(f.team), 3), 2, 1, 0, 0, 1, TEAM(f.team, colour));
             loc.z += 2.5f;
-            if((m_gsp(game::gamemode, game::mutators) && f.droptime) || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team))
+            if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
             {
                 part_icon(loc, textureload(hud::progresstex, 3), 3, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
                 part_icon(loc, textureload(hud::progresstex, 3), 2, 0.25f, 0, 0, 1, pcolour);

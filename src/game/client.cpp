@@ -962,6 +962,13 @@ namespace client
                 break;
             }
             case EDIT_MAT:
+            {
+                addmsg(N_EDITF + op, "ri9i6",
+                    sel.o.x, sel.o.y, sel.o.z, sel.s.x, sel.s.y, sel.s.z, sel.grid, sel.orient,
+                    sel.cx, sel.cxs, sel.cy, sel.cys, sel.corner,
+                    arg1, arg2);
+                break;
+            }
             case EDIT_ROTATE:
             {
                 addmsg(N_EDITF + op, "ri9i5",
@@ -1919,7 +1926,7 @@ namespace client
                     {
                         case N_EDITF: dir = getint(p); mode = getint(p); if(s.validate()) mpeditface(dir, mode, s, false); break;
                         case N_EDITT: tex = getint(p); allfaces = getint(p); if(s.validate()) mpedittex(tex, allfaces, s, false); break;
-                        case N_EDITM: mat = getint(p); if(s.validate()) mpeditmat(mat, s, false); break;
+                        case N_EDITM: mat = getint(p); mode = getint(p); if(s.validate()) mpeditmat(mat, mode, s, false); break;
                         case N_FLIP: if(s.validate()) mpflip(s, false); break;
                         case N_COPY: if(d && s.validate()) mpcopy(d->edit, s, false); break;
                         case N_PASTE: if(d && s.validate()) mppaste(d->edit, s, false); break;

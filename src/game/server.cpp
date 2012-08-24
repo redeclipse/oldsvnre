@@ -2252,6 +2252,13 @@ namespace server
 
     enum { ALST_FIRST = 0, ALST_TRY, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
 
+    bool crclocked(clientinfo *ci)
+    {
+        if(m_play(gamemode) && GAME(mapcrclock) && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, GAME(mapcrclock)-1+PRIV_HELPER))
+            return true;
+        return false;
+    }
+
     bool allowstate(clientinfo *ci, int n)
     {
         if(!ci) return false;
@@ -2266,12 +2273,14 @@ namespace server
                     return false;
                 if(ci->state.state == CS_ALIVE || ci->state.state == CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
+                if(crclocked(ci)) return false;
                 break;
             }
             case ALST_SPAWN: // spawn
             {
                 if(ci->state.state != CS_DEAD && ci->state.state != CS_WAITING) return false;
                 if(ci->state.lastdeath && gamemillis-ci->state.lastdeath <= DEATHMILLIS) return false;
+                if(crclocked(ci)) return false;
                 break;
             }
             case ALST_SPEC: return !isai; // spec
@@ -2391,7 +2400,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_SPECTATOR || ci->state.aitype > AI_NONE) continue;
+            if(ci->state.aitype > AI_NONE) continue;
             total++;
             if(!ci->clientmap[0])
             {
@@ -2411,7 +2420,7 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_SPECTATOR || ci->state.aitype > AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
+            if(ci->state.aitype > AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
             srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
             if(req < 0) ci->warned = true;
         }
@@ -2422,7 +2431,7 @@ namespace server
             if(i || info.matches <= crcs[i+1].matches) loopvj(clients)
             {
                 clientinfo *ci = clients[j];
-                if(ci->state.state==CS_SPECTATOR || ci->state.aitype > AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
+                if(ci->state.aitype > AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
                 srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
                 if(req < 0) ci->warned = true;
             }
@@ -3674,7 +3683,7 @@ namespace server
         }
     }
 
-    void spectate(clientinfo *ci, bool val)
+    bool spectate(clientinfo *ci, bool val)
     {
         if(ci->state.state != CS_SPECTATOR && val)
         {
@@ -3696,6 +3705,8 @@ namespace server
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
         {
+            if(ci->clientmap[0] || ci->mapcrc) checkmaps();
+            if(crclocked(ci)) return false;
             ci->state.cpnodes.shrink(0);
             ci->state.cpmillis = 0;
             ci->state.state = CS_DEAD;
@@ -3704,8 +3715,8 @@ namespace server
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
             aiman::dorefresh = GAME(airefresh);
-            if(ci->clientmap[0] || ci->mapcrc) checkmaps();
         }
+        return true;
     }
 
     void checkclients()
@@ -4381,12 +4392,13 @@ namespace server
                 {
                     int lcn = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || !allowstate(cp, ALST_TRY)) break;
+                    if(!hasclient(cp, ci)) break;
                     if(!ci->clientmap[0] && !ci->mapcrc)
                     {
                         ci->mapcrc = -1;
                         checkmaps();
                     }
+                    if(!allowstate(cp, ALST_TRY)) break;
                     if(smode) smode->canspawn(cp, true);
                     mutate(smuts, mut->canspawn(cp, true));
                     cp->state.state = CS_DEAD;
@@ -4765,7 +4777,7 @@ namespace server
                     {
                         if(!allowstate(ci, ALST_TRY) && !haspriv(ci, GAME(speclock)+PRIV_HELPER, "exit spectator"))
                             break;
-                        spectate(ci, false);
+                        if(!spectate(ci, false)) break;
                         reset = false;
                     }
                     setteam(ci, team, reset, true);

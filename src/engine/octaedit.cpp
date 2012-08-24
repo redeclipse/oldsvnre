@@ -2152,39 +2152,50 @@ void rotate(int *cw)
 COMMAND(0, flip, "");
 COMMAND(0, rotate, "i");
 
-void setmat(cube &c, uchar mat, uchar matmask)
+void setmat(cube &c, uchar mat, uchar matmask, int style)
 {
     if(c.children)
-        loopi(8) setmat(c.children[i], mat, matmask);
-    else if(mat!=MAT_AIR)
+        loopi(8) setmat(c.children[i], mat, matmask, style);
+    else
     {
-        c.material &= matmask;
-        c.material |= mat;
+        switch(style)
+        {
+            case 1: if(isempty(c)) return; break;
+            case 2: if(!isempty(c)) return; break;
+            case 3: if(isentirelysolid(c)) return; break;
+            case 4: if(!isentirelysolid(c)) return; break;
+            case 0: default: break;
+        }
+        if(mat != MAT_AIR)
+        {
+            c.material &= matmask;
+            c.material |= mat;
+        }
+        else c.material = MAT_AIR;
     }
-    else c.material = MAT_AIR;
 }
 
-void mpeditmat(int matid, selinfo &sel, bool local)
+void mpeditmat(int matid, int style, selinfo &sel, bool local)
 {
-    if(local) client::edittrigger(sel, EDIT_MAT, matid);
+    if(local) client::edittrigger(sel, EDIT_MAT, matid, style);
 
     uchar matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : 0xFF);
     if(isclipped(matid&MATF_VOLUME)) matid |= MAT_CLIP;
     if(isdeadly(matid&MATF_VOLUME)) matid |= MAT_DEATH;
     if(local && (matid&MATF_VOLUME) == MAT_GLASS)
         conoutft(CON_SELF, "\fzoyWARNING\fw - quin dislikes glass material: if seeing through this is unimportant, think about using alpha instead");
-    loopselxyz(setmat(c, matid, matmask));
+    loopselxyz(setmat(c, matid, matmask, style));
 }
 
-void editmat(char *name)
+void editmat(char *name, int *style)
 {
     if(noedit()) return;
     int id = findmaterial(name, true);
     if(id<0) { conoutf("\frunknown material \"%s\"", name); return; }
-    mpeditmat(id, sel, true);
+    mpeditmat(id, *style, sel, true);
 }
 
-COMMAND(0, editmat, "s");
+COMMAND(0, editmat, "si");
 
 VAR(IDF_PERSIST, autoapplytexgui, 0, 1, 1);
 VAR(IDF_PERSIST, autopreviewtexgui, 0, 1, 1);

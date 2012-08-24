@@ -154,21 +154,21 @@ namespace bomber
                 hud::drawitem(hud::bombtakentex, x, oldy, s, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
             }
             else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
-            if(f.droptime || (f.owner && bombercarrytime))
+            if(!game::intermission)
             {
-                int sx = x-int(s*skew);
-                float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f);
-                if(wait > 0.5f)
+                if(f.droptime || (f.owner && bombercarrytime))
                 {
-                    int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
-                    float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
-                    flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
+                    int sx = x-int(s*skew);
+                    float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f);
+                    if(wait > 0.5f)
+                    {
+                        int delay = wait > 0.7f ? (wait > 0.85f ? 150 : 300) : 600, millis = lastmillis%(delay*2);
+                        float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
+                        flashcolour(colour.r, colour.g, colour.b, 1.f, 0.f, 0.f, amt);
+                    }
+                    if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, colour.r, colour.g, colour.b, blend*0.25f, skew);
+                    hud::drawprogress(sx, oldy, 0, wait, s, false, colour.r, colour.g, colour.b, blend, skew, "super", "%d%%", int(wait*100.f));
                 }
-                if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, colour.r, colour.g, colour.b, blend*0.25f, skew);
-                hud::drawprogress(sx, oldy, 0, wait, s, false, colour.r, colour.g, colour.b, blend, skew, "super", "%d%%", int(wait*100.f));
-            }
-            if(f.owner)
-            {
                 if(f.owner == game::focus && m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
                 {
                     gameent *e = game::getclient(findtarget(f.owner));
@@ -268,7 +268,7 @@ namespace bomber
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);
-                    if(f.droptime)
+                    if(!game::intermission && f.droptime)
                     {
                         above.z += enttype[AFFINITY].radius/4*trans+2.5f;
                         part_icon(above, textureload(hud::progresstex, 3), 3*trans, 1, 0, 0, 1, pcolour, (lastmillis%1000)/1000.f, 0.1f);
