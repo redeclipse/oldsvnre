@@ -4364,11 +4364,13 @@ namespace server
                     int lcn = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
+                    #if 0
                     if(!ci->clientmap[0] && !ci->mapcrc)
                     {
                         ci->mapcrc = -1;
                         checkmaps();
                     }
+                    #endif
                     if(!allowstate(cp, ALST_TRY)) break;
                     if(smode) smode->canspawn(cp, true);
                     mutate(smuts, mut->canspawn(cp, true));

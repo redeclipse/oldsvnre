@@ -17,7 +17,7 @@ GVAR(IDF_ADMIN, floodlock, 0, 3, 4); // 0 = no flood lock, 1 = lock below helper
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
 GVAR(IDF_ADMIN, floodtime, 250, 10000, VAR_MAX); // time span to check for floody messages
 GVAR(IDF_ADMIN, floodlines, 1, 5, VAR_MAX); // number of lines in aforementioned span before too many
-GVAR(IDF_ADMIN, mapcrclock, 0, 3, 4); // 0 = no mapcrc lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
+GVAR(IDF_ADMIN, mapcrclock, 0, 4, 4); // 0 = no mapcrc lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
@@ -51,7 +51,7 @@ GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic cargo center colony conflict da
 GSVAR(IDF_ADMIN, holdmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial isolation keystone2k linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
 
-GSVAR(IDF_ADMIN, multimaps, "deadsimple depot keystone2k warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
+GSVAR(IDF_ADMIN, multimaps, "canals deadsimple depot keystone2k warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
 GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic canals cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error forge fourplex futuresport ghost isolation linear longestyard mist nova oneiroi pumpstation spacetech starlibido testchamber tower tranquility tribal ubik venus warp");
 

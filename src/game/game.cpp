@@ -1137,19 +1137,31 @@ namespace game
                 {
                     concatstring(d->obit, " \fs\fzZedouble-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
-                    if(!override && allowanc) anc = S_V_MULTI;
+                    if(!override && allowanc)
+                    {
+                        override = true;
+                        anc = S_V_MULTI;
+                    }
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     concatstring(d->obit, " \fs\fzZetriple-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
-                    if(!override && allowanc) anc = S_V_MULTI2;
+                    if(!override && allowanc)
+                    {
+                        override = true;
+                        anc = S_V_MULTI2;
+                    }
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzZemulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
-                    if(!override && allowanc) anc = S_V_MULTI3;
+                    if(!override && allowanc)
+                    {
+                        override = true;
+                        anc = S_V_MULTI3;
+                    }
                 }
             }
 
@@ -2842,7 +2854,7 @@ namespace game
             previewent->spawnstate(G_DEATHMATCH, 0);
             previewent->light.color = vec(1, 1, 1);
             previewent->light.dir = vec(0, -1, 2).normalize();
-        } 
+        }
         previewent->setinfo(NULL, color, model);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
         previewent->light.millis = -1;
