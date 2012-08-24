@@ -307,6 +307,45 @@ struct gui : guient
         return layout(size+guishadow, size+guishadow);
     }
 
+    int playerpreview(int color, int model, float sizescale, bool overlaid)
+    {
+        autotab();
+        if(sizescale==0) sizescale = 1;
+        int size = (int)(sizescale*2*guibound[1])-guishadow;
+        if(visible()) 
+        {
+            bool hit = ishit(size+guishadow, size+guishadow);
+            float xs = size, ys = size, xi = curx, yi = cury, xpad = 0, ypad = 0;
+            if(overlaid)
+            {
+                xpad = xs/32;
+                ypad = ys/32;
+                xi += xpad;
+                yi += ypad;
+                xs -= 2*xpad;
+                ys -= 2*ypad;
+            }
+            int x1 = int(floor(screen->w*(xi*scale.x+origin.x))), y1 = int(floor(screen->h*(1 - ((yi+ys)*scale.y+origin.y)))),
+                x2 = int(ceil(screen->w*((xi+xs)*scale.x+origin.x))), y2 = int(ceil(screen->h*(1 - (yi*scale.y+origin.y))));
+            glViewport(x1, y1, x2-x1, y2-y1);
+            glScissor(x1, y1, x2-x1, y2-y1);
+            glEnable(GL_SCISSOR_TEST);
+            extern void renderplayerpreview(int color, int model, bool background);
+            renderplayerpreview(color, model, overlaid);
+            glDisable(GL_SCISSOR_TEST);
+            glViewport(0, 0, screen->w, screen->h);
+            if(overlaid)
+            {
+                if(!overlaytex) overlaytex = textureload(guioverlaytex, 3, true, false);
+                const vec &ocolor = hit && hitfx ? vec(1, 0.25f, 0.25f) : vec(1, 1, 1);
+                glColor3fv(ocolor.v);
+                glBindTexture(GL_TEXTURE_2D, overlaytex->id);
+                rect_(xi - xpad, yi - ypad, xs + 2*xpad, ys + 2*ypad, 0);
+            }
+        }
+        return layout(size+guishadow, size+guishadow);
+    }
+ 
     int slice(Texture *t, float scale, float start, float end, const char *text)
     {
         autotab();

@@ -2449,6 +2449,7 @@ namespace game
         else flags |= MDL_CULL_DIST;
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
+        if(playerpreviewing) flags &= ~(MDL_LIGHT|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_CULL_QUERY|MDL_CULL_DIST|MDL_DYNSHADOW);
         dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
@@ -2829,6 +2830,23 @@ namespace game
         else if(!thirdpersonview() && focus->state == CS_ALIVE)
             renderplayer(focus, false, opacity(focus, false), focus->curscale, early);
         if(rendernormally && early) rendercheck(focus);
+    }
+
+    void renderplayerpreview(int color, int model)
+    {
+        static gameent *previewent = NULL;
+        if(!previewent)
+        {
+            previewent = new gameent;
+            previewent->o = vec(0, 0.75f*(previewent->height + previewent->aboveeye), previewent->height - (previewent->height + previewent->aboveeye)/2);
+            previewent->spawnstate(G_DEATHMATCH, 0);
+            previewent->light.color = vec(1, 1, 1);
+            previewent->light.dir = vec(0, -1, 2).normalize();
+        } 
+        previewent->setinfo(NULL, color, model);
+        previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
+        previewent->light.millis = -1;
+        renderplayer(previewent, true, 1, 1);
     }
 
     bool clientoption(char *arg) { return false; }

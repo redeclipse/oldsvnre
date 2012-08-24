@@ -615,6 +615,13 @@ COMMAND(0, guifield, "sisi");
 COMMAND(0, guikeyfield, "sisi");
 COMMAND(0, guieditor, "siiii");
 
+void guiplayerpreview(int *color, int *model, float *scale, int *overlaid)
+{
+    if(!cgui) return;
+    cgui->playerpreview(*color, *model, *scale, *overlaid);
+}
+COMMAND(0, guiplayerpreview, "iifi");
+
 struct change
 {
     int type;
