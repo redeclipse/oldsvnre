@@ -85,14 +85,6 @@ namespace server
         void process(clientinfo *ci);
     };
 
-    struct stickyevent : timedevent
-    {
-        int id, weap, flags, target;
-        ivec pos;
-        bool keepable() const { return true; }
-        void process(clientinfo *ci);
-    };
-
     struct suicideevent : gameevent
     {
         int flags;
@@ -3226,7 +3218,7 @@ namespace server
         {
             if(!gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
             {
-                if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - not found", weap, id);
+                if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d:%d (%d)] failed - not found", weap, flags&HIT_ALT ? 1 : 0, id);
                 return;
             }
             if(hits.empty())
@@ -3257,7 +3249,6 @@ namespace server
                     servstate &ts = target->state;
                     loopj(WEAP_MAX) loopk(2) if(ts.weapshots[j][k].find(h.proj))
                     {
-                        ts.weapshots[j][k].remove(h.proj);
                         sendf(target->clientnum, 1, "ri4", N_DESTROY, target->clientnum, 1, h.proj);
                         break;
                     }
@@ -3279,24 +3270,6 @@ namespace server
                         srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] state disallows it", weap, id, i, h.target);
                 }
             }
-        }
-    }
-
-    void stickyevent::process(clientinfo *ci)
-    {
-        servstate &gs = ci->state;
-        if(isweap(weap))
-        {
-            if(!gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
-            {
-                if(GAME(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
-                return;
-            }
-            clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
-            if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
-                sendf(-1, 1, "ri7x", N_STICKY, ci->clientnum, target, id, pos.x, pos.y, pos.z, ci->clientnum);
-            else if(GAME(serverdebug) >= 2)
-                srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
         }
     }
 
@@ -4555,20 +4528,24 @@ namespace server
                     break;
                 }
 
-                case N_STICKY: // cn millis weap id flags target stickpos
+                case N_STICKY: // cn weap id flags target stickpos
                 {
-                    int lcn = getint(p), millis = getint(p);
+                    int lcn = getint(p), weap = getint(p), flags = getint(p), id = getint(p), target = getint(p),
+                        x = getint(p), y = getint(p), z = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    bool havecn = (cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum));
-                    stickyevent *ev = new stickyevent;
-                    ev->weap = getint(p);
-                    if(havecn) ev->millis = cp->getmillis(gamemillis, millis);
-                    ev->id = getint(p);
-                    ev->flags = getint(p);
-                    ev->target = getint(p);
-                    loopk(3) ev->pos[k] = getint(p);
-                    if(havecn) cp->events.add(ev);
-                    else delete ev;
+                    if(isweap(weap) && cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum))
+                    {
+                        if(!cp->state.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
+                        {
+                            if(GAME(serverdebug) >= 2) srvmsgf(cp->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
+                            return;
+                        }
+                        clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
+                        if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
+                            sendf(-1, 1, "ri7x", N_STICKY, cp->clientnum, target, id, x, y, z, cp->clientnum);
+                        else if(GAME(serverdebug) >= 2)
+                            srvmsgf(cp->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
+                    }
                     break;
                 }
 
