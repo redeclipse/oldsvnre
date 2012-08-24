@@ -71,3 +71,9 @@ Please edit only that file and regenerate this wiki text via:\n\
 
 guidelines-wiki: ../doc/guidelines-wiki.txt
 
+../doc/examples/servexec.cfg: scripts/update-servexec-defaults scripts/update-servexec-comments ../data/usage.cfg install-server
+	scripts/update-servexec-defaults ../doc/examples/servexec.cfg
+	scripts/update-servexec-comments ../data/usage.cfg ../doc/examples/servexec.cfg
+
+update-servexec: ../doc/examples/servexec.cfg
+
