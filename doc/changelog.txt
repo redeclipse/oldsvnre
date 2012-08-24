@@ -60,6 +60,8 @@ Modding & Data Assets:
  * Skyboxes: arid2, interstellar, miramar, stormydays - added; dusk - removed
  * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
  * Added texture based slippery physics (textcoastscale and vcoastscale, sets as a scale of floorcoast/slidecoast, only works on top facing textures)
+ * Added sigma/kappa concrete textures and mapmodels
+ * Added style parameter for /editmat (empty/non-empty/entirely-solid/non-entirely-solid)
 
 Multiplayer & Servers:
  * Now possible to allow demo recording for masters (/restrictdemos 0)
@@ -75,6 +77,7 @@ Multiplayer & Servers:
  * Intermission now waits full time before proceeding to the next map
  * Added auto-mute on chat spam (warns on 3 lines per 10 seconds, mutes after 3 warns)
  * Added selectable end-of-match voting style (/voteinterm)
+ * Added ability to disallow players using modified maps (/mapcrclock)
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions
