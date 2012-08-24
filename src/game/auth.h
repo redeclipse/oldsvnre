@@ -201,6 +201,7 @@ namespace auth
             p.flag = ipinfo::GLOBAL; // master info
             p.time = totalmillis ? totalmillis : 1;
             updatecontrols = true;
+            break;
         }
         loopj(numargs) if(w[j]) delete[] w[j];
     }
@@ -240,6 +241,3 @@ void processmasterinput(const char *cmd, int cmdlen, const char *args)
 {
     auth::processinput(cmd);
 }
-
-
-

@@ -5,6 +5,7 @@ GSVAR(IDF_ADMIN, serverdesc, "");
 GSVAR(IDF_ADMIN, servermotd, "");
 
 GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
+
 GVAR(IDF_ADMIN, speclock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, kicklock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, allowlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
@@ -16,6 +17,7 @@ GVAR(IDF_ADMIN, floodlock, 0, 3, 4); // 0 = no flood lock, 1 = lock below helper
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
 GVAR(IDF_ADMIN, floodtime, 250, 10000, VAR_MAX); // time span to check for floody messages
 GVAR(IDF_ADMIN, floodlines, 1, 5, VAR_MAX); // number of lines in aforementioned span before too many
+GVAR(IDF_ADMIN, mapcrclock, 0, 3, 4); // 0 = no mapcrc lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
@@ -45,7 +47,7 @@ GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic canals cargo center colony confli
 GSVAR(IDF_ADMIN, capturemaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone2k linear mist nova panic pumpstation stone tribal venus warp wet");
 GSVAR(IDF_ADMIN, defendmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial institute isolation keystone2k linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, kingmaps, "ares bath biolytic cargo center colony conflict darkness deadsimple depot dropzone dutility echo fourplex futuresport industrial keystone2k linear processing stone tower tribal ubik venus");
-GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation futuresport fourplex ghost industrial isolation linear mist nova pumpstation stone tower tribal venus warp wet");
+GSVAR(IDF_ADMIN, bombermaps, "ares bath biolytic cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation futuresport fourplex ghost industrial isolation linear mist nova pumpstation stone tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deli depot dropzone dutility echo foundation fourplex futuresport ghost industrial isolation keystone2k linear mist nova panic processing pumpstation stone tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
 
