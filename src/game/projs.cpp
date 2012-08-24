@@ -1330,7 +1330,7 @@ namespace projs
                 {
                     if(!proj.child && !m_insta(game::gamemode, game::mutators) && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                     {
-                        int w = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT)%WEAP_MAX, life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
+                        int f = WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT), w = f%WEAP_MAX, life = WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT);
                         float mag = max(proj.vel.magnitude(), 1.f), scale = WEAP2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.curscale,
                               skew = proj.hit ? WEAP2(proj.weap, flakskew, proj.flags&HIT_ALT) : WEAP2(proj.weap, flakspread, proj.flags&HIT_ALT);
                         vec pos = vec(proj.o).sub(vec(proj.vel).normalize().mul(proj.hit ? WEAP2(proj.weap, flakoffset, proj.flags&HIT_ALT) : 1));
@@ -1343,7 +1343,7 @@ namespace projs
                             if(skew > 0) dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(skew*mag));
                             if(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0)
                                 dir.add(vec(proj.vel).normalize().mul(WEAP2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
-                            create(pos, dir.add(pos), proj.local, proj.owner, PRJ_SHOT, max(life, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, (WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
+                            create(pos, dir.add(pos), proj.local, proj.owner, PRJ_SHOT, max(life, 1), WEAP2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, WEAP2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, -1, (f >= WEAP_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
                         }
                     }
                     if(proj.local)
@@ -1429,7 +1429,7 @@ namespace projs
                         proj.stickpos = vec(proj.o).sub(d->headpos(-d->height*0.5f));
                         proj.stickpos.rotate_around_z(-d->yaw*RAD);
                         if(proj.projtype == PRJ_SHOT)
-                            client::addmsg(N_STICKY, "ri9", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
+                            client::addmsg(N_STICKY, "ri8", proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
                                     proj.stick->clientnum, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
                     }
                     return 1;
@@ -1447,7 +1447,7 @@ namespace projs
                         proj.stick = NULL;
                         proj.stickpos = proj.o.sub(vec(dir).mul(proj.radius*0.125f));
                         if(proj.projtype == PRJ_SHOT)
-                            client::addmsg(N_STICKY, "ri9", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
+                            client::addmsg(N_STICKY, "ri8", proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
                                     -1, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
                     }
                     return 1;
