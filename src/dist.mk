@@ -6,33 +6,33 @@ tarname=$(APPNAME)_$(appversion)_linux_bsd.tar
 	rm -rf ../$(dirname)
 	tar \
 		--exclude-vcs --exclude-backups \
-		--exclude='../$(dirname)' --exclude='../$(tarname)*' \
+		--exclude='$@' --exclude='../$(tarname)*' \
 		--exclude='*.o' --exclude='*.lo' --exclude='*.gch' \
 		--exclude='*src/reclient' --exclude='*src/reserver' \
 		--exclude='*.exe' --exclude='*.dll' \
 		--exclude='*redeclipse.app*' --exclude='*.bat' \
 		--exclude='*src/lib*' --exclude='*src/include*' \
 		--exclude='*src/xcode*' --exclude='*src/site*' \
-		-cf - ../ | (mkdir ../$(dirname)/; cd ../$(dirname)/ ; tar -xpf -)
-	$(MAKE) -C ../$(dirname)/src clean
-	-$(MAKE) -C ../$(dirname)/src/enet distclean
-	rm -rf ../$(dirname)/src/enet/autom4te.cache/
+		-cf - ../ | (mkdir $@/; cd $@/ ; tar -xpf -)
+	$(MAKE) -C $@/src clean
+	-$(MAKE) -C $@/src/enet distclean
+	rm -rf $@/src/enet/autom4te.cache/
 
 distdir: ../$(dirname)
 
 ../$(tarname): ../$(dirname)
-	tar -cf ../$(tarname) ../$(dirname)
+	tar -cf $@ $<
 
 dist-tar: ../$(tarname)
 
 dist-gz: ../$(tarname)
-	gzip -c < ../$(tarname) > ../$(tarname).gz
+	gzip -c < $< > $<.gz
 
 dist-bz2: ../$(tarname)
-	bzip2 -c < ../$(tarname) > ../$(tarname).bz2
+	bzip2 -c < $< > $<.bz2
 
 dist-xz: ../$(tarname)
-	xz -c < ../$(tarname) > ../$(tarname).xz
+	xz -c < $< > $<.xz
 
 dist: dist-bz2
 
@@ -46,18 +46,18 @@ dist-clean:
 	rm -f ../$(tarname).xz
 
 ../doc/cube2font.txt: ../doc/man/cube2font.1
-	scripts/generate-cube2font-txt ../doc/man/cube2font.1 ../doc/cube2font.txt
+	scripts/generate-cube2font-txt $< $@
 
 cube2font-txt: ../doc/cube2font.txt
 
 ../doc/guidelines-wiki.txt: ../doc/guidelines.txt
-	scripts/generate-guidelines-wiki ../doc/guidelines.txt ../doc/guidelines-wiki.txt
+	scripts/generate-guidelines-wiki $< $@
 
 guidelines-wiki: ../doc/guidelines-wiki.txt
 
-../doc/examples/servexec.cfg: scripts/update-servexec-defaults scripts/update-servexec-comments ../data/usage.cfg install-server
-	scripts/update-servexec-defaults ../doc/examples/servexec.cfg
-	scripts/update-servexec-comments ../data/usage.cfg ../doc/examples/servexec.cfg
+../doc/examples/servexec.cfg: ../data/usage.cfg install-server
+	scripts/update-servexec-defaults $@
+	scripts/update-servexec-comments $< $@
 
 update-servexec: ../doc/examples/servexec.cfg
 
