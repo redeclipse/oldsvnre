@@ -3,12 +3,12 @@
 int lnjitterx[2][MAXLIGHTNINGSTEPS], lnjittery[2][MAXLIGHTNINGSTEPS];
 int lnjitterframe = 0, lastlnjitter = 0;
 
-VAR(IDF_WORLD, lnjittermillis, 0, 100, 1000);
-VAR(IDF_WORLD, lnjitterradius, 0, 4, 100);
-FVAR(IDF_WORLD, lnjitterscale, 0, 0.5f, 10);
-VAR(IDF_WORLD, lnscrollmillis, 1, 300, 5000);
-FVAR(IDF_WORLD, lnscrollscale, 0, 0.125f, 10);
-FVAR(IDF_WORLD, lnblendpower, 0, 0.25f, 1000);
+VAR(IDF_PERSIST, lnjittermillis, 0, 100, 1000);
+VAR(IDF_PERSIST, lnjitterradius, 0, 4, 100);
+FVAR(IDF_PERSIST, lnjitterscale, 0, 0.5f, 10);
+VAR(IDF_PERSIST, lnscrollmillis, 1, 300, 5000);
+FVAR(IDF_PERSIST, lnscrollscale, 0, 0.125f, 10);
+FVAR(IDF_PERSIST, lnblendpower, 0, 0.25f, 1000);
 
 static void calclightningjitter(int frame)
 {
@@ -115,7 +115,7 @@ struct lightningrenderer : sharedlistrenderer
         if(type&PT_MOD) //multiply alpha into color
         {
             midcol[0] = (color[0]*blend)>>8; midcol[1] = (color[1]*blend)>>8; midcol[2] = (color[2]*blend)>>8; midcol[3] = 0xFF;
-            memset(endcol, 0, 3); endcol[3] = 0xFF; 
+            memset(endcol, 0, 3); endcol[3] = 0xFF;
         }
         else
         {
