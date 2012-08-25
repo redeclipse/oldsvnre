@@ -31,6 +31,7 @@ Visuals:
  * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
  * Replace "ragdolls" var with "deathanim" and add new ragdoll animation
  * Bot info hidden on scoreboard per default
+ * Added player model preview in profile selection
 
 Interface & Menus:
  * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
@@ -77,7 +78,6 @@ Multiplayer & Servers:
  * Intermission now waits full time before proceeding to the next map
  * Added auto-mute on chat spam (warns on 3 lines per 10 seconds, mutes after 3 warns)
  * Added selectable end-of-match voting style (/voteinterm)
- * Added ability to disallow players using modified maps (/mapcrclock)
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions
