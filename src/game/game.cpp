@@ -2745,7 +2745,7 @@ namespace game
                      powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
                      reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
                      secondary = physics::secondaryweap(d);
-                float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 0.f;
+                float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 1.f;
                 int colour = WEAPHCOL(d, d->weapselect, partcol, secondary);
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                 {
@@ -2796,7 +2796,7 @@ namespace game
                         }
                         case 4:
                         {
-                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, powerfx[d->weapselect].size, max(amt, 0.1f));
+                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, WEAP2(d->weapselect, partsize, secondary)*0.75f, 1);
                             break;
                         }
                         case 0: default: break;
