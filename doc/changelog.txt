@@ -58,7 +58,6 @@ Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
  * track_11, track_12, new music
  * Skyboxes: arid2, interstellar, miramar, stormydays - added; dusk - removed
- * Replace "ragdolls" var with "deathanim" and add new ragdoll animation
  * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
  * Added texture based slippery physics (textcoastscale and vcoastscale, sets as a scale of floorcoast/slidecoast, only works on top facing textures)
  * Added sigma/kappa concrete textures and mapmodels
