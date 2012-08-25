@@ -28,10 +28,6 @@ Maps:
  * Isolation, added bomber-ball waypoints
 
 Visuals:
- * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
- * Replace "ragdolls" var with "deathanim" and add new ragdoll animation
- * Bot info hidden on scoreboard per default
- * Added player model preview in profile selection
 
 Interface & Menus:
  * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
@@ -40,10 +36,13 @@ Interface & Menus:
  * Show unresponsive servers (bottom of server list)
  * Several new international keycodes are now bind-able as WORLD_{0..95}
  * Added ability to mark map favourites (pinned to top of map list)
+ * Now possible to skip dead players while spectating (on by default in duel & survivor; /followdead, /spectvdead)
  * Added on-screen help for commands/vars/etc. (work in progress)
  * Blank names are no longer possible
  * Added Texture preview on hover in browser
+ * Bot info hidden on scoreboard per default
  * Joins/leaves no longer shown when connecting/disconnecting
+ * Added player model preview in profile selection
 
 Modes & Mutators:
  * Hover mutator removed
@@ -59,6 +58,7 @@ Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
  * track_11, track_12, new music
  * Skyboxes: arid2, interstellar, miramar, stormydays - added; dusk - removed
+ * Replace "ragdolls" var with "deathanim" and add new ragdoll animation
  * Now possible to link playerstart/affinity/checkpoint to mapsound/particles/lightfx
  * Added texture based slippery physics (textcoastscale and vcoastscale, sets as a scale of floorcoast/slidecoast, only works on top facing textures)
  * Added sigma/kappa concrete textures and mapmodels
