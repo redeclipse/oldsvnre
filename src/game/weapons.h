@@ -207,7 +207,7 @@ WEAPON(pistol,      0x888888,       0x666611,       0x666611,       -1,         
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     WEAP_PISTOL
 );
-WEAPON(sword,       0x2222EE,       0x2222EE,       0x2222EE,       0x2222EE,       0x2222EE,
+WEAPON(sword,       0x4444FF,       0x4444FF,       0x4444FF,       0x4444FF,       0x4444FF,
     1,      1,      0,      0,      500,    750,    50,     30,     60,     0,      0,      0,      0,      0,      0,
     0,      0,      350,    500,
     10,     10,     0,      0,      200,    200,    0,      0,      1,      1,      1,      1,      0,      0,      0,      0,

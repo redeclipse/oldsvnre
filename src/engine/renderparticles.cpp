@@ -1665,9 +1665,13 @@ void makeparticle(const vec &o, attrvector &attr)
         case 0: //fire
         {
             float radius = attr[1] ? float(attr[1])/100.0f : 1.5f,
-                  height = attr[2] ? float(attr[2])/100.0f : radius*3;
-            regularflame(PART_FLAME, o, radius, height, partcolour(attr[3] ? attr[3] : 0xF05010, attr[5], attr[6]), 3, attr[4] > 0 ? attr[4]/2 : 500, 2.0f, 1, -5, 0, 30);
-            regularflame(PART_SMOKE, vec(o.x, o.y, o.z + 2.f*min(radius, height)), radius, height, 0x101008, 1, attr[4] > 0 ? attr[4] : 1000, 2.0f, 1, -10, 0, 30);
+                  height = attr[2] ? float(attr[2])/100.0f : radius*3,
+                  size = attr[7] ? float(attr[7])/100.f : 2.f,
+                  blend = attr[8] ? float(attr[8])/100.f : 1.f,
+                  vel = attr[10] ? float(attr[10]) : 30.f;
+            int fade = attr[4] > 0 ? attr[4] : 1000, grav = attr[9] ? attr[9] : -10;
+            regularflame(PART_FLAME, o, radius, height, partcolour(attr[3] ? attr[3] : 0xF05010, attr[5], attr[6]), 3, fade/2, size, blend, grav/2, 0, vel);
+            regularflame(PART_SMOKE, vec(o.x, o.y, o.z + 2.f*min(radius, height)), radius, height, 0x101008, 1, fade, size, blend, grav, 0, vel);
             break;
         }
         case 1: //smoke vent - <dir>
