@@ -8,11 +8,3 @@ To view a copy of this license:
 3. send a letter to Creative Commons,
 444 Castro Street, Suite 900,
 Mountain View, California, 94041, USA.
-
-**************************************
-Installation to Red Eclipse:
-
-put all files to the following folder:
-in Windows: Username\My Documents\My Games\Red Eclipse
-in Mac OS:/Users/<name>/Library/Application Support/redeclipse
-in Linux: ~/.redeclipse
