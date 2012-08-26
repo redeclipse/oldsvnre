@@ -369,7 +369,6 @@ namespace server
 
     VAR(0, maxdemos, 0, 5, 25);
     VAR(0, maxdemosize, 0, 16, 64);
-    VAR(0, restrictdemos, 0, 1, 1);
 
     bool demonextmatch = false;
     stream *demotmp = NULL, *demorecord = NULL, *demoplayback = NULL;
@@ -5050,7 +5049,7 @@ namespace server
                 case N_RECORDDEMO:
                 {
                     int val = getint(p);
-                    if(!haspriv(ci, restrictdemos ? PRIV_ADMINISTRATOR : PRIV_HELPER, "record demos")) break;
+                    if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "record demos")) break;
                     if(!maxdemos || !maxdemosize)
                     {
                         srvmsgft(ci->clientnum, CON_EVENT, "\frthe server has disabled demo recording");
@@ -5063,7 +5062,7 @@ namespace server
 
                 case N_STOPDEMO:
                 {
-                    if(!haspriv(ci, restrictdemos ? PRIV_ADMINISTRATOR : PRIV_HELPER, "stop demos")) break;
+                    if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "stop demos")) break;
                     if(m_demo(gamemode)) enddemoplayback();
                     else enddemorecord();
                     break;
@@ -5072,7 +5071,7 @@ namespace server
                 case N_CLEARDEMOS:
                 {
                     int demo = getint(p);
-                    if(!haspriv(ci, restrictdemos ? PRIV_ADMINISTRATOR : PRIV_HELPER, "clear demos")) break;
+                    if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "clear demos")) break;
                     cleardemos(demo);
                     break;
                 }
