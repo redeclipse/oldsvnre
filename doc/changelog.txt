@@ -6,6 +6,7 @@ Gameplay:
  * Flamer primary and secondary range and size reduced, secondary fire lifetime of particles increased
  * Pistol secondary now fires twice as many particles, with more spread, less damage and longer intervals
  * SMG secondary now fires with longer range, half the spread and longer intervals
+ * Points no longer given for consecutively dropping and picking up affinities (flags/ball)
 
 Maps:
  * Institute, new map
