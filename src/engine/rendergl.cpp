@@ -499,11 +499,9 @@ void gl_checkextensions()
     bool hasshaders = (hasVP && hasFP) || hasGLSL;
     if(hasshaders)
     {
-        extern int forceglsl;
         if(!avoidshaders)
         {
             setvar("matskel", 0, false, true);
-            if(hasGLSL && glslversion >= 130) forceglsl = 1;
         }
     }
 
@@ -734,7 +732,7 @@ void gl_init(int w, int h, int bpp, int depth, int fsaa)
         else if(useshaders<0 && !hasTF) conoutf("\frWARNING: Disabling shaders for extra performance. (use \"/shaders 1\" to enable shaders if desired)");
         renderpath = R_FIXEDFUNCTION;
     }
-    else renderpath = hasGLSL ? (!hasVP || !hasFP || forceglsl > 0 ? R_GLSLANG : R_ASMGLSLANG) : R_ASMSHADER;
+    else renderpath = hasGLSL ? ((forceglsl && (forceglsl > 0 || glslversion >= 130)) || !hasVP || !hasFP ? (forceglsl ? R_GLSLANG : R_FIXEDFUNCTION) : R_ASMGLSLANG) : R_ASMSHADER;
 
     static const char * const rpnames[4] = { "fixed-function", "assembly shader", "GLSL shader", "assembly/GLSL shader" };
     conoutf("Rendering using the OpenGL %s path.", rpnames[renderpath]);
