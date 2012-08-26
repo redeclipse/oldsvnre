@@ -4,8 +4,12 @@ set RE_DIR=.
 set RE_OPTIONS=-gservlog.txt
 set RE_BINARY=bin
 
-IF %PROCESSOR_ARCHITECTURE% == amd64 set RE_BINARY=bin64
-IF %PROCESSOR_ARCHITEW6432% == amd64 set RE_BINARY=bin64
+IF /I "%PROCESSOR_ARCHITECTURE%" == "amd64" (
+    set RE_BINARY=bin64
+)
+IF /I "%PROCESSOR_ARCHITEW6432%" == "amd64" (
+    set RE_BINARY=bin64
+)
 
 :RETRY
 IF EXIST %RE_BINARY%\reserver.exe (
