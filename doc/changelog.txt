@@ -64,11 +64,10 @@ Modding & Data Assets:
  * Added style parameter for /editmat (empty/non-empty/entirely-solid/non-entirely-solid)
 
 Multiplayer & Servers:
- * Now possible to allow demo recording for masters (/restrictdemos 0)
  * Added server hosting and player guidelines for the master server
  * mapname.wpt and mapname.txt is now included when sending a map
  * Allow players to cast votes for ones made by an admin which conflict with a lock control
- * Added ability to lock spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
+ * Added ability to lock demos/spec/kick/ban to specific access levels (master/auth/admin), likewise for {mode,maps,vars,vote}lock
  * Expanded admin control (can now add allows, mute, and limit team changing)
  * Renamed privileges: master->helper, auth->moderator
  * Added ability to specify a ban/kick/etc. reason
