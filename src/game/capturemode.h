@@ -108,7 +108,7 @@ struct captureservmode : capturestate, servmode
         else
         {
             capturestate::takeaffinity(i, ci->clientnum, gamemillis);
-            if(f.team != ci->team) givepoints(ci, GAME(capturepickuppoints));
+            if(f.team != ci->team && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, GAME(capturepickuppoints));
             sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
         }
     }
