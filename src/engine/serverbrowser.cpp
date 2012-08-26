@@ -263,7 +263,7 @@ bool sortedservers = true;
 ENetSocket pingsock = ENET_SOCKET_NULL;
 int lastinfo = 0;
 
-static serverinfo *newserver(const char *name, int port = RE_SERVER_PORT, int priority = 0, uint ip = ENET_HOST_ANY)
+static serverinfo *newserver(const char *name, int port = RE_SERVER_PORT, const char *desc = NULL, int priority = 0, uint ip = ENET_HOST_ANY)
 {
     serverinfo *si = new serverinfo(ip, port);
 
@@ -273,6 +273,7 @@ static serverinfo *newserver(const char *name, int port = RE_SERVER_PORT, int pr
         delete si;
         return NULL;
     }
+    if(desc && *desc) copystring(si->sdesc, desc);
 
     servers.add(si);
     sortedservers = false;
@@ -280,13 +281,13 @@ static serverinfo *newserver(const char *name, int port = RE_SERVER_PORT, int pr
     return si;
 }
 
-void addserver(const char *name, int port)
+void addserver(const char *name, int port, const char *desc)
 {
     loopv(servers) if(!strcmp(servers[i]->name, name) && servers[i]->port == port) return;
-    if(newserver(name, port) && verbose >= 2)
-        conoutf("added server %s (%d)", name, port);
+    if(newserver(name, port, desc) && verbose >= 2)
+        conoutf("added server %s (%d) [%s]", name, port, desc);
 }
-ICOMMAND(0, addserver, "si", (char *n, int *p), addserver(n, *p > 0 ? *p : RE_SERVER_PORT));
+ICOMMAND(0, addserver, "sis", (char *n, int *p, char *d), addserver(n, *p > 0 ? *p : RE_SERVER_PORT, d));
 VAR(0, searchlan, 0, 0, 1);
 VAR(IDF_PERSIST, maxservpings, 0, 10, 1000);
 VAR(IDF_PERSIST, serverupdateinterval, 0, 10, VAR_MAX);
@@ -388,7 +389,7 @@ void checkpings()
         if(len <= 0) return;
         serverinfo *si = NULL;
         loopv(servers) if(addr.host == servers[i]->address.host && addr.port == servers[i]->address.port) { si = servers[i]; break; }
-        if(!si && searchlan) si = newserver(NULL, addr.port-1, 1, addr.host);
+        if(!si && searchlan) si = newserver(NULL, addr.port-1, NULL, 1, addr.host);
         if(!si) continue;
         ucharbuf p(ping, len);
         int millis = getint(p), rtt = clamp(totalmillis - millis, 0, min(serverdecay*1000, totalmillis));
@@ -402,7 +403,6 @@ void checkpings()
         filtertext(si->map, text, false);
         getstring(text, p);
         filtertext(si->sdesc, text);
-        if(!strcmp(si->sdesc, "unnamed")) copystring(si->sdesc, si->name);
         si->players.deletearrays();
         loopi(si->numplayers)
         {
@@ -504,7 +504,7 @@ void updatefrommaster()
     retrieveservers(data);
     if(data.length() && data[0])
     {
-        clearservers();
+        //clearservers();
         execute(data.getbuf());
         if(verbose) conoutf("\faretrieved %d server(s) from master", servers.length());
         else conoutf("\faretrieved list from master successfully", servers.length());
@@ -544,7 +544,7 @@ void writeservercfg()
     loopv(servers)
     {
         serverinfo *s = servers[i];
-        f->printf("addserver %s %d\n", escapeid(s->name), s->port);
+        f->printf("addserver %s %d %s\n", escapeid(s->name), s->port, escapeid(s->sdesc[0] ? s->sdesc : s->name));
     }
     delete f;
 }

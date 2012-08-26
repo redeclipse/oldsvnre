@@ -2320,7 +2320,7 @@ namespace server
             if(mapdata[i]) DELETEP(mapdata[i]);
             defformatstring(reqfile)(strstr(reqmap, "maps/")==reqmap || strstr(reqmap, "maps\\")==reqmap ? "%s" : "maps/%s", reqmap);
             defformatstring(reqfext)("%s.%s", reqfile, sendmaptypes[i]);
-            if(!(mapdata[i] = openfile(reqfext, "rb")) && i < SENDMAP_PNG)
+            if(!(mapdata[i] = openfile(reqfext, "rb")) && i <= SENDMAP_MIN)
             {
                 loopk(SENDMAP_MAX) if(mapdata[k]) DELETEP(mapdata[k]);
                 break;
@@ -3914,10 +3914,10 @@ namespace server
         else
         {
             #ifdef STANDALONE
-            sendstring("unnamed", p);
+            sendstring("", p);
             #else
             const char *cname = client::getname();
-            if(!cname || !cname[0]) cname = "unnamed";
+            if(!cname || !cname[0]) cname = "";
             sendstring(cname, p);
             #endif
         }

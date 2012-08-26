@@ -515,7 +515,7 @@ extern void localconnect(bool force = true);
 extern void localdisconnect();
 
 // serverbrowser
-extern void addserver(const char *name, int port);
+extern void addserver(const char *name, int port, const char *desc = NULL);
 
 // client
 extern char *connectname;

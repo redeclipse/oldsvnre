@@ -851,7 +851,7 @@ namespace client
                 if(needclipboard >= 0) needclipboard++;
                 delete f;
             }
-            else conoutft(CON_MESG, "\frfailed to open map file: %s", reqfext);
+            else if(i <= SENDMAP_MIN) conoutft(CON_MESG, "\frfailed to open map file: %s", reqfext);
         }
     }
     ICOMMAND(0, sendmap, "", (), sendmap());
@@ -2502,7 +2502,7 @@ namespace client
                         case 0: intret(serverstat(si)); break;
                         case 1: result(si->name); break;
                         case 2: intret(si->port); break;
-                        case 3: result(si->sdesc); break;
+                        case 3: result(si->sdesc[0] ? si->sdesc : si->name); break;
                         case 4: result(si->map); break;
                         case 5: intret(si->numplayers); break;
                         case 6: intret(si->ping); break;
