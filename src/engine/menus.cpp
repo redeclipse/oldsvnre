@@ -615,12 +615,23 @@ COMMAND(0, guifield, "sisi");
 COMMAND(0, guikeyfield, "sisi");
 COMMAND(0, guieditor, "siiii");
 
-void guiplayerpreview(int *model, int *color, int *team, int *weap, float *scale, int *overlaid)
+void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action, float *scale, int *overlaid, char *altact)
 {
     if(!cgui) return;
-    cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0);
+    int ret = cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0);
+    if(ret&GUI_UP)
+    {
+        char *act = NULL;
+        if(altact[0] && ret&GUI_ALT) act = altact;
+        else if(action[0]) act = action;
+        if(act)
+        {
+            updatelater.add().schedule(act);
+            if(shouldclearmenu) clearlater = true;
+        }
+    }
 }
-COMMAND(0, guiplayerpreview, "iiiifi");
+COMMAND(0, guiplayerpreview, "iiiisfis");
 
 struct change
 {
