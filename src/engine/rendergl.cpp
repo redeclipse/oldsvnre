@@ -1574,11 +1574,11 @@ void drawcubemap(int size, int level, const vec &o, float yaw, float pitch, bool
 
 bool playerpreviewing = false;
 
-void renderplayerpreview(int color, int model, bool background)
+void renderplayerpreview(int model, int color, int team, int weap, bool background)
 {
     float fovy = 90.f, aspect = 1.f;
     envmapping = playerpreviewing = true;
-            
+
     physent *oldcamera = camera1;
     static physent pcamera;
     pcamera = *camera1;
@@ -1616,7 +1616,7 @@ void renderplayerpreview(int color, int model, bool background)
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
-    game::renderplayerpreview(color, model);
+    game::renderplayerpreview(model, color, team, weap);
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);

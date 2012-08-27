@@ -615,12 +615,12 @@ COMMAND(0, guifield, "sisi");
 COMMAND(0, guikeyfield, "sisi");
 COMMAND(0, guieditor, "siiii");
 
-void guiplayerpreview(int *color, int *model, float *scale, int *overlaid)
+void guiplayerpreview(int *model, int *color, int *team, int *weap, float *scale, int *overlaid)
 {
     if(!cgui) return;
-    cgui->playerpreview(*color, *model, *scale, *overlaid);
+    cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid);
 }
-COMMAND(0, guiplayerpreview, "iifi");
+COMMAND(0, guiplayerpreview, "iiiifi");
 
 struct change
 {

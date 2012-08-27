@@ -110,7 +110,7 @@ namespace game
     extern void findanims(const char *pattern, vector<int> &anims);
     extern void render();
     extern void renderavatar(bool early);
-    extern void renderplayerpreview(int color, int model);
+    extern void renderplayerpreview(int model, int color, int team, int weap);
     extern bool thirdpersonview(bool viewonly = false);
     extern vec camerapos(physent *d);
     extern void start();

@@ -2844,7 +2844,7 @@ namespace game
         if(rendernormally && early) rendercheck(focus);
     }
 
-    void renderplayerpreview(int color, int model)
+    void renderplayerpreview(int model, int color, int team, int weap)
     {
         static gameent *previewent = NULL;
         if(!previewent)
@@ -2854,8 +2854,11 @@ namespace game
             previewent->spawnstate(G_DEATHMATCH, 0);
             previewent->light.color = vec(1, 1, 1);
             previewent->light.dir = vec(0, -1, 2).normalize();
+            loopi(WEAP_MAX) previewent->ammo[i] = WEAP(i, max);
         }
         previewent->setinfo(NULL, color, model);
+        previewent->team = clamp(team, 0, int(TEAM_MULTI));
+        previewent->weapselect = clamp(weap, 0, WEAP_MAX-1);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
         previewent->light.millis = -1;
         renderplayer(previewent, true, 1, 1);
