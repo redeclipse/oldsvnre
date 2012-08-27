@@ -597,7 +597,7 @@ struct guient
     virtual void spring(int weight = 1) = 0;
     virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED) = 0;
     virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED) = 0;
-    virtual int playerpreview(int color, int model, float scale, bool overlaid = false) { return 0; }
+    virtual int playerpreview(int model, int color, int team, int weap, float scale, bool overlaid = false) { return 0; }
 };
 
 struct guicb

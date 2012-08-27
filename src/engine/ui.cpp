@@ -307,12 +307,12 @@ struct gui : guient
         return layout(size+guishadow, size+guishadow);
     }
 
-    int playerpreview(int color, int model, float sizescale, bool overlaid)
+    int playerpreview(int model, int color, int team, int weap, float sizescale, bool overlaid)
     {
         autotab();
         if(sizescale==0) sizescale = 1;
         int size = (int)(sizescale*2*guibound[1])-guishadow;
-        if(visible()) 
+        if(visible())
         {
             bool hit = ishit(size+guishadow, size+guishadow);
             float xs = size, ys = size, xi = curx, yi = cury, xpad = 0, ypad = 0;
@@ -330,8 +330,8 @@ struct gui : guient
             glViewport(x1, y1, x2-x1, y2-y1);
             glScissor(x1, y1, x2-x1, y2-y1);
             glEnable(GL_SCISSOR_TEST);
-            extern void renderplayerpreview(int color, int model, bool background);
-            renderplayerpreview(color, model, overlaid);
+            extern void renderplayerpreview(int model, int color, int team, int weap, bool background);
+            renderplayerpreview(model, color, team, weap, overlaid);
             glDisable(GL_SCISSOR_TEST);
             glViewport(0, 0, screen->w, screen->h);
             if(overlaid)
@@ -345,7 +345,7 @@ struct gui : guient
         }
         return layout(size+guishadow, size+guishadow);
     }
- 
+
     int slice(Texture *t, float scale, float start, float end, const char *text)
     {
         autotab();
