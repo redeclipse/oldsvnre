@@ -618,7 +618,7 @@ COMMAND(0, guieditor, "siiii");
 void guiplayerpreview(int *model, int *color, int *team, int *weap, float *scale, int *overlaid)
 {
     if(!cgui) return;
-    cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid);
+    cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0);
 }
 COMMAND(0, guiplayerpreview, "iiiifi");
 
