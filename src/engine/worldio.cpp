@@ -774,7 +774,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
         if(s.variants->colorscale != vec(1, 1, 1))
             h->printf("texcolor %f %f %f\n", s.variants->colorscale.x, s.variants->colorscale.y, s.variants->colorscale.z);
         if(s.variants->palette > 0 || s.variants->palindex > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
-        if(s.variants->coastscale >= 0.f) h->printf("texcoastscale %f\n", s.variants->coastscale);
+        if(s.variants->coastscale != 1) h->printf("texcoastscale %f\n", s.variants->coastscale);
         if(s.texgrass)
         {
             h->printf("texgrass %s\n", escapestring(s.texgrass));
