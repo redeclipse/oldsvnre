@@ -4,7 +4,6 @@
 	<Project>
 		<Option title="redeclipse" />
 		<Option platforms="Windows;" />
-		<Option pch_mode="2" />
 		<Option default_target="client" />
 		<Option compiler="gcc" />
 		<Build>
@@ -53,6 +52,9 @@
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 			<Target title="client32-dbg">
 				<Option output="..\bin\reclient-dbg.exe" prefix_auto="0" extension_auto="0" />
@@ -96,6 +98,9 @@
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 			<Target title="client32-prof">
 				<Option output="..\bin\reclient.exe" prefix_auto="0" extension_auto="0" />
@@ -140,6 +145,9 @@
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 			<Target title="server32">
 				<Option output="..\bin\reserver.exe" prefix_auto="0" extension_auto="0" />
@@ -182,6 +190,9 @@
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 			<Target title="server32-dbg">
 				<Option output="..\bin\reserver-dbg.exe" prefix_auto="0" extension_auto="0" />
@@ -220,6 +231,9 @@
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 			<Target title="client64">
 				<Option output="..\bin64\reclient.exe" prefix_auto="0" extension_auto="0" />
@@ -266,6 +280,9 @@
 					<Add directory="..\bin64" />
 					<Add directory="lib64" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
 			</Target>
 			<Target title="client64-prof">
 				<Option output="..\bin64\reclient.exe" prefix_auto="0" extension_auto="0" />
@@ -310,6 +327,9 @@
 					<Add directory="..\bin64" />
 					<Add directory="lib64" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
 			</Target>
 			<Target title="client64-dbg">
 				<Option output="..\bin64\reclient-dbg.exe" prefix_auto="0" extension_auto="0" />
@@ -353,6 +373,9 @@
 					<Add directory="..\bin64" />
 					<Add directory="lib64" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
 			</Target>
 			<Target title="server64">
 				<Option output="..\bin64\reserver.exe" prefix_auto="0" extension_auto="0" />
@@ -395,6 +418,9 @@
 					<Add directory="..\bin64" />
 					<Add directory="lib64" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
 			</Target>
 			<Target title="server64-dbg">
 				<Option output="..\bin64\reserver-dbg.exe" prefix_auto="0" extension_auto="0" />
@@ -433,6 +459,9 @@
 					<Add directory="..\bin64" />
 					<Add directory="lib64" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
 			</Target>
 			<Target title="data">
 				<Option output="." prefix_auto="0" extension_auto="0" />
@@ -1781,6 +1810,7 @@
 		</Unit>
 		<Unit filename="redeclipse.rc">
 			<Option compilerVar="WINDRES" />
+			<Option compiler="gcc" use="1" buildCommand="$rescomp -F $WINDRES_TARGET -i $file -J rc -o $resource_output -O coff $res_includes" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="server32" />
