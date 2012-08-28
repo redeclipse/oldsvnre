@@ -361,7 +361,7 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
                 trying &= ~m;
             }
         }
-        loop(r, G_M_NUM)
+        loop(r, G_M_NUM*G_M_NUM)
         {
             if(!muts) break;
             bool changed = false;
@@ -403,7 +403,7 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
                 if(changed) break;
                 if(muts&(1<<mutstype[i].type))
                 {
-                    int mutators = (1<<mutstype[i].type) != (1<<G_M_INSTA) ? mutstype[i].mutators : GAME(instagibfilter);
+                    int mutators = i != G_M_INSTA ? mutstype[i].mutators : GAME(instagibfilter);
                     loopj(G_M_NUM)
                     {
                         if(mutators && !(mutators&(1<<mutstype[j].type)) && (muts&(1<<mutstype[j].type)))
