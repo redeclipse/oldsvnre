@@ -49,15 +49,11 @@
 #ifndef STANDALONE
 #include <SDL.h>
 #include <SDL_image.h>
-#ifdef INTERFACE
 #include <SDL_syswm.h>
 #include <SDL_opengl.h>
 #endif
-#endif
 
-#if defined(INTERFACE) || defined(STANDALONE)
 #include <enet/enet.h>
-#endif
 
 #ifdef __sun__
 #undef sun

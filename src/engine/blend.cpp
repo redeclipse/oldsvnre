@@ -103,7 +103,7 @@ struct BlendMapRoot : BlendMapNode
 
     void shrink(int quadrant)
     {
-        if(type == BM_BRANCH) 
+        if(type == BM_BRANCH)
         {
             BlendMapRoot oldroot = *this;
             type = branch->shrink(*this, quadrant);
@@ -454,7 +454,7 @@ void shrinkblendmap(int octant)
 {
     blendmap.shrink(octant&3);
 }
- 
+
 struct BlendBrush
 {
     char *name;
@@ -650,7 +650,6 @@ COMMAND(0, paintblendmap, "");
 void clearblendmapsel()
 {
     if(noedit(false)) return;
-    extern selinfo sel;
     int x1 = sel.o.x>>BM_SCALE, y1 = sel.o.y>>BM_SCALE,
         x2 = (sel.o.x+sel.s.x*sel.grid+(1<<BM_SCALE)-1)>>BM_SCALE,
         y2 = (sel.o.y+sel.s.y*sel.grid+(1<<BM_SCALE)-1)>>BM_SCALE;
@@ -664,7 +663,6 @@ COMMAND(0, clearblendmapsel, "");
 void invertblendmapsel()
 {
     if(noedit(false)) return;
-    extern selinfo sel;
     int x1 = sel.o.x>>BM_SCALE, y1 = sel.o.y>>BM_SCALE,
         x2 = (sel.o.x+sel.s.x*sel.grid+(1<<BM_SCALE)-1)>>BM_SCALE,
         y2 = (sel.o.y+sel.s.y*sel.grid+(1<<BM_SCALE)-1)>>BM_SCALE;

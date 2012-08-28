@@ -330,7 +330,6 @@ struct gui : guient
             glViewport(x1, y1, x2-x1, y2-y1);
             glScissor(x1, y1, x2-x1, y2-y1);
             glEnable(GL_SCISSOR_TEST);
-            extern void renderplayerpreview(int model, int color, int team, int weap, bool background);
             renderplayerpreview(model, color, team, weap, overlaid);
             glDisable(GL_SCISSOR_TEST);
             glViewport(0, 0, screen->w, screen->h);

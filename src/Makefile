@@ -38,10 +38,10 @@ STD_LIBS=
 else
 STD_LIBS= -static-libgcc -static-libstdc++
 endif
-CLIENT_INCLUDES= -DINTERFACE -DIRC $(INCLUDES) -Iinclude
+CLIENT_INCLUDES= $(INCLUDES) -Iinclude
 CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL -lSDL_image -lSDL_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
 else
-CLIENT_INCLUDES= -DINTERFACE -DIRC $(INCLUDES) -I/usr/X11R6/include `sdl-config --cflags`
+CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl-config --cflags`
 CLIENT_LIBS= -Lenet/.libs -lenet -L/usr/X11R6/lib -lX11 `sdl-config --libs` -lSDL_image -lSDL_mixer -lz -lGL
 endif
 ifeq ($(PLATFORM),Linux)
@@ -109,10 +109,10 @@ CLIENT_OBJS= \
 CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
-SERVER_INCLUDES= -DSTANDALONE -DMASTERSERVER -DIRC $(INCLUDES) -Iinclude
+SERVER_INCLUDES= -DSTANDALONE $(INCLUDES) -Iinclude
 SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
 else
-SERVER_INCLUDES= -DSTANDALONE -DMASTERSERVER -DIRC $(INCLUDES)
+SERVER_INCLUDES= -DSTANDALONE $(INCLUDES)
 SERVER_LIBS= -Lenet/.libs -lenet -lz
 endif
 SERVER_OBJS= \
@@ -212,9 +212,9 @@ endif
 install: install-client install-server
 
 depend:
-	makedepend -Y -Ishared -Iengine -Igame -DINTERFACE -DIRC -DMASTERSERVER $(subst .o,.cpp,$(CLIENT_OBJS))
-	makedepend -a -o-standalone.o -Y -Ishared -Iengine -Igame -DSTANDALONE -DINTERFACE -DIRC -DMASTERSERVER $(subst -standalone.o,.cpp,$(SERVER_OBJS))
-	makedepend -a -o.h.gch -Y -Ishared -Iengine -Igame -DINTERFACE -DIRC -DMASTERSERVER $(subst .h.gch,.h,$(CLIENT_PCH))
+	makedepend -Y -Ishared -Iengine -Igame $(subst .o,.cpp,$(CLIENT_OBJS))
+	makedepend -a -o-standalone.o -Y -Ishared -Iengine -Igame -DSTANDALONE $(subst -standalone.o,.cpp,$(SERVER_OBJS))
+	makedepend -a -o.h.gch -Y -Ishared -Iengine -Igame $(subst .h.gch,.h,$(CLIENT_PCH))
 
 all: client server
 

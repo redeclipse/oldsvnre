@@ -129,9 +129,7 @@ void conoutft(int type, const char *s, ...)
 {
     defvformatstring(sf, s, s);
     console(type, "%s", sf);
-#ifdef IRC
     ircoutf(5, "%s", sf);
-#endif
 }
 
 void conoutf(const char *s, ...)
@@ -382,10 +380,7 @@ void cleanupserver()
 {
     server::shutdown();
     cleanupserversockets();
-
-#ifdef IRC
     irccleanup();
-#endif
 }
 
 void reloadserver()
@@ -1195,15 +1190,11 @@ void serverloop()
         //lastmillis = totalmillis = (int)enet_time_get();
         //curtime = lastmillis-_lastmillis;
         updatetimer(false);
-
-#ifdef MASTERSERVER
+#ifdef STANDALONE
         checkmaster();
 #endif
         serverslice(5);
-#ifdef IRC
         ircslice();
-#endif
-
 #ifdef WIN32
         MSG msg;
         while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -1288,17 +1279,12 @@ void changeservertype()
 void setupserver()
 {
     server::changemap(load && *load ? load : NULL);
-
     if(!servertype) return;
-
-#ifdef MASTERSERVER
+#ifdef STANDALONE
     setupmaster();
 #endif
-
     conoutf("init: server (%s:%d)", *serverip ? serverip : "*", serverport);
-
     if(setupserversockets() && verbose) conoutf("\fggame server started");
-
 #ifndef STANDALONE
     if(servertype >= 3) serverloop();
 #endif
@@ -1351,7 +1337,7 @@ bool serveroption(char *opt)
                 case 'a': setvar("servermasterport", atoi(opt+3)); return true;
             }
         }
-#ifdef MASTERSERVER
+#ifdef STANDALONE
         case 'm':
         {
             switch(opt[2])
@@ -1538,10 +1524,10 @@ void rehash(bool reload)
         writecfg();
     }
     reloadserver();
-#ifdef MASTERSERVER
+#ifdef STANDALONE
     reloadmaster();
-#endif
-#ifndef STANDALONE
+    execfile("servinit.cfg", false);
+#else
     execfile("localinit.cfg", false);
     execfile("defaults.cfg");
     initing = INIT_LOAD;
@@ -1551,8 +1537,6 @@ void rehash(bool reload)
     execfile("autoexec.cfg", false);
     interactive = false;
     initing = NOT_INITING;
-#else
-    execfile("servinit.cfg", false);
 #endif
     conoutf("\fwconfiguration reloaded");
     rehashing = 0;
@@ -1572,7 +1556,7 @@ void fatal(const char *s, ...)    // failure exit
         if(errors <= 1) // avoid recursion
         {
             cleanupserver();
-#ifdef MASTERSERVER
+#ifdef STANDALONE
             cleanupmaster();
 #endif
             enet_deinitialize();
