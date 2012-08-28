@@ -1048,7 +1048,7 @@ namespace physics
         if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             gameent *d = (gameent *)pl;
-            if(!d->turnside && (d->physstate > PHYS_FALL || d->onladder)) d->resetjump();
+            if(!d->turnside && (d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d))) d->resetjump();
             if(local) modifyinput(d, m, wantsmove, floating, millis);
             if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
             else d->timeinair = 0;
