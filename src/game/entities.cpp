@@ -310,7 +310,7 @@ namespace entities
         }
         d->useitem(ent, e.type, attr, ammoamt, reloadamt, sweap, lastmillis, weaponswitchdelay);
         playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, 0, -1, -1, -1, &d->wschan);
-        if(game::dynlighteffects) adddynlight(d->headpos(-d->height/2), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
+        if(game::dynlighteffects) adddynlight(d->center(), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
         if(ents.inrange(drop) && ents[drop]->type == WEAPON)
         {
             gameentity &f = *(gameentity *)ents[drop];
@@ -560,7 +560,7 @@ namespace entities
                     float mag = max(e.attrs[2], 1);
                     if(e.attrs[4] && e.attrs[4] < e.attrs[3])
                     {
-                        float dist = e.o.dist(d->headpos(-d->height*0.5f));
+                        float dist = e.o.dist(d->center());
                         if(dist > e.attrs[4] && dist < e.attrs[3])
                             mag *= 1.f-clamp((dist-e.attrs[4])/float(e.attrs[3]-e.attrs[4]), 0.f, 0.99f);
                     }

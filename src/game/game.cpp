@@ -544,7 +544,7 @@ namespace game
                 {
                     int millis = lastmillis-d->lastburn;
                     size_t seed = size_t(d) + (millis/50);
-                    float pc = d->curscale, amt = (millis%50)/50.0f, intensity = 0.75f+(detrnd(seed, 25)*(1-amt) + detrnd(seed + 1, 25)*amt)/100.f;
+                    float pc = 1, amt = (millis%50)/50.0f, intensity = 0.75f+(detrnd(seed, 25)*(1-amt) + detrnd(seed + 1, 25)*amt)/100.f;
                     if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                     else
                     {
@@ -552,13 +552,13 @@ namespace game
                         if(fluc >= 0.25f) fluc = (0.25f+0.03f-fluc)*(0.25f/0.03f);
                         pc *= 0.75f+fluc;
                     }
-                    adddynlight(d->headpos(-d->height*0.5f), d->height*(1.5f+intensity)*pc, vec(1.1f*max(pc,0.5f), 0.45f*max(pc,0.2f), 0.05f*pc), 0, 0, DL_KEEP);
+                    adddynlight(d->center(), d->height*intensity*pc, pulsecolour(d).mul(pc), 0, 0, DL_KEEP);
                     continue;
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
                     vec col = vec::hexcolor(getcolour(d, playereffecttone)).mul(illumlevel);
-                    adddynlight(d->headpos(-d->height*0.5f), illumradius, col, 0, 0, DL_KEEP);
+                    adddynlight(d->center(), illumradius, col, 0, 0, DL_KEEP);
                 }
             }
         }
@@ -1260,7 +1260,7 @@ namespace game
         }
         if(aistyle[d->aitype].living && gibscale > 0)
         {
-            vec pos = d->headpos(-d->height*0.5f);
+            vec pos = d->center();
             int gib = clamp(max(damage,5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
             if(d->obliterated) amt *= 3;
             loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
@@ -1709,7 +1709,7 @@ namespace game
             gameent *a = deathcamstyle > 1 ? d : getclient(d->lastattacker);
             if(a)
             {
-                vec dir = vec(a->headpos(-a->height*0.5f)).sub(camera1->o).normalize();
+                vec dir = vec(a->center()).sub(camera1->o).normalize();
                 vectoyawpitch(dir, camera1->aimyaw, camera1->aimpitch);
                 float speed = (float(curtime)/1000.f)*deathcamspeed;
                 if(deathcamspeed > 0) scaleyawpitch(yaw, pitch, camera1->aimyaw, camera1->aimpitch, speed, speed*4.f);
@@ -2808,11 +2808,11 @@ namespace game
             if(burntime && d->burning(lastmillis, burntime))
             {
                 int millis = lastmillis-d->lastburn;
-                float pc = d->curscale, intensity = 0.5f+(rnd(50)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
+                float pc = 1, intensity = 0.5f+(rnd(50)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL, max(onfirefade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*d->curscale*intensity*pc, blend*pc*onfireblend, -10, 0);
+                regular_part_create(PART_FIREBALL, max(onfirefade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*intensity*pc, blend*pc*onfireblend, -10, 0);
             }
         }
     }

@@ -11,13 +11,13 @@ struct aistyles
 aistyles aistyle[] = {
     {
         AI_NONE,         -1,             0,
-            3,          3,          15,         200,        50,         1,
+            3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
                 "player",   { "actors/player/male",     "actors/player/male/hwep" }
     },
     {
         AI_BOT,         -1,             0,
-            3,          3,          15,         200,        50,         1,
+            3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
                 "bot",      { "actors/player/male",     "actors/player/male/hwep" }
     },
@@ -29,7 +29,7 @@ aistyles aistyle[] = {
     },
     {
         AI_GRUNT,       WEAP_MELEE,     50,
-            3,          3,          16,         150,        40,         1,
+            3,          3,          14,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    { "actors/grunt",           "actors/player/hwep" }
     },
