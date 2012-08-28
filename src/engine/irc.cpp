@@ -1,4 +1,3 @@
-#ifdef IRC
 #include "engine.h"
 
 vector<ircnet *> ircnets;
@@ -891,7 +890,3 @@ bool ircgui(guient *g, const char *s)
 
 #endif
 ICOMMAND(0, ircconns, "", (void), { int num = 0; loopv(ircnets) if(ircnets[i]->state >= IRC_ATTEMPT) num++; intret(num); });
-#else
-ICOMMAND(0, ircgui, "s", (char *s), intret(0));
-ICOMMAND(0, ircconns, "", (void), intret(0));
-#endif

@@ -80,9 +80,6 @@ void cleanup()
 {
     recorder::stop();
     cleanupserver();
-#ifdef MASTERSERVER
-    cleanupmaster();
-#endif
     setscreensaver(true);
     showcursor(true);
 #ifdef FAKESHOWCURSOR
@@ -1002,9 +999,7 @@ int main(int argc, char **argv)
 
         checksleep(lastmillis);
         serverslice();
-#ifdef IRC
         ircslice();
-#endif
         if(frameloops)
         {
             game::recomputecamera(screen->w, screen->h);

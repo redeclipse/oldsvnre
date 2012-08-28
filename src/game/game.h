@@ -1469,7 +1469,6 @@ namespace entities
     extern void render();
     extern void update();
 }
-
 #elif defined(GAMESERVER)
 namespace client
 {

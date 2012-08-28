@@ -75,6 +75,7 @@ struct selinfo
         return s.x > 0 && s.y > 0 && s.z > 0;
     }
 };
+extern selinfo sel;
 
 struct editinfo;
 

@@ -4,7 +4,6 @@
 	<Project>
 		<Option title="redeclipse" />
 		<Option platforms="Windows;" />
-		<Option default_target="client" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="client32">
@@ -22,15 +21,13 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
+					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-mwindows" />
-					<Add option="-m32" />
-					<Add option="-DINTERFACE" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -39,8 +36,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -70,14 +67,12 @@
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-fsigned-char" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
-					<Add option="-DINTERFACE" />
-					<Add option="-DIRC" />
+					<Add option="-mwindows" />
+					<Add option="-fsigned-char" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -85,8 +80,8 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -118,12 +113,10 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-pg" />
+					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
-					<Add option="-mwindows" />
-					<Add option="-m32" />
-					<Add option="-DINTERFACE" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -132,8 +125,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -163,16 +156,14 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
+					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-mwindows" />
-					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMASTERSERVER" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -181,8 +172,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="zlib1" />
 					<Add library="enet" />
 					<Add library="ws2_32" />
@@ -209,12 +200,10 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-fsigned-char" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
+					<Add option="-fsigned-char" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMASTERSERVER" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -222,8 +211,8 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="zlib1" />
 					<Add library="enet" />
 					<Add library="ws2_32" />
@@ -241,7 +230,7 @@
 				<Option object_output=".objs\client64" />
 				<Option deps_output=".deps\client" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_64bit" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -250,15 +239,13 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
+					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-mwindows" />
-					<Add option="-m64" />
-					<Add option="-DINTERFACE" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -267,8 +254,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-mwindows" />
 					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -290,7 +277,7 @@
 				<Option object_output=".objs\client64-prof" />
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_64bit" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -300,12 +287,10 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-pg" />
+					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
-					<Add option="-mwindows" />
-					<Add option="-m64" />
-					<Add option="-DINTERFACE" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -314,8 +299,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />
-					<Add option="-mwindows" />
 					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -337,7 +322,7 @@
 				<Option object_output=".objs\client64-dbg" />
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_64bit" />
+				<Option compiler="gcc" />
 				<Option parameters="-hhome -r -df0 -dw800 -dh600 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
@@ -345,14 +330,12 @@
 				<Option projectResourceIncludeDirsRelation="1" />
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-fsigned-char" />
-					<Add option="-mwindows" />
 					<Add option="-m64" />
-					<Add option="-DINTERFACE" />
-					<Add option="-DIRC" />
+					<Add option="-mwindows" />
+					<Add option="-fsigned-char" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -360,8 +343,8 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-mwindows" />
 					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add library="SDL" />
 					<Add library="SDL_image" />
 					<Add library="SDL_mixer" />
@@ -383,7 +366,7 @@
 				<Option object_output=".objs\server64" />
 				<Option deps_output=".deps\server" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_64bit" />
+				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -391,16 +374,14 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
+					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-mwindows" />
-					<Add option="-m64" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMASTERSERVER" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -409,8 +390,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-mwindows" />
 					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add library="zlib1" />
 					<Add library="enet" />
 					<Add library="ws2_32" />
@@ -428,7 +409,7 @@
 				<Option object_output=".objs\server64-dbg" />
 				<Option deps_output=".deps\server" />
 				<Option type="0" />
-				<Option compiler="gnu_gcc_compiler_for_64bit" />
+				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
@@ -437,12 +418,10 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-fsigned-char" />
-					<Add option="-mwindows" />
 					<Add option="-m64" />
+					<Add option="-mwindows" />
+					<Add option="-fsigned-char" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMASTERSERVER" />
-					<Add option="-DIRC" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -450,8 +429,8 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-mwindows" />
 					<Add option="-m64" />
+					<Add option="-mwindows" />
 					<Add library="zlib1" />
 					<Add library="enet" />
 					<Add library="ws2_32" />
@@ -491,7 +470,7 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
@@ -499,7 +478,6 @@
 					<Add option="-mwindows" />
 					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DGENKEY" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -508,12 +486,15 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="zlib1" />
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 			<Target title="cube2font">
 				<Option output="..\bin\cube2font.exe" prefix_auto="0" extension_auto="0" />
@@ -530,14 +511,13 @@
 				<Option projectLibDirsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-mwindows" />
 					<Add option="-m32" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DGENKEY" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -546,20 +526,23 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-mwindows" />
 					<Add option="-m32" />
+					<Add option="-mwindows" />
 					<Add library="freetype" />
 					<Add library="zlib1" />
 					<Add directory="..\bin" />
 					<Add directory="lib" />
 				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="32 bit" targets="client32;server32;" />
-			<Add alias="64 bit" targets="client64;server64;" />
 			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="Tools" targets="cube2font;genkey;" />
+			<Add alias="x32" targets="client32;server32;" />
+			<Add alias="x64" targets="client64;server64;" />
 		</VirtualTargets>
 		<Unit filename="engine\animmodel.h">
 			<Option target="client32" />

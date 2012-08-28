@@ -29,11 +29,7 @@
 #define RE_SERVER_PORT      28801
 #define RE_MASTER_HOST      "play.redeclipse.net"
 
-#ifdef IRC
-#include "irc.h"
-#endif
-
-#ifdef MASTERSERVER
+#ifdef STANDALONE
 extern void setupmaster();
 extern void checkmaster();
 extern void cleanupmaster();
@@ -42,6 +38,7 @@ extern int masterserver, masterport;
 extern char *masterip;
 #endif
 
+#include "irc.h"
 #include "sound.h"
 
 enum { CON_DEBUG = 0, CON_MESG, CON_INFO, CON_SELF, CON_GAMESPECIFIC };
@@ -558,7 +555,8 @@ enum
 extern int initing;
 
 extern bool progressing;
-extern float loadprogress;
+extern float loadprogress, progresspart, progressamt;
+extern char *progresstitle, *progresstext;
 extern void progress(float bar1 = 0, const char *text1 = NULL, float bar2 = 0, const char *text2 = NULL);
 extern void limitfps(int &millis, int curmillis);
 
@@ -713,6 +711,7 @@ extern void usetexturing(bool on);
 #define renderatopview (glaring)
 #define rendernormally (rendermainview || renderatopview)
 
+extern void renderplayerpreview(int model, int color, int team, int weap, bool background);
 extern void drawslice(float start, float length, float x, float y, float size);
 extern void drawfadedslice(float start, float length, float x, float y, float size, float alpha, float r = 1.f, float g = 1.f, float b = 1.f, float minsize = 0.25f);
 extern void polyhue(dynent *d, vec &colour, int flags = 0);

@@ -733,7 +733,6 @@ bool menuactive()
 
 ICOMMAND(0, menustacklen, "", (void), intret(menustack.length()));
 
-#if defined(IRC) && !defined(STANDALONE)
 void guiirc(const char *s)
 {
     extern bool ircgui(guient *g, const char *s);
@@ -743,5 +742,3 @@ void guiirc(const char *s)
     }
 }
 ICOMMAND(0, ircgui, "s", (char *s), guiirc(s));
-#endif
-
