@@ -745,7 +745,7 @@ static inline bool mmcollide(physent *d, const vec &dir, const extentity &e, con
 {
     E entvol(d);
     M mdlvol(e.o, center, radius, yaw, roll);
-    vec cp;
+    vec cp(0, 0, 0);
     if(mpr::collide(entvol, mdlvol, NULL, NULL, &cp))
     {
         vec wn = vec(cp).sub(mdlvol.center());
