@@ -1918,15 +1918,11 @@ namespace server
             }
         }
         bool passed = force;
-        if(!passed && best)
+        if(!passed && best) switch(maprequest ? GAME(voteinterm) : GAME(votestyle))
         {
-            if(!maprequest) passed = best->count >= int(maxvotes*GAME(votethreshold));
-            else switch(GAME(voteinterm))
-            {
-                case 2: passed = best->count >= maxvotes; break;
-                case 1: passed = best->count >= int(maxvotes*GAME(votethreshold)); break;
-                case 0: default: break;
-            }
+            case 2: passed = best->count >= maxvotes; break;
+            case 1: passed = best->count >= int(maxvotes*GAME(votethreshold)); break;
+            case 0: default: break;
         }
         if(passed)
         {
