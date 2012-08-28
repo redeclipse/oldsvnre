@@ -7,7 +7,7 @@
 #endif
 
 VAR(0, version, 1, RE_VERSION, -1); // for scripts
-VAR(0, kidmode, 0, 0, 1); // kid protections
+VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 
 const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
 
