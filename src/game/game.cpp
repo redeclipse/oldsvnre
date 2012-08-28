@@ -939,14 +939,21 @@ namespace game
                     d->addstun(weap, lastmillis, int(scale*WEAP2(weap, stuntime, flags&HIT_ALT)), scale*WEAP2(weap, stunscale, flags&HIT_ALT));
                 if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
                 {
-                    float force = flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale;
-                    d->vel.mul(1.f-(scale*WEAP2(weap, slow, flags&HIT_ALT))*force);
+                    float force = 1.f-((scale*WEAP2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale));
+                    d->vel.x *= force;
+                    d->vel.y *= force;
                 }
                 if(WEAP2(weap, hitpush, flags&HIT_ALT) != 0)
                 {
                     if(d == actor) scale *= 1/WEAP2(weap, selfdmg, flags&HIT_ALT);
                     float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
-                    d->vel.add(vec(dir).mul(scale*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators)));
+                    vec psh = vec(dir).mul(scale*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators));
+                    if(!psh.iszero())
+                    {
+                        d->vel.add(psh);
+                        d->falling = vec(0, 0, 0);
+                        d->timeinair = 0;
+                    }
                 }
             }
             ai::damaged(d, actor, weap, flags, damage);
