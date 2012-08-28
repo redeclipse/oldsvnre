@@ -21,16 +21,25 @@ endif
 MV=mv
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
+WINDRES= windres
 ifneq (,$(findstring 64,$(PLATFORM)))
 WINLIB=lib64
 WINBIN=../bin64
+override CXX+= -m64
+override WINDRES+= -F pe-x86-64
 else
 WINLIB=lib
 WINBIN=../bin
+override CXX+= -m32
+override WINDRES+= -F pe-i386
 endif
-WINDRES= windres
+ifneq (,$(findstring TDM,$(PLATFORM)))
+STD_LIBS=
+else
+STD_LIBS= -static-libgcc -static-libstdc++
+endif
 CLIENT_INCLUDES= -DINTERFACE -DIRC $(INCLUDES) -Iinclude
-CLIENT_LIBS= -mwindows -static-libgcc -static-libstdc++ -L$(WINBIN) -L$(WINLIB) -lSDL -lSDL_image -lSDL_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
+CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL -lSDL_image -lSDL_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
 else
 CLIENT_INCLUDES= -DINTERFACE -DIRC $(INCLUDES) -I/usr/X11R6/include `sdl-config --cflags`
 CLIENT_LIBS= -Lenet/.libs -lenet -L/usr/X11R6/lib -lX11 `sdl-config --libs` -lSDL_image -lSDL_mixer -lz -lGL
@@ -101,7 +110,7 @@ CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 SERVER_INCLUDES= -DSTANDALONE -DMASTERSERVER -DIRC $(INCLUDES) -Iinclude
-SERVER_LIBS= -mwindows -static-libgcc -static-libstdc++ -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
+SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
 else
 SERVER_INCLUDES= -DSTANDALONE -DMASTERSERVER -DIRC $(INCLUDES)
 SERVER_LIBS= -Lenet/.libs -lenet -lz
