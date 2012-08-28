@@ -106,7 +106,7 @@ CLIENT_OBJS= \
 	game/waypoint.o \
 	game/weapons.o
 
-CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
+CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 SERVER_INCLUDES= -DSTANDALONE $(INCLUDES) -Iinclude
@@ -222,7 +222,6 @@ include system-install.mk
 include dist.mk
 
 engine/engine.h.gch: shared/cube.h.gch
-game/game.h.gch: shared/cube.h.gch engine/engine.h.gch
 
 # DO NOT DELETE
 
@@ -594,10 +593,3 @@ engine/engine.h.gch: shared/igame.h engine/irc.h engine/sound.h
 engine/engine.h.gch: engine/world.h engine/octa.h engine/lightmap.h
 engine/engine.h.gch: engine/bih.h engine/texture.h engine/model.h
 engine/engine.h.gch: engine/varray.h
-game/game.h.gch: engine/engine.h shared/cube.h shared/tools.h
-game/game.h.gch: shared/command.h shared/geom.h shared/ents.h
-game/game.h.gch: shared/iengine.h shared/igame.h engine/irc.h engine/sound.h
-game/game.h.gch: engine/world.h engine/octa.h engine/lightmap.h engine/bih.h
-game/game.h.gch: engine/texture.h engine/model.h engine/varray.h
-game/game.h.gch: game/weapons.h game/gamemode.h game/team.h game/ai.h
-game/game.h.gch: game/vars.h game/capture.h game/defend.h game/bomber.h
