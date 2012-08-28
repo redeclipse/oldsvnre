@@ -442,19 +442,6 @@
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
-			<Target title="data">
-				<Option output="." prefix_auto="0" extension_auto="0" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
-				<Option projectResourceIncludeDirsRelation="1" />
-				<Compiler>
-					<Add option="-fsigned-char" />
-					<Add option="-fomit-frame-pointer" />
-					<Add option="-fno-exceptions" />
-					<Add option="-fno-rtti" />
-				</Compiler>
-			</Target>
 			<Target title="genkey">
 				<Option output="..\bin\genkey.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
@@ -555,14 +542,12 @@
 		<Unit filename="engine\bih.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\bih.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -573,7 +558,6 @@
 		<Unit filename="engine\blend.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -582,7 +566,6 @@
 		<Unit filename="engine\blob.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -591,7 +574,6 @@
 		<Unit filename="engine\client.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -612,7 +594,6 @@
 		<Unit filename="engine\console.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -645,7 +626,6 @@
 		<Unit filename="engine\engine.h">
 			<Option compile="1" />
 			<Option weight="0" />
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -723,14 +703,12 @@
 		<Unit filename="engine\lightmap.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\lightmap.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -749,7 +727,6 @@
 		<Unit filename="engine\main.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -770,14 +747,12 @@
 		<Unit filename="engine\material.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\md2.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -786,7 +761,6 @@
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\md3.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -805,14 +779,12 @@
 		<Unit filename="engine\menus.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\model.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -839,7 +811,6 @@
 		<Unit filename="engine\normal.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -856,14 +827,12 @@
 		<Unit filename="engine\octa.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\octa.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -874,7 +843,6 @@
 		<Unit filename="engine\octaedit.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -883,7 +851,6 @@
 		<Unit filename="engine\octarender.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -892,7 +859,6 @@
 		<Unit filename="engine\physics.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -917,7 +883,6 @@
 		<Unit filename="engine\rendergl.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -926,7 +891,6 @@
 		<Unit filename="engine\rendermodel.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -935,7 +899,6 @@
 		<Unit filename="engine\renderparticles.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -944,7 +907,6 @@
 		<Unit filename="engine\rendersky.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -961,7 +923,6 @@
 		<Unit filename="engine\rendertext.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -970,7 +931,6 @@
 		<Unit filename="engine\renderva.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -988,7 +948,6 @@
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="server32" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="server32-dbg" />
 			<Option target="client64" />
@@ -1000,7 +959,6 @@
 		<Unit filename="engine\serverbrowser.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -1009,7 +967,6 @@
 		<Unit filename="engine\shader.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -1042,7 +999,6 @@
 		<Unit filename="engine\sound.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -1067,14 +1023,12 @@
 		<Unit filename="engine\texture.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\texture.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1085,14 +1039,12 @@
 		<Unit filename="engine\ui.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\varray.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1101,7 +1053,6 @@
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\vertmodel.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1112,7 +1063,6 @@
 		<Unit filename="engine\water.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -1121,14 +1071,12 @@
 		<Unit filename="engine\world.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\world.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1139,7 +1087,6 @@
 		<Unit filename="engine\worldio.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -1342,12 +1289,11 @@
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="game\game.h">
-			<Option compile="1" />
 			<Option weight="0" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
-			<Option target="server32" />
 			<Option target="client32-prof" />
+			<Option target="server32" />
 			<Option target="server32-dbg" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
@@ -1837,7 +1783,6 @@
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
-			<Option target="data" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
@@ -1847,7 +1792,6 @@
 			<Option target="cube2font" />
 		</Unit>
 		<Unit filename="shared\ents.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1859,7 +1803,6 @@
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="server32" />
-			<Option target="data" />
 			<Option target="client32-prof" />
 			<Option target="server32-dbg" />
 			<Option target="client64" />
@@ -1869,7 +1812,6 @@
 			<Option target="server64-dbg" />
 		</Unit>
 		<Unit filename="shared\geom.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1878,7 +1820,6 @@
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="shared\iengine.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1887,7 +1828,6 @@
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="shared\igame.h">
-			<Option target="data" />
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />
@@ -1927,7 +1867,6 @@
 			<Option target="client32-prof" />
 			<Option target="server32" />
 			<Option target="server32-dbg" />
-			<Option target="data" />
 			<Option target="genkey" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
