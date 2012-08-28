@@ -68,7 +68,7 @@ namespace ai
         {
             int dt = owner(d), et = owner(e);
             if(dt == TEAM_ENEMY && et == TEAM_ENEMY) return false;
-            if(!m_team(game::gamemode, game::mutators) || dt != et) return true;
+            if(!m_isteam(game::gamemode, game::mutators) || dt != et) return true;
         }
         return false;
     }
@@ -273,7 +273,7 @@ namespace ai
                 int dt = owner(d), et = owner(e);
                 if(dt != TEAM_ENEMY || et != TEAM_ENEMY)
                 {
-                    if(m_team(game::gamemode, game::mutators) && dt != et) continue;
+                    if(m_isteam(game::gamemode, game::mutators) && dt != et) continue;
                 }
             }
             if(members) (*members)++;
@@ -544,7 +544,7 @@ namespace ai
             {
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
-                if(m_team(game::gamemode, game::mutators)) assist(d, b, interests, false, false);
+                if(m_isteam(game::gamemode, game::mutators)) assist(d, b, interests, false, false);
             }
             if(m_fight(game::gamemode))
             {
@@ -567,7 +567,7 @@ namespace ai
             int q = interests.length()-1;
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
-            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);
@@ -693,7 +693,6 @@ namespace ai
             d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
             return 1;
         }
-        d->ai->clean(true);
         return 0; // but don't pop the state
     }
 
@@ -1076,20 +1075,20 @@ namespace ai
         d->action[AC_SPECIAL] = d->ai->dontmove = false;
         if(idle || !aistyle[d->aitype].canmove)
         {
-            d->ai->lasthunt = lastmillis;
             d->ai->dontmove = true;
             d->ai->spot = vec(0, 0, 0);
         }
-        else if(hunt(d, b))
-        {
-            vec fp = d->feetpos();
-            game::getyawpitch(fp, d->ai->spot, d->ai->targyaw, d->ai->targpitch);
-            d->ai->lasthunt = lastmillis;
-        }
+        else if(hunt(d, b)) game::getyawpitch(d->feetpos(), d->ai->spot, d->ai->targyaw, d->ai->targpitch);
         else
         {
-            idle = d->ai->dontmove = true;
-            d->ai->spot = vec(0, 0, 0);
+            if(d->blocked && (!d->ai->lastturn || lastmillis-d->ai->lastturn >= 1000))
+            {
+                d->ai->targyaw += 90+rnd(180);
+                d->ai->lastturn = lastmillis;
+            }
+            vec dir; vecfromyawpitch(d->ai->targyaw, 0, 1, 0, dir);
+            d->ai->spot = vec(d->feetpos()).add(dir.mul(CLOSEDIST));
+            d->ai->targnode = -1;
         }
 
         bool enemyok = false, locked = false;
@@ -1409,7 +1408,7 @@ namespace ai
         }
         else d->ai->blocktime = d->ai->blockseq = 0;
 
-        if(d->ai->targnode == d->ai->targlast || d->ai->hasprevnode(d->ai->targnode))
+        if(iswaypoint(d->ai->targnode) && (d->ai->targnode == d->ai->targlast || d->ai->hasprevnode(d->ai->targnode)))
         {
             d->ai->targtime += lastmillis-d->ai->lastrun;
             if(d->ai->targtime > (d->ai->targseq+1)*1000)
@@ -1436,27 +1435,6 @@ namespace ai
         {
             d->ai->targtime = d->ai->targseq = 0;
             d->ai->targlast = d->ai->targnode;
-        }
-
-        if(d->ai->lasthunt)
-        {
-            int millis = lastmillis-d->ai->lasthunt;
-            if(millis <= 1000) { d->ai->tryreset = false; d->ai->huntseq = 0; }
-            else if(millis > (d->ai->huntseq+1)*1000)
-            {
-                d->ai->huntseq++;
-                switch(d->ai->huntseq)
-                {
-                    case 1: d->ai->clear(false); break;
-                    case 2: if(!transport(d)) d->ai->reset(false); break;
-                    case 3: default:
-                        if(b.type != AI_S_WAIT) { game::suicide(d, HIT_LOST); return; } // this is our last resort..
-                        else d->ai->blockseq = 0; // waiting, so just try again..
-                        break;
-                }
-                if(aidebug >= 6 && dbgfocus(d))
-                    conoutf("%s hunting %dms sequence %d", game::colorname(d), millis, d->ai->huntseq);
-            }
         }
     }
 
@@ -1590,7 +1568,7 @@ namespace ai
             logic(d, c);
             break;
         }
-        if(d->ai->trywipe) d->ai->wipe();
+        if(d->ai->tryreset) d->ai->reset();
         d->ai->lastrun = lastmillis;
     }
 

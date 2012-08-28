@@ -241,7 +241,7 @@ namespace client
 
     int teamname(const char *team)
     {
-        if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+        if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
         {
             if(team[0])
             {
@@ -264,7 +264,7 @@ namespace client
     {
         if(team[0])
         {
-            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
                 int t = teamname(team);
                 if(t != game::player1->team) addmsg(N_SWITCHTEAM, "ri", t);
@@ -445,7 +445,7 @@ namespace client
 
     void setteam(const char *arg1, const char *arg2)
     {
-        if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+        if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
         {
             int i = parseplayer(arg1);
             if(i>=0)
@@ -620,7 +620,7 @@ namespace client
     {
         if(!waiting(false))
         {
-            if(flags&SAY_TEAM && !m_team(game::gamemode, game::mutators))
+            if(flags&SAY_TEAM && !m_isteam(game::gamemode, game::mutators))
                 flags &= ~SAY_TEAM;
             saytext(game::player1, flags, text);
             addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, text);
@@ -2096,7 +2096,7 @@ namespace client
                     if(!w) return;
                     if(w->team != tn)
                     {
-                        if(m_team(game::gamemode, game::mutators) && game::showpresence >= (waiting(false) ? 1 : 2) && w->aitype == AI_NONE && w->team != TEAM_NEUTRAL && tn != TEAM_NEUTRAL)
+                        if(m_isteam(game::gamemode, game::mutators) && game::showpresence >= (waiting(false) ? 1 : 2) && w->aitype == AI_NONE && w->team != TEAM_NEUTRAL && tn != TEAM_NEUTRAL)
                             conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(tn, colour), hud::teamtexname(tn), TEAM(tn, name));
                         w->team = tn;
                         if(w == game::focus) hud::lastteam = 0;
@@ -2170,7 +2170,7 @@ namespace client
                 case N_SCORE:
                 {
                     int team = getint(p), total = getint(p);
-                    if(m_team(game::gamemode, game::mutators))
+                    if(m_isteam(game::gamemode, game::mutators))
                     {
                         score &ts = hud::teamscore(team);
                         ts.total = total;

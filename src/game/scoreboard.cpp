@@ -105,7 +105,7 @@ namespace hud
             gameent *o = (gameent *)game::iterdynents(i);
             if(!o || o->type!=ENT_PLAYER || (!showconnecting && !o->name[0])) continue;
             if(o->state==CS_SPECTATOR) { spectators.add(o); continue; }
-            int team = m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? o->team : TEAM_NEUTRAL;
+            int team = m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? o->team : TEAM_NEUTRAL;
             bool found = false;
             loopj(numgroups)
             {
@@ -120,7 +120,7 @@ namespace hud
             scoregroup &g = *groups[numgroups++];
             g.team = team;
             if(!team) g.total = 0;
-            else if(m_team(game::gamemode, game::mutators)) g.total = teamscore(o->team).total;
+            else if(m_isteam(game::gamemode, game::mutators)) g.total = teamscore(o->team).total;
             else g.total = o->points;
 
             g.players.shrink(0);
@@ -156,7 +156,7 @@ namespace hud
                     int numgroups = groupplayers();
                     if(!numgroups) return;
                     scoregroup &sg = *groups[0];
-                    if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+                    if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
                     {
                         int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                         if(m_defend(game::gamemode) && sg.total == INT_MAX)
@@ -321,7 +321,7 @@ namespace hud
                     SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                     g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
                 }
-                if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+                if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
                 {
                     SEARCHBINDCACHE(teamkey)("showgui team", 0);
                     g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey);
@@ -343,7 +343,7 @@ namespace hud
             else
                 g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
 
-            if(m_team(game::gamemode, game::mutators))
+            if(m_isteam(game::gamemode, game::mutators))
                 g.textf("playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtexname(game::player1->team), TEAM(game::player1->team, name));
             else
                 g.textf("free-for-all", 0xFFFFFF, NULL, 0);
@@ -394,7 +394,7 @@ namespace hud
             }
 
             scoregroup &sg = *groups[k];
-            int bgcolor = sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333,
+            int bgcolor = sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333,
                 fgcolor = 0xFFFFFF;
 
             g.pushlist(); // vertical
@@ -408,7 +408,7 @@ namespace hud
                 }
 
             g.pushlist();
-            if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
                 g.pushlist();
                 g.background(bgcolor, numgroups>1 ? 3 : 5);
@@ -421,7 +421,7 @@ namespace hud
             loopscoregroup({
                 const char *status = hud::playertex;
                 if(o->state == CS_DEAD || o->state == CS_WAITING) status = hud::deadtex;
-                else if(o->state == CS_ALIVE && (!m_team(game::gamemode, game::mutators) || o->team != game::focus->team))
+                else if(o->state == CS_ALIVE && (!m_isteam(game::gamemode, game::mutators) || o->team != game::focus->team))
                 {
                     if(o->dominating.find(game::focus) >= 0) status = hud::dominatingtex;
                     else if(o->dominated.find(game::focus) >= 0) status = hud::dominatedtex;
@@ -437,7 +437,7 @@ namespace hud
             });
             g.poplist();
 
-            if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
                 g.pushlist(); // vertical
                 if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
@@ -532,7 +532,7 @@ namespace hud
                 g.poplist();
             }
 
-            if(sg.team && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
                 g.poplist(); // horizontal
                 g.poplist(); // vertical
@@ -620,7 +620,7 @@ namespace hud
         {
             if(sy > m) break;
             scoregroup &sg = *groups[k];
-            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+            if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
                 if(!sg.team || ((sg.team != game::focus->team) == !i)) continue;
                 float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
@@ -650,7 +650,7 @@ namespace hud
         {
             pushfont("reduced");
             scoregroup &sg = *groups[0];
-            if(m_team(game::gamemode, game::mutators))
+            if(m_isteam(game::gamemode, game::mutators))
             {
                 if(sg.total) sy += draw_textx("\fg%s", x, y, 255, 255, 255, int(blend*255), TEXT_LEFT_UP, -1, -1, timetostr(sg.total));
             }

@@ -53,7 +53,7 @@ namespace projs
         if(actor->aitype < AI_START)
         {
             if((actor == target && !selfdamage) || (m_trial(game::gamemode) && !trialdamage)) nodamage++;
-            else if(m_play(game::gamemode) && m_team(game::gamemode, game::mutators) && actor->team == target->team && actor != target)
+            else if(m_play(game::gamemode) && m_isteam(game::gamemode, game::mutators) && actor->team == target->team && actor != target)
             {
                 switch(teamdamage)
                 {
@@ -1564,7 +1564,7 @@ namespace projs
                                 break;
                             }
                         }
-                        if(t && (!m_team(game::gamemode, game::mutators) || t->type != ENT_PLAYER || ((gameent *)t)->team != proj.owner->team))
+                        if(t && (!m_isteam(game::gamemode, game::mutators) || t->type != ENT_PLAYER || ((gameent *)t)->team != proj.owner->team))
                         {
                             proj.target = t;
                             targ = proj.target->center();
