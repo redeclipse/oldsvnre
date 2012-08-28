@@ -47,7 +47,7 @@ namespace ai
     const float MINWPDIST       = 4.f;     // is on top of
     const float CLOSEDIST       = 32.f;    // is close
     const float RETRYDIST       = 64.f;    // is close when retrying
-    const float JETDIST       = 128.f;   // close when jetting
+    const float JETDIST         = 128.f;   // close when jetting
     const float FARDIST         = 256.f;   // too far to remap close
     const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
@@ -236,9 +236,9 @@ namespace ai
         vector<int> route;
         vec target, spot;
         int weappref, enemy, enemyseen, enemymillis, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
-            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, lastmelee;
+            lastrun, lastaction, lastcheck, jumpseed, jumprand, blocktime, blockseq, lastaimrnd, lastmelee, lastturn;
         float targyaw, targpitch, views[3], aimrnd[3];
-        bool dontmove, tryreset, trywipe;
+        bool dontmove, tryreset;
 
         aiinfo()
         {
@@ -251,36 +251,26 @@ namespace ai
         void clearsetup()
         {
             spot = target = vec(0, 0, 0);
-            lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = lastmelee = 0;
+            lastaction = lastcheck = enemyseen = enemymillis = blocktime = blockseq = targtime = targseq = lastaimrnd = lastmelee = lastturn = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
             weappref = targnode = targlast = enemy = -1;
         }
 
-        void clear(bool prev = false)
+        void clear(bool tryit = false)
         {
-            if(prev) memset(prevnodes, -1, sizeof(prevnodes));
+            if(tryit) memset(prevnodes, -1, sizeof(prevnodes));
             route.setsize(0);
             lastcheck = 0;
         }
 
-        void wipe(bool prev = false)
+        void reset(bool tryit = false)
         {
-            clear(prev);
+            clear(tryit);
             state.setsize(0);
             addstate(AI_S_WAIT);
-            trywipe = false;
+            tryreset = false;
         }
-
-        void clean(bool tryit = false)
-        {
-            if(!tryit) dontmove = false;
-            targyaw = rnd(360);
-            targpitch = 0.f;
-            tryreset = tryit;
-        }
-
-        void reset(bool tryit = false) { wipe(tryit); clean(tryit); }
 
         bool hasprevnode(int n) const
         {

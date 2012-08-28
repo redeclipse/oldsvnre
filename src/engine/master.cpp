@@ -279,13 +279,13 @@ bool checkmasterclientinput(masterclient &c)
             c.lastactivity = c.lastpush = totalmillis ? totalmillis : 1;
             if(c.isserver)
             {
-                masteroutf(c, "echo \"server updated\"\n");
+                masteroutf(c, "echo \"server updated, sending ping request\"\n");
                 conoutf("master peer %s updated server info",  c.name);
             }
             else
             {
                 if(*masterscriptserver) masteroutf(c, "%s\n", masterscriptserver);
-                masteroutf(c, "echo \"server initiated\"\n");
+                masteroutf(c, "echo \"server registered, sending ping request\"\n");
                 conoutf("master peer %s registered as a server",  c.name);
                 c.isserver = true;
             }
@@ -362,7 +362,7 @@ void checkmaster()
             {
                 c.listserver = false;
                 c.shouldping = false;
-                masteroutf(c, "echo \"failed pinging server\n");
+                masteroutf(c, "echo \"ping attempts failed, your server will not be listed\n");
             }
         }
         if(c.isserver)

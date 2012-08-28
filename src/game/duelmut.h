@@ -122,7 +122,7 @@ struct duelservmode : servmode
             if(gamemillis >= dueltime)
             {
                 bool resetwinner = false;
-                if(m_duel(gamemode, mutators) && GAME(duelcycle)&(m_team(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
+                if(m_duel(gamemode, mutators) && GAME(duelcycle)&(m_isteam(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
                 {
                     clientinfo *ci = (clientinfo *)getinfo(duelwinner);
                     if(ci)
@@ -131,7 +131,7 @@ struct duelservmode : servmode
                         loopv(clients)
                             if(clients[i]->state.aitype < AI_START && clients[i]->state.state != CS_SPECTATOR && clients[i]->team == ci->team)
                                 numplrs++;
-                        if(numplrs > (m_team(gamemode, mutators) ? 1 : 2))
+                        if(numplrs > (m_isteam(gamemode, mutators) ? 1 : 2))
                         {
                             if(!numwins) numwins = numplrs;
                             if(duelwins >= numwins) resetwinner = true;
@@ -157,7 +157,7 @@ struct duelservmode : servmode
                         if(ci->state.state != CS_ALIVE)
                         {
                             if(ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
-                            if(ci->state.aitype < AI_START && m_duel(gamemode, mutators) && m_team(gamemode, mutators))
+                            if(ci->state.aitype < AI_START && m_duel(gamemode, mutators) && m_isteam(gamemode, mutators))
                             {
                                 bool skip = false;
                                 loopv(alive) if(ci->team == alive[i]->team) { skip = true; break; }
@@ -213,7 +213,7 @@ struct duelservmode : servmode
             }
             if(allowed.empty())
             {
-                if(m_survivor(gamemode, mutators) && m_team(gamemode, mutators) && !alive.empty())
+                if(m_survivor(gamemode, mutators) && m_isteam(gamemode, mutators) && !alive.empty())
                 {
                     bool found = false;
                     loopv(alive) if(i && alive[i]->team != alive[i-1]->team) { found = true; break; }

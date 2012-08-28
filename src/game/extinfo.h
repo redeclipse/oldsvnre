@@ -54,10 +54,10 @@
 
     void extinfoteams(ucharbuf &p)
     {
-        putint(p, m_fight(gamemode) && m_team(gamemode, mutators) ? 0 : 1);
+        putint(p, m_fight(gamemode) && m_isteam(gamemode, mutators) ? 0 : 1);
         putint(p, gamemode);
         putint(p, timeremaining/60);
-        if(!m_team(gamemode, mutators) || !m_fight(gamemode)) return;
+        if(!m_isteam(gamemode, mutators) || !m_fight(gamemode)) return;
 
         loopv(scores)
         {

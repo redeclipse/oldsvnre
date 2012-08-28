@@ -114,7 +114,7 @@ mutstypes mutstype[] = {
         "two teams fight to determine the winning side"
     },
     {
-        G_M_COOP,       (1<<G_M_COOP),
+        G_M_COOP,       (1<<G_M_TEAM)|(1<<G_M_COOP),
         (1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
         "coop",
         "players versus drones"
@@ -225,8 +225,8 @@ extern mutstypes mutstype[];
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
-#define m_implied(a,b)      (gametype[a].implied|((b&(1<<G_M_MULTI)) || (b&(1<<G_M_COOP)) || (a == G_BOMBER && !((b|gametype[a].implied)&(1<<G_M_GSP1))) ? (1<<G_M_TEAM) : 0))
-#define m_doimply(a,b,c)    (gametype[a].implied|mutstype[c].implied|((b&(1<<G_M_MULTI)) || (b&(1<<G_M_COOP)) || (a == G_BOMBER && !((b|gametype[a].implied|mutstype[c].implied)&(1<<G_M_GSP1))) ? (1<<G_M_TEAM) : 0))
+#define m_implied(a,b)      (gametype[a].implied|(a == G_BOMBER && !((b|gametype[a].implied)&(1<<G_M_GSP1)) ? (1<<G_M_TEAM) : 0))
+#define m_doimply(a,b,c)    (gametype[a].implied|mutstype[c].implied|(a == G_BOMBER && !((b|gametype[a].implied|mutstype[c].implied)&(1<<G_M_GSP1)) ? (1<<G_M_TEAM) : 0))
 
 #define m_multi(a,b)        ((b&(1<<G_M_MULTI)) || (m_implied(a,b)&(1<<G_M_MULTI)))
 #define m_team(a,b)         ((b&(1<<G_M_TEAM)) || (m_implied(a,b)&(1<<G_M_TEAM)))
@@ -248,6 +248,7 @@ extern mutstypes mutstype[];
 #define m_gsp3(a,b)         ((b&(1<<G_M_GSP3)) || (m_implied(a,b)&(1<<G_M_GSP3)))
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
+#define m_isteam(a,b)       (m_multi(a, b) || m_team(a, b))
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b) || m_ballistic(a, b))
 #define m_special(a,b)      (m_arena(a, b) || m_insta(a, b) || m_medieval(a, b) || m_ballistic(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))

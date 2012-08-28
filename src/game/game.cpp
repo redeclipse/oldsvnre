@@ -465,7 +465,7 @@ namespace game
             case 1: // teams
             {
                 int team = index;
-                if(team < 0 || team >= TEAM_MAX+TEAM_TOTAL || (!m_team(gamemode, mutators) && !m_edit(gamemode) && team >= TEAM_FIRST && team <= TEAM_MULTI))
+                if(team < 0 || team >= TEAM_MAX+TEAM_TOTAL || (!m_isteam(gamemode, mutators) && !m_edit(gamemode) && team >= TEAM_FIRST && team <= TEAM_MULTI))
                     team = TEAM_NEUTRAL; // abstract team coloured levels to neutral
                 else if(team >= TEAM_MAX) team = (team%TEAM_MAX)+TEAM_FIRST; // force team colour palette
                 return vec::hexcolor(TEAM(team, colour));
@@ -922,7 +922,7 @@ namespace game
                 }
                 if(d != actor)
                 {
-                    bool sameteam = m_team(gamemode, mutators) && d->team == actor->team;
+                    bool sameteam = m_isteam(gamemode, mutators) && d->team == actor->team;
                     if(!sameteam) pushdamagemerge(d, actor, weap, damage, burning ? damagemerge::BURN : (bleeding ? damagemerge::BLEED : 0));
                     else if(actor == player1 && !burning && !bleeding)
                     {
@@ -1098,7 +1098,7 @@ namespace game
                 concatstring(d->obit, actor->aitype >= AI_START ? " a " : " ");
                 concatstring(d->obit, colorname(actor));
             }
-            else if(m_team(gamemode, mutators) && d->team == actor->team)
+            else if(m_isteam(gamemode, mutators) && d->team == actor->team)
             {
                 concatstring(d->obit, " \fs\fzawteam-mate\fS ");
                 concatstring(d->obit, colorname(actor));
@@ -1265,7 +1265,7 @@ namespace game
             if(d->obliterated) amt *= 3;
             loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }
-        if(m_team(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
+        if(m_isteam(gamemode, mutators) && d->team == actor->team && d != actor && actor == player1)
         {
             hud::teamkills.add(totalmillis);
             if(hud::numteamkills() >= hud::teamkillnum) hud::lastteam = totalmillis;
@@ -1318,7 +1318,7 @@ namespace game
     int numwaiting()
     {
         int n = 0;
-        loopv(waiting) if(waiting[i]->state == CS_WAITING && (!m_team(gamemode, mutators) || waiting[i]->team == player1->team)) n++;
+        loopv(waiting) if(waiting[i]->state == CS_WAITING && (!m_isteam(gamemode, mutators) || waiting[i]->team == player1->team)) n++;
         return n;
     }
 
@@ -2546,9 +2546,9 @@ namespace game
             else if(d->state == CS_ALIVE)
             {
                 if(d->conopen) t = textureload(hud::chattex, 3);
-                else if(m_team(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
+                else if(m_isteam(gamemode, mutators) && aboveheadteam > (d->team != focus->team ? 1 : 0))
                     t = textureload(hud::teamtexname(d->team), 3+max(hud::numteamkills()-hud::teamkillnum, 0));
-                else if(!m_team(gamemode, mutators) || d->team != focus->team)
+                else if(!m_isteam(gamemode, mutators) || d->team != focus->team)
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
@@ -2612,7 +2612,7 @@ namespace game
                 trans = 1e-16f; // we need tag_muzzle/tag_waist
             else return; // screw it, don't render them
         }
-        int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : TEAM_NEUTRAL,
+        int team = m_fight(gamemode) && m_isteam(gamemode, mutators) ? d->team : TEAM_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
         bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
 

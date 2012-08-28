@@ -426,7 +426,7 @@ namespace hud
 
         if(before) ADDMODEICON
         if(m_multi(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MULTI)))) ADDMODE(modemultitex)
-        if(m_team(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_TEAM)))) ADDMODE(modeteamtex)
+        if(m_isteam(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_TEAM)))) ADDMODE(modeteamtex)
         if(m_coop(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_COOP)))) ADDMODE(modecooptex)
         if(m_insta(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_INSTA)))) ADDMODE(modeinstatex)
         if(m_medieval(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MEDIEVAL)))) ADDMODE(modemedievaltex)
@@ -894,7 +894,7 @@ namespace hud
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
         else if(game::inzoom() && WEAP(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
-        else if(m_team(game::gamemode, game::mutators))
+        else if(m_isteam(game::gamemode, game::mutators))
         {
             vec pos = game::focus->headpos();
             gameent *d = game::intersectclosest(pos, worldpos, game::focus);
@@ -1025,7 +1025,7 @@ namespace hud
                     ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change");
                     popfont();
                 }
-                if(target == game::player1 && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+                if(target == game::player1 && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
                 {
                     SEARCHBINDCACHE(teamkey)("showgui team", 0);
                     pushfont("little");
@@ -1132,7 +1132,7 @@ namespace hud
             SEARCHBINDCACHE(speconkey)("spectator 0", 1);
             pushfont("little");
             ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
-            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators) && shownotices >= 2)
+            if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) && shownotices >= 2)
             {
                 SEARCHBINDCACHE(teamkey)("showgui team", 0);
                 ty += draw_textx("Press \fs\fc%s\fS to join a team", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
@@ -1497,7 +1497,7 @@ namespace hud
         if(dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
-                 dominated = radarplayereffects && (!m_team(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0;
+                 dominated = radarplayereffects && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0;
             vec colour[2];
             if(burning) colour[0] = game::burncolour(d);
             else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
@@ -1685,7 +1685,7 @@ namespace hud
             int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, numothers = 0;
             loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
             {
-                if(d->state == CS_ALIVE && (!m_team(game::gamemode, game::mutators) || d->team != game::focus->team))
+                if(d->state == CS_ALIVE && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team))
                 {
                     numothers++;
                     o = d;
@@ -1693,8 +1693,8 @@ namespace hud
                 switch(radarplayerfilter)
                 {
                     case 0: case 3: default: break;
-                    case 1: if(m_team(game::gamemode, game::mutators) && d->team == game::focus->team) continue; break;
-                    case 2: if(m_team(game::gamemode, game::mutators) && d->team != game::focus->team) continue; break;
+                    case 1: if(m_isteam(game::gamemode, game::mutators) && d->team == game::focus->team) continue; break;
+                    case 2: if(m_isteam(game::gamemode, game::mutators) && d->team != game::focus->team) continue; break;
                 }
                 drawplayerblip(d, w, h, style, blend*radarblend);
             }
@@ -2357,7 +2357,7 @@ namespace hud
         if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
             drawradar(w, h, fade);
         if(showinventory) drawinventory(w, h, os, fade);
-        if(teamhurttime && m_team(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
+        if(teamhurttime && m_isteam(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
         {
             vec targ;
             bool hasbound = false;
@@ -2447,14 +2447,14 @@ namespace hud
                 tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
                 tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
-            if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
+            if(teamkillnum && m_isteam(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
                 to += draw_textx("\fzZyDon't shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
             if(teamnotices >= 2)
             {
                 if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
                 if(totalmillis-lastteam <= teamnoticedelay)
                 {
-                    if(!m_team(game::gamemode, game::mutators))
+                    if(!m_isteam(game::gamemode, game::mutators))
                     {
                         if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         else to += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);

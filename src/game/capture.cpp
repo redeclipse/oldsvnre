@@ -666,7 +666,7 @@ namespace capture
                     }
                     if(!targets.empty())
                     {
-                        d->ai->trywipe = true; // re-evaluate so as not to herd
+                        d->ai->tryreset = true; // re-evaluate so as not to herd
                         return true;
                     }
                     else

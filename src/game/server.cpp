@@ -525,7 +525,7 @@ namespace server
         vampireservmode() {}
         void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0))
         {
-            if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
+            if(actor != target && (!m_isteam(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
                 int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators)*GAME(maxhealthvampire))), eff = heal-rgn;
                 if(eff)
@@ -565,7 +565,7 @@ namespace server
                 if(msg && allowbroadcast(ci->clientnum) && !top)
                 {
                     int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients()*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
-                    if(m_team(gamemode, mutators))
+                    if(m_isteam(gamemode, mutators))
                     {
                         if(maxplayers%2) maxplayers++;
                         maxplayers = maxplayers/2;
@@ -623,7 +623,7 @@ namespace server
                     if(!hasgameinfo) return false;
                     if(GAME(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
                     int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients()*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
-                    if(m_team(gamemode, mutators))
+                    if(m_isteam(gamemode, mutators))
                     {
                         if(maxplayers%2) maxplayers++;
                         maxplayers = maxplayers/2;
@@ -1162,7 +1162,7 @@ namespace server
                         bool wantsovertime = false;
                         if(!inovertime && GAME(overtimeallow))
                         {
-                            if(m_team(gamemode, mutators))
+                            if(m_isteam(gamemode, mutators))
                             {
                                 int best = -1;
                                 loopi(numteams(gamemode, mutators))
@@ -1227,7 +1227,7 @@ namespace server
             if(inovertime)
             {
                 bool wantsovertime = false;
-                if(m_team(gamemode, mutators))
+                if(m_isteam(gamemode, mutators))
                 {
                     int best = -1;
                     loopi(numteams(gamemode, mutators))
@@ -1265,7 +1265,7 @@ namespace server
             }
             if(GAME(pointlimit) && m_scores(gamemode))
             {
-                if(m_team(gamemode, mutators))
+                if(m_isteam(gamemode, mutators))
                 {
                     int best = -1;
                     loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+TEAM_FIRST).total > teamscore(best).total)
@@ -1451,7 +1451,7 @@ namespace server
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
-            if(m_fight(gamemode) && m_team(gamemode, mutators))
+            if(m_fight(gamemode) && m_isteam(gamemode, mutators))
             {
                 loopk(3)
                 {
@@ -1460,10 +1460,10 @@ namespace server
                         if(!k && !isteam(gamemode, mutators, sents[i].attrs[0], TEAM_FIRST)) continue;
                         else if(k == 1 && sents[i].attrs[0] == TEAM_NEUTRAL) continue;
                         else if(k == 2 && sents[i].attrs[0] != TEAM_NEUTRAL) continue;
-                        spawns[!k && m_team(gamemode, mutators) ? sents[i].attrs[0] : TEAM_NEUTRAL].add(i);
+                        spawns[!k && m_isteam(gamemode, mutators) ? sents[i].attrs[0] : TEAM_NEUTRAL].add(i);
                         totalspawns++;
                     }
-                    if(!k && m_team(gamemode, mutators))
+                    if(!k && m_isteam(gamemode, mutators))
                     {
                         loopi(numt) if(spawns[i+TEAM_FIRST].ents.empty())
                         {
@@ -1503,7 +1503,7 @@ namespace server
                 cplayers = totalspawns/3;
             }
             nplayers = players > 0 ? players : cplayers;
-            if(m_fight(gamemode) && m_team(gamemode, mutators))
+            if(m_fight(gamemode) && m_isteam(gamemode, mutators))
             {
                 int offt = nplayers%numt;
                 if(offt) nplayers += numt-offt;
@@ -1523,7 +1523,7 @@ namespace server
             }
             if(totalspawns && GAME(spawnrotate))
             {
-                int cycle = -1, team = m_fight(gamemode) && m_team(gamemode, mutators) && !spawns[ci->team].ents.empty() ? ci->team : TEAM_NEUTRAL;
+                int cycle = -1, team = m_fight(gamemode) && m_isteam(gamemode, mutators) && !spawns[ci->team].ents.empty() ? ci->team : TEAM_NEUTRAL;
                 if(!spawns[team].ents.empty()) switch(GAME(spawnrotate))
                 {
                     case 2:
@@ -2089,7 +2089,7 @@ namespace server
         ci->state.score += points;
         ci->state.points += points;
         sendf(-1, 1, "ri4", N_POINTS, ci->clientnum, points, ci->state.points);
-        if(team && m_scores(gamemode) && m_team(gamemode, mutators))
+        if(team && m_scores(gamemode) && m_isteam(gamemode, mutators))
         {
             score &ts = teamscore(ci->team);
             ts.total += points;
@@ -2155,7 +2155,7 @@ namespace server
     int chooseteam(clientinfo *ci, int suggest = -1)
     {
         if(ci->state.aitype >= AI_START) return TEAM_ENEMY;
-        else if(m_fight(gamemode) && m_team(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
+        else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
             int team = -1, balance = GAME(teambalance), teams[3][3] = {
                 { suggest, ci->team, -1 },
@@ -2910,7 +2910,7 @@ namespace server
             sendstring(GAME(servermotd), p);
         }
 
-        if(m_team(gamemode, mutators)) loopv(scores)
+        if(m_isteam(gamemode, mutators)) loopv(scores)
         {
             score &cs = scores[i];
             putint(p, N_SCORE);
@@ -2961,7 +2961,7 @@ namespace server
         if(actor->state.aitype < AI_START)
         {
             if((actor == target && !GAME(selfdamage)) || (m_trial(gamemode) && !GAME(trialdamage))) nodamage++;
-            else if(m_play(gamemode) && m_team(gamemode, mutators) && actor->team == target->team && actor != target)
+            else if(m_play(gamemode) && m_isteam(gamemode, mutators) && actor->team == target->team && actor != target)
             {
                 switch(GAME(teamdamage))
                 {
@@ -3022,20 +3022,20 @@ namespace server
         }
         if(smode) smode->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush);
         mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush));
-        if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team))
+        if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team))
             addhistory(target, actor, gamemillis);
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
         if(realflags&HIT_KILL)
         {
             int fragvalue = 1;
-            if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
+            if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
             int pointvalue = (smode && target->state.aitype < AI_START ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
             pointvalue *= target->state.aitype >= AI_START ? GAME(enemybonus) : GAME(fragbonus);
             if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators) : m_health(gamemode, mutators)*3/2)))
                 style = FRAG_OBLITERATE;
             target->state.spree = 0;
-            if(m_team(gamemode, mutators) && actor->team == target->team)
+            if(m_isteam(gamemode, mutators) && actor->team == target->team)
             {
                 actor->state.spree = 0;
                 if(actor->state.aitype < AI_START)
@@ -4585,7 +4585,7 @@ namespace server
                                             if(sents[ent].attrs[6] == CP_FINISH) { cp->state.cpmillis = -gamemillis; waiting(cp); }
                                         }
                                         sendf(-1, 1, "ri5", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime);
-                                        if(m_team(gamemode, mutators))
+                                        if(m_isteam(gamemode, mutators))
                                         {
                                             score &ts = teamscore(cp->team);
                                             if(!ts.total || ts.total > cp->state.cptime)
@@ -4690,7 +4690,7 @@ namespace server
                         }
                         cp->state.chatmillis.add(totalmillis ? totalmillis : 1);
                     }
-                    if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
+                    if(flags&SAY_TEAM && !m_isteam(gamemode, mutators)) flags &= ~SAY_TEAM;
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
@@ -4745,7 +4745,7 @@ namespace server
                 {
                     int team = getint(p);
                     if(!allowteam(ci, team, TEAM_FIRST)) team = chooseteam(ci);
-                    if(!m_team(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
+                    if(!m_isteam(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
                     uint ip = getclientip(ci->clientnum);
                     if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, GAME(limitlock)+PRIV_HELPER, "change teams while limited")) break;
                     bool reset = true;
@@ -5040,7 +5040,7 @@ namespace server
                     int who = getint(p), team = getint(p);
                     if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_HELPER, "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
-                    if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
+                    if(!cp || cp == ci || !m_isteam(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, TEAM_FIRST)) break;
                     setteam(cp, team, true, true);
                     break;

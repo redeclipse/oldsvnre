@@ -229,7 +229,7 @@ namespace aiman
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : GAME(botbalance)); break; // balance to at least this
             }
-            if(m_team(gamemode, mutators) && balance > 0)
+            if(m_isteam(gamemode, mutators) && balance > 0)
             { // skew this if teams are unbalanced
                 int plrs[TEAM_TOTAL] = {0}, highest = -1; // we do this because humans can unbalance in odd ways
                 loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
@@ -256,7 +256,7 @@ namespace aiman
         {
             while(numclients(-1, true, AI_BOT) < balance) if(!addai(AI_BOT, -1, -1)) break;
             while(numclients(-1, true, AI_BOT) > balance) if(!delai(AI_BOT)) break;
-            if(m_team(gamemode, mutators)) loopvrev(clients)
+            if(m_isteam(gamemode, mutators)) loopvrev(clients)
             {
                 clientinfo *ci = clients[i];
                 if(ci->state.aitype == AI_BOT && ci->state.ownernum >= 0)
