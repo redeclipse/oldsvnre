@@ -741,7 +741,7 @@ namespace physics
 
     bool impulseplayer(gameent *d, bool &onfloor, bool &jetting, bool melee = false)
     {
-        bool power = !melee && onfloor && !jetting && sliding(d, true) && d->action[AC_JUMP];
+        bool power = !melee && onfloor && !jetting && impulsemethod&1 && sliding(d, true) && d->action[AC_JUMP];
         if(power || d->ai || impulseaction || melee)
         {
             bool dash = false, pulse = false;

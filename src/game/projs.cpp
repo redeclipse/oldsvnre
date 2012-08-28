@@ -106,7 +106,7 @@ namespace projs
 
     void hitpush(gameent *d, projent &proj, int flags = 0, int radial = 0, float dist = 0, float scale = 1)
     {
-        vec dir, middle = d->headpos(-d->height*0.5f);
+        vec dir, middle = d->center();
         dir = vec(middle).sub(proj.o);
         float dmag = dir.magnitude();
         if(dmag > 1e-3f) dir.div(dmag);
@@ -1419,14 +1419,14 @@ namespace projs
         {
             if(d)
             {
-                proj.norm = vec(d->headpos(-d->height*0.5f)).sub(proj.o).normalize();
+                proj.norm = vec(d->center()).sub(proj.o).normalize();
                 if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&COLLIDE_STICK)
                 {
                     if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
                     {
                         proj.stuck = true;
                         proj.stick = (gameent *)d;
-                        proj.stickpos = vec(proj.o).sub(d->headpos(-d->height*0.5f));
+                        proj.stickpos = vec(proj.o).sub(d->center());
                         proj.stickpos.rotate_around_z(-d->yaw*RAD);
                         if(proj.projtype == PRJ_SHOT)
                             client::addmsg(N_STICKY, "ri8", proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
@@ -1541,7 +1541,7 @@ namespace projs
                     {
                         if(WEAP2(proj.weap, guided, proj.flags&HIT_ALT)%2 && proj.target && proj.target->state == CS_ALIVE)
                         {
-                            targ = proj.target->headpos(-proj.target->height/2);
+                            targ = proj.target->center();
                             break;
                         }
                         gameent *t = NULL;
@@ -1567,7 +1567,7 @@ namespace projs
                         if(t && (!m_team(game::gamemode, game::mutators) || t->type != ENT_PLAYER || ((gameent *)t)->team != proj.owner->team))
                         {
                             proj.target = t;
-                            targ = proj.target->headpos(-proj.target->height/2);
+                            targ = proj.target->center();
                         }
                         break;
                     }
@@ -1791,7 +1791,7 @@ namespace projs
                     {
                         proj.o = proj.stickpos;
                         proj.o.rotate_around_z(proj.stick->yaw*RAD);
-                        proj.o.add(proj.stick->headpos(-proj.stick->height*0.5f));
+                        proj.o.add(proj.stick->center());
                         proj.vel = vec(proj.stick->vel).add(proj.stick->falling);
                         proj.resetinterp();
                     }

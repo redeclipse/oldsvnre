@@ -59,7 +59,7 @@ struct bomberstate
                         {
                             float yaw = 360-((lastmillis/2)%360), off = (lastmillis%1000)/500.f;
                             vecfromyawpitch(yaw, 0, 1, 0, renderpos);
-                            renderpos.normalize().mul(owner->radius+4).add(owner->headpos(-owner->height/2));
+                            renderpos.normalize().mul(owner->radius+4).add(owner->center());
                             renderpos.z += owner->height*(off > 1 ?  2-off : off);
                             rendertime = totalmillis;
                         }
