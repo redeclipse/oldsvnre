@@ -742,16 +742,16 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced) loopk(2)
+        if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
         {
-            if(!k && (!proj.owner || proj.child)) continue;
-            vec loc = k ? vec(proj.o).sub(proj.vel) : proj.owner->o, eyedir = vec(proj.o).sub(loc);
+            vec loc = vec(!proj.owner || proj.child ? proj.o : proj.owner->o).sub(vec(proj.vel).normalize().mul(proj.radius+0.1f)),
+                eyedir = vec(proj.o).sub(loc);
             float eyedist = eyedir.magnitude();
             if(eyedist >= 1e-3f)
             {
                 eyedir.div(eyedist);
-                float blocked = pltracecollide(&proj, loc, eyedir, eyedist);
-                if(blocked >= 0) { proj.o = vec(eyedir).mul(blocked-0.1f).add(loc); break; }
+                float blocked = tracecollide(&proj, loc, eyedir, eyedist);
+                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-proj.radius-0.1f).add(loc);
             }
         }
         if(proj.projtype != PRJ_SHOT) physics::entinmap(&proj, true);
