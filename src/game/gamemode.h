@@ -103,13 +103,13 @@ gametypes gametype[] = {
 mutstypes mutstype[] = {
     {
         G_M_MULTI,      (1<<G_M_MULTI),
-        (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+        (1<<G_M_MULTI)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
         "multi",
         "four teams fight to determine the winning side"
     },
     {
         G_M_TEAM,       (1<<G_M_TEAM),
-        (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+        (1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
         "team",
         "two teams fight to determine the winning side"
     },
@@ -225,8 +225,9 @@ extern mutstypes mutstype[];
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
-#define m_implied(a,b)      (gametype[a].implied|(a == G_BOMBER && !((b|gametype[a].implied)&(1<<G_M_GSP1)) ? (1<<G_M_TEAM) : 0))
-#define m_doimply(a,b,c)    (gametype[a].implied|mutstype[c].implied|(a == G_BOMBER && !((b|gametype[a].implied|mutstype[c].implied)&(1<<G_M_GSP1)) ? (1<<G_M_TEAM) : 0))
+#define m_altimpl(a,b)      ((b)&(1<<G_M_MULTI) ? ((a)&~(1<<G_M_TEAM)) : (a))
+#define m_implied(a,b)      (m_altimpl(gametype[a].implied|(a == G_BOMBER && !(b&(1<<G_M_GSP1)) ? (1<<G_M_TEAM) : 0), b))
+#define m_doimply(a,b,c)    (mutstype[c].implied|m_implied(a, b))
 
 #define m_multi(a,b)        ((b&(1<<G_M_MULTI)) || (m_implied(a,b)&(1<<G_M_MULTI)))
 #define m_team(a,b)         ((b&(1<<G_M_TEAM)) || (m_implied(a,b)&(1<<G_M_TEAM)))
