@@ -1552,17 +1552,14 @@ namespace ai
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
                 }
-                if(result <= 0)
+                if(result <= 0 && c.type != AI_S_WAIT)
                 {
-                    if(c.type != AI_S_WAIT)
+                    switch(result)
                     {
-                        switch(result)
-                        {
-                            case 0: default: d->ai->removestate(i); cleannext = true; break;
-                            case -1: i = d->ai->state.length()-1; break;
-                        }
-                        continue; // shouldn't interfere
+                        case 0: default: d->ai->removestate(i); cleannext = true; break;
+                        case -1: i = d->ai->state.length()-1; break;
                     }
+                    continue; // shouldn't interfere
                 }
             }
             logic(d, c);
