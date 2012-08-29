@@ -289,7 +289,6 @@ namespace ai
 
     bool makeroute(gameent *d, aistate &b, int node, bool changed, int retries)
     {
-        if(!iswaypoint(d->lastnode)) return false;
         if(changed && !d->ai->route.empty() && d->ai->route[0] == node) return true;
         if(route(d, d->lastnode, node, d->ai->route, obstacles, retries))
         {
@@ -520,11 +519,9 @@ namespace ai
                     int attr = w_attr(game::gamemode, e.attrs[0], sweap);
                     if(isweap(attr) && wantsweap(d, attr) && proj.owner != d)
                     { // go get a weapon upgrade
-                        int wp = closestwaypoint(proj.o, CLOSEDIST, true);
-                        if(!iswaypoint(wp)) break;
                         interest &n = interests.add();
                         n.state = AI_S_INTEREST;
-                        n.node = wp;
+                        n.node = closestwaypoint(proj.o, CLOSEDIST, true);
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
                         n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
@@ -569,21 +566,18 @@ namespace ai
             int q = interests.length()-1;
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
-            if(iswaypoint(n.node))
+            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
             {
-                if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
-                {
-                    int members = 0;
-                    static vector<int> targets; targets.setsize(0);
-                    int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
-                    if(n.state == AI_S_DEFEND && members == 1) continue;
-                    if(others >= int(ceilf(members*n.tolerance))) continue;
-                }
-                if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
-                {
-                    d->ai->switchstate(b, n.state, n.targtype, n.target);
-                    return true;
-                }
+                int members = 0;
+                static vector<int> targets; targets.setsize(0);
+                int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
+                if(n.state == AI_S_DEFEND && members == 1) continue;
+                if(others >= int(ceilf(members*n.tolerance))) continue;
+            }
+            if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
+            {
+                d->ai->switchstate(b, n.state, n.targtype, n.target);
+                return true;
             }
         }
         return false;
@@ -689,17 +683,14 @@ namespace ai
 
     int dowait(gameent *d, aistate &b)
     {
-        if(iswaypoint(d->lastnode))
+        //d->ai->clear(true); // ensure they're clean
+        if(check(d, b) || find(d, b)) return 1;
+        if(target(d, b, 4, false)) return 1;
+        if(target(d, b, 4, true)) return 1;
+        if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
         {
-            //d->ai->clear(true); // ensure they're clean
-            if(check(d, b) || find(d, b)) return 1;
-            if(target(d, b, 4, false)) return 1;
-            if(target(d, b, 4, true)) return 1;
-            if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
-            {
-                d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
-                return 1;
-            }
+            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
+            return 1;
         }
         return 0; // but don't pop the state
     }
@@ -1486,7 +1477,6 @@ namespace ai
 
     void avoid()
     {
-        if(waypoints.empty()) return;
         float guessradius = max(aistyle[AI_NONE].xradius, aistyle[AI_NONE].yradius);
         obstacles.clear();
         int numdyns = game::numdynents();
@@ -1702,7 +1692,8 @@ namespace ai
             {
                 int idx = showwaypointsradius ? close[i] : i;
                 waypoint &w = waypoints[idx];
-                loopj(MAXWAYPOINTLINKS)
+                if(!w.haslinks()) part_create(PART_EDIT, 1, w.o, 0xFFFF00, 1.f);
+                else loopj(MAXWAYPOINTLINKS)
                 {
                      int link = w.links[j];
                      if(!link) break;
