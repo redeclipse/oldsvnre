@@ -1245,9 +1245,9 @@ struct cament
     enum { DISTMIN = 8, DISTMAX = 512, TRACKMAX = 8 };
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
-    int type, id, inview[MAX];
+    int type, id, inview[MAX], lastyawtime, lastpitchtime;
     vec o, dir, olddir;
-    float dist, mindist, maxdist;
+    float dist, mindist, maxdist, lastyaw, lastpitch;
     gameent *player;
     bool current, ignore;
     cament *moveto;
@@ -1260,6 +1260,11 @@ struct cament
         loopi(MAX) inview[i] = 0;
         olddir = update ? dir : vec(0, 0, 0);
         dir = vec(0, 0, 0);
+        if(!update)
+        {
+            lastyawtime = lastpitchtime = lastmillis;
+            lastyaw = lastpitch = 0;
+        }
     }
 
     static bool camsort(const cament *a, const cament *b)

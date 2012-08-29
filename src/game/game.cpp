@@ -79,9 +79,14 @@ namespace game
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmaxtime, 0, 20000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvspeed, 1, 1500, VAR_MAX);
+    VAR(IDF_PERSIST, spectvyawspeed, 1, 1000, VAR_MAX);
+    VAR(IDF_PERSIST, spectvpitchspeed, 1, 750, VAR_MAX);
     FVAR(IDF_PERSIST, spectvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
-    FVAR(IDF_PERSIST, spectvyawspeed, 0, 1, 1000);
-    FVAR(IDF_PERSIST, spectvpitchspeed, 0, 1, 1000);
+    FVAR(IDF_PERSIST, spectvyawscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, spectvpitchscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, spectvyawthresh, FVAR_MIN, 25, 1000);
+    FVAR(IDF_PERSIST, spectvpitchthresh, FVAR_MIN, 25, 1000);
     VAR(IDF_PERSIST, spectvdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
@@ -1971,10 +1976,29 @@ namespace game
         else
         {
             vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
-            if(!renew && spectvyawspeed > 0)
+            if(!renew)
             {
-                float speed = float(curtime)/1000.f;
-                scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, speed*spectvyawspeed, speed*spectvpitchspeed, spectvrotate);
+                float speed = curtime/float(spectvspeed);
+                #define SCALEAXIS(x) \
+                    float x##scale = 1, adj##x = camera1->x, off##x = camera1->aim##x; \
+                    if(adj##x < camera1->aim##x - 180.0f) adj##x += 360.0f; \
+                    if(adj##x > camera1->aim##x + 180.0f) adj##x -= 360.0f; \
+                    off##x -= adj##x; \
+                    if(cam->last##x == 0 || (off##x > 0 && cam->last##x < 0) || (off##x < 0 && cam->last##x > 0) || (fabs(cam->last##x - off##x) >= spectv##x##thresh)) \
+                    { \
+                        cam->last##x##time = lastmillis; \
+                        x##scale = 0; \
+                    } \
+                    else if(cam->last##x##time) \
+                    { \
+                        int offtime = lastmillis-cam->last##x##time; \
+                        if(offtime <= spectv##x##speed) x##scale = offtime/float(spectv##x##speed); \
+                    } \
+                    cam->last##x = off##x;
+                SCALEAXIS(yaw);
+                SCALEAXIS(pitch);
+                //conoutft(CON_SELF, "camera: %.2f/%.2f -> %.2f/%.2f (%.2f/%.2f) [%.2f/%2.f] @ %d/%d", camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, cam->lastyaw, cam->lastpitch, yawscale, pitchscale, lastmillis-cam->lastyawtime, lastmillis-cam->lastpitchtime);
+                scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, speed*spectvyawscale*yawscale, speed*spectvpitchscale*pitchscale, spectvrotate);
             }
             else
             {
