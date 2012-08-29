@@ -3165,7 +3165,11 @@ namespace server
     int calcdamage(clientinfo *actor, clientinfo *target, int weap, int &flags, int radial, float size, float dist, float scale, bool self)
     {
         flags &= ~HIT_SFLAGS;
-        if(!hithurts(flags)) flags = HIT_WAVE|(flags&HIT_ALT ? HIT_ALT : 0); // so it impacts, but not hurts
+        if(!hithurts(flags))
+        {
+            flags &= ~HIT_CLEAR;
+            flags |= HIT_WAVE;
+        }
 
         float skew = 1;
         if(!m_insta(gamemode, mutators))
@@ -3196,7 +3200,15 @@ namespace server
             else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
             else skew = 0;
         }
-        if(self) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
+        if(self)
+        {
+            if(WEAP2(weap, selfdmg, flags&HIT_ALT) > 0) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
+            else
+            {
+                flags &= ~HIT_CLEAR;
+                flags |= HIT_WAVE;
+            }
+        }
 
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
     }
