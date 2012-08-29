@@ -1,12 +1,18 @@
 = Red Eclipse 1.3 =
 Gameplay:
+ * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
+ * Points no longer given for consecutively dropping and picking up affinities (flags/ball)
+ * AI now uses "random walk" when no waypoints are present
+
+Weapons:
  * Rocket launcher now spawns in instagib
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
- * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
  * Flamer primary and secondary range and size reduced, secondary fire lifetime of particles increased
- * Pistol secondary now fires twice as many particles, with more spread, less damage and longer intervals
+ * Pistol recoil slightly increased, secondary now fires twice as many particles with more spread, but with less damage and longer intervals
  * SMG secondary now fires with longer range, half the spread and longer intervals
- * Points no longer given for consecutively dropping and picking up affinities (flags/ball)
+ * Shotgun recoil increased
+ * Plasma primary damage and radius reduced, primary and secondary recoil increased
+ * Rifle recoil increased
 
 Maps:
  * Institute, new map
@@ -18,7 +24,7 @@ Maps:
  * Industrial, new map
  * Oneiroi, new map
  * Pumpstation, new map
- * Dawn, removed
+ * Dawn, removed from rotations
  * Neodrive, new time-trial map
  * Hawk, new time-trial map
  * Ubik, clip/water/door fixes
@@ -27,8 +33,6 @@ Maps:
  * Wet, tweaked obstacles
  * Keystone, revamped as "Keystone2k"
  * Isolation, added bomber-ball waypoints
-
-Visuals:
 
 Interface & Menus:
  * Brush selection now mapped to K+wheel (unbound in 1.2, J+wheel in 1.1)
@@ -44,6 +48,7 @@ Interface & Menus:
  * Bot info hidden on scoreboard per default
  * Joins/leaves no longer shown when connecting/disconnecting
  * Added player model preview in profile selection
+ * /kidmode (reduced blood & gore) is now persistent
 
 Modes & Mutators:
  * Hover mutator removed
@@ -54,6 +59,7 @@ Modes & Mutators:
  * Removed campaign and teambalance 3,
  * Added new mutator "coop" (humans vs bots)
  * Added new mutator "king of the hill" for defend the flag
+ * Multi and team mutators are now mutually exclusive
 
 Modding & Data Assets:
  * Removed kitchen and kitchen1 textures from trak4 (unused)
@@ -73,10 +79,10 @@ Multiplayer & Servers:
  * Renamed privileges: master->helper, auth->moderator
  * Added ability to specify a ban/kick/etc. reason
  * Added ability to get client hostname (/echo (gethostname <cn>) or /showhostname to show on scoreboard)
- * Increased threshold for auto-passing votes from 1/2 to 3/4
  * Intermission now waits full time before proceeding to the next map
  * Added auto-mute on chat spam (warns on 3 lines per 10 seconds, mutes after 3 warns)
- * Added selectable end-of-match voting style (/voteinterm)
+ * Voting mid-game now requires unanimous vote
+ * Added selectable voting styles (/voteinterm, /votestyle)
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions
@@ -113,6 +119,9 @@ Additional Fixed Bugs:
  * #102 - Some flat geometry walls acts as crouch-entrance
  * #189 - overcome MAXSTRLEN limitation in N_COMMAND/N_EDITVAR by dynamically allocating and transmitting arguments
  * #197 - synchronise sticky grenade offset position across the network
+ * #207 - corrected bug with projectile "in wall" checks
+ * #209 - ghost texture tweaks
+
 
 
 = Red Eclipse 1.2 =
