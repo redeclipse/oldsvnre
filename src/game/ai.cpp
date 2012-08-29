@@ -256,7 +256,7 @@ namespace ai
             int c = 0;
             loopv(game::players) if(game::players[i] && game::players[i]->ai)
                 think(game::players[i], ++c == iteration ? true : false);
-            if(++iteration > c) iteration = 0;
+            if(c && ++iteration > c) iteration = 0;
         }
     }
 
@@ -359,7 +359,7 @@ namespace ai
                     b.override = true;
                     return true;
                 }
-                else if(d->ai->route.empty())
+                if(d->ai->route.empty())
                 {
                     b.override = false;
                     if(!retry) return patrol(d, b, pos, guard, wander, walk, true);
@@ -520,9 +520,11 @@ namespace ai
                     int attr = w_attr(game::gamemode, e.attrs[0], sweap);
                     if(isweap(attr) && wantsweap(d, attr) && proj.owner != d)
                     { // go get a weapon upgrade
+                        int wp = closestwaypoint(proj.o, CLOSEDIST, true);
+                        if(!iswaypoint(wp)) break;
                         interest &n = interests.add();
                         n.state = AI_S_INTEREST;
-                        n.node = closestwaypoint(proj.o, CLOSEDIST, true);
+                        n.node = wp;
                         n.target = proj.id;
                         n.targtype = AI_T_DROP;
                         n.score = pos.squaredist(proj.o)/(attr == d->ai->weappref ? 1e8f : (force ? 1e4f : 1.f));
@@ -567,18 +569,21 @@ namespace ai
             int q = interests.length()-1;
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
-            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+            if(iswaypoint(n.node))
             {
-                int members = 0;
-                static vector<int> targets; targets.setsize(0);
-                int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
-                if(n.state == AI_S_DEFEND && members == 1) continue;
-                if(others >= int(ceilf(members*n.tolerance))) continue;
-            }
-            if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
-            {
-                d->ai->switchstate(b, n.state, n.targtype, n.target);
-                return true;
+                if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                {
+                    int members = 0;
+                    static vector<int> targets; targets.setsize(0);
+                    int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
+                    if(n.state == AI_S_DEFEND && members == 1) continue;
+                    if(others >= int(ceilf(members*n.tolerance))) continue;
+                }
+                if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
+                {
+                    d->ai->switchstate(b, n.state, n.targtype, n.target);
+                    return true;
+                }
             }
         }
         return false;
@@ -612,7 +617,7 @@ namespace ai
         d->aientity = ent;
         if(d->ai)
         {
-            d->ai->clearsetup();
+            d->ai->clean();
             d->ai->reset(true);
             d->ai->lastrun = lastmillis;
             if(d->aitype >= AI_START)
@@ -648,7 +653,7 @@ namespace ai
         if(!passive() && m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned > 0)
         {
             int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, entities::ents[ent]->attrs[0], sweap);
-            loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT)
+            loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT && game::players[i]->state == CS_ALIVE && iswaypoint(game::players[i]->lastnode))
             {
                 gameent *d = game::players[i];
                 aistate &b = d->ai->getstate();
@@ -684,14 +689,17 @@ namespace ai
 
     int dowait(gameent *d, aistate &b)
     {
-        d->ai->clear(true); // ensure they're clean
-        if(check(d, b) || find(d, b)) return 1;
-        if(target(d, b, 4, false)) return 1;
-        if(target(d, b, 4, true)) return 1;
-        if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
+        if(iswaypoint(d->lastnode))
         {
-            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
-            return 1;
+            //d->ai->clear(true); // ensure they're clean
+            if(check(d, b) || find(d, b)) return 1;
+            if(target(d, b, 4, false)) return 1;
+            if(target(d, b, 4, true)) return 1;
+            if(aistyle[d->aitype].canmove && randomnode(d, b, CLOSEDIST, 1e16f))
+            {
+                d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
+                return 1;
+            }
         }
         return 0; // but don't pop the state
     }
@@ -868,7 +876,7 @@ namespace ai
         {
             vec epos = waypoints[d->ai->route[i]].o;
             float dist = epos.squaredist(pos);
-            if(dist > FARDIST*FARDIST) continue;
+            if(dist > mindist3) continue;
             if(dist < mindist1) { node1 = i; mindist1 = dist; }
             else
             {
@@ -923,7 +931,7 @@ namespace ai
     {
         if(iswaypoint(d->lastnode)) loopk(2)
         {
-            d->ai->clear(k ? true : false);
+            //d->ai->clear(k ? true : false);
             int n = randomlink(d, d->lastnode);
             if(wpspot(d, n))
             {
@@ -1086,7 +1094,8 @@ namespace ai
                 d->ai->targyaw += 90+rnd(180);
                 d->ai->lastturn = lastmillis;
             }
-            vec dir; vecfromyawpitch(d->ai->targyaw, 0, 1, 0, dir);
+            d->ai->targpitch = 0;
+            vec dir; vecfromyawpitch(d->ai->targyaw, d->ai->targpitch, 1, 0, dir);
             d->ai->spot = vec(d->feetpos()).add(dir.mul(CLOSEDIST));
             d->ai->targnode = -1;
         }
@@ -1392,9 +1401,9 @@ namespace ai
                 switch(d->ai->blockseq)
                 {
                     case 1: case 2:
+                        d->ai->clear(d->ai->blockseq!=1);
                         if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
                             d->ai->addprevnode(d->ai->targnode);
-                        d->ai->clear(false);
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
                     case 4: default:
@@ -1417,9 +1426,9 @@ namespace ai
                 switch(d->ai->targseq)
                 {
                     case 1: case 2:
+                        d->ai->clear(d->ai->targseq!=1);
                         if(iswaypoint(d->ai->targnode) && !d->ai->hasprevnode(d->ai->targnode))
                             d->ai->addprevnode(d->ai->targnode);
-                        d->ai->clear(false);
                         break;
                     case 3: if(!transport(d)) d->ai->reset(false); break;
                     case 4: default:
@@ -1477,6 +1486,7 @@ namespace ai
 
     void avoid()
     {
+        if(waypoints.empty()) return;
         float guessradius = max(aistyle[AI_NONE].xradius, aistyle[AI_NONE].yradius);
         obstacles.clear();
         int numdyns = game::numdynents();
@@ -1590,7 +1600,7 @@ namespace ai
         if(aidebug >= 5)
         {
             vec pos = d->feetpos();
-            if(d->ai->spot != vec(0, 0, 0)) part_trace(pos, d->ai->spot, 1, 1, 1, 0x00FFFF);
+            if(!d->ai->spot.iszero()) part_trace(pos, d->ai->spot, 1, 1, 1, 0x00FFFF);
             if(iswaypoint(d->ai->targnode)) part_trace(pos, waypoints[d->ai->targnode].o, 1, 1, 1, 0xFF00FF);
             if(iswaypoint(d->lastnode)) part_trace(pos, waypoints[d->lastnode].o, 1, 1, 1, 0xFFFF00);
             loopi(NUMPREVNODES) if(iswaypoint(d->ai->prevnodes[i]))

@@ -45,10 +45,10 @@ namespace ai
     const int WAYPOINTRADIUS    = 16;
 
     const float MINWPDIST       = 4.f;     // is on top of
-    const float CLOSEDIST       = 32.f;    // is close
-    const float RETRYDIST       = 64.f;    // is close when retrying
-    const float JETDIST         = 128.f;   // close when jetting
-    const float FARDIST         = 256.f;   // too far to remap close
+    const float CLOSEDIST       = 16.f;    // is close
+    const float RETRYDIST       = 32.f;    // is close when retrying
+    const float JETDIST         = 64.f;    // close when jetting
+    const float FARDIST         = 64.f;    // too far to remap close
     const float JUMPMIN         = 2.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
     const float SIGHTMIN        = 128.f;   // minimum line of sight
@@ -242,19 +242,20 @@ namespace ai
 
         aiinfo()
         {
-            clearsetup();
+            clean();
             reset();
             loopk(3) views[k] = aimrnd[k] = 0.f;
         }
         ~aiinfo() {}
 
-        void clearsetup()
+        void clean()
         {
             spot = target = vec(0, 0, 0);
             lastaction = lastcheck = enemyseen = enemymillis = blocktime = blockseq = targtime = targseq = lastaimrnd = lastmelee = lastturn = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis+5000;
             weappref = targnode = targlast = enemy = -1;
+            targyaw = targpitch = 0;
         }
 
         void clear(bool tryit = false)
