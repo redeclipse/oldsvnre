@@ -183,7 +183,6 @@ namespace ai
 
     void buildwpcache()
     {
-        if(waypoints.empty()) return;
         loopi(NUMWPCACHES) if(wpcaches[i].maxdepth < 0)
             wpcaches[i].build(i > 0 ? wpcaches[i-1].lastwp+1 : 0, i+1 >= NUMWPCACHES || wpcaches[i+1].maxdepth < 0 ? -1 : wpcaches[i+1].firstwp);
         clearedwpcaches = 0;
@@ -307,7 +306,7 @@ namespace ai
 
     void avoidset::avoidnear(void *owner, float above, const vec &pos, float limit)
     {
-        if(ai::waypoints.empty() || waypoints.empty()) return;
+        if(ai::waypoints.empty()) return;
         if(clearedwpcaches) buildwpcache();
 
         float limit2 = limit*limit;
@@ -356,7 +355,6 @@ namespace ai
 
     int avoidset::remap(gameent *d, int n, vec &pos, bool retry)
     {
-        if(waypoints.empty()) return -1;
         if(!obstacles.empty())
         {
             int cur = 0;
@@ -659,6 +657,8 @@ namespace ai
                     k--;
                 }
             }
+            //if(!w.haslinks()) conoutf("warning: waypoint %d has no links after import", i);
+
         }
         if(cleared)
         {
@@ -705,13 +705,8 @@ namespace ai
             o.z = f->getlil<float>();
             waypoint &w = waypoints.add(waypoint(o, getweight(o)));
             int numlinks = f->getchar(), k = 0;
-            loopi(numlinks)
-            {
-                if((w.links[k] = f->getlil<ushort>()))
-                {
-                    if(++k >= MAXWAYPOINTLINKS) break;
-                }
-            }
+            loopj(numlinks) if((w.links[k] = f->getlil<ushort>()) != 0) if(++k >= MAXWAYPOINTLINKS) break;
+            //if(!w.haslinks()) conoutf("warning: waypoint %d has no links", i);
         }
 
         delete f;
@@ -768,13 +763,8 @@ namespace ai
             }
             waypoint &w = waypoints.add(waypoint(v.o, getweight(v.o)));
             int k = 0;
-            loopvj(v.links)
-            {
-                if((w.links[k] = v.links[j]))
-                {
-                    if(++k >= MAXWAYPOINTLINKS) break;
-                }
-            }
+            loopvj(v.links) if((w.links[k] = v.links[j]) != 0) if(++k >= MAXWAYPOINTLINKS) break;
+            //if(!w.haslinks()) conoutf("warning: imported waypoint %d has no links", i);
         }
         conoutf("imported %d waypoints from the map file", oldwaypoints.length());
         oldwaypoints.setsize(0);
