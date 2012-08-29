@@ -183,6 +183,7 @@ namespace ai
 
     void buildwpcache()
     {
+        if(waypoints.empty()) return;
         loopi(NUMWPCACHES) if(wpcaches[i].maxdepth < 0)
             wpcaches[i].build(i > 0 ? wpcaches[i-1].lastwp+1 : 0, i+1 >= NUMWPCACHES || wpcaches[i+1].maxdepth < 0 ? -1 : wpcaches[i+1].firstwp);
         clearedwpcaches = 0;
@@ -306,7 +307,7 @@ namespace ai
 
     void avoidset::avoidnear(void *owner, float above, const vec &pos, float limit)
     {
-        if(ai::waypoints.empty()) return;
+        if(ai::waypoints.empty() || waypoints.empty()) return;
         if(clearedwpcaches) buildwpcache();
 
         float limit2 = limit*limit;
@@ -355,6 +356,7 @@ namespace ai
 
     int avoidset::remap(gameent *d, int n, vec &pos, bool retry)
     {
+        if(waypoints.empty()) return -1;
         if(!obstacles.empty())
         {
             int cur = 0;
