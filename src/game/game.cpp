@@ -1781,7 +1781,7 @@ namespace game
         if(c->player && !allowspec(c->player, spectvdead)) return false;
         loopj(c->player ? 1 : 2)
         {
-            int players = c->player ? 1 : 0;
+            int players = c->player ? 1 : 0, count = 0;
             loopv(cameras) if(c != cameras[i])
             {
                 cament *cam = cameras[i];
@@ -1800,14 +1800,14 @@ namespace game
                 if(dist >= c->mindist && dist <= fogdist)
                 {
                     bool hassight = false;
-                    if(j && !c->cansee) hassight = true; // rejigger and get a direction
+                    if(j && !c->inview[cament::PLAYER]) hassight = true; // rejigger and get a direction
                     else
                     {
                         float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
                         if(!c->player && (update || j))
                         {
                             vec dir = from;
-                            if(c->cansee) dir.add(vec(c->dir).div(c->cansee));
+                            if(count) dir.add(vec(c->dir).div(count));
                             dir.sub(pos).normalize();
                             vectoyawpitch(dir, yaw, pitch);
                         }
@@ -1818,20 +1818,16 @@ namespace game
                     if(hassight && raycubelos(pos, from, trg))
                     {
                         if(cam->type == cament::PLAYER) players++;
-                        c->cansee++;
+                        c->inview[cam->type]++;
                         c->dir.add(cam->o);
-                        c->score += dist;
+                        count++;
                     }
                 }
             }
-            if(c->cansee > 0)
+            if(count > 0)
             {
-                if(c->cansee > 1)
-                {
-                    c->dir.div(c->cansee);
-                    c->score /= c->cansee;
-                }
-                if(c->player) c->cansee++;
+                if(count > 1) c->dir.div(count);
+                if(c->player) c->inview[cament::PLAYER]++;
                 if(players || j) return players!=0;
             }
             c->dir = c->olddir;
