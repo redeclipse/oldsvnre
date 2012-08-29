@@ -8,6 +8,9 @@ namespace client
     string connectpass = "";
     int needclipboard = -1;
 
+    VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
+    VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
+
     ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), {
          char *list = NULL;
          maplist(list, *g, *m, *c);
@@ -1494,7 +1497,7 @@ namespace client
                         copystring(oldname, game::colorname(d));
                         d->setinfo(namestr, colour, model);
                         copystring(newname, game::colorname(d));
-                        if(game::showpresence >= (waiting(false) ? 1 : 2) && !isignored(d->clientnum))
+                        if(showpresence >= (waiting(false) ? 1 : 2) && !isignored(d->clientnum))
                             conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
                     else d->setinfo(namestr, colour, model);
@@ -1525,7 +1528,7 @@ namespace client
                             copystring(oldname, game::colorname(d, NULL, "", false));
                             d->setinfo(text, colour, model);
                             copystring(newname, game::colorname(d, text));
-                            if(game::showpresence >= (waiting(false) ? 1 : 2) && !isignored(d->clientnum))
+                            if(showpresence >= (waiting(false) ? 1 : 2) && !isignored(d->clientnum))
                                 conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, newname);
                         }
                         else d->setinfo(text, colour, model);
@@ -1533,7 +1536,7 @@ namespace client
                     else                    // new client
                     {
                         d->setinfo(text, colour, model);
-                        if(game::showpresence >= (waiting(false) ? 1 : 2)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, text, "", false), d->hostname);
+                        if(showpresence >= (waiting(false) ? 1 : 2)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, text, "", false), d->hostname);
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.deletecontents();
                     }
@@ -2096,7 +2099,7 @@ namespace client
                     if(!w) return;
                     if(w->team != tn)
                     {
-                        if(m_isteam(game::gamemode, game::mutators) && game::showpresence >= (waiting(false) ? 1 : 2) && w->aitype == AI_NONE && w->team != TEAM_NEUTRAL && tn != TEAM_NEUTRAL)
+                        if(m_isteam(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != TEAM_NEUTRAL && tn != TEAM_NEUTRAL ? 1 : 2))
                             conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(tn, colour), hud::teamtexname(tn), TEAM(tn, name));
                         w->team = tn;
                         if(w == game::focus) hud::lastteam = 0;

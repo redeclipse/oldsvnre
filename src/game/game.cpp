@@ -132,7 +132,6 @@ namespace game
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
     VAR(IDF_PERSIST, obitannounce, 0, 1, 2); // 0 = off, 1 = only focus, 2 = everyone
-    VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
 
     VAR(IDF_PERSIST, damagemergedelay, 0, 75, VAR_MAX);
     VAR(IDF_PERSIST, damagemergeburn, 0, 250, VAR_MAX);
@@ -1339,7 +1338,7 @@ namespace game
         if(!players.inrange(cn)) return;
         gameent *d = players[cn];
         if(!d) return;
-        if(d->name[0] && showpresence >= (client::waiting(false) ? 1 : 2) && (d->aitype == AI_NONE || ai::showaiinfo))
+        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 1 : 2) && (d->aitype == AI_NONE || ai::showaiinfo))
             conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colorname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         int numdyns = numdynents();
