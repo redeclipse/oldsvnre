@@ -99,7 +99,15 @@ namespace projs
                 else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
                 else skew = 0;
             }
-            if(actor == target) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
+            if(actor == target)
+            {
+                if(WEAP2(weap, selfdmg, flags&HIT_ALT) > 0) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
+                else
+                {
+                    flags &= ~HIT_CLEAR;
+                    flags |= HIT_WAVE;
+                }
+            }
         }
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
     }
