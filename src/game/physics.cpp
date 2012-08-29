@@ -327,7 +327,7 @@ namespace physics
         else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
         {
             gameent *e = (gameent *)pl;
-            vel *= movespeed/100.f;
+            vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
             if((!e->timeinair && !sliding(e) && iscrouching(e)) || (e == game::player1 && game::inzoom()))
                 vel *= movecrawl;
             if(e->move >= 0) vel *= e->strafe ? movestrafe : movestraight;
@@ -345,35 +345,35 @@ namespace physics
                 if(m_capture(game::gamemode)) vel *= capturecarryspeed;
                 else if(m_bomber(game::gamemode)) vel *= bombercarryspeed;
             }
-            float stun = clamp(e->stunned(lastmillis), 0.f, 1.f);
-            if(stun > 0) vel *= 1.f-stun;
         }
         return vel;
     }
 
     float impulsevelocity(physent *d, float amt, int &cost)
     {
-        float speed = impulsespeed*amt, limit = impulselimit;
-        #define rescaleimpulse(n) { speed *= n; limit *= n; }
-        rescaleimpulse(d->speedscale);
+        float scale = d->speedscale;
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             gameent *e = (gameent *)d;
-            if(impulsemeter)
-            {
-                int diff = impulsemeter-e->impulse[IM_METER];
-                if(cost > diff) { rescaleimpulse(float(diff)/float(cost)); cost = diff; }
-            }
-            else cost = 0;
+            scale *= 1.f-clamp(e->stunned(lastmillis), 0.f, 1.f);
             if(carryaffinity(e))
             {
-                if(m_capture(game::gamemode)) { rescaleimpulse(capturecarryspeed); }
-                else if(m_bomber(game::gamemode)) { rescaleimpulse(bombercarryspeed); }
+                if(m_capture(game::gamemode)) scale *= capturecarryspeed;
+                else if(m_bomber(game::gamemode)) scale *= bombercarryspeed;
             }
-            float stun = clamp(e->stunned(lastmillis), 0.f, 1.f);
-            if(stun > 0) { rescaleimpulse(1.f-stun); }
+            if(impulsemeter)
+            {
+                if(impulsecostscale) cost = int(cost*scale);
+                int diff = impulsemeter-e->impulse[IM_METER];
+                if(cost > diff)
+                {
+                    scale *= float(diff)/float(cost);
+                    cost = diff;
+                }
+            }
+            else cost = 0;
         }
-        speed += vec(d->vel).add(d->falling).magnitude();
+        float speed = (impulsespeed*amt*scale)+vec(d->vel).add(d->falling).magnitude(), limit = impulselimit*scale;
         return limit > 0 && speed > limit ? limit : speed;
     }
 

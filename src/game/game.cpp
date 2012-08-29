@@ -942,11 +942,7 @@ namespace game
                 if(hithurts(flags) && WEAP2(weap, stuntime, flags&HIT_ALT))
                     d->addstun(weap, lastmillis, int(scale*WEAP2(weap, stuntime, flags&HIT_ALT)), scale*WEAP2(weap, stunscale, flags&HIT_ALT));
                 if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
-                {
-                    float force = 1.f-((scale*WEAP2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale));
-                    d->vel.x *= force;
-                    d->vel.y *= force;
-                }
+                    d->vel.mul(1.f-clamp((scale*WEAP2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
                 if(WEAP2(weap, hitpush, flags&HIT_ALT) != 0)
                 {
                     if(d == actor) scale *= 1/WEAP2(weap, selfdmg, flags&HIT_ALT);
@@ -955,8 +951,7 @@ namespace game
                     if(!psh.iszero())
                     {
                         d->vel.add(psh);
-                        d->falling = vec(0, 0, 0);
-                        d->timeinair = 0;
+                        d->resetphys(psh.z > 0);
                     }
                 }
             }
