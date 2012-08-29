@@ -1245,43 +1245,37 @@ struct cament
     enum { DISTMIN = 8, DISTMAX = 512, TRACKMAX = 8 };
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
-    int type, id, cansee;
+    int type, id, inview[MAX];
     vec o, dir, olddir;
-    float dist, mindist, maxdist, score;
+    float dist, mindist, maxdist;
     gameent *player;
     bool current, ignore;
     cament *moveto;
 
-    cament() : type(-1), id(-1), dist(1e16f), mindist(DISTMIN), maxdist(DISTMAX), score(0), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament() : type(-1), id(-1), mindist(DISTMIN), maxdist(DISTMAX), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
     ~cament() {}
 
     void reset(bool update = false)
     {
-        cansee = 0;
+        loopi(MAX) inview[i] = 0;
         olddir = update ? dir : vec(0, 0, 0);
         dir = vec(0, 0, 0);
-        score = 0;
     }
 
     static bool camsort(const cament *a, const cament *b)
     {
         if(a->ignore) return false;
-        if(a->score > 0 && b->score <= 0) return true;
-        if(a->score <= 0 && b->score > 0) return false;
-        if(a->cansee > b->cansee) return true;
-        if(a->cansee < b->cansee) return false;
-        if(a->score < b->score) return true;
-        if(a->score > b->score) return false;
-        if(a->dist < b->dist) return true;
-        if(a->dist > b->dist) return false;
+        if(a->inview[cament::PLAYER] > b->inview[cament::PLAYER]) return true;
+        if(a->inview[cament::PLAYER] < b->inview[cament::PLAYER]) return false;
+        if(a->inview[cament::AFFINITY] > b->inview[cament::AFFINITY]) return true;
+        if(a->inview[cament::AFFINITY] < b->inview[cament::AFFINITY]) return false;
         return !rnd(2);
     }
 
     vec pos(float amt = 0)
     {
-        vec v = o;
-        if(amt > 0 && moveto) v.add(vec(moveto->o).sub(o).mul(min(amt, 1.f)));
-        return v;
+        if(amt > 0 && moveto) return vec(o).add(vec(moveto->o).sub(o).mul(min(amt, 1.f)));
+        return o;
     }
 };
 
