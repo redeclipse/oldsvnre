@@ -311,6 +311,7 @@ GVAR(0, impulsemeleechain, 0, 0, VAR_MAX); // impulse melee style; 0 = any time,
 
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
+GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amount the impulse scales
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
 GFVAR(0, impulsejet, 0, 0.5f, FVAR_MAX); // jetpack impulse meter depletion

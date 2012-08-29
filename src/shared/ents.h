@@ -129,11 +129,11 @@ struct physent                                  // base entity type, can be affe
         resetinterp();
     }
 
-    void resetphys()
+    void resetphys(bool fall = true)
     {
         falling = vec(0, 0, 0);
-        physstate = PHYS_FALL;
         floor = vec(0, 0, 1);
+        if(fall) physstate = PHYS_FALL;
     }
 
     vec abovehead(float offset = 1) const { return vec(o).add(vec(0, 0, aboveeye+offset)); }
