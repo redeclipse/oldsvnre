@@ -942,6 +942,7 @@ namespace server
             case 0: return RE_VERSION;
             case 1: return GAMEVERSION;
             case 2: case 3: return version[n%2];
+            case 4: return RE_ARCH;
             default: break;
         }
         return 0;
