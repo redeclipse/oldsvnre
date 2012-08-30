@@ -752,7 +752,7 @@ namespace projs
         proj.movement = 1;
         if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
         {
-            vec loc = vec(!proj.owner || proj.child ? proj.o : proj.owner->o).sub(vec(proj.vel).normalize().mul(proj.radius+0.1f)),
+            vec loc = vec(!proj.owner || proj.child || proj.projtype != PRJ_SHOT ? proj.o : proj.owner->o).sub(vec(proj.vel).normalize().mul(proj.radius+0.1f)),
                 eyedir = vec(proj.o).sub(loc);
             float eyedist = eyedir.magnitude();
             if(eyedist >= 1e-3f)
