@@ -771,12 +771,7 @@
 				);
 				INFOPLIST_FILE = "redeclipse-Info.plist";
 				INSTALL_PATH = "";
-				OTHER_CFLAGS = (
-					"-DINTERFACE",
-					"-DIRC",
-				);
 				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
 					"-fomit-frame-pointer",
 				);
 				OTHER_LDFLAGS = "-lz";
@@ -796,10 +791,6 @@
 					../include/,
 				);
 				INFOPLIST_FILE = "redeclipse-Info.plist";
-				OTHER_CFLAGS = (
-					"-DINTERFACE",
-					"-DIRC",
-				);
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = redeclipse;
 			};
@@ -819,12 +810,7 @@
 				);
 				INFOPLIST_FILE = "redeclipse-Info.plist";
 				INSTALL_PATH = "";
-				OTHER_CFLAGS = (
-					"-DINTERFACE",
-					"-DIRC",
-				);
 				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
 					"-fomit-frame-pointer",
 				);
 				OTHER_LDFLAGS = "-lz";
