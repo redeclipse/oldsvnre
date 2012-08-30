@@ -1795,6 +1795,14 @@ namespace game
                     default: break;
                 }
                 vec trg, from = cam->o;
+                if(cam->type == cament::AFFINITY && followdist > 0)
+                {
+                    vec oldpos = camera1->o;
+                    camera1->o = cam->o;
+                    vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
+                    physics::movecamera(camera1, dir, followdist, 1.0f);
+                    camera1->o = oldpos;
+                }
                 float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
                 if(dist >= c->mindist && dist <= fogdist)
                 {
