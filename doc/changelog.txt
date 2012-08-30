@@ -9,7 +9,7 @@ Weapons:
  * Melee no longer requires an impulse action before (back to 1.1 behaviour)
  * Flamer primary and secondary range and size reduced, secondary fire lifetime of particles increased
  * Pistol recoil slightly increased, secondary now fires twice as many particles with more spread, but with less damage and longer intervals
- * SMG secondary now fires with longer range, half the spread and longer intervals
+ * SMG secondary now fires balls which after a short distance explodes into a large amount of radial flak
  * Shotgun recoil increased
  * Plasma primary damage and radius reduced, primary and secondary recoil increased
  * Rifle recoil increased
@@ -121,7 +121,8 @@ Additional Fixed Bugs:
  * #197 - synchronise sticky grenade offset position across the network
  * #207 - corrected bug with projectile "in wall" checks
  * #209 - ghost texture tweaks
-
+ * #211 - Going in water doesn't reset the "able to double jump" state
+ * #210 - Map Bath has some texture errors
 
 
 = Red Eclipse 1.2 =
