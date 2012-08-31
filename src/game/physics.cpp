@@ -205,8 +205,8 @@ namespace physics
         {
             if(d->state == CS_ALIVE)
             {
-                gameent *f = (gameent *)d;
-                if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
+                if(m_trial(game::gamemode) && !trialstyle) return false;
+                if(((gameent *)d)->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
                 return true;
             }
             return d->state == CS_DEAD || d->state == CS_WAITING;

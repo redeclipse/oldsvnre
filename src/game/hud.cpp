@@ -2030,7 +2030,7 @@ namespace hud
         int size = s+s/2, width = s-s/4, sy = 0;
         if(game::focus->state == CS_ALIVE)
         {
-            if(inventoryhealth && (!m_trial(game::gamemode) || trialdamage))
+            if(inventoryhealth && (!m_trial(game::gamemode) || trialstyle >= 2))
             {
                 float fade = blend*inventoryhealthblend;
                 int heal = m_health(game::gamemode, game::mutators);

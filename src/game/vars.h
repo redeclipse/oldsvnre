@@ -152,7 +152,6 @@ GVAR(0, duelcycle, 0, 2, 3); // determines if players are force-cycled after a c
 GVAR(0, duelcycles, 0, 3, VAR_MAX); // maximum wins in a row before force-cycling (0 = num team/total players)
 
 GVAR(0, selfdamage, 0, 1, 1); // 0 = off, 1 = either hurt self or use teamdamage rules
-GVAR(0, trialdamage, 0, 1, 1); // 0 = off, 1 = allow damage in time-trial
 GVAR(0, teamdamage, 0, 1, 2); // 0 = off, 1 = non-bots damage team, 2 = all players damage team
 GVAR(0, teambalance, 0, 1, 2); // 0 = off, 1 = by number then rank, 2 = by rank then number
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
@@ -234,6 +233,8 @@ GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buff
 GVAR(0, bomberregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
 GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the goal
+
+GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are solid, but can't deal damage, 2 = regular gameplay style, solid+damage
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
