@@ -170,12 +170,12 @@ server: $(SERVER_OBJS)
 
 install-client: client
 ifneq (,$(STRIP))
-	$(STRIP) ../bin/$(APPCLIENT).exe
+	$(STRIP) $(WINBIN)/$(APPCLIENT).exe
 endif
 
 install-server: server
 ifneq (,$(STRIP))
-	$(STRIP) ../bin/$(APPSERVER).exe
+	$(STRIP) $(WINBIN)/$(APPSERVER).exe
 endif
 else
 client: libenet $(CLIENT_OBJS)
