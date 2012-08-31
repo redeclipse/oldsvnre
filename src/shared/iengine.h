@@ -87,7 +87,7 @@ extern void freeeditinfo(editinfo *&e);
 extern void rendereditcursor();
 extern void pruneundos(int maxremain = 0);
 extern bool noedit(bool view = false);
-extern void toggleedit();
+extern void toggleedit(bool force = true);
 extern void mpeditface(int dir, int mode, selinfo &sel, bool local);
 extern void mpedittex(int tex, int allfaces, selinfo &sel, bool local);
 extern void mpeditmat(int matid, int style, selinfo &sel, bool local);
