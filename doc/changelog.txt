@@ -84,6 +84,7 @@ Multiplayer & Servers:
  * Added auto-mute on chat spam (warns on 3 lines per 10 seconds, mutes after 3 warns)
  * Voting mid-game now requires unanimous vote
  * Added selectable voting styles (/voteinterm, /votestyle)
+ * Client-based servers no longer put into private mode
 
 Core & Install:
  * Corrected icon size for x32 and x48 versions

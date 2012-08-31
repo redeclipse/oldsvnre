@@ -1,4 +1,4 @@
-.TH @CAPPNAME@ 6 2012-08-29 "Red Eclipse 1.3" "Red Eclipse Manual"
+.TH @CAPPNAME@ 6 2012-08-31 "Red Eclipse 1.3" "Red Eclipse Manual"
 
 
 .SH NAME
@@ -33,6 +33,7 @@
 .OP \-\-help
 
 '\" Server options
+.OP \-ss\fR{0..3}
 .OP \-sm\fRservermaster
 .OP \-sa\fRservermasterport
 
@@ -190,6 +191,10 @@ This configuration is stored in init.cfg
 Display this manpage
 
 .SS Server options
+
+.TP
+.BI \-ss {0..3}
+Sets the server type of the local server. 0 for local only, 1 for private, 2 for public, 3 for dedicated. Defaults to 1. If set as dedicated (3) @APPNAME@ will act similarly to @APPNAME@-server and not start the GUI.
 
 .TP
 .BI \-sm servermaster
