@@ -2560,6 +2560,13 @@ namespace server
         {
             const char *name = &id->name[3], *val = NULL;
             int locked = max(id->flags&IDF_ADMIN ? 3 : 0, GAME(varslock));
+            #ifndef STANDALONE
+            if(servertype < 3)
+            {
+                if(!strcmp(id->name, "sv_gamespeed")) locked = PRIV_MAX;
+                if(!strcmp(id->name, "sv_gamepaused")) locked = PRIV_MAX;
+            }
+            #endif
             if(!strcmp(id->name, "sv_gamespeed") && GAME(gamespeedlock) > locked) locked = GAME(gamespeedlock);
             switch(id->type)
             {
@@ -3839,15 +3846,7 @@ namespace server
         ci->sessionid = (rnd(0x1000000)*((totalmillis%10000)+1))&0xFFFFFF;
         ci->local = local;
         connects.add(ci);
-        if(!local)
-        {
-            if(m_local(gamemode) || servertype <= 0) return DISC_PRIVATE;
-#ifndef STANDALONE
-            bool haslocal = false;
-            loopv(clients) if(clients[i]->local) { haslocal = true; break; }
-            if(!haslocal) return DISC_PRIVATE;
-#endif
-        }
+        if(!local && (m_local(gamemode) || servertype <= 0)) return DISC_PRIVATE;
         sendservinit(ci);
         return DISC_NONE;
     }
@@ -3906,16 +3905,7 @@ namespace server
         putint(p, mutators);            // 3
         putint(p, timeremaining);       // 4
         putint(p, GAME(serverclients)); // 5
-        bool priv = m_local(gamemode);
-#ifndef STANDALONE
-        if(!priv)
-        {
-            bool haslocal = false;
-            loopv(clients) if(clients[i]->local) { haslocal = true; break; }
-            if(!haslocal) priv = true;
-        }
-#endif
-        putint(p, serverpass[0] ? MM_PASSWORD : (priv ? MM_PRIVATE : mastermode)); // 6
+        putint(p, serverpass[0] ? MM_PASSWORD : (m_local(gamemode) ? MM_PRIVATE : mastermode)); // 6
         putint(p, numgamevars); // 7
         putint(p, numgamemods); // 8
         sendstring(smapname, p);
