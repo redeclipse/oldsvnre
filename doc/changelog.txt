@@ -3,6 +3,7 @@ Gameplay:
  * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
  * Points no longer given for consecutively dropping and picking up affinities (flags/ball)
  * AI now uses "random walk" when no waypoints are present
+ * Players in time trial are now non-solid by default (/{sv_}trialstyle)
 
 Weapons:
  * Rocket launcher now spawns in instagib
