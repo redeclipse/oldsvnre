@@ -245,7 +245,7 @@ WEAPON(shotgun,     0x999900,       0x999900,       0x999900,       0x999900,   
 );
 WEAPON(smg,         0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,
     40,     40,     1,      4,      100,    450,    1500,   22,     4,      2500,   450,    0,      0,      25,     25,
-    0,      0,      800,    250,
+    0,      0,      750,    500,
     0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      3,      6,      0,      0,      0,      0,
     2,      2,      20,     20,     -1,             WALT(SMG),      16,     4,      5,      35,     500,    800,    0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
