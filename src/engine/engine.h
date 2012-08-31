@@ -13,7 +13,7 @@
 
 #define RE_NAME             "Red Eclipse"
 #define RE_UNAME            "redeclipse"
-#define RE_RELEASE          "Development"
+#define RE_RELEASE          "Galactic"
 #define RE_URL              "www.redeclipse.net"
 #ifdef WIN32
 #define RE_PLATFORM         "win"
