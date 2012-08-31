@@ -147,8 +147,6 @@ bool noedit(bool view)
     return !viewable;
 }
 
-extern void createheightmap();
-
 void reorient()
 {
     sel.cx = 0;
