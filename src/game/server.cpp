@@ -2957,7 +2957,7 @@ namespace server
         mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; });
         if(actor->state.aitype < AI_START)
         {
-            if((actor == target && !GAME(selfdamage)) || (m_trial(gamemode) && !GAME(trialdamage))) nodamage++;
+            if((actor == target && !GAME(selfdamage)) || (m_trial(gamemode) && GAME(trialstyle) <= 1)) nodamage++;
             else if(m_play(gamemode) && m_isteam(gamemode, mutators) && actor->team == target->team && actor != target)
             {
                 switch(GAME(teamdamage))
