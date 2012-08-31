@@ -122,9 +122,9 @@ void cancelsel()
     entcancel();
 }
 
-void toggleedit()
+void toggleedit(bool force)
 {
-    if(!client::allowedittoggle(editmode)) return;
+    if(!force && (!connected(false) || !client::allowedittoggle(editmode))) return;
     editmode = !editmode;
     editing = entediting = (editmode ? 1 : 0);
     client::edittoggled(editmode);
@@ -173,7 +173,7 @@ void selextend()
     }
 }
 
-COMMANDN(0, edittoggle, toggleedit, "");
+ICOMMAND(0, edittoggle, "", (), toggleedit(false));
 COMMAND(0, entcancel, "");
 COMMAND(0, cubecancel, "");
 COMMAND(0, cancelsel, "");
