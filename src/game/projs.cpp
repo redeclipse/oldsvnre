@@ -92,21 +92,21 @@ namespace projs
                 if(actor->lastbuff) skew *= bomberbuffdamage;
                 if(target->lastbuff) skew /= bomberbuffshield;
             }
-            if(!(flags&HIT_HEAD))
+        }
+        if(!(flags&HIT_HEAD))
+        {
+            if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
+            else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
+            else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
+            else skew = 0;
+        }
+        if(actor == target)
+        {
+            if(WEAP2(weap, selfdmg, flags&HIT_ALT) > 0) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
+            else
             {
-                if(flags&HIT_WHIPLASH) skew *= WEAP2(weap, whipdmg, flags&HIT_ALT);
-                else if(flags&HIT_TORSO) skew *= WEAP2(weap, torsodmg, flags&HIT_ALT);
-                else if(flags&HIT_LEGS) skew *= WEAP2(weap, legsdmg, flags&HIT_ALT);
-                else skew = 0;
-            }
-            if(actor == target)
-            {
-                if(WEAP2(weap, selfdmg, flags&HIT_ALT) > 0) skew *= WEAP2(weap, selfdmg, flags&HIT_ALT);
-                else
-                {
-                    flags &= ~HIT_CLEAR;
-                    flags |= HIT_WAVE;
-                }
+                flags &= ~HIT_CLEAR;
+                flags |= HIT_WAVE;
             }
         }
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
