@@ -1610,9 +1610,7 @@ namespace server
     void relayf(int r, const char *s, ...)
     {
         defvformatstring(str, s, s);
-#ifdef IRC
         ircoutf(r, "%s", str);
-#endif
 #ifdef STANDALONE
         string ft;
         filtertext(ft, str);
