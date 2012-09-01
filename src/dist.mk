@@ -1,17 +1,20 @@
 appversion=$(shell sed -n 's,.*RE_VER_STR.*"\(.*\)",\1,p' engine/engine.h)
-dirname=$(APPNAME)
-tarname=$(APPNAME)_$(appversion)_linux_bsd.tar
+dirname=$(APPNAME)-$(appversion)
+tarname=$(APPNAME)_$(appversion)_nix_bsd.tar
+tarname-all=$(APPNAME)_$(appversion)_all.tar
+tarname-osx=$(APPNAME)_$(appversion)_osx.tar
+exename=$(APPNAME)_$(appversion)_win.exe
 
 ../$(dirname):
-	rm -rf ../$(dirname)
+	rm -rf $@
 	tar \
 		--exclude-vcs --exclude-backups \
-		--exclude='$@' --exclude='../$(tarname)*' \
+		--exclude='$@*' \
+		--exclude='../$(tarname)*' --exclude='../$(tarname-all)*' \
+		--exclude='../$(tarname-osx)*' --exclude='../$(exename)' \
 		--exclude='*.o' --exclude='*.lo' --exclude='*.gch' \
-		--exclude='*src/reclient' --exclude='*src/reserver' \
-		--exclude='*.exe' --exclude='*.dll' \
-		--exclude='*redeclipse.app*' --exclude='*.bat' \
-		--exclude='*src/site*' \
+		--exclude='../src/reclient' --exclude='../src/reserver' \
+		--exclude='../src/site*' \
 		-cf - ../ | (mkdir $@/; cd $@/ ; tar -xpf -)
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
@@ -20,29 +23,79 @@ tarname=$(APPNAME)_$(appversion)_linux_bsd.tar
 distdir: ../$(dirname)
 
 ../$(tarname): ../$(dirname)
-	tar -cf $@ $<
+	tar \
+		--exclude='$</bin*/redeclipse.app*' \
+		--exclude='$</bin*/*.exe' \
+		--exclude='$</bin*/*.dll' \
+		--exclude='$</bin*/*.txt' \
+		--exclude='$</*.bat' \
+		-cf $@ $<
 
 dist-tar: ../$(tarname)
 
+../$(tarname-all): ../$(dirname)
+	tar -cf $@ $<
+
+dist-tar-all: ../$(tarname-all)
+
+../$(tarname-osx): ../$(dirname)
+	tar \
+		--exclude='$</bin*/*linux*' \
+		--exclude='$</bin*/*bsd*' \
+		--exclude='$</*.sh' \
+		--exclude='$</bin*/*.exe' \
+		--exclude='$</bin*/*.dll' \
+		--exclude='$</bin*/*.txt' \
+		--exclude='$</*.bat' \
+		-cf $@ $<
+
+dist-tar-osx: ../$(tarname-osx)
+
 dist-gz: ../$(tarname)
-	gzip -c < $< > $<.gz
+	gzip -f $<
 
 dist-bz2: ../$(tarname)
-	bzip2 -c < $< > $<.bz2
+	bzip2 -f $<
 
 dist-xz: ../$(tarname)
-	xz -c < $< > $<.xz
+	xz -f $<
 
-dist: dist-bz2
+dist-gz-all: ../$(tarname-all)
+	gzip -f $<
 
-dist-all: dist-gz dist-bz2 dist-xz
+dist-bz2-all: ../$(tarname-all)
+	bzip2 -f $<
+
+dist-xz-all: ../$(tarname-all)
+	xz -f $<
+
+dist-gz-osx: ../$(tarname-osx)
+	gzip -f $<
+
+dist-bz2-osx: ../$(tarname-osx)
+	bzip2 -f $<
+
+dist-xz-osx: ../$(tarname-osx)
+	xz -f $<
+
+../$(exename): ../$(dirname)
+	rm -rf $</bin*/redeclipse.app/
+	rm -rf $</bin*/*linux*
+	rm -rf $</bin*/*freebsd*
+	makensis $</src/install/win/redeclipse.nsi
+	mv $</src/install/win/$(exename) ../
+	cp -r ../bin* $<
+
+dist-win: ../$(exename)
+
+dist: dist-bz2 dist-bz2-all dist-bz2-osx dist-win
 
 dist-clean:
 	rm -rf ../$(dirname)
-	rm -f ../$(tarname)
-	rm -f ../$(tarname).gz
-	rm -f ../$(tarname).bz2
-	rm -f ../$(tarname).xz
+	rm -f ../$(tarname)*
+	rm -f ../$(tarname-all)*
+	rm -f ../$(tarname-osx)*
+	rm -f ../$(exename)
 
 ../doc/cube2font.txt: ../doc/man/cube2font.1
 	scripts/generate-cube2font-txt $< $@
