@@ -1497,7 +1497,7 @@ namespace client
                         copystring(oldname, game::colorname(d));
                         d->setinfo(namestr, colour, model);
                         copystring(newname, game::colorname(d));
-                        if(showpresence >= (waiting(false) ? 1 : 2) && !isignored(d->clientnum))
+                        if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
                             conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
                     else d->setinfo(namestr, colour, model);
@@ -1528,7 +1528,7 @@ namespace client
                             copystring(oldname, game::colorname(d, NULL, "", false));
                             d->setinfo(text, colour, model);
                             copystring(newname, game::colorname(d, text));
-                            if(showpresence >= (waiting(false) ? 1 : 2) && !isignored(d->clientnum))
+                            if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
                                 conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, newname);
                         }
                         else d->setinfo(text, colour, model);
@@ -1536,7 +1536,7 @@ namespace client
                     else                    // new client
                     {
                         d->setinfo(text, colour, model);
-                        if(showpresence >= (waiting(false) ? 1 : 2)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, text, "", false), d->hostname);
+                        if(showpresence >= (waiting(false) ? 2 : 1)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, text, "", false), d->hostname);
                         if(needclipboard >= 0) needclipboard++;
                         game::cameras.deletecontents();
                     }
