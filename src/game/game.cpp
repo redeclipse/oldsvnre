@@ -1101,6 +1101,11 @@ namespace game
             }
             else concatstring(d->obit, "killed by");
             bool override = false;
+            if(style&FRAG_HEADSHOT)
+            {
+                actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
+                if(!override && allowanc) anc = S_V_HEADSHOT;
+            }
             if(!m_fight(gamemode) || actor->aitype >= AI_START)
             {
                 concatstring(d->obit, actor->aitype >= AI_START ? " a " : " ");
@@ -1145,39 +1150,22 @@ namespace game
                 {
                     concatstring(d->obit, " \fs\fzZedouble-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
-                    if(!override && allowanc)
-                    {
-                        override = true;
-                        anc = S_V_MULTI;
-                    }
+                    if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
                     concatstring(d->obit, " \fs\fzZetriple-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
-                    if(!override && allowanc)
-                    {
-                        override = true;
-                        anc = S_V_MULTI2;
-                    }
+                    if(!override && allowanc) anc = S_V_MULTI2;
                 }
                 else if(style&FRAG_MKILL3)
                 {
                     concatstring(d->obit, " \fs\fzZemulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
-                    if(!override && allowanc)
-                    {
-                        override = true;
-                        anc = S_V_MULTI3;
-                    }
+                    if(!override && allowanc) anc = S_V_MULTI3;
                 }
             }
 
-            if(style&FRAG_HEADSHOT)
-            {
-                actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
-                if(!override && allowanc) anc = S_V_HEADSHOT;
-            }
             if(style&FRAG_FIRSTBLOOD)
             {
                 concatstring(d->obit, " for \fs\fzwRfirst blood\fS");
