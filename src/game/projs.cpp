@@ -71,12 +71,11 @@ namespace projs
             flags |= HIT_WAVE;
         }
 
-        float skew = 1;
+        float skew = clamp(scale, 0.f, 1.f)*damagescale;
+        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+        else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(game::gamemode, game::mutators))
         {
-            skew *= clamp(scale, 0.f, 1.f)*damagescale;
-            if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-            else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
             if(m_capture(game::gamemode) && capturebuffdelay)
             {
                 if(actor->lastbuff) skew *= capturebuffdamage;

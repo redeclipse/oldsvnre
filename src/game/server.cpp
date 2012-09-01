@@ -3177,12 +3177,11 @@ namespace server
             flags |= HIT_WAVE;
         }
 
-        float skew = 1;
+        float skew = clamp(scale, 0.f, 1.f)*GAME(damagescale);
+        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+        else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(gamemode, mutators))
         {
-            skew *= clamp(scale, 0.f, 1.f)*GAME(damagescale);
-            if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-            else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
             if(m_capture(gamemode) && GAME(capturebuffdelay))
             {
                 if(actor->state.lastbuff) skew *= GAME(capturebuffdamage);
