@@ -122,11 +122,11 @@ system-install-menus: icons
 	install -m644 install/nix/$(appsrcname)_x32.xpm \
 		$(pixmapdir)/$(appname).xpm
 
-system-install-cube2font: system-install-cube2font-docs
+system-install-cube2font: cube2font system-install-cube2font-docs
 	install -d $(bindir)
 	install -m755 cube2font $(bindir)/cube2font
 
-system-install-cube2font-docs: install/nix/cube2font.1
+system-install-cube2font-docs: ../doc/man/cube2font.1
 	install -d $(mandir)/man1
 	gzip -9 -n -c < ../doc/man/cube2font.1 \
 		> $(mandir)/man1/cube2font.1.gz
