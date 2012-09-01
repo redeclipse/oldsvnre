@@ -1335,7 +1335,7 @@ namespace game
         if(!players.inrange(cn)) return;
         gameent *d = players[cn];
         if(!d) return;
-        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 1 : 2) && (d->aitype == AI_NONE || ai::showaiinfo))
+        if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1) && (d->aitype == AI_NONE || ai::showaiinfo))
             conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colorname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         int numdyns = numdynents();

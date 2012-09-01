@@ -192,7 +192,7 @@ namespace ai
 
         if(!d->name[0])
         {
-            if(showaiinfo && client::showpresence >= (client::waiting(false) ? 1 : 2))
+            if(showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
             {
                 if(showaiinfo > 1) conoutft(CON_EVENT, "\fg%s assigned to %s at skill %d", game::colorname(d, name), m, sk);
                 else conoutft(CON_EVENT, "\fg%s joined the game", game::colorname(d, name), m, sk);
@@ -204,11 +204,11 @@ namespace ai
         {
             if(d->ownernum != on)
             {
-                if(showaiinfo && client::showpresence >= (client::waiting(false) ? 1 : 2))
+                if(showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
                     conoutft(CON_EVENT, "\fg%s reassigned to %s", game::colorname(d, name), m);
                 resetthisguy = true;
             }
-            if(d->skill != sk && showaiinfo > 1 && client::showpresence >= (client::waiting(false) ? 1 : 2))
+            if(d->skill != sk && showaiinfo > 1 && client::showpresence >= (client::waiting(false) ? 2 : 1))
                 conoutft(CON_EVENT, "\fg%s changed skill to %d", game::colorname(d, name), sk);
         }
 
