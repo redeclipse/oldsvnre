@@ -1,5 +1,5 @@
 appversion=$(shell sed -n 's,.*RE_VER_STR.*"\(.*\)",\1,p' engine/engine.h)
-dirname=$(APPNAME)-$(appversion)
+dirname=$(APPNAME)
 tarname=$(APPNAME)_$(appversion)_linux_bsd.tar
 
 ../$(dirname):
@@ -11,8 +11,7 @@ tarname=$(APPNAME)_$(appversion)_linux_bsd.tar
 		--exclude='*src/reclient' --exclude='*src/reserver' \
 		--exclude='*.exe' --exclude='*.dll' \
 		--exclude='*redeclipse.app*' --exclude='*.bat' \
-		--exclude='*src/lib*' --exclude='*src/include*' \
-		--exclude='*src/xcode*' --exclude='*src/site*' \
+		--exclude='*src/site*' \
 		-cf - ../ | (mkdir $@/; cd $@/ ; tar -xpf -)
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
