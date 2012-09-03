@@ -788,6 +788,8 @@ void transplayer()
 }
 
 float curfov = 100, fovy, aspect;
+FVARN(IDF_PERSIST, aspect, forceaspect, 0, 0, 1e3f);
+
 int farplane, xtraverts, xtravertsva;
 
 VAR(IDF_WORLD, fog, 16, 4000, VAR_MAX);
@@ -2070,6 +2072,7 @@ void drawnoviewtype(int targtype)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     int w = screen->w, h = screen->h;
+    if(forceaspect) w = int(ceil(h*forceaspect));
     gettextres(w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -2309,6 +2312,7 @@ void drawviewtype(int targtype)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     int w = screen->w, h = screen->h;
+    if(forceaspect) w = int(ceil(h*forceaspect));
     gettextres(w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();

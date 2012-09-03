@@ -2507,6 +2507,9 @@ namespace hud
 
     void drawhud(bool noview)
     {
+        glLoadIdentity();
+        glOrtho(0, hudwidth, hudheight, 0, -1, 1);
+
         float fade = hudblend, consolefade = hudblend;
         if(!progressing)
         {
@@ -2567,7 +2570,7 @@ namespace hud
             if(colour.x < 1 || colour.y < 1 || colour.z < 1)
             {
                 usetexturing(false);
-                drawblend(0, 0, screen->w, screen->h, colour.x, colour.y, colour.z);
+                drawblend(0, 0, hudwidth, hudheight, colour.x, colour.y, colour.z);
                 usetexturing(true);
                 float amt = (colour.x+colour.y+colour.z)/3.f;
                 if(!commandmillis || (commandmillis < 0 && totalmillis-abs(commandmillis) > commandfade)) consolefade *= amt+((1.f-amt)*commandfadeskew);
@@ -2578,8 +2581,6 @@ namespace hud
         int gap = int(hudsize*gapsize), inv = int(hudsize*inventorysize), br = inv+gap*2, bs = (hudwidth-br*2)/2, bx = hudwidth-br, by = hudheight-gap;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glLoadIdentity();
-        glOrtho(0, hudwidth, hudheight, 0, -1, 1);
         glColor3f(1, 1, 1);
 
         if(noview) drawbackground(hudwidth, hudheight);
@@ -2600,17 +2601,17 @@ namespace hud
 
     void update(int w, int h)
     {
-        aspect = w/float(h);
+        aspect = forceaspect ? forceaspect : w/float(h);
         fovy = 2*atan2(tan(curfov/2*RAD), aspect)/RAD;
-        if(w > h)
+        if(aspect > 1)
         {
             hudheight = hudsize;
-            hudwidth = int(ceil(hudsize*(w/float(h))));
+            hudwidth = int(ceil(hudsize*aspect));
         }
-        else if(w < h)
+        else if(aspect < 1)
         {
             hudwidth = hudsize;
-            hudheight = int(ceil(hudsize*(h/float(w))));
+            hudheight = int(ceil(hudsize/aspect));
         }
         else hudwidth = hudheight = hudsize;
 
