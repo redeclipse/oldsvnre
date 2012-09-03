@@ -3403,14 +3403,9 @@ namespace server
             return;
         }
         int sweap = m_weapon(gamemode, mutators);
-        if(!gs.hasweap(weap, sweap))
+        if(!gs.candrop(weap, sweap, millis, (1<<WEAP_S_SWITCH)))
         {
-            if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
-            return;
-        }
-        if(!gs.weapwaited(weap, millis, (1<<WEAP_S_SWITCH)))
-        {
-            if(!gs.weapwaited(weap, millis, (1<<WEAP_S_RELOAD)))
+            if(!gs.candrop(weap, sweap, millis, (1<<WEAP_S_RELOAD)))
             {
                 if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: drop [%d] failed - current state disallows it", weap);
                 return;

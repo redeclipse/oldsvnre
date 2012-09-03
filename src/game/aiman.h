@@ -2,7 +2,8 @@
 namespace aiman
 {
     int oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
-        oldbotbalance = -2, oldcoopbalance = -1, oldbotlimit = -1, oldbotoffset = 0;
+        oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0;
+    float oldcoopbalance = -1;
 
     int findaiclient(int exclude)
     {
@@ -219,7 +220,7 @@ namespace aiman
         if(m_coop(gamemode, mutators))
         {
             numt--; // filter out the human team
-            balance = people+max(people*numt*GAME(coopbalance), 0);
+            balance = people+max(int(ceilf(people*numt*GAME(coopbalance))), 0);
         }
         else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
         {

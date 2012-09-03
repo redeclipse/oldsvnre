@@ -541,6 +541,13 @@ struct gamestate
         return skipstate;
     }
 
+    bool candrop(int weap, int sweap, int millis, int skip = 0)
+    {
+        if(weapwaited(weapselect, millis, skip) && weap >= WEAP_OFFSET && hasweap(weap, sweap) && weapwaited(weap, millis, skip) && (isweap(sweap) ? weap != sweap : weap >= 0-sweap))
+            return true;
+        return false;
+    }
+
     bool canswitch(int weap, int sweap, int millis, int skip = 0)
     {
         if((aitype >= AI_START || weap != WEAP_MELEE || sweap == WEAP_MELEE || weapselect == WEAP_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skip) && hasweap(weap, sweap) && weapwaited(weap, millis, skip))
@@ -556,9 +563,9 @@ struct gamestate
         return false;
     }
 
-    bool canreload(int weap, int sweap, int millis = -1)
+    bool canreload(int weap, int sweap, int millis = -1, int skip = 0)
     {
-        if(millis < 0 || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < WEAP(weap, max) && weapwaited(weap, millis)))
+        if(millis < 0 || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < WEAP(weap, max) && weapwaited(weap, millis, skip)))
         {
             int n = w_reload(weap, sweap);
             switch(n)
