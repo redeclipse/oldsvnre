@@ -1,4 +1,5 @@
 #define GAMEWORLD 1
+#define GAMEWORLD 1
 #include "game.h"
 namespace game
 {
@@ -1791,9 +1792,10 @@ namespace game
                 if(cam->type == cament::AFFINITY && followdist > 0)
                 {
                     vec oldpos = camera1->o;
-                    camera1->o = cam->o;
+                    camera1->o = from;
                     vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
                     physics::movecamera(camera1, dir, followdist, 1.0f);
+                    from = camera1->o;
                     camera1->o = oldpos;
                 }
                 float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
