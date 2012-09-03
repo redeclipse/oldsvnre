@@ -36,12 +36,12 @@ struct masterclient
     string name;
     char input[4096];
     vector<char> output;
-    int inputpos, outputpos, port, numpings;
-    enet_uint32 lastping, lastpong, lastactivity, lastpush;
+    int inputpos, outputpos, port, numpings, lastcontrol;
+    enet_uint32 lastping, lastpong, lastactivity;
     vector<authreq> authreqs;
     bool isserver, ishttp, listserver, shouldping, shouldpurge;
 
-    masterclient() : inputpos(0), outputpos(0), port(RE_SERVER_PORT), numpings(0), lastping(0), lastpong(0), lastactivity(0), lastpush(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
+    masterclient() : inputpos(0), outputpos(0), port(RE_SERVER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
@@ -222,6 +222,24 @@ void checkmasterpongs()
     }
 }
 
+static int controlversion = 0;
+
+static void checkcontrolversion()
+{
+    int i = 0;
+    for(; i < control.length(); i++) if(control[i].version < 0) break;
+    if(i >= control.length()) return;
+
+    ++controlversion;
+    if(controlversion < 0)
+    {
+        controlversion = 0;
+        loopv(masterclients) masterclients[i]->lastcontrol = -1;
+        loopv(control) control[i].version = controlversion;
+    }
+    else for(; i < control.length(); i++) if(control[i].version < 0) control[i].version = controlversion;
+}
+
 bool checkmasterclientinput(masterclient &c)
 {
     if(c.inputpos < 0) return false;
@@ -276,7 +294,8 @@ bool checkmasterclientinput(masterclient &c)
             if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
             c.shouldping = true;
             c.numpings = 0;
-            c.lastactivity = c.lastpush = totalmillis ? totalmillis : 1;
+            c.lastactivity = totalmillis ? totalmillis : 1;
+            c.lastcontrol = controlversion;
             if(c.isserver)
             {
                 masteroutf(c, "echo \"server updated, sending ping request\"\n");
@@ -335,6 +354,8 @@ void checkmaster()
 {
     if(mastersocket == ENET_SOCKET_NULL || pingsocket == ENET_SOCKET_NULL) return;
 
+    if(masterclients.length()) checkcontrolversion();
+
     ENetSocketSet readset, writeset;
     ENetSocket maxsock = max(mastersocket, pingsocket);
     ENET_SOCKETSET_EMPTY(readset);
@@ -365,14 +386,12 @@ void checkmaster()
                 masteroutf(c, "echo \"ping attempts failed, your server will not be listed\n");
             }
         }
-        #if 0
-        if(c.isserver)
+        if(c.isserver && c.lastcontrol < controlversion)
         {
-            loopv(control) if(control[i].flag == ipinfo::LOCAL && ENET_TIME_GREATER(control[i].time, c.lastpush))
+            loopv(control) if(control[i].flag == ipinfo::LOCAL && control[i].version > c.lastcontrol)
                 masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
-            c.lastpush = totalmillis ? totalmillis : 1;
+            c.lastcontrol = controlversion;
         }
-        #endif
         if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);
         else ENET_SOCKETSET_ADD(readset, c.socket);
         maxsock = max(maxsock, c.socket);

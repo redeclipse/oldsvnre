@@ -50,9 +50,9 @@ struct ipinfo
     enum { ALLOW = 0, BAN, MUTE, LIMIT, MAXTYPES };
     enum { TEMPORARY = 0, LOCAL, GLOBAL };
     enet_uint32 ip, mask;
-    int type, flag, time;
+    int type, flag, time, version;
 
-    ipinfo() : ip(0), mask(0), type(-1), flag(TEMPORARY), time(-1) {}
+    ipinfo() : ip(0), mask(0), type(-1), flag(TEMPORARY), time(-1), version(-1) {}
     ~ipinfo() {}
 };
 extern vector<ipinfo> control;
