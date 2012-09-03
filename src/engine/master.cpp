@@ -365,12 +365,14 @@ void checkmaster()
                 masteroutf(c, "echo \"ping attempts failed, your server will not be listed\n");
             }
         }
+        #if 0
         if(c.isserver)
         {
             loopv(control) if(control[i].flag == ipinfo::LOCAL && ENET_TIME_GREATER(control[i].time, c.lastpush))
                 masteroutf(c, "%s %u %u\n", ipinfotypes[control[i].type], control[i].ip, control[i].mask);
             c.lastpush = totalmillis ? totalmillis : 1;
         }
+        #endif
         if(c.outputpos < c.output.length()) ENET_SOCKETSET_ADD(writeset, c.socket);
         else ENET_SOCKETSET_ADD(readset, c.socket);
         maxsock = max(maxsock, c.socket);
