@@ -701,7 +701,7 @@ extern char *gettime(char *format);
 // rendergl
 extern int dynentsize, watercolour, lavacolour, fog, fogcolour;
 extern bvec ambientcolor, skylightcolor;
-extern float curfov, fovy, aspect;
+extern float curfov, fovy, aspect, forceaspect;
 
 extern void project(float fovy, float aspect, int farplane, bool flipx = false, bool flipy = false, bool swapxy = false, float zscale = 1);
 extern void transplayer();
