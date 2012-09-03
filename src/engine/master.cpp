@@ -224,20 +224,16 @@ void checkmasterpongs()
 
 static int controlversion = 0;
 
-static void checkcontrolversion()
+int nextcontrolversion()
 {
-    int i = 0;
-    for(; i < control.length(); i++) if(control[i].version < 0) break;
-    if(i >= control.length()) return;
-
     ++controlversion;
     if(controlversion < 0)
     {
         controlversion = 0;
         loopv(masterclients) masterclients[i]->lastcontrol = -1;
-        loopv(control) control[i].version = controlversion;
+        loopv(control) if(control[i].flag == ipinfo::LOCAL) control[i].version = controlversion;
     }
-    else for(; i < control.length(); i++) if(control[i].version < 0) control[i].version = controlversion;
+    return controlversion;
 }
 
 bool checkmasterclientinput(masterclient &c)
@@ -353,8 +349,6 @@ bool checkmasterclientinput(masterclient &c)
 void checkmaster()
 {
     if(mastersocket == ENET_SOCKET_NULL || pingsocket == ENET_SOCKET_NULL) return;
-
-    if(masterclients.length()) checkcontrolversion();
 
     ENetSocketSet readset, writeset;
     ENetSocket maxsock = max(mastersocket, pingsocket);

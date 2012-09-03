@@ -36,6 +36,7 @@ extern void cleanupmaster();
 extern void reloadmaster();
 extern int masterserver, masterport;
 extern char *masterip;
+extern int nextcontrolversion();
 #endif
 
 #include "irc.h"
