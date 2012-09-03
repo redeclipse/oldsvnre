@@ -14,7 +14,7 @@ torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
 		--exclude-vcs --exclude-backups \
 		--exclude='$@*' \
 		--exclude='../$(tarname)*' --exclude='../$(tarname-all)*' \
-		--exclude='../$(tarname-osx)*' --exclude='../$(exename)' \
+		--exclude='../$(tarname-osx)*' --exclude='../$(exename)*' \
 		--exclude='*.o' --exclude='*.lo' --exclude='*.gch' \
 		--exclude='../src/reclient' --exclude='../src/reserver' \
 		--exclude='../src/site*' \
@@ -104,6 +104,7 @@ dist-xz-osx: ../$(tarname-osx).xz
 	rm -rf $@/bin*/redeclipse.app/
 	rm -rf $@/bin*/*linux*
 	rm -rf $@/bin*/*freebsd*
+	rm -f $@/*.sh
 
 distdir-win: ../$(dirname-win)
 
