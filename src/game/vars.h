@@ -238,18 +238,18 @@ GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
-GVAR(0, botskillmin, 1, 50, 101);
-GVAR(0, botskillmax, 1, 75, 101);
+GVAR(0, botskillmin, 1, 75, 101);
+GVAR(0, botskillmax, 1, 85, 101);
 GVAR(0, botlimit, 0, 16, VAR_MAX);
 GVAR(0, botoffset, VAR_MIN, 0, VAR_MAX);
 GFVAR(0, botspeed, 0, 1, FVAR_MAX);
 GFVAR(0, botscale, FVAR_NONZERO, 1, FVAR_MAX);
-GVAR(0, coopbalance, 1, 2, VAR_MAX);
-GVAR(0, coopskillmin, 1, 75, 101);
+GFVAR(0, coopbalance, FVAR_NONZERO, 1.5f, FVAR_MAX);
+GVAR(0, coopskillmin, 1, 85, 101);
 GVAR(0, coopskillmax, 1, 95, 101);
 GVAR(0, enemybalance, 1, 1, 3);
-GVAR(0, enemyskillmin, 1, 65, 101);
-GVAR(0, enemyskillmax, 1, 85, 101);
+GVAR(0, enemyskillmin, 1, 80, 101);
+GVAR(0, enemyskillmax, 1, 90, 101);
 GVAR(0, enemyspawntime, 1, 30000, VAR_MAX); // when enemies respawn
 GVAR(0, enemyspawndelay, 0, 1000, VAR_MAX); // after map start enemies first spawn
 GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random, 3 = randomise between both

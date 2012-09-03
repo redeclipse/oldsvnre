@@ -1257,7 +1257,7 @@ namespace ai
         {
             if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != WEAP_S_WAIT)
             {
-                loopirev(WEAP_ITEM) if(i >= WEAP_OFFSET && i != d->ai->weappref && i != d->weapselect)
+                loopirev(WEAP_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, WEAP_S_FILTER))
                 {
                     client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, i);
                     d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);

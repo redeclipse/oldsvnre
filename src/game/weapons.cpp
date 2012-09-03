@@ -130,16 +130,14 @@ namespace weapons
 
     void weapdrop(gameent *d, int w)
     {
-        int weap = isweap(w) ? w : d->weapselect;
+        int weap = isweap(w) ? w : d->weapselect, sweap = m_weapon(game::gamemode, game::mutators);
         bool found = false;
-        if(isweap(weap) && weap >= WEAP_OFFSET && weap != m_weapon(game::gamemode, game::mutators))
+        if(d->candrop(weap, sweap, lastmillis, WEAP_S_FILTER))
         {
-            if(d->weapwaited(d->weapselect, lastmillis, WEAP_S_FILTER))
-            {
-                client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
-                d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
-                found = true;
-            }
+            client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
+            d->setweapstate(weap, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
+            conoutf("dropping %s", WEAP(weap, name));
+            found = true;
         }
         d->action[AC_DROP] = false;
         if(!found) game::errorsnd(d);
@@ -147,7 +145,7 @@ namespace weapons
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators)))
+        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
         {
             bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT),
                  noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
