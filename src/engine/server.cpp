@@ -28,7 +28,6 @@ char *gettime(char *format)
 ICOMMAND(0, gettime, "s", (char *a), result(gettime(a)));
 
 vector<ipinfo> control;
-bool updatecontrolversion = false;
 void addipinfo(vector<ipinfo> &info, int type, const char *name)
 {
     union { uchar b[sizeof(enet_uint32)]; enet_uint32 i; } ip, mask;
