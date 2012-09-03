@@ -147,6 +147,7 @@ system-uninstall-data:
 
 system-uninstall-docs:
 	@rm -rfv $(docdir)/$(appname)/examples
+	@rm -fv $(docdir)/$(appname)/guidelines.txt
 	@rm -fv $(mandir)/man6/$(appname).6.gz
 	@rm -fv $(mandir)/man6/$(appname)-server.6.gz
 
