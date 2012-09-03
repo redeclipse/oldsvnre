@@ -920,7 +920,7 @@ namespace server
         if(ci->local || ci->privilege >= flag) return true;
         else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_HELPER && !numclients(ci->clientnum)) return true;
         else if(msg && *msg)
-            srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag), msg);
+            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag), msg);
         return false;
     }
 
@@ -1929,7 +1929,7 @@ namespace server
             endmatch();
             if(best)
             {
-                srvoutf(3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
+                srvoutf(-3, "vote passed: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(best->mode, best->muts), best->map);
                 sendf(-1, 1, "risi3", N_MAPCHANGE, best->map, 0, best->mode, best->muts);
                 changemap(best->map, best->mode, best->muts);
             }
@@ -1938,7 +1938,7 @@ namespace server
                 int mode = GAME(rotatemode) ? -1 : gamemode, muts = GAME(rotatemuts) ? -1 : mutators;
                 changemode(mode, muts);
                 const char *map = choosemap(smapname, mode, muts);
-                srvoutf(3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
+                srvoutf(-3, "server chooses: \fs\fy%s\fS on map \fs\fo%s\fS", gamename(mode, muts), map);
                 sendf(-1, 1, "risi3", N_MAPCHANGE, map, 0, mode, muts);
                 changemap(map, mode, muts);
             }
@@ -2039,7 +2039,7 @@ namespace server
         if(hasveto)
         {
             endmatch();
-            srvoutf(3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+            srvoutf(-3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
             sendf(-1, 1, "risi3", N_MAPCHANGE, ci->mapvote, 0, ci->modevote, ci->mutsvote);
             changemap(ci->mapvote, ci->modevote, ci->mutsvote);
             return;
@@ -4680,7 +4680,7 @@ namespace server
                                     c.mask = 0xFFFFFFFF;
                                     c.type = ipinfo::MUTE;
                                     c.time = totalmillis ? totalmillis : 1;
-                                    srvoutf(3, "\fs\fcmute\fS added on %s: exceeded the number of allowed flood warnings", colorname(cp));
+                                    srvoutf(-3, "\fs\fcmute\fS added on %s: exceeded the number of allowed flood warnings", colorname(cp));
                                 }
                             }
                             break;
@@ -4948,8 +4948,8 @@ namespace server
                         { \
                             if(haspriv(ci, GAME(y##lock)+PRIV_HELPER, "clear " #y "s")) \
                             { \
-                                resetallows(); \
-                                srvoutf(3, "cleared existing " #y "s"); \
+                                reset##y##s(); \
+                                srvoutf(-3, "cleared existing " #y "s"); \
                             } \
                             break; \
                         }
@@ -4995,14 +4995,14 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
-                                    if(text[0]) srvoutf(3, "\fs\fc" #y "\fS added on %s by %s: %s", colorname(cp), name, text); \
-                                    else srvoutf(3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), name); \
+                                    if(text[0]) srvoutf(-3, "\fs\fc" #y "\fS added on %s by %s: %s", colorname(cp), name, text); \
+                                    else srvoutf(-3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), name); \
                                     if(value == ipinfo::BAN) disconnect_client(cp->clientnum, DISC_IPBAN); \
                                 } \
                                 else \
                                 { \
-                                    if(text[0]) srvoutf(3, "%s has been kicked by %s: %s", colorname(cp), name, text); \
-                                    else srvoutf(3, "%s has been kicked by %s", colorname(cp), name); \
+                                    if(text[0]) srvoutf(-3, "%s has been kicked by %s: %s", colorname(cp), name, text); \
+                                    else srvoutf(-3, "%s has been kicked by %s", colorname(cp), name); \
                                     disconnect_client(cp->clientnum, DISC_KICK); \
                                 } \
                             } \
