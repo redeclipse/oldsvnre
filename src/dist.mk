@@ -209,3 +209,6 @@ guidelines-wiki: ../doc/guidelines-wiki.txt
 
 update-servexec: ../doc/examples/servexec.cfg
 
+resave-maps: ../data/maps/*.cfg ../data/maps/*.mpz
+	scripts/resave-maps
+
