@@ -1921,7 +1921,7 @@ namespace server
         if(!passed && best) switch(maprequest ? GAME(voteinterm) : GAME(votestyle))
         {
             case 2: passed = best->count >= maxvotes; break;
-            case 1: passed = best->count >= int(maxvotes*GAME(votethreshold)); break;
+            case 1: passed = best->count >= int(ceilf(maxvotes*GAME(votethreshold))); break;
             case 0: default: break;
         }
         if(passed)
@@ -4944,7 +4944,7 @@ namespace server
                             if(haspriv(ci, GAME(y##lock)+PRIV_HELPER, "clear " #y "s")) \
                             { \
                                 reset##y##s(); \
-                                srvoutf(-3, "cleared existing " #y "s"); \
+                                srvoutf(-3, "%s cleared existing \fs\fc" #y "s\fS", colorname(ci)); \
                             } \
                             break; \
                         }
@@ -4971,7 +4971,7 @@ namespace server
                             if(haspriv(ci, GAME(y##lock)+PRIV_HELPER, #y " people") && victim >= 0) \
                             { \
                                 clientinfo *cp = (clientinfo *)getinfo(victim); \
-                                if(!cp || cp->state.ownernum >= 0 || !cmppriv(ci, cp, #y)) break; \
+                                if(!cp || cp->state.ownernum >= 0 || (value != ipinfo::ALLOW && !cmppriv(ci, cp, #y))) break; \
                                 uint ip = getclientip(cp->clientnum); \
                                 if(!ip) break; \
                                 if(checkipinfo(control, ipinfo::ALLOW, ip)) \
@@ -4990,14 +4990,14 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
-                                    if(text[0]) srvoutf(-3, "\fs\fc" #y "\fS added on %s by %s: %s", colorname(cp), name, text); \
-                                    else srvoutf(-3, "\fs\fc" #y "\fS added on %s by %s", colorname(cp), name); \
+                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s: %s", name, colorname(cp), text); \
+                                    else srvoutf(-3, "%s added \fs\fc" #y "\fS on %s", name, colorname(cp)); \
                                     if(value == ipinfo::BAN) disconnect_client(cp->clientnum, DISC_IPBAN); \
                                 } \
                                 else \
                                 { \
-                                    if(text[0]) srvoutf(-3, "%s has been kicked by %s: %s", colorname(cp), name, text); \
-                                    else srvoutf(-3, "%s has been kicked by %s", colorname(cp), name); \
+                                    if(text[0]) srvoutf(-3, "%s kicked %s: %s", name, colorname(cp), text); \
+                                    else srvoutf(-3, "%s kicked %s", name, colorname(cp)); \
                                     disconnect_client(cp->clientnum, DISC_KICK); \
                                 } \
                             } \
