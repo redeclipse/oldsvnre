@@ -26,8 +26,8 @@ do
     SRC_DEF="$(grep -hr "G[A-Z]*VAR[A-Z]*([^,]*, $VAR, " "$SRC_DIR")"
     if [ -z "$SRC_DEF" ]; then continue; fi
 
-    DESC="$(echo $i | sed -n 's%^setdesc "[^"]*" "\([^"]*\)".*%\1%p')"
-    PARAM="$(echo $i | sed -n 's%^setdesc "[^"]*" "[^"]*" "\([^"]*\)".*%\1%p')"
+    DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
+    PARAM="$(echo $i | sed 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%')"
 
     SRC_TYPE="$(echo $SRC_DEF | sed 's%.*\(G[A-Z]*VAR[A-Z]*\)(.*%\1%')"
     case "$SRC_TYPE" in
