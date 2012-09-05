@@ -1921,7 +1921,7 @@ namespace server
         if(!passed && best) switch(maprequest ? GAME(voteinterm) : GAME(votestyle))
         {
             case 2: passed = best->count >= maxvotes; break;
-            case 1: passed = best->count >= int(ceilf(maxvotes*GAME(votethreshold))); break;
+            case 1: passed = best->count >= maxvotes*GAME(votethreshold); break;
             case 0: default: break;
         }
         if(passed)
