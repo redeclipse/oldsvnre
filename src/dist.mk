@@ -209,7 +209,9 @@ guidelines-wiki: ../doc/guidelines-wiki.txt
 
 update-servexec: ../doc/examples/servexec.cfg
 
-../doc/game-vars-wiki.txt: ../data/usage.cfg
-	scripts/generate-game-vars-wiki $< $@
+../doc/%-vars-wiki.txt: ../data/usage.cfg
+	scripts/generate-$*-vars-wiki $< $@
 
 game-vars-wiki: ../doc/game-vars-wiki.txt
+
+weapon-vars-wiki: ../doc/weapon-vars-wiki.txt
