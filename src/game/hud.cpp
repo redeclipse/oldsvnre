@@ -295,10 +295,10 @@ namespace hud
     FVAR(IDF_PERSIST, radarblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radarplayerhintblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarplayersize, 0, 0.4f, 1000);
-    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, radarplayersize, 0, 0.3f, 1000);
+    FVAR(IDF_PERSIST, radarplayerhintsize, 0, 0.7f, 1);
     FVAR(IDF_PERSIST, radarblipblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radarblipsize, 0, 0.25f, 1000);
+    FVAR(IDF_PERSIST, radarblipsize, 0, 0.3f, 1000);
     FVAR(IDF_PERSIST, radarbliprotate, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinityblend, 0, 1, 1);
     FVAR(IDF_PERSIST, radaraffinitysize, 0, 1, 1000);
@@ -1497,12 +1497,25 @@ namespace hud
         if(dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
+                 bleeding = radarplayereffects && bleedtime && lastmillis%150 < 50 && d->bleeding(lastmillis, bleedtime),
                  dominated = radarplayereffects && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0;
             vec colour[2];
-            if(burning) colour[0] = game::burncolour(d);
-            else if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
-            else colour[0] = vec::hexcolor(game::getcolour(d, game::playerovertone));
-            colour[1] = vec::hexcolor(game::getcolour(d, game::playerundertone));
+            if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
+            else if(d->lastbuff)
+            {
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
+                flashcolour(colour[0].r, colour[0].g, colour[0].b, 1.f, 1.f, 1.f, amt);
+            }
+            else if(burning) colour[0] = game::burncolour(d);
+            else if(bleeding)
+            {
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                flashcolour(colour[0].r, colour[0].g, colour[0].b, 1.f, 0.2f, 0.2f, amt);
+            }
+            else colour[0] = vec::hexcolor(game::getcolour(d, game::playerundertone));
+            colour[1] = vec::hexcolor(game::getcolour(d, game::playerovertone));
             const char *tex = dominated ? dominatedtex : playerbliptex;
             float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
@@ -1682,14 +1695,19 @@ namespace hud
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
             gameent *d = NULL, *o = NULL;
-            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, numothers = 0;
-            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
+            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1;
+            if(m_duke(game::gamemode, game::mutators))
             {
-                if(d->state == CS_ALIVE && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team))
+                int numothers = 0;
+                loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state == CS_ALIVE && d->aitype < AI_START && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team))
                 {
-                    numothers++;
+                    if(++numothers > 1) { o = NULL; break; }
                     o = d;
                 }
+                if(o) hud::drawblip(arrowtex, 3, w, h, radarplayersize, blend*radarblend*radarplayerblend, style, o->o, vec::hexcolor(game::getcolour(o, game::playerovertone)), "tiny", game::colorname(o));
+            }
+            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d != o && d->state != CS_SPECTATOR && d->aitype < AI_START)
+            {
                 switch(radarplayerfilter)
                 {
                     case 0: case 3: default: break;
@@ -1698,8 +1716,6 @@ namespace hud
                 }
                 drawplayerblip(d, w, h, style, blend*radarblend);
             }
-            if(m_duke(game::gamemode, game::mutators) && o && numothers == 1)
-                hud::drawblip(arrowtex, 3, w, h, radarplayersize, blend*radarblend*radarplayerblend, style, o->o, vec::hexcolor(game::getcolour(o, game::playerovertone)), "tiny", game::colorname(o));
         }
         if(radardamage) drawdamageblips(w, h, blend*radarblend); // 5+
     }
