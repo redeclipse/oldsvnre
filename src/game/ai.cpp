@@ -1086,7 +1086,7 @@ namespace ai
                 d->ai->lastturn = lastmillis;
             }
             d->ai->targpitch = 0;
-            vec dir; vecfromyawpitch(d->ai->targyaw, d->ai->targpitch, 1, 0, dir);
+            vec dir(d->ai->targyaw, d->ai->targpitch);
             d->ai->spot = vec(d->feetpos()).add(dir.mul(CLOSEDIST));
             d->ai->targnode = -1;
         }

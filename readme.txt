@@ -107,6 +107,9 @@ too.
 * Derek "JoJo" Stegall - Artist
     - Maps, Models, Textures, HUD, Sound FX, Design and Testing
 
+* Jonathan "Ulukai" De Nil
+    - Maps (ares, conflict, canals), Testing, Support
+
 * Jeff "Architect" Cope - Collaborator
     - Design and Testing
 

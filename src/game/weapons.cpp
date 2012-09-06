@@ -131,16 +131,14 @@ namespace weapons
     void weapdrop(gameent *d, int w)
     {
         int weap = isweap(w) ? w : d->weapselect, sweap = m_weapon(game::gamemode, game::mutators);
-        bool found = false;
+        d->action[AC_DROP] = false;
         if(d->candrop(weap, sweap, lastmillis, WEAP_S_FILTER))
         {
             client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             d->setweapstate(weap, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
-            conoutf("dropping %s", WEAP(weap, name));
-            found = true;
+            return;
         }
-        d->action[AC_DROP] = false;
-        if(!found) game::errorsnd(d);
+        game::errorsnd(d);
     }
 
     bool autoreload(gameent *d, int flags = 0)
