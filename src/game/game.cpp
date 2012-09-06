@@ -2071,7 +2071,7 @@ namespace game
         c->roll = calcroll(d);
         if(bob && firstpersonbob && !thirdperson && !intermission)
         {
-            vec dir; vecfromyawpitch(c->yaw, c->pitch, 1, 0, dir);
+            vec dir(c->yaw, c->pitch);
             float steps = bobdist/firstpersonbobstep*M_PI, dist = raycube(c->o, dir, firstpersonbobfocusmaxdist, RAY_CLIPMAT|RAY_POLY), yaw, pitch;
             if(dist < 0 || dist > firstpersonbobfocusmaxdist) dist = firstpersonbobfocusmaxdist;
             else if(dist < firstpersonbobfocusmindist) dist = firstpersonbobfocusmindist;

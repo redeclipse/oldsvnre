@@ -868,8 +868,7 @@ namespace client
             gameent *d = game::getclient(i);
             if(!d) return;
             game::player1->o = d->o;
-            vec dir;
-            vecfromyawpitch(game::player1->yaw, game::player1->pitch, 1, 0, dir);
+            vec dir(game::player1->yaw, game::player1->pitch);
             game::player1->o.add(dir.mul(-32));
             game::player1->resetinterp();
             game::resetcamera();
