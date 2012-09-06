@@ -215,3 +215,5 @@ update-servexec: ../doc/examples/servexec.cfg
 game-vars-wiki: ../doc/game-vars-wiki.txt
 
 weapon-vars-wiki: ../doc/weapon-vars-wiki.txt
+
+engine-vars-wiki: ../doc/engine-vars-wiki.txt
