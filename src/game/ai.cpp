@@ -619,13 +619,13 @@ namespace ai
                 if(entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[6] > 0)
                     d->ai->weappref = entities::ents[d->aientity]->attrs[6]-1;
                 else d->ai->weappref = aistyle[d->aitype].weap;
-                if(!isweap(d->ai->weappref)) d->ai->weappref = rnd(WEAP_MAX-1)+1;
+                if(!isweap(d->ai->weappref)) d->ai->weappref = rnd(WEAP_MAX);
             }
             else
             {
                 if(m_limited(game::gamemode, game::mutators)) d->ai->weappref = m_weapon(game::gamemode, game::mutators);
                 else if(aiforcegun >= 0 && aiforcegun < WEAP_MAX) d->ai->weappref = aiforcegun;
-                else d->ai->weappref = rnd(WEAP_MAX-WEAP_OFFSET)+WEAP_OFFSET;
+                else d->ai->weappref = rnd(WEAP_LOADOUT)+WEAP_OFFSET;
             }
             vec dp = d->headpos();
             findorientation(dp, d->yaw, d->pitch, d->ai->target);
@@ -1319,7 +1319,7 @@ namespace ai
             }
         }
 
-        bool timepassed = d->weapstate[d->weapselect] == WEAP_S_IDLE && (!d->ammo[d->weapselect] || lastmillis-d->weaplast[d->weapselect] >= 6000-(d->skill*50));
+        bool timepassed = d->weapstate[d->weapselect] == WEAP_S_IDLE && (!d->ammo[d->weapselect] || lastmillis-d->weaplast[d->weapselect] >= max(6000-(d->skill*50), weaponswitchdelay));
         if(busy <= 2 && haswaited && timepassed)
         {
             int weap = d->ai->weappref;
@@ -1533,7 +1533,9 @@ namespace ai
                 {
                     if(d->aitype == AI_BOT && m_arena(game::gamemode, game::mutators))
                     {
-                        d->loadweap[0] = d->ai->weappref; d->loadweap[1] = WEAP_MELEE;
+                        d->loadweap[0] = d->ai->weappref;
+                        if((d->loadweap[1] = rnd(WEAP_LOADOUT)+WEAP_OFFSET) == d->loadweap[0])
+                            if(++d->loadweap[1] >= WEAP_ITEM) d->loadweap[1] = WEAP_OFFSET;
                         client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
                     }
                     client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
