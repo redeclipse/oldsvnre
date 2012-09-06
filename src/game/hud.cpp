@@ -1490,11 +1490,11 @@ namespace hud
         }
     }
 
-    void drawplayerblip(gameent *d, int w, int h, int style, float blend)
+    void drawplayerblip(gameent *d, int w, int h, int style, float blend, bool force)
     {
         vec dir = vec(d->o).sub(camera1->o);
         float dist = dir.magnitude();
-        if(dist <= radarrange())
+        if(force || dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
                  bleeding = radarplayereffects && bleedtime && lastmillis%150 < 50 && d->bleeding(lastmillis, bleedtime),
@@ -1517,7 +1517,7 @@ namespace hud
             else colour[0] = vec::hexcolor(game::getcolour(d, game::playerundertone));
             colour[1] = vec::hexcolor(game::getcolour(d, game::playerovertone));
             const char *tex = dominated ? dominatedtex : playerbliptex;
-            float fade = clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f)*blend, size = dominated ? 1.25f : 1.f;
+            float fade = (force ? 1.f : clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f))*blend, size = dominated ? 1.25f : 1.f;
             if(d->state == CS_DEAD || d->state == CS_WAITING)
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
@@ -1535,12 +1535,12 @@ namespace hud
             {
                 int len = m_protect(game::gamemode, game::mutators), millis = d->protect(lastmillis, len);
                 if(millis > 0) fade *= clamp(float(len-millis)/float(len), 0.f, 1.f);
-                fade *= clamp(vec(d->vel).add(d->falling).magnitude()/movespeed, 0.f, 1.f);
+                if(!force) fade *= clamp(vec(d->vel).add(d->falling).magnitude()/movespeed, 0.f, 1.f);
             }
             else if(d->state != CS_EDITING) return;
             loopi(2)
             {
-                if(!i && chkcond(radarplayernames, !game::tvmode()))
+                if(!i && (force || chkcond(radarplayernames, !game::tvmode())))
                     drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", game::colorname(d, NULL, "", false));
                 else drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i]);
             }
@@ -1704,17 +1704,16 @@ namespace hud
                     if(++numothers > 1) { o = NULL; break; }
                     o = d;
                 }
-                if(o) hud::drawblip(arrowtex, 3, w, h, radarplayersize, blend*radarblend*radarplayerblend, style, o->o, vec::hexcolor(game::getcolour(o, game::playerovertone)), "tiny", game::colorname(o));
             }
-            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d != o && d->state != CS_SPECTATOR && d->aitype < AI_START)
+            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
             {
-                switch(radarplayerfilter)
+                if(d != o) switch(radarplayerfilter)
                 {
                     case 0: case 3: default: break;
                     case 1: if(m_isteam(game::gamemode, game::mutators) && d->team == game::focus->team) continue; break;
                     case 2: if(m_isteam(game::gamemode, game::mutators) && d->team != game::focus->team) continue; break;
                 }
-                drawplayerblip(d, w, h, style, blend*radarblend);
+                drawplayerblip(d, w, h, style, blend*radarblend, d == o);
             }
         }
         if(radardamage) drawdamageblips(w, h, blend*radarblend); // 5+
