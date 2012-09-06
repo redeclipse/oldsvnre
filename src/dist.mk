@@ -198,22 +198,22 @@ dist-clean: dist-mostlyclean
 
 cube2font-txt: ../doc/cube2font.txt
 
-../doc/guidelines-wiki.txt: ../doc/guidelines.txt
-	scripts/generate-guidelines-wiki $< $@
-
-guidelines-wiki: ../doc/guidelines-wiki.txt
-
 ../doc/examples/servexec.cfg: ../data/usage.cfg install-server
 	scripts/update-servexec-defaults $@
 	scripts/update-servexec-comments $< $@
 
 update-servexec: ../doc/examples/servexec.cfg
 
-../doc/%-vars-wiki.txt: ../data/usage.cfg
-	scripts/generate-$*-vars-wiki $< $@
+../doc/wiki-guidelines.txt: ../doc/guidelines.txt
+	scripts/generate-wiki-guidelines $< $@
 
-game-vars-wiki: ../doc/game-vars-wiki.txt
+wiki-guidelines: ../doc/wiki-guidelines.txt
 
-weapon-vars-wiki: ../doc/weapon-vars-wiki.txt
+../doc/wiki-%-vars.txt: ../data/usage.cfg
+	scripts/generate-wiki-$*-vars $< $@
 
-engine-vars-wiki: ../doc/engine-vars-wiki.txt
+wiki-game-vars-wiki: ../doc/wiki-game-vars.txt
+
+wiki-weapon-vars: ../doc/wiki-weapon-vars.txt
+
+wiki-engine-vars: ../doc/wiki-engine-vars.txt
