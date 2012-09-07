@@ -7,6 +7,9 @@ Weapons:
 
 Maps:
  * Assigned map music to all maps
+ * Canals, updated and added to rotations
+ * Fourplex, updated
+ * Starlibido, updated
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
