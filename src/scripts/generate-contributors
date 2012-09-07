@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# "$1" is doc/readme.txt
+# "$2" is output file
+
+cat <<EOF > "$2"
+{{DISPLAYTITLE:Red Eclipse Team}}
+
+This page was automatically generated from the source of Red Eclipse, please do not edit it manually.
+
+==Team Lead==
+
+EOF
+
+sed -ne 'H;$x;$s%^\n%%;$s%\n   *% %g;$p' \
+    -ne '%== Developers ==%,%== Supporters ==%p' \
+    "$1" > "$2"
+
+sed 's%.*Eihrul.*%&\n\n== Team Members ==\n\n%'
+
+sed '%== Developers ==%d'

@@ -204,6 +204,11 @@ cube2font-txt: ../doc/cube2font.txt
 
 update-servexec: ../doc/examples/servexec.cfg
 
+../doc/wiki-contributors.txt: ../readme.txt
+	scripts/generate-wiki-contributors $< $@
+
+wiki-contributors: ../doc/wiki-contributors.txt
+
 ../doc/wiki-guidelines.txt: ../doc/guidelines.txt
 	scripts/generate-wiki-guidelines $< $@
 
