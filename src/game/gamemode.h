@@ -280,12 +280,12 @@ extern mutstypes mutstype[];
     } \
 }
 
-#define mapcull(a,b,c,d) \
+#define mapcull(a,b,c,d,e) \
 { \
     mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, GAME(multimaps)); \
     mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
     mapshrink(m_jetpack(b, c), a, GAME(jetpackmaps)); \
-    if(d > 0 && GAME(mapsfilter) >= 2 && m_fight(b) && !m_duel(b, c)) \
+    if(d > 0 && e >= 2 && m_fight(b) && !m_duel(b, c)) \
     { \
         mapshrink(GAME(smallmapmax) && d <= GAME(smallmapmax), a, GAME(smallmaps)) \
         else mapshrink(GAME(mediummapmax) && d <= GAME(mediummapmax), a, GAME(mediummaps)) \
@@ -293,7 +293,7 @@ extern mutstypes mutstype[];
     } \
 }
 
-#define maplist(a,b,c,d) \
+#define maplist(a,b,c,d,e) \
 { \
     if(m_capture(b)) a = newstring(GAME(capturemaps)); \
     else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? GAME(kingmaps) : GAME(defendmaps)); \
@@ -301,7 +301,7 @@ extern mutstypes mutstype[];
     else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
     else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
     else a = newstring(GAME(allowmaps)); \
-    if(GAME(mapsfilter)) mapcull(a, b, c, d); \
+    if(e) mapcull(a, b, c, d, e); \
 }
 
 #ifdef GAMESERVER
