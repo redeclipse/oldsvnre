@@ -214,11 +214,13 @@ wiki-contributors: ../doc/wiki-contributors.txt
 
 wiki-guidelines: ../doc/wiki-guidelines.txt
 
-../doc/wiki-%-vars.txt: ../data/usage.cfg
-	scripts/generate-wiki-$*-vars $< $@
+../doc/wiki-%.txt: ../data/usage.cfg
+	scripts/generate-wiki-$* $< $@
 
 wiki-game-vars-wiki: ../doc/wiki-game-vars.txt
 
 wiki-weapon-vars: ../doc/wiki-weapon-vars.txt
 
 wiki-engine-vars: ../doc/wiki-engine-vars.txt
+
+wiki-commands: ../doc/wiki-commands.txt
