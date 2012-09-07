@@ -98,7 +98,7 @@ too.
     - Textures, Design and Testing
 
 * Martin "arand" Werner - Collaborator
-    - Documentation, Legal Drafting, Cross-Distribution Support, 
+    - Documentation, Legal Drafting, Cross-Distribution Support,
         Open Source Compliance Checks, and much more.
 
 * Mike "mikeplus64" Ledger - Artist
@@ -107,7 +107,7 @@ too.
 * Derek "JoJo" Stegall - Artist
     - Maps, Models, Textures, HUD, Sound FX, Design and Testing
 
-* Jonathan "Ulukai" De Nil
+* Jonathan "Ulukai" De Nil - Artist
     - Maps (ares, conflict, canals), Testing, Support
 
 * Jeff "Architect" Cope - Collaborator
