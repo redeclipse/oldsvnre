@@ -191,6 +191,18 @@ void rendercmenu()
     t = *compasstex ? textureload(compasstex, 3) : NULL;
     loopi(min(curcompass->actions.length(), 8))
         renderaction(i+1, size, t, curcompass->actions[i].code, curcompass->actions[i].name, hit == i);
+    if(curcompass->actions.length() > 8)
+    {
+        pushfont("reduced");
+        int x = hudwidth/2, y = hudheight/2+size+FONTH*4, maxy = hudheight-FONTH*2;
+        loopi(curcompass->actions.length()-8)
+        {
+            caction &c = curcompass->actions[i+8];
+            y += draw_textx("\fs\fa[\fS%s\fs\fa]\fS %s", x, y, 255, 255, 255, 192, TEXT_CENTERED, -1, -1, getkeyname(c.code), c.name);
+            if(y >= maxy) break;
+        }
+        popfont();
+    }
 }
 
 bool runcmenu(int idx)
