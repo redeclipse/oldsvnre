@@ -1,3 +1,34 @@
+= Red Eclipse SVN (unreleased) =
+Gameplay:
+ * Increased overall AI skill
+
+Weapons:
+ * Plasma primary damage and explosion radius increased
+
+Maps:
+ * Assigned map music to all maps
+
+Modes & Mutators:
+ * Number of bots in coop reduced to 3/2 of humans
+
+Additional fixed bugs:
+ * #218 - can no longer drop your loadout weapons in arena
+
+
+= Red Eclipse 1.3.1 =
+Maps:
+ * Canals, removed from rotations
+
+Modding & Data Assets:
+ * arid skybox added
+
+Multiplayer & Servers:
+ * Fix IRC relaying
+
+Core & Install:
+ * Fix "msvcr100.dll missing" bug on Windows
+
+
 = Red Eclipse 1.3 =
 Gameplay:
  * New "impulse vaulting" movement (press Q next to an obstacle to use it to propel yourself upward)
