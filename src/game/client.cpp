@@ -13,7 +13,7 @@ namespace client
 
     ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), {
          char *list = NULL;
-         maplist(list, *g, *m, *c);
+         maplist(list, *g, *m, *c, mapsfilter);
          if(list)
          {
              result(list);

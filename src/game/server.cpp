@@ -769,7 +769,7 @@ namespace server
     const char *pickmap(const char *suggest, int mode, int muts)
     {
         const char *map = GAME(defaultmap);
-        if(!map || !*map) map = choosemap(suggest, mode, muts, GAME(maprotate));
+        if(!map || !*map) map = choosemap(suggest, mode, muts, GAME(rotatemaps));
         return map && *map ? map : "maps/untitled";
     }
 
@@ -1078,11 +1078,11 @@ namespace server
             else copystring(chosen, suggest);
         }
         else *chosen = 0;
-        int rotate = force ? force : GAME(maprotate);
+        int rotate = force ? force : GAME(rotatemaps);
         if(rotate)
         {
             char *list = NULL;
-            maplist(list, mode, muts, numclients());
+            maplist(list, mode, muts, numclients(), GAME(rotatemapsfilter));
             if(list)
             {
                 int n = listlen(list), p = -1, c = -1;
@@ -2009,13 +2009,13 @@ namespace server
                     case 1: case 2: case 3:
                     {
                         list = newstring(GAME(allowmaps));
-                        mapcull(list, reqmode, reqmuts, numclients());
+                        mapcull(list, reqmode, reqmuts, numclients(), GAME(mapsfilter));
                         break;
                     }
                     case 4: case 5: case 6:
                     {
                         level -= 3;
-                        maplist(list, reqmode, reqmuts, numclients());
+                        maplist(list, reqmode, reqmuts, numclients(), GAME(mapsfilter));
                         break;
                     }
                     case 7: if(!haspriv(ci, PRIV_MAX, "select a map to play")) return; level -= 6; break;

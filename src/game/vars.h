@@ -37,10 +37,6 @@ GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepause
 GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
-GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
-GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_NEVER, rotatemodefilter &= ~G_NEVER); // modes not in this array are filtered out
-GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
-GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
 
 GSVAR(IDF_ADMIN, allowmaps, "ares bath biolytic blink canals cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone2k lab linear longestyard mist neodrive nova oneiroi panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
 
@@ -60,15 +56,21 @@ GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple dutility echo fourplex gho
 GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink canals cargo center colony conflict darkness deadsimple deathtrap deli dropzone echo error facility forge foundation fourplex futuresport ghost industrial institute isolation keystone2k lab linear mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, largemaps, "ares biolytic blink canals cargo center colony dawn deadsimple deathtrap deli depot error facility forge foundation futuresport ghost industrial isolation lab linear mist nova processing pumpstation spacetech tower tranquility tribal ubik venus warp");
 
-
 GVAR(IDF_ADMIN, modelock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administrator only, 4-6 = helper/moderator/administrator can only set limited mode and higher, 7 = no mode selection
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
 GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_ARENA), mutstype[G_M_INSTA].mutators, sv_instagibfilter &= ~(1<<G_M_VAMPIRE); sv_instagibfilter |= (1<<G_M_INSTA), instagibfilter &= ~(1<<G_M_VAMPIRE); instagibfilter |= (1<<G_M_INSTA));
 
-GVAR(IDF_ADMIN, maprotate, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 GVAR(IDF_ADMIN, mapslock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administrator can select non-allow maps, 4-6 = helper/moderator/administrator can select non-rotation maps, 7 = no map selection
+
+GVAR(IDF_ADMIN, rotatemaps, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
+GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
+GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_NEVER, rotatemodefilter &= ~G_NEVER); // modes not in this array are filtered out
+GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
+GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
+GVAR(IDF_ADMIN, rotatemapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
+
 GVAR(IDF_ADMIN, varslock, 0, 2, 4); // 0 = off, 1 = helper, 2 = moderator, 3 = administrator, 4 = nobody
 GVAR(IDF_ADMIN, votelock, 0, 2, 7); // 0 = off, 1-3 = helper/moderator/administrator can select same game, 4 = helper/moderator/administrator only can vote, 7 = no voting
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
