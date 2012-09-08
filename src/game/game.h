@@ -587,8 +587,16 @@ struct gamestate
             case EU_AUTO: case EU_ACT: return true; break;
             case EU_ITEM:
             { // can't use when reloading or firing
-                if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skip))
-                    return true;
+                switch(type)
+                {
+                    case WEAPON:
+                    {
+                        if(isweap(attr) && !hasweap(attr, sweap, 4) && weapwaited(weapselect, millis, skip))
+                            return true;
+                        break;
+                    }
+                    default: return true;
+                }
                 break;
             }
             default: break;

@@ -171,7 +171,7 @@ namespace client
         }
         delete f;
     }
-    ICOMMAND(0, writevars, "sii", (char *name, int *all, int *sv), writegamevars(name, *all!=0, *sv!=0));
+    ICOMMAND(0, writevars, "sii", (char *name, int *all, int *sv), if(!(identflags&IDF_WORLD)) writegamevars(name, *all!=0, *sv!=0));
 
     // collect c2s messages conveniently
     vector<uchar> messages;

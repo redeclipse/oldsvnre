@@ -3486,28 +3486,33 @@ namespace server
             else return;
         }
         int weap = -1, ammoamt = -1, reloadamt = -1, dropped = -1, ammo = -1, reloads = -1;
-        if(sents[ent].type == WEAPON)
+        switch(sents[ent].type)
         {
-            if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= GAME(maxcarry))
-                weap = gs.drop(sweap);
-            loopvk(clients) if(clients[k]->state.dropped.find(ent))
+            case WEAPON:
             {
-                clients[k]->state.dropped.values(ent, ammoamt, reloadamt);
+                if(!gs.hasweap(attr, sweap) && w_carry(attr, sweap) && gs.carry(sweap) >= GAME(maxcarry))
+                    weap = gs.drop(sweap);
+                loopvk(clients) if(clients[k]->state.dropped.find(ent))
+                {
+                    clients[k]->state.dropped.values(ent, ammoamt, reloadamt);
+                    break;
+                }
+                if(isweap(weap))
+                {
+                    if(sents.inrange(gs.entid[weap]))
+                    {
+                        dropped = gs.entid[weap];
+                        ammo = gs.ammo[weap];
+                        reloads = gs.reloads[weap];
+                        setspawn(dropped, false);
+                        gs.setweapstate(weap, WEAP_S_SWITCH, GAME(weaponswitchdelay), millis);
+                        gs.dropped.add(dropped, ammo, reloads);
+                    }
+                    gs.ammo[weap] = gs.entid[weap] = gs.reloads[weap] = -1;
+                }
                 break;
             }
-            if(isweap(weap))
-            {
-                if(sents.inrange(gs.entid[weap]))
-                {
-                    dropped = gs.entid[weap];
-                    ammo = gs.ammo[weap];
-                    reloads = gs.reloads[weap];
-                    setspawn(dropped, false);
-                    gs.setweapstate(weap, WEAP_S_SWITCH, GAME(weaponswitchdelay), millis);
-                    gs.dropped.add(dropped, ammo, reloads);
-                }
-                gs.ammo[weap] = gs.entid[weap] = gs.reloads[weap] = -1;
-            }
+            default: break;
         }
         setspawn(ent, false, true);
         gs.useitem(ent, sents[ent].type, attr, ammoamt, reloadamt, sweap, millis, GAME(weaponswitchdelay));
