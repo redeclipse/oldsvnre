@@ -1,5 +1,4 @@
 #define GAMEWORLD 1
-#define GAMEWORLD 1
 #include "game.h"
 namespace game
 {

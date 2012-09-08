@@ -1,7 +1,4 @@
 #include "game.h"
-extern char *progresstitle, *progresstext;
-extern float progresspart, progressamt;
-
 namespace hud
 {
     const int NUMSTATS = 11;

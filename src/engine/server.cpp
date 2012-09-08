@@ -1516,7 +1516,7 @@ void writecfg()
 #endif
 }
 
-COMMAND(0, writecfg, "");
+ICOMMAND(0, writecfg, "", (void), if(!(identflags&IDF_WORLD)) writecfg());
 
 VAR(0, rehashing, 1, 0, -1);
 void rehash(bool reload)
@@ -1544,7 +1544,7 @@ void rehash(bool reload)
     conoutf("\fwconfiguration reloaded");
     rehashing = 0;
 }
-ICOMMAND(0, rehash, "i", (int *nosave), rehash(*nosave ? false : true));
+ICOMMAND(0, rehash, "i", (int *nosave), if(!(identflags&IDF_WORLD)) rehash(*nosave ? false : true));
 
 #ifdef STANDALONE
 #include <signal.h>
