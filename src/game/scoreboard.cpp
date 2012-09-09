@@ -104,7 +104,11 @@ namespace hud
         {
             gameent *o = (gameent *)game::iterdynents(i);
             if(!o || o->type!=ENT_PLAYER || (!showconnecting && !o->name[0])) continue;
-            if(o->state==CS_SPECTATOR) { spectators.add(o); continue; }
+            if(o->state==CS_SPECTATOR)
+            {
+                if(o != game::player1 || !client::demoplayback) spectators.add(o);
+                continue;
+            }
             int team = m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? o->team : TEAM_NEUTRAL;
             bool found = false;
             loopj(numgroups)
@@ -255,9 +259,9 @@ namespace hud
         g.textf("%s", 0xFFFFFF, NULL, 0, gname);
         if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
         {
-            if(!game::timeremaining) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
+            if(game::intermission) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
             else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
-            else g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, hud::timetostr(game::timeremaining, 2));
+            else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, hud::timetostr(game::timeremaining, 2));
         }
         g.popfont();
         g.poplist();
@@ -279,98 +283,108 @@ namespace hud
             g.popfont();
             g.poplist();
         }
-        if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
-        {
-            int sdelay = m_delay(game::gamemode, game::mutators), delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
-            const char *msg = game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait";
-            g.space(0.5f);
-            g.pushlist();
-            g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
-            if(shownotices >= 2)
-            {
-                g.space(1);
-                SEARCHBINDCACHE(attackkey)("action 0", 0);
-                g.pushfont("little");
-                if(delay || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
-                {
-                    if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
-                    else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, hud::timetostr(delay, -1));
-                    else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
-                    {
-                        int n = game::numwaiting();
-                        if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
-                        else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
-                    }
-                    g.poplist();
-                    if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
-                        g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey);
-                }
-                else
-                {
-                    g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
-                    g.poplist();
-                    if(game::player1->state != CS_WAITING) g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey);
-                }
-                if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
-                {
-                    SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                    g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey);
-                }
-                if(m_arena(game::gamemode, game::mutators))
-                {
-                    SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                    g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
-                }
-                if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
-                {
-                    SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                    g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey);
-                }
-                g.popfont();
-            }
-            else g.poplist();
-        }
-        else if(game::player1->state == CS_ALIVE)
+        if(client::demoplayback)
         {
             g.space(0.5f);
             g.pushfont("reduced");
-
-            // In two cases, the main mode-description is not applicable
-            if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // bomber-ball hold
-                g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
-            else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // ctf protect
-                g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
-            else
-                g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
-
-            if(m_isteam(game::gamemode, game::mutators))
-                g.textf("playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtexname(game::player1->team), TEAM(game::player1->team, name));
-            else
-                g.textf("free-for-all", 0xFFFFFF, NULL, 0);
-
+            g.textf("Demo Playback in Progress", 0xFFFFFF, NULL, 0);
             g.popfont();
         }
-        else if(game::player1->state == CS_SPECTATOR)
+        else if(!game::intermission)
         {
-            g.space(0.5f);
-            g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
-            SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-            g.pushfont("little");
-            g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey);
-            if(!m_edit(game::gamemode) && shownotices >= 2)
+            if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
             {
-                SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV");
+                int sdelay = m_delay(game::gamemode, game::mutators), delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
+                const char *msg = game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait";
+                g.space(0.5f);
+                g.pushlist();
+                g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, msg); g.popfont();
+                if(shownotices >= 2)
+                {
+                    g.space(1);
+                    SEARCHBINDCACHE(attackkey)("action 0", 0);
+                    g.pushfont("little");
+                    if(delay || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                    {
+                        if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                        else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, hud::timetostr(delay, -1));
+                        else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                        {
+                            int n = game::numwaiting();
+                            if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
+                            else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
+                        }
+                        g.poplist();
+                        if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
+                            g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey);
+                    }
+                    else
+                    {
+                        g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
+                        g.poplist();
+                        if(game::player1->state != CS_WAITING) g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey);
+                    }
+                    if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
+                    {
+                        SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
+                        g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey);
+                    }
+                    if(m_arena(game::gamemode, game::mutators))
+                    {
+                        SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
+                        g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change");
+                    }
+                    if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                    {
+                        SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                        g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey);
+                    }
+                    g.popfont();
+                }
+                else g.poplist();
             }
-            g.popfont();
-        }
+            else if(game::player1->state == CS_ALIVE)
+            {
+                g.space(0.5f);
+                g.pushfont("reduced");
 
-        if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
-        {
-            SEARCHBINDCACHE(editkey)("edittoggle", 1);
-            g.pushfont("little");
-            g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
-            g.popfont();
+                // In two cases, the main mode-description is not applicable
+                if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // bomber-ball hold
+                    g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
+                else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // ctf protect
+                    g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
+                else
+                    g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
+
+                if(m_isteam(game::gamemode, game::mutators))
+                    g.textf("playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), hud::teamtexname(game::player1->team), TEAM(game::player1->team, name));
+                else
+                    g.textf("free-for-all", 0xFFFFFF, NULL, 0);
+
+                g.popfont();
+            }
+            else if(game::player1->state == CS_SPECTATOR)
+            {
+                g.space(0.5f);
+                g.pushfont("reduced"); g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating"); g.popfont();
+                SEARCHBINDCACHE(speconkey)("spectator 0", 1);
+                g.pushfont("little");
+                g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey);
+                if(!m_edit(game::gamemode) && shownotices >= 2)
+                {
+                    SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
+                    g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV");
+                }
+                g.popfont();
+            }
+
+            if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
+            {
+                SEARCHBINDCACHE(editkey)("edittoggle", 1);
+                g.pushfont("little");
+                g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
+                g.popfont();
+            }
         }
 
         SEARCHBINDCACHE(scoreboardkey)("showscores", 1);

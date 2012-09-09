@@ -23,7 +23,7 @@ namespace physics
     FVAR(IDF_PERSIST, impulsekick, 0, 150, 180); // determines the minimum angle to switch between wall kick and run
     VAR(IDF_PERSIST, impulsemethod, 0, 3, 3); // determines which impulse method to use, 0 = none, 1 = power jump, 2 = power slide, 3 = both
     VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = impulse jump, 2 = impulse dash, 3 = both
-    FVAR(IDF_PERSIST, impulseroll, 0, 15, 90);
+    FVAR(IDF_PERSIST, impulseroll, 0, 15, 89);
 
     VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
