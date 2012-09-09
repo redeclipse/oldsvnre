@@ -197,7 +197,7 @@ namespace ai
                 if(showaiinfo > 1) conoutft(CON_EVENT, "\fg%s assigned to %s at skill %d", game::colorname(d, name), m, sk);
                 else conoutft(CON_EVENT, "\fg%s joined the game", game::colorname(d, name), m, sk);
             }
-            game::cameras.deletecontents();
+            game::tvreset(d);
             resetthisguy = true;
         }
         else

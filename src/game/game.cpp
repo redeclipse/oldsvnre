@@ -367,6 +367,45 @@ namespace game
     }
     ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announcef(*idx, *targ, NULL, "\fw%s", s));
 
+    void tvreset(gameent *d, bool clear)
+    {
+        if(d)
+        {
+            if(clear)
+            {
+                int x = -1;
+                loopv(cameras) if(cameras[i]->type == cament::PLAYER && cameras[i]->player == d)
+                {
+                    x = i;
+                    break;
+                }
+                if(x >= 0)
+                {
+                    cament *p = cameras[x];
+                    cameras.remove(x);
+                    if(p) delete p;
+                    if(!x) lastcamera = lasttvcam = lasttvchg = 0;
+                }
+            }
+            else
+            {
+                if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
+                {
+                    cament *c = cameras.add(new cament);
+                    c->o = camerapos(d);
+                    c->type = cament::PLAYER;
+                    c->id = d->clientnum;
+                    c->player = d;
+                }
+            }
+        }
+        else
+        {
+            cameras.deletecontents();
+            lastcamera = lasttvcam = lasttvchg = 0;
+        }
+    }
+
     bool tvmode(bool check)
     {
         if(!m_edit(gamemode) && (!check || !cameras.empty())) switch(player1->state)
@@ -1333,7 +1372,7 @@ namespace game
             e->dominated.removeobj(d);
         }
         if(focus == d) { focus = player1; follow = 0; } // just in case
-        cameras.deletecontents();
+        tvreset(d, true);
         client::unignore(d->clientnum);
         waiting.removeobj(d);
         client::clearvotes(d);
@@ -1398,7 +1437,7 @@ namespace game
         ai::startmap(name, reqname, empty);
         intermission = false;
         maptime = hud::lastnewgame = 0;
-        cameras.deletecontents();
+        tvreset();
         projs::reset();
         physics::reset();
         resetworld();
@@ -1467,7 +1506,7 @@ namespace game
     bool duplicatename(gameent *d, char *name = NULL)
     {
         if(!name) name = d->name;
-        if(d!=player1 && !strcmp(name, player1->name)) return true;
+        if(!client::demoplayback && d!=player1 && !strcmp(name, player1->name)) return true;
         loopv(players) if(players[i] && d!=players[i] && !strcmp(name, players[i]->name)) return true;
         return false;
     }
@@ -1876,7 +1915,7 @@ namespace game
                 cament *c = cameras.add(new cament);
                 c->o = camerapos(d);
                 c->type = cament::PLAYER;
-                c->id = i+1;
+                c->id = d->clientnum;
                 c->player = d;
             }
             if(m_capture(gamemode)) capture::checkcams(cameras);
@@ -1888,7 +1927,7 @@ namespace game
         {
             case cament::PLAYER:
             {
-                if(cameras[i]->player || ((cameras[i]->player = (gameent *)iterdynents(cameras[i]->id))))
+                if(cameras[i]->player || ((cameras[i]->player = getclient(cameras[i]->id)) != NULL))
                 {
                     cameras[i]->o = camerapos(cameras[i]->player);
                     vecfromyawpitch(cameras[i]->player->yaw, cameras[i]->player->pitch, 1, 0, cameras[i]->dir);

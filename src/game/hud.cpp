@@ -19,6 +19,7 @@ namespace hud
     ICOMMAND(0, conout, "is", (int *n, char *s), conoutft(clamp(*n, 0, CON_MAX-1), "%s", s));
 
     VAR(IDF_PERSIST, showhud, 0, 1, 1);
+    VAR(IDF_PERSIST, showdemoplayback, 0, 1, 1);
     VAR(IDF_PERSIST, huduioverride, 0, 1, 2); // 0=off, 1=except intermission, 2=interactive ui only
     VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
@@ -955,205 +956,217 @@ namespace hud
             ty += draw_textx("[ \fs\fa%s\fS ]", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw, gname);
             popfont();
         }
-        if(game::intermission) ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
 
         if(game::player1->state == CS_SPECTATOR)
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
         else if(game::player1->state == CS_WAITING && showname())
             ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colorname(game::focus));
 
-        gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
-        if(target->state == CS_DEAD || target->state == CS_WAITING)
+
+        if(game::intermission)
+            ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
+        else if(client::demoplayback && showdemoplayback)
+            ty += draw_textx("Demo Playback in Progress", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
+        if(!game::intermission)
         {
-            int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
-            const char *msg = target->state == CS_WAITING && target == game::player1 ? "Please Wait" : "Fragged";
-            ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
-            if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
+            gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
+            if(target->state == CS_DEAD || target->state == CS_WAITING)
             {
-                pushfont("reduced");
-                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
-                popfont();
-            }
-            if(shownotices >= 2)
-            {
-                SEARCHBINDCACHE(attackkey)("action 0", 0);
-                if(delay || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
+                const char *msg = target->state == CS_WAITING && target == game::player1 ? "Please Wait" : "Fragged";
+                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
+                if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
                 {
                     pushfont("reduced");
-                    if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                    else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
-                    else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
+                    popfont();
+                }
+                if(shownotices >= 2)
+                {
+                    SEARCHBINDCACHE(attackkey)("action 0", 0);
+                    if(delay || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                     {
-                        int n = game::numwaiting();
-                        if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
-                        else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                    }
-                    popfont();
-                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
-                    {
-                        pushfont("little");
-                        ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
-                        popfont();
-                    }
-                }
-                else
-                {
-                    pushfont("reduced");
-                    ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                    popfont();
-                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
-                    {
-                        pushfont("little");
-                        ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
-                        popfont();
-                    }
-                }
-                if(target == game::player1 && target->state == CS_WAITING && shownotices >= 3)
-                {
-                    SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                    pushfont("little");
-                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
-                    popfont();
-                }
-                if(target == game::player1 && m_arena(game::gamemode, game::mutators))
-                {
-                    SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                    pushfont("little");
-                    ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change");
-                    popfont();
-                }
-                if(target == game::player1 && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
-                {
-                    SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                    pushfont("little");
-                    ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
-                    popfont();
-                }
-            }
-        }
-        else if(target->state == CS_ALIVE)
-        {
-            if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
-            {
-                pushfont("reduced");
-                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
-                popfont();
-            }
-            if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
-            {
-                pushfont("emphasis");
-                static vector<actitem> actitems;
-                actitems.setsize(0);
-                if(entities::collateitems(target, actitems))
-                {
-                    SEARCHBINDCACHE(actionkey)("action 3", 0);
-                    while(!actitems.empty())
-                    {
-                        actitem &t = actitems.last();
-                        int ent = -1;
-                        switch(t.type)
+                        pushfont("reduced");
+                        if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                        else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
+                        else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                         {
-                            case actitem::ENT:
-                            {
-                                if(!entities::ents.inrange(t.target)) break;
-                                ent = t.target;
-                                break;
-                            }
-                            case actitem::PROJ:
-                            {
-                                if(!projs::projs.inrange(t.target)) break;
-                                projent &proj = *projs::projs[t.target];
-                                ent = proj.id;
-                                break;
-                            }
-                            default: break;
+                            int n = game::numwaiting();
+                            if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
+                            else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                         }
-                        if(entities::ents.inrange(ent))
+                        popfont();
+                        if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
                         {
-                            extentity &e = *entities::ents[ent];
-                            if(enttype[e.type].usetype == EU_ITEM)
+                            pushfont("little");
+                            ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                            popfont();
+                        }
+                    }
+                    else
+                    {
+                        pushfont("reduced");
+                        ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                        popfont();
+                        if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
+                        {
+                            pushfont("little");
+                            ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                            popfont();
+                        }
+                    }
+                    if(target == game::player1 && !client::demoplayback)
+                    {
+                        if(target->state == CS_WAITING && shownotices >= 3)
+                        {
+                            SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
+                            pushfont("little");
+                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
+                            popfont();
+                        }
+                        if(m_arena(game::gamemode, game::mutators))
+                        {
+                            SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
+                            pushfont("little");
+                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change");
+                            popfont();
+                        }
+                        if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                        {
+                            SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                            pushfont("little");
+                            ty += draw_textx("Press \fs\fc%s\fS to change teams", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
+                            popfont();
+                        }
+                    }
+                }
+            }
+            else if(target->state == CS_ALIVE)
+            {
+                if(obitnotices && totalmillis-target->lastkill <= noticetime && *target->obit)
+                {
+                    pushfont("reduced");
+                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
+                    popfont();
+                }
+                if(target == game::player1 && shownotices >= 3 && game::allowmove(target))
+                {
+                    pushfont("emphasis");
+                    static vector<actitem> actitems;
+                    actitems.setsize(0);
+                    if(entities::collateitems(target, actitems))
+                    {
+                        SEARCHBINDCACHE(actionkey)("action 3", 0);
+                        while(!actitems.empty())
+                        {
+                            actitem &t = actitems.last();
+                            int ent = -1;
+                            switch(t.type)
                             {
-                                int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                                if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_ALL))
+                                case actitem::ENT:
                                 {
-                                    if(e.type == WEAPON)
+                                    if(!entities::ents.inrange(t.target)) break;
+                                    ent = t.target;
+                                    break;
+                                }
+                                case actitem::PROJ:
+                                {
+                                    if(!projs::projs.inrange(t.target)) break;
+                                    projent &proj = *projs::projs[t.target];
+                                    ent = proj.id;
+                                    break;
+                                }
+                                default: break;
+                            }
+                            if(entities::ents.inrange(ent))
+                            {
+                                extentity &e = *entities::ents[ent];
+                                if(enttype[e.type].usetype == EU_ITEM)
+                                {
+                                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
+                                    if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_ALL))
                                     {
-                                        int drop = -1;
-                                        if(w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
-                                            drop = target->drop(sweap);
-                                        if(isweap(drop))
+                                        if(e.type == WEAPON)
                                         {
-                                            static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
-                                            attrs[0] = drop;
-                                            defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
-                                            ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
+                                            int drop = -1;
+                                            if(w_carry(target->weapselect, sweap) && target->ammo[attr] < 0 && w_carry(attr, sweap) && target->carry(sweap) >= maxcarry)
+                                                drop = target->drop(sweap);
+                                            if(isweap(drop))
+                                            {
+                                                static struct dropattrs : attrvector { dropattrs() { add(0, 5); } } attrs;
+                                                attrs[0] = drop;
+                                                defformatstring(dropweap)("%s", entities::entinfo(WEAPON, attrs, false, true));
+                                                ty += draw_textx("Press \fs\fc%s\fS to swap \fs%s\fS for \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, dropweap, entities::entinfo(e.type, e.attrs, false, true));
+                                            }
+                                            else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
                                         }
-                                        else ty += draw_textx("Press \fs\fc%s\fS to pickup \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                        else ty += draw_textx("Press \fs\fc%s\fS to use \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                        break;
                                     }
-                                    else ty += draw_textx("Press \fs\fc%s\fS to use \fs%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey, entities::entinfo(e.type, e.attrs, false, true));
+                                }
+                                else if(e.type == TRIGGER && e.attrs[2] == TA_ACTION)
+                                {
+                                    ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey);
                                     break;
                                 }
                             }
-                            else if(e.type == TRIGGER && e.attrs[2] == TA_ACTION)
-                            {
-                                ty += draw_textx("Press \fs\fc%s\fS to interact", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, actionkey);
-                                break;
-                            }
+                            actitems.pop();
                         }
-                        actitems.pop();
-                    }
-                }
-                popfont();
-                if(shownotices >= 4)
-                {
-                    pushfont("little");
-                    if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
-                    {
-                        SEARCHBINDCACHE(attackkey)("action 0", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
-                        SEARCHBINDCACHE(altkey)("action 1", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack");
-                    }
-                    if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
-                    {
-                        SEARCHBINDCACHE(reloadkey)("action 2", 0);
-                        ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
                     }
                     popfont();
+                    if(shownotices >= 4)
+                    {
+                        pushfont("little");
+                        if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
+                        {
+                            SEARCHBINDCACHE(attackkey)("action 0", 0);
+                            ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                            SEARCHBINDCACHE(altkey)("action 1", 0);
+                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack");
+                        }
+                        if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
+                        {
+                            SEARCHBINDCACHE(reloadkey)("action 2", 0);
+                            ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);
+                        }
+                        popfont();
+                    }
                 }
             }
-        }
 
-        if(game::player1->state == CS_SPECTATOR)
-        {
-            SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-            pushfont("little");
-            ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
-            if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) && shownotices >= 2)
+            if(game::player1->state == CS_SPECTATOR)
             {
-                SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                ty += draw_textx("Press \fs\fc%s\fS to join a team", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
+                SEARCHBINDCACHE(speconkey)("spectator 0", 1);
+                pushfont("little");
+                if(!client::demoplayback)
+                {
+                    ty += draw_textx("Press \fs\fc%s\fS to join the game", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, speconkey);
+                    if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) && shownotices >= 2)
+                    {
+                        SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                        ty += draw_textx("Press \fs\fc%s\fS to join a team", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, teamkey);
+                    }
+                }
+                if(!m_edit(game::gamemode) && shownotices >= 2)
+                {
+                    SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
+                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
+                }
+                popfont();
             }
-            if(!m_edit(game::gamemode) && shownotices >= 2)
+
+            if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4) && !client::demoplayback)
             {
-                SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
+                SEARCHBINDCACHE(editkey)("edittoggle", 1);
+                pushfont("little");
+                ty += draw_textx("Press \fs\fc%s\fS to %s editmode", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
+                popfont();
             }
-            popfont();
+
+            if(m_capture(game::gamemode)) capture::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
+            else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
+            else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
         }
-
-        if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
-        {
-            SEARCHBINDCACHE(editkey)("edittoggle", 1);
-            pushfont("little");
-            ty += draw_textx("Press \fs\fc%s\fS to %s editmode", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, editkey, game::focus->state != CS_EDITING ? "enter" : "exit");
-            popfont();
-        }
-
-        if(m_capture(game::gamemode)) capture::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
-        else if(m_defend(game::gamemode)) defend::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
-        else if(m_bomber(game::gamemode)) bomber::drawnotices(hudwidth, hudheight, tx, ty, tf/255.f);
-
         popfont();
         glPopMatrix();
     }
