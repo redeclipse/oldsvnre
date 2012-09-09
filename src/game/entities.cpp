@@ -449,7 +449,7 @@ namespace entities
                 case TR_TOGGLE: case TR_LINK: case TR_ONCE:
                 {
                     client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
-                    if(!e.spawned) setspawn(n, 1);
+                    if(!e.spawned || e.attrs[1] == TR_TOGGLE) setspawn(n, e.spawned ? 0 : 1);
                     break;
                 }
                 case TR_SCRIPT:

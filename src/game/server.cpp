@@ -4611,18 +4611,16 @@ namespace server
                             {
                                 case TR_TOGGLE:
                                 {
-                                    if(!sents[ent].spawned || sents[ent].attrs[2] != TA_AUTO)
-                                    {
-                                        sents[ent].millis = gamemillis+(triggertime(ent)*2);
-                                        sents[ent].spawned = !sents[ent].spawned;
-                                        commit = kin = true;
-                                    }
+                                    sents[ent].millis = gamemillis+(triggertime(ent)*2);
+                                    sents[ent].spawned = !sents[ent].spawned;
+                                    commit = kin = true;
                                     break;
                                 }
                                 case TR_ONCE: if(sents[ent].spawned) break;
                                 case TR_LINK:
                                 {
-                                    sents[ent].millis = gamemillis+(triggertime(ent)*2); kin = true;
+                                    sents[ent].millis = gamemillis+(triggertime(ent)*2);
+                                    kin = true;
                                     if(!sents[ent].spawned)
                                     {
                                         sents[ent].spawned = true;
