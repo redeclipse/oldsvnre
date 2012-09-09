@@ -321,6 +321,7 @@ namespace projs
                 projs[i]->o = pos;
                 projs[i]->stick = NULL;
             }
+            projs[i]->resetinterp();
             break;
         }
     }

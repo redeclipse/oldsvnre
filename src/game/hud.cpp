@@ -20,7 +20,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showhud, 0, 1, 1);
     VAR(IDF_PERSIST, showdemoplayback, 0, 1, 1);
-    VAR(IDF_PERSIST, huduioverride, 0, 1, 2); // 0=off, 1=except intermission, 2=interactive ui only
+    VAR(IDF_PERSIST, huduioverride, 0, 0, 2); // 0=off, 1=except intermission, 2=interactive ui only
     VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
     FVAR(IDF_PERSIST, gapsize, 0, 0.01f, 1000);
@@ -43,10 +43,10 @@ namespace hud
     VAR(IDF_PERSIST, spawnfade, 0, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, commandfade, 0, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, commandfadeskew, 0, 0.25f, 1);
     VAR(IDF_PERSIST, uifade, 0, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, uifadeamt, 0, 0.5f, 1);
+    FVAR(IDF_PERSIST, uifadeamt, 0, 0.65f, 1);
 
     int conskip = 0;
     void setconskip(int *n)

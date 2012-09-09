@@ -25,7 +25,7 @@ namespace physics
     VAR(IDF_PERSIST, impulseaction, 0, 3, 3); // determines how impulse action works, 0 = off, 1 = impulse jump, 2 = impulse dash, 3 = both
     FVAR(IDF_PERSIST, impulseroll, 0, 15, 89);
 
-    VAR(IDF_PERSIST, dashstyle, 0, 1, 1); // 0 = only with impulse, 1 = double tap
+    VAR(IDF_PERSIST, dashstyle, 0, 0, 1); // 0 = only with impulse, 1 = double tap
     VAR(IDF_PERSIST, crouchstyle, 0, 0, 2); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle
     VAR(IDF_PERSIST, sprintstyle, 0, 3, 5); // 0 = press and hold, 1 = double-tap toggle, 2 = toggle, 3-5 = same, but auto engage if impulsesprint == 0
 
