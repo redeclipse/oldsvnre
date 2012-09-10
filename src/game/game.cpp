@@ -353,7 +353,7 @@ namespace game
         if(idx >= 0)
         {
             physent *t = !d || d == focus ? camera1 : d;
-            playsound(idx, t->o, t, SND_DIRECT|SND_NOCULL, -1, -1, -1, d ? &d->aschan : NULL);
+            playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, d ? &d->aschan : NULL);
         }
     }
     void announcef(int idx, int targ, gameent *d, const char *msg, ...)
@@ -361,7 +361,7 @@ namespace game
         if(targ >= 0 && msg && *msg)
         {
             defvformatstring(text, msg, msg);
-            conoutft(targ, "%s", text);
+            conoutft(targ == CON_INFO && d == game::player1 ? CON_SELF : targ, "%s", text);
         }
         announce(idx, d);
     }
