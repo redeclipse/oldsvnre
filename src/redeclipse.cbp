@@ -738,12 +738,6 @@
 			<Option target="server64" />
 			<Option target="server64-dbg" />
 		</Unit>
-		<Unit filename="engine\master.h">
-			<Option target="server32" />
-			<Option target="server32-dbg" />
-			<Option target="server64" />
-			<Option target="server64-dbg" />
-		</Unit>
 		<Unit filename="engine\material.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />

@@ -315,7 +315,7 @@ void drawbb(const ivec &bo, const ivec &br, const vec &camera)
         else if(camera[dim] > bo[dim]) continue; \
         v0 v1 v2 v3 \
         xtraverts += 4; \
-    } while(0); 
+    } while(0);
     #define GENFACEVERT(orient, vert, ox,oy,oz, rx,ry,rz) \
         glVertex3f(ox rx, oy ry, oz rz);
     GENFACEVERTS(bo.x, bo.x + br.x, bo.y, bo.y + br.y, bo.z, bo.z + br.z, , , , , , )
@@ -443,7 +443,7 @@ void renderreflectedmapmodels()
         }
         *lastmms = NULL;
     }
-    for(octaentities *oe = mms; oe; oe = reflecting ? oe->rnext : oe->next) if(reflecting || oe->distance >= 0) 
+    for(octaentities *oe = mms; oe; oe = reflecting ? oe->rnext : oe->next) if(reflecting || oe->distance >= 0)
     {
         if(reflecting || refracting>0 ? oe->bbmax.z <= reflectz : oe->bbmin.z >= reflectz) continue;
         if(isfoggedcube(oe->o, oe->size)) continue;
@@ -1463,7 +1463,7 @@ static void changeslottmus(renderstate &cur, int pass, Slot &slot, VSlot &vslot)
 {
     if(pass==RENDERPASS_LIGHTMAP || pass==RENDERPASS_COLOR || pass==RENDERPASS_ENVMAP || pass==RENDERPASS_DYNLIGHT)
     {
-        GLuint diffusetex = blankgeom && editmode ? blanktexture->id : (slot.sts.empty() ? notexture->id : slot.sts[0].t->id);
+        GLuint diffusetex = blankgeom ? blanktexture->id : (slot.sts.empty() ? notexture->id : slot.sts[0].t->id);
         if(cur.textures[cur.diffusetmu]!=diffusetex)
             glBindTexture(GL_TEXTURE_2D, cur.textures[cur.diffusetmu] = diffusetex);
     }
