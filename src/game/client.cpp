@@ -718,7 +718,13 @@ namespace client
         hud::resetscores();
         mapvotes.shrink(0);
         if(editmode) toggleedit();
-        if(m_demo(gamemode)) return;
+        if(m_demo(game::gamemode))
+        {
+            game::maptime = 1;
+            game::intermission = true;
+            game::timeremaining = 0;
+            return;
+        }
         if(m_capture(game::gamemode)) capture::reset();
         else if(m_defend(game::gamemode)) defend::reset();
         else if(m_bomber(game::gamemode)) bomber::reset();
