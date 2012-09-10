@@ -18,6 +18,7 @@ VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guiblend, 1, 255, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
+FVAR(IDF_PERSIST, guibgfade, 0, 0, 1);
 
 static bool needsinput = false, hastitle = true;
 
@@ -863,6 +864,18 @@ struct gui : guient
             glPushMatrix();
             glTranslatef(origin.x, origin.y, origin.z);
             glScalef(scale.x, scale.y, scale.z);
+            if(guibgfade > 0)
+            {
+                usetexturing(false);
+                int x = curx-guibound[0], y = cury-guibound[1], w = xsize+guibound[0]*2, h = ysize+guibound[1]*2;
+                if(hastitle)
+                {
+                    y -= guibound[1]*3/2;
+                    h += guibound[1]*3/2;
+                }
+                hud::drawblend(x, y, w, h, 1-guibgfade, 1-guibgfade, 1-guibgfade, true);
+                usetexturing(true);
+            }
         }
     }
 

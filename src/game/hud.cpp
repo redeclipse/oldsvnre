@@ -20,7 +20,6 @@ namespace hud
 
     VAR(IDF_PERSIST, showhud, 0, 1, 1);
     VAR(IDF_PERSIST, showdemoplayback, 0, 1, 1);
-    VAR(IDF_PERSIST, huduioverride, 0, 0, 2); // 0=off, 1=except intermission, 2=interactive ui only
     VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
     FVAR(IDF_PERSIST, gapsize, 0, 0.01f, 1000);
@@ -43,10 +42,10 @@ namespace hud
     VAR(IDF_PERSIST, spawnfade, 0, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, commandfade, 0, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.65f, 1);
-    FVAR(IDF_PERSIST, commandfadeskew, 0, 0.25f, 1);
+    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, commandfadeskew, 0, 0, 1);
     VAR(IDF_PERSIST, uifade, 0, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, uifadeamt, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, uifadeamt, 0, 0.75f, 1);
 
     int conskip = 0;
     void setconskip(int *n)
@@ -553,7 +552,7 @@ namespace hud
     void drawtexture(float x, float y, float w, float h, bool flipx, bool flipy) { drawquad(x, y, w, h, 0, 0, 1, 1, flipx, flipy); }
     void drawsized(float x, float y, float s, bool flipx, bool flipy) { drawquad(x, y, s, s, 0, 0, 1, 1, flipx, flipy); }
 
-    void drawblend(int x, int y, int w, int h, float r, float g, float b, bool blend = false)
+    void drawblend(int x, int y, int w, int h, float r, float g, float b, bool blend)
     {
         if(!blend) glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -2554,7 +2553,7 @@ namespace hud
                 else a += (1.f-compassfadeamt);
                 loopi(3) if(a < colour[i]) colour[i] *= a;
             }
-            if(huduioverride >= (game::intermission ? 2 : 1) && uifade && (uimillis > 0 || totalmillis-abs(uimillis) <= uifade))
+            if(uifade && (uimillis > 0 || totalmillis-abs(uimillis) <= uifade))
             {
                 float n = min(float(totalmillis-abs(uimillis))/float(uifade), 1.f), a = n*uifadeamt;
                 if(uimillis > 0) a = 1.f-a;
@@ -2599,7 +2598,8 @@ namespace hud
                 drawblend(0, 0, hudwidth, hudheight, colour.x, colour.y, colour.z);
                 usetexturing(true);
                 float amt = (colour.x+colour.y+colour.z)/3.f;
-                if(!commandmillis || (commandmillis < 0 && totalmillis-abs(commandmillis) > commandfade)) consolefade *= amt+((1.f-amt)*commandfadeskew);
+                if(commandfadeskew > 0 && (!commandmillis || (commandmillis < 0 && totalmillis-abs(commandmillis) > commandfade)))
+                    consolefade *= amt+((1.f-amt)*commandfadeskew);
                 fade *= amt;
             }
         }

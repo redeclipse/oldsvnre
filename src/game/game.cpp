@@ -1452,7 +1452,7 @@ namespace game
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
             d->mapchange(lastmillis, m_health(gamemode, mutators));
-        if(m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
+        if(!client::demoplayback && m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
             chooseloadweap(game::player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
