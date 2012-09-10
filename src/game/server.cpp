@@ -1115,18 +1115,40 @@ namespace server
         return false;
     }
 
-    void startintermission()
+    void enddemorecord();
+    bool checkvotes(bool force = false);
+    void startintermission(bool req = false)
     {
-        setpause(false);
-        timeremaining = 0;
-        gamelimit = min(gamelimit, gamemillis);
-        inovertime = false;
-        if(smode) smode->intermission();
-        mutate(smuts, mut->intermission());
-        maprequest = false;
-        interm = totalmillis+GAME(intermlimit);
-        if(!interm) interm = 1;
-        sendf(-1, 1, "ri2", N_TICK, 0);
+        if(!interm)
+        {
+            setpause(false);
+            timeremaining = 0;
+            gamelimit = min(gamelimit, gamemillis);
+            inovertime = maprequest = false;
+            if(smode) smode->intermission();
+            mutate(smuts, mut->intermission());
+            sendf(-1, 1, "ri2", N_TICK, 0);
+        }
+        if(req)
+        {
+            if(!maprequest && GAME(votelimit) && GAME(votelock) != 7 && GAME(modelock) != 7 && GAME(mapslock) != 7)
+            {
+                if(demorecord) enddemorecord();
+                sendf(-1, 1, "ri", N_NEWGAME);
+                maprequest = true;
+                if(!(interm = totalmillis+GAME(votelimit))) interm = 1;
+            }
+            else // if they can't vote, no point in waiting for them to do so
+            {
+                interm = 0;
+                checkvotes(true);
+            }
+        }
+        else
+        {
+            maprequest = false;
+            if(!(interm = totalmillis+GAME(intermlimit))) interm = 1;
+        }
     }
 
     void checklimits()
@@ -1709,12 +1731,10 @@ namespace server
     {
         if(!demoplayback) return;
         DELETEP(demoplayback);
-
         loopv(clients) sendf(clients[i]->clientnum, 1, "ri3", N_DEMOPLAYBACK, 0, clients[i]->clientnum);
-
         srvoutf(4, "demo playback finished");
-
         loopv(clients) sendwelcome(clients[i]);
+        startintermission(true);
     }
 
     void setupdemoplayback()
@@ -1878,7 +1898,7 @@ namespace server
         if(GAME(resetlimitsonend) >= 2) resetlimits();
     }
 
-    bool checkvotes(bool force = false)
+    bool checkvotes(bool force)
     {
         shouldcheckvotes = false;
 
@@ -3814,22 +3834,7 @@ namespace server
                 privupdate = false;
             }
 
-            if(interm && totalmillis-interm >= 0) // wait then call for next map
-            {
-                if(GAME(votelimit) && !maprequest && GAME(votelock) != 7 && GAME(modelock) != 7 && GAME(mapslock) != 7)
-                { // if they can't vote, no point in waiting for them to do so
-                    if(demorecord) enddemorecord();
-                    sendf(-1, 1, "ri", N_NEWGAME);
-                    maprequest = true;
-                    interm = totalmillis+GAME(votelimit);
-                    if(!interm) interm = 1;
-                }
-                else
-                {
-                    interm = 0;
-                    checkvotes(true);
-                }
-            }
+            if(interm && totalmillis-interm >= 0) startintermission(true); // wait then call for next map
             if(shouldcheckvotes) checkvotes();
         }
         aiman::checkai();
