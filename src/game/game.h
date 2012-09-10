@@ -1370,12 +1370,6 @@ namespace hud
     extern vector<int> teamkills;
     extern const char *icontex(int type, int value);
     extern bool chkcond(int val, bool cond);
-    extern char *timetostr(int dur, int style = 0);
-    extern void drawquad(float x, float y, float w, float h, float tx1 = 0, float ty1 = 0, float tx2 = 1, float ty2 = 1, bool flipx = false, bool flipy = false);
-    extern void drawcoord(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1, bool flipx = false, bool flipy = false);
-    extern void drawtexture(float x, float y, float w, float h, bool flipx = false, bool flipy = false);
-    extern void drawsized(float x, float y, float s, bool flipx = false, bool flipy = false);
-    extern void colourskew(float &r, float &g, float &b, float skew = 1);
     extern void drawindicator(int weap, int x, int y, int s);
     extern void drawclip(int weap, int x, int y, float s);
     extern void drawpointertex(const char *tex, int x, int y, int s, float r = 1, float g = 1, float b = 1, float fade = 1);

@@ -774,7 +774,7 @@ namespace ai
 
     bool getwaypoints(bool force, const char *mname, bool check)
     {
-        if(check && loadedwaypoints[0]) return false;
+        if(check && (client::demoplayback || loadedwaypoints[0])) return false;
         return loadwaypoints(force, mname) || importwaypoints();
     }
 
