@@ -190,8 +190,9 @@ struct duelservmode : servmode
                         }
                         else if(m_survivor(gamemode, mutators))
                             formatstring(fight)("\fwsurvivor, round \fs\fr#%d\fS", duelround);
-                        loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                            ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
+                        //loopv(playing) if(allowbroadcast(playing[i]->clientnum))
+                        //    ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
+                        ancmsgft(-1, S_V_FIGHT, CON_EVENT, fight);
                         dueltime = dueldeath = -1;
                         duelcheck = gamemillis+5000;
                     }

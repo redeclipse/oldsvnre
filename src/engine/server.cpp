@@ -402,8 +402,8 @@ void sendpacket(int n, int chan, ENetPacket *packet, int exclude)
 {
     if(n < 0)
     {
-        server::recordpacket(chan, packet->data, packet->dataLength);
-        loopv(clients) if(i != server::peerowner(exclude) && server::allowbroadcast(i)) sendpacket(i, chan, packet, exclude);
+        server::recordpacket(abs(chan), packet->data, packet->dataLength);
+        if(chan >= 0) loopv(clients) if(i != server::peerowner(exclude) && server::allowbroadcast(i)) sendpacket(i, chan, packet, exclude);
         return;
     }
     switch(clients[n]->type)
