@@ -4686,6 +4686,7 @@ namespace server
                         cp->state.chatmillis.add(totalmillis ? totalmillis : 1);
                     }
                     if(flags&SAY_TEAM && !m_isteam(gamemode, mutators)) flags &= ~SAY_TEAM;
+                    sendf(-1, -1, "ri3s", N_TEXT, cp->clientnum, flags, text); // sent to nagative chan for recordpacket
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
