@@ -741,7 +741,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
             if(s.params[j].type == SHPARAM_LOOKUP || s.params[j].type == SHPARAM_UNIFORM) h->printf(" %s", escapeid(s.params[j].name));
             else h->printf(" %d", s.params[j].index);
             loopk(4) h->printf(" %f", s.params[j].val[k]);
-            if(s.params[j].palette > 0 || s.params[j].palindex > 0) h->printf(" %d %d", s.params[j].palette, s.params[j].palindex);
+            if(s.params[j].palette || s.params[j].palindex) h->printf(" %d %d", s.params[j].palette, s.params[j].palindex);
             h->printf("\n");
         }
     }
@@ -773,7 +773,7 @@ void saveslotconfig(stream *h, Slot &s, int index)
             h->printf("texalpha %f %f\n", s.variants->alphafront, s.variants->alphaback);
         if(s.variants->colorscale != vec(1, 1, 1))
             h->printf("texcolor %f %f %f\n", s.variants->colorscale.x, s.variants->colorscale.y, s.variants->colorscale.z);
-        if(s.variants->palette > 0 || s.variants->palindex > 0) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
+        if(s.variants->palette || s.variants->palindex) h->printf("texpalette %d %d\n", s.variants->palette, s.variants->palindex);
         if(s.variants->coastscale != 1) h->printf("texcoastscale %f\n", s.variants->coastscale);
         if(s.texgrass)
         {

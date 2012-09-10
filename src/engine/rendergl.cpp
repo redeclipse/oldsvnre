@@ -2244,7 +2244,6 @@ void drawviewtype(int targtype)
     if(limitsky()) drawskybox(farplane, true);
 
     rendergeom(causticspass);
-    extern int outline, blankgeom;
     if(!wireframe && editmode && (outline || (fullbright && blankgeom))) renderoutline();
 
     queryreflections();

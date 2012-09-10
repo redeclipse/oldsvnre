@@ -1,6 +1,5 @@
 #include "engine.h"
 
-extern int outline, blankgeom;
 editinfo *localedit = NULL;
 
 VAR(0, showpastegrid, 0, 0, 1);
@@ -2233,7 +2232,7 @@ struct texturegui : guicb
         if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, autoclosetexgui ? false : true)&GUI_UP)
             autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
         g.space(2);
-        if(g.button("\foreset mru", 0xFFFFFF, NULL)&GUI_UP)
+        if(g.button("\foreset order", 0xFFFFFF, NULL)&GUI_UP)
         {
             int old = texmru.inrange(menutex) ? texmru[menutex] : -1;
             resettexmru();
