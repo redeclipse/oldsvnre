@@ -6,7 +6,7 @@
 RE_PATH="$(cd "$(dirname "$0")" && pwd)"
 
 # RE_OPTIONS contains any command line options you would like to start Red Eclipse with.
-RE_OPTIONS=""
+RE_OPTIONS="-glog.txt"
 
 # SYSTEM_NAME should be set to the name of your operating system.
 #SYSTEM_NAME=Linux
