@@ -2219,7 +2219,7 @@ namespace hud
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(!texpaneltimer)
                 {
-                    cy[i] -= showfps || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? cs/2 : cs/16;
+                    cy[i] -= showfps || showstats >= (m_edit(game::gamemode) ? 1 : 2) ? FONTH*2 : 0;
                     if(lastnewgame)
                     {
                         if(!game::intermission) lastnewgame = 0;
