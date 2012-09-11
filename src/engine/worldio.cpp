@@ -1704,6 +1704,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 extentity &e = *ents.add(entities::newent());
                 e.attrs.add(0, 5);
                 e.type = ET_SUNLIGHT;
+                e.o = vec(hdr.worldsize, hdr.worldsize, hdr.worldsize).div(2);
                 e.attrs[0] = sunlightyaw;
                 e.attrs[1] = sunlightpitch;
                 e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale);
