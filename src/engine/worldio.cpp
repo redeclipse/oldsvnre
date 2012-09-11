@@ -1097,10 +1097,10 @@ static void sanevars()
     setvar("blankgeom", 0, false);
 }
 
-VAR(IDF_HEX|IDF_READONLY, sunlight, 0, 0, 0xFFFFFF); // OCTA compatibility
-VAR(IDF_READONLY, sunlightyaw, 0, 0, 360);
-VAR(IDF_READONLY, sunlightpitch, -90, 90, 90);
-FVAR(IDF_READONLY, sunlightscale, 0, 1, 16);
+VAR(IDF_HEX, sunlight, 0, 0, 0xFFFFFF); // OCTA compatibility
+VAR(0, sunlightyaw, 0, 0, 360);
+VAR(0, sunlightpitch, -90, 90, 90);
+FVAR(0, sunlightscale, 0, 1, 16);
 
 bool load_world(const char *mname, bool temp)       // still supports all map formats that have existed since the earliest cube betas!
 {
@@ -1704,8 +1704,8 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 extentity &e = *ents.add(entities::newent());
                 e.attrs.add(0, 5);
                 e.type = ET_SUNLIGHT;
-                e.o = vec(hdr.worldsize, hdr.worldsize, hdr.worldsize).div(2);
-                e.attrs[0] = sunlightyaw;
+                e.o = vec(hdr.worldsize/2, hdr.worldsize/2, hdr.worldsize-2);
+                if((e.attrs[0] = sunlightyaw-180) < 0) e.attrs[0] += 360;
                 e.attrs[1] = sunlightpitch;
                 e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale);
                 e.attrs[3] = int(((sunlight>>8)&0xFF)*sunlightscale);
