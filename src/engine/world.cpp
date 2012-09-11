@@ -843,6 +843,10 @@ void splitocta(cube *c, int size)
 
 void clearworldvars(bool msg)
 {
+    setvar("sunlight", 0, false);
+    setvar("sunlightyaw", 0, false);
+    setvar("sunlightpitch", 90, false);
+    setfvar("sunlightscale", 1, false);
     identflags |= IDF_WORLD;
     enumerate(idents, ident, id, {
         if(id.flags&IDF_WORLD) // reset world vars

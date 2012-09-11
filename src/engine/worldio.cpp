@@ -1097,6 +1097,11 @@ static void sanevars()
     setvar("blankgeom", 0, false);
 }
 
+VAR(IDF_HEX, sunlight, 0, 0, 0xFFFFFF); // OCTA compatibility
+VAR(0, sunlightyaw, 0, 0, 360);
+VAR(0, sunlightpitch, -90, 90, 90);
+FVAR(0, sunlightscale, 0, 1, 16);
+
 bool load_world(const char *mname, bool temp)       // still supports all map formats that have existed since the earliest cube betas!
 {
     int loadingstart = SDL_GetTicks();
@@ -1224,7 +1229,11 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         {
                             string name;
                             f->read(name, len+1);
-                            if(hdr.version <= 34 && !strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
+                            if(hdr.version <= 34)
+                            {
+                                if(!strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
+                                if(!strcmp(name, "cloudblend")) copystring(name, "cloudlayerblend");
+                            }
                             if(hdr.version <= 41)
                             {
                                 if(!strcmp(name, "liquidcurb")) copystring(name, "liquidcoast");
@@ -1271,9 +1280,13 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                                 case ID_SVAR:
                                 {
                                     int slen = f->getlil<int>();
-                                    string val;
-                                    f->read(val, slen+1);
-                                    if(proceed && slen) setsvar(name, val, true);
+                                    if(slen >= 0)
+                                    {
+                                        char *val = newstring(slen);
+                                        f->read(val, slen+1);
+                                        if(proceed && slen) setsvar(name, val, true);
+                                        delete[] val;
+                                    }
                                     break;
                                 }
                                 default:
@@ -1413,6 +1426,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     if(ilen >= OCTASTRLEN) f->seek(ilen - (OCTASTRLEN-1), SEEK_CUR);
                     if(!strcmp(name, "cloudalpha")) copystring(name, "cloudblend");
                     if(!strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
+                    if(!strcmp(name, "cloudblend")) copystring(name, "cloudlayerblend");
                     if(!strcmp(name, "grassalpha")) copystring(name, "grassblend");
                     ident *id = getident(name);
                     bool exists = id && id->type == type;
@@ -1656,11 +1670,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 execfile(cfgname);
             }
             else if(!execfile(cfgname, false)) execfile("map.cfg");
-            if(maptype == MAP_OCTA || (maptype == MAP_MAPZ && hdr.version <= 34))
-            {
-                extern float cloudblend;
-                setfvar("cloudlayerblend", cloudblend, true);
-            }
             identflags &= ~IDF_WORLD;
 
             loopv(ents)
