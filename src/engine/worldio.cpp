@@ -1424,10 +1424,12 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     f->read(name, min(ilen, OCTASTRLEN-1));
                     name[min(ilen, OCTASTRLEN-1)] = '\0';
                     if(ilen >= OCTASTRLEN) f->seek(ilen - (OCTASTRLEN-1), SEEK_CUR);
-                    if(!strcmp(name, "cloudalpha")) copystring(name, "cloudblend");
-                    if(!strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
                     if(!strcmp(name, "cloudblend")) copystring(name, "cloudlayerblend");
+                    if(!strcmp(name, "cloudalpha")) copystring(name, "cloudblend");
                     if(!strcmp(name, "grassalpha")) copystring(name, "grassblend");
+                    if(!strcmp(name, "skyboxcolour")) copystring(name, "skycolour");
+                    if(!strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
+                    if(!strcmp(name, "cloudboxcolour")) copystring(name, "cloudcolour");
                     ident *id = getident(name);
                     bool exists = id && id->type == type;
                     switch(type)
