@@ -15,6 +15,10 @@ Maps:
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
 
+Core & Install:
+ * Added IRC gudelines
+ * Client now uses log.txt in the homedir by default
+
 Additional fixed bugs:
  * #218 - can no longer drop your loadout weapons in arena
  * #223 - can no longer use common file-writing commands from a map script
