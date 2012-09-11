@@ -1444,7 +1444,7 @@ namespace game
         resetcursor();
         if(*name)
         {
-            conoutft(CON_MESG, "\fs\fw%s by %s [\fa%s\fS]", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
+            conoutft(CON_MESG, "\fs%s\fS by \fs%s\fS \fs[\fa%s\fS]", *maptitle ? maptitle : "Untitled", *mapauthor ? mapauthor : "Unknown", server::gamename(gamemode, mutators));
             preload();
         }
         // reset perma-state
