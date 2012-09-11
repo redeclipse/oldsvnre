@@ -1615,6 +1615,19 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     conoutf("\frWARNING: ent outside of world: enttype[%s] index %d (%f, %f, %f)", entities::findname(e.type), i, e.o.x, e.o.y, e.o.z);
             }
             if(verbose) conoutf("\faloaded %d entities", hdr.numents);
+            if(maptype == MAP_OCTA && sunlight)
+            {
+                extentity &e = *ents.add(entities::newent());
+                e.attrs.add(0, 6);
+                e.type = ET_SUNLIGHT;
+                e.o = vec(hdr.worldsize/2, hdr.worldsize/2, hdr.worldsize*3/4);
+                e.attrs[0] = sunlightyaw;
+                e.attrs[1] = sunlightpitch-90;
+                e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale);
+                e.attrs[3] = int(((sunlight>>8)&0xFF)*sunlightscale);
+                e.attrs[4] = int((sunlight&0xFF)*sunlightscale);
+                e.attrs[5] = 1;
+            }
 
             progress(0, "loading slots...");
             loadvslots(f, hdr.numvslots);
@@ -1700,19 +1713,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         if(verbose) conoutf("\frWARNING: auto linked spotlight %d to light %d", i, closest);
                     }
                 }
-            }
-            if(maptype == MAP_OCTA && sunlight)
-            {
-                extentity &e = *ents.add(entities::newent());
-                e.attrs.add(0, 5);
-                e.type = ET_SUNLIGHT;
-                e.o = vec(hdr.worldsize/2, hdr.worldsize/2, hdr.worldsize-2);
-                if((e.attrs[0] = sunlightyaw-180) < 0) e.attrs[0] += 360;
-                e.attrs[1] = sunlightpitch;
-                e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale);
-                e.attrs[3] = int(((sunlight>>8)&0xFF)*sunlightscale);
-                e.attrs[4] = int((sunlight&0xFF)*sunlightscale);
-                e.attrs[5] = 1;
             }
 
             preloadusedmapmodels(true);
