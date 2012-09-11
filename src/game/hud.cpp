@@ -2598,7 +2598,7 @@ namespace hud
                 drawblend(0, 0, hudwidth, hudheight, colour.x, colour.y, colour.z);
                 usetexturing(true);
                 float amt = (colour.x+colour.y+colour.z)/3.f;
-                if(commandfadeskew > 0 && (!commandmillis || (commandmillis < 0 && totalmillis-abs(commandmillis) > commandfade)))
+                if(commandfadeskew < 1 && (!commandmillis || (commandmillis < 0 && totalmillis-abs(commandmillis) > commandfade)))
                     consolefade *= amt+((1.f-amt)*commandfadeskew);
                 fade *= amt;
             }
