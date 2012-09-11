@@ -1097,10 +1097,10 @@ static void sanevars()
     setvar("blankgeom", 0, false);
 }
 
-VAR(IDF_HEX, sunlight, 0, 0, 0xFFFFFF); // OCTA compatibility
-VAR(0, sunlightyaw, 0, 0, 360);
-VAR(0, sunlightpitch, -90, 90, 90);
-FVAR(0, sunlightscale, 0, 1, 16);
+VAR(IDF_HEX|IDF_READONLY, sunlight, 0, 0, 0xFFFFFF); // OCTA compatibility
+VAR(IDF_READONLY, sunlightyaw, 0, 0, 360);
+VAR(IDF_READONLY, sunlightpitch, -90, 90, 90);
+FVAR(IDF_READONLY, sunlightscale, 0, 1, 16);
 
 bool load_world(const char *mname, bool temp)       // still supports all map formats that have existed since the earliest cube betas!
 {
@@ -1515,7 +1515,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             loopi(hdr.numents)
             {
                 if(verbose) progress(float(i)/float(hdr.numents), "loading entities...");
-                extentity &e = *entities::newent(); ents.add(&e);
+                extentity &e = *ents.add(entities::newent());
                 if(maptype == MAP_OCTA || (maptype == MAP_MAPZ && hdr.version <= 36))
                 {
                     entcompat ec;
@@ -1564,7 +1564,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         int links = f->getlil<int>();
                         f->seek(sizeof(int)*links, SEEK_CUR);
                     }
-                    entities::deleteent(ents.pop());
+                    e.type = ET_EMPTY;
                     continue;
                 }
                 entities::readent(f, maptype, hdr.version, hdr.gameid, hdr.gamever, i);
@@ -1698,6 +1698,18 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         if(verbose) conoutf("\frWARNING: auto linked spotlight %d to light %d", i, closest);
                     }
                 }
+            }
+            if(maptype == MAP_OCTA && sunlight)
+            {
+                extentity &e = *ents.add(entities::newent());
+                e.attrs.add(0, 5);
+                e.type = ET_SUNLIGHT;
+                e.attrs[0] = sunlightyaw;
+                e.attrs[1] = sunlightpitch;
+                e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale);
+                e.attrs[3] = int(((sunlight>>8)&0xFF)*sunlightscale);
+                e.attrs[4] = int((sunlight&0xFF)*sunlightscale);
+                e.attrs[5] = 1;
             }
 
             preloadusedmapmodels(true);

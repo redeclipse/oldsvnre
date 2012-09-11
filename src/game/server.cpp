@@ -2506,7 +2506,7 @@ namespace server
                         conoutft(CON_MESG, id->flags&IDF_HEX && *id->storage.i >= 0 ? (id->maxval==0xFFFFFF ? "\fc%s = 0x%.6X" : "\fc%s = 0x%X") : "\fc%s = %d", id->name, *id->storage.i);
                         return true;
                     }
-                    if(id->maxval < id->minval)
+                    if(id->maxval < id->minval || id->flags&IDF_READONLY)
                     {
                         conoutft(CON_MESG, "\frcannot override variable: %s", id->name);
                         return true;
@@ -2617,7 +2617,7 @@ namespace server
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
                         return;
                     }
-                    if(id->maxval < id->minval)
+                    if(id->maxval < id->minval || id->flags&IDF_READONLY)
                     {
                         srvmsgf(ci->clientnum, "\frcannot override variable: %s", name);
                         return;
