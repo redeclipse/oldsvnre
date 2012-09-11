@@ -2,7 +2,7 @@
 
 rem set SDL_VIDEO_WINDOW_POS=0,0
 set RE_DIR=.
-set RE_OPTIONS=-glog.txt
+set RE_OPTIONS=
 set RE_BINARY=bin
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "amd64" (

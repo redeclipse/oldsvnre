@@ -850,6 +850,7 @@ int main(int argc, char **argv)
             case 'h': serveroption(argv[i]); break;
         }
     }
+    setlogfile("log.txt");
     execfile("init.cfg", false);
     for(int i = 1; i<argc; i++)
     {

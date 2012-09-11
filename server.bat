@@ -1,7 +1,7 @@
 @ECHO OFF
 
 set RE_DIR=.
-set RE_OPTIONS=-gservlog.txt
+set RE_OPTIONS=
 set RE_BINARY=bin
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "amd64" (
