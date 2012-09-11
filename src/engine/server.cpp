@@ -1325,7 +1325,7 @@ bool serveroption(char *opt)
         case 'h': logoutf("set home directory: %s", &opt[2]); sethomedir(&opt[2]); return true;
         case 'o': setsvar("octadir", &opt[2]); return true;
         case 'p': logoutf("add package directory: %s", &opt[2]); addpackagedir(&opt[2]); return true;
-        case 'g': logoutf("setting log file: %s", &opt[2]); setlogfile(&opt[2]); return true;
+        case 'g': logoutf("setting log file: %s", opt[2] ? &opt[2] : "<stdout>"); setlogfile(&opt[2]); return true;
         case 'v': setvar("verbose", atoi(opt+2)); return true;
         case 's':
         {
