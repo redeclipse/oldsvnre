@@ -19,7 +19,7 @@
 .OP \-df\fR{0|1}
 .OP \-dw\fRwidth
 .OP \-dh\fRheight
-.OP \-du\fR{0..3}
+.OP \-du\fR{agf123}
 .OP \-dv\fR{0|1}
 .OP \-da\fRsamples
 .OP \-dc\fRdepth
@@ -130,8 +130,8 @@ If width not specified, also sets width to 4/3 of height. min is 320.
 This configuration is stored in init.cfg
 
 .TP
-.BR \-du {0..3}
-Set shader quality. 0 for none, 1 for shaders with fastest quality, max is 3. Defaults to 1 where hardware supports it.
+.BR \-du {agf123}
+Set shader and glsl options. \'\fBa\fR' enables shadows and forces glsl off, \'\fBg\fR' enables shadows and forces glsl on, \'\fBf\fR' or no parameters disables shadows, 1-3 sets shader quality. Multiple options can be combined.
 .IP
 This configuration is stored in init.cfg
 
