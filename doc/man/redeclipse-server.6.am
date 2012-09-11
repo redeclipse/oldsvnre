@@ -1,4 +1,4 @@
-.TH @CAPPNAME@-SERVER 6 2012-07-16 "Red Eclipse 1.3" "Red Eclipse Manual"
+.TH @CAPPNAME@-SERVER 6 2012-09-11 "Red Eclipse 1.3" "Red Eclipse Manual"
 
 
 .SH NAME
@@ -85,7 +85,10 @@ Sets the path to your Sauerbraten directory. If the Red Eclipse server can find 
 Output log to
 .IR logfile .
 Path is set relative to
-.IR homedir .
+.IR homedir
+unless a leading \'\fB/\fR' is used, uses stdout if
+.B -g
+is given without a parameter. Defaults to stdout.
 
 .SS Server configuration options
 
