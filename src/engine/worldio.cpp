@@ -847,7 +847,7 @@ void save_config(char *mname)
     int nummats = sizeof(materialslots)/sizeof(materialslots[0]);
     loopi(nummats)
     {
-        if(verbose) progress(float(i)/float(nummats), "saving material slots...");
+        progress(i/float(nummats), "saving material slots...");
 
         if(i == MAT_WATER || i == MAT_LAVA)
         {
@@ -858,14 +858,14 @@ void save_config(char *mname)
 
     loopv(slots)
     {
-        if(verbose) progress(float(i)/float(slots.length()), "saving texture slots...");
+        progress(i/float(slots.length()), "saving texture slots...");
         saveslotconfig(h, *slots[i], i);
     }
     if(verbose) conoutf("\fasaved %d texture slots", slots.length());
 
     loopv(mapmodels)
     {
-        if(verbose) progress(float(i)/float(mapmodels.length()), "saving mapmodel slots...");
+        progress(i/float(mapmodels.length()), "saving mapmodel slots...");
         h->printf("mmodel %s\n", escapestring(mapmodels[i].name));
     }
     if(mapmodels.length()) h->printf("\n");
@@ -873,7 +873,7 @@ void save_config(char *mname)
 
     loopv(mapsounds)
     {
-        if(verbose) progress(float(i)/float(mapsounds.length()), "saving mapsound slots...");
+        progress(i/float(mapsounds.length()), "saving mapsound slots...");
         h->printf("mapsound %s", escapestring(mapsounds[i].name));
         if((mapsounds[i].vol > 0 && mapsounds[i].vol < 255) || mapsounds[i].maxrad > 0 || mapsounds[i].minrad >= 0)
             h->printf(" %d", mapsounds[i].vol);
@@ -973,7 +973,7 @@ void save_world(const char *mname, bool nodata, bool forcesave)
         if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && strlen(id.name))
         {
             vars++;
-            if(verbose) progress(float(vars)/float(numvars), "saving world variables...");
+            progress(vars/float(numvars), "saving world variables...");
             f->putlil<int>((int)strlen(id.name));
             f->write(id.name, (int)strlen(id.name)+1);
             f->putlil<int>(id.type);
@@ -1006,7 +1006,7 @@ void save_world(const char *mname, bool nodata, bool forcesave)
     if(!forcesave) entities::remapents(remapents);
     loopv(ents) // extended
     {
-        if(verbose) progress(float(i)/float(ents.length()), "saving entities...");
+        progress(i/float(ents.length()), "saving entities...");
         int idx = remapents.inrange(i) ? remapents[i] : i;
         extentity &e = *(extentity *)ents[idx];
         if(e.type!=ET_EMPTY || forcesave)
@@ -1225,7 +1225,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     progress(0, "loading variables...");
                     loopi(numvars)
                     {
-                        if(verbose) progress(float(i)/float(numvars), "loading variables...");
+                        progress(i/float(numvars), "loading variables...");
                         int len = hdr.version >= 25 ? f->getlil<int>() : f->getchar();
                         if(len)
                         {
@@ -1518,7 +1518,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             vector<extentity *> &ents = entities::getents();
             loopi(hdr.numents)
             {
-                if(verbose) progress(float(i)/float(hdr.numents), "loading entities...");
+                progress(i/float(hdr.numents), "loading entities...");
                 extentity &e = *ents.add(entities::newent());
                 if(maptype == MAP_OCTA || (maptype == MAP_MAPZ && hdr.version <= 36))
                 {
@@ -1649,7 +1649,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             {
                 if(hdr.version >= 7) loopi(hdr.lightmaps)
                 {
-                    if(verbose) progress(i/(float)hdr.lightmaps, "loading lightmaps...");
+                    progress(i/(float)hdr.lightmaps, "loading lightmaps...");
                     LightMap &lm = lightmaps.add();
                     if(hdr.version >= 17)
                     {
@@ -1675,10 +1675,11 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
 
             progress(0, "loading world...");
             game::loadworld(f, maptype);
+            progress(0, "initialising entities...");
             entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
 
+            progress(0, "initialising config...");
             mapcrc = f->getcrc();
-
             identflags |= IDF_WORLD;
             defformatstring(cfgname)("%s.cfg", mapname);
             if(maptype == MAP_OCTA)
@@ -1716,7 +1717,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     }
                 }
             }
-
+            progress(0, "preloading models...");
             preloadusedmapmodels(true);
 
             delete f;

@@ -783,7 +783,7 @@ COMMANDN(0, listcomplete, addlistcomplete, "ss");
 
 void complete(char *s, const char *cmdprefix)
 {
-    const char *start = s;
+    char *start = s;
     if(cmdprefix)
     {
         int cmdlen = strlen(cmdprefix);
