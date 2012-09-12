@@ -24,23 +24,23 @@ ICONS= \
 	install/nix/$(appsrcname)_x128.png \
 	install/nix/$(appsrcname)_x32.xpm
 
-install/nix/$(appsrcname)_x16.png: $(appsrcname).ico
-	convert '$(appsrcname).ico[0]' $@
+install/nix/$(appsrcname)_x16.png: ../data/textures/icon.png
+	convert '$<' -resize 16x16 $@
 
-install/nix/$(appsrcname)_x32.png: $(appsrcname).ico
-	convert '$(appsrcname).ico[1]' $@
+install/nix/$(appsrcname)_x32.png: ../data/textures/icon.png
+	convert '$<' -resize 32x32 $@
 
-install/nix/$(appsrcname)_x48.png: $(appsrcname).ico
-	convert '$(appsrcname).ico[2]' -resize 48x48 $@
+install/nix/$(appsrcname)_x48.png: ../data/textures/icon.png
+	convert '$<' -resize 48x48 $@
 
-install/nix/$(appsrcname)_x64.png: $(appsrcname).ico
-	convert '$(appsrcname).ico[2]' $@
+install/nix/$(appsrcname)_x64.png: ../data/textures/icon.png
+	convert '$<' -resize 64x64 $@
 
-install/nix/$(appsrcname)_x128.png: $(appsrcname).ico
-	convert '$(appsrcname).ico[3]' $@
+install/nix/$(appsrcname)_x128.png: ../data/textures/icon.png
+	convert '$<' -resize 128x128 $@
 
-install/nix/$(appsrcname)_x32.xpm: $(appsrcname).ico
-	convert '$(appsrcname).ico[1]' $@
+install/nix/$(appsrcname)_x32.xpm: ../data/textures/icon.png
+	convert '$<' -resize 32x32 $@
 
 icons: $(ICONS)
 
