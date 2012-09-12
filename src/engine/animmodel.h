@@ -74,11 +74,11 @@ struct animmodel : model
         part *owner;
         Texture *tex, *masks, *envmap, *unlittex, *normalmap;
         Shader *shader;
-        float spec, ambient, glow, specglare, glowglare, fullbright, envmapmin, envmapmax, scrollu, scrollv, alphatest;
+        float spec, ambient, glow, glowdelta, glowpulse, specglare, glowglare, fullbright, envmapmin, envmapmax, scrollu, scrollv, alphatest;
         bool alphablend, cullface;
         int material, material2;
 
-        skin() : owner(0), tex(notexture), masks(notexture), envmap(NULL), unlittex(NULL), normalmap(NULL), shader(NULL), spec(1.0f), ambient(0.3f), glow(3.0f), specglare(1), glowglare(1), fullbright(0), envmapmin(0), envmapmax(0), scrollu(0), scrollv(0), alphatest(0.9f), alphablend(true), cullface(true), material(0), material2(0) {}
+        skin() : owner(0), tex(notexture), masks(notexture), envmap(NULL), unlittex(NULL), normalmap(NULL), shader(NULL), spec(1.0f), ambient(0.3f), glow(3.0f), glowdelta(0), glowpulse(0), specglare(1), glowglare(1), fullbright(0), envmapmin(0), envmapmax(0), scrollu(0), scrollv(0), alphatest(0.9f), alphablend(true), cullface(true), material(0), material2(0) {}
 
         bool multitextured() { return enableglow; }
         bool envmapped() { return hasCM && envmapmax>0 && envmapmodels && (renderpath!=R_FIXEDFUNCTION || maxtmus >= 3); }
@@ -171,7 +171,14 @@ struct animmodel : model
                 setenvparamf("lightscale", SHPARAM_VERTEX, 2, scale - minshade, scale, minshade + bias);
                 setenvparamf("lightscale", SHPARAM_PIXEL, 2, scale - minshade, scale, minshade + bias);
             }
-            setenvparamf("maskscale", SHPARAM_PIXEL, 4, 0.5f*spec*lightmodels, 0.5f*glow*glowmodels, 16*specglare, 4*glowglare);
+            float curglow = glow;
+            if(glowpulse > 0)
+            {
+                float curpulse = lastmillis*glowpulse;
+                curpulse -= floor(curpulse);
+                curglow += glowdelta*2*fabs(curpulse - 0.5f);
+            }
+            setenvparamf("maskscale", SHPARAM_PIXEL, 4, 0.5f*spec*lightmodels, 0.5f*curglow*glowmodels, 16*specglare, 4*glowglare);
             vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor().mul(2) : vec(2, 2, 2), 
                 matcolor2 = material2 > 0 && lightmaterial ? lightmaterial[min(material2, int(MAXLIGHTMATERIALS))-1].tocolor().mul(2) : vec(2, 2, 2);
             setenvparamf("lightmaterial", SHPARAM_PIXEL, 6, matcolor.x, matcolor.y, matcolor.z, 1);
@@ -975,8 +982,8 @@ struct animmodel : model
     {
         if(!loaded) return;
 
-        yaw += spin*lastmillis/1000.0f;
-        pitch += offsetpitch;
+        yaw += spinyaw*lastmillis/1000.0f;
+        pitch += offsetpitch + spinpitch*lastmillis/1000.0f;
 
         vec axis(0, -1, 0), forward(1, 0, 0);
 
@@ -1196,10 +1203,16 @@ struct animmodel : model
         loopv(parts) loopvj(parts[i]->skins) parts[i]->skins[j].ambient = ambient;
     }
 
-    void setglow(float glow)
+    void setglow(float glow, float delta, float pulse)
     {
         if(parts.empty()) loaddefaultparts();
-        loopv(parts) loopvj(parts[i]->skins) parts[i]->skins[j].glow = glow;
+        loopv(parts) loopvj(parts[i]->skins)
+        {
+            skin &s = parts[i]->skins[j];
+            s.glow = glow;
+            s.glowdelta = delta;
+            s.glowpulse = pulse;
+        }
     }
 
     void setglare(float specglare, float glowglare)
@@ -1472,12 +1485,13 @@ template<class MDL, class MESH> struct modelcommands
         loopskins(meshname, s, s.ambient = ambient);
     }
 
-    static void setglow(char *meshname, int *percent)
+    static void setglow(char *meshname, int *percent, int *delta, float *pulse)
     {
-        float glow = 3.0f;
+        float glow = 3.0f, glowdelta = *delta/100.0f, glowpulse = *pulse > 0 ? *pulse/1000.0f : 0;
         if(*percent>0) glow = *percent/100.0f;
         else if(*percent<0) glow = 0.0f;
-        loopskins(meshname, s, s.glow = glow);
+        glowdelta -= glow;
+        loopskins(meshname, s, { s.glow = glow; s.glowdelta = glowdelta; s.glowpulse = glowpulse; });
     }
 
     static void setglare(char *meshname, float *specglare, float *glowglare)
@@ -1560,7 +1574,7 @@ template<class MDL, class MESH> struct modelcommands
             modelcommand(setskin, "skin", "sssff");
             modelcommand(setspec, "spec", "si");
             modelcommand(setambient, "ambient", "si");
-            modelcommand(setglow, "glow", "si");
+            modelcommand(setglow, "glow", "siif");
             modelcommand(setglare, "glare", "sff");
             modelcommand(setalphatest, "alphatest", "sf");
             modelcommand(setalphablend, "alphablend", "si");

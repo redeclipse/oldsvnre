@@ -141,6 +141,8 @@ void modifyoctaentity(int flags, int id, cube *c, const ivec &cor, int size, con
     }
 }
 
+vector<int> outsideents;
+
 static bool modifyoctaent(int flags, int id)
 {
     vector<extentity *> &ents = entities::getents();
@@ -149,13 +151,24 @@ static bool modifyoctaent(int flags, int id)
     extentity &e = *ents[id];
     if((flags&MODOE_ADD ? e.inoctanode : !e.inoctanode) || !getentboundingbox(e, o, r)) return false;
 
-    int leafsize = octaentsize, limit = max(r.x, max(r.y, r.z));
-    while(leafsize < limit) leafsize *= 2;
-    int diff = ~(leafsize-1) & ((o.x^(o.x+r.x))|(o.y^(o.y+r.y))|(o.z^(o.z+r.z)));
-    if(diff && (limit > octaentsize/2 || diff < leafsize*2)) leafsize *= 2;
-
+    if(!insideworld(e.o))
+    {
+        int idx = outsideents.find(id);
+        if(flags&MODOE_ADD)
+        {
+            if(idx < 0) outsideents.add(id);
+        }
+        else if(idx >= 0) outsideents.removeunordered(idx);
+    }
+    else
+    {
+        int leafsize = octaentsize, limit = max(r.x, max(r.y, r.z));
+        while(leafsize < limit) leafsize *= 2;
+        int diff = ~(leafsize-1) & ((o.x^(o.x+r.x))|(o.y^(o.y+r.y))|(o.z^(o.z+r.z)));
+        if(diff && (limit > octaentsize/2 || diff < leafsize*2)) leafsize *= 2;
+        modifyoctaentity(flags, id, worldroot, ivec(0, 0, 0), hdr.worldsize>>1, o, r, leafsize);
+    }
     e.inoctanode = flags&MODOE_ADD ? 1 : 0;
-    modifyoctaentity(flags, id, worldroot, ivec(0, 0, 0), hdr.worldsize>>1, o, r, leafsize);
     if(e.type == ET_LIGHT || e.type == ET_SUNLIGHT) clearlightcache(id);
     else if(flags&MODOE_ADD) lightent(e);
     return true;
@@ -183,6 +196,53 @@ void entitiesinoctanodes()
 {
     vector<extentity *> &ents = entities::getents();
     loopv(ents) modifyoctaent(MODOE_ADD, i);
+}
+static inline void findents(octaentities &oe, int low, int high, bool notspawned, const vec &pos, const vec &radius, vector<int> &found)
+{
+    vector<extentity *> &ents = entities::getents();
+    loopv(oe.other)
+    {
+        int id = oe.other[i];
+        extentity &e = *ents[id];
+        if(e.type >= low && e.type <= high && (e.spawned || notspawned) && vec(e.o).mul(radius).squaredlen() <= 1) found.add(id);
+    }
+}
+
+static inline void findents(cube *c, const ivec &o, int size, const ivec &bo, const ivec &br, int low, int high, bool notspawned, const vec &pos, const vec &radius, vector<int> &found)
+{
+    loopoctabox(o, size, bo, br)
+    {
+        if(c[i].ext && c[i].ext->ents) findents(*c[i].ext->ents, low, high, notspawned, pos, radius, found);
+        if(c[i].children && size > octaentsize)
+        {
+            ivec co(i, o.x, o.y, o.z, size);
+            findents(c[i].children, co, size>>1, bo, br, low, high, notspawned, pos, radius, found);
+        }
+    }
+}
+
+void findents(int low, int high, bool notspawned, const vec &pos, const vec &radius, vector<int> &found)
+{
+    vec invradius(1/radius.x, 1/radius.y, 1/radius.z);
+    ivec bo = vec(pos).sub(radius).sub(1),
+         br = vec(radius).add(1).mul(2);
+    int diff = (bo.x^(bo.x+br.x)) | (bo.y^(bo.y+br.y)) | (bo.z^(bo.z+br.z)) | octaentsize,
+        scale = worldscale-1;
+    if(diff&~((1<<scale)-1) || uint(bo.x|bo.y|bo.z|(bo.x+br.x)|(bo.y+br.y)|(bo.z+br.z)) >= uint(hdr.worldsize))
+    {
+        findents(worldroot, ivec(0, 0, 0), 1<<scale, bo, br, low, high, notspawned, pos, invradius, found);
+        return;
+    }
+    cube *c = &worldroot[octastep(bo.x, bo.y, bo.z, scale)];
+    if(c->ext && c->ext->ents) findents(*c->ext->ents, low, high, notspawned, pos, invradius, found);
+    scale--;
+    while(c->children && !(diff&(1<<scale)))
+    {
+        c = &c->children[octastep(bo.x, bo.y, bo.z, scale)];
+        if(c->ext && c->ext->ents) findents(*c->ext->ents, low, high, notspawned, pos, invradius, found);
+        scale--;
+    }
+    if(c->children && 1<<scale >= octaentsize) findents(c->children, ivec(bo).mask(~((2<<scale)-1)), 1<<scale, bo, br, low, high, notspawned, pos, invradius, found);
 }
 
 extern bool havesel, selectcorners;
@@ -885,6 +945,7 @@ void resetmap(bool empty)
     pruneundos();
     clearmapcrc();
     entities::clearents();
+    outsideents.setsize(0);
     game::resetmap(empty);
 }
 
@@ -943,6 +1004,8 @@ bool enlargemap(bool force)
     }
     if(hdr.worldsize >= 1<<16) return false;
 
+    while(outsideents.length()) removeentity(outsideents.pop());
+
     worldscale++;
     hdr.worldsize *= 2;
     cube *c = newcubes(F_EMPTY);
@@ -978,6 +1041,8 @@ void shrinkmap()
         octant = i;
     }
     if(octant < 0) return;
+
+    while(outsideents.length()) removeentity(outsideents.pop());
 
     if(!worldroot[octant].children) subdividecube(worldroot[octant], false, false);
     cube *root = worldroot[octant].children;

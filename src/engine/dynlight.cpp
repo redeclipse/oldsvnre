@@ -121,7 +121,7 @@ int finddynlights()
         }
         else if(refracting < 0 && d.o.z - d.curradius > reflectz) continue;
         e.o = d.o;
-        e.radius = e.height = e.aboveeye = d.curradius;
+        e.radius = e.xradius = e.yradius = e.height = e.aboveeye = d.curradius;
         if(collide(&e, vec(0, 0, 0), 0, false)) continue;
 
         int insert = 0;

@@ -65,16 +65,6 @@ struct keym
     ~keym() { DELETEA(name); loopi(NUMACTIONS) { DELETEA(actions[i]); persist[i] = false; } }
 };
 
-/*
-extern keym *keypressed;
-extern char *keyaction;
-extern keym *findbind(const char *key);
-extern int findactionkey(const char *action, int which, int num);
-
-extern const char *retbind(const char *key, int which);
-extern const char *retbindaction(const char *action, int which, int num);
-*/
-
 hashtable<int, keym> keyms(128);
 
 void keymap(int *code, char *key)

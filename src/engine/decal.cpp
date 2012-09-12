@@ -615,7 +615,7 @@ void renderdecals(bool mainpass)
     decalrenderer::cleanuprenderstate();
 }
 
-VAR(IDF_PERSIST, maxdecaldistance, 128, 1024, VAR_MAX);
+VAR(IDF_PERSIST, maxdecaldistance, 1, 1024, VAR_MAX);
 
 void adddecal(int type, const vec &center, const vec &surface, float radius, const bvec &color, int info)
 {

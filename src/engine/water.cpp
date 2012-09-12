@@ -768,7 +768,7 @@ void renderwater()
     }
     glActiveTexture_(GL_TEXTURE0_ARB);
 
-    if(!glaring && waterenvmap && !waterreflect && hasCM)
+    if(!glaring && waterenvmap && !waterreflect && hasCM && !minimapping)
     {
         glDisable(GL_TEXTURE_CUBE_MAP_ARB);
         glEnable(GL_TEXTURE_2D);

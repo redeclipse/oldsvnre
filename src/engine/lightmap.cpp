@@ -90,10 +90,6 @@ VARF(IDF_HEX|IDF_WORLD, skylight, 0, 0, 0xFFFFFF,
     if(skylight <= 255) skylight |= (skylight<<8) | (skylight<<16);
     skylightcolor = bvec((skylight>>16)&0xFF, (skylight>>8)&0xFF, skylight&0xFF);
 });
-VARN(IDF_WORLD, lmshadows, lmshadows_, 0, 2, 2);
-VARN(IDF_WORLD, lmaa, lmaa_, 0, 3, 3);
-VARN(IDF_WORLD, lerptjoints, lerptjoints_, 0, 1, 1);
-static int lmshadows = 2, lmaa = 3, lerptjoints = 1;
 
 static const surfaceinfo brightsurfaces[6] =
 {
@@ -190,6 +186,10 @@ void setsurface(cube &c, int orient, const surfaceinfo &src, const vertinfo *src
     if(srcverts) memcpy(c.ext->verts() + dstoffset, srcverts, numsrcverts*sizeof(vertinfo));
 }
 
+VARN(IDF_WORLD, lmshadows, lmshadows_, 0, 2, 2);
+VARN(IDF_WORLD, lmaa, lmaa_, 0, 3, 3);
+VARN(IDF_WORLD, lerptjoints, lerptjoints_, 0, 1, 1);
+static int lmshadows = 2, lmaa = 3, lerptjoints = 1;
 static uint lmprog = 0, taskprogress = 0;
 GLuint lmprogtex = 0;
 static int lmprogtexticks = 0, lmprogid = -1;
@@ -1603,7 +1603,9 @@ static lightmapinfo *setupsurfaces(lightmapworker *w, lightmaptask &task)
                 surf.numverts |= LAYER_TOP;
                 continue;
 
-            default: freelightmap(w); continue;
+            default:
+                freelightmap(w);
+                continue;
         }
 
         w->slot = layer->slot;
@@ -2119,8 +2121,8 @@ void calclight(int *quality)
     }
     progress(0, "computing lightmaps...");
     mpremip(true);
-    loadlayermasks();
     optimizeblendmap();
+    loadlayermasks();
     if(lightthreads > 1) preloadusedmapmodels(false, true);
     resetlightmaps(false);
     clearsurfaces(worldroot);
@@ -2483,7 +2485,6 @@ void genlightmaptexs(int flagmask, int flagval)
         remaining[LM_BUMPMAP0] = remaining[LM_BUMPMAP1] = 0;
     }
 
-    extern int maxtexsize;
     int sizelimit = (maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize)/max(LM_PACKW, LM_PACKH);
     sizelimit = min(batchlightmaps, sizelimit*sizelimit);
     while(total)

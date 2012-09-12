@@ -971,10 +971,10 @@ namespace client
             }
             case EDIT_MAT:
             {
-                addmsg(N_EDITF + op, "ri9i6",
+                addmsg(N_EDITF + op, "ri9i7",
                     sel.o.x, sel.o.y, sel.o.z, sel.s.x, sel.s.y, sel.s.z, sel.grid, sel.orient,
                     sel.cx, sel.cxs, sel.cy, sel.cys, sel.corner,
-                    arg1, arg2);
+                    arg1, arg2, arg3);
                 break;
             }
             case EDIT_ROTATE:
@@ -987,12 +987,19 @@ namespace client
             }
             case EDIT_FACE:
             case EDIT_TEX:
-            case EDIT_REPLACE:
             {
                 addmsg(N_EDITF + op, "ri9i6",
                     sel.o.x, sel.o.y, sel.o.z, sel.s.x, sel.s.y, sel.s.z, sel.grid, sel.orient,
                     sel.cx, sel.cxs, sel.cy, sel.cys, sel.corner,
                     arg1, arg2);
+                break;
+            }
+            case EDIT_REPLACE:
+            {
+                addmsg(N_EDITF + op, "ri9i7",
+                    sel.o.x, sel.o.y, sel.o.z, sel.s.x, sel.s.y, sel.s.z, sel.grid, sel.orient,
+                    sel.cx, sel.cxs, sel.cy, sel.cys, sel.corner,
+                    arg1, arg2, arg3);
                 break;
             }
             case EDIT_REMIP:
@@ -1934,12 +1941,12 @@ namespace client
                     {
                         case N_EDITF: dir = getint(p); mode = getint(p); if(s.validate()) mpeditface(dir, mode, s, false); break;
                         case N_EDITT: tex = getint(p); allfaces = getint(p); if(s.validate()) mpedittex(tex, allfaces, s, false); break;
-                        case N_EDITM: mat = getint(p); mode = getint(p); if(s.validate()) mpeditmat(mat, mode, s, false); break;
+                        case N_EDITM: mat = getint(p); mode = getint(p); allfaces = getint(p); if(s.validate()) mpeditmat(mat, mode, allfaces, s, false); break;
                         case N_FLIP: if(s.validate()) mpflip(s, false); break;
                         case N_COPY: if(d && s.validate()) mpcopy(d->edit, s, false); break;
                         case N_PASTE: if(d && s.validate()) mppaste(d->edit, s, false); break;
                         case N_ROTATE: dir = getint(p); if(s.validate()) mprotate(dir, s, false); break;
-                        case N_REPLACE: tex = getint(p); newtex = getint(p); if(s.validate()) mpreplacetex(tex, newtex, s, false); break;
+                        case N_REPLACE: tex = getint(p); newtex = getint(p); allfaces = getint(p); if(s.validate()) mpreplacetex(tex, newtex, allfaces!=0, s, false); break;
                         case N_DELCUBE: if(s.validate()) mpdelcube(s, false); break;
                     }
                     break;

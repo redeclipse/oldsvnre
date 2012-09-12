@@ -265,7 +265,7 @@ inline bool isheightmap(int orient, int d, bool empty, cube *c);
 extern void entdrag(const vec &ray);
 extern bool hoveringonent(int ent, int orient);
 extern void renderentselection(const vec &o, const vec &ray, bool entmoving);
-extern float rayent(const vec &o, const vec &ray, vec &hitpos, float radius, int mode, int size, int &orient, int &ent);
+extern float rayent(const vec &o, const vec &ray, float radius, int mode, int size, int &orient, int &ent);
 
 VAR(0, gridlookup, 0, 0, 1);
 VAR(0, passthroughcube, 0, 1, 1);
@@ -308,12 +308,12 @@ void rendereditcursor()
     }
     else
     {
-        vec v;
         ivec w;
         float sdist = 0, wdist = 0, t;
         int entorient = 0, ent = -1;
 
-        wdist = rayent(player->o, ray, v, 0, (editmode && showmat ? RAY_EDITMAT : 0)    // select cubes first
+        wdist = rayent(player->o, ray, 1e16f,
+                       (editmode && showmat ? RAY_EDITMAT : 0)   // select cubes first
                                             | (!dragging && entediting ? RAY_ENTS : 0)
                                             | RAY_SKIPFIRST
                                             | (passthroughcube==1 ? RAY_PASS : 0), gridsize, entorient, ent);
@@ -338,17 +338,24 @@ void rendereditcursor()
         }
         else
         {
-            v = ray;
-            v.mul(wdist+0.1f);
-            v.add(player->o);
-            w = v;
-            cube *c = &lookupcube(w.x, w.y, w.z);
+            vec w = vec(camdir).mul(wdist+0.05f).add(player->o);
+            if(!insideworld(w))
+            {
+                loopi(3) wdist = min(wdist, ((camdir[i] > 0 ? hdr.worldsize : 0) - player->o[i]) / camdir[i]);
+                w = vec(camdir).mul(wdist-0.05f).add(player->o);
+                if(!insideworld(w))
+                {
+                    wdist = 0;
+                    loopi(3) w[i] = clamp(player->o[i], 0.0f, float(hdr.worldsize));
+                }
+            }
+            cube *c = &lookupcube(int(w.x), int(w.y), int(w.z));
             if(gridlookup && !dragging && !moving && !havesel && hmapedit!=1) gridsize = lusize;
             int mag = gridsize && lusize ? lusize / gridsize : 0;
-            normalizelookupcube(w.x, w.y, w.z);
+            normalizelookupcube(int(w.x), int(w.y), int(w.z));
             if(sdist == 0 || sdist > wdist) rayrectintersect(lu.tovec(), vec(gridsize), player->o, ray, t=0, orient); // just getting orient
             cur = lu;
-            cor = vec(v).mul(2).div(gridsize);
+            cor = vec(w).mul(2).div(gridsize);
             od = dimension(orient);
             d = dimension(sel.orient);
 
@@ -1218,7 +1225,6 @@ namespace hmap
 
     void pushside(cube &c, int d, int x, int y, int z)
     {
-        if(d < 0 || d > 2) return;
         ivec a;
         getcubevector(c, d, x, y, z, a);
         a[R[d]] = 8 - a[R[d]];
@@ -1354,7 +1360,7 @@ namespace hmap
                     edgeset(cubeedge(*c[k], d, i, j), dc, dc ? f : 8-f);
                 }
             }
-            else if(c[k])
+            else
                 emptyfaces(*c[k]);
         }
 
@@ -1945,7 +1951,7 @@ void compactmruvslots()
 void edittex(int i, bool save = true, bool edit = true)
 {
     lasttex = i;
-    lasttexmillis = lastmillis;
+    lasttexmillis = totalmillis;
     if(save)
     {
         loopvj(texmru) if(texmru[j]==lasttex) { curtexindex = j; break; }
@@ -2008,6 +2014,7 @@ COMMANDN(0, edittex, edittex_, "i");
 COMMAND(0, gettex, "");
 COMMAND(0, getcurtex, "");
 COMMAND(0, getseltex, "");
+ICOMMAND(0, getreptex, "", (), { if(!noedit()) intret(vslots.inrange(reptex) ? reptex : -1); });
 COMMAND(0, gettexname, "ii");
 
 void replacetexcube(cube &c, int oldtex, int newtex)
@@ -2016,24 +2023,38 @@ void replacetexcube(cube &c, int oldtex, int newtex)
     if(c.children) loopi(8) replacetexcube(c.children[i], oldtex, newtex);
 }
 
-void mpreplacetex(int oldtex, int newtex, selinfo &sel, bool local)
+void mpreplacetex(int oldtex, int newtex, bool insel, selinfo &sel, bool local)
 {
-    if(local) client::edittrigger(sel, EDIT_REPLACE, oldtex, newtex);
-    loopi(8) replacetexcube(worldroot[i], oldtex, newtex);
+    if(local) client::edittrigger(sel, EDIT_REPLACE, oldtex, newtex, insel ? 1 : 0);
+    if(insel)
+    {
+        loopselxyz(replacetexcube(c, oldtex, newtex));
+    }
+    else
+    {
+        loopi(8) replacetexcube(worldroot[i], oldtex, newtex);
+    }
     allchanged();
 }
 
-void replacetex(int texnum = -1)
+void replacetex(bool insel, int texnum = -1)
 {
     if(noedit()) return;
-    mpreplacetex(texnum, lasttex, sel, true);
+    mpreplacetex(texnum, lasttex, insel, sel, true);
 }
 
-ICOMMAND(0, replace, "", (void), {
-    if(reptex < 0) { conoutf("\frcan only replace after a texture edit"); return; }
-    replacetex(reptex);
+ICOMMAND(0, replace, "iN", (int *t, int *numargs), {
+    int tex = *numargs >= 1 ? *t : reptex;
+    if(tex < 0) { conoutf("\frcan only replace after a texture edit"); return; }
+    replacetex(false, tex);
 });
-ICOMMAND(0, replaceall, "", (void), replacetex(););
+ICOMMAND(0, replacesel, "iN", (int *t, int *numargs), {
+    int tex = *numargs >= 1 ? *t : reptex;
+    if(tex < 0) { conoutf("\frcan only replace after a texture edit"); return; }
+    replacetex(true, tex);
+});
+ICOMMAND(0, replaceall, "", (void), replacetex(false));
+ICOMMAND(0, replaceallsel, "", (void), replacetex(true));
 
 void resettexmru()
 {
@@ -2149,11 +2170,11 @@ void rotate(int *cw)
 COMMAND(0, flip, "");
 COMMAND(0, rotate, "i");
 
-void setmat(cube &c, uchar mat, uchar matmask, int style)
+void setmat(cube &c, uchar mat, uchar matmask, uchar filtermat, uchar filtermask, int style)
 {
     if(c.children)
-        loopi(8) setmat(c.children[i], mat, matmask, style);
-    else
+        loopi(8) setmat(c.children[i], mat, matmask, filtermat, filtermask, style);
+    else if((c.material&filtermask) == filtermat)
     {
         switch(style)
         {
@@ -2172,27 +2193,44 @@ void setmat(cube &c, uchar mat, uchar matmask, int style)
     }
 }
 
-void mpeditmat(int matid, int style, selinfo &sel, bool local)
+void mpeditmat(int matid, int filter, int style, selinfo &sel, bool local)
 {
-    if(local) client::edittrigger(sel, EDIT_MAT, matid, style);
+    if(local) client::edittrigger(sel, EDIT_MAT, matid, filter, style);
 
-    uchar matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : 0xFF);
+    uchar matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : ~matid),
+          filtermat = filter < 0 ? 0 : filter,
+          filtermask = filter < 0 ? 0 : (filter&MATF_VOLUME ? MATF_VOLUME : (filter&MATF_CLIP ? MATF_CLIP : filter));
     if(isclipped(matid&MATF_VOLUME)) matid |= MAT_CLIP;
     if(isdeadly(matid&MATF_VOLUME)) matid |= MAT_DEATH;
-    if(local && (matid&MATF_VOLUME) == MAT_GLASS)
-        conoutft(CON_SELF, "\fzoyWARNING\fw - quin dislikes glass material: if seeing through this is unimportant, think about using alpha instead");
-    loopselxyz(setmat(c, matid, matmask, style));
+    if(matid < 0 && filter >= 0)
+    {
+        matid = 0;
+        matmask = filtermask;
+        if(isclipped(filter&MATF_VOLUME)) matmask &= ~MATF_CLIP;
+        if(isdeadly(filter&MATF_VOLUME)) matmask &= ~MAT_DEATH;
+    }
+    loopselxyz(setmat(c, matid, matmask, filtermat, filtermask, style));
 }
 
-void editmat(char *name, int *style)
+void editmat(char *name, char *filtername, int *style)
 {
     if(noedit()) return;
-    int id = findmaterial(name, true);
-    if(id<0) { conoutf("\frunknown material \"%s\"", name); return; }
-    mpeditmat(id, *style, sel, true);
+    int filter = -1;
+    if(filtername[0])
+    {
+        filter = findmaterial(filtername, true);
+        if(filter < 0) { conoutf("\frunknown material \"%s\"", filtername); return; }
+    }
+    int id = -1;
+    if(name[0] || filter < 0)
+    {
+        id = findmaterial(name, true);
+        if(id<0) { conoutf("\frunknown material \"%s\"", name); return; }
+    }
+    mpeditmat(id, filter, *style, sel, true);
 }
 
-COMMAND(0, editmat, "si");
+COMMAND(0, editmat, "ssi");
 
 VAR(IDF_PERSIST, autoapplytexgui, 0, 1, 1);
 VAR(IDF_PERSIST, autopreviewtexgui, 0, 1, 1);
@@ -2355,7 +2393,7 @@ void showtexgui(int *n)
 
 COMMAND(0, showtexgui, "i"); // 0/noargs = toggle, 1 = on, other = off - will autoclose when exiting editmode
 
-void render_texture_panel(int w, int h)
+void rendertexturepanel(int w, int h)
 {
     if((texpaneltimer -= curtime)>0 && editmode)
     {

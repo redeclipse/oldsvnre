@@ -329,6 +329,8 @@ extern char *shrinklist(const char *list, const char *limit, int failover);
 extern void checksleep(int millis);
 extern void clearsleep(bool clearworlds = true);
 
+extern char *gettime(char *format);
+
 // nasty macros for registering script functions, abuses globals to avoid excessive infrastructure
 #define COMMANDN(flags, name, fun, nargs) static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs, flags|IDF_COMPLETE)
 #define COMMAND(flags, name, nargs) COMMANDN(flags, name, name, nargs)
