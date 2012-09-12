@@ -155,6 +155,7 @@ static void writelog(FILE *file, const char *fmt, va_list args)
         if(carry >= len) ubuf[numu++] = '\n';
         fwrite(ubuf, 1, numu, file);
     }
+    fflush(file);
 }
 
 #ifdef STANDALONE

@@ -746,12 +746,11 @@ void addcomplete(char *command, int type, char *dir, char *ext)
     }
     if(type==FILES_DIR)
     {
-    int dirlen = (int)strlen(dir);
-    while(dirlen > 0 && (dir[dirlen-1] == '/' || dir[dirlen-1] == '\\'))
-        dir[--dirlen] = '\0';
+        int dirlen = (int)strlen(dir);
+        while(dirlen > 0 && (dir[dirlen-1] == '/' || dir[dirlen-1] == '\\')) dir[--dirlen] = '\0';
         if(ext)
         {
-    if(strchr(ext, '*')) ext[0] = '\0';
+            if(strchr(ext, '*')) ext[0] = '\0';
             if(!ext[0]) ext = NULL;
         }
     }
@@ -784,51 +783,61 @@ COMMANDN(0, listcomplete, addlistcomplete, "ss");
 
 void complete(char *s, const char *cmdprefix)
 {
-    int cmdlen = 0;
+    const char *start = s;
     if(cmdprefix)
     {
-        cmdlen = strlen(cmdprefix);
+        int cmdlen = strlen(cmdprefix);
         if(strncmp(s, cmdprefix, cmdlen))
         {
-            defformatstring(cmd)("%s%s", cmdprefix, s);
+            defformatstring(cmd)("%s%s", cmdprefix, start);
             copystring(s, cmd);
         }
+        start = &s[cmdlen];
     }
-    if(!s[cmdlen]) return;
-    if(!completesize) { completesize = (int)strlen(&s[cmdlen]); lastcomplete[0] = '\0'; }
-
+    if(!start[0]) return;
+    if(!completesize)
+    {
+        completesize = (int)strlen(start);
+        lastcomplete[0] = '\0';
+    }
     filesval *f = NULL;
     if(completesize)
     {
-        char *end = strchr(&s[cmdlen], ' ');
+        char *semi = strchr(start, ';');
+        while(semi)
+        {
+            start = semi+1;
+            semi = strchr(start, ';');
+        }
+        while(*start == ' ') start++;
+        char *end = strchr(start, ' ');
         if(end)
         {
             string command;
-            copystring(command, &s[cmdlen], min(size_t(end-&s[cmdlen]+1), sizeof(command)));
+            copystring(command, start, min(size_t(end-start+1), sizeof(command)));
             filesval **hasfiles = completions.access(command);
             if(hasfiles) f = *hasfiles;
         }
     }
-
     const char *nextcomplete = NULL;
     string prefix;
     if(f) // complete using filenames
     {
-        int commandsize = strchr(&s[cmdlen], ' ')+1-s;
-        copystring(prefix, s, min(size_t(commandsize+1), sizeof(prefix)));
+        int commandsize = strchr(start, ' ')+1-start;
+        copystring(prefix, s, min(size_t(commandsize+1+(start-s)), sizeof(prefix)));
         f->update();
         loopv(f->files)
         {
-            if(strncmp(f->files[i], &s[commandsize], completesize+cmdlen-commandsize)==0 &&
+            if(strncmp(f->files[i], &start[commandsize], completesize-commandsize-(start-s-1))==0 &&
                 strcmp(f->files[i], lastcomplete) > 0 && (!nextcomplete || strcmp(f->files[i], nextcomplete) < 0))
                 nextcomplete = f->files[i];
         }
     }
     else // complete using command names
     {
-        if(cmdprefix) copystring(prefix, cmdprefix); else prefix[0] = '\0';
+        copystring(prefix, s, min(size_t(1+(start-s)), sizeof(prefix)));
         enumerate(idents, ident, id,
-            if(id.flags&IDF_COMPLETE && strncmp(id.name, &s[cmdlen], completesize)==0 &&
+            if(id.flags&IDF_COMPLETE && strncmp(id.name, start, completesize-(start-s)+1)==0 &&
                strcmp(id.name, lastcomplete) > 0 && (!nextcomplete || strcmp(id.name, nextcomplete) < 0))
                 nextcomplete = id.name;
         );
@@ -838,7 +847,11 @@ void complete(char *s, const char *cmdprefix)
         formatstring(s)("%s%s", prefix, nextcomplete);
         copystring(lastcomplete, nextcomplete);
     }
-    else lastcomplete[0] = '\0';
+    else
+    {
+        s[completesize+1] = '\0';
+        completesize = 0;
+    }
 }
 
 void setidflag(const char *s, const char *v, int flag, const char *msg, bool alias)

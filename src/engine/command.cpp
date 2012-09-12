@@ -1071,10 +1071,10 @@ static bool compileblocksub(vector<uint> &code, const char *&p)
             ident *id = newident(lookup, IDF_UNKNOWN);
             if(id) switch(id->type)
             {
-            case ID_VAR: code.add(CODE_IVAR|RET_STR|(id->index<<8)); goto done;
-            case ID_FVAR: code.add(CODE_FVAR|RET_STR|(id->index<<8)); goto done;
-            case ID_SVAR: code.add(CODE_SVAR|RET_STR|(id->index<<8)); goto done;
-            case ID_ALIAS: code.add((id->index < MAXARGS ? CODE_LOOKUPARG : CODE_LOOKUP)|RET_STR|(id->index<<8)); goto done;
+                case ID_VAR: code.add(CODE_IVAR|RET_STR|(id->index<<8)); goto done;
+                case ID_FVAR: code.add(CODE_FVAR|RET_STR|(id->index<<8)); goto done;
+                case ID_SVAR: code.add(CODE_SVAR|RET_STR|(id->index<<8)); goto done;
+                case ID_ALIAS: code.add((id->index < MAXARGS ? CODE_LOOKUPARG : CODE_LOOKUP)|RET_STR|(id->index<<8)); goto done;
             }
             compilestr(code, lookup, p-start, true);
             code.add(CODE_LOOKUPU|RET_STR);
