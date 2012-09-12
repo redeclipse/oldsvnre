@@ -608,11 +608,11 @@ static void calcskylight(lightmapworker *w, const vec &o, const vec &normal, flo
     flags |= RAY_SHADOW;
     if(skytexturelight) flags |= RAY_SKIPSKY;
     int hit = 0;
-    if(w) loopi(17) 
+    if(w) loopi(17)
     {
         if(normal.dot(rays[i])>=0 && shadowray(w->shadowraycache, vec(rays[i]).mul(tolerance).add(o), rays[i], 1e16f, flags, t)>1e15f) hit++;
     }
-    else loopi(17) 
+    else loopi(17)
     {
         if(normal.dot(rays[i])>=0 && shadowray(vec(rays[i]).mul(tolerance).add(o), rays[i], 1e16f, flags, t)>1e15f) hit++;
     }
@@ -628,33 +628,38 @@ void calcsunlight(lightmapworker *w, const vec &o, const vec &normal, float tole
     {
         const extentity &light = *sunlights[i];
         if(light.attrs.length() < 5 || (slight[0] >= light.attrs[2] && slight[1] >= light.attrs[3] && slight[2] >= light.attrs[4])) continue;
-        int yaw = light.attrs[0], pitch = light.attrs[1]+90, offset = light.attrs.inrange(5) && light.attrs[5] ? light.attrs[5] : 10, hit = 0;
+        int yaw = light.attrs[0], pitch = light.attrs[1]+90,
+            offset = light.attrs.inrange(5) && light.attrs[5] ? (light.attrs[5] > 0 ? light.attrs[5] : 0) : 10, hit = 0;
         vec dir(yaw*RAD, pitch*RAD);
-        if(normal.dot(dir) >= 0 && 
+        if(normal.dot(dir) >= 0 &&
             (w ? shadowray(w->shadowraycache, vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f :
                  shadowray(vec(dir).mul(tolerance).add(o), dir, 1e16f, flags, t) > 1e15f))
             hit++;
-        matrix3x3 rot(90*RAD, dir);
-        vec spoke(yaw*RAD, (pitch + offset)*RAD);
-        spoke.rotate(21*RAD, dir);
-        loopk(4)
+        if(offset)
         {
-            if(normal.dot(spoke) >= 0 && 
-                (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f :
-                     shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f))
-                hit++;
-            spoke = rot.transform(spoke);
+            matrix3x3 rot(90*RAD, dir);
+            vec spoke(yaw*RAD, (pitch + offset)*RAD);
+            spoke.rotate(21*RAD, dir);
+            loopk(4)
+            {
+                if(normal.dot(spoke) >= 0 &&
+                    (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f :
+                         shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f))
+                    hit++;
+                spoke = rot.transform(spoke);
+            }
+            spoke = vec(yaw*RAD, (pitch + 0.5f*offset)*RAD).rotate((66-21)*RAD, dir);
+            loopk(4)
+            {
+                if(normal.dot(spoke) >= 0 &&
+                    (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f :
+                         shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f))
+                    hit++;
+                spoke = rot.transform(spoke);
+            }
+            loopk(3) slight[k] = max(uchar(light.attrs[2+k]*hit/9.f), slight[k]);
         }
-        spoke = vec(yaw*RAD, (pitch + 0.5f*offset)*RAD).rotate((66-21)*RAD, dir);
-        loopk(4)
-        {
-            if(normal.dot(spoke) >= 0 && 
-                (w ? shadowray(w->shadowraycache, vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f :
-                     shadowray(vec(spoke).mul(tolerance).add(o), spoke, 1e16f, flags, t) > 1e15f))
-                hit++;
-            spoke = rot.transform(spoke);
-        }
-        loopk(3) slight[k] = max(uchar(light.attrs[2+k]*hit/9.f), slight[k]);
+        else if(hit) loopk(3) slight[k] = max(uchar(light.attrs[2+k]), slight[k]);
     }
 }
 
@@ -899,8 +904,8 @@ static int finishlightmap(lightmapworker *w)
                 if(ray->iszero()) dstray[0] = bvec(128, 128, 255);
                 else
                 {
-                    // bias the normals towards the amount of ambient/skylight in the lumel 
-                    // this is necessary to prevent the light values in shaders from dropping too far below the skylight (to the ambient) if N.L is small 
+                    // bias the normals towards the amount of ambient/skylight in the lumel
+                    // this is necessary to prevent the light values in shaders from dropping too far below the skylight (to the ambient) if N.L is small
                     ray->normalize();
                     int l = max(r, max(g, b)), a = max(ar, max(ag, ab));
                     ray->mul(max(l-a, 0));
@@ -992,7 +997,7 @@ static void clearsurfaces(cube *c)
     {
         if(c[i].ext)
         {
-            loopj(6) 
+            loopj(6)
             {
                 surfaceinfo &surf = c[i].ext->surfaces[j];
                 if(!surf.used()) continue;
@@ -1011,7 +1016,7 @@ static void clearsurfaces(cube *c)
                         v.norm = 0;
                     }
                 }
-            } 
+            }
         }
         if(c[i].children) clearsurfaces(c[i].children);
     }
@@ -1167,7 +1172,7 @@ static int packlightmaps(lightmapworker *w = NULL)
     {
         lightmaptask &t = lightmaptasks[0][packidx];
         if(!t.lightmaps) break;
-        if(t.ext && t.c->ext != t.ext) 
+        if(t.ext && t.c->ext != t.ext)
         {
             lightmapext &e = lightmapexts.add();
             e.c = t.c;
@@ -1181,7 +1186,7 @@ static int packlightmaps(lightmapworker *w = NULL)
         {
             l->packed = true;
             space += l->bufsize;
-            if(l->surface < 0 || !t.ext) continue; 
+            if(l->surface < 0 || !t.ext) continue;
             surfaceinfo &surf = t.ext->surfaces[l->surface];
             layoutinfo layout;
             packlightmap(*l, layout);
@@ -1416,7 +1421,7 @@ static int setupsurface(lightmapworker *w, plane planes[2], int numplanes, const
     loopk(numverts)
     {
         litverts[k].u = ushort(floor(clamp(c[k].x*texscale.x, 0.0f, float(USHRT_MAX))));
-        litverts[k].v = ushort(floor(clamp(c[k].y*texscale.y, 0.0f, float(USHRT_MAX)))); 
+        litverts[k].v = ushort(floor(clamp(c[k].y*texscale.y, 0.0f, float(USHRT_MAX))));
     }
     return surftype;
 }
@@ -1446,7 +1451,7 @@ static lightmapinfo *setupsurfaces(lightmapworker *w, lightmaptask &task)
 
     w->curlightmaps = NULL;
     w->c = &c;
-    
+
     surfaceinfo surfaces[6];
     vertinfo litverts[6*2*MAXFACEVERTS];
     int numlitverts = 0;
@@ -1676,9 +1681,9 @@ int lightmapworker::work(void *data)
             t.lightmaps = l;
             packlightmaps(w);
         }
-        else 
+        else
         {
-            if(packidx >= lightmaptasks[0].length()) SDL_CondSignal(emptycond);   
+            if(packidx >= lightmaptasks[0].length()) SDL_CondSignal(emptycond);
             SDL_CondWait(fullcond, tasklock);
         }
     }
@@ -1704,7 +1709,7 @@ static bool processtasks(bool finish = false)
             SDL_CondWaitTimeout(emptycond, tasklock, 250);
             CHECK_PROGRESS_LOCKED({ SDL_UnlockMutex(tasklock); return false; }, SDL_UnlockMutex(tasklock), SDL_LockMutex(tasklock));
         }
-        else 
+        else
         {
             while(allocidx < lightmaptasks[0].length())
             {
@@ -2319,7 +2324,7 @@ void fixrotatedlightmaps(cube &c, const ivec &co, int size)
         return;
     }
     if(!c.ext) return;
-    loopi(6) 
+    loopi(6)
     {
         if(c.merged&(1<<i)) continue;
         surfaceinfo &surf = c.ext->surfaces[i];
@@ -2340,7 +2345,7 @@ void fixrotatedlightmaps(cube &c, const ivec &co, int size)
             verts[1].x = verts[2].x; verts[1].y = verts[2].y; verts[1].z = verts[2].z;
             verts[2].x = verts[3].x; verts[2].y = verts[3].y; verts[2].z = verts[3].z;
             verts[3].x = tmp.x; verts[3].y = tmp.y; verts[3].z = tmp.z;
-            if(surf.numverts&LAYER_DUP) loopk(4) 
+            if(surf.numverts&LAYER_DUP) loopk(4)
             {
                 vertinfo &v = verts[k], &b = verts[k+4];
                 b.x = v.x;
@@ -2676,7 +2681,7 @@ void lightreaching(const vec &target, vec &color, vec &dir, bool fast, extentity
         if(mag < 1e-4f) ray = vec(0, 0, -1);
         else
         {
-            ray.div(mag); 
+            ray.div(mag);
             if(shadowray(e.o, ray, mag, RAY_SHADOW | RAY_POLY, t) < mag)
                 continue;
         }

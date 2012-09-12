@@ -23,6 +23,8 @@ VAR(IDF_PERSIST, autosavemapshot, 0, 1, 1);
 
 void fixmaptitle()
 {
+    string s; // remove colour from these things in RE
+    if(filtertext(s, maptitle)) setsvar("maptitle", s, false);
     const char *title = maptitle, *author = strstr(title, " by ");
     if(author && *author)
     {
@@ -41,7 +43,7 @@ void fixmaptitle()
 }
 
 SVARF(IDF_WORLD, maptitle, "", fixmaptitle());
-SVAR(IDF_WORLD, mapauthor, "");
+SVARF(IDF_WORLD, mapauthor, "", { string s; if(filtertext(s, mapauthor)) setsvar("mapauthor", s, false); });
 
 void setnames(const char *fname, int type)
 {
@@ -1623,10 +1625,10 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 e.o = vec(hdr.worldsize/2, hdr.worldsize/2, hdr.worldsize*3/4);
                 e.attrs[0] = sunlightyaw;
                 e.attrs[1] = sunlightpitch-90;
-                e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale);
-                e.attrs[3] = int(((sunlight>>8)&0xFF)*sunlightscale);
-                e.attrs[4] = int((sunlight&0xFF)*sunlightscale);
-                e.attrs[5] = 1;
+                e.attrs[2] = int(((sunlight>>16)&0xFF)*sunlightscale*5/8);
+                e.attrs[3] = int(((sunlight>>8)&0xFF)*sunlightscale*5/8);
+                e.attrs[4] = int((sunlight&0xFF)*sunlightscale*5/8);
+                e.attrs[5] = -1;
             }
 
             progress(0, "loading slots...");

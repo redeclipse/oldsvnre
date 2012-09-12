@@ -273,8 +273,9 @@ void getstring(char *text, ucharbuf &p, int len)
     while(*t++);
 }
 
-void filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, int len)
+bool filtertext(char *dst, const char *src, bool newline, bool colour, bool whitespace, int len)
 {
+    bool filtered = false;
     for(int c = uchar(*src); c; c = uchar(*++src))
     {
         if(newline && (c=='\n' || c=='\r')) c = ' ';
@@ -283,6 +284,7 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
             if(!colour) *dst++ = c;
             else
             {
+                filtered = true;
                 c = *++src;
                 if(!c) break;
                 else if(c=='z')
@@ -305,8 +307,10 @@ void filtertext(char *dst, const char *src, bool newline, bool colour, bool whit
             *dst++ = c;
             if(!--len) break;
         }
+        else filtered = true;
     }
     *dst = '\0';
+    return filtered;
 }
 ICOMMAND(0, filter, "siiiN", (char *s, int *a, int *b, int *c, int *numargs),
 {
