@@ -761,6 +761,15 @@ namespace entities
                 }
                 break;
             }
+            case SUNLIGHT:
+            {
+                while(e.attrs[0] < 0) e.attrs[0] += 360;
+                while(e.attrs[0] >= 360) e.attrs[0] -= 360;
+                while(e.attrs[1] < -180) e.attrs[0] += 360;
+                while(e.attrs[1] >= 180) e.attrs[0] -= 360;
+                if(e.attrs[5] < -1) e.attrs[5] = 0;
+                break;
+            }
             case PUSHER:
             {
                 while(e.attrs[0] < 0) e.attrs[0] += 360;
@@ -1804,10 +1813,11 @@ namespace entities
                 }
                 case SUNLIGHT:
                 {
-                    int colour = ((e.attrs[2]/2)<<16)|((e.attrs[3]/2)<<8)|(e.attrs[4]/2), offset = e.attrs[5] ? e.attrs[5] : 10, yaw = e.attrs[0], pitch = e.attrs[1]+90;
+                    int colour = ((e.attrs[2]/2)<<16)|((e.attrs[3]/2)<<8)|(e.attrs[4]/2),
+                        offset = e.attrs[5] ? (e.attrs[5] > 0 ? e.attrs[5] : 0) : 10, yaw = e.attrs[0], pitch = e.attrs[1]+90;
                     vec dir(yaw*RAD, pitch*RAD);
                     static const float offsets[9][2] = { { 0, 0 }, { 0, 1 }, { 90, 1 }, { 180, 1 }, { 270, 1 }, { 45, 0.5f }, { 135, 0.5f }, { 225, 0.5f }, { 315, 0.5f } };
-                    loopk(9)
+                    loopk(offset ? 9 : 1)
                     {
                         vec spoke(yaw*RAD, (pitch + offset*offsets[k][1])*RAD);
                         spoke.rotate(offsets[k][0]*RAD, dir);
