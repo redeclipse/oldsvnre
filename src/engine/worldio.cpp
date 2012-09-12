@@ -1676,20 +1676,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             progress(0, "loading world...");
             game::loadworld(f, maptype);
             progress(0, "initialising entities...");
-            entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
-
-            progress(0, "initialising config...");
-            mapcrc = f->getcrc();
-            identflags |= IDF_WORLD;
-            defformatstring(cfgname)("%s.cfg", mapname);
-            if(maptype == MAP_OCTA)
-            {
-                execfile("octa.cfg"); // for use with -pSAUER_DIR
-                execfile(cfgname);
-            }
-            else if(!execfile(cfgname, false)) execfile("map.cfg");
-            identflags &= ~IDF_WORLD;
-
             loopv(ents)
             {
                 extentity &e = *ents[i];
@@ -1717,12 +1703,27 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     }
                 }
             }
+            entities::initents(f, maptype, hdr.version, hdr.gameid, hdr.gamever);
+
+            progress(0, "initialising config...");
+            mapcrc = f->getcrc();
+            identflags |= IDF_WORLD;
+            defformatstring(cfgname)("%s.cfg", mapname);
+            if(maptype == MAP_OCTA)
+            {
+                execfile("octa.cfg"); // for use with -pSAUER_DIR
+                execfile(cfgname);
+            }
+            else if(!execfile(cfgname, false)) execfile("map.cfg");
+            identflags &= ~IDF_WORLD;
+
             progress(0, "preloading models...");
             preloadusedmapmodels(true);
 
             delete f;
             conoutf("\faloaded map %s v.%d:%d (r%d) in %.1f secs", mapname, hdr.version, hdr.gamever, hdr.revision, (SDL_GetTicks()-loadingstart)/1000.0f);
 
+            progress(0, "checking world...");
             if((maptype == MAP_OCTA && hdr.version <= 25) || (maptype == MAP_MAPZ && hdr.version <= 26))
                 fixlightmapnormals();
             if((maptype == MAP_OCTA && hdr.version <= 31) || (maptype == MAP_MAPZ && hdr.version <= 40))
@@ -1732,6 +1733,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             initlights();
             allchanged(true);
 
+            progress(0, "preloading textures...");
             preloadtextures(IDF_GAMEPRELOAD);
 
             progress(0, "starting world...");
