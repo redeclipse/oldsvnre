@@ -2,7 +2,7 @@ enum { MDL_MD2 = 0, MDL_MD3, MDL_MD5, MDL_OBJ, MDL_SMD, MDL_IQM, NUMMODELTYPES }
 
 struct model
 {
-    float spin, offsetyaw, offsetpitch, offsetroll;
+    float spinyaw, spinpitch, offsetyaw, offsetpitch, offsetroll;
     bool collide, ellipsecollide, shadow, alphadepth, depthoffset;
     float scale;
     vec translate;
@@ -11,7 +11,7 @@ struct model
     float height, collideradius, collideheight;
     int batch;
 
-    model() : spin(0), offsetyaw(0), offsetpitch(0), offsetroll(0), collide(true), ellipsecollide(false), shadow(true), alphadepth(true), depthoffset(false), scale(1.0f), translate(0, 0, 0), bih(0), bbcenter(0, 0, 0), bbradius(0, 0, 0), bbextend(0, 0, 0), height(0.45f), collideradius(0), collideheight(0), batch(-1) {}
+    model() : spinyaw(0), spinpitch(0), offsetyaw(0), offsetpitch(0), offsetroll(0), collide(true), ellipsecollide(false), shadow(true), alphadepth(true), depthoffset(false), scale(1.0f), translate(0, 0, 0), bih(0), bbcenter(0, 0, 0), bbradius(0, 0, 0), bbextend(0, 0, 0), height(0.45f), collideradius(0), collideheight(0), batch(-1) {}
     virtual ~model() { DELETEP(bih); }
     virtual void calcbb(int frame, vec &center, vec &radius) = 0;
     virtual void render(int anim, int basetime, int basetime2, const vec &o, float yaw, float pitch, float roll, dynent *d, modelattach *a = NULL, const vec &color = vec(0, 0, 0), const vec &dir = vec(0, 0, 0), const bvec *material = NULL, float transparent = 1, float size = 1) = 0;
@@ -26,7 +26,7 @@ struct model
     virtual void setenvmap(float envmapmin, float envmapmax, Texture *envmap) {}
     virtual void setspec(float spec) {}
     virtual void setambient(float ambient) {}
-    virtual void setglow(float glow) {}
+    virtual void setglow(float glow, float glowdelta, float glowpulse) {}
     virtual void setglare(float specglare, float glowglare) {}
     virtual void setalphatest(float alpha) {}
     virtual void setalphablend(bool blend) {}

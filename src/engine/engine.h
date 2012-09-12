@@ -195,7 +195,7 @@ struct font
 extern font *curfont;
 
 // texture
-extern int hwtexsize, hwcubetexsize, hwmaxaniso, aniso, envmapradius;
+extern int hwtexsize, hwcubetexsize, hwmaxaniso, maxtexsize, aniso, envmapradius;
 
 extern Texture *textureload(const char *name, int clamp = 0, bool mipit = true, bool msg = true);
 extern int texalign(void *data, int w, int bpp);
@@ -397,7 +397,7 @@ extern void pasteundoents(undoblock *u);
 extern selinfo sel;
 extern int texpaneltimer;
 extern void cancelsel();
-extern void render_texture_panel(int w, int h);
+extern void rendertexturepanel(int w, int h);
 extern void addundo(undoblock *u);
 extern void commitchanges(bool force = false);
 extern editinfo *localedit;
@@ -522,7 +522,7 @@ extern int connectport;
 extern void localservertoclient(int chan, ENetPacket *packet);
 extern bool connected(bool attempt = true, bool local = true);
 extern void connectserv(const char *name = NULL, int port = RE_SERVER_PORT, const char *password = NULL);
-extern void reconnect();
+extern void reconnect(const char *pass);
 extern void lanconnect();
 extern void abortconnect(bool msg = true);
 extern void clientkeepalive();
@@ -603,6 +603,8 @@ extern int getmaprevision();
 
 
 // world
+extern vector<int> outsideents;
+
 extern void entcancel();
 extern void entitiesinoctanodes();
 extern void attachentities();
@@ -696,9 +698,6 @@ struct cline { char *cref; int type, reftime, outtime; };
 extern vector<cline> conlines;
 extern void conline(int type, const char *sf, int n);
 
-// command
-extern char *gettime(char *format);
-
 // rendergl
 extern int dynentsize, watercolour, lavacolour, fog, fogcolour;
 extern bvec ambientcolor, skylightcolor;
@@ -724,6 +723,8 @@ extern void generategrass();
 extern void rendergrass();
 
 // blendmap
+extern int blendpaintmode;
+
 struct BlendMapCache;
 extern BlendMapCache *newblendmapcache();
 extern void freeblendmapcache(BlendMapCache *&cache);
@@ -734,6 +735,8 @@ extern void resetblendmap();
 extern void enlargeblendmap();
 extern void shrinkblendmap(int octant);
 extern void optimizeblendmap();
+extern void stoppaintblendmap();
+extern void trypaintblendmap();
 extern void renderblendbrush(GLuint tex, float x, float y, float w, float h);
 extern void renderblendbrush();
 extern bool loadblendmap(stream *f);

@@ -128,6 +128,41 @@ void clear_command()
     });
 }
 
+void clearoverride(ident &i)
+{
+    switch(i.type)
+    {
+        case ID_ALIAS:
+            if(i.valtype==VAL_STR)
+            {
+                if(!i.val.s[0]) break;
+                delete[] i.val.s;
+            }
+            cleancode(i);
+            i.valtype = VAL_STR;
+            i.val.s = newstring(i.def.s);
+            break;
+        case ID_VAR:
+            *i.storage.i = i.def.i;
+            i.changed();
+            break;
+        case ID_FVAR:
+            *i.storage.f = i.def.f;
+            i.changed();
+            break;
+        case ID_SVAR:
+            delete[] *i.storage.s;
+            *i.storage.s = i.def.s;
+            i.changed();
+            break;
+    }
+}
+
+void clearoverrides()
+{
+    enumerate(idents, ident, i, clearoverride(i));
+}
+
 static bool initedidents = false;
 static vector<ident> *identinits = NULL;
 
@@ -319,6 +354,16 @@ ident *readident(const char *name)
        return NULL;
     return id;
 }
+
+void resetvar(char *name)
+{
+    ident *id = idents.access(name);
+    if(!id) return;
+    if(id->flags&IDF_READONLY) debugcode("variable %s is read-only", id->name);
+    else clearoverride(*id);
+}
+
+COMMAND(0, resetvar, "s");
 
 static inline void setarg(ident &id, tagval &v)
 {
@@ -1202,7 +1247,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
                     delete[] idname;
                 }
                 if(!(more = compilearg(code, p, VAL_ANY))) compilestr(code);
-                code.add(idname && id ? (id->index < MAXARGS ? CODE_ALIASARG : CODE_ALIAS)|(id->index<<8) : CODE_ALIASU);
+                code.add(id && idname ? (id->index < MAXARGS ? CODE_ALIASARG : CODE_ALIAS)|(id->index<<8) : CODE_ALIASU);
                 goto endstatement;
         }
         numargs = 0;
@@ -2672,6 +2717,8 @@ ICOMMAND(0, maxf, "V", (tagval *args, int numargs),
     loopi(numargs - 1) val = max(val, args[i].getfloat());
     floatret(val);
 });
+ICOMMAND(0, abs, "i", (int *n), intret(abs(*n)));
+ICOMMAND(0, absf, "f", (float *n), floatret(fabs(*n)));
 ICOMMAND(0, precf, "fi", (float *a, int *b),
 {
     defformatstring(format)("%%.%df", max(*b, 0));
@@ -2728,6 +2775,7 @@ ICOMMAND(0, strcasecmp, "ss", (char *a, char *b), intret(strcasecmp(a,b)==0));
 ICOMMAND(0, strncmp, "ssi", (char *a, char *b, int *n), intret(strncmp(a,b,*n)==0));
 ICOMMAND(0, strncasecmp, "ssi", (char *a, char *b, int *n), intret(strncasecmp(a,b,*n)==0));
 ICOMMAND(0, echo, "C", (char *s), conoutft(CON_MESG, "%s", s));
+ICOMMAND(0, error, "C", (char *s), conoutft(CON_DEBUG, "\fr%s", s));
 ICOMMAND(0, strstr, "ss", (char *a, char *b), { char *s = strstr(a, b); intret(s ? s-a : -1); });
 ICOMMAND(0, strlen, "s", (char *s), intret(strlen(s)));
 
@@ -2736,6 +2784,7 @@ char *strreplace(const char *s, const char *oldval, const char *newval)
     vector<char> buf;
 
     int oldlen = strlen(oldval);
+    if(!oldlen) return newstring(s);
     for(;;)
     {
         const char *found = strstr(s, oldval);

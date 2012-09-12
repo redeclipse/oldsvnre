@@ -354,7 +354,10 @@ void optimizeblendmap()
     optimizeblendmap(blendmap.type, blendmap);
 }
 
-VAR(0, blendpaintmode, 0, 0, 5);
+VARF(0, blendpaintmode, 0, 0, 5,
+{
+    if(!blendpaintmode) stoppaintblendmap();
+});
 
 static void blitblendmap(uchar &type, BlendMapNode &node, int bmx, int bmy, int bmsize, uchar *src, int sx, int sy, int sw, int sh)
 {
@@ -606,7 +609,7 @@ COMMAND(0, setblendbrush, "s");
 COMMAND(0, getblendbrushname, "i");
 COMMAND(0, curblendbrush, "");
 
-bool canpaintblendmap(bool brush = true, bool sel = false)
+bool canpaintblendmap(bool brush = true, bool sel = false, bool msg = true)
 {
     if(noedit(!sel)) return false;
     if(!blendpaintmode)
@@ -616,7 +619,7 @@ bool canpaintblendmap(bool brush = true, bool sel = false)
     }
     if(brush && !brushes.inrange(curbrush))
     {
-        conoutft(CON_MESG, "\frno blend brush selected");
+        if(msg) conoutft(CON_MESG, "\frno blend brush selected");
         return false;
     }
     return true;
@@ -633,9 +636,9 @@ void rotateblendbrush(int *val)
 
 COMMAND(0, rotateblendbrush, "i");
 
-void paintblendmap()
+void paintblendmap(bool msg)
 {
-    if(!canpaintblendmap()) return;
+    if(!canpaintblendmap(true, false, msg)) return;
 
     BlendBrush *brush = brushes[curbrush];
     int x = (int)floor(clamp(worldpos.x, 0.0f, float(hdr.worldsize))/(1<<BM_SCALE) - 0.5f*brush->w),
@@ -645,7 +648,38 @@ void paintblendmap()
                   ivec((brush->w+2)<<BM_SCALE, (brush->h+2)<<BM_SCALE, hdr.worldsize));
 }
 
-COMMAND(0, paintblendmap, "");
+VAR(0, paintblendmapdelay, 1, 500, 3000);
+VAR(0, paintblendmapinterval, 1, 30, 3000);
+
+int paintingblendmap = 0, lastpaintblendmap = 0;
+
+void stoppaintblendmap()
+{
+    paintingblendmap = 0;
+    lastpaintblendmap = 0;
+}
+
+void trypaintblendmap()
+{
+    if(!paintingblendmap || totalmillis - paintingblendmap < paintblendmapdelay) return;
+    if(lastpaintblendmap)
+    {
+        int diff = totalmillis - lastpaintblendmap;
+        if(diff < paintblendmapinterval) return;
+        lastpaintblendmap = (diff - diff%paintblendmapinterval) + lastpaintblendmap;
+    }
+    else lastpaintblendmap = totalmillis;
+    paintblendmap(false);
+}
+
+ICOMMAND(0, paintblendmap, "D", (int *isdown),
+{
+    if(*isdown)
+    {
+        if(!paintingblendmap) { paintblendmap(true); paintingblendmap = totalmillis; }
+    }
+    else stoppaintblendmap();
+});
 
 void clearblendmapsel()
 {

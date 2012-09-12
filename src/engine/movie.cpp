@@ -185,26 +185,13 @@ struct aviwriter
             const char *desc;
             switch (soundformat)
             {
-            case AUDIO_U8:
-                desc = "u8";
-                break;
-            case AUDIO_S8:
-                desc = "s8";
-                break;
-            case AUDIO_U16LSB:
-                desc = "u16l";
-                break;
-            case AUDIO_U16MSB:
-                desc = "u16b";
-                break;
-            case AUDIO_S16LSB:
-                desc = "s16l";
-                break;
-            case AUDIO_S16MSB:
-                desc = "s16b";
-                break;
-            default:
-                desc = "unkn";
+                case AUDIO_U8:     desc = "u8"; break;
+                case AUDIO_S8:     desc = "s8"; break;
+                case AUDIO_U16LSB: desc = "u16l"; break;
+                case AUDIO_U16MSB: desc = "u16b"; break;
+                case AUDIO_S16LSB: desc = "s16l"; break;
+                case AUDIO_S16MSB: desc = "s16b"; break;
+                default:           desc = "unkn";
             }
             if(dbgmovie) conoutf("soundspec: %dhz %s x %d", soundfrequency, desc, soundchannels);
         }
@@ -451,12 +438,7 @@ struct aviwriter
         if(!yuv) yuv = new uchar[(planesize*3)/2];
         uchar *yplane = yuv, *uplane = yuv + planesize, *vplane = yuv + planesize + planesize/4;
         const int ystride = flip*int(videow), uvstride = flip*int(videow)/2;
-        if(flip < 0)
-        {
-            yplane -= int(videoh-1)*ystride;
-            uplane -= int(videoh/2-1)*uvstride;
-            vplane -= int(videoh/2-1)*uvstride;
-        }
+        if(flip < 0) { yplane -= int(videoh-1)*ystride; uplane -= int(videoh/2-1)*uvstride; vplane -= int(videoh/2-1)*uvstride; }
 
         const uint stride = srcw<<2;
         srcw &= ~1;
@@ -516,12 +498,7 @@ struct aviwriter
         if(!yuv) yuv = new uchar[(planesize*3)/2];
         uchar *yplane = yuv, *uplane = yuv + planesize, *vplane = yuv + planesize + planesize/4;
         const int ystride = flip*int(videow), uvstride = flip*int(videow)/2;
-        if(flip < 0)
-        {
-            yplane -= int(videoh-1)*ystride;
-            uplane -= int(videoh/2-1)*uvstride;
-            vplane -= int(videoh/2-1)*uvstride;
-        }
+        if(flip < 0) { yplane -= int(videoh-1)*ystride; uplane -= int(videoh/2-1)*uvstride; vplane -= int(videoh/2-1)*uvstride; }
 
         const uint stride = videow<<2;
         const uchar *src = pixels, *yend = src + videoh*stride;
@@ -568,12 +545,7 @@ struct aviwriter
         if(!yuv) yuv = new uchar[(planesize*3)/2];
         uchar *yplane = yuv, *uplane = yuv + planesize, *vplane = yuv + planesize + planesize/4;
         const int ystride = flip*int(videow), uvstride = flip*int(videow)/2;
-        if(flip < 0)
-        {
-            yplane -= int(videoh-1)*ystride;
-            uplane -= int(videoh/2-1)*uvstride;
-            vplane -= int(videoh/2-1)*uvstride;
-        }
+        if(flip < 0) { yplane -= int(videoh-1)*ystride; uplane -= int(videoh/2-1)*uvstride; vplane -= int(videoh/2-1)*uvstride; }
 
         const uint stride = videow<<2;
         const uchar *src = pixels, *yend = src + videoh*stride;
@@ -603,24 +575,31 @@ struct aviwriter
 
     bool writesound(uchar *data, uint framesize, uint frame)
     {
-        switch (soundformat) // do conversion inplace to little endian format
+        // do conversion in-place to little endian format
+        // note that xoring by half the range yields the same bit pattern as subtracting the range regardless of signedness
+        // ... so can toggle signedness just by xoring the high byte with 0x80
+        switch(soundformat)
         {
         case AUDIO_U8:
-            loopi(framesize) ((Sint8*)data)[i] = ((Uint8*)data)[i] - 0x80;
+                for(uchar *dst = data, *end = &data[framesize]; dst < end; dst++) *dst ^= 0x80;
             break;
         case AUDIO_S8:
             break;
         case AUDIO_U16LSB:
-            loopi(framesize/2) ((Sint16*)data)[i] = ((Uint16*)data)[i] - 0x8000;
+                for(uchar *dst = &data[1], *end = &data[framesize]; dst < end; dst += 2) *dst ^= 0x80;
             break;
         case AUDIO_U16MSB:
-            loopi(framesize/2) ((Sint16*)data)[i] = ((Uint16*)data)[i] - 0x8000;
-            lilswap((Sint16*)data, framesize/2);
+                for(ushort *dst = (ushort *)data, *end = (ushort *)&data[framesize]; dst < end; dst++)
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+                    *dst = endianswap(*dst) ^ 0x0080;
+#else
+                    *dst = endianswap(*dst) ^ 0x8000;
+#endif
             break;
         case AUDIO_S16LSB:
             break;
         case AUDIO_S16MSB:
-            lilswap((Sint16*)data, framesize/2);
+                endianswap((short *)data, framesize/2);
             break;
         }
 
@@ -781,29 +760,27 @@ namespace recorder
     enum { MAXSOUNDBUFFERS = 128 }; // sounds queue up until there is a video frame, so at low fps you'll need a bigger queue
     struct soundbuffer
     {
-        Uint8 *sound;
-        uint size;
+        uchar *sound;
+        uint size, maxsize;
         uint frame;
 
-        soundbuffer() : sound(NULL) {}
-        ~soundbuffer()
-        {
-            cleanup();
-        }
+        soundbuffer() : sound(NULL), maxsize(0) {}
+        ~soundbuffer() { cleanup(); }
 
-        void load(Uint8 *stream, uint len, uint fnum)
+        void load(uchar *stream, uint len, uint fnum)
+        {
+            if(len > maxsize)
         {
             DELETEA(sound);
+                sound = new uchar[len];
+                maxsize = len;
+            }
             size = len;
-            sound = new Uint8[len];
             frame = fnum;
             memcpy(sound, stream, len);
         }
 
-        void cleanup()
-        {
-            DELETEA(sound);
-        }
+        void cleanup() { DELETEA(sound); maxsize = 0; }
     };
     static queue<soundbuffer, MAXSOUNDBUFFERS> soundbuffers;
     static SDL_mutex *soundlock = NULL;
@@ -816,10 +793,7 @@ namespace recorder
         int format;
 
         videobuffer() : video(NULL){}
-        ~videobuffer()
-        {
-            cleanup();
-        }
+        ~videobuffer() { cleanup(); }
 
         void init(int nw, int nh, int nbpp)
         {
@@ -831,10 +805,7 @@ namespace recorder
             format = -1;
         }
 
-        void cleanup()
-        {
-            DELETEA(video);
-        }
+        void cleanup() { DELETEA(video); }
     };
     static queue<videobuffer, MAXVIDEOBUFFERS> videobuffers;
     static uint lastframe = ~0U;
@@ -847,10 +818,7 @@ namespace recorder
     static SDL_mutex *videolock = NULL;
     static SDL_cond *shouldencode = NULL, *shouldread = NULL;
 
-    bool isrecording()
-    {
-        return file != NULL;
-    }
+    bool isrecording() { return file != NULL; }
 
     float calcquality()
     {
@@ -870,11 +838,7 @@ namespace recorder
             for (; numvid > 0; numvid--) videobuffers.remove();
             SDL_CondSignal(shouldread);
             while (videobuffers.empty() && state == REC_OK) SDL_CondWait(shouldencode, videolock);
-            if(state != REC_OK)
-            {
-                SDL_UnlockMutex(videolock);
-                break;
-            }
+            if(state != REC_OK) { SDL_UnlockMutex(videolock); break; }
             videobuffer &m = videobuffers.removing();
             numvid++;
             SDL_UnlockMutex(videolock);
@@ -926,7 +890,7 @@ namespace recorder
         {
             uint nextframe = (max(gettime() - starttime, 0)*file->videofps)/1000;
             soundbuffer &s = soundbuffers.add();
-            s.load(stream, len, nextframe);
+            s.load((uchar *)stream, len, nextframe);
         }
         SDL_UnlockMutex(soundlock);
     }
@@ -1038,11 +1002,7 @@ namespace recorder
         bool accelyuv = movieaccelyuv && renderpath!=R_FIXEDFUNCTION && !(m.w%8),
                         usefbo = movieaccel && hasFBO && hasTR && file->videow <= (uint)screen->w && file->videoh <= (uint)screen->h && (accelyuv || file->videow < (uint)screen->w || file->videoh < (uint)screen->h);
         uint w = screen->w, h = screen->h;
-        if(usefbo)
-        {
-            w = file->videow;
-            h = file->videoh;
-        }
+        if(usefbo) { w = file->videow; h = file->videoh; }
         if(w != m.w || h != m.h) m.init(w, h, 4);
         m.format = aviwriter::VID_RGB;
         m.frame = nextframe;
@@ -1051,11 +1011,7 @@ namespace recorder
         if(usefbo)
         {
             uint tw = screen->w, th = screen->h;
-            if(hasFBB && movieaccelblit)
-            {
-                tw = max(tw/2, m.w);
-                th = max(th/2, m.h);
-            }
+            if(hasFBB && movieaccelblit) { tw = max(tw/2, m.w); th = max(th/2, m.h); }
             if(tw != scalew || th != scaleh)
             {
                 if(!scalefb) glGenFramebuffers_(1, &scalefb);
@@ -1109,18 +1065,13 @@ namespace recorder
                     glFramebufferTexture2D_(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, scaletex[1], 0);
                     glBindTexture(GL_TEXTURE_RECTANGLE_ARB, scaletex[0]);
                     uint dw = max(tw/2, m.w), dh = max(th/2, m.h);
-                    if(dw == m.w && dh == m.h && !accelyuv && renderpath != R_FIXEDFUNCTION)
-                    {
-                        SETSHADER(movieyuv);
-                        m.format = aviwriter::VID_YUV;
-                    }
+                    if(dw == m.w && dh == m.h && !accelyuv && renderpath != R_FIXEDFUNCTION) { SETSHADER(movieyuv); m.format = aviwriter::VID_YUV; }
                     else SETSHADER(moviergb);
                     drawquad(tw, th, 0, 0, dw, dh);
                     tw = dw;
                     th = dh;
                     swap(scaletex[0], scaletex[1]);
-                }
-                while (tw > m.w || th > m.h);
+                } while(tw > m.w || th > m.h);
                 glDisable(GL_TEXTURE_RECTANGLE_ARB);
             }
             if(accelyuv)
@@ -1135,12 +1086,9 @@ namespace recorder
                 glLoadIdentity();
                 glEnable(GL_TEXTURE_RECTANGLE_ARB);
                 glBindTexture(GL_TEXTURE_RECTANGLE_ARB, scaletex[0]);
-                SETSHADER(moviey);
-                drawquad(m.w, m.h, 0, 0, m.w/4, m.h);
-                SETSHADER(moviev);
-                drawquad(m.w, m.h, m.w/4, 0, m.w/8, m.h/2);
-                SETSHADER(movieu);
-                drawquad(m.w, m.h, m.w/4, m.h/2, m.w/8, m.h/2);
+                SETSHADER(moviey); drawquad(m.w, m.h, 0, 0, m.w/4, m.h);
+                SETSHADER(moviev); drawquad(m.w, m.h, m.w/4, 0, m.w/8, m.h/2);
+                SETSHADER(movieu); drawquad(m.w, m.h, m.w/4, m.h/2, m.w/8, m.h/2);
                 glDisable(GL_TEXTURE_RECTANGLE_ARB);
                 const uint planesize = m.w * m.h;
                 glPixelStorei(GL_PACK_ALIGNMENT, texalign(m.video, m.w/4, 4));
@@ -1209,16 +1157,8 @@ namespace recorder
 
         double totalsize = file->filespaceguess();
         const char *unit = "KB";
-        if(totalsize >= 1e9)
-        {
-            totalsize /= 1e9;
-            unit = "GB";
-        }
-        else if(totalsize >= 1e6)
-        {
-            totalsize /= 1e6;
-            unit = "MB";
-        }
+        if(totalsize >= 1e9) { totalsize /= 1e9; unit = "GB"; }
+        else if(totalsize >= 1e6) { totalsize /= 1e6; unit = "MB"; }
         else totalsize /= 1e3;
 
         draw_textx("recorded %.1f%s %d%%", w*3-FONTH*3/2, FONTH*3/2, 255, 255, 255, 255, TEXT_RIGHT_JUSTIFY, -1, -1, totalsize, unit, int(calcquality()*100));

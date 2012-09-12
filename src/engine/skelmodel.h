@@ -176,7 +176,7 @@ struct skelmodel : animmodel
         int voffset, eoffset, elen;
         ushort minvert, maxvert;
 
-        skelmesh() : verts(NULL), bumpverts(NULL), tris(0), numverts(0), numtris(0), maxweights(0)
+        skelmesh() : verts(NULL), bumpverts(NULL), tris(NULL), numverts(0), numtris(0), maxweights(0)
         {
         }
 

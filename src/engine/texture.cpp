@@ -1255,11 +1255,6 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
             int emphasis = atoi(arg[0]);
             texnormal(d, emphasis > 0 ? emphasis : 3);
         }
-        else if(!strncmp(cmd, "blur", len))
-        {
-            int emphasis = atoi(arg[0]), repeat = atoi(arg[1]);
-            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 1, repeat > 0 ? repeat : 1);
-        }
         else if(!strncmp(cmd, "dup", len)) texdup(d, atoi(arg[0]), atoi(arg[1]));
         else if(!strncmp(cmd, "decal", len)) texdecal(d);
         else if(!strncmp(cmd, "offset", len)) texoffset(d, atoi(arg[0]), atoi(arg[1]));
@@ -1268,6 +1263,11 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         else if(!strncmp(cmd, "crop", len)) texcrop(d, atoi(arg[0]), atoi(arg[1]), atoi(arg[2]), atoi(arg[3]));
         else if(!strncmp(cmd, "mix", len)) texmix(d, *arg[0] ? atoi(arg[0]) : -1, *arg[1] ? atoi(arg[1]) : -1, *arg[2] ? atoi(arg[2]) : -1, *arg[3] ? atoi(arg[3]) : -1);
         else if(!strncmp(cmd, "grey", len)) texgrey(d);
+        else if(!strncmp(cmd, "blur", len))
+        {
+            int emphasis = atoi(arg[0]), repeat = atoi(arg[1]);
+            texblur(d, emphasis > 0 ? clamp(emphasis, 1, 2) : 1, repeat > 0 ? repeat : 1);
+        }
         else if(!strncmp(cmd, "premul", len)) texpremul(d);
         else if(!strncmp(cmd, "agrad", len)) texagrad(d, atof(arg[0]), atof(arg[1]), atof(arg[2]), atof(arg[3]));
         else if(!strncmp(cmd, "compress", len) || !strncmp(cmd, "dds", len))
@@ -1292,6 +1292,13 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
                 anim->h = d.h/anim->y;
                 anim->count = anim->x*anim->y;
             }
+        }
+        else if(!strncmp(cmd, "thumbnail", len))
+        {
+            int w = atoi(arg[0]), h = atoi(arg[1]);
+            if(w <= 0 || w > (1<<12)) w = 64;
+            if(h <= 0 || h > (1<<12)) h = w;
+            if(d.w > w || d.h > h) scaleimage(d, w, h);
         }
         else if(!strncmp(cmd, "ffskip", len))
         {
@@ -2142,7 +2149,7 @@ static void texcombine(Slot &s, int index, Slot::Tex &t, bool forceload = false)
                     if(bs.w!=ts.w || bs.h!=ts.h) scaleimage(bs, ts.w, ts.h);
                     switch(b.type)
                     {
-                        case TEX_DECAL: if(bs.bpp==4) blenddecal(ts, bs); break;
+                        case TEX_DECAL: /*if(bs.bpp==4)*/ blenddecal(ts, bs); break;
                         case TEX_NORMAL: addbump(ts, bs, envmap, (texmask&(1<<TEX_SPEC))!=0); break;
                         case TEX_SPEC: mergespec(ts, bs, envmap); break;
                     }

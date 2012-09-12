@@ -82,10 +82,10 @@ void cleanup()
     cleanupserver();
     setscreensaver(true);
     showcursor(true);
-#ifdef FAKESHOWCURSOR
-    if(scursor) SDL_FreeCursor(scursor);
-    scursor = ncursor = NULL;
-#endif
+//#ifdef FAKESHOWCURSOR
+//    if(scursor) SDL_FreeCursor(scursor);
+//    scursor = ncursor = NULL;
+//#endif
     SDL_WM_GrabInput(SDL_GRAB_OFF);
     cleargamma();
     freeocta(worldroot);

@@ -452,6 +452,7 @@ struct smd : skelmodel, skelloader<smd>
                 loading = NULL;
                 return false;
             }
+            loading = NULL;
         }
         scale /= 4;
         parts[0]->translate = translate;

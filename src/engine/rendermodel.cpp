@@ -127,16 +127,17 @@ void mdldepthoffset(int *offset)
 
 COMMAND(0, mdldepthoffset, "i");
 
-void mdlglow(int *percent)
+void mdlglow(int *percent, int *delta, float *pulse)
 {
     checkmdl;
-    float glow = 3.0f;
+    float glow = 3.0f, glowdelta = *delta/100.0f, glowpulse = *pulse > 0 ? *pulse/1000.0f : 0;
     if(*percent>0) glow = *percent/100.0f;
     else if(*percent<0) glow = 0.0f;
-    loadingmodel->setglow(glow);
+    glowdelta -= glow;
+    loadingmodel->setglow(glow, glowdelta, glowpulse);
 }
 
-COMMAND(0, mdlglow, "i");
+COMMAND(0, mdlglow, "iif");
 
 void mdlglare(float *specglare, float *glowglare)
 {
@@ -170,13 +171,14 @@ void mdlshader(const char *shader)
 
 COMMAND(0, mdlshader, "s");
 
-void mdlspin(float *rate)
+void mdlspin(float *yaw, float *pitch)
 {
     checkmdl;
-    loadingmodel->spin = *rate;
+    loadingmodel->spinyaw = *yaw;
+    loadingmodel->spinpitch = *pitch;
 }
 
-COMMAND(0, mdlspin, "f");
+COMMAND(0, mdlspin, "ff");
 
 void mdlscale(int *percent)
 {

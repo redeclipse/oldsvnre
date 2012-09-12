@@ -40,6 +40,24 @@ bool connected(bool attempt, bool local)
     return curpeer || (attempt && connpeer) || (local && haslocalclients());
 }
 
+const ENetAddress *connectedpeer()
+{
+    return curpeer ? &curpeer->address : NULL;
+}
+
+ICOMMAND(0, connectedip, "", (),
+{
+    const ENetAddress *address = connectedpeer();
+    string hostname;
+    result(address && enet_address_get_host_ip(address, hostname, sizeof(hostname)) >= 0 ? hostname : "");
+});
+
+ICOMMAND(0, connectedport, "", (),
+{
+    const ENetAddress *address = connectedpeer();
+    intret(address ? address->port : -1);
+});
+
 void abortconnect(bool msg)
 {
     if(!connpeer) return;
@@ -166,21 +184,16 @@ ICOMMAND(0, localconnect, "i", (int *n), localconnect(*n ? false : true));
 ICOMMAND(0, isonline, "", (), intret(curpeer ? 1 : 0));
 ICOMMAND(0, isconnected, "ii", (int *a, int *b), intret(connected(*a==0, *b==0) ? 1 : 0));
 
-void reconnect()
+void reconnect(const char *pass)
 {
     int port = 0;
     mkstring(addr);
     if(*connectname) copystring(addr, connectname);
     if(connectport) port = connectport;
     disconnect(1);
-    if(*addr)
-    {
-        if(port) connectserv(addr, port);
-        else connectserv(addr);
-    }
-    else connectserv();
+    connectserv(*addr ? addr : NULL, port > 0 ? port : RE_SERVER_PORT, pass);
 }
-COMMAND(0, reconnect, "");
+COMMAND(0, reconnect, "s");
 
 int lastupdate = -1000;
 

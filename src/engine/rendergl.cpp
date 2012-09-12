@@ -214,10 +214,6 @@ void gl_checkextensions()
     else if(strstr(vendor, "Intel"))
         intel = true;
 
-    GLint val;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &val);
-    hwtexsize = val;
-
     uint glmajorversion, glminorversion;
     if(sscanf(version, " %u.%u", &glmajorversion, &glminorversion) != 2) glversion = 100;
     else glversion = glmajorversion*100 + glminorversion*10;
@@ -226,6 +222,10 @@ void gl_checkextensions()
     // default to low precision shaders on certain cards, can be overridden with -f3
     // char *weakcards[] = { "GeForce FX", "Quadro FX", "6200", "9500", "9550", "9600", "9700", "9800", "X300", "X600", "FireGL", "Intel", "Chrome", NULL }
     // if(shaderprecision==2) for(char **wc = weakcards; *wc; wc++) if(strstr(renderer, *wc)) shaderprecision = 1;
+
+    GLint val;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &val);
+    hwtexsize = val;
 
     if(hasext(exts, "GL_EXT_texture_env_combine") || hasext(exts, "GL_ARB_texture_env_combine"))
     {
@@ -2347,7 +2347,7 @@ void drawviewtype(int targtype)
     glEnable(GL_TEXTURE_2D);
     defaultshader->set();
     hud::drawhud();
-    render_texture_panel(w, h);
+    rendertexturepanel(w, h);
     hud::drawlast();
     glDisable(GL_TEXTURE_2D);
 
