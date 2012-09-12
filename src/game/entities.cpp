@@ -765,8 +765,8 @@ namespace entities
             {
                 while(e.attrs[0] < 0) e.attrs[0] += 360;
                 while(e.attrs[0] >= 360) e.attrs[0] -= 360;
-                while(e.attrs[1] < -180) e.attrs[0] += 360;
-                while(e.attrs[1] >= 180) e.attrs[0] -= 360;
+                while(e.attrs[1] < -180) e.attrs[1] += 360;
+                while(e.attrs[1] >= 180) e.attrs[1] -= 360;
                 if(e.attrs[5] < -1) e.attrs[5] = 0;
                 break;
             }
@@ -1251,7 +1251,7 @@ namespace entities
     void importentities(int mtype, int mver, int gver)
     {
         int flag = 0, teams[TEAM_TOTAL] = {0};
-        if(verbose) progress(0, "importing entities...");
+        progress(0, "importing entities...");
         loopv(octateles) // translate teledest to teleport and link them appropriately
         {
             octatele &t = octateles[i];
@@ -1319,7 +1319,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(verbose) progress(float(i+1)/float(ents.length()), "importing entities...");
+            progress(i/float(ents.length()), "importing entities...");
             switch(e.type)
             {
                 case WEAPON:
@@ -1424,7 +1424,7 @@ namespace entities
         loopvj(ents)
         {
             gameentity &e = *(gameentity *)ents[j];
-            if(verbose) progress(float(j)/float(ents.length()), "updating old entities...");
+            progress(j/float(ents.length()), "updating old entities...");
             switch(e.type)
             {
                 case LIGHTFX:
@@ -1649,6 +1649,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
+            progress(i/float(ents.length()), "setting entity attributes...");
             int num = max(5, enttype[e.type].numattrs);
             if(e.attrs.length() < num) e.attrs.add(0, num - e.attrs.length());
             else if(e.attrs.length() > num) e.attrs.setsize(num);
@@ -1657,6 +1658,7 @@ namespace entities
         if(mtype == MAP_OCTA || (mtype == MAP_MAPZ && gver < GAMEVERSION)) updateoldentities(mtype, mver, gver);
         loopv(ents)
         {
+            progress(i/float(ents.length()), "fixing entities...");
             fixentity(i, false);
             switch(ents[i]->type)
             {
@@ -1694,6 +1696,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
+            progress(i/float(ents.length()), "updating entities...");
             if(mtype == MAP_MAPZ && gver <= 212)
             {
                 if(e.type == DUMMY1) e.type = NOTUSED;
