@@ -726,7 +726,7 @@ static inline uint hthash(const fileskey &k)
 static hashtable<fileskey, filesval *> completefiles;
 static hashtable<char *, filesval *> completions;
 
-int completesize = 0;
+int completeoffset = -1, completesize = 0;
 string lastcomplete;
 
 void resetcomplete() { completesize = 0; }
@@ -794,22 +794,19 @@ void complete(char *s, const char *cmdprefix)
         }
         start = &s[cmdlen];
     }
+    char *semi = strrchr(start, ';');
+    if(semi) start = semi+1;
+    while(*start == ' ') start++;
     if(!start[0]) return;
-    if(!completesize)
+    if(start-s != completeoffset || !completesize)
     {
+        completeoffset = start-s;
         completesize = (int)strlen(start);
         lastcomplete[0] = '\0';
     }
     filesval *f = NULL;
     if(completesize)
     {
-        char *semi = strchr(start, ';');
-        while(semi)
-        {
-            start = semi+1;
-            semi = strchr(start, ';');
-        }
-        while(*start == ' ') start++;
         char *end = strchr(start, ' ');
         if(end)
         {
@@ -828,7 +825,7 @@ void complete(char *s, const char *cmdprefix)
         f->update();
         loopv(f->files)
         {
-            if(strncmp(f->files[i], &start[commandsize], completesize-commandsize-(start-s-1))==0 &&
+            if(strncmp(f->files[i], &start[commandsize], completesize-commandsize)==0 &&
                 strcmp(f->files[i], lastcomplete) > 0 && (!nextcomplete || strcmp(f->files[i], nextcomplete) < 0))
                 nextcomplete = f->files[i];
         }
@@ -837,7 +834,7 @@ void complete(char *s, const char *cmdprefix)
     {
         copystring(prefix, s, min(size_t(1+(start-s)), sizeof(prefix)));
         enumerate(idents, ident, id,
-            if(id.flags&IDF_COMPLETE && strncmp(id.name, start, completesize-(start-s)+1)==0 &&
+            if(id.flags&IDF_COMPLETE && strncmp(id.name, start, completesize)==0 &&
                strcmp(id.name, lastcomplete) > 0 && (!nextcomplete || strcmp(id.name, nextcomplete) < 0))
                 nextcomplete = id.name;
         );
@@ -849,7 +846,7 @@ void complete(char *s, const char *cmdprefix)
     }
     else
     {
-        s[completesize+1] = '\0';
+        if((int)strlen(start) > completesize) start[completesize] = '\0';
         completesize = 0;
     }
 }
