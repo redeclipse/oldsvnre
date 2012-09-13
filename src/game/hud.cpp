@@ -1517,6 +1517,12 @@ namespace hud
         float dist = dir.magnitude();
         bool isdominated = radarplayereffects && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0,
             dominated = radarplayerdominated && isdominated;
+        if(!force && !killer && !self && !dominated) switch(radarplayerfilter)
+        {
+            case 1: if(m_isteam(game::gamemode, game::mutators) && d->team == game::focus->team) return; break;
+            case 2: if(m_isteam(game::gamemode, game::mutators) && d->team != game::focus->team) return; break;
+            default: break;
+        }
         if(force || killer || self || dominated || dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
@@ -1725,12 +1731,6 @@ namespace hud
                     if(m_duel(game::gamemode, game::mutators)) force = true;
                     else if(m_survivor(game::gamemode, game::mutators))
                         force = (m_isteam(game::gamemode, game::mutators) ? (d->team != game::focus->team && others[game::focus->team] == 1) : (others[TEAM_NEUTRAL] == 2));
-                }
-                if(!force) switch(radarplayerfilter)
-                {
-                    case 0: case 3: default: break;
-                    case 1: if(m_isteam(game::gamemode, game::mutators) && d->team == game::focus->team) continue; break;
-                    case 2: if(m_isteam(game::gamemode, game::mutators) && d->team != game::focus->team) continue; break;
                 }
                 drawplayerblip(d, w, h, style, blend*radarblend, force);
             }
