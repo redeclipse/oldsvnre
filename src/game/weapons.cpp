@@ -57,7 +57,7 @@ namespace weapons
 
     bool weapreload(gameent *d, int weap, int load, int ammo, int reloads, bool local)
     {
-        if(!local || d->canreload(weap, m_weapon(game::gamemode, game::mutators), lastmillis))
+        if(!local || d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis))
         {
             bool doact = false;
             if(local)
@@ -143,7 +143,7 @@ namespace weapons
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
+        if(d == game::player1 && WEAP2(d->weapselect, sub, flags&HIT_ALT) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
         {
             bool noammo = d->ammo[d->weapselect] < WEAP2(d->weapselect, sub, flags&HIT_ALT),
                  noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
