@@ -137,8 +137,11 @@ namespace game
     VAR(IDF_PERSIST, damagemergeburn, 0, 250, VAR_MAX);
     VAR(IDF_PERSIST, damagemergebleed, 0, 250, VAR_MAX);
     VAR(IDF_PERSIST, playdamagetones, 0, 1, 3);
+    VAR(IDF_PERSIST, damagetonevol, -1, -1, 255);
     VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
+    VAR(IDF_PERSIST, crittonevol, -1, -1, 255);
     VAR(IDF_PERSIST, playreloadnotify, 0, 3, 15);
+    VAR(IDF_PERSIST, reloadnotifyvol, -1, -1, 255);
 
     VAR(IDF_PERSIST, deathanim, 0, 2, 2); // 0 = hide player when dead, 1 = old death animation, 2 = ragdolls
     VAR(IDF_PERSIST, deathfade, 0, 1, 1); // 0 = don't fade out dead players, 1 = fade them out
@@ -365,7 +368,7 @@ namespace game
         }
         announce(idx, d);
     }
-    ICOMMAND(0, announce, "iis", (int *idx, int *targ, char *s), announcef(*idx, *targ, NULL, "\fw%s", s));
+    ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, char *s, int *numargs), (*numargs >= 4 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, NULL)));
 
     void tvreset(gameent *d, bool clear)
     {
@@ -789,7 +792,7 @@ namespace game
             if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
             {
                 if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
-                    playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, 0, -1, -1, -1, &d->wschan);
+                    playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
             }
             if(d->state != CS_ALIVE || timeexpired)
                 d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
@@ -892,7 +895,7 @@ namespace game
             if(flags&CRIT)
             {
                 if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
-                    playsound(S_CRITICAL, d->o, d, SND_DIRECT);
+                    playsound(S_CRITICAL, d->o, d, actor == game::focus ? SND_FORCED : SND_DIRECT, crittonevol);
             }
             else
             {
@@ -903,7 +906,7 @@ namespace game
                     if(flags&BURN) snd = S_BURNED;
                     else if(flags&BLEED) snd = S_BLEED;
                     else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                    if(snd >= 0) playsound(snd, d->o, d, SND_DIRECT);
+                    if(snd >= 0) playsound(snd, d->o, d, actor == game::focus ? SND_FORCED : SND_DIRECT, damagetonevol);
                 }
                 if(aboveheaddamage)
                 {
@@ -1028,7 +1031,7 @@ namespace game
         d->deaths++;
         d->obliterated = (style&FRAG_OBLITERATE) != 0;
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), isfocus = d == focus || actor == focus,
-             isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce > 1 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
+             isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
         int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
             dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH;
         if(d != player1) d->resetinterp();
@@ -1277,21 +1280,26 @@ namespace game
             }
         }
         if(dth >= 0) playsound(dth, d->o, d, 0, -1, -1, -1, &d->vschan);
-        if(showobituaries && d->aitype < AI_START)
+        if(d->aitype < AI_START)
         {
-            bool show = false;
-            if(flags&HIT_LOST) show = true;
-            else switch(showobituaries)
+            if(showobituaries)
             {
-                case 1: if(isme || m_duke(gamemode, mutators)) show = true; break;
-                case 2: if(isme || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                case 3: if(isme || d->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                case 4: if(isme || d->aitype == AI_NONE || actor->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
-                case 5: default: show = true; break;
+                bool show = false;
+                if(flags&HIT_LOST) show = true;
+                else switch(showobituaries)
+                {
+                    case 1: if(isme || m_duke(gamemode, mutators)) show = true; break;
+                    case 2: if(isme || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                    case 3: if(isme || d->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                    case 4: if(isme || d->aitype == AI_NONE || actor->aitype == AI_NONE || anc >= 0 || m_duke(gamemode, mutators)) show = true; break;
+                    case 5: default: show = true; break;
+                }
+                int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
+                if(showobitdists && d != actor) announcef(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
+                else announcef(anc, target, d, "\fw%s", d->obit);
             }
-            int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-            if(showobitdists && d != actor) announcef(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
-            else announcef(anc, target, d, "\fw%s", d->obit);
+            else if(anc >= 0) announce(anc, d);
+            if(anc >= 0 && d != actor) announce(anc, actor);
         }
         if(aistyle[d->aitype].living && gibscale > 0)
         {

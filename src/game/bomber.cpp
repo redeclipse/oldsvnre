@@ -451,7 +451,7 @@ namespace bomber
         entities::execlink(NULL, f.ent, false);
         entities::execlink(NULL, g.ent, false);
         hud::teamscore(d->team).total = score;
-        game::announcef(S_V_BOMBSCORE, CON_INFO, d, "\fa%s destroyed the \fs\f[%d]%s\fS base for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.inittime));
+        game::announcef(S_V_BOMBSCORE, CON_INFO, NULL, "\fa%s destroyed the \fs\f[%d]%s\fS base for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(g.team, colour), TEAM(g.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.inittime));
         st.returnaffinity(relay, lastmillis, false);
     }
 
@@ -465,7 +465,7 @@ namespace bomber
         if(!f.droptime)
         {
             affinityeffect(i, d->team, d->feetpos(), f.pos(true, true), 1, "TAKEN");
-            game::announcef(S_V_BOMBPICKUP, CON_INFO, d, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
+            game::announcef(S_V_BOMBPICKUP, CON_INFO, NULL, "\fa%s picked up the \fs\fwbomb\fS", game::colorname(d));
             entities::execlink(NULL, f.ent, false);
         }
         st.takeaffinity(i, d, lastmillis);

@@ -52,7 +52,9 @@ VAR(IDF_PERSIST, soundvol, 0, 255, 255);
 VARF(0, soundmono, 0, 0, 1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundchans, 1, 32, 128, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(0, soundbufferlen, 128, 1024, INT_MAX-1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(0, soundbufferlen, 128, 1024, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VAR(IDF_PERSIST, soundmaxrad, 0, 256, VAR_MAX);
+VAR(IDF_PERSIST, soundminrad, 0, 0, VAR_MAX);
 
 VARF(IDF_PERSIST, musicvol, 0, 64, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 1000, VAR_MAX);
@@ -331,7 +333,7 @@ void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec 
         }
         if(!(flags&SND_NODIST))
         {
-            float mrad = maxrad > 0 ? maxrad : 256, nrad = minrad > 0 ? (minrad <= mrad ? minrad : mrad) : 0;
+            float mrad = maxrad > 0 ? maxrad : soundmaxrad, nrad = minrad > 0 ? (minrad <= mrad ? minrad : mrad) : soundminrad;
             if(dist > nrad)
             {
                 if(dist <= mrad) svol = int(svol*(1.f-((dist-nrad)/max(mrad-nrad,1e-16f))));
@@ -423,8 +425,8 @@ int playsound(int n, const vec &pos, physent *d, int flags, int vol, int maxrad,
             oldhook = NULL;
 
         int cvol = 0, cpan = 0, v = vol > 0 && vol < 256 ? vol : (flags&SND_CLAMPED ? 64 : 255),
-            x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : 256)),
-            y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : 0)),
+            x = maxrad > 0 ? maxrad : (flags&SND_CLAMPED ? getworldsize() : (slot->maxrad > 0 ? slot->maxrad : soundmaxrad)),
+            y = minrad >= 0 ? minrad : (flags&SND_CLAMPED ? 32 : (slot->minrad >= 0 ? slot->minrad : soundminrad)),
             mat = lookupmaterial(pos);
 
         bool liquid = isliquid(lookupmaterial(camera1->o)&MATF_VOLUME);
