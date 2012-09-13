@@ -338,11 +338,11 @@ void rendereditcursor()
         }
         else
         {
-            vec w = vec(camdir).mul(wdist+0.05f).add(player->o);
+            vec w = vec(ray).mul(wdist+0.05f).add(player->o);
             if(!insideworld(w))
             {
-                loopi(3) wdist = min(wdist, ((camdir[i] > 0 ? hdr.worldsize : 0) - player->o[i]) / camdir[i]);
-                w = vec(camdir).mul(wdist-0.05f).add(player->o);
+                loopi(3) wdist = min(wdist, ((ray[i] > 0 ? hdr.worldsize : 0) - player->o[i]) / ray[i]);
+                w = vec(ray).mul(wdist-0.05f).add(player->o);
                 if(!insideworld(w))
                 {
                     wdist = 0;
