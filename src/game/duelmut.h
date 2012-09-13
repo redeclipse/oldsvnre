@@ -8,7 +8,7 @@ struct duelservmode : servmode
 
     void position(clientinfo *ci)
     {
-        if(allowbroadcast(ci->clientnum) && ci->state.aitype < AI_START)
+        if(ci->state.aitype < AI_START)
         {
             int n = duelqueue.find(ci);
             if(n >= 0)
@@ -186,13 +186,11 @@ struct duelservmode : servmode
                         {
                             defformatstring(namea)("%s", colorname(alive[0]));
                             defformatstring(nameb)("%s", colorname(alive[1]));
-                            formatstring(fight)("\fwduel between %s and %s, round \fs\fr#%d\fS", namea, nameb, duelround);
+                            formatstring(fight)("\fyduel between %s and %s, round \fs\fr#%d\fS", namea, nameb, duelround);
                         }
                         else if(m_survivor(gamemode, mutators))
-                            formatstring(fight)("\fwsurvivor, round \fs\fr#%d\fS", duelround);
-                        //loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                        //    ancmsgft(playing[i]->clientnum, S_V_FIGHT, CON_EVENT, fight);
-                        ancmsgft(-1, S_V_FIGHT, CON_EVENT, fight);
+                            formatstring(fight)("\fysurvivor, round \fs\fr#%d\fS", duelround);
+                        ancmsgft(-1, S_V_FIGHT, CON_INFO, fight);
                         dueltime = dueldeath = -1;
                         duelcheck = gamemillis+5000;
                     }
@@ -225,23 +223,22 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                srvmsgf(-1, "\fyteam \fs\f[%d]%s\fS are the victors", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
+                                defformatstring(end)("\fyteam \fs\f[%d]%s\fS are the victors", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
                                 bool teampoints = true;
-                                loopv(playing)
+                                loopv(clients) if(playing.find(clients[i]) >= 0)
                                 {
-                                    if(playing[i]->team == alive[0]->team)
+                                    if(clients[i]->team == alive[0]->team)
                                     {
-                                        if(allowbroadcast(playing[i]->clientnum))
-                                            ancmsgft(playing[i]->clientnum, S_V_YOUWIN, -1, "");
-                                        if(alive.find(playing[i]) >= 0)
+                                        ancmsgft(clients[i]->clientnum, S_V_YOUWIN, CON_INFO, end);
+                                        if(alive.find(clients[i]) >= 0)
                                         {
-                                            givepoints(playing[i], 1, teampoints);
+                                            givepoints(clients[i], 1, teampoints);
                                             teampoints = false;
                                         }
                                     }
-                                    else if(allowbroadcast(playing[i]->clientnum))
-                                        ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
+                                    else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
                                 }
+                                else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
                             }
                             clear();
                         }
@@ -253,9 +250,10 @@ struct duelservmode : servmode
                     {
                         if(!cleanup)
                         {
-                            srvmsgf(-1, "\fyeveryone died, \fzoyepic fail");
-                            loopv(playing) if(allowbroadcast(playing[i]->clientnum))
-                                ancmsgft(playing[i]->clientnum, S_V_DRAW, -1, "");
+                            defformatstring(end)("\fyeveryone died, \fzoyepic fail");
+                            loopv(clients) if(playing.find(clients[i]) >= 0)
+                                ancmsgft(clients[i]->clientnum, S_V_DRAW, CON_INFO, end);
+                            else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
                             duelwinner = -1;
                             duelwins = 0;
                         }
@@ -269,28 +267,28 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
+                                string end;
                                 if(duelwinner != alive[0]->clientnum)
                                 {
                                     duelwinner = alive[0]->clientnum;
                                     duelwins = 1;
-                                    srvmsgf(-1, "\fy%s was the victor", colorname(alive[0]));
+                                    formatstring(end)("\fy%s was the victor", colorname(alive[0]));
                                 }
                                 else
                                 {
                                     duelwins++;
-                                    srvmsgf(-1, "\fy%s was the victor (\fs\fc%d\fS in a row)", colorname(alive[0]), duelwins);
+                                    formatstring(end)("\fy%s was the victor (\fs\fc%d\fS in a row)", colorname(alive[0]), duelwins);
                                 }
-                                loopv(playing)
+                                loopv(clients) if(playing.find(clients[i]) >= 0)
                                 {
-                                    if(playing[i] == alive[0])
+                                    if(clients[i] == alive[0])
                                     {
-                                        if(allowbroadcast(playing[i]->clientnum))
-                                            ancmsgft(playing[i]->clientnum, S_V_YOUWIN, -1, "");
-                                        givepoints(playing[i], 1);
+                                        ancmsgft(clients[i]->clientnum, S_V_YOUWIN, CON_INFO, end);
+                                        givepoints(clients[i], 1);
                                     }
-                                    else if(allowbroadcast(playing[i]->clientnum))
-                                        ancmsgft(playing[i]->clientnum, S_V_YOULOSE, -1, "");
+                                    else ancmsgft(clients[i]->clientnum, S_V_YOULOSE, CON_INFO, end);
                                 }
+                                else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
                             }
                             clear();
                         }
