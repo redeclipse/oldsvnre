@@ -316,20 +316,24 @@ namespace hud
     VAR(IDF_PERSIST, radaritemspawn, 0, 1, 1);
     VAR(IDF_PERSIST, radaritemtime, 0, 5000, VAR_MAX);
     VAR(IDF_PERSIST, radaritemnames, 0, 0, 2);
+
     VAR(IDF_PERSIST, radarplayers, 0, 2, 2);
     VAR(IDF_PERSIST, radarplayerfilter, 0, 0, 3); // 0 = off, 1 = non-team, 2 = team, 3 = only in duel/survivor/edit
     VAR(IDF_PERSIST, radarplayernames, 0, 0, 2);
     VAR(IDF_PERSIST, radarplayereffects, 0, 1, 1);
+    VAR(IDF_PERSIST, radarplayerdominated, 0, 1, 1); // 0 = off, 1 = always track dominating players
+    VAR(IDF_PERSIST, radarplayerduke, 0, 1, 1); // 0 = off, 1 = track when your side has one player left
+    VAR(IDF_PERSIST, radarplayerkill, 0, 2, 2); // 0 = off, 1 = track killers, 2 = bots too
+
     VAR(IDF_PERSIST, radaraffinity, 0, 2, 2);
     VAR(IDF_PERSIST, radaraffinitynames, 0, 1, 2);
 
-    VAR(IDF_PERSIST, radardamage, 0, 3, 5); // 0 = off, 1 = basic damage, 2 = with killer announce (+1 killer track, +2 and bots), 5 = verbose
+    VAR(IDF_PERSIST, radardamage, 0, 1, 2); // 0 = off, 1 = basic damage, 2 = verbose
     VAR(IDF_PERSIST, radardamagemerge, 1, 250, VAR_MAX);
     VAR(IDF_PERSIST, radardamagetime, 1, 250, VAR_MAX);
     VAR(IDF_PERSIST, radardamagefade, 1, 3500, VAR_MAX);
     FVAR(IDF_PERSIST, radardamagesize, 0, 20, 1000);
     FVAR(IDF_PERSIST, radardamageblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, radardamagetrack, 0, 1, 1000);
     VAR(IDF_PERSIST, radardamagemin, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, radardamagemax, 1, 100, VAR_MAX);
 
@@ -1501,15 +1505,24 @@ namespace hud
 
     void drawplayerblip(gameent *d, int w, int h, int style, float blend, bool force)
     {
+        bool killer = false, self = false;
+        if(radarplayerkill && (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath)
+        {
+            if(d->clientnum == game::focus->lastattacker)
+                killer = (radarplayerkill >= 2 || d->aitype == AI_NONE) && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING);
+            if(d == game::focus) self = lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators);
+        }
+        if(d == game::focus && !self) return;
         vec dir = vec(d->o).sub(camera1->o);
         float dist = dir.magnitude();
-        if(force || dist <= radarrange())
+        bool isdominated = radarplayereffects && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0,
+            dominated = radarplayerdominated && isdominated;
+        if(force || killer || self || dominated || dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
-                 bleeding = radarplayereffects && bleedtime && lastmillis%150 < 50 && d->bleeding(lastmillis, bleedtime),
-                 dominated = radarplayereffects && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team) && d->dominated.find(game::focus) >= 0;
+                 bleeding = radarplayereffects && bleedtime && lastmillis%150 < 50 && d->bleeding(lastmillis, bleedtime);
             vec colour[2];
-            if(dominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
+            if(isdominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
             else if(d->lastbuff)
             {
                 int millis = lastmillis%1000;
@@ -1525,9 +1538,9 @@ namespace hud
             }
             else colour[0] = vec::hexcolor(game::getcolour(d, game::playerundertone));
             colour[1] = vec::hexcolor(game::getcolour(d, game::playerovertone));
-            const char *tex = dominated ? dominatedtex : playerbliptex;
-            float fade = (force ? 1.f : clamp(1.f-(dist/radarrange()), dominated ? 0.25f : 0.f, 1.f))*blend, size = dominated ? 1.25f : 1.f;
-            if(d->state == CS_DEAD || d->state == CS_WAITING)
+            const char *tex = isdominated ? dominatedtex : (killer || self ? arrowtex : playerbliptex);
+            float fade = (force || killer || self || dominated ? 1.f : clamp(1.f-(dist/radarrange()), isdominated ? 0.25f : 0.f, 1.f))*blend, size = killer || self ? 1.5f : (isdominated ? 1.25f : 1.f);
+            if(!self && (d->state == CS_DEAD || d->state == CS_WAITING))
             {
                 int millis = d->lastdeath ? lastmillis-d->lastdeath : 0;
                 if(millis > 0)
@@ -1538,20 +1551,30 @@ namespace hud
                 }
                 else return;
                 tex = deadtex;
-
             }
             else if(d->state == CS_ALIVE)
             {
                 int len = m_protect(game::gamemode, game::mutators), millis = d->protect(lastmillis, len);
                 if(millis > 0) fade *= clamp(float(len-millis)/float(len), 0.f, 1.f);
-                if(!force) fade *= clamp(vec(d->vel).add(d->falling).magnitude()/movespeed, 0.f, 1.f);
+                if(!force && !killer && !self && !dominated)
+                    fade *= clamp(vec(d->vel).add(d->falling).magnitude()/movespeed, 0.f, 1.f);
             }
-            else if(d->state != CS_EDITING) return;
             loopi(2)
             {
-                if(!i && (force || chkcond(radarplayernames, !game::tvmode())))
-                    drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", game::colorname(d, NULL, "", false));
-                else drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i]);
+                if(i)
+                {
+                    if(killer && d->state == CS_ALIVE)
+                    {
+                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s (%d)", game::colorname(d, NULL, "", false), d->health);
+                        continue;
+                    }
+                    if(force || self || chkcond(radarplayernames, !game::tvmode()))
+                    {
+                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", d != game::focus ? game::colorname(d, NULL, "", false) : "you");
+                        continue;
+                    }
+                }
+                drawblip(i ? tex : hinttex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i]);
             }
         }
     }
@@ -1652,22 +1675,6 @@ namespace hud
                 else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour);
             }
         }
-        if(radardamage >= 2)
-        {
-            bool dead = (game::focus->state == CS_DEAD || game::focus->state == CS_WAITING) && game::focus->lastdeath;
-            if(dead && lastmillis-game::focus->lastdeath <= m_delay(game::gamemode, game::mutators))
-                drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, game::focus->o, vec::hexcolor(game::getcolour(game::focus, game::playereffecttone)), "tiny", "you");
-            gameent *a = game::getclient(game::focus->lastattacker);
-            if(a && a != game::focus && (dead || (radardamage >= 3 && (a->aitype == AI_NONE || radardamage >= 4))))
-            {
-                vec colour = vec::hexcolor(game::getcolour(a, game::playereffecttone));
-                if(dead && (a->state == CS_ALIVE || a->state == CS_DEAD || a->state == CS_WAITING))
-                {
-                    if(a->state == CS_ALIVE) drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "tiny", "%s (%d)", game::colorname(a), a->health);
-                    else drawblip(arrowtex, 3+radardamagetrack/2, w, h, radardamagetrack, blend*radardamageblend, radarstyle, a->o, colour, "tiny", "%s", game::colorname(a));
-                }
-            }
-        }
     }
 
     void drawradar(int w, int h, float blend)
@@ -1703,26 +1710,29 @@ namespace hud
         }
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
-            gameent *d = NULL, *o = NULL;
-            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1;
-            if(m_duke(game::gamemode, game::mutators))
+            gameent *d = NULL;
+            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, others[TEAM_MAX] = {0};
+            if(radarplayerduke && game::focus->state == CS_ALIVE && m_survivor(game::gamemode, game::mutators))
             {
-                int numothers = 0;
-                loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state == CS_ALIVE && d->aitype < AI_START && (!m_isteam(game::gamemode, game::mutators) || d->team != game::focus->team))
-                {
-                    if(++numothers > 1) { o = NULL; break; }
-                    o = d;
-                }
+                loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state == CS_ALIVE && d->aitype < AI_START)
+                    others[d->team]++;
             }
-            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d != game::focus && d->state != CS_SPECTATOR && d->aitype < AI_START)
+            loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state != CS_SPECTATOR && d->aitype < AI_START)
             {
-                if(d != o) switch(radarplayerfilter)
+                bool force = false;
+                if(radarplayerduke && game::focus->state == CS_ALIVE)
+                {
+                    if(m_duel(game::gamemode, game::mutators)) force = true;
+                    else if(m_survivor(game::gamemode, game::mutators))
+                        force = (m_isteam(game::gamemode, game::mutators) ? (d->team != game::focus->team && others[game::focus->team] == 1) : (others[TEAM_NEUTRAL] == 2));
+                }
+                if(!force) switch(radarplayerfilter)
                 {
                     case 0: case 3: default: break;
                     case 1: if(m_isteam(game::gamemode, game::mutators) && d->team == game::focus->team) continue; break;
                     case 2: if(m_isteam(game::gamemode, game::mutators) && d->team != game::focus->team) continue; break;
                 }
-                drawplayerblip(d, w, h, style, blend*radarblend, d == o);
+                drawplayerblip(d, w, h, style, blend*radarblend, force);
             }
         }
         if(radardamage) drawdamageblips(w, h, blend*radarblend); // 5+
