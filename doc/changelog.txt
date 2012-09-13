@@ -2,6 +2,7 @@
 Gameplay:
  * Increased overall AI skill
  * Disable double-tap dashing by default
+ * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
 
 Weapons:
  * Plasma primary damage and explosion radius increased
@@ -22,6 +23,7 @@ Core & Install:
 Additional fixed bugs:
  * #218 - can no longer drop your loadout weapons in arena
  * #223 - can no longer use common file-writing commands from a map script
+ * #224 - Possible to cut in map "hawk"
 
 
 = Red Eclipse 1.3.1 =
