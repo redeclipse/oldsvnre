@@ -3460,7 +3460,7 @@ namespace server
             sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
             return;
         }
-        if(!gs.canreload(weap, m_weapon(gamemode, mutators), millis))
+        if(!gs.canreload(weap, m_weapon(gamemode, mutators), false, millis))
         {
             if(GAME(serverdebug)) srvmsgf(ci->clientnum, "sync error: reload [%d] failed - current state disallows it", weap);
             sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);

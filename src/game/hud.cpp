@@ -719,15 +719,14 @@ namespace hud
         int interval = lastmillis-game::focus->weaplast[weap];
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
-            case WEAP_S_PRIMARY:
-            case WEAP_S_SECONDARY:
+            case WEAP_S_PRIMARY: case WEAP_S_SECONDARY:
             {
                 float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
                 if(showclips >= 2) size *= amt;
                 break;
             }
-            case WEAP_S_RELOAD:
+            case WEAP_S_RELOAD: case WEAP_S_USE:
             {
                 if(game::focus->weapload[weap] > 0)
                 {
@@ -747,9 +746,10 @@ namespace hud
                 }
                 // falls through
             }
-            case WEAP_S_USE: case WEAP_S_SWITCH:
+            case WEAP_S_SWITCH:
             {
-                float amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f); fade *= amt;
+                float amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                fade *= amt;
                 if(showclips >= 2 && game::focus->weapstate[weap] != WEAP_S_RELOAD) size *= amt;
                 break;
             }
@@ -782,7 +782,7 @@ namespace hud
                 size = s*clipskew[weapid];
                 break;
             }
-            case WEAP_S_RELOAD:
+            case WEAP_S_RELOAD: case WEAP_S_USE:
             {
                 if(game::focus->weapload[weap] > 0)
                 {
@@ -1127,7 +1127,7 @@ namespace hud
                             SEARCHBINDCACHE(altkey)("action 1", 0);
                             ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack");
                         }
-                        if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), lastmillis))
+                        if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
                         {
                             SEARCHBINDCACHE(reloadkey)("action 2", 0);
                             ty += draw_textx("Press \fs\fc%s\fS to reload ammo", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, reloadkey);

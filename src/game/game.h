@@ -520,8 +520,11 @@ struct gamestate
     {
         if(isweap(weap))
         {
-            lastweap = weapselect;
-            setweapstate(lastweap, WEAP_S_SWITCH, delay, millis);
+            if(weap != weapselect)
+            {
+                lastweap = weapselect;
+                setweapstate(lastweap, WEAP_S_SWITCH, delay, millis);
+            }
             weapselect = weap;
             setweapstate(weap, state, delay, millis);
         }
@@ -563,9 +566,9 @@ struct gamestate
         return false;
     }
 
-    bool canreload(int weap, int sweap, int millis = -1, int skip = 0)
+    bool canreload(int weap, int sweap, bool check = true, int millis = 0, int skip = 0)
     {
-        if(millis < 0 || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < WEAP(weap, max) && weapwaited(weap, millis, skip)))
+        if(check || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < WEAP(weap, max) && weapwaited(weap, millis, skip)))
         {
             int n = w_reload(weap, sweap);
             switch(n)
@@ -612,7 +615,7 @@ struct gamestate
             case WEAPON:
             {
                 int prev = ammo[attr], ammoval = ammoamt >= 0 ? ammoamt : WEAPUSE(attr);
-                weapswitch(attr, millis, delay, hasweap(attr, sweap) ? WEAP_S_SWITCH : WEAP_S_USE);
+                weapswitch(attr, millis, delay, WEAP_S_USE);
                 ammo[attr] = clamp(max(ammo[attr], 0)+ammoval, 0, WEAP(attr, max));
                 weapload[attr] = ammo[attr]-prev;
                 reloads[attr] = reloadamt >= 0 ? reloadamt : 0;
