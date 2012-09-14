@@ -1,4 +1,4 @@
-FVAR(IDF_PERSIST, compasssize, 0, 0.2f, 1000);
+FVAR(IDF_PERSIST, compasssize, 0, 0.15f, 1000);
 VAR(IDF_PERSIST, compassfade, 0, 250, VAR_MAX);
 FVAR(IDF_PERSIST, compassfadeamt, 0, 0.5f, 1);
 TVAR(IDF_PERSIST, compasstex, "<grey>textures/compass", 3);
