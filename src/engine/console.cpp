@@ -492,6 +492,25 @@ void execbind(keym &k, bool isdown)
     k.pressed = isdown;
 }
 
+void processkey(int code, bool isdown, int cooked)
+{
+    resetcomplete();
+    if(cooked)
+    {
+        size_t len = (int)strlen(commandbuf);
+        if(len+1<sizeof(commandbuf))
+        {
+            if(commandpos<0) commandbuf[len] = cooked;
+            else
+            {
+                memmove(&commandbuf[commandpos+1], &commandbuf[commandpos], len - commandpos);
+                commandbuf[commandpos++] = cooked;
+            }
+            commandbuf[len+1] = '\0';
+        }
+    }
+}
+
 void consolekey(int code, bool isdown, int cooked)
 {
     if(isdown)
@@ -559,41 +578,15 @@ void consolekey(int code, bool isdown, int cooked)
 
             case SDLK_f:
                 if(SDL_GetModState()&MOD_KEYS) cooked = '\f';
-                // fall through
+                else processkey(code, isdown, cooked);
+                break;
 
             case SDLK_v:
-                if(SDL_GetModState()&MOD_KEYS)
-                {
-                    pasteconsole();
-                    break;
-                }
-                // fall through
-
-            case SDLK_F4:
-                if(SDL_GetModState()&MOD_KEYS)
-                {
-                    quit();
-                    break;
-                }
-                // fall through
-
-            default:
-                resetcomplete();
-                if(cooked)
-                {
-                    size_t len = (int)strlen(commandbuf);
-                    if(len+1<sizeof(commandbuf))
-                    {
-                        if(commandpos<0) commandbuf[len] = cooked;
-                        else
-                        {
-                            memmove(&commandbuf[commandpos+1], &commandbuf[commandpos], len - commandpos);
-                            commandbuf[commandpos++] = cooked;
-                        }
-                        commandbuf[len+1] = '\0';
-                    }
-                }
+                if(SDL_GetModState()&MOD_KEYS) pasteconsole();
+                else processkey(code, isdown, cooked);
                 break;
+
+            default: processkey(code, isdown, cooked); break;
         }
     }
     else
@@ -633,10 +626,26 @@ void consolekey(int code, bool isdown, int cooked)
 
 void keypress(int code, bool isdown, int cooked)
 {
-    keym *haskey = keyms.access(code);
-    if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
-    else if(commandmillis > 0) consolekey(code, isdown, cooked);
-    else if(!hud::keypress(code, isdown, cooked) && haskey) execbind(*haskey, isdown);
+    switch(code)
+    {
+#ifdef __APPLE__
+        case SDLK_Q:
+            if(SDL_GetModState()&KMOD_META)
+#else
+        case SDLK_F4:
+            if(SDL_GetModState()&KMOD_ALT)
+#endif
+                if(isdown) quit(); // top-level bail-out
+            return;
+        default:
+        {
+            keym *haskey = keyms.access(code);
+            if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
+            else if(commandmillis > 0) consolekey(code, isdown, cooked);
+            else if(!hud::keypress(code, isdown, cooked) && haskey) execbind(*haskey, isdown);
+            break;
+        }
+    }
 }
 
 char *getcurcommand()
