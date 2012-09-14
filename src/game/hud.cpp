@@ -2650,20 +2650,23 @@ namespace hud
             hudheight = int(ceil(hudsize/aspect));
         }
         else hudwidth = hudheight = hudsize;
-
-        int wait = client::waiting();
-        if(wait > 1)
+        if(!hasinput(true))
         {
-            forceprogress = progressing = true;
-            setfvar("progressamt", 0);
-            switch(wait)
+            int wait = client::waiting();
+            if(wait > 1)
             {
-                case 3: setsvar("progresstitle", "downloading map.."); break;
-                case 2: setsvar("progresstitle", "requesting map.."); break;
-                case 1: case 0: default: break;
+                forceprogress = progressing = true;
+                setfvar("progressamt", 0);
+                switch(wait)
+                {
+                    case 3: setsvar("progresstitle", "downloading map.."); break;
+                    case 2: setsvar("progresstitle", "requesting map.."); break;
+                    case 1: case 0: default: break;
+                }
+                setsvar("progresstext", "this could take some time..");
+                setfvar("progresspart", 0);
             }
-            setsvar("progresstext", "this could take some time..");
-            setfvar("progresspart", 0);
+            else if(forceprogress) forceprogress = progressing = false;
         }
         else if(forceprogress) forceprogress = progressing = false;
     }
