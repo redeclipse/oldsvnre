@@ -172,11 +172,11 @@ void reloadsignal(int signum)
 
 int initing = NOT_INITING;
 
-bool initwarning(const char *desc, int level, int type)
+bool initwarning(const char *desc, int level, int type, bool force)
 {
     if(initing < level)
     {
-        addchange(desc, type);
+        addchange(desc, type, force);
         return true;
     }
     return false;
@@ -239,11 +239,12 @@ void screenshot(char *sname)
 COMMAND(0, screenshot, "s");
 COMMAND(0, quit, "");
 
-void setfullscreen(bool enable)
+void setfullscreen(bool enable, bool force)
 {
     if(!screen) return;
+    fullscreen = enable ? 1 : 0;
 #if defined(WIN32) || defined(__APPLE__)
-    initwarning(enable ? "fullscreen" : "windowed");
+    initwarning(enable ? "fullscreen" : "windowed", INIT_RESET, CHANGE_GFX, force);
 #else
     if(enable == !(screen->flags&SDL_FULLSCREEN))
     {
