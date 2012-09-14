@@ -624,9 +624,9 @@ void consolekey(int code, bool isdown, int cooked)
     }
 }
 
-bool keyquit = false, keyfullscreen = false;
 #define interceptkey(name,body) \
 { \
+    static bool key##name = false; \
     if(SDL_GetModState()&MOD_ALTS && isdown) \
     { \
         if(!key##name) \
@@ -655,6 +655,9 @@ void keypress(int code, bool isdown, int cooked)
             break;
         case SDLK_RETURN:
             interceptkey(fullscreen, setfullscreen(!fullscreen, true));
+            break;
+        case SDLK_TAB:
+            interceptkey(iconify, SDL_WM_IconifyWindow());
             break;
         default: break;
     }
