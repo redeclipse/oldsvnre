@@ -621,7 +621,7 @@ namespace client
 
     void toserver(int flags, char *text)
     {
-        if(!waiting(false))
+        if(!waiting(false) && !client::demoplayback)
         {
             if(flags&SAY_TEAM && !m_isteam(game::gamemode, game::mutators))
                 flags &= ~SAY_TEAM;
