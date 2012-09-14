@@ -367,9 +367,6 @@ namespace server
 
     vector<demofile> demos;
 
-    VAR(0, maxdemos, 0, 5, 25);
-    VAR(0, maxdemosize, 0, 16, 64);
-
     bool demonextmatch = false;
     stream *demotmp = NULL, *demorecord = NULL, *demoplayback = NULL;
     int nextplayback = 0, triggerid = 0;
@@ -782,6 +779,19 @@ namespace server
         }
     }
 
+    void setdemorecord(bool value)
+    {
+        demonextmatch = value;
+        srvoutf(-3, "\fydemo recording is \fs\fc%s\fS for next match", demonextmatch ? "enabled" : "disabled");
+    }
+
+    void enddemorecord();
+    void checkdemorecord()
+    {
+        if(demorecord) enddemorecord();
+        if(GAME(demoautorec) && !demonextmatch) setdemorecord(true);
+    }
+
     void resetbans()
     {
         loopvrev(control) if(control[i].type == ipinfo::BAN && control[i].flag == ipinfo::TEMPORARY) control.remove(i);
@@ -1115,7 +1125,6 @@ namespace server
         return false;
     }
 
-    void enddemorecord();
     bool checkvotes(bool force = false);
     void startintermission(bool req = false)
     {
@@ -1131,9 +1140,9 @@ namespace server
         }
         if(req)
         {
+            checkdemorecord();
             if(!maprequest && GAME(votelimit) && GAME(votelock) != 7 && GAME(modelock) != 7 && GAME(mapslock) != 7)
             {
-                if(demorecord) enddemorecord();
                 sendf(-1, 1, "ri", N_NEWGAME);
                 maprequest = true;
                 if(!(interm = totalmillis+GAME(votelimit))) interm = 1;
@@ -1706,13 +1715,13 @@ namespace server
         {
             loopv(demos) delete[] demos[i].data;
             demos.shrink(0);
-            srvoutf(4, "cleared all demos");
+            srvoutf(4, "\fycleared all demos");
         }
         else if(demos.inrange(n-1))
         {
             delete[] demos[n-1].data;
             demos.remove(n-1);
-            srvoutf(4, "cleared demo %d", n);
+            srvoutf(4, "\fycleared demo \fs\fc%d\fS", n);
         }
     }
 
@@ -1732,7 +1741,7 @@ namespace server
         if(!demoplayback) return;
         DELETEP(demoplayback);
         loopv(clients) sendf(clients[i]->clientnum, 1, "ri3", N_DEMOPLAYBACK, 0, clients[i]->clientnum);
-        srvoutf(4, "demo playback finished");
+        srvoutf(4, "\fydemo playback finished");
         loopv(clients) sendwelcome(clients[i]);
         startintermission(true);
     }
@@ -1744,14 +1753,14 @@ namespace server
         msg[0] = '\0';
         defformatstring(file)("%s.dmo", smapname);
         demoplayback = opengzfile(file, "rb");
-        if(!demoplayback) formatstring(msg)("could not read demo \"%s\"", file);
+        if(!demoplayback) formatstring(msg)("\frcould not read demo \fs\fc%s\fS", file);
         else if(demoplayback->read(&hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
-            formatstring(msg)("\"%s\" is not a demo file", file);
+            formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", file);
         else
         {
             lilswap(&hdr.version, 2);
-            if(hdr.version!=DEMO_VERSION) formatstring(msg)("demo \"%s\" requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", RE_NAME);
-            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("demo \"%s\" requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", RE_NAME);
+            if(hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", RE_NAME);
+            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", RE_NAME);
         }
         if(msg[0])
         {
@@ -1760,7 +1769,7 @@ namespace server
             return;
         }
 
-        srvoutf(4, "playing demo \"%s\"", file);
+        srvoutf(4, "\fyplaying demo \fs\fc%s\fS", file);
 
         sendf(-1, 1, "ri3", N_DEMOPLAYBACK, 1, -1);
 
@@ -1807,7 +1816,7 @@ namespace server
 
     void prunedemos(int extra = 0)
     {
-        int n = clamp(demos.length() + extra - maxdemos, 0, demos.length());
+        int n = clamp(demos.length()+extra-GAME(democount), 0, demos.length());
         if(n <= 0) return;
         loopi(n) delete[] demos[n].data;
         demos.remove(0, n);
@@ -1816,13 +1825,13 @@ namespace server
     void adddemo()
     {
         if(!demotmp) return;
-        int len = (int)min(demotmp->size(), stream::offset((maxdemosize<<20) + 0x10000));
+        int len = (int)min(demotmp->size(), stream::offset((GAME(demomaxsize)<<20) + 0x10000));
         demofile &d = demos.add();
         time_t t = time(NULL);
         char *timestr = ctime(&t), *trim = timestr + strlen(timestr);
         while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
         formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, gamename(gamemode, mutators), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
-        srvoutf(4, "demo \"%s\" recorded", d.info);
+        srvoutf(4, "\fydemo \fs\fc%s\fS recorded", d.info);
         d.data = new uchar[len];
         d.len = len;
         demotmp->seek(0, SEEK_SET);
@@ -1833,12 +1842,8 @@ namespace server
     void enddemorecord()
     {
         if(!demorecord) return;
-
         DELETEP(demorecord);
-
         if(!demotmp) return;
-        if(!maxdemos || !maxdemosize) { DELETEP(demotmp); return; }
-
         prunedemos(1);
         adddemo();
     }
@@ -1850,7 +1855,7 @@ namespace server
         lilswap(stamp, 3);
         demorecord->write(stamp, sizeof(stamp));
         demorecord->write(data, len);
-        if(demorecord->rawtell() >= (maxdemosize<<20)) enddemorecord();
+        if(demorecord->rawtell() >= (GAME(demomaxsize)<<20)) enddemorecord();
     }
 
     void recordpacket(int chan, void *data, int len)
@@ -1866,7 +1871,7 @@ namespace server
         stream *f = opengzfile(NULL, "wb", demotmp);
         if(!f) { DELETEP(demotmp); return; }
 
-        srvoutf(4, "recording demo");
+        srvoutf(4, "\fyrecording demo");
 
         demorecord = f;
 
@@ -1885,7 +1890,7 @@ namespace server
     void endmatch()
     {
         setpause(false);
-        if(demorecord) enddemorecord();
+        checkdemorecord();
         if(sv_botoffset != 0)
         {
             setvar("sv_botoffset", 0, true);
@@ -2242,7 +2247,7 @@ namespace server
     void stopdemo()
     {
         if(m_demo(gamemode)) enddemoplayback();
-        else enddemorecord();
+        else checkdemorecord();
     }
 
     void connected(clientinfo *ci);
@@ -5051,13 +5056,7 @@ namespace server
                 {
                     int val = getint(p);
                     if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "record demos")) break;
-                    if(!maxdemos || !maxdemosize)
-                    {
-                        srvmsgft(ci->clientnum, CON_EVENT, "\frthe server has disabled demo recording");
-                        break;
-                    }
-                    demonextmatch = val!=0;
-                    srvoutf(4, "\fodemo recording is \fs\fc%s\fS for next match", demonextmatch ? "enabled" : "disabled");
+                    setdemorecord(val != 0);
                     break;
                 }
 
@@ -5065,7 +5064,7 @@ namespace server
                 {
                     if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "stop demos")) break;
                     if(m_demo(gamemode)) enddemoplayback();
-                    else enddemorecord();
+                    else checkdemorecord();
                     break;
                 }
 
