@@ -674,13 +674,26 @@ static struct applymenu : menu
 
 VAR(IDF_PERSIST, applydialog, 0, 1, 1);
 
-void addchange(const char *desc, int type)
+void addchange(const char *desc, int type, bool force)
 {
-    if(!applydialog) return;
-    loopv(needsapply) if(!strcmp(needsapply[i].desc, desc)) return;
-    needsapply.add(change(type, desc));
-    if(needsapply.length() && menustack.find(&applymenu) < 0)
-        pushgui(&applymenu, max(menustack.length()-1, 0));
+    if(!applydialog || force)
+    {
+        int changetypes = type;
+        if(menustack.find(&applymenu) >= 0)
+        {
+            loopv(needsapply) changetypes |= needsapply[i].type;
+            clearlater = true;
+        }
+        if(changetypes&CHANGE_GFX) updatelater.add().schedule("resetgl");
+        if(changetypes&CHANGE_SOUND) updatelater.add().schedule("resetsound");
+    }
+    else
+    {
+        loopv(needsapply) if(!strcmp(needsapply[i].desc, desc)) return;
+        needsapply.add(change(type, desc));
+        if(needsapply.length() && menustack.find(&applymenu) < 0)
+            pushgui(&applymenu, max(menustack.length()-1, 0));
+    }
 }
 
 void clearchanges(int type)

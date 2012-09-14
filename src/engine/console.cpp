@@ -624,28 +624,44 @@ void consolekey(int code, bool isdown, int cooked)
     }
 }
 
+bool keyquit = false, keyfullscreen = false;
+#define interceptkey(name,body) \
+{ \
+    if(SDL_GetModState()&MOD_ALTS && isdown) \
+    { \
+        if(!key##name) \
+        { \
+            body; \
+            key##name = true; \
+        } \
+        return; \
+    } \
+    if(!isdown && key##name) \
+    { \
+        key##name = false; \
+        return; \
+    } \
+}
 void keypress(int code, bool isdown, int cooked)
 {
     switch(code)
     {
 #ifdef __APPLE__
         case SDLK_Q:
-            if(SDL_GetModState()&KMOD_META)
 #else
         case SDLK_F4:
-            if(SDL_GetModState()&KMOD_ALT)
 #endif
-                if(isdown) quit(); // top-level bail-out
-            return;
-        default:
-        {
-            keym *haskey = keyms.access(code);
-            if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
-            else if(commandmillis > 0) consolekey(code, isdown, cooked);
-            else if(!hud::keypress(code, isdown, cooked) && haskey) execbind(*haskey, isdown);
+            interceptkey(quit, quit());
             break;
-        }
+        case SDLK_RETURN:
+            interceptkey(fullscreen, setfullscreen(!fullscreen, true));
+            break;
+        default: break;
     }
+    keym *haskey = keyms.access(code);
+    if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
+    else if(commandmillis > 0) consolekey(code, isdown, cooked);
+    else if(!hud::keypress(code, isdown, cooked) && haskey) execbind(*haskey, isdown);
 }
 
 char *getcurcommand()

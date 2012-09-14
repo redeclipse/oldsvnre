@@ -533,8 +533,10 @@ extern ENetPeer *curpeer, *connpeer;
 // console
 #ifdef __APPLE__
     #define MOD_KEYS (KMOD_LMETA|KMOD_RMETA)
+    #define MOD_ALTS MOD_KEYS
 #else
     #define MOD_KEYS (KMOD_LCTRL|KMOD_RCTRL)
+    #define MOD_ALTS (KMOD_LALT|KMOD_RALT)
 #endif
 
 extern void writebinds(stream *f);
@@ -556,8 +558,8 @@ enum
     INIT_RESET,
     INIT_DEFAULTS
 };
-extern int initing;
-
+extern int initing, fullscreen;
+void setfullscreen(bool enable, bool force = false);
 extern bool progressing;
 extern float loadprogress, progresspart, progressamt;
 extern char *progresstitle, *progresstext;
@@ -569,7 +571,7 @@ enum
     CHANGE_GFX   = 1<<0,
     CHANGE_SOUND = 1<<1
 };
-extern bool initwarning(const char *desc, int level = INIT_RESET, int type = CHANGE_GFX);
+extern bool initwarning(const char *desc, int level = INIT_RESET, int type = CHANGE_GFX, bool force = false);
 extern void resetcursor(bool warp = true, bool reset = true);
 extern int compresslevel, imageformat;
 
@@ -583,7 +585,7 @@ extern int getclockmillis();
 extern float menuscale;
 
 extern void menuprocess();
-extern void addchange(const char *desc, int type);
+extern void addchange(const char *desc, int type, bool force = false);
 extern void clearchanges(int type);
 
 // physics
