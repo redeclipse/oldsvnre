@@ -1536,6 +1536,7 @@ void rehash(bool reload)
     execfile("servinit.cfg", false);
 #else
     execfile("localinit.cfg", false);
+    initing = INIT_DEFAULTS;
     execfile("defaults.cfg");
     initing = INIT_LOAD;
     interactive = true;
