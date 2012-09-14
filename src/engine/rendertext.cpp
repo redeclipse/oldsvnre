@@ -1,6 +1,7 @@
 #include "engine.h"
 
 VAR(IDF_PERSIST, blinkingtext, 0, 250, VAR_MAX);
+FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -315,14 +316,14 @@ static float icon_width(const char *name, float scale)
     if(!y && (flags&TEXT_RIGHT_JUSTIFY) && !(flags&TEXT_NO_INDENT)) maxwidth -= FONTTAB; \
     y += FONTH;
 #define TEXTSKELETON \
-    float y = 0, x = 0, scale = curfont->scale/float(curfont->defaulth);\
+    float y = 0, x = 0, scale = curfont->scale/float(curfont->defaulth)*textscale;\
     int i;\
     for(i = 0; str[i]; i++)\
     {\
         int c = uchar(str[i]);\
         TEXTINDEX(i)\
         if(c=='\t')      { x = TEXTTAB(x); TEXTWHITE(i) }\
-        else if(c==' ')  { x += scale*curfont->defaultw; TEXTWHITE(i) }\
+        else if(c==' ')  { x += scale*curfont->defaultw*textscale; TEXTWHITE(i) }\
         else if(c=='\n') { TEXTLINE(i) TEXTALIGN }\
         else if(c=='\f') { if(str[i+1]) { i++; TEXTCOLORIZE(str, i); } }\
         else if(curfont->chars.inrange(c-curfont->charoffset))\
