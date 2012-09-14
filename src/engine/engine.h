@@ -553,7 +553,8 @@ enum
 {
     NOT_INITING = 0,
     INIT_LOAD,
-    INIT_RESET
+    INIT_RESET,
+    INIT_DEFAULTS
 };
 extern int initing;
 

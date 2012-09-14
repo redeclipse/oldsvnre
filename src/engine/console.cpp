@@ -247,7 +247,7 @@ void bindkey(char *key, char *action, int state, const char *cmd)
     int len = strlen(action);
     while(len>0 && iscubespace(action[len-1])) len--;
     binding = newstring(action, len);
-    *persist = interactive;
+    *persist = initing != INIT_DEFAULTS;
     changedkeys = totalmillis;
 }
 
@@ -675,9 +675,10 @@ void writebinds(stream *f)
         loopv(binds)
         {
             keym &km = *binds[i];
-            if(km.persist[j] && *km.actions[j])
+            if(km.persist[j])
             {
-                if(validateblock(km.actions[j])) f->printf("%s %s [%s]\n", cmds[j], escapestring(km.name), km.actions[j]);
+                if(!*km.actions[j]) f->printf("%s %s []\n", cmds[j], escapestring(km.name));
+                else if(validateblock(km.actions[j])) f->printf("%s %s [%s]\n", cmds[j], escapestring(km.name), km.actions[j]);
                 else f->printf("%s %s %s\n", cmds[j], escapestring(km.name), escapestring(km.actions[j]));
                 found = true;
             }
