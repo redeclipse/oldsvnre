@@ -18,7 +18,8 @@ VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guiblend, 1, 255, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
-FVAR(IDF_PERSIST, guibgfade, 0, 0, 1);
+VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x888888, 0xFFFFFF);
+VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x181818, 0xFFFFFF);
 
 static bool needsinput = false, hastitle = true;
 
@@ -864,17 +865,35 @@ struct gui : guient
             glPushMatrix();
             glTranslatef(origin.x, origin.y, origin.z);
             glScalef(scale.x, scale.y, scale.z);
-            if(guibgfade > 0)
+            int x = curx-guibound[0]*2, y = cury-guibound[1], w = xsize+guibound[0]*4, h = ysize+guibound[1]*2;
+            if(hastitle)
             {
-                usetexturing(false);
-                int x = curx-guibound[0], y = cury-guibound[1], w = xsize+guibound[0]*2, h = ysize+guibound[1]*2;
-                if(hastitle)
-                {
-                    y -= guibound[1]*3/2;
-                    h += guibound[1]*3/2;
-                }
-                hud::drawblend(x, y, w, h, 1-guibgfade, 1-guibgfade, 1-guibgfade, true);
-                usetexturing(true);
+                y -= guibound[1]*3/2;
+                h += guibound[1]*3/2;
+            }
+            if(guibgcolour >= 0)
+            {
+                notextureshader->set();
+                glDisable(GL_TEXTURE_2D);
+                hud::drawblend(x, y, w, h, (guibgcolour>>16)/255.f, ((guibgcolour>>8)&0xFF)/255.f, (guibgcolour&0xFF)/255.f, true);
+                defaultshader->set();
+                glEnable(GL_TEXTURE_2D);
+            }
+            if(guibordercolour >= 0)
+            {
+                lineshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glDisable(GL_BLEND);
+                glColor3ub(guibordercolour>>16, (guibordercolour>>8)&0xFF, guibordercolour&0xFF);
+                glBegin(GL_LINE_LOOP);
+                glVertex2f(x, y);
+                glVertex2f(x+w, y);
+                glVertex2f(x+w, y+h);
+                glVertex2f(x, y+h);
+                glEnd();
+                defaultshader->set();
+                glEnable(GL_TEXTURE_2D);
+                glEnable(GL_BLEND);
             }
         }
     }
