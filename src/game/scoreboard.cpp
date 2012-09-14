@@ -232,7 +232,7 @@ namespace hud
 
     void renderscoreboard(guient &g, bool firstpass)
     {
-        g.start(menustart, menuscale, NULL, false);
+        g.start(menustart, menuscale, NULL, false, false);
         int numgroups = groupplayers();
         g.pushlist();
         g.image(NULL, 6, true);
