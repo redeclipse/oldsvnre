@@ -188,7 +188,8 @@ struct font
     ~font() { DELETEA(name); }
 };
 
-#define FONTH (curfont->scale)
+extern float textscale;
+#define FONTH (curfont->scale*textscale)
 #define FONTW (FONTH/2)
 #define FONTTAB (4*FONTW)
 
