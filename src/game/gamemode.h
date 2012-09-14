@@ -38,7 +38,7 @@ gametypes gametype[] = {
             0, 0, 0, 0
         },
         "demo",                             { "", "", "" },
-        "",                                 { "", "", "" },
+        "play back previously recorded games", { "", "", "" },
     },
     {
         G_EDITMODE,     0,
