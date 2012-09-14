@@ -86,6 +86,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamomegatex, "<grey>textures/teamomega", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamkappatex, "<grey>textures/teamkappa", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, teamsigmatex, "<grey>textures/teamsigma", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, insigniatex, "<grey>textures/action", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, playertex, "<grey>textures/player", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, deadtex, "<grey>textures/dead", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatingtex, "<grey>textures/dominating", 3);
@@ -1403,7 +1404,7 @@ namespace hud
         else
         {
             dir = style ? vec(pos).sub(camera1->o) : pos;
-            dist = clamp(dir.magnitude()/hud::radarrange(), 0.f, 1.f);
+            dist = clamp(dir.magnitude()/radarrange(), 0.f, 1.f);
         }
         dir.rotate_around_z(-camera1->yaw*RAD).normalize();
         vec loc(0, 0, 0);
@@ -2403,7 +2404,7 @@ namespace hud
                 if(!getsight(camera1->o, camera1->yaw, camera1->pitch, game::players[i]->o, targ, dist, curfov, fovy)) continue;
                 if(!hasbound)
                 {
-                    Texture *t = textureload(hud::warningtex, 3);
+                    Texture *t = textureload(warningtex, 3);
                     glBindTexture(GL_TEXTURE_2D, t->id);
                     float amt = float(lastmillis%250)/250.f, value = (amt > 0.5f ? 1.f-amt : amt)*2.f;
                     glColor4f(value, value*0.125f, value*0.125f, value);
@@ -2413,7 +2414,7 @@ namespace hud
                 if(vectocursor(game::players[i]->o, cx, cy, cz))
                 {
                     int s = int(teamhurtsize*w), sx = int(cx*w-s), sy = int(cy*h-s);
-                    hud::drawsized(sx, sy, s*2);
+                    drawsized(sx, sy, s*2);
                 }
             }
         }
@@ -2494,7 +2495,7 @@ namespace hud
                         if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         else to += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                     }
-                    else to += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), hud::teamtexname(game::focus->team), TEAM(game::focus->team, name));
+                    else to += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), teamtexname(game::focus->team), TEAM(game::focus->team, name));
                 }
             }
             popfont();
@@ -2514,7 +2515,7 @@ namespace hud
                 int millis = lastmillis-game::focus->icons[i].millis;
                 if(millis <= game::focus->icons[i].fade)
                 {
-                    Texture *t = textureload(hud::icontex(game::focus->icons[i].type, game::focus->icons[i].value));
+                    Texture *t = textureload(icontex(game::focus->icons[i].type, game::focus->icons[i].value));
                     if(t && t != notexture)
                     {
                         int olen = min(game::focus->icons[i].length/5, 1000), ilen = olen/2, colour = 0xFFFFFF;

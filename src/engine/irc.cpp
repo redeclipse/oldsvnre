@@ -846,6 +846,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     return true;
 }
 
+static const char *ircstates[IRC_MAX] = { "\froffline", "\foconnecting", "\fynegotiating", "\fgonline" };
 bool ircgui(guient *g, const char *s)
 {
     g->allowautotab(false);
@@ -865,14 +866,11 @@ bool ircgui(guient *g, const char *s)
         loopv(ircnets) if(ircnets[i]->name[0] && ircnets[i]->sock != ENET_SOCKET_NULL)
         {
             ircnet *n = ircnets[i];
-            g->pushlist();
-            g->buttonf("%s via %s:[%d]", 0xFFFFFF, NULL, 0, true, n->name, n->serv, n->port);
-            g->space(1);
-            const char *ircstates[IRC_MAX] = {
-                    "\froffline", "\foconnecting", "\fynegotiating", "\fgonline"
-            };
-            g->buttonf("\fs%s\fS as %s", 0xFFFFFF, NULL, 0, true, ircstates[n->state], n->nick);
-            g->poplist();
+            uilist(*g, {
+                g->buttonf("%s via %s:[%d]", 0xFFFFFF, NULL, 0, true, n->name, n->serv, n->port);
+                g->space(1);
+                g->buttonf("\fs%s\fS as %s", 0xFFFFFF, NULL, 0, true, ircstates[n->state], n->nick);
+            });
             nets++;
         }
         if(nets)
