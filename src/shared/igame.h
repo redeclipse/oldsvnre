@@ -131,7 +131,7 @@ namespace server
     extern void ancmsgft(int cn, int snd, int conlevel, const char *s, ...);
     extern void srvmsgft(int cn, int conlevel, const char *s, ...);
     extern void srvmsgf(int cn, const char *s, ...);
-    extern void srvoutf(const char *s, ...);
+    extern void srvoutf(int r, const char *s, ...);
     extern bool serveroption(char *arg);
     extern void *newinfo();
     extern void deleteinfo(void *ci);

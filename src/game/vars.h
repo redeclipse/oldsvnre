@@ -7,6 +7,10 @@ GSVAR(IDF_ADMIN, servermotd, "");
 GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
 
 GVAR(IDF_ADMIN, demolock, 0, 2, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
+GVAR(IDF_ADMIN, democount, 1, 5, VAR_MAX);
+GVAR(IDF_ADMIN, demomaxsize, 1, 16, VAR_MAX);
+GVAR(IDF_ADMIN, demoautorec, 0, 0, 1); // automatically record demos each match
+
 GVAR(IDF_ADMIN, speclock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, kicklock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, allowlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
