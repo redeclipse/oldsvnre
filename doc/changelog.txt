@@ -13,6 +13,10 @@ Maps:
  * Fourplex, updated
  * Starlibido, updated
 
+Interface & Menus:
+ * Overall reduced font sizes
+ * Added /textscale variable so one can simply scale all on-screen text
+
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
 
