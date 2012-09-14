@@ -520,11 +520,8 @@ struct gamestate
     {
         if(isweap(weap))
         {
-            if(weap != weapselect)
-            {
-                lastweap = weapselect;
-                setweapstate(lastweap, WEAP_S_SWITCH, delay, millis);
-            }
+            lastweap = weapselect;
+            setweapstate(lastweap, WEAP_S_SWITCH, delay, millis);
             weapselect = weap;
             setweapstate(weap, state, delay, millis);
         }
