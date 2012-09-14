@@ -761,6 +761,13 @@ namespace entities
                 }
                 break;
             }
+            case LIGHT:
+            {
+                if(e.attrs[0] < 0) e.attrs[0] = 0;
+                if(e.attrs[4] < 0) e.attrs[4] = 3;
+                if(e.attrs[4] > 3) e.attrs[4] = 0;
+                break;
+            }
             case SUNLIGHT:
             {
                 while(e.attrs[0] < 0) e.attrs[0] += 360;
@@ -768,6 +775,8 @@ namespace entities
                 while(e.attrs[1] < -180) e.attrs[1] += 360;
                 while(e.attrs[1] >= 180) e.attrs[1] -= 360;
                 if(e.attrs[5] < -1) e.attrs[5] = 0;
+                if(e.attrs[6] < 0) e.attrs[6] = 3;
+                if(e.attrs[6] > 3) e.attrs[6] = 0;
                 break;
             }
             case PUSHER:

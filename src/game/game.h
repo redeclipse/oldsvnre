@@ -65,10 +65,10 @@ enttypes enttype[] = {
                 "none",         { "" }
     },
     {
-        LIGHT,          1,          59,     0,      EU_NONE,    4,          -1,
+        LIGHT,          1,          59,     0,      EU_NONE,    5,          -1,
             (1<<LIGHTFX), (1<<LIGHTFX),
             false,  false,  false,      false,      false,
-                "light",        { "radius", "red",      "green",    "blue"  }
+                "light",        { "radius", "red",      "green",    "blue",     "flare"  }
     },
     {
         MAPMODEL,       1,          58,     0,      EU_NONE,    9,          -1,
@@ -111,10 +111,10 @@ enttypes enttype[] = {
                 "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
     {
-        SUNLIGHT,       1,          160,    0,      EU_NONE,    6,          -1,
+        SUNLIGHT,       1,          160,    0,      EU_NONE,    7,          -1,
             0, 0,
             false,  false,  false,      false,      false,
-                "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset" }
+                "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset",   "flare" }
     },
     {
         WEAPON,         2,          59,     24,     EU_ITEM,    5,          2,
