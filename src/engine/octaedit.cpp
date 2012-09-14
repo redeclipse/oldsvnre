@@ -2259,100 +2259,94 @@ struct texturegui : guicb
         if(menupage > numpages) menupage = numpages;
         else if(menupage < 0) menupage = 0;
         g.start(menustart, menuscale, NULL, true);
-        g.pushlist();
-        g.space(2);
-        if(g.button("\fgauto apply", 0xFFFFFF, autoapplytexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autoapplytexgui ? false : true)&GUI_UP)
-            autoapplytexgui = autoapplytexgui ? 0 : 1;
-        g.space(2);
-        if(g.button("\fgauto preview", 0xFFFFFF, autopreviewtexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autopreviewtexgui ? false : true)&GUI_UP)
-            autopreviewtexgui = autopreviewtexgui ? 0 : 1;
-        g.space(2);
-        if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, autoclosetexgui ? false : true)&GUI_UP)
-            autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
-        g.space(2);
-        if(g.button("\foreset order", 0xFFFFFF, NULL)&GUI_UP)
-        {
-            int old = texmru.inrange(menutex) ? texmru[menutex] : -1;
-            resettexmru();
-            curtex = menutex = rolltex = texmru.find(old);
-        }
-        g.poplist();
-        g.space(1);
-        g.pushlist();
-        if(texmru.inrange(curtex))
-        {
-            VSlot &v = lookupvslot(texmru[curtex], false);
-            if(v.slot->sts.empty()) g.texture(dummyvslot, thumbheight*thumbsize, false);
-            else if(!v.slot->loaded && !v.slot->thumbnail)
+        uilist(g, {
+            g.space(2);
+            if(g.button("\fgauto apply", 0xFFFFFF, autoapplytexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autoapplytexgui ? false : true)&GUI_UP)
+                autoapplytexgui = autoapplytexgui ? 0 : 1;
+            g.space(2);
+            if(g.button("\fgauto preview", 0xFFFFFF, autopreviewtexgui ? "checkboxon" : "checkbox", 0xFFFFFF, autopreviewtexgui ? false : true)&GUI_UP)
+                autopreviewtexgui = autopreviewtexgui ? 0 : 1;
+            g.space(2);
+            if(g.button("\fgauto close", 0xFFFFFF, autoclosetexgui ? (autoclosetexgui > 1 ? "checkboxtwo" : "checkboxon") : "checkbox", 0xFFFFFF, autoclosetexgui ? false : true)&GUI_UP)
+                autoclosetexgui = autoclosetexgui ? (autoclosetexgui > 1 ? 0 : 2) : 1;
+            g.space(2);
+            if(g.button("\foreset order", 0xFFFFFF, NULL)&GUI_UP)
             {
-                if(totalmillis-lastthumbnail<thumbtime)
-                    g.texture(dummyvslot, thumbheight*thumbsize, false); //create an empty space
-                loadthumbnail(*v.slot);
-                lastthumbnail = totalmillis;
+                int old = texmru.inrange(menutex) ? texmru[menutex] : -1;
+                resettexmru();
+                curtex = menutex = rolltex = texmru.find(old);
             }
-            int ret = g.texture(v, thumbheight*thumbsize, true);
-            if(ret&GUI_UP)
-            {
-                edittex(texmru[curtex]);
-                if(autoclosetexgui) menuon = false;
-            }
-        }
-        else g.image(textureload("textures/nothumb", 3), thumbheight*thumbsize, true);
+        });
         g.space(1);
-        g.pushlist();
-        g.pushlist();
-        g.pushlist();
-        loop(h, thumbheight)
-        {
-            g.pushlist();
-            loop(w, thumbwidth)
+        uilist(g, {
+            if(texmru.inrange(curtex))
             {
-                int ti = (menupage*thumbheight+h)*thumbwidth+w;
-                if(ti<texmru.length())
+                VSlot &v = lookupvslot(texmru[curtex], false);
+                if(v.slot->sts.empty()) g.texture(dummyvslot, thumbheight*thumbsize, false);
+                else if(!v.slot->loaded && !v.slot->thumbnail)
                 {
-                    VSlot &v = lookupvslot(texmru[ti], false);
-                    if(v.slot->sts.empty()) continue;
-                    else if(!v.slot->loaded && !v.slot->thumbnail)
-                    {
-                        if(totalmillis-lastthumbnail<thumbtime)
-                        {
-                            g.texture(dummyvslot, thumbsize, false); //create an empty space
-                            continue;
-                        }
-                        loadthumbnail(*v.slot);
-                        lastthumbnail = totalmillis;
-                    }
-                    int ret = g.texture(v, thumbsize, true);
-                    if(ret&GUI_UP)
-                    {
-                        if(autoapplytexgui && (v.slot->loaded || v.slot->thumbnail!=notexture))
-                        {
-                            menutex = ti;
-                            edittex(texmru[ti]);
-                            if(autoclosetexgui > 1) menuon = false;
-                        }
-                    }
-                    else if(ret&GUI_ROLLOVER) rolltex = ti;
+                    if(totalmillis-lastthumbnail<thumbtime)
+                        g.texture(dummyvslot, thumbheight*thumbsize, false); //create an empty space
+                    loadthumbnail(*v.slot);
+                    lastthumbnail = totalmillis;
                 }
-                else g.texture(dummyvslot, thumbsize, false); //create an empty space
+                int ret = g.texture(v, thumbheight*thumbsize, true);
+                if(ret&GUI_UP)
+                {
+                    edittex(texmru[curtex]);
+                    if(autoclosetexgui) menuon = false;
+                }
             }
-            g.poplist();
-        }
-        g.poplist();
-        g.slider(menupage, 0, numpages, 0xFFFFFF, NULL, true, true);
-        g.poplist();
-        g.poplist();
-        g.poplist();
+            else g.image(textureload("textures/nothumb", 3), thumbheight*thumbsize, true);
+            g.space(1);
+            uimlist(g, 2, {
+                uilist(g, loop(h, thumbheight)
+                {
+                    uilist(g,  loop(w, thumbwidth)
+                    {
+                        int ti = (menupage*thumbheight+h)*thumbwidth+w;
+                        if(ti<texmru.length())
+                        {
+                            VSlot &v = lookupvslot(texmru[ti], false);
+                            if(v.slot->sts.empty()) continue;
+                            else if(!v.slot->loaded && !v.slot->thumbnail)
+                            {
+                                if(totalmillis-lastthumbnail<thumbtime)
+                                {
+                                    g.texture(dummyvslot, thumbsize, false); //create an empty space
+                                    continue;
+                                }
+                                loadthumbnail(*v.slot);
+                                lastthumbnail = totalmillis;
+                            }
+                            int ret = g.texture(v, thumbsize, true);
+                            if(ret&GUI_UP)
+                            {
+                                if(autoapplytexgui && (v.slot->loaded || v.slot->thumbnail!=notexture))
+                                {
+                                    menutex = ti;
+                                    edittex(texmru[ti]);
+                                    if(autoclosetexgui > 1) menuon = false;
+                                }
+                            }
+                            else if(ret&GUI_ROLLOVER) rolltex = ti;
+                        }
+                        else g.texture(dummyvslot, thumbsize, false); //create an empty space
+                    });
+                });
+                g.slider(menupage, 0, numpages, 0xFFFFFF, NULL, true, true);
+            });
+        });
         g.space(1);
-        g.pushlist();
-        g.space(1);
-        if(texmru.inrange(curtex))
-        {
-            VSlot &v = lookupvslot(texmru[curtex]);
-            g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, texmru[curtex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
-        }
-        else g.textf("no texture selected", 0x888888);
-        g.poplist();
+        uilist(g, {
+            g.space(1);
+            if(texmru.inrange(curtex))
+            {
+                VSlot &v = lookupvslot(texmru[curtex]);
+                g.textf("#%-3d \fa%s", 0xFFFFFF, NULL, 0, texmru[curtex], v.slot->sts.empty() ? "<unknown texture>" : v.slot->sts[0].name);
+            }
+            else g.textf("no texture selected", 0x888888);
+        });
         g.end();
     }
 

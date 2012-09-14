@@ -676,6 +676,28 @@ extern void texturemenu();
 extern bool menuactive();
 extern int cleargui(int n = 0);
 
+#define uipad(parent,count,body) \
+{ \
+    (parent).space(count); \
+    body; \
+    (parent).space(count); \
+}
+#define uifont(parent,font,body) \
+{ \
+    (parent).pushfont(font); \
+    body; \
+    (parent).popfont(); \
+}
+#define uimlist(parent,count,body) \
+{ \
+    loop(uimlist##__LINE__, count) (parent).pushlist(); \
+    body; \
+    loop(uimlist##__LINE__, count) (parent).poplist(); \
+}
+#define uilist(parent,body) uimlist(parent, 1, body)
+#define uimcenter(parent,count,body) uimlist(parent, count, (parent).spring(); body; (parent).spring())
+#define uicenter(parent,body) uimcenter(parent, 1, body)
+
 // octaedit
 extern void replacetexcube(cube &c, int oldtex, int newtex);
 
