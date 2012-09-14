@@ -1610,7 +1610,8 @@ namespace server
         if(ci->state.aitype >= AI_START)
         {
             bool hasent = sents.inrange(ci->state.aientity) && sents[ci->state.aientity].type == ACTOR;
-            weap = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6]-1 : aistyle[ci->state.aitype].weap;
+            if(m_insta(gamemode, mutators) && !m_arena(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
+            else weap = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6]-1 : aistyle[ci->state.aitype].weap;
             if(!m_insta(gamemode, mutators))
             {
                 int heal = hasent && sents[ci->state.aientity].attrs[7] > 0 ? sents[ci->state.aientity].attrs[7] : aistyle[ci->state.aitype].health,
