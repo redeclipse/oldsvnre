@@ -1870,7 +1870,9 @@ namespace server
 
     void setupdemorecord()
     {
+        if(demorecord) enddemorecord(false);
         if(m_demo(gamemode) || m_edit(gamemode)) return;
+        demonextmatch = false;
 
         demotmp = opentempfile("demorecord", "w+b");
         stream *f = opengzfile(NULL, "wb", demotmp);
@@ -2383,15 +2385,11 @@ namespace server
             else spectator(ci);
         }
 
-        if(m_fight(gamemode) && numclients()) sendf(-1, 1, "ri2", N_TICK, timeremaining);
-        if(m_demo(gamemode))
+        if(numclients())
         {
-            if(clients.length()) setupdemoplayback();
-        }
-        else if(demonextmatch)
-        {
-            demonextmatch = false;
-            setupdemorecord();
+            if(m_fight(gamemode)) sendf(-1, 1, "ri2", N_TICK, timeremaining);
+            if(m_demo(gamemode)) setupdemoplayback();
+            else if(demonextmatch) setupdemorecord();
         }
     }
 
@@ -4129,6 +4127,8 @@ namespace server
 
     void connected(clientinfo *ci)
     {
+        if(!m_demo(gamemode) && !numclients() && demonextmatch) setupdemorecord();
+
         connects.removeobj(ci);
         clients.add(ci);
 
