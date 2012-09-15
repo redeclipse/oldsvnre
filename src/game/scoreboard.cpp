@@ -520,7 +520,7 @@ namespace hud
                 if(scorehighlight)
                 {
                     uilist(g, {
-                        uicenterlist(g, g.space(1));
+                        uicenterlist(g, uipad(g, 0.5f, g.text(" ", fgcolor)));
                         loopscoregroup({
                             int bgcol = o == game::player1 ? 0x888888 : 0x111111;
                             switch(o->privilege)
