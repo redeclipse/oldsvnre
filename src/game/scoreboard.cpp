@@ -530,9 +530,7 @@ namespace hud
                                 case PRIV_HELPER: bgcol |= 0x000044; break;
                                 default: break;
                             }
-                            uicenterlist(g, uipad(g, 0.5f, {
-                                g.text("", 0, insigniatex, bgcol);
-                            }));
+                            uicenterlist(g, uipad(g, 0.5f, g.text("", 0, insigniatex, bgcol)));
                         });
                     });
                 }
