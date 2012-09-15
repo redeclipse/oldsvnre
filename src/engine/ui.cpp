@@ -776,7 +776,6 @@ struct gui : guient
         if(visible())
         {
             if(!slidertex) slidertex = textureload(guislidertex, 3, true, false);
-            glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, slidertex->id);
             if(percent < 0.99f)
             {
