@@ -694,7 +694,7 @@ void ircslice()
                 {
                     if(*n->passkey) ircsend(n, "PASS %s", n->passkey);
                     ircsend(n, "NICK %s", n->nick);
-                    ircsend(n, "USER %s +iw %s :%s v%s-%s %d bit (%s), %s", n->nick, RE_UNAME, RE_NAME, RE_VER_STR, RE_PLATFORM, RE_ARCH, RE_RELEASE, RE_URL);
+                    ircsend(n, "USER %s +iw %s :%s v%s-%s %d bit (%s)", RE_UNAME, RE_UNAME, RE_NAME, RE_VER_STR, RE_PLATFORM, RE_ARCH, RE_RELEASE);
                     n->state = IRC_CONN;
                     loopvj(n->channels)
                     {
