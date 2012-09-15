@@ -5035,7 +5035,7 @@ namespace server
                 {
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
-                    if(!cp || cp->state.aitype > AI_NONE) break;
+                    if(!cp || cp->state.aitype > AI_NONE || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
                     if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, GAME(speclock)+PRIV_HELPER, sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
                     spectate(cp, val);
@@ -5078,14 +5078,14 @@ namespace server
                 }
 
                 case N_LISTDEMOS:
-                    if(ci->state.state==CS_SPECTATOR) break;
+                    //if(ci->state.state==CS_SPECTATOR) break;
                     listdemos(sender);
                     break;
 
                 case N_GETDEMO:
                 {
                     int n = getint(p);
-                    if(ci->state.state==CS_SPECTATOR) break;
+                    //if(ci->state.state==CS_SPECTATOR) break;
                     senddemo(sender, n);
                     break;
                 }
