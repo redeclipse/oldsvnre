@@ -16,6 +16,9 @@ Maps:
 Interface & Menus:
  * Overall reduced font sizes
  * Added /textscale variable so one can simply scale all on-screen text
+ * Added frames around most UI elements
+ * Revamped score screen
+ * Added ALT+ENTER fullscreen toggle
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
@@ -28,6 +31,7 @@ Additional fixed bugs:
  * #218 - can no longer drop your loadout weapons in arena
  * #223 - can no longer use common file-writing commands from a map script
  * #224 - Possible to cut in map "hawk"
+ * #232 - ALT + F4 and ALT + TAB not working from fullscreen in Linux
 
 
 = Red Eclipse 1.3.1 =
