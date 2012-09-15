@@ -785,10 +785,10 @@ namespace server
         srvoutf(-3, "\fydemo recording is \fs\fc%s\fS for next match", demonextmatch ? "enabled" : "disabled");
     }
 
-    void enddemorecord();
-    void checkdemorecord()
+    void enddemorecord(bool full);
+    void checkdemorecord(bool full)
     {
-        if(demorecord) enddemorecord();
+        if(demorecord) enddemorecord(full);
         if(GAME(demoautorec) && !demonextmatch) setdemorecord(true);
     }
 
@@ -1140,7 +1140,7 @@ namespace server
         }
         if(req)
         {
-            checkdemorecord();
+            checkdemorecord(true);
             if(!maprequest && GAME(votelimit) && GAME(votelock) != 7 && GAME(modelock) != 7 && GAME(mapslock) != 7)
             {
                 sendf(-1, 1, "ri", N_NEWGAME);
@@ -1840,13 +1840,17 @@ namespace server
         DELETEP(demotmp);
     }
 
-    void enddemorecord()
+    void enddemorecord(bool full)
     {
         if(!demorecord) return;
         DELETEP(demorecord);
         if(!demotmp) return;
-        prunedemos(1);
-        adddemo();
+        if(!full && !GAME(demokeep)) { DELETEP(demotmp); }
+        else
+        {
+            prunedemos(1);
+            adddemo();
+        }
     }
 
     void writedemo(int chan, void *data, int len)
@@ -1856,7 +1860,7 @@ namespace server
         lilswap(stamp, 3);
         demorecord->write(stamp, sizeof(stamp));
         demorecord->write(data, len);
-        if(demorecord->rawtell() >= (GAME(demomaxsize)<<20)) enddemorecord();
+        if(demorecord->rawtell() >= (GAME(demomaxsize)<<20)) enddemorecord(interm != 0);
     }
 
     void recordpacket(int chan, void *data, int len)
@@ -1891,7 +1895,7 @@ namespace server
     void endmatch()
     {
         setpause(false);
-        checkdemorecord();
+        checkdemorecord(true);
         if(sv_botoffset != 0)
         {
             setvar("sv_botoffset", 0, true);
@@ -2248,7 +2252,7 @@ namespace server
     void stopdemo()
     {
         if(m_demo(gamemode)) enddemoplayback();
-        else checkdemorecord();
+        else checkdemorecord(interm != 0);
     }
 
     void connected(clientinfo *ci);
@@ -5065,7 +5069,7 @@ namespace server
                 {
                     if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "stop demos")) break;
                     if(m_demo(gamemode)) enddemoplayback();
-                    else checkdemorecord();
+                    else checkdemorecord(interm != 0);
                     break;
                 }
 
