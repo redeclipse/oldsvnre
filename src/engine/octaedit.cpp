@@ -2299,7 +2299,7 @@ struct texturegui : guicb
             }
             else g.image(textureload("textures/nothumb", 3), thumbheight*thumbsize, true);
             g.space(1);
-            uimlist(g, 2, {
+            uilistv(g, 2, {
                 uilist(g, loop(h, thumbheight)
                 {
                     uilist(g,  loop(w, thumbwidth)

@@ -238,133 +238,135 @@ namespace hud
             g.image(NULL, 6, true);
             g.space(2);
             uicenter(g, {
-                g.space(0.25f);
-                uicenter(g, uifont(g, "emphasis", g.textf("%s", 0xFFFFFF, NULL, 0, *maptitle ? maptitle : mapname)));
-                if(*mapauthor) uicenter(g, uifont(g, "default", g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor)));
-                uicenter(g, uifont(g, "reduced", {
-                    defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
-                    if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
-                    g.textf("%s", 0xFFFFFF, NULL, 0, gname);
-                    if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
-                    {
-                        if(game::intermission) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
-                        else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
-                        else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timetostr(game::timeremaining, 2));
-                    }
-                }));
-                if(*connectname)
-                {
-                    uicenter(g, {
-                        uifont(g, "little", g.textf("\fdon ", 0xFFFFFF, NULL, 0));
-                        if(*serverdesc) uifont(g, "reduced", g.textf("%s ", 0xFFFFFF, NULL, 0, serverdesc));
-                        uifont(g, "little", g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, 0, connectname, connectport));
-                    });
-                }
-                if(client::demoplayback)
-                {
-                    uicenter(g, {
-                        uifont(g, "reduced", g.textf("Demo Playback in Progress", 0xFFFFFF, NULL, 0));
-                    });
-                }
-                else if(!game::intermission)
-                {
-                    if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
-                    {
-                        int sdelay = m_delay(game::gamemode, game::mutators);
-                        int delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
-                        g.pushlist();
-                        g.spring();
-                        uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait"));
-                        if(shownotices >= 2)
+                uicenterlist(g, {
+                    g.space(0.25f);
+                    uicenterlist(g, uifont(g, "emphasis", g.textf("%s", 0xFFFFFF, NULL, 0, *maptitle ? maptitle : mapname)));
+                    if(*mapauthor) uicenterlist(g, uifont(g, "default", g.textf("by %s", 0xFFFFFF, NULL, 0, mapauthor)));
+                    uicenterlist(g, uifont(g, "reduced", {
+                        defformatstring(gname)("%s", server::gamename(game::gamemode, game::mutators));
+                        if(strlen(gname) > 32) formatstring(gname)("%s", server::gamename(game::gamemode, game::mutators, 1));
+                        g.textf("%s", 0xFFFFFF, NULL, 0, gname);
+                        if((m_play(game::gamemode) || client::demoplayback) && game::timeremaining >= 0)
                         {
-                            g.space(1);
-                            SEARCHBINDCACHE(attackkey)("action 0", 0);
-                            uifont(g, "little", {
-                                if(delay || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
-                                {
-                                    if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
-                                    else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, timetostr(delay, -1));
-                                    else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
-                                    {
-                                        int n = game::numwaiting();
-                                        if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
-                                        else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
-                                    }
-                                    g.spring();
-                                    g.poplist();
-                                    if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
-                                        uicenter(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey));
-                                }
-                                else
-                                {
-                                    g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
-                                    g.spring();
-                                    g.poplist();
-                                    if(game::player1->state != CS_WAITING) uicenter(g, g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey));
-                                }
-                                if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
-                                {
-                                    SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                                    uicenter(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey));
-                                }
-                                if(m_arena(game::gamemode, game::mutators))
-                                {
-                                    SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                                    uicenter(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change"));
-                                }
-                                if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
-                                {
-                                    SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                                    uicenter(g, g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey));
-                                }
-                            });
+                            if(game::intermission) g.textf(", \fs\fyintermission\fS", 0xFFFFFF, NULL, 0);
+                            else if(paused) g.textf(", \fs\fopaused\fS", 0xFFFFFF, NULL, 0);
+                            else if(game::timeremaining) g.textf(", \fs\fg%s\fS remain", 0xFFFFFF, NULL, 0, timetostr(game::timeremaining, 2));
                         }
-                        else
+                    }));
+                    if(*connectname)
+                    {
+                        uicenterlist(g, {
+                            uifont(g, "little", g.textf("\fdon ", 0xFFFFFF, NULL, 0));
+                            if(*serverdesc) uifont(g, "reduced", g.textf("%s ", 0xFFFFFF, NULL, 0, serverdesc));
+                            uifont(g, "little", g.textf("\fd(\fa%s:[%d]\fd)", 0xFFFFFF, NULL, 0, connectname, connectport));
+                        });
+                    }
+                    if(client::demoplayback)
+                    {
+                        uicenterlist(g, {
+                            uifont(g, "reduced", g.textf("Demo Playback in Progress", 0xFFFFFF, NULL, 0));
+                        });
+                    }
+                    else if(!game::intermission)
+                    {
+                        if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
                         {
+                            int sdelay = m_delay(game::gamemode, game::mutators);
+                            int delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
+                            g.pushlist();
                             g.spring();
-                            g.poplist();
+                            uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait"));
+                            if(shownotices >= 2)
+                            {
+                                g.space(1);
+                                SEARCHBINDCACHE(attackkey)("action 0", 0);
+                                uifont(g, "little", {
+                                    if(delay || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                                    {
+                                        if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                                        else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, timetostr(delay, -1));
+                                        else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                                        {
+                                            int n = game::numwaiting();
+                                            if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
+                                            else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
+                                        }
+                                        g.spring();
+                                        g.poplist();
+                                        if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
+                                            uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey));
+                                    }
+                                    else
+                                    {
+                                        g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
+                                        g.spring();
+                                        g.poplist();
+                                        if(game::player1->state != CS_WAITING) uicenterlist(g, g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey));
+                                    }
+                                    if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
+                                    {
+                                        SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey));
+                                    }
+                                    if(m_arena(game::gamemode, game::mutators))
+                                    {
+                                        SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change"));
+                                    }
+                                    if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                                    {
+                                        SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey));
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                g.spring();
+                                g.poplist();
+                            }
+                        }
+                        else if(game::player1->state == CS_ALIVE)
+                        {
+                            uifont(g, "little", {
+                                uicenterlist(g, {
+                                    // In two cases, the main mode-description is not applicable
+                                    if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // bomber-ball hold
+                                        g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
+                                    else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // ctf protect
+                                        g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
+                                    else g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
+                                });
+                                if(m_isteam(game::gamemode, game::mutators))
+                                uicenterlist(g, g.textf("Playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), teamtexname(game::player1->team), TEAM(game::player1->team, name)));
+                            });
+                        }
+                        else if(game::player1->state == CS_SPECTATOR)
+                        {
+                            uicenterlist(g, uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating")));
+                            SEARCHBINDCACHE(speconkey)("spectator 0", 1);
+                            uifont(g, "little", {
+                                uicenterlist(g, g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey));
+                                if(!m_edit(game::gamemode) && shownotices >= 2)
+                                {
+                                    SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
+                                    uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV"));
+                                }
+                            });
+                        }
+
+                        if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
+                        {
+                            SEARCHBINDCACHE(editkey)("edittoggle", 1);
+                            uicenterlist(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
                         }
                     }
-                    else if(game::player1->state == CS_ALIVE)
-                    {
-                        uifont(g, "little", {
-                            uicenter(g, {
-                                // In two cases, the main mode-description is not applicable
-                                if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // bomber-ball hold
-                                    g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
-                                else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // ctf protect
-                                    g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
-                                else g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
-                            });
-                            if(m_isteam(game::gamemode, game::mutators))
-                            uicenter(g, g.textf("Playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), teamtexname(game::player1->team), TEAM(game::player1->team, name)));
-                        });
-                    }
-                    else if(game::player1->state == CS_SPECTATOR)
-                    {
-                        uicenter(g, uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::tvmode() ? "SpecTV" : "Spectating")));
-                        SEARCHBINDCACHE(speconkey)("spectator 0", 1);
-                        uifont(g, "little", {
-                            uicenter(g, g.textf("Press \fs\fc%s\fS to join the game", 0xFFFFFF, NULL, 0, speconkey));
-                            if(!m_edit(game::gamemode) && shownotices >= 2)
-                            {
-                                SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                                uicenter(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV"));
-                            }
-                        });
-                    }
 
-                    if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
-                    {
-                        SEARCHBINDCACHE(editkey)("edittoggle", 1);
-                        uicenter(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
-                    }
-                }
-
-                SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
-                uifont(g, "little", {
-                    uicenter(g, g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey));
-                    uicenter(g, g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0));
+                    SEARCHBINDCACHE(scoreboardkey)("showscores", 1);
+                    uifont(g, "little", {
+                        uicenterlist(g, g.textf("%s \fs\fc%s\fS to close this window", 0xFFFFFF, NULL, 0, scoresoff ? "Release" : "Press", scoreboardkey));
+                        uicenterlist(g, g.textf("Double-tap to keep the window open", 0xFFFFFF, NULL, 0));
+                    });
                 });
             });
         });
@@ -376,166 +378,171 @@ namespace hud
                 if(k) g.space(0.5f);
                 g.pushlist();
             }
-            g.spring();
-            scoregroup &sg = *groups[k];
-            int bgcolor = sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333;
-            int fgcolor = 0xFFFFFF;
-            #define loopscoregroup(b) \
-                loopv(sg.players) \
-                { \
-                    gameent *o = sg.players[i]; \
-                    b; \
-                }
+            uicenter(g, {
+                scoregroup &sg = *groups[k];
+                int bgcolor = sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? TEAM(sg.team, colour) : 0x333333;
+                int fgcolor = 0xFFFFFF;
+                #define loopscoregroup(b) \
+                    loopv(sg.players) \
+                    { \
+                        gameent *o = sg.players[i]; \
+                        b; \
+                    }
 
-            uilist(g, {
+                uilist(g, {
+                    if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                    {
+                        uicenterlist(g, {
+                            g.background(bgcolor);
+                            g.text("", 0, teamtexname(sg.team), TEAM(sg.team, colour));
+                        });
+                    }
+                    g.space(1);
+                    loopscoregroup({
+                        const char *status = playertex;
+                        if(o->state == CS_DEAD || o->state == CS_WAITING) status = deadtex;
+                        else if(o->state == CS_ALIVE && (!m_isteam(game::gamemode, game::mutators) || o->team != game::focus->team))
+                        {
+                            if(o->dominating.find(game::focus) >= 0) status = dominatingtex;
+                            else if(o->dominated.find(game::focus) >= 0) status = dominatedtex;
+                        }
+                        uicenterlist(g, {
+                            g.text("", 0, status, game::getcolour(o, game::playerdisplaytone));
+                        });
+                    });
+                });
+
                 if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
                 {
-                    uicenter(g, {
+                    g.pushlist();
+                    uilist(g, {
                         g.background(bgcolor);
-                        g.text("", 0, teamtexname(sg.team), TEAM(sg.team, colour));
+                        if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
+                            g.textf("%s: WIN", fgcolor, NULL, 0, TEAM(sg.team, name));
+                        else g.textf("%s: %d", fgcolor, NULL, 0, TEAM(sg.team, name), sg.total);
+                        g.spring();
+                    });
+                    g.pushlist();
+                }
+
+                uilist(g, {
+                    uicenterlist(g, uipad(g, 0.5f, uicenterlist(g, g.text("name", fgcolor))));
+                    loopscoregroup(uicenterlist(g, uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))))));
+                });
+
+                if(showpoints)
+                {
+                    uilist(g, {
+                        uicenterlist(g, uipad(g, 0.5f, g.text("points", fgcolor)));
+                        loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->points))));
                     });
                 }
-                g.space(1);
-                loopscoregroup({
-                    const char *status = playertex;
-                    if(o->state == CS_DEAD || o->state == CS_WAITING) status = deadtex;
-                    else if(o->state == CS_ALIVE && (!m_isteam(game::gamemode, game::mutators) || o->team != game::focus->team))
-                    {
-                        if(o->dominating.find(game::focus) >= 0) status = dominatingtex;
-                        else if(o->dominated.find(game::focus) >= 0) status = dominatedtex;
-                    }
-                    uicenter(g, {
-                        g.text("", 0, status, game::getcolour(o, game::playerdisplaytone));
-                    });
-                });
-            });
 
-            if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
-            {
-                g.pushlist();
-                uilist(g, {
-                    g.background(bgcolor);
-                    if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
-                        g.textf("%s: WIN", fgcolor, NULL, 0, TEAM(sg.team, name));
-                    else g.textf("%s: %d", fgcolor, NULL, 0, TEAM(sg.team, name), sg.total);
-                    g.spring();
-                });
-                g.pushlist();
-            }
-
-            uilist(g, {
-                uicenter(g, uipad(g, 0.5f, uicenter(g, g.text("name", fgcolor))));
-                loopscoregroup(uicenter(g, uipad(g, 0.5f, uicenter(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))))));
-            });
-
-            if(showpoints)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("points", fgcolor)));
-                    loopscoregroup(uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->points))));
-                });
-            }
-
-            if(showscore && (showscore >= 2 || !m_affinity(game::gamemode)))
-            {
-                uilist(g, {
-                    if(m_trial(game::gamemode))
-                    {
-                        uicenter(g, uipad(g, 0.5f, g.text("best", fgcolor)));
-                        loopscoregroup(uicenter(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
-                    }
-                    else
-                    {
-                        uicenter(g, uipad(g, 0.5f, g.text("frags", fgcolor)));
-                        loopscoregroup(uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags))));
-                    }
-                });
-            }
-
-            if(showpj)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("pj", fgcolor)));
-                    loopscoregroup(uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag))));
-                });
-            }
-
-            if(showping)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("ping", fgcolor)));
-                    loopscoregroup(uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping))));
-                });
-            }
-
-            if(showclientnum || game::player1->privilege>=PRIV_HELPER)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("cn", fgcolor)));
-                    loopscoregroup(uicenter(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum))));
-                });
-            }
-
-            if(showbotinfo)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("sk", fgcolor)));
-                    loopscoregroup({
-                        uicenter(g, uipad(g, 0.5f, {
-                            if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
-                            else g.space(1);
-                        }));
-                    });
-                });
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("on", fgcolor)));
-                    loopscoregroup({
-                        uicenter(g, uipad(g, 0.5f, {
-                            if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
-                            else g.space(1);
-                        }));
-                    });
-                });
-            }
-
-            if(showhostname)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text("host", fgcolor)));
-                    loopscoregroup({
-                        uicenter(g, uipad(g, 0.5f, {
-                            if(o->aitype == AI_NONE) g.textf("%s ", 0xFFFFFF, NULL, 0, o->hostname);
-                            else g.space(1);
-                        }));
-                    });
-                });
-            }
-            if(scorehighlight)
-            {
-                uilist(g, {
-                    uicenter(g, uipad(g, 0.5f, g.text(" ", fgcolor)));
-                    loopscoregroup({
-                        int bgcol = o == game::player1 ? 0x888888 : 0x111111;
-                        switch(o->privilege)
+                if(showscore && (showscore >= 2 || !m_affinity(game::gamemode)))
+                {
+                    uilist(g, {
+                        if(m_trial(game::gamemode))
                         {
-                            case PRIV_ADMINISTRATOR: bgcol |= 0x004444; break;
-                            case PRIV_MODERATOR: bgcol |= 0x440044; break;
-                            case PRIV_HELPER: bgcol |= 0x000044; break;
-                            default: break;
+                            uicenterlist(g, uipad(g, 0.5f, g.text("best", fgcolor)));
+                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
                         }
-                        uicenter(g, uipad(g, 0.5f, {
-                            g.text("", 0, insigniatex, bgcol);
-                        }));
+                        else
+                        {
+                            uicenterlist(g, uipad(g, 0.5f, g.text("frags", fgcolor)));
+                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags))));
+                        }
                     });
-                });
-            }
+                }
 
-            if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
-            {
-                g.poplist(); // horizontal
-                g.poplist(); // vertical
-            }
-            g.spring();
+                if(showpj)
+                {
+                    uilist(g, {
+                        uicenterlist(g, uipad(g, 0.5f, g.text("pj", fgcolor)));
+                        loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag))));
+                    });
+                }
+
+                if(showping)
+                {
+                    uilist(g, {
+                        uicenterlist(g, uipad(g, 0.5f, g.text("ping", fgcolor)));
+                        loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping))));
+                    });
+                }
+
+                if(showclientnum || game::player1->privilege>=PRIV_HELPER)
+                {
+                    uilist(g, {
+                        uicenterlist(g, uipad(g, 0.5f, g.text("cn", fgcolor)));
+                        loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum))));
+                    });
+                }
+
+                if(showbotinfo)
+                {
+                    bool hasbots = false;
+                    loopscoregroup(if(o->aitype > AI_NONE) { hasbots = true; break; });
+                    if(hasbots)
+                    {
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, 0.5f, g.text("sk", fgcolor)));
+                            loopscoregroup({
+                                uicenterlist(g, uipad(g, 0.5f, {
+                                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
+                                    else g.space(1);
+                                }));
+                            });
+                        });
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, 0.5f, g.text("on", fgcolor)));
+                            loopscoregroup({
+                                uicenterlist(g, uipad(g, 0.5f, {
+                                    if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
+                                    else g.space(1);
+                                }));
+                            });
+                        });
+                    }
+                }
+
+                if(showhostname)
+                {
+                    uilist(g, {
+                        uicenterlist(g, uipad(g, 0.5f, g.text("host", fgcolor)));
+                        loopscoregroup({
+                            uicenterlist(g, uipad(g, 0.5f, {
+                                if(o->aitype == AI_NONE) g.textf("%s", 0xFFFFFF, NULL, 0, o->hostname);
+                                else g.space(1);
+                            }));
+                        });
+                    });
+                }
+                if(scorehighlight)
+                {
+                    uilist(g, {
+                        uicenterlist(g, g.space(1));
+                        loopscoregroup({
+                            int bgcol = o == game::player1 ? 0x888888 : 0x111111;
+                            switch(o->privilege)
+                            {
+                                case PRIV_ADMINISTRATOR: bgcol |= 0x004444; break;
+                                case PRIV_MODERATOR: bgcol |= 0x440044; break;
+                                case PRIV_HELPER: bgcol |= 0x000044; break;
+                                default: break;
+                            }
+                            uicenterlist(g, uipad(g, 0.5f, {
+                                g.text("", 0, insigniatex, bgcol);
+                            }));
+                        });
+                    });
+                }
+
+                if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                {
+                    g.poplist(); // horizontal
+                    g.poplist(); // vertical
+                }
+            });
             if(k+1<numgroups && (k+1)%2) g.space(1);
             else g.poplist();
         });
@@ -553,8 +560,7 @@ namespace hud
                         g.pushlist();
                         pushed = true;
                     }
-                    g.spring();
-                    uipad(g, 0.5f, {
+                    uicenter(g, uipad(g, 0.5f, {
                         g.space(0.5f);
                         if(showclientnum || game::player1->privilege>=PRIV_HELPER)
                             g.textf("%s (%d)", 0x666666, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false), o->clientnum);
@@ -572,8 +578,7 @@ namespace hud
                             g.space(0.25f);
                             g.text("", 0, insigniatex, bgcol);
                         }
-                    });
-                    g.spring();
+                    }));
                     if(!((i+1)%count) && pushed)
                     {
                         g.poplist();
@@ -587,7 +592,7 @@ namespace hud
         {
             float ratio = game::player1->frags >= game::player1->deaths ? (game::player1->frags/float(max(game::player1->deaths, 1))) : -(game::player1->deaths/float(max(game::player1->frags, 1)));
             g.space(0.5f);
-            uicenter(g, uifont(g, "reduced", {
+            uicenterlist(g, uifont(g, "reduced", {
                 g.textf("\fs\fg%d\fS %s, \fs\fg%d\fS %s, \fs\fy%.1f\fS:\fs\fy%.1f\fS ratio, \fs\fg%d\fS damage", 0xFFFFFF, NULL, 0,
                     game::player1->frags, game::player1->frags != 1 ? "frags" : "frag",
                     game::player1->deaths, game::player1->deaths != 1 ? "deaths" : "death", ratio >= 0 ? ratio : 1.f, ratio >= 0 ? 1.f : -ratio,
