@@ -308,9 +308,9 @@ void guislice(char *path, char *action, float *scale, float *start, float *end, 
     }
 }
 
-void guitext(char *name, char *icon, int *colour)
+void guitext(char *name, char *icon, int *colour, int *icolour)
 {
-    if(cgui) cgui->text(name, *colour ? *colour : 0xFFFFFF, icon[0] ? icon : NULL);
+    if(cgui) cgui->text(name, *colour ? *colour : 0xFFFFFF, icon[0] ? icon : NULL, *icolour ? *icolour : 0xFFFFFF);
 }
 
 void guititle(char *name)
@@ -583,7 +583,7 @@ COMMAND(0, newgui, "sss");
 COMMAND(0, guiheader, "s");
 COMMAND(0, guimodify, "ss");
 COMMAND(0, guibutton, "ssssi");
-COMMAND(0, guitext, "ssi");
+COMMAND(0, guitext, "ssii");
 COMMANDN(0, cleargui, cleargui_, "i");
 ICOMMAND(0, showgui, "si", (const char *s, int *n), showgui(s, *n));
 COMMAND(0, guishowtitle, "i");
