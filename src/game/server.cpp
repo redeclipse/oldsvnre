@@ -1750,8 +1750,7 @@ namespace server
     void setupdemoplayback()
     {
         demoheader hdr;
-        string msg;
-        msg[0] = '\0';
+        mkstring(msg);
         defformatstring(file)("%s.dmo", smapname);
         demoplayback = opengzfile(file, "rb");
         if(!demoplayback) formatstring(msg)("\frcould not read demo \fs\fc%s\fS", file);
@@ -2952,7 +2951,6 @@ namespace server
         if(smode) smode->initclient(ci, p, true);
         mutate(smuts, mut->initclient(ci, p, true));
         if(ci) ci->online = true;
-        aiman::dorefresh = GAME(airefresh);
         return 1;
     }
 
@@ -4144,6 +4142,7 @@ namespace server
         relayf(2, "\fg%s (%s) has joined the game (%d %s)", colorname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
 
         if(m_demo(gamemode)) setupdemoplayback();
+        else aiman::dorefresh = GAME(airefresh);
     }
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet

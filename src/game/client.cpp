@@ -116,6 +116,100 @@ namespace client
     }
     ICOMMAND(0, getvote, "iiiN", (int *vote, int *prop, int *idx, int *numargs), getvotes(*numargs >= 1 ? *vote : -1, *numargs >= 2 ? *prop : -1, *numargs >= 3 ? *idx : -1));
 
+    struct demoinfo
+    {
+        demoheader hdr;
+        string file, mapname;
+        int gamemode, mutators;
+    };
+    vector<demoinfo> demoinfos;
+
+    int demoint(stream *f)
+    {
+        int c = (char)f->get<uchar>();
+        if(c==-128) { int n = f->get<uchar>(); n |= char(f->get<uchar>())<<8; return n; }
+        else if(c==-127) { int n = f->get<uchar>(); n |= f->get<uchar>()<<8; n |= f->get<uchar>()<<16; return n|(f->get<uchar>()<<24); }
+        else return c;
+    }
+
+    int scandemo(const char *name)
+    {
+        if(!name || !*name) return -1;
+        loopv(demoinfos) if(!strcmp(demoinfos[i].file, name)) return i;
+        stream *f = opengzfile(name, "rb");
+        if(!f) return -1;
+        int num = demoinfos.length();
+        demoinfo &d = demoinfos.add();
+        copystring(d.file, name);
+        mkstring(msg);
+        if(f->read(&d.hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(d.hdr.magic, DEMO_MAGIC, sizeof(d.hdr.magic)))
+            formatstring(msg)("\frsorry, \fs\fc%s\fS is not a demo file", name);
+        else
+        {
+            lilswap(&d.hdr.version, 2);
+            if(d.hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", name, d.hdr.version<DEMO_VERSION ? "an older" : "a newer", RE_NAME);
+            else if(d.hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", name, d.hdr.gamever<GAMEVERSION ? "an older" : "a newer", RE_NAME);
+        }
+        if(msg[0])
+        {
+            conoutft(CON_INFO, "%s", msg);
+            demoinfos.pop();
+            delete f;
+            return -1;
+        }
+        if(f->seek(12, SEEK_CUR) && demoint(f) == N_WELCOME && demoint(f) == N_MAPCHANGE)
+        {
+            char *t = d.mapname;
+            do // serialised version of getstring
+            {
+                if(t >= &d.mapname[MAXSTRLEN]) { d.mapname[MAXSTRLEN-1] = 0; break; }
+                int c = (char)demoint(f);
+                if(c == -1)
+                {
+                    conoutft(CON_INFO, "\frunable to parse map name from \fs\fc%s\fS", name);
+                    demoinfos.pop();
+                    delete f;
+                    return -1;
+                }
+                *t = c;
+            } while(*t++);
+            demoint(f);
+            d.gamemode = demoint(f);
+            d.mutators = demoint(f);
+            //conoutft(CON_INFO, "read demo %s: [%d:%d] %s on %s", d.file, d.hdr.version, d.hdr.gamever, server::gamename(d.gamemode, d.mutators), d.mapname);
+            delete f;
+            return num;
+        }
+        conoutft(CON_INFO, "\frunexpected message while reading \fs\fc%s\fS", name);
+        demoinfos.pop();
+        delete f;
+        return -1;
+    }
+    ICOMMAND(0, demoscan, "s", (char *name), intret(scandemo(name)));
+
+    void infodemo(const char *name, int prop)
+    {
+        if(prop < 0) intret(5);
+        else
+        {
+            loopv(demoinfos) if(!strcmp(demoinfos[i].file, name))
+            {
+                demoinfo &d = demoinfos[i];
+                switch(prop)
+                {
+                    case 0: intret(d.hdr.version); return;
+                    case 1: intret(d.hdr.gamever); return;
+                    case 2: result(d.mapname); return;
+                    case 3: intret(d.gamemode); return;
+                    case 4: intret(d.mutators); return;
+                    default: return;
+                }
+            }
+            intret(-1);
+        }
+    }
+    ICOMMAND(0, demoinfo, "siN", (char *name, int *prop, int *numargs), infodemo(name, *numargs >= 2 ? *prop : -1));
+
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
     string authname = "", authkey = "";
 
