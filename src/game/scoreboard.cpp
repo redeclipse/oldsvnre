@@ -489,7 +489,7 @@ namespace hud
                             loopscoregroup({
                                 uicenterlist(g, uipad(g, 0.5f, {
                                     if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
-                                    else g.space(1);
+                                    else g.strut(1);
                                 }));
                             });
                         });
@@ -498,7 +498,7 @@ namespace hud
                             loopscoregroup({
                                 uicenterlist(g, uipad(g, 0.5f, {
                                     if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
-                                    else g.space(1);
+                                    else g.strut(1);
                                 }));
                             });
                         });
@@ -512,7 +512,7 @@ namespace hud
                         loopscoregroup({
                             uicenterlist(g, uipad(g, 0.5f, {
                                 if(o->aitype == AI_NONE) g.textf("%s", 0xFFFFFF, NULL, 0, o->hostname);
-                                else g.space(1);
+                                else g.strut(1);
                             }));
                         });
                     });
@@ -520,7 +520,7 @@ namespace hud
                 if(scorehighlight)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 0.5f, g.text(" ", fgcolor)));
+                        uicenterlist(g, uipad(g, 0.5f, g.strut(1)));
                         loopscoregroup({
                             int bgcol = o == game::player1 ? 0x888888 : 0x111111;
                             switch(o->privilege)
