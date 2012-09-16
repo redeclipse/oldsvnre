@@ -242,16 +242,13 @@ namespace ai
         if(game::intermission) { loopv(game::players) if(game::players[i] && game::players[i]->ai) game::players[i]->stopmoving(true); }
         else // fixed rate logic done out-of-sequence at 1 frame per second for each ai
         {
-            if(totalmillis-updatemillis > 1000)
-            {
-                avoid();
-                if(multiplayer(false)) { aiforcegun = -1; aipassive = 0; }
-                updatemillis = totalmillis;
-            }
+            if(totalmillis-updatemillis > 100) avoid();
             if(!iteration && totalmillis-itermillis > 1000)
             {
                 iteration = 1;
                 itermillis = totalmillis;
+                if(multiplayer(false)) { aiforcegun = -1; aipassive = 0; }
+                updatemillis = totalmillis;
             }
             int c = 0;
             loopv(game::players) if(game::players[i] && game::players[i]->ai)
@@ -943,20 +940,20 @@ namespace ai
     bool checkroute(gameent *d, int n)
     {
         if(d->ai->route.empty() || !d->ai->route.inrange(n)) return false;
-        int last = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
-        if(last < 500 || n < 3) return false; // route length is too short
-        d->ai->lastcheck = lastmillis;
-        int w = iswaypoint(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(n-1, NUMPREVNODES);
-        loopj(c) // check ahead to see if we need to go around something
+        int len = d->ai->route.length();
+        if(len <= 2 || (d->ai->lastcheck && lastmillis-d->ai->lastcheck <= 100)) return false;
+        int w = iswaypoint(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(len, NUMPREVNODES);
+        if(c >= 3) loopj(c) // check ahead to see if we need to go around something
         {
-            int p = n-j-1, v = d->ai->route[p];
+            int m = len-j-1;
+            if(m <= 1) return false; // route length is too short from this point
+            int v = d->ai->route[j];
             if(d->ai->hasprevnode(v) || obstacles.find(v, d)) // something is in the way, try to remap around it
             {
-                int m = p-1;
-                if(m < 3) return false; // route length is too short from this point
-                loopirev(m)
+                d->ai->lastcheck = lastmillis;
+                loopi(m)
                 {
-                    int t = d->ai->route[i];
+                    int q = j+i+1, t = d->ai->route[q];
                     if(!d->ai->hasprevnode(t) && !obstacles.find(t, d))
                     {
                         static vector<int> remap; remap.setsize(0);
