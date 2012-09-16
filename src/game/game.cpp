@@ -980,16 +980,17 @@ namespace game
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
-            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove))
+            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove) && WEAP2(weap, damage, flags&HIT_ALT) != 0)
             {
-                float scale = float(damage)/float(WEAP2(weap, damage, flags&HIT_ALT));
+                float scale = damage/float(WEAP2(weap, damage, flags&HIT_ALT));
                 if(hithurts(flags) && WEAP2(weap, stuntime, flags&HIT_ALT))
                     d->addstun(weap, lastmillis, int(scale*WEAP2(weap, stuntime, flags&HIT_ALT)), scale*WEAP2(weap, stunscale, flags&HIT_ALT));
                 if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
                     d->vel.mul(1.f-clamp((scale*WEAP2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
                 if(WEAP2(weap, hitpush, flags&HIT_ALT) != 0)
                 {
-                    if(d == actor) scale *= 1/WEAP2(weap, selfdmg, flags&HIT_ALT);
+                    if(d == actor && WEAP2(weap, selfdmg, flags&HIT_ALT) != 0)
+                        scale *= 1/float(WEAP2(weap, selfdmg, flags&HIT_ALT));
                     float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
                     vec psh = vec(dir).mul(scale*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators));
                     if(!psh.iszero())
