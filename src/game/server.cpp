@@ -5242,7 +5242,7 @@ namespace server
                             }
                             else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_HELPER)
                             {
-                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another helper");
+                                srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another player with elevated privileges");
                                 fail = true;
                                 break;
                             }
