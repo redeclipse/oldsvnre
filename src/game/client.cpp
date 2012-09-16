@@ -157,7 +157,7 @@ namespace client
             delete f;
             return -1;
         }
-        if(f->seek(12, SEEK_CUR) && demoint(f) == N_WELCOME && demoint(f) == N_MAPCHANGE)
+        if(f->seek(sizeof(int)*3, SEEK_CUR) && demoint(f) == N_WELCOME && demoint(f) == N_MAPCHANGE)
         {
             char *t = d.mapname;
             do // serialised version of getstring
@@ -187,28 +187,24 @@ namespace client
     }
     ICOMMAND(0, demoscan, "s", (char *name), intret(scandemo(name)));
 
-    void infodemo(const char *name, int prop)
+    void infodemo(int idx, int prop)
     {
-        if(prop < 0) intret(5);
-        else
+        if(idx < 0) intret(demoinfos.length());
+        else if(demoinfos.inrange(idx))
         {
-            loopv(demoinfos) if(!strcmp(demoinfos[i].file, name))
+            demoinfo &d = demoinfos[idx];
+            switch(prop)
             {
-                demoinfo &d = demoinfos[i];
-                switch(prop)
-                {
-                    case 0: intret(d.hdr.version); return;
-                    case 1: intret(d.hdr.gamever); return;
-                    case 2: result(d.mapname); return;
-                    case 3: intret(d.gamemode); return;
-                    case 4: intret(d.mutators); return;
-                    default: return;
-                }
+                case 0: intret(d.hdr.version); break;
+                case 1: intret(d.hdr.gamever); break;
+                case 2: result(d.mapname); break;
+                case 3: intret(d.gamemode); break;
+                case 4: intret(d.mutators); break;
+                default: break;
             }
-            intret(-1);
         }
     }
-    ICOMMAND(0, demoinfo, "siN", (char *name, int *prop, int *numargs), infodemo(name, *numargs >= 2 ? *prop : -1));
+    ICOMMAND(0, demoinfo, "iiN", (int *idx, int *prop, int *numargs), infodemo(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *prop : -1));
 
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
     string authname = "", authkey = "";
