@@ -957,10 +957,10 @@ namespace projs
             }
             if(spanin > 0)
             {
-                if(proj.lifespan < spanin) proj.lifesize = clamp(proj.lifespan*(1.f/spanin), 0.f, 1.f);
+                if(proj.lifespan < spanin) proj.lifesize = clamp(proj.lifespan/spanin, 0.f, 1.f);
                 else if(spanout > 0 && proj.lifespan > (1.f-spanout))
                 {
-                    if(!proj.stuck) proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))*(1.f/spanout)), 0.f, 1.f);
+                    if(!proj.stuck) proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))/spanout), 0.f, 1.f);
                 }
                 else proj.lifesize = 1;
             }

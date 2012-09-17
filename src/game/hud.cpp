@@ -946,9 +946,9 @@ namespace hud
         glPushMatrix();
         glScalef(noticescale, noticescale, 1);
         pushfont("default");
-        int ty = int(((hudheight/2)+(hudheight/2*noticeoffset))*(1.f/noticescale)), tx = int((hudwidth/2)*(1.f/noticescale)),
+        int ty = int(((hudheight/2)+(hudheight/2*noticeoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
             tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-            tw = int((hudwidth-((hudsize*gapsize)*2+(hudsize*inventorysize)*2))*(1.f/noticescale));
+            tw = int((hudwidth-((hudsize*gapsize)*2+(hudsize*inventorysize)*2))/noticescale);
         if(noticestone) skewcolour(tr, tg, tb, noticestone);
         if(lastmillis-game::maptime <= noticetitle)
         {
@@ -1242,9 +1242,9 @@ namespace hud
                 }
                 glPushMatrix();
                 glScalef(chatconscale, chatconscale, 1);
-                int tx = int(x*(1.f/chatconscale)), ty = int(y*(1.f/chatconscale)),
-                    ts = int(s*(1.f/chatconscale)), tr = tx+FONTW;
-                tz = int(tz*1.f/chatconscale);
+                int tx = int(x/chatconscale), ty = int(y/chatconscale),
+                    ts = int(s/chatconscale), tr = tx+FONTW;
+                tz = int(tz/chatconscale);
                 loopvj(refs)
                 {
                     int len = !full && conlines[refs[j]].type > CON_CHAT ? chatcontime/2 : chatcontime;
@@ -1292,9 +1292,9 @@ namespace hud
                 }
                 glPushMatrix();
                 glScalef(conscale, conscale, 1);
-                int tx = int(x*(1.f/conscale)), ty = int(y*(1.f/conscale)),
-                    ts = int(s*(1.f/conscale)), tr = concenter ? tx+ts/2 : tx;
-                tz = int(tz*1.f/conscale);
+                int tx = int(x/conscale), ty = int(y/conscale),
+                    ts = int(s/conscale), tr = concenter ? tx+ts/2 : tx;
+                tz = int(tz/conscale);
                 loopvrev(refs)
                 {
                     int len = !full && conlines[refs[i]].type < CON_IMPORTANT ? contime/2 : contime;
@@ -1316,9 +1316,9 @@ namespace hud
                 glPushMatrix();
                 glScalef(commandscale, commandscale, 1);
                 float th = FONTH, tw = float(t->w)/float(t->h)*th;
-                int tx = int(x*(1.f/commandscale)), ty = int(y*(1.f/commandscale)),
-                    ts = int(s*(1.f/commandscale)), tq = (concenter ? tx+ts/2-FONTW*3 : tx), tr = int(tw+FONTW), tt = ts-(FONTH+FONTW);
-                tz = int(tz*1.f/commandscale);
+                int tx = int(x/commandscale), ty = int(y/commandscale),
+                    ts = int(s/commandscale), tq = (concenter ? tx+ts/2-FONTW*3 : tx), tr = int(tw+FONTW), tt = ts-(FONTH+FONTW);
+                tz = int(tz/commandscale);
                 glBindTexture(GL_TEXTURE_2D, t->id);
                 glColor4f(c.x, c.y, c.z, fullconblend*fade*f);
                 drawtexture(tx, ty+tz, th, tw);
@@ -1784,7 +1784,7 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int(cx*(1.f/skew)), ty = int((cy-FONTH/2*skew)*(1.f/skew)), ti = int(255.f*fade);
+            int tx = int(cx/skew), ty = int((cy-FONTH/2*skew)/skew), ti = int(255.f*fade);
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, ti, TEXT_CENTERED, -1, -1, str);
             if(font && *font) popfont();
@@ -1840,8 +1840,8 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (cx+cw+(FONTW*skew*0.5f)) : (cx-cw-(FONTW*skew*0.5f)))*(1.f/skew)),
-                ty = int((cy-cs+cs/2-(FONTH/2*skew))*(1.f/skew)), tj = left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY;
+            int tx = int((left ? (cx+cw+(FONTW*skew*0.5f)) : (cx-cw-(FONTW*skew*0.5f)))/skew),
+                ty = int((cy-cs+cs/2-(FONTH/2*skew))/skew), tj = left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY;
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), tj|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
@@ -1864,8 +1864,8 @@ namespace hud
             cy -= co/2;
         }
         int sy = int(FONTH*skew), tj = left ? TEXT_LEFT_UP : TEXT_RIGHT_UP,
-            tx = int((left ? (cx+(FONTW*skew*0.5f)) : (cx-(FONTW*skew*0.5f)))*(1.f/skew)),
-            ty = int(cy*(1.f/skew)), ti = int(255.f*blend);
+            tx = int((left ? (cx+(FONTW*skew*0.5f)) : (cx-(FONTW*skew*0.5f)))/skew),
+            ty = int(cy/skew), ti = int(255.f*blend);
         defvformatstring(str, text, text);
         draw_textx("%s", tx, ty, 255, 255, 255, ti, tj|TEXT_NO_INDENT, -1, -1, str);
         if(font && *font) popfont();
@@ -2509,9 +2509,9 @@ namespace hud
             glPushMatrix();
             glScalef(noticescale, noticescale, 1);
             pushfont("super");
-            int ty = ((hudheight/2)-int(hudheight/2*eventoffset))*(1.f/noticescale), tx = (hudwidth/2)*(1.f/noticescale),
+            int ty = int(((hudheight/2)-int(hudheight/2*eventoffset))/noticescale), tx = int((hudwidth/2)/noticescale),
                 tf = int(255*hudblend*noticeblend), tr = 255, tg = 255, tb = 255,
-                tw = hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2);
+                tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
             if(teamkillnum && m_isteam(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
                 to += draw_textx("\fzZyDon't shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
@@ -2536,7 +2536,7 @@ namespace hud
             glPushMatrix();
             glScalef(eventscale, eventscale, 1);
             pushfont("emphasis");
-            int ty = (((hudheight/2)-int(hudheight/2*eventoffset)-(to*noticescale))*(1.f/eventscale)), tx = (hudwidth/2)*(1.f/eventscale);
+            int ty = int(((hudheight/2)-int(hudheight/2*eventoffset)-(to*noticescale))/eventscale), tx = int((hudwidth/2)/eventscale);
             loopv(game::focus->icons)
             {
                 if(game::focus->icons[i].type == eventicon::AFFINITY && !(showevents&2)) break;
