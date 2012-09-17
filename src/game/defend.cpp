@@ -228,6 +228,7 @@ namespace defend
             b.kinship = team;
             b.reset();
         }
+        if(!st.flags.length()) return; // map doesn't seem to support this mode at all..
         int bases[TEAM_ALL] = {0};
         bool hasteams = true;
         loopv(st.flags) bases[st.flags[i].kinship]++;
