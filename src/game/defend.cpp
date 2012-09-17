@@ -231,7 +231,7 @@ namespace defend
         int bases[TEAM_ALL] = {0};
         bool hasteams = true;
         loopv(st.flags) bases[st.flags[i].kinship]++;
-        loopi(numteams(game::gamemode, game::mutators)-1) if(bases[i+1] != bases[i+2])
+        loopi(numteams(game::gamemode, game::mutators)-1) if(!bases[i+1] || (bases[i+1] != bases[i+2]))
         {
             loopvk(st.flags) st.flags[k].kinship = TEAM_NEUTRAL;
             hasteams = false;
