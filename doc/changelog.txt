@@ -15,10 +15,13 @@ Maps:
 
 Interface & Menus:
  * Overall reduced font sizes
- * Added /textscale variable so one can simply scale all on-screen text
+ * Added variables for scaling text globally and for specific elements  (/{text,con,chatcon,command}scale)
  * Added frames around most UI elements
  * Revamped score screen
  * Added ALT+ENTER fullscreen toggle
+ * Added ability to enable automatic demo recording each match (/demoautorec 1)
+ * Added "reset selection" button for mutators
+ * Added variables to control death/kill message content (/obit{verbose,styles})
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
