@@ -3015,7 +3015,7 @@ namespace server
                 int offset = GAME(criticalchance)-actor->state.crits;
                 if(target != actor)
                 {
-                    if(crdash && WEAP(weap, critboost) > 0) offset = int(offset*(1.f/WEAP(weap, critboost)));
+                    if(crdash && WEAP(weap, critboost) > 0) offset = int(offset/float(WEAP(weap, critboost)));
                     if(WEAP(weap, critdist) != 0)
                     {
                         float dist = actor->state.o.dist(target->state.o);
