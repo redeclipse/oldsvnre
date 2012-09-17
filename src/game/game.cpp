@@ -1046,12 +1046,12 @@ namespace game
         {
             if(!aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
             else if(!obitverbose) concatstring(d->obit, "died");
-            else if(flags&HIT_MELT) concatstring(d->obit, obitverbose == 1 ? "melted" : (*obitlava ? obitlava : "melted into a ball of fire"));
-            else if(flags&HIT_WATER) concatstring(d->obit, obitverbose == 2 && *obitwater ? obitwater : "died");
-            else if(flags&HIT_DEATH) concatstring(d->obit, obitverbose == 2 &&*obitdeath ? obitdeath : "died");
-            else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose == 1 ? "died" : "tried to spawn inside solid matter");
-            else if(flags&HIT_LOST) concatstring(d->obit, obitverbose == 2 ? "was lost" : "got very, very lost");
-            else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose == 2 ? "entered spectator" : "gave up their corporeal form");
+            else if(flags&HIT_MELT) concatstring(d->obit, obitverbose != 2 ? "melted" : (*obitlava ? obitlava : "melted into a ball of fire"));
+            else if(flags&HIT_WATER) concatstring(d->obit, obitverbose != 2 || !*obitwater ? "died" : obitwater);
+            else if(flags&HIT_DEATH) concatstring(d->obit, obitverbose != 2 || !*obitdeath ? "died" : obitdeath);
+            else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose != 2 ? "died" : "tried to spawn inside solid matter");
+            else if(flags&HIT_LOST) concatstring(d->obit, obitverbose != 2 ? "was lost" : "got very, very lost");
+            else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose != 2 ? "entered spectator" : "gave up their corporeal form");
             else if(flags && isweap(weap) && !burning && !bleeding)
             {
                 static const char *suicidenames[WEAP_MAX][2] = {
@@ -1066,7 +1066,7 @@ namespace game
                     { "kicked it, kamikaze style", "blew themself up" },
                     { "exploded with style", "exploded themself" },
                 };
-                concatstring(d->obit, suicidenames[weap][obitverbose == 3 ? 0 : 1]);
+                concatstring(d->obit, suicidenames[weap][obitverbose == 2 ? 0 : 1]);
             }
             else if(flags&HIT_BURN || burning) concatstring(d->obit, "burned up");
             else if(flags&HIT_BLEED || bleeding) concatstring(d->obit, "bled out");
@@ -1144,7 +1144,7 @@ namespace game
                         { "obliterated by", "obliterated by" },
                     }
                 };
-                concatstring(d->obit, obitnames[flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)))][weap][obitverbose == 3 ? 0 : 1]);
+                concatstring(d->obit, obitnames[flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)))][weap][obitverbose == 2 ? 0 : 1]);
             }
             else concatstring(d->obit, "killed by");
             bool override = false;
@@ -1275,11 +1275,11 @@ namespace game
         }
         if(!log.empty())
         {
-            if(obitverbose >= 2 || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
+            if(obitverbose == 2 || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
             else concatstring(d->obit, " +");
             loopv(log) if(log[i])
             {
-                if(obitverbose >= 2 || obitstyles)
+                if(obitverbose == 2 || obitstyles)
                     concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
                 else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
                 if(log[i]->aitype >= AI_START) concatstring(d->obit, "a ");
