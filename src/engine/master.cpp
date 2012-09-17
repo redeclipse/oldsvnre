@@ -318,6 +318,7 @@ bool checkmasterclientinput(masterclient &c)
         if(!strcmp(w[0], "list") || !strcmp(w[0], "update"))
         {
             int servs = 0;
+            masteroutf(c, "clearservers\n");
             loopvj(masterclients)
             {
                 masterclient &s = *masterclients[j];
