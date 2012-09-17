@@ -647,7 +647,7 @@ void keypress(int code, bool isdown, int cooked)
     switch(code)
     {
 #ifdef __APPLE__
-        case SDLK_Q:
+        case SDLK_q:
 #else
         case SDLK_F4:
 #endif
