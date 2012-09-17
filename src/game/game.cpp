@@ -132,6 +132,8 @@ namespace game
     VAR(IDF_PERSIST, showobituaries, 0, 4, 5); // 0 = off, 1 = only me, 2 = 1 + announcements, 3 = 2 + but dying bots, 4 = 3 + but bot vs bot, 5 = all
     VAR(IDF_PERSIST, showobitdists, 0, 1, 1);
     VAR(IDF_PERSIST, obitannounce, 0, 2, 2); // 0 = off, 1 = only focus, 2 = everyone
+    VAR(IDF_PERSIST, obitverbose, 0, 2, 2); // 0 = extremely simple, 2 = simplified per-weapon, 3 = regular messages
+    VAR(IDF_PERSIST, obitstyles, 0, 1, 1); // 0 = no obituary styles, 1 = show sprees/dominations/etc
 
     VAR(IDF_PERSIST, damagemergedelay, 0, 75, VAR_MAX);
     VAR(IDF_PERSIST, damagemergeburn, 0, 250, VAR_MAX);
@@ -1043,27 +1045,28 @@ namespace game
         if(d == actor)
         {
             if(!aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
-            else if(flags&HIT_MELT) concatstring(d->obit, *obitlava ? obitlava : "melted into a ball of fire");
-            else if(flags&HIT_WATER) concatstring(d->obit, *obitwater ? obitwater : "died");
-            else if(flags&HIT_DEATH) concatstring(d->obit, *obitdeath ? obitdeath : "died");
-            else if(flags&HIT_SPAWN) concatstring(d->obit, "tried to spawn inside solid matter");
-            else if(flags&HIT_LOST) concatstring(d->obit, "got very, very lost");
-            else if(flags&HIT_SPEC) concatstring(d->obit, "gave up their corporeal form");
+            else if(!obitverbose) concatstring(d->obit, "died");
+            else if(flags&HIT_MELT) concatstring(d->obit, obitverbose == 1 ? "melted" : (*obitlava ? obitlava : "melted into a ball of fire"));
+            else if(flags&HIT_WATER) concatstring(d->obit, obitverbose == 2 && *obitwater ? obitwater : "died");
+            else if(flags&HIT_DEATH) concatstring(d->obit, obitverbose == 2 &&*obitdeath ? obitdeath : "died");
+            else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose == 1 ? "died" : "tried to spawn inside solid matter");
+            else if(flags&HIT_LOST) concatstring(d->obit, obitverbose == 2 ? "was lost" : "got very, very lost");
+            else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose == 2 ? "entered spectator" : "gave up their corporeal form");
             else if(flags && isweap(weap) && !burning && !bleeding)
             {
-                static const char *suicidenames[WEAP_MAX] = {
-                    "hit themself",
-                    "ate a bullet",
-                    "created too much torsional stress",
-                    "tested the effectiveness of their own shrapnel",
-                    "fell victim to their own crossfire",
-                    "spontaneously combusted",
-                    "was caught up in their own plasma-filled mayhem",
-                    "got a good shock",
-                    "kicked it, kamikaze style",
-                    "exploded with style",
+                static const char *suicidenames[WEAP_MAX][2] = {
+                    { "hit themself", "hit themself" },
+                    { "ate a bullet", "shot themself" },
+                    { "created too much torsional stress", "cut themself" },
+                    { "tested the effectiveness of their own shrapnel", "shot themself" },
+                    { "fell victim to their own crossfire", "shot themself" },
+                    { "spontaneously combusted", "burned themself" },
+                    { "was caught up in their own plasma-filled mayhem", "plasmified themself" },
+                    { "got a good shock", "shocked themself" },
+                    { "kicked it, kamikaze style", "blew themself up" },
+                    { "exploded with style", "exploded themself" },
                 };
-                concatstring(d->obit, suicidenames[weap]);
+                concatstring(d->obit, suicidenames[weap][obitverbose == 3 ? 0 : 1]);
             }
             else if(flags&HIT_BURN || burning) concatstring(d->obit, "burned up");
             else if(flags&HIT_BLEED || bleeding) concatstring(d->obit, "bled out");
@@ -1074,73 +1077,74 @@ namespace game
         {
             concatstring(d->obit, "was ");
             if(!aistyle[d->aitype].living) concatstring(d->obit, "destroyed by");
+            else if(!obitverbose) concatstring(d->obit, "fragged by");
             else if(burning) concatstring(d->obit, "set ablaze by");
             else if(bleeding) concatstring(d->obit, "fatally wounded by");
             else if(isweap(weap))
             {
-                static const char *obitnames[5][WEAP_MAX] = {
+                static const char *obitnames[5][WEAP_MAX][2] = {
                     {
-                        "punched by",
-                        "pierced by",
-                        "impaled by",
-                        "sprayed with buckshot by",
-                        "riddled with holes by",
-                        "char-grilled by",
-                        "plasmified by",
-                        "laser shocked by",
-                        "blown to pieces by",
-                        "exploded by",
+                        { "punched by", "punched by" },
+                        { "pierced by", "pierced by" },
+                        { "impaled by", "impaled by" },
+                        { "sprayed with buckshot by", "shot by" },
+                        { "riddled with holes by", "shot by" },
+                        { "char-grilled by", "burned by" },
+                        { "plasmified by", "plasmified by" },
+                        { "laser shocked by", "shocked by" },
+                        { "blown to pieces by", "blown up by" },
+                        { "exploded by", "exploded by" },
                     },
                     {
-                        "kicked by",
-                        "pierced by",
-                        "impaled by",
-                        "filled with lead by",
-                        "spliced apart by",
-                        "fireballed by",
-                        "shown the light by",
-                        "given laser burn by",
-                        "blown to pieces by",
-                        "exploded by",
+                        { "kicked by", "kicked by" },
+                        { "pierced by", "pierced by" },
+                        { "impaled by", "impaled by" },
+                        { "filled with lead by", "shot by" },
+                        { "spliced apart by", "shot by" },
+                        { "fireballed by", "burned by" },
+                        { "shown the light by", "melted by" },
+                        { "given laser burn by", "lasered by" },
+                        { "blown to pieces by", "blown up by" },
+                        { "exploded by", "exploded by" },
                     },
                     {
-                        "given kung-fu lessons by",
-                        "capped by",
-                        "sliced in half by",
-                        "scrambled by",
-                        "air conditioned courtesy of",
-                        "char-grilled by",
-                        "plasmafied by",
-                        "expertly sniped by",
-                        "blown to pieces by",
-                        "exploded by",
+                        { "given kung-fu lessons by", "kung-fu'd by" },
+                        { "capped by", "capped by" },
+                        { "sliced in half by", "sliced by" },
+                        { "scrambled by", "scrambled by" },
+                        { "air conditioned courtesy of", "aerated by" },
+                        { "char-grilled by", "grilled by" },
+                        { "plasmafied by", "plasmified by" },
+                        { "expertly sniped by", "sniped by" },
+                        { "blown to pieces by", "blown up by" },
+                        { "exploded by", "exploded by" },
                     },
                     {
-                        "given kung-fu lessons by",
-                        "skewered by",
-                        "sliced in half by",
-                        "turned into little chunks by",
-                        "swiss-cheesed by",
-                        "barbequed by",
-                        "reduced to ooze by",
-                        "given laser shock treatment by",
-                        "turned into shrapnel by",
-                        "obliterated by",
+                        { "given kung-fu lessons by", "kung-fu'd by" },
+                        { "skewered by", "skewered by" },
+                        { "sliced in half by", "sliced by" },
+                        { "turned into little chunks by", "scrambled by" },
+                        { "swiss-cheesed by", "aerated by" },
+                        { "barbequed by", "grilled by" },
+                        { "reduced to ooze by", "plasmified by" },
+                        { "given laser shock treatment by", "shocked by" },
+                        { "turned into shrapnel by", "gibbed by" },
+                        { "obliterated by", "obliterated by" },
                     },
                     {
-                        "given kung-fu lessons by",
-                        "picked to pieces by",
-                        "melted in half by",
-                        "filled with shrapnel by",
-                        "air-conditioned by",
-                        "cooked alive by",
-                        "melted alive by",
-                        "electrified by",
-                        "turned into shrapnel by",
-                        "obliterated by",
+                        { "given kung-fu lessons by", "kung-fu'd by" },
+                        { "picked to pieces by", "skewered by" },
+                        { "melted in half by", "sliced by" },
+                        { "filled with shrapnel by", "flak-filled by" },
+                        { "air-conditioned by", "aerated by" },
+                        { "cooked alive by", "cooked by" },
+                        { "melted alive by", "plasmified by" },
+                        { "electrified by", "electrified by" },
+                        { "turned into shrapnel by", "gibbed by" },
+                        { "obliterated by", "obliterated by" },
                     }
                 };
-                concatstring(d->obit, obitnames[flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)))][weap]);
+                concatstring(d->obit, obitnames[flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)))][weap][obitverbose == 3 ? 0 : 1]);
             }
             else concatstring(d->obit, "killed by");
             bool override = false;
@@ -1160,7 +1164,7 @@ namespace game
                 concatstring(d->obit, colorname(actor));
                 if(actor == focus) { anc = S_ALARM; override = true; }
             }
-            else
+            else if(obitstyles)
             {
                 if(style&FRAG_REVENGE)
                 {
@@ -1208,66 +1212,76 @@ namespace game
                     if(!override && allowanc) anc = S_V_MULTI3;
                 }
             }
+            else
+            {
+                concatstring(d->obit, " ");
+                concatstring(d->obit, colorname(actor));
+            }
+            if(obitstyles)
+            {
+                if(style&FRAG_FIRSTBLOOD)
+                {
+                    concatstring(d->obit, " for \fs\fzwRfirst blood\fS");
+                    actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
+                    if(!override && allowanc)
+                    {
+                        anc = S_V_FIRSTBLOOD;
+                        override = true;
+                    }
+                }
 
-            if(style&FRAG_FIRSTBLOOD)
-            {
-                concatstring(d->obit, " for \fs\fzwRfirst blood\fS");
-                actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
-                if(!override && allowanc)
+                if(style&FRAG_SPREE1)
                 {
-                    anc = S_V_FIRSTBLOOD;
-                    override = true;
+                    concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
+                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
+                    if(!override && allowanc)
+                    {
+                        anc = S_V_SPREE;
+                        override = true;
+                    }
                 }
-            }
-
-            if(style&FRAG_SPREE1)
-            {
-                concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
-                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
-                if(!override && allowanc)
+                else if(style&FRAG_SPREE2)
                 {
-                    anc = S_V_SPREE;
-                    override = true;
+                    concatstring(d->obit, " on a \fs\fzcgslaughter\fS");
+                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
+                    if(!override && allowanc)
+                    {
+                        anc = S_V_SPREE2;
+                        override = true;
+                    }
                 }
-            }
-            else if(style&FRAG_SPREE2)
-            {
-                concatstring(d->obit, " on a \fs\fzcgslaughter\fS");
-                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
-                if(!override && allowanc)
+                else if(style&FRAG_SPREE3)
                 {
-                    anc = S_V_SPREE2;
-                    override = true;
+                    concatstring(d->obit, " on a \fs\fzcgmassacre\fS");
+                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
+                    if(!override && allowanc)
+                    {
+                        anc = S_V_SPREE3;
+                        override = true;
+                    }
                 }
-            }
-            else if(style&FRAG_SPREE3)
-            {
-                concatstring(d->obit, " on a \fs\fzcgmassacre\fS");
-                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
-                if(!override && allowanc)
+                else if(style&FRAG_SPREE4)
                 {
-                    anc = S_V_SPREE3;
-                    override = true;
+                    concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
+                    actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
+                    if(!override && allowanc)
+                    {
+                        anc = S_V_SPREE4;
+                        override = true;
+                    }
                 }
+                if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzgrcritical\fS hit");
             }
-            else if(style&FRAG_SPREE4)
-            {
-                concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
-                actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
-                if(!override && allowanc)
-                {
-                    anc = S_V_SPREE4;
-                    override = true;
-                }
-            }
-            if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzgrcritical\fS hit");
         }
         if(!log.empty())
         {
-            concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
+            if(obitverbose >= 2 || obitstyles) concatstring(d->obit, rnd(2) ? ", assisted by" : ", helped by");
+            else concatstring(d->obit, " +");
             loopv(log) if(log[i])
             {
-                concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
+                if(obitverbose >= 2 || obitstyles)
+                    concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
+                else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
                 if(log[i]->aitype >= AI_START) concatstring(d->obit, "a ");
                 concatstring(d->obit, colorname(log[i]));
             }
