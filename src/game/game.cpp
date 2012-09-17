@@ -1905,12 +1905,22 @@ namespace game
         vec pos = d->headpos();
         if(firstpersonbob && d == focus && !intermission && !thirdpersonview(true))
         {
-            vec dir;
-            vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-            float steps = bobdist/firstpersonbobstep*M_PI;
-            dir.mul(firstpersonbobside*cosf(steps));
-            dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1);
-            pos.add(dir);
+            float scale = 1;
+            if(d == game::player1 && inzoom())
+            {
+                int frame = lastmillis-lastzoom;
+                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
+                scale *= zooming ? 1.f-pc : pc;
+            }
+            if(scale > 0)
+            {
+                vec dir;
+                vecfromyawpitch(d->yaw, 0, 0, 1, dir);
+                float steps = bobdist/firstpersonbobstep*M_PI;
+                dir.mul(firstpersonbobside*cosf(steps)*scale);
+                dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
+                pos.add(dir);
+            }
         }
         return pos;
     }
@@ -2132,15 +2142,25 @@ namespace game
         c->roll = calcroll(d);
         if(bob && firstpersonbob && !thirdperson && !intermission)
         {
-            vec dir(c->yaw, c->pitch);
-            float steps = bobdist/firstpersonbobstep*M_PI, dist = raycube(c->o, dir, firstpersonbobfocusmaxdist, RAY_CLIPMAT|RAY_POLY), yaw, pitch;
-            if(dist < 0 || dist > firstpersonbobfocusmaxdist) dist = firstpersonbobfocusmaxdist;
-            else if(dist < firstpersonbobfocusmindist) dist = firstpersonbobfocusmindist;
-            vectoyawpitch(vec(firstpersonbobside*cosf(steps), dist, firstpersonbobup*(fabs(sinf(steps)) - 1)), yaw, pitch);
-            c->yaw -= yaw*firstpersonbobfocus;
-            c->pitch -= pitch*firstpersonbobfocus;
-            c->roll += (1 - firstpersonbobfocus)*firstpersonbobroll*cosf(steps);
-            fixfullrange(c->yaw, c->pitch, c->roll, false);
+            float scale = 1;
+            if(d == game::player1 && inzoom())
+            {
+                int frame = lastmillis-lastzoom;
+                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
+                scale *= zooming ? 1.f-pc : pc;
+            }
+            if(scale > 0)
+            {
+                vec dir(c->yaw, c->pitch);
+                float steps = bobdist/firstpersonbobstep*M_PI, dist = raycube(c->o, dir, firstpersonbobfocusmaxdist, RAY_CLIPMAT|RAY_POLY), yaw, pitch;
+                if(dist < 0 || dist > firstpersonbobfocusmaxdist) dist = firstpersonbobfocusmaxdist;
+                else if(dist < firstpersonbobfocusmindist) dist = firstpersonbobfocusmindist;
+                vectoyawpitch(vec(firstpersonbobside*cosf(steps), dist, firstpersonbobup*(fabs(sinf(steps)) - 1)), yaw, pitch);
+                c->yaw -= yaw*firstpersonbobfocus*scale;
+                c->pitch -= pitch*firstpersonbobfocus*scale;
+                c->roll += (1 - firstpersonbobfocus)*firstpersonbobroll*cosf(steps)*scale;
+                fixfullrange(c->yaw, c->pitch, c->roll, false);
+            }
         }
     }
 
