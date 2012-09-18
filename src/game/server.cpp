@@ -5008,9 +5008,9 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
-                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s: %s", name, colorname(cp), text); \
+                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s (%s): %s", name, colorname(cp), gethostname(cp->clientnum), text); \
                                     else srvoutf(-3, "%s added \fs\fc" #y "\fS on %s", name, colorname(cp)); \
-                                    if(value == ipinfo::BAN) disconnect_client(cp->clientnum, DISC_IPBAN); \
+                                    if(value == ipinfo::BAN) updatecontrols = true; \
                                 } \
                                 else \
                                 { \
