@@ -264,7 +264,7 @@ static inline bool pvsoccluded(const ivec &bborigin, int size)
 extern bool hasVBO, hasDRE, hasOQ, hasTR, hasFBO, hasDS, hasTF, hasBE, hasBC, hasCM, hasNP2, hasTC, hasTE, hasMT, hasD3, hasAF, hasVP2, hasVP3, hasPP, hasMDA, hasTE3, hasTE4, hasVP, hasFP, hasGLSL, hasGM, hasNVFB, hasSGIDT, hasSGISH, hasDT, hasSH, hasNVPCF, hasRN, hasPBO, hasFBB, hasUBO, hasBUE, hasFC, hasTEX;
 extern int hasstencil;
 
-extern bool envmapping, minimapping, renderedgame, playerpreviewing;
+extern bool envmapping, minimapping, renderedgame, modelpreviewing;
 extern const glmatrixf viewmatrix;
 extern glmatrixf mvmatrix, projmatrix, mvpmatrix, invmvmatrix, invmvpmatrix, fogmatrix, invfogmatrix, envmatrix;
 extern bvec fogcolor;
@@ -306,6 +306,12 @@ extern void calcspherescissor(const vec &center, float size, float &sx1, float &
 extern int pushscissor(float sx1, float sy1, float sx2, float sy2);
 extern void popscissor();
 extern void setcolormask(bool r = true, bool g = true, bool b = true);
+
+namespace modelpreview
+{
+    extern void start(bool background = true);
+    extern void end();
+}
 
 // renderextras
 extern void render3dbox(vec &o, float tofloor, float toceil, float xradius, float yradius = 0);
