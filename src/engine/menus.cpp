@@ -639,7 +639,7 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
     int anim = ANIM_ALL;
     if(animspec[0])
     {
-        if(isdigit(animspec[0])) 
+        if(isdigit(animspec[0]))
         {
             anim = parseint(animspec);
             if(anim >= 0) anim %= ANIM_INDEX;
@@ -665,7 +665,7 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
         }
     }
 }
-COMMAND(0, guimodelpreview, "sssfia");
+COMMAND(0, guimodelpreview, "sssfis");
 
 struct change
 {
