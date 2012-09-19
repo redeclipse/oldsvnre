@@ -633,6 +633,40 @@ void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action
 }
 COMMAND(0, guiplayerpreview, "iiiisfis");
 
+void guimodelpreview(char *model, char *animspec, char *action, float *scale, int *overlaid, char *altact)
+{
+    if(!cgui) return;
+    int anim = ANIM_ALL;
+    if(animspec[0])
+    {
+        if(isdigit(animspec[0])) 
+        {
+            anim = parseint(animspec);
+            if(anim >= 0) anim %= ANIM_INDEX;
+            else anim = ANIM_ALL;
+        }
+        else
+        {
+            vector<int> anims;
+            game::findanims(animspec, anims);
+            if(anims.length()) anim = anims[0];
+        }
+    }
+    int ret = cgui->modelpreview(model, anim|ANIM_LOOP, *scale, *overlaid!=0);
+    if(ret&GUI_UP)
+    {
+        char *act = NULL;
+        if(altact[0] && ret&GUI_ALT) act = altact;
+        else if(action[0]) act = action;
+        if(act)
+        {
+            updatelater.add().schedule(act);
+            if(shouldclearmenu) clearlater = true;
+        }
+    }
+}
+COMMAND(0, guimodelpreview, "sssfia");
+
 struct change
 {
     int type;
