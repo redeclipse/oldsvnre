@@ -224,3 +224,5 @@ wiki-weapon-vars: ../doc/wiki-weapon-vars.txt
 wiki-engine-vars: ../doc/wiki-engine-vars.txt
 
 wiki-commands: ../doc/wiki-commands.txt
+
+wiki-aliases: ../doc/wiki-aliases.txt
