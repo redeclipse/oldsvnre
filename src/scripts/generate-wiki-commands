@@ -6,47 +6,41 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC_DIR="$DIR/.."
 
-cat <<EOF > "$2"
-This page was automatically generated from the source of Red Eclipse, please do not edit it manually.
+source "$DIR"/wiki-common
 
-{| border="1" class="wikitable sortable"
-! Name&nbsp;&&nbsp;Parameters
-! class="unsortable"|Description
-! Type
-EOF
+table_content_commands ()
+{
+    IFS=$'\n'
+    for i in $(grep "^setdesc" "$1" | sort)
+    do
+        COM="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
 
-IFS=$'\n'
-for i in $(grep "^setdesc" "$1" | sort)
-do
-    COM="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
+        # Get corresponding source lines
+        SRC_DEF="$(grep -hr "^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, $COM, " "$SRC_DIR")"
+        if [ -z "$SRC_DEF" ]; then continue; fi
 
-    # Get corresponding source lines
-    SRC_DEF="$(grep -hr "^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, $COM, " "$SRC_DIR")"
-    if [ -z "$SRC_DEF" ]; then continue; fi
+        DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)".*%\1%' -e 's%" "<.*%%' -e 's%\^%%g')"
+        PARAM="$(echo $i | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p')"
+        PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
 
-    DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)".*%\1%' -e 's%" "<.*%%' -e 's%\^%%g')"
-    PARAM="$(echo $i | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p')"
-    PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
+        SRC_IDF="$(echo $SRC_DEF | sed 's%^[^A-Z]*[A-Z]*COMMAND[A-Z]*(\([^,]*\),%\1%')"
+        IDF_ADMIN=""
+        # Currently only one case
+        case "$SRC_IDF" in
+            *IDF_ADMIN*)
+                IDF_ADMIN="admin-only"
+                ;;
+        esac
 
-    SRC_IDF="$(echo $SRC_DEF | sed 's%^[^A-Z]*[A-Z]*COMMAND[A-Z]*(\([^,]*\),%\1%')"
-    IDF_ADMIN=""
-    # Currently only one case
-    case "$SRC_IDF" in
-        *IDF_ADMIN*)
-            IDF_ADMIN="admin-only"
-            ;;
-    esac
+        TYPE_STRING="$(echo "$IDF_ADMIN command" | sed -e 's%^ *%%' -e 's%  *% %g')"
 
-    TYPE_STRING="$(echo "$IDF_ADMIN command" | sed -e 's%^ *%%' -e 's%  *% %g')"
+	# ending sed cleans up no-parameter commands
+        table_entry_simple "$COM" "$PARAM" "$DESC" "$TYPE_STRING" | sed "s%&nbsp;['\'']*$%%"
+        done
+}
 
-    cat <<EOF >> "$2"
-|-
-| '''$COM'''&nbsp;''$PARAM''
-| $DESC
-| $TYPE_STRING
-EOF
-    done
 
-sed 's%&nbsp;['\'']*$%%' -i "$2"
-
-echo "|}" >> "$2"
+noedit_header > "$2"
+table_header_simple >> "$2"
+table_content_commands "$1" >> "$2"
+table_end >> "$2"

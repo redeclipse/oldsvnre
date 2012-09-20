@@ -7,35 +7,29 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 CFG_FILES="$DIR/../../data/*.cfg"
 
-cat <<EOF > "$2"
-This page was automatically generated from the source of Red Eclipse, please do not edit it manually.
+source "$DIR"/wiki-common
 
-{| border="1" class="wikitable sortable"
-! Name&nbsp;&&nbsp;Parameters
-! class="unsortable"|Description
-! Type
-EOF
+table_content_aliases ()
+{
+    IFS=$'\n'
+    for i in $(grep "^setdesc" "$1" | sort)
+    do
+        ALI="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
 
-IFS=$'\n'
-for i in $(grep "^setdesc" "$1" | sort)
-do
-    VAR="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
+        CFG_DEF="$(grep -hr "^$ALI *=.*" $CFG_FILES)"
+        if [ -z "$CFG_DEF" ]; then continue; fi
 
-    CFG_DEF="$(grep -hr "^$VAR *=.*" $CFG_FILES)"
-    if [ -z "$CFG_DEF" ]; then continue; fi
+        DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
+        PARAM="$(echo $i | sed 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%')"
+        PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
 
-    DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
-    PARAM="$(echo $i | sed 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%')"
-    PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
+        TYPE_STRING="alias"
 
-    TYPE_STRING="alias"
+        table_entry_simple "$ALI" "$PARAM" "$DESC" "$TYPE_STRING"
+        done
+}
 
-    cat <<EOF >> "$2"
-|-
-| '''$VAR'''&nbsp;''$PARAM''
-| $DESC
-| $TYPE_STRING
-EOF
-    done
-
-echo "|}" >> "$2"
+noedit_header > "$2"
+table_header_simple >> "$2"
+table_content_aliases "$1" >> "$2"
+table_end >> "$2"
