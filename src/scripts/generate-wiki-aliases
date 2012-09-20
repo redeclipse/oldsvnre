@@ -13,7 +13,7 @@ This page was automatically generated from the source of Red Eclipse, please do 
 {| border="1" class="wikitable sortable"
 ! Name&nbsp;&&nbsp;Parameters
 ! class="unsortable"|Description
-! Type(s)
+! Type
 EOF
 
 IFS=$'\n'
@@ -26,8 +26,7 @@ do
 
     DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
     PARAM="$(echo $i | sed 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%')"
-
-    SRC_IDF="n/a"
+    PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
 
     TYPE_STRING="alias"
 
