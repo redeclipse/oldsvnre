@@ -13,15 +13,14 @@ table_content_commands ()
     IFS=$'\n'
     for i in $(grep "^setdesc" "$1" | sort)
     do
-        COM="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
+        COM="$(format_name "$i")"
 
         # Get corresponding source lines
         SRC_DEF="$(grep -hr "^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, $COM, " $SRC_FILES)"
         if [ -z "$SRC_DEF" ]; then continue; fi
 
-        DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)".*%\1%' -e 's%" "<.*%%' -e 's%\^%%g')"
-        PARAM="$(echo $i | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p')"
-        PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
+        DESC="$(format_desc "$i")"
+        PARAM="$(format_param "$i")"
 
         SRC_IDF="$(echo $SRC_DEF | sed 's%^[^A-Z]*[A-Z]*COMMAND[A-Z]*(\([^,]*\),%\1%')"
         IDF_ADMIN=""

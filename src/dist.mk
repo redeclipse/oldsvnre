@@ -217,7 +217,7 @@ wiki-guidelines: ../doc/wiki-guidelines.txt
 ../doc/wiki-%.txt: ../data/usage.cfg
 	scripts/generate-wiki-$* $< $@
 
-wiki-game-vars-wiki: ../doc/wiki-game-vars.txt
+wiki-game-vars: ../doc/wiki-game-vars.txt
 
 wiki-weapon-vars: ../doc/wiki-weapon-vars.txt
 

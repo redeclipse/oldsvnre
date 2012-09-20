@@ -13,14 +13,13 @@ table_content_aliases ()
     IFS=$'\n'
     for i in $(grep "^setdesc" "$1" | sort)
     do
-        ALI="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
+        ALI="$(format_name "$i")"
 
         CFG_DEF="$(grep -hr "^$ALI *=.*" $CFG_FILES)"
         if [ -z "$CFG_DEF" ]; then continue; fi
 
-        DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
-        PARAM="$(echo $i | sed 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%')"
-        PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
+        DESC="$(format_desc "$i")"
+        PARAM="$(format_param "$i")"
 
         TYPE_STRING="alias"
 
