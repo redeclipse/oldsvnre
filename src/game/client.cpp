@@ -400,6 +400,26 @@ namespace client
     }
     ICOMMAND(0, getclientname, "ii", (int *cn, int *colour), result(getclientname(*cn, *colour)));
 
+    int getclientcolour(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? d->colour : -1;
+    }
+    ICOMMAND(0, getclientcolour, "i", (int *cn), intret(getclientcolour(*cn)));
+
+    int getclientmodel(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? clamp(d->model, 0, NUMPLAYERMODELS-1) : -1;
+    }
+    ICOMMAND(0, getclientmodel, "i", (int *cn), intret(getclientmodel(*cn)));
+
+    const char *getmodelname(int mdl, int idx)
+    {
+        return mdl >= 0 ? playermodels[clamp(mdl, 0, NUMPLAYERMODELS-1)][clamp(idx, 0, 2)] : "";
+    }
+    ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 2)));
+
     const char *getclienthost(int cn)
     {
         gameent *d = game::getclient(cn);
