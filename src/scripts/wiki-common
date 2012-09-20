@@ -14,6 +14,21 @@ find_src_files ()
     \)
 }
 
+format_name ()
+{
+    echo "$1" | sed 's%^setdesc "\([^"]*\)".*%\1%'
+}
+
+format_desc ()
+{
+    echo "$1" | sed 's%^setdesc "[^"]*" \[\([^]]*\)\].*%\1%'
+}
+
+format_param ()
+{
+    echo "$1" | sed -ne 's%^setdesc "[^"]*" \[[^]]*\] "\([^"]*\)"%\1%p' -e 's% %\&nbsp;%g'
+}
+
 noedit_header ()
 {
     echo -e "This page was automatically generated from the source of Red Eclipse, please do not edit it manually.\n"

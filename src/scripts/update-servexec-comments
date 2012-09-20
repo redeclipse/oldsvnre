@@ -11,7 +11,7 @@ IFS=$'\n'
 for i in $(grep "// sv_" "$2")
 do
     VAR=$(echo $i | sed -n -e 's%//\ sv_\([a-z0-9]*\) .*%\1%p' -e '/^$/d')
-    DESC=$(sed -n 's%^setdesc "'"$VAR"'" "\(.*\)" "<[^>]*>"$%\1%p' "$1" | sed 's%\^"%"%g')
+    DESC="$(sed -n 's%^setdesc "'"$VAR"'" \[\([^\]]*\)\].*%\1%p' "$1")"
     if [ -n "$DESC" ]
     then
         sed 's%^\(//\ sv_'"$VAR"' .*// \).*$%\1'"$DESC"'%' -i "$2"

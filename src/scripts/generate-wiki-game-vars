@@ -13,14 +13,14 @@ table_content_game-vars ()
 IFS=$'\n'
 for i in $(grep "^setdesc" "$1" | sort)
 do
-        VAR="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
+        VAR="$(format_name "$i")"
 
         # Only consider G*VAR*s
         SRC_DEF="$(grep -hr "G[A-Z]*VAR[A-Z]*([^,]*, $VAR, " $SRC_FILES)"
         if [ -z "$SRC_DEF" ]; then continue; fi
 
-        DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
-        PARAM="$(echo $i | sed 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%')"
+        DESC="$(format_desc "$i")"
+        PARAM="$(format_param "$i")"
 
         SRC_TYPE="$(echo $SRC_DEF | sed 's%.*\(G[A-Z]*VAR[A-Z]*\)(.*%\1%')"
         case "$SRC_TYPE" in
