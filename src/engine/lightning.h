@@ -110,12 +110,16 @@ struct lightningrenderer : sharedlistrenderer
 
     void renderpart(sharedlistparticle *p, int blend, int ts, float size, uchar *color)
     {
-        blend = min(blend<<2, 255);
+        blend = int(min(blend<<2, 255)*p->blend);
         uchar midcol[4], endcol[4];
         if(type&PT_MOD) //multiply alpha into color
         {
-            midcol[0] = (color[0]*blend)>>8; midcol[1] = (color[1]*blend)>>8; midcol[2] = (color[2]*blend)>>8; midcol[3] = 0xFF;
-            memset(endcol, 0, 3); endcol[3] = 0xFF;
+            midcol[0] = (color[0]*blend)>>8;
+            midcol[1] = (color[1]*blend)>>8;
+            midcol[2] = (color[2]*blend)>>8;
+            midcol[3] = 0xFF;
+            memset(endcol, 0, 3);
+            endcol[3] = 0xFF;
         }
         else
         {

@@ -1405,7 +1405,7 @@ namespace hud
                     }
                 }
                 glPopMatrix();
-                tz = int(tz*commandscale);
+                //tz = int(tz*commandscale);
             }
         }
         popfont();
