@@ -1,6 +1,18 @@
 #!/bin/bash
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
+find_src_files ()
+{
+    find "$1" \
+    ! -wholename '*include*' \
+    ! -wholename '*xcode*' \
+    ! -wholename '*enet*' \
+    \( \
+        -name '*.c' \
+        -or -name '*.h' \
+        -or -name '*.cpp' \
+        -or -name '*.hpp' \
+    \)
+}
 
 noedit_header ()
 {

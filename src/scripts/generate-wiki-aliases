@@ -3,7 +3,6 @@
 # "$1" is usage.cfg
 # "$2" is output file
 
-
 DIR="$(cd "$(dirname "$0")" && pwd)"
 CFG_FILES="$DIR/../../data/*.cfg"
 

@@ -4,9 +4,9 @@
 # "$2" is output file
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-SRC_DIR="$DIR/.."
-
 source "$DIR"/wiki-common
+
+SRC_FILES="$(find_src_files "$DIR"/..)"
 
 table_content_game-vars ()
 {
@@ -16,7 +16,7 @@ do
         VAR="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
 
         # Only consider G*VAR*s
-        SRC_DEF="$(grep -hr "G[A-Z]*VAR[A-Z]*([^,]*, $VAR, " "$SRC_DIR")"
+        SRC_DEF="$(grep -hr "G[A-Z]*VAR[A-Z]*([^,]*, $VAR, " $SRC_FILES)"
         if [ -z "$SRC_DEF" ]; then continue; fi
 
         DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"

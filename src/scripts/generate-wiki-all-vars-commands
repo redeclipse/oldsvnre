@@ -4,7 +4,6 @@
 # "$2" is output file
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-SRC_DIR="$DIR/.."
 
 source "$DIR"/wiki-common
 source "$DIR"/generate-wiki-aliases
