@@ -226,3 +226,5 @@ wiki-engine-vars: ../doc/wiki-engine-vars.txt
 wiki-commands: ../doc/wiki-commands.txt
 
 wiki-aliases: ../doc/wiki-aliases.txt
+
+wiki-all-vars-commands: ../doc/wiki-all-vars-commands.txt
