@@ -1,0 +1,58 @@
+#!/bin/bash
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+noedit_header ()
+{
+    echo -e "This page was automatically generated from the source of Red Eclipse, please do not edit it manually.\n"
+}
+
+table_header ()
+{
+    cat <<EOF
+{| border="1" class="wikitable sortable"
+! Name&nbsp;&&nbsp;Parameters
+! class="unsortable"|Description
+! Type
+! class="unsortable"|Range
+! class="unsortable"|Default&nbsp;Value
+EOF
+}
+
+table_entry ()
+{
+    cat <<EOF
+|-
+| '''$1'''&nbsp;''$2''
+| $3
+| $4
+| $5
+| $6
+EOF
+}
+
+table_header_simple ()
+{
+    cat <<EOF
+{| border="1" class="wikitable sortable"
+! Name&nbsp;&&nbsp;Parameters
+! class="unsortable"|Description
+! Type
+EOF
+}
+
+table_entry_simple ()
+{
+    cat <<EOF
+|-
+| '''$1'''&nbsp;''$2''
+| $3
+| $4
+EOF
+}
+
+table_end ()
+{
+    echo "|}"
+}
+

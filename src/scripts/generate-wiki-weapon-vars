@@ -6,60 +6,51 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 WEAPONS_H="$DIR/../game/weapons.h"
 
-cat <<EOF > "$2"
-This page was automatically generated from the source of Red Eclipse, please do not edit it manually.
+source "$DIR"/wiki-common
 
-To use these variable templates, replace [weap] with the weapon name, and (if given) [1|2] with either 1 or 2.
-
-{| border="1" class="wikitable sortable"
-! Name&nbsp;&&nbsp;Parameters
-! class="unsortable"|Description
-! Type
-! class="unsortable"|Range
-! class="unsortable"|Default&nbsp;Value
-EOF
-
+table_content_weapon-vars ()
+{
 IFS=$'\n'
 for i in $(grep "^  *setdesc" "$1" | sed 's%^  *%%' | sort)
 do
-    VAR="$(echo $i | sed 's%^setdesc (concatword \$w \([^ ^)]*\).*%\1%')"
-    DESC="$(echo $i | sed -e 's%^setdesc[^"]*"\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
-    PARAM="$(echo $i | sed 's%^setdesc[^"]*".*" "\([^"]*\)"%\1%')"
+        VAR="$(echo $i | sed 's%^setdesc (concatword \$w \([^ ^)]*\).*%\1%')"
+        DESC="$(echo $i | sed -e 's%^setdesc[^"]*"\(.*\)" "[^"]*"%\1%' -e 's%\^%%g')"
+        PARAM="$(echo $i | sed 's%^setdesc[^"]*".*" "\([^"]*\)"%\1%')"
 
-    SRC_DEF="$(sed -n 's%.*\(G[A-Z]*VAR[A-Z]*([^,]*, a##'"$VAR"'[1,][^)]*)\).*%\1%p' "$WEAPONS_H")"
+        SRC_DEF="$(sed -n 's%.*\(G[A-Z]*VAR[A-Z]*([^,]*, a##'"$VAR"'[1,][^)]*)\).*%\1%p' "$WEAPONS_H")"
 
-    SPLIT="$(echo "$SRC_DEF" | sed -n 's%.*'"$VAR"'[12].*%[1|2]%p')"
+        SPLIT="$(echo "$SRC_DEF" | sed -n 's%.*'"$VAR"'[12].*%[1|2]%p')"
 
-    SRC_TYPE="$(echo "$SRC_DEF" | sed 's%.*\(G[A-Z]*VAR[A-Z]*\)(([^,]*, a##'"$VAR"'.*%\1%')"
-    case "$SRC_TYPE" in
-        GVAR*)
-            TYPE="integer" ;;
-        GFVAR*)
-            TYPE="float" ;;
-        GSVAR*)
-            TYPE="string" ;;
-        *)
-            TYPE="BUG" ;;
-    esac
+        SRC_TYPE="$(echo "$SRC_DEF" | sed 's%.*\(G[A-Z]*VAR[A-Z]*\)(([^,]*, a##'"$VAR"'.*%\1%')"
+        case "$SRC_TYPE" in
+            GVAR*)
+                TYPE="integer" ;;
+            GFVAR*)
+                TYPE="float" ;;
+            GSVAR*)
+                TYPE="string" ;;
+            *)
+                TYPE="BUG" ;;
+        esac
 
-    SRC_IDF="$(echo "$SRC_DEF" | sed 's%.*G[A-Z]*VAR[A-Z]*(\([^,]*\),%\1%')"
-    IDF_HEX=""
-    # Currently only one case
-    case "$SRC_IDF" in
-        *IDF_HEX*)
-            IDF_HEX="hex"
-            ;;
-    esac
+        SRC_IDF="$(echo "$SRC_DEF" | sed 's%.*G[A-Z]*VAR[A-Z]*(\([^,]*\),%\1%')"
+        IDF_HEX=""
+        # Currently only one case
+        case "$SRC_IDF" in
+            *IDF_HEX*)
+                IDF_HEX="hex"
+                ;;
+        esac
 
-    TYPE_STRING="$(echo "$IDF_HEX weapon $TYPE" | sed 's%^ %%')"
+        TYPE_STRING="$(echo "$IDF_HEX weapon $TYPE" | sed 's%^ %%')"
 
-    MIN_MAX="n/a"
-    DEFAULT="n/a"
-    if [ "x$TYPE" != "xstring" ]
-    then
-        MIN_MAX="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, \([^,]*\), [^,]*, \([^,^)]*\).*%\1..\2%')"
-    fi
-    cat <<EOF >> "$2"
+        MIN_MAX="n/a"
+        DEFAULT="n/a"
+        if [ "x$TYPE" != "xstring" ]
+        then
+            MIN_MAX="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, \([^,]*\), [^,]*, \([^,^)]*\).*%\1..\2%')"
+        fi
+        cat <<EOF
 |-
 | <nowiki>[weap]</nowiki>'''$VAR'''<nowiki>$SPLIT</nowiki>&nbsp;''$PARAM''
 | $DESC
@@ -68,5 +59,10 @@ do
 | $DEFAULT
 EOF
 done
+}
 
-echo "|}" >> "$2"
+noedit_header > "$2"
+echo -e "To use these variable templates, replace [weap] with the weapon name, and (if given) [1|2] with either 1 or 2.\n" >> "$2"
+table_header >> "$2"
+table_content_weapon-vars "$1" >> "$2"
+table_end >> "$2"
