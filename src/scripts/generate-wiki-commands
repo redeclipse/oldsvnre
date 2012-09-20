@@ -4,9 +4,9 @@
 # "$2" is output file
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-SRC_DIR="$DIR/.."
-
 source "$DIR"/wiki-common
+
+SRC_FILES="$(find_src_files "$DIR"/..)"
 
 table_content_commands ()
 {
@@ -16,7 +16,7 @@ table_content_commands ()
         COM="$(echo $i | sed -n 's%^setdesc "\([^"]*\)".*%\1%p')"
 
         # Get corresponding source lines
-        SRC_DEF="$(grep -hr "^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, $COM, " "$SRC_DIR")"
+        SRC_DEF="$(grep -hr "^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, $COM, " $SRC_FILES)"
         if [ -z "$SRC_DEF" ]; then continue; fi
 
         DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)".*%\1%' -e 's%" "<.*%%' -e 's%\^%%g')"
