@@ -710,7 +710,7 @@ namespace game
         if(deathfade && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {
-            if(d == focus && d->weapselect == WEAP_MELEE && !thirdpersonview(true)) return 0; // hack
+            if(d == focus && d->weapselect == WEAP_MELEE && !third) return 0; // hack
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
             if(millis > 0) total *= 1.f-(float(millis)/float(prot));
             if(d == player1 && inzoom())
@@ -2609,9 +2609,6 @@ namespace game
                     float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
                     flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(255), uchar(255), uchar(255), amt);
                     flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 1.f, 1.f, amt);
-                    //vec col = vec(0.25f, 1.f, 1.f).mul(amt);
-                    //e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
-                    //e->light.effect.max(col);
                 }
                 if(bleedtime && d->bleeding(lastmillis, bleedtime))
                 {
@@ -2620,9 +2617,6 @@ namespace game
                     float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                     flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(255), uchar(52), uchar(52), amt);
                     flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 0.2f, 0.2f, amt);
-                    //vec col = vec(1, 0.2f, 0.2f).mul(amt);
-                    //e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
-                    //e->light.effect.max(col);
                 }
             }
         }
@@ -2844,6 +2838,7 @@ namespace game
         d->checktags();
         if(rendernormally)
         {
+            float blend = opacity(d, thirdpersonview(true));
             if(d->state == CS_ALIVE)
             {
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
@@ -2855,9 +2850,9 @@ namespace game
                 if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.5f*scale, min(0.65f*scale, 0.8f), 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f), 0, 0);
-                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f), d->vel.magnitude() > 10 ? -40 : -10, 0);
+                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.5f*scale, min(0.65f*scale, 0.8f)*blend, 0, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
+                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
                 if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && !reloading)
                 {
@@ -2866,7 +2861,7 @@ namespace game
                     float yaw, pitch;
                     vectoyawpitch(vec(muzzle).sub(origin).normalize(), yaw, pitch);
                     findorientation(d->o, d->yaw, d->pitch, v);
-                    part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt);
+                    part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt*blend);
                 }
                 if(d->weapselect == WEAP_SWORD || powering)
                 {
@@ -2876,7 +2871,7 @@ namespace game
                     } powerfx[WEAP_MAX] = {
                         { 0, 0, 0, 0 },
                         { 2, PART_SPARK, 0.1f, 1.5f },
-                        { 4, PART_LIGHTNING_FLARE, 1, 1 },
+                        { 4, PART_LIGHTNING, 1, 1 },
                         { 2, PART_SPARK, 0.15f, 2 },
                         { 2, PART_SPARK, 0.1f, 2 },
                         { 2, PART_FIREBALL, 0.1f, 6 },
@@ -2889,19 +2884,19 @@ namespace game
                     {
                         case 1: case 2:
                         {
-                            regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f), 1, 0, 5+(amt*5));
+                            regularshape(powerfx[d->weapselect].parttype, 1+(amt*powerfx[d->weapselect].radius), colour, powerfx[d->weapselect].type == 2 ? 21 : 53, 5, 60+int(30*amt), d->muzzlepos(d->weapselect), powerfx[d->weapselect].size*max(amt, 0.25f), max(amt*0.25f, 0.05f)*blend, 1, 0, 5+(amt*5));
                             break;
                         }
                         case 3:
                         {
                             int interval = lastmillis%1000;
                             float fluc = powerfx[d->weapselect].size+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                            part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc, max(amt, 0.1f));
+                            part_create(powerfx[d->weapselect].parttype, 1, d->originpos(), colour, (powerfx[d->weapselect].radius*max(amt, 0.25f))+fluc, max(amt, 0.1f)*blend);
                             break;
                         }
                         case 4:
                         {
-                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, PART_LIGHTNING, colour, WEAP2(d->weapselect, partsize, secondary)*0.75f, 1);
+                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, powerfx[d->weapselect].parttype, colour, WEAP2(d->weapselect, partsize, secondary)*0.75f, blend);
                             break;
                         }
                         case 0: default: break;
@@ -2913,11 +2908,11 @@ namespace game
             if(burntime && d->burning(lastmillis, burntime))
             {
                 int millis = lastmillis-d->lastburn;
-                float pc = 1, intensity = 0.5f+(rnd(50)/100.f), blend = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
+                float pc = 1, intensity = 0.5f+(rnd(50)/100.f), fade = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->o).sub(vec(rnd(11)-5, rnd(11)-5, d->height/2+rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL, max(onfirefade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*intensity*pc, blend*pc*onfireblend, -10, 0);
+                regular_part_create(PART_FIREBALL, max(onfirefade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*intensity*pc, fade*blend*pc*onfireblend, -10, 0);
             }
         }
     }
