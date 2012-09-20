@@ -26,6 +26,7 @@ do
 
     DESC="$(echo $i | sed -e 's%^setdesc "[^"]*" "\(.*\)".*%\1%' -e 's%" "<.*%%' -e 's%\^%%g')"
     PARAM="$(echo $i | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p')"
+    PARAM="$(echo $PARAM | sed 's% %\&nbsp;%g')"
 
     SRC_IDF="$(echo $SRC_DEF | sed 's%^[^A-Z]*[A-Z]*COMMAND[A-Z]*(\([^,]*\),%\1%')"
     IDF_ADMIN=""

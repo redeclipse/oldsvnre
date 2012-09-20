@@ -14,7 +14,7 @@ To use these variable templates, replace [weap] with the weapon name, and (if gi
 {| border="1" class="wikitable sortable"
 ! Name&nbsp;&&nbsp;Parameters
 ! class="unsortable"|Description
-! Type(s)
+! Type
 ! class="unsortable"|Range
 ! class="unsortable"|Default&nbsp;Value
 EOF
