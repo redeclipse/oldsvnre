@@ -43,12 +43,12 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, thirdpersondist, 0, 25, 1000);
+    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 25, FVAR_MAX);
 
     VAR(0, follow, 0, 0, VAR_MAX);
     VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, followdist, 0, 25, 1000);
+    FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 25, FVAR_MAX);
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
@@ -2267,8 +2267,8 @@ namespace game
                     entities::checkitems(player1);
                     weapons::checkweapons(player1);
                 }
-                if(!intermission) addsway(focus);
             }
+            if(!intermission) addsway(focus);
             checkcamera();
             if(hud::canshowscores()) hud::showscores(true);
         }
@@ -2282,29 +2282,29 @@ namespace game
         checkcamera();
         if(!client::waiting())
         {
-            bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1 && !tvmode(), bob = false;
-            if(self || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
+            physent *d = camera1;
+            bool bob = false;
+            if(!tvmode())
             {
-                physent *d = self ? player1 : focus;
-                camera1->o = camerapos(focus);
-                camera1->yaw = d->yaw;
-                camera1->pitch = d->pitch;
-                fixfullrange(camera1->yaw, camera1->pitch, camera1->roll, false);
-                findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
-                if(thirdpersonview(true))
+                bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1;
+                d = self ? player1 : focus;
+                if(self || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
                 {
-                    float dist = focus != player1 ? followdist : thirdpersondist;
-                    if(dist > 0)
-                    {
-                        vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
-                        physics::movecamera(camera1, dir, dist, 1.0f);
-                    }
+                    camera1->o = camerapos(focus);
+                    camera1->yaw = d->yaw;
+                    camera1->pitch = d->pitch;
+                    bob = true;
                 }
-                camera1->resetinterp();
-                bob = true;
             }
-
+            else if(focus != player1) bob = true;
             calcangles(camera1, focus, bob);
+            findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
+            if(thirdpersonview(true))
+            {
+                vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
+                physics::movecamera(camera1, dir, focus != player1 ? followdist : thirdpersondist, 1.0f);
+            }
+            camera1->resetinterp();
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
