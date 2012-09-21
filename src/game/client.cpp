@@ -1160,7 +1160,6 @@ namespace client
             if(fall > 0xFF) flags |= 1<<5;
             if(d->falling.x || d->falling.y || d->falling.z > 0) flags |= 1<<6;
         }
-        if((int)d->aimyaw!=(int)d->yaw || (int)d->aimpitch!=(int)d->pitch) flags |= 1<<7;
         if(d->conopen) flags |= 1<<8;
         if(d->action[AC_JUMP]) flags |= 1<<9;
         if(d->action[AC_SPRINT] == (d!=game::player1 || physics::sprintstyle < 3)) flags |= 1<<10;
@@ -1196,12 +1195,6 @@ namespace client
                 q.put(falldir&0xFF);
                 q.put((falldir>>8)&0xFF);
             }
-        }
-        if((int)d->aimyaw!=(int)d->yaw || (int)d->aimpitch!=(int)d->pitch)
-        {
-            uint aimdir = (d->aimyaw < 0 ? 360 + int(d->aimyaw)%360 : int(d->aimyaw)%360) + clamp(int(d->aimpitch+90), 0, 180)*360;
-            q.put(aimdir&0xFF);
-            q.put((aimdir>>8)&0xFF);
         }
     }
 
@@ -1338,15 +1331,15 @@ namespace client
             {
                 int lcn = getuint(p), physstate = p.get(), meter = getuint(p), flags = getuint(p);
                 vec o, vel, falling;
-                float yaw, pitch, roll, aimyaw, aimpitch;
+                float yaw, pitch, roll;
                 loopk(3)
                 {
                     int n = p.get(); n |= p.get()<<8; if(flags&(1<<k)) { n |= p.get()<<16; if(n&0x800000) n |= -1<<24; }
                     o[k] = n/DMF;
                 }
                 int dir = p.get(); dir |= p.get()<<8;
-                aimyaw = yaw = dir%360;
-                aimpitch = pitch = clamp(dir/360, 0, 180)-90;
+                yaw = dir%360;
+                pitch = clamp(dir/360, 0, 180)-90;
                 roll = clamp(int(p.get()), 0, 180)-90;
                 int mag = p.get(); if(flags&(1<<3)) mag |= p.get()<<8;
                 dir = p.get(); dir |= p.get()<<8;
@@ -1364,20 +1357,17 @@ namespace client
                     falling.mul(mag/DVELF);
                 }
                 else falling = vec(0, 0, 0);
-                if(flags&(1<<7))
+                if(flags&(1<<7)) // TODO: REMOVE
                 {
-                    dir = p.get(); dir |= p.get()<<8;
-                    aimyaw = dir%360;
-                    aimpitch = clamp(dir/360, 0, 180)-90;
+                    dir = p.get();
+                    dir |= p.get()<<8;
                 }
                 gameent *d = game::getclient(lcn);
                 if(!d || d==game::player1 || d->ai) continue;
-                float oldyaw = d->yaw, oldpitch = d->pitch, oldaimyaw = d->aimyaw, oldaimpitch = d->aimpitch;
+                float oldyaw = d->yaw, oldpitch = d->pitch;
                 d->yaw = yaw;
                 d->pitch = pitch;
                 d->roll = roll;
-                d->aimyaw = aimyaw;
-                d->aimpitch = aimpitch;
                 d->move = (physstate>>3)&2 ? -1 : (physstate>>3)&1;
                 d->strafe = (physstate>>5)&2 ? -1 : (physstate>>5)&1;
                 d->turnside = (physstate>>7)&2 ? -1 : (physstate>>7)&1;
@@ -1412,14 +1402,10 @@ namespace client
                     d->newpos.z -= d->height;
                     d->newyaw = d->yaw;
                     d->newpitch = d->pitch;
-                    d->newaimyaw = d->aimyaw;
-                    d->newaimpitch = d->aimpitch;
 
                     d->o = oldpos;
                     d->yaw = oldyaw;
                     d->pitch = oldpitch;
-                    d->aimyaw = oldaimyaw;
-                    d->aimpitch = oldaimpitch;
 
                     oldpos.z -= d->height;
                     (d->deltapos = oldpos).sub(d->newpos);
@@ -1428,11 +1414,6 @@ namespace client
                     if(d->deltayaw > 180) d->deltayaw -= 360;
                     else if(d->deltayaw < -180) d->deltayaw += 360;
                     d->deltapitch = oldpitch - d->newpitch;
-
-                    d->deltaaimyaw = oldaimyaw - d->newaimyaw;
-                    if(d->deltaaimyaw > 180) d->deltaaimyaw -= 360;
-                    else if(d->deltaaimyaw < -180) d->deltaaimyaw += 360;
-                    d->deltaaimpitch = oldaimpitch - d->newaimpitch;
 
                     d->smoothmillis = lastmillis;
                 }

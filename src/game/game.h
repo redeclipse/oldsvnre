@@ -833,7 +833,7 @@ struct gameent : dynent, gamestate
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, stuntime, spree;
-    float deltayaw, deltapitch, newyaw, newpitch, deltaaimyaw, deltaaimpitch, newaimyaw, newaimpitch, turnyaw, turnroll, stunscale;
+    float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll, stunscale;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string hostname, name, info, obit;
@@ -1439,7 +1439,6 @@ namespace game
     extern void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch);
     extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float yawspeed = 1, float pitchspeed = 1, float rotate = 0);
     extern bool allowmove(physent *d);
-    extern int mousestyle();
     extern int deadzone();
     extern int panspeed();
     extern void checkzoom();

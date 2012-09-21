@@ -1178,8 +1178,6 @@ namespace ai
         if(result < 3) d->action[AC_ATTACK] = d->action[AC_ALTERNATE] = false;
 
         game::fixrange(d->ai->targyaw, d->ai->targpitch);
-        d->aimyaw = d->ai->targyaw;
-        d->aimpitch = d->ai->targpitch;
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
@@ -1199,8 +1197,6 @@ namespace ai
         if(d->ai->dontmove || (d->aitype >= AI_START && lastmillis-d->lastpain <= PHYSMILLIS/3)) d->move = d->strafe = 0;
         else if(!aistyle[d->aitype].canmove || !aistyle[d->aitype].canstrafe)
         {
-            d->aimyaw = d->yaw;
-            d->aimpitch = d->pitch;
             d->move = aistyle[d->aitype].canmove ? 1 : 0;
             d->strafe = 0;
         }
@@ -1217,16 +1213,14 @@ namespace ai
                 {  0,  1,   270 },
                 {  1,  1,   315 }
             };
-            float yaw = d->aimyaw-d->yaw;
+            float yaw = d->ai->targyaw-d->yaw;
             while(yaw < 0.0f) yaw += 360.0f;
             while(yaw >= 360.0f) yaw -= 360.0f;
             const aimdir &ad = aimdirs[clamp(((int)floor((yaw+22.5f)/45.0f))&7, 0, 7)];
             d->move = ad.move;
             d->strafe = ad.strafe;
-            d->aimyaw -= ad.offset;
         }
         if(!aistyle[d->aitype].canstrafe && d->move && enemyok && lockon(d, e, 8, weaptype[d->weapselect].melee)) d->move = 0;
-        game::fixrange(d->aimyaw, d->aimpitch);
         findorientation(dp, d->yaw, d->pitch, d->ai->target);
         return result;
     }
