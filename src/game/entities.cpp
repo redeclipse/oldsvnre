@@ -1296,33 +1296,30 @@ namespace entities
                 dest = p.ent;
                 bestdist = dist;
             }
-            if(dest < 0)
-            {
-                if(verbose) conoutf("\frWARNING: teledest %d has become a teleport", i);
-            }
-            else
+            if(ents.inrange(dest))
             {
                 gameentity &f = *(gameentity *)ents[dest];
-                if(verbose) conoutf("\frWARNING: replaced teledest %d with closest teleport %d", i, dest);
+                if(verbose) conoutf("\frWARNING: replaced teledest %d with closest teleport %d", t.ent, dest);
                 f.attrs[0] = e.attrs[0]; // copy the yaw
                 loopvk(e.links) if(f.links.find(e.links[k]) < 0) f.links.add(e.links[k]);
-                loopvj(ents) if(j != i && j != dest)
+                loopvj(ents) if(j != t.ent && j != dest)
                 {
                     gameentity &g = *(gameentity *)ents[j];
                     if(g.type == TELEPORT)
                     {
-                        int link = g.links.find(i);
+                        int link = g.links.find(t.ent);
                         if(link >= 0)
                         {
                             g.links.remove(link);
                             if(g.links.find(dest) < 0) g.links.add(dest);
-                            if(verbose) conoutf("\frWARNING: imported link to teledest %d to teleport %d", i, j);
+                            if(verbose) conoutf("\frWARNING: imported link to teledest %d to teleport %d", t.ent, j);
                         }
                     }
                 }
                 e.type = NOTUSED; // get rid of ye olde teledest
                 e.links.shrink(0);
             }
+            else if(verbose) conoutf("\frWARNING: teledest %d has become a teleport", t.ent);
         }
         octateles.setsize(0);
         loopv(ents)
@@ -1505,7 +1502,7 @@ namespace entities
                         if(e.attrs[0] >= 0)
                         {
                             int material = lookupmaterial(e.o), clipmat = material&MATF_CLIP;
-                            if(clipmat == MAT_CLIP || (material&MAT_DEATH ) || (material&MATF_VOLUME) == MAT_LAVA)
+                            if(clipmat == MAT_CLIP || (material&MAT_DEATH) || (material&MATF_VOLUME) == MAT_LAVA)
                             {
                                 vec dir;
                                 vecfromyawpitch(e.attrs[0], e.attrs[1], 1, 0, dir);

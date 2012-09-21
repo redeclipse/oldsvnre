@@ -2778,7 +2778,7 @@ namespace game
                     case WEAP_S_PRIMARY:
                     case WEAP_S_SECONDARY:
                     {
-                        if(weaptype[weap].thrown[0] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
+                        if(weaptype[weap].thrown[d->weapstate[weap] != WEAP_S_SECONDARY ? 0 : 1] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
                             showweap = false;
                         weapflags = animflags = (weaptype[weap].anim+d->weapstate[weap])|ANIM_CLAMP;
                         break;
