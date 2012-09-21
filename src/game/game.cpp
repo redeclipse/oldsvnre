@@ -3,8 +3,8 @@
 namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
-        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, lastmousetype = 0, liquidchan = -1;
-    bool intermission = false, prevzoom = false, zooming = false;
+        lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1;
+    bool intermission = false, prevzoom = false, zooming = false, inputmouse = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
 
@@ -32,8 +32,6 @@ namespace game
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
-    VAR(IDF_PERSIST, mouseabsolute, 0, 0, 1);
-    VAR(IDF_PERSIST, mousetype, 0, 0, 2);
     VAR(IDF_PERSIST, mousedeadzone, 0, 10, 100);
     VAR(IDF_PERSIST, mousepanspeed, 1, 50, VAR_MAX);
 
@@ -100,7 +98,6 @@ namespace game
     FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.65f, 1000);
     FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
-    VAR(IDF_PERSIST, zoommousetype, 0, 0, 2);
     VAR(IDF_PERSIST, zoommousedeadzone, 0, 25, 100);
     VAR(IDF_PERSIST, zoommousepanspeed, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, zoomfov, 1, 10, 150);
@@ -217,12 +214,6 @@ namespace game
     }
     ICOMMAND(0, isthirdperson, "i", (int *viewonly), intret(thirdpersonview(*viewonly ? true : false) ? 1 : 0));
     ICOMMAND(0, thirdpersonswitch, "", (), int *n = (focus != player1 ? &thirdpersonfollow : &thirdperson); *n = !*n;);
-
-    int mousestyle()
-    {
-        if(inzoom()) return zoommousetype;
-        return mousetype;
-    }
 
     int deadzone()
     {
@@ -1683,22 +1674,12 @@ namespace game
 
     bool mousemove(int dx, int dy, int x, int y, int w, int h)
     {
-        bool hasinput = hud::hasinput(true);
         #define mousesens(a,b,c) ((float(a)/float(b))*c)
-        if(hasinput || mousestyle() >= 1)
+        if(hud::hasinput(true))
         {
-            if(mouseabsolute) // absolute positions, unaccelerated
-            {
-                cursorx = clamp(float(x)/float(w), 0.f, 1.f);
-                cursory = clamp(float(y)/float(h), 0.f, 1.f);
-                return false;
-            }
-            else
-            {
-                cursorx = clamp(cursorx+mousesens(dx, w, mousesensitivity), 0.f, 1.f);
-                cursory = clamp(cursory+mousesens(dy, h, mousesensitivity*(!hasinput && mouseinvert ? -1.f : 1.f)), 0.f, 1.f);
-                return true;
-            }
+            cursorx = clamp(cursorx+mousesens(dx, w, mousesensitivity), 0.f, 1.f);
+            cursory = clamp(cursory+mousesens(dy, h, mousesensitivity), 0.f, 1.f);
+            return true;
         }
         else if(!tvmode())
         {
@@ -1708,7 +1689,7 @@ namespace game
             {
                 float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : (self ? followsensitivity : 1.f))*sensitivity;
                 target->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
-                target->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(!hasinput && mouseinvert ? -1.f : 1.f));
+                target->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(mouseinvert ? -1.f : 1.f));
                 fixfullrange(target->yaw, target->pitch, target->roll, false);
             }
             return true;
@@ -1718,13 +1699,13 @@ namespace game
 
     void project(int w, int h)
     {
-        int style = hud::hasinput() ? -1 : mousestyle();
-        if(style != lastmousetype)
+        bool input = hud::hasinput();
+        if(input != inputmouse)
         {
             resetcursor();
-            lastmousetype = style;
+            inputmouse = input;
         }
-        if(style >= 0) vecfromcursor(cursorx, cursory, 1.f, cursordir);
+        if(!input) vecfromcursor(cursorx, cursory, 1.f, cursordir);
     }
 
     void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch)
@@ -1771,29 +1752,10 @@ namespace game
             if(a)
             {
                 vec dir = vec(a->center()).sub(camera1->o).normalize();
-                vectoyawpitch(dir, camera1->aimyaw, camera1->aimpitch);
+                vectoyawpitch(dir, camera1->yaw, camera1->pitch);
                 float speed = (float(curtime)/1000.f)*deathcamspeed;
-                if(deathcamspeed > 0) scaleyawpitch(yaw, pitch, camera1->aimyaw, camera1->aimpitch, speed, speed*4.f);
-                else { yaw = camera1->aimyaw; pitch = camera1->aimpitch; }
-            }
-        }
-    }
-
-    void cameraplayer()
-    {
-        if(player1->state != CS_WAITING && player1->state != CS_SPECTATOR && player1->state != CS_DEAD && !tvmode())
-        {
-            player1->aimyaw = camera1->yaw;
-            player1->aimpitch = camera1->pitch;
-            fixrange(player1->aimyaw, player1->aimpitch);
-            if(lastcamera && mousestyle() >= 1 && !hud::hasinput())
-            {
-                physent *d = mousestyle() != 2 ? player1 : camera1;
-                float amt = clamp(float(lastmillis-lastcamera)/100.f, 0.f, 1.f)*panspeed();
-                float zone = float(deadzone())/200.f, cx = cursorx-0.5f, cy = 0.5f-cursory;
-                if(cx > zone || cx < -zone) d->yaw += ((cx > zone ? cx-zone : cx+zone)/(1.f-zone))*amt;
-                if(cy > zone || cy < -zone) d->pitch += ((cy > zone ? cy-zone : cy+zone)/(1.f-zone))*amt;
-                fixfullrange(d->yaw, d->pitch, d->roll, false);
+                if(deathcamspeed > 0) scaleyawpitch(yaw, pitch, camera1->yaw, camera1->pitch, speed, speed*4.f);
+                else { yaw = camera1->yaw; pitch = camera1->pitch; }
             }
         }
     }
@@ -2037,20 +1999,21 @@ namespace game
         camera1->o = cam->pos(amt);
         if(focus != player1)
         {
-            camera1->yaw = camera1->aimyaw = focus->yaw;
-            camera1->pitch = camera1->aimpitch = focus->pitch;
+            camera1->yaw = focus->yaw;
+            camera1->pitch = focus->pitch;
             camera1->roll = focus->roll;
         }
         else
         {
-            vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), camera1->aimyaw, camera1->aimpitch);
+            float yaw = camera1->yaw, pitch = camera1->pitch;
+            vectoyawpitch(vec(cam->dir).sub(camera1->o).normalize(), yaw, pitch);
             if(!renew)
             {
                 float speed = curtime/float(spectvspeed);
                 #define SCALEAXIS(x) \
-                    float x##scale = 1, adj##x = camera1->x, off##x = camera1->aim##x; \
-                    if(adj##x < camera1->aim##x - 180.0f) adj##x += 360.0f; \
-                    if(adj##x > camera1->aim##x + 180.0f) adj##x -= 360.0f; \
+                    float x##scale = 1, adj##x = camera1->x, off##x = x; \
+                    if(adj##x < x-180.0f) adj##x += 360.0f; \
+                    if(adj##x > x+180.0f) adj##x -= 360.0f; \
                     off##x -= adj##x; \
                     if(cam->last##x == 0 || (off##x > 0 && cam->last##x < 0) || (off##x < 0 && cam->last##x > 0) || (fabs(cam->last##x - off##x) >= spectv##x##thresh)) \
                     { \
@@ -2065,13 +2028,12 @@ namespace game
                     cam->last##x = off##x;
                 SCALEAXIS(yaw);
                 SCALEAXIS(pitch);
-                //conoutft(CON_SELF, "camera: %.2f/%.2f -> %.2f/%.2f (%.2f/%.2f) [%.2f/%2.f] @ %d/%d", camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, cam->lastyaw, cam->lastpitch, yawscale, pitchscale, lastmillis-cam->lastyawtime, lastmillis-cam->lastpitchtime);
-                scaleyawpitch(camera1->yaw, camera1->pitch, camera1->aimyaw, camera1->aimpitch, speed*spectvyawscale*yawscale, speed*spectvpitchscale*pitchscale, spectvrotate);
+                scaleyawpitch(camera1->yaw, camera1->pitch, yaw, pitch, speed*spectvyawscale*yawscale, speed*spectvpitchscale*pitchscale, spectvrotate);
             }
             else
             {
-                camera1->yaw = camera1->aimyaw;
-                camera1->pitch = camera1->aimpitch;
+                camera1->yaw = yaw;
+                camera1->pitch = pitch;
             }
         }
         if(cam->type == cament::AFFINITY && followdist > 0)
@@ -2101,12 +2063,7 @@ namespace game
         }
         if(!cameratv())
         {
-            if(focus->state == CS_DEAD)
-            {
-                deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
-                camera1->aimyaw = camera1->yaw;
-                camera1->aimpitch = camera1->pitch;
-            }
+            if(focus->state == CS_DEAD) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
             else if(focus->state >= CS_SPECTATOR)
             {
                 camera1->move = player1->move;
@@ -2116,8 +2073,8 @@ namespace game
         }
         if(focus->state == CS_SPECTATOR)
         {
-            player1->aimyaw = player1->yaw = camera1->yaw;
-            player1->aimpitch = player1->pitch = camera1->pitch;
+            player1->yaw = camera1->yaw;
+            player1->pitch = camera1->pitch;
             player1->o = camera1->o;
             player1->resetinterp();
         }
@@ -2272,8 +2229,7 @@ namespace game
                     resetcamera();
                 }
             }
-            if(allowmove(player1)) cameraplayer();
-            else player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
+            if(!allowmove(player1)) player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
 
             physics::update();
             ai::navigate();
@@ -2326,67 +2282,25 @@ namespace game
         checkcamera();
         if(!client::waiting())
         {
-            if(!lastcamera && mousestyle() == 2 && focus->state != CS_WAITING && focus->state != CS_SPECTATOR)
-            {
-                camera1->yaw = focus->aimyaw = focus->yaw;
-                camera1->pitch = focus->aimpitch = focus->pitch;
-            }
-
             bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1 && !tvmode(), bob = false;
-            if(!self && (focus->state == CS_DEAD || focus->state >= CS_SPECTATOR))
+            if(self || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
             {
-                camera1->aimyaw = camera1->yaw;
-                camera1->aimpitch = camera1->pitch;
-            }
-            else
-            {
+                physent *d = self ? player1 : focus;
                 camera1->o = camerapos(focus);
-                if(mousestyle() <= 1)
-                    findorientation(camera1->o, (self ? player1 : focus)->yaw, (self ? player1 : focus)->pitch, worldpos);
-                camera1->aimyaw = self ? player1->yaw : (mousestyle() <= 1 ? focus->yaw : focus->aimyaw);
-                camera1->aimpitch = self ? player1->pitch : (mousestyle() <= 1 ? focus->pitch : focus->aimpitch);
+                camera1->yaw = d->yaw;
+                camera1->pitch = d->pitch;
+                fixfullrange(camera1->yaw, camera1->pitch, camera1->roll, false);
+                findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
                 if(thirdpersonview(true))
                 {
                     float dist = focus != player1 ? followdist : thirdpersondist;
                     if(dist > 0)
                     {
-                        vec dir; vecfromyawpitch(camera1->aimyaw, camera1->aimpitch, -1, 0, dir);
+                        vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
                         physics::movecamera(camera1, dir, dist, 1.0f);
                     }
                 }
                 camera1->resetinterp();
-
-                switch(mousestyle())
-                {
-                    case 0:
-                    case 1:
-                    {
-                        camera1->yaw = (self ? player1 : focus)->yaw;
-                        camera1->pitch = (self ? player1 : focus)->pitch;
-                        if(mousestyle())
-                        {
-                            camera1->aimyaw = camera1->yaw;
-                            camera1->aimpitch = camera1->pitch;
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-                        float yaw, pitch;
-                        vectoyawpitch(cursordir, yaw, pitch);
-                        fixrange(yaw, pitch);
-                        findorientation(camera1->o, yaw, pitch, worldpos);
-                        if(focus == player1 && allowmove(player1))
-                        {
-                            player1->yaw = yaw;
-                            player1->pitch = pitch;
-                        }
-                        break;
-                    }
-                }
-                fixfullrange(camera1->yaw, camera1->pitch, camera1->roll, false);
-                fixrange(camera1->aimyaw, camera1->aimpitch);
-
                 bob = true;
             }
 

@@ -871,20 +871,16 @@ namespace hud
         int cx = int(hudwidth*cursorx), cy = int(hudheight*cursory);
         if(index != POINTER_GUI)
         {
-            int nx = int(hudwidth*0.5f), ny = int(hudheight*0.5f), ss = int(crosshairsize*hudsize),
-                sx = game::mousestyle() != 1 ? cx : nx, sy = game::mousestyle() != 1 ? cy : ny;
-            drawpointertex(getpointer(index, game::focus->weapselect), sx-cs/2, sy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
+            drawpointertex(getpointer(index, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
             if(index > POINTER_GUI)
             {
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
                 {
-                    if(showclips) drawclip(game::focus->weapselect, nx, ny, clipsize*hudsize);
-                    if(showindicator) drawindicator(game::focus->weapselect, nx, ny, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
+                    if(showclips) drawclip(game::focus->weapselect, cx, cy, clipsize*hudsize);
+                    if(showindicator) drawindicator(game::focus->weapselect, cx, cy, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
-                if(game::mousestyle() >= 1) // renders differently
-                    drawpointertex(getpointer(POINTER_RELATIVE), (game::mousestyle() != 1 ? nx : cx)-ss/2, (game::mousestyle() != 1 ? ny : cy)-ss/2, ss, c.r, c.g, c.b, crosshairblend*hudblend);
                 if(crosshairhitspeed && totalmillis-game::focus->lasthit <= crosshairhitspeed)
-                    drawpointertex(getpointer(POINTER_HIT, game::focus->weapselect), sx-ss/2, sy-ss/2, ss, c.r, c.g, c.b, crosshairblend*hudblend);
+                    drawpointertex(getpointer(POINTER_HIT, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, crosshairblend*hudblend);
             }
         }
         else drawpointertex(getpointer(index, game::focus->weapselect), cx, cy, cs, c.r, c.g, c.b, fade*hudblend);

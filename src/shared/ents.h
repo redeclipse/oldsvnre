@@ -84,7 +84,6 @@ struct physent                                  // base entity type, can be affe
     vec o, vel, falling;                        // origin and velocity
     vec deltapos, newpos;
     float yaw, pitch, roll;
-    float aimyaw, aimpitch;
     float speed, weight;
     int timeinair;
     float radius, height, aboveeye;             // bounding box size
@@ -124,7 +123,7 @@ struct physent                                  // base entity type, can be affe
         strafe = move = 0;
         physstate = PHYS_FALL;
         o = vel = falling = vec(0, 0, 0);
-        yaw = pitch = roll = aimyaw = aimpitch = 0.f;
+        yaw = pitch = roll = 0;
         floor = vec(0, 0, 1);
         resetinterp();
     }

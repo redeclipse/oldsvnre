@@ -380,7 +380,7 @@ namespace physics
     bool movepitch(physent *d)
     {
         if(d->type == ENT_CAMERA || d->state == CS_EDITING || d->state == CS_SPECTATOR) return true;
-        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->aimpitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
+        if(d->onladder || (d->inliquid && (liquidcheck(d) || d->pitch < 0.f)) || jetpack(d) || PHYS(gravity) == 0) return true;
         return false;
     }
 
@@ -770,7 +770,7 @@ namespace physics
                     vec dir(0, 0, 1);
                     if(power || dash || moving || onfloor)
                     {
-                        float yaw = d->aimyaw, pitch = moving && (power || pulse) ? d->aimpitch : 0;
+                        float yaw = d->yaw, pitch = moving && (power || pulse) ? d->pitch : 0;
                         vecfromyawpitch(yaw, pitch, moving ? move : 1, strafe, dir);
                         if(!power && dash && !d->floor.iszero() && !dir.iszero())
                         {
@@ -879,7 +879,7 @@ namespace physics
                     float mag = impulsevelocity(d, impulseparkourkick, cost);
                     if(mag > 0)
                     {
-                        vec rft; vecfromyawpitch(d->aimyaw, 0, 1, 0, rft);
+                        vec rft; vecfromyawpitch(d->yaw, 0, 1, 0, rft);
                         (d->vel = rft.normalize()).mul(mag); d->vel.z += mag/2;
                         d->doimpulse(cost, IM_T_KICK, lastmillis);
                         d->turnmillis = PHYSMILLIS;
@@ -917,7 +917,7 @@ namespace physics
                 if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true)))
                 {
                     vec oldpos = d->o, dir;
-                    vecfromyawpitch(d->aimyaw, 0, 1, 0, dir);
+                    vecfromyawpitch(d->yaw, 0, 1, 0, dir);
                     d->o.add(dir.normalize());
                     bool collided = collide(d, dir);
                     d->o = oldpos;
@@ -946,7 +946,7 @@ namespace physics
                     if(move == 2) move = d->move > 0 ? d->move : 0;
                     if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
                     if(!move && !strafe) continue;
-                    vecfromyawpitch(d->aimyaw, 0, move, strafe, dir);
+                    vecfromyawpitch(d->yaw, 0, move, strafe, dir);
                     dir.normalize();
                     d->o.add(dir);
                     bool collided = collide(d, dir);
@@ -958,7 +958,7 @@ namespace physics
                         bool cankick = d->action[AC_SPECIAL] && canimpulse(d, IM_A_PARKOUR, true), parkour = cankick && !onfloor && !d->onladder;
                         float yaw = 0, pitch = 0;
                         vectoyawpitch(face, yaw, pitch);
-                        float off = yaw-d->aimyaw;
+                        float off = yaw-d->yaw;
                         if(off > 180) off -= 360; else if(off < -180) off += 360;
                         bool iskick = impulsekick > 0 && fabs(off) >= impulsekick, vault = false;
                         if(cankick && iskick)
@@ -989,7 +989,7 @@ namespace physics
                                 float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost);
                                 if(mag > 0)
                                 {
-                                    vecfromyawpitch(d->aimyaw, vault ? 90.f : fabs(d->aimpitch), 1, 0, dir);
+                                    vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, dir);
                                     (d->vel = dir.normalize()).reflect(face).normalize().mul(mag);
                                     d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
                                     d->turnmillis = PHYSMILLIS;
@@ -1014,7 +1014,7 @@ namespace physics
                                 if(mag > 0)
                                 {
                                     (d->vel = rft.normalize()).mul(mag);
-                                    off = yaw-d->aimyaw;
+                                    off = yaw-d->yaw;
                                     if(off > 180) off -= 360;
                                     else if(off < -180) off += 360;
                                     d->doimpulse(cost, IM_T_SKATE, lastmillis);
@@ -1074,7 +1074,7 @@ namespace physics
         bool wantsmove = game::allowmove(pl) && (pl->move || pl->strafe);
         if(wantsmove)
         {
-            vecfromyawpitch(pl->aimyaw, movepitch(pl) ? pl->aimpitch : 0, pl->move, pl->strafe, m);
+            vecfromyawpitch(pl->yaw, movepitch(pl) ? pl->pitch : 0, pl->move, pl->strafe, m);
             if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !floating && pl->physstate >= PHYS_SLOPE)
             { // move up or down slopes in air but only move up slopes in liquid
                 float dz = -(m.x*pl->floor.x + m.y*pl->floor.y)/pl->floor.z;
@@ -1266,7 +1266,7 @@ namespace physics
                     if(e->turnmillis > 0)
                     {
                         float amt = float(millis)/float(PHYSMILLIS), yaw = e->turnyaw*amt, roll = e->turnroll*amt;
-                        if(yaw != 0) { e->aimyaw += yaw; e->yaw += yaw; }
+                        if(yaw != 0) e->yaw += yaw;
                         if(roll != 0) e->roll += roll;
                         e->turnmillis -= millis;
                     }
@@ -1537,9 +1537,6 @@ namespace physics
         d->yaw = d->newyaw;
         d->pitch = d->newpitch;
 
-        d->aimyaw = d->newaimyaw;
-        d->aimpitch = d->newaimpitch;
-
         if(domove)
         {
             move(d, res, local);
@@ -1556,11 +1553,6 @@ namespace physics
             if(d->yaw<0) d->yaw += 360;
             else if(d->yaw>=360) d->yaw -= 360;
             d->pitch += d->deltapitch*k;
-
-            d->aimyaw += d->deltaaimyaw*k;
-            if(d->aimyaw<0) d->aimyaw += 360;
-            else if(d->aimyaw>=360) d->aimyaw -= 360;
-            d->aimpitch += d->deltaaimpitch*k;
         }
     }
 
