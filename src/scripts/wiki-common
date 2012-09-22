@@ -19,14 +19,29 @@ format_name ()
     echo "$1" | sed 's%^setdesc "\([^"]*\)".*%\1%'
 }
 
+format_name_weap ()
+{
+    echo "$1" | sed 's%^setdesc (concatword \$w \([^ ^)]*\).*%\1%'
+}
+
 format_desc ()
 {
-    echo "$1" | sed 's%^setdesc "[^"]*" \[\([^]]*\)\].*%\1%'
+    echo "$1" | sed -e 's%\^n% %g' -e 's%\^"%ESC_QUOT%g' -e 's%^setdesc "[^"]*" "\([^"]*\)".*%\1%' -e 's%ESC_QUOT%"%g'
+}
+
+format_desc_weap ()
+{
+    echo "$1" | sed -e 's%\^n% %g' -e 's%\^"%ESC_QUOT%g' -e 's%^setdesc ([^)]*) "\([^"]*\)".*%\1%' -e 's%ESC_QUOT%"%g'
 }
 
 format_param ()
 {
-    echo "$1" | sed -ne 's%^setdesc "[^"]*" \[[^]]*\] "\([^"]*\)"%\1%p' -e 's% %\&nbsp;%g'
+    echo "$1" | sed -ne 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p' -e 's% %\&nbsp;%g'
+}
+
+format_param_weap ()
+{
+    echo "$1" | sed -ne 's%^setdesc ([^)]*) ".*" "\([^"]*\)"%\1%p' -e 's% %\&nbsp;%g'
 }
 
 noedit_header ()

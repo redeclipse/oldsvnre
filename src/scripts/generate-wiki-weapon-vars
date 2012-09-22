@@ -13,9 +13,9 @@ table_content_weapon-vars ()
 IFS=$'\n'
 for i in $(grep "^  *setdesc" "$1" | sed 's%^  *%%' | sort)
 do
-        VAR="$(echo $i | sed 's%^setdesc (concatword \$w \([^ ^)]*\).*%\1%')"
-        DESC="$(echo $i | sed 's%^setdesc ([^)]*) \[\([^]]*\)\].*"%\1%')"
-        PARAM="$(echo $i | sed 's%^setdesc ([^)]*) \[[^]]*\] "\([^"]*\)"%\1%')"
+        VAR="$(format_name_weap "$i")"
+        DESC="$(format_desc_weap "$i")"
+        PARAM="$(format_param_weap "$i")"
 
         SRC_DEF="$(sed -n 's%.*\(G[A-Z]*VAR[A-Z]*([^,]*, a##'"$VAR"'[1,][^)]*)\).*%\1%p' "$WEAPONS_H")"
 
