@@ -120,7 +120,7 @@ namespace game
     extern void renderplayerpreview(int model, int color, int team, int weap);
     extern bool thirdpersonview(bool viewonly = false, physent *d = NULL);
     extern vec thirdpos(const vec &pos, float yaw, float pitch, float dist);
-    extern vec camerapos(physent *d, bool flw = false, float yaw = -1, float pitch = 0);
+    extern vec camerapos(physent *d, bool hasfoc = false, bool hasyp = false, float yaw = 0, float pitch = 0);
     extern void start();
 }
 #endif

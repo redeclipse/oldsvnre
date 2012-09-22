@@ -45,7 +45,15 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 25, FVAR_MAX);
 
-    VAR(0, follow, 0, 0, VAR_MAX);
+    VAR(0, follow, -1, -1, VAR_MAX);
+    void resetfollow()
+    {
+        bool reset = focus != player1;
+        focus = player1;
+        follow = -1;
+        if(reset) resetcamera();
+    }
+
     VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
     FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 25, FVAR_MAX);
@@ -71,8 +79,8 @@ namespace game
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
 
-    VARF(IDF_PERSIST, specmode, 0, 1, 1, follow = 0); // 0 = float, 1 = tv
-    VARF(IDF_PERSIST, waitmode, 0, 2, 2, follow = 0); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
+    VARF(IDF_PERSIST, specmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
+    VARF(IDF_PERSIST, waitmode, 0, 2, 2, resetfollow()); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
@@ -415,38 +423,47 @@ namespace game
         return false;
     }
 
-    ICOMMAND(0, specmodeswitch, "", (), specmode = specmode ? 0 : 1; hud::showscores(false); follow = 0);
-    ICOMMAND(0, waitmodeswitch, "", (), waitmode = waitmode ? 0 : (m_duke(gamemode, mutators) ? 1 : 2); hud::showscores(false); follow = 0);
+    ICOMMAND(0, specmodeswitch, "", (), specmode = specmode ? 0 : 1; hud::showscores(false); resetfollow());
+    ICOMMAND(0, waitmodeswitch, "", (), waitmode = waitmode ? 0 : (m_duke(gamemode, mutators) ? 1 : 2); hud::showscores(false); resetfollow());
 
     bool followswitch(int n, bool other = false)
     {
         if(!tvmode())
         {
-            follow = max(follow, 0)+n;
-            int numdyns = numdynents();
             #define checkfollow \
-                if(follow >= numdyns) follow = 0; \
-                else if(follow < 0) follow = numdyns-1;
+                if(follow >= players.length()) follow = -1; \
+                else if(follow < -1) follow = players.length()-1;
             #define addfollow \
             { \
                 follow += clamp(n, -1, 1); \
                 checkfollow; \
+                if(follow == -1) \
+                { \
+                    if(other) follow += clamp(n, -1, 1); \
+                    else \
+                    { \
+                        resetfollow(); \
+                        return true; \
+                    } \
+                    checkfollow; \
+                } \
             }
-            checkfollow;
-            loopi(numdyns)
+            addfollow;
+            loopi(players.length())
             {
-                gameent *d = (gameent *)iterdynents(follow);
-                if(!d) addfollow
-                else if(d == player1)
+                if(!players.inrange(follow)) addfollow
                 {
-                    if(other) addfollow
-                    else return true;
+                    gameent *d = players[follow];
+                    if(!d || d->aitype >= AI_START || !allowspec(d, followdead)) addfollow
+                    else
+                    {
+                        focus = d;
+                        return true;
+                    }
                 }
-                else if(d->aitype >= AI_START || !allowspec(d, followdead)) addfollow
-                else return true;
             }
+            resetfollow();
         }
-        follow = -1;
         return false;
     }
     ICOMMAND(0, followdelta, "ii", (int *n, int *o), followswitch(*n!=0 ? *n : 1, *o!=0));
@@ -643,11 +660,10 @@ namespace game
 
     gameent *pointatplayer()
     {
-        loopv(players)
+        vec pos = focus->headpos();
+        loopv(players) if(players[i])
         {
             gameent *o = players[i];
-            if(!o) continue;
-            vec pos = focus->headpos();
             float dist;
             if(intersect(o, pos, worldpos, dist)) return o;
         }
@@ -1386,7 +1402,7 @@ namespace game
             e->dominating.removeobj(d);
             e->dominated.removeobj(d);
         }
-        if(focus == d) { focus = player1; follow = 0; } // just in case
+        if(focus == d) resetfollow(); // just in case
         tvreset(d, true);
         client::unignore(d->clientnum);
         waiting.removeobj(d);
@@ -1521,8 +1537,8 @@ namespace game
     bool duplicatename(gameent *d, char *name = NULL)
     {
         if(!name) name = d->name;
-        if(!client::demoplayback && d!=player1 && !strcmp(name, player1->name)) return true;
-        loopv(players) if(players[i] && d!=players[i] && !strcmp(name, players[i]->name)) return true;
+        if(!client::demoplayback && d != player1 && !strcmp(name, player1->name)) return true;
+        loopv(players) if(players[i] && d != players[i] && !strcmp(name, players[i]->name)) return true;
         return false;
     }
 
@@ -1745,9 +1761,9 @@ namespace game
         fixrange(yaw, pitch);
     }
 
-    physent tpcam;
     vec thirdpos(const vec &pos, float yaw, float pitch, float dist)
     {
+        static physent tpcam;
         if(tpcam.type != ENT_CAMERA)
         {
             tpcam.reset();
@@ -1760,21 +1776,20 @@ namespace game
         tpcam.o = pos;
         vecfromyawpitch(yaw, pitch, -1, 0, dir);
         physics::movecamera(&tpcam, dir, dist, 1.0f);
-        tpcam.resetinterp();
         return tpcam.o;
     }
 
-    vec camerapos(physent *d, bool flw, float yaw, float pitch)
+    vec camerapos(physent *d, bool hasfoc, bool hasyp, float yaw, float pitch)
     {
         vec pos = d->headpos();
-        if(d == focus || flw)
+        if(d == focus || hasfoc)
         {
-            if(yaw < 0)
+            if(!hasyp)
             {
                 yaw = d->yaw;
                 pitch = d->pitch;
             }
-            if(thirdpersonview(true, flw ? d : focus)) pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist);
+            if(thirdpersonview(true, hasfoc ? d : focus)) pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist);
             else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
             {
                 float scale = 1;
@@ -1829,16 +1844,8 @@ namespace game
         }
         if(renew || rejigger || (cam->player && focus != cam->player) || (!cam->player && focus != player1))
         {
-            if(cam->player)
-            {
-                focus = cam->player;
-                follow = cam->id;
-            }
-            else
-            {
-                focus = player1;
-                follow = 0;
-            }
+            if(cam->player) focus = cam->player;
+            else focus = player1;
             return true;
         }
         return false;
@@ -1978,8 +1985,8 @@ namespace game
             if(force) loopv(cameras) if(cameras[i]->ignore) cameras[i]->ignore = false;
             cam = cameras[0];
             lasttvcam = lastmillis;
-            camrefresh(cam, true);
         }
+        camrefresh(cam, renew);
         if(!lasttvchg || cam->type != lasttype || cam->id != lastid)
         {
             amt = 0;
@@ -2052,7 +2059,6 @@ namespace game
                 camera1->pitch = pitch;
             }
         }
-        camera1->resetinterp();
         return true;
     }
 
@@ -2131,7 +2137,7 @@ namespace game
 
     void resetworld()
     {
-        follow = 0; focus = player1;
+        resetfollow();
         hud::showscores(false);
         cleargui();
     }
@@ -2182,24 +2188,13 @@ namespace game
         if(connected())
         {
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
-
-            gameent *d = NULL;
-            bool allow = player1->state >= CS_SPECTATOR, found = false;
-            int numdyns = numdynents();
-            loopi(numdyns) if((d = (gameent *)iterdynents(i)) != NULL)
+            checkoften(player1, true);
+            loopv(players) if(players[i])
             {
-                if(i == follow && (d == player1 || (allow && allowspec(d, followdead))))
-                {
-                    if(focus != d)
-                    {
-                        focus = d;
-                        resetcamera();
-                    }
-                    found = true;
-                }
+                gameent *d = players[i];
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
-                    checkoften(d, d == player1 || d->ai);
+                    checkoften(d, d->ai != NULL);
                     if(d == player1)
                     {
                         int state = d->weapstate[d->weapselect];
@@ -2212,15 +2207,6 @@ namespace game
                         else if(WEAP(d->weapselect, zooms) && state == WEAP_S_IDLE && zooming != d->action[AC_ALTERNATE])
                             zoomset(d->action[AC_ALTERNATE], lastmillis);
                     }
-                }
-            }
-            if((!found || !allow) && focus != player1)
-            {
-                if(!allow || follow < 0 || !followswitch(1, true))
-                {
-                    focus = player1;
-                    follow = -1;
-                    resetcamera();
                 }
             }
             if(!allowmove(player1)) player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
@@ -2295,13 +2281,13 @@ namespace game
                 if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
                 {
                     physent *d = aim ? player1 : focus;
-                    camera1->o = camerapos(focus, true, d->yaw, d->pitch);
+                    camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
                     camera1->yaw = d->yaw;
                     camera1->pitch = d->pitch;
-                    camera1->resetinterp();
                 }
                 else if(focus->state == CS_DEAD) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
             }
+            camera1->resetinterp();
             calcangles(camera1, focus);
             findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
 
