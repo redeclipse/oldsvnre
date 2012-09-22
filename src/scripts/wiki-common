@@ -14,6 +14,11 @@ find_src_files ()
     \)
 }
 
+extract_src_def ()
+{
+	echo "$1" | grep '^[^A-Z]*[A-Z]*([^,]*, '"$2"', '
+}
+
 format_name ()
 {
     echo "$1" | sed 's%^setdesc "\([^"]*\)".*%\1%'
@@ -36,12 +41,12 @@ format_desc_weap ()
 
 format_param ()
 {
-    echo "$1" | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p' | sed 's% %\&nbsp;%g'
+    echo "$1" | sed -n '/^setdesc "[^"]*" ".*" "\([^"]*\)"/{s%%\1%; s% %\&nbsp;%g; p;}'
 }
 
 format_param_weap ()
 {
-    echo "$1" | sed -n 's%^setdesc ([^)]*) ".*" "\([^"]*\)"%\1%p' | sed 's% %\&nbsp;%g'
+    echo "$1" | sed -n '/^setdesc ([^)]*) ".*" "\([^"]*\)"/{s%%\1%; s% %\&nbsp;%g; p;}'
 }
 
 noedit_header ()

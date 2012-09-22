@@ -6,58 +6,55 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$DIR"/wiki-common
 
-SRC_FILES="$(find_src_files "$DIR"/..)"
+noedit_header > "$2"
+table_header >> "$2"
 
-table_content_game-vars ()
-{
+SRC_DEFS="$(grep -h '^[^A-Z]*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, ' $(find_src_files "$DIR/..") | sed 's%^ *%%')"
+
 IFS=$'\n'
 for i in $(grep "^setdesc" "$1" | sort)
 do
-        VAR="$(format_name "$i")"
+    VAR="$(format_name "$i")"
 
-        # Only consider G*VAR*s
-        SRC_DEF="$(grep -hr "G[A-Z]*VAR[A-Z]*([^,]*, $VAR, " $SRC_FILES)"
-        if [ -z "$SRC_DEF" ]; then continue; fi
+    # Only consider G*VAR*s
+    SRC_DEF="$(extract_src_def "$SRC_DEFS" "$VAR")"
+    if [ -z "$SRC_DEF" ]; then continue; fi
 
-        DESC="$(format_desc "$i")"
-        PARAM="$(format_param "$i")"
+    DESC="$(format_desc "$i")"
+    PARAM="$(format_param "$i")"
 
-        SRC_TYPE="$(echo $SRC_DEF | sed 's%.*\(G[A-Z]*VAR[A-Z]*\)(.*%\1%')"
-        case "$SRC_TYPE" in
-            GVAR*)
-                TYPE="integer" ;;
-            GFVAR*)
-                TYPE="float" ;;
-            GSVAR*)
-                TYPE="string" ;;
-            *)
-                TYPE="BUG" ;;
-        esac
+    SRC_TYPE="$(echo $SRC_DEF | sed 's%.*\(G[A-Z]*VAR[A-Z]*\)(.*%\1%')"
+    case "$SRC_TYPE" in
+        GVAR*)
+            TYPE="integer" ;;
+        GFVAR*)
+            TYPE="float" ;;
+        GSVAR*)
+            TYPE="string" ;;
+        *)
+            TYPE="BUG" ;;
+    esac
 
-        SRC_IDF="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*(\([^,]*\),%\1%')"
-        IDF_ADMIN=""
-        # Currently only one case
-        case "$SRC_IDF" in
-            *IDF_ADMIN*)
-                IDF_ADMIN="admin-only"
-                ;;
-        esac
+    SRC_IDF="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*(\([^,]*\),%\1%')"
+    IDF_ADMIN=""
+    # Currently only one case
+    case "$SRC_IDF" in
+        *IDF_ADMIN*)
+            IDF_ADMIN="admin-only"
+            ;;
+    esac
 
-        TYPE_STRING="$(echo "$IDF_ADMIN game $TYPE" | sed 's%^ %%')"
+    TYPE_STRING="$(echo "$IDF_ADMIN game $TYPE" | sed 's%^ %%')"
 
-        MIN_MAX="n/a"
-        if [ "x$TYPE" != "xstring" ]
-        then
-            MIN_MAX="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, \([^,]*\), [^,]*, \([^,^)]*\).*%\1..\2%')"
-            DEFAULT="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, [^,]*, \([^,^)]*\).*%\1%')"
-        else
-            DEFAULT="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, \([^,^)]*\).*%\1%')"
-        fi
-        table_entry "$VAR" "$PARAM" "$DESC" "$TYPE_STRING" "$MIN_MAX" "$DEFAULT"
-        done
-}
+    MIN_MAX="n/a"
+    if [ "x$TYPE" != "xstring" ]
+    then
+        MIN_MAX="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, \([^,]*\), [^,]*, \([^,^)]*\).*%\1..\2%')"
+        DEFAULT="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, [^,]*, \([^,^)]*\).*%\1%')"
+    else
+        DEFAULT="$(echo $SRC_DEF | sed 's%.*G[A-Z]*VAR[A-Z]*([^,]*, [^,]*, \([^,^)]*\).*%\1%')"
+    fi
+    table_entry "$VAR" "$PARAM" "$DESC" "$TYPE_STRING" "$MIN_MAX" "$DEFAULT" >> "$2"
+done
 
-noedit_header > "$2"
-table_header >> "$2"
-table_content_game-vars "$1" >> "$2"
 table_end >> "$2"

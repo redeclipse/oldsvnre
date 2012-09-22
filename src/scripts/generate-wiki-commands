@@ -6,40 +6,36 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$DIR"/wiki-common
 
-SRC_FILES="$(find_src_files "$DIR"/..)"
-
-table_content_commands ()
-{
-    IFS=$'\n'
-    for i in $(grep "^setdesc" "$1" | sort)
-    do
-        COM="$(format_name "$i")"
-
-        # Get corresponding source lines
-        SRC_DEF="$(grep -hr "^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, $COM, " $SRC_FILES)"
-        if [ -z "$SRC_DEF" ]; then continue; fi
-
-        DESC="$(format_desc "$i")"
-        PARAM="$(format_param "$i")"
-
-        SRC_IDF="$(echo $SRC_DEF | sed 's%^[^A-Z]*[A-Z]*COMMAND[A-Z]*(\([^,]*\),%\1%')"
-        IDF_ADMIN=""
-        # Currently only one case
-        case "$SRC_IDF" in
-            *IDF_ADMIN*)
-                IDF_ADMIN="admin-only"
-                ;;
-        esac
-
-        TYPE_STRING="$(echo "$IDF_ADMIN command" | sed -e 's%^ *%%' -e 's%  *% %g')"
-
-	# ending sed cleans up no-parameter commands
-        table_entry_simple "$COM" "$PARAM" "$DESC" "$TYPE_STRING" | sed "s%&nbsp;['\'']*$%%"
-        done
-}
-
-
 noedit_header > "$2"
 table_header_simple >> "$2"
-table_content_commands "$1" >> "$2"
+
+SRC_DEFS="$(grep -h '^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, [^,]*, ' $(find_src_files "$DIR/..") | sed 's%^ *%%')"
+
+IFS=$'\n'
+for i in $(grep "^setdesc" "$1" | sort)
+do
+    COM="$(format_name "$i")"
+
+    # Get corresponding source lines
+    SRC_DEF="$(extract_src_def "$SRC_DEFS" "$COM")"
+    if [ -z "$SRC_DEF" ]; then continue; fi
+
+    DESC="$(format_desc "$i")"
+    PARAM="$(format_param "$i")"
+
+    SRC_IDF="$(echo $SRC_DEF | sed 's%^[^A-Z]*[A-Z]*COMMAND[A-Z]*(\([^,]*\),%\1%')"
+    IDF_ADMIN=""
+    # Currently only one case
+    case "$SRC_IDF" in
+        *IDF_ADMIN*)
+            IDF_ADMIN="admin-only"
+            ;;
+    esac
+
+    TYPE_STRING="$(echo "$IDF_ADMIN command" | sed -e 's%^ *%%' -e 's%  *% %g')"
+
+	# ending sed cleans up no-parameter commands
+    table_entry_simple "$COM" "$PARAM" "$DESC" "$TYPE_STRING" | sed "s%&nbsp;['\'']*$%%" >> "$2"
+done
+
 table_end >> "$2"
