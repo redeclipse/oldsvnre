@@ -1,23 +1,25 @@
 #!/bin/bash
 #
-# "$1" is usage.cfg
-# "$2" is output file
+# "$1..n-1" is input files
+# "$n" is output file
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-
 source "$DIR"/wiki-common
-source "$DIR"/generate-wiki-aliases
-source "$DIR"/generate-wiki-commands
-for i in "$DIR"/generate-wiki-*-vars
+
+for i
 do
-    source "$i"
+    if [ -n "$INFILES" ]
+    then
+        INFILES="$INFILES $OUTFILE"
+    else
+        INFILES="$OUTFILE"
+    fi
+    OUTFILE="$i"
 done
 
-noedit_header > "$2"
-table_header >> "$2"
-table_content_aliases "$1" >> "$2"
-table_content_commands "$1" >> "$2"
-table_content_engine-vars "$1" >> "$2"
-table_content_game-vars "$1" >> "$2"
-table_content_weapon-vars "$1" >> "$2"
-table_end >> "$2"
+noedit_header > "$OUTFILE"
+table_header >> "$OUTFILE"
+
+sed -n '/|-/,/|}/p' $INFILES | sed '/|}/d' >> "$OUTFILE"
+
+table_end >> "$OUTFILE"

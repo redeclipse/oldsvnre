@@ -217,11 +217,14 @@ wiki-guidelines: ../doc/wiki-guidelines.txt
 ../doc/wiki-%.txt: ../data/usage.cfg
 	scripts/generate-wiki-$* $< $@
 
+../doc/wiki-all-vars-commands.txt: ../doc/wiki-game-vars.txt ../doc/wiki-engine-vars.txt ../doc/wiki-weapon-vars.txt ../doc/wiki-commands.txt ../doc/wiki-aliases.txt
+	scripts/generate-wiki-all-vars-commands $^ $@
+
 wiki-game-vars: ../doc/wiki-game-vars.txt
 
-wiki-weapon-vars: ../doc/wiki-weapon-vars.txt
-
 wiki-engine-vars: ../doc/wiki-engine-vars.txt
+
+wiki-weapon-vars: ../doc/wiki-weapon-vars.txt
 
 wiki-commands: ../doc/wiki-commands.txt
 
