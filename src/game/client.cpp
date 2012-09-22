@@ -2153,7 +2153,7 @@ namespace client
                     int sn = getint(p), val = getint(p);
                     gameent *s = game::newclient(sn);
                     if(!s) break;
-                    if(s == game::player1) game::focus = game::player1;
+                    if(s == game::player1) game::resetfollow();
                     if(val)
                     {
                         if(s == game::player1 && editmode) toggleedit();

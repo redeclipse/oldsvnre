@@ -811,7 +811,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     if(progressing || !inbetweenframes || envmapping) return;
     int ticks = SDL_GetTicks();
     if(lastprogress > 0 && ticks < 0) lastprogress = 1-INT_MAX;
-    if((bar1 > 0 || !progressupdate) && ticks-lastprogress < progressdelay) return;
+    if((actualvsync || bar1 > 0 || !progressupdate) && ticks-lastprogress < progressdelay) return;
     lastprogress = ticks;
     clientkeepalive();
 

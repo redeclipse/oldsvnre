@@ -1409,6 +1409,7 @@ namespace game
     extern string clientmap;
 
     extern gameent *player1, *focus;
+    extern void resetfollow();
     extern vector<gameent *> players, waiting;
 
     struct avatarent : dynent
