@@ -203,12 +203,13 @@ namespace game
         return true;
     }
 
-    bool thirdpersonview(bool viewonly)
+    bool thirdpersonview(bool viewonly, physent *d)
     {
-        if(!viewonly && (focus->state == CS_DEAD || focus->state == CS_WAITING)) return true;
-        if(!(focus != player1 ? thirdpersonfollow : thirdperson)) return false;
+        if(!d) d = focus;
+        if(!viewonly && (d->state == CS_DEAD || d->state == CS_WAITING)) return true;
+        if(!(d != player1 ? thirdpersonfollow : thirdperson)) return false;
         if(player1->state == CS_EDITING) return false;
-        if(player1->state >= CS_SPECTATOR && focus == player1) return false;
+        if(player1->state >= CS_SPECTATOR && d == player1) return false;
         if(inzoom()) return false;
         return true;
     }
@@ -383,12 +384,12 @@ namespace game
                     if(!x) lastcamera = lasttvcam = lasttvchg = 0;
                 }
             }
-            else
+            else if(maptime > 0)
             {
                 if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
                 {
                     cament *c = cameras.add(new cament);
-                    c->o = camerapos(d);
+                    c->o = d->center();
                     c->type = cament::PLAYER;
                     c->id = d->clientnum;
                     c->player = d;
@@ -1451,7 +1452,6 @@ namespace game
         ai::startmap(name, reqname, empty);
         intermission = false;
         maptime = hud::lastnewgame = 0;
-        tvreset();
         projs::reset();
         physics::reset();
         resetworld();
@@ -1470,9 +1470,10 @@ namespace game
             chooseloadweap(game::player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera();
+        resetsway();
+        tvreset();
         if(!empty) client::sendinfo = client::sendcrc = true;
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
-        resetsway();
     }
 
     gameent *intersectclosest(vec &from, vec &to, gameent *at)
@@ -1744,6 +1745,59 @@ namespace game
         fixrange(yaw, pitch);
     }
 
+    physent tpcam;
+    vec thirdpos(const vec &pos, float yaw, float pitch, float dist)
+    {
+        if(tpcam.type != ENT_CAMERA)
+        {
+            tpcam.reset();
+            tpcam.type = ENT_CAMERA;
+            tpcam.collidetype = COLLIDE_AABB;
+            tpcam.state = CS_ALIVE;
+            tpcam.height = tpcam.zradius = tpcam.radius = tpcam.xradius = tpcam.yradius = 2;
+        }
+        vec dir;
+        tpcam.o = pos;
+        vecfromyawpitch(yaw, pitch, -1, 0, dir);
+        physics::movecamera(&tpcam, dir, dist, 1.0f);
+        tpcam.resetinterp();
+        return tpcam.o;
+    }
+
+    vec camerapos(physent *d, bool flw, float yaw, float pitch)
+    {
+        vec pos = d->headpos();
+        if(d == focus || flw)
+        {
+            if(yaw < 0)
+            {
+                yaw = d->yaw;
+                pitch = d->pitch;
+            }
+            if(thirdpersonview(true, flw ? d : focus)) pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist);
+            else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
+            {
+                float scale = 1;
+                if(d == game::player1 && inzoom())
+                {
+                    int frame = lastmillis-lastzoom;
+                    float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
+                    scale *= zooming ? 1.f-pc : pc;
+                }
+                if(scale > 0)
+                {
+                    vec dir;
+                    vecfromyawpitch(yaw, 0, 0, 1, dir);
+                    float steps = bobdist/firstpersonbobstep*M_PI;
+                    dir.mul(firstpersonbobside*cosf(steps)*scale);
+                    dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
+                    pos.add(dir);
+                }
+            }
+        }
+        return pos;
+    }
+
     void deathcamyawpitch(gameent *d, float &yaw, float &pitch)
     {
         if(deathcamstyle)
@@ -1793,11 +1847,11 @@ namespace game
     bool camupdate(cament *c, const vec &pos, bool update = false)
     {
         float foglevel = float(fog*2/3);
-        c->reset(true);
+        c->reset();
         if(c->player && !allowspec(c->player, spectvdead)) return false;
         loopj(c->player ? 1 : 2)
         {
-            int players = c->player ? 1 : 0, count = 0;
+            int count = 0;
             loopv(cameras) if(c != cameras[i])
             {
                 cament *cam = cameras[i];
@@ -1806,21 +1860,12 @@ namespace game
                     case cament::ENTITY: continue;
                     case cament::PLAYER:
                     {
-                        if(!cam->player || cam->player->state != CS_ALIVE || (c->player && cam->player && c->player == cam->player)) continue;
+                        if(!cam->player || c->player == cam->player || cam->player->state != CS_ALIVE) continue;
                         break;
                     }
                     default: break;
                 }
                 vec trg, from = cam->o;
-                if(cam->type == cament::AFFINITY && followdist > 0)
-                {
-                    vec oldpos = camera1->o;
-                    camera1->o = from;
-                    vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
-                    physics::movecamera(camera1, dir, followdist, 1.0f);
-                    from = camera1->o;
-                    camera1->o = oldpos;
-                }
                 float dist = pos.dist(from), fogdist = min(c->maxdist, foglevel);
                 if(dist >= c->mindist && dist <= fogdist)
                 {
@@ -1828,8 +1873,9 @@ namespace game
                     if(j && !c->inview[cament::PLAYER]) hassight = true; // rejigger and get a direction
                     else
                     {
-                        float yaw = c->player ? c->player->yaw : camera1->yaw, pitch = c->player ? c->player->pitch : camera1->pitch;
-                        if(!c->player && (update || j))
+                        bool reiter = update || j, alive = c->player && c->player->state == CS_ALIVE;
+                        float yaw = alive ? c->player->yaw : camera1->yaw, pitch = alive ? c->player->pitch : camera1->pitch;
+                        if(!alive && reiter)
                         {
                             vec dir = from;
                             if(count) dir.add(vec(c->dir).div(count));
@@ -1842,49 +1888,22 @@ namespace game
                     }
                     if(hassight && raycubelos(pos, from, trg))
                     {
-                        if(cam->type == cament::PLAYER) players++;
                         c->inview[cam->type]++;
                         c->dir.add(cam->o);
                         count++;
                     }
                 }
             }
-            if(count > 0)
+            if(count)
             {
                 if(count > 1) c->dir.div(count);
                 if(c->player) c->inview[cament::PLAYER]++;
-                if(players || j) return players!=0;
+                if(c->inview[cament::PLAYER] || j) return true;
             }
             c->dir = c->olddir;
-            c->reset(true);
+            c->reset();
         }
-        c->dir = c->olddir;
         return false;
-    }
-
-    vec camerapos(physent *d)
-    {
-        vec pos = d->headpos();
-        if(firstpersonbob && d == focus && !intermission && !thirdpersonview(true))
-        {
-            float scale = 1;
-            if(d == game::player1 && inzoom())
-            {
-                int frame = lastmillis-lastzoom;
-                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
-                scale *= zooming ? 1.f-pc : pc;
-            }
-            if(scale > 0)
-            {
-                vec dir;
-                vecfromyawpitch(d->yaw, 0, 0, 1, dir);
-                float steps = bobdist/firstpersonbobstep*M_PI;
-                dir.mul(firstpersonbobside*cosf(steps)*scale);
-                dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
-                pos.add(dir);
-            }
-        }
-        return pos;
     }
 
     bool cameratv()
@@ -1896,7 +1915,6 @@ namespace game
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
                 if(e.type!=PLAYERSTART && e.type!=LIGHT && e.type<MAPSOUND) continue;
-                //if(e.type==MAPMODEL) continue;
                 cament *c = cameras.add(new cament);
                 c->o = e.o;
                 c->o.z += max(enttype[e.type].radius, 2);
@@ -1908,7 +1926,7 @@ namespace game
             loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
             {
                 cament *c = cameras.add(new cament);
-                c->o = camerapos(d);
+                c->o = d->center();
                 c->type = cament::PLAYER;
                 c->id = d->clientnum;
                 c->player = d;
@@ -1918,24 +1936,14 @@ namespace game
             else if(m_bomber(gamemode)) bomber::checkcams(cameras);
         }
         if(cameras.empty()) return false;
-        loopv(cameras) switch(cameras[i]->type)
+        loopv(cameras)
         {
-            case cament::PLAYER:
-            {
-                if(cameras[i]->player || ((cameras[i]->player = getclient(cameras[i]->id)) != NULL))
-                {
-                    cameras[i]->o = camerapos(cameras[i]->player);
-                    vecfromyawpitch(cameras[i]->player->yaw, cameras[i]->player->pitch, 1, 0, cameras[i]->dir);
-                }
-            }
-            default:
-            {
-                if(cameras[i]->type != cament::PLAYER && cameras[i]->player) cameras[i]->player = NULL;
-                if(m_capture(gamemode)) capture::updatecam(cameras[i]);
-                else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
-                else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
-                break;
-            }
+            if(cameras[i]->type == cament::PLAYER && (cameras[i]->player || ((cameras[i]->player = getclient(cameras[i]->id)) != NULL)))
+                cameras[i]->o = cameras[i]->player->center();
+            if(cameras[i]->type != cament::PLAYER && cameras[i]->player) cameras[i]->player = NULL;
+            if(m_capture(gamemode)) capture::updatecam(cameras[i]);
+            else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
+            else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
         }
         int millis = lasttvchg ? lastmillis-lasttvchg : 0;
         bool force = spectvmaxtime && millis >= spectvmaxtime,
@@ -1945,10 +1953,12 @@ namespace game
         cament *cam = cameras[0];
         camrefresh(cam);
         int lasttype = cam->type, lastid = cam->id;
-        bool updated = camupdate(cam, cam->pos(amt));
+        vec pos = cam->player ? camerapos(cam->player, true) : cam->pos(amt);
+        bool updated = camupdate(cam, pos);
         if(renew || (!updated && override))
         {
-            loopv(cameras) if(!camupdate(cameras[i], cameras[i]->o, true)) cameras[i]->reset();
+            loopv(cameras) if(!camupdate(cameras[i], cameras[i]->player ? camerapos(cameras[i]->player, true) : cameras[i]->o, true))
+                cameras[i]->reset();
             if(!updated && override) renew = force = true;
         }
         if(renew)
@@ -1956,22 +1966,27 @@ namespace game
             if(force)
             {
                 cam->ignore = true;
-                if(cam->player) loopv(cameras) if(cameras[i]->player == cam->player)
-                    cameras[i]->ignore = true;
+                loopv(cameras) if(cameras[i]->player)
+                {
+                    if(cameras[i]->player == cam->player)
+                        cameras[i]->ignore = true;
+                    else if((cameras[i]->player->state == CS_DEAD || cameras[i]->player->state == CS_WAITING) && !cameras[i]->player->lastdeath)
+                        cameras[i]->ignore = true;
+                }
             }
             cameras.sort(cament::camsort);
             if(force) loopv(cameras) if(cameras[i]->ignore) cameras[i]->ignore = false;
-            cam->current = false;
             cam = cameras[0];
-            cam->current = true;
             lasttvcam = lastmillis;
+            camrefresh(cam, true);
         }
-        camrefresh(cam, renew);
         if(!lasttvchg || cam->type != lasttype || cam->id != lastid)
         {
+            amt = 0;
             lasttvchg = lastmillis;
             if(!renew) renew = true;
             cam->moveto = NULL;
+            cam->resetlast();
             if(cam->type == cament::ENTITY)
             {
                 vector<cament *> mcams;
@@ -1993,11 +2008,12 @@ namespace game
                     }
                 }
             }
-            amt = 0;
         }
         else if(renew) renew = false;
-        camera1->o = cam->pos(amt);
-        if(focus != player1)
+        if(cam->type == cament::AFFINITY)
+            camera1->o = thirdpos(cam->o, camera1->yaw, camera1->pitch, followdist);
+        else camera1->o = cam->player ? camerapos(cam->player, true) : cam->pos(amt);
+        if(focus != player1 && focus->state != CS_DEAD && focus->state != CS_WAITING)
         {
             camera1->yaw = focus->yaw;
             camera1->pitch = focus->pitch;
@@ -2012,8 +2028,8 @@ namespace game
                 float speed = curtime/float(spectvspeed);
                 #define SCALEAXIS(x) \
                     float x##scale = 1, adj##x = camera1->x, off##x = x; \
-                    if(adj##x < x-180.0f) adj##x += 360.0f; \
-                    if(adj##x > x+180.0f) adj##x -= 360.0f; \
+                    if(adj##x < x - 180.0f) adj##x += 360.0f; \
+                    if(adj##x > x + 180.0f) adj##x -= 360.0f; \
                     off##x -= adj##x; \
                     if(cam->last##x == 0 || (off##x > 0 && cam->last##x < 0) || (off##x < 0 && cam->last##x > 0) || (fabs(cam->last##x - off##x) >= spectv##x##thresh)) \
                     { \
@@ -2036,11 +2052,6 @@ namespace game
                 camera1->pitch = pitch;
             }
         }
-        if(cam->type == cament::AFFINITY && followdist > 0)
-        {
-            vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
-            physics::movecamera(camera1, dir, followdist, 1.0f);
-        }
         camera1->resetinterp();
         return true;
     }
@@ -2061,23 +2072,6 @@ namespace game
             camera1->vel = vec(0, 0, 0);
             camera1->move = camera1->strafe = 0;
         }
-        if(!cameratv())
-        {
-            if(focus->state == CS_DEAD) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
-            else if(focus->state >= CS_SPECTATOR)
-            {
-                camera1->move = player1->move;
-                camera1->strafe = player1->strafe;
-                physics::move(camera1, 10, true);
-            }
-        }
-        if(focus->state == CS_SPECTATOR)
-        {
-            player1->yaw = camera1->yaw;
-            player1->pitch = camera1->pitch;
-            player1->o = camera1->o;
-            player1->resetinterp();
-        }
     }
 
     float calcroll(gameent *d)
@@ -2094,10 +2088,10 @@ namespace game
         return r;
     }
 
-    void calcangles(physent *c, gameent *d, bool bob = true)
+    void calcangles(physent *c, gameent *d)
     {
         c->roll = calcroll(d);
-        if(bob && firstpersonbob && !thirdperson && !intermission)
+        if(firstpersonbob && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
         {
             float scale = 1;
             if(d == game::player1 && inzoom())
@@ -2251,6 +2245,7 @@ namespace game
         if(connected())
         {
             flushdamagemerges();
+            checkcamera();
             if(player1->state == CS_DEAD || player1->state == CS_WAITING)
             {
                 if(player1->ragdoll) moveragdoll(player1, true);
@@ -2261,15 +2256,27 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 if(player1->state == CS_EDITING) physics::move(player1, 10, true);
-                else if(!intermission && player1->state == CS_ALIVE)
+                else if(!intermission && !tvmode())
                 {
-                    physics::move(player1, 10, true);
-                    entities::checkitems(player1);
-                    weapons::checkweapons(player1);
+                    if(player1->state >= CS_SPECTATOR && focus == player1)
+                    {
+                        camera1->move = player1->move;
+                        camera1->strafe = player1->strafe;
+                        physics::move(camera1, 10, true);
+                        player1->yaw = camera1->yaw;
+                        player1->pitch = camera1->pitch;
+                        player1->o = camera1->o;
+                        player1->resetinterp();
+                    }
+                    else if(player1->state == CS_ALIVE)
+                    {
+                        physics::move(player1, 10, true);
+                        entities::checkitems(player1);
+                        weapons::checkweapons(player1);
+                    }
                 }
             }
             if(!intermission) addsway(focus);
-            checkcamera();
             if(hud::canshowscores()) hud::showscores(true);
         }
 
@@ -2279,32 +2286,24 @@ namespace game
     void recomputecamera(int w, int h)
     {
         fixview(w, h);
-        checkcamera();
         if(!client::waiting())
         {
-            physent *d = camera1;
-            bool bob = false;
-            if(!tvmode())
+            checkcamera();
+            if(!cameratv())
             {
-                bool self = thirdpersonview(true) && thirdpersonaiming && focus != player1;
-                d = self ? player1 : focus;
-                if(self || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
+                bool aim = thirdpersonaiming && focus != player1 && thirdpersonview(true);
+                if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
                 {
-                    camera1->o = camerapos(focus);
+                    physent *d = aim ? player1 : focus;
+                    camera1->o = camerapos(focus, true, d->yaw, d->pitch);
                     camera1->yaw = d->yaw;
                     camera1->pitch = d->pitch;
-                    bob = true;
+                    camera1->resetinterp();
                 }
+                else if(focus->state == CS_DEAD) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
             }
-            else if(focus != player1) bob = true;
-            calcangles(camera1, focus, bob);
+            calcangles(camera1, focus);
             findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
-            if(thirdpersonview(true))
-            {
-                vec dir; vecfromyawpitch(camera1->yaw, camera1->pitch, -1, 0, dir);
-                physics::movecamera(camera1, dir, focus != player1 ? followdist : thirdpersondist, 1.0f);
-            }
-            camera1->resetinterp();
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
@@ -2328,7 +2327,6 @@ namespace game
                     break;
                 }
             }
-
             lastcamera = lastmillis;
         }
     }
