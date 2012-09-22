@@ -1264,22 +1264,23 @@ struct cament
     vec o, dir, olddir;
     float dist, mindist, maxdist, lastyaw, lastpitch;
     gameent *player;
-    bool current, ignore;
+    bool ignore;
     cament *moveto;
 
-    cament() : type(-1), id(-1), mindist(DISTMIN), maxdist(DISTMAX), player(NULL), current(false), ignore(false), moveto(NULL) { reset(); }
+    cament() : type(-1), id(-1), mindist(DISTMIN), maxdist(DISTMAX), player(NULL), ignore(false), moveto(NULL) { reset(); resetlast(); }
     ~cament() {}
 
-    void reset(bool update = false)
+    void reset()
     {
         loopi(MAX) inview[i] = 0;
-        olddir = update ? dir : vec(0, 0, 0);
+        if(!dir.iszero()) olddir = dir;
         dir = vec(0, 0, 0);
-        if(!update)
-        {
-            lastyawtime = lastpitchtime = lastmillis;
-            lastyaw = lastpitch = 0;
-        }
+    }
+
+    void resetlast()
+    {
+        lastyawtime = lastpitchtime = lastmillis;
+        lastyaw = lastpitch = 0;
     }
 
     static bool camsort(const cament *a, const cament *b)
