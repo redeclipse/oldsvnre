@@ -396,12 +396,16 @@ namespace game
 
     bool tvmode(bool check)
     {
-        if(!m_edit(gamemode) && (!check || !cameras.empty())) switch(player1->state)
+        if(!m_edit(gamemode) && (!check || !cameras.empty()))
         {
-            case CS_SPECTATOR: if(specmode) return true; break;
-            case CS_WAITING: if(waitmode >= (m_duke(gamemode, mutators) ? 1 : 2) && (!player1->lastdeath || lastmillis-player1->lastdeath >= 500))
-                return true; break;
-            default: break;
+            if(intermission) return true;
+            else switch(player1->state)
+            {
+                case CS_SPECTATOR: if(specmode) return true; break;
+                case CS_WAITING: if(waitmode >= (m_duke(gamemode, mutators) ? 1 : 2) && (!player1->lastdeath || lastmillis-player1->lastdeath >= 500))
+                    return true; break;
+                default: break;
+            }
         }
         return false;
     }
@@ -2046,7 +2050,7 @@ namespace game
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
         if(player1->state < CS_SPECTATOR && focus != player1) resetfollow();
-        if((focus->state != CS_WAITING && focus->state != CS_SPECTATOR) || tvmode())
+        if(tvmode() || (focus->state != CS_WAITING && focus->state != CS_SPECTATOR))
         {
             camera1->vel = vec(0, 0, 0);
             camera1->move = camera1->strafe = 0;

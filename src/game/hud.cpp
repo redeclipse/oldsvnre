@@ -42,11 +42,11 @@ namespace hud
     VAR(IDF_PERSIST, spawnfade, 0, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, commandfade, 0, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, commandfadeamt, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, commandfadeskew, 0, 0, 1);
     FVAR(IDF_PERSIST, commandscale, FVAR_NONZERO, 1, FVAR_MAX);
     VAR(IDF_PERSIST, uifade, 0, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, uifadeamt, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, uifadeamt, 0, 0.5f, 1);
 
     int conskip = 0;
     void setconskip(int *n)
