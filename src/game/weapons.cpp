@@ -45,7 +45,7 @@ namespace weapons
 
     bool weapselect(gameent *d, int weap, bool local, int filter)
     {
-        if(!game::intermission && (!local || d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, filter)))
+        if(!local || (!game::intermission && d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, filter)))
         {
             if(local) client::addmsg(N_WEAPSELECT, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             playsound(WEAPSND(weap, S_W_SWITCH), d->o, d, 0, -1, -1, -1, &d->wschan);
@@ -57,7 +57,7 @@ namespace weapons
 
     bool weapreload(gameent *d, int weap, int load, int ammo, int reloads, bool local)
     {
-        if(!game::intermission && (!local || d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis)))
+        if(!local || (!game::intermission && d->canreload(weap, m_weapon(game::gamemode, game::mutators), false, lastmillis)))
         {
             bool doact = false;
             if(local)
