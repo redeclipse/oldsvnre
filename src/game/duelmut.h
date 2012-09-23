@@ -17,7 +17,7 @@ struct duelservmode : servmode
                     srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are now \fs\fzgyqueued\fS for your \fs\fgnext match\fS");
                 else
                 {
-                    if(n) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcy#%d\fS in the \fs\fgduel queue\fS", n+1);
+                    if(n) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcy#%d\fS in the \fs\fgduel queue\fS", n);
                     else srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgduel queue\fS");
                 }
             }
@@ -223,7 +223,7 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                defformatstring(end)("\fyteam \fs\f[%d]%s\fS are the victors", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
+                                defformatstring(end)("\fyteam \fs\f[%d]%s\fS are the winners", TEAM(alive[0]->team, colour), TEAM(alive[0]->team, name));
                                 bool teampoints = true;
                                 loopv(clients) if(playing.find(clients[i]) >= 0)
                                 {
@@ -267,17 +267,20 @@ struct duelservmode : servmode
                         {
                             if(!cleanup)
                             {
-                                string end;
+                                string end, hp;
+                                if(!m_vampire(gamemode, mutators) && alive[0]->state.health == GAME(maxhealth))
+                                    formatstring(hp)("a \fs\fcflawless victory\fS");
+                                else formatstring(hp)("\fs\fc%d\fS health left", alive[0]->state.health);
                                 if(duelwinner != alive[0]->clientnum)
                                 {
                                     duelwinner = alive[0]->clientnum;
                                     duelwins = 1;
-                                    formatstring(end)("\fy%s was the victor", colorname(alive[0]));
+                                    formatstring(end)("\fy%s was the winner with %s", colorname(alive[0]), hp);
                                 }
                                 else
                                 {
                                     duelwins++;
-                                    formatstring(end)("\fy%s was the victor (\fs\fc%d\fS in a row)", colorname(alive[0]), duelwins);
+                                    formatstring(end)("\fy%s was the winner with %s (\fs\fc%d\fS in a row)", colorname(alive[0]), hp, duelwins);
                                 }
                                 loopv(clients) if(playing.find(clients[i]) >= 0)
                                 {
