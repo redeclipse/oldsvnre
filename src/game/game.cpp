@@ -31,10 +31,6 @@ namespace game
     SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
-    VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
-    VAR(IDF_PERSIST, mousedeadzone, 0, 10, 100);
-    VAR(IDF_PERSIST, mousepanspeed, 1, 50, VAR_MAX);
-
     VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
 
@@ -99,6 +95,7 @@ namespace game
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
     FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
 
+    VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
     FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10, 10000);
     FVAR(IDF_PERSIST, sensitivityscale, 1e-4f, 100, 10000);
     FVAR(IDF_PERSIST, yawsensitivity, 1e-4f, 1, 10000);
@@ -107,10 +104,7 @@ namespace game
     FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.65f, 1000);
     FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
-    VAR(IDF_PERSIST, zoommousedeadzone, 0, 25, 100);
-    VAR(IDF_PERSIST, zoommousepanspeed, 1, 10, VAR_MAX);
     VAR(IDF_PERSIST, zoomfov, 1, 10, 150);
-
     VARF(IDF_PERSIST, zoomlevel, 1, 4, 10, checkzoom());
     VAR(IDF_PERSIST, zoomlevels, 1, 5, 10);
     VAR(IDF_PERSIST, zoomdefault, 0, 0, 10); // 0 = last used, else defines default level
@@ -224,18 +218,6 @@ namespace game
     }
     ICOMMAND(0, isthirdperson, "i", (int *viewonly), intret(thirdpersonview(*viewonly ? true : false) ? 1 : 0));
     ICOMMAND(0, thirdpersonswitch, "", (), int *n = (focus != player1 ? &followthirdperson : &thirdperson); *n = !*n;);
-
-    int deadzone()
-    {
-        if(inzoom()) return zoommousedeadzone;
-        return mousedeadzone;
-    }
-
-    int panspeed()
-    {
-        if(inzoom()) return zoommousepanspeed;
-        return mousepanspeed;
-    }
 
     int fov()
     {
@@ -429,7 +411,7 @@ namespace game
 
     bool followswitch(int n, bool other = false)
     {
-        if(!tvmode())
+        if(!tvmode() && player1->state >= CS_SPECTATOR)
         {
             #define checkfollow \
                 if(follow >= players.length()) follow = -1; \
@@ -2036,13 +2018,17 @@ namespace game
                 camera1->yaw = yaw;
                 camera1->pitch = pitch;
             }
-            camera1->roll = 0;
         }
         else
         {
-            camera1->yaw = focus->yaw;
-            camera1->pitch = focus->pitch;
-            camera1->roll = focus->roll;
+            if((focus->state == CS_DEAD || focus->state == CS_WAITING) && focus->lastdeath)
+                deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
+            else
+            {
+                camera1->yaw = focus->yaw;
+                camera1->pitch = focus->pitch;
+                camera1->roll = focus->roll;
+            }
         }
         camera1->o = camvec(cam, amt, camera1->yaw, camera1->pitch);
         return true;
@@ -2059,6 +2045,7 @@ namespace game
             camera1->state = CS_ALIVE;
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
+        if(player1->state < CS_SPECTATOR && focus != player1) resetfollow();
         if((focus->state != CS_WAITING && focus->state != CS_SPECTATOR) || tvmode())
         {
             camera1->vel = vec(0, 0, 0);
@@ -2175,27 +2162,22 @@ namespace game
         {
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
             checkoften(player1, true);
-            loopv(players) if(players[i])
-            {
-                gameent *d = players[i];
-                if(d->type == ENT_PLAYER || d->type == ENT_AI)
-                {
-                    checkoften(d, d->ai != NULL);
-                    if(d == player1)
-                    {
-                        int state = d->weapstate[d->weapselect];
-                        if(WEAP(d->weapselect, zooms))
-                        {
-                            if(state == WEAP_S_PRIMARY || state == WEAP_S_SECONDARY || (state == WEAP_S_RELOAD && lastmillis-d->weaplast[d->weapselect] >= max(d->weapwait[d->weapselect]-zoomtime, 1)))
-                                state = WEAP_S_IDLE;
-                        }
-                        if(zooming && (!WEAP(d->weapselect, zooms) || state != WEAP_S_IDLE)) zoomset(false, lastmillis);
-                        else if(WEAP(d->weapselect, zooms) && state == WEAP_S_IDLE && zooming != d->action[AC_ALTERNATE])
-                            zoomset(d->action[AC_ALTERNATE], lastmillis);
-                    }
-                }
-            }
+            loopv(players) if(players[i] && (players[i]->type == ENT_PLAYER || players[i]->type == ENT_AI))
+                checkoften(players[i], players[i]->ai != NULL);
             if(!allowmove(player1)) player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
+            if(player1->state == CS_ALIVE)
+            {
+                int state = player1->weapstate[player1->weapselect];
+                if(WEAP(player1->weapselect, zooms))
+                {
+                    if(state == WEAP_S_PRIMARY || state == WEAP_S_SECONDARY || (state == WEAP_S_RELOAD && lastmillis-player1->weaplast[player1->weapselect] >= max(player1->weapwait[player1->weapselect]-zoomtime, 1)))
+                        state = WEAP_S_IDLE;
+                }
+                if(zooming && (!WEAP(player1->weapselect, zooms) || state != WEAP_S_IDLE)) zoomset(false, lastmillis);
+                else if(WEAP(player1->weapselect, zooms) && state == WEAP_S_IDLE && zooming != player1->action[AC_ALTERNATE])
+                    zoomset(player1->action[AC_ALTERNATE], lastmillis);
+            }
+            else if(zooming) zoomset(false, lastmillis);
 
             physics::update();
             ai::navigate();
@@ -2271,7 +2253,8 @@ namespace game
                     camera1->yaw = d->yaw;
                     camera1->pitch = d->pitch;
                 }
-                else if(focus->state == CS_DEAD) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
+                else if((focus->state == CS_DEAD || focus->state == CS_WAITING) && focus->lastdeath)
+                    deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
             }
             camera1->resetinterp();
             calcangles(camera1, focus);

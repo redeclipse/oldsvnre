@@ -1443,7 +1443,6 @@ namespace game
     extern void scaleyawpitch(float &yaw, float &pitch, float targyaw, float targpitch, float yawspeed = 1, float pitchspeed = 1, float rotate = 0);
     extern bool allowmove(physent *d);
     extern int deadzone();
-    extern int panspeed();
     extern void checkzoom();
     extern bool inzoom();
     extern bool inzoomswitch();
