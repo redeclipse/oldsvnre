@@ -304,6 +304,12 @@ struct duelservmode : servmode
         }
     }
 
+    bool wantsovertime()
+    {
+        if((dueltime < 0 || dueltime > gamemillis) && duelround > 0) return true;
+        return 0;
+    }
+
     void reset(bool empty)
     {
         duelround = duelwins = 0;

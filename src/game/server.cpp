@@ -401,6 +401,7 @@ namespace server
         virtual void reset(bool empty) {}
         virtual void layout() {}
         virtual void intermission() {}
+        virtual bool wantsovertime() { return false; }
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
         virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
@@ -411,7 +412,7 @@ namespace server
     vector<savedscore> savedscores;
     servmode *smode;
     vector<servmode *> smuts;
-    #define mutate(a,b) loopvk(a) { servmode *mut = a[k]; { b; } }
+    #define mutate(a,b) { loopvk(a) { servmode *mut = a[k]; { b; } } }
     int nplayers, totalspawns;
 
     vector<score> scores;
@@ -1155,6 +1156,43 @@ namespace server
         }
     }
 
+    bool wantsovertime()
+    {
+        if(smode && smode->wantsovertime()) return true;
+        mutate(smuts, if(mut->wantsovertime()) return true);
+        bool result = false;
+        if(m_isteam(gamemode, mutators))
+        {
+            int best = -1;
+            loopi(numteams(gamemode, mutators))
+            {
+                score &cs = teamscore(i+TEAM_FIRST);
+                if(best < 0 || cs.total > teamscore(best).total)
+                {
+                    best = i+TEAM_FIRST;
+                    result = false;
+                }
+                else if(best >= 0 && cs.total == teamscore(best).total)
+                    result = true;
+            }
+        }
+        else
+        {
+            int best = -1;
+            loopv(clients) if(clients[i]->state.aitype < AI_START)
+            {
+                if(best < 0 || clients[i]->state.points > clients[best]->state.points)
+                {
+                    best = i;
+                    result = false;
+                }
+                else if(best >= 0 && clients[i]->state.points == clients[best]->state.points)
+                    result = true;
+            }
+        }
+        return result;
+    }
+
     void checklimits()
     {
         if(m_fight(gamemode))
@@ -1168,6 +1206,7 @@ namespace server
                     return;
                 }
             }
+            bool wasinovertime = inovertime;
             int limit = inovertime ? GAME(overtimelimit) : GAME(timelimit);
             if(limit != oldtimelimit || (gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000))
             {
@@ -1187,40 +1226,7 @@ namespace server
                     bool wantsoneminute = true;
                     if(!timeremaining)
                     {
-                        bool wantsovertime = false;
-                        if(!inovertime && GAME(overtimeallow))
-                        {
-                            if(m_isteam(gamemode, mutators))
-                            {
-                                int best = -1;
-                                loopi(numteams(gamemode, mutators))
-                                {
-                                    score &cs = teamscore(i+TEAM_FIRST);
-                                    if(best < 0 || cs.total > teamscore(best).total)
-                                    {
-                                        best = i+TEAM_FIRST;
-                                        wantsovertime = false;
-                                    }
-                                    else if(best >= 0 && cs.total == teamscore(best).total)
-                                        wantsovertime = true;
-                                }
-                            }
-                            else
-                            {
-                                int best = -1;
-                                loopv(clients) if(clients[i]->state.aitype < AI_START)
-                                {
-                                    if(best < 0 || clients[i]->state.points > clients[best]->state.points)
-                                    {
-                                        best = i;
-                                        wantsovertime = false;
-                                    }
-                                    else if(best >= 0 && clients[i]->state.points == clients[best]->state.points)
-                                        wantsovertime = true;
-                                }
-                            }
-                        }
-                        if(wantsovertime)
+                        if(!inovertime && GAME(overtimeallow) && wantsovertime())
                         {
                             limit = oldtimelimit = GAME(overtimelimit);
                             if(limit)
@@ -1252,44 +1258,11 @@ namespace server
                     }
                 }
             }
-            if(inovertime)
+            if(wasinovertime && !wantsovertime())
             {
-                bool wantsovertime = false;
-                if(m_isteam(gamemode, mutators))
-                {
-                    int best = -1;
-                    loopi(numteams(gamemode, mutators))
-                    {
-                        score &cs = teamscore(i+TEAM_FIRST);
-                        if(best < 0 || cs.total > teamscore(best).total)
-                        {
-                            best = i+TEAM_FIRST;
-                            wantsovertime = false;
-                        }
-                        else if(best >= 0 && cs.total == teamscore(best).total)
-                            wantsovertime = true;
-                    }
-                }
-                else
-                {
-                    int best = -1;
-                    loopv(clients) if(clients[i]->state.aitype < AI_START)
-                    {
-                        if(best < 0 || clients[i]->state.points > clients[best]->state.points)
-                        {
-                            best = i;
-                            wantsovertime = false;
-                        }
-                        else if(best >= 0 && clients[i]->state.points == clients[best]->state.points)
-                            wantsovertime = true;
-                    }
-                }
-                if(!wantsovertime)
-                {
-                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyovertime has ended, a winner has been chosen");
-                    startintermission();
-                    return; // bail
-                }
+                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyovertime has ended, a winner has been chosen");
+                startintermission();
+                return; // bail
             }
             if(GAME(pointlimit) && m_scores(gamemode))
             {
