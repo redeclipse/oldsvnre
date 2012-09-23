@@ -77,6 +77,7 @@ namespace game
 
     VARF(IDF_PERSIST, specmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
     VARF(IDF_PERSIST, waitmode, 0, 2, 2, resetfollow()); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
+    VARF(IDF_PERSIST, intermmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
@@ -209,6 +210,7 @@ namespace game
     bool thirdpersonview(bool viewonly, physent *d)
     {
         if(!d) d = focus;
+        if(tvmode() || intermission) return true;
         if(!viewonly && (d->state == CS_DEAD || d->state == CS_WAITING)) return true;
         if(!(d != player1 ? followthirdperson : thirdperson)) return false;
         if(player1->state == CS_EDITING) return false;
@@ -398,7 +400,7 @@ namespace game
     {
         if(!m_edit(gamemode) && (!check || !cameras.empty()))
         {
-            if(intermission) return true;
+            if(intermission && intermmode) return true;
             else switch(player1->state)
             {
                 case CS_SPECTATOR: if(specmode) return true; break;
@@ -1687,7 +1689,7 @@ namespace game
         }
         else if(!tvmode())
         {
-            bool self = player1->state >= CS_SPECTATOR && focus != player1 && thirdpersonview(true) && followaiming;
+            bool self = intermission || (player1->state >= CS_SPECTATOR && focus != player1 && thirdpersonview(true) && followaiming);
             physent *target = player1->state >= CS_SPECTATOR ? (self ? player1 : camera1) : (allowmove(player1) ? player1 : NULL);
             if(target)
             {
@@ -2249,7 +2251,7 @@ namespace game
             checkcamera();
             if(!cameratv())
             {
-                bool aim = followaiming && focus != player1 && thirdpersonview(true);
+                bool aim = intermission || (followaiming && focus != player1 && thirdpersonview(true));
                 if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
                 {
                     physent *d = aim ? player1 : focus;
