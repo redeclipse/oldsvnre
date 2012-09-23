@@ -7,6 +7,7 @@
 #endif
 
 VAR(0, version, 1, RE_VERSION, -1); // for scripts
+VAR(0, rehashing, 1, 0, -1);
 VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 
 const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
@@ -1318,8 +1319,13 @@ void initgame()
 }
 
 VAR(0, hasoctapaks, 1, 0, 0); // mega hack; try to find Cube 2, done after our own data so as to not clobber stuff
-SVAR(IDF_PERSIST, octadir, "");
-//, if(!hasoctapaks) trytofindocta(false););
+SVARF(IDF_PERSIST, octadir, "", {
+#ifdef STANDALONE
+    if(rehashing) trytofindocta();
+#else
+    if(initing == NOT_INITING) trytofindocta();
+#endif
+});
 
 bool serveroption(char *opt)
 {
@@ -1379,6 +1385,7 @@ bool findoctadir(const char *name, bool fallback)
         hasoctapaks = fallback ? 1 : 2;
         return true;
     }
+    hasoctapaks = 0;
     return false;
 }
 
@@ -1387,7 +1394,7 @@ void trytofindocta(bool fallback)
     if(!octadir || !*octadir)
     {
         const char *dir = getenv("OCTA_DIR");
-        if(dir && *dir) setsvar("octadir", dir);
+        if(dir && *dir) setsvar("octadir", dir, false);
     }
     if((!octadir || !*octadir || !findoctadir(octadir, false)) && fallback)
     { // user hasn't specifically set it, try some common locations alongside our folder
@@ -1522,7 +1529,6 @@ void writecfg()
 
 ICOMMAND(0, writecfg, "", (void), if(!(identflags&IDF_WORLD)) writecfg());
 
-VAR(0, rehashing, 1, 0, -1);
 void rehash(bool reload)
 {
     if(reload)

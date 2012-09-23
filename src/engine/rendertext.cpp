@@ -129,8 +129,24 @@ float text_widthf(const char *str, int flags)
     return width;
 }
 ICOMMAND(0, textwidth, "si", (char *s, int *f), floatret(text_widthf(s, *f)));
-ICOMMAND(0, fontwidth, "", (), intret(FONTW));
-ICOMMAND(0, fontheight, "", (), intret(FONTH));
+
+int text_fontw(const char *s)
+{
+    if(s && *s) pushfont(s);
+    int w = FONTW;
+    if(s && *s) popfont();
+    return w;
+}
+ICOMMAND(0, fontwidth, "s", (char *s), intret(text_fontw(s)));
+
+int text_fonth(const char *s)
+{
+    if(s && *s) pushfont(s);
+    int h = FONTH;
+    if(s && *s) popfont();
+    return h;
+}
+ICOMMAND(0, fontheight, "s", (char *s), intret(text_fonth(s)));
 
 #define TEXTTAB(x) (max((int((x)/FONTTAB)+1.0f)*FONTTAB, (x) + FONTW))
 
