@@ -426,14 +426,14 @@ namespace hud
                 }
 
                 uilist(g, {
-                    uicenterlist(g, uipad(g, 0.5f, uicenterlist(g, g.text("name", fgcolor))));
+                    uicenterlist(g, uipad(g, 1, uicenterlist(g, g.text("name", fgcolor))));
                     loopscoregroup(uicenterlist(g, uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))))));
                 });
 
                 if(showpoints)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 0.5f, g.text("points", fgcolor)));
+                        uicenterlist(g, uipad(g, 1, g.text("points", fgcolor)));
                         loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->points))));
                     });
                 }
@@ -443,12 +443,12 @@ namespace hud
                     uilist(g, {
                         if(m_trial(game::gamemode))
                         {
-                            uicenterlist(g, uipad(g, 0.5f, g.text("best", fgcolor)));
+                            uicenterlist(g, uipad(g, 1, g.text("best", fgcolor)));
                             loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
                         }
                         else
                         {
-                            uicenterlist(g, uipad(g, 0.5f, g.text("frags", fgcolor)));
+                            uicenterlist(g, uipad(g, 1, g.text("frags", fgcolor)));
                             loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->frags))));
                         }
                     });
@@ -457,7 +457,7 @@ namespace hud
                 if(showpj)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 0.5f, g.text("pj", fgcolor)));
+                        uicenterlist(g, uipad(g, 1, g.text("pj", fgcolor)));
                         loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag))));
                     });
                 }
@@ -465,7 +465,7 @@ namespace hud
                 if(showping)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 0.5f, g.text("ping", fgcolor)));
+                        uicenterlist(g, uipad(g, 1, g.text("ping", fgcolor)));
                         loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping))));
                     });
                 }
@@ -473,7 +473,7 @@ namespace hud
                 if(showclientnum || game::player1->privilege>=PRIV_HELPER)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 0.5f, g.text("cn", fgcolor)));
+                        uicenterlist(g, uipad(g, 1, g.text("cn", fgcolor)));
                         loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->clientnum))));
                     });
                 }
@@ -485,7 +485,7 @@ namespace hud
                     if(hasbots)
                     {
                         uilist(g, {
-                            uicenterlist(g, uipad(g, 0.5f, g.text("sk", fgcolor)));
+                            uicenterlist(g, uipad(g, 1, g.text("sk", fgcolor)));
                             loopscoregroup({
                                 uicenterlist(g, uipad(g, 0.5f, {
                                     if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->skill);
@@ -494,7 +494,7 @@ namespace hud
                             });
                         });
                         uilist(g, {
-                            uicenterlist(g, uipad(g, 0.5f, g.text("on", fgcolor)));
+                            uicenterlist(g, uipad(g, 1, g.text("on", fgcolor)));
                             loopscoregroup({
                                 uicenterlist(g, uipad(g, 0.5f, {
                                     if(o->aitype > AI_NONE) g.textf("%d", 0xFFFFFF, NULL, 0, o->ownernum);
@@ -508,7 +508,7 @@ namespace hud
                 if(showhostname)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 0.5f, g.text("host", fgcolor)));
+                        uicenterlist(g, uipad(g, 1, g.text("host", fgcolor)));
                         loopscoregroup({
                             uicenterlist(g, uipad(g, 0.5f, {
                                 if(o->aitype == AI_NONE) g.textf("%s", 0xFFFFFF, NULL, 0, o->hostname);
