@@ -220,8 +220,7 @@ namespace aiman
         if(m_coop(gamemode, mutators))
         {
             numt--; // filter out the human team
-            int coop = m_multi(gamemode, mutators) ? GAME(coopmultibalance) : GAME(coopbalance);
-            balance = people+max(int(ceilf(people*numt*coop)), 0);
+            balance = people+int(ceilf(people*numt*(m_multi(gamemode, mutators) ? GAME(coopmultibalance) : GAME(coopbalance))));
         }
         else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
         {
