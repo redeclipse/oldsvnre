@@ -2086,10 +2086,10 @@ namespace hud
         return sy;
     }
 
-    int drawhealth(int x, int y, int s, float blend)
+    int drawhealth(int x, int y, int s, float blend, bool interm)
     {
         int size = s+s/2, width = s-s/4, sy = 0;
-        if(!game::tvmode() && game::focus->state == CS_ALIVE)
+        if(!interm && game::focus->state == CS_ALIVE)
         {
             if(inventoryhealth && (!m_trial(game::gamemode) || trialstyle >= 2))
             {
@@ -2184,7 +2184,7 @@ namespace hud
         }
         else
         {
-            int st = game::intermission ? CS_WAITING : game::player1->state;
+            int st = interm ? CS_WAITING : game::player1->state;
             const char *state = "", *tex = "";
             switch(st)
             {
@@ -2242,18 +2242,19 @@ namespace hud
         float fade = blend*inventoryblend;
         int cx[2] = { edge, w-edge }, cy[2] = { h-edge, h-edge }, cs = int(inventorysize*w), cr = edge/2, cc = 0;
         popfont();
+        bool interm = game::intermission && game::tvmode() && game::focus == game::player1;
         loopi(2) switch(i)
         {
             case 0: default:
             {
-                if((cc = drawhealth(cx[i], cy[i], cs, fade)) > 0) cy[i] -= cc+cr;
-                if((cc = drawtimer(cx[i], cy[i], cs, fade)) > 0) cy[i] -= cc+cr;
+                if((cc = drawhealth(cx[i], cy[i], cs, fade, interm)) > 0) cy[i] -= cc+cr;
+                if(!interm && (cc = drawtimer(cx[i], cy[i], cs, fade)) > 0) cy[i] -= cc+cr;
                 break;
             }
             case 1:
             {
                 int cm = edge;
-                if(radarstyle == 3 && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                if(radarstyle == 3 && !game::intermission && !hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                     cm += int(max(w, h)/2*radarcorner*2);
                 if(!texpaneltimer)
                 {
@@ -2274,7 +2275,7 @@ namespace hud
                             cm += drawprogress(cx[i], cm+cs, 1-amt, amt, cs, false, 1, 1, 1, fade, 1, "default", "%s%d", col, int(millis/1000.f));
                         }
                     }
-                    else if(!m_edit(game::gamemode) && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade)) > 0)) cm += cc+cr;
+                    else if(!interm && !m_edit(game::gamemode) && inventoryscore && ((cc = drawscore(cx[i], cm, cs, (h-edge*2)/2, fade)) > 0)) cm += cc+cr;
 
                     if((cc = drawselection(cx[i], cy[i], cs, cm, fade)) > 0) cy[i] -= cc+cr;
                     if(inventorygame)
