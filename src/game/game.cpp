@@ -103,7 +103,6 @@ namespace game
     FVAR(IDF_PERSIST, pitchsensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.65f, 1000);
-    FVAR(IDF_PERSIST, followsensitivity, 0, 2, 1000);
 
     VAR(IDF_PERSIST, zoomfov, 1, 10, 150);
     VARF(IDF_PERSIST, zoomlevel, 1, 4, 10, checkzoom());
@@ -1689,14 +1688,17 @@ namespace game
         }
         else if(!tvmode())
         {
-            bool self = intermission || (player1->state >= CS_SPECTATOR && focus != player1 && thirdpersonview(true) && followaiming);
-            physent *target = player1->state >= CS_SPECTATOR ? (self ? player1 : camera1) : (allowmove(player1) ? player1 : NULL);
-            if(target)
+            physent *d = NULL;
+            if(intermission && player1->state < CS_SPECTATOR && focus == player1) d = camera1;
+            else if(player1->state >= CS_SPECTATOR)
+                d = followaiming && focus != player1 && thirdpersonview(true) ? player1 : camera1;
+            else if(allowmove(player1)) d = player1;
+            if(d)
             {
-                float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : (self ? followsensitivity : 1.f))*sensitivity;
-                target->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
-                target->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(mouseinvert ? -1.f : 1.f));
-                fixfullrange(target->yaw, target->pitch, target->roll, false);
+                float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : 1.f)*sensitivity;
+                d->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
+                d->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(mouseinvert ? -1.f : 1.f));
+                fixfullrange(d->yaw, d->pitch, d->roll, false);
             }
             return true;
         }
@@ -2251,13 +2253,26 @@ namespace game
             checkcamera();
             if(!cameratv())
             {
-                bool aim = intermission || (followaiming && focus != player1 && thirdpersonview(true));
+                bool aim = false;
+                physent *d = focus;
+                if(intermission && player1->state < CS_SPECTATOR && focus == player1)
+                {
+                    aim = true;
+                    d = camera1;
+                }
+                else if(player1->state >= CS_SPECTATOR)
+                {
+                    aim = followaiming && focus != player1 && thirdpersonview(true);
+                    if(aim) d = player1;
+                }
                 if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
                 {
-                    physent *d = aim ? player1 : focus;
                     camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
-                    camera1->yaw = d->yaw;
-                    camera1->pitch = d->pitch;
+                    if(d != camera1)
+                    {
+                        camera1->yaw = d->yaw;
+                        camera1->pitch = d->pitch;
+                    }
                 }
                 else if((focus->state == CS_DEAD || focus->state == CS_WAITING) && focus->lastdeath)
                     deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
