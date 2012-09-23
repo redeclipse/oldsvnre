@@ -709,6 +709,7 @@ namespace server
 
     #define setmod(a,b) { if(a != b) { setvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
     #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
+    #define setmods(a,b) { if(strcmp(a, b)) { setsvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(b), b); } }
 
     //void eastereggs()
     //{
@@ -726,7 +727,7 @@ namespace server
     {
         numgamevars = numgamemods = 0;
         enumerate(idents, ident, id, {
-            if(id.flags&IDF_SERVER) // reset vars
+            if(id.flags&IDF_SERVER && !(id.flags&IDF_READONLY)) // reset vars
             {
                 const char *val = NULL;
                 numgamevars++;
@@ -772,11 +773,8 @@ namespace server
 
     void setpause(bool on = false)
     {
-        if(sv_gamepaused != (on ? 1 : 0))
-        {
-            setvar("sv_gamepaused", on ? 1 : 0, true);
-            sendf(-1, 1, "ri2sis", N_COMMAND, -1, "gamepaused", 1, on ? "1" : "0");
-        }
+        if(on) { setmod(sv_gamepaused, 1); }
+        else { setmod(sv_gamepaused, 0); }
     }
 
     void setdemorecord(bool value)
@@ -815,11 +813,8 @@ namespace server
     void cleanup(bool init = false)
     {
         setpause(false);
-        if(sv_botoffset != 0)
-        {
-            setvar("sv_botoffset", 0, true);
-            sendf(-1, 1, "ri2sis", N_COMMAND, -1, "botoffset", 1, "0");
-        }
+        setmod(sv_botoffset, 0);
+        if(*sv_prevmaps) setmods(sv_prevmaps, "");
         if(GAME(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetbansonend)) resetbans();
         if(GAME(resetmutesonend)) resetmutes();
@@ -1897,11 +1892,7 @@ namespace server
     {
         setpause(false);
         checkdemorecord(true);
-        if(sv_botoffset != 0)
-        {
-            setvar("sv_botoffset", 0, true);
-            sendf(-1, 1, "ri2sis", N_COMMAND, -1, "botoffset", 1, "0");
-        }
+        setmod(sv_botoffset, 0);
         if(GAME(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(GAME(resetvarsonend) >= 2) resetgamevars(true);
         if(GAME(resetbansonend) >= 2) resetbans();
@@ -2014,7 +2005,13 @@ namespace server
             if(GAME(modelock) == 7 && GAME(mapslock) == 7 && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
             else switch(GAME(votelock))
             {
-                case 1: case 2: case 3: if(!m_edit(reqmode) && !strcmp(reqmap, smapname) && !haspriv(ci, GAME(votelock)-1+PRIV_HELPER, "vote for the same map again")) return; break;
+                case 1: case 2: case 3:
+                    if(!m_edit(reqmode))
+                    {
+                        int n = listincludes(sv_prevmaps, reqmap, strlen(reqmap));
+                        if(n >= 0 && n < GAME(maphistory) && !haspriv(ci, GAME(votelock)-1+PRIV_HELPER, "vote for a recently played map")) return;
+                    }
+                    break;
                 case 4: case 5: case 6: if(!haspriv(ci, GAME(votelock)-4+PRIV_HELPER, "vote for a new game")) return; break;
                 case 7: if(!haspriv(ci, PRIV_MAX, "vote for a new game")) return; break;
                 case 0: default: break;
@@ -2380,6 +2377,37 @@ namespace server
             else spectator(ci);
         }
 
+        if(m_fight(gamemode) && GAME(maphistory))
+        {
+            vector<char> buf;
+            buf.put(smapname, strlen(smapname));
+            if(*sv_prevmaps && numclients())
+            {
+                vector<char *> prev;
+                explodelist(sv_prevmaps, prev);
+                loopvrev(prev) if(!strcmp(prev[i], smapname))
+                {
+                    delete[] prev[i];
+                    prev.remove(i);
+                }
+                while(prev.length() >= GAME(maphistory))
+                {
+                    int last = prev.length()-1;
+                    delete[] prev[last];
+                    prev.remove(last);
+                }
+                loopv(prev)
+                {
+                    buf.add(' ');
+                    buf.put(prev[i], strlen(prev[i]));
+                }
+                prev.deletearrays();
+            }
+            buf.add(0);
+            const char *str = buf.getbuf();
+            if(*str) setmods(sv_prevmaps, str);
+        }
+
         if(numclients())
         {
             if(m_fight(gamemode)) sendf(-1, 1, "ri2", N_TICK, timeremaining);
@@ -2536,6 +2564,11 @@ namespace server
                         conoutft(CON_MESG, "\fc%s = %s", id->name, floatstr(*id->storage.f));
                         return true;
                     }
+                    if(id->maxvalf < id->minvalf || id->flags&IDF_READONLY)
+                    {
+                        conoutft(CON_MESG, "\frcannot override variable: %s", id->name);
+                        return true;
+                    }
                     float ret = parsefloat(arg);
                     if(ret < id->minvalf || ret > id->maxvalf)
                     {
@@ -2553,6 +2586,11 @@ namespace server
                     if(nargs <= 1 || !arg)
                     {
                         conoutft(CON_MESG, strchr(*id->storage.s, '"') ? "\fc%s = [%s]" : "\fc%s = \"%s\"", id->name, *id->storage.s);
+                        return true;
+                    }
+                    if(id->flags&IDF_READONLY)
+                    {
+                        conoutft(CON_MESG, "\frcannot override variable: %s", id->name);
                         return true;
                     }
                     checkvar(id, arg);
@@ -2653,6 +2691,11 @@ namespace server
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
                         return;
                     }
+                    if(id->maxvalf < id->minvalf || id->flags&IDF_READONLY)
+                    {
+                        srvmsgf(ci->clientnum, "\frcannot override variable: %s", name);
+                        return;
+                    }
                     float ret = parsefloat(arg);
                     if(ret < id->minvalf || ret > id->maxvalf)
                     {
@@ -2676,6 +2719,11 @@ namespace server
                     {
                         val = *id->storage.s;
                         sendf(ci->clientnum, 1, "ri2sis", N_COMMAND, -1, name, strlen(val), val);
+                        return;
+                    }
+                    if(id->flags&IDF_READONLY)
+                    {
+                        srvmsgf(ci->clientnum, "\frcannot override variable: %s", name);
                         return;
                     }
                     checkvar(id, arg);
