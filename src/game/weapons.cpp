@@ -86,7 +86,7 @@ namespace weapons
 
     void weaponswitch(gameent *d, int a = -1, int b = -1)
     {
-        if(game::intermission || a < -1 || b < -1 || a >= WEAP_MAX || b >= WEAP_MAX)
+        if(game::intermission || a < -1 || b < -1 || a >= WEAP_MAX || b >= WEAP_MAX) return;
         if(weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay) return;
         if(!d->weapwaited(d->weapselect, lastmillis, WEAP_S_FILTER)) return;
         int s = slot(d, d->weapselect);
