@@ -247,11 +247,12 @@ GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botskillmin, 1, 75, 101);
 GVAR(0, botskillmax, 1, 85, 101);
-GVAR(0, botlimit, 0, 16, VAR_MAX);
+GVAR(0, botlimit, 0, 32, VAR_MAX);
 GVAR(0, botoffset, VAR_MIN, 0, VAR_MAX);
 GFVAR(0, botspeed, 0, 1, FVAR_MAX);
 GFVAR(0, botscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, coopbalance, FVAR_NONZERO, 1.5f, FVAR_MAX);
+GFVAR(0, coopmultibalance, FVAR_NONZERO, 2, FVAR_MAX);
 GVAR(0, coopskillmin, 1, 85, 101);
 GVAR(0, coopskillmax, 1, 95, 101);
 GVAR(0, enemybalance, 1, 1, 3);

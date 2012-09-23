@@ -2173,8 +2173,8 @@ namespace server
         if(isteam(gamemode, mutators, team, first))
         {
             if(!m_coop(gamemode, mutators)) return true;
-            else if(ci->state.aitype > AI_NONE) return team == TEAM_ALPHA;
-            else return team != TEAM_ALPHA;
+            else if(ci->state.aitype > AI_NONE) return team != TEAM_ALPHA;
+            else return team == TEAM_ALPHA;
         }
         return false;
     }
@@ -2184,30 +2184,31 @@ namespace server
         if(ci->state.aitype >= AI_START) return TEAM_ENEMY;
         else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
-            int team = -1, balance = GAME(teambalance), teams[3][3] = {
-                { suggest, ci->team, -1 },
-                { suggest, ci->team, ci->lastteam },
-                { suggest, ci->lastteam, ci->team }
-            };
-            loopi(3) if(allowteam(ci, teams[GAME(teampersist)][i], TEAM_FIRST))
-            {
-                team = teams[GAME(teampersist)][i];
-                if(GAME(teampersist) == 2) return team;
-                break;
-            }
-            if(ci->state.aitype > AI_NONE)
+            bool human = ci->state.aitype == AI_NONE;
+            int team = -1, balance = human ? GAME(teambalance) : 1;
+            if(human)
             {
                 if(m_coop(gamemode, mutators)) return TEAM_ALPHA;
-                balance = 1;
+                int teams[3][3] = {
+                    { suggest, ci->team, -1 },
+                    { suggest, ci->team, ci->lastteam },
+                    { suggest, ci->lastteam, ci->team }
+                };
+                loopi(3) if(allowteam(ci, teams[GAME(teampersist)][i], TEAM_FIRST))
+                {
+                    team = teams[GAME(teampersist)][i];
+                    if(GAME(teampersist) == 2) return team;
+                    break;
+                }
             }
             if(balance || team < 0)
             {
                 teamcheck teamchecks[TEAM_TOTAL];
-                loopk(TEAM_TOTAL) teamchecks[k].team = k+1;
+                loopk(TEAM_TOTAL) teamchecks[k].team = TEAM_FIRST+k;
                 loopv(clients)
                 {
                     clientinfo *cp = clients[i];
-                    if(!cp->team || cp == ci || cp->state.state == CS_SPECTATOR || cp->state.state == CS_EDITING) continue;
+                    if(!cp->team || cp == ci || cp->state.state == CS_SPECTATOR) continue;
                     if((cp->state.aitype > AI_NONE && cp->state.ownernum < 0) || cp->state.aitype >= AI_START) continue;
                     if(ci->state.aitype > AI_NONE || (ci->state.aitype == AI_NONE && cp->state.aitype == AI_NONE))
                     { // remember: ai just balance teams
@@ -2218,14 +2219,9 @@ namespace server
                         ts.clients++;
                     }
                 }
-                teamcheck *worst = &teamchecks[0];
-                loopi(numteams(gamemode, mutators))
+                teamcheck *worst = &teamchecks[m_coop(gamemode, mutators) ? 1 : 0];
+                loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, TEAM_FIRST))
                 {
-                    if(!i && m_coop(gamemode, mutators))
-                    {
-                        worst = &teamchecks[1];
-                        continue;
-                    }
                     teamcheck &ts = teamchecks[i];
                     switch(balance)
                     {

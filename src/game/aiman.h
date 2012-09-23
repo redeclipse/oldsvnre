@@ -3,7 +3,7 @@ namespace aiman
 {
     int oldbotskillmin = -1, oldbotskillmax = -1, oldcoopskillmin = -1, oldcoopskillmax = -1, oldenemyskillmin = -1, oldenemyskillmax = -1,
         oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0;
-    float oldcoopbalance = -1;
+    float oldcoopbalance = -1, oldcoopmultibalance = -1;
 
     int findaiclient(int exclude)
     {
@@ -220,7 +220,8 @@ namespace aiman
         if(m_coop(gamemode, mutators))
         {
             numt--; // filter out the human team
-            balance = people+max(int(ceilf(people*numt*GAME(coopbalance))), 0);
+            int coop = m_multi(gamemode, mutators) ? GAME(coopmultibalance) : GAME(coopbalance);
+            balance = people+max(int(ceilf(people*numt*coop)), 0);
         }
         else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
         {
@@ -306,17 +307,30 @@ namespace aiman
         {
             if(hasgameinfo && !interm)
             {
-                #define checkold(n) if(old##n != GAME(n)) { dorefresh = 1; old##n = GAME(n); }
-                checkold(botskillmin);
-                checkold(botskillmax);
-                checkold(coopskillmin);
-                checkold(coopskillmax);
-                checkold(enemyskillmin);
-                checkold(enemyskillmax);
-                checkold(botbalance);
-                checkold(coopbalance);
-                checkold(botlimit);
-                checkold(botoffset);
+                if(!dorefresh)
+                {
+                    #define checkold(n) if(old##n != GAME(n)) { dorefresh = 1; old##n = GAME(n); }
+                    if(m_enemies(gamemode, mutators))
+                    {
+                        checkold(enemyskillmin);
+                        checkold(enemyskillmax);
+                    }
+                    if(m_coop(gamemode, mutators))
+                    {
+                        checkold(coopskillmin);
+                        checkold(coopskillmax);
+                        if(m_multi(gamemode, mutators)) { checkold(coopmultibalance); }
+                        else { checkold(coopbalance); }
+                    }
+                    else
+                    {
+                        checkold(botskillmin);
+                        checkold(botskillmax);
+                        checkold(botbalance);
+                    }
+                    checkold(botlimit);
+                    checkold(botoffset);
+                }
                 if(dorefresh)
                 {
                     dorefresh -= curtime;
