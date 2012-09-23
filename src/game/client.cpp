@@ -386,6 +386,7 @@ namespace client
         game::player1->state = edit ? CS_EDITING : (m_edit(game::gamemode) ? CS_ALIVE : CS_DEAD);
         game::player1->resetinterp();
         game::resetstate();
+        game::resetfollow();
         physics::entinmap(game::player1, true); // find spawn closest to current floating pos
         projs::remove(game::player1);
         if(m_edit(game::gamemode)) addmsg(N_EDITMODE, "ri", edit ? 1 : 0);
@@ -1713,6 +1714,7 @@ namespace client
                     if(f->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
                         entities::execlink(f, ent, false);
                     ai::spawned(f, ent);
+                    if(f == game::player1) game::resetfollow();
                     if(f == game::focus) game::resetcamera();
                     f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
                     break;
