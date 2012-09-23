@@ -14,10 +14,10 @@ struct duelservmode : servmode
             if(n >= 0)
             {
                 if(m_survivor(gamemode, mutators))
-                    srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are now \fs\fzgyqueued\fS for your \fs\fgnext match\fS");
+                    srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are now \fs\fzgyqueued\fS for the \fs\fgnext match\fS");
                 else
                 {
-                    if(n) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcy#%d\fS in the \fs\fgduel queue\fS", n);
+                    if(n) srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcy#%d\fS in the \fs\fgduel queue\fS", n+1);
                     else srvmsgft(ci->clientnum, CON_EVENT, "\fyyou are \fs\fzcrNEXT\fS in the \fs\fgduel queue\fS");
                 }
             }
@@ -179,6 +179,7 @@ struct duelservmode : servmode
                     {
                         if(smode) smode->layout();
                         mutate(smuts, mut->layout());
+                        loopv(alive) duelqueue.removeobj(alive[i]);
                         loopv(clients) if(clients[i]->state.aitype < AI_START) position(clients[i]);
                         duelround++;
                         string fight;
