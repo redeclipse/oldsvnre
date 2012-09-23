@@ -22,6 +22,7 @@ Interface & Menus:
  * Added ability to enable automatic demo recording each match (/demoautorec 1)
  * Added "reset selection" button for mutators
  * Added variables to control death/kill message content (/obit{verbose,styles})
+ * Removed alternative mouse styles
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
