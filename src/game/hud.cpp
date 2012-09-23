@@ -890,7 +890,7 @@ namespace hud
     {
         int index = POINTER_NONE;
         if(hasinput()) index = !hasinput(true) || commandmillis > 0 ? POINTER_NONE : POINTER_GUI;
-        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
+        else if(!showhud || !showcrosshair || game::focus->state == CS_DEAD || game::intermission || client::waiting() || (game::thirdpersonview(true) && game::focus != game::player1))
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
@@ -2089,7 +2089,7 @@ namespace hud
     int drawhealth(int x, int y, int s, float blend)
     {
         int size = s+s/2, width = s-s/4, sy = 0;
-        if(game::focus->state == CS_ALIVE)
+        if(!game::tvmode() && game::focus->state == CS_ALIVE)
         {
             if(inventoryhealth && (!m_trial(game::gamemode) || trialstyle >= 2))
             {
@@ -2184,8 +2184,9 @@ namespace hud
         }
         else
         {
+            int st = game::intermission ? CS_WAITING : game::player1->state;
             const char *state = "", *tex = "";
-            switch(game::player1->state)
+            switch(st)
             {
                 case CS_EDITING: state = "EDIT"; tex = modeeditingtex; break;
                 case CS_SPECTATOR: state = "SPEC"; tex = spectex; break;
@@ -2409,41 +2410,44 @@ namespace hud
                 drawtexture(0, 0, w, h);
             }
         }
-        bool third = game::thirdpersonview(true) && game::focus != game::player1;
-        if(game::focus->state == CS_ALIVE && game::inzoom() && WEAP(game::focus->weapselect, zooms)) drawzoom(w, h);
-        if(showdamage && !third)
+        if(!game::intermission)
         {
-            if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
-            if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
-        }
-        if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
-            drawradar(w, h, fade);
-        if(showinventory) drawinventory(w, h, os, fade);
-        if(teamhurttime && m_isteam(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
-        {
-            vec targ;
-            bool hasbound = false;
-            int dist = teamhurtdist ? teamhurtdist : getworldsize();
-            loopv(game::players) if(game::players[i] && game::players[i]->team == game::player1->team)
+            bool third = game::thirdpersonview(true) && game::focus != game::player1;
+            if(game::focus->state == CS_ALIVE && game::inzoom() && WEAP(game::focus->weapselect, zooms)) drawzoom(w, h);
+            if(showdamage && !third)
             {
-                if(game::players[i]->lastteamhit < 0 || lastmillis-game::players[i]->lastteamhit > teamhurttime) continue;
-                if(!getsight(camera1->o, camera1->yaw, camera1->pitch, game::players[i]->o, targ, dist, curfov, fovy)) continue;
-                if(!hasbound)
+                if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
+                if(!kidmode && game::bloodscale > 0) drawdamage(w, h, os, fade);
+            }
+            if(teamhurttime && m_isteam(game::gamemode, game::mutators) && game::focus == game::player1 && game::player1->lastteamhit >= 0 && lastmillis-game::player1->lastteamhit <= teamhurttime)
+            {
+                vec targ;
+                bool hasbound = false;
+                int dist = teamhurtdist ? teamhurtdist : getworldsize();
+                loopv(game::players) if(game::players[i] && game::players[i]->team == game::player1->team)
                 {
-                    Texture *t = textureload(warningtex, 3);
-                    glBindTexture(GL_TEXTURE_2D, t->id);
-                    float amt = float(lastmillis%250)/250.f, value = (amt > 0.5f ? 1.f-amt : amt)*2.f;
-                    glColor4f(value, value*0.125f, value*0.125f, value);
-                    hasbound = true;
-                }
-                float cx = 0.5f, cy = 0.5f, cz = 1;
-                if(vectocursor(game::players[i]->o, cx, cy, cz))
-                {
-                    int s = int(teamhurtsize*w), sx = int(cx*w-s), sy = int(cy*h-s);
-                    drawsized(sx, sy, s*2);
+                    if(game::players[i]->lastteamhit < 0 || lastmillis-game::players[i]->lastteamhit > teamhurttime) continue;
+                    if(!getsight(camera1->o, camera1->yaw, camera1->pitch, game::players[i]->o, targ, dist, curfov, fovy)) continue;
+                    if(!hasbound)
+                    {
+                        Texture *t = textureload(warningtex, 3);
+                        glBindTexture(GL_TEXTURE_2D, t->id);
+                        float amt = float(lastmillis%250)/250.f, value = (amt > 0.5f ? 1.f-amt : amt)*2.f;
+                        glColor4f(value, value*0.125f, value*0.125f, value);
+                        hasbound = true;
+                    }
+                    float cx = 0.5f, cy = 0.5f, cz = 1;
+                    if(vectocursor(game::players[i]->o, cx, cy, cz))
+                    {
+                        int s = int(teamhurtsize*w), sx = int(cx*w-s), sy = int(cy*h-s);
+                        drawsized(sx, sy, s*2);
+                    }
                 }
             }
+            if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
+                drawradar(w, h, fade);
         }
+        if(showinventory) drawinventory(w, h, os, fade);
 
         if(!texpaneltimer)
         {
@@ -2650,7 +2654,7 @@ namespace hud
         else if(!client::waiting() && showhud && fade > 0)
         {
             drawheadsup(hudwidth, hudheight, fade, gap, inv, br, bs, bx, by);
-            if(!client::waiting() && !hasinput(false) && !texpaneltimer) drawevents(fade);
+            if(!texpaneltimer && !game::tvmode() && !client::waiting() && !hasinput(false)) drawevents(fade);
         }
         if(UI::ready && showconsole && showhud)
         {
