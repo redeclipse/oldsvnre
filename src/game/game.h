@@ -1285,7 +1285,8 @@ struct cament
 
     static bool camsort(const cament *a, const cament *b)
     {
-        if(a->ignore) return false;
+        if(!a->ignore && b->ignore) return true;
+        if(a->ignore && !b->ignore) return false;
         if(a->inview[cament::PLAYER] > b->inview[cament::PLAYER]) return true;
         if(a->inview[cament::PLAYER] < b->inview[cament::PLAYER]) return false;
         if(a->inview[cament::AFFINITY] > b->inview[cament::AFFINITY]) return true;
@@ -1401,7 +1402,7 @@ namespace game
     extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
             lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
-            announcefilter, dynlighteffects, aboveheadnames, thirdpersonfollow,
+            announcefilter, dynlighteffects, aboveheadnames, followthirdperson,
             playerovertone, playerundertone, playerdisplaytone, playereffecttone, forceplayermodel;
     extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
