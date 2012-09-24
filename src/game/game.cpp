@@ -50,7 +50,7 @@ namespace game
 
     VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     VAR(IDF_PERSIST, followthirdperson, 0, 1, 1);
-    VAR(IDF_PERSIST, followaiming, 0, 1, 1);
+    VAR(IDF_PERSIST, followaiming, 0, 1, 3); // 0 = don't aim, &1 = aim in thirdperson, &2 = aim in first person
     FVAR(IDF_PERSIST, followblend, 0, 1, 1);
     FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 25, FVAR_MAX);
 
@@ -444,6 +444,7 @@ namespace game
                     else
                     {
                         focus = d;
+                        resetcamera(true);
                         return true;
                     }
                 }
@@ -1681,9 +1682,7 @@ namespace game
         }
         else if(!tvmode())
         {
-            physent *d = NULL;
-            if(player1->state >= CS_SPECTATOR || (intermission && player1->state < CS_SPECTATOR && focus == player1)) d = camera1;
-            else if(allowmove(player1)) d = player1;
+            physent *d = (intermission || player1->state >= CS_SPECTATOR) && (focus == player1 || followaiming&(thirdpersonview(true) ? 1 : 2)) ? camera1 : (allowmove(player1) ? player1 : NULL);
             if(d)
             {
                 float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : 1.f)*sensitivity;
@@ -2243,25 +2242,17 @@ namespace game
             checkcamera();
             if(!cameratv())
             {
-                if(focus->state == CS_DEAD && focus->lastdeath) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
+                if((focus->state == CS_DEAD || (focus != player1 && focus->state == CS_WAITING)) && focus->lastdeath)
+                    deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
                 else
                 {
-                    bool aim = false, free = false, interm = intermission && player1->state < CS_SPECTATOR && focus == player1;
-                    physent *d = focus;
-                    if(player1->state >= CS_SPECTATOR || interm)
+                    physent *d = player1->state >= CS_SPECTATOR || (intermission && focus == player1) ? camera1 : focus;
+                    if(d != camera1 || focus != player1 || intermission)
+                        camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
+                    if(d != camera1 || (intermission && focus == player1) || (focus != player1 && !(followaiming&(thirdpersonview(true) ? 1 : 2))))
                     {
-                        if(interm || (focus != player1 && followaiming && thirdpersonview(true))) aim = true;
-                        else if(focus == player1) free = true;
-                        d = camera1;
-                    }
-                    if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
-                    {
-                        if(!free) camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
-                        if(d != camera1)
-                        {
-                            camera1->yaw = d->yaw;
-                            camera1->pitch = d->pitch;
-                        }
+                        camera1->yaw = (d != camera1 ? d : focus)->yaw;
+                        camera1->pitch = (d != camera1 ? d : focus)->pitch;
                     }
                 }
             }
