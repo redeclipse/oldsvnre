@@ -802,8 +802,8 @@ SVAR(0, progresstitle, "");
 SVAR(0, progresstext, "");
 FVAR(0, progressamt, 0, 0, 1);
 FVAR(0, progresspart, 0, 0, 1);
-VAR(0, progressdelay, 0, 100, VAR_MAX);
-VAR(0, progressupdate, 0, 1, 1);
+VAR(IDF_PERSIST, progressdelay, 0, 50, VAR_MAX);
+VAR(IDF_PERSIST, progressupdate, 0, 0, 1);
 int lastprogress = 0;
 
 void progress(float bar1, const char *text1, float bar2, const char *text2)
@@ -811,7 +811,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     if(progressing || !inbetweenframes || envmapping) return;
     int ticks = SDL_GetTicks();
     if(lastprogress > 0 && ticks < 0) lastprogress = 1-INT_MAX;
-    if((actualvsync || bar1 > 0 || !progressupdate) && ticks-lastprogress < progressdelay) return;
+    if((actualvsync || !progressupdate || bar1 > 0) && ticks-lastprogress < progressdelay) return;
     lastprogress = ticks;
     clientkeepalive();
 
