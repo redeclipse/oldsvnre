@@ -3,6 +3,7 @@ Gameplay:
  * Increased overall AI skill
  * Disable double-tap dashing by default
  * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
+ * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
 
 Weapons:
  * Plasma primary damage and explosion radius increased
@@ -26,6 +27,10 @@ Interface & Menus:
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
+ * Enabled multi-coop (one human team and multiple bot teams)
+
+Multiplayer & Servers:
+ * Implemented short-term map history to prevent players voting on the same maps
 
 Core & Install:
  * Added IRC gudelines
