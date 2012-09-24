@@ -68,8 +68,6 @@ struct duelservmode : servmode
 
     void spawned(clientinfo *ci) { allowed.removeobj(ci); }
 
-    void died(clientinfo *ci, clientinfo *at) {}
-
     void layout()
     {
         loopvj(clients) if(clients[j]->state.aitype < AI_START)

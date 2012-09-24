@@ -1474,7 +1474,6 @@ namespace entities
     extern const char *entinfo(int type, attrvector &attr, bool full = false, bool icon = false);
     extern void useeffects(gameent *d, int ent, int ammoamt, int reloadamt, bool spawn, int weap, int drop, int ammo = -1, int reloads = -1);
     extern const char *entmdlname(int type, attrvector &attr);
-    extern void edittoggled(bool edit);
     extern const char *findname(int type);
     extern void adddynlights();
     extern void render();

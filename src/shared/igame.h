@@ -104,12 +104,9 @@ namespace game
     extern vec getpalette(int palette, int index);
     extern void adddynlights();
     extern void particletrack(particle *p, uint type, int &ts, bool lastpass);
-    extern void dynlighttrack(physent *owner, vec &o);
     extern bool mousemove(int dx, int dy, int x, int y, int w, int h);
     extern void project(int w, int h);
     extern void recomputecamera(int w, int h);
-    extern void loadworld(stream *f, int maptype);
-    extern void saveworld(stream *f);
     extern int localplayers();
     extern const char *gametitle();
     extern const char *gametext();

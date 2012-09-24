@@ -1301,9 +1301,6 @@ void setupserver()
 void initgame()
 {
     server::start();
-#ifndef STANDALONE
-    game::start();
-#endif
     loopv(gameargs)
     {
 #ifndef STANDALONE
