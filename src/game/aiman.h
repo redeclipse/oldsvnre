@@ -12,7 +12,7 @@ namespace aiman
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->name[0] || !ci->connected || ci->clientnum == exclude)
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci->clientnum == exclude)
                 siblings[i] = -1;
             else
             {
@@ -103,7 +103,7 @@ namespace aiman
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? TEAM_NEUTRAL : TEAM_ENEMY;
-                ci->online = ci->connected = true;
+                ci->online = ci->connected = ci->ready = true;
                 return true;
             }
             delclient(cn);
@@ -130,13 +130,19 @@ namespace aiman
         dorefresh = 1;
     }
 
-    bool delai(int type)
+    bool delai(int type, bool skip)
     {
+        bool retry = false;
         loopvrev(clients) if(clients[i]->state.aitype == type && clients[i]->state.ownernum >= 0)
         {
-            deleteai(clients[i]);
-            return true;
+            if(!skip || clients[i]->state.state == CS_DEAD || clients[i]->state.state == CS_WAITING)
+            {
+                deleteai(clients[i]);
+                return true;
+            }
+            else if(skip && !retry) retry = true;
         }
+        if(skip && retry) delai(type, false);
         return false;
     }
 
@@ -178,7 +184,7 @@ namespace aiman
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->name[0] || !ci->connected || ci->clientnum == exclude)
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci->clientnum == exclude)
                 siblings[i] = -1;
             else
             {
@@ -255,7 +261,7 @@ namespace aiman
         if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
         if(balance > 0)
         {
-            while(numclients(-1, true, AI_BOT) < balance) if(!addai(AI_BOT, -1, -1)) break;
+            while(numclients(-1, true, AI_BOT) < balance) if(!addai(AI_BOT)) break;
             while(numclients(-1, true, AI_BOT) > balance) if(!delai(AI_BOT)) break;
             if(m_isteam(gamemode, mutators)) loopvrev(clients)
             {
@@ -287,7 +293,7 @@ namespace aiman
                 if(count < GAME(enemybalance))
                 {
                     int amt = GAME(enemybalance)-count;
-                    loopk(amt) addai(sents[j].attrs[0]+AI_START, j, -1);
+                    loopk(amt) addai(sents[j].attrs[0]+AI_START, j);
                 }
             }
         }
