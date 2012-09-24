@@ -7,11 +7,16 @@
 #
 # Usage: update-servexec-comments /path/usage.cfg /path/servexec.cfg
 
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+source "$DIR"/wiki-common
+
 IFS=$'\n'
 for i in $(grep "// sv_" "$2")
 do
     VAR=$(echo $i | sed -n -e 's%//\ sv_\([a-z0-9]*\) .*%\1%p' -e '/^$/d')
-    DESC="$(sed -n 's%^setdesc "'"$VAR"'" \[\([^\]]*\)\].*%\1%p' "$1")"
+    USAGE_DEF=$(grep "^setdesc \"$VAR\"" "$1")
+    DESC="$(format_desc "$USAGE_DEF")"
     if [ -n "$DESC" ]
     then
         sed 's%^\(//\ sv_'"$VAR"' .*// \).*$%\1'"$DESC"'%' -i "$2"
