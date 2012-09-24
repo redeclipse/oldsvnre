@@ -8,26 +8,23 @@ CFG_FILES="$DIR/../../data/*.cfg"
 
 source "$DIR"/wiki-common
 
-table_content_aliases ()
-{
-    IFS=$'\n'
-    for i in $(grep "^setdesc" "$1" | sort)
-    do
-        ALI="$(format_name "$i")"
-
-        CFG_DEF="$(grep -hr "^$ALI *=.*" $CFG_FILES)"
-        if [ -z "$CFG_DEF" ]; then continue; fi
-
-        DESC="$(format_desc "$i")"
-        PARAM="$(format_param "$i")"
-
-        TYPE_STRING="alias"
-
-        table_entry_simple "$ALI" "$PARAM" "$DESC" "$TYPE_STRING"
-        done
-}
-
 noedit_header > "$2"
 table_header_simple >> "$2"
-table_content_aliases "$1" >> "$2"
+
+IFS=$'\n'
+for i in $(grep "^setdesc" "$1" | sort)
+do
+    ALI="$(format_name "$i")"
+
+    CFG_DEF="$(grep -hr "^$ALI *=.*" $CFG_FILES)"
+    if [ -z "$CFG_DEF" ]; then continue; fi
+
+    DESC="$(format_desc "$i")"
+    PARAM="$(format_param "$i")"
+
+    TYPE_STRING="alias"
+
+    table_entry_simple "$ALI" "$PARAM" "$DESC" "$TYPE_STRING" >> "$2"
+done
+
 table_end >> "$2"
