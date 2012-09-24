@@ -200,7 +200,6 @@ enum
 
 extern void adddynlight(const vec &o, float radius, const vec &color, int fade = 0, int peak = 0, int flags = 0, float initradius = 0, const vec &initcolor = vec(0, 0, 0));
 extern void dynlightreaching(const vec &target, vec &color, vec &dir);
-extern void removetrackeddynlights(physent *owner);
 extern void makelightfx(extentity &e, extentity &f);
 
 // rendergl
@@ -321,24 +320,6 @@ extern void splash(int type, int color, float radius, int num, int fade, const v
 extern void regularsplash(int type, int color, float radius, int num, int fade, const vec &p, float size = 2, float blend = 1, int grav = 0, int collide = 0, float vel = 1, int delay = 0);
 extern void regularshape(int type, float radius, int color, int dir, int num, int fade, const vec &p, float size = 2, float blend = 1, int grav = 0, int collide = 0, float vel = 1);
 extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, int fade = 500, float size = 2, float blend = 1, int grav = -1, int collide = 0, float vel = 1);
-
-#if 0
-enum { PARTTYPE_CREATE = 0, PARTTYPE_SPLASH, PARTTYPE_SHAPE, PARTTYPE_FIRE, PARTTYPE_FLAME, PARTTYPE_ICON, PARTTYPE_FLARE, PARTTYPE_MAX };
-
-struct mapparticle
-{
-    const char *name;
-    int part, type, colour, grav, fade, attr;
-    float radius, height, size, blend, vel;
-
-    mapparticle() : name(NULL) {}
-    ~mapparticle()
-    {
-        if(name) delete name;
-    }
-};
-extern vector<mapparticle> mapparts;
-#endif
 
 // decal
 enum

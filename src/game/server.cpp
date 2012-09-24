@@ -778,10 +778,10 @@ namespace server
         else { setmod(sv_gamepaused, 0); }
     }
 
-    void setdemorecord(bool value)
+    void setdemorecord(bool value, bool msg = false)
     {
         demonextmatch = value;
-        srvoutf(-3, "\fydemo recording is \fs\fc%s\fS for next match", demonextmatch ? "enabled" : "disabled");
+        if(msg) srvoutf(-3, "\fydemo recording is \fs\fc%s\fS for next match", demonextmatch ? "enabled" : "disabled");
     }
 
     void enddemorecord(bool full);
@@ -1845,7 +1845,7 @@ namespace server
         stream *f = opengzfile(NULL, "wb", demotmp);
         if(!f) { DELETEP(demotmp); return; }
 
-        srvoutf(4, "\fyrecording demo");
+        //srvoutf(4, "\fyrecording demo");
 
         demorecord = f;
 
@@ -5077,7 +5077,7 @@ namespace server
                 {
                     int val = getint(p);
                     if(!haspriv(ci, GAME(demolock)+PRIV_HELPER, "record demos")) break;
-                    setdemorecord(val != 0);
+                    setdemorecord(val != 0, true);
                     break;
                 }
 
