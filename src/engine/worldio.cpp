@@ -1076,13 +1076,8 @@ void save_world(const char *mname, bool nodata, bool forcesave)
             if(verbose) conoutf("\fasaved blendmap");
         }
     }
-
-    progress(0, "saving world...");
-    game::saveworld(f);
     delete f;
-
     conoutf("\fasaved map %s v.%d:%d (r%d) in %.1f secs", mapname, hdr.version, hdr.gamever, hdr.revision, (SDL_GetTicks()-savingstart)/1000.0f);
-
     if(istempname(mapname)) setnames(&mapname[5], MAP_MAPZ);
 }
 
@@ -1678,8 +1673,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 if(verbose) conoutf("\faloaded %d lightmaps", hdr.lightmaps);
             }
 
-            progress(0, "loading world...");
-            game::loadworld(f, maptype);
             progress(0, "initialising entities...");
             loopv(ents)
             {

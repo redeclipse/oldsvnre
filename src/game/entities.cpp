@@ -1739,10 +1739,7 @@ namespace entities
         }
     }
 
-    void edittoggled(bool edit) {}
-
     #define renderfocus(i,f) { gameentity &e = *(gameentity *)ents[i]; f; }
-
     void renderlinked(gameentity &e, int idx)
     {
         loopv(e.links)

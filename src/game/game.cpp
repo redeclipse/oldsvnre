@@ -189,8 +189,6 @@ namespace game
     ICOMMAND(0, gspmutname, "ii", (int *g, int *n), result(*g >= 0 && *g < G_MAX && *n >= 0 && *n < G_M_GSN ? gametype[*g].gsp[*n] : ""));
     ICOMMAND(0, getintermission, "", (), intret(intermission ? 1 : 0));
 
-    void start() { }
-
     const char *gametitle() { return connected() ? server::gamename(gamemode, mutators) : "ready"; }
     const char *gametext() { return connected() ? mapname : "not connected"; }
 
@@ -1630,12 +1628,7 @@ namespace game
         }
     }
 
-    void dynlighttrack(physent *owner, vec &o) { }
-
     void newmap(int size) { client::addmsg(N_NEWMAP, "ri", size); }
-
-    void loadworld(stream *f, int maptype) { }
-    void saveworld(stream *f) { }
 
     void fixfullrange(float &yaw, float &pitch, float &roll, bool full)
     {

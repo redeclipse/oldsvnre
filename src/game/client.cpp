@@ -390,7 +390,6 @@ namespace client
         physics::entinmap(game::player1, true); // find spawn closest to current floating pos
         projs::remove(game::player1);
         if(m_edit(game::gamemode)) addmsg(N_EDITMODE, "ri", edit ? 1 : 0);
-        entities::edittoggled(edit);
     }
 
     const char *getclientname(int cn, int colour)
