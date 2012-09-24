@@ -987,7 +987,7 @@ namespace client
             vec dir(game::player1->yaw, game::player1->pitch);
             game::player1->o.add(dir.mul(-32));
             game::player1->resetinterp();
-            game::resetcamera();
+            game::resetcamera(true);
         }
     }
     ICOMMAND(0, goto, "s", (char *s), gotoplayer(s));
@@ -1714,7 +1714,7 @@ namespace client
                         entities::execlink(f, ent, false);
                     ai::spawned(f, ent);
                     if(f == game::player1) game::resetfollow();
-                    if(f == game::focus) game::resetcamera();
+                    if(f == game::focus) game::resetcamera(true);
                     f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
                     break;
                 }

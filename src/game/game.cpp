@@ -45,7 +45,7 @@ namespace game
         bool reset = focus != player1;
         focus = player1;
         follow = -1;
-        if(reset) resetcamera();
+        if(reset) resetcamera(false);
     }
 
     VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
@@ -1471,7 +1471,7 @@ namespace game
         if(!client::demoplayback && m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
             chooseloadweap(game::player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
-        resetcamera();
+        resetcamera(true);
         resetsway();
         tvreset();
         if(!empty) client::sendinfo = client::sendcrc = true;
@@ -1682,16 +1682,14 @@ namespace game
         else if(!tvmode())
         {
             physent *d = NULL;
-            if(intermission && player1->state < CS_SPECTATOR && focus == player1) d = camera1;
-            else if(player1->state >= CS_SPECTATOR)
-                d = followaiming && focus != player1 && thirdpersonview(true) ? player1 : camera1;
+            if(player1->state >= CS_SPECTATOR || (intermission && player1->state < CS_SPECTATOR && focus == player1)) d = camera1;
             else if(allowmove(player1)) d = player1;
             if(d)
             {
                 float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : 1.f)*sensitivity;
                 d->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
                 d->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(mouseinvert ? -1.f : 1.f));
-                fixfullrange(d->yaw, d->pitch, d->roll, false);
+                fixrange(d->yaw, d->pitch);
             }
             return true;
         }
@@ -2047,7 +2045,7 @@ namespace game
             camera1->height = camera1->zradius = camera1->radius = camera1->xradius = camera1->yradius = 2;
         }
         if(player1->state < CS_SPECTATOR && focus != player1) resetfollow();
-        if(tvmode() || (focus->state != CS_WAITING && focus->state != CS_SPECTATOR))
+        if(tvmode() || player1->state < CS_SPECTATOR)
         {
             camera1->vel = vec(0, 0, 0);
             camera1->move = camera1->strafe = 0;
@@ -2095,18 +2093,21 @@ namespace game
         }
     }
 
-    void resetcamera()
+    void resetcamera(bool full)
     {
         lastcamera = 0;
         zoomset(false, 0);
-        if(!focus) focus = player1;
         checkcamera();
-        camera1->o = camerapos(focus);
-        camera1->yaw = focus->yaw;
-        camera1->pitch = focus->pitch;
-        camera1->roll = calcroll(focus);
-        camera1->resetinterp();
-        focus->resetinterp();
+        if(full || !focus)
+        {
+            if(!focus) focus = player1;
+            camera1->o = camerapos(focus);
+            camera1->yaw = focus->yaw;
+            camera1->pitch = focus->pitch;
+            camera1->roll = calcroll(focus);
+            camera1->resetinterp();
+            focus->resetinterp();
+        }
     }
 
     void resetworld()
@@ -2119,7 +2120,7 @@ namespace game
     void resetstate()
     {
         resetworld();
-        resetcamera();
+        resetcamera(true);
     }
 
     void updateworld()      // main game update loop
@@ -2165,7 +2166,7 @@ namespace game
             checkoften(player1, true);
             loopv(players) if(players[i] && (players[i]->type == ENT_PLAYER || players[i]->type == ENT_AI))
                 checkoften(players[i], players[i]->ai != NULL);
-            if(!allowmove(player1)) player1->stopmoving(player1->state != CS_WAITING && player1->state != CS_SPECTATOR);
+            if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
             if(player1->state == CS_ALIVE)
             {
                 int state = player1->weapstate[player1->weapselect];
@@ -2211,27 +2212,23 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 if(player1->state == CS_EDITING) physics::move(player1, 10, true);
-                else if(!intermission && !tvmode())
+                else if(!intermission && !tvmode() && player1->state == CS_ALIVE)
                 {
-                    if(player1->state >= CS_SPECTATOR && focus == player1)
-                    {
-                        camera1->move = player1->move;
-                        camera1->strafe = player1->strafe;
-                        physics::move(camera1, 10, true);
-                        player1->yaw = camera1->yaw;
-                        player1->pitch = camera1->pitch;
-                        player1->o = camera1->o;
-                        player1->resetinterp();
-                    }
-                    else if(player1->state == CS_ALIVE)
-                    {
-                        physics::move(player1, 10, true);
-                        entities::checkitems(player1);
-                        weapons::checkweapons(player1);
-                    }
+                    physics::move(player1, 10, true);
+                    entities::checkitems(player1);
+                    weapons::checkweapons(player1);
                 }
             }
-            if(!intermission) addsway(focus);
+            if(!intermission)
+            {
+                addsway(focus);
+                if(!tvmode() && player1->state >= CS_SPECTATOR)
+                {
+                    camera1->move = player1->move;
+                    camera1->strafe = player1->strafe;
+                    physics::move(camera1, 10, true);
+                }
+            }
             if(hud::canshowscores()) hud::showscores(true);
         }
 
@@ -2246,29 +2243,27 @@ namespace game
             checkcamera();
             if(!cameratv())
             {
-                bool aim = false;
-                physent *d = focus;
-                if(intermission && player1->state < CS_SPECTATOR && focus == player1)
+                if(focus->state == CS_DEAD && focus->lastdeath) deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
+                else
                 {
-                    aim = true;
-                    d = camera1;
-                }
-                else if(player1->state >= CS_SPECTATOR)
-                {
-                    aim = followaiming && focus != player1 && thirdpersonview(true);
-                    if(aim) d = player1;
-                }
-                if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
-                {
-                    camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
-                    if(d != camera1)
+                    bool aim = false, free = false, interm = intermission && player1->state < CS_SPECTATOR && focus == player1;
+                    physent *d = focus;
+                    if(player1->state >= CS_SPECTATOR || interm)
                     {
-                        camera1->yaw = d->yaw;
-                        camera1->pitch = d->pitch;
+                        if(interm || (focus != player1 && followaiming && thirdpersonview(true))) aim = true;
+                        else if(focus == player1) free = true;
+                        d = camera1;
+                    }
+                    if(aim || (focus->state != CS_DEAD && focus->state < CS_SPECTATOR))
+                    {
+                        if(!free) camera1->o = camerapos(focus, true, true, d->yaw, d->pitch);
+                        if(d != camera1)
+                        {
+                            camera1->yaw = d->yaw;
+                            camera1->pitch = d->pitch;
+                        }
                     }
                 }
-                else if((focus->state == CS_DEAD || focus->state == CS_WAITING) && focus->lastdeath)
-                    deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
             }
             camera1->resetinterp();
             calcangles(camera1, focus);
