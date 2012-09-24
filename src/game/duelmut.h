@@ -175,9 +175,9 @@ struct duelservmode : servmode
                     }
                     if(alive.length() >= 2)
                     {
+                        cleanup();
                         if(smode) smode->layout();
                         mutate(smuts, mut->layout());
-                        loopv(alive) duelqueue.removeobj(alive[i]);
                         loopv(clients) if(clients[i]->state.aitype < AI_START) position(clients[i]);
                         duelround++;
                         string fight;

@@ -1612,41 +1612,6 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
     }
 }
 
-#if 0
-vector<mapparticle> mapparts;
-
-int addmapparticle(const char *name, int part, int type, int colour, int grav, int fade, float radius, float height, int attr, float size, float blend, float vel)
-{
-    if(!name || !*name || part < 0 || part >= PART_MAX) return -1;
-    int idx = -1;
-    loopv(mapparts) if(!strcasecmp(name, mapparts[i].name)) return i;
-    idx = mapparts.length();
-    mapparticle &p = mapparts.add();
-    p.name = newstring(name);
-    p.part = part;
-    p.type = type;
-    p.colour = colour;
-    p.grav = grav;
-    p.fade = fade;
-    p.radius = radius;
-    p.height = height;
-    p.attr = attr;
-    p.size = size;
-    p.blend = blend;
-    p.vel = vel;
-}
-ICOMMAND(0, mapparticle, "siiiiiffifff", (const char *name, int *part, int *type, int *colour, int *grav, int *fade, float *radius, float *height, int *attr, float *size, float *blend, float *vel),
-    intret(addmapparticle(name, *part, *type, *colour, *grav, *fade, *radius, *height, *attr, *size, *blend, *vel)));
-
-void defaultparticles()
-{
-    if(mapparts.length()) mapparts.setsize(0);
-    addmapparticle("fire", PART_FLAME, PARTTYPE_FIRE, 0x903020, -10, 500, 1.5f, 0.5f, 0, 2.f, 1, 200);
-    addmapparticle("smoke", PART_SMOKE, PARTTYPE_SPLASH, 0x897661, -20, 200, 2.f, 0.f, 3, 2.4f, 0.f, 1, 1);
-    addmapparticle("water", PART_SPARK, PARTTYPE_SPLASH, (int(watercol[0])<<16) | (int(watercol[1])<<8) | int(watercol[2]), 10, 500, 10.f, 0.f, 20, 0.6f, 1, 4);
-}
-#endif
-
 static int partcolour(int c, int p, int x)
 {
     if(p || x)
