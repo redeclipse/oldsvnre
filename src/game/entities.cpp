@@ -539,7 +539,7 @@ namespace entities
                                     }
                                     game::fixfullrange(d->yaw, d->pitch, d->roll, true);
                                     f.lastuse = f.lastemit = e.lastemit;
-                                    if(d == game::focus) game::resetcamera();
+                                    if(d == game::focus) game::resetcamera(true);
                                     execlink(d, n, true);
                                     execlink(d, teleports[r], true);
                                     d->resetair();
