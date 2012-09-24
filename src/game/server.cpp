@@ -257,7 +257,7 @@ namespace server
         string name, mapvote;
         int modevote, mutsvote, lastvote;
         int privilege;
-        bool connected, local, timesync, online, wantsmap, failedmap, connectauth;
+        bool connected, ready, local, timesync, online, wantsmap, failedmap, connectauth;
         int gameoffset, lastevent;
         servstate state;
         vector<gameevent *> events;
@@ -286,7 +286,7 @@ namespace server
             state.reset(change);
             events.deletecontents();
             overflow = 0;
-            timesync = wantsmap = failedmap = false;
+            ready = timesync = wantsmap = failedmap = false;
             lastevent = gameoffset = lastvote = 0;
             team = lastteam = TEAM_NEUTRAL;
             clientmap[0] = '\0';
@@ -305,7 +305,7 @@ namespace server
             ping = 0;
             name[0] = 0;
             privilege = PRIV_NONE;
-            connected = local = online = wantsmap = failedmap = connectauth = false;
+            connected = ready = local = online = wantsmap = failedmap = connectauth = false;
             authreq = 0;
             position.setsize(0);
             messages.setsize(0);
@@ -335,9 +335,9 @@ namespace server
     namespace aiman {
         int dorefresh = 0;
         extern int findaiclient(int exclude = -1);
-        extern bool addai(int type, int ent, int skill);
+        extern bool addai(int type, int ent = -1, int skill = -1);
         extern void deleteai(clientinfo *ci);
-        extern bool delai(int type);
+        extern bool delai(int type, bool skip = true);
         extern void removeai(clientinfo *ci, bool complete = false);
         extern bool reassignai(int exclude = -1);
         extern void checkskills();
@@ -4159,7 +4159,11 @@ namespace server
         relayf(2, "\fg%s (%s) has joined the game (%d %s)", colorname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
 
         if(m_demo(gamemode)) setupdemoplayback();
-        else aiman::dorefresh = GAME(airefresh);
+        else if(m_edit(gamemode))
+        {
+            ci->ready = true;
+            aiman::dorefresh = GAME(airefresh);
+        }
     }
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
@@ -4366,6 +4370,11 @@ namespace server
                     getstring(text, p);
                     int crc = getint(p);
                     if(!ci) break;
+                    if(!ci->ready)
+                    {
+                        ci->ready = true;
+                        aiman::dorefresh = GAME(airefresh);
+                    }
                     if(strcmp(text, smapname))
                     {
                         if(ci->clientmap[0])
