@@ -306,7 +306,7 @@ namespace hud
                                     if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
                                     {
                                         SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, waitmodekey));
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, waitmodekey, game::tvmode() ? "interact" : "switch to TV"));
                                     }
                                     if(m_arena(game::gamemode, game::mutators))
                                     {
@@ -350,7 +350,7 @@ namespace hud
                                 if(!m_edit(game::gamemode) && shownotices >= 2)
                                 {
                                     SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                                    uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode(true, false) ? "interact" : "switch to TV"));
+                                    uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV"));
                                 }
                             });
                         }

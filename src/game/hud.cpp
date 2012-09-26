@@ -1027,7 +1027,7 @@ namespace hud
                         {
                             SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
                             pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode(true, false) ? "interact" : "switch to TV");
+                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
                             popfont();
                         }
                         if(m_arena(game::gamemode, game::mutators))
@@ -1156,7 +1156,7 @@ namespace hud
                 if(!m_edit(game::gamemode) && shownotices >= 2)
                 {
                     SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode(true, false) ? "interact" : "switch to TV");
+                    ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, specmodekey, game::tvmode() ? "interact" : "switch to TV");
                 }
                 popfont();
             }
