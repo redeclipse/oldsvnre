@@ -792,275 +792,269 @@ namespace physics
         return false;
     }
 
-    void modifyinput(gameent *d, vec &m, bool wantsmove, bool floating, int millis)
+    void modifyinput(gameent *d, vec &m, bool wantsmove, int millis)
     {
-        if(floating)
+        bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
+        if(impulsemeter && millis)
         {
-            if(game::allowmove(d) && d->action[AC_JUMP]) d->vel.z += jumpvel(d, false);
-        }
-        else if(game::allowmove(d))
-        {
-            bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d), jetting = jetpack(d);
-
-            if(impulsemeter && millis)
+            #define impchk (!impulsemeter || d->impulse[IM_METER]+len <= impulsemeter)
+            bool sprint = sprinting(d, false);
+            if(sprint && impulsesprint > 0)
             {
-                #define impchk (!impulsemeter || d->impulse[IM_METER]+len <= impulsemeter)
-                bool sprint = sprinting(d, false);
-                if(sprint && impulsesprint > 0)
+                int len = int(ceilf(millis*impulsesprint));
+                if(len > 0 && impchk)
                 {
-                    int len = int(ceilf(millis*impulsesprint));
+                    d->impulse[IM_METER] += len;
+                    d->impulse[IM_REGEN] = lastmillis;
+                }
+                else sprint = d->action[AC_SPRINT] = false;
+            }
+            if(jetting)
+            {
+                if(allowjet(d) && impulsejet > 0)
+                {
+                    int len = int(ceilf(millis*impulsejet));
                     if(len > 0 && impchk)
                     {
                         d->impulse[IM_METER] += len;
                         d->impulse[IM_REGEN] = lastmillis;
                     }
-                    else sprint = d->action[AC_SPRINT] = false;
-                }
-                if(jetting)
-                {
-                    if(allowjet(d) && impulsejet > 0)
-                    {
-                        int len = int(ceilf(millis*impulsejet));
-                        if(len > 0 && impchk)
-                        {
-                            d->impulse[IM_METER] += len;
-                            d->impulse[IM_REGEN] = lastmillis;
-                        }
-                        else jetting = d->action[AC_JUMP] = false;
-                    }
                     else jetting = d->action[AC_JUMP] = false;
                 }
-                if(d->impulse[IM_METER] > 0 && canregenimpulse(d))
-                {
-                    bool collect = true; // collect time until it is able to act upon it
-                    int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
-                    #define impulsemod(x,y) \
-                        if(collect && (x)) \
-                        { \
-                            if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
-                            else collect = false; \
-                        }
-                    impulsemod(allowjet(d), impulseregenjet);
-                    impulsemod(sprint, impulseregensprint);
-                    impulsemod(d->move || d->strafe, impulseregenmove);
-                    impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
-                    impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);
-                    if(collect)
-                    {
-                        if(timeslice > 0)
-                        {
-                            if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
-                            d->impulse[IM_COLLECT] = 0;
-                        }
-                        else d->impulse[IM_COLLECT] += millis;
+                else jetting = d->action[AC_JUMP] = false;
+            }
+            if(d->impulse[IM_METER] > 0 && canregenimpulse(d))
+            {
+                bool collect = true; // collect time until it is able to act upon it
+                int timeslice = int((millis+d->impulse[IM_COLLECT])*impulseregen);
+                #define impulsemod(x,y) \
+                    if(collect && (x)) \
+                    { \
+                        if(y > 0) { if(timeslice > 0) timeslice = int(timeslice*y); } \
+                        else collect = false; \
                     }
-                }
-            }
-
-            if(allowjet(d) && jetting)
-            {
-                if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/jetdecay));
-                else if(jetheight > 0)
+                impulsemod(allowjet(d), impulseregenjet);
+                impulsemod(sprint, impulseregensprint);
+                impulsemod(d->move || d->strafe, impulseregenmove);
+                impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
+                impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);
+                if(collect)
                 {
-                    vec v(0, 0, -1);
-                    float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-jetheight;
-                    if(d->o.z-floor >= jetheight) m.z = min(m.z, 0-(millis/jetdecay));
-                }
-            }
-
-            if(d->turnside && (!allowimpulse(d, IM_A_PARKOUR) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
-                d->turnside = 0;
-
-            if(d->turnside)
-            {
-                if(d->action[AC_JUMP] && canimpulse(d, IM_A_PARKOUR, true))
-                {
-                    int cost = impulsecost;
-                    float mag = impulsevelocity(d, impulseparkourkick, cost);
-                    if(mag > 0)
+                    if(timeslice > 0)
                     {
-                        vec rft; vecfromyawpitch(d->yaw, 0, 1, 0, rft);
-                        (d->vel = rft.normalize()).mul(mag); d->vel.z += mag/2;
-                        d->doimpulse(cost, IM_T_KICK, lastmillis);
+                        if((d->impulse[IM_METER] -= timeslice) < 0) d->impulse[IM_METER] = 0;
+                        d->impulse[IM_COLLECT] = 0;
+                    }
+                    else d->impulse[IM_COLLECT] += millis;
+                }
+            }
+        }
+
+        if(allowjet(d) && jetting)
+        {
+            if(d->o.z >= hdr.worldsize) m.z = min(m.z, 0-(millis/jetdecay));
+            else if(jetheight > 0)
+            {
+                vec v(0, 0, -1);
+                float ray = raycube(d->o, v, hdr.worldsize), floor = ray < hdr.worldsize ? d->o.z-ray : 0.f-jetheight;
+                if(d->o.z-floor >= jetheight) m.z = min(m.z, 0-(millis/jetdecay));
+            }
+        }
+
+        if(d->turnside && (!allowimpulse(d, IM_A_PARKOUR) || d->impulse[IM_TYPE] != IM_T_SKATE || (impulseskate && lastmillis-d->impulse[IM_TIME] > impulseskate) || d->vel.magnitude() <= 1))
+            d->turnside = 0;
+
+        if(d->turnside)
+        {
+            if(d->action[AC_JUMP] && canimpulse(d, IM_A_PARKOUR, true))
+            {
+                int cost = impulsecost;
+                float mag = impulsevelocity(d, impulseparkourkick, cost);
+                if(mag > 0)
+                {
+                    vec rft; vecfromyawpitch(d->yaw, 0, 1, 0, rft);
+                    (d->vel = rft.normalize()).mul(mag); d->vel.z += mag/2;
+                    d->doimpulse(cost, IM_T_KICK, lastmillis);
+                    d->turnmillis = PHYSMILLIS;
+                    d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                    d->action[AC_JUMP] = onfloor = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
+                    game::impulseeffect(d);
+                }
+            }
+        }
+        else
+        {
+            impulseplayer(d, onfloor, jetting);
+            if(onfloor && d->action[AC_JUMP])// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
+            {
+                float force = jumpvel(d, true);
+                if(force > 0)
+                {
+                    d->vel.z += force;
+                    if(d->inliquid)
+                    {
+                        float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
+                        d->vel.x *= scale;
+                        d->vel.y *= scale;
+                    }
+                    d->resetphys();
+                    d->impulse[IM_JUMP] = lastmillis;
+                    if(allowjet(d) && !allowimpulse(d, IM_A_BOOST)) d->doimpulse(0, IM_T_BOOST, lastmillis);
+                    d->action[AC_JUMP] = onfloor = false;
+                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
+                    playsound(S_JUMP, d->o, d);
+                    regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
+                }
+            }
+            if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true)))
+            {
+                vec oldpos = d->o, dir;
+                vecfromyawpitch(d->yaw, 0, 1, 0, dir);
+                d->o.add(dir.normalize());
+                bool collided = collide(d, dir);
+                d->o = oldpos;
+                if(!collided && hitplayer && weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
+                {
+                    d->action[AC_SPECIAL] = false;
+                    d->resetjump();
+                    impulseplayer(d, onfloor, jetting, true);
+                    if(d->turnside)
+                    {
                         d->turnmillis = PHYSMILLIS;
-                        d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                        d->action[AC_JUMP] = onfloor = false;
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_KICK);
-                        game::impulseeffect(d);
+                        d->turnside = 0;
+                        d->turnyaw = d->turnroll = 0;
                     }
                 }
             }
-            else
+        }
+        bool found = false;
+        if(d->turnside || d->action[AC_SPECIAL])
+        {
+            const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
+            loopi(d->turnside ? 6 : 4)
             {
-                impulseplayer(d, onfloor, jetting);
-                if(onfloor && d->action[AC_JUMP])// && (d->ai || !(impulsemethod&1) || !d->action[AC_CROUCH]))
+                vec oldpos = d->o, dir;
+                int move = movements[i][0], strafe = movements[i][1];
+                if(move == 2) move = d->move > 0 ? d->move : 0;
+                if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
+                if(!move && !strafe) continue;
+                vecfromyawpitch(d->yaw, 0, move, strafe, dir);
+                dir.normalize();
+                d->o.add(dir);
+                bool collided = collide(d, dir);
+                d->o = oldpos;
+                if(collided || hitplayer || wall.iszero()) continue;
+                vec face = vec(wall).normalize();
+                if(fabs(face.z) <= impulseparkournorm)
                 {
-                    float force = jumpvel(d, true);
-                    if(force > 0)
+                    bool cankick = d->action[AC_SPECIAL] && canimpulse(d, IM_A_PARKOUR, true), parkour = cankick && !onfloor && !d->onladder;
+                    float yaw = 0, pitch = 0;
+                    vectoyawpitch(face, yaw, pitch);
+                    float off = yaw-d->yaw;
+                    if(off > 180) off -= 360; else if(off < -180) off += 360;
+                    bool iskick = impulsekick > 0 && fabs(off) >= impulsekick, vault = false;
+                    if(cankick && iskick)
                     {
-                        d->vel.z += force;
-                        if(d->inliquid)
+                        float space = d->height+d->aboveeye, m = min(impulsevaultmin, impulsevaultmax), n = max(impulsevaultmin, impulsevaultmax);
+                        d->o.add(dir);
+                        if(onfloor)
                         {
-                            float scale = liquidmerge(d, 1.f, PHYS(liquidspeed));
-                            d->vel.x *= scale;
-                            d->vel.y *= scale;
-                        }
-                        d->resetphys();
-                        d->impulse[IM_JUMP] = lastmillis;
-                        if(allowjet(d) && !allowimpulse(d, IM_A_BOOST)) d->doimpulse(0, IM_T_BOOST, lastmillis);
-                        d->action[AC_JUMP] = onfloor = false;
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_JUMP);
-                        playsound(S_JUMP, d->o, d);
-                        regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
-                    }
-                }
-                if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true)))
-                {
-                    vec oldpos = d->o, dir;
-                    vecfromyawpitch(d->yaw, 0, 1, 0, dir);
-                    d->o.add(dir.normalize());
-                    bool collided = collide(d, dir);
-                    d->o = oldpos;
-                    if(!collided && hitplayer && weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
-                    {
-                        d->action[AC_SPECIAL] = false;
-                        d->resetjump();
-                        impulseplayer(d, onfloor, jetting, true);
-                        if(d->turnside)
-                        {
-                            d->turnmillis = PHYSMILLIS;
-                            d->turnside = 0;
-                            d->turnyaw = d->turnroll = 0;
-                        }
-                    }
-                }
-            }
-            bool found = false;
-            if(d->turnside || d->action[AC_SPECIAL])
-            {
-                const int movements[6][2] = { { 2, 2 }, { 1, 2 }, { 1, -1 }, { 1, 1 }, { 0, 2 }, { -1, 2 } };
-                loopi(d->turnside ? 6 : 4)
-                {
-                    vec oldpos = d->o, dir;
-                    int move = movements[i][0], strafe = movements[i][1];
-                    if(move == 2) move = d->move > 0 ? d->move : 0;
-                    if(strafe == 2) strafe = d->turnside ? d->turnside : d->strafe;
-                    if(!move && !strafe) continue;
-                    vecfromyawpitch(d->yaw, 0, move, strafe, dir);
-                    dir.normalize();
-                    d->o.add(dir);
-                    bool collided = collide(d, dir);
-                    d->o = oldpos;
-                    if(collided || hitplayer || wall.iszero()) continue;
-                    vec face = vec(wall).normalize();
-                    if(fabs(face.z) <= impulseparkournorm)
-                    {
-                        bool cankick = d->action[AC_SPECIAL] && canimpulse(d, IM_A_PARKOUR, true), parkour = cankick && !onfloor && !d->onladder;
-                        float yaw = 0, pitch = 0;
-                        vectoyawpitch(face, yaw, pitch);
-                        float off = yaw-d->yaw;
-                        if(off > 180) off -= 360; else if(off < -180) off += 360;
-                        bool iskick = impulsekick > 0 && fabs(off) >= impulsekick, vault = false;
-                        if(cankick && iskick)
-                        {
-                            float space = d->height+d->aboveeye, m = min(impulsevaultmin, impulsevaultmax), n = max(impulsevaultmin, impulsevaultmax);
-                            d->o.add(dir);
-                            if(onfloor)
+                            d->o.z += space*m;
+                            if(!collide(d, dir))
                             {
-                                d->o.z += space*m;
-                                if(!collide(d, dir))
-                                {
-                                    d->o.z += space*n-space*m;
-                                    if(collide(d, dir) || hitplayer) vault = true;
-                                }
-                            }
-                            else
-                            {
-                                d->o.z += space*n;
+                                d->o.z += space*n-space*m;
                                 if(collide(d, dir) || hitplayer) vault = true;
                             }
-                            d->o = oldpos;
                         }
-                        if(!d->turnside && (parkour || vault) && iskick)
+                        else
                         {
-                            if(!d->impulse[IM_TIME] || (d->impulse[IM_TYPE] != IM_T_KICK && d->impulse[IM_TYPE] != IM_T_VAULT) || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
+                            d->o.z += space*n;
+                            if(collide(d, dir) || hitplayer) vault = true;
+                        }
+                        d->o = oldpos;
+                    }
+                    if(!d->turnside && (parkour || vault) && iskick)
+                    {
+                        if(!d->impulse[IM_TIME] || (d->impulse[IM_TYPE] != IM_T_KICK && d->impulse[IM_TYPE] != IM_T_VAULT) || lastmillis-d->impulse[IM_TIME] > impulsekickdelay)
+                        {
+                            int cost = impulsecost;
+                            float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost);
+                            if(mag > 0)
                             {
-                                int cost = impulsecost;
-                                float mag = impulsevelocity(d, vault ? impulseparkourvault : impulseparkourkick, cost);
-                                if(mag > 0)
-                                {
-                                    vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, dir);
-                                    (d->vel = dir.normalize()).reflect(face).normalize().mul(mag);
-                                    d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
-                                    d->turnmillis = PHYSMILLIS;
-                                    d->turnside = 0; d->turnyaw = d->turnroll = 0;
-                                    client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
-                                    game::impulseeffect(d);
-                                }
+                                vecfromyawpitch(d->yaw, vault ? 90.f : fabs(d->pitch), 1, 0, dir);
+                                (d->vel = dir.normalize()).reflect(face).normalize().mul(mag);
+                                d->doimpulse(cost, vault ? IM_T_VAULT : IM_T_KICK, lastmillis);
+                                d->turnmillis = PHYSMILLIS;
+                                d->turnside = 0; d->turnyaw = d->turnroll = 0;
+                                client::addmsg(N_SPHY, "ri2", d->clientnum, vault ? SPHY_VAULT : SPHY_KICK);
+                                game::impulseeffect(d);
+                            }
+                        }
+                        break;
+                    }
+                    else if(d->turnside || parkour)
+                    {
+                        int side = off < 0 ? -1 : 1;
+                        if(off < 0) yaw += 90; else yaw -= 90;
+                        while(yaw >= 360) yaw -= 360;
+                        while(yaw < 0) yaw += 360;
+                        vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
+                        if(!d->turnside)
+                        {
+                            int cost = impulsecost;
+                            float mag = impulsevelocity(d, impulseparkour, cost);
+                            if(mag > 0)
+                            {
+                                (d->vel = rft.normalize()).mul(mag);
+                                off = yaw-d->yaw;
+                                if(off > 180) off -= 360;
+                                else if(off < -180) off += 360;
+                                d->doimpulse(cost, IM_T_SKATE, lastmillis);
+                                d->turnmillis = PHYSMILLIS;
+                                d->turnside = side; d->turnyaw = off;
+                                d->turnroll = (impulseroll*d->turnside)-d->roll;
+                                client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
+                                game::impulseeffect(d);
+                                found = true;
                             }
                             break;
                         }
-                        else if(d->turnside || parkour)
+                        if(side == d->turnside)
                         {
-                            int side = off < 0 ? -1 : 1;
-                            if(off < 0) yaw += 90; else yaw -= 90;
-                            while(yaw >= 360) yaw -= 360;
-                            while(yaw < 0) yaw += 360;
-                            vec rft; vecfromyawpitch(yaw, 0, 1, 0, rft);
-                            if(!d->turnside)
-                            {
-                                int cost = impulsecost;
-                                float mag = impulsevelocity(d, impulseparkour, cost);
-                                if(mag > 0)
-                                {
-                                    (d->vel = rft.normalize()).mul(mag);
-                                    off = yaw-d->yaw;
-                                    if(off > 180) off -= 360;
-                                    else if(off < -180) off += 360;
-                                    d->doimpulse(cost, IM_T_SKATE, lastmillis);
-                                    d->turnmillis = PHYSMILLIS;
-                                    d->turnside = side; d->turnyaw = off;
-                                    d->turnroll = (impulseroll*d->turnside)-d->roll;
-                                    client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_SKATE);
-                                    game::impulseeffect(d);
-                                    found = true;
-                                }
-                                break;
-                            }
-                            if(side == d->turnside)
-                            {
-                                (m = rft).normalize(); // re-project and override
-                                found = true;
-                                break;
-                            }
+                            (m = rft).normalize(); // re-project and override
+                            found = true;
+                            break;
                         }
                     }
                 }
             }
-            if(!found && d->turnside) d->turnside = 0;
         }
-        else d->action[AC_JUMP] = false;
+        if(!found && d->turnside) d->turnside = 0;
         d->action[AC_DASH] = false;
     }
 
-    void modifymovement(physent *pl, vec &m, bool local, bool floating, bool wantsmove, int millis)
+    void modifymovement(gameent *d, vec &m, bool local, bool wantsmove, int millis)
     {
-        if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
-        {
-            gameent *d = (gameent *)pl;
-            if(!d->turnside && (d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d))) d->resetjump();
-            if(local) modifyinput(d, m, wantsmove, floating, millis);
-            if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
-            else d->timeinair = 0;
+        if(wantsmove && d->physstate >= PHYS_SLOPE)
+        { // move up or down slopes in air but only move up slopes in liquid
+            float dz = -(m.x*d->floor.x + m.y*d->floor.y)/d->floor.z;
+            m.z = liquidcheck(d) ? max(m.z, dz) : dz;
+            m.normalize();
         }
-        else if(pl->physstate == PHYS_FALL && !pl->onladder) pl->timeinair += millis;
-        else pl->timeinair = 0;
-        if(pl->onladder && !m.iszero())
+        if(!d->turnside && (d->physstate >= PHYS_SLOPE || d->onladder || liquidcheck(d))) d->resetjump();
+        if(local)
         {
-            if((pl->type != ENT_PLAYER && pl->type != ENT_AI) || !((gameent *)pl)->turnside)
-                m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
+            if(game::allowmove(d)) modifyinput(d, m, wantsmove, millis);
+            else d->action[AC_JUMP] = d->action[AC_CROUCH] = false;
         }
-        else if(jetpack(pl) && m.iszero()) m = vec(0, 0, 1);
+        if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
+        else d->timeinair = 0;
+        if(!d->turnside)
+        {
+            if(d->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
+            else if(jetpack(d) && m.iszero()) m = vec(0, 0, 1);
+        }
     }
 
     float coastscale(const vec &o)
@@ -1075,21 +1069,17 @@ namespace physics
         if(wantsmove)
         {
             vecfromyawpitch(pl->yaw, movepitch(pl) ? pl->pitch : 0, pl->move, pl->strafe, m);
-            if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !floating && pl->physstate >= PHYS_SLOPE)
-            { // move up or down slopes in air but only move up slopes in liquid
-                float dz = -(m.x*pl->floor.x + m.y*pl->floor.y)/pl->floor.z;
-                m.z = liquidcheck(pl) ? max(m.z, dz) : dz;
-            }
             m.normalize();
         }
-        modifymovement(pl, m, local, floating, wantsmove, millis);
+        if(!floating && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
+        else pl->timeinair = 0;
         m.mul(movevelocity(pl, floating));
-        float scale = coastscale(pl->feetpos(-2)), coast = PHYS(floorcoast)*scale;
+        float coast = PHYS(floorcoast);
         if(floating || pl->type == ENT_CAMERA) coast = floatcoast;
         else
         {
             bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
-            float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*scale : PHYS(aircoast);
+            float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*coastscale(pl->feetpos(-2)) : PHYS(aircoast);
             coast = pl->inliquid ? liquidmerge(pl, c, PHYS(liquidcoast)) : c;
         }
         pl->vel.lerp(m, pl->vel, pow(max(1.0f - 1.0f/coast, 0.0f), millis/20.0f));
@@ -1195,27 +1185,26 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl), jetting = false;
+        bool floating = isfloating(pl), player = !floating && (pl->type == ENT_PLAYER || pl->type == ENT_AI), jetting = false;
         float secs = millis/1000.f;
 
         pl->blocked = false;
-        if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+        if(player)
         {
-            updatematerial(pl, local, floating);
-            modifyvelocity(pl, local, floating, millis);
+            updatematerial(pl, local, false);
+            modifyvelocity(pl, local, false, millis);
             jetting = jetpack(pl);
-            if(!floating && !sticktospecial(pl) && !pl->onladder && !jetting)
-                modifygravity(pl, millis); // apply gravity
+            if(!sticktospecial(pl) && !pl->onladder && !jetting) modifygravity(pl, millis); // apply gravity
             else pl->resetphys();
         }
         else modifyvelocity(pl, local, floating, millis);
 
-        vec d(pl->vel);
-        if((pl->type == ENT_PLAYER || pl->type == ENT_AI) && !floating && pl->inliquid) d.mul(liquidmerge(pl, 1.f, PHYS(liquidspeed)));
-        d.add(pl->falling);
-        d.mul(secs);
+        vec vel(pl->vel);
+        if(player && pl->inliquid) vel.mul(liquidmerge(pl, 1.f, PHYS(liquidspeed)));
+        vel.add(pl->falling);
+        vel.mul(secs);
 
-        if(floating)                // just apply velocity
+        if(floating) // just apply velocity
         {
             if(pl->physstate != PHYS_FLOAT)
             {
@@ -1223,28 +1212,29 @@ namespace physics
                 pl->timeinair = 0;
                 pl->falling = vec(0, 0, 0);
             }
-            pl->o.add(d);
+            pl->o.add(vel);
         }
-        else                        // apply velocity with collision
+        else // apply velocity with collision
         {
-            const float f = 1.0f/moveres, mag = vec(pl->vel).add(pl->falling).magnitude();
+            float mag = vec(pl->vel).add(pl->falling).magnitude();
             int collisions = 0, timeinair = pl->timeinair;
-            vec vel(pl->vel); d.mul(f);
-            loopi(moveres) if(!move(pl, d)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
-            if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+            vel.mul(1.0f/moveres);
+            loopi(moveres) if(!move(pl, vel)) { if(++collisions<5) i--; } // discrete steps collision detection & sliding
+            if(player)
             {
-                if(local && jetting && !jetpack(pl)) ((gameent *)pl)->action[AC_JUMP] = false;
-                if(!pl->timeinair)
+                gameent *d = (gameent *)pl;
+                if(local && jetting && !jetpack(d)) d->action[AC_JUMP] = false;
+                if(!d->timeinair)
                 {
-                    if(local && impulsemethod&2 && timeinair >= impulsedelay && pl->move == 1 && allowimpulse(pl, IM_A_DASH) && ((gameent *)pl)->action[AC_CROUCH])
+                    if(local && impulsemethod&2 && timeinair >= impulsedelay && d->move == 1 && allowimpulse(d, IM_A_DASH) && d->action[AC_CROUCH])
                     {
-                        ((gameent *)pl)->action[AC_DASH] = true;
-                        ((gameent *)pl)->actiontime[AC_DASH] = lastmillis;
+                        d->action[AC_DASH] = true;
+                        d->actiontime[AC_DASH] = lastmillis;
                     }
                     if(timeinair >= PHYSMILLIS*2 && mag >= 20)
                     {
-                        int vol = min(int(mag*1.25f), 255); if(pl->inliquid) vol /= 2;
-                        playsound(S_LAND, pl->o, pl, 0, vol);
+                        int vol = min(int(mag*1.25f), 255); if(d->inliquid) vol /= 2;
+                        playsound(S_LAND, d->o, d, 0, vol);
                     }
                 }
             }
@@ -1255,36 +1245,49 @@ namespace physics
             if(pl->state == CS_ALIVE) updatedynentcache(pl);
             if(local)
             {
-                gameent *e = (gameent *)pl;
-                if(e->state == CS_ALIVE && !floating)
+                gameent *d = (gameent *)pl;
+                if(d->state == CS_ALIVE && !floating)
                 {
-                    if(e->o.z < 0)
+                    if(d->o.z < 0)
                     {
-                        game::suicide(e, HIT_DEATH);
+                        game::suicide(d, HIT_DEATH);
                         return false;
                     }
-                    if(e->turnmillis > 0)
+                    if(d->turnmillis > 0)
                     {
-                        float amt = float(millis)/float(PHYSMILLIS), yaw = e->turnyaw*amt, roll = e->turnroll*amt;
-                        if(yaw != 0) e->yaw += yaw;
-                        if(roll != 0) e->roll += roll;
-                        e->turnmillis -= millis;
+                        float amt = float(millis)/float(PHYSMILLIS), yaw = d->turnyaw*amt, roll = d->turnroll*amt;
+                        if(yaw != 0) d->yaw += yaw;
+                        if(roll != 0) d->roll += roll;
+                        d->turnmillis -= millis;
                     }
                     else
                     {
-                        e->turnmillis = 0;
-                        if(e->roll != 0 && !e->turnside) adjustscaled(float, e->roll, PHYSMILLIS);
+                        d->turnmillis = 0;
+                        if(d->roll != 0 && !d->turnside) adjustscaled(float, d->roll, PHYSMILLIS);
                     }
                 }
                 else
                 {
-                    e->turnmillis = e->turnside = 0;
-                    e->roll = 0;
+                    d->turnmillis = d->turnside = 0;
+                    d->roll = 0;
                 }
             }
         }
 
         return true;
+    }
+
+    void interppos(physent *d)
+    {
+        d->o = d->newpos;
+        d->o.z += d->height;
+
+        int diff = lastphysframe - lastmillis;
+        if(diff <= 0 || !physinterp) return;
+
+        vec deltapos(d->deltapos);
+        deltapos.mul(min(diff, physframetime)/float(physframetime));
+        d->o.add(deltapos);
     }
 
     bool movecamera(physent *pl, const vec &dir, float dist, float stepdist)
@@ -1305,19 +1308,6 @@ namespace physics
             }
         }
         return true;
-    }
-
-    void interppos(physent *d)
-    {
-        d->o = d->newpos;
-        d->o.z += d->height;
-
-        int diff = lastphysframe - lastmillis;
-        if(diff <= 0 || !physinterp) return;
-
-        vec deltapos(d->deltapos);
-        deltapos.mul(min(diff, physframetime)/float(physframetime));
-        d->o.add(deltapos);
     }
 
     void move(physent *d, int moveres, bool local)
