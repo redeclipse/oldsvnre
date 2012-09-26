@@ -141,9 +141,10 @@ struct editor
     enum { SCROLLEND = INT_MAX };
 
     int mode; //editor mode - 1= keep while focused, 2= keep while used in gui, 3= keep forever (i.e. until mode changes)
-    bool active, rendered;
+    bool active, rendered, unfocus;
     const char *name;
     const char *filename;
+    const char *parent;
 
     int cx, cy; // cursor position - ensured to be valid after a region() or currentline()
     int mx, my; // selection mark, mx=-1 if following cursor - avoid direct access, instead use region()
@@ -157,8 +158,8 @@ struct editor
 
     vector<editline> lines; // MUST always contain at least one line!
 
-    editor(const char *name, int mode, const char *initval) :
-        mode(mode), active(true), rendered(false), name(newstring(name)), filename(NULL),
+    editor(const char *name, int mode, const char *initval, const char *parent = NULL) :
+        mode(mode), active(true), rendered(false), unfocus(false), name(newstring(name)), filename(NULL), parent(newstring(parent && *parent ? parent : "")),
         cx(0), cy(0), mx(-1), maxx(-1), maxy(-1), scrolly(mode==EDITORREADONLY ? SCROLLEND : 0), linewrap(false), pixelwidth(-1), pixelheight(-1)
     {
         //printf("editor %08x '%s'\n", this, name);
@@ -170,6 +171,7 @@ struct editor
         //printf("~editor %08x '%s'\n", this, name);
         DELETEA(name);
         DELETEA(filename);
+        DELETEA(parent);
         clear(NULL);
     }
 
@@ -680,7 +682,7 @@ static void flusheditors()
     }
 }
 
-static editor *useeditor(const char *name, int mode, bool focus, const char *initval = NULL)
+static editor *useeditor(const char *name, int mode, bool focus, const char *initval = NULL, const char *parent = NULL)
 {
     loopv(editors) if(strcmp(editors[i]->name, name) == 0)
     {
@@ -689,11 +691,16 @@ static editor *useeditor(const char *name, int mode, bool focus, const char *ini
         e->active = true;
         return e;
     }
-    editor *e = new editor(name, mode, initval);
+    editor *e = new editor(name, mode, initval, parent);
     if(focus) editors.add(e); else editors.insert(0, e);
     return e;
 }
 
+static editor *findeditor(const char *name)
+{
+    loopv(editors) if(strcmp(editors[i]->name, name) == 0) return editors[i];
+    return NULL;
+}
 
 #define TEXTCOMMAND(f, s, d, body) ICOMMAND(0, f, s, d,\
     editor *top = currentfocus();\
@@ -717,8 +724,8 @@ TEXTCOMMAND(textshow, "", (), // @DEBUG return the start of the buffer
     result(line.text);
     line.clear();
 );
-ICOMMAND(0, textfocus, "si", (char *name, int *mode), // focus on a (or create a persistent) specific editor, else returns current name
-    if(*name) useeditor(name, *mode<=0 ? EDITORFOREVER : *mode, true);
+ICOMMAND(0, textfocus, "siss", (char *name, int *mode, char *initval, char *parent), // focus on a (or create a persistent) specific editor, else returns current name
+    if(*name) useeditor(name, *mode<=0 ? EDITORFOREVER : *mode, true, initval, parent);
     else if(editors.length() > 0) result(editors.last()->name);
 );
 TEXTCOMMAND(textprev, "", (), editors.insert(0, top); editors.pop();); // return to the previous editor

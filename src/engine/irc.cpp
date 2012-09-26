@@ -851,11 +851,11 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab)
     g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
     defformatstring(cinput)("%s_%s_input", n->name, c->name);
-    char *v = g->field(cinput, 0x666666, -100, 0, "", EDITORFOREVER);
+    char *v = g->field(cinput, 0x666666, -100, 0, "", EDITORFOREVER, g->visible(), cwindow);
     if(v && *v)
     {
         irccmd(n, c, v);
-        UI::editoredit(UI::geteditor(cinput, EDITORFOREVER));
+        UI::editoredit(UI::geteditor(cinput, EDITORFOREVER, NULL, cwindow));
     }
     return true;
 }
@@ -879,11 +879,11 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
     defformatstring(input)("%s_input", n->name);
-    char *w = g->field(input, 0x666666, -100, 0, "", EDITORFOREVER);
+    char *w = g->field(input, 0x666666, -100, 0, "", EDITORFOREVER, g->visible(), window);
     if(w && *w)
     {
         irccmd(n, NULL, w);
-        UI::editoredit(UI::geteditor(input, EDITORFOREVER));
+        UI::editoredit(UI::geteditor(input, EDITORFOREVER, NULL, window));
     }
 
     loopvj(n->channels) if(n->channels[j].state != IRCC_NONE && n->channels[j].name[0])
