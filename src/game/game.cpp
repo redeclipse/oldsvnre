@@ -485,10 +485,9 @@ namespace game
 
     bool allowmove(physent *d)
     {
-        if(d == player1 && tvmode()) return false;
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(d->state == CS_DEAD || d->state >= CS_SPECTATOR || intermission)
+            if((d == player1 && tvmode()) || d->state == CS_DEAD || d->state >= CS_SPECTATOR || intermission)
                 return false;
         }
         return true;
@@ -2316,7 +2315,7 @@ namespace game
                     }
                 }
             }
-            camera1->resetinterp();
+            //camera1->resetinterp();
             calcangles(camera1, focus);
             findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
 
