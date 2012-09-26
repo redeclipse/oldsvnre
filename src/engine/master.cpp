@@ -71,7 +71,7 @@ void setupmaster()
         if(enet_socket_listen(mastersocket, -1) < 0) fatal("failed to listen on master server socket");
         if(enet_socket_set_option(mastersocket, ENET_SOCKOPT_NONBLOCK, 1) < 0) fatal("failed to make master server socket non-blocking");
         if(!setuppingsocket(&address)) fatal("failed to create ping socket");
-        starttime = time(NULL);
+        starttime = clocktime;
         char *ct = ctime(&starttime);
         if(strchr(ct, '\n')) *strchr(ct, '\n') = '\0';
         conoutf("master server started on %s:[%d]", *masterip ? masterip : "localhost", masterport);
@@ -133,8 +133,7 @@ void reqauth(masterclient &c, uint id, char *name)
 {
     purgeauths(c);
 
-    time_t t = time(NULL);
-    char *ct = ctime(&t);
+    char *ct = ctime(&clocktime);
     if(ct)
     {
         char *newline = strchr(ct, '\n');

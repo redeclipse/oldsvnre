@@ -169,6 +169,7 @@ VAR(0, serverport, 1, RE_SERVER_PORT, VAR_MAX);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
+time_t clocktime = 0;
 uint totalsecs = 0;
 const char *load = NULL;
 vector<char *> gameargs;
@@ -881,6 +882,7 @@ int getclockmillis()
 
 int updatetimer(bool limit)
 {
+    clocktime = time(NULL);
     int millis = getclockmillis();
 #ifndef STANDALONE
     if(limit) limitfps(millis, totalmillis);
@@ -1597,8 +1599,11 @@ void reloadsignal(int signum)
 
 int main(int argc, char **argv)
 {
+    clocktime = time(NULL); // initialise
+
     setlogfile(NULL);
     setlocations(true);
+
     char *initscript = NULL;
     for(int i = 1; i<argc; i++)
     {
@@ -1609,7 +1614,9 @@ int main(int argc, char **argv)
         }
         else gameargs.add(argv[i]);
     }
+
     if(enet_initialize()<0) fatal("Unable to initialise network module");
+
     signal(SIGINT, fatalsignal);
     signal(SIGILL, fatalsignal);
     signal(SIGABRT, fatalsignal);
