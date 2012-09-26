@@ -488,20 +488,20 @@ struct gui : guient
         }
     }
 
-    char *field(const char *name, int color, int length, int height, const char *initval, int initmode)
+    char *field(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDEDIT, "console");
+        return field_(name, color, length, height, initval, initmode, FIELDEDIT, focus, parent, "console");
     }
 
-    char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode)
+    char *keyfield(const char *name, int color, int length, int height, const char *initval, int initmode, bool focus, const char *parent)
     {
-        return field_(name, color, length, height, initval, initmode, FIELDKEY, "console");
+        return field_(name, color, length, height, initval, initmode, FIELDKEY, focus, parent, "console");
     }
 
-    char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, const char *font = "")
+    char *field_(const char *name, int color, int length, int height, const char *initval, int initmode, int fieldtype = FIELDEDIT, bool focus = false, const char *parent = NULL, const char *font = "")
     {
         if(font && *font) gui::pushfont(font);
-        editor *e = useeditor(name, initmode, false, initval); // generate a new editor if necessary
+        editor *e = useeditor(name, initmode, false, initval, parent); // generate a new editor if necessary
         if(layoutpass)
         {
             if(initval && e->mode==EDITORFOCUSED && (e!=currentfocus() || fieldmode == FIELDSHOW))
@@ -533,7 +533,7 @@ struct gui : guient
         if(visible())
         {
             e->rendered = true;
-
+            if(focus && e->unfocus) focus = false;
             bool hit = ishit(w, h) && e->mode!=EDITORREADONLY;
             bool editing = (fieldmode != FIELDSHOW) && e==currentfocus() && e->mode!=EDITORREADONLY;
             if(mouseaction[0]&GUI_UP && mergedepth >= 0 && hit) mouseaction[0] &= ~GUI_UP;
@@ -541,16 +541,17 @@ struct gui : guient
             {
                 if(hit)
                 {
-                    if(fieldtype==FIELDKEY) e->clear();
-                    useeditor(e->name, initmode, true);
-                    e->mark(false);
-                    fieldmode = fieldtype;
+                    focus = true;
+                    if(e->unfocus) e->unfocus = false;
                 }
-                else if(editing)
-                {
-                    fieldmode = FIELDCOMMIT;
-                    //e->mode = EDITORFOCUSED;
-                }
+                else if(editing) fieldmode = FIELDCOMMIT;
+            }
+            if(focus)
+            {
+                if(fieldtype == FIELDKEY) e->clear();
+                useeditor(e->name, initmode, true, initval, parent);
+                e->mark(false);
+                fieldmode = fieldtype;
             }
             if(hit && editing && (mouseaction[0]&GUI_PRESSED)!=0 && fieldtype==FIELDEDIT)
                 e->hit(int(floor(hitx-(curx+wpad/2))), int(floor(hity-(cury+hpad/2))), (mouseaction[0]&GUI_DRAGGED)!=0); //mouse request position
@@ -574,6 +575,7 @@ struct gui : guient
             glEnable(GL_BLEND);
             defaultshader->set();
         }
+        else if(e->unfocus) e->unfocus = false;
         layout(w, h);
         if(e->maxy != 1)
         {
@@ -1030,8 +1032,8 @@ namespace UI
 
         if(code<0) switch(code)
         { // fall-through-o-rama
-            case -5: if(fieldmode == FIELDEDIT) break; mouseaction[1] |= GUI_ALT;
-            case -4: if(fieldmode == FIELDEDIT) break; mouseaction[1] |= isdown ? GUI_DOWN : GUI_UP;
+            case -5: mouseaction[1] |= GUI_ALT;
+            case -4: mouseaction[1] |= isdown ? GUI_DOWN : GUI_UP;
                 if(active()) return true;
                 break;
             case -3: mouseaction[0] |= GUI_ALT;
@@ -1049,7 +1051,11 @@ namespace UI
         switch(code)
         {
             case SDLK_ESCAPE: //cancel editing without commit
-                if(isdown) fieldmode = FIELDABORT;
+                if(isdown)
+                {
+                    fieldmode = FIELDABORT;
+                    e->unfocus = true;
+                }
                 return true;
             case SDLK_RETURN:
             case SDLK_TAB:
@@ -1059,8 +1065,6 @@ namespace UI
                 return true;
             case SDLK_HOME:
             case SDLK_END:
-            case SDLK_PAGEUP:
-            case SDLK_PAGEDOWN:
             case SDLK_DELETE:
             case SDLK_BACKSPACE:
             case SDLK_UP:
@@ -1069,8 +1073,16 @@ namespace UI
             case SDLK_RIGHT:
             case SDLK_LSHIFT:
             case SDLK_RSHIFT:
+                break;
+            case SDLK_PAGEUP:
+            case SDLK_PAGEDOWN:
             case -4:
             case -5:
+                if(e->parent && *e->parent)
+                { // pass input on to parent
+                    editor *f = findeditor(e->parent);
+                    if(f) e = f;
+                }
                 break;
             default:
                 if(!cooked || (code<32)) return false;
@@ -1163,9 +1175,9 @@ namespace UI
         loopi(2) mouseaction[i] = 0;
     }
 
-    editor *geteditor(const char *name, int mode, const char *init)
+    editor *geteditor(const char *name, int mode, const char *init, const char *parent)
     {
-        return useeditor(name, mode, false, init);
+        return useeditor(name, mode, false, init, parent);
     }
 
     void editorline(editor *e, const char *str, int limit)

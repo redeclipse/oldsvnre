@@ -580,8 +580,8 @@ struct guient
     virtual void strut(float size = 1) = 0;
     virtual void space(float size = 1) = 0;
     virtual void spring(int weight = 1) = 0;
-    virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED) = 0;
-    virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED) = 0;
+    virtual char *field(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED, bool focus = false, const char *parent = NULL) = 0;
+    virtual char *keyfield(const char *name, int color, int length, int height = 0, const char *initval = NULL, int initmode = EDITORFOCUSED, bool focus = false, const char *parent = NULL) = 0;
     virtual int playerpreview(int model, int color, int team, int weap, float scale, bool overlaid = false) { return 0; }
     virtual int modelpreview(const char *name, int anim, float scale, bool overlaid = false) { return 0; }
 
@@ -609,7 +609,7 @@ namespace UI
     extern bool hit(bool on, bool act);
     extern void addcb(guicb *cb);
     extern void limitscale(float scale);
-    extern editor *geteditor(const char *name, int mode, const char *init = NULL);
+    extern editor *geteditor(const char *name, int mode, const char *init = NULL, const char *parent = NULL);
     extern void editorline(editor *e, const char *str, int limit = -1);
     extern void editorclear(editor *e, const char *init = "");
     extern void editoredit(editor *e);

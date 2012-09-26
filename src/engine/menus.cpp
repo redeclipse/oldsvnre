@@ -491,28 +491,28 @@ void guibitfield(char *name, char *var, int *mask, char *onchange, int *colour)
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guifield(char *var, int *maxlength, char *onchange, int *colour)
+void guifield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->field(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, 0, initval);
+    char *result = cgui->field(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, 0, initval, EDITORFOCUSED, *focus!=0, parent);
     if(result) updateval(var, result, onchange);
 }
 
 //-ve maxlength indicates a wrapped text field of any (approx 260 chars) length, |maxlength| is the field width
-void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour)
+void guieditor(char *name, int *maxlength, int *height, int *mode, int *colour, int *focus, char *parent)
 {
     if(!cgui) return;
-    cgui->field(name, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode);
+    cgui->field(name, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode, *focus!=0, parent);
     //returns a non-NULL pointer (the currentline) when the user commits, could then manipulate via text* commands
 }
 
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
-void guikeyfield(char *var, int *maxlength, char *onchange, int *colour)
+void guikeyfield(char *var, int *maxlength, char *onchange, int *colour, int *focus, char *parent)
 {
     if(!cgui) return;
     const char *initval = getsval(var);
-    char *result = cgui->keyfield(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval);
+    char *result = cgui->keyfield(var, *colour ? *colour : 0xFFFFFF, *maxlength ? *maxlength : -8, 0, initval, EDITORFOCUSED, *focus!=0, parent);
     if(result) updateval(var, result, onchange);
 }
 
@@ -611,9 +611,9 @@ COMMAND(0, guiradio,"ssfsi");
 COMMAND(0, guibitfield, "ssisi");
 COMMAND(0, guicheckbox, "ssffsi");
 COMMAND(0, guitab, "s");
-COMMAND(0, guifield, "sisi");
-COMMAND(0, guikeyfield, "sisi");
-COMMAND(0, guieditor, "siiii");
+COMMAND(0, guifield, "sisiis");
+COMMAND(0, guikeyfield, "sisiis");
+COMMAND(0, guieditor, "siiiiis");
 
 void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action, float *scale, int *overlaid, char *altact)
 {
