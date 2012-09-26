@@ -1412,7 +1412,7 @@ namespace server
 
     struct spawn
     {
-        int spawncycle, lastused;
+        int spawncycle, lastused, iteration;
         vector<int> ents;
         vector<int> cycle;
 
@@ -1423,7 +1423,7 @@ namespace server
         {
             ents.shrink(0);
             cycle.shrink(0);
-            spawncycle = 0;
+            spawncycle = iteration = 0;
             lastused = -1;
         }
         void add(int n)
@@ -1440,16 +1440,23 @@ namespace server
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
-            if(m_fight(gamemode) && m_isteam(gamemode, mutators))
+            bool teamspawns = m_isteam(gamemode, mutators);
+            if(!teamspawns && m_duel(gamemode, mutators))
+            { // iterate through teams so players spawn on opposite sides in duel
+                teamspawns = true;
+                numt = 2;
+            }
+            if(m_fight(gamemode) && teamspawns)
             {
                 loopk(3)
                 {
                     loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                     {
-                        if(!k && !isteam(gamemode, mutators, sents[i].attrs[0], TEAM_FIRST)) continue;
+                        if(!k && (m_isteam(gamemode, mutators) ? !isteam(gamemode, mutators, sents[i].attrs[0], TEAM_FIRST) : (sents[i].attrs[0] == TEAM_ALPHA || sents[i].attrs[0] == TEAM_OMEGA)))
+                            continue;
                         else if(k == 1 && sents[i].attrs[0] == TEAM_NEUTRAL) continue;
                         else if(k == 2 && sents[i].attrs[0] != TEAM_NEUTRAL) continue;
-                        spawns[!k && m_isteam(gamemode, mutators) ? sents[i].attrs[0] : TEAM_NEUTRAL].add(i);
+                        spawns[k ? TEAM_NEUTRAL : sents[i].attrs[0]].add(i);
                         totalspawns++;
                     }
                     if(!k && m_isteam(gamemode, mutators))
@@ -1472,13 +1479,14 @@ namespace server
                     totalspawns++;
                 }
             }
-            if(!totalspawns)
+            if(!totalspawns) loopk(2)
             { // use all spawns
-                loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                loopv(sents) if(sents[i].type == PLAYERSTART && (k || ((sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))))
                 {
                     spawns[TEAM_NEUTRAL].add(i);
                     totalspawns++;
                 }
+                if(totalspawns) break;
             }
 
             if(totalspawns) cplayers = totalspawns/2;
@@ -1510,14 +1518,22 @@ namespace server
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
             }
-            if(totalspawns && GAME(spawnrotate))
+            if(totalspawns)
             {
-                int cycle = -1, team = m_fight(gamemode) && m_isteam(gamemode, mutators) && !spawns[ci->team].ents.empty() ? ci->team : TEAM_NEUTRAL;
-                if(!spawns[team].ents.empty()) switch(GAME(spawnrotate))
+                int cycle = -1, team = TEAM_NEUTRAL, rotate = GAME(spawnrotate);
+                if(m_duel(gamemode, mutators) && !m_isteam(gamemode, mutators))
+                {
+                    if(!spawns[TEAM_ALPHA].ents.empty() && !spawns[TEAM_OMEGA].ents.empty())
+                        team = spawns[TEAM_ALPHA].iteration <= spawns[TEAM_OMEGA].iteration ? TEAM_ALPHA : TEAM_OMEGA;
+                    if(!rotate) rotate = 2;
+                }
+                else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && !spawns[ci->team].ents.empty()) team = ci->team;
+                switch(rotate)
                 {
                     case 2:
                     {
-                        static vector<int> lowest; lowest.setsize(0);
+                        static vector<int> lowest;
+                        lowest.setsize(0);
                         loopv(spawns[team].cycle) if(lowest.empty() || spawns[team].cycle[i] <= spawns[team].cycle[lowest[0]])
                         {
                             if(spawns[team].cycle.length() > 1 && cycle == i) continue; // avoid using this one again straight away
@@ -1533,16 +1549,18 @@ namespace server
                         }
                         // fall through if this fails..
                     }
-                    case 1: default:
+                    case 1:
                     {
                         if(++spawns[team].spawncycle >= spawns[team].ents.length()) spawns[team].spawncycle = 0;
                         cycle = spawns[team].spawncycle;
                         break;
                     }
+                    case 0: default: break;
                 }
                 if(spawns[team].ents.inrange(cycle))
                 {
                     spawns[team].lastused = cycle;
+                    spawns[team].iteration++;
                     return spawns[team].ents[cycle];
                 }
             }
