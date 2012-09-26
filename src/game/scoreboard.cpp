@@ -275,7 +275,7 @@ namespace hud
                             int delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
                             g.pushlist();
                             g.spring();
-                            uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::player1->state != CS_WAITING && game::player1->lastdeath ? "Fragged" : "Please Wait"));
+                            uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged"));
                             if(shownotices >= 2)
                             {
                                 g.space(1);

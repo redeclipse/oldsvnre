@@ -979,8 +979,11 @@ namespace hud
             if(target->state == CS_DEAD || target->state == CS_WAITING)
             {
                 int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
-                const char *msg = target->state == CS_WAITING && target == game::player1 ? "Please Wait" : "Fragged";
-                ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
+                if(target == game::player1)
+                {
+                    const char *msg = target->state == CS_WAITING ? "Please Wait" : "Fragged";
+                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
+                }
                 if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
                 {
                     pushfont("reduced");
