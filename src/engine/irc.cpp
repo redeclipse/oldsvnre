@@ -14,7 +14,7 @@ ircnet *ircfind(const char *name)
 void ircestablish(ircnet *n)
 {
     if(!n) return;
-    n->lastattempt = totalmillis;
+    n->lastattempt = clocktime;
     if(n->address.host == ENET_HOST_ANY)
     {
         conoutf("looking up %s:[%d]...", n->serv, n->port);
@@ -281,7 +281,7 @@ bool ircjoin(ircnet *n, ircchan *c)
     if(*c->passkey) ircsend(n, "JOIN %s :%s", c->name, c->passkey);
     else ircsend(n, "JOIN %s", c->name);
     c->state = IRCC_JOINING;
-    c->lastjoin = totalmillis;
+    c->lastjoin = clocktime;
     c->lastsync = 0;
     return true;
 }
@@ -455,7 +455,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             if(c && !strcasecmp(user[0], n->nick))
             {
                 c->state = IRCC_JOINED;
-                c->lastjoin = c->lastsync = totalmillis;
+                c->lastjoin = c->lastsync = clocktime;
             }
             ircprintf(n, 3, w[g+1], "\fg%s (%s@%s) has joined", user[0], user[1], user[2]);
         }
@@ -468,7 +468,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             if(c && !strcasecmp(user[0], n->nick))
             {
                 c->state = IRCC_NONE;
-                c->lastjoin = totalmillis;
+                c->lastjoin = clocktime;
                 c->lastsync = 0;
             }
             ircprintf(n, 3, w[g+1], "\fo%s (%s@%s) has left", user[0], user[1], user[2]);
@@ -487,7 +487,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             if(c && !strcasecmp(w[g+2], n->nick))
             {
                 c->state = IRCC_KICKED;
-                c->lastjoin = totalmillis;
+                c->lastjoin = clocktime;
                 c->lastsync = 0;
             }
             ircprintf(n, 3, w[g+1], "\fr%s (%s@%s) has kicked %s from %s", user[0], user[1], user[2], w[g+2], w[g+1]);
@@ -517,9 +517,8 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
         }
         else
         {
-            int t = time(NULL);
             ircprintf(n, 4, NULL, "%s PING (empty)", user[0]);
-            ircsend(n, "PONG %d", t);
+            ircsend(n, "PONG %d", clocktime);
         }
     }
     else
@@ -573,7 +572,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
                 if(c)
                 {
                     c->state = IRCC_BANNED;
-                    c->lastjoin = totalmillis;
+                    c->lastjoin = clocktime;
                     c->lastsync = 0;
                     if(c->type == IRCCT_AUTO)
                         ircprintf(n, 4, w[g+2], "\fbwaiting 5 mins to rejoin %s", c->name);
@@ -668,7 +667,7 @@ void ircdiscon(ircnet *n)
     enet_socket_destroy(n->sock);
     n->state = IRC_DISC;
     n->sock = ENET_SOCKET_NULL;
-    n->lastattempt = totalmillis;
+    n->lastattempt = clocktime;
 }
 
 void irccleanup()
@@ -700,7 +699,7 @@ void ircslice()
                     {
                         ircchan *c = &n->channels[j];
                         c->state = IRCC_NONE;
-                        c->lastjoin = totalmillis;
+                        c->lastjoin = clocktime;
                         c->lastsync = 0;
                     }
                     break;
@@ -710,14 +709,14 @@ void ircslice()
                     loopvj(n->channels)
                     {
                         ircchan *c = &n->channels[j];
-                        if(c->type == IRCCT_AUTO && c->state != IRCC_JOINED && (!c->lastjoin || totalmillis-c->lastjoin >= (c->state != IRCC_BANNED ? 5000 : 300000)))
+                        if(c->type == IRCCT_AUTO && c->state != IRCC_JOINED && (!c->lastjoin || clocktime-c->lastjoin >= (c->state != IRCC_BANNED ? 5 : 300)))
                             ircjoin(n, c);
                     }
                     // fall through
                 }
                 case IRC_CONN:
                 {
-                    if(n->state == IRC_CONN && totalmillis-n->lastattempt >= 60000)
+                    if(n->state == IRC_CONN && clocktime-n->lastattempt >= 60)
                     {
                         ircprintf(n, 4, NULL, "connection attempt timed out");
                         ircdiscon(n);
@@ -737,7 +736,7 @@ void ircslice()
                 }
             }
         }
-        else if(!n->lastattempt || totalmillis-n->lastattempt >= 60000) ircestablish(n);
+        else if(!n->lastattempt || clocktime-n->lastattempt >= 60) ircestablish(n);
     }
 }
 #ifndef STANDALONE
@@ -841,7 +840,7 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
         ircchan *c = &n->channels[j];
         if(!ircchangui(g, n, c, true, c->lastsync && c->lastsync > lastchanupdate)) return false;
     }
-    lastchanupdate = totalmillis;
+    lastchanupdate = clocktime;
 
     return true;
 }

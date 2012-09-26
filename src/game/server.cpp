@@ -712,17 +712,6 @@ namespace server
     #define setmodf(a,b) { if(a != b) { setfvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(#b), #b); } }
     #define setmods(a,b) { if(strcmp(a, b)) { setsvar(#a, b, true);  sendf(-1, 1, "ri2sis", N_COMMAND, -1, &(#a)[3], strlen(b), b); } }
 
-    //void eastereggs()
-    //{
-    //    if(GAME(alloweastereggs))
-    //    {
-    //        time_t ct = time(NULL); // current time
-    //        struct tm *lt = localtime(&ct);
-    //        int month = lt->tm_mon+1, mday = lt->tm_mday; //, day = lt->tm_wday+1
-    //        if(GAME(alloweastereggs) >= 2 && month == 4 && mday == 1) setmod(sv_returningfire, 1);
-    //    }
-    //}
-
     int numgamevars = 0, numgamemods = 0;
     void resetgamevars(bool flush)
     {
@@ -762,7 +751,6 @@ namespace server
 #else
         execfile("servexec.cfg", false);
 #endif
-        //eastereggs();
     }
 
     const char *pickmap(const char *suggest, int mode, int muts)
@@ -1795,8 +1783,7 @@ namespace server
         if(!demotmp) return;
         int len = (int)min(demotmp->size(), stream::offset((GAME(demomaxsize)<<20) + 0x10000));
         demofile &d = demos.add();
-        time_t t = time(NULL);
-        char *timestr = ctime(&t), *trim = timestr + strlen(timestr);
+        char *timestr = ctime(&clocktime), *trim = timestr + strlen(timestr);
         while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
         formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, gamename(gamemode, mutators), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
         srvoutf(4, "\fydemo \fs\fc%s\fS recorded", d.info);

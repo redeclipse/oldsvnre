@@ -846,6 +846,8 @@ int main(int argc, char **argv)
     #endif
     #endif
 
+    clocktime = time(NULL); // initialise
+
     setlogfile(NULL);
     setlocations(true);
 
