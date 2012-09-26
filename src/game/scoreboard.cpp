@@ -49,14 +49,14 @@ namespace hud
 
     bool canshowscores()
     {
-        if(!scoresoff && !scoreson && !shownscores && autoshowscores && (game::player1->state == CS_DEAD || (autoshowscores >= (game::player1->state == CS_SPECTATOR ? 2 : 3) && game::tvmode())))
+        if(!scoresoff && !scoreson && !shownscores && autoshowscores)
         {
-            if(game::tvmode()) return true;
-            else if(game::player1->state == CS_DEAD)
+            if(game::player1->state == CS_DEAD)
             {
                 int delay = showscoresdelay ? showscoresdelay : m_delay(game::gamemode, game::mutators);
                 if(!delay || lastmillis-game::player1->lastdeath > delay) return true;
             }
+            else return game::tvmode() && autoshowscores >= (game::player1->state == CS_SPECTATOR ? 2 : 3);
         }
         return false;
     }
@@ -350,7 +350,7 @@ namespace hud
                                 if(!m_edit(game::gamemode) && shownotices >= 2)
                                 {
                                     SEARCHBINDCACHE(specmodekey)("specmodeswitch", 1);
-                                    uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode() ? "interact" : "switch to TV"));
+                                    uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, specmodekey, game::tvmode(true, false) ? "interact" : "switch to TV"));
                                 }
                             });
                         }

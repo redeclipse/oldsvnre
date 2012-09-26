@@ -1261,20 +1261,23 @@ struct cament
     enum { ENTITY = 0, PLAYER, AFFINITY, MAX };
 
     int type, id, inview[MAX], lastyawtime, lastpitchtime;
-    vec o, dir, olddir;
+    vec o, dir;
     float dist, mindist, maxdist, lastyaw, lastpitch;
     gameent *player;
     bool ignore;
     cament *moveto;
 
-    cament() : type(-1), id(-1), mindist(DISTMIN), maxdist(DISTMAX), player(NULL), ignore(false), moveto(NULL) { reset(); resetlast(); }
+    cament() : type(-1), id(-1), mindist(DISTMIN), maxdist(DISTMAX), player(NULL), ignore(false), moveto(NULL)
+    {
+        reset();
+        resetlast();
+    }
     ~cament() {}
 
     void reset()
     {
         loopi(MAX) inview[i] = 0;
-        if(!dir.iszero()) olddir = dir;
-        dir = vec(0, 0, 0);
+        if(dir.iszero()) dir = vec(float(rnd(360)), float(rnd(91)-45));
     }
 
     void resetlast()
@@ -1447,7 +1450,7 @@ namespace game
     extern bool inzoom();
     extern bool inzoomswitch();
     extern void zoomview(bool down);
-    extern bool tvmode(bool check = true);
+    extern bool tvmode(bool check = true, bool force = true);
     extern void resetcamera(bool full);
     extern void resetworld();
     extern void resetstate();

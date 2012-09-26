@@ -504,7 +504,7 @@ void cleanragdoll(dynent *d)
 
 vec ragdollcenter(dynent *d)
 {
-    if(!d->ragdoll) return vec(d->o).sub(vec(0, 0, d->height*0.5f));
+    if(!d->ragdoll) return d->center();
     return d->ragdoll->center;
 }
 
