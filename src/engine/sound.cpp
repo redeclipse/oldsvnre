@@ -53,8 +53,12 @@ VARF(0, soundmono, 0, 0, 1, initwarning("sound configuration", INIT_RESET, CHANG
 VARF(0, soundchans, 1, 32, 128, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(0, soundbufferlen, 128, 1024, VAR_MAX, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VAR(IDF_PERSIST, soundmaxrad, 0, 256, VAR_MAX);
+VAR(IDF_PERSIST, soundmaxrad, 0, 512, VAR_MAX);
 VAR(IDF_PERSIST, soundminrad, 0, 0, VAR_MAX);
+FVAR(IDF_PERSIST, soundevtvol, 0, 1, FVAR_MAX);
+FVAR(IDF_PERSIST, soundevtscale, 0, 1, FVAR_MAX);
+FVAR(IDF_PERSIST, soundenvvol, 0, 1, FVAR_MAX);
+FVAR(IDF_PERSIST, soundenvscale, 0, 1, FVAR_MAX);
 
 VARF(IDF_PERSIST, musicvol, 0, 64, 255, changedvol = true);
 VAR(IDF_PERSIST, musicfadein, 0, 1000, VAR_MAX);
@@ -333,7 +337,8 @@ void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec 
         }
         if(!(flags&SND_NODIST))
         {
-            float mrad = maxrad > 0 ? maxrad : soundmaxrad, nrad = minrad > 0 ? (minrad <= mrad ? minrad : mrad) : soundminrad;
+            float mrad = int((maxrad > 0 ? maxrad : soundmaxrad)*(flags&SND_MAP ? soundenvscale : soundevtscale)),
+                  nrad = minrad > 0 ? (minrad <= mrad ? minrad : mrad) : soundminrad;
             if(dist > nrad)
             {
                 if(dist <= mrad) svol = int(svol*(1.f-((dist-nrad)/max(mrad-nrad,1e-16f))));
@@ -343,7 +348,7 @@ void calcvol(int flags, int vol, int slotvol, int maxrad, int minrad, const vec 
     }
     if(!(flags&SND_NOQUIET) && svol > 0 && liquid) svol = int(svol*0.65f);
     if(flags&SND_CLAMPED) svol = max(svol, clamp(vol, 0, 255));
-    *curvol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(slotvol/255.f)*(svol/255.f)*MIX_MAX_VOLUME), 0, MIX_MAX_VOLUME);
+    *curvol = clamp(int((mastervol/255.f)*(soundvol/255.f)*(slotvol/255.f)*(svol/255.f)*MIX_MAX_VOLUME*(flags&SND_MAP ? soundenvvol : soundevtvol)), 0, MIX_MAX_VOLUME);
     *curpan = span;
 }
 
