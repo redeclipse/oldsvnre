@@ -711,7 +711,7 @@ void ircslice()
         {
             ircchan &c = n->channels[j];
             if(c.state != IRCC_JOINED && c.state != IRCC_JOINING && (c.type != IRCCT_AUTO || c.updated&IRCUP_LEAVE))
-                n->channels.remove(i);
+                n->channels.remove(j);
         }
     }
     #endif
@@ -806,7 +806,7 @@ void irccmd(ircnet *n, ircchan *c, char *s)
                     ircsend(n, "PART %s", d->name);
                     d->updated |= IRCUP_LEAVE;
                 }
-                else ircsend(n, "PART %s", r);
+                else ircprintf(n, 4, NULL, "\fcyou are not on a channel");
             }
             else if(!strcasecmp(q, "QUIT"))
             {
