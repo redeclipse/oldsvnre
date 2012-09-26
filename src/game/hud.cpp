@@ -1603,7 +1603,7 @@ namespace hud
                     }
                     if(force || self || chkcond(radarplayernames, !game::tvmode()))
                     {
-                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", d != game::focus ? game::colorname(d, NULL, "", false) : "you");
+                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", d != game::player1 ? game::colorname(d, NULL, "", false) : "you");
                         continue;
                     }
                 }
