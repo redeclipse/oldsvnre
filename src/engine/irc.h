@@ -1,10 +1,13 @@
 enum { IRCC_NONE = 0, IRCC_JOINING, IRCC_JOINED, IRCC_KICKED, IRCC_BANNED };
 enum { IRCCT_NONE = 0, IRCCT_AUTO };
-struct irclines
+#ifndef STANDALONE
+enum { IRCUP_NEW = 1<<0, IRCUP_MSG = 1<<1, IRCUP_LEAVE = 1<<2 };
+#define MAXIRCLINES 100
+struct ircbuf
 {
     int newlines;
     vector<char *> lines;
-   
+
     void reset()
     {
         lines.deletearrays();
@@ -22,17 +25,19 @@ struct irclines
 
     void addline(const char *str, int limit = -1)
     {
-#ifndef STANDALONE
         if(limit >= 0) choplines(limit);
         lines.add(newstring(str));
-#endif
     }
 };
-struct ircchan : irclines
+#endif
+struct ircchan
 {
     int state, type, relay, lastjoin, lastsync;
     string name, friendly, passkey;
-
+#ifndef STANDALONE
+    int updated;
+    ircbuf buffer;
+#endif
     ircchan() { reset(); }
     ~ircchan() { reset(); }
 
@@ -42,12 +47,15 @@ struct ircchan : irclines
         type = IRCCT_NONE;
         relay = lastjoin = lastsync = 0;
         name[0] = friendly[0] = passkey[0] = 0;
-        irclines::reset();
+#ifndef STANDALONE
+        updated = 0;
+        buffer.reset();
+#endif
     }
 };
 enum { IRCT_NONE = 0, IRCT_CLIENT, IRCT_RELAY, IRCT_MAX };
-enum { IRC_DISC = 0, IRC_ATTEMPT, IRC_CONN, IRC_ONLINE, IRC_MAX };
-struct ircnet : irclines
+enum { IRC_NEW = 0, IRC_DISC, IRC_ATTEMPT, IRC_CONN, IRC_ONLINE, IRC_MAX };
+struct ircnet
 {
     int type, state, port, lastattempt, inputcarry, inputlen;
     string name, serv, nick, ip, passkey, authname, authpass;
@@ -55,6 +63,10 @@ struct ircnet : irclines
     ENetSocket sock;
     vector<ircchan> channels;
     uchar input[4096];
+#ifndef STANDALONE
+    int updated;
+    ircbuf buffer;
+#endif
 
     ircnet() { reset(); }
     ~ircnet() { reset(); }
@@ -67,7 +79,10 @@ struct ircnet : irclines
         port = lastattempt = 0;
         name[0] = serv[0] = nick[0] = ip[0] = passkey[0] = authname[0] = authpass[0] = 0;
         channels.shrink(0);
-        irclines::reset();
+#ifndef STANDALONE
+        updated = 0;
+        buffer.reset();
+#endif
     }
 };
 

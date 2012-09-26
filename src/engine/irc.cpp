@@ -195,10 +195,13 @@ void ircnewnet(int type, const char *name, const char *serv, int port, const cha
     }
     ircnet &n = *ircnets.add(new ircnet);
     n.type = type;
-    n.state = IRC_DISC;
+    n.state = IRC_NEW;
     n.sock = ENET_SOCKET_NULL;
     n.port = port;
     n.lastattempt = 0;
+    #ifndef STANDALONE
+    n.updated = IRCUP_NEW;
+    #endif
     copystring(n.name, name);
     copystring(n.serv, serv);
     copystring(n.nick, nick);
@@ -256,7 +259,7 @@ ICOMMAND(0, ircauth, "sss", (const char *name, const char *s, const char *t), {
 ICOMMAND(0, ircconnect, "s", (const char *name), {
     ircnet *n = ircfind(name);
     if(!n) { conoutf("no such ircnet: %s", name); return; }
-    if(n->state != IRC_DISC) { conoutf("ircnet %s is already connected", n->name); return; }
+    if(n->state != IRC_DISC) { conoutf("ircnet %s is already active", n->name); return; }
     ircestablish(n);
 });
 
@@ -273,9 +276,9 @@ ircchan *ircfindchan(ircnet *n, const char *name)
 bool ircjoin(ircnet *n, ircchan *c)
 {
     if(!n || !c) return false;
-    if(n->state == IRC_DISC)
+    if(n->state != IRC_ONLINE)
     {
-        conoutf("ircnet %s is not connected", n->name);
+        conoutf("ircnet %s is not online", n->name);
         return false;
     }
     if(*c->passkey) ircsend(n, "JOIN %s :%s", c->name, c->passkey);
@@ -321,7 +324,7 @@ bool ircnewchan(int type, const char *name, const char *channel, const char *fri
     copystring(d.name, channel);
     copystring(d.friendly, friendly && *friendly ? friendly : channel);
     copystring(d.passkey, passkey);
-    if(n->state != IRC_DISC) ircjoin(n, &d);
+    if(n->state == IRC_ONLINE) ircjoin(n, &d);
     conoutf("%s added channel %s", n->name, d.name);
     return true;
 }
@@ -357,8 +360,6 @@ ICOMMAND(0, ircfriendlychan, "sss", (const char *name, const char *chan, const c
     copystring(c->friendly, s);
 });
 
-#define MAXLINES 100
-
 void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
 {
     defvformatstring(str, msg, msg);
@@ -369,20 +370,29 @@ void ircprintf(ircnet *n, int relay, const char *target, const char *msg, ...)
         if(c)
         {
             formatstring(s)("\fs\fa[%s:%s]\fS", n->name, c->name);
-            c->addline(str, MAXLINES);
+            #ifndef STANDALONE
+            c->buffer.addline(str, MAXIRCLINES);
+            c->updated |= IRCUP_MSG;
+            #endif
             if(n->type == IRCT_RELAY && c->relay >= relay)
                 server::srvmsgf(relay > 1 ? -2 : -3, "\fs\fa[%s]\fS %s", c->friendly, str);
         }
         else
         {
             formatstring(s)("\fs\fa[%s:%s]\fS", n->name, target);
-            n->addline(str, MAXLINES);
+            #ifndef STANDALONE
+            n->buffer.addline(str, MAXIRCLINES);
+            n->updated |= IRCUP_MSG;
+            #endif
         }
     }
     else
     {
         formatstring(s)("\fs\fa[%s]\fS", n->name);
-        n->addline(newstring(str), MAXLINES);
+        #ifndef STANDALONE
+        n->buffer.addline(newstring(str), MAXIRCLINES);
+        n->updated |= IRCUP_MSG;
+        #endif
     }
     console(0, "%s %s", s, str); // console is not used to relay
 }
@@ -456,6 +466,9 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
             {
                 c->state = IRCC_JOINED;
                 c->lastjoin = c->lastsync = clocktime;
+                #ifndef STANDALONE
+                c->updated |= IRCUP_NEW;
+                #endif
             }
             ircprintf(n, 3, w[g+1], "\fg%s (%s@%s) has joined", user[0], user[1], user[2]);
         }
@@ -576,6 +589,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
                     c->lastsync = 0;
                     if(c->type == IRCCT_AUTO)
                         ircprintf(n, 4, w[g+2], "\fbwaiting 5 mins to rejoin %s", c->name);
+                    else ircprintf(n, 4, NULL, "\fbbanned from channel: %s", c->name);
                 }
                 break;
             }
@@ -682,10 +696,28 @@ void irccleanup()
 
 void ircslice()
 {
+    #ifndef STANDALONE
+    loopvrev(ircnets)
+    {
+        ircnet *n = ircnets[i];
+        if((n->sock == ENET_SOCKET_NULL || n->state == IRC_DISC) && n->updated&IRCUP_LEAVE)
+        {
+            delete n;
+            ircnets.remove(i);
+            continue;
+        }
+        loopvjrev(n->channels)
+        {
+            ircchan &c = n->channels[j];
+            if(c.state != IRCC_JOINED && c.state != IRCC_JOINING && (c.type != IRCCT_AUTO || c.updated&IRCUP_LEAVE))
+                n->channels.remove(i);
+        }
+    }
+    #endif
     loopv(ircnets)
     {
         ircnet *n = ircnets[i];
-        if(n->sock != ENET_SOCKET_NULL && n->state != IRC_DISC)
+        if(n->sock != ENET_SOCKET_NULL && n->state > IRC_DISC)
         {
             switch(n->state)
             {
@@ -769,9 +801,18 @@ void irccmd(ircnet *n, ircchan *c, char *s)
             else if(!strcasecmp(q, "PART"))
             {
                 ircchan *d = ircfindchan(n, r);
-                if(d) ircsend(n, "PART %s", d->name);
-                else if(c) ircsend(n, "PART %s", c->name);
+                if(!d && c) d = c;
+                if(d)
+                {
+                    ircsend(n, "PART %s", d->name);
+                    d->updated |= IRCUP_LEAVE;
+                }
                 else ircsend(n, "PART %s", r);
+            }
+            else if(!strcasecmp(q, "QUIT"))
+            {
+                ircsend(n, "QUIT :%s", r);
+                n->updated |= IRCUP_LEAVE;
             }
             else if(*r) ircsend(n, "%s %s", q, r); // send it raw so we support any command
             else ircsend(n, "%s", q);
@@ -792,15 +833,21 @@ void irccmd(ircnet *n, ircchan *c, char *s)
     }
 }
 
-bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
+bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab)
 {
-    if(tab) g->tab(c->name, 0xFFFFFF, front);
+    if(tab)
+    {
+        bool front = c->updated&IRCUP_NEW, msg = c->updated&IRCUP_MSG;
+        g->tab(c->name, msg ? 0x00FFFF : 0xFFFFFF, front);
+        if(front) c->updated &= ~IRCUP_NEW;
+        if(msg && g->visible()) c->updated &= ~IRCUP_MSG;
+    }
 
     defformatstring(cwindow)("%s_%s_window", n->name, c->name);
-    if(c->newlines < c->lines.length())
+    if(c->buffer.newlines < c->buffer.lines.length())
     {
         editor *e = UI::geteditor(cwindow, EDITORREADONLY);
-        if(e) while(c->newlines < c->lines.length()) UI::editorline(e, c->lines[c->newlines++], MAXLINES);
+        if(e) while(c->buffer.newlines < c->buffer.lines.length()) UI::editorline(e, c->buffer.lines[c->buffer.newlines++], MAXIRCLINES);
     }
     g->field(cwindow, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
@@ -814,16 +861,21 @@ bool ircchangui(guient *g, ircnet *n, ircchan *c, bool tab, bool front)
     return true;
 }
 
-int lastchanupdate = -1;
 bool ircnetgui(guient *g, ircnet *n, bool tab)
 {
-    if(tab) g->tab(n->name);
+    if(tab)
+    {
+        bool front = n->updated&IRCUP_NEW, msg = n->updated&IRCUP_MSG;
+        g->tab(n->name, msg ? 0x00FFFF : 0xFFFFFF, front);
+        if(front) n->updated &= ~IRCUP_NEW;
+        if(msg && g->visible()) n->updated &= ~IRCUP_MSG;
+    }
 
     defformatstring(window)("%s_window", n->name);
-    if(n->newlines < n->lines.length())
+    if(n->buffer.newlines < n->buffer.lines.length())
     {
         editor *e = UI::geteditor(window, EDITORREADONLY);
-        if(e) while(n->newlines < n->lines.length()) UI::editorline(e, n->lines[n->newlines++], MAXLINES);
+        if(e) while(n->buffer.newlines < n->buffer.lines.length()) UI::editorline(e, n->buffer.lines[n->buffer.newlines++], MAXIRCLINES);
     }
     g->field(window, 0x666666, -100, 25, NULL, EDITORREADONLY);
 
@@ -838,10 +890,8 @@ bool ircnetgui(guient *g, ircnet *n, bool tab)
     loopvj(n->channels) if(n->channels[j].state != IRCC_NONE && n->channels[j].name[0])
     {
         ircchan *c = &n->channels[j];
-        if(!ircchangui(g, n, c, true, c->lastsync && c->lastsync > lastchanupdate)) return false;
+        if(!ircchangui(g, n, c, true)) return false;
     }
-    lastchanupdate = clocktime;
-
     return true;
 }
 
@@ -874,7 +924,7 @@ bool ircgui(guient *g, const char *s)
         }
         if(nets)
         {
-            loopv(ircnets) if(ircnets[i]->state != IRC_DISC && ircnets[i]->name[0] && ircnets[i]->sock != ENET_SOCKET_NULL)
+            loopv(ircnets)
             {
                 ircnet *n = ircnets[i];
                 if(!ircnetgui(g, n, true)) return false;
