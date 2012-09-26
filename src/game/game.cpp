@@ -48,22 +48,6 @@ namespace game
         if(reset) resetcamera(false);
     }
 
-    VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
-    VAR(IDF_PERSIST, followthirdperson, 0, 1, 1);
-    VAR(IDF_PERSIST, followaiming, 0, 1, 3); // 0 = don't aim, &1 = aim in thirdperson, &2 = aim in first person
-    FVAR(IDF_PERSIST, followblend, 0, 0.65f, 1);
-    FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 25, FVAR_MAX);
-
-    VAR(IDF_PERSIST, followtv, 0, 1, 1); // 0 = never, 1 = use tv style when following
-    VAR(IDF_PERSIST, followtvspeed, 1, 500, VAR_MAX);
-    VAR(IDF_PERSIST, followtvyawspeed, 1, 500, VAR_MAX);
-    VAR(IDF_PERSIST, followtvpitchspeed, 1, 500, VAR_MAX);
-    FVAR(IDF_PERSIST, followtvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
-    FVAR(IDF_PERSIST, followtvyawscale, FVAR_MIN, 1, 1000);
-    FVAR(IDF_PERSIST, followtvpitchscale, FVAR_MIN, 1, 1000);
-    FVAR(IDF_PERSIST, followtvyawthresh, 0, 0, 360);
-    FVAR(IDF_PERSIST, followtvpitchthresh, 0, 0, 180);
-
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
@@ -85,9 +69,25 @@ namespace game
     VAR(IDF_PERSIST, editfov, 1, 120, 179);
     VAR(IDF_PERSIST, specfov, 1, 120, 179);
 
+    VAR(IDF_PERSIST, followmode, 0, 1, 1); // 0 = never, 1 = tv
     VARF(IDF_PERSIST, specmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
-    VARF(IDF_PERSIST, waitmode, 0, 2, 2, resetfollow()); // 0 = float, 1 = tv in duel/survivor, 2 = tv always
+    VARF(IDF_PERSIST, waitmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
     VARF(IDF_PERSIST, intermmode, 0, 1, 1, resetfollow()); // 0 = float, 1 = tv
+
+    VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
+    VAR(IDF_PERSIST, followthirdperson, 0, 1, 1);
+    VAR(IDF_PERSIST, followaiming, 0, 1, 3); // 0 = don't aim, &1 = aim in thirdperson, &2 = aim in first person
+    FVAR(IDF_PERSIST, followblend, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 25, FVAR_MAX);
+
+    VAR(IDF_PERSIST, followtvspeed, 1, 500, VAR_MAX);
+    VAR(IDF_PERSIST, followtvyawspeed, 1, 500, VAR_MAX);
+    VAR(IDF_PERSIST, followtvpitchspeed, 1, 500, VAR_MAX);
+    FVAR(IDF_PERSIST, followtvrotate, FVAR_MIN, 45, FVAR_MAX); // rotate style, < 0 = absolute angle, 0 = scaled, > 0 = scaled with max angle
+    FVAR(IDF_PERSIST, followtvyawscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, followtvpitchscale, FVAR_MIN, 1, 1000);
+    FVAR(IDF_PERSIST, followtvyawthresh, 0, 0, 360);
+    FVAR(IDF_PERSIST, followtvpitchthresh, 0, 0, 180);
 
     VAR(IDF_PERSIST, spectvtime, 1000, 10000, VAR_MAX);
     VAR(IDF_PERSIST, spectvmintime, 1000, 5000, VAR_MAX);
@@ -221,7 +221,7 @@ namespace game
         if(!viewonly && (d->state == CS_DEAD || d->state == CS_WAITING)) return true;
         if(player1->state == CS_EDITING) return false;
         if(player1->state >= CS_SPECTATOR && d == player1) return false;
-        if(inzoom()) return false;
+        if(d == player1 && inzoom()) return false;
         if(!(d != player1 ? followthirdperson : thirdperson)) return false;
         return true;
     }
@@ -269,7 +269,7 @@ namespace game
 
     bool zoomallow()
     {
-        if(allowmove(player1) && WEAP(player1->weapselect, zooms)) switch(zoomlock)
+        if(WEAP(player1->weapselect, zooms)) switch(zoomlock)
         {
             case 4: if(!physics::iscrouching(player1)) break;
             case 3: if(player1->physstate != PHYS_FLOOR) break;
@@ -412,8 +412,8 @@ namespace game
             if(intermission && intermmode) return true;
             else switch(player1->state)
             {
-                case CS_SPECTATOR: if(specmode || (force && focus != player1 && followtv && followaim())) return true; break;
-                case CS_WAITING: if((waitmode >= (m_duke(gamemode, mutators) ? 1 : 2) && (!player1->lastdeath || lastmillis-player1->lastdeath >= 500)) || (force && focus != player1 && followtv && followaim()))
+                case CS_SPECTATOR: if(specmode || (force && focus != player1 && followmode && followaim())) return true; break;
+                case CS_WAITING: if((waitmode && (!player1->lastdeath || lastmillis-player1->lastdeath >= 500)) || (force && focus != player1 && followmode && followaim()))
                     return true; break;
                 default: break;
             }
@@ -421,8 +421,24 @@ namespace game
         return false;
     }
 
-    ICOMMAND(0, specmodeswitch, "", (), specmode = specmode ? 0 : 1; hud::showscores(false); resetfollow());
-    ICOMMAND(0, waitmodeswitch, "", (), waitmode = waitmode ? 0 : (m_duke(gamemode, mutators) ? 1 : 2); hud::showscores(false); resetfollow());
+    ICOMMAND(0, specmodeswitch, "", (), {
+        if(tvmode(true, true))
+        {
+            if(!tvmode(true, false)) followmode = 0;
+            else { specmode = 0; resetfollow(); }
+        }
+        else if(focus != player1) followmode = 1;
+        else specmode = 1;
+    });
+    ICOMMAND(0, waitmodeswitch, "", (), {
+        if(tvmode(true, true))
+        {
+            if(!tvmode(true, false)) followmode = 0;
+            else { waitmode = 0; resetfollow(); }
+        }
+        else if(focus != player1) followmode = 1;
+        else waitmode = 1;
+    });
 
     bool followswitch(int n, bool other = false)
     {
@@ -1961,14 +1977,18 @@ namespace game
             else if(m_defend(gamemode)) defend::updatecam(cameras[i]);
             else if(m_bomber(gamemode)) bomber::updatecam(cameras[i]);
         }
+        camrefresh(cam);
         if(forced)
         {
             camupdate(cam, amt, renew, true);
-            if(renew) cam->resetlast();
+            if(renew)
+            {
+                lasttvchg = lasttvcam = lastmillis;
+                cam->resetlast();
+            }
         }
         else
         {
-            camrefresh(cam);
             int lasttype = cam->type, lastid = cam->id, millis = lasttvchg ? lastmillis-lasttvchg : 0;
             if(millis) amt = float(millis)/float(spectvmaxtime);
             bool updated = camupdate(cam, amt, renew), override = !lasttvchg || millis >= spectvmintime,
