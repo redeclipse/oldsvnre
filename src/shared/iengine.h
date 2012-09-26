@@ -564,6 +564,8 @@ struct guient
 
     virtual void allowautotab(bool on) = 0;
     virtual void allowhitfx(bool on) = 0;
+
+    virtual bool visible() = 0;
     virtual bool shouldtab() { return false; }
     virtual void tab(const char *name = NULL, int color = 0xFFFFFF, bool front = false) = 0;
     virtual int title(const char *text, int color = 0xFFFFFF, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
