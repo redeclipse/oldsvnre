@@ -253,6 +253,10 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, burningtex, "<grey>textures/alertburn", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bleedingtex, "<grey>textures/alertbleed", 3);
 
+    VAR(IDF_PERSIST, inventoryconopen, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventoryconopenblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, inventoryconopenflash, 0, 0, 1);
+
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, meleetex, "<grey>textures/melee", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, pistoltex, "<grey>textures/pistol", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, swordtex, "<grey>textures/sword", 3);
@@ -2179,6 +2183,22 @@ namespace hud
                         flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
                     }
                     sy += drawitem(burningtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                }
+            }
+            if(inventoryconopen)
+            {
+                float fade = blend*inventoryconopenblend;
+                if(game::focus->conopen)
+                {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+                    if(inventoryconopenflash)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
+                    }
+                    sy += drawitem(chattex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
             }
         }

@@ -860,7 +860,7 @@ namespace client
             {
                 data += p.length();
                 len -= p.length();
-                defformatstring(fname)("%d.dmo", totalmillis);
+                defformatstring(fname)("demos/%d.dmo", clocktime);
                 stream *demo = openfile(fname, "wb");
                 if(!demo) return;
                 conoutft(CON_MESG, "received demo \"%s\"", fname);

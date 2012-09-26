@@ -1707,7 +1707,7 @@ namespace server
     {
         demoheader hdr;
         mkstring(msg);
-        defformatstring(file)("%s.dmo", smapname);
+        defformatstring(file)(strstr(smapname, "maps/")==smapname || strstr(smapname, "maps\\")==smapname ? "%s.dmo" : "demos/%s.dmo", smapname);
         demoplayback = opengzfile(file, "rb");
         if(!demoplayback) formatstring(msg)("\frcould not read demo \fs\fc%s\fS", file);
         else if(demoplayback->read(&hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
