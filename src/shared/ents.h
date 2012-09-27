@@ -75,7 +75,7 @@ extern int efocus, enthover, entorient;
 #define entfocus(i, f)  { int n = efocus = (i); if(n>=0) { extentity &e = *entities::getents()[n]; f; } }
 
 enum { CS_ALIVE = 0, CS_DEAD, CS_SPAWNING, CS_EDITING, CS_SPECTATOR, CS_WAITING }; // beware, some stuff uses >= CS_SPECTATOR
-enum { PHYS_FLOAT = 0, PHYS_FALL, PHYS_SLIDE, PHYS_SLOPE, PHYS_FLOOR, PHYS_STEP_UP, PHYS_STEP_DOWN, PHYS_BOUNCE };
+enum { PHYS_FLOAT = 0, PHYS_FALL, PHYS_SLIDE, PHYS_SLOPE, PHYS_FLOOR, PHYS_STEP_UP, PHYS_STEP_DOWN };
 enum { ENT_PLAYER = 0, ENT_AI, ENT_INANIMATE, ENT_CAMERA, ENT_PROJ, ENT_RAGDOLL, ENT_DUMMY };
 enum { COLLIDE_AABB = 0, COLLIDE_OBB, COLLIDE_ELLIPSE };
 

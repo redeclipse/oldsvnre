@@ -1363,7 +1363,7 @@ namespace client
                     dir |= p.get()<<8;
                 }
                 gameent *d = game::getclient(lcn);
-                if(!d || d==game::player1 || d->ai) continue;
+                if(!d || d == game::player1 || d->ai) continue;
                 float oldyaw = d->yaw, oldpitch = d->pitch;
                 d->yaw = yaw;
                 d->pitch = pitch;
@@ -1391,12 +1391,19 @@ namespace client
                 d->physstate = physstate&7;
                 physics::updatephysstate(d);
                 updatepos(d);
-                if(d->state==CS_DEAD || d->state==CS_WAITING)
+                if(d->state == CS_DEAD || d->state == CS_WAITING)
                 {
                     d->resetinterp();
                     d->smoothmillis = 0;
                 }
-                else if(physics::smoothmove && d->smoothmillis>=0 && oldpos.dist(d->o) < physics::smoothdist)
+                else if(d->respawned < 0)
+                {
+                    d->resetinterp();
+                    d->smoothmillis = 0;
+                    game::respawned(d, false);
+                    d->respawned = lastmillis;
+                }
+                else if(physics::smoothmove && d->smoothmillis >= 0 && oldpos.dist(d->o) < physics::smoothdist)
                 {
                     d->newpos = d->o;
                     d->newpos.z -= d->height;
@@ -1656,27 +1663,6 @@ namespace client
                     break;
                 }
 
-                case N_SPAWN:
-                {
-                    int lcn = getint(p);
-                    gameent *f = game::newclient(lcn);
-                    if(f && f != game::player1 && !f->ai)
-                    {
-                        f->respawn(lastmillis);
-                        parsestate(f, p);
-                        if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
-                        if(game::dynlighteffects)
-                        {
-                            int colour = game::getcolour(f, game::playereffecttone);
-                            adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2), 250, 250);
-                            regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
-                        }
-                    }
-                    else parsestate(NULL, p);
-                    f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
-                    break;
-                }
-
                 case N_LOADWEAP:
                 {
                     hud::showscores(false);
@@ -1685,11 +1671,25 @@ namespace client
                     break;
                 }
 
+                case N_SPAWN:
+                {
+                    int lcn = getint(p);
+                    gameent *f = game::newclient(lcn);
+                    if(!f || f == game::player1 || f->ai)
+                    {
+                        parsestate(NULL, p);
+                        break;
+                    }
+                    f->respawn(lastmillis);
+                    parsestate(f, p);
+                    break;
+                }
+
                 case N_SPAWNSTATE:
                 {
                     int lcn = getint(p), ent = getint(p);
                     gameent *f = game::newclient(lcn);
-                    if(!f)
+                    if(!f || (f != game::player1 && !f->ai))
                     {
                         parsestate(NULL, p);
                         break;
@@ -1697,25 +1697,7 @@ namespace client
                     if(f == game::player1 && editmode) toggleedit();
                     f->respawn(lastmillis);
                     parsestate(f, p);
-                    f->state = CS_ALIVE;
-                    if(f == game::player1 || f->ai)
-                    {
-                        addmsg(N_SPAWN, "ri", f->clientnum);
-                        entities::spawnplayer(f, ent, true);
-                        if(f->aitype < AI_START) playsound(S_RESPAWN, f->o, f);
-                        if(game::dynlighteffects)
-                        {
-                            int colour = game::getcolour(f, game::playereffecttone);
-                            adddynlight(f->headpos(), f->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
-                            regularshape(PART_SPARK, f->height*2, colour, 53, 50, 350, f->headpos(-f->height/2), 1.5f, 1, 1, 0, 35);
-                        }
-                    }
-                    if(f->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
-                        entities::execlink(f, ent, false);
-                    ai::spawned(f, ent);
-                    if(f == game::player1) game::resetfollow();
-                    if(f == game::focus) game::resetcamera(true);
-                    f->setscale(game::rescale(f), 0, true, game::gamemode, game::mutators);
+                    game::respawned(f, true, ent);
                     break;
                 }
 
