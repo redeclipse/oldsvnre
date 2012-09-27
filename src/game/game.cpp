@@ -1783,7 +1783,7 @@ namespace game
         vec dir;
         tpcam.o = pos;
         vecfromyawpitch(yaw, pitch, -1, 0, dir);
-        physics::movecamera(&tpcam, dir, dist, 1.0f);
+        physics::movecamera(&tpcam, dir.normalize(), dist, 0.1f);
         return tpcam.o;
     }
 
@@ -2088,6 +2088,7 @@ namespace game
             }
         }
         camera1->o = camvec(cam, amt, camera1->yaw, camera1->pitch);
+        camera1->resetinterp(); // because this just sets position directly
         return true;
     }
 
