@@ -2377,9 +2377,18 @@ const char *indexlist(const char *s, int pos, int &len)
     return start;
 }
 
-void at(char *s, int *pos)
+void at(tagval *args, int numargs)
 {
-    commandret->setstr(indexlist(s, *pos));
+    if(!numargs) return;
+    const char *start = args[0].getstr(), *end = start + strlen(start);
+    for(int i = 1; i < numargs; i++)
+    {
+        const char *list = start;
+        int pos = args[i].getint();
+        for(; pos > 0; pos--) if(!parselist(list)) break;
+        if(pos > 0 || !parselist(list, start, end)) start = end = "";
+    }
+    commandret->setstr(newstring(start, end-start));
 }
 
 void substr(char *s, int *start, int *count, int *numargs)
@@ -2404,7 +2413,7 @@ void getalias_(char *s)
 }
 
 ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n!=0));
-COMMAND(0, at, "si");
+COMMAND(0, at, "si1V");
 ICOMMAND(0, escape, "s", (char *s), result(escapestring(s)));
 ICOMMAND(0, unescape, "s", (char *s),
 {
