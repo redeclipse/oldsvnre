@@ -175,7 +175,7 @@ namespace game
     VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerundertone, -1, CTONE_TMIX, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_MIXED, CTONE_MAX-1);
-    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAMED, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_MIXED, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.3f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, NUMPLAYERMODELS);
@@ -358,7 +358,7 @@ namespace game
         if(targ >= 0 && msg && *msg)
         {
             defvformatstring(text, msg, msg);
-            conoutft(targ == CON_INFO && d == game::player1 ? CON_SELF : targ, "%s", text);
+            conoutft(targ == CON_INFO && d == player1 ? CON_SELF : targ, "%s", text);
         }
         announce(idx, d);
     }
@@ -499,6 +499,34 @@ namespace game
         {
             client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
             d->respawned = lastmillis;
+        }
+    }
+
+    void respawned(gameent *d, bool local, int ent)
+    { // remote clients wait until first position update to process this
+        if(local)
+        {
+            d->state = CS_ALIVE;
+            client::addmsg(N_SPAWN, "ri", d->clientnum);
+            entities::spawnplayer(d, ent, true);
+        }
+        d->setscale(rescale(d), 0, true, gamemode, mutators);
+
+        if(d == player1) resetfollow();
+        if(d == focus) resetcamera(true);
+
+        if(d->aitype < AI_START) playsound(S_RESPAWN, d->o, d);
+        if(dynlighteffects)
+        {
+            int colour = getcolour(d, playereffecttone);
+            adddynlight(d->headpos(), d->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
+            regularshape(PART_SPARK, d->height*2, colour, 53, 50, 350, d->headpos(-d->height/2), 1.5f, 1, 1, 0, 35);
+        }
+        if(local)
+        {
+            if(d->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
+                entities::execlink(d, ent, true);
+            ai::spawned(d, ent);
         }
     }
 
@@ -839,8 +867,11 @@ namespace game
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);
-        if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
-        if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
+        if(local)
+        {
+            if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
+            if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
+        }
         if(d->lastburn > 0 && lastmillis-d->lastburn >= burntime-500)
         {
             if(lastmillis-d->lastburn >= burntime) d->resetburning();
@@ -919,7 +950,7 @@ namespace game
             if(flags&CRIT)
             {
                 if(playcrittones >= (actor == focus ? 1 : (d == focus ? 2 : 3)))
-                    playsound(S_CRITICAL, d->o, d, actor == game::focus ? SND_FORCED : SND_DIRECT, crittonevol);
+                    playsound(S_CRITICAL, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, crittonevol);
             }
             else
             {
@@ -930,7 +961,7 @@ namespace game
                     if(flags&BURN) snd = S_BURNED;
                     else if(flags&BLEED) snd = S_BLEED;
                     else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
-                    if(snd >= 0) playsound(snd, d->o, d, actor == game::focus ? SND_FORCED : SND_DIRECT, damagetonevol);
+                    if(snd >= 0) playsound(snd, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
                 }
                 if(aboveheaddamage)
                 {
@@ -1463,7 +1494,7 @@ namespace game
             {
                 d->loadweap[j] = (j ? b : a);
                 if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
-                if(d == game::player1) (j ? favloadweap2 : favloadweap1) = d->loadweap[j];
+                if(d == player1) (j ? favloadweap2 : favloadweap1) = d->loadweap[j];
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
             conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
@@ -1497,7 +1528,7 @@ namespace game
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
             d->mapchange(lastmillis, m_health(gamemode, mutators));
         if(!client::demoplayback && m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
-            chooseloadweap(game::player1, favloadweap1, favloadweap2);
+            chooseloadweap(player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         resetcamera(true);
         resetsway();
@@ -1801,7 +1832,7 @@ namespace game
             else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
             {
                 float scale = 1;
-                if(d == game::player1 && inzoom())
+                if(d == player1 && inzoom())
                 {
                     int frame = lastmillis-lastzoom;
                     float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
@@ -2131,7 +2162,7 @@ namespace game
         if(firstpersonbob && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
         {
             float scale = 1;
-            if(d == game::player1 && inzoom())
+            if(d == player1 && inzoom())
             {
                 int frame = lastmillis-lastzoom;
                 float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;

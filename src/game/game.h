@@ -1436,6 +1436,7 @@ namespace game
     extern void announcef(int idx, int targ, gameent *d, const char *msg, ...);
     extern void tvreset(gameent *d = NULL, bool clear = false);
     extern void respawn(gameent *d);
+    extern void respawned(gameent *d, bool local, int ent = -1);
     extern vec pulsecolour(physent *d, int i = 0, int cycle = 50);
     extern int hexpulsecolour(physent *d, int i = 0, int cycle = 50);
     extern void impulseeffect(gameent *d, int effect = 0);

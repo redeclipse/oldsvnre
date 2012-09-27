@@ -2643,7 +2643,8 @@ namespace hud
                         float a = (lastmillis-game::focus->lastspawn)/float(spawnfade/3);
                         if(a < 3.f)
                         {
-                            vec col = vec(1, 1, 1); skewcolour(col.x, col.y, col.z, game::getcolour(game::focus, game::playereffecttone));
+                            vec col = vec(1, 1, 1);
+                            skewcolour(col.x, col.y, col.z, game::getcolour(game::focus, game::playereffecttone));
                             if(a < 1.f) { loopi(3) col[i] *= a; }
                             else { a = (a-1.f)*0.5f; loopi(3) col[i] += (1.f-col[i])*a; }
                             loopi(3) if(col[i] < colour[i]) colour[i] *= col[i];
