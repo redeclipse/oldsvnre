@@ -2346,8 +2346,8 @@ namespace game
                         camera1->pitch = (d != camera1 ? d : focus)->pitch;
                     }
                 }
+                if(player1->state >= CS_SPECTATOR && focus != player1) camera1->resetinterp();
             }
-            //camera1->resetinterp();
             calcangles(camera1, focus);
             findorientation(camera1->o, camera1->yaw, camera1->pitch, worldpos);
 
