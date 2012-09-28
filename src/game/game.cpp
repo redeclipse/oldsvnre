@@ -104,7 +104,7 @@ namespace game
     VAR(IDF_PERSIST, spectvaiming, 0, 2, 2); // 0 = aim in direction followed player is facing, 1 = aim in direction determined by spectv when dead, 2 = always aim in direction
 
     VAR(IDF_PERSIST, deathcamstyle, 0, 2, 2); // 0 = no follow, 1 = follow attacker, 2 = follow self
-    FVAR(IDF_PERSIST, deathcamspeed, 0, 2.f, 1000);
+    VAR(IDF_PERSIST, deathcamspeed, 0, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, mouseinvert, 0, 0, 1);
     FVAR(IDF_PERSIST, sensitivity, 1e-4f, 10, 10000);
@@ -1859,11 +1859,18 @@ namespace game
             gameent *a = deathcamstyle > 1 ? d : getclient(d->lastattacker);
             if(a)
             {
-                vec dir = vec(ragdollcenter(a)).sub(camera1->o).normalize();
+                vec dir = vec(a->center()).sub(camera1->o).normalize();
                 vectoyawpitch(dir, camera1->yaw, camera1->pitch);
-                float speed = (float(curtime)/1000.f)*deathcamspeed;
-                if(deathcamspeed > 0) scaleyawpitch(yaw, pitch, camera1->yaw, camera1->pitch, speed, speed*4.f);
-                else { yaw = camera1->yaw; pitch = camera1->pitch; }
+                if(deathcamspeed > 0)
+                {
+                    float speed = curtime/float(deathcamspeed);
+                    scaleyawpitch(yaw, pitch, camera1->yaw, camera1->pitch, speed, speed*4.f);
+                }
+                else
+                {
+                    yaw = camera1->yaw;
+                    pitch = camera1->pitch;
+                }
             }
         }
     }
