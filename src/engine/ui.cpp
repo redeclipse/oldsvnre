@@ -18,6 +18,7 @@ VAR(IDF_PERSIST, guiclicktab, 0, 1, 1);
 VAR(IDF_PERSIST, guiblend, 1, 255, 255);
 VAR(IDF_PERSIST, guilinesize, 1, 36, 128);
 VAR(IDF_PERSIST, guisepsize, 1, 10, 128);
+VAR(IDF_PERSIST, guiscaletime, 0, 250, VAR_MAX);
 VAR(IDF_PERSIST|IDF_HEX, guibgcolour, -1, 0x888888, 0xFFFFFF);
 VAR(IDF_PERSIST|IDF_HEX, guibordercolour, -1, 0x181818, 0xFFFFFF);
 
@@ -893,19 +894,21 @@ struct gui : guient
 
     void adjustscale()
     {
-        int w = xsize + guibound[0]*2, h = ysize + guibound[1]*2;
+        int w = xsize + guibound[0]*4, h = ysize + guibound[1]*2;
         float aspect = forceaspect ? 1.0f/forceaspect : float(screen->h)/float(screen->w), fit = 1.0f;
         if(w*aspect*basescale>1.0f) fit = 1.0f/(w*aspect*basescale);
         if(h*basescale*fit>maxscale) fit *= maxscale/(h*basescale*fit);
-        origin = vec(0.5f-((w-xsize)/2 - guibound[0])*aspect*scale.x*fit, 0.5f + (0.5f*h-guibound[1])*scale.y*fit, 0);
         scale = vec(aspect*scale.x*fit, scale.y*fit, 1);
+        origin = vec(0.5f - ((w-xsize)/2 - guibound[0])*scale.x, 0.5f + (0.5f*h-guibound[1])*scale.y, 0);
+        //origin = vec(0.5f - (guibound[0]*2)*scale.x, 0.5f + (h-guibound[1]*2)*scale.y, 0);
     }
 
     void start(int starttime, float initscale, int *tab, bool allowinput, bool wantstitle)
     {
         initscale *= 0.025f;
         basescale = initscale;
-        if(layoutpass) scale.x = scale.y = scale.z = basescale; //min(basescale*(totalmillis-starttime)/300.0f, basescale);
+        if(layoutpass)
+            scale.x = scale.y = scale.z = guiscaletime ? min(basescale*(totalmillis-starttime)/float(guiscaletime), basescale) : basescale;
         needsinput = allowinput;
         hastitle = wantstitle;
         passthrough = !allowinput;

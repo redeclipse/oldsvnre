@@ -194,6 +194,12 @@ struct animinterpinfo // used for animation blending of animated characters
 
 struct occludequery;
 struct ragdolldata;
+struct dynent;
+
+extern vec rdabove(dynent *d, float offset = 1);
+extern vec rdbottom(dynent *d, float offset = 0);
+extern vec rdtop(dynent *d, float offset = 0);
+extern vec rdcenter(dynent *d);
 
 struct dynent : physent                         // animated characters, or characters that can receive input
 {
@@ -227,6 +233,11 @@ struct dynent : physent                         // animated characters, or chara
         while(yaw<angle-180.0f) yaw += 360.0f;
         while(yaw>angle+180.0f) yaw -= 360.0f;
     }
+
+    vec abovehead(float offset = 1) { return rdabove(this, offset); }
+    vec feetpos(float offset = 0) { return rdbottom(this, offset); }
+    vec headpos(float offset = 0) { return rdtop(this, offset); }
+    vec center() { return rdcenter(this); }
 };
 
 

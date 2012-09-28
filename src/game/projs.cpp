@@ -570,7 +570,7 @@ namespace projs
                     if(proj.owner)
                     {
                         if(proj.owner->state == CS_DEAD || proj.owner->state == CS_WAITING)
-                            proj.o = ragdollcenter(proj.owner);
+                            proj.o = proj.owner->center();
                         else
                         {
                             proj.lifemillis = proj.lifetime = 1;

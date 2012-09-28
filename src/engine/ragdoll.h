@@ -133,7 +133,7 @@ struct ragdolldata
     ragdollskel *skel;
     int millis, collidemillis, collisions, floating, lastmove;
     vec offset, center;
-    float radius, timestep, scale;
+    float radius, ztop, zbottom, timestep, scale;
     vert *verts;
     matrix3x3 *tris;
     matrix3x4 *animjoints, *reljoints;
@@ -201,8 +201,15 @@ struct ragdolldata
         center = vec(0, 0, 0);
         loopv(skel->verts) center.add(verts[i].pos);
         center.div(skel->verts.length());
-        radius = 0;
-        loopv(skel->verts) radius = max(radius, verts[i].pos.dist(center));
+        radius = ztop = zbottom = 0;
+        loopv(skel->verts)
+        {
+            radius = max(radius, verts[i].pos.dist(center));
+            ztop = max(ztop, verts[i].pos.z);
+            zbottom = min(zbottom, verts[i].pos.z);
+        }
+        ztop -= center.z;
+        zbottom -= center.z;
     }
 
     void init(dynent *d)
@@ -502,9 +509,23 @@ void cleanragdoll(dynent *d)
     DELETEP(d->ragdoll);
 }
 
-vec ragdollcenter(dynent *d)
+vec rdabove(dynent *d, float offset)
 {
-    if(!d->ragdoll) return d->center();
+    if(!d->ragdoll) return d->physent::abovehead(offset);
+    return vec(d->ragdoll->center).add(vec(0, 0, 1+d->aboveeye+offset+d->ragdoll->ztop));
+}
+vec rdbottom(dynent *d, float offset)
+{
+    if(!d->ragdoll) return d->physent::feetpos(offset);
+    return vec(d->ragdoll->center).add(vec(0, 0, offset+d->ragdoll->zbottom));
+}
+vec rdtop(dynent *d, float offset)
+{
+    if(!d->ragdoll) return d->physent::headpos(offset);
+    return vec(d->ragdoll->center).add(vec(0, 0, offset+d->ragdoll->ztop));
+}
+vec rdcenter(dynent *d)
+{
+    if(!d->ragdoll) return d->physent::center();
     return d->ragdoll->center;
 }
-
