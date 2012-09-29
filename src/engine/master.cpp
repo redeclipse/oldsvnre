@@ -317,7 +317,7 @@ bool checkmasterclientinput(masterclient &c)
         if(!strcmp(w[0], "list") || !strcmp(w[0], "update"))
         {
             int servs = 0;
-            masteroutf(c, "clearservers\nmasters_toggle = [ircaddclient mt irc.freenode.net 6667 (getname);ircaddchan mt #re-mt;ircconnect mt]\n");
+            masteroutf(c, "clearservers\n");
             loopvj(masterclients)
             {
                 masterclient &s = *masterclients[j];
