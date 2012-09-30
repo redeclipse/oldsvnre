@@ -81,8 +81,8 @@ You may not use the marks in the following ways:
    distribution, platform, product, etc. over another except where explicitly
    indicated in writing by the Red Eclipse project.
 
-5. In any way that promotes the use of third party services over those of
-   provided by Red Eclipse.
+5. In any way that promotes the use of third party services over those provided
+   by Red Eclipse.
 
 6. In any way that could be deemed harmful or disruptive to the Red Eclipse
    community and/or project.
