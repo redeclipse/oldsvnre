@@ -516,7 +516,7 @@ struct gamestate
         weaplast[weap] = millis;
     }
 
-    void weapswitch(int weap, int millis, int delay, int state = WEAP_S_SWITCH)
+    void weapswitch(int weap, int millis, int delay = 0, int state = WEAP_S_SWITCH)
     {
         if(isweap(weap))
         {
