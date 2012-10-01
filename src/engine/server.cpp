@@ -97,6 +97,11 @@ void closelogfile()
     }
 }
 
+FILE *getlogfile()
+{
+    return logfile ? logfile : stdout;
+}
+
 void setlogfile(const char *fname)
 {
     closelogfile();
@@ -1565,7 +1570,9 @@ void fatal(const char *s, ...)    // failure exit
     {
         defvformatstring(msg, s, s);
         if(logfile) logoutf(msg);
+#ifndef WIN32
         fprintf(stderr, "Exiting: %s\n", msg);
+#endif
         if(errors <= 1) // avoid recursion
         {
             cleanupserver();

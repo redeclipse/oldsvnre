@@ -118,7 +118,9 @@ void fatal(const char *s, ...)    // failure exit
     {
         defvformatstring(msg, s, s);
         if(logfile) logoutf("%s", msg);
+        #ifndef WIN32
         fprintf(stderr, "%s\n", msg);
+        #endif
         if(errors <= 1) // avoid recursion
         {
             setscreensaver(true);

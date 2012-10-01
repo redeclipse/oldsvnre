@@ -12,6 +12,7 @@ extern void conoutft(int type, const char *s, ...);
 extern void conoutf(const char *s, ...);
 
 extern FILE *logfile;
+extern FILE *getlogfile();
 extern void setlogfile(const char *fname);
 extern void closelogfile();
 extern void logoutfv(const char *fmt, va_list args);
