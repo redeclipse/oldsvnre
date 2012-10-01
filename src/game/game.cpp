@@ -364,25 +364,24 @@ namespace game
     }
     ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, char *s, int *numargs), (*numargs >= 4 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, NULL)));
 
-    void tvreset(gameent *d, bool clear)
+    void specreset(gameent *d, bool clear)
     {
         if(d)
         {
             if(clear)
             {
-                int x = -1;
-                loopv(cameras) if(cameras[i]->type == cament::PLAYER && cameras[i]->player == d)
+                loopvrev(cameras) if(cameras[i]->player == d)
                 {
-                    x = i;
-                    break;
+                    if(cameras[i]->type == cament::PLAYER)
+                    {
+                        cament *p = cameras[i];
+                        cameras.remove(i);
+                        if(p) delete p;
+                        if(!i) lastcamera = lasttvcam = lasttvchg = 0;
+                    }
+                    else cameras[i]->player = NULL;
                 }
-                if(x >= 0)
-                {
-                    cament *p = cameras[x];
-                    cameras.remove(x);
-                    if(p) delete p;
-                    if(!x) lastcamera = lasttvcam = lasttvchg = 0;
-                }
+                if(d == focus) resetfollow();
             }
             else if(maptime > 0)
             {
@@ -400,6 +399,7 @@ namespace game
         {
             cameras.deletecontents();
             lastcamera = lasttvcam = lasttvchg = 0;
+            resetfollow();
         }
     }
 
@@ -1447,8 +1447,7 @@ namespace game
             e->dominating.removeobj(d);
             e->dominated.removeobj(d);
         }
-        if(focus == d) resetfollow(); // just in case
-        tvreset(d, true);
+        specreset(d, true);
         client::unignore(d->clientnum);
         waiting.removeobj(d);
         client::clearvotes(d);
@@ -1530,9 +1529,9 @@ namespace game
         if(!client::demoplayback && m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
             chooseloadweap(player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
-        resetcamera(true);
+        specreset();
         resetsway();
-        tvreset();
+        resetcamera(true);
         if(!empty) client::sendinfo = client::sendcrc = true;
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
     }
