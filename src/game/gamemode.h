@@ -14,7 +14,8 @@ enum
     G_M_GSP, G_M_GSP1 = G_M_GSP, G_M_GSP2, G_M_GSP3, G_M_NUM,
     G_M_GSN = G_M_NUM-G_M_GSP,
     G_M_ALL = (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-    G_M_FILTER = (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3)
+    G_M_FILTER = (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
+    G_M_ROTATE = (1<<G_M_MULTI)|(1<<G_M_TEAM)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_SURVIVOR)|(1<<G_M_ARENA)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3)
 };
 
 struct gametypes
@@ -348,8 +349,6 @@ VAR(0, mutsidxresize, 1, G_M_RESIZE, -1);
 VAR(0, mutsidxgsp1, 1, G_M_GSP1, -1);
 VAR(0, mutsidxgsp2, 1, G_M_GSP2, -1);
 VAR(0, mutsidxgsp3, 1, G_M_GSP3, -1);
-VAR(0, mutsidxall, 1, G_M_ALL, -1);
-VAR(0, mutsidxfilter, 1, G_M_FILTER, -1);
 VAR(0, mutsidxgsn, 1, G_M_GSN, -1);
 VAR(0, mutsidxgsp, 1, G_M_GSP, -1);
 VAR(0, mutsidxnum, 1, G_M_NUM, -1);
