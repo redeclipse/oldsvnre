@@ -1169,7 +1169,7 @@ namespace UI
         }
 
         flusheditors();
-        if(!fieldsactive) fieldmode = FIELDSHOW; //didn't draw any fields, so loose focus - mainly for menu closed
+        if(!fieldsactive) fieldmode = FIELDSHOW; //didn't draw any fields, so lose focus - mainly for menu closed
         if((fieldmode!=FIELDSHOW) != wasfocused)
         {
             SDL_EnableUNICODE(fieldmode!=FIELDSHOW);
