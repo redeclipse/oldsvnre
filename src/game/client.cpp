@@ -384,6 +384,9 @@ namespace client
     {
         game::player1->editspawn(game::gamemode, game::mutators);
         game::player1->state = edit ? CS_EDITING : (m_edit(game::gamemode) ? CS_ALIVE : CS_DEAD);
+        game::player1->o = camera1->o;
+        game::player1->yaw = camera1->yaw;
+        game::player1->pitch = camera1->pitch;
         game::player1->resetinterp();
         game::resetstate();
         game::resetfollow();
