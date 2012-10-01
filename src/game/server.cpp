@@ -4768,8 +4768,11 @@ namespace server
                     const char *namestr = text;
                     while(*namestr && iscubespace(*namestr)) namestr++;
                     if(!*namestr) namestr = copystring(text, "unnamed");
-                    copystring(ci->name, namestr, MAXNAMELEN+1);
-                    relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
+                    if(strcmp(ci->name, namestr))
+                    {
+                        copystring(ci->name, namestr, MAXNAMELEN+1);
+                        relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
+                    }
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
                     QUEUE_INT(ci->state.model);

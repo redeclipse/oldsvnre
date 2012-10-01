@@ -1632,24 +1632,26 @@ namespace client
                     getstring(text, p);
                     int colour = getint(p), model = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
-                    if(!text[0]) copystring(text, "unnamed");
+                    const char *namestr = text;
+                    while(*namestr && iscubespace(*namestr)) namestr++;
+                    if(!*namestr) namestr = copystring(text, "unnamed");
                     if(d->name[0])        // already connected
                     {
-                        if(strcmp(d->name, text))
+                        if(strcmp(d->name, namestr))
                         {
                             string oldname, newname;
                             copystring(oldname, game::colorname(d, NULL, "", false));
-                            d->setinfo(text, colour, model);
-                            copystring(newname, game::colorname(d, text));
+                            d->setinfo(namestr, colour, model);
+                            copystring(newname, game::colorname(d, namestr));
                             if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
                                 conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, newname);
                         }
-                        else d->setinfo(text, colour, model);
+                        else d->setinfo(namestr, colour, model);
                     }
-                    else                    // new client
+                    else // new client
                     {
-                        d->setinfo(text, colour, model);
-                        if(showpresence >= (waiting(false) ? 2 : 1)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, text, "", false), d->hostname);
+                        d->setinfo(namestr, colour, model);
+                        if(showpresence >= (waiting(false) ? 2 : 1)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, namestr, "", false), d->hostname);
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
                     }
