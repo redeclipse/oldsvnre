@@ -722,10 +722,12 @@ struct gamestate
 
 namespace server
 {
+    struct clientinfo;
     extern void stopdemo();
     extern void hashpassword(int cn, int sessionid, const char *pwd, char *result, int maxlen = MAXSTRLEN);
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
     extern const char *gamename(int mode, int muts, int compact = 0);
+    extern void waiting(clientinfo *ci, int drop = 0, bool exclude = false);
 }
 
 #if !defined(GAMESERVER) && !defined(STANDALONE)

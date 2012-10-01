@@ -33,7 +33,7 @@ struct duelservmode : servmode
                 n = duelqueue.length();
                 duelqueue.add(ci);
             }
-            if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
+            if(wait && ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
             if(pos) position(ci, n);
         }
     }
@@ -130,7 +130,7 @@ struct duelservmode : servmode
                     clientinfo *ci = duelqueue[i];
                     if(ci->state.state != CS_ALIVE)
                     {
-                        if(ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
+                        if(ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
                         if(m_duel(gamemode, mutators) && m_isteam(gamemode, mutators))
                         {
                             bool skip = false;
