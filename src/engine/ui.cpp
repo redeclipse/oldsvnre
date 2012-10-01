@@ -1045,7 +1045,7 @@ namespace UI
                 if(active()) return true;
                 break;
             case -2:
-                cleargui(1);
+                if(isdown) cleargui(1);
                 if(active()) return true;
             default: break;
         }
