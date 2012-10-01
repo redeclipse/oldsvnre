@@ -1639,19 +1639,18 @@ namespace client
                     {
                         if(strcmp(d->name, namestr))
                         {
-                            string oldname, newname;
+                            string oldname;
                             copystring(oldname, game::colorname(d, NULL, "", false));
                             d->setinfo(namestr, colour, model);
-                            copystring(newname, game::colorname(d, namestr));
                             if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
-                                conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, newname);
+                                conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, game::colorname(d));
                         }
                         else d->setinfo(namestr, colour, model);
                     }
                     else // new client
                     {
                         d->setinfo(namestr, colour, model);
-                        if(showpresence >= (waiting(false) ? 2 : 1)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d, namestr, "", false), d->hostname);
+                        if(showpresence >= (waiting(false) ? 2 : 1)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d), d->hostname);
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
                     }
