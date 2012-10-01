@@ -429,7 +429,6 @@ namespace server
         return cs;
     }
 
-    extern void waiting(clientinfo *ci, int doteam = 0, int drop = 0, bool exclude = false);
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
         loopj(2)
@@ -559,7 +558,7 @@ namespace server
                     spawnq.insert(0, ci);
                 }
                 else if(n < 0) spawnq.add(ci);
-                if(wait && ci->state.state != CS_WAITING) waiting(ci, 0, DROP_RESET);
+                if(wait && ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
                 if(msg && allowbroadcast(ci->clientnum) && !top)
                 {
                     int maxplayers = max(int(GAME(maxalive)*nplayers), max(int(numclients()*GAME(maxalivethreshold)), GAME(maxaliveminimum)));
@@ -2110,7 +2109,7 @@ namespace server
         if(ci->team != team)
         {
             bool sm = false;
-            if(reset) waiting(ci, 0, DROP_WEAPONS);
+            if(reset) waiting(ci, DROP_WEAPONS);
             else if(ci->state.state == CS_ALIVE)
             {
                 if(smode) smode->leavegame(ci);
@@ -2350,7 +2349,7 @@ namespace server
             if(allowstate(ci, ALST_FIRST))
             {
                 ci->state.state = CS_DEAD;
-                waiting(ci, 2, DROP_RESET);
+                waiting(ci, DROP_RESET);
             }
             else spectator(ci);
         }
@@ -3624,7 +3623,7 @@ namespace server
         while(ci->events.length() > keep) delete ci->events.pop();
     }
 
-    void waiting(clientinfo *ci, int doteam, int drop, bool exclude)
+    void waiting(clientinfo *ci, int drop, bool exclude)
     {
         if(ci->state.state == CS_ALIVE)
         {
@@ -3633,14 +3632,12 @@ namespace server
             mutate(smuts, mut->died(ci));
             ci->state.lastdeath = gamemillis;
         }
-        else if(!doteam && drop%2 == 1) ci->state.lastdeath = gamemillis;
         if(exclude) sendf(-1, 1, "ri2x", N_WAITING, ci->clientnum, ci->clientnum);
         else sendf(-1, 1, "ri2", N_WAITING, ci->clientnum);
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_arena(gamemode, mutators)) chkloadweap(ci);
-        if(doteam && (doteam == 2 || !allowteam(ci, ci->team, TEAM_FIRST)))
-            setteam(ci, chooseteam(ci), false, true);
+        if(!allowteam(ci, ci->team, TEAM_FIRST)) setteam(ci, chooseteam(ci), false, true);
     }
 
     int triggertime(int i)
@@ -3743,7 +3740,7 @@ namespace server
             ci->state.cpmillis = 0;
             ci->state.state = CS_DEAD;
             ci->state.lasttimeplayed = lastmillis;
-            waiting(ci, 2, DROP_RESET);
+            waiting(ci, DROP_RESET);
             if(smode) smode->entergame(ci);
             mutate(smuts, mut->entergame(ci));
             aiman::dorefresh = GAME(airefresh);
@@ -4416,7 +4413,7 @@ namespace server
                     if(smode) smode->canspawn(cp, true);
                     mutate(smuts, mut->canspawn(cp, true));
                     cp->state.state = CS_DEAD;
-                    waiting(cp, 1, DROP_RESET);
+                    waiting(cp, DROP_RESET);
                     break;
                 }
 
@@ -4428,11 +4425,8 @@ namespace server
                     cp->state.loadweap[0] = aweap;
                     cp->state.loadweap[1] = bweap;
                     chkloadweap(cp);
-                    if(cp->state.state == CS_ALIVE)
-                    {
-                        cp->state.state = CS_DEAD;
-                        waiting(cp, 1, DROP_WEAPONS);
-                    }
+                    //if(cp->state.state == CS_ALIVE && !m_duke(gamemode, mutators)) TODO: make respawn optional
+                    //    waiting(cp, DROP_WEAPONS);
                     break;
                 }
 
