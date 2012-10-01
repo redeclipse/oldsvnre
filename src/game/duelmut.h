@@ -83,12 +83,12 @@ struct duelservmode : servmode
             loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i), true, true);
     }
 
-    void clear(bool full)
+    void clear()
     {
         duelcheck = dueldeath = -1;
         dueltime = gamemillis+GAME(duellimit);
         bool reset = false;
-        if(full && m_duel(gamemode, mutators) && GAME(duelcycle)&(m_isteam(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
+        if(m_duel(gamemode, mutators) && GAME(duelcycle)&(m_isteam(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
         {
             clientinfo *ci = (clientinfo *)getinfo(duelwinner);
             if(ci)
@@ -216,7 +216,7 @@ struct duelservmode : servmode
                                 }
                                 else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
                             }
-                            clear(true);
+                            clear();
                         }
                     }
                 }
@@ -233,7 +233,7 @@ struct duelservmode : servmode
                             duelwinner = -1;
                             duelwins = 0;
                         }
-                        clear(true);
+                        clear();
                         break;
                     }
                     case 1:
@@ -269,7 +269,7 @@ struct duelservmode : servmode
                                 }
                                 else ancmsgft(clients[i]->clientnum, S_V_NOTIFY, CON_INFO, end);
                             }
-                            clear(true);
+                            clear();
                         }
                         break;
                     }
@@ -289,9 +289,11 @@ struct duelservmode : servmode
     {
         duelround = duelwins = 0;
         duelwinner = -1;
+        duelcheck = dueldeath = -1;
+        dueltime = gamemillis+GAME(duellimit);
         allowed.shrink(0);
+        playing.shrink(0);
         duelqueue.shrink(0);
-        clear(false);
     }
 } duelmutator;
 #endif
