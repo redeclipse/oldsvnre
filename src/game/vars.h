@@ -63,7 +63,7 @@ GSVAR(IDF_ADMIN, largemaps, "ares biolytic blink canals cargo center colony dawn
 
 GVAR(IDF_ADMIN, modelock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administrator only, 4-6 = helper/moderator/administrator can only set limited mode and higher, 7 = no mode selection
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
-GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_ALL, G_M_ALL);
+GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_FILTER, G_M_ALL);
 GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_ARENA), mutstype[G_M_INSTA].mutators, sv_instagibfilter &= ~(1<<G_M_VAMPIRE); sv_instagibfilter |= (1<<G_M_INSTA), instagibfilter &= ~(1<<G_M_VAMPIRE); instagibfilter |= (1<<G_M_INSTA));
 
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
@@ -76,7 +76,7 @@ GVAR(IDF_ADMIN, rotatemaps, 0, 2, 2); // 0 = off, 1 = sequence, 2 = random
 GVAR(IDF_ADMIN, rotatemode, 0, 1, 1);
 GVARF(IDF_ADMIN, rotatemodefilter, 0, G_LIMIT, G_ALL, sv_rotatemodefilter &= ~G_NEVER, rotatemodefilter &= ~G_NEVER); // modes not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the chances of it picking
-GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_FILTER, G_M_ALL); // mutators not in this array are filtered out
+GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_ROTATE, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 
 GVAR(IDF_ADMIN, varslock, 0, 2, 4); // 0 = off, 1 = helper, 2 = moderator, 3 = administrator, 4 = nobody
