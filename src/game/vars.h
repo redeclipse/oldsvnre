@@ -43,6 +43,28 @@ GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
 
+#ifdef MEKARCADE
+GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
+
+GSVAR(IDF_ADMIN, allowmaps, "riviera campaign1");
+
+GSVAR(IDF_ADMIN, mainmaps, "riviera");
+GSVAR(IDF_ADMIN, capturemaps, "riviera");
+GSVAR(IDF_ADMIN, defendmaps, "riviera");
+GSVAR(IDF_ADMIN, kingmaps, "riviera");
+GSVAR(IDF_ADMIN, bombermaps, "riviera");
+GSVAR(IDF_ADMIN, holdmaps, "riviera");
+GSVAR(IDF_ADMIN, trialmaps, "riviera");
+GSVAR(IDF_ADMIN, campaignmaps, "campaign1");
+
+GSVAR(IDF_ADMIN, multimaps, "riviera"); // applies to modes which *require* multi spawns (ctf/bb)
+GSVAR(IDF_ADMIN, duelmaps, "riviera");
+GSVAR(IDF_ADMIN, jetpackmaps, "riviera");
+
+GSVAR(IDF_ADMIN, smallmaps, "riviera");
+GSVAR(IDF_ADMIN, mediummaps, "riviera");
+GSVAR(IDF_ADMIN, largemaps, "riviera");
+#else
 GSVAR(IDF_ADMIN, allowmaps, "ares bath biolytic blink canals cargo center colony conflict darkness dawn deadsimple deathtrap deli depot dropzone dutility echo error facility forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone2k lab linear longestyard mist neodrive nova oneiroi panic processing pumpstation purge spacetech starlibido stone testchamber tower tranquility tribal ubik venus warp wet");
 
 GSVAR(IDF_ADMIN, mainmaps, "ares bath biolytic canals cargo center colony conflict darkness deadsimple deathtrap deli depot dropzone dutility echo error foundation fourplex futuresport ghost industrial institute isolation keystone2k linear longestyard mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tribal ubik venus warp wet");
@@ -60,6 +82,7 @@ GSVAR(IDF_ADMIN, jetpackmaps, "ares biolytic canals cargo center colony conflict
 GSVAR(IDF_ADMIN, smallmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
 GSVAR(IDF_ADMIN, mediummaps, "ares biolytic blink canals cargo center colony conflict darkness deadsimple deathtrap deli dropzone echo error facility forge foundation fourplex futuresport ghost industrial institute isolation keystone2k lab linear mist nova oneiroi panic processing pumpstation spacetech starlibido stone tower tranquility tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, largemaps, "ares biolytic blink canals cargo center colony dawn deadsimple deathtrap deli depot error facility forge foundation futuresport ghost industrial isolation lab linear mist nova processing pumpstation spacetech tower tranquility tribal ubik venus warp");
+#endif
 
 GVAR(IDF_ADMIN, modelock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administrator only, 4-6 = helper/moderator/administrator can only set limited mode and higher, 7 = no mode selection
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
@@ -112,7 +135,9 @@ GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to 
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
+#ifndef MEKARCADE
 GVAR(0, spawnhealth, 0, 100, VAR_MAX);
+#endif
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 2.0f, FVAR_MAX);
 
@@ -133,7 +158,11 @@ GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating norm
 GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
 GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
 
+#ifdef MEKARCADE
+GVAR(0, kamikaze, 0, 3, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
+#else
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
+#endif
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn

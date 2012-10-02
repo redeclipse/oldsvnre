@@ -1,3 +1,14 @@
+#ifdef MEKARCADE
+enum
+{
+    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
+    G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH,
+    G_RAND = G_BOMBER-G_DEATHMATCH+1, G_COUNT = G_MAX-G_PLAY,
+    G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE),
+    G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER),
+    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_CAMPAIGN)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)
+};
+#else
 enum
 {
     G_DEMO = 0, G_EDITMODE, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
@@ -7,6 +18,7 @@ enum
     G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER),
     G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)
 };
+#endif
 enum
 {
     G_M_MULTI = 0, G_M_TEAM, G_M_COOP, G_M_INSTA, G_M_MEDIEVAL, G_M_BALLISTIC, G_M_DUEL, G_M_SURVIVOR,
@@ -50,6 +62,17 @@ gametypes gametype[] = {
         "editing",                          { "", "", "" },
         "create and edit existing maps",    { "", "", "" },
     },
+#ifdef MEKARCADE
+    {
+        G_CAMPAIGN,     (1<<G_M_TEAM),
+        {
+            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_ARENA)|(1<<G_M_MEDIEVAL)|(1<<G_M_BALLISTIC)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
+            0, 0, 0
+        },
+        "campaign",                         { "", "", "" },
+        "make your way through the mission alive", { "", "", "" },
+    },
+#endif
     {
         G_DEATHMATCH,   0,
         {
@@ -216,6 +239,9 @@ extern mutstypes mutstype[];
 
 #define m_demo(a)           (a == G_DEMO)
 #define m_edit(a)           (a == G_EDITMODE)
+#ifdef MEKARCADE
+#define m_campaign(a)       (a == G_CAMPAIGN)
+#endif
 #define m_dm(a)             (a == G_DEATHMATCH)
 #define m_capture(a)        (a == G_CAPTURE)
 #define m_defend(a)         (a == G_DEFEND)
@@ -255,16 +281,26 @@ extern mutstypes mutstype[];
 #define m_special(a,b)      (m_arena(a, b) || m_insta(a, b) || m_medieval(a, b) || m_ballistic(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
+#ifdef MEKARCADE
+#define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
+#define m_checkpoint(a)     (m_campaign(a) || m_trial(a))
+#else
 #define m_enemies(a,b)      (m_onslaught(a, b))
-#define m_scores(a)         (m_dm(a))
 #define m_checkpoint(a)     (m_trial(a))
+#endif
+#define m_scores(a)         (m_dm(a))
 #define m_sweaps(a,b)       (m_medieval(a, b) || m_ballistic(a, b) || m_arena(a, b))
 
 #define m_weapon(a,b)       (m_arena(a,b) ? 0-WEAP_ITEM : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_trial(a) ? GAME(trialweapon) : GAME(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
-#define m_health(a,b)       (m_insta(a,b) ? 1 : GAME(spawnhealth))
+#ifdef MEKARCADE
+#define m_health(a,b,c)     (m_insta(a,b) ? 1 : CLASS(c, health))
+#define m_armour(a,b,c)     (m_insta(a,b) ? 0 : CLASS(c, armour))
+#else
+#define m_health(a,b,c)     (m_insta(a,b) ? 1 : GAME(spawnhealth))
+#endif
 
 #define w_reload(w1,w2)     (w1 != WEAP_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : WEAP(w1, reloads)) : (w1 < 0-w2 ? -1 : WEAP(w1, reloads))) : 0)
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && WEAP(w1, carried)))
@@ -306,8 +342,15 @@ extern mutstypes mutstype[];
 }
 
 #ifdef GAMESERVER
+#ifdef MEKARCADE
+SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-the-flag bomber-ball time-trial");
+SVAR(0, modeidxname, "demo editing campaign deathmatch capture defend bomber trial");
+VAR(0, modeidxcampaign, 1, G_CAMPAIGN, -1);
+VAR(0, modebitcampaign, 1, (1<<G_CAMPAIGN), -1);
+#else
 SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-the-flag bomber-ball time-trial");
 SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial");
+#endif
 VAR(0, modeidxdemo, 1, G_DEMO, -1);
 VAR(0, modeidxediting, 1, G_EDITMODE, -1);
 VAR(0, modeidxdeathmatch, 1, G_DEATHMATCH, -1);

@@ -7,6 +7,7 @@
 #endif
 
 VAR(0, version, 1, RE_VERSION, -1); // for scripts
+SVAR(0, gamestr, RE_UNAME);
 VAR(0, rehashing, 1, 0, -1);
 VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 

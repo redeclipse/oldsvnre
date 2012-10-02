@@ -3,8 +3,15 @@
 
 #include "engine.h"
 
+#ifdef MEKARCADE
+#define GAMEID              "mek"
+#define GAMEVERSION         217
+#define DEMO_MAGIC          "MEK_ARCADE_DEMO"
+#else
 #define GAMEID              "fps"
 #define GAMEVERSION         217
+#define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
+#endif
 #define DEMO_VERSION        GAMEVERSION
 
 #define MAXAI 256
@@ -37,7 +44,13 @@ enum                                // entity types
 {
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
-    TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT, DUMMY1, DUMMY2,  MAXENTTYPES
+    TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT,
+#ifdef MEKARCADE
+    HEALTH, ARMOUR,
+#else
+    DUMMY1, DUMMY2,
+#endif
+    MAXENTTYPES
 };
 
 enum { EU_NONE = 0, EU_ITEM, EU_AUTO, EU_ACT, EU_MAX };
@@ -48,6 +61,10 @@ enum { TA_MANUAL = 0, TA_AUTO, TA_ACTION, TA_MAX };
 #define TRIGSTATE(a,b)  (b%2 ? !a : a)
 
 enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
+#ifdef MEKARCADE
+enum { HEALTH_SMALL = 0, HEALTH_REGULAR, HEALTH_LARGE, HEALTH_MAX };
+enum { ARMOUR_SMALL = 0, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
+#endif
 
 struct enttypes
 {
@@ -163,6 +180,20 @@ enttypes enttype[] = {
             false,  true,   false,      false,      false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
+#ifdef MEKARCADE
+    {
+        HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,
+            0, 0,
+            false,  true,   true,      false,      false,
+                "health",       { "type",   "modes",    "muts",     "id" }
+    },
+    {
+        ARMOUR,         2,          59,     24,     EU_ITEM,    4,          1,
+            0, 0,
+            false,  true,   true,      false,      false,
+                "armour",       { "type",   "modes",    "muts",     "id" }
+    }
+#else
     {
         DUMMY1,         1,          48,     0,      EU_NONE,    4,          -1,
             0, 0,
@@ -175,9 +206,16 @@ enttypes enttype[] = {
             true,   false,  false,      false,      false,
                 "dummy2",     { "" }
     }
+#endif
 };
+#ifdef MEKARCADE
+int healthamt[HEALTH_MAX] = { 25, 50, 100 }, armouramt[ARMOUR_MAX] = { 25, 50, 100 };
+#endif
 #else
 extern enttypes enttype[];
+#ifdef MEKARCADE
+extern int healthamt[HEALTH_MAX], armouramt[ARMOUR_MAX];
+#endif
 #endif
 
 enum
@@ -299,7 +337,6 @@ extern char msgsizelookup(int msg);
 #endif
 enum { CON_CHAT = CON_GAMESPECIFIC, CON_EVENT, CON_MAX, CON_LO = CON_MESG, CON_HI = CON_SELF, CON_IMPORTANT = CON_SELF };
 
-#define DEMO_MAGIC "RED_ECLIPSE_DEMO"
 struct demoheader
 {
     char magic[16];
@@ -445,7 +482,9 @@ struct gamestate
     int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime, lastbuff;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
-
+#ifdef MEKARCADE
+    int armour;
+#endif
     gamestate() : colour(0), model(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
@@ -619,6 +658,20 @@ struct gamestate
                 entid[attr] = id;
                 break;
             }
+#ifdef MEKARCADE
+            case HEALTH:
+            {
+                int value = ammoamt >= 0 ? ammoamt : healthamt[attr];
+                health = max(health + value, CLASS(model, health));
+                break;
+            }
+            case ARMOUR:
+            {
+                int value = ammoamt >= 0 ? ammoamt : armouramt[attr];
+                armour = max(armour + value, CLASS(model, armour));
+                break;
+            }
+#endif
             default: break;
         }
     }
@@ -635,6 +688,18 @@ struct gamestate
         loopj(2) loadweap[j] = -1;
     }
 
+#ifdef MEKARCADE
+    void respawn(int millis, int heal = 0, int armr = -1)
+    {
+        health = heal ? heal : 100;
+        armour = armr >= 0 ? armr : 100;
+        lastspawn = millis;
+        clearstate();
+        weapreset(true);
+    }
+
+    void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
+#else
     void respawn(int millis, int heal = 0)
     {
         health = heal ? heal : 100;
@@ -644,6 +709,7 @@ struct gamestate
     }
 
     void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0)
+#endif
     {
         weapreset(true);
         if(!isweap(sweap)) sweap = aitype >= AI_START ? WEAP_MELEE : (isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : WEAP_PISTOL);
@@ -659,11 +725,13 @@ struct gamestate
         }
         else
         {
+#ifndef MEKARCADE
             if(sweap != WEAP_MELEE)
             {
                 ammo[WEAP_MELEE] = WEAP(WEAP_MELEE, max);
                 reloads[WEAP_MELEE] = 0;
             }
+#endif
             if(GAME(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != WEAP_GRENADE)
             {
                 ammo[WEAP_GRENADE] = max(WEAP(WEAP_GRENADE, max), 1);
@@ -695,14 +763,25 @@ struct gamestate
                 lastweap = weapselect = sweap;
             }
         }
-        health = heal ? heal : m_health(gamemode, mutators);
+        health = heal ? heal : m_health(gamemode, mutators, model);
+#ifdef MEKARCADE
+        armour = armr >= 0 ? armr : m_armour(gamemode, mutators, model);
+#endif
     }
 
+#ifdef MEKARCADE
+    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
+    {
+        clearstate();
+        spawnstate(gamemode, mutators, sweap, heal, armr);
+    }
+#else
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
     {
         clearstate();
         spawnstate(gamemode, mutators, sweap, heal);
     }
+#endif
 
     int respawnwait(int millis, int delay)
     {
@@ -781,12 +860,7 @@ struct actitem
     actitem() : type(ENT), target(-1), score(0) {}
     ~actitem() {}
 };
-#define NUMPLAYERMODELS 2
 #ifdef GAMEWORLD
-const char *playermodels[NUMPLAYERMODELS][3] = {
-    { "actors/player/male",     "actors/player/male/hwep",      "male" },
-    { "actors/player/female",   "actors/player/female/hwep",    "female" }
-};
 const char * const animnames[] =
 {
     "idle", "forward", "backward", "left", "right", "dead", "dying", "swim",
@@ -814,7 +888,6 @@ const char * const animnames[] =
 };
 #else
 extern const char * const animnames[];
-extern const char *playermodels[NUMPLAYERMODELS][3];
 #endif
 
 struct eventicon
@@ -867,11 +940,26 @@ struct gameent : dynent, gamestate
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
         int type = clamp(aitype, 0, int(AI_MAX-1));
-        speed = aistyle[type].speed;
-        xradius = aistyle[type].xradius*curscale;
-        yradius = aistyle[type].yradius*curscale;
-        zradius = height = aistyle[type].height*curscale;
-        weight = aistyle[type].weight*curscale;
+#ifdef MEKARCADE
+        if(type >= AI_START)
+        {
+#endif
+            speed = aistyle[type].speed;
+            xradius = aistyle[type].xradius*curscale;
+            yradius = aistyle[type].yradius*curscale;
+            zradius = height = aistyle[type].height*curscale;
+            weight = aistyle[type].weight*curscale;
+#ifdef MEKARCADE
+        }
+        else
+        {
+            speed = CLASS(model, speed);
+            xradius = CLASS(model, xradius)*curscale;
+            yradius = CLASS(model, yradius)*curscale;
+            zradius = height = CLASS(model, height)*curscale;
+            weight = CLASS(model, weight)*curscale;
+        }
+#endif
         radius = max(xradius, yradius);
         aboveeye = curscale;
     }
@@ -929,6 +1017,46 @@ struct gameent : dynent, gamestate
         stuns.shrink(0);
     }
 
+#ifdef MEKARCADE
+    void respawn(int millis = 0, int heal = 0, int armr = -1, int gamemode = 0, int mutators = 0)
+    {
+        stopmoving(true);
+        removesounds();
+        clearstate(gamemode, mutators);
+        physent::reset();
+        gamestate::respawn(millis, heal, armr);
+    }
+
+    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
+    {
+        stopmoving(true);
+        clearstate();
+        inmaterial = timeinair = 0;
+        inliquid = onladder = false;
+        strafe = move = 0;
+        physstate = PHYS_FALL;
+        vel = falling = vec(0, 0, 0);
+        floor = vec(0, 0, 1);
+        resetinterp();
+        gamestate::editspawn(gamemode, mutators, sweap, heal, armr);
+    }
+
+    void resetstate(int millis, int heal, int armr)
+    {
+        respawn(millis, heal, armr);
+        frags = deaths = totaldamage = 0;
+    }
+
+    void mapchange(int millis, int heal, int armr)
+    {
+        checkpoint = -1;
+        dominating.shrink(0);
+        dominated.shrink(0);
+        icons.shrink(0);
+        resetstate(millis, heal, armr);
+        gamestate::mapchange();
+    }
+#else
     void respawn(int millis = 0, int heal = 0, int gamemode = 0, int mutators = 0)
     {
         stopmoving(true);
@@ -967,6 +1095,7 @@ struct gameent : dynent, gamestate
         resetstate(millis, heal);
         gamestate::mapchange();
     }
+#endif
 
     void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = vec(-1, -1, -1); }
 
@@ -1458,7 +1587,11 @@ namespace game
     extern void resetworld();
     extern void resetstate();
     extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local = false);
+#ifdef MEKARCADE
+    extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir);
+#else
     extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir);
+#endif
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent*> &log, int style);
     extern void timeupdate(int timeremain);
     extern vec burncolour(dynent *d);

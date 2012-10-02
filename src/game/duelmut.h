@@ -141,10 +141,16 @@ struct duelservmode : servmode
                     }
                     else
                     {
-                        ci->state.health = m_health(gamemode, mutators);
                         ci->state.lastregen = gamemillis;
                         ci->state.lastburn = ci->state.lastburntime = ci->state.lastbleed = ci->state.lastbleedtime = 0;
+#ifdef MEKARCADE
+                        ci->state.health = m_health(gamemode, mutators, ci->state.model);
+                        ci->state.armour = m_armour(gamemode, mutators, ci->state.model);
+                        sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, ci->state.armour, 0); // amt = 0 regens impulse
+#else
+                        ci->state.health = m_health(gamemode, mutators, ci->state.model);
                         sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, 0); // amt = 0 regens impulse
+#endif
                     }
                     playing.add(ci);
                 }
@@ -244,7 +250,7 @@ struct duelservmode : servmode
                             if(!cleanup)
                             {
                                 string end, hp;
-                                if(!m_vampire(gamemode, mutators) && alive[0]->state.health == GAME(spawnhealth))
+                                if(!m_insta(gamemode, mutators) && !m_vampire(gamemode, mutators) && alive[0]->state.health == m_health(gamemode, mutators, alive[0]->state.model))
                                     formatstring(hp)("a \fs\fcflawless victory\fS");
                                 else formatstring(hp)("\fs\fc%d\fS health left", alive[0]->state.health);
                                 if(duelwinner != alive[0]->clientnum)

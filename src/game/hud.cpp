@@ -102,6 +102,10 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, chattex, "<grey>textures/chat", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthtex, "<grey>textures/health", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthbgtex, "<grey>textures/healthbg", 3);
+#ifdef MEKARCADE
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourtex, "<grey>textures/impulse", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourbgtex, "<grey>textures/impulsebg", 3);
+#endif
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsetex, "<grey>textures/impulse", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsebgtex, "<grey>textures/impulsebg", 3);
     TVAR(IDF_PERSIST|IDF_PRELOAD, progresstex, "<grey>textures/progress", 3);
@@ -292,7 +296,11 @@ namespace hud
     FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
+#ifdef MEKARCADE
+    VAR(IDF_PERSIST, radarstyle, 0, 3, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
+#else
     VAR(IDF_PERSIST, radarstyle, 0, 1, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
+#endif
     FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, radarcornertex, "<grey>textures/radar", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bliptex, "<grey>textures/blip", 3);
@@ -374,6 +382,9 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/firstblood", 3);
 
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
+#ifdef MEKARCADE
+    TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
+#endif
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modedeathmatch.png", 3);
     TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modetimetrial.png", 3);
 
@@ -409,6 +420,34 @@ namespace hud
     {
         modecheck(g, m);
         #define ADDMODE(s) { list.put(s, strlen(s)); list.add(' '); }
+#ifdef MEKARCADE
+        #define ADDMODEICON \
+        { \
+            if(m_edit(g)) ADDMODE(modeeditingtex) \
+            else if(m_campaign(g)) ADDMODE(modecampaigntex) \
+            else if(m_trial(g)) ADDMODE(modetimetrialtex) \
+            else if(m_capture(g)) \
+            { \
+                if(m_gsp1(g, m)) ADDMODE(modecapturereturntex) \
+                else if(m_gsp2(g, m)) ADDMODE(modecapturedefendtex) \
+                else if(m_gsp3(g, m)) ADDMODE(modecaptureprotecttex) \
+                else ADDMODE(modecapturetex) \
+            } \
+            else if(m_defend(g)) \
+            { \
+                if(m_gsp1(g, m)) ADDMODE(modedefendquicktex) \
+                else if(m_gsp2(g, m)) ADDMODE(modedefendconquertex) \
+                else ADDMODE(modedefendtex) \
+            } \
+            else if(m_bomber(g)) \
+            { \
+                if(GAME(bomberbasket)) ADDMODE(modebomberbaskettex) \
+                else if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
+                else ADDMODE(modebombertex) \
+            } \
+            else ADDMODE(modedeathmatchtex) \
+        }
+#else
         #define ADDMODEICON \
         { \
             if(m_edit(g)) ADDMODE(modeeditingtex) \
@@ -434,6 +473,7 @@ namespace hud
             } \
             else ADDMODE(modedeathmatchtex) \
         }
+#endif
 
         if(before) ADDMODEICON
         if(m_multi(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MULTI)))) ADDMODE(modemultitex)
@@ -517,7 +557,7 @@ namespace hud
             {
                 if(game::focus->state >= CS_SPECTATOR || game::focus->state == CS_EDITING) break;
                 float damage = game::focus->state == CS_ALIVE ? min(damageresidue, 100)/100.f : 1.f,
-                      healthscale = float(m_health(game::gamemode, game::mutators));
+                      healthscale = float(m_health(game::gamemode, game::mutators, game::focus->model));
                 if(healthscale > 0) damage = max(damage, 1.f-max(game::focus->health, 0)/healthscale);
                 amt += damage*0.65f;
                 if(burntime && game::focus->burning(lastmillis, burntime))
@@ -860,7 +900,7 @@ namespace hud
                 fade += (zoomcrosshairblend-fade)*amt;
             }
             if(crosshairtone) skewcolour(c.r, c.g, c.b, crosshairtone);
-            int heal = m_health(game::gamemode, game::mutators);
+            int heal = m_health(game::gamemode, game::mutators, game::focus->model);
             if(crosshairflash && game::focus->state == CS_ALIVE && game::focus->health < heal)
             {
                 int millis = lastmillis%1000;
@@ -1802,7 +1842,7 @@ namespace hud
         if(skew <= 0.f) return 0;
         Texture *t = textureload(tex, 3);
         float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew, w = float(t->w)/float(t->h)*s;
-        int heal = m_health(game::gamemode, game::mutators), sy = int(s), cx = x, cy = y, cs = int(s), cw = int(w);
+        int heal = m_health(game::gamemode, game::mutators, game::focus->model), sy = int(s), cx = x, cy = y, cs = int(s), cw = int(w);
         bool pulse = inventoryflash && game::focus->state == CS_ALIVE && game::focus->health < heal;
         if(bg && sub == 0 && inventorybg)
         {
@@ -1889,6 +1929,10 @@ namespace hud
         {
             case PLAYERSTART: return playertex; break;
             case AFFINITY: return flagtex; break;
+#ifdef MEKARCADE
+            case HEALTH: return healthtex; break;
+            case ARMOUR: return armourtex; break;
+#endif
             case WEAPON:
             {
                 const char *weaptexs[WEAP_MAX] = {
@@ -2102,7 +2146,7 @@ namespace hud
             if(inventoryhealth && (!m_trial(game::gamemode) || trialstyle >= 2))
             {
                 float fade = blend*inventoryhealthblend;
-                int heal = m_health(game::gamemode, game::mutators);
+                int heal = m_health(game::gamemode, game::mutators, game::focus->model);
                 float pulse = inventoryhealthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)

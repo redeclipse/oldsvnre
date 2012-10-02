@@ -187,6 +187,28 @@ namespace entities
                 }
                 break;
             }
+#ifdef MEKARCADE
+            case HEALTH:
+            {
+                if(attr[0] >= 0 && attr[0] < HEALTH_MAX)
+                {
+                    defformatstring(str)("+%d", healthamt[attr[0]]);
+                    addentinfo(str);
+                }
+                if(full) addmodeinfo(attr[1], attr[2]);
+                break;
+            }
+            case ARMOUR:
+            {
+                if(attr[0] >= 0 && attr[0] < ARMOUR_MAX)
+                {
+                    defformatstring(str)("+%d", armouramt[attr[0]]);
+                    addentinfo(str);
+                }
+                if(full) addmodeinfo(attr[1], attr[2]);
+                break;
+            }
+#endif
             case MAPMODEL:
             {
                 mapmodelinfo *mmi = getmminfo(attr[0]);
@@ -267,7 +289,13 @@ namespace entities
         switch(type)
         {
             case AFFINITY: return "flag";
-            case PLAYERSTART: return playermodels[game::forceplayermodel ? game::forceplayermodel-1 : 0][0];
+#ifdef MEKARCADE
+            case PLAYERSTART: return playertypes[0][0];
+            case HEALTH: return "health";
+            case ARMOUR: return "armour";
+#else
+            case PLAYERSTART: return playertypes[game::forceplayermodel ? game::forceplayermodel-1 : 0][0];
+#endif
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
@@ -478,7 +506,7 @@ namespace entities
         gameentity &e = *(gameentity *)ents[n];
         switch(enttype[e.type].usetype)
         {
-            case EU_ITEM: if(d->action[AC_USE])
+            case EU_ITEM: if(e.type != WEAPON || d->action[AC_USE])
             {
                 if(game::allowmove(d))
                 {
@@ -817,6 +845,16 @@ namespace entities
                 while(e.attrs[0] < WEAP_OFFSET) e.attrs[0] += WEAP_MAX-WEAP_OFFSET; // don't allow superimposed weaps
                 while(e.attrs[0] >= WEAP_MAX) e.attrs[0] -= WEAP_MAX-WEAP_OFFSET;
                 break;
+#ifdef MEKARCADE
+            case HEALTH:
+                while(e.attrs[0] < 0) e.attrs[0] += HEALTH_MAX;
+                while(e.attrs[0] >= HEALTH_MAX) e.attrs[0] -= HEALTH_MAX;
+                break;
+            case ARMOUR:
+                while(e.attrs[0] < 0) e.attrs[0] += ARMOUR_MAX;
+                while(e.attrs[0] >= ARMOUR_MAX) e.attrs[0] -= ARMOUR_MAX;
+                break;
+#endif
             case PLAYERSTART:
                 while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
                 while(e.attrs[0] >= TEAM_ALL) e.attrs[0] -= TEAM_ALL;
@@ -1619,6 +1657,9 @@ namespace entities
             }
             if(gver <= 216 && enttype[e.type].modesattr > 0) // mode/mutator array updates
             {
+#ifdef MEKARCADE
+                int attr = enttype[e.type].modesattr+1;
+#else
                 int attr = enttype[e.type].modesattr;
                 if(e.attrs[attr])
                 {
@@ -1633,6 +1674,7 @@ namespace entities
                     e.attrs[attr] = neg ? 0-value : value;
                 }
                 attr++; // mutators
+#endif
                 if(e.attrs[attr])
                 {
                     bool neg = e.attrs[attr] < 0;
@@ -1705,8 +1747,13 @@ namespace entities
             progress(i/float(ents.length()), "updating entities...");
             if(mtype == MAP_MAPZ && gver <= 212)
             {
+#ifdef MEKARCADE
+                if(e.type == HEALTH) e.type = NOTUSED;
+                else if(e.type == ARMOUR)
+#else
                 if(e.type == DUMMY1) e.type = NOTUSED;
                 else if(e.type == DUMMY2)
+#endif
                 {
                     ai::oldwaypoint &o = ai::oldwaypoints.add();
                     o.o = e.o;

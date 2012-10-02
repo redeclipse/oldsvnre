@@ -223,6 +223,10 @@ namespace aiman
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
+#ifdef MEKARCADE
+        if(m_campaign(gamemode)) balance = GAME(campaignplayers); // campaigns strictly obeys nplayers
+        else
+#endif
         if(m_coop(gamemode, mutators))
         {
             numt--; // filter out the human team
@@ -284,13 +288,31 @@ namespace aiman
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
+#ifdef MEKARCADE
+                bool allow = !m_campaign(gamemode);
+                if(!allow)
+                {
+                    loopv(clients) if(clients[i]->state.aitype < AI_START)
+                    {
+                        float dist = clients[i]->state.o.dist(sents[j].o);
+                        if(dist <= MAXSPAWNDIST) allow = true;
+                        else if(allow && dist <= MINSPAWNDIST)
+                        {
+                            allow = false;
+                            break;
+                        }
+                    }
+                }
+#else
+                bool allow = true;
+#endif
                 int count = 0;
                 loopvrev(clients) if(clients[i]->state.aientity == j)
                 {
                     count++;
-                    if(count > GAME(enemybalance)) deleteai(clients[i]);
+                    if(!allow || count > GAME(enemybalance)) deleteai(clients[i]);
                 }
-                if(count < GAME(enemybalance))
+                if(allow && count < GAME(enemybalance))
                 {
                     int amt = GAME(enemybalance)-count;
                     loopk(amt) addai(sents[j].attrs[0]+AI_START, j);
