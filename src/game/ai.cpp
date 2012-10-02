@@ -629,7 +629,7 @@ namespace ai
         }
     }
 
-    void spawned(gameent *d, int ent)
+    void respawned(gameent *d, bool local, int ent)
     {
         if(d->ai) setup(d, ent);
     }

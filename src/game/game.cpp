@@ -515,19 +515,19 @@ namespace game
         if(d == player1) resetfollow();
         if(d == focus) resetcamera(true);
 
-        if(d->aitype < AI_START) playsound(S_RESPAWN, d->o, d);
-        if(dynlighteffects)
+        if(d->aitype < AI_START)
         {
-            int colour = getcolour(d, playereffecttone);
-            adddynlight(d->headpos(), d->height*2, vec::hexcolor(colour).mul(2.f), 250, 250);
-            regularshape(PART_SPARK, d->height*2, colour, 53, 50, 350, d->headpos(-d->height/2), 1.5f, 1, 1, 0, 35);
+            playsound(S_RESPAWN, d->o, d);
+            if(dynlighteffects)
+            {
+                adddynlight(d->headpos(), d->height*2, vec::hexcolor(getcolour(d, playereffecttone)).mul(2.f), 250, 250);
+                regularshape(PART_SPARK, d->height*2, getcolour(d, playerundertone), 53, 50, 350, d->headpos(-d->height/2), 1.5f, 1, 1, 0, 35);
+                regularshape(PART_SPARK, d->height*2, getcolour(d, playerovertone), 53, 50, 350, d->headpos(-d->height/2), 1.5f, 1, 1, 0, 35);
+            }
         }
-        if(local)
-        {
-            if(d->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
-                entities::execlink(d, ent, true);
-            ai::spawned(d, ent);
-        }
+        if(local && d->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
+            entities::execlink(d, ent, true);
+        ai::respawned(d, local, ent);
     }
 
     vec pulsecolour(physent *d, int i, int cycle)
@@ -1801,20 +1801,22 @@ namespace game
 
     vec thirdpos(const vec &pos, float yaw, float pitch, float dist)
     {
-        static physent tpcam;
-        if(tpcam.type != ENT_CAMERA)
+        static struct tpcam : physent
         {
-            tpcam.reset();
-            tpcam.type = ENT_CAMERA;
-            tpcam.collidetype = COLLIDE_AABB;
-            tpcam.state = CS_ALIVE;
-            tpcam.height = tpcam.zradius = tpcam.radius = tpcam.xradius = tpcam.yradius = 2;
-        }
+            tpcam()
+            {
+                physent::reset();
+                type = ENT_CAMERA;
+                collidetype = COLLIDE_AABB;
+                state = CS_ALIVE;
+                height = zradius = radius = xradius = yradius = 2;
+            }
+        } d;
         vec dir;
-        tpcam.o = pos;
+        d.o = pos;
         vecfromyawpitch(yaw, pitch, -1, 0, dir);
-        physics::movecamera(&tpcam, dir.normalize(), dist, 0.1f);
-        return tpcam.o;
+        physics::movecamera(&d, dir.normalize(), dist, 0.1f);
+        return d.o;
     }
 
     vec camerapos(physent *d, bool hasfoc, bool hasyp, float yaw, float pitch)
@@ -2308,7 +2310,7 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 if(player1->state == CS_EDITING) physics::move(player1, 10, true);
-                else if(!intermission && !tvmode() && player1->state == CS_ALIVE)
+                else if(player1->state == CS_ALIVE && !intermission && !tvmode())
                 {
                     physics::move(player1, 10, true);
                     entities::checkitems(player1);
