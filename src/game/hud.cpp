@@ -62,7 +62,7 @@ namespace hud
     VAR(IDF_PERSIST, conoverflow, 0, 5, VAR_MAX);
     VAR(IDF_PERSIST, concenter, 0, 0, 1);
     VAR(IDF_PERSIST, confilter, 0, 1, 1);
-    FVAR(IDF_PERSIST, conblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, conblend, 0, 0.6f, 1);
     FVAR(IDF_PERSIST, conscale, FVAR_NONZERO, 1, FVAR_MAX);
     VAR(IDF_PERSIST, chatconsize, 0, 5, 100);
     VAR(IDF_PERSIST, chatcontime, 0, 30000, VAR_MAX);
@@ -70,6 +70,8 @@ namespace hud
     VAR(IDF_PERSIST, chatconoverflow, 0, 5, VAR_MAX);
     FVAR(IDF_PERSIST, chatconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, chatconscale, FVAR_NONZERO, 1, FVAR_MAX);
+
+    FVAR(IDF_PERSIST, selfconblend, 0, 1, 1);
     FVAR(IDF_PERSIST, fullconblend, 0, 1, 1);
 
     FVAR(IDF_PERSIST, noticeoffset, -1, 0.3f, 1);
@@ -1301,7 +1303,7 @@ namespace hud
                 {
                     int len = !full && conlines[refs[i]].type < CON_IMPORTANT ? contime/2 : contime;
                     float f = full || !confade ? 1.f : clamp(((len+confade)-(totalmillis-conlines[refs[i]].reftime))/float(confade), 0.f, 1.f),
-                        g = full || conlines[refs[i]].type >= CON_IMPORTANT ? fullconblend : conblend;
+                        g = full ? fullconblend  : (conlines[refs[i]].type >= CON_IMPORTANT ? selfconblend : conblend);
                     tz += draw_textx("%s", tr, ty+tz, 255, 255, 255, int(255*fade*f*g), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, ts, conlines[refs[i]].cref)*f;
                 }
                 glPopMatrix();
