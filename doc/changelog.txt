@@ -31,6 +31,7 @@ Interface & Menus:
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
  * Enabled multi-coop (one human team and multiple bot teams)
+ * Removed expert from default set of allowed mutators
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
@@ -44,6 +45,7 @@ Additional fixed bugs:
  * #223 - can no longer use common file-writing commands from a map script
  * #224 - Possible to cut in map "hawk"
  * #232 - ALT + F4 and ALT + TAB not working from fullscreen in Linux
+ * #219 - Bots do not show proper weapons
 
 
 = Red Eclipse 1.3.1 =
