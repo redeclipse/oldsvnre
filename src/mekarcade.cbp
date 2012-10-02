@@ -9,7 +9,7 @@
 			<Target title="client32">
 				<Option output="..\bin\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\client32" />
+				<Option object_output=".objs\mekarcade\client32" />
 				<Option deps_output=".deps\client" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -57,7 +57,7 @@
 			<Target title="client32-dbg">
 				<Option output="..\bin\mekclient-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\client32-dbg" />
+				<Option object_output=".objs\mekarcade\client32-dbg" />
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -102,7 +102,7 @@
 			<Target title="client32-prof">
 				<Option output="..\bin\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\client32-prof" />
+				<Option object_output=".objs\mekarcade\client32-prof" />
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -148,7 +148,7 @@
 			<Target title="server32">
 				<Option output="..\bin\mekserver.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\server32" />
+				<Option object_output=".objs\mekarcade\server32" />
 				<Option deps_output=".deps\server" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -192,7 +192,7 @@
 			<Target title="server32-dbg">
 				<Option output="..\bin\mekserver-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\server32-dbg" />
+				<Option object_output=".objs\mekarcade\server32-dbg" />
 				<Option deps_output=".deps\server" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -232,7 +232,7 @@
 			<Target title="client64">
 				<Option output="..\bin64\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\client64" />
+				<Option object_output=".objs\mekarcade\client64" />
 				<Option deps_output=".deps\client" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -280,7 +280,7 @@
 			<Target title="client64-prof">
 				<Option output="..\bin64\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\client64-prof" />
+				<Option object_output=".objs\mekarcade\client64-prof" />
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -326,7 +326,7 @@
 			<Target title="client64-dbg">
 				<Option output="..\bin64\mekclient-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\client64-dbg" />
+				<Option object_output=".objs\mekarcade\client64-dbg" />
 				<Option deps_output=".deps\debug" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -371,7 +371,7 @@
 			<Target title="server64">
 				<Option output="..\bin64\mekserver.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\server64" />
+				<Option object_output=".objs\mekarcade\server64" />
 				<Option deps_output=".deps\server" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -415,7 +415,7 @@
 			<Target title="server64-dbg">
 				<Option output="..\bin64\mekserver-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
-				<Option object_output=".objs\server64-dbg" />
+				<Option object_output=".objs\mekarcade\server64-dbg" />
 				<Option deps_output=".deps\server" />
 				<Option type="0" />
 				<Option compiler="gcc" />

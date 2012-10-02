@@ -1763,14 +1763,9 @@ namespace client
 
                 case N_DAMAGE:
                 {
-                    int tcn = getint(p),
-                        acn = getint(p),
-                        weap = getint(p),
-                        flags = getint(p),
-                        damage = getint(p),
+                    int tcn = getint(p), acn = getint(p), weap = getint(p), flags = getint(p), damage = getint(p),
 #ifdef MEKARCADE
-                        health = getint(p),
-                        armour = getint(p);
+                        health = getint(p), armour = getint(p);
 #else
                         health = getint(p);
 #endif
