@@ -328,7 +328,11 @@ namespace client
                 addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
             }
         }
-        if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playermodels[game::player1->model%NUMPLAYERMODELS][2]);
+#ifdef MEKARCADE
+        if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, class: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, CLASS(game::player1->model, name));
+#else
+        if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playertypes[game::player1->model%PLAYERTYPES][2]);
+#endif
     }
     ICOMMAND(0, setinfo, "siiN", (char *s, int *c, int *m, int *numargs), setplayerinfo(s, *numargs >= 2 ? *c : -1, *numargs >= 3 ? *m : -1));
 
@@ -413,13 +417,13 @@ namespace client
     int getclientmodel(int cn)
     {
         gameent *d = game::getclient(cn);
-        return d ? d->model%NUMPLAYERMODELS : -1;
+        return d ? d->model%PLAYERTYPES : -1;
     }
     ICOMMAND(0, getclientmodel, "i", (int *cn), intret(getclientmodel(*cn)));
 
     const char *getmodelname(int mdl, int idx)
     {
-        return mdl >= 0 ? playermodels[mdl%NUMPLAYERMODELS][clamp(idx, 0, 2)] : "";
+        return mdl >= 0 ? playertypes[mdl%PLAYERTYPES][clamp(idx, 0, 2)] : "";
     }
     ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 2)));
 
@@ -1282,6 +1286,9 @@ namespace client
         d->frags = getint(p);
         d->deaths = getint(p);
         d->health = getint(p);
+#ifdef MEKARCADE
+        d->armour = getint(p);
+#endif
         d->cptime = getint(p);
         if(resume && (d == game::player1 || d->ai))
         {
@@ -1761,13 +1768,22 @@ namespace client
                         weap = getint(p),
                         flags = getint(p),
                         damage = getint(p),
+#ifdef MEKARCADE
+                        health = getint(p),
+                        armour = getint(p);
+#else
                         health = getint(p);
+#endif
                     vec dir;
                     loopk(3) dir[k] = getint(p)/DNF;
                     dir.normalize();
                     gameent *target = game::getclient(tcn), *actor = game::getclient(acn);
                     if(!target || !actor) break;
+#ifdef MEKARCADE
+                    game::damaged(weap, flags, damage, health, armour, target, actor, lastmillis, dir);
+#else
                     game::damaged(weap, flags, damage, health, target, actor, lastmillis, dir);
+#endif
                     break;
                 }
 
@@ -1782,7 +1798,11 @@ namespace client
 
                 case N_REGEN:
                 {
+#ifdef MEKARCADE
+                    int trg = getint(p), heal = getint(p), amt = getint(p), armour = getint(p);
+#else
                     int trg = getint(p), heal = getint(p), amt = getint(p);
+#endif
                     gameent *f = game::getclient(trg);
                     if(!f) break;
                     if(!amt)
@@ -1793,6 +1813,9 @@ namespace client
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal;
+#ifdef MEKARCADE
+                    f->armour = armour;
+#endif
                     f->lastregen = lastmillis;
                     break;
                 }

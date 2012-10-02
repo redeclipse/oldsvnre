@@ -416,7 +416,7 @@ const char *findfile(const char *filename, const char *mode)
     }
     copystring(s, filename); path(s); // our own packages take priority
     if(mode[0]=='w' || mode[0]=='a' || fileexists(s, mode)) return s;
-    loopv(packagedirs) if((packagedirs[i].flags & packagedirmask) == packagedirs[i].flags)
+    loopvrev(packagedirs) if((packagedirs[i].flags & packagedirmask) == packagedirs[i].flags)
     {
         formatstring(s)("%s%s", packagedirs[i].name, filename); path(s);
         if(fileexists(s, mode)) return s;
@@ -476,7 +476,7 @@ int listfiles(const char *dir, const char *ext, vector<char *> &files)
         formatstring(s)("%s%s", homedir, dir);
         if(listdir(s, false, ext, files)) dirs++;
     }
-    loopv(packagedirs) if((packagedirs[i].flags & packagedirmask) == packagedirs[i].flags)
+    loopvrev(packagedirs) if((packagedirs[i].flags & packagedirmask) == packagedirs[i].flags)
     {
         formatstring(s)("%s%s", packagedirs[i].name, dir);
         if(listdir(s, false, ext, files)) dirs++;

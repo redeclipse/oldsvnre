@@ -185,6 +185,18 @@ namespace server
             respawn();
         }
 
+#ifdef MEKARCADE
+        void respawn(int millis = 0, int heal = 0, int armr = -1)
+        {
+            lastboost = 0;
+            lastburnowner = lastbleedowner = -1;
+            loopi(WEAP_MAX) weapjams[i] = 0;
+            gamestate::respawn(millis, heal, armr);
+            o = vec(-1e10f, -1e10f, -1e10f);
+            vel = falling = vec(0, 0, 0);
+            yaw = pitch = roll = 0;
+        }
+#else
         void respawn(int millis = 0, int heal = 0)
         {
             lastboost = 0;
@@ -195,6 +207,7 @@ namespace server
             vel = falling = vec(0, 0, 0);
             yaw = pitch = roll = 0;
         }
+#endif
     };
 
     struct savedscore
@@ -524,12 +537,16 @@ namespace server
         {
             if(actor != target && (!m_isteam(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
-                int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators)*GAME(maxhealthvampire))), eff = heal-rgn;
+                int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators, actor->state.model)*GAME(maxhealthvampire))), eff = heal-rgn;
                 if(eff)
                 {
                     actor->state.health = heal;
                     actor->state.lastregen = gamemillis;
+#ifdef MEKARCADE
+                    sendf(-1, 1, "ri5", N_REGEN, actor->clientnum, actor->state.health, eff, actor->state.armour);
+#else
                     sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
+#endif
                 }
             }
         }
@@ -1103,8 +1120,11 @@ namespace server
 
     bool canload(const char *type)
     {
-        if(!strcmp(type, gameid()) || !strcmp(type, "bfa") || !strcmp(type, "bfg"))
-            return true;
+        if(!strcmp(type, gameid())) return true;
+#ifdef MEKARCADE
+        if(!strcmp(type, "fps")) return true;
+#endif
+        if(!strcmp(type, "bfa") || !strcmp(type, "bfg")) return true;
         return false;
     }
 
@@ -1301,6 +1321,13 @@ namespace server
                 if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators)) return false;
                 break;
             }
+#ifdef MEKARCADE
+            case HEALTH: case ARMOUR:
+            {
+                if(m_insta(gamemode, mutators) || (sents[i].attrs[3] && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[1], sents[i].attrs[2], gamemode, mutators)) return false;
+                break;
+            }
+#endif
             default: break;
         }
         return true;
@@ -1339,7 +1366,11 @@ namespace server
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
+#ifdef MEKARCADE
+                sents[i].millis += m_campaign(gamemode) ? 50 : GAME(enemyspawndelay);
+#else
                 sents[i].millis += GAME(enemyspawndelay);
+#endif
                 switch(GAME(enemyspawnstyle) == 3 ? rnd(2)+1 : GAME(enemyspawnstyle))
                 {
                     case 1: actors.add(i); break;
@@ -1371,7 +1402,12 @@ namespace server
         if(!actors.empty())
         {
             sortrandomly(actors);
-            loopv(actors) sents[actors[i]].millis += GAME(enemyspawndelay)*i;
+            loopv(actors)
+#ifdef MEKARCADE
+                sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : GAME(enemyspawndelay))*i;
+#else
+                sents[actors[i]].millis += GAME(enemyspawndelay)*i;
+#endif
         }
     }
 
@@ -1593,9 +1629,14 @@ namespace server
             }
             if(!isweap(weap)) weap = rnd(WEAP_MAX-1)+1;
         }
-        gs.spawnstate(gamemode, mutators, weap, health);
         int spawn = pickspawn(ci);
+#ifdef MEKARCADE
+        gs.spawnstate(gamemode, mutators, weap, health, 0);
+        sendf(ci->clientnum, 1, "ri9i2vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0], WEAP_MAX, &gs.reloads[0]);
+#else
+        gs.spawnstate(gamemode, mutators, weap, health);
         sendf(ci->clientnum, 1, "ri9ivv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0], WEAP_MAX, &gs.reloads[0]);
+#endif
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
 
@@ -1607,6 +1648,9 @@ namespace server
         putint(p, gs.frags);
         putint(p, gs.deaths);
         putint(p, gs.health);
+#ifdef MEKARCADE
+        putint(p, gs.armour);
+#endif
         putint(p, gs.cptime);
         putint(p, gs.weapselect);
         loopi(WEAP_MAX) putint(p, gs.ammo[i]);
@@ -2764,7 +2808,11 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
+#ifdef MEKARCADE
+        sendf(-1, 1, "ri9ivvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0], WEAP_MAX, &gs.reloads[0], -1);
+#else
         sendf(-1, 1, "ri9vvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, WEAP_MAX, &gs.ammo[0], WEAP_MAX, &gs.reloads[0], -1);
+#endif
     }
 
     void putinitclient(clientinfo *ci, packetbuf &p)
@@ -3053,9 +3101,18 @@ namespace server
                     actor->state.crits = 0;
                 }
             }
+#ifdef MEKARCADE
+            if(target->state.armour > 0)
+            {
+                int absorb = realdamage/2; // armour absorbs half until depleted
+                if(target->state.armour < absorb) absorb = target->state.armour;
+                target->state.armour -= absorb;
+                realdamage -= absorb;
+            }
+#endif
             hurt = min(target->state.health, realdamage);
             target->state.health -= realdamage;
-            if(target->state.health <= m_health(gamemode, mutators)) target->state.lastregen = 0;
+            if(target->state.health <= m_health(gamemode, mutators, target->state.model)) target->state.lastregen = 0;
             target->state.lastpain = gamemillis;
             actor->state.damage += realdamage;
             if(target->state.health <= 0) realflags |= HIT_KILL;
@@ -3074,15 +3131,24 @@ namespace server
         mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush));
         if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team))
             addhistory(target, actor, gamemillis);
+#ifdef MEKARCADE
+        sendf(-1, 1, "ri8i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, target->state.armour, hitpush.x, hitpush.y, hitpush.z);
+#else
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
+#endif
         if(realflags&HIT_KILL)
         {
             int fragvalue = 1;
             if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
-            int pointvalue = (smode && target->state.aitype < AI_START ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
-            pointvalue *= target->state.aitype >= AI_START ? GAME(enemybonus) : GAME(fragbonus);
-            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators) : m_health(gamemode, mutators)*3/2)))
+#ifdef MEKARCADE
+            bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode);
+#else
+            bool isai = target->state.aitype >= AI_START;
+#endif
+            int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
+            pointvalue *= isai ? GAME(enemybonus) : GAME(fragbonus);
+            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.model) : m_health(gamemode, mutators, target->state.model)*3/2)))
                 style = FRAG_OBLITERATE;
             target->state.spree = 0;
             if(m_isteam(gamemode, mutators) && actor->team == target->team)
@@ -3096,7 +3162,11 @@ namespace server
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
+#ifdef MEKARCADE
+                if(!m_campaign(gamemode) && !firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
+#else
                 if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
+#endif
                 {
                     firstblood = true;
                     style |= FRAG_FIRSTBLOOD;
@@ -3559,6 +3629,13 @@ namespace server
                 }
                 break;
             }
+#ifdef MEKARCADE
+            case HEALTH:
+            {
+                ammoamt = healthamt[attr];
+                break;
+            }
+#endif
             default: break;
         }
         setspawn(ent, false, true);
@@ -3625,6 +3702,19 @@ namespace server
 
     void waiting(clientinfo *ci, int drop, bool exclude)
     {
+#ifdef MEKARCADE
+        if(m_campaign(gamemode) && ci->state.cpnodes.empty())
+        {
+            int maxnodes = -1;
+            loopv(clients)
+            {
+                clientinfo *oi = clients[i];
+                if(oi->clientnum >= 0 && oi->name[0] && oi->state.aitype < AI_START && (!clients.inrange(maxnodes) || oi->state.cpnodes.length() > clients[maxnodes]->state.cpnodes.length()))
+                    maxnodes = i;
+            }
+            if(clients.inrange(maxnodes)) loopv(clients[maxnodes]->state.cpnodes) ci->state.cpnodes.add(clients[maxnodes]->state.cpnodes[i]);
+        }
+#endif
         if(ci->state.state == CS_ALIVE)
         {
             if(drop) dropitems(ci, drop);
@@ -3779,7 +3869,7 @@ namespace server
                 else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleedtime = 0;
                 if(m_regen(gamemode, mutators) && ci->state.aitype < AI_START)
                 {
-                    int total = m_health(gamemode, mutators), amt = GAME(regenhealth),
+                    int total = m_health(gamemode, mutators, ci->state.model), amt = GAME(regenhealth),
                         delay = ci->state.lastregen ? GAME(regentime) : GAME(regendelay);
                     if(smode) smode->regen(ci, total, amt, delay);
                     if(delay && ci->state.health != total)
@@ -3792,14 +3882,18 @@ namespace server
                             {
                                 amt = -GAME(regendecay);
                                 total = ci->state.health;
-                                low = m_health(gamemode, mutators);
+                                low = m_health(gamemode, mutators, ci->state.model);
                             }
                             int rgn = ci->state.health, heal = clamp(ci->state.health+amt, low, total), eff = heal-rgn;
                             if(eff)
                             {
                                 ci->state.health = heal;
                                 ci->state.lastregen = gamemillis;
+#ifdef MEKARCADE
+                                sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, eff, ci->state.armour);
+#else
                                 sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, eff);
+#endif
                             }
                         }
                     }
@@ -3815,7 +3909,11 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-                    ci->state.respawn(gamemillis, m_health(gamemode, mutators));
+#ifdef MEKARCADE
+                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model), m_armour(gamemode, mutators, ci->state.model));
+#else
+                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model));
+#endif
                     sendspawn(ci);
                 }
             }

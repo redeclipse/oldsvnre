@@ -8,6 +8,9 @@ namespace ai
     VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
     VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
+#ifdef MEKARCADE
+    VAR(0, aicampaign, 0, 0, 1);
+#endif
     VAR(0, aipassive, 0, 0, 1);
 
     VARF(0, showwaypoints, 0, 0, 1, if(showwaypoints) getwaypoints());
@@ -540,7 +543,12 @@ namespace ai
             {
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
-                if(m_isteam(game::gamemode, game::mutators)) assist(d, b, interests, false, false);
+                if(m_isteam(game::gamemode, game::mutators))
+#ifdef MEKARCADE
+                    assist(d, b, interests, false, m_campaign(game::gamemode));
+#else
+                    assist(d, b, interests, false, false);
+#endif
             }
             if(m_fight(game::gamemode))
             {
@@ -548,6 +556,21 @@ namespace ai
                 else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
                 else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
             }
+#ifdef MEKARCADE
+            if(m_campaign(game::gamemode) && aicampaign)
+            {
+                loopi(entities::lastent(TRIGGER)) if(entities::ents[i]->type == TRIGGER && entities::ents[i]->attrs[1] == TR_EXIT)
+                {
+                    interest &n = interests.add();
+                    n.state = AI_S_PURSUE;
+                    n.target = i;
+                    n.node = closestwaypoint(entities::ents[i]->o, CLOSEDIST, true);
+                    n.targtype = AI_T_AFFINITY;
+                    n.score = -1;
+                    n.tolerance = 1;
+                }
+            }
+#endif
         }
         else if(entities::ents.inrange(d->aientity)) loopv(entities::ents[d->aientity]->links)
         {
@@ -716,6 +739,13 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
+#ifdef MEKARCADE
+                if(m_campaign(game::gamemode))
+                {
+                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                }
+                else
+#endif
                 if(m_capture(game::gamemode)) return capture::aidefense(d, b) ? 1 : 0;
                 else if(m_defend(game::gamemode)) return defend::aidefense(d, b) ? 1 : 0;
                 else if(m_bomber(game::gamemode)) return bomber::aidefense(d, b) ? 1 : 0;
@@ -817,6 +847,13 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
+#ifdef MEKARCADE
+                if(m_campaign(game::gamemode))
+                {
+                    if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                }
+                else
+#endif
                 if(m_capture(game::gamemode)) return capture::aipursue(d, b) ? 1 : 0;
                 else if(m_defend(game::gamemode)) return defend::aipursue(d, b) ? 1 : 0;
                 else if(m_bomber(game::gamemode)) return bomber::aipursue(d, b) ? 1 : 0;

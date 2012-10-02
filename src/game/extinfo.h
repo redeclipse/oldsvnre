@@ -43,7 +43,11 @@
         putint(q, ci->state.teamkills);
         putint(q, ci->state.damage*100/max(ci->state.shotdamage,1));
         putint(q, ci->state.health);
+#ifdef MEKARCADE
+        putint(q, ci->state.armour);
+#else
         putint(q, ci->state.spree);
+#endif
         putint(q, ci->state.weapselect);
         putint(q, ci->privilege);
         putint(q, ci->state.state);

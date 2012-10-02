@@ -3,18 +3,38 @@
 
 #include "cube.h"
 
+#ifdef MEKARCADE
+#define RE_VER_MAJOR        0
+#define RE_VER_MINOR        1
+#define RE_VER_PATCH        0
+#define RE_VER_STR          "0.1"
+#define RE_NAME             "MekArcade"
+#define RE_UNAME            "mekarcade"
+#define RE_RELEASE          "Pre-Alpha"
+#define RE_URL              "www.mekarcade.com"
+#define RE_LAN_PORT         28799
+#define RE_MASTER_PORT      28800
+#define RE_SERVER_PORT      28801
+#define RE_MASTER_HOST      ""
+#else
 #define RE_VER_MAJOR        1
 #define RE_VER_MINOR        3
 #define RE_VER_PATCH        1
 #define RE_VER_STR          "1.3.1"
-#define RE_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
-#define RE_VER              RE_VER_MAKE(RE_VER_MAJOR, RE_VER_MINOR, RE_VER_PATCH)
-#define RE_VERSION          (RE_VER_MAJOR*100)+(RE_VER_MINOR*10)+RE_VER_PATCH
-
 #define RE_NAME             "Red Eclipse"
 #define RE_UNAME            "redeclipse"
 #define RE_RELEASE          "Galactic"
 #define RE_URL              "www.redeclipse.net"
+#define RE_LAN_PORT         28799
+#define RE_MASTER_PORT      28800
+#define RE_SERVER_PORT      28801
+#define RE_MASTER_HOST      "play.redeclipse.net"
+#endif
+
+#define RE_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
+#define RE_VER              RE_VER_MAKE(RE_VER_MAJOR, RE_VER_MINOR, RE_VER_PATCH)
+#define RE_VERSION          (RE_VER_MAJOR*100)+(RE_VER_MINOR*10)+RE_VER_PATCH
+
 #ifdef WIN32
 #define RE_PLATFORM         "win"
 #elif defined(__APPLE__)
@@ -23,11 +43,6 @@
 #define RE_PLATFORM         "nix"
 #endif
 #define RE_ARCH             (8*sizeof(void *))
-
-#define RE_LAN_PORT         28799
-#define RE_MASTER_PORT      28800
-#define RE_SERVER_PORT      28801
-#define RE_MASTER_HOST      "play.redeclipse.net"
 
 #ifdef STANDALONE
 extern void setupmaster();

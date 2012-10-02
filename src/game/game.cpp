@@ -178,8 +178,9 @@ namespace game
     VAR(IDF_PERSIST, playereffecttone, -1, CTONE_MIXED, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.3f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
-    VAR(IDF_PERSIST, forceplayermodel, 0, 0, NUMPLAYERMODELS);
-
+#ifndef MEKARCADE
+    VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
+#endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     VAR(IDF_PERSIST, favloadweap1, -1, -1, WEAP_MAX-1);
     VAR(IDF_PERSIST, favloadweap2, -1, -1, WEAP_MAX-1);
@@ -740,7 +741,7 @@ namespace game
         {
             if(m_resize(gamemode, mutators) || d->aitype >= AI_START)
             {
-                float minscale = 1, amtscale = m_insta(gamemode, mutators) ? 1+(d->spree*instaresizeamt) : max(d->health, 1)/float(d->aitype >= AI_START ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators));
+                float minscale = 1, amtscale = m_insta(gamemode, mutators) ? 1+(d->spree*instaresizeamt) : max(d->health, 1)/float(d->aitype >= AI_START ? aistyle[d->aitype].health*enemystrength : m_health(gamemode, mutators, d->model));
                 if(m_resize(gamemode, mutators))
                 {
                     minscale = minresizescale;
@@ -1059,13 +1060,20 @@ namespace game
         }
     }
 
+#ifdef MEKARCADE
+    void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir)
+#else
     void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir)
+#endif
     {
         if(d->state != CS_ALIVE || intermission) return;
         if(hithurts(flags))
         {
             d->health = health;
-            if(d->health <= m_health(gamemode, mutators)) d->lastregen = 0;
+#ifdef MEKARCADE
+            d->armour = armour;
+#endif
+            if(d->health <= m_health(gamemode, mutators, d->model)) d->lastregen = 0;
             d->lastpain = lastmillis;
             actor->totaldamage += damage;
         }
@@ -1525,7 +1533,11 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
-            d->mapchange(lastmillis, m_health(gamemode, mutators));
+#ifdef MEKARCADE
+            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
+#else
+            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model));
+#endif
         if(!client::demoplayback && m_arena(gamemode, mutators) && autoloadweap && favloadweap1 >= 0 && favloadweap2 >= 0)
             chooseloadweap(player1, favloadweap1, favloadweap2);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
@@ -2399,9 +2411,15 @@ namespace game
 
     void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-        const char *mdl = playermodels[forceplayermodel ? forceplayermodel-1 : 0][third ? 0 : 1];
+#ifdef MEKARCADE
+        const char *mdl = playertypes[0][third ? 0 : 1];
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : 1];
-        else if(!forceplayermodel) mdl = playermodels[d->model%NUMPLAYERMODELS][third ? 0 : 1];
+        else mdl = playertypes[d->model%PLAYERTYPES][third ? 0 : 1];
+#else
+        const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][third ? 0 : 1];
+        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : 1];
+        else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][third ? 0 : 1];
+#endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
         if(!third && firstpersonsway && !intermission)
@@ -2773,7 +2791,11 @@ namespace game
         }
         if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
         const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
+#ifdef MEKARCADE
+        bool hasweapon = false; // TEMP
+#else
         bool hasweapon = showweap && *weapmdl;
+#endif
         modelattach a[11]; int ai = 0;
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
         if(rendernormally && (early || d != focus))
