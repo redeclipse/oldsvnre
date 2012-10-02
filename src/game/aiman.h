@@ -5,14 +5,14 @@ namespace aiman
         oldbotbalance = -2, oldbotlimit = -1, oldbotoffset = 0;
     float oldcoopbalance = -1, oldcoopmultibalance = -1;
 
-    int findaiclient(int exclude)
+    clientinfo *findaiclient(clientinfo *exclude = NULL)
     {
         vector<int> siblings;
         while(siblings.length() < clients.length()) siblings.add(-1);
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci->clientnum == exclude)
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci == exclude)
                 siblings[i] = -1;
             else
             {
@@ -29,12 +29,12 @@ namespace aiman
                     q = i;
             if(siblings.inrange(q))
             {
-                if(clients.inrange(q)) return clients[q]->clientnum;
+                if(clients.inrange(q)) return clients[q];
                 else siblings.removeunordered(q);
             }
             else break;
         }
-        return -1;
+        return NULL;
     }
 
     void getskillrange(int type, int &m, int &n)
@@ -71,7 +71,10 @@ namespace aiman
                 clientinfo *ci = clients[i];
                 if(ci->state.ownernum < 0)
                 { // reuse a slot that was going to removed
-                    if((ci->state.ownernum = findaiclient()) < 0) return false;
+                    clientinfo *owner = findaiclient();
+                    if(!owner) return false;
+                    ci->state.ownernum = owner->clientnum;
+                    owner->bots.add(ci);
                     ci->state.aireinit = 1;
                     ci->state.aitype = type;
                     ci->state.aientity = ent;
@@ -91,7 +94,9 @@ namespace aiman
                 getskillrange(type, m, n);
                 if(skill > m || skill < n) s = (m != n ? rnd(m-n) + n + 1 : m);
                 ci->clientnum = cn;
-                ci->state.ownernum = findaiclient();
+                clientinfo *owner = findaiclient();
+                ci->state.ownernum = owner ? owner->clientnum : -1;
+                if(owner) owner->bots.add(ci);
                 ci->state.aireinit = 2;
                 ci->state.aitype = type;
                 ci->state.aientity = ent;
@@ -125,6 +130,8 @@ namespace aiman
         ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
         savescore(ci);
         sendf(-1, 1, "ri3", N_DISCONNECT, cn, DISC_NONE);
+        clientinfo *owner = (clientinfo *)getinfo(ci->state.ownernum);
+        if(owner) owner->bots.removeobj(ci);
         clients.removeobj(ci);
         delclient(cn);
         dorefresh = 1;
@@ -164,16 +171,18 @@ namespace aiman
         }
     }
 
-    void shiftai(clientinfo *ci, int cn = -1)
+    void shiftai(clientinfo *ci, clientinfo *owner = NULL)
     {
-        if(cn < 0) { ci->state.aireinit = 0; ci->state.ownernum = -1; }
-        else if(ci->state.ownernum != cn) { ci->state.aireinit = 1; ci->state.ownernum = cn; }
+        clientinfo *prevowner = (clientinfo *)getinfo(ci->state.ownernum);
+        if(prevowner) prevowner->bots.removeobj(ci);
+        if(!owner) { ci->state.aireinit = 0; ci->state.ownernum = -1; }
+        else if(ci->state.ownernum != owner->clientnum) { ci->state.aireinit = 1; ci->state.ownernum = owner->clientnum; owner->bots.add(ci); }
     }
 
     void removeai(clientinfo *ci, bool complete)
     { // either schedules a removal, or someone else to assign to
         loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum == ci->clientnum)
-            shiftai(clients[i], complete ? -1 : findaiclient(ci->clientnum));
+            shiftai(clients[i], complete ? NULL : findaiclient(ci));
     }
 
     bool reassignai(int exclude)
@@ -200,7 +209,7 @@ namespace aiman
             clientinfo *ci = clients[hi];
             loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum == ci->clientnum)
             {
-                shiftai(clients[i], clients[lo]->clientnum);
+                shiftai(clients[i], clients[lo]);
                 return true;
             }
         }
@@ -219,7 +228,7 @@ namespace aiman
                 ci->state.skill = (m != n ? rnd(m-n) + n + 1 : m);
                 if(!ci->state.aireinit) ci->state.aireinit = 1;
             }
-            if(ci->state.aitype == AI_BOT && ++numbots >= GAME(botlimit)) shiftai(ci, -1);
+            if(ci->state.aitype == AI_BOT && ++numbots >= GAME(botlimit)) shiftai(ci, NULL);
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
