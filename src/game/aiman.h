@@ -7,34 +7,14 @@ namespace aiman
 
     clientinfo *findaiclient(clientinfo *exclude = NULL)
     {
-        vector<int> siblings;
-        while(siblings.length() < clients.length()) siblings.add(-1);
+        clientinfo *least = NULL;
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci == exclude)
-                siblings[i] = -1;
-            else
-            {
-                siblings[i] = 0;
-                loopvj(clients) if(clients[j]->state.aitype > AI_NONE && clients[j]->state.ownernum == ci->clientnum)
-                    siblings[i]++;
-            }
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci == exclude) continue;
+            if(!least || ci->bots.length() < least->bots.length()) least = ci;
         }
-        while(!siblings.empty())
-        {
-            int q = -1;
-            loopv(siblings)
-                if(siblings[i] >= 0 && (!siblings.inrange(q) || siblings[i] < siblings[q]))
-                    q = i;
-            if(siblings.inrange(q))
-            {
-                if(clients.inrange(q)) return clients[q];
-                else siblings.removeunordered(q);
-            }
-            else break;
-        }
-        return NULL;
+        return least;
     }
 
     void getskillrange(int type, int &m, int &n)
@@ -181,35 +161,25 @@ namespace aiman
 
     void removeai(clientinfo *ci, bool complete)
     { // either schedules a removal, or someone else to assign to
-        loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum == ci->clientnum)
-            shiftai(clients[i], complete ? NULL : findaiclient(ci));
+        loopvrev(ci->bots) shiftai(ci->bots[i], complete ? NULL : findaiclient(ci));
     }
 
-    bool reassignai(int exclude)
+    bool reassignai(clientinfo *exclude)
     {
-        vector<int> siblings;
-        while(siblings.length() < clients.length()) siblings.add(-1);
-        int hi = -1, lo = -1;
+        clientinfo *hi = NULL, *lo = NULL;
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci->clientnum == exclude)
-                siblings[i] = -1;
-            else
-            {
-                siblings[i] = 0;
-                loopvj(clients) if(clients[j]->state.aitype > AI_NONE && clients[j]->state.ownernum == ci->clientnum)
-                    siblings[i]++;
-                if(!siblings.inrange(hi) || siblings[i] > siblings[hi]) hi = i;
-                if(!siblings.inrange(lo) || siblings[i] < siblings[lo]) lo = i;
-            }
+            if(ci->clientnum < 0 || ci->state.aitype > AI_NONE || !ci->ready || ci == exclude)
+                continue;
+            if(!lo || ci->bots.length() < lo->bots.length()) lo = ci;
+            if(!hi || hi->bots.length() > hi->bots.length()) hi = ci;
         }
-        if(siblings.inrange(hi) && siblings.inrange(lo) && (siblings[hi]-siblings[lo]) > 1)
+        if(hi && lo && hi->bots.length() - lo->bots.length() > 1)
         {
-            clientinfo *ci = clients[hi];
-            loopv(clients) if(clients[i]->state.aitype > AI_NONE && clients[i]->state.ownernum == ci->clientnum)
+            loopvrev(hi->bots)
             {
-                shiftai(clients[i], clients[lo]);
+                shiftai(hi->bots[i], lo);
                 return true;
             }
         }
