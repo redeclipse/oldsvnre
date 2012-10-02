@@ -410,6 +410,7 @@ void reloadserver()
 
 void process(ENetPacket *packet, int sender, int chan);
 
+int getservermtu() { return serverhost ? serverhost->mtu : -1; }
 void *getinfo(int i)            { return !clients.inrange(i) || clients[i]->type==ST_EMPTY ? NULL : clients[i]->info; }
 const char *gethostname(int i)  { int o = server::peerowner(i); return !clients.inrange(o) || clients[o]->type==ST_EMPTY ? "unknown" : clients[o]->hostname; }
 int getnumclients()             { return clients.length(); }
