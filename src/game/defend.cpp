@@ -309,7 +309,7 @@ namespace defend
                 int numdyns = game::numdynents();
                 loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                     if((d = e) == game::focus) break;
-                game::announcef(S_V_FLAGSECURED, CON_INFO, NULL, "\fateam \fs\f[%d]%s\fS secured \fw%s", TEAM(owner, colour), TEAM(owner, name), b.name);
+                game::announcef(S_V_FLAGSECURED, CON_INFO, d, "\fateam \fs\f[%d]%s\fS secured \fw%s", TEAM(owner, colour), TEAM(owner, name), b.name);
                 part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeSECURED", PART_TEXT, game::eventiconfade, TEAM(owner, colour), 3, 1, -10);
                 if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(owner, colour)).mul(2.f), 500, 250);
                 entities::execlink(NULL, b.ent, false);
@@ -321,7 +321,7 @@ namespace defend
             int numdyns = game::numdynents();
             loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->type == ENT_PLAYER && insideaffinity(b, e))
                 if((d = e) == game::focus) break;
-            game::announcef(S_V_FLAGOVERTHROWN, CON_INFO, NULL, "\fateam \fs\f[%d]%s\fS overthrew \fw%s", TEAM(enemy, colour), TEAM(enemy, name), b.name);
+            game::announcef(S_V_FLAGOVERTHROWN, CON_INFO, d, "\fateam \fs\f[%d]%s\fS overthrew \fw%s", TEAM(enemy, colour), TEAM(enemy, name), b.name);
             part_textcopy(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), "<super>\fzZeOVERTHROWN", PART_TEXT, game::eventiconfade, TEAM(enemy, colour), 3, 1, -10);
             if(game::dynlighteffects) adddynlight(vec(b.o).add(vec(0, 0, enttype[AFFINITY].radius)), enttype[AFFINITY].radius*2, vec::hexcolor(TEAM(enemy, colour)).mul(2.f), 500, 250);
             entities::execlink(NULL, b.ent, false);

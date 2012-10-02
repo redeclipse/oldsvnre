@@ -2248,7 +2248,7 @@ namespace client
                             if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
                             {
                                 defformatstring(best)("%s", hud::timetostr(besttime));
-                                conoutft(t != game::focus ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
+                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
                             }
                         }
                         if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
