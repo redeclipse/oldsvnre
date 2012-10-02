@@ -1566,6 +1566,7 @@ namespace physics
         {
             dropent()
             {
+                physent::reset();
                 radius = xradius = yradius = height = aboveeye = 1;
                 type = ENT_DUMMY;
                 collidetype = COLLIDE_AABB;

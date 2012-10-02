@@ -416,8 +416,8 @@ FVAR(0, ragdollbodyfricscale, 0, 2, 10);
 FVAR(0, ragdollliquidfric, 0, 0.85f, 1);
 FVAR(0, ragdollgroundfric, 0, 0.8f, 1);
 FVAR(0, ragdollairfric, 0, 0.996f, 1);
-FVAR(0, ragdollgravity, 0, 1.f, 1000);
-FVAR(0, ragdollelasticity, 0, 0.5f, 1000);
+FVAR(0, ragdollgravity, 0, 1, 1000);
+FVAR(0, ragdollelasticity, 0, 1, 1000);
 VAR(0, ragdollexpireoffset, 0, 1500, 30000);
 VAR(0, ragdollliquidexpireoffset, 0, 3000, 30000);
 
@@ -453,7 +453,7 @@ void ragdolldata::move(dynent *pl, float ts)
         if(v.collided)
         {
             v.pos = v.oldpos;
-            v.oldpos.sub(dir.reflect(wall));
+            v.oldpos.sub(dir.reflect(wall).mul(ragdollelasticity));
             collisions++;
         }
     }
@@ -493,15 +493,19 @@ void moveragdoll(dynent *d, bool smooth)
             d->ragdoll->lastmove += timestep;
         }
     }
-
-    vec eye = d->ragdoll->skel->eye >= 0 ? d->ragdoll->verts[d->ragdoll->skel->eye].pos : d->ragdoll->center;
-    eye.add(d->ragdoll->offset);
-    if(smooth)
+    #if 0
+    if(d->state == CS_DEAD || d->state == CS_WAITING)
     {
-        float k = pow(ragdolleyesmooth, float(curtime)/ragdolleyesmoothmillis);
-        d->o.mul(k).add(eye.mul(1-k));
+        vec eye = d->ragdoll->skel->eye >= 0 ? d->ragdoll->verts[d->ragdoll->skel->eye].pos : d->ragdoll->center;
+        eye.add(d->ragdoll->offset);
+        if(smooth)
+        {
+            float k = pow(ragdolleyesmooth, float(curtime)/ragdolleyesmoothmillis);
+            d->o.mul(k).add(eye.mul(1-k));
+        }
+        else d->o = eye;
     }
-    else d->o = eye;
+    #endif
 }
 
 void cleanragdoll(dynent *d)
@@ -511,21 +515,21 @@ void cleanragdoll(dynent *d)
 
 vec rdabove(dynent *d, float offset)
 {
-    if(!d->ragdoll) return d->physent::abovehead(offset);
+    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::abovehead(offset);
     return vec(d->ragdoll->center).add(vec(0, 0, 1+d->aboveeye+offset+d->ragdoll->ztop));
 }
 vec rdbottom(dynent *d, float offset)
 {
-    if(!d->ragdoll) return d->physent::feetpos(offset);
+    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::feetpos(offset);
     return vec(d->ragdoll->center).add(vec(0, 0, offset+d->ragdoll->zbottom));
 }
 vec rdtop(dynent *d, float offset)
 {
-    if(!d->ragdoll) return d->physent::headpos(offset);
+    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::headpos(offset);
     return vec(d->ragdoll->center).add(vec(0, 0, offset+d->ragdoll->ztop));
 }
 vec rdcenter(dynent *d)
 {
-    if(!d->ragdoll) return d->physent::center();
+    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::center();
     return d->ragdoll->center;
 }
