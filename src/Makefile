@@ -28,8 +28,8 @@ WINBIN=../bin/x64
 override CXX+= -m64
 override WINDRES+= -F pe-x86-64
 else
-WINLIB=lib\x32
-WINBIN=../bin/x32
+WINLIB=lib\x86
+WINBIN=../bin/x86
 override CXX+= -m32
 override WINDRES+= -F pe-i386
 endif

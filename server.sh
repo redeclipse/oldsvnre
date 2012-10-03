@@ -34,14 +34,14 @@ else
 
     case ${MACHINE_NAME} in
     i486|i586|i686)
-        RE_ARCH="x32/"
+        RE_ARCH="x86/"
         ;;
     x86_64|amd64)
         RE_ARCH="x64/"
         ;;
     *)
         SYSTEM_SUFFIX=""
-        RE_ARCH="x32/"
+        RE_ARCH="x86/"
         ;;
     esac
 fi
