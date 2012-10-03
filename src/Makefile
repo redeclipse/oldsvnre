@@ -23,13 +23,13 @@ MV=mv
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 WINDRES= windres
 ifneq (,$(findstring 64,$(PLATFORM)))
-WINLIB=lib64
-WINBIN=../bin64
+WINLIB=lib\x64
+WINBIN=../bin/x64
 override CXX+= -m64
 override WINDRES+= -F pe-x86-64
 else
-WINLIB=lib
-WINBIN=../bin
+WINLIB=lib\x32
+WINBIN=../bin/x32
 override CXX+= -m32
 override WINDRES+= -F pe-i386
 endif

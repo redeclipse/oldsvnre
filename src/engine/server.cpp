@@ -1445,8 +1445,11 @@ void setlocations(bool wanthome)
     defformatstring(resource)("%s/defaults.cfg", dir);
     if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
 #endif
-    if(!fileexists(findfile("data/defaults.cfg", "r"), "r"))
-        if(fileexists(findfile("../data/defaults.cfg", "r"), "r")) chdir("..");
+    loopi(3) if(!fileexists(findfile("data/defaults.cfg", "r"), "r"))
+    {
+        if(i != 2) chdir("..");
+        else fatal("could not find data directory");
+    }
     addpackagedir("data");
     if(wanthome)
     {
