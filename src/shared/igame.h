@@ -83,7 +83,7 @@ namespace physics
     extern bool iscrouching(physent *d);
     extern bool moveplayer(physent *pl, int moveres, bool local, int millis);
     extern void interppos(physent *d);
-    extern void updateragdoll(dynent *d, const vec &center, float radius);
+    extern void updatematerial(physent *pl, const vec &center, const vec &bottom, bool local = false);
     extern bool xcollide(physent *d, const vec &dir, physent *o);
     extern bool xtracecollide(physent *d, const vec &from, const vec &to, float x1, float x2, float y1, float y2, float maxdist, float &dist, physent *o);
     extern void complexboundbox(physent *d);

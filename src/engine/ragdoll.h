@@ -425,7 +425,7 @@ void ragdolldata::move(dynent *pl, float ts)
 {
     if(collidemillis && lastmillis > collidemillis) return;
 
-    physics::updateragdoll(pl, center, radius);
+    physics::updatematerial(pl, pl->center(), pl->feetpos(), true);
     float gravity = physics::gravityvel(pl)*ragdollgravity;
 
     calcrotfriction();
