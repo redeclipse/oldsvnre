@@ -739,6 +739,33 @@ void rendermodelquery(model *m, dynent *d, const vec &center, float radius)
 
 extern int oqfrags;
 
+void renderradius(const vec &o, float radius)
+{
+    glColor3f(0.5f, 0.5f, 0.5f);
+    loopk(3)
+    {
+        glBegin(GL_LINE_LOOP);
+        loopi(16)
+        {
+            vec d = o;
+            switch(k)
+            {
+                case 0:
+                    d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_x(90*RAD));
+                    break;
+                case 1:
+                    d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_y(90*RAD));
+                    break;
+                case 2: default:
+                    d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_z(90*RAD));
+                    break;
+            }
+            glVertex3fv(d.v);
+        }
+        glEnd();
+    }
+}
+
 void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, float yaw, float pitch, float roll, int flags, dynent *d, modelattach *a, int basetime, int basetime2, float trans, float size)
 {
     if(shadowmapping && !(flags&(MDL_SHADOW|MDL_DYNSHADOW))) return;
@@ -823,7 +850,22 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
-        if(d && showboundingbox==1) physics::complexboundbox(d);
+        if(d && showboundingbox==1)
+        {
+            if(d->ragdoll && (d->state == CS_DEAD || d->state == CS_WAITING))
+            {
+                loopv(d->ragdoll->skel->verts) renderradius(d->ragdoll->verts[i].pos, d->ragdoll->skel->verts[i].radius);
+                loopv(d->ragdoll->skel->tris)
+                {
+                    ragdollskel::tri &t = d->ragdoll->skel->tris[i];
+                    glColor3f(1, 1, 1);
+                    glBegin(GL_LINE_LOOP);
+                    loopk(3) glVertex3fv(d->ragdoll->verts[t.vert[k]].pos.v);
+                    glEnd();
+                }
+            }
+            else physics::complexboundbox(d);
+        }
         else
         {
             vec center, radius;
