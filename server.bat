@@ -2,7 +2,7 @@
 
 set RE_DIR=.
 set RE_OPTIONS=
-set RE_ARCH=x32
+set RE_ARCH=x86
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "amd64" (
     set RE_ARCH=x64
@@ -21,7 +21,7 @@ IF EXIST bin\%RE_ARCH%\reserver.exe (
         popd
     ) ELSE (
         IF %RE_ARCH% == x64 (
-            set RE_ARCH=x32
+            set RE_ARCH=x86
             goto RETRY
         )
         echo Unable to find the Red Eclipse server binary

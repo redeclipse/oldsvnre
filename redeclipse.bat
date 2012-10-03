@@ -3,7 +3,7 @@
 rem set SDL_VIDEO_WINDOW_POS=0,0
 set RE_DIR=.
 set RE_OPTIONS=
-set RE_ARCH=x32
+set RE_ARCH=x86
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "amd64" (
     set RE_ARCH=x64
@@ -22,7 +22,7 @@ IF EXIST %RE_ARCH%\bin\reclient.exe (
         popd
     ) ELSE (
         IF %RE_ARCH% == x64 (
-            set RE_ARCH=x32
+            set RE_ARCH=x86
             goto RETRY
         )
         echo Unable to find the Red Eclipse client
