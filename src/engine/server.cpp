@@ -1440,10 +1440,12 @@ void setlocations(bool wanthome)
 {
 #if defined(__APPLE__)
     extern const char *mac_resourcedir(const char *what);
-    const char *dir = mac_resourcedir("data"); // ./blah.app/Contents/Resources
-    conoutf("attempting to use resources in: %s", dir);
-    defformatstring(resource)("%s/defaults.cfg", dir);
-    if(fileexists(findfile(resource, "r"), "r")) chdir(dir);
+    const char *dir = mac_resourcedir(); // ./blah.app/Contents/Resources
+    if(dir && *dir)
+    {
+        conoutf("attempting to use resources in: %s", dir);
+        chdir(dir);
+    }
 #endif
     loopi(3) if(!fileexists(findfile("data/defaults.cfg", "r"), "r"))
     {
@@ -1459,7 +1461,6 @@ void setlocations(bool wanthome)
         {
             defformatstring(s)("%s\\My Games\\%s", dir, RE_NAME);
             sethomedir(s);
-            return;
         }
 #elif defined(__APPLE__)
         extern const char *mac_personaldir();
@@ -1468,7 +1469,6 @@ void setlocations(bool wanthome)
         {
             defformatstring(s)("%s/%s", dir, RE_UNAME);
             sethomedir(s);
-            return;
         }
 #else
         const char *dir = getenv("HOME");
@@ -1476,10 +1476,9 @@ void setlocations(bool wanthome)
         {
             defformatstring(s)("%s/.%s", dir, RE_UNAME);
             sethomedir(s);
-            return;
         }
 #endif
-        sethomedir("home");
+        else sethomedir("home");
     }
 }
 
