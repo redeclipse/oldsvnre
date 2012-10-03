@@ -16,41 +16,41 @@ SYSTEM_NAME=`uname -s`
 #MACHINE_NAME=i686
 MACHINE_NAME=`uname -m`
 
-case ${SYSTEM_NAME} in
-Linux)
-    SYSTEM_SUFFIX="_linux"
-    ;;
-FreeBSD)
-    SYSTEM_SUFFIX="_freebsd"
-    ;;
-*)
-    SYSTEM_SUFFIX="_unknown"
-    ;;
-esac
-
-case ${MACHINE_NAME} in
-i486|i586|i686)
-    BINARY_PATH="bin"
-    ;;
-x86_64|amd64)
-    BINARY_PATH="bin64"
-    ;;
-*)
-    SYSTEM_SUFFIX=""
-    BINARY_PATH="bin"
-    ;;
-esac
-
 if [ -x ${RE_PATH}/bin/reclient_native ]
 then
     SYSTEM_SUFFIX="_native"
-    BINARY_PATH="bin"
+    RE_ARCH=""
+else
+    case ${SYSTEM_NAME} in
+    Linux)
+        SYSTEM_SUFFIX="_linux"
+        ;;
+    FreeBSD)
+        SYSTEM_SUFFIX="_freebsd"
+        ;;
+    *)
+        SYSTEM_SUFFIX="_unknown"
+        ;;
+    esac
+
+    case ${MACHINE_NAME} in
+    i486|i586|i686)
+        RE_ARCH="x32/"
+        ;;
+    x86_64|amd64)
+        RE_ARCH="x64/"
+        ;;
+    *)
+        SYSTEM_SUFFIX=""
+        RE_ARCH="x32/"
+        ;;
+    esac
 fi
 
-if [ -x ${RE_PATH}/${BINARY_PATH}/reclient${SYSTEM_SUFFIX} ]
+if [ -x ${RE_PATH}/bin/${RE_ARCH}reclient${SYSTEM_SUFFIX} ]
 then
     cd ${RE_PATH} || exit 1
-    exec ${RE_PATH}/${BINARY_PATH}/reclient${SYSTEM_SUFFIX} ${RE_OPTIONS} "$@"
+    exec ${RE_PATH}/bin/${RE_ARCH}reclient${SYSTEM_SUFFIX} ${RE_OPTIONS} "$@"
 else
     echo "Your platform does not have a pre-compiled Red Eclipse client."
     echo -n "Would you like to build one now? [Yn] "

@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="client32">
-				<Option output="..\bin\mekclient.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\client32" />
 				<Option deps_output=".deps\client" />
@@ -47,15 +47,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="client32-dbg">
-				<Option output="..\bin\mekclient-dbg.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\mekclient-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\client32-dbg" />
 				<Option deps_output=".deps\debug" />
@@ -92,15 +92,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="client32-prof">
-				<Option output="..\bin\mekclient.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\client32-prof" />
 				<Option deps_output=".deps\debug" />
@@ -138,15 +138,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="server32">
-				<Option output="..\bin\mekserver.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\mekserver.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\server32" />
 				<Option deps_output=".deps\server" />
@@ -182,15 +182,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="server32-dbg">
-				<Option output="..\bin\mekserver-dbg.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\mekserver-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\server32-dbg" />
 				<Option deps_output=".deps\server" />
@@ -222,15 +222,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="client64">
-				<Option output="..\bin64\mekclient.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x64\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\client64" />
 				<Option deps_output=".deps\client" />
@@ -270,15 +270,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin64" />
-					<Add directory="lib64" />
+					<Add directory="..\bin\x64" />
+					<Add directory="lib\x64" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
 			<Target title="client64-prof">
-				<Option output="..\bin64\mekclient.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x64\mekclient.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\client64-prof" />
 				<Option deps_output=".deps\debug" />
@@ -316,15 +316,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin64" />
-					<Add directory="lib64" />
+					<Add directory="..\bin\x64" />
+					<Add directory="lib\x64" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
 			<Target title="client64-dbg">
-				<Option output="..\bin64\mekclient-dbg.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x64\mekclient-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\client64-dbg" />
 				<Option deps_output=".deps\debug" />
@@ -361,15 +361,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin64" />
-					<Add directory="lib64" />
+					<Add directory="..\bin\x64" />
+					<Add directory="lib\x64" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
 			<Target title="server64">
-				<Option output="..\bin64\mekserver.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x64\mekserver.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\server64" />
 				<Option deps_output=".deps\server" />
@@ -405,15 +405,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin64" />
-					<Add directory="lib64" />
+					<Add directory="..\bin\x64" />
+					<Add directory="lib\x64" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
 			<Target title="server64-dbg">
-				<Option output="..\bin64\mekserver-dbg.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x64\mekserver-dbg.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\mekarcade\server64-dbg" />
 				<Option deps_output=".deps\server" />
@@ -445,15 +445,15 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
-					<Add directory="..\bin64" />
-					<Add directory="lib64" />
+					<Add directory="..\bin\x64" />
+					<Add directory="lib\x64" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
 			<Target title="genkey">
-				<Option output="..\bin\genkey.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\genkey.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\genkey" />
 				<Option deps_output=".deps\server" />
@@ -486,15 +486,15 @@
 					<Add option="-m32" />
 					<Add option="-mwindows" />
 					<Add library="zlib1" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="cube2font">
-				<Option output="..\bin\cube2font.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="..\bin\x32\cube2font.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\" />
 				<Option object_output=".objs\cube2font" />
 				<Option deps_output=".deps\server" />
@@ -527,8 +527,8 @@
 					<Add option="-mwindows" />
 					<Add library="freetype" />
 					<Add library="zlib1" />
-					<Add directory="..\bin" />
-					<Add directory="lib" />
+					<Add directory="..\bin\x32" />
+					<Add directory="lib\x32" />
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-i386" />
