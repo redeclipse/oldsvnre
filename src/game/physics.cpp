@@ -1110,12 +1110,12 @@ namespace physics
         }
     }
 
-    void updatematerial(physent *pl, const vec &center, float radius, const vec &bottom, bool local, bool floating)
+    void updatematerial(physent *pl, const vec &center, const vec &bottom, bool local)
     {
         int matid = lookupmaterial(bottom), curmat = matid&MATF_VOLUME, flagmat = matid&MATF_FLAGS,
             oldmat = pl->inmaterial&MATF_VOLUME;
-
-        if(!floating && curmat != oldmat)
+        float radius = center.z-bottom.z;
+        if(curmat != oldmat)
         {
             #define mattrig(mo,mcol,ms,mt,mz,mq,mp,mw) \
             { \
@@ -1125,14 +1125,14 @@ namespace physics
             }
             if(curmat == MAT_WATER || oldmat == MAT_WATER)
                 mattrig(bottom, watercol, 0.5f, int(radius), PHYSMILLIS, 0.25f, PART_SPARK, curmat != MAT_WATER ? S_SPLASH2 : S_SPLASH1);
-            if(curmat == MAT_LAVA) mattrig(vec(bottom).add(vec(0, 0, radius)), lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
+            if(curmat == MAT_LAVA) mattrig(center, lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
         }
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->state == CS_ALIVE && flagmat&MAT_DEATH)
             game::suicide((gameent *)pl, curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH));
         pl->inmaterial = matid;
-        if((pl->inliquid = !floating && isliquid(curmat)) != false)
+        if((pl->inliquid = isliquid(curmat)) != false)
         {
-            float frac = float(center.z-bottom.z)/10.f, sub = pl->submerged;
+            float frac = radius/10.f, sub = pl->submerged;
             vec tmp = bottom;
             int found = 0;
             loopi(10)
@@ -1154,8 +1154,8 @@ namespace physics
                     {
                         d->resetburning();
                         playsound(S_EXTINGUISH, d->o, d);
-                        part_create(PART_SMOKE, 500, d->feetpos(d->height/2), 0xAAAAAA, d->radius*4, 1, -10);
-                        client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);
+                        part_create(PART_SMOKE, 500, center, 0xAAAAAA, radius*4, 1, -10);
+                        if(d->state == CS_ALIVE) client::addmsg(N_SPHY, "ri2", d->clientnum, SPHY_EXTINGUISH);
                     }
                 }
                 if(pl->physstate < PHYS_SLIDE && sub >= 0.5f && pl->submerged < 0.5f && pl->vel.z > 1e-3f)
@@ -1163,20 +1163,8 @@ namespace physics
             }
         }
         else pl->submerged = 0;
-        pl->onladder = !floating && flagmat&MAT_LADDER;
+        pl->onladder = flagmat&MAT_LADDER;
         if(pl->onladder && pl->physstate < PHYS_SLIDE) pl->floor = vec(0, 0, 1);
-    }
-
-    void updatematerial(physent *pl, bool local, bool floating)
-    {
-        updatematerial(pl, pl->o, pl->height/2.f, (pl->type == ENT_PLAYER || pl->type == ENT_AI) ? pl->feetpos(1) : pl->o, local, floating);
-    }
-
-    void updateragdoll(dynent *d, const vec &center, float radius)
-    {
-        vec bottom(center);
-        bottom.z -= radius/2.f;
-        updatematerial(d, center, radius, bottom, false, false);
     }
 
     // main physics routine, moves a player/monster for a time step
@@ -1191,13 +1179,19 @@ namespace physics
         pl->blocked = false;
         if(player)
         {
-            updatematerial(pl, local, false);
+            updatematerial(pl, pl->center(), pl->feetpos(), local);
             modifyvelocity(pl, local, false, millis);
             jetting = jetpack(pl);
             if(!sticktospecial(pl) && !pl->onladder && !jetting) modifygravity(pl, millis); // apply gravity
             else pl->resetphys();
         }
-        else modifyvelocity(pl, local, floating, millis);
+        else
+        {
+            pl->inliquid = 0;
+            pl->onladder = false;
+            pl->submerged = 0;
+            modifyvelocity(pl, local, floating, millis);
+        }
 
         vec vel(pl->vel);
         if(player && pl->inliquid) vel.mul(liquidmerge(pl, 1.f, PHYS(liquidspeed)));
