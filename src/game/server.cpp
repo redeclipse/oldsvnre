@@ -3917,11 +3917,11 @@ namespace server
 
     void serverupdate()
     {
-        loopv(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
+        loopvrev(connects) if(totalmillis-connects[i]->connectmillis > 15000) disconnect_client(connects[i]->clientnum, DISC_TIMEOUT);
         loopvrev(control) if(control[i].flag == ipinfo::TEMPORARY && totalmillis-control[i].time > 4*60*60000) control.remove(i);
         if(updatecontrols)
         {
-            loopv(clients)
+            loopvrev(clients)
             {
                 uint ip = getclientip(clients[i]->clientnum);
                 if(ip && !clients[i]->privilege && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
