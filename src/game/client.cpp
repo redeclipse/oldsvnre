@@ -867,7 +867,9 @@ namespace client
             {
                 data += p.length();
                 len -= p.length();
-                defformatstring(fname)("demos/%d.dmo", clocktime);
+                string fname;
+                if(*filetimeformat) formatstring(fname)("demos/%s.dmo", gettime(clocktime, filetimeformat));
+                else formatstring(fname)("demos/%d.dmo", clocktime);
                 stream *demo = openfile(fname, "wb");
                 if(!demo) return;
                 conoutft(CON_MESG, "received demo \"%s\"", fname);
