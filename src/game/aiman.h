@@ -303,7 +303,7 @@ namespace aiman
 
     void clearai(int type)
     { // clear and remove all ai immediately
-        loopvrev(clients) if(type ? (type == 2 ? clients[i]->state.aitype >= AI_START : clients[i]->state.aitype == AI_BOT) : true)
+        loopvrev(clients) if(!type || (type == 2 ? clients[i]->state.aitype >= AI_START : clients[i]->state.aitype == AI_BOT))
             deleteai(clients[i]);
     }
 

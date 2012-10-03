@@ -13,21 +13,21 @@ VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 
 const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
 
-SVAR(IDF_PERSIST, consoletimefmt, "%c");
-char *gettime(char *format)
+SVAR(IDF_PERSIST, logtimeformat, "%c");
+SVAR(IDF_PERSIST, filetimeformat, "%Y%m%d%H%M%S");
+char *gettime(time_t ctime, char *format)
 {
-    time_t ltime;
     struct tm *t;
 
-    ltime = time (NULL);
-    t = localtime (&ltime);
+    if(!ctime) ctime = clocktime;
+    t = localtime(&ctime);
 
     static string buf;
-    strftime (buf, sizeof (buf) - 1, format, t);
+    strftime(buf, sizeof (buf) - 1, format && *format ? format : logtimeformat, t);
 
     return buf;
 }
-ICOMMAND(0, gettime, "s", (char *a), result(gettime(a)));
+ICOMMAND(0, gettime, "is", (int *n, char *a), result(gettime(*n, a)));
 
 vector<ipinfo> control;
 void addipinfo(vector<ipinfo> &info, int type, const char *name)
@@ -131,10 +131,10 @@ void logoutf(const char *fmt, ...)
 void console(int type, const char *s, ...)
 {
     defvformatstring(sf, s, s);
-    string osf, fmt;
-    formatstring(fmt)(consoletimefmt);
+    string osf;
     filtertext(osf, sf);
-    logoutf("%s", osf);
+    if(*logtimeformat) logoutf("%s %s", gettime(clocktime, logtimeformat), osf);
+    else logoutf("%s", osf);
 #ifndef STANDALONE
     conline(type, sf, 0);
 #endif

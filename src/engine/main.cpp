@@ -234,8 +234,10 @@ void screenshot(char *sname)
     ImageData image(screen->w, screen->h, 3);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, screen->w, screen->h, GL_RGB, GL_UNSIGNED_BYTE, image.data);
-    defformatstring(fname)("%s", sname && *sname ? sname : "screenshot");
-    saveimage(fname, image, imageformat, compresslevel, true, true);
+    string fname;
+    if(sname && *sname) copystring(fname, sname);
+    else formatstring(fname)("screenshots/%s", *filetimeformat ? gettime(clocktime, filetimeformat) : (*mapname ? mapname : "screen"));
+    saveimage(fname, image, imageformat, compresslevel, true);
 }
 
 COMMAND(0, screenshot, "s");

@@ -1501,7 +1501,7 @@ namespace game
             {
                 d->loadweap[j] = (j ? b : a);
                 if(d->loadweap[j] < WEAP_OFFSET || d->loadweap[j] >= WEAP_ITEM) d->loadweap[j] = WEAP_MELEE;
-                if(d == player1) (j ? favloadweap2 : favloadweap1) = d->loadweap[j];
+                if(saved && d == player1) (j ? favloadweap2 : favloadweap1) = d->loadweap[j];
             }
             client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
             conoutft(CON_SELF, "weapon selection is now: \fs\f[%d]\f(%s)%s\fS and \fs\f[%d]\f(%s)%s\fS",
