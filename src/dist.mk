@@ -1,4 +1,7 @@
-appversion:=$(shell sed -n '/else/,/Red Eclipse/ s,.*RE_VER_STR.*"\(.*\)",\1,p' engine/engine.h)
+appversion:=$(shell \
+	VER="$$(sed -n '/else/,/Red Eclipse/ s,.*RE_VER_STR.*"\(.*\)",\1,p' engine/engine.h | tr '\n' ' ')"; \
+	if [ -z $$VER ]; then VER=0; fi; \
+	echo $$VER)
 dirname=$(APPNAME)-$(appversion)
 dirname-osx=$(APPNAME).app
 resourcespath-osx=$(APPNAME).app/Contents/Resources
