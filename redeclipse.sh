@@ -41,8 +41,8 @@ else
         RE_ARCH="amd64/"
         ;;
     *)
-        SYSTEM_SUFFIX=""
-        RE_ARCH="x86/"
+        SYSTEM_SUFFIX="_native"
+        RE_ARCH=""
         ;;
     esac
 fi
