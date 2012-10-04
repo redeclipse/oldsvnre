@@ -11,17 +11,33 @@ exename=$(APPNAME)_$(appversion)_win.exe
 torrent-trackers-url="udp://tracker.openbittorrent.com:80,udp://tracker.publicbt.com:80,udp://tracker.ccc.de:80,udp://tracker.istole.it:80"
 torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
 
+SRC_DIRS=src/enet src/engine src/game src/include src/install src/lib src/scripts src/shared src/xcode
+
+# Relative to root dir
+DISTFILES:= \
+	bin/amd64 \
+	bin/redeclipse.app \
+	bin/x86 \
+	data \
+	doc \
+	readme.txt \
+	redeclipse.sh \
+	server.sh \
+	redeclipse.bat \
+	server.bat \
+	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
+	src/Makefile \
+	src/dist.mk \
+	src/dpiaware.manifest \
+	src/redeclipse.cbp \
+	src/redeclipse.ico \
+	src/redeclipse.rc \
+	src/system-install.mk
+
 ../$(dirname):
 	rm -rf $@
-	tar \
-		--exclude-vcs --exclude-backups \
-		--exclude='$@*' \
-		--exclude='../$(tarname)*' --exclude='../$(tarname-all)*' \
-		--exclude='../$(tarname-osx)*' --exclude='../$(exename)*' \
-		--exclude='*.o' --exclude='*.lo' --exclude='*.gch' \
-		--exclude='../src/reclient' --exclude='../src/reserver' \
-		--exclude='../src/site*' \
-		-cf - ../ | (mkdir $@/; cd $@/ ; tar -xpf -)
+	# Transform relative to src/ dir
+	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
 	rm -rf $@/src/enet/autom4te.cache/
@@ -30,10 +46,10 @@ distdir: ../$(dirname)
 
 ../$(tarname): ../$(dirname)
 	tar \
-		--exclude='$</bin*/redeclipse.app*' \
-		--exclude='$</bin*/*.exe' \
-		--exclude='$</bin*/*.dll' \
-		--exclude='$</bin*/*.txt' \
+		--exclude='$</bin/*/redeclipse.app*' \
+		--exclude='$</bin/*/*.exe' \
+		--exclude='$</bin/*/*.dll' \
+		--exclude='$</bin/*/*.txt' \
 		--exclude='$</*.bat' \
 		-cf $@ $<
 
@@ -52,6 +68,7 @@ dist-tar-all: ../$(tarname-all)
 	mkdir ../$(tmpdir-osx)/$(dirname-osx)
 	mkdir ../$(tmpdir-osx)/$(dirname-osx)/Contents
 	mkdir ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources
+	# Use links with tar dereference to change directory paths
 	ln -s ../../../$</data/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/data
 	ln -s ../../../$</doc/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/doc
 	ln -s ../../../$</src/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/src
@@ -64,9 +81,9 @@ dist-tar-osx: ../$(tarname-osx)
 
 ../$(dirname-win): ../$(dirname)
 	cp -r $< $@
-	rm -rf $@/bin*/redeclipse.app/
-	rm -rf $@/bin*/*linux*
-	rm -rf $@/bin*/*freebsd*
+	rm -rf $@/bin/*/redeclipse.app/
+	rm -rf $@/bin/*/*linux*
+	rm -rf $@/bin/*/*freebsd*
 	rm -f $@/*.sh
 
 distdir-win: ../$(dirname-win)
