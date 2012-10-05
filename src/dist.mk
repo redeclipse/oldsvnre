@@ -49,7 +49,7 @@ distdir: ../$(dirname)
 
 ../$(tarname): ../$(dirname)
 	tar \
-		--exclude='$</bin/*/redeclipse.app*' \
+		--exclude='$</bin/redeclipse.app*' \
 		--exclude='$</bin/*/*.exe' \
 		--exclude='$</bin/*/*.dll' \
 		--exclude='$</bin/*/*.txt' \
@@ -84,7 +84,7 @@ dist-tar-osx: ../$(tarname-osx)
 
 ../$(dirname-win): ../$(dirname)
 	cp -r $< $@
-	rm -rf $@/bin/*/redeclipse.app/
+	rm -rf $@/bin/redeclipse.app/
 	rm -rf $@/bin/*/*linux*
 	rm -rf $@/bin/*/*freebsd*
 	rm -f $@/*.sh
