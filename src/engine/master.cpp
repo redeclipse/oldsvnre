@@ -455,7 +455,7 @@ void checkmaster()
             else { purgemasterclient(i--); continue; }
         }
         /* if(c.output.length() > OUTPUT_LIMIT) { purgemasterclient(i--); continue; } */
-        if(ENET_TIME_DIFFERENCE(totalmillis, c.lastactivity) >= (c.isserver ? SERVER_TIME : CLIENT_TIME))
+        if(ENET_TIME_DIFFERENCE(totalmillis, c.lastactivity) >= (c.isserver ? SERVER_TIME : CLIENT_TIME) || (checkipinfo(control, ipinfo::BAN, c.address.host) && !checkipinfo(control, ipinfo::ALLOW, c.address.host)))
         {
             purgemasterclient(i--);
             continue;
