@@ -1,7 +1,7 @@
 = Red Eclipse SVN (unreleased) =
 Gameplay:
  * Increased overall AI skill
- * Disable double-tap dashing by default
+ * Disable double-tap dashing by default (enable with /dashstyle 1)
  * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
  * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
 
@@ -25,7 +25,7 @@ Interface & Menus:
  * Added variables to control death/kill message content (/obit{verbose,styles})
  * Removed alternative mouse styles
  * IRC improvements, fixed disconnecting properly
- * Demos are now kept in a "demos" subdirectory in the homedir
+ * Demos and screenshots are now stored in "demos" and "screenshots" subdirectories in the homedir, using "<date><time>[.<number>]" for filename
  * Incomplete demos discarded by default (/demokeep 1 to enable)
 
 Modes & Mutators:
@@ -39,6 +39,8 @@ Multiplayer & Servers:
 Core & Install:
  * Added IRC gudelines
  * Client now uses log.txt in the homedir by default
+ * Binary files moved to bin/{amd64,x86}/ subdirectories
+ * MekArcade source code tree merged in
 
 Additional fixed bugs:
  * #218 - can no longer drop your loadout weapons in arena
