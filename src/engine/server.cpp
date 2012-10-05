@@ -1542,6 +1542,7 @@ ICOMMAND(0, writecfg, "", (void), if(!(identflags&IDF_WORLD)) writecfg());
 
 void rehash(bool reload)
 {
+    maskpackagedirs(~PACKAGEDIR_OCTA);
     if(reload)
     {
         rehashing = 1;
@@ -1565,6 +1566,7 @@ void rehash(bool reload)
 #endif
     conoutf("\fwconfiguration reloaded");
     rehashing = 0;
+    maskpackagedirs(~0);
 }
 ICOMMAND(0, rehash, "i", (int *nosave), if(!(identflags&IDF_WORLD)) rehash(*nosave ? false : true));
 
