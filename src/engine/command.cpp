@@ -2907,3 +2907,11 @@ void hexcolour(int *n)
 
 COMMAND(0, hexcolour, "i");
 
+void genkey(char *s)
+{
+    vector<char> privkey, pubkey;
+    genprivkey(s, privkey, pubkey);
+    conoutft(CON_MESG, "private key: %s", privkey.getbuf());
+    conoutft(CON_MESG, "public key: %s", pubkey.getbuf());
+}
+COMMAND(0, genkey, "s");

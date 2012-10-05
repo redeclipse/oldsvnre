@@ -17,14 +17,11 @@ SVAR(IDF_PERSIST, logtimeformat, "%c");
 SVAR(IDF_PERSIST, filetimeformat, "%Y%m%d%H%M%S");
 char *gettime(time_t ctime, char *format)
 {
+    static string buf;
     struct tm *t;
-
     if(!ctime) ctime = clocktime;
     t = localtime(&ctime);
-
-    static string buf;
-    strftime(buf, sizeof (buf) - 1, format && *format ? format : logtimeformat, t);
-
+    strftime(buf, sizeof(buf)-1, format && *format ? format : logtimeformat, t);
     return buf;
 }
 ICOMMAND(0, gettime, "is", (int *n, char *a), result(gettime(*n, a)));
