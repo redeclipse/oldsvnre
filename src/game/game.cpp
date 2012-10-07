@@ -2353,6 +2353,7 @@ namespace game
             checkcamera();
             if(!cameratv())
             {
+                lasttvchg = lasttvcam = 0;
                 if((focus->state == CS_DEAD || (focus != player1 && focus->state == CS_WAITING)) && focus->lastdeath)
                     deathcamyawpitch(focus, camera1->yaw, camera1->pitch);
                 else
