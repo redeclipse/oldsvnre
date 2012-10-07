@@ -544,7 +544,7 @@ namespace entities
                                 if(physics::entinmap(d, true))
                                 {
                                     float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
-                                        yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
+                                          yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
                                     game::fixrange(yaw, pitch);
                                     vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
                                     d->vel.mul(mag);

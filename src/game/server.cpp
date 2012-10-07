@@ -1998,7 +1998,7 @@ namespace server
         clientinfo *ci = (clientinfo *)getinfo(sender);
         modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
-        bool hasvote = false, hasveto = haspriv(ci, PRIV_HELPER) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
+        bool hasvote = false, hasveto = haspriv(ci, GAME(vetolock)+PRIV_HELPER) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
         if(!hasveto)
         {
             if(ci->lastvote && totalmillis-ci->lastvote <= GAME(votewait)) return;

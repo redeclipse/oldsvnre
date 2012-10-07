@@ -566,7 +566,7 @@ extern const char *addreleaseaction(char *s);
 extern const char *getkeyname(int code);
 extern int findkeycode(char *key);
 
-extern int uimillis, conskip, commandmillis,  commandpos, commandcolour;
+extern int uimillis, commandmillis,  commandpos, commandcolour;
 extern string commandbuf;
 extern char *commandaction, *commandicon;
 extern bool fullconsole;

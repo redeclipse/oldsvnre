@@ -18,6 +18,7 @@ GVAR(IDF_ADMIN, allowlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administr
 GVAR(IDF_ADMIN, banlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, mutelock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 GVAR(IDF_ADMIN, limitlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
+GVAR(IDF_ADMIN, vetolock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
 
 GVAR(IDF_ADMIN, floodlock, 0, 3, 4); // 0 = no flood lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times

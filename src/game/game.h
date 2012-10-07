@@ -1563,8 +1563,8 @@ namespace game
     extern int getcolour(gameent *d, int level = 0);
     extern int findcolour(gameent *d, bool tone = false, bool mix = false);
     extern void errorsnd(gameent *d);
-    extern void announce(int idx, gameent *d = NULL);
-    extern void announcef(int idx, int targ, gameent *d, const char *msg, ...);
+    extern void announce(int idx, gameent *d = NULL, bool forced = false);
+    extern void announcef(int idx, int targ, gameent *d, bool forced, const char *msg, ...);
     extern void specreset(gameent *d = NULL, bool clear = false);
     extern void respawn(gameent *d);
     extern void respawned(gameent *d, bool local, int ent = -1);
