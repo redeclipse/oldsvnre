@@ -162,7 +162,7 @@ namespace hud
                 {
                     int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                     if(m_defend(game::gamemode) && sg.total == INT_MAX)
-                        game::announcef(anc, CON_MESG, NULL, "\fwteam \fs\f[%d]%s\fS secured all flags", TEAM(sg.team, colour), TEAM(sg.team, name));
+                        game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS secured all flags", TEAM(sg.team, colour), TEAM(sg.team, name));
                     else
                     {
                         if(numgroups > 1 && sg.total == groups[1]->total)
@@ -177,9 +177,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, sg.total);
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw\fs\f[%d]%s\fS tied %swith a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), winner, sg.total);
                         }
-                        else game::announcef(anc, CON_MESG, NULL, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fwteam \fs\f[%d]%s\fS won the match with a total score of: \fs\fc%d\fS", TEAM(sg.team, colour), TEAM(sg.team, name), sg.total);
                     }
                 }
                 else
@@ -199,9 +199,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                         }
-                        else game::announcef(anc, CON_MESG, NULL, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                     }
                     else
                     {
@@ -217,9 +217,9 @@ namespace hud
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, "\fw%s tied %swith a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), winner, sg.players[0]->points);
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), winner, sg.players[0]->points);
                         }
-                        else game::announcef(anc, CON_MESG, NULL, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->points);
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->points);
                     }
                 }
             }
@@ -419,7 +419,7 @@ namespace hud
                 }
 
                 uilist(g, {
-                    uicenterlist(g, uipad(g, 1, uicenterlist(g, g.text("name", fgcolor))));
+                    uicenterlist(g, uipad(g, MAXNAMELEN*0.5f-1, uicenterlist(g, g.text("name", fgcolor))));
                     loopscoregroup(uicenterlist(g, uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))))));
                 });
 
@@ -436,7 +436,7 @@ namespace hud
                     uilist(g, {
                         if(m_trial(game::gamemode))
                         {
-                            uicenterlist(g, uipad(g, 1, g.text("best", fgcolor)));
+                            uicenterlist(g, uipad(g, 4, g.text("best", fgcolor)));
                             loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
                         }
                         else
@@ -450,7 +450,7 @@ namespace hud
                 if(showpj)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 1, g.text("pj", fgcolor)));
+                        uicenterlist(g, uipad(g, 2, g.text("pj", fgcolor)));
                         loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->plag))));
                     });
                 }
@@ -458,7 +458,7 @@ namespace hud
                 if(showping)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 1, g.text("ping", fgcolor)));
+                        uicenterlist(g, uipad(g, 2, g.text("ping", fgcolor)));
                         loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->ping))));
                     });
                 }
@@ -501,7 +501,7 @@ namespace hud
                 if(showhostname)
                 {
                     uilist(g, {
-                        uicenterlist(g, uipad(g, 1, g.text("host", fgcolor)));
+                        uicenterlist(g, uipad(g, 4, g.text("host", fgcolor)));
                         loopscoregroup({
                             uicenterlist(g, uipad(g, 0.5f, {
                                 if(o->aitype == AI_NONE) g.textf("%s", 0xFFFFFF, NULL, 0, o->hostname);

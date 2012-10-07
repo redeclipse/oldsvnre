@@ -1526,7 +1526,7 @@ namespace client
                 {
                     int snd = getint(p), targ = getint(p);
                     getstring(text, p);
-                    if(targ >= 0 && text[0]) game::announcef(snd, targ, NULL, "%s", text);
+                    if(targ >= 0 && text[0]) game::announcef(snd, targ, NULL, false, "%s", text);
                     else game::announce(snd);
                     break;
                 }

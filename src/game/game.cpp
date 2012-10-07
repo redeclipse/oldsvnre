@@ -346,24 +346,24 @@ namespace game
             playsound(S_ERROR, d->o, d, SND_FORCED, -1, -1, -1, &errorchan);
     }
 
-    void announce(int idx, gameent *d)
+    void announce(int idx, gameent *d, bool forced)
     {
         if(idx >= 0)
         {
-            physent *t = !d || d == focus ? camera1 : d;
-            playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, d ? &d->aschan : NULL);
+            physent *t = !d || d == focus || forced ? camera1 : d;
+            playsound(idx, t->o, t, t != camera1 ? SND_IMPORT : SND_FORCED, -1, -1, -1, d && !forced ? &d->aschan : NULL);
         }
     }
-    void announcef(int idx, int targ, gameent *d, const char *msg, ...)
+    void announcef(int idx, int targ, gameent *d, bool forced, const char *msg, ...)
     {
         if(targ >= 0 && msg && *msg)
         {
             defvformatstring(text, msg, msg);
             conoutft(targ == CON_INFO && d == player1 ? CON_SELF : targ, "%s", text);
         }
-        announce(idx, d);
+        announce(idx, d, forced);
     }
-    ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, char *s, int *numargs), (*numargs >= 4 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, NULL)));
+    ICOMMAND(0, announce, "iiisN", (int *idx, int *targ, int *cn, int *forced, char *s, int *numargs), (*numargs >= 5 ? announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, "\fw%s", s) : announcef(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *targ : CON_MESG, *numargs >= 3 ? getclient(*cn) : NULL, *numargs >= 4 ? *forced!=0 : false, NULL)));
 
     void specreset(gameent *d, bool clear)
     {
@@ -522,8 +522,8 @@ namespace game
             if(dynlighteffects)
             {
                 adddynlight(d->headpos(), d->height*2, vec::hexcolor(getcolour(d, playereffecttone)).mul(2.f), 250, 250);
-                regularshape(PART_SPARK, d->height*2, getcolour(d, playerundertone), 53, 50, 350, d->headpos(-d->height/2), 1.5f, 1, 1, 0, 35);
-                regularshape(PART_SPARK, d->height*2, getcolour(d, playerovertone), 53, 50, 350, d->headpos(-d->height/2), 1.5f, 1, 1, 0, 35);
+                regularshape(PART_SPARK, d->height*2, getcolour(d, playerundertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
+                regularshape(PART_SPARK, d->height*2, getcolour(d, playerovertone), 53, 50, 350, d->center(), 1.5f, 1, 1, 0, 35);
             }
         }
         if(local && d->aitype <= AI_BOT && entities::ents.inrange(ent) && entities::ents[ent]->type == PLAYERSTART)
@@ -1012,9 +1012,9 @@ namespace game
                 if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
                 if(d->type == ENT_PLAYER || d->type == ENT_AI)
                 {
-                    vec p = d->headpos(-d->height/4);
                     if(aistyle[d->aitype].living)
                     {
+                        vec p = d->headpos(-d->height/4);
                         if(!kidmode && bloodscale > 0)
                             part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
                         if(kidmode || bloodscale <= 0 || bloodsparks)
@@ -1371,8 +1371,8 @@ namespace game
                     case 5: default: show = true; break;
                 }
                 int target = show ? (isme ? CON_SELF : CON_INFO) : -1;
-                if(showobitdists && d != actor) announcef(anc, target, d, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
-                else announcef(anc, target, d, "\fw%s", d->obit);
+                if(showobitdists && d != actor) announcef(anc, target, d, false, "\fw%s \fs[\fo@\fy%.2f\fom\fS]", d->obit, actor->o.dist(d->o)/8.f);
+                else announcef(anc, target, d, false, "\fw%s", d->obit);
             }
             else if(anc >= 0) announce(anc, d);
             if(anc >= 0 && d != actor) announce(anc, actor);
