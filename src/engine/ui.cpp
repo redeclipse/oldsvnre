@@ -4,7 +4,7 @@ int uimillis = -1;
 
 bool layoutpass = false;
 static bool actionon = false;
-static int mouseaction[2] = {0}, guibound[2] = {0};
+int mouseaction[2] = {0}, guibound[2] = {0};
 
 static float firstx, firsty;
 
