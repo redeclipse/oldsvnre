@@ -27,7 +27,7 @@ namespace game
         if(connected() && maptime > 0 && !intermission) musicdone(true);
     }
     VARF(IDF_PERSIST, musictype, 0, 1, 5, stopmapmusic()); // 0 = no in-game music, 1 = map music (or random if none), 2 = always random, 3 = map music (silence if none), 4-5 = same as 1-2 but pick new tracks when done
-    VARF(IDF_PERSIST, musicedit, 0, 0, 5, stopmapmusic()); // same as above for editmode
+    VARF(IDF_PERSIST, musicedit, -1, 0, 5, stopmapmusic()); // same as above for editmode, -1 = use musictype
     SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
@@ -776,7 +776,7 @@ namespace game
 
     void checkoften(gameent *d, bool local)
     {
-        adjustscaled(int, d->quake, quakefade);
+        adjustscaled(d->quake, quakefade);
 
         d->setscale(rescale(d), curtime, false, gamemode, mutators);
         d->speedscale = d->curscale;
@@ -2247,7 +2247,7 @@ namespace game
             }
             else if(!nosound && mastervol && musicvol)
             {
-                int type = m_edit(gamemode) ? musicedit : musictype;
+                int type = m_edit(gamemode) && musicedit >= 0 ? musicedit : musictype;
                 if(type && !playingmusic())
                 {
                     defformatstring(musicfile)("%s", mapmusic);
@@ -2267,7 +2267,12 @@ namespace game
                 }
             }
         }
-        if(!curtime) { gets2c(); if(player1->clientnum >= 0) client::c2sinfo(); return; }
+        if(!curtime)
+        {
+            gets2c();
+            if(player1->clientnum >= 0) client::c2sinfo();
+            return;
+        }
 
         if(!*player1->name && !menuactive()) showgui("profile", -1);
         if(connected())
@@ -2307,7 +2312,7 @@ namespace game
         else if(!menuactive()) showgui("main", -1);
 
         gets2c();
-        adjustscaled(int, hud::damageresidue, hud::damageresiduefade);
+        adjustscaled(hud::damageresidue, hud::damageresiduefade);
         if(connected())
         {
             flushdamagemerges();

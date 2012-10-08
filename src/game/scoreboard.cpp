@@ -63,12 +63,12 @@ namespace hud
 
     static inline bool playersort(const gameent *a, const gameent *b)
     {
-        if(a->state==CS_SPECTATOR)
+        if(a->state == CS_SPECTATOR)
         {
-            if(b->state==CS_SPECTATOR) return strcmp(a->name, b->name) < 0;
+            if(b->state == CS_SPECTATOR) return strcmp(a->name, b->name) < 0;
             else return false;
         }
-        else if(b->state==CS_SPECTATOR) return true;
+        else if(b->state == CS_SPECTATOR) return true;
         if(m_trial(game::gamemode))
         {
             if((a->cptime && !b->cptime) || (a->cptime && b->cptime && a->cptime < b->cptime)) return true;
@@ -103,8 +103,8 @@ namespace hud
         loopi(numdyns)
         {
             gameent *o = (gameent *)game::iterdynents(i);
-            if(!o || o->type!=ENT_PLAYER || (!showconnecting && !o->name[0])) continue;
-            if(o->state==CS_SPECTATOR)
+            if(!o || o->type != ENT_PLAYER || (!showconnecting && !o->name[0])) continue;
+            if(o->state == CS_SPECTATOR)
             {
                 if(o != game::player1 || !client::demoplayback) spectators.add(o);
                 continue;
@@ -118,9 +118,10 @@ namespace hud
                 if(team) g.total = teamscore(team).total;
                 g.players.add(o);
                 found = true;
+                break;
             }
             if(found) continue;
-            if(numgroups>=groups.length()) groups.add(new scoregroup);
+            if(numgroups >= groups.length()) groups.add(new scoregroup);
             scoregroup &g = *groups[numgroups++];
             g.team = team;
             if(!team) g.total = 0;

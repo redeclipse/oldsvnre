@@ -1960,11 +1960,12 @@ void edittex(int i, bool save = true, bool edit = true)
 }
 ICOMMAND(0, settex, "i", (int *slot), edittex(*slot));
 
+VAR(IDF_PERSIST, texpaneltime, 0, 5000, VAR_MAX);
 void edittex_(int *dir)
 {
     if(noedit()) return;
     filltexlist();
-    texpaneltimer = 5000;
+    texpaneltimer = texpaneltime;
     if(!(lastsel==sel)) tofronttex();
     curtexindex = clamp(curtexindex<0 ? 0 : curtexindex+*dir, 0, texmru.length()-1);
     edittex(texmru[curtexindex], false);
