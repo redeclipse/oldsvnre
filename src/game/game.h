@@ -345,9 +345,19 @@ struct demoheader
 
 #include "team.h"
 
-#define adjustscaled(t,n,s) { \
-    if(n > 0) { n = (t)(n/(1.f+sqrtf((float)curtime)/float(s))); if(n <= 0) n = (t)0; } \
-    else if(n < 0) { n = (t)(n/(1.f+sqrtf((float)curtime)/float(s))); if(n >= 0) n = (t)0; } \
+template<class T>
+static inline void adjustscaled(T &n, int s)
+{
+    if(n > 0)
+    {
+        n = (T)(n/(1.f+sqrtf((float)curtime)/float(s)));
+        if(n <= 0) n = (T)0;
+    }
+    else if(n < 0)
+    {
+        n = (T)(n/(1.f+sqrtf((float)curtime)/float(s)));
+        if(n >= 0) n = (T)0;
+    }
 }
 
 #define MAXNAMELEN 24
