@@ -377,9 +377,9 @@ namespace hud
             loopk(numgroups)
             {
                 scoregroup &sg = *groups[k];
-                loopscoregroup(namepad = max(namepad, text_width(game::colorname(o, NULL, "", false))*0.5f/guibound[0]));
+                loopscoregroup(namepad = max(namepad, (float)text_width(game::colorname(o, NULL, "", false))));
             }
-            namepad -= (text_width("name")-1)*0.5f/guibound[0];
+            namepad = (namepad-(text_width("name")-guibound[0]))*0.5f/guibound[0];
             loopk(numgroups)
             {
                 if((k%2)==0)
