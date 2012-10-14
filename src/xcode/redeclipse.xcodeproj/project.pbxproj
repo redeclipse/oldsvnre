@@ -771,9 +771,7 @@
 				);
 				INFOPLIST_FILE = "redeclipse-Info.plist";
 				INSTALL_PATH = "";
-				OTHER_CPLUSPLUSFLAGS = (
-					"-fomit-frame-pointer",
-				);
+				OTHER_CPLUSPLUSFLAGS = "-fomit-frame-pointer";
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = redeclipse;
 				SKIP_INSTALL = NO;
@@ -810,9 +808,7 @@
 				);
 				INFOPLIST_FILE = "redeclipse-Info.plist";
 				INSTALL_PATH = "";
-				OTHER_CPLUSPLUSFLAGS = (
-					"-fomit-frame-pointer",
-				);
+				OTHER_CPLUSPLUSFLAGS = "-fomit-frame-pointer";
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = redeclipse;
 				SKIP_INSTALL = NO;
