@@ -1436,7 +1436,7 @@ void trytofindocta(bool fallback)
 void setlocations(bool wanthome)
 {
 #if defined(__APPLE__)
-    extern const char *mac_resourcedir(const char *what);
+    extern const char *mac_resourcedir();
     const char *dir = mac_resourcedir(); // ./blah.app/Contents/Resources
     if(dir && *dir)
     {
