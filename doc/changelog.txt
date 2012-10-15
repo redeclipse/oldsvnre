@@ -13,6 +13,8 @@ Maps:
  * Canals, updated and added to rotations
  * Fourplex, updated
  * Starlibido, updated
+ * Cutec, new map (added from mapversion 1.6)
+ * Erosion, new map (added from mapversion 1.4)
 
 Interface & Menus:
  * Overall reduced font sizes
