@@ -37,6 +37,7 @@ Modes & Mutators:
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
+ * Added vetolock variable to determine who may force match votes
 
 Core & Install:
  * Added IRC gudelines
