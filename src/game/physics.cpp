@@ -2,11 +2,14 @@
 namespace physics
 {
     FVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
-    FVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
-    FVAR(IDF_WORLD, liquidcoast, 0, 10.f, 1000);
     FVAR(IDF_WORLD, floorcoast, 0, 5.f, 1000);
     FVAR(IDF_WORLD, aircoast, 0, 25.f, 1000);
     FVAR(IDF_WORLD, slidecoast, 0, 40.f, 1000);
+
+    FVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
+    FVAR(IDF_WORLD, liquidcoast, 0, 10.f, 1000);
+    FVAR(IDF_WORLD, liquidsubmerge, 0, 0.75f, 1);
+    FVAR(IDF_WORLD, liquidextinguish, 0, 0.25f, 1);
 
     FVAR(IDF_WORLD, stairheight, 0, 4.1f, 1000);
     FVAR(IDF_WORLD, floorz, 0, 0.867f, 1);
@@ -257,7 +260,7 @@ namespace physics
         return false;
     }
 
-    bool liquidcheck(physent *d) { return d->inliquid && d->submerged > 0.8f; }
+    bool liquidcheck(physent *d) { return d->inliquid && d->submerged >= PHYS(liquidsubmerge); }
 
     float liquidmerge(physent *d, float from, float to)
     {
@@ -1135,7 +1138,7 @@ namespace physics
             float frac = radius/10.f, sub = pl->submerged;
             vec tmp = bottom;
             int found = 0;
-            loopi(10)
+            loopi(20)
             {
                 tmp.z += frac;
                 if(!isliquid(lookupmaterial(tmp)&MATF_VOLUME))
@@ -1144,10 +1147,10 @@ namespace physics
                     break;
                 }
             }
-            pl->submerged = found ? found/10.f : 1.f;
+            pl->submerged = found ? found/20.f : 1.f;
             if(local)
             {
-                if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= 0.25f)
+                if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= PHYS(liquidextinguish))
                 {
                     gameent *d = (gameent *)pl;
                     if(d->burning(lastmillis, burntime) && lastmillis-d->lastburn > PHYSMILLIS)
