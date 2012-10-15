@@ -1,6 +1,6 @@
 appname=$(APPNAME)
 appsrcname=$(APPNAME)
-cappname=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
+cappname:=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
 prefix=/usr/local
