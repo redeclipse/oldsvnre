@@ -41,12 +41,12 @@ format_desc_weap ()
 
 format_param ()
 {
-    echo "$1" | sed -n '/^setdesc "[^"]*" ".*" "\([^"]*\)"/{s%%\1%; s% %\&nbsp;%g; p;}'
+    echo "$1" | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p'
 }
 
 format_param_weap ()
 {
-    echo "$1" | sed -n '/^setdesc ([^)]*) ".*" "\([^"]*\)"/{s%%\1%; s% %\&nbsp;%g; p;}'
+    echo "$1" | sed -n 's%^setdesc ([^)]*) ".*" "\([^"]*\)"%\1%p'
 }
 
 noedit_header ()
@@ -72,7 +72,7 @@ table_entry ()
     then
         cat <<EOF
 |-
-| '''$1'''&nbsp;''$2''
+| '''$1''' ''$2''
 | $3
 | $4
 | $5
@@ -106,7 +106,7 @@ table_entry_simple ()
     then
         cat <<EOF
 |-
-| '''$1'''&nbsp;''$2''
+| '''$1''' ''$2''
 | $3
 | $4
 EOF
