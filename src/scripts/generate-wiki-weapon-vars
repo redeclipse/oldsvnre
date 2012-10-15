@@ -54,7 +54,7 @@ do
     fi
     cat <<EOF >> "$2"
 |-
-| <nowiki>[weap]</nowiki>'''$VAR'''<nowiki>$SPLIT</nowiki>&nbsp;''$PARAM''
+| <nowiki>[weap]</nowiki>'''$VAR'''<nowiki>$SPLIT</nowiki> ''$PARAM''
 | $DESC
 | $TYPE_STRING
 | $MIN_MAX
