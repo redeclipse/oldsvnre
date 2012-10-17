@@ -34,7 +34,7 @@ Copyright: 2011-2012, Red Eclipse Team
 License: Zlib
 
 Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
-       doc/man/redeclipse-server.6.am
+       doc/man/redeclipse-server.6.am src/scripts/*
 Copyright: 2011-2012, Martin Erik "arand" Werner <martinerikwerner@gmail.com>
 License: ZLib
 
@@ -48,6 +48,10 @@ Files: data/maps/ares* data/maps/canals* data/maps/conflict*
 Copyright: 2011-2012, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
+Files: data/maps/industrial* data/maps/isolation* data/maps/keystone2k*
+Copyright: 2012, John_III <snaginneb@yahoo.com>
+License: CC-BY-SA-3.0
+
 Files: data/maps/fourplex* data/maps/pumpstation* data/maps/starlibido*
 Copyright: 2012 D.a.M.i.E.n. <daymeenn@gmail.com>,
 License: CC-BY-SA-3.0
@@ -56,9 +60,13 @@ Files: data/maps/neodrive* data/maps/hawk*
 Copyright: 2012, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
 
-Files: data/maps/industrial* data/maps/isolation* data/maps/keystone2k*
-Copyright: 2012, John_III <snaginneb@yahoo.com>
+Files: data/maps/cutec*
+Copyright: 2012, Raiden
 License: CC-BY-SA-3.0
+
+Files: data/maps/erosion*
+Copyright: 2012, Matt "greasepirate" Kalt
+License: CC-BY-3.0
 
 Files: data/jwin/*
 Copyright: JWindecker <jacobwindecker@hotmail.com>
