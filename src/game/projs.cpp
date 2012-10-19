@@ -1099,6 +1099,11 @@ namespace projs
                             if(WEAP(proj.weap, pusharea) >= 1)
                                 part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 1, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
                         }
+                        if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
+                        {
+                            part_create(PART_PLASMA_SOFT, projtraillength, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.125f, 20);
+                            proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
+                        }
                         part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.5f);
                         part_create(PART_ELECTRIC_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale, 0.5f);
                         if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend);
@@ -1279,7 +1284,7 @@ namespace projs
                     }
                     case WEAP_PLASMA:
                     {
-                        int len = proj.flags&HIT_ALT ? 500 : 300;
+                        int len = proj.flags&HIT_ALT ? 750 : 500;
                         float expl = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {

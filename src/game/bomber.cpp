@@ -583,17 +583,18 @@ namespace bomber
         {
             bomberstate::flag &f = st.flags[j];
             if(!entities::ents.inrange(f.ent) || !f.enabled) continue;
-            bool home = isbomberhome(f, ai::owner(d));
+            int owner = ai::owner(d);
+            bool home = isbomberhome(f, owner) || isbombertarg(f, owner);
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
+            bool regen = d->aitype != AI_BOT || f.team != owner || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
             ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {
                 gameent *e = NULL;
                 int numdyns = game::numdynents();
                 float mindist = enttype[AFFINITY].radius*4; mindist *= mindist;
-                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && ai::owner(d) == ai::owner(e))
+                loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && !e->ai && e->state == CS_ALIVE && owner == ai::owner(e))
                 {
                     if(targets.find(e->clientnum) < 0 && (f.owner == e || e->feetpos().squaredist(f.pos()) <= mindist))
                         targets.add(e->clientnum);
@@ -623,7 +624,7 @@ namespace bomber
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos())/(!regen ? 100.f : 1.f);
-                    n.tolerance = 0.25f;
+                    n.tolerance = f.team != owner ? 0.5f : 0.25f;
                     n.team = true;
                 }
             }
@@ -637,7 +638,7 @@ namespace bomber
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos());
-                    n.tolerance = 0.25f;
+                    n.tolerance = 0.5f;
                     n.team = true;
                 }
                 else
@@ -646,13 +647,13 @@ namespace bomber
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
                         ai::interest &n = interests.add();
-                        bool team = ai::owner(d) == ai::owner(t);
+                        bool team = owner == ai::owner(t);
                         n.state = team ? ai::AI_S_DEFEND : ai::AI_S_PURSUE;
                         n.node = t->lastnode;
                         n.target = t->clientnum;
                         n.targtype = ai::AI_T_ACTOR;
                         n.score = d->o.squaredist(t->o);
-                        n.tolerance = 0.25f;
+                        n.tolerance = 0.5f;
                         n.team = team;
                     }
                 }
