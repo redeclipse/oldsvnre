@@ -514,9 +514,11 @@ VARF(IDF_PERSIST, trilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD
 VARF(IDF_PERSIST, bilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
 VARF(IDF_PERSIST, aniso, 0, 0, 16, initwarning("texture filtering", INIT_LOAD));
 
+extern int usetexcompress;
+
 void setuptexcompress()
 {
-    if(!hasTC) return;
+    if(!hasTC || !usetexcompress) return;
 
     GLenum hint = GL_DONT_CARE;
     switch(texcompressquality)
@@ -529,7 +531,7 @@ void setuptexcompress()
 
 GLenum compressedformat(GLenum format, int w, int h, int force = 0)
 {
-    if(hasTC && texcompress && force >= 0 && (force || max(w, h) >= texcompress)) switch(format)
+    if(hasTC && usetexcompress && texcompress && force >= 0 && (force || max(w, h) >= texcompress)) switch(format)
     {
         case GL_RGB5:
         case GL_RGB8:
@@ -568,7 +570,7 @@ void resizetexture(int w, int h, bool mipmap, bool canreduce, GLenum target, int
 {
     int hwlimit = target==GL_TEXTURE_CUBE_MAP_ARB ? hwcubetexsize : hwtexsize,
         sizelimit = mipmap && maxtexsize ? min(maxtexsize, hwlimit) : hwlimit;
-    if(compress > 0 && !hasTC)
+    if(compress > 0 && (!hasTC || !usetexcompress))
     {
         w = max(w/compress, 1);
         h = max(h/compress, 1);
@@ -2872,7 +2874,7 @@ bool loaddds(const char *filename, ImageData &image)
 
 void gendds(char *infile, char *outfile)
 {
-    if(!hasTC) { conoutf("\frOpenGL driver does not support texture compression"); return; }
+    if(!hasTC || !usetexcompress) { conoutf("\frOpenGL driver does not support texture compression"); return; }
 
     glHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
 

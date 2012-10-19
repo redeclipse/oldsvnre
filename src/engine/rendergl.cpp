@@ -161,6 +161,7 @@ VAR(0, usetexrect, 1, 0, 0);
 VAR(0, hasglsl, 1, 0, 0);
 VAR(0, useubo, 1, 0, 0);
 VAR(0, usebue, 1, 0, 0);
+VAR(0, usetexcompress, 1, 0, 0);
 VAR(0, rtscissor, 0, 1, 1);
 VAR(0, blurtile, 0, 1, 1);
 VAR(0, rtsharefb, 0, 1, 1);
@@ -479,9 +480,6 @@ void gl_checkextensions()
 #endif
         }
 
-        // silence warnings
-        (void)mesa;
-
         if(!hasGLSL || glslversion < 130)
         {
             avoidshaders = 1;
@@ -496,6 +494,11 @@ void gl_checkextensions()
         reservevpparams = 20;
 
         if(!hasOQ) waterrefract = 0;
+    }
+
+    if(mesa)
+    {
+        usetexcompress = 0;
     }
 
     bool hasshaders = (hasVP && hasFP) || hasGLSL;
