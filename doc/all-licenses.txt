@@ -68,6 +68,10 @@ Files: data/maps/erosion*
 Copyright: 2012, Matt "greasepirate" Kalt
 License: CC-BY-3.0
 
+Files: data/maps/battlefield*
+Copyright: 2012, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
+License: CC-BY-SA-3.0
+
 Files: data/jwin/*
 Copyright: JWindecker <jacobwindecker@hotmail.com>
 License: CC-BY-3.0

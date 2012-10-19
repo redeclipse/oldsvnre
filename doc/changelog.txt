@@ -15,6 +15,7 @@ Maps:
  * Starlibido, updated
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.4)
+ * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from Blood Frontier)
 
 Interface & Menus:
  * Overall reduced font sizes
