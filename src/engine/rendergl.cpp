@@ -496,11 +496,6 @@ void gl_checkextensions()
         if(!hasOQ) waterrefract = 0;
     }
 
-    if(mesa)
-    {
-        usetexcompress = 0;
-    }
-
     bool hasshaders = (hasVP && hasFP) || hasGLSL;
     if(hasshaders)
     {
@@ -615,6 +610,7 @@ void gl_checkextensions()
         glGetCompressedTexImage_ =   (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)  getprocaddress("glGetCompressedTexImageARB");
 
         hasTC = true;
+        if(!mesa) usetexcompress = 1;
         if(dbgexts) conoutf("\frUsing GL_EXT_texture_compression_s3tc extension.");
     }
 
