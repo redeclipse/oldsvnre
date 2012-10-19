@@ -535,17 +535,10 @@ GLenum compressedformat(GLenum format, int w, int h, int force = 0)
     {
         case GL_RGB5:
         case GL_RGB8:
-#ifdef __APPLE__
         case GL_LUMINANCE:
-        case GL_RGB: return GL_COMPRESSED_RGB_ARB;
+        case GL_RGB: return usetexcompress > 1 ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_ARB;
         case GL_LUMINANCE_ALPHA:
-        case GL_RGBA: return GL_COMPRESSED_RGBA_ARB;
-#else
-        case GL_LUMINANCE:
-        case GL_RGB: return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-        case GL_LUMINANCE_ALPHA:
-        case GL_RGBA: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-#endif
+        case GL_RGBA: return usetexcompress > 1 ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGBA_ARB;
     }
     return format;
 }
@@ -1232,7 +1225,7 @@ static bool texturedata(ImageData &d, const char *tname, Slot::Tex *tex = NULL, 
         copystring(dfile, file);
         if(flen >= 4 && dfile[flen-4]=='.') memcpy(dfile + flen - 4, ".dds", 4);
         else concatstring(dfile, ".dds");
-        if(!raw && hasTC && loaddds(dfile, d)) return true;
+        if(!raw && hasS3TC && loaddds(dfile, d)) return true;
         if(!dds) { if(msg) conoutf("\frcould not load texture %s", dfile); return false; }
     }
 
@@ -2874,7 +2867,7 @@ bool loaddds(const char *filename, ImageData &image)
 
 void gendds(char *infile, char *outfile)
 {
-    if(!hasTC || !usetexcompress) { conoutf("\frOpenGL driver does not support texture compression"); return; }
+    if(!hasS3TC || usetexcompress <= 1) { conoutf("\frOpenGL driver does not support S3TC texture compression"); return; }
 
     glHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
 
