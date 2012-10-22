@@ -34,7 +34,6 @@ do
 
     TYPE_STRING="$(echo "$IDF_ADMIN command" | sed -e 's%^ *%%' -e 's%  *% %g')"
 
-	# ending sed cleans up no-parameter commands
     table_entry_simple "$COM" "$PARAM" "$DESC" "$TYPE_STRING" >> "$2"
 done
 

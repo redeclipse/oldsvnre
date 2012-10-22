@@ -72,20 +72,20 @@ table_entry ()
     then
         cat <<EOF
 |-
-| '''$1''' ''$2''
-| $3
-| $4
-| $5
-| $6
+| '''<nowiki>$1</nowiki>''' ''$2''
+| <nowiki>$3</nowiki>
+| <nowiki>$4</nowiki>
+| <nowiki>$5</nowiki>
+| <nowiki>$6</nowiki>
 EOF
     else
         cat <<EOF
 |-
-| '''$1'''
-| $3
-| $4
-| $5
-| $6
+| '''<nowiki>$1</nowiki>'''
+| <nowiki>$3</nowiki>
+| <nowiki>$4</nowiki>
+| <nowiki>$5</nowiki>
+| <nowiki>$6</nowiki>
 EOF
     fi
 }
@@ -106,16 +106,16 @@ table_entry_simple ()
     then
         cat <<EOF
 |-
-| '''$1''' ''$2''
-| $3
-| $4
+| '''<nowiki>$1</nowiki>''' ''$2''
+| <nowiki>$3</nowiki>
+| <nowiki>$4</nowiki>
 EOF
     else
         cat <<EOF
 |-
-| '''$1'''
-| $3
-| $4
+| '''<nowiki>$1</nowiki>'''
+| <nowiki>$3</nowiki>
+| <nowiki>$4</nowiki>
 EOF
     fi
 }
