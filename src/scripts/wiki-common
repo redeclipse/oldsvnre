@@ -16,37 +16,42 @@ find_src_files ()
 
 extract_src_def ()
 {
-	echo "$1" | grep '^[^A-Z]*[A-Z]*([^,]*, '"$2"', '
+    echo "$1" | grep '^[^A-Z]*[A-Z]*([^,]*, '"$2"', '
+}
+
+replace_escapes ()
+{
+    echo "$1" | sed -e 's%[^^]\^"%ESC_QUOT%g' -e 's%[^^]\^n% %g' -e 's%\^\(.\)%\1%g'
 }
 
 format_name ()
 {
-    echo "$1" | sed 's%^setdesc "\([^"]*\)".*%\1%'
+    replace_escapes "$1" | sed -e 's%^setdesc "\([^"]*\)".*%\1%'
 }
 
 format_name_weap ()
 {
-    echo "$1" | sed 's%^setdesc (concatword \$w \([^ ^)]*\).*%\1%'
+    replace_escapes "$1" | sed 's%^setdesc (concatword \$w \([^ ^)]*\).*%\1%'
 }
 
 format_desc ()
 {
-    echo "$1" | sed -e 's%\^n% %g' -e 's%\^"%ESC_QUOT%g' -e 's%^setdesc "[^"]*" "\([^"]*\)".*%\1%' -e 's%ESC_QUOT%"%g'
+    replace_escapes "$1" | sed -e's%^setdesc "[^"]*" "\([^"]*\)".*%\1%' -e 's%ESC_QUOT%"%g'
 }
 
 format_desc_weap ()
 {
-    echo "$1" | sed -e 's%\^n% %g' -e 's%\^"%ESC_QUOT%g' -e 's%^setdesc ([^)]*) "\([^"]*\)".*%\1%' -e 's%ESC_QUOT%"%g'
+    replace_escapes "$1" | sed -e 's%^setdesc ([^)]*) "\([^"]*\)".*%\1%' -e 's%ESC_QUOT%"%g'
 }
 
 format_param ()
 {
-    echo "$1" | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p'
+    replace_escapes "$1" | sed -n 's%^setdesc "[^"]*" ".*" "\([^"]*\)"%\1%p'
 }
 
 format_param_weap ()
 {
-    echo "$1" | sed -n 's%^setdesc ([^)]*) ".*" "\([^"]*\)"%\1%p'
+    replace_escapes "$1" | sed -n 's%^setdesc ([^)]*) ".*" "\([^"]*\)"%\1%p'
 }
 
 noedit_header ()
@@ -72,7 +77,7 @@ table_entry ()
     then
         cat <<EOF
 |-
-| '''<nowiki>$1</nowiki>''' ''$2''
+| '''<nowiki>$1</nowiki>''' ''<nowiki>$2</nowiki>''
 | <nowiki>$3</nowiki>
 | <nowiki>$4</nowiki>
 | <nowiki>$5</nowiki>
@@ -106,7 +111,7 @@ table_entry_simple ()
     then
         cat <<EOF
 |-
-| '''<nowiki>$1</nowiki>''' ''$2''
+| '''<nowiki>$1</nowiki>''' ''<nowiki>$2</nowiki>''
 | <nowiki>$3</nowiki>
 | <nowiki>$4</nowiki>
 EOF
