@@ -457,8 +457,9 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
         { \
             cx = x; \
             cy = y; \
-            if(commandposfade < 1) \
+            if(!hasfade && commandposfade < 1) \
             { \
+                hasfade = true; \
                 fade = int(fade*commandposfade); \
                 xtraverts += varray::end(); \
                 glColor4ub(color.x, color.y, color.z, fade); \
@@ -479,7 +480,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     varray::defattrib(varray::ATTRIB_TEXCOORD0, 2, GL_FLOAT);
     varray::begin(GL_QUADS);
     int fade = a;
-    bool usecolor = true;
+    bool usecolor = true, hasfade = false;
     if(fade < 0) { usecolor = false; fade = -a; }
     int colorpos = 0, ly = 0, left = rleft, top = rtop;
     float cx = -FONTW, cy = 0;
