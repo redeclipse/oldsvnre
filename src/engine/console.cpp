@@ -823,8 +823,17 @@ void complete(char *s, const char *cmdprefix)
         }
         start = &s[cmdlen];
     }
-    char *semi = strrchr(start, ';');
-    if(semi) start = semi+1;
+    const char chrlist[7] = { ';', '(', ')', '[', ']', '\"', '$', };
+    bool variable = false;
+    loopi(7)
+    {
+        char *semi = strrchr(start, chrlist[i]);
+        if(semi)
+        {
+            start = semi+1;
+            if(chrlist[i] == '$') variable = true;
+        }
+    }
     while(*start == ' ') start++;
     if(!start[0]) return;
     if(start-s != completeoffset || !completesize)
@@ -863,7 +872,7 @@ void complete(char *s, const char *cmdprefix)
     {
         copystring(prefix, s, min(size_t(1+(start-s)), sizeof(prefix)));
         enumerate(idents, ident, id,
-            if(id.flags&IDF_COMPLETE && strncmp(id.name, start, completesize)==0 &&
+            if((variable ? id.type == ID_VAR || id.type == ID_SVAR || id.type == ID_FVAR || id.type == ID_ALIAS: id.flags&IDF_COMPLETE) && strncmp(id.name, start, completesize)==0 &&
                strcmp(id.name, lastcomplete) > 0 && (!nextcomplete || strcmp(id.name, nextcomplete) < 0))
                 nextcomplete = id.name;
         );
