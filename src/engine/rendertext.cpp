@@ -2,6 +2,7 @@
 
 VAR(IDF_PERSIST, blinkingtext, 0, 250, VAR_MAX);
 FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
+FVAR(IDF_PERSIST, commandposfade, 0, 0.65f, 1);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -451,11 +452,22 @@ void text_boundsf(const char *str, float &width, float &height, int maxwidth, in
 
 int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, int flags, int cursor, int maxwidth)
 {
-    #define TEXTINDEX(idx) if(cursor == idx) { cx = x; cy = y; }
+    #define TEXTINDEX(idx) \
+        if(cursor >= 0 && idx == cursor) \
+        { \
+            cx = x; \
+            cy = y; \
+            if(commandposfade < 1) \
+            { \
+                fade = int(fade*commandposfade); \
+                xtraverts += varray::end(); \
+                glColor4ub(color.x, color.y, color.z, fade); \
+            } \
+        }
     #define TEXTWHITE(idx)
     #define TEXTLINE(idx) ly += FONTH;
-    #define TEXTCOLOR(idx) if(usecolor) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, a);
-    #define TEXTHEXCOLOR(ret) if(usecolor) { xtraverts += varray::end(); color = ret; glColor4ub(color.x, color.y, color.z, a); }
+    #define TEXTCOLOR(idx) if(usecolor) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, fade);
+    #define TEXTHEXCOLOR(ret) if(usecolor) { xtraverts += varray::end(); color = ret; glColor4ub(color.x, color.y, color.z, fade); }
     #define TEXTICON(ret) { x += draw_icon(tex, ret, left+x, top+y, scale); }
     #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y, scale); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
@@ -466,14 +478,15 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     varray::defattrib(varray::ATTRIB_VERTEX, 2, GL_FLOAT);
     varray::defattrib(varray::ATTRIB_TEXCOORD0, 2, GL_FLOAT);
     varray::begin(GL_QUADS);
+    int fade = a;
     bool usecolor = true;
-    if(a < 0) { usecolor = false; a = -a; }
+    if(fade < 0) { usecolor = false; fade = -a; }
     int colorpos = 0, ly = 0, left = rleft, top = rtop;
     float cx = -FONTW, cy = 0;
     char colorstack[10];
     memset(colorstack, 'u', sizeof(colorstack)); //indicate user color
     bvec color(r, g, b);
-    glColor4ub(color.x, color.y, color.z, a);
+    glColor4ub(color.x, color.y, color.z, fade);
     TEXTSKELETON
     TEXTEND(cursor)
     xtraverts += varray::end();

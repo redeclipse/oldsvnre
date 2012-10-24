@@ -1366,7 +1366,9 @@ namespace hud
                 glBindTexture(GL_TEXTURE_2D, t->id);
                 glColor4f(c.x, c.y, c.z, fullconblend*fade*f);
                 drawtexture(tx, ty+tz, th, tw);
-                tz += draw_textx("%s", tq+tr, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, commandpos >= 0 ? commandpos : strlen(commandbuf), tt, commandbuf);
+                int pos = commandpos >= 0 ? commandpos : strlen(commandbuf);
+                if(completesize && completeoffset >= 0) pos = min(pos, completeoffset+completesize);
+                tz += draw_textx("%s", tq+tr, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, pos, tt, commandbuf);
                 popfont();
                 if(commandbuf[0] == '/' && commandbuf[1])
                 {
