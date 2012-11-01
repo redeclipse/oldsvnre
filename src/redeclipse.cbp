@@ -515,7 +515,7 @@
 					<Add option="-s" />
 					<Add option="-m32" />
 					<Add option="-mwindows" />
-					<Add library="freetype" />
+					<Add library="freetype6" />
 					<Add library="zlib1" />
 					<Add directory="..\bin\x86" />
 					<Add directory="lib\x86" />
@@ -528,8 +528,8 @@
 		<VirtualTargets>
 			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="Tools" targets="cube2font;genkey;" />
-			<Add alias="x86" targets="client32;server32;" />
 			<Add alias="amd64" targets="client64;server64;" />
+			<Add alias="x86" targets="client32;server32;" />
 		</VirtualTargets>
 		<Unit filename="dpiaware.manifest">
 			<Option target="client32" />
