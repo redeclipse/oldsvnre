@@ -1990,17 +1990,17 @@ namespace game
             loopv(entities::ents)
             {
                 gameentity &e = *(gameentity *)entities::ents[i];
-                if(e.type!=PLAYERSTART && e.type!=LIGHT && e.type<MAPSOUND) continue;
+                if(e.type != PLAYERSTART && e.type != LIGHT && e.type < MAPSOUND) continue;
                 cament *c = cameras.add(new cament);
                 c->o = e.o;
                 c->o.z += max(enttype[e.type].radius, 2);
                 c->type = cament::ENTITY;
                 c->id = i;
             }
-            gameent *d = NULL;
-            int numdyns = numdynents();
-            loopi(numdyns-1) if((d = (gameent *)iterdynents(i+1)) != NULL && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
+            loopv(players) if(players[i])
             {
+                gameent *d = players[i];
+                if((d->type != ENT_PLAYER && d->type != ENT_AI) || d->aitype >= AI_START) continue;
                 cament *c = cameras.add(new cament);
                 c->o = d->headpos();
                 c->type = cament::PLAYER;
