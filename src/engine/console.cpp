@@ -624,7 +624,7 @@ void consolekey(int code, bool isdown, int cooked)
     }
 }
 
-#define interceptkey(name,body) \
+#define keyintercept(name,body) \
 { \
     static bool key##name = false; \
     if(SDL_GetModState()&MOD_ALTS && isdown) \
@@ -651,13 +651,13 @@ void keypress(int code, bool isdown, int cooked)
 #else
         case SDLK_F4:
 #endif
-            interceptkey(quit, quit());
+            keyintercept(quit, quit());
             break;
         case SDLK_RETURN:
-            interceptkey(fullscreen, setfullscreen(!fullscreen, true));
+            keyintercept(fullscreen, setfullscreen(!fullscreen, true));
             break;
         case SDLK_TAB:
-            interceptkey(iconify, SDL_WM_IconifyWindow());
+            keyintercept(iconify, SDL_WM_IconifyWindow());
             break;
         default: break;
     }

@@ -527,21 +527,17 @@ static inline bool pollevent(SDL_Event &event)
     return false;
 }
 
-bool interceptkey(int sym)
+bool interceptkey(int sym, int mod)
 {
     SDL_Event event;
-    while(pollevent(event))
+    while(pollevent(event)) switch(event.type)
     {
-        switch(event.type)
-        {
         case SDL_KEYDOWN:
-            if(event.key.keysym.sym == sym)
+            if(event.key.keysym.sym == sym && (!mod || SDL_GetModState()&mod))
                 return true;
-
         default:
             pushevent(event);
             break;
-        }
     }
     return false;
 }
