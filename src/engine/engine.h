@@ -597,7 +597,7 @@ extern void resetcursor(bool warp = true, bool reset = true);
 extern int compresslevel, imageformat;
 
 extern void pushevent(const SDL_Event &e);
-extern bool interceptkey(int sym);
+extern bool interceptkey(int sym, int mod = 0);
 extern void getfps(int &fps, int &bestdiff, int &worstdiff);
 extern void swapbuffers();
 extern int getclockmillis();
