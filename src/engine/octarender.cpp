@@ -8,16 +8,6 @@ struct vboinfo
     uchar *data;
 };
 
-static inline uint hthash(GLuint key)
-{
-    return key;
-}
-
-static inline bool htcmp(GLuint x, GLuint y)
-{
-    return x==y;
-}
-
 hashtable<GLuint, vboinfo> vbos;
 
 VAR(0, printvbo, 0, 0, 1);
