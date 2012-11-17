@@ -2717,7 +2717,6 @@ bool reloadtexture(Texture *t)
     loopv(t->frames) if(t->frames[i]) return true;
     switch(t->type&Texture::TYPE)
     {
-        case Texture::STUB:
         case Texture::IMAGE:
         {
             ImageData s;

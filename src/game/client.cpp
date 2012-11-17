@@ -2108,10 +2108,11 @@ namespace client
                 case N_SENDDEMOLIST:
                 {
                     int demos = getint(p);
-                    if(!demos) conoutft(CON_MESG, "\frno demos available");
+                    if(demos <= 0) conoutft(CON_MESG, "\frno demos available");
                     else loopi(demos)
                     {
                         getstring(text, p);
+                        if(p.overread()) break;
                         conoutft(CON_MESG, "\fa%d. %s", i+1, text);
                     }
                     break;
