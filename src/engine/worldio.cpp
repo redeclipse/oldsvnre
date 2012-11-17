@@ -1428,7 +1428,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     if(!strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
                     if(!strcmp(name, "cloudboxcolour")) copystring(name, "cloudcolour");
                     ident *id = getident(name);
-                    bool exists = id && id->type == type;
+                    bool exists = id && id->type == type && id->flags&IDF_WORLD;
                     switch(type)
                     {
                         case ID_VAR:
