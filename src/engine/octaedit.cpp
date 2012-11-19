@@ -2171,21 +2171,29 @@ void rotate(int *cw)
 COMMAND(0, flip, "");
 COMMAND(0, rotate, "i");
 
-void setmat(cube &c, uchar mat, uchar matmask, uchar filtermat, uchar filtermask, int style)
+enum { EDITMATF_EMPTY = 0x100, EDITMATF_NOTEMPTY = 0x200, EDITMATF_SOLID = 0x400, EDITMATF_NOTSOLID = 0x800 };
+static const struct { const char *name; int filter; } editmatfilters[] =
+{
+    { "empty", EDITMATF_EMPTY },
+    { "notempty", EDITMATF_NOTEMPTY },
+    { "solid", EDITMATF_SOLID },
+    { "notsolid", EDITMATF_NOTSOLID }
+};
+
+void setmat(cube &c, uchar mat, uchar matmask, uchar filtermat, uchar filtermask, int filtergeom)
 {
     if(c.children)
-        loopi(8) setmat(c.children[i], mat, matmask, filtermat, filtermask, style);
+        loopi(8) setmat(c.children[i], mat, matmask, filtermat, filtermask, filtergeom);
     else if((c.material&filtermask) == filtermat)
     {
-        switch(style)
+        switch(filtergeom)
         {
-            case 1: if(isempty(c)) return; break;
-            case 2: if(!isempty(c)) return; break;
-            case 3: if(isentirelysolid(c)) return; break;
-            case 4: if(!isentirelysolid(c)) return; break;
-            case 0: default: break;
+            case EDITMATF_EMPTY: if(isempty(c)) break; return;
+            case EDITMATF_NOTEMPTY: if(!isempty(c)) break; return;
+            case EDITMATF_SOLID: if(isentirelysolid(c)) break; return;
+            case EDITMATF_NOTSOLID: if(!isentirelysolid(c)) break; return;
         }
-        if(mat != MAT_AIR)
+        if(mat!=MAT_AIR)
         {
             c.material &= matmask;
             c.material |= mat;
@@ -2198,19 +2206,35 @@ void mpeditmat(int matid, int filter, int style, selinfo &sel, bool local)
 {
     if(local) client::edittrigger(sel, EDIT_MAT, matid, filter, style);
 
-    uchar matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : ~matid),
-          filtermat = filter < 0 ? 0 : filter,
-          filtermask = filter < 0 ? 0 : (filter&MATF_VOLUME ? MATF_VOLUME : (filter&MATF_CLIP ? MATF_CLIP : filter));
-    if(isclipped(matid&MATF_VOLUME)) matid |= MAT_CLIP;
-    if(isdeadly(matid&MATF_VOLUME)) matid |= MAT_DEATH;
-    if(matid < 0 && filter >= 0)
+    uchar filtermat = 0, filtermask = 0, matmask;
+    int filtergeom = 0;
+    if(filter >= 0)
+    {
+        filtermat = filter&0xFF;
+        filtermask = filtermat&MATF_VOLUME ? MATF_VOLUME : (filtermat&MATF_CLIP ? MATF_CLIP : filtermat);
+        filtergeom = filter&~0xFF;
+    }
+    switch(style)
+    {
+        case 1: filtergeom = EDITMATF_NOTEMPTY; break;
+        case 2: filtergeom = EDITMATF_EMPTY; break;
+        case 3: filtergeom = EDITMATF_NOTSOLID; break;
+        case 4: filtergeom = EDITMATF_SOLID; break;
+    } 
+    if(matid < 0)
     {
         matid = 0;
         matmask = filtermask;
-        if(isclipped(filter&MATF_VOLUME)) matmask &= ~MATF_CLIP;
-        if(isdeadly(filter&MATF_VOLUME)) matmask &= ~MAT_DEATH;
+        if(isclipped(filtermat&MATF_VOLUME)) matmask &= ~MATF_CLIP;
+        if(isdeadly(filtermat&MATF_VOLUME)) matmask &= ~MAT_DEATH;
     }
-    loopselxyz(setmat(c, matid, matmask, filtermat, filtermask, style));
+    else
+    {
+        matmask = matid&MATF_VOLUME ? 0 : (matid&MATF_CLIP ? ~MATF_CLIP : ~matid);
+        if(isclipped(matid&MATF_VOLUME)) matid |= MAT_CLIP;
+        if(isdeadly(matid&MATF_VOLUME)) matid |= MAT_DEATH;
+    }
+    loopselxyz(setmat(c, matid, matmask, filtermat, filtermask, filtergeom));
 }
 
 void editmat(char *name, char *filtername, int *style)
@@ -2219,7 +2243,8 @@ void editmat(char *name, char *filtername, int *style)
     int filter = -1;
     if(filtername[0])
     {
-        filter = findmaterial(filtername, true);
+        loopi(sizeof(editmatfilters)/sizeof(editmatfilters[0])) if(!strcmp(editmatfilters[i].name, filtername)) { filter = editmatfilters[i].filter; break; }
+        if(filter < 0) filter = findmaterial(filtername, true);
         if(filter < 0) { conoutf("\frunknown material \"%s\"", filtername); return; }
     }
     int id = -1;
