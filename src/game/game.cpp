@@ -38,7 +38,7 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersoninterp, 0, 100, VAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 8, FVAR_MAX);
+    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 10, FVAR_MAX);
     FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 8, FVAR_MAX);
 
     VAR(0, follow, -1, -1, VAR_MAX);
@@ -79,8 +79,8 @@ namespace game
     VAR(IDF_PERSIST, followdead, 0, 1, 2); // 0 = never, 1 = in all but duel/survivor, 2 = always
     VAR(IDF_PERSIST, followthirdperson, 0, 1, 1);
     VAR(IDF_PERSIST, followaiming, 0, 1, 3); // 0 = don't aim, &1 = aim in thirdperson, &2 = aim in first person
-    FVAR(IDF_PERSIST, followblend, 0, 0.65f, 1);
-    FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 8, FVAR_MAX);
+    FVAR(IDF_PERSIST, followblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, followdist, FVAR_NONZERO, 10, FVAR_MAX);
     FVAR(IDF_PERSIST, followside, FVAR_MIN, 8, FVAR_MAX);
 
     VAR(IDF_PERSIST, followtvspeed, 1, 500, VAR_MAX);
@@ -764,7 +764,11 @@ namespace game
         if(deathfade && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {
-            if(d == focus && d->weapselect == WEAP_MELEE && !third) return 0; // hack
+            if(d == focus)
+            {
+                if(third) total *= camera1->o.dist(d->o)/(d != player1 ? followdist : thirdpersondist);
+                else if(d->weapselect == WEAP_MELEE) return 0; // hack
+            }
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
             if(millis > 0) total *= 1.f-(float(millis)/float(prot));
             if(d == player1 && inzoom())
@@ -1775,7 +1779,7 @@ namespace game
             resetcursor();
             inputmouse = input;
         }
-        if(!input)
+        if(!hud::hasinput(true))
         {
             if(thirdpersonview(true, focus))
             {
@@ -1783,8 +1787,8 @@ namespace game
                 if(vectocursor(worldpos, loc.x, loc.y, loc.z))
                 {
                     float amt = curtime/float(thirdpersoninterp);
-                    cursorx += (loc.x-cursorx)*amt;
-                    cursory += (loc.y-cursory)*amt;
+                    cursorx = clamp(cursorx+((loc.x-cursorx)*amt), 0.f, 1.f);
+                    cursory = clamp(cursory+((loc.y-cursory)*amt), 0.f, 1.f);
                 }
             }
             vecfromcursor(cursorx, cursory, 1.f, cursordir);
@@ -1841,15 +1845,12 @@ namespace game
             }
         } d;
         if(!dist && !side) return d.o = pos;
-        vec dir[2];
+        vec dir[3];
         if(dist) vecfromyawpitch(yaw, pitch, -1, 0, dir[0]);
         if(side) vecfromyawpitch(yaw, pitch, 0, -1, dir[1]);
+        dir[2] = dir[0].mul(dist).add(dir[1].mul(side)).normalize();
         d.o = pos;
-        loopi(10)
-        {
-            if(dist) physics::movecamera(&d, dir[0], dist/10.f, 0.1f);
-            if(side) physics::movecamera(&d, dir[1], side/10.f, 0.1f);
-        }
+        physics::movecamera(&d, dir[2], dist, 0.1f);
         return d.o;
     }
 
