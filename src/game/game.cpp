@@ -1775,17 +1775,20 @@ namespace game
             resetcursor();
             inputmouse = input;
         }
-        if(focus == player1 && focus->state == CS_ALIVE && thirdpersonview(true, focus))
+        if(!input)
         {
-            vec loc(0, 0, 0);
-            if(vectocursor(worldpos, loc.x, loc.y, loc.z))
+            if(thirdpersonview(true, focus))
             {
-                float amt = curtime/float(thirdpersoninterp);
-                cursorx += (loc.x-cursorx)*amt;
-                cursory += (loc.y-cursory)*amt;
+                vec loc(0, 0, 0);
+                if(vectocursor(worldpos, loc.x, loc.y, loc.z))
+                {
+                    float amt = curtime/float(thirdpersoninterp);
+                    cursorx += (loc.x-cursorx)*amt;
+                    cursory += (loc.y-cursory)*amt;
+                }
             }
+            vecfromcursor(cursorx, cursory, 1.f, cursordir);
         }
-        if(!input) vecfromcursor(cursorx, cursory, 1.f, cursordir);
     }
 
     void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch)
@@ -1837,6 +1840,7 @@ namespace game
                 height = zradius = radius = xradius = yradius = 2;
             }
         } d;
+        if(!dist && !side) return d.o = pos;
         vec dir[2];
         if(dist) vecfromyawpitch(yaw, pitch, -1, 0, dir[0]);
         if(side) vecfromyawpitch(yaw, pitch, 0, -1, dir[1]);
@@ -1859,7 +1863,8 @@ namespace game
                 yaw = d->yaw;
                 pitch = d->pitch;
             }
-            if(thirdpersonview(true, hasfoc ? d : focus)) pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist, d != player1 ? followside : thirdpersonside);
+            if(thirdpersonview(true, hasfoc ? d : focus))
+                pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist, d != player1 ? followside : thirdpersonside);
             else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
             {
                 float scale = 1;
@@ -2225,6 +2230,7 @@ namespace game
     {
         lastcamera = 0;
         zoomset(false, 0);
+        resetcursor();
         checkcamera();
         if(full || !focus)
         {
@@ -2393,7 +2399,7 @@ namespace game
                 if(player1->state >= CS_SPECTATOR && focus != player1) camera1->resetinterp();
             }
             calcangles(camera1, focus);
-            physent *c = focus == player1 && thirdpersonview(true, focus) ? player1 : camera1;
+            physent *c = thirdpersonview(true, focus) ? focus : camera1;
             findorientation(c->o, c->yaw, c->pitch, worldpos);
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
