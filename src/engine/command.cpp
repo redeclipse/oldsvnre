@@ -2715,6 +2715,7 @@ void sortlist(char *list, ident *x, ident *y, uint *body)
         memcpy(&sorted[offset], item.quotestart, len);
         offset += len;
     }
+    sorted[offset] = '\0';
 
     commandret->setstr(sorted);
 }
