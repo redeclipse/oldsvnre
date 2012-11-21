@@ -2684,7 +2684,7 @@ void sortlist(char *list, ident *x, ident *y, uint *body)
 
     vector<sortitem> items;
     int macrolen = strlen(list), total = 0;
-    char *macros = newstring(macrolen);
+    char *macros = newstring(list, macrolen);
     const char *curlist = list, *start, *end, *quotestart, *quoteend;
     while(parselist(curlist, start, end, quotestart, quoteend))
     {
