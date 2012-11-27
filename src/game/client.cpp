@@ -114,7 +114,7 @@ namespace client
             }
         }
     }
-    ICOMMAND(0, getvote, "iiiN", (int *vote, int *prop, int *idx, int *numargs), getvotes(*numargs >= 1 ? *vote : -1, *numargs >= 2 ? *prop : -1, *numargs >= 3 ? *idx : -1));
+    ICOMMAND(0, getvote, "bbb", (int *vote, int *prop, int *idx, int *numargs), getvotes(*vote, *prop, *idx));
 
     struct demoinfo
     {
@@ -204,7 +204,7 @@ namespace client
             }
         }
     }
-    ICOMMAND(0, demoinfo, "iiN", (int *idx, int *prop, int *numargs), infodemo(*numargs >= 1 ? *idx : -1, *numargs >= 2 ? *prop : -1));
+    ICOMMAND(0, demoinfo, "bb", (int *idx, int *prop, int *numargs), infodemo(*idx, *prop));
 
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
     string authname = "", authkey = "";
@@ -334,7 +334,7 @@ namespace client
         if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playertypes[game::player1->model%PLAYERTYPES][2]);
 #endif
     }
-    ICOMMAND(0, setinfo, "siiN", (char *s, int *c, int *m, int *numargs), setplayerinfo(s, *numargs >= 2 ? *c : -1, *numargs >= 3 ? *m : -1));
+    ICOMMAND(0, setinfo, "sbb", (char *s, int *c, int *m, int *numargs), setplayerinfo(s, *c, *m));
 
     int teamname(const char *team)
     {
@@ -2635,5 +2635,5 @@ namespace client
             }
         }
     }
-    ICOMMAND(0, getserver, "iiiN", (int *server, int *prop, int *idx, int *numargs), getservers(*numargs >= 1 ? *server : -1, *numargs >= 2 ? *prop : -1, *numargs >= 3 ? *idx : -1));
+    ICOMMAND(0, getserver, "bbb", (int *server, int *prop, int *idx, int *numargs), getservers(*server, *prop, *idx));
 }
