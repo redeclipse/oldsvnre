@@ -313,7 +313,7 @@ void rdjoint(int *n, int *t, int *v1, int *v2, int *v3)
     j.vert[1] = *v2;
     j.vert[2] = *v3;
 }
-COMMAND(rdjoint, "iibbb");
+COMMAND(0, rdjoint, "iibbb");
 
 void rdlimitdist(int *v1, int *v2, float *mindist, float *maxdist)
 {

@@ -1341,10 +1341,10 @@ bool serveroption(char *opt)
     switch(opt[1])
     {
         case 'k': kidmode = atoi(opt+2); return true;
-        case 'h': logoutf("set home directory: %s", &opt[2]); sethomedir(&opt[2]); return true;
+        case 'h': sethomedir(&opt[2]); logoutf("set home directory: %s", &opt[2]); return true;
         case 'o': setsvar("octadir", &opt[2]); return true;
-        case 'p': logoutf("add package directory: %s", &opt[2]); addpackagedir(&opt[2]); return true;
-        case 'g': logoutf("setting log file: %s", opt[2] ? &opt[2] : "<stdout>"); setlogfile(&opt[2]); return true;
+        case 'p': addpackagedir(&opt[2]); logoutf("add package directory: %s", &opt[2]); return true;
+        case 'g': setlogfile(&opt[2]); logoutf("set log file: %s", opt[2] ? &opt[2] : "<stdout>"); return true;
         case 'v': setvar("verbose", atoi(opt+2)); return true;
         case 's':
         {
