@@ -251,3 +251,6 @@ wiki-commands: ../doc/wiki-commands.txt
 wiki-aliases: ../doc/wiki-aliases.txt
 
 wiki-all-vars-commands: ../doc/wiki-all-vars-commands.txt
+
+wiki-check-all-result: ../doc/wiki-all-vars-commands.txt
+	scripts/check-wiki-all-result ../data/usage.cfg ../doc/wiki-all-vars-commands.txt
