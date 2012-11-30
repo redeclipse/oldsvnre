@@ -4,6 +4,7 @@ Gameplay:
  * Disable double-tap dashing by default (enable with /dashstyle 1)
  * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
  * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
+ * New thirdperson style with camera postion to the side (adjust with /thirdpersondist and /thirdpersonside)
 
 Weapons:
  * Plasma primary damage and explosion radius increased
