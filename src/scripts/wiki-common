@@ -16,7 +16,7 @@ find_src_files ()
 
 extract_src_def ()
 {
-    echo "$1" | grep '^[^A-Z]*[A-Z]*([^,]*, '"$(echo "$2" | sed 's%\*%\\*%')"', '
+    echo "$1" | grep '^[^A-Z]*[A-Z]*([A-Z_0,| ]*'"$(echo "$2" | sed 's%\*%\\*%')"','
 }
 
 replace_escapes ()
