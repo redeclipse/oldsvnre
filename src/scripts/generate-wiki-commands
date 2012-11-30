@@ -9,7 +9,7 @@ source "$DIR"/wiki-common
 noedit_header > "$2"
 table_header_simple >> "$2"
 
-SRC_DEFS="$(grep -h '^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, [^,]*, ' $(find_src_files "$DIR/..") | sed 's%^ *%%')"
+SRC_DEFS="$(grep -h '^[^A-Z]*[A-Z]*COMMAND[A-Z]*([^,]*, [^,]*,' $(find_src_files "$DIR/..") | sed 's%^ *%%')"
 
 IFS=$'\n'
 for i in $(grep "^setdesc" "$1" | sort)
