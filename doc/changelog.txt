@@ -23,7 +23,7 @@ Interface & Menus:
  * Added variables for scaling text globally and for specific elements  (/{text,con,chatcon,command}scale)
  * Added frames around most UI elements
  * Revamped score screen
- * Added ALT+ENTER fullscreen toggle
+ * Added ALT+ENTER/CMD+ENTER fullscreen toggle, and ALT+F4/CMD+Q for closing the window
  * Added ability to enable automatic demo recording each match (/demoautorec 1)
  * Added "reset selection" button for mutators
  * Added variables to control death/kill message content (/obit{verbose,styles})
