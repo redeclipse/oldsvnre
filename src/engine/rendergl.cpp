@@ -1102,6 +1102,7 @@ void setenvmatrix()
 
 static float findsurface(int fogmat, const vec &v, int &abovemat)
 {
+    fogmat &= MATF_VOLUME;
     ivec o(v), co;
     int csize;
     do
@@ -1110,7 +1111,7 @@ static float findsurface(int fogmat, const vec &v, int &abovemat)
         int mat = c.material&MATF_VOLUME;
         if(mat != fogmat)
         {
-            abovemat = isliquid(mat) ? mat : MAT_AIR;
+            abovemat = isliquid(mat) ? c.material : MAT_AIR;
             return o.z;
         }
         o.z = co.z + csize;
@@ -1122,17 +1123,25 @@ static float findsurface(int fogmat, const vec &v, int &abovemat)
 
 static void blendfog(int fogmat, float blend, float logblend, float &start, float &end, float *fogc)
 {
-    switch(fogmat)
+    switch(fogmat&MATF_VOLUME)
     {
         case MAT_WATER:
-            loopk(3) fogc[k] += blend*watercol[k]/255.0f;
-            end += logblend*min(fog, max(waterfog*4, 32));
+        {
+            const bvec &wcol = getwatercol(fogmat);
+            int wfog = getwaterfog(fogmat);
+            loopk(3) fogc[k] += blend*wcol[k]/255.0f;
+            end += logblend*min(fog, max(wfog*4, 32));
             break;
+        }
 
         case MAT_LAVA:
-            loopk(3) fogc[k] += blend*lavacol[k]/255.0f;
-            end += logblend*min(fog, max(lavafog*4, 32));
+        {
+            const bvec &lcol = getlavacol(fogmat);
+            int lfog = getlavafog(fogmat);
+            loopk(3) fogc[k] += blend*lcol[k]/255.0f;
+            end += logblend*min(fog, max(lfog*4, 32));
             break;
+        }
 
         default:
             loopk(3) fogc[k] += blend*fogcolor[k]/255.0f;
@@ -1247,17 +1256,23 @@ void invalidatepostfx()
 static void blendfogoverlay(int fogmat, float blend, float *overlay)
 {
     float maxc;
-    switch(fogmat)
+    switch(fogmat&MATF_VOLUME)
     {
         case MAT_WATER:
-            maxc = max(watercol[0], max(watercol[1], watercol[2]));
-            loopk(3) overlay[k] += blend*max(0.4f, watercol[k]/min(32.0f + maxc*7.0f/8.0f, 255.0f));
+        {
+            const bvec &wcol = getwatercol(fogmat);
+            maxc = max(wcol[0], max(wcol[1], wcol[2]));
+            loopk(3) overlay[k] += blend*max(0.4f, wcol[k]/min(32.0f + maxc*7.0f/8.0f, 255.0f));
             break;
+        }
 
         case MAT_LAVA:
-            maxc = max(lavacol[0], max(lavacol[1], lavacol[2]));
-            loopk(3) overlay[k] += blend*max(0.4f, lavacol[k]/min(32.0f + maxc*7.0f/8.0f, 255.0f));
+        {
+            const bvec &lcol = getlavacol(fogmat);
+            maxc = max(lcol[0], max(lcol[1], lcol[2]));
+            loopk(3) overlay[k] += blend*max(0.4f, lcol[k]/min(32.0f + maxc*7.0f/8.0f, 255.0f));
             break;
+        }
 
         default:
             loopk(3) overlay[k] += blend;
@@ -1374,13 +1389,15 @@ VAR(IDF_WORLD, refractsky, 0, 0, 1);
 
 glmatrixf fogmatrix, invfogmatrix;
 
-void drawreflection(float z, bool refract)
+void drawreflection(float z, bool refract, int fog, const bvec &col)
 {
     reflectz = z < 0 ? 1e16f : z;
     reflecting = !refract;
     refracting = refract ? (z < 0 || camera1->o.z >= z ? -1 : 1) : 0;
     fading = renderpath!=R_FIXEDFUNCTION && waterrefract && waterfade && hasFBO && z>=0;
     fogging = refracting<0 && z>=0;
+    refractfog = fog;
+    refractcolor = fogging ? col : fogcolor;
 
     float oldfogstart, oldfogend, oldfogcolor[4];
     glGetFloatv(GL_FOG_START, &oldfogstart);
@@ -1390,7 +1407,7 @@ void drawreflection(float z, bool refract)
     if(fogging)
     {
         glFogf(GL_FOG_START, camera1->o.z - z);
-        glFogf(GL_FOG_END, camera1->o.z - (z-max(waterfog, 1)));
+        glFogf(GL_FOG_END, camera1->o.z - (z-max(refractfog, 1)));
         GLfloat m[16] =
         {
              1,   0,  0, 0,
@@ -1403,7 +1420,7 @@ void drawreflection(float z, bool refract)
         pushprojection();
         glPushMatrix();
         glLoadMatrixf(fogmatrix.v);
-        float fogc[4] = { watercol.x/255.0f, watercol.y/255.0f, watercol.z/255.0f, 1.0f };
+        float fogc[4] = { col.x/255.0f, col.y/255.0f, col.z/255.0f, 1.0f };
         glFogfv(GL_FOG_COLOR, fogc);
     }
     else
@@ -1537,14 +1554,14 @@ void drawcubemap(int size, int level, const vec &o, float yaw, float pitch, bool
 
     updatedynlights();
 
-    int fogmat = lookupmaterial(camera1->o)&MATF_VOLUME, abovemat = MAT_AIR;
+    int fogmat = lookupmaterial(camera1->o)&(MATF_VOLUME|MATF_INDEX), abovemat = MAT_AIR;
     float fogblend = 1.0f, causticspass = 0.0f;
-    if(fogmat==MAT_WATER || fogmat==MAT_LAVA)
+    if(isliquid(fogmat&MATF_VOLUME))
     {
         float z = findsurface(fogmat, camera1->o, abovemat) - WATER_OFFSET;
         if(camera1->o.z < z + 1) fogblend = min(z + 1 - camera1->o.z, 1.0f);
         else fogmat = abovemat;
-        if(level > 1 && caustics && fogmat==MAT_WATER && camera1->o.z < z)
+        if(level > 1 && caustics && (fogmat&MATF_VOLUME)==MAT_WATER && camera1->o.z < z)
             causticspass = renderpath==R_FIXEDFUNCTION ? 1.0f : min(z - camera1->o.z, 1.0f);
     }
     else
@@ -2351,7 +2368,7 @@ void drawviewtype(int targtype)
 
     addmotionblur();
     addglare();
-    if(fogmat==MAT_WATER || fogmat==MAT_LAVA) drawfogoverlay(fogmat, fogblend, abovemat);
+    if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
     renderpostfx();
 
     glDisable(GL_TEXTURE_2D);
@@ -2428,14 +2445,14 @@ void gl_drawframe(int w, int h)
     if(hasnoview()) drawnoview();
     else
     {
-        fogmat = lookupmaterial(camera1->o)&MATF_VOLUME;
+        fogmat = lookupmaterial(camera1->o)&(MATF_VOLUME|MATF_INDEX);
         causticspass = 0.f;
-        if(fogmat == MAT_WATER || fogmat == MAT_LAVA)
+        if(isliquid(fogmat&MATF_VOLUME))
         {
             float z = findsurface(fogmat, camera1->o, abovemat) - WATER_OFFSET;
             if(camera1->o.z < z + 1) fogblend = min(z + 1 - camera1->o.z, 1.0f);
             else fogmat = abovemat;
-            if(caustics && fogmat == MAT_WATER && camera1->o.z < z)
+            if(caustics && (fogmat&MATF_VOLUME) == MAT_WATER && camera1->o.z < z)
                 causticspass = renderpath==R_FIXEDFUNCTION ? 1.0f : min(z - camera1->o.z, 1.0f);
 
             float blend = abovemat == MAT_AIR ? fogblend : 1.0f;

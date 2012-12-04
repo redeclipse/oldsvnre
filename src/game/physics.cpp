@@ -1127,8 +1127,15 @@ namespace physics
                 if(mw >= 0) playsound(mw, mo, pl); \
             }
             if(curmat == MAT_WATER || oldmat == MAT_WATER)
+            {
+                const bvec &watercol = getwatercol((curmat == MAT_WATER ? matid : pl->inmaterial) & MATF_INDEX);
                 mattrig(bottom, watercol, 0.5f, int(radius), PHYSMILLIS, 0.25f, PART_SPARK, curmat != MAT_WATER ? S_SPLASH2 : S_SPLASH1);
-            if(curmat == MAT_LAVA) mattrig(center, lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
+            }
+            if(curmat == MAT_LAVA) 
+            {
+                const bvec &lavacol = getlavacol(matid & MATF_INDEX); 
+                mattrig(center, lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
+            }
         }
         if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->state == CS_ALIVE && flagmat&MAT_DEATH)
             game::suicide((gameent *)pl, curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH));

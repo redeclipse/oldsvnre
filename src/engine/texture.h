@@ -823,7 +823,7 @@ extern void mergevslot(VSlot &dst, const VSlot &src, const VSlot &delta);
 
 extern vector<Slot *> slots;
 extern vector<VSlot *> vslots;
-extern MSlot materialslots[MATF_VOLUME+1];
+extern MSlot materialslots[(MATF_VOLUME|MATF_INDEX)+1];
 
 extern int maxtmus, nolights, nowater, nomasks;
 
