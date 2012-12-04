@@ -2410,7 +2410,7 @@ namespace game
             camera1->inmaterial = lookupmaterial(camera1->o);
             camera1->inliquid = isliquid(camera1->inmaterial&MATF_VOLUME);
 
-            switch(camera1->inmaterial)
+            switch(camera1->inmaterial&MATF_VOLUME)
             {
                 case MAT_WATER:
                 {

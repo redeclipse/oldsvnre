@@ -1644,7 +1644,14 @@ void makeparticle(const vec &o, attrvector &attr)
             break;
         case 2: //water fountain - <dir>
         {
-            int color = (int(watercol[0])<<16) | (int(watercol[1])<<8) | int(watercol[2]);
+            int mat = MAT_WATER + clamp(-attr[2], 0, 3); 
+            const bvec &wfcol = getwaterfallcol(mat);
+            int color = (int(wfcol[0])<<16) | (int(wfcol[1])<<8) | int(wfcol[2]);
+            if(!color) 
+            {
+                const bvec &wcol = getwatercol(mat);
+                color = (int(wcol[0])<<16) | (int(wcol[1])<<8) | int(wcol[2]);
+            }
             regularsplash(PART_SPARK, color, 10, 4, 200, offsetvec(o, attr[1], rnd(10)), 0.6f, 1, 20);
             break;
         }

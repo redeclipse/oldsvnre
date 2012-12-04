@@ -24,7 +24,7 @@ extern void logoutf(const char *fmt, ...);
 #define _dbg_ fprintf(stderr, "%s:%d\n", __FILE__, __LINE__);
 #endif
 
-struct namemap { const char *name; uchar id; };
+struct namemap { const char *name; int id; };
 
 extern void lightent(extentity &e, float height = 8);
 extern void lightreaching(const vec &target, vec &color, vec &dir, bool fast = false, extentity *e = 0, float ambient = 0.4f);
@@ -653,13 +653,15 @@ enum
 
 enum
 {
-    MATF_VOLUME_SHIFT = 0,
-    MATF_CLIP_SHIFT   = 3,
-    MATF_FLAG_SHIFT   = 5,
+    MATF_INDEX_SHIFT  = 0,
+    MATF_VOLUME_SHIFT = 2,
+    MATF_CLIP_SHIFT   = 5,
+    MATF_FLAG_SHIFT   = 8,
 
+    MATF_INDEX  = 3 << MATF_INDEX_SHIFT,
     MATF_VOLUME = 7 << MATF_VOLUME_SHIFT,
-    MATF_CLIP   = 3 << MATF_CLIP_SHIFT,
-    MATF_FLAGS  = 7 << MATF_FLAG_SHIFT
+    MATF_CLIP   = 7 << MATF_CLIP_SHIFT,
+    MATF_FLAGS  = 0xFF << MATF_FLAG_SHIFT
 };
 
 enum // cube empty-space materials
