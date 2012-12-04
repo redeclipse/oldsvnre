@@ -501,6 +501,7 @@ extern int showmat;
 
 extern const char *findmaterialname(int type);
 extern int findmaterial(const char *name, bool tryint = false);
+extern const char *getmaterialdesc(int mat, const char *prefix = "");
 extern void genmatsurfs(const cube &c, int cx, int cy, int cz, int size, vector<materialsurface> &matsurfs);
 extern void rendermatsurfs(materialsurface *matbuf, int matsurfs);
 extern void rendermatgrid(materialsurface *matbuf, int matsurfs);
