@@ -142,7 +142,7 @@ static void drawmaterial(const materialsurface &m, float offset)
     }
 }
 
-namemap materials[] =
+extern const namemap materials[] =
 {
     {"air", MAT_AIR},
     {"water", MAT_WATER}, {"water1", MAT_WATER}, {"water2", MAT_WATER+1}, {"water3", MAT_WATER+2}, {"water4", MAT_WATER+3},

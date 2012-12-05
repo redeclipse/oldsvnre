@@ -2,12 +2,12 @@
 
 #include "engine.h"
 
-namemap mapexts[] = {
+extern const namemap mapexts[] = {
     { ".mpz", MAP_MAPZ },
     { ".ogz", MAP_OCTA },
 };
 
-namemap mapdirs[] = {
+extern const namemap mapdirs[] = {
     { "maps", MAP_MAPZ },
     { "base", MAP_OCTA },
 };

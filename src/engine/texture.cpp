@@ -1757,7 +1757,7 @@ ICOMMAND(0, fixinsidefaces, "i", (int *tex),
     allchanged();
 });
 
-namemap textypes[] =
+extern const namemap textypes[] =
 {
     {"c", TEX_DIFFUSE},
     {"u", TEX_UNKNOWN},
