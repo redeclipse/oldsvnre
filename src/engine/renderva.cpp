@@ -662,9 +662,7 @@ VAR(IDF_HEX, blendbrushcolor, 0, 0x0000C0, 0xFFFFFF);
 
 void renderblendbrush(GLuint tex, float x, float y, float w, float h)
 {
-    static Shader *blendbrushshader = NULL;
-    if(!blendbrushshader) blendbrushshader = lookupshaderbyname("blendbrush");
-    blendbrushshader->set();
+    SETSHADER(blendbrush);
 
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -733,9 +731,7 @@ void rendershadowmapreceivers()
 {
     if(!hasBE) return;
 
-    static Shader *shadowmapshader = NULL;
-    if(!shadowmapshader) shadowmapshader = lookupshaderbyname("shadowmapreceiver");
-    shadowmapshader->set();
+    SETSHADER(shadowmapreceiver);
 
     glDisable(GL_TEXTURE_2D);
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -2047,9 +2043,7 @@ void setupcaustics(int tmu, float blend, GLfloat *color = NULL)
     }
     if(renderpath!=R_FIXEDFUNCTION)
     {
-        static Shader *causticshader = NULL;
-        if(!causticshader) causticshader = lookupshaderbyname("caustic");
-        causticshader->set();
+        SETSHADER(caustic);
         setlocalparamfv("texgenS", SHPARAM_VERTEX, 0, s);
         setlocalparamfv("texgenT", SHPARAM_VERTEX, 1, t);
         setlocalparamf("frameoffset", SHPARAM_PIXEL, 0, blend*(1-frac), blend*frac, blend);

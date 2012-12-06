@@ -2436,10 +2436,7 @@ void rendertexturepanel(int w, int h)
         glOrtho(0, width, 1800, 0, -1, 1);
         int y = 50, gap = 10;
 
-        static Shader *rgbonlyshader = NULL;
-        if(!rgbonlyshader) rgbonlyshader = lookupshaderbyname("rgbonly");
-
-        rgbonlyshader->set();
+        SETSHADER(rgbonly);
 
         loopi(7)
         {
