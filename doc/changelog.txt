@@ -5,6 +5,7 @@ Gameplay:
  * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
  * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with /thirdpersondist and /thirdpersonside)
+ * Changed melee mechanic to need prior impulse action (needs clarification, is it 1.2-style?)
 
 Weapons:
  * Plasma primary damage and explosion radius increased
@@ -32,11 +33,15 @@ Interface & Menus:
  * Demos and screenshots are now stored in "demos" and "screenshots" subdirectories in the homedir, using "<date><time>[.<number>]" for filename
  * Incomplete demos discarded by default (/demokeep 1 to enable)
  * Added inline tab completion for commands and inline help descriptions
+ * Added ammo bars in weapon inventory
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
  * Enabled multi-coop (one human team and multiple bot teams)
  * Removed expert from default set of allowed mutators
+
+Modding & Data Assets:
+ * Added support for up to 4 types of water, lava, and glass
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
@@ -52,7 +57,6 @@ Additional fixed bugs:
  * #218 - can no longer drop your loadout weapons in arena
  * #223 - can no longer use common file-writing commands from a map script
  * #224 - Possible to cut in map "hawk"
- * #232 - ALT + F4 and ALT + TAB not working from fullscreen in Linux
  * #219 - Bots do not show proper weapons
 
 
