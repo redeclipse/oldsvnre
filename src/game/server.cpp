@@ -4432,7 +4432,6 @@ namespace server
                         falling.mul(mag/DVELF);
                     }
                     else falling = vec(0, 0, 0);
-                    if(flags&(1<<7)) loopk(2) p.get();
                     if(havecn)
                     {
                         vec oldpos = cp->state.o;

@@ -420,6 +420,7 @@ namespace projs
                 int type = WEAP2(proj.weap, parttype, proj.flags&HIT_ALT);
                 switch(type)
                 {
+                    //case WEAP_MELEE:
                     case WEAP_SWORD:
                     {
                         part_splash(PART_SPARK, 25, 350, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
@@ -516,13 +517,23 @@ namespace projs
 
     void updatetargets(projent &proj, int style = 0)
     {
-        if(!proj.child && proj.projtype == PRJ_SHOT && proj.weap != WEAP_MELEE && proj.owner && proj.owner->state == CS_ALIVE)
+        if(!proj.child && proj.projtype == PRJ_SHOT && proj.owner && proj.owner->state == CS_ALIVE)
         {
             if(weaptype[proj.weap].traced)
             {
-                proj.from = proj.owner->originpos();
-                proj.to = proj.owner->muzzlepos(proj.weap, proj.flags&HIT_ALT);
-                if(style != 2) proj.o = proj.from;
+                if(proj.weap == WEAP_MELEE && proj.flags&HIT_ALT)
+                {
+                    proj.o = proj.to = proj.from = proj.owner->center();
+                    if(proj.target && proj.target->state == CS_ALIVE)
+                        proj.to.add(vec(proj.target->center()).sub(proj.from).normalize().mul(proj.owner->radius*2));
+                    else proj.to.add(vec(proj.owner->yaw, proj.owner->pitch).mul(proj.owner->radius*2));
+                }
+                else
+                {
+                    proj.from = proj.owner->originpos();
+                    proj.to = proj.owner->muzzlepos(proj.weap, proj.flags&HIT_ALT);
+                    if(style != 2) proj.o = proj.from;
+                }
             }
             else
             {
@@ -805,7 +816,7 @@ namespace projs
                 proj.yaw = d->yaw;
                 proj.pitch = d->pitch;
                 proj.inertia = vec(d->vel).add(d->falling);
-                if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan))
+                if(proj.projtype == PRJ_SHOT && isweap(proj.weap) && issound(d->pschan) && proj.weap != WEAP_MELEE)
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, int(ceilf(sounds[d->pschan].vol)), -1, -1, &proj.schan, 0, &d->pschan);
             }
         }
@@ -849,7 +860,7 @@ namespace projs
             if(cooked&32) speed = limspeed+int(ceilf(max(speed-limspeed, 0)*(1-scale))); // inverted speed
         }
 
-        if(weaptype[weap].sound >= 0)
+        if(weaptype[weap].sound >= 0 && (weap != WEAP_MELEE || !(flags&HIT_ALT)))
         {
             int slot = WEAPSNDF(weap, flags&HIT_ALT), vol = int(ceilf(255*skew));
             if(slot >= 0 && vol > 0)
@@ -902,8 +913,11 @@ namespace projs
                 targ.sub(from).normalize().mul(weapfx[weap].flarelen).add(from);
                 part_flare(from, targ, WEAP2(weap, adelay, flags&HIT_ALT)/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
             }
-            int peak = WEAP2(weap, adelay, flags&HIT_ALT)/4, fade = min(peak/2, 75);
-            adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
+            if(weap != WEAP_MELEE)
+            {
+                int peak = WEAP2(weap, adelay, flags&HIT_ALT)/4, fade = min(peak/2, 75);
+                adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
+            }
         }
 
         loopv(shots)
@@ -975,7 +989,7 @@ namespace projs
         {
             case PRJ_SHOT:
             {
-                if(!proj.child && !proj.limited)
+                if(!proj.child && !proj.limited && proj.weap != WEAP_MELEE)
                 {
                     int vol = int(ceilf(255*proj.curscale));
                     if(WEAP2(proj.weap, power, proj.flags&HIT_ALT)) switch(WEAP2(proj.weap, cooked, proj.flags&HIT_ALT))
@@ -989,6 +1003,7 @@ namespace projs
                 int type = WEAP2(proj.weap, parttype, proj.flags&HIT_ALT);
                 switch(type)
                 {
+                    //case WEAP_MELEE:
                     case WEAP_SWORD:
                     {
                         part_flare(proj.from, proj.to, 1, PART_LIGHTNING_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 1);
@@ -1334,7 +1349,7 @@ namespace projs
                     }
                     default: break;
                 }
-                if(!proj.limited && !proj.child && vol > 0)
+                if(!proj.limited && !proj.child && vol > 0 && proj.weap != WEAP_MELEE)
                 {
                     int slot = WEAPEX(proj.weap, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize) > 0 ? S_W_EXPLODE : S_W_DESTROY;
                     playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
@@ -1393,7 +1408,7 @@ namespace projs
         }
         if(chk)
         {
-            if(chk&1 && !proj.limited && !proj.child)
+            if(chk&1 && !proj.limited && !proj.child && proj.weap != WEAP_MELEE)
             {
                 int vol = int(ceilf(48*proj.curscale)), snd = S_EXTINGUISH;
                 float size = max(proj.radius, 1.f);
@@ -1577,7 +1592,7 @@ namespace projs
                                 break;
                             }
                         }
-                        if(t && (!m_isteam(game::gamemode, game::mutators) || t->type != ENT_PLAYER || ((gameent *)t)->team != proj.owner->team))
+                        if(t && (!m_isteam(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
                         {
                             proj.target = t;
                             targ = proj.target->center();
@@ -1896,6 +1911,7 @@ namespace projs
                 if(!hits.empty())
                     client::addmsg(N_DESTROY, "ri7iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
                             int(radius), int(proj.curscale*DNF), hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                if(proj.weap == WEAP_MELEE && proj.flags&HIT_ALT) proj.target = NULL;
             }
             if(proj.state == CS_DEAD)
             {

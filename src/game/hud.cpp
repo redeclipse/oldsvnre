@@ -110,6 +110,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsebgtex, "<grey>textures/impulsebg", 3);
     TVAR(IDF_PERSIST|IDF_PRELOAD, progresstex, "<grey>textures/progress", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorytex, "<grey>textures/inventory", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, inventorybartex, "<grey>textures/inventorybar", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, warningtex, "<grey>textures/warning", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flagtex, "<grey>textures/flag", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bombtex, "<grey>textures/bomb", 3);
@@ -203,6 +204,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 3);
+    VAR(IDF_PERSIST, inventoryammobar, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryhidemelee, 0, 1, 1);
     VAR(IDF_PERSIST, inventorygame, 0, 2, 2);
     VAR(IDF_PERSIST, inventoryscore, 0, 1, VAR_MAX);
@@ -217,11 +219,17 @@ namespace hud
     FVAR(IDF_PERSIST, inventoryscoreshrinkmax, 0, 0.45f, 1);
     FVAR(IDF_PERSIST, inventoryblend, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryglow, 0, 0.05f, 1);
+    FVAR(IDF_PERSIST, inventorytextoffsetx, -1, -0.25f, 1);
+    FVAR(IDF_PERSIST, inventorytextoffsety, -1, -0.125f, 1);
 
     VAR(IDF_PERSIST, inventorybg, 0, 1, 1);
     FVAR(IDF_PERSIST, inventorybgskew, 0, 0.05f, 1); // skew items inside by this much
     FVAR(IDF_PERSIST, inventorybgblend, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, inventorybgspace, 0, 0.05f, 1); // for aligning diagonals
+
+    FVAR(IDF_PERSIST, inventorybartop, 0, 0.046875f, 1); // starts from this offset
+    FVAR(IDF_PERSIST, inventorybarbottom, 0, 0.28125f, 1); // ends at this offset
+    FVAR(IDF_PERSIST, inventorybaroffset, -1, -0.25f, 1); // starts from this offset
 
     VAR(IDF_PERSIST, inventoryedit, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryeditblend, 0, 1, 1);
@@ -1843,6 +1851,59 @@ namespace hud
         return int(s);
     }
 
+    const struct barstep
+    {
+        float amt, r, g, b;
+    } barsteps[3][4] = {
+        { { 0, 0.25f, 0.25f, 0.25f }, { 0.35f, 0.5f, 0.5f, 0.5f }, { 0.65f, 0.75f, 0.75f, 0.75f }, { 1, 1, 1, 1 } },
+        { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } },
+        { { 0, 1, 0.25f, 0.25f }, { 0.35f, 1, 0, 1 }, { 0.65f, 0.25f, 0.25f, 1 }, { 1, 0, 1, 1 } }
+    };
+
+    int drawitembar(int x, int y, float size, bool left, float r, float g, float b, float fade, float skew, float amt, int type)
+    {
+        if(skew <= 0.f) return 0;
+        Texture *t = textureload(inventorybartex, 3);
+        float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew,
+              w = float(t->w)/float(t->h)*s, btoff = 1-inventorybarbottom, middle = btoff-inventorybartop;
+        int sx = int(w), sy = int(s), so = int(sx*inventorybaroffset), cx = left ? x-so : x-sx+so, cy = y-sy+int(sy*inventorybartop), cw = sx, ch = int(sy*middle), id = clamp(type, 0, 2);
+        glBindTexture(GL_TEXTURE_2D, t->id);
+        glBegin(GL_TRIANGLE_STRIP);
+        const float margin = 0.1f;
+        loopi(4)
+        {
+            const barstep &step = barsteps[id][i];
+            if(i > 0)
+            {
+                if(step.amt > amt && barsteps[id][i-1].amt <= amt)
+                {
+                    float hoff = 1 - amt, hlerp = (amt - barsteps[id][i-1].amt) / (step.amt - barsteps[id][i-1].amt),
+                          hr = cr*step.r*hlerp + cr*barsteps[id][i-1].r*(1-hlerp),
+                          hg = cg*step.g*hlerp + cg*barsteps[id][i-1].g*(1-hlerp),
+                          hb = cb*step.b*hlerp + cb*barsteps[id][i-1].b*(1-hlerp);
+                    glColor4f(hr, hg, hb, fade); glTexCoord2f(0, hoff*middle+inventorybartop); glVertex2f(cx, cy + hoff*ch);
+                    glColor4f(hr, hg, hb, fade); glTexCoord2f(1, hoff*middle+inventorybartop); glVertex2f(cx + cw, cy + hoff*ch);
+                }
+                if(step.amt > amt + margin)
+                {
+                    float hoff = 1 - (amt + margin), hlerp = (amt + margin - barsteps[id][i-1].amt) / (step.amt - barsteps[id][i-1].amt),
+                          hr = cr*step.r*hlerp + cr*barsteps[id][i-1].r*(1-hlerp),
+                          hg = cg*step.g*hlerp + cg*barsteps[id][i-1].g*(1-hlerp),
+                          hb = cb*step.b*hlerp + cb*barsteps[id][i-1].b*(1-hlerp);
+                    glColor4f(hr, hg, hb, 0); glTexCoord2f(0, hoff*middle+inventorybartop); glVertex2f(cx, cy + hoff*ch);
+                    glColor4f(hr, hg, hb, 0); glTexCoord2f(1, hoff*middle+inventorybartop); glVertex2f(cx + cw, cy + hoff*ch);
+                    break;
+                }
+            }
+            float off = 1 - step.amt, hfade = fade, hr = cr*step.r, hg = cg*step.g, hb = cb*step.b;
+            if(step.amt > amt) hfade *= 1 - (step.amt - amt)/margin;
+            glColor4f(hr, hg, hb, hfade); glTexCoord2f(0, off*middle+inventorybartop); glVertex2f(cx, cy + off*ch);
+            glColor4f(hr, hg, hb, hfade); glTexCoord2f(1, off*middle+inventorybartop); glVertex2f(cx + cw, cy + off*ch);
+        }
+        glEnd();
+        return sy;
+    }
+
     int drawitem(const char *tex, int x, int y, float size, float sub, bool bg, bool left, float r, float g, float b, float fade, float skew, const char *font, const char *text, ...)
     {
         if(skew <= 0.f) return 0;
@@ -1890,8 +1951,9 @@ namespace hud
             glPushMatrix();
             glScalef(skew, skew, 1);
             if(font && *font) pushfont(font);
-            int tx = int((left ? (cx+cw+(FONTW*skew*0.5f)) : (cx-cw-(FONTW*skew*0.5f)))/skew),
-                ty = int((cy-cs+cs/2-(FONTH/2*skew))/skew), tj = left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY;
+            int ox = int(cw*inventorytextoffsetx), oy = int(cs*inventorytextoffsety),
+                tx = int((left ? (cx+cw-ox) : (cx-cw+ox))/skew),
+                ty = int((cy-cs+cs/2-(FONTH/2*skew)+oy)/skew), tj = left ? TEXT_LEFT_JUSTIFY : TEXT_RIGHT_JUSTIFY;
             defvformatstring(str, text, text);
             draw_textx("%s", tx, ty, 255, 255, 255, int(255*fade), tj|TEXT_NO_INDENT, -1, -1, str);
             if(font && *font) popfont();
@@ -2043,6 +2105,8 @@ namespace hud
                     if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", game::focus->ammo[i]);
                     else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
+                    if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
+                        drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, game::focus->ammo[i]/float(WEAP(i, max)));
                     if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                     {
                         static string weapids[WEAP_MAX];
@@ -2080,7 +2144,7 @@ namespace hud
 
     int drawbar(int x, int y, int w, int h, int type, float top, float bottom, float fade, float amt, const char *tex, const char *bgtex, int tone, float bgglow, float blend, float pulse, float throb)
     {
-        int sy = 0, offset = int(w*throb);
+        int sy = 0, offset = int(w*throb), id = clamp(type, 0, 2);
         if(*bgtex)
         {
             int glow = 0;
@@ -2090,20 +2154,13 @@ namespace hud
             {
                 int millis = lastmillis%1000;
                 float skew = (millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f))*pulse;
-                flashcolourf(gr, gg, gb, gf, type ? 0.5f : 1.f, 0.f, type ? 0.5f : 0.f, 1.f, skew);
+                flashcolourf(gr, gg, gb, gf, id != 1 ? 0.5f : 1.f, 0.f, id != 1 ? 0.5f : 0.f, 1.f, skew);
                 glow += int(w*bgglow*skew);
             }
             settexture(bgtex, 3);
             glColor4f(gr, gg, gb, fade*gf);
             drawtexture(x-offset-glow, y-h-offset-glow, w+glow*2+offset*2, h+glow*2+offset*2);
         }
-        const struct barstep
-        {
-            float amt, r, g, b;
-        } steps[2][4] = {
-            { { 0, 0.75f, 0, 0 }, { 0.35f, 1, 0.5f, 0 }, { 0.65f, 1, 1, 0 }, { 1, 0, 1, 0 } },
-            { { 0, 1, 0.25f, 0.25f }, { 0.35f, 1, 0, 1 }, { 0.65f, 0.25f, 0.25f, 1 }, { 1, 0, 1, 1 } }
-        };
         settexture(tex, 3);
         glBegin(GL_TRIANGLE_STRIP);
         float btoff = 1-bottom, middle = btoff-top;
@@ -2111,24 +2168,24 @@ namespace hud
         const float margin = 0.1f;
         loopi(4)
         {
-            const barstep &step = steps[type][i];
+            const barstep &step = barsteps[id][i];
             if(i > 0)
             {
-                if(step.amt > amt && steps[type][i-1].amt <= amt)
+                if(step.amt > amt && barsteps[id][i-1].amt <= amt)
                 {
-                    float hoff = 1 - amt, hlerp = (amt - steps[type][i-1].amt) / (step.amt - steps[type][i-1].amt),
-                          r = step.r*hlerp + steps[type][i-1].r*(1-hlerp),
-                          g = step.g*hlerp + steps[type][i-1].g*(1-hlerp),
-                          b = step.b*hlerp + steps[type][i-1].b*(1-hlerp);
+                    float hoff = 1 - amt, hlerp = (amt - barsteps[id][i-1].amt) / (step.amt - barsteps[id][i-1].amt),
+                          r = step.r*hlerp + barsteps[id][i-1].r*(1-hlerp),
+                          g = step.g*hlerp + barsteps[id][i-1].g*(1-hlerp),
+                          b = step.b*hlerp + barsteps[id][i-1].b*(1-hlerp);
                     glColor4f(r, g, b, fade); glTexCoord2f(0, hoff*middle+top); glVertex2f(cx, cy + hoff*ch);
                     glColor4f(r, g, b, fade); glTexCoord2f(1, hoff*middle+top); glVertex2f(cx + cw, cy + hoff*ch);
                 }
                 if(step.amt > amt + margin)
                 {
-                    float hoff = 1 - (amt + margin), hlerp = (amt + margin - steps[type][i-1].amt) / (step.amt - steps[type][i-1].amt),
-                          r = step.r*hlerp + steps[type][i-1].r*(1-hlerp),
-                          g = step.g*hlerp + steps[type][i-1].g*(1-hlerp),
-                          b = step.b*hlerp + steps[type][i-1].b*(1-hlerp);
+                    float hoff = 1 - (amt + margin), hlerp = (amt + margin - barsteps[id][i-1].amt) / (step.amt - barsteps[id][i-1].amt),
+                          r = step.r*hlerp + barsteps[id][i-1].r*(1-hlerp),
+                          g = step.g*hlerp + barsteps[id][i-1].g*(1-hlerp),
+                          b = step.b*hlerp + barsteps[id][i-1].b*(1-hlerp);
                     glColor4f(r, g, b, 0); glTexCoord2f(0, hoff*middle+top); glVertex2f(cx, cy + hoff*ch);
                     glColor4f(r, g, b, 0); glTexCoord2f(1, hoff*middle+top); glVertex2f(cx + cw, cy + hoff*ch);
                     break;
@@ -2156,7 +2213,7 @@ namespace hud
                 float pulse = inventoryhealthflash && game::focus->health < heal ? float(heal-game::focus->health)/float(heal) : 0.f,
                     throb = inventoryhealththrob > 0 && regentime && game::focus->lastregen && lastmillis-game::focus->lastregen <= regentime ? clamp((lastmillis-game::focus->lastregen)/float(regentime/2), 0.f, 2.f) : 0.f;
                 if(inventoryhealth&2)
-                    sy += drawbar(x, y, width, size, 0, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*inventoryhealththrob);
+                    sy += drawbar(x, y, width, size, 1, inventoryhealthbartop, inventoryhealthbarbottom, fade, clamp(game::focus->health/float(heal), 0.0f, 1.0f), healthtex, healthbgtex, inventorytone, inventoryhealthbgglow, inventoryhealthbgblend, pulse, (throb > 1.f ? 1.f-throb : throb)*inventoryhealththrob);
                 float gr = 1, gg = 1, gb = 1;
                 if(pulse > 0)
                 {
@@ -2186,7 +2243,7 @@ namespace hud
                 float fade = blend*inventoryimpulseblend;
                 float amt = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
                 if(inventoryimpulse == 2)
-                    sy += drawbar(x, y-sy, width, size, 1, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, amt, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
+                    sy += drawbar(x, y-sy, width, size, 2, inventoryimpulsebartop, inventoryimpulsebarbottom, fade, amt, impulsetex, impulsebgtex, inventorytone, inventoryimpulsebgglow, inventoryimpulsebgblend, inventoryimpulseflash && game::focus->impulse[IM_METER] ? 1-amt : 0.f, 0.f);
                 else
                 {
                     pushfont("emphasis");

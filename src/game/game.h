@@ -5,11 +5,11 @@
 
 #ifdef MEKARCADE
 #define GAMEID              "mek"
-#define GAMEVERSION         217
+#define GAMEVERSION         218
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
 #else
 #define GAMEID              "fps"
-#define GAMEVERSION         217
+#define GAMEVERSION         218
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
 #endif
 #define DEMO_VERSION        GAMEVERSION
@@ -1337,10 +1337,16 @@ struct gameent : dynent, gamestate
         return stun;
     }
 
-    bool canmelee(int sweap, int millis, bool check = false, bool slide = false)
+    bool hasmelee(int millis, bool check = false, bool slide = false, bool onfloor = true, bool can = true)
     {
-        if(check && !action[AC_SPECIAL] && !slide) return false;
-        if(impulsemeleechain && (!impulse[IM_TYPE] || millis-impulse[IM_TIME] > impulsemeleechain)) return false;
+        if(check && (!action[AC_SPECIAL] || onfloor) && !slide) return false;
+        if(can && (weapstate[WEAP_MELEE] != WEAP_S_SECONDARY || millis-weaplast[WEAP_MELEE] >= weapwait[WEAP_MELEE])) return false;
+        return true;
+    }
+
+    bool canmelee(int sweap, int millis, bool check = false, bool slide = false, bool onfloor = true)
+    {
+        if(!hasmelee(millis, check, slide, onfloor, false)) return false;
         if(!canshoot(WEAP_MELEE, HIT_ALT, sweap, millis, (1<<WEAP_S_RELOAD))) return false;
         return true;
     }
@@ -1524,6 +1530,7 @@ namespace hud
     extern float radarrange();
     extern void drawblip(const char *tex, float area, int w, int h, float s, float blend, int style, vec &pos, const vec &colour = vec(1, 1, 1), const char *font = "reduced", const char *text = NULL, ...);
     extern int drawprogress(int x, int y, float start, float length, float size, bool left, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, const char *font = NULL, const char *text = NULL, ...);
+    extern int drawitembar(int x, int y, float size, bool left, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, float amt = 1, int type = 0);
     extern int drawitem(const char *tex, int x, int y, float size, float sub = 0, bool bg = true, bool left = false, float r = 1, float g = 1, float b = 1, float fade = 1, float skew = 1, const char *font = NULL, const char *text = NULL, ...);
     extern int drawitemtext(int x, int y, float size, bool left = false, float skew = 1, const char *font = NULL, float blend = 1, const char *text = NULL, ...);
     extern int drawweapons(int x, int y, int s, float blend = 1);

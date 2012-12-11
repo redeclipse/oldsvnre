@@ -910,14 +910,14 @@ namespace physics
                     regularshape(PART_SMOKE, int(d->radius), 0x222222, 21, 20, 250, d->feetpos(), 1, 1, -10, 0, 10.f);
                 }
             }
-            if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true)))
+            if(d->hasmelee(lastmillis, true, sliding(d, true), onfloor))
             {
                 vec oldpos = d->o, dir;
                 vecfromyawpitch(d->yaw, 0, 1, 0, dir);
                 d->o.add(dir.normalize());
                 bool collided = collide(d, dir);
                 d->o = oldpos;
-                if(!collided && hitplayer && weapons::doshot(d, hitplayer->o, WEAP_MELEE, true, true))
+                if(!collided && hitplayer && (hitplayer->type == ENT_PLAYER || hitplayer->type == ENT_AI))
                 {
                     d->action[AC_SPECIAL] = false;
                     d->resetjump();
@@ -927,6 +927,12 @@ namespace physics
                         d->turnmillis = PHYSMILLIS;
                         d->turnside = 0;
                         d->turnyaw = d->turnroll = 0;
+                    }
+                    loopv(projs::projs)
+                    {
+                        projent *p = projs::projs[i];
+                        if(p->owner != d || !p->ready() || p->projtype != PRJ_SHOT || p->weap != WEAP_MELEE || !(p->flags&HIT_ALT)) continue;
+                        p->target = (gameent *)hitplayer;
                     }
                 }
             }
@@ -1033,6 +1039,7 @@ namespace physics
                 }
             }
         }
+        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true), onfloor)) weapons::doshot(d, d->o, WEAP_MELEE, true, true);
         if(!found && d->turnside) d->turnside = 0;
         d->action[AC_DASH] = false;
     }
@@ -1131,9 +1138,9 @@ namespace physics
                 const bvec &watercol = getwatercol((curmat == MAT_WATER ? matid : pl->inmaterial) & MATF_INDEX);
                 mattrig(bottom, watercol, 0.5f, int(radius), PHYSMILLIS, 0.25f, PART_SPARK, curmat != MAT_WATER ? S_SPLASH2 : S_SPLASH1);
             }
-            if(curmat == MAT_LAVA) 
+            if(curmat == MAT_LAVA)
             {
-                const bvec &lavacol = getlavacol(matid & MATF_INDEX); 
+                const bvec &lavacol = getlavacol(matid & MATF_INDEX);
                 mattrig(center, lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
             }
         }
