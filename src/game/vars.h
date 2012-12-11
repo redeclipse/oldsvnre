@@ -337,6 +337,7 @@ GFVAR(0, impulseboost, 0, 1, FVAR_MAX); // thrust modifier
 GFVAR(0, impulsepower, 0, 1.5f, FVAR_MAX); // power jump modifier
 GFVAR(0, impulsedash, 0, 1.2f, FVAR_MAX); // dashing/powerslide modifier
 GFVAR(0, impulsejump, 0, 1.1f, FVAR_MAX); // jump modifier
+GFVAR(0, impulsemelee, 0, 0.75f, FVAR_MAX); // melee modifier
 GFVAR(0, impulseparkour, 0, 1, FVAR_MAX); // parkour modifier
 GFVAR(0, impulseparkourkick, 0, 1.3f, FVAR_MAX); // parkour kick modifier
 GFVAR(0, impulseparkourvault, 0, 1.3f, FVAR_MAX); // parkour vault modifier
@@ -351,9 +352,6 @@ GVAR(0, impulsedashdelay, 0, 750, VAR_MAX); // minimum time between dashes/power
 GVAR(0, impulsekickdelay, 0, 350, VAR_MAX); // minimum time between wall kicks/climbs
 GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage of height for vault
 GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
-
-GFVAR(0, impulsemelee, 0, 0.75f, FVAR_MAX); // melee modifier
-GVAR(0, impulsemeleechain, 0, 0, VAR_MAX); // impulse melee style; 0 = any time, 1+ = only this long after an impulse in ms
 
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
 GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump

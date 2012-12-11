@@ -172,9 +172,9 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 //  flakcollide2
 //  parttype
 WEAPON(melee,       0xEEEEEE,       0xEEEE22,       0xEEEE22,       -1,             -1,
-    1,      1,      0,      0,      250,    500,    50,     30,     40,     0,      0,      0,      0,      0,      0,
-    0,      0,      100,    100,
-    10,     10,     0,      0,      200,    200,    0,      0,      1,      1,      1,      1,      0,      0,      0,      0,
+    1,      1,      0,      0,      250,    1000,   50,     30,     40,     0,      0,      0,      0,      0,      0,
+    0,      0,      100,    500,
+    0,      0,      0,      0,      200,    200,    0,      0,      1,      1,      1,      1,      0,      0,      0,      0,
     1,      1,      1,      1,      -1,             -1,             25,     10,     5,      5,      500,    500,    0,      0,
     IMPACT_PLAYER|COLLIDE_TRACE,
     IMPACT_PLAYER|COLLIDE_TRACE,

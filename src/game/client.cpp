@@ -1369,11 +1369,6 @@ namespace client
                     falling.mul(mag/DVELF);
                 }
                 else falling = vec(0, 0, 0);
-                if(flags&(1<<7)) // TODO: REMOVE
-                {
-                    dir = p.get();
-                    dir |= p.get()<<8;
-                }
                 gameent *d = game::getclient(lcn);
                 if(!d || d == game::player1 || d->ai) continue;
                 float oldyaw = d->yaw, oldpitch = d->pitch;

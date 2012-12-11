@@ -159,7 +159,6 @@ namespace capture
                 else hud::drawitem(hud::teamtexname(f.team), x, oldy, s, 0.5f, true, false, c.r, c.g, c.b, blend, skew);
                 if(!game::intermission && (f.droptime || (m_gsp3(game::gamemode, game::mutators) && f.taketime && f.owner && f.owner->team != f.team)))
                 {
-                    int sx = x-int(s*skew);
                     float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(capturedelay), 0.f, 1.f) : clamp((lastmillis-f.taketime)/float(captureprotectdelay), 0.f, 1.f);
                     if(wait > 0.5f)
                     {
@@ -167,8 +166,7 @@ namespace capture
                         float amt = (millis <= delay ? millis/float(delay) : 1.f-((millis-delay)/float(delay)));
                         flashcolour(c.r, c.g, c.b, 0.65f, 0.65f, 0.65f, amt);
                     }
-                    if(wait < 1) hud::drawprogress(sx, oldy, wait, 1-wait, s, false, c.r, c.g, c.b, blend*0.25f, skew);
-                    hud::drawprogress(sx, oldy, 0, wait, s, false, c.r, c.g, c.b, blend, skew, "super", "%d%%", int(wait*100.f));
+                    hud::drawitembar(x, oldy, s, false, c.r, c.g, c.b, blend, skew, wait);
                 }
             }
         }

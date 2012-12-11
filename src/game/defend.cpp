@@ -170,18 +170,17 @@ namespace defend
                 if(f.hasflag) skew += (millis <= 1000 ? clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew) : 1.f-skew);
                 else if(millis <= 1000) skew += (1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew));
                 int oldy = y-sy;
-                sy += hud::drawitem(hud::flagtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew);
+                if(hasflag || f.enemy)
+                    sy += hud::drawitem(hud::flagtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
+                else sy += hud::drawitem(hud::flagtex, x, oldy, s, 0, true, false, c.r, c.g, c.b, blend, skew);
                 if(f.enemy)
                 {
-                    int sx = x-int(s*skew);
                     vec c2 = vec::hexcolor(TEAM(f.enemy, colour));
-                    hud::drawprogress(sx, oldy, occupy, 1-occupy, s, false, c1.r, c1.g, c1.b, blend*0.25f, skew);
-                    hud::drawprogress(sx, oldy, 0, occupy, s, false, c2.r, c2.g, c2.b, blend, skew, "super", "%s%d%%", hasflag ? (f.owner && f.enemy == game::focus->team ? "\fy" : (occupy < 1.f ? "\fc" : "\fg")) : "\fw", int(occupy*100.f));
                     hud::drawitem(hud::attacktex, x, oldy, s, 0.5f, true, false, c2.r, c2.g, c2.b, blend, skew);
+                    hud::drawitembar(x, oldy, s, false, c.r, c.g, c.b, blend, skew, occupy);
                 }
                 else if(f.owner)
                     hud::drawitem(hud::teamtexname(f.owner), x, oldy, s, 0.5f, true, false, c1.r, c1.g, c1.b, blend, skew);
-                //hud::drawitemtext(x, oldy, s, false, skew, "reduced", blend, "%s", f.name);
             }
         }
         return sy;

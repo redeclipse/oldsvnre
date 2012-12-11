@@ -2471,19 +2471,15 @@ namespace game
         }
         else
         {
+            bool melee = d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d));
             if(secondary && allowmove(d) && aistyle[d->aitype].canmove)
             {
                 if(physics::jetpack(d))
                 {
-                    if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
+                    if(melee)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->actiontime[AC_SPECIAL];
-                    }
-                    else if(d->impulse[IM_TYPE] == IM_T_MELEE)
-                    {
-                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->impulse[IM_TIME];
+                        basetime2 = d->weaplast[WEAP_MELEE];
                     }
                     else if(d->move>0) anim |= (ANIM_JET_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_JET_LEFT : ANIM_JET_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2496,15 +2492,10 @@ namespace game
                 {
                     basetime2 = d->impulse[IM_TIME];
                     if(d->impulse[IM_TYPE] == IM_T_KICK || d->impulse[IM_TYPE] == IM_T_VAULT) anim |= ANIM_WALL_JUMP<<ANIM_SECONDARY;
-                    else if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
+                    else if(melee)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->actiontime[AC_SPECIAL];
-                    }
-                    else if(d->impulse[IM_TYPE] == IM_T_MELEE)
-                    {
-                        anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->impulse[IM_TIME];
+                        basetime2 = d->weaplast[WEAP_MELEE];
                     }
                     else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
@@ -2515,10 +2506,10 @@ namespace game
                 {
                     if(d->impulse[IM_JUMP] && d->timeinair) basetime2 = d->impulse[IM_JUMP];
                     else if(d->timeinair) basetime2 = lastmillis-d->timeinair;
-                    if(d->canmelee(m_weapon(gamemode, mutators), lastmillis, true))
+                    if(melee)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->actiontime[AC_SPECIAL];
+                        basetime2 = d->weaplast[WEAP_MELEE];
                     }
                     else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
                     {
