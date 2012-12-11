@@ -1862,7 +1862,7 @@ namespace hud
 
     int drawitembar(int x, int y, float size, bool left, float r, float g, float b, float fade, float skew, float amt, int type)
     {
-        if(skew <= 0.f) return 0;
+        if(skew <= 0.f || amt <= 0.f) return 0;
         Texture *t = textureload(inventorybartex, 3);
         float q = clamp(skew, 0.f, 1.f), cr = left ? r : r*q, cg = left ? g : g*q, cb = left ? b : b*q, s = size*skew,
               w = float(t->w)/float(t->h)*s, btoff = 1-inventorybarbottom, middle = btoff-inventorybartop;
@@ -2161,6 +2161,7 @@ namespace hud
             glColor4f(gr, gg, gb, fade*gf);
             drawtexture(x-offset-glow, y-h-offset-glow, w+glow*2+offset*2, h+glow*2+offset*2);
         }
+        if(amt <= 0.f) return sy;
         settexture(tex, 3);
         glBegin(GL_TRIANGLE_STRIP);
         float btoff = 1-bottom, middle = btoff-top;
