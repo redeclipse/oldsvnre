@@ -79,11 +79,11 @@ void savec(cube *c, const ivec &o, int size, stream *f, bool nolms)
         }
         else
         {
-            int oflags = 0, surfmask = 0, totalverts = 0, merged = c[i].visible&c[i].merged;
+            int oflags = 0, surfmask = 0, totalverts = 0;
             if(c[i].material!=MAT_AIR) oflags |= 0x40;
             if(!nolms)
             {
-                if(merged) oflags |= 0x80;
+                if(c[i].merged) oflags |= 0x80;
                 if(c[i].ext) loopj(6)
                 {
                     const surfaceinfo &surf = c[i].ext->surfaces[j];
@@ -106,7 +106,7 @@ void savec(cube *c, const ivec &o, int size, stream *f, bool nolms)
             loopj(6) f->putlil<ushort>(c[i].texture[j]);
 
             if(oflags&0x40) f->putlil<ushort>(c[i].material);
-            if(oflags&0x80) f->putchar(merged);
+            if(oflags&0x80) f->putchar(c[i].merged);
             if(oflags&0x20)
             {
                 f->putchar(surfmask);
