@@ -825,11 +825,6 @@ bool mmcollide(physent *d, const vec &dir, octaentities &oc)               // co
     return true;
 }
 
-static inline int collidesolidmask(const cube &c)
-{
-    return isentirelysolid(c) ? (c.collide&0x80 ? collidefaces(c) : c.visible|c.collide) : 0xFF;
-}
-
 template<class E>
 static bool fuzzycollidesolid(physent *d, const vec &dir, float cutoff, const cube &c, const ivec &co, int size) // collide with solid cube geometry
 {
@@ -841,7 +836,7 @@ static bool fuzzycollidesolid(physent *d, const vec &dir, float cutoff, const cu
     E entvol(d);
     wall = vec(0, 0, 0);
     float bestdist = -1e10f;
-    int visible = collidesolidmask(c);
+    int visible = isentirelysolid(c) ? c.visible : 0xFF;
     loopi(6) if(visible&(1<<i))
     {
         int dim = dimension(i), dc = dimcoord(i), dimdir = 2*dc - 1;
@@ -976,7 +971,7 @@ static bool cubecollidesolid(physent *d, const vec &dir, float cutoff, const cub
 
     wall = vec(0, 0, 0);
     float bestdist = -1e10f;
-    int visible = collidesolidmask(c);
+    int visible = isentirelysolid(c) ? c.visible : 0xFF;
     loopi(6) if(visible&(1<<i))
     {
         int dim = dimension(i), dc = dimcoord(i), dimdir = 2*dc - 1;
@@ -1080,7 +1075,7 @@ static inline bool cubecollide(physent *d, const vec &dir, float cutoff, const c
             if(cutoff <= 0)
             {
                 int crad = size/2;
-                return rectcollide(d, dir, vec(co.x + crad, co.y + crad, co.z), crad, crad, size, 0, collidesolidmask(c));
+                return rectcollide(d, dir, vec(co.x + crad, co.y + crad, co.z), crad, crad, size, 0, isentirelysolid(c) ? c.visible : 0xFF);
             }
 #if 0
             else return cubecollidesolid<mpr::EntAABB>(d, dir, cutoff, c, co, size);
