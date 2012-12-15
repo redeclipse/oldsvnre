@@ -57,6 +57,8 @@ SVARF(IDF_WORLD, cloudlayer, "", { if(cloudlayer[0]) cloudoverlay = loadskyoverl
 FVAR(IDF_WORLD, cloudlayerblend, 0, 1.0f, 1);
 VAR(IDF_WORLD, cloudlayerglare, 0, 0, 1);
 VAR(IDF_HEX|IDF_WORLD, cloudlayercolour, 0, 0xFFFFFF, 0xFFFFFF);
+FVAR(IDF_WORLD, cloudoffsetx, 0, 0, 1);
+FVAR(IDF_WORLD, cloudoffsety, 0, 0, 1);
 FVAR(IDF_WORLD, cloudscrollx, -16, 0, 16);
 FVAR(IDF_WORLD, cloudscrolly, -16, 0, 16);
 FVAR(IDF_WORLD, cloudscale, 0, 1, 64);
@@ -70,6 +72,8 @@ SVARF(IDF_WORLD, envlayer, "", { if(envlayer[0]) envoverlay = loadskyoverlay(env
 FVAR(IDF_WORLD, envlayerblend, 0, 1.0f, 1);
 VAR(IDF_WORLD, envlayerglare, 0, 0, 1);
 VAR(IDF_HEX|IDF_WORLD, envlayercolour, 0, 0xFFFFFF, 0xFFFFFF);
+FVAR(IDF_WORLD, envoffsetx, 0, 0, 1);
+FVAR(IDF_WORLD, envoffsety, 0, 0, 1);
 FVAR(IDF_WORLD, envscrollx, -16, 0, 16);
 FVAR(IDF_WORLD, envscrolly, -16, 0, 16);
 FVAR(IDF_WORLD, envscale, 0, 1, 64);
@@ -610,7 +614,7 @@ void drawskybox(int farplane, bool limited)
         glRotatef(camera1->pitch, -1, 0, 0);
         glRotatef(camera1->yaw+spincloudlayer*lastmillis/1000.0f+yawcloudlayer, 0, 0, -1);
         if(reflecting) glScalef(1, 1, -1);
-        draw_env_overlay(farplane/2, cloudheight, cloudsubdiv, cloudfade, cloudscale, cloudoverlay, cloudlayercolour, cloudlayerblend, cloudscrollx * lastmillis/1000.0f, cloudscrolly * lastmillis/1000.0f);
+        draw_env_overlay(farplane/2, cloudheight, cloudsubdiv, cloudfade, cloudscale, cloudoverlay, cloudlayercolour, cloudlayerblend, cloudoffsetx + cloudscrollx * lastmillis/1000.0f, cloudoffsety + cloudscrolly * lastmillis/1000.0f);
         glPopMatrix();
 
         glDisable(GL_BLEND);
@@ -633,7 +637,7 @@ void drawskybox(int farplane, bool limited)
         glRotatef(camera1->pitch, -1, 0, 0);
         glRotatef(camera1->yaw+spinenvlayer*lastmillis/1000.0f+yawenvlayer, 0, 0, -1);
         if(reflecting) glScalef(1, 1, -1);
-        draw_env_overlay(farplane/2, envheight, envsubdiv, envfade, envscale, envoverlay, envlayercolour, envlayerblend, envscrollx * lastmillis/1000.0f, envscrolly * lastmillis/1000.0f);
+        draw_env_overlay(farplane/2, envheight, envsubdiv, envfade, envscale, envoverlay, envlayercolour, envlayerblend, envoffsetx + envscrollx * lastmillis/1000.0f, envoffsety + envscrolly * lastmillis/1000.0f);
         glPopMatrix();
 
         glDisable(GL_BLEND);
