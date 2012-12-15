@@ -526,7 +526,7 @@ namespace projs
                     proj.o = proj.to = proj.from = proj.owner->center();
                     if(proj.target && proj.target->state == CS_ALIVE)
                         proj.to.add(vec(proj.target->center()).sub(proj.from).normalize().mul(proj.owner->radius*2));
-                    else proj.to.add(vec(proj.owner->yaw, proj.owner->pitch).mul(proj.owner->radius*2));
+                    else proj.to.add(vec(RAD*proj.owner->yaw, RAD*proj.owner->pitch).mul(proj.owner->radius*2));
                 }
                 else
                 {
