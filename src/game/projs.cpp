@@ -1611,8 +1611,7 @@ namespace projs
             {
                 float amt = clamp(WEAP2(proj.weap, delta, proj.flags&HIT_ALT)*secs, 1e-8f, 1.f),
                       mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
-                vec dest = vec(proj.dest).sub(proj.o).normalize();
-                dir.mul(1.f-amt).add(dest.mul(amt)).normalize();
+                dir.mul(1.f-amt).add(vec(proj.dest).sub(proj.o).normalize().mul(amt)).normalize();
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }
         }
