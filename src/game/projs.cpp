@@ -523,7 +523,7 @@ namespace projs
             {
                 if(proj.weap == WEAP_MELEE && proj.flags&HIT_ALT)
                 {
-                    proj.o = proj.to = proj.from = proj.owner->center();
+                    proj.o = proj.to = proj.from = proj.dest = proj.owner->center();
                     if(proj.target && proj.target->state == CS_ALIVE)
                         proj.to.add(vec(proj.target->center()).sub(proj.from).normalize().mul(proj.owner->radius*2));
                     else proj.to.add(vec(RAD*proj.owner->yaw, RAD*proj.owner->pitch).mul(proj.owner->radius*2));
@@ -531,7 +531,7 @@ namespace projs
                 else
                 {
                     proj.from = proj.owner->originpos();
-                    proj.to = proj.owner->muzzlepos(proj.weap, proj.flags&HIT_ALT);
+                    proj.to = proj.dest = proj.owner->muzzlepos(proj.weap, proj.flags&HIT_ALT);
                     if(style != 2) proj.o = proj.from;
                 }
             }
@@ -568,6 +568,8 @@ namespace projs
                 proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
+                if(WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && proj.owner)
+                    findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, proj.dest);
                 if(proj.projcollide&COLLIDE_SHOTS) collideprojs.add(&proj);
                 break;
             }
@@ -781,7 +783,7 @@ namespace projs
     {
         projent &proj = *new projent;
         proj.o = proj.from = from;
-        proj.to = to;
+        proj.to = proj.dest = to;
         proj.local = local;
         proj.projtype = type;
         proj.addtime = lastmillis;
@@ -1558,57 +1560,60 @@ namespace projs
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }
         }
-        else if(proj.projtype == PRJ_SHOT && proj.escaped && proj.owner)
+        else if(proj.projtype == PRJ_SHOT && proj.escaped && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
         {
-            if(proj.owner->state == CS_ALIVE && WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && lastmillis-proj.spawntime >= WEAP2(proj.weap, gdelay, proj.flags&HIT_ALT))
+            vec dir = vec(proj.vel).normalize();
+            switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))
             {
-                vec targ(0, 0, 0), dir = vec(proj.vel).normalize();
-                switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))
+                case 6: default: break; // use original dest
+                case 5: case 4: case 3: case 2:
                 {
-                    case 5: case 4: case 3: case 2:
+                    if(WEAP2(proj.weap, guided, proj.flags&HIT_ALT)%2 && proj.target && proj.target->state == CS_ALIVE)
+                        proj.dest = proj.target->center();
+                    gameent *t = NULL;
+                    switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))
                     {
-                        if(WEAP2(proj.weap, guided, proj.flags&HIT_ALT)%2 && proj.target && proj.target->state == CS_ALIVE)
+                        case 2: case 3: default:
                         {
-                            targ = proj.target->center();
-                            break;
-                        }
-                        gameent *t = NULL;
-                        switch(WEAP2(proj.weap, guided, proj.flags&HIT_ALT))
-                        {
-                            case 4: case 5:
-                            {
-                                float yaw, pitch;
-                                vectoyawpitch(dir, yaw, pitch);
-                                vec dest;
-                                findorientation(proj.o, yaw, pitch, dest);
-                                t = game::intersectclosest(proj.o, dest, proj.owner);
-                                break;
-                            }
-                            case 2: case 3: default:
+                            if(proj.owner && proj.owner->state == CS_ALIVE)
                             {
                                 vec dest;
                                 findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, dest);
                                 t = game::intersectclosest(proj.owner->o, dest, proj.owner);
                                 break;
-                            }
+                            } // otherwise..
                         }
-                        if(t && (!m_isteam(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
+                        case 4: case 5:
                         {
-                            proj.target = t;
-                            targ = proj.target->center();
+                            float yaw, pitch;
+                            vectoyawpitch(dir, yaw, pitch);
+                            vec dest; findorientation(proj.o, yaw, pitch, dest);
+                            t = game::intersectclosest(proj.o, dest, proj.owner);
+                            break;
                         }
-                        break;
                     }
-                    case 1: default: findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, targ); break;
+                    if(t && (!m_isteam(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
+                    {
+                        if(proj.target && proj.o.dist(proj.target->o) < proj.o.dist(t->o)) break;
+                        proj.target = t;
+                        proj.dest = proj.target->center();
+                    }
+                    break;
                 }
-                if(!targ.iszero())
+                case 1:
                 {
-                    float amt = clamp(WEAP2(proj.weap, delta, proj.flags&HIT_ALT)*secs, 1e-8f, 1.f),
-                          mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
-                    targ.sub(proj.o).normalize();
-                    dir.mul(1.f-amt).add(targ.mul(amt)).normalize();
-                    if(!dir.iszero()) (proj.vel = dir).mul(mag);
+                    if(proj.owner && proj.owner->state == CS_ALIVE)
+                        findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, proj.dest);
+                    break;
                 }
+            }
+            if(!proj.dest.iszero())
+            {
+                float amt = clamp(WEAP2(proj.weap, delta, proj.flags&HIT_ALT)*secs, 1e-8f, 1.f),
+                      mag = max(proj.vel.magnitude(), physics::movevelocity(&proj));
+                vec dest = vec(proj.dest).sub(proj.o).normalize();
+                dir.mul(1.f-amt).add(dest.mul(amt)).normalize();
+                if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }
         }
         if(proj.weight != 0.f) proj.vel.z -= physics::gravityvel(&proj)*secs;

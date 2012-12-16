@@ -111,7 +111,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, a##collide1, 0, wp, VAR_MAX); GVAR(0, a##collide2, 0, wq, VAR_MAX); \
     GVAR(0, a##extinguish1, 0, x21, 7); GVAR(0, a##extinguish2, 0, x22, 7); \
     GVAR(0, a##cooked1, 0, x31, VAR_MAX); GVAR(0, a##cooked2, 0, x32, VAR_MAX); \
-    GVAR(0, a##guided1, 0, x33, 5); GVAR(0, a##guided2, 0, x34, 5); \
+    GVAR(0, a##guided1, 0, x33, 6); GVAR(0, a##guided2, 0, x34, 6); \
     GVAR(0, a##radial1, 0, x4, VAR_MAX); GVAR(0, a##radial2, 0, x5, VAR_MAX); \
     GVAR(0, a##residual1, 0, x6, 2); GVAR(0, a##residual2, 0, x7, 2); \
     GVAR(0, a##reloads, -1, x81, VAR_MAX); GVAR(0, a##carried, 0, x82, 1); GVAR(0, a##zooms, 0, x9, 1); \

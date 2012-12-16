@@ -1356,7 +1356,7 @@ enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ
 
 struct projent : dynent
 {
-    vec from, to, norm, inertia, stickpos, effectpos;
+    vec from, to, dest, norm, inertia, stickpos, effectpos;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
     float movement, roll, lifespan, lifesize, minspeed;
     bool local, limited, stuck, escaped, child;
