@@ -3380,7 +3380,7 @@ namespace server
                 {
                     int hflags = flags|h.flags;
                     float skew = float(scale)/DNF;
-                    if(radial) radial = clamp(radial, 1, WEAPEX(weap, flags&HIT_ALT, gamemode, mutators, skew));
+                    if(radial) radial = clamp(radial, 1, WEAPS(weap, explode, flags&HIT_ALT, gamemode, mutators, skew));
                     float size = radial ? (hflags&HIT_WAVE ? radial*WEAP(weap, pusharea) : radial) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
