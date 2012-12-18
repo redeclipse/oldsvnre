@@ -414,7 +414,7 @@ void guiprogress(float *percent, float *scale)
 void guislider(char *var, int *min, int *max, char *onchange, int *reverse, int *scroll, int *colour)
 {
     if(!cgui) return;
-    int oldval = getval(var), val = oldval, vmin = *max ? *min : getvarmin(var), vmax = *max ? *max : getvarmax(var);
+    int oldval = getval(var), val = oldval, vmin = *max != -1 ? *min : getvarmin(var), vmax = *max != -1 ? *max : getvarmax(var);
     if(vmax >= INT_MAX-1)
     { // not a sane value for a slider..
         int vdef = getvardef(var);
@@ -604,7 +604,7 @@ COMMAND(0, guifont,"se");
 COMMAND(0, guiimage,"ssfiss");
 COMMAND(0, guislice,"ssfffsss");
 COMMAND(0, guiprogress,"ff");
-COMMAND(0, guislider,"siisiii");
+COMMAND(0, guislider,"sbbsiii");
 COMMAND(0, guilistslider, "sssiii");
 COMMAND(0, guinameslider, "ssssiii");
 COMMAND(0, guiradio,"ssfsi");
