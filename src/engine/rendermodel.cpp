@@ -420,7 +420,7 @@ model *loadmodel(const char *name, int i, bool msg)
     if(mm) m = *mm;
     else
     {
-        if(lightmapping > 1) return NULL;
+        if(loadingmodel || lightmapping > 1) return NULL;
         if(msg)
         {
             defformatstring(str)("models/%s", name);
