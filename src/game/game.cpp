@@ -2770,12 +2770,6 @@ namespace game
                         weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-WEAP_S_SWITCH);
                         break;
                     }
-                    case WEAP_S_JAM:
-                    {
-                        showweap = false;
-                        weapflags = animflags = ANIM_JAM;
-                        break;
-                    }
                     case WEAP_S_POWER:
                     {
                         if(weaptype[weap].anim == ANIM_GRENADE) weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];

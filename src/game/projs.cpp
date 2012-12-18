@@ -132,7 +132,7 @@ namespace projs
         if(proj.owner && proj.local)
         {
             int hflags = proj.flags|flags;
-            float size = hflags&HIT_WAVE ? radial*WEAP(proj.weap, pusharea) : radial;
+            float size = hflags&HIT_WAVE ? radial*WEAP2(proj.weap, wavepush, hflags&HIT_ALT) : radial;
             int damage = calcdamage(proj.owner, d, proj.weap, hflags, radial, size, dist, scale);
             if(damage) game::hiteffect(proj.weap, hflags, damage, d, proj.owner, dir, false);
             else return;
@@ -205,8 +205,8 @@ namespace projs
 
     bool radialeffect(dynent *d, projent &proj, int flags, int radius)
     {
-        bool push = WEAP(proj.weap, pusharea) > 1, radiated = false;
-        float maxdist = push ? radius*WEAP(proj.weap, pusharea) : radius;
+        bool push = WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) > 1, radiated = false;
+        float maxdist = push ? radius*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) : radius;
         #define radialpush(xx,yx,yy,yz1,yz2,zz) \
             if(!proj.o.reject(xx, maxdist+max(yx, yy))) \
             { \
@@ -238,7 +238,7 @@ namespace projs
                         hitpush(e, proj, flag|flags, radius, rdist[i], proj.curscale);
                         radiated = true;
                     }
-                    else if(WEAP(proj.weap, pusharea) > 1 && rdist[i] <= maxdist)
+                    else if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) > 1 && rdist[i] <= maxdist)
                     {
                         hitpush(e, proj, flag|HIT_WAVE, radius, rdist[i], proj.curscale);
                         radiated = true;
@@ -256,7 +256,7 @@ namespace projs
                         hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|flags, radius, dist, proj.curscale);
                         radiated = true;
                     }
-                    else if(WEAP(proj.weap, pusharea) > 1 && dist <= maxdist)
+                    else if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) > 1 && dist <= maxdist)
                     {
                         hitpush(e, proj, (m_expert(game::gamemode, game::mutators) ? HIT_WHIPLASH : HIT_TORSO)|HIT_WAVE, radius, dist, proj.curscale);
                         radiated = true;
@@ -853,7 +853,6 @@ namespace projs
                     create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_ENT, w_spawn(weap), w_spawn(weap), 1, 1, ent, ammo, reloads, index);
                 d->ammo[weap] = d->reloads[weap] = -1;
                 if(targ >= 0) d->setweapstate(weap, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
-                else if(targ == -2) d->setweapstate(weap, WEAP_S_JAM, weaponjamtime, lastmillis);
             }
             else if(weap == WEAP_GRENADE)
                 create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 1, WEAP2(weap, time, false), 1, 1, 1, weap);
@@ -1130,8 +1129,8 @@ namespace projs
                         if(expl > 0)
                         {
                             part_explosion(proj.o, expl, PART_SHOCKBALL, 1, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 1.f, 0.95f);
-                            if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 1, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend*trans);
+                            if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
+                                part_explosion(proj.o, expl*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, 1, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend*trans);
                         }
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
@@ -1212,7 +1211,7 @@ namespace projs
 
     void quake(const vec &o, int weap, int flags, float scale)
     {
-        int q = int(WEAP2(weap, damage, flags&HIT_ALT)/float(WEAP2(weap, rays, flags&HIT_ALT))), r = int(WEAP2(weap, radius, flags&HIT_ALT)*WEAP(weap, pusharea)*scale);
+        int q = int(WEAP2(weap, damage, flags&HIT_ALT)/float(WEAP2(weap, rays, flags&HIT_ALT))), r = int(WEAP2(weap, radius, flags&HIT_ALT)*WEAP2(weap, wavepush, flags&HIT_ALT)*scale);
         gameent *d;
         int numdyns = game::numdynents();
         loopi(numdyns) if((d = (gameent *)game::iterdynents(i)))
@@ -1241,8 +1240,8 @@ namespace projs
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 200, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             part_splash(PART_SPARK, 15, 250, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
-                            if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 100, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
+                            if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
+                                part_explosion(proj.o, expl*0.5f*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, 100, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
@@ -1269,8 +1268,8 @@ namespace projs
                                 int len = type != WEAP_ROCKET ? 500 : 750;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 1);
                                 part_splash(PART_SPARK, 50, len*2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.75f, 1, 1, 0, expl, 20);
-                                if(WEAP(proj.weap, pusharea) >= 1)
-                                    part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.5f*projhintblend);
+                                if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
+                                    part_explosion(proj.o, expl*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.5f*projhintblend);
                             }
                             else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
@@ -1306,8 +1305,8 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 250, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
-                            if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*0.5f*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, 125, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
+                            if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
+                                part_explosion(proj.o, expl*0.5f*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, 125, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 10))
                             {
                                 adddecal(DECAL_SCORCH_SHORT, proj.o, proj.norm, expl*0.5f);
@@ -1324,8 +1323,8 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
-                            if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
+                            if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
+                                part_explosion(proj.o, expl*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
                         }
                         else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
                         part_splash(PART_SPARK, 50, len*2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 20);
@@ -1352,8 +1351,8 @@ namespace projs
                             part_create(PART_PLASMA_SOFT, len, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f); // corona
                             part_splash(PART_SPARK, 50, len*2, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
-                            if(WEAP(proj.weap, pusharea) >= 1)
-                                part_explosion(proj.o, expl*WEAP(proj.weap, pusharea), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
+                            if(WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
+                                part_explosion(proj.o, expl*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, len/2, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                         }
                         else expl = WEAP2(proj.weap, partsize, proj.flags&HIT_ALT);
                         part_flare(proj.to, proj.o, len, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
