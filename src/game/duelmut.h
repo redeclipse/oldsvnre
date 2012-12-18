@@ -71,10 +71,11 @@ struct duelservmode : servmode
         loopvj(clients) if(clients[j]->state.aitype < AI_START)
         {
             vector<int> shots;
-            loop(a, WEAP_MAX) loop(b, 2) loopvrev(clients[j]->state.weapshots[a][b].projs)
+            loop(a, WEAP_MAX) loop(b, 2)
             {
-                shots.add(clients[j]->state.weapshots[a][b].projs[i].id);
-                clients[j]->state.weapshots[a][b].remove(i);
+                loopv(clients[j]->state.weapshots[a][b].projs)
+                    shots.add(clients[j]->state.weapshots[a][b].projs[i].id);
+                clients[j]->state.weapshots[a][b].projs.shrink(0);
             }
             if(!shots.empty()) sendf(-1, 1, "ri2iv", N_DESTROY, clients[j]->clientnum, shots.length(), shots.length(), shots.getbuf());
 

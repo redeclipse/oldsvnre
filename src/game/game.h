@@ -239,7 +239,7 @@ enum
     ANIM_RIFLE, ANIM_RIFLE_PRIMARY, ANIM_RIFLE_SECONDARY, ANIM_RIFLE_RELOAD,
     ANIM_GRENADE, ANIM_GRENADE_PRIMARY, ANIM_GRENADE_SECONDARY, ANIM_GRENADE_RELOAD, ANIM_GRENADE_POWER,
     ANIM_ROCKET, ANIM_ROCKET_PRIMARY, ANIM_ROCKET_SECONDARY, ANIM_ROCKET_RELOAD,
-    ANIM_SWITCH, ANIM_USE, ANIM_JAM,
+    ANIM_SWITCH, ANIM_USE,
     ANIM_MAX
 };
 
@@ -893,7 +893,7 @@ const char * const animnames[] =
     "rifle", "rifle primary", "rifle secondary", "rifle reload",
     "grenade", "grenade primary", "grenade secondary", "grenade reload", "grenade power",
     "rocket", "rocket primary", "rocket secondary", "rocket reload",
-    "switch", "use", "jam",
+    "switch", "use",
     ""
 };
 #else
