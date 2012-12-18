@@ -5,11 +5,11 @@
 
 #ifdef MEKARCADE
 #define GAMEID              "mek"
-#define GAMEVERSION         218
+#define GAMEVERSION         219
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
 #else
 #define GAMEID              "fps"
-#define GAMEVERSION         218
+#define GAMEVERSION         219
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
 #endif
 #define DEMO_VERSION        GAMEVERSION
@@ -238,6 +238,7 @@ enum
     ANIM_PLASMA, ANIM_PLASMA_PRIMARY, ANIM_PLASMA_SECONDARY, ANIM_PLASMA_RELOAD,
     ANIM_RIFLE, ANIM_RIFLE_PRIMARY, ANIM_RIFLE_SECONDARY, ANIM_RIFLE_RELOAD,
     ANIM_GRENADE, ANIM_GRENADE_PRIMARY, ANIM_GRENADE_SECONDARY, ANIM_GRENADE_RELOAD, ANIM_GRENADE_POWER,
+    ANIM_MINE, ANIM_MINE_PRIMARY, ANIM_MINE_SECONDARY, ANIM_MINE_RELOAD,
     ANIM_ROCKET, ANIM_ROCKET_PRIMARY, ANIM_ROCKET_SECONDARY, ANIM_ROCKET_RELOAD,
     ANIM_SWITCH, ANIM_USE,
     ANIM_MAX
@@ -747,6 +748,11 @@ struct gamestate
                 ammo[WEAP_GRENADE] = max(WEAP(WEAP_GRENADE, max), 1);
                 reloads[WEAP_GRENADE] = 0;
             }
+            if(GAME(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != WEAP_MINE)
+            {
+                ammo[WEAP_MINE] = max(WEAP(WEAP_MINE, max), 1);
+                reloads[WEAP_MINE] = 0;
+            }
             if(m_arena(gamemode, mutators))
             {
                 int aweap[2] = { -1, -1 };
@@ -892,6 +898,7 @@ const char * const animnames[] =
     "plasma", "plasma primary", "plasma secondary", "plasma reload",
     "rifle", "rifle primary", "rifle secondary", "rifle reload",
     "grenade", "grenade primary", "grenade secondary", "grenade reload", "grenade power",
+    "mine", "mine primary", "mine secondary", "mine reload",
     "rocket", "rocket primary", "rocket secondary", "rocket reload",
     "switch", "use",
     ""

@@ -8,6 +8,7 @@ namespace weapons
     VAR(IDF_PERSIST, skipmelee, 0, 7, 10); // skip melee; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
     VAR(IDF_PERSIST, skippistol, 0, 0, 10); // skip pistol; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
     VAR(IDF_PERSIST, skipgrenade, 0, 0, 10); // skip grenade; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
+    VAR(IDF_PERSIST, skipmine, 0, 0, 10); // skip mine; 0 = never, 1 = if numweaps > 1 (+2), 4 = if carry > 0 (+2), 7 = if carry > 0 and is offset (+2), 10 = always
 
     int lastweapselect = 0;
     VAR(IDF_PERSIST, weapselectdelay, 0, 150, VAR_MAX);
@@ -116,6 +117,7 @@ namespace weapons
                 skipweap(skipmelee, WEAP_MELEE);
                 skipweap(skippistol, WEAP_PISTOL);
                 skipweap(skipgrenade, WEAP_GRENADE);
+                skipweap(skipmine, WEAP_MINE);
             }
 
             if(weapselect(d, n))

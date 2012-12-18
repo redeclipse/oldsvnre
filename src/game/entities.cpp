@@ -1572,6 +1572,10 @@ namespace entities
                         e.attrs[3] = 0;
                         checkmodes(e.attrs[2]);
                     }
+                    if(mtype == MAP_MAPZ && gver <= 218)
+                    { // insert mine before rockets (9 -> 10) after grenades (8)
+                        if(e.attrs[0] >= 9) e.attrs[0]++;
+                    }
                     break;
                 }
                 case TRIGGER:

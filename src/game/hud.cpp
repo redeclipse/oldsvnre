@@ -187,6 +187,8 @@ namespace hud
     TVAR(IDF_PERSIST, riflehithairtex, "crosshairs/simple-01-hit", 3);
     TVAR(IDF_PERSIST, grenadecrosshairtex, "crosshairs/circle-02", 3);
     TVAR(IDF_PERSIST, grenadehithairtex, "crosshairs/circle-02-hit", 3);
+    TVAR(IDF_PERSIST, minecrosshairtex, "crosshairs/circle-02", 3);
+    TVAR(IDF_PERSIST, minehithairtex, "crosshairs/circle-02-hit", 3);
     TVAR(IDF_PERSIST, rocketcrosshairtex, "crosshairs/circle-01", 3);
     TVAR(IDF_PERSIST, rockethithairtex, "crosshairs/circle-01-hit", 3);
 
@@ -277,6 +279,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shotguntex, "<grey>textures/shotgun", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, smgtex, "<grey>textures/smg", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, grenadetex, "<grey>textures/grenade", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, minetex, "<grey>textures/mine", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, rockettex, "<grey>textures/rocket", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flamertex, "<grey>textures/flamer", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, plasmatex, "<grey>textures/plasma", 3);
@@ -290,6 +293,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shotguncliptex, "<grey>textures/shotgunclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, smgcliptex, "<grey>textures/smgclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, grenadecliptex, "<grey>textures/grenadeclip", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, minecliptex, "<grey>textures/mineclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, rocketcliptex, "<grey>textures/rocketclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flamercliptex, "<grey>textures/flamerclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, plasmacliptex, "<grey>textures/plasmaclip", 3);
@@ -298,6 +302,7 @@ namespace hud
     FVAR(IDF_PERSIST, shotgunclipskew, 0, 1, 1000);
     FVAR(IDF_PERSIST, smgclipskew, 0, 0.85f, 1000);
     FVAR(IDF_PERSIST, grenadeclipskew, 0, 1.25f, 1000);
+    FVAR(IDF_PERSIST, mineclipskew, 0, 1.25f, 1000);
     FVAR(IDF_PERSIST, rocketclipskew, 0, 1, 1000);
     FVAR(IDF_PERSIST, flamerclipskew, 0, 0.85f, 1000);
     FVAR(IDF_PERSIST, plasmaclipskew, 0, 0.85f, 1000);
@@ -689,7 +694,8 @@ namespace hud
                 {
                     const char *crosshairtexs[WEAP_MAX] = {
                         meleecrosshairtex, pistolcrosshairtex, swordcrosshairtex, shotguncrosshairtex, smgcrosshairtex,
-                        flamercrosshairtex, plasmacrosshairtex, riflecrosshairtex, grenadecrosshairtex, rocketcrosshairtex, // end of regular weapons
+                        flamercrosshairtex, plasmacrosshairtex, riflecrosshairtex, grenadecrosshairtex, minecrosshairtex,
+                        rocketcrosshairtex, // end of regular weapons
                     };
                     if(*crosshairtexs[weap]) return crosshairtexs[weap];
                 }
@@ -703,7 +709,8 @@ namespace hud
                 {
                     const char *hithairtexs[WEAP_MAX] = {
                         meleehithairtex, pistolhithairtex, swordhithairtex, shotgunhithairtex, smghithairtex,
-                        flamerhithairtex, plasmahithairtex, riflehithairtex, grenadehithairtex, rockethithairtex, // end of regular weapons
+                        flamerhithairtex, plasmahithairtex, riflehithairtex, grenadehithairtex, minehithairtex,
+                        rockethithairtex, // end of regular weapons
                     };
                     if(*hithairtexs[weap]) return hithairtexs[weap];
                 }
@@ -756,7 +763,7 @@ namespace hud
         if(!isweap(weap) || (!WEAP2(weap, sub, false) && !WEAP2(weap, sub, true)) || WEAP(weap, max) <= 1) return;
         const char *cliptexs[WEAP_MAX] = {
             progresstex, pistolcliptex, progresstex, shotguncliptex, smgcliptex,
-            flamercliptex, plasmacliptex, riflecliptex, grenadecliptex, rocketcliptex, // end of regular weapons
+            flamercliptex, plasmacliptex, riflecliptex, grenadecliptex, minecliptex, rocketcliptex, // end of regular weapons
         };
         if(!clipsizes[weap])
         {
@@ -771,7 +778,7 @@ namespace hud
 
         const float clipskew[WEAP_MAX] = {
             1, pistolclipskew, 1, shotgunclipskew, smgclipskew,
-            flamerclipskew, plasmaclipskew, rifleclipskew, grenadeclipskew, rocketclipskew, // end of regular weapons
+            flamerclipskew, plasmaclipskew, rifleclipskew, grenadeclipskew, mineclipskew, rocketclipskew, // end of regular weapons
         };
         float fade = clipblend*hudblend, size = s*clipskew[weapid];
         int interval = lastmillis-game::focus->weaplast[weap];
@@ -829,7 +836,7 @@ namespace hud
                     case WEAP_FLAMER: case WEAP_ROCKET:
                         drawslice(ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
-                    case WEAP_GRENADE:
+                    case WEAP_GRENADE: case WEAP_MINE:
                         drawslice(0.25f/maxammo+ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
                     default:
@@ -850,7 +857,7 @@ namespace hud
                         case WEAP_FLAMER: case WEAP_ROCKET:
                             drawslice(ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
-                        case WEAP_GRENADE:
+                        case WEAP_GRENADE: case WEAP_MINE:
                             drawslice(0.25f/maxammo+ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
                         default:
@@ -869,7 +876,7 @@ namespace hud
             case WEAP_FLAMER: case WEAP_ROCKET:
                 drawslice(0, ammo/float(maxammo), x, y, size);
                 break;
-            case WEAP_GRENADE:
+            case WEAP_GRENADE: case WEAP_MINE:
                 drawslice(0.25f/maxammo, ammo/float(maxammo), x, y, size);
                 break;
             default:
@@ -2004,7 +2011,7 @@ namespace hud
             case WEAPON:
             {
                 const char *weaptexs[WEAP_MAX] = {
-                    meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, rockettex
+                    meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
                 };
                 if(isweap(stype)) return weaptexs[stype];
                 break;
@@ -2083,7 +2090,7 @@ namespace hud
             if(inventoryammo)
             {
                 const char *hudtexs[WEAP_MAX] = {
-                    meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, rockettex
+                    meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
                 };
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 loopi(WEAP_MAX) if((i != WEAP_MELEE || sweap == WEAP_MELEE || game::focus->weapselect == WEAP_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))

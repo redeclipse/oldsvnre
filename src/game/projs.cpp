@@ -854,7 +854,7 @@ namespace projs
                 d->ammo[weap] = d->reloads[weap] = -1;
                 if(targ >= 0) d->setweapstate(weap, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
             }
-            else if(weap == WEAP_GRENADE)
+            else if(weap == WEAP_GRENADE || weap == WEAP_MINE)
                 create(d->muzzlepos(), d->muzzlepos(), local, d, PRJ_SHOT, 1, WEAP2(weap, time, false), 1, 1, 1, weap);
             d->entid[weap] = -1;
         }
@@ -1073,6 +1073,14 @@ namespace projs
                         }
                         break;
                     }
+                    case WEAP_MINE:
+                    {
+                        int interval = lastmillis%1000;
+                        float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
+                        break;
+                    }
                     case WEAP_ROCKET:
                     {
                         int interval = lastmillis%1000;
@@ -1251,7 +1259,7 @@ namespace projs
                         else if(notrayspam(proj.weap, proj.flags&HIT_ALT, 20)) adddecal(DECAL_BULLET, proj.o, proj.norm, WEAP2(proj.weap, partsize, proj.flags&HIT_ALT));
                         break;
                     }
-                    case WEAP_FLAMER: case WEAP_GRENADE: case WEAP_ROCKET:
+                    case WEAP_FLAMER: case WEAP_GRENADE: case WEAP_MINE: case WEAP_ROCKET:
                     { // all basically explosions
                         float expl = WEAPS(proj.weap, explode, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(type == WEAP_FLAMER)
@@ -1694,7 +1702,7 @@ namespace projs
                     vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
                     break;
                 }
-                if(proj.weap != WEAP_GRENADE) break;
+                if(proj.weap != WEAP_GRENADE && proj.weap != WEAP_MINE) break;
             }
             case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_AFFINITY:
             {

@@ -2548,7 +2548,7 @@ namespace game
             {
                 case ANIM_IDLE: case ANIM_MELEE: case ANIM_PISTOL: case ANIM_SWORD:
                 case ANIM_SHOTGUN: case ANIM_SMG: case ANIM_FLAMER: case ANIM_PLASMA:
-                case ANIM_RIFLE: case ANIM_GRENADE: case ANIM_ROCKET:
+                case ANIM_RIFLE: case ANIM_GRENADE: case ANIM_MINE: case ANIM_ROCKET:
                 {
                     anim = (anim>>ANIM_SECONDARY) | ((anim&((1<<ANIM_SECONDARY)-1))<<ANIM_SECONDARY);
                     swap(basetime, basetime2);
@@ -2772,8 +2772,11 @@ namespace game
                     }
                     case WEAP_S_POWER:
                     {
-                        if(weaptype[weap].anim == ANIM_GRENADE) weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
-                        else weapflags = animflags = weaptype[weap].anim|ANIM_LOOP;
+                        switch(weaptype[weap].anim)
+                        {
+                            case ANIM_GRENADE: case ANIM_MINE: weapflags = animflags = weaptype[weap].anim+d->weapstate[weap]; break;
+                            default: weapflags = animflags = weaptype[weap].anim|ANIM_LOOP; break;
+                        }
                         break;
                     }
                     case WEAP_S_PRIMARY:
