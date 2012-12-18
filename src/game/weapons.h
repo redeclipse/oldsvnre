@@ -2,7 +2,7 @@ enum
 {
     WEAP_MELEE = 0, WEAP_PISTOL, WEAP_OFFSET, // end of unselectable weapon set
     WEAP_SWORD = WEAP_OFFSET, WEAP_SHOTGUN, WEAP_SMG, WEAP_FLAMER, WEAP_PLASMA, WEAP_RIFLE, WEAP_ITEM,
-    WEAP_GRENADE = WEAP_ITEM, WEAP_ROCKET, // end of item weapon set
+    WEAP_GRENADE = WEAP_ITEM, WEAP_MINE, WEAP_ROCKET, // end of item weapon set
     WEAP_MAX, WEAP_LOADOUT = WEAP_ITEM-WEAP_OFFSET
 };
 #define isweap(a)       (a >= 0 && a < WEAP_MAX)
@@ -40,7 +40,8 @@ enum
     S_PLASMA    = S_FLAMER+S_W_MAX,
     S_RIFLE     = S_PLASMA+S_W_MAX,
     S_GRENADE   = S_RIFLE+S_W_MAX,
-    S_ROCKET    = S_GRENADE+S_W_MAX,
+    S_MINE      = S_GRENADE+S_W_MAX,
+    S_ROCKET    = S_MINE+S_W_MAX,
     S_MAX
 };
 
@@ -337,6 +338,24 @@ WEAPON(grenade,     0x119911,       -1,             -1,             0x981808,   
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS,
     WEAP_GRENADE
 );
+WEAPON(mine,        0x226622,       -1,             -1,             0x981808,      0x981808,
+    1,      2,      1,      1,      1000,   1000,   1500,   100,    50,     250,    250,    0,      0,      0,      0,
+    0,      0,      120000, 45000,  0,      1000,
+    75,     75,     0,      0,      200,    200,    50,     50,     1,      1,      1,      1,      0,      0,      0,      0,
+    0,      0,      5,      5,      WEAP_SHOTGUN,   WEAP_SHOTGUN,   150,    150,    75,     75,     3000,   3000,   300,    300,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS,
+    2,      2,      8,      8,      0,      0,      0,      0,      1,      1,      0,      0,      0,      0,      0,
+    3,      0,      0,      0,      200,    200,
+    0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      1,      1,      2,      2,      65,     65,     1,      1,
+    5,      5,      250,    250,    0,      0,      384,    256,    1,      1,      0,      0,      2,      2,      2,      2,    2,
+    2,      0,      2,      10,     10,     1,      1,      1,      1,      10,     10,
+    8,      8,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,   0.5f,   0.5f,
+    1,      1,      1,      1,      0,      0,      0,      0,      0,      0,      1,      1,      0,      0,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_STICK|COLLIDE_SHOTS,
+    WEAP_MINE
+);
 WEAPON(rocket,      0xAA3300,       -1,             -1,              0x981808,      0x981808,
     1,      1,      1,      1,      1000,   1000,   1500,   150,     150,   1000,   250,    0,      0,      0,      0,
     2000,   2000,   5000,   5000,   0,      0,
@@ -421,22 +440,28 @@ weaptypes weaptype[] =
             "grenade",  "weapons/grenade/item",     "weapons/grenade/vwep", "weapons/grenade/hwep",    "weapons/grenade/proj", ""
     },
     {
+            ANIM_MINE,          S_MINE,     1,
+            false,      false,      false,      false,
+            { 0.0625f, 0.0625f },   6,          0,
+            "mine",     "weapons/mine/item",        "weapons/mine/vwep",    "weapons/mine/hwep",        "weapons/mine/proj", ""
+    },
+    {
             ANIM_ROCKET,        S_ROCKET,   1,
             false,      false,      true,      false,
             { 0, 0 },               10,          0,
             "rocket",   "weapons/rocket/item",       "weapons/rocket/vwep", "weapons/rocket/hwep",     "weapons/rocket/proj",  ""
     }
 };
-#define WEAPDEF(proto,name)     proto *sv_weap_stat_##name[] = {&sv_melee##name, &sv_pistol##name, &sv_sword##name, &sv_shotgun##name, &sv_smg##name, &sv_flamer##name, &sv_plasma##name, &sv_rifle##name, &sv_grenade##name, &sv_rocket##name };
-#define WEAPDEF2(proto,name)    proto *sv_weap_stat_##name[][2] = {{&sv_melee##name##1,&sv_melee##name##2}, {&sv_pistol##name##1,&sv_pistol##name##2}, {&sv_sword##name##1,&sv_sword##name##2}, {&sv_shotgun##name##1,&sv_shotgun##name##2}, {&sv_smg##name##1,&sv_smg##name##2}, {&sv_flamer##name##1,&sv_flamer##name##2}, {&sv_plasma##name##1,&sv_plasma##name##2}, {&sv_rifle##name##1,&sv_rifle##name##2}, {&sv_grenade##name##1,&sv_grenade##name##2}, {&sv_rocket##name##1,&sv_rocket##name##2} };
+#define WEAPDEF(proto,name)     proto *sv_weap_stat_##name[] = {&sv_melee##name, &sv_pistol##name, &sv_sword##name, &sv_shotgun##name, &sv_smg##name, &sv_flamer##name, &sv_plasma##name, &sv_rifle##name, &sv_grenade##name, &sv_mine##name, &sv_rocket##name };
+#define WEAPDEF2(proto,name)    proto *sv_weap_stat_##name[][2] = {{&sv_melee##name##1,&sv_melee##name##2}, {&sv_pistol##name##1,&sv_pistol##name##2}, {&sv_sword##name##1,&sv_sword##name##2}, {&sv_shotgun##name##1,&sv_shotgun##name##2}, {&sv_smg##name##1,&sv_smg##name##2}, {&sv_flamer##name##1,&sv_flamer##name##2}, {&sv_plasma##name##1,&sv_plasma##name##2}, {&sv_rifle##name##1,&sv_rifle##name##2}, {&sv_grenade##name##1,&sv_grenade##name##2}, {&sv_mine##name##1,&sv_mine##name##2}, {&sv_rocket##name##1,&sv_rocket##name##2} };
 #define WEAP(weap,name)         (*sv_weap_stat_##name[weap])
 #define WEAP2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
 #define WEAPSTR(a,weap,attr)    defformatstring(a)("sv_%s%s", weaptype[weap].name, #attr)
 #else
 extern weaptypes weaptype[];
 #ifdef GAMEWORLD
-#define WEAPDEF(proto,name)     proto *weap_stat_##name[] = {&melee##name, &pistol##name, &sword##name, &shotgun##name, &smg##name, &flamer##name, &plasma##name, &rifle##name, &grenade##name, &rocket##name };
-#define WEAPDEF2(proto,name)    proto *weap_stat_##name[][2] = {{&melee##name##1,&melee##name##2}, {&pistol##name##1,&pistol##name##2}, {&sword##name##1,&sword##name##2}, {&shotgun##name##1,&shotgun##name##2}, {&smg##name##1,&smg##name##2}, {&flamer##name##1,&flamer##name##2}, {&plasma##name##1,&plasma##name##2}, {&rifle##name##1,&rifle##name##2}, {&grenade##name##1,&grenade##name##2}, {&rocket##name##1,&rocket##name##2} };
+#define WEAPDEF(proto,name)     proto *weap_stat_##name[] = {&melee##name, &pistol##name, &sword##name, &shotgun##name, &smg##name, &flamer##name, &plasma##name, &rifle##name, &grenade##name, &mine##name, &rocket##name };
+#define WEAPDEF2(proto,name)    proto *weap_stat_##name[][2] = {{&melee##name##1,&melee##name##2}, {&pistol##name##1,&pistol##name##2}, {&sword##name##1,&sword##name##2}, {&shotgun##name##1,&shotgun##name##2}, {&smg##name##1,&smg##name##2}, {&flamer##name##1,&flamer##name##2}, {&plasma##name##1,&plasma##name##2}, {&rifle##name##1,&rifle##name##2}, {&grenade##name##1,&grenade##name##2}, {&mine##name##1,&mine##name##2}, {&rocket##name##1,&rocket##name##2} };
 #else
 #define WEAPDEF(proto,name)     extern proto *weap_stat_##name[];
 #define WEAPDEF2(proto,name)    extern proto *weap_stat_##name[][2];
@@ -540,7 +565,7 @@ WEAPDEF2(int, flakcollide);
 WEAPDEF2(int, parttype);
 
 #ifdef GAMESERVER
-SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma rifle grenade rocket");
+SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma rifle grenade mine rocket");
 VAR(0, weapidxmelee, 1, WEAP_MELEE, -1);
 VAR(0, weapidxpistol, 1, WEAP_PISTOL, -1);
 VAR(0, weapidxsword, 1, WEAP_SWORD, -1);
@@ -550,6 +575,7 @@ VAR(0, weapidxflamer, 1, WEAP_FLAMER, -1);
 VAR(0, weapidxplasma, 1, WEAP_PLASMA, -1);
 VAR(0, weapidxrifle, 1, WEAP_RIFLE, -1);
 VAR(0, weapidxgrenade, 1, WEAP_GRENADE, -1);
+VAR(0, weapidxmine, 1, WEAP_MINE, -1);
 VAR(0, weapidxrocket, 1, WEAP_ROCKET, -1);
 VAR(0, weapidxoffset, 1, WEAP_OFFSET, -1);
 VAR(0, weapidxitem, 1, WEAP_ITEM, -1);
