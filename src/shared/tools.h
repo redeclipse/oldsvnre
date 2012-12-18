@@ -402,6 +402,40 @@ template<class T> struct isclass
     enum { yes = sizeof(test<T>(0)) == 1 ? 1 : 0, no = yes^1 };
 };
 
+static inline uint hthash(const char *key)
+{
+    uint h = 5381;
+    for(int i = 0, k; (k = key[i]); i++) h = ((h<<5)+h)^k;    // bernstein k=33 xor
+    return h;
+}
+
+static inline bool htcmp(const char *x, const char *y)
+{
+    return !strcmp(x, y);
+}
+
+static inline uint hthash(int key)
+{
+    return key;
+}
+
+static inline bool htcmp(int x, int y)
+{
+    return x==y;
+}
+
+#ifndef STANDALONE
+static inline uint hthash(GLuint key)
+{
+    return key;
+}
+
+static inline bool htcmp(GLuint x, GLuint y)
+{
+    return x==y;
+}
+#endif
+
 template <class T> struct vector
 {
     static const int MINSIZE = 8;
@@ -801,41 +835,14 @@ template <class T> struct smallvector
         loopi(len) if(buf[i]==o) return i;
         return -1;
     }
+
+    template<class K> 
+    int htfind(const K &key)
+    {
+        loopi(ulen) if(htcmp(key, buf[i])) return i;
+        return -1;
+    }
 };
-
-static inline uint hthash(const char *key)
-{
-    uint h = 5381;
-    for(int i = 0, k; (k = key[i]); i++) h = ((h<<5)+h)^k;    // bernstein k=33 xor
-    return h;
-}
-
-static inline bool htcmp(const char *x, const char *y)
-{
-    return !strcmp(x, y);
-}
-
-static inline uint hthash(int key)
-{
-    return key;
-}
-
-static inline bool htcmp(int x, int y)
-{
-    return x==y;
-}
-
-#ifndef STANDALONE
-static inline uint hthash(GLuint key)
-{
-    return key;
-}
-
-static inline bool htcmp(GLuint x, GLuint y)
-{
-    return x==y;
-}
-#endif
 
 template<class T> struct hashset
 {
