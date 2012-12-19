@@ -1132,6 +1132,7 @@ namespace game
                     { "was caught up in their own plasma-filled mayhem", "plasmified themself" },
                     { "got a good shock", "shocked themself" },
                     { "kicked it, kamikaze style", "blew themself up" },
+                    { "kicked it, kamikaze style", "blew themself up" },
                     { "exploded with style", "exploded themself" },
                 };
                 concatstring(d->obit, suicidenames[weap][obitverbose == 2 ? 0 : 1]);
@@ -1160,6 +1161,7 @@ namespace game
                         { "char-grilled by", "burned by" },
                         { "plasmified by", "plasmified by" },
                         { "laser shocked by", "shocked by" },
+                        { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
                         { "exploded by", "exploded by" },
                     },
@@ -2886,6 +2888,7 @@ namespace game
                         { 1, PART_PLASMA, 0.05f, 2 },
                         { 2, PART_PLASMA, 0.05f, 2.5f },
                         { 3, PART_PLASMA, 0.1f, 0.125f },
+                        { 0, 0, 0, 0 },
                         { 0, 0, 0, 0 },
                     };
                     switch(powerfx[d->weapselect].type)

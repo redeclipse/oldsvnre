@@ -836,10 +836,10 @@ template <class T> struct smallvector
         return -1;
     }
 
-    template<class K> 
+    template<class K>
     int htfind(const K &key)
     {
-        loopi(ulen) if(htcmp(key, buf[i])) return i;
+        loopi(len) if(htcmp(key, buf[i])) return i;
         return -1;
     }
 };
