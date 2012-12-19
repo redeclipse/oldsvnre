@@ -461,7 +461,7 @@ void loadc(stream *f, cube &c, const ivec &co, int size, bool &failed)
     }
     else
     {
-        if(octsav&0x40) 
+        if(octsav&0x40)
         {
             if((maptype == MAP_OCTA && hdr.version <= 32) || (maptype == MAP_MAPZ && hdr.version <= 42))
             {
@@ -864,7 +864,7 @@ void save_config(char *mname)
 
         switch(i&MATF_VOLUME)
         {
-            case MAT_WATER: case MAT_LAVA:    
+            case MAT_WATER: case MAT_LAVA:
                 saveslotconfig(h, materialslots[i], -i);
                 break;
         }
@@ -1615,6 +1615,11 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         e.attrs[2] = e.attrs[3];
                         e.attrs[5] = e.attrs[4];
                         e.attrs[3] = e.attrs[4] = 0;
+                    }
+                    if(maptype == MAP_MAPZ && hdr.gamever <= 219)
+                    {
+                        loopi(e.attrs.length()-3) e.attrs[i+3] = e.attrs[i+2];
+                        e.attrs[2] = 0;
                     }
                 }
                 if(e.type == ET_SUNLIGHT && hdr.version <= 38) e.attrs[1] -= 90; // reorient pitch axis

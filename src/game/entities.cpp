@@ -216,10 +216,10 @@ namespace entities
                 addentinfo(mmi->name);
                 if(full)
                 {
-                    if(attr[5]&MMT_HIDE) addentinfo("hide");
-                    if(attr[5]&MMT_NOCLIP) addentinfo("noclip");
-                    if(attr[5]&MMT_NOSHADOW) addentinfo("noshadow");
-                    if(attr[5]&MMT_NODYNSHADOW) addentinfo("nodynshadow");
+                    if(attr[6]&MMT_HIDE) addentinfo("hide");
+                    if(attr[6]&MMT_NOCLIP) addentinfo("noclip");
+                    if(attr[6]&MMT_NOSHADOW) addentinfo("noshadow");
+                    if(attr[6]&MMT_NODYNSHADOW) addentinfo("nodynshadow");
                 }
                 break;
             }
@@ -772,9 +772,11 @@ namespace entities
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -180) e.attrs[2] += 360;
                 while(e.attrs[2] > 180) e.attrs[2] -= 360;
-                while(e.attrs[3] < 0) e.attrs[3] += 101;
-                while(e.attrs[3] >= 101) e.attrs[3] -= 101;
-                if(e.attrs[4] < 0) e.attrs[4] = 0;
+                while(e.attrs[3] < -180) e.attrs[3] += 360;
+                while(e.attrs[3] > 180) e.attrs[3] -= 360;
+                while(e.attrs[4] < 0) e.attrs[4] += 101;
+                while(e.attrs[4] >= 101) e.attrs[3] -= 101;
+                if(e.attrs[5] < 0) e.attrs[5] = 0;
             case PARTICLES:
             case MAPSOUND:
             case LIGHTFX:
@@ -1914,11 +1916,11 @@ namespace entities
                     entdirpart(e.o, e.attrs[1], e.attrs[2], 4.f, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
                     break;
                 }
-                case MAPMODEL:
-                {
-                    entdirpart(e.o, e.attrs[1], 360-e.attrs[2], 4.f, 1, 0x00FFFF);
-                    break;
-                }
+                //case MAPMODEL:
+                //{
+                //    entdirpart(e.o, e.attrs[1], 360-e.attrs[3], 4.f, 1, 0x00FFFF);
+                //    break;
+                //}
                 case ACTOR:
                 {
                     entdirpart(e.o, e.attrs[1], e.attrs[2], 4.f, 1, 0xAAAAAA);

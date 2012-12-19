@@ -361,7 +361,7 @@ void findvisiblemms(const vector<extentity *> &ents)
                 loopv(oe->mapmodels)
                 {
                     extentity &e = *ents[oe->mapmodels[i]];
-                    if(e.lastemit && e.spawned && e.attrs[5]&MMT_HIDE) continue;
+                    if(e.lastemit && e.spawned && e.attrs[6]&MMT_HIDE) continue;
                     e.visible = true;
                     ++visible;
                 }
@@ -395,12 +395,12 @@ void rendermapmodel(extentity &e)
     int anim = ANIM_MAPMODEL|ANIM_LOOP, basetime = 0, flags = MDL_CULL_VFC|MDL_CULL_DIST|MDL_DYNLIGHT;
     if(e.lastemit)
     {
-        if(e.attrs[5]&MMT_HIDE && e.spawned) return;
+        if(e.attrs[6]&MMT_HIDE && e.spawned) return;
         anim = e.spawned ? ANIM_TRIGGER_ON : ANIM_TRIGGER_OFF;
         if(e.lastemit > 0 && lastmillis-e.lastemit < entities::triggertime(e)) basetime = e.lastemit;
         else anim |= ANIM_END;
     }
-    if(e.attrs[5]&MMT_NOSHADOW && !(e.attrs[5]&MMT_NODYNSHADOW)) flags |= e.lastemit ? MDL_DYNSHADOW : MDL_SHADOW;
+    if(e.attrs[6]&MMT_NOSHADOW && !(e.attrs[6]&MMT_NODYNSHADOW)) flags |= e.lastemit ? MDL_DYNSHADOW : MDL_SHADOW;
     if(mmanimoverride)
     {
         anim = (mmanimoverride<0 ? ANIM_ALL : mmanimoverride)|ANIM_LOOP;
@@ -409,14 +409,14 @@ void rendermapmodel(extentity &e)
     mapmodelinfo *mmi = getmminfo(e.attrs[0]);
     if(mmi)
     {
-        if(e.attrs[7] || e.attrs[8])
+        if(e.attrs[8] || e.attrs[9])
         {
-            vec r = game::getpalette(e.attrs[7], e.attrs[8]);
-            if(e.attrs[6]) r.mul(vec::hexcolor(e.attrs[6]));
+            vec r = game::getpalette(e.attrs[8], e.attrs[9]);
+            if(e.attrs[7]) r.mul(vec::hexcolor(e.attrs[7]));
             e.light.material[0] = bvec::fromcolor(r);
         }
-        else e.light.material[0] = e.attrs[6] ? bvec(e.attrs[6]) : bvec(255, 255, 255);
-        rendermodel(&e.light, mmi->name, anim, e.o, (float)(e.attrs[1]%360), 0, (float)(e.attrs[2]%360), flags, NULL, NULL, basetime, 0, e.attrs[3] ? min(e.attrs[3]/100.f, 1.f) : 1.f, e.attrs[4] ? max(e.attrs[4]/100.f, 1e-3f) : 1.f);
+        else e.light.material[0] = e.attrs[7] ? bvec(e.attrs[7]) : bvec(255, 255, 255);
+        rendermodel(&e.light, mmi->name, anim, e.o, e.attrs[1], e.attrs[2], e.attrs[3], flags, NULL, NULL, basetime, 0, e.attrs[4] ? min(e.attrs[4]/100.f, 1.f) : 1.f, e.attrs[5] ? max(e.attrs[5]/100.f, 1e-3f) : 1.f);
     }
 }
 
@@ -451,7 +451,7 @@ void renderreflectedmapmodels()
         loopv(oe->mapmodels)
         {
            extentity &e = *ents[oe->mapmodels[i]];
-           if(e.visible || (e.lastemit && e.spawned && e.attrs[4]&MMT_HIDE)) continue;
+           if(e.visible || (e.lastemit && e.spawned && e.attrs[6]&MMT_HIDE)) continue;
            e.visible = true;
         }
     }
@@ -903,7 +903,7 @@ void renderquery(renderstate &cur, occludequery *query, vtxarray *va, bool full 
     else drawbb(va->geommin, ivec(va->geommax).sub(va->geommin), camera);
 
     endquery(query);
-    
+
     extern int intel_immediate_bug;
     if(intel_immediate_bug && cur.vbuf) cur.vbuf = 0;
 }

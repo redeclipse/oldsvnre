@@ -118,10 +118,10 @@ int hitent, hitorient;
 
 #define mapmodelskip \
     { \
-            if(e.attrs[5]&MMT_NOCLIP) continue; \
+            if(e.attrs[6]&MMT_NOCLIP) continue; \
             if(e.lastemit) \
             { \
-                if(e.attrs[5]&MMT_HIDE) \
+                if(e.attrs[6]&MMT_HIDE) \
                 { \
                     if(e.spawned) continue; \
                 } \
@@ -217,7 +217,7 @@ static float shadowent(octaentities *oc, octaentities *last, const vec &o, const
     {
         extentity &e = *ents[oc->mapmodels[i]];
         if(!e.inoctanode || &e==t) continue;
-        if(e.attrs[5]&MMT_NOSHADOW) continue;
+        if(e.attrs[6]&MMT_NOSHADOW) continue;
         if(!mmintersect(e, o, ray, radius, mode, f)) continue;
         if(f>0 && f<dist) dist = f;
     }
@@ -742,7 +742,7 @@ bool plcollide(physent *d, const vec &dir)  // collide with player or monster
     return true;
 }
 
-void rotatebb(vec &center, vec &radius, int yaw, int roll)
+void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll)
 {
     if(roll)
     {
@@ -753,6 +753,17 @@ void rotatebb(vec &center, vec &radius, int yaw, int roll)
         center.y = oldcenter.x*rot.x + oldcenter.y*rot.y;
         center.z = oldcenter.y*rot.x - oldcenter.x*rot.y;
         radius.y = fabs(oldradius.x*rot.x) + fabs(oldradius.y*rot.y);
+        radius.z = fabs(oldradius.y*rot.x) + fabs(oldradius.x*rot.y);
+    }
+    if(pitch)
+    {
+        if(pitch < 0) pitch = 360 + pitch%360;
+        else if(pitch >= 360) pitch %= 360;
+        const vec2 &rot = sincos360[pitch];
+        vec2 oldcenter(center), oldradius(radius);
+        center.x = oldcenter.x*rot.x - oldcenter.y*rot.y;
+        center.z = oldcenter.y*rot.x + oldcenter.x*rot.y;
+        radius.x = fabs(oldradius.x*rot.x) + fabs(oldradius.y*rot.y);
         radius.z = fabs(oldradius.y*rot.x) + fabs(oldradius.x*rot.y);
     }
     if(yaw)
@@ -796,12 +807,12 @@ bool mmcollide(physent *d, const vec &dir, octaentities &oc)               // co
         if(!m || !m->collide) continue;
         vec center, radius;
         m->collisionbox(0, center, radius);
-        if(e.attrs[4]) { float scale = max(e.attrs[4]/100.f, 1e-3f); center.mul(scale); radius.mul(scale); }
-        int yaw = e.attrs[1], roll = e.attrs[2];
+        if(e.attrs[5]) { float scale = max(e.attrs[5]/100.f, 1e-3f); center.mul(scale); radius.mul(scale); }
+        int yaw = e.attrs[1], pitch = e.attrs[2], roll = e.attrs[3];
         switch(d->collidetype)
         {
             case COLLIDE_ELLIPSE:
-                if(roll) rotatebb(center, radius, 0, roll);
+                if(roll) rotatebb(center, radius, 0, pitch, roll);
                 if(m->ellipsecollide)
                 {
                     if(!ellipsecollide(d, dir, e.o, center, yaw, radius.x, radius.y, radius.z, radius.z)) return false;
@@ -817,7 +828,7 @@ bool mmcollide(physent *d, const vec &dir, octaentities &oc)               // co
                 break;
             case COLLIDE_AABB:
             default:
-                rotatebb(center, radius, yaw, roll);
+                rotatebb(center, radius, yaw, pitch, roll);
                 if(!rectcollide(d, dir, center.add(e.o), radius.x, radius.y, radius.z, radius.z)) return false;
                 break;
         }
