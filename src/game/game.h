@@ -5,11 +5,11 @@
 
 #ifdef MEKARCADE
 #define GAMEID              "mek"
-#define GAMEVERSION         219
+#define GAMEVERSION         220
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
 #else
 #define GAMEID              "fps"
-#define GAMEVERSION         219
+#define GAMEVERSION         220
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
 #endif
 #define DEMO_VERSION        GAMEVERSION
@@ -88,10 +88,10 @@ enttypes enttype[] = {
                 "light",        { "radius", "red",      "green",    "blue",     "flare"  }
     },
     {
-        MAPMODEL,       1,          58,     0,      EU_NONE,    9,          -1,
+        MAPMODEL,       1,          58,     0,      EU_NONE,    10,         -1,
             (1<<TRIGGER), (1<<TRIGGER),
             false,  false,  false,      false,      false,
-                "mapmodel",     { "type",   "yaw",      "rot",      "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
+                "mapmodel",     { "type",   "yaw",      "pitch",    "roll",     "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
     {
         PLAYERSTART,    1,          59,     0,      EU_NONE,    6,          3,
@@ -167,11 +167,11 @@ enttypes enttype[] = {
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
     {
-        AFFINITY,       1,          48,     32,     EU_NONE,    6,          3,
+        AFFINITY,       1,          48,     32,     EU_NONE,    7,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             false,  false,  false,      false,      false,
-                "affinity",     { "team",   "yaw",      "rot",    "modes",    "muts",     "id" }
+                "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,

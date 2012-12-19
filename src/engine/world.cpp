@@ -21,13 +21,13 @@ bool getentboundingbox(extentity &e, ivec &o, ivec &r)
             {
                 vec center, radius;
                 m->boundbox(0, center, radius);
-                if(e.attrs[4])
+                if(e.attrs[5])
                 {
-                    float scale = max(e.attrs[4]/100.0f, 1e-3f);
+                    float scale = max(e.attrs[5]/100.0f, 1e-3f);
                     center.mul(scale);
                     radius.mul(scale);
                 }
-                rotatebb(center, radius, e.attrs[1], e.attrs[2]);
+                rotatebb(center, radius, e.attrs[1], e.attrs[2], e.attrs[3]);
                 o = vec(center).add(e.o);
                 r = vec(radius).add(1);
                 o.sub(r);
@@ -395,8 +395,8 @@ void entselectionbox(const extentity &e, vec &eo, vec &es)
     if(e.type == ET_MAPMODEL && (m = loadmodel(NULL, e.attrs[0])))
     {
         m->collisionbox(0, eo, es);
-        if(e.attrs[4]) { float scale = max(e.attrs[4]/100.f, 1e-3f); eo.mul(scale); es.mul(scale); }
-        rotatebb(eo, es, e.attrs[1], e.attrs[2]);
+        if(e.attrs[5]) { float scale = max(e.attrs[5]/100.f, 1e-3f); eo.mul(scale); es.mul(scale); }
+        rotatebb(eo, es, e.attrs[1], e.attrs[2], e.attrs[3]);
         if(m->collide)
             eo.z -= camera1->aboveeye; // wacky but true. see physics collide
         else
@@ -597,8 +597,8 @@ bool dropentity(extentity &e, int drop = -1)
         {
             vec center;
             m->boundbox(0, center, radius);
-            if(e.attrs[4]) { float scale = max(e.attrs[4]/100.f, 1e-3f); center.mul(scale); radius.mul(scale); }
-            rotatebb(center, radius, e.attrs[1], e.attrs[2]);
+            if(e.attrs[5]) { float scale = max(e.attrs[5]/100.f, 1e-3f); center.mul(scale); radius.mul(scale); }
+            rotatebb(center, radius, e.attrs[1], e.attrs[2], e.attrs[3]);
             radius.x += fabs(center.x);
             radius.y += fabs(center.y);
         }

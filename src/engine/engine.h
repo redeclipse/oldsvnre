@@ -646,7 +646,7 @@ extern void clearchanges(int type);
 // physics
 extern bool pointincube(const clipplanes &p, const vec &v);
 extern bool overlapsdynent(const vec &o, float radius);
-extern void rotatebb(vec &center, vec &radius, int yaw, int roll = 0);
+extern void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll = 0);
 extern float shadowray(const vec &o, const vec &ray, float radius, int mode, extentity *t = NULL);
 struct ShadowRayCache;
 extern ShadowRayCache *newshadowraycache();

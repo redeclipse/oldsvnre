@@ -66,7 +66,7 @@ namespace defend
             float occupy = b.occupied(defendinstant, defendcount);
             entitylight *light = &entities::ents[b.ent]->light;
             light->material[0] = bvec::fromcolor(skewcolour(b.owner, b.enemy, occupy));
-            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[2], entities::ents[b.ent]->attrs[3], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
+            rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, b.o, entities::ents[b.ent]->attrs[1], entities::ents[b.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             if(b.enemy && b.owner)
                 formatstring(b.info)("\fs\f[%d]\f(%s)%s\fS vs. \fs\f[%d]\f(%s)%s\fS", TEAM(b.owner, colour), hud::teamtexname(b.owner), TEAM(b.owner, name), TEAM(b.enemy, colour), hud::teamtexname(b.enemy), TEAM(b.enemy, name));
             else

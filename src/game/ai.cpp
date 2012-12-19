@@ -1533,8 +1533,8 @@ namespace ai
             if(!mmi) continue;
             vec center, radius;
             mmi->m->collisionbox(0, center, radius);
-            if(entities::ents[i]->attrs[4]) { center.mul(entities::ents[i]->attrs[4]/100.f); radius.mul(entities::ents[i]->attrs[4]/100.f); }
-            if(!mmi->m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]));
+            if(entities::ents[i]->attrs[5]) { center.mul(entities::ents[i]->attrs[5]/100.f); radius.mul(entities::ents[i]->attrs[5]/100.f); }
+            if(!mmi->m->ellipsecollide) rotatebb(center, radius, int(entities::ents[i]->attrs[1]), int(entities::ents[i]->attrs[2]));
             float limit = WAYPOINTRADIUS+(max(radius.x, max(radius.y, radius.z))*mmi->m->height);
             vec pos = entities::ents[i]->o; pos.z += limit*0.5f;
             obstacles.avoidnear(NULL, pos.z + limit*0.5f, pos, limit);
