@@ -914,6 +914,7 @@ namespace projs
             { 150, PART_PLASMA, 250, 10, 6, 1.5f, 0, 0, 0.0125f },
             { 150, PART_PLASMA, 250, 5, 6, 2, 3, 6, 0.0125f },
             { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 150, PART_MUZZLE_FLASH, 250, 10, 8, 3, 3, 6, 0.0125f },
         };
         if(WEAP2(weap, adelay, flags&HIT_ALT) >= 5)
@@ -1458,6 +1459,26 @@ namespace projs
         return 1;
     }
 
+    void stick(projent &proj, const vec &dir, gameent *d = NULL)
+    {
+        if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
+        {
+            proj.stuck = true;
+            if(!(proj.stick = d)) proj.stickpos = proj.o.sub(vec(dir).mul(proj.radius*0.125f));
+            else
+            {
+                proj.stickpos = vec(proj.o).sub(d->center());
+                proj.stickpos.rotate_around_z(-d->yaw*RAD);
+            }
+            if(proj.projtype == PRJ_SHOT)
+                client::addmsg(N_STICKY, "ri8", proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
+                        proj.stick ? proj.stick->clientnum : -1, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
+            proj.lastbounce = lastmillis;
+            vectoyawpitch(proj.norm, proj.yaw, proj.pitch); proj.pitch -= 90;
+            game::fixfullrange(proj.yaw, proj.pitch, proj.roll, true);
+        }
+    }
+
     int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
         if(d && d->type == ENT_PROJ)
@@ -1476,17 +1497,7 @@ namespace projs
                 proj.norm = vec(d->center()).sub(proj.o).normalize();
                 if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&COLLIDE_STICK)
                 {
-                    if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
-                    {
-                        proj.stuck = true;
-                        proj.stick = (gameent *)d;
-                        proj.stickpos = vec(proj.o).sub(d->center());
-                        proj.stickpos.rotate_around_z(-d->yaw*RAD);
-                        if(proj.projtype == PRJ_SHOT)
-                            client::addmsg(N_STICKY, "ri8", proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
-                                    proj.stick->clientnum, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
-                        proj.lastbounce = lastmillis;
-                    }
+                    stick(proj, dir, (gameent *)d);
                     return 1;
                 }
                 if(!hiteffect(proj, d, flags, proj.norm)) return 1;
@@ -1496,16 +1507,7 @@ namespace projs
                 proj.norm = norm;
                 if(proj.projcollide&IMPACT_GEOM && proj.projcollide&COLLIDE_STICK)
                 {
-                    if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
-                    {
-                        proj.stuck = true;
-                        proj.stick = NULL;
-                        proj.stickpos = proj.o.sub(vec(dir).mul(proj.radius*0.125f));
-                        if(proj.projtype == PRJ_SHOT)
-                            client::addmsg(N_STICKY, "ri8", proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
-                                    -1, int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
-                        proj.lastbounce = lastmillis;
-                    }
+                    stick(proj, dir);
                     return 1;
                 }
             }
@@ -1697,12 +1699,29 @@ namespace projs
         {
             case PRJ_SHOT:
             {
+                if(proj.stuck) break;
+                if(proj.weap == WEAP_MINE)
+                {
+                    if(!proj.lastbounce || proj.movement >= 1)
+                    {
+                        vec axis(sinf(proj.yaw*RAD), -cosf(proj.yaw*RAD), 0);
+                        if(proj.vel.dot2(axis) >= 0) { proj.pitch -= diff; if(proj.pitch < -180) proj.pitch = 180 - fmod(180 - proj.pitch, 360); }
+                        else { proj.pitch += diff; if(proj.pitch > 180) proj.pitch = fmod(proj.pitch + 180, 360) - 180; }
+                        break;
+                    }
+                    if(proj.pitch != 0)
+                    {
+                        if(proj.pitch < 0) { proj.pitch += max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch > 0) proj.pitch = 0; }
+                        else if(proj.pitch > 0) { proj.pitch -= max(diff, !proj.lastbounce || proj.movement >= 1 ? 1.f : 5.f); if(proj.pitch < 0) proj.pitch = 0; }
+                    }
+                    break;
+                }
                 if(proj.weap == WEAP_ROCKET)
                 {
                     vectoyawpitch(vec(proj.vel).normalize(), proj.yaw, proj.pitch);
                     break;
                 }
-                if(proj.weap != WEAP_GRENADE && proj.weap != WEAP_MINE) break;
+                if(proj.weap != WEAP_GRENADE) break;
             }
             case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_AFFINITY:
             {
@@ -1988,7 +2007,7 @@ namespace projs
         {
             projent &proj = *projs[i];
             if((proj.projtype == PRJ_ENT && !entities::ents.inrange(proj.id)) || !projs[i]->mdl || !*projs[i]->mdl) continue;
-            float trans = 1, size = projs[i]->curscale, yaw = proj.yaw;
+            float trans = 1, size = projs[i]->curscale, yaw = proj.yaw, pitch = proj.pitch, roll = proj.roll;
             int flags = MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_CULL_DIST;
             switch(proj.projtype)
             {
@@ -2048,7 +2067,8 @@ namespace projs
                 }
                 default: break;
             }
-            rendermodel(NULL, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, yaw, proj.pitch, proj.roll, flags, &proj, NULL, 0, 0, trans, size);
+            if(trans > 0 && size > 0)
+                rendermodel(NULL, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, yaw, pitch, roll, flags, &proj, NULL, proj.spawntime, 0, trans, size);
         }
     }
 

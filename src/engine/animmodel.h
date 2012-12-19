@@ -163,8 +163,8 @@ struct animmodel : model
             }
             else
             {
-                float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f, 
-                      bias = max(mincolor-1.0f, 0.2f), scale = 0.5f*max(0.8f-bias, 0.0f), 
+                float mincolor = as->cur.anim&ANIM_FULLBRIGHT ? fullbrightmodels/100.0f : 0.0f,
+                      bias = max(mincolor-1.0f, 0.2f), scale = 0.5f*max(0.8f-bias, 0.0f),
                       minshade = scale*max(ambient, mincolor);
                 vec color = vec(lightcolor).max(mincolor);
                 glColor4f(color.x, color.y, color.z, trans);
@@ -179,7 +179,7 @@ struct animmodel : model
                 curglow += glowdelta*2*fabs(curpulse - 0.5f);
             }
             setenvparamf("maskscale", SHPARAM_PIXEL, 4, 0.5f*spec*lightmodels, 0.5f*curglow*glowmodels, 16*specglare, 4*glowglare);
-            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor().mul(2) : vec(2, 2, 2), 
+            vec matcolor = material > 0 && lightmaterial ? lightmaterial[min(material, int(MAXLIGHTMATERIALS))-1].tocolor().mul(2) : vec(2, 2, 2),
                 matcolor2 = material2 > 0 && lightmaterial ? lightmaterial[min(material2, int(MAXLIGHTMATERIALS))-1].tocolor().mul(2) : vec(2, 2, 2);
             setenvparamf("lightmaterial", SHPARAM_PIXEL, 6, matcolor.x, matcolor.y, matcolor.z, 1);
             setenvparamf("lightmaterial2", SHPARAM_PIXEL, 7, matcolor2.x, matcolor2.y, matcolor2.z, 1);
@@ -1255,7 +1255,7 @@ struct animmodel : model
     void setmaterial(int material, int material2)
     {
         if(parts.empty()) loaddefaultparts();
-        loopv(parts) loopvj(parts[i]->skins) 
+        loopv(parts) loopvj(parts[i]->skins)
         {
             skin &s = parts[i]->skins[j];
             s.material = material;

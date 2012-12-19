@@ -3,7 +3,7 @@ enum
     WEAP_MELEE = 0, WEAP_PISTOL, WEAP_OFFSET, // end of unselectable weapon set
     WEAP_SWORD = WEAP_OFFSET, WEAP_SHOTGUN, WEAP_SMG, WEAP_FLAMER, WEAP_PLASMA, WEAP_RIFLE, WEAP_ITEM,
     WEAP_GRENADE = WEAP_ITEM, WEAP_MINE, WEAP_ROCKET, // end of item weapon set
-    WEAP_MAX, WEAP_LOADOUT = WEAP_ITEM-WEAP_OFFSET
+    WEAP_MAX, WEAP_LOADOUT = WEAP_ITEM-WEAP_OFFSET // if you add to this at all, check all arrays with WEAP_MAX
 };
 #define isweap(a)       (a >= 0 && a < WEAP_MAX)
 

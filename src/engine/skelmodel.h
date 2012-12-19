@@ -810,7 +810,7 @@ struct skelmodel : animmodel
             {
                 int pos = pitchdeps.length();
                 loopvj(pitchdeps) if(bone <= pitchdeps[j].bone)
-                { 
+                {
                     if(bone == pitchdeps[j].bone) goto nextbone;
                     pos = j;
                     break;
@@ -852,7 +852,7 @@ struct skelmodel : animmodel
             {
                 pitchdep &d = pitchdeps[i];
                 int parent = bones[d.bone].parent;
-                if(parent >= 0) 
+                if(parent >= 0)
                 {
                     int j = findpitchdep(parent);
                     if(j >= 0)
@@ -870,7 +870,7 @@ struct skelmodel : animmodel
                 {
                     t.deps = j;
                     t.pose = pitchdeps[j].pose;
-                }    
+                }
                 t.corrects = -1;
                 for(int parent = t.bone; parent >= 0; parent = bones[parent].parent)
                 {
@@ -983,8 +983,8 @@ struct skelmodel : animmodel
                 {
                     pitchcorrect &c = pitchcorrects[i];
                     if(c.target != j) continue;
-                    float total = c.parent >= 0 ? pitchcorrects[c.parent].pitchtotal : 0, 
-                          avail = tpitch - total, 
+                    float total = c.parent >= 0 ? pitchcorrects[c.parent].pitchtotal : 0,
+                          avail = tpitch - total,
                           used = tpitch*c.pitchscale;
                     if(c.pitchmin || c.pitchmax)
                     {
@@ -1192,7 +1192,7 @@ struct skelmodel : animmodel
 
         void calctags(part *p, modelattach *attached, skelcacheentry *sc = NULL)
         {
-            loopv(p->links) 
+            loopv(p->links)
             {
                 linkedpart &l = p->links[i];
                 tag &t = tags[l.tag];
@@ -1519,7 +1519,7 @@ struct skelmodel : animmodel
                     int numverts = 0, htlen = 128;
                     loopv(meshes) numverts += ((skelmesh *)meshes[i])->numverts;
                     while(htlen < numverts) htlen *= 2;
-                    if(numverts*4 > htlen*3) htlen *= 2;  
+                    if(numverts*4 > htlen*3) htlen *= 2;
                     int *htdata = new int[htlen];
                     memset(htdata, -1, htlen*sizeof(int));
                     if(tangents) GENVBOSTAT(vvertbump);
@@ -1918,7 +1918,7 @@ struct skelmodel : animmodel
                 LINK_REUSE :
                 LINK_TAG;
     }
-    
+
     bool skeletal() const { return true; }
 };
 
@@ -1976,7 +1976,7 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
             mdl.initskins();
         }
     }
-   
+
     static void settag(char *name, char *tagname, float *tx, float *ty, float *tz, float *rx, float *ry, float *rz)
     {
         if(!MDL::loading || MDL::loading->parts.empty()) { conoutf("\frnot loading an %s", MDL::formatname()); return; }
@@ -1999,7 +1999,7 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
     {
         if(!MDL::loading || MDL::loading->parts.empty()) { conoutf("\frnot loading an %s", MDL::formatname()); return; }
         part &mdl = *(part *)MDL::loading->parts.last();
-    
+
         if(name[0])
         {
             int i = mdl.meshes ? ((meshgroup *)mdl.meshes)->skel->findbone(name) : -1;
@@ -2023,7 +2023,7 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
             conoutf("\frcould not find bone %s to pitch", name);
             return;
         }
-    
+
         mdl.pitchscale = *pitchscale;
         mdl.pitchoffset = *pitchoffset;
         if(*pitchmin || *pitchmax)
@@ -2089,13 +2089,13 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
         c.pitchscale = *scale;
         int pos = skel->pitchcorrects.length();
         loopv(skel->pitchcorrects) if(bone <= skel->pitchcorrects[i].bone) { pos = i; break; break; }
-        skel->pitchcorrects.insert(pos, c); 
+        skel->pitchcorrects.insert(pos, c);
     }
 
     static void setanim(char *anim, char *animfile, float *speed, int *priority, int *startoffset, int *endoffset)
     {
         if(!MDL::loading || MDL::loading->parts.empty()) { conoutf("\frnot loading an %s", MDL::formatname()); return; }
-    
+
         vector<int> anims;
         game::findanims(anim, anims);
         if(anims.empty()) conoutf("\frcould not find animation %s", anim);
@@ -2113,18 +2113,18 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
                 else if(*startoffset < 0) start += max(end + *startoffset, 0);
                 end -= start - sa->frame;
                 if(*endoffset > 0) end = min(end, *endoffset);
-                else if(*endoffset < 0) end = max(end + *endoffset, 1); 
+                else if(*endoffset < 0) end = max(end + *endoffset, 1);
                 MDL::loading->parts.last()->setanim(p->numanimparts-1, anims[i], start, end, *speed, *priority);
             }
         }
     }
-    
+
     static void setanimpart(char *maskstr)
     {
         if(!MDL::loading || MDL::loading->parts.empty()) { conoutf("\frnot loading an %s", MDL::formatname()); return; }
-    
+
         part *p = (part *)MDL::loading->parts.last();
-    
+
         vector<char *> bonestrs;
         explodelist(maskstr, bonestrs);
         vector<ushort> bonemask;
@@ -2138,7 +2138,7 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
         bonestrs.deletearrays();
         bonemask.sort();
         if(bonemask.length()) bonemask.add(BONEMASK_END);
-    
+
         if(!p->addanimpart(bonemask.getbuf())) conoutf("\frtoo many animation parts");
     }
 
@@ -2153,7 +2153,7 @@ template<class MDL> struct skelcommands : modelcommands<MDL, struct MDL::skelmes
         while(!MDL::adjustments.inrange(i)) MDL::adjustments.add(skeladjustment(0, 0, 0, vec(0, 0, 0)));
         MDL::adjustments[i] = skeladjustment(*yaw, *pitch, *roll, vec(*tx/4, *ty/4, *tz/4));
     }
-    
+
     skelcommands()
     {
         if(MDL::multiparted()) this->modelcommand(loadpart, "load", "ssf");
