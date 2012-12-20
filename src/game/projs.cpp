@@ -2060,7 +2060,6 @@ namespace projs
                         else if(proj.beenused) proj.light.material[0] = bvec(64, 255, 64);
                         else if(proj.stuck) proj.light.material[0] = bvec(255, 255, 0);
                         else proj.light.material[0] = bvec(255, 32, 32);
-                        proj.light.effect = vec(proj.light.material[0][0], proj.light.material[0][1], proj.light.material[0][2]).div(255);
                     }
                     yaw += 90;
                     break;
@@ -2083,7 +2082,7 @@ namespace projs
                 }
                 default: break;
             }
-            rendermodel(NULL, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, yaw, pitch, roll, flags, &proj, NULL, proj.spawntime, 0, trans, size);
+            rendermodel(&proj.light, proj.mdl, ANIM_MAPMODEL|ANIM_LOOP, proj.o, yaw, pitch, roll, flags, &proj, NULL, proj.spawntime, 0, trans, size);
         }
     }
 
