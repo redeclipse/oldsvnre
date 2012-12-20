@@ -4659,10 +4659,12 @@ namespace server
                     break;
                 }
 
-                case N_STICKY: // cn weap id flags target stickpos
+                case N_STICKY: // cn weap id flags target norm pos
                 {
-                    int lcn = getint(p), weap = getint(p), flags = getint(p), id = getint(p), target = getint(p),
-                        x = getint(p), y = getint(p), z = getint(p);
+                    int lcn = getint(p), weap = getint(p), flags = getint(p), id = getint(p), target = getint(p);
+                    ivec norm(0, 0, 0), pos(0, 0, 0);
+                    loopk(3) norm[k] = getint(p);
+                    loopk(3) pos[k] = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(isweap(weap) && cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum))
                     {
@@ -4673,7 +4675,7 @@ namespace server
                         }
                         clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
                         if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
-                            sendf(-1, 1, "ri7x", N_STICKY, cp->clientnum, target, id, x, y, z, cp->clientnum);
+                            sendf(-1, 1, "ri9ix", N_STICKY, cp->clientnum, target, id, norm.x, norm.y, norm.z, pos.x, pos.y, pos.z, cp->clientnum);
                         else if(GAME(serverdebug) >= 2)
                             srvmsgf(cp->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
                     }
