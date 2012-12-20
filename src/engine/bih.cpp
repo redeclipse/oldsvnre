@@ -311,14 +311,6 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
         mo.rotate_around_z(rot.x, -rot.y);
         mray.rotate_around_z(rot.x, -rot.y);
     }
-    if(pitch != 0)
-    {
-        if(pitch < 0) pitch = 360 + pitch%360;
-        else if(pitch >= 360) pitch %= 360;
-        const vec2 &rot = sincos360[pitch];
-        mo.rotate_around_y(rot.x, -rot.y);
-        mray.rotate_around_y(rot.x, -rot.y);
-    }
     if(roll != 0)
     {
         if(roll < 0) roll = 360 + roll%360;
@@ -327,13 +319,21 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
         mo.rotate_around_x(rot.x, rot.y);
         mray.rotate_around_x(rot.x, rot.y);
     }
+    if(pitch != 0)
+    {
+        if(pitch < 0) pitch = 360 + pitch%360;
+        else if(pitch >= 360) pitch %= 360;
+        const vec2 &rot = sincos360[pitch];
+        mo.rotate_around_y(rot.x, rot.y);
+        mray.rotate_around_y(rot.x, rot.y);
+    }
     if(m->bih->traverse(mo, mray, maxdist*scale, dist, mode))
     {
         dist /= scale;
         if(!(mode&RAY_SHADOW))
         {
+            if(pitch != 0) hitsurface.rotate_around_y(-pitch*RAD);
             if(roll != 0) hitsurface.rotate_around_x(-roll*RAD);
-            if(pitch != 0) hitsurface.rotate_around_y(pitch*RAD);
             if(yaw != 0) hitsurface.rotate_around_z(yaw*RAD);
         }
         return true;

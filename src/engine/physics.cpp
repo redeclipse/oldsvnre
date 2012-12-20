@@ -744,6 +744,17 @@ bool plcollide(physent *d, const vec &dir)  // collide with player or monster
 
 void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll)
 {
+    if(pitch)
+    {
+        if(pitch < 0) pitch = 360 + pitch%360;
+        else if(pitch >= 360) pitch %= 360;
+        const vec2 &rot = sincos360[pitch];
+        vec2 oldcenter(center.x, center.z), oldradius(radius.x, radius.z);
+        center.x = oldcenter.x*rot.x + oldcenter.y*rot.y;
+        center.z = oldcenter.y*rot.x - oldcenter.x*rot.y;
+        radius.x = fabs(oldradius.x*rot.x) + fabs(oldradius.y*rot.y);
+        radius.z = fabs(oldradius.y*rot.x) + fabs(oldradius.x*rot.y);
+    }
     if(roll)
     {
         if(roll < 0) roll = 360 + roll%360;
@@ -753,17 +764,6 @@ void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll)
         center.y = oldcenter.x*rot.x + oldcenter.y*rot.y;
         center.z = oldcenter.y*rot.x - oldcenter.x*rot.y;
         radius.y = fabs(oldradius.x*rot.x) + fabs(oldradius.y*rot.y);
-        radius.z = fabs(oldradius.y*rot.x) + fabs(oldradius.x*rot.y);
-    }
-    if(pitch)
-    {
-        if(pitch < 0) pitch = 360 + pitch%360;
-        else if(pitch >= 360) pitch %= 360;
-        const vec2 &rot = sincos360[pitch];
-        vec2 oldcenter(center.x, center.z), oldradius(radius.x, radius.z);
-        center.x = oldcenter.x*rot.x - oldcenter.y*rot.y;
-        center.z = oldcenter.y*rot.x + oldcenter.x*rot.y;
-        radius.x = fabs(oldradius.x*rot.x) + fabs(oldradius.y*rot.y);
         radius.z = fabs(oldradius.y*rot.x) + fabs(oldradius.x*rot.y);
     }
     if(yaw)
