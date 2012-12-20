@@ -1198,13 +1198,3 @@ mesh {
 	weight 309 0 1.000000 ( 0.329246 -0.007041 -0.206878 )
 }
 
-mesh {
-	shader ""
-
-	numverts 0
-
-	numtris 0
-
-	numweights 0
-}
-
