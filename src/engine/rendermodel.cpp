@@ -768,7 +768,7 @@ void renderradius(const vec &o, float radius)
 
 void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, float yaw, float pitch, float roll, int flags, dynent *d, modelattach *a, int basetime, int basetime2, float trans, float size)
 {
-    if(shadowmapping && !(flags&(MDL_SHADOW|MDL_DYNSHADOW))) return;
+    if((shadowmapping && !(flags&(MDL_SHADOW|MDL_DYNSHADOW))) || trans <= 0 || size <= 0) return;
     model *m = loadmodel(mdl);
     if(!m) return;
     vec center(0, 0, 0), bbradius(0, 0, 0);

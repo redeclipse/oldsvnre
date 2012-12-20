@@ -157,7 +157,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, zoomtex, "textures/zoom", 3);
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
-    VAR(IDF_PERSIST, crosshairweapons, 0, 0, 2); // 0 = off, 1 = crosshair-specific weapons, 2 = also appy colour
+    VAR(IDF_PERSIST, crosshairweapons, 0, 0, 3); // 0 = off, &1 = crosshair-specific weapons, &2 = also appy colour
     FVAR(IDF_PERSIST, crosshairsize, 0, 0.04f, 1000);
     VAR(IDF_PERSIST, crosshairhitspeed, 0, 500, VAR_MAX);
     FVAR(IDF_PERSIST, crosshairblend, 0, 1, 1);
@@ -690,7 +690,7 @@ namespace hud
             case POINTER_SPEC: return game::tvmode() ? tvcursortex : speccursortex;
             case POINTER_HAIR:
             {
-                if(crosshairweapons && isweap(weap))
+                if(crosshairweapons&1 && isweap(weap))
                 {
                     const char *crosshairtexs[WEAP_MAX] = {
                         meleecrosshairtex, pistolcrosshairtex, swordcrosshairtex, shotguncrosshairtex, smgcrosshairtex,
@@ -705,7 +705,7 @@ namespace hud
             case POINTER_ZOOM: return zoomcrosshairtex;
             case POINTER_HIT:
             {
-                if(crosshairweapons && isweap(weap))
+                if(crosshairweapons&1 && isweap(weap))
                 {
                     const char *hithairtexs[WEAP_MAX] = {
                         meleehithairtex, pistolhithairtex, swordhithairtex, shotgunhithairtex, smghithairtex,
@@ -905,7 +905,7 @@ namespace hud
         vec c(1, 1, 1);
         if(game::focus->state == CS_ALIVE && index >= POINTER_HAIR)
         {
-            if(crosshairweapons >= 2) c = vec::hexcolor(WEAP(game::focus->weapselect, colour));
+            if(crosshairweapons&2) c = vec::hexcolor(WEAP(game::focus->weapselect, colour));
             if(index == POINTER_ZOOM && game::inzoom() && WEAP(game::focus->weapselect, zooms))
             {
                 int frame = lastmillis-game::lastzoom, off = int(zoomcrosshairsize*hudsize)-cs;

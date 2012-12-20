@@ -214,7 +214,7 @@ struct defendservmode : defendstate, servmode
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
         if(!hasflaginfo || !GAME(defendregenbuff) || !ci->state.lastbuff) return;
-        if(GAME(maxhealth)) total = max(int(m_health(gamemode, mutators, ci->state.model)*GAME(maxhealth)), total);
+        if(GAME(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
         if(ci->state.lastregen && GAME(defendregendelay)) delay = GAME(defendregendelay);
         if(GAME(defendregenextra)) amt += GAME(defendregenextra);
     }
