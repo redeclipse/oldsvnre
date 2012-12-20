@@ -1118,7 +1118,7 @@ struct animmodel : model
         m.identity();
         if(offsetyaw) m.rotate_around_z(offsetyaw*RAD);
         if(offsetroll) m.rotate_around_x(-offsetroll*RAD);
-        if(offsetpitch) m.rotate_around_y(-offsetpitch*RAD);
+        if(offsetpitch) m.rotate_around_y(offsetpitch*RAD);
     }
 
     void gentris(int frame, vector<BIH::tri> *tris)

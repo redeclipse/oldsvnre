@@ -876,6 +876,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
             glTranslatef(o.x, o.y, o.z);
             glRotatef(yaw, 0, 0, 1);
             glRotatef(-roll, 1, 0, 0);
+            glRotatef(-pitch, 0, 1, 0);
             render3dbox(center, radius.z, radius.z, radius.x, radius.y);
         }
 

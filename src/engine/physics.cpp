@@ -750,8 +750,8 @@ void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll)
         else if(pitch >= 360) pitch %= 360;
         const vec2 &rot = sincos360[pitch];
         vec2 oldcenter(center.x, center.z), oldradius(radius.x, radius.z);
-        center.x = oldcenter.x*rot.x + oldcenter.y*rot.y;
-        center.z = oldcenter.y*rot.x - oldcenter.x*rot.y;
+        center.x = oldcenter.x*rot.x - oldcenter.y*rot.y;
+        center.z = oldcenter.y*rot.x + oldcenter.x*rot.y;
         radius.x = fabs(oldradius.x*rot.x) + fabs(oldradius.y*rot.y);
         radius.z = fabs(oldradius.y*rot.x) + fabs(oldradius.x*rot.y);
     }
