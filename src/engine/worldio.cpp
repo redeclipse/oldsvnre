@@ -1608,7 +1608,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         int angle = e.attrs[0];
                         e.attrs[0] = e.attrs[1];
                         e.attrs[1] = angle;
-                        loopi(e.attrs.length()-2) e.attrs[i+2] = 0;
+                        loopk(e.attrs.length()-2) e.attrs[k+2] = 0;
                     }
                     if(maptype == MAP_MAPZ && hdr.version <= 37)
                     {
@@ -1618,7 +1618,8 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     }
                     if(maptype == MAP_MAPZ && hdr.gamever <= 219)
                     {
-                        loopi(e.attrs.length()-3) e.attrs[i+3] = e.attrs[i+2];
+                        int num = e.attrs.length();
+                        loopk(num-3) e.attrs[num-k] = e.attrs[num-k-1];
                         e.attrs[2] = 0;
                     }
                 }

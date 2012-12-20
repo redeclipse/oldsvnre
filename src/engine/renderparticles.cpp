@@ -16,7 +16,7 @@ VAR(0, debugparticles, 0, 0, 1);
 
 // Check emit_particles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
-VAR(IDF_PERSIST, emitmillis, 0, 15, VAR_MAX);
+VAR(IDF_PERSIST, emitmillis, 1, 15, VAR_MAX);
 static int lastemitframe = 0;
 static bool emit = false;
 
@@ -1644,10 +1644,10 @@ void makeparticle(const vec &o, attrvector &attr)
             break;
         case 2: //water fountain - <dir>
         {
-            int mat = MAT_WATER + clamp(-attr[2], 0, 3); 
+            int mat = MAT_WATER + clamp(-attr[2], 0, 3);
             const bvec &wfcol = getwaterfallcol(mat);
             int color = (int(wfcol[0])<<16) | (int(wfcol[1])<<8) | int(wfcol[2]);
-            if(!color) 
+            if(!color)
             {
                 const bvec &wcol = getwatercol(mat);
                 color = (int(wcol[0])<<16) | (int(wcol[1])<<8) | int(wcol[2]);

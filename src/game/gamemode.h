@@ -301,6 +301,7 @@ extern mutstypes mutstype[];
 #else
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : GAME(spawnhealth))
 #endif
+#define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? GAME(maxhealthvampire) : GAME(maxhealth))))
 
 #define w_reload(w1,w2)     (w1 != WEAP_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : WEAP(w1, reloads)) : (w1 < 0-w2 ? -1 : WEAP(w1, reloads))) : 0)
 #define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && WEAP(w1, carried)))

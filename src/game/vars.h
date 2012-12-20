@@ -124,11 +124,12 @@ GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of play
 
 GVAR(0, maxcarry, 1, 2, WEAP_MAX-1);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
-GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
+GVAR(0, spawnweapon, 0, WEAP_MINE, WEAP_MAX-1);
+//GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
 GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);
 GVAR(0, trialweapon, 0, WEAP_MELEE, WEAP_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
-GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
+GVAR(0, spawnmines, 0, 2, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib matches
 GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
@@ -211,7 +212,7 @@ GVAR(0, captureextinguish, 0, 6, 7);
 GFVAR(0, capturerelativity, 0, 0.25f, FVAR_MAX);
 GFVAR(0, captureelasticity, FVAR_MIN, 0.35f, FVAR_MAX);
 GFVAR(0, capturewaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
-GFVAR(0, captureweight, FVAR_MIN, 100, FVAR_MAX);
+GFVAR(0, captureweight, FVAR_MIN, 200, FVAR_MAX);
 GFVAR(0, captureminspeed, 0, 0, FVAR_MAX);
 GFVAR(0, capturerepulsion, 0, 16, FVAR_MAX);
 GFVAR(0, capturerepelspeed, 0, 25, FVAR_MAX);
@@ -255,14 +256,14 @@ GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, VAR_MAX);
 GVAR(0, bomberlockondelay, 0, 250, VAR_MAX);
 GVAR(0, bomberreset, 0, 0, 2); // 0 = off, 1 = kill winners, 2 = kill everyone
-GFVAR(0, bomberspeed, 0, 250, FVAR_MAX);
+GFVAR(0, bomberspeed, 0, 200, FVAR_MAX);
 GFVAR(0, bomberdelta, 0, 1000, FVAR_MAX);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, bomberextinguish, 0, 6, 7);
 GFVAR(0, bomberrelativity, 0, 0.25f, FVAR_MAX);
 GFVAR(0, bomberelasticity, FVAR_MIN, 0.65f, FVAR_MAX);
 GFVAR(0, bomberwaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
-GFVAR(0, bomberweight, FVAR_MIN, 150, FVAR_MAX);
+GFVAR(0, bomberweight, FVAR_MIN, 200, FVAR_MAX);
 GFVAR(0, bomberminspeed, 0, 50, FVAR_MAX);
 GFVAR(0, bomberthreshold, 0, 0, FVAR_MAX); // if someone 'warps' more than this distance, auto-drop
 GVAR(0, bomberbuffing, 0, 1, 3); // buffed; 0 = off, &1 = when guarding, &2 = when securing

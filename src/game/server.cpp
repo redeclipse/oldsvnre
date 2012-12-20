@@ -521,7 +521,7 @@ namespace server
         {
             if(actor != target && (!m_isteam(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
-                int rgn = actor->state.health, heal = min(actor->state.health+hurt, int(m_health(gamemode, mutators, actor->state.model)*GAME(maxhealthvampire))), eff = heal-rgn;
+                int rgn = actor->state.health, heal = min(actor->state.health+hurt, m_maxhealth(gamemode, mutators, actor->state.model)), eff = heal-rgn;
                 if(eff)
                 {
                     actor->state.health = heal;
@@ -3086,7 +3086,7 @@ namespace server
                 }
             }
 #ifdef MEKARCADE
-            if(target->state.armour > 0)
+            if(realdamage >= 0 && target->state.armour > 0)
             {
                 int absorb = realdamage/2; // armour absorbs half until depleted
                 if(target->state.armour < absorb) absorb = target->state.armour;
@@ -3095,7 +3095,7 @@ namespace server
             }
 #endif
             hurt = min(target->state.health, realdamage);
-            target->state.health -= realdamage;
+            target->state.health = min(target->state.health-realdamage, m_maxhealth(gamemode, mutators, target->state.model));
             if(target->state.health <= m_health(gamemode, mutators, target->state.model)) target->state.lastregen = 0;
             target->state.lastpain = gamemillis;
             actor->state.damage += realdamage;

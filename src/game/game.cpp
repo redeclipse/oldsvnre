@@ -1056,11 +1056,7 @@ namespace game
                         scale *= 1/float(WEAP2(weap, selfdmg, flags&HIT_ALT));
                     float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
                     vec psh = vec(dir).mul(scale*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPLM(force, gamemode, mutators));
-                    if(!psh.iszero())
-                    {
-                        d->vel.add(psh);
-                        d->resetphys(psh.z > 0);
-                    }
+                    if(!psh.iszero()) d->vel.add(psh);
                 }
             }
             ai::damaged(d, actor, weap, flags, damage);
