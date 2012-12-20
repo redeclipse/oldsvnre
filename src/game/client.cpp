@@ -1751,10 +1751,11 @@ namespace client
                 case N_STICKY:
                 {
                     int scn = getint(p), tcn = getint(p), id = getint(p);
-                    vec pos(0, 0, 0);
+                    vec norm(0, 0, 0), pos(0, 0, 0);
+                    loopk(3) norm[k] = getint(p)/DMF;
                     loopk(3) pos[k] = getint(p)/DMF;
                     gameent *t = game::getclient(scn), *v = tcn >= 0 ? game::getclient(tcn) : NULL;
-                    if(t && (tcn < 0 || v)) projs::sticky(t, id, v, pos);
+                    if(t && (tcn < 0 || v)) projs::sticky(t, id, norm, pos, v);
                     break;
                 }
 

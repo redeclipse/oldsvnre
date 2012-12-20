@@ -833,10 +833,10 @@ namespace hud
                 int shot = game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1;
                 if(shot) switch(weapid)
                 {
-                    case WEAP_FLAMER: case WEAP_ROCKET:
+                    case WEAP_FLAMER: case WEAP_ROCKET: case WEAP_MINE:
                         drawslice(ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
-                    case WEAP_GRENADE: case WEAP_MINE:
+                    case WEAP_GRENADE:
                         drawslice(0.25f/maxammo+ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
                     default:
@@ -854,10 +854,10 @@ namespace hud
                     ammo -= game::focus->weapload[weap];
                     switch(weapid)
                     {
-                        case WEAP_FLAMER: case WEAP_ROCKET:
+                        case WEAP_FLAMER: case WEAP_ROCKET: case WEAP_MINE:
                             drawslice(ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
-                        case WEAP_GRENADE: case WEAP_MINE:
+                        case WEAP_GRENADE:
                             drawslice(0.25f/maxammo+ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
                         default:
@@ -873,10 +873,10 @@ namespace hud
         }
         if(ammo > 0) switch(weapid)
         {
-            case WEAP_FLAMER: case WEAP_ROCKET:
+            case WEAP_FLAMER: case WEAP_ROCKET: case WEAP_MINE:
                 drawslice(0, ammo/float(maxammo), x, y, size);
                 break;
-            case WEAP_GRENADE: case WEAP_MINE:
+            case WEAP_GRENADE:
                 drawslice(0.25f/maxammo, ammo/float(maxammo), x, y, size);
                 break;
             default:

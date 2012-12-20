@@ -1403,7 +1403,7 @@ struct projent : dynent
 
     bool ready(bool used = true)
     {
-        if(owner && (!used || !beenused) && waittime <= 0 && state != CS_DEAD)
+        if(owner && (!used || projtype == PRJ_SHOT || !beenused) && waittime <= 0 && state != CS_DEAD)
             return true;
         return false;
     }
@@ -1499,7 +1499,7 @@ namespace projs
     extern void preload();
     extern void remove(gameent *owner);
     extern void destruct(gameent *d, int id);
-    extern void sticky(gameent *d, int id, gameent *f, vec &pos);
+    extern void sticky(gameent *d, int id, vec &norm, vec &pos, gameent *f = NULL);
     extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local);
     extern void drop(gameent *d, int weap, int ent, int ammo = -1, int reloads = -1, bool local = true, int index = 0, int targ = -1);
     extern void adddynlights();
