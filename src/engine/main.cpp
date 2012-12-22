@@ -666,7 +666,7 @@ VAR(IDF_PERSIST, menufps, 0, 60, 1000);
 
 void limitfps(int &millis, int curmillis)
 {
-    int limit = hasnoview() && menufps ? (maxfps ? min(maxfps, menufps) : menufps) : maxfps;
+    int limit = (hasnoview() || minimized) && menufps ? (maxfps ? min(maxfps, menufps) : menufps) : maxfps;
     if(!limit) return;
     static int fpserror = 0;
     int delay = 1000/limit - (millis-curmillis);
