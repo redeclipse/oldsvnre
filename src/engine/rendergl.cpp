@@ -166,6 +166,7 @@ VAR(0, apple_ff_bug, 0, 0, 1);
 VAR(0, apple_vp_bug, 0, 0, 1);
 VAR(0, sdl_backingstore_bug, -1, 0, 1);
 VAR(0, avoidshaders, 1, 0, 0);
+VAR(0, preferglsl, 1, 0, 0);
 VAR(0, minimizetcusage, 1, 0, 0);
 VAR(0, emulatefog, 1, 0, 0);
 VAR(0, usevp2, 1, 0, 0);
@@ -466,6 +467,11 @@ void gl_checkextensions()
             uint majorversion, minorversion;
             if(!str || sscanf(str, " %u.%u", &majorversion, &minorversion) != 2) glslversion = 100;
             else glslversion = majorversion*100 + minorversion;
+#ifdef __APPLE__
+            if(osversion >= 0x0A0600 && intel) { if(glslversion >= 120) preferglsl = 1; }
+            else
+#endif
+            if(glslversion >= 130) preferglsl = 1;
         }
     }
 
@@ -504,7 +510,7 @@ void gl_checkextensions()
 #endif
         }
 
-        if(!hasGLSL || glslversion < 130)
+        if(!hasGLSL || !preferglsl)
         {
             avoidshaders = 1;
             if(hwtexsize < 4096)
@@ -781,7 +787,7 @@ void gl_init(int w, int h, int bpp, int depth, int fsaa)
         else if(useshaders<0 && !hasTF) conoutf("\frWARNING: Disabling shaders for extra performance. (use \"/shaders 1\" to enable shaders if desired)");
         renderpath = R_FIXEDFUNCTION;
     }
-    else renderpath = hasGLSL ? ((forceglsl && (forceglsl > 0 || glslversion >= 130)) || !hasVP || !hasFP ? (forceglsl ? R_GLSLANG : R_FIXEDFUNCTION) : R_ASMGLSLANG) : R_ASMSHADER;
+    else renderpath = hasGLSL ? ((forceglsl && (forceglsl > 0 || preferglsl)) || !hasVP || !hasFP ? (forceglsl ? R_GLSLANG : R_FIXEDFUNCTION) : R_ASMGLSLANG) : R_ASMSHADER;
 
     extern void setupshaders();
     setupshaders();
