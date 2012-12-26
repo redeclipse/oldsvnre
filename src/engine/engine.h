@@ -613,7 +613,7 @@ enum
     INIT_RESET,
     INIT_DEFAULTS
 };
-extern int initing, fullscreen;
+extern int initing, fullscreen, numcpus;
 void setfullscreen(bool enable, bool force = false);
 extern bool progressing;
 extern float loadprogress, progresspart, progressamt;

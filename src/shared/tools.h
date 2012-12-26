@@ -1340,7 +1340,8 @@ extern void backup(const char *fname, const char *ext, int revision = 0, int sta
 
 extern void endianswap(void *, int, int);
 extern void seedMT(uint seed);
-extern uint randomMT(void);
+extern uint randomMT();
+extern int guessnumcpus();
 
 #endif
 
