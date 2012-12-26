@@ -905,7 +905,7 @@ void readmatrices()
     invmvpmatrix.invert(mvpmatrix);
 }
 
-FVAR(0, nearplane, 1e-3f, 0.54f, 1e3f);
+FVAR(0, nearplane, 0.01f, 0.54f, 2.0f);
 
 void project(float fovy, float aspect, int farplane, bool flipx, bool flipy, bool swapxy, float zscale)
 {
