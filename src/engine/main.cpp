@@ -910,6 +910,8 @@ int main(int argc, char **argv)
 
     initing = NOT_INITING;
 
+    if(numcpus < 0) numcpus = clamp(guessnumcpus(), 1, 16);
+
     conoutf("loading enet..");
     if(enet_initialize()<0) fatal("Unable to initialise network module");
     atexit(enet_deinitialize);
