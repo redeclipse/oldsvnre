@@ -835,6 +835,8 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     progressing = false;
 }
 
+VAR(numcpus, 1, -1, 16);
+
 int main(int argc, char **argv)
 {
     #ifdef WIN32
