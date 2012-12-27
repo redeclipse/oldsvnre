@@ -835,7 +835,7 @@ void progress(float bar1, const char *text1, float bar2, const char *text2)
     progressing = false;
 }
 
-VAR(0, numcpus, 1, -1, 16);
+VAR(0, numcpus, 1, 1, 16);
 
 int main(int argc, char **argv)
 {
@@ -912,7 +912,7 @@ int main(int argc, char **argv)
 
     initing = NOT_INITING;
 
-    if(numcpus < 0) numcpus = clamp(guessnumcpus(), 1, 16);
+    numcpus = clamp(guessnumcpus(), 1, 16);
 
     conoutf("loading enet..");
     if(enet_initialize()<0) fatal("Unable to initialise network module");
