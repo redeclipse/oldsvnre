@@ -38,7 +38,7 @@ enum
     RET_FLOAT  = VAL_FLOAT<<CODE_RET,
 };
 
-enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS };
+enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS, ID_LOCAL };
 #define VAR_MIN INT_MIN+1
 #define VAR_MAX INT_MAX-1
 #define FVAR_MIN -1e6f
@@ -292,6 +292,7 @@ extern ident *newident(const char *name, int flags = 0);
 extern ident *readident(const char *name);
 extern ident *writeident(const char *name, int flags = 0);
 extern bool addcommand(const char *name, identfun fun, const char *narg, int flags = IDF_COMPLETE);
+extern bool addkeyword(int type, const char *name, int flags = 0);
 
 extern uint *compilecode(const char *p);
 extern void keepcode(uint *p);
@@ -333,6 +334,7 @@ extern char *logtimeformat, *filetimeformat;
 extern char *gettime(time_t ctime = 0, char *format = NULL);
 
 // nasty macros for registering script functions, abuses globals to avoid excessive infrastructure
+#define KEYWORD(flags, name, type) static bool __dummy_##name = addkeyword(type, #name, flags)
 #define COMMANDN(flags, name, fun, nargs) static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs, flags|IDF_COMPLETE)
 #define COMMAND(flags, name, nargs) COMMANDN(flags, name, name, nargs)
 
