@@ -693,8 +693,8 @@ bool addcommand(const char *name, identfun fun, const char *args, int flags)
     bool limit = true;
     for(const char *fmt = args; *fmt; fmt++) switch(*fmt)
     {
-        case 'i': case 'b': case 'f': case 't': case 'N': case 'D': case 'R': if(numargs < MAXARGS) numargs++; break;
-        case 's': case 'e': case 'r': if(numargs < MAXARGS) { argmask |= 1<<numargs; numargs++; } break;
+        case 'i': case 'b': case 'f': case 't': case 'N': case 'D': if(numargs < MAXARGS) numargs++; break;
+        case 's': case 'e': case 'r': case '$': if(numargs < MAXARGS) { argmask |= 1<<numargs; numargs++; } break;
         case '1': case '2': case '3': case '4': if(numargs < MAXARGS) fmt -= *fmt-'0'+1; break;
         case 'C': case 'V': limit = false; break;
         default: fatal("builtin %s declared with illegal type: %s", name, args); break;
@@ -923,10 +923,14 @@ static inline void compileblock(vector<uint> &code)
     code[start] |= uint(code.length() - (start + 1))<<8;
 }
 
+static inline void compileident(vector<uint> &code, ident *id)
+{
+    code.add((id->index < MAXARGS ? CODE_IDENTARG : CODE_IDENT)|(id->index<<8));
+}
+    
 static inline void compileident(vector<uint> &code, const char *word = NULL)
 {
-    ident *id = word ? newident(word, IDF_UNKNOWN) : dummyident;
-    code.add((id->index < MAXARGS ? CODE_IDENTARG : CODE_IDENT)|(id->index<<8));
+    compileident(code, word ? newident(word, IDF_UNKNOWN) : dummyident);
 }
 
 static inline void compileint(vector<uint> &code, const char *word = NULL)
@@ -1012,18 +1016,19 @@ static void compilelookup(vector<uint> &code, const char *&p, int ltype)
                 case ID_ALIAS: code.add((id->index < MAXARGS ? CODE_LOOKUPARG : CODE_LOOKUP)|((ltype >= VAL_ANY ? VAL_STR : ltype)<<CODE_RET)|(id->index<<8)); goto done;
                 case ID_COMMAND:
                 {
-                    int comtype = CODE_COM, fakeargs = 0, numargs = 0;
+                    int comtype = CODE_COM, numargs = 0;
                     code.add(CODE_ENTER);
                     for(const char *fmt = id->args; *fmt; fmt++) switch(*fmt)
                     {
-                        case 's': compilestr(code, NULL, 0, true); fakeargs++; numargs++; break;
-                        case 'i': compileint(code); fakeargs++; numargs++; break;         
-                        case 'b': compileint(code, INT_MIN); fakeargs++; numargs++; break;
-                        case 'f': compilefloat(code); fakeargs++; numargs++; break;
-                        case 't': compilenull(code); fakeargs++; numargs++; break;
-                        case 'e': compileblock(code); fakeargs++; numargs++; break;
-                        case 'r': compileident(code); fakeargs++; numargs++; break;
-                        case 'N': compileint(code, numargs-fakeargs); numargs++; break;
+                        case 's': compilestr(code, NULL, 0, true); numargs++; break;
+                        case 'i': compileint(code); numargs++; break;         
+                        case 'b': compileint(code, INT_MIN); numargs++; break;
+                        case 'f': compilefloat(code); numargs++; break;
+                        case 't': compilenull(code); numargs++; break;
+                        case 'e': compileblock(code); numargs++; break;
+                        case 'r': compileident(code); numargs++; break;
+                        case '$': compileident(code, id); numargs++; break;
+                        case 'N': compileint(code, -1); numargs++; break;
 #ifndef STANDALONE
                         case 'D': comtype = CODE_COMD; numargs++; break;
 #endif
@@ -1365,6 +1370,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
                     case 't': if(more) more = compilearg(code, p, VAL_ANY); if(!more) { if(rep) break; compilenull(code); fakeargs++; } numargs++; break;
                     case 'e': if(more) more = compilearg(code, p, VAL_CODE); if(!more) { if(rep) break; compileblock(code); fakeargs++; } numargs++; break;
                     case 'r': if(more) more = compilearg(code, p, VAL_IDENT); if(!more) { if(rep) break; compileident(code); fakeargs++; } numargs++; break;
+                    case '$': compileident(code, id); numargs++; break;
                     case 'N': compileint(code, numargs-fakeargs); numargs++; break;
 #ifndef STANDALONE
                     case 'D': comtype = CODE_COMD; numargs++; break;
@@ -1592,6 +1598,7 @@ static inline void callcommand(ident *id, tagval *args, int numargs)
             }
             break;
         case 'r': if(++i >= numargs) { if(rep) break; args[i].setident(dummyident); fakeargs++; } else forceident(args[i]); break;
+        case '$': if(++i < numargs) freearg(args[i]); args[i].setident(id); break;
         case 'N': if(++i < numargs) freearg(args[i]); args[i].setint(i-fakeargs); fakeargs++; break;
 #ifndef STANDALONE
         case 'D': if(++i < numargs) freearg(args[i]); args[i].setint(addreleaseaction(conc(args, i, true, id->name)) ? 1 : 0); fakeargs++; break;
