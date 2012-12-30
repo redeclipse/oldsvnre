@@ -60,7 +60,7 @@ extern int nextcontrolversion();
 enum { CON_DEBUG = 0, CON_MESG, CON_INFO, CON_SELF, CON_GAMESPECIFIC };
 
 enum { PACKAGEDIR_OCTA = 1<<0 };
-extern const char *disc_reasons[];
+extern const char * const disc_reasons[];
 struct ipinfo
 {
     enum { ALLOW = 0, BAN, MUTE, LIMIT, MAXTYPES };

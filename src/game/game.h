@@ -294,7 +294,7 @@ enum
     N_MAPCRC, N_CHECKMAPS,
     N_SETPLAYERINFO, N_SWITCHTEAM,
     N_AUTHTRY, N_AUTHCHAL, N_AUTHANS,
-    NUMSV
+    NUMMSG
 };
 
 #ifdef GAMESERVER
@@ -325,13 +325,13 @@ char msgsizelookup(int msg)
         N_AUTHTRY, 0, N_AUTHCHAL, 0, N_AUTHANS, 0,
         -1
     };
-    static int sizetable[NUMSV] = { -1 };
+    static int sizetable[NUMMSG] = { -1 };
     if(sizetable[0] < 0)
     {
         memset(sizetable, -1, sizeof(sizetable));
         for(const int *p = msgsizes; *p >= 0; p += 2) sizetable[p[0]] = p[1];
     }
-    return msg >= 0 && msg < NUMSV ? sizetable[msg] : -1;
+    return msg >= 0 && msg < NUMMSG ? sizetable[msg] : -1;
 }
 #else
 extern char msgsizelookup(int msg);
