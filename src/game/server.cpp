@@ -5430,7 +5430,7 @@ namespace server
                 }
 
                 case -1:
-                    conoutf("\fy[tag error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
+                    conoutf("\fy[msg error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
                     disconnect_client(sender, DISC_MSGERR);
                     return;
 
@@ -5443,7 +5443,7 @@ namespace server
                     int size = msgsizelookup(type);
                     if(size<=0)
                     {
-                        conoutf("\fy[tag error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
+                        conoutf("\fy[msg error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
                         disconnect_client(sender, DISC_MSGERR);
                         return;
                     }
