@@ -11,7 +11,7 @@ SVAR(0, gamestr, RE_UNAME);
 VAR(0, rehashing, 1, 0, -1);
 VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 
-const char *disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "tag type error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
+extern const char * const disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "message error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
 
 SVAR(IDF_PERSIST, logtimeformat, "%c");
 SVAR(IDF_PERSIST, filetimeformat, "%Y%m%d%H%M%S");

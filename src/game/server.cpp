@@ -4272,7 +4272,7 @@ namespace server
         if(ci && !ci->connected)
         {
             if(chan==0) return;
-            else if(chan!=1) { disconnect_client(sender, DISC_TAGT); return; }
+            else if(chan!=1) { disconnect_client(sender, DISC_MSGERR); return; }
             else while(p.length() < p.maxlen) switch(checktype(getint(p), ci))
             {
                 case N_CONNECT:
@@ -4314,7 +4314,7 @@ namespace server
                     break;
 
                 default:
-                    disconnect_client(sender, DISC_TAGT);
+                    disconnect_client(sender, DISC_MSGERR);
                     return;
             }
             return;
@@ -5431,7 +5431,7 @@ namespace server
 
                 case -1:
                     conoutf("\fy[tag error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
-                    disconnect_client(sender, DISC_TAGT);
+                    disconnect_client(sender, DISC_MSGERR);
                     return;
 
                 case -2:
@@ -5444,7 +5444,7 @@ namespace server
                     if(size<=0)
                     {
                         conoutf("\fy[tag error] from: %d, cur: %d, msg: %d, prev: %d", sender, curtype, type, prevtype);
-                        disconnect_client(sender, DISC_TAGT);
+                        disconnect_client(sender, DISC_MSGERR);
                         return;
                     }
                     loopi(size-1) getint(p);
