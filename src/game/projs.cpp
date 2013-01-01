@@ -73,7 +73,7 @@ namespace projs
 
         float skew = clamp(scale, 0.f, 1.f)*damagescale;
         if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-        else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+        else if(WEAP2(weap, taper, flags&HIT_ALT)) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(game::gamemode, game::mutators))
         {
             if(m_capture(game::gamemode) && capturebuffdelay)
@@ -834,7 +834,7 @@ namespace projs
         proj.id = id;
         proj.flags = flags;
         proj.curscale = scale;
-        proj.movement = 0;
+        proj.movement = proj.distance = 0;
         if(proj.projtype == PRJ_AFFINITY)
         {
             proj.vel = proj.inertia = proj.to;
@@ -988,6 +988,71 @@ namespace projs
         }
     }
 
+    void updatetaper(projent &proj, float distance, bool firstpass = false)
+    {
+        switch(WEAP2(proj.weap, taper, proj.flags&HIT_ALT))
+        {
+            case 2:
+            {
+                if(WEAP2(proj.weap, taperout, proj.flags&HIT_ALT) > 0)
+                {
+                    if(distance > WEAP2(proj.weap, taperout, proj.flags&HIT_ALT))
+                    {
+                        proj.state = CS_DEAD;
+                        proj.lifesize = 0;
+                        break;
+                    }
+                    else if(distance > WEAP2(proj.weap, taperin, proj.flags&HIT_ALT))
+                    {
+                        float dist = distance-WEAP2(proj.weap, taperin, proj.flags&HIT_ALT);
+                        proj.lifesize = 1.f-(dist/WEAP2(proj.weap, taperout, proj.flags&HIT_ALT));
+                        break;
+                    }
+                }
+                if(distance < WEAP2(proj.weap, taperin, proj.flags&HIT_ALT))
+                {
+                    proj.lifesize = distance/WEAP2(proj.weap, taperin, proj.flags&HIT_ALT);
+                    break;
+                }
+                proj.lifesize = 1;
+                break;
+            }
+            case 1:
+            {
+                if(!firstpass) return;
+                float spanin = WEAP2(proj.weap, taperin, proj.flags&HIT_ALT),
+                      spanout = WEAP2(proj.weap, taperout, proj.flags&HIT_ALT);
+                if(spanin+spanout > 1.f)
+                {
+                    float off = (spanin+spanout)-1.f;
+                    if(spanout > 0.f)
+                    {
+                        off *= 0.5f;
+                        spanout -= off;
+                        if(spanout < 0.f)
+                        {
+                            off += 0.f-spanout;
+                            spanout = 0.f;
+                        }
+                    }
+                    spanin = max(0.f, spanin-off);
+                }
+                if(spanin > 0)
+                {
+                    if(proj.lifespan < spanin) proj.lifesize = clamp(proj.lifespan/spanin, 0.f, 1.f);
+                    else if(spanout > 0 && proj.lifespan > (1.f-spanout))
+                    {
+                        if(!proj.stuck) proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))/spanout), 0.f, 1.f);
+                        break;
+                    }
+                }
+                proj.lifesize = 1;
+                break;
+            }
+            default: if(!firstpass) proj.lifesize = 1; break;
+        }
+    }
+
     void iter(projent &proj)
     {
         proj.lifespan = clamp((proj.lifemillis-proj.lifetime)/float(max(proj.lifemillis, 1)), 0.f, 1.f);
@@ -995,32 +1060,7 @@ namespace projs
         if(proj.projtype == PRJ_SHOT)
         {
             updatetargets(proj);
-            float spanin = WEAP2(proj.weap, taperin, proj.flags&HIT_ALT), spanout = WEAP2(proj.weap, taperout, proj.flags&HIT_ALT);
-            if(spanin+spanout > 1.f)
-            {
-                float off = (spanin+spanout)-1.f;
-                if(spanout > 0.f)
-                {
-                    off *= 0.5f;
-                    spanout -= off;
-                    if(spanout < 0.f)
-                    {
-                        off += 0.f-spanout;
-                        spanout = 0.f;
-                    }
-                }
-                spanin = max(0.f, spanin-off);
-            }
-            if(spanin > 0)
-            {
-                if(proj.lifespan < spanin) proj.lifesize = clamp(proj.lifespan/spanin, 0.f, 1.f);
-                else if(spanout > 0 && proj.lifespan > (1.f-spanout))
-                {
-                    if(!proj.stuck) proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))/spanout), 0.f, 1.f);
-                }
-                else proj.lifesize = 1;
-            }
-            else proj.lifesize = 1;
+            updatetaper(proj, proj.distance, true);
         }
         updatebb(proj);
     }
@@ -1031,6 +1071,7 @@ namespace projs
         {
             case PRJ_SHOT:
             {
+                updatetaper(proj, proj.distance);
                 float trans = fadeweap(proj);
                 if(!proj.child && !proj.limited && proj.weap != WEAP_MELEE)
                 {
@@ -1534,15 +1575,16 @@ namespace projs
         return 1; // live!
     }
 
-    int step(projent &proj, const vec &dir)
+    int step(projent &proj, const vec &dir, const vec &oldpos)
     {
         int ret = check(proj, dir);
+        if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
         if(ret == 1 && (!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_PLAYER) || inside))
             ret = impact(proj, dir, hitplayer, hitflags, wall);
         return ret;
     }
 
-    int trace(projent &proj, const vec &dir, int mat = -1)
+    int trace(projent &proj, const vec &dir, const vec &oldpos, int mat = -1)
     {
         int ret = check(proj, dir, mat);
         if(ret == 1)
@@ -1555,6 +1597,7 @@ namespace projs
                 ray.mul(1/maxdist);
                 float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT | RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
                 proj.o.add(vec(ray).mul(dist >= 0 ? dist : maxdist));
+                if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
                 if(dist >= 0) ret = impact(proj, dir, hitplayer, hitflags, hitsurface);
             }
         }
@@ -1659,7 +1702,7 @@ namespace projs
         bool blocked = false;
         if(proj.projcollide&COLLIDE_TRACE)
         {
-            switch(trace(proj, dir, mat))
+            switch(trace(proj, dir, pos, mat))
             {
                 case 2: blocked = true; break;
                 case 1: break;
@@ -1677,7 +1720,7 @@ namespace projs
                 if(barrier < stepdist)
                 {
                     proj.o.add(ray.mul(barrier-0.15f));
-                    switch(step(proj, ray))
+                    switch(step(proj, ray, pos))
                     {
                         case 2: proj.o = pos; blocked = true; break;
                         case 1: proj.o = pos; break;
@@ -1688,7 +1731,7 @@ namespace projs
             if(!blocked)
             {
                 proj.o.add(dir);
-                switch(step(proj, dir))
+                switch(step(proj, dir, pos))
                 {
                     case 2: proj.o = pos; if(proj.projtype == PRJ_SHOT) blocked = true; break;
                     case 1: default: break;
@@ -1699,6 +1742,7 @@ namespace projs
 
         float dist = proj.o.dist(pos), diff = dist/float(4*RAD);
         if(!blocked) proj.movement += dist;
+        proj.distance += dist;
         switch(proj.projtype)
         {
             case PRJ_SHOT:

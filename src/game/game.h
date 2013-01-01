@@ -1365,7 +1365,7 @@ struct projent : dynent
 {
     vec from, to, dest, norm, inertia, stickpos, effectpos;
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
-    float movement, roll, lifespan, lifesize, minspeed;
+    float movement, distance, lifespan, lifesize, minspeed;
     bool local, limited, stuck, escaped, child;
     int projtype, projcollide;
     float elasticity, reflectivity, relativity, waterfric;
@@ -1394,7 +1394,7 @@ struct projent : dynent
         effectpos = vec(-1e16f, -1e16f, -1e16f);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = value = -1;
-        movement = roll = lifespan = lifesize = minspeed = 0;
+        movement = distance = lifespan = lifesize = minspeed = 0;
         curscale = speedscale = 1;
         extinguish = 0;
         limited = stuck = escaped = child = false;
