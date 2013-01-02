@@ -1563,10 +1563,10 @@ namespace ai
                 {
                     if(d->aitype == AI_BOT && m_arena(game::gamemode, game::mutators))
                     {
-                        d->loadweap[0] = d->ai->weappref;
-                        if((d->loadweap[1] = rnd(WEAP_LOADOUT)+WEAP_OFFSET) == d->loadweap[0])
-                            if(++d->loadweap[1] >= WEAP_ITEM) d->loadweap[1] = WEAP_OFFSET;
-                        client::addmsg(N_LOADWEAP, "ri3", d->clientnum, d->loadweap[0], d->loadweap[1]);
+                        d->loadweap.shrink(0);
+                        d->loadweap.add(d->ai->weappref);
+                        if(maxcarry > 1) loopj(maxcarry-1) d->loadweap.add(0);
+                        client::addmsg(N_LOADWEAP, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
                     }
                     client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
                     d->respawned = lastmillis;

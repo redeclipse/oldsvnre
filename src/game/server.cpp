@@ -431,10 +431,11 @@ namespace server
 
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
-        loopj(2)
+        while(ci->state.loadweap.length() < GAME(maxcarry)) ci->state.loadweap.add(0);
+        loopj(GAME(maxcarry))
         {
             int aweap = ci->state.loadweap[j];
-            if(ci->state.loadweap[j] >= WEAP_ITEM) ci->state.loadweap[j] = WEAP_MELEE;
+            if(ci->state.loadweap[j] >= WEAP_ITEM) ci->state.loadweap[j] = 0;
             else if(ci->state.loadweap[j] >= WEAP_OFFSET) switch(WEAP(ci->state.loadweap[j], allowed))
             {
                 case 0: ci->state.loadweap[j] = -1; break;
@@ -443,7 +444,7 @@ namespace server
             }
             if(!isweap(ci->state.loadweap[j]))
             {
-                if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = WEAP_MELEE;
+                if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = 0;
                 else
                 {
                     if(request)
@@ -4513,11 +4514,13 @@ namespace server
 
                 case N_LOADWEAP:
                 {
-                    int lcn = getint(p), aweap = getint(p), bweap = getint(p);
+                    int lcn = getint(p), n = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(!hasclient(cp, ci) || !isweap(aweap) || !m_arena(gamemode, mutators)) break;
-                    cp->state.loadweap[0] = aweap;
-                    cp->state.loadweap[1] = bweap;
+                    vector<int> items;
+                    loopk(n) items.add(getint(p));
+                    if(!hasclient(cp, ci) || !m_arena(gamemode, mutators)) break;
+                    cp->state.loadweap.shrink(0);
+                    loopvk(items) cp->state.loadweap.add(items[k]);
                     chkloadweap(cp);
                     //if(cp->state.state == CS_ALIVE && !m_duke(gamemode, mutators)) TODO: make respawn optional
                     //    waiting(cp, DROP_WEAPONS);

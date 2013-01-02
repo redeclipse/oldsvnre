@@ -1094,7 +1094,7 @@ namespace hud
                         {
                             SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                             pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap[0] < 0 ? "\fzoyselect" : "change");
+                            ty += draw_textx("Press \fs\fc%s\fS to \fs%s\fS loadout", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, loadkey, target->loadweap.empty() ? "\fzoyselect" : "change");
                             popfont();
                         }
                         if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))

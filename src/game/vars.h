@@ -122,7 +122,7 @@ GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, us
 GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if numplayers >= this
 GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
 
-GVAR(0, maxcarry, 1, 2, WEAP_MAX-1);
+GVAR(0, maxcarry, 1, 2, WEAP_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
 GVAR(0, spawnweapon, 0, WEAP_MINE, WEAP_MAX-1);
 //GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
@@ -380,7 +380,8 @@ GVAR(0, quakewobble, 1, 19, VAR_MAX);
 
 GVAR(0, zoomlock, 0, 0, 4); // 0 = unrestricted, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor, 4 = must also be crouched
 GVAR(0, zoomlocktime, 0, 500, VAR_MAX); // time before zoomlock kicks in when in the air
-GVAR(0, zoomlimit, 1, 10, 150);
+GVAR(0, zoomlimitmin, 1, 10, 150);
+GVAR(0, zoomlimitmax, 1, 65, 150);
 GVAR(0, zoomtime, 1, 100, VAR_MAX);
 
 GFVAR(0, explodescale, 0, 1, FVAR_MAX);
