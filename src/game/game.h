@@ -490,16 +490,17 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 struct gamestate
 {
     int health, ammo[WEAP_MAX], entid[WEAP_MAX], reloads[WEAP_MAX], colour, model;
-    int lastweap, loadweap[2], weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
+    int lastweap, weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime, lastbuff;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 #ifdef MEKARCADE
     int armour;
 #endif
+    vector<int> loadweap;
     gamestate() : colour(0), model(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
-        loopj(2) loadweap[j] = -1;
+        loadweap.shrink(0);
     }
     ~gamestate() {}
 
@@ -696,7 +697,7 @@ struct gamestate
     void mapchange()
     {
         points = cpmillis = cptime = 0;
-        loopj(2) loadweap[j] = -1;
+        loadweap.shrink(0);
     }
 
 #ifdef MEKARCADE
@@ -731,7 +732,7 @@ struct gamestate
         }
         if(aitype >= AI_START)
         {
-            loopj(2) loadweap[j] = -1;
+            loadweap.shrink(0);
             lastweap = weapselect = sweap;
         }
         else
@@ -755,27 +756,34 @@ struct gamestate
             }
             if(m_arena(gamemode, mutators))
             {
-                int aweap[2] = { -1, -1 };
-                loopj(2)
+                vector<int> aweap;
+                loopj(GAME(maxcarry))
                 {
-                    aweap[j] = loadweap[j];
-                    if(aweap[j] < WEAP_OFFSET || aweap[j] >= WEAP_ITEM || hasweap(aweap[j], sweap))
+                    if(!loadweap.inrange(j)) aweap.add(0);
+                    else if(loadweap[j] < WEAP_OFFSET || loadweap[j] >= WEAP_ITEM || hasweap(loadweap[j], sweap))
                     {
-                        aweap[j] = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // random
+                        int r = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // random
                         int iters = 0;
-                        while(++iters < 10 && (hasweap(aweap[j], sweap) || WEAP(aweap[j], allowed) <= (m_duke(gamemode, mutators) ? 1 : 0)))
+                        while(hasweap(r, sweap) || WEAP(r, allowed) <= (m_duke(gamemode, mutators) ? 1 : 0))
                         {
-                            if(++aweap[j] >= WEAP_ITEM) aweap[j] = WEAP_OFFSET;
+                            if(++iters > WEAP_MAX)
+                            {
+                                r = 0;
+                                break;
+                            }
+                            if(++r >= WEAP_ITEM) r = WEAP_OFFSET;
                         }
+                        aweap.add(r);
                     }
+                    else aweap.add(loadweap[j]);
                     ammo[aweap[j]] = max(WEAPUSE(aweap[j]), 1);
                     reloads[aweap[j]] = 0;
                 }
-                lastweap = weapselect = aweap[0];
+                lastweap = weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
             }
             else
             {
-                loopj(2) loadweap[j] = -1;
+                loadweap.shrink(0);
                 lastweap = weapselect = sweap;
             }
         }

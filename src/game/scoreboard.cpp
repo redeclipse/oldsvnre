@@ -309,7 +309,7 @@ namespace hud
                                     if(m_arena(game::gamemode, game::mutators))
                                     {
                                         SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap[0] < 0 ? "\fzoyselect" : "change"));
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap.empty() ? "\fzoyselect" : "change"));
                                     }
                                     if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
                                     {

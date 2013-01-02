@@ -1674,7 +1674,7 @@ namespace client
                 case N_LOADWEAP:
                 {
                     hud::showscores(false);
-                    loopj(2) game::player1->loadweap[j] = -1;
+                    game::player1->loadweap.shrink(0);
                     if(!menuactive()) showgui("loadout", -1);
                     break;
                 }
