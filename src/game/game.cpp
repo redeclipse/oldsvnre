@@ -581,8 +581,7 @@ namespace game
                 else
                 {
                     weap = w_attr(gamemode, weap, m_weapon(gamemode, mutators));
-                    if(!isweap(weap)) weap = -1;
-                    else if(m_arena(gamemode, mutators) && weap < WEAP_ITEM && GAME(maxcarry) <= 2) weap = -1;
+                    if(!isweap(weap) || (m_arena(gamemode, mutators) && weap < WEAP_ITEM)) weap = -1;
                     else switch(WEAP(weap, allowed))
                     {
                         case 0: weap = -1; break;
@@ -1526,10 +1525,10 @@ namespace game
                     if(!value.empty()) value.add(' ');
                     value.add(char(d->loadweap[i]+48));
                 }
-                int colour = WEAP(d->loadweap[0] ? d->loadweap[0] : WEAP_MELEE, colour);
+                int colour = WEAP(d->loadweap[i] ? d->loadweap[i] : WEAP_MELEE, colour);
                 const char *pre = msg.empty() ? "" : (i == r-1 ? ", and " : ", "),
-                           *tex = d->loadweap[0] ? hud::itemtex(WEAPON, d->loadweap[0]) : hud::questiontex,
-                           *name = d->loadweap[0] ? WEAP(d->loadweap[0], name) : "random";
+                           *tex = d->loadweap[i] ? hud::itemtex(WEAPON, d->loadweap[i]) : hud::questiontex,
+                           *name = d->loadweap[i] ? WEAP(d->loadweap[i], name) : "random";
                 defformatstring(weap)("%s\fs\f[%d]\f(%s)%s\fS", pre, colour, tex, name);
                 msg.put(weap, strlen(weap));
             }
