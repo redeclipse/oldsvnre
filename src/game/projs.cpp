@@ -1163,7 +1163,7 @@ namespace projs
                     }
                     case WEAP_SHOTGUN:
                     {
-                        if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                        if(proj.stuck || (!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0))
                         {
                             part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5*proj.curscale, 0.75f*trans);
                             part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*10*proj.curscale, 0.75f*trans);
@@ -1187,11 +1187,15 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*trans);
-                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend*trans);
-                            if(!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
+                            if(!proj.stuck)
                             {
-                                part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5.f, 0.75f*trans);
+                                part_flare(proj.to, proj.o, 1, PART_FLARE, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*trans);
+                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend*trans);
+                            }
+                            if(proj.stuck || (!proj.child && WEAP2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0))
+                            {
+                                part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*4*proj.curscale, 0.75f*trans);
+                                if(proj.stuck) part_create(PART_PLASMA, 1, proj.o, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*6*proj.curscale, 0.75f*trans);
                                 if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WEAPHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), WEAP2(proj.weap, partsize, proj.flags&HIT_ALT)*5.f*projhintsize*proj.curscale, 0.75f*projhintblend*trans);
                             }
                         }
