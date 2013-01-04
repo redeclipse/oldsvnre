@@ -117,9 +117,9 @@ namespace game
     FVAR(IDF_PERSIST, mousesensitivity, 1e-4f, 1, 10000);
     FVAR(IDF_PERSIST, zoomsensitivity, 0, 0.65f, 1000);
 
-    VARF(IDF_PERSIST, zoomlevel, 1, 4, 10, checkzoom());
+    VARF(IDF_PERSIST, zoomlevel, 0, 4, 10, checkzoom());
     VAR(IDF_PERSIST, zoomlevels, 1, 5, 10);
-    VAR(IDF_PERSIST, zoomdefault, 0, 0, 10); // 0 = last used, else defines default level
+    VAR(IDF_PERSIST, zoomdefault, -1, -1, 10); // -1 = last used, else defines default level
     VAR(IDF_PERSIST, zoomscroll, 0, 0, 1); // 0 = stop at min/max, 1 = go to opposite end
 
     VAR(IDF_PERSIST, aboveheadnames, 0, 1, 1);
@@ -243,7 +243,7 @@ namespace game
     void checkzoom()
     {
         if(zoomdefault > zoomlevels) zoomdefault = zoomlevels;
-        if(zoomlevel < 0) zoomlevel = zoomdefault ? zoomdefault : zoomlevels;
+        if(zoomlevel < 0) zoomlevel = zoomdefault >= 0 ? zoomdefault : zoomlevels;
         if(zoomlevel > zoomlevels) zoomlevel = zoomlevels;
     }
 
@@ -251,8 +251,8 @@ namespace game
     {
         checkzoom();
         zoomlevel += level;
-        if(zoomlevel > zoomlevels) zoomlevel = zoomscroll ? 1 : zoomlevels;
-        else if(zoomlevel < 1) zoomlevel = zoomscroll ? zoomlevels : 1;
+        if(zoomlevel > zoomlevels) zoomlevel = zoomscroll ? 0 : zoomlevels;
+        else if(zoomlevel < 0) zoomlevel = zoomscroll ? zoomlevels : 0;
     }
     ICOMMAND(0, setzoom, "i", (int *level), setzoomlevel(*level));
 
@@ -263,7 +263,7 @@ namespace game
             resetcursor();
             lastzoom = millis-max(zoomtime-(millis-lastzoom), 0);
             prevzoom = zooming;
-            if(zoomdefault && on) zoomlevel = zoomdefault;
+            if(zoomdefault && on) zoomlevel = zoomdefault >= 0 ? zoomdefault : zoomlevels;
         }
         checkzoom();
         zooming = on;
@@ -1490,7 +1490,7 @@ namespace game
 
     int lookupweap(const char *a)
     {
-        if(*a >= '0' && *a <= '9') return parseint(a);
+        if(isnumeric(*a)) return parseint(a);
         else loopi(WEAP_MAX) if(!strcasecmp(WEAP(i, name), a)) return i;
         return -1;
     }
@@ -1508,14 +1508,18 @@ namespace game
                 loopv(chunk)
                 {
                     if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
-                    int v = atoi(chunk[i]);
+                    int v = parseint(chunk[i]);
                     items.add(v >= WEAP_OFFSET && v < WEAP_ITEM ? v : 0);
                 }
                 chunk.deletearrays();
             }
             int r = max(maxcarry, items.length());
             while(d->loadweap.length() < r) d->loadweap.add(0);
-            loopi(r) d->loadweap[i] = d->loadweap.find(items[i]) < 0 ? items[i] : 0;
+            loopi(r)
+            {
+                int n = d->loadweap.find(items[i]);
+                d->loadweap[i] = n < 0 || n == i ? items[i] : 0;
+            }
             client::addmsg(N_LOADWEAP, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
             vector<char> value, msg;
             loopi(r)
@@ -1538,7 +1542,7 @@ namespace game
         else conoutft(CON_MESG, "\foweapon selection is only available in arena");
     }
     ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0));
-    ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n!=0 ? 1 : 0] : -1));
+    ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
     ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && WEAP(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
@@ -1755,10 +1759,10 @@ namespace game
     {
         if(inzoom())
         {
-            int frame = lastmillis-lastzoom, f = zoomlimitmax, t = zoomtime;
             checkzoom();
-            if(zoomlevels > 1 && zoomlevel < zoomlevels) f = zoomlimitmax-(((zoomlimitmax-zoomlimitmin)/zoomlevels)*zoomlevel);
-            float diff = float(fov()-f), amt = frame < t ? clamp(float(frame)/float(t), 0.f, 1.f) : 1.f;
+            int frame = lastmillis-lastzoom;
+            float zoom = zoomlimitmax-((zoomlimitmax-zoomlimitmin)/float(zoomlevels)*zoomlevel),
+                  diff = float(fov()-zoom), amt = frame < zoomtime ? clamp(frame/float(zoomtime), 0.f, 1.f) : 1.f;
             if(!zooming) amt = 1.f-amt;
             curfov = fov()-(amt*diff);
         }
@@ -1779,7 +1783,7 @@ namespace game
             physent *d = (intermission || player1->state >= CS_SPECTATOR) && (focus == player1 || followaim()) ? camera1 : (allowmove(player1) ? player1 : NULL);
             if(d)
             {
-                float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-(zoomlevel/float(zoomlevels+1)))*zoomsensitivity : 1.f)*sensitivity;
+                float scale = (inzoom() && zoomsensitivity > 0 ? (1.f-((zoomlevel+1)/float(zoomlevels+1)))*zoomsensitivity : 1.f)*sensitivity;
                 d->yaw += mousesens(dx, sensitivityscale, yawsensitivity*scale);
                 d->pitch -= mousesens(dy, sensitivityscale, pitchsensitivity*scale*(mouseinvert ? -1.f : 1.f));
                 fixrange(d->yaw, d->pitch);
