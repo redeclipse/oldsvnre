@@ -1042,11 +1042,11 @@ void findsunlights()
     loopi(numents) if(ents[i]->type == ET_SUNLIGHT) sunlights.add(ents[i]);
 }
 
-void clearlightcache(int e)
+void clearlightcache(int id)
 {
-    if(e >= 0)
+    if(id >= 0)
     {
-        const extentity &light = *entities::getents()[e];
+        const extentity &light = *entities::getents()[id];
         if(light.type == ET_LIGHT && light.attrs[0])
         {
             int radius = light.attrs[0];
@@ -2267,7 +2267,7 @@ void setfullbrightlevel(int fullbrightlevel)
     initlights();
 }
 
-VARF(0, fullbright, 0, 0, 1, if(lightmaptexs.length()) initlights());
+VARF(0, fullbright, 0, 0, 1, if(lightmaptexs.length()) { initlights(); lightents(); });
 VARF(IDF_PERSIST, fullbrightlevel, 0, 128, 255, setfullbrightlevel(fullbrightlevel));
 
 vector<LightMapTexture> lightmaptexs;
@@ -2576,7 +2576,7 @@ void genlightmaptexs(int flagmask, int flagval)
     }
 }
 
-bool brightengeom = false;
+bool brightengeom = false, shouldlightents = false;
 
 void clearlights()
 {
@@ -2588,6 +2588,7 @@ void clearlights()
         e.light.color = vec(1, 1, 1);
         e.light.dir = vec(0, 0, 1);
     }
+    shouldlightents = false;
     if(nolights) return;
 
     genlightmaptexs(LM_ALPHA, 0);
@@ -2609,10 +2610,14 @@ void lightent(extentity &e, float height)
     lightreaching(target, e.light.color, e.light.dir, false, &e, amb);
 }
 
-void updateentlighting()
+void lightents(bool force)
 {
+    if(!force && !shouldlightents) return;
+
     const vector<extentity *> &ents = entities::getents();
     loopv(ents) lightent(*ents[i]);
+
+    shouldlightents = false;
 }
 
 void initlights()
@@ -2624,10 +2629,10 @@ void initlights()
     }
 
     clearlightcache();
-    updateentlighting();
     genlightmaptexs(LM_ALPHA, 0);
     genlightmaptexs(LM_ALPHA, LM_ALPHA);
     brightengeom = false;
+    shouldlightents = true; 
 }
 
 static inline void fastskylight(const vec &o, float tolerance, uchar *skylight, int flags = RAY_ALPHAPOLY, extentity *t = NULL, bool fast = false)
