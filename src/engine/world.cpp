@@ -48,25 +48,26 @@ bool getentboundingbox(extentity &e, ivec &o, ivec &r)
 enum
 {
     MODOE_ADD      = 1<<0,
-    MODOE_UPDATEBB = 1<<1
+    MODOE_UPDATEBB = 1<<1,
+    MODOE_LIGHTENT = 1<<2
 };
 
-void modifyoctaentity(int flags, int id, cube *c, const ivec &cor, int size, const ivec &bo, const ivec &br, int leafsize, vtxarray *lastva = NULL)
+void modifyoctaentity(int flags, int id, extentity &e, cube *c, const ivec &cor, int size, const ivec &bo, const ivec &br, int leafsize, vtxarray *lastva = NULL)
 {
     loopoctabox(cor, size, bo, br)
     {
         ivec o(i, cor.x, cor.y, cor.z, size);
         vtxarray *va = c[i].ext && c[i].ext->va ? c[i].ext->va : lastva;
         if(c[i].children != NULL && size > leafsize)
-            modifyoctaentity(flags, id, c[i].children, o, size>>1, bo, br, leafsize, va);
+            modifyoctaentity(flags, id, e, c[i].children, o, size>>1, bo, br, leafsize, va);
         else if(flags&MODOE_ADD)
         {
             if(!c[i].ext || !c[i].ext->ents) ext(c[i]).ents = new octaentities(o, size);
             octaentities &oe = *c[i].ext->ents;
-            switch(entities::getents()[id]->type)
+            switch(e.type)
             {
                 case ET_MAPMODEL:
-                    if(loadmodel(NULL, entities::getents()[id]->attrs[0]))
+                    if(loadmodel(NULL, e.attrs[0]))
                     {
                         if(va)
                         {
@@ -91,10 +92,10 @@ void modifyoctaentity(int flags, int id, cube *c, const ivec &cor, int size, con
         else if(c[i].ext && c[i].ext->ents)
         {
             octaentities &oe = *c[i].ext->ents;
-            switch(entities::getents()[id]->type)
+            switch(e.type)
             {
                 case ET_MAPMODEL:
-                    if(loadmodel(NULL, entities::getents()[id]->attrs[0]))
+                    if(loadmodel(NULL, e.attrs[0]))
                     {
                         oe.mapmodels.removeobj(id);
                         if(va)
@@ -143,13 +144,12 @@ void modifyoctaentity(int flags, int id, cube *c, const ivec &cor, int size, con
 
 vector<int> outsideents;
 
-static bool modifyoctaent(int flags, int id)
+static bool modifyoctaent(int flags, int id, extentity &e)
 {
-    vector<extentity *> &ents = entities::getents();
-    if(!ents.inrange(id)) return false;
+    if(flags&MODOE_ADD ? e.inoctanode : !e.inoctanode) return false;
+
     ivec o, r;
-    extentity &e = *ents[id];
-    if((flags&MODOE_ADD ? e.inoctanode : !e.inoctanode) || !getentboundingbox(e, o, r)) return false;
+    if(!getentboundingbox(e, o, r)) return false;
 
     if(!insideworld(e.o))
     {
@@ -166,15 +166,21 @@ static bool modifyoctaent(int flags, int id)
         while(leafsize < limit) leafsize *= 2;
         int diff = ~(leafsize-1) & ((o.x^(o.x+r.x))|(o.y^(o.y+r.y))|(o.z^(o.z+r.z)));
         if(diff && (limit > octaentsize/2 || diff < leafsize*2)) leafsize *= 2;
-        modifyoctaentity(flags, id, worldroot, ivec(0, 0, 0), hdr.worldsize>>1, o, r, leafsize);
+        modifyoctaentity(flags, id, e, worldroot, ivec(0, 0, 0), hdr.worldsize>>1, o, r, leafsize);
     }
     e.inoctanode = flags&MODOE_ADD ? 1 : 0;
     if(e.type == ET_LIGHT || e.type == ET_SUNLIGHT) clearlightcache(id);
-    else if(flags&MODOE_ADD) lightent(e);
+    else if(flags&MODOE_LIGHTENT) lightent(e);
     return true;
 }
 
-static inline void addentity(int id)    { modifyoctaent(MODOE_ADD|MODOE_UPDATEBB, id); }
+static inline bool modifyoctaent(int flags, int id)
+{
+    vector<extentity *> &ents = entities::getents();
+    return ents.inrange(id) && modifyoctaent(flags, id, *ents[id]);
+}
+
+static inline void addentity(int id)    { modifyoctaent(MODOE_ADD|MODOE_UPDATEBB|MODOE_LIGHTENT, id); }
 static inline void removeentity(int id) { modifyoctaent(MODOE_UPDATEBB, id); }
 
 void freeoctaentities(cube &c)
@@ -195,8 +201,9 @@ void freeoctaentities(cube &c)
 void entitiesinoctanodes()
 {
     vector<extentity *> &ents = entities::getents();
-    loopv(ents) modifyoctaent(MODOE_ADD, i);
+    loopv(ents) modifyoctaent(MODOE_ADD, i, *ents[i]);
 }
+
 static inline void findents(octaentities &oe, int low, int high, bool notspawned, const vec &pos, const vec &radius, vector<int> &found)
 {
     vector<extentity *> &ents = entities::getents();
@@ -988,7 +995,7 @@ bool emptymap(int scale, bool force, char *mname, bool nocfg)   // main empty wo
         identflags &= ~IDF_WORLD;
     }
 
-    clearlights();
+    initlights();
     allchanged(true);
 
     game::startmap(nocfg ? "" : "maps/untitled", NULL, true);
