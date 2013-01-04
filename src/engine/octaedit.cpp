@@ -192,7 +192,7 @@ cube &blockcube(int x, int y, int z, const block3 &b, int rgrid) // looks up a w
 
 #define loopxy(b)       loop(y,(b).s[C[dimension((b).orient)]]) loop(x,(b).s[R[dimension((b).orient)]])
 #define loopxyz(b, r, f) { loop(z,(b).s[D[dimension((b).orient)]]) loopxy((b)) { cube &c = blockcube(x,y,z,b,r); f; } }
-#define loopselxyz(f)   { makeundo(); loopxyz(sel, sel.grid, f); changed(sel); }
+#define loopselxyz(f)   { if(local) makeundo(); loopxyz(sel, sel.grid, f); changed(sel); }
 #define selcube(x, y, z) blockcube(x, y, z, sel, sel.grid)
 
 ////////////// cursor ///////////////
@@ -990,7 +990,7 @@ void savebrush(char *name)
 }
 COMMAND(0, savebrush, "s");
 
-void pasteblock(block3 &b, selinfo &sel)
+void pasteblock(block3 &b, selinfo &sel, bool local)
 {
     sel.s = b.s;
     int o = sel.orient;
@@ -1022,7 +1022,7 @@ void pastebrush(char *name)
         b->name = newstring(name);
         b->copy = copy;
     }
-    pasteblock(*b->copy, sel);
+    pasteblock(*b->copy, sel, true);
 }
 COMMAND(0, pastebrush, "s");
 
@@ -1040,7 +1040,7 @@ void mppaste(editinfo *&e, selinfo &sel, bool local)
 {
     if(e==NULL) return;
     if(local) client::edittrigger(sel, EDIT_PASTE);
-    if(e->copy) pasteblock(*e->copy, sel);
+    if(e->copy) pasteblock(*e->copy, sel, local);
 }
 
 void copy()
@@ -1270,10 +1270,8 @@ namespace hmap
         {   // try up
             c[2] = c[1];
             c[1] = getcube(t, 1);
-            if(!c[1] || isempty(*c[1])) {
-                c[0] = c[1], c[1] = c[2], c[2] = NULL;
-            }else
-                z++, t[d]+=fg;
+            if(!c[1] || isempty(*c[1])) { c[0] = c[1]; c[1] = c[2]; c[2] = NULL; }
+            else { z++; t[d]+=fg; }
         }
         else // drop down
         {
@@ -2132,9 +2130,12 @@ void rotatecube(cube &c, int d) // rotates cube clockwise. see pics in cvs for h
 
 void mpflip(selinfo &sel, bool local)
 {
-    if(local) client::edittrigger(sel, EDIT_FLIP);
+    if(local) 
+    {
+        client::edittrigger(sel, EDIT_FLIP);
+        makeundo();
+    }
     int zs = sel.s[dimension(sel.orient)];
-    makeundo();
     loopxy(sel)
     {
         loop(z,zs) flipcube(selcube(x, y, z), dimension(sel.orient));
@@ -2156,12 +2157,15 @@ void flip()
 
 void mprotate(int cw, selinfo &sel, bool local)
 {
-    if(local) client::edittrigger(sel, EDIT_ROTATE, cw);
+    if(local) 
+    {
+        client::edittrigger(sel, EDIT_ROTATE, cw);
+        makeundo();
+    }
     int d = dimension(sel.orient);
     if(!dimcoord(sel.orient)) cw = -cw;
     int m = sel.s[C[d]] < sel.s[R[d]] ? C[d] : R[d];
     int ss = sel.s[m] = max(sel.s[R[d]], sel.s[C[d]]);
-    makeundo();
     loop(z,sel.s[D[d]]) loopi(cw>0 ? 1 : 3)
     {
         loopxy(sel) rotatecube(selcube(x,y,z), d);
