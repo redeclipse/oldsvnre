@@ -1245,6 +1245,7 @@ done:
 static bool compileword(vector<uint> &code, const char *&p, int wordtype, char *&word, int &wordlen)
 {
     skipcomments(p);
+retry:
     switch(*p)
     {
         case '\"': word = cutstring(p, wordlen); break;
@@ -1266,11 +1267,10 @@ static bool compileword(vector<uint> &code, const char *&p, int wordtype, char *
             return true;
         case '@':
             debugcode(debugline(p, "\frunexpected \"@\""));
-            p++;
-            return true;
+            do ++p; while(*p == '@');
+            goto retry;
         default: word = cutword(p, wordlen); break;
     }
-    return word!=NULL;
 }
 
 static inline bool compilearg(vector<uint> &code, const char *&p, int wordtype)
