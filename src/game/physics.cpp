@@ -190,7 +190,7 @@ namespace physics
             projent *p = (projent *)e;
             if(d->type == ENT_PLAYER || d->type == ENT_AI)
             {
-                if(impact && (p->hit == d || !(p->projcollide&HIT_PLAYER))) return false;
+                if(impact && (p->hit == d || !(p->projcollide&COLLIDE_PLAYER))) return false;
                 if(p->owner == d && (!(p->projcollide&COLLIDE_OWNER) || (esc && !p->escaped))) return false;
             }
             else if(d->type == ENT_PROJ)
@@ -198,7 +198,7 @@ namespace physics
                 projent *q = (projent *)d;
                 if(p->projtype == PRJ_SHOT && q->projtype == PRJ_SHOT)
                 {
-                    if(p->projcollide&IMPACT_SHOTS && q->projcollide&COLLIDE_SHOTS) return true;
+                    if((p->projcollide&IMPACT_SHOTS || p->projcollide&BOUNCE_SHOTS) && q->projcollide&COLLIDE_PROJ) return true;
                 }
                 return false;
             }
