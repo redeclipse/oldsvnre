@@ -198,7 +198,7 @@ namespace projs
                     }
                     break;
             }
-            return (proj.projcollide&COLLIDE_CONT) ? false : true;
+            return (proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER)) ? false : true;
         }
         return false;
     }
@@ -289,7 +289,7 @@ namespace projs
             {
                 if(projs[i]->projtype == PRJ_SHOT)
                 {
-                    if(projs[i]->projcollide&COLLIDE_SHOTS) collideprojs.removeobj(projs[i]);
+                    if(projs[i]->projcollide&COLLIDE_PROJ) collideprojs.removeobj(projs[i]);
                     delete projs[i];
                     projs.removeunordered(i--);
                 }
@@ -610,7 +610,7 @@ namespace projs
                 updatetargets(proj, waited ? 1 : 0);
                 if(WEAP2(proj.weap, guided, proj.flags&HIT_ALT) && proj.owner)
                     findorientation(proj.owner->o, proj.owner->yaw, proj.owner->pitch, proj.dest);
-                if(proj.projcollide&COLLIDE_SHOTS) collideprojs.add(&proj);
+                if(proj.projcollide&COLLIDE_PROJ) collideprojs.add(&proj);
                 break;
             }
             case PRJ_GIBS:
@@ -1318,7 +1318,7 @@ namespace projs
             case PRJ_SHOT:
             {
                 updatetargets(proj, 2);
-                if(proj.projcollide&COLLIDE_SHOTS) collideprojs.removeobj(&proj);
+                if(proj.projcollide&COLLIDE_PROJ) collideprojs.removeobj(&proj);
                 int vol = int(255*proj.curscale), type = WEAP2(proj.weap, parttype, proj.flags&HIT_ALT);
                 if(!proj.limited) switch(type)
                 {
@@ -1544,21 +1544,12 @@ namespace projs
 
     int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
-        if(d && d->type == ENT_PROJ)
-        {
-            if(proj.projcollide&IMPACT_SHOTS)
-            {
-                proj.norm = vec(d->o).sub(proj.o).normalize();
-                if(hiteffect(proj, d, flags, proj.norm)) return 0;
-            }
-            return 1;
-        }
-        if(d ? proj.projcollide&COLLIDE_PLAYER : proj.projcollide&COLLIDE_GEOM)
+        if(d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM)
         {
             if(d)
             {
                 proj.norm = vec(proj.o).sub(d->center()).normalize();
-                if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&COLLIDE_STICK)
+                if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&STICK_PLAYER)
                 {
                     stick(proj, dir, (gameent *)d);
                     return 1;
@@ -1568,13 +1559,24 @@ namespace projs
             else
             {
                 proj.norm = norm;
-                if(proj.projcollide&IMPACT_GEOM && proj.projcollide&COLLIDE_STICK)
+                if(proj.projcollide&IMPACT_GEOM && proj.projcollide&STICK_GEOM)
                 {
                     stick(proj, dir);
                     return 1;
                 }
+                if(proj.projcollide&(IMPACT_GEOM|BOUNCE_GEOM) && proj.projcollide&DRILL_GEOM)
+                {
+                    vec orig = proj.o;
+                    loopi(WEAP2(proj.weap, drill, proj.flags&HIT_ALT))
+                    {
+                        proj.o.add(dir);
+                        if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT))
+                            return 0;
+                    }
+                    proj.o = orig; // continues below
+                }
             }
-            bool ricochet = proj.projcollide&(d ? BOUNCE_PLAYER : BOUNCE_GEOM);
+            bool ricochet = proj.projcollide&(d ? (d->type == ENT_PROJ ? BOUNCE_SHOTS : BOUNCE_PLAYER) : BOUNCE_GEOM);
             bounce(proj, ricochet);
             if(ricochet)
             {
@@ -1587,7 +1589,7 @@ namespace projs
                 proj.lastbounce = lastmillis;
                 return 2; // bounce
             }
-            else if(proj.projcollide&(d ? IMPACT_PLAYER : IMPACT_GEOM))
+            else if(proj.projcollide&(d ? (d->type == ENT_PROJ ? IMPACT_SHOTS : IMPACT_PLAYER) : IMPACT_GEOM))
                 return 0; // die on impact
         }
         return 1; // live!
@@ -1597,7 +1599,7 @@ namespace projs
     {
         int ret = check(proj, dir);
         if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
-        if(ret == 1 && (!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_PLAYER) || inside))
+        if(ret == 1 && (!collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) || inside))
             ret = impact(proj, dir, hitplayer, hitflags, wall);
         return ret;
     }
@@ -1613,7 +1615,7 @@ namespace projs
             if(maxdist > 0)
             {
                 ray.mul(1/maxdist);
-                float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT | RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
+                float dist = tracecollide(&proj, proj.o, ray, maxdist, RAY_CLIPMAT|RAY_ALPHAPOLY, proj.projcollide&COLLIDE_DYNENT);
                 proj.o.add(vec(ray).mul(dist >= 0 ? dist : maxdist));
                 if(proj.projtype == PRJ_SHOT) updatetaper(proj, proj.distance+proj.o.dist(oldpos));
                 if(dist >= 0) ret = impact(proj, dir, hitplayer, hitflags, hitsurface);
@@ -1868,7 +1870,7 @@ namespace projs
         float maxdist = ray.magnitude();
         if(maxdist <= 0) return 1; // not moving anywhere, so assume still alive since it was already alive
         ray.mul(1/maxdist);
-        float dist = tracecollide(&proj, proj.from, ray, maxdist, RAY_CLIPMAT | RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
+        float dist = tracecollide(&proj, proj.from, ray, maxdist, RAY_CLIPMAT|RAY_ALPHAPOLY, proj.projcollide&COLLIDE_DYNENT);
         if(dist >= 0)
         {
             vec dir = vec(proj.to).sub(proj.from).normalize();
@@ -1998,7 +2000,7 @@ namespace projs
                 if(!proj.child && weaptype[proj.weap].traced) proj.o = proj.to;
                 if(!proj.limited && proj.state != CS_DEAD)
                 {
-                    if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
+                    if(!(proj.projcollide&DRILL_PLAYER)) proj.hit = NULL;
                     bool radial = WEAP2(proj.weap, radial, proj.flags&HIT_ALT) && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= WEAP2(proj.weap, radial, proj.flags&HIT_ALT)),
                          proximity = proj.stuck && !proj.beenused && WEAP2(proj.weap, proximity, proj.flags&HIT_ALT) > 0;
                     if(radial || proximity)
@@ -2020,7 +2022,7 @@ namespace projs
                 }
                 if(proj.state == CS_DEAD)
                 {
-                    if(!(proj.projcollide&COLLIDE_CONT)) proj.hit = NULL;
+                    if(!(proj.projcollide&DRILL_PLAYER)) proj.hit = NULL;
                     if(!proj.limited && radius > 0)
                     {
                         int numdyns = game::numdynents(true);
