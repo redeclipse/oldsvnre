@@ -990,9 +990,11 @@ namespace projs
 
     void updatetaper(projent &proj, float distance, bool firstpass = false)
     {
-        switch(WEAP2(proj.weap, taper, proj.flags&HIT_ALT))
+        int type = WEAP2(proj.weap, taper, proj.flags&HIT_ALT);
+        if(!firstpass && type != 3) return;
+        switch(type)
         {
-            case 2:
+            case 3:
             {
                 if(WEAP2(proj.weap, taperout, proj.flags&HIT_ALT) > 0)
                 {
@@ -1017,9 +1019,8 @@ namespace projs
                 proj.lifesize = 1;
                 break;
             }
-            case 1:
+            case 1: case 2:
             {
-                if(!firstpass) return;
                 float spanin = WEAP2(proj.weap, taperin, proj.flags&HIT_ALT),
                       spanout = WEAP2(proj.weap, taperout, proj.flags&HIT_ALT);
                 if(spanin+spanout > 1.f)
@@ -1039,17 +1040,22 @@ namespace projs
                 }
                 if(spanin > 0)
                 {
-                    if(proj.lifespan < spanin) proj.lifesize = clamp(proj.lifespan/spanin, 0.f, 1.f);
+                    if(proj.lifespan < spanin)
+                    {
+                        proj.lifesize = clamp(proj.lifespan/spanin, 0.f, 1.f);
+                        break;
+                    }
                     else if(spanout > 0 && proj.lifespan > (1.f-spanout))
                     {
-                        if(!proj.stuck) proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))/spanout), 0.f, 1.f);
+                        if(type != 2 || !proj.stuck)
+                            proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))/spanout), 0.f, 1.f);
                         break;
                     }
                 }
                 proj.lifesize = 1;
                 break;
             }
-            default: if(!firstpass) proj.lifesize = 1; break;
+            default: proj.lifesize = 1; break;
         }
     }
 
