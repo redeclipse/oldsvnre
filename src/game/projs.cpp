@@ -991,10 +991,10 @@ namespace projs
     void updatetaper(projent &proj, float distance, bool firstpass = false)
     {
         int type = WEAP2(proj.weap, taper, proj.flags&HIT_ALT);
-        if(!firstpass && type != 3) return;
+        if(!firstpass && type <= 4) return; // only distance tapers need continuous updates
         switch(type)
         {
-            case 3:
+            case 5: case 6:
             {
                 if(WEAP2(proj.weap, taperout, proj.flags&HIT_ALT) > 0)
                 {
@@ -1006,8 +1006,11 @@ namespace projs
                     }
                     else if(distance > WEAP2(proj.weap, taperin, proj.flags&HIT_ALT))
                     {
-                        float dist = distance-WEAP2(proj.weap, taperin, proj.flags&HIT_ALT);
-                        proj.lifesize = 1.f-(dist/WEAP2(proj.weap, taperout, proj.flags&HIT_ALT));
+                        if(type%2 || !proj.stuck)
+                        {
+                            float dist = distance-WEAP2(proj.weap, taperin, proj.flags&HIT_ALT);
+                            proj.lifesize = 1-(dist/WEAP2(proj.weap, taperout, proj.flags&HIT_ALT));
+                        }
                         break;
                     }
                 }
@@ -1019,21 +1022,26 @@ namespace projs
                 proj.lifesize = 1;
                 break;
             }
-            case 1: case 2:
+            case 1: case 2: case 3: case 4:
             {
                 float spanin = WEAP2(proj.weap, taperin, proj.flags&HIT_ALT),
                       spanout = WEAP2(proj.weap, taperout, proj.flags&HIT_ALT);
-                if(spanin+spanout > 1.f)
+                if(type >= 3)
+                { // timer-to-span translation
+                    spanin /= max(proj.lifemillis, 1);
+                    spanout /= max(proj.lifemillis, 1);
+                }
+                if(spanin+spanout > 1)
                 {
-                    float off = (spanin+spanout)-1.f;
-                    if(spanout > 0.f)
+                    float off = (spanin+spanout)-1;
+                    if(spanout > 0)
                     {
                         off *= 0.5f;
                         spanout -= off;
-                        if(spanout < 0.f)
+                        if(spanout < 0)
                         {
-                            off += 0.f-spanout;
-                            spanout = 0.f;
+                            off += 0-spanout;
+                            spanout = 0;
                         }
                     }
                     spanin = max(0.f, spanin-off);
@@ -1045,10 +1053,10 @@ namespace projs
                         proj.lifesize = clamp(proj.lifespan/spanin, 0.f, 1.f);
                         break;
                     }
-                    else if(spanout > 0 && proj.lifespan > (1.f-spanout))
+                    else if(spanout > 0 && proj.lifespan > (1-spanout))
                     {
-                        if(type != 2 || !proj.stuck)
-                            proj.lifesize = clamp(1.f-((proj.lifespan-(1.f-spanout))/spanout), 0.f, 1.f);
+                        if(type%2 || !proj.stuck)
+                            proj.lifesize = clamp(1-((proj.lifespan-(1-spanout))/spanout), 0.f, 1.f);
                         break;
                     }
                 }
