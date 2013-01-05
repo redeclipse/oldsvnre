@@ -1,7 +1,7 @@
 <?php
-    $app['releasever'] = "v1.2 (Cosmic Edition)";
-    $app['releasedate'] = "7th January 2012";
-    $app['releasefile'] = "redeclipse_1.2";
+    $app['releasever'] = "v1.3.1 (Galactic Edition)";
+    $app['releasedate'] = "1st September 2012";
+    $app['releasefile'] = "redeclipse_1.3";
     $app['background'] = "/bits/background_01.jpg";
     $app['youtubevid'] = "mjHVb3z72tM";
     $app['screenshots'] = 16;
@@ -14,10 +14,11 @@
     // nav items should be in reverse order for the top navbar 
     $app['targets']['donate'] = array('name' => 'Donate', 'url' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'alturl' => 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=212900', 'nav' => 1, 'redir' => 1);
     $app['targets']['download'] = array('name' => 'Download', 'url' => 'http://sourceforge.net/projects/redeclipse/files/'.$app['releasefile'].'/', 'alturl' => 'http://sourceforge.net/projects/redeclipse/files/', 'nav' => 1, 'redir' => 1);
-    $app['targets']['tracker'] = array('name' => 'Bug Tracker', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/report/', 'nav' => 1, 'redir' => 1);
+    $app['targets']['tracker'] = array('name' => 'Tracker', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/report/', 'nav' => 1, 'redir' => 1);
     $app['targets']['chat'] = array('name' => 'Chat', 'url' => 'http://webchat.freenode.net/?channels=redeclipse', 'alturl' => '', 'nav' => 1, 'redir' => 1);
-    $app['targets']['forum'] = array('name' => 'Forums', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
+    $app['targets']['forum'] = array('name' => 'Forum', 'url' => 'http://forum.freegamedev.net/viewforum.php?f=53', 'alturl' => 'http://forum.freegamedev.net/viewforum.php?f=53&t=', 'nav' => 1, 'redir' => 1);
     $app['targets']['wiki'] = array('name' => 'Wiki', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Main_Page', 'alturl' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=', 'nav' => 1, 'redir' => 1);
+    $app['targets']['servers'] = array('name' => 'Servers', 'url' => 'http://redflare.ofthings.net/', 'alturl' => 'http://redflare.ofthings.net/', 'nav' => 1, 'redir' => 1);
 
     $app['targets']['project'] = array('name' => 'Project', 'url' => 'http://sourceforge.net/projects/redeclipse/', 'alturl' => '', 'nav' => -1, 'redir' => 1);
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/', 'nav' => -1, 'redir' => 1);
@@ -215,8 +216,7 @@
                 <a href="/download">Download</a>, <a href="/chat">Chat</a>, <a href="/forum">Discuss</a>, <a href="/wiki">Learn More</a>, or <a href="/tracker">Report a Bug</a> today.
             </div>
             <div id="copyright" align="center">
-                <p>Red Eclipse Engine, Copyright (C) 2010-2012 Quinton Reeves, Lee Salzman</p>
-                <p>Red Eclipse Data, Copyright (C) 2010-2012 Red Eclipse Team</p>
+                <p>Red Eclipse, Copyright (C) 2011 Quinton Reeves, Lee Salzman</p>
                 <p>Cube Engine 2, Copyright (C) 2001-2011 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, and Quinton Reeves</p>
             </div>
         </div>

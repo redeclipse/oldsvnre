@@ -48,7 +48,7 @@
 			lastText: 		'Last',
 			lastShow:		false,				
 			vertical:		false,
-			speed: 			1500,
+			speed: 			10,
 			auto:			false,
 			pause:			3000,
 			continuous:		false, 
