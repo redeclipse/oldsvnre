@@ -124,8 +124,7 @@ GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of play
 
 GVAR(0, maxcarry, 1, 2, WEAP_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
-GVAR(0, spawnweapon, 0, WEAP_MINE, WEAP_MAX-1);
-//GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
+GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
 GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);
 GVAR(0, trialweapon, 0, WEAP_MELEE, WEAP_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
