@@ -1271,6 +1271,7 @@ retry:
             goto retry;
         default: word = cutword(p, wordlen); break;
     }
+    return word!=NULL;
 }
 
 static inline bool compilearg(vector<uint> &code, const char *&p, int wordtype)
