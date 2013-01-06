@@ -630,7 +630,7 @@ namespace game
                     if(d->weapselect == WEAP_SWORD || powering)
                     {
                         static float powerdl[WEAP_MAX] = {
-                            0, 16, 18, 20, 18, 20, 24, 18, 18, 18
+                            0, 16, 18, 20, 18, 20, 24, 18, 18, 18, 18
                         };
                         if(powerdl[d->weapselect] > 0)
                         {
@@ -1168,6 +1168,7 @@ namespace game
                         { "shown the light by", "melted by" },
                         { "given laser burn by", "lasered by" },
                         { "blown to pieces by", "blown up by" },
+                        { "blown to pieces by", "blown up by" },
                         { "exploded by", "exploded by" },
                     },
                     {
@@ -1179,6 +1180,7 @@ namespace game
                         { "char-grilled by", "grilled by" },
                         { "plasmafied by", "plasmified by" },
                         { "expertly sniped by", "sniped by" },
+                        { "blown to pieces by", "blown up by" },
                         { "blown to pieces by", "blown up by" },
                         { "exploded by", "exploded by" },
                     },
@@ -1192,6 +1194,7 @@ namespace game
                         { "reduced to ooze by", "plasmified by" },
                         { "given laser shock treatment by", "shocked by" },
                         { "turned into shrapnel by", "gibbed by" },
+                        { "turned into shrapnel by", "gibbed by" },
                         { "obliterated by", "obliterated by" },
                     },
                     {
@@ -1203,6 +1206,7 @@ namespace game
                         { "cooked alive by", "cooked by" },
                         { "melted alive by", "plasmified by" },
                         { "electrified by", "electrified by" },
+                        { "turned into shrapnel by", "gibbed by" },
                         { "turned into shrapnel by", "gibbed by" },
                         { "obliterated by", "obliterated by" },
                     }
