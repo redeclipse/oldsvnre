@@ -104,12 +104,12 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
     GVAR(0, a##pdelay1, 0, we1, VAR_MAX); GVAR(0, a##pdelay2, 0, we2, VAR_MAX); \
     GVAR(0, a##gdelay1, 0, we3, VAR_MAX); GVAR(0, a##gdelay2, 0, we4, VAR_MAX); \
     GVAR(0, a##edelay1, 0, we5, VAR_MAX); GVAR(0, a##edelay2, 0, we6, VAR_MAX); \
-    GVAR(0, a##explode1, 0, wf, VAR_MAX); GVAR(0, a##explode2, 0, wg, VAR_MAX); \
+    GFVAR(0, a##explode1, 0, wf, FVAR_MAX); GFVAR(0, a##explode2, 0, wg, FVAR_MAX); \
     GVAR(0, a##rays1, 1, wh, VAR_MAX); GVAR(0, a##rays2, 1, wi, VAR_MAX); \
-    GVAR(0, a##spread1, 0, wj, VAR_MAX); GVAR(0, a##spread2, 0, wk, VAR_MAX); \
-    GVAR(0, a##minspread1, 0, mwj, VAR_MAX); GVAR(0, a##minspread2, 0, mwk, VAR_MAX); \
-    GVAR(0, a##maxspread1, 0, xwj, VAR_MAX); GVAR(0, a##maxspread2, 0, xwk, VAR_MAX); \
-    GVAR(0, a##zdiv1, 0, wl, VAR_MAX); GVAR(0, a##zdiv2, 0, wm, VAR_MAX); \
+    GFVAR(0, a##spread1, 0, wj, FVAR_MAX); GFVAR(0, a##spread2, 0, wk, FVAR_MAX); \
+    GFVAR(0, a##minspread1, 0, mwj, FVAR_MAX); GFVAR(0, a##minspread2, 0, mwk, FVAR_MAX); \
+    GFVAR(0, a##maxspread1, 0, xwj, FVAR_MAX); GFVAR(0, a##maxspread2, 0, xwk, FVAR_MAX); \
+    GFVAR(0, a##zdiv1, 0, wl, FVAR_MAX); GFVAR(0, a##zdiv2, 0, wm, FVAR_MAX); \
     GVAR(0, a##aiskew1, 0, wn1, VAR_MAX); GVAR(0, a##aiskew2, 0, wn2, VAR_MAX); \
     GVAR(0, a##flakweap1, -1, wo1, WEAP_MAX*2-1); GVAR(0, a##flakweap2, -1, wo2, WEAP_MAX*2-1); \
     GVAR(0, a##flakdmg1, VAR_MIN, wo3, VAR_MAX);GVAR(0, a##flakdmg2, VAR_MIN, wo4, VAR_MAX); \
@@ -191,30 +191,30 @@ WEAPON(melee,       0xEEEEEE,       0xEEEE22,       0xEEEE22,       -1,         
     IMPACT_PLAYER|COLLIDE_TRACE,
     IMPACT_PLAYER|COLLIDE_TRACE,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
-    2,      0,      500,    500,    50,     100,    0,      0,      0,      0,
+    2,      0,      500,    500,    100,    200,    0,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      0,      0,      0,      0,      1,      1,
-    0,      0,      50,     100,    0,      0,      16,     16,     1,      2,      0,      0,      0,      1.5f,   1.5f,   0.5f,   0.5f,
+    0,      0,      100,    200,    0,      0,      16,     16,     1,      2,      0,      0,      0,      1.5f,   1.5f,   0.5f,   1,
     2,      0,      2,      10,     10,     4,      4,      1,      1,      0,      0,
-    0,      0,      0.8f,   0.8f,   0.7f,   0.6f,   0.3f,   0.3f,   0,      0,
+    0,      0,      0.8f,   0.8f,   0.5f,   0.8f,   0.3f,   0.6f,   0,      0,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,      0,      0,
     IMPACT_PLAYER|COLLIDE_TRACE,
     IMPACT_PLAYER|COLLIDE_TRACE,
     WEAP_MELEE
 );
 WEAPON(pistol,      0x888888,       0x666611,       0x666611,       -1,             -1,
-    10,     10,     1,      2,      150,    350,    1000,   35,     3,      3000,   1000,   0,      0,      0,      0,
-    0,      0,      2000,   400,    0,      0,      0,      0,
-    0,      0,      0,      0,      200,    200,    0,      0,      1,      10,     1,      10,     0,      0,      0,      0,
-    2,      1,      100,    100,    -1,             -1,             10,     12,     5,      5,      500,    500,    0,      0,
+    10,     10,     1,      2,      150,    350,    1000,   35,     5,      3000,   1000,   0,      0,      0,      0,
+    0,      0,      2000,   100,    0,      0,      0,      0,
+    0,      0,      0,      0,      200,    200,    0,      0,      1,      10,     1,      8,      0,      0,      0,      0,
+    2,      1,      100,    100,    -1,             WEAP_PISTOL,    10,     5,      5,      5,      500,    750,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      -1,     0,      0,      0,      0,
     2,      0,      0,      0,      25,     25,     0,      0,      0,      0,
-    0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
+    0,      10,     0,      0,      0.5f,   0.5f,   0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
     6,      4,      35,     50,     0,      0,      256,    256,    2,      0.5f,   10,     10,     0,      1.5f,   1.5f,   0.25f,  0.25f,
     3,      128,    2,      10,     10,     1,      1,      1,      1,      0,      0,
     0,      0,      0.8f,   0.8f,   0.65f,  0.65f,  0.325f, 0.325f, 0,      0,
-    1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,      0,      0,
+    1,      0.5f,   1,      0.25f,  1,      1,      0,      0,      8,      8,      1,      1,      0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     WEAP_PISTOL
@@ -240,7 +240,7 @@ WEAPON(sword,       0x4444FF,       0x4444FF,       0x4444FF,       0x4444FF,   
 WEAPON(shotgun,     0x999900,       0x999900,       0x999900,       0x999900,       0x999900,
     2,      8,      1,      2,      500,    900,    750,    15,     4,      1000,   200,    0,      0,      25,     25,
     0,      0,      400,    5000,   0,      0,      0,      0,
-    0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      4,      2,      16,     0,      0,      0,
+    0,      0,      0,      0,      200,    200,    0,      0,      10,     1,      6,      3,      16,     0,      0,      0,
     1,      4,      10,     10,     -1,             WALT(SHOTGUN),  16,     4,      5,      40,     250,    2000,   0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|DRILL_GEOM,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
@@ -249,7 +249,7 @@ WEAPON(shotgun,     0x999900,       0x999900,       0x999900,       0x999900,   
     10,     0,      500,    0,      0.5f,   0.5f,   0,      0,      0.05f,  0.75f,  2,      2,      0,      250,    1,      1,
     50,     75,     50,     25,     0,      0,      256,    512,    0.65f,  0.45f,  25,     15,     1,      1.5f,   1.5f,   1,      0.5f,
     2,      256,    2,      10,     10,     1,      1,      1,      1,      0,      0,
-    0,      0,      0.8f,   0.9f,   0.6f,   0.7f,   0.3f,   0.4f,   0.5f,   0.5f,
+    0,      0,      0.8f,   0.8f,   0.6f,   0.6f,   0.3f,   0.3f,   0.5f,   0.5f,
     1,      1,      1,      0.2f,   1,      1.5f,   0,      0,      8,      8,      1,      1,      25,     25,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
@@ -258,16 +258,16 @@ WEAPON(shotgun,     0x999900,       0x999900,       0x999900,       0x999900,   
 WEAPON(smg,         0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,       0xFF6600,
     40,     40,     1,      4,      100,    450,    1500,   22,     4,      2500,   350,    0,      0,      25,     25,
     0,      0,      500,    2500,   0,      0,      0,      0,
-    0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      6,      3,      0,      0,      0,      0,
+    0,      0,      0,      100,    200,    200,    0,      0,      1,      1,      8,      4,      0,      0,      0,      0,
     1,      2,      20,     20,     -1,             WALT(SMG),      16,     4,      5,      35,     500,    800,    0,      0,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|DRILL_GEOM,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      -1,     1,      0,      1,      1,
     2,      0,      0,      0,      200,    200,    5,      0,      5,      0,
-    10,     0,      750,    0,      0.65f,  0.45f,  0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
-    5,      10,     50,     50,     0,      0,      512,    96,     0.5f,   0.35f,  30,     15,     1,      1.5f,   1.5f,   2,    2,
+    10,     0,      700,    0,      0.65f,  0.45f,  0,      0,      0.05f,  0.05f,  2,      2,      0,      0,      1,      1,
+    5,      10,     50,     50,     0,      0,      512,    96,     0.5f,   0.35f,  30,     15,     1,      1.5f,   1.5f,   2,      2,
     3,      128,    2,      10,     1000,   1,      1,      1,      1,      0,      0,
-    0,      0,      0.8f,   0.8f,   0.7f,   0.7f,   0.35f,  0.35f,  0.5f,   0.5f,
+    0,      0,      0.8f,   0.8f,   0.6f,   0.6f,   0.3f,   0.3f,   0.5f,   0.5f,
     1,      1,      0.2f,   1,      1,      0.05f,  0,      0,      8,      8,      1,      1,      25,     25,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
@@ -301,7 +301,7 @@ WEAPON(plasma,      0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,   
     1,      0,      0,      33,     0,      0,      40,     80,     0,      0,      -1,     1,      0,      1,      0,
     2,      0,      0,      0,      50,     50,     1,      2,      0,      0,
     0.025f, 0.5f,   0,      0.5f,   0.5f,   0.5f,   0,      0,      0.1f,   0.1f,   1,      1,      0,      0,      2,      2,
-    25,     150,    20,     -100,   0,      0.2f,   128,    64,     8,      24,     0,      0,      1,      1.5f,   2,      0.5f,   1.f,
+    25,     150,    20,     -100,   0,      0.2f,   128,    64,     8,      24,     0,      0,      1,      1.5f,   2,      0.5f,   1,
     2,      0,      2,      10,     10,     1,      1,      1,      1,      0,      0,
     8,      4,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,   0.5f,   0.5f,
     1,      1,      1,      1,      1,      1,      0,      0,      8,      8,      1,      1,      0,      0,
@@ -312,16 +312,16 @@ WEAPON(plasma,      0x44DDCC,       0x44DDCC,       0x44DDCC,       0x44DDCC,   
 WEAPON(rifle,       0x8822DD,       0x8822DD,       0x8822DD,       0x8822DD,       0x8822DD,
     5,      5,      1,      1,      750,    1000,   1750,   35,     150,    10000,  100000, 0,      0,      0,      0,
     0,      0,      5000,   5000,   0,      0,      0,      0,
-    0,      0,      0,      0,      200,    200,    32,     0,      1,      1,      1,      0,      0,      0,      0,      0,
-    0,      0,      40,     40,     -1,             -1,             18,     50,     5,      5,      500,    500,    0,      0,
+    0,      0,      0,      0,      200,    200,    24,     0,      1,      1,      2,      1,      0,      0,      0,      0,
+    1,      1,      40,     40,     -1,             -1,             18,     50,     5,      5,      500,    500,    0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE|DRILL_GEOM,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|DRILL_GEOM|DRILL_PLAYER,
     2,      2,      0,      0,      0,      0,      0,      0,      0,      0,      -1,     1,      1,      0,      0,
     2,      0,      0,      0,      100,    200,    5,      5,      5,      10,
-    500,    500,    0,      0,      0.5f,   0.5f,   0,      0,      1,      0,      2,      2,      0,      0,      1,      1,
-    50,     50,     50,     100,    0,      0,      768,    2048,   1.5f,   3,      256,    512,    1,      1.5f,   1.5f,   0.5f,   1.f,
+    100,    100,    0,      0,      0.5f,   0.5f,   0,      0,      1,      0,      2,      2,      0,      0,      1,      1,
+    50,     50,     50,     100,    0,      0,      768,    2048,   1.5f,   3,      256,    512,    1,      1.5f,   1.5f,   0.35f,  1,
     2,      1024,   2,      10,     10,     1,      1,      1,      1,      0,      0,
-    4,      4,      0.75f,  0.75f,  0.5f,   0.5f,   0.3f,   0.3f,   0.5f,   0.5f,
+    4,      4,      0.6f,   0.6f,   0.4f,   0.4f,   0.2f,   0.2f,   0.5f,   0.5f,
     1,      1,      0.25f,  0.25f,  1,      1,      0,      0,      8,      8,      1,      1,      0,      0,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|DRILL_PLAYER,
@@ -371,7 +371,7 @@ WEAPON(rocket,      0xAA3300,       -1,             -1,              0x981808,  
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ,
     2,      2,      8,      8,      0,      1,      0,      0,      1,      1,      0,      1,      0,      0,      0,
-    3,      0,      0,      0,      350,    350,    0,      0,      0,      0,
+    3,      0,      0,      0,      500,    500,    0,      0,      0,      0,
     0,      0,      0,      0,      0.5f,   0.5f,   0,      0,      0,      0,      2,      2,      0,      0,      1,      1,
     150,    150,    500,    500,    0,      0,      1024,   512,    3,      3,      0,      0,      4,      4,      4,      4,    4,
     2,      0,      2,      10,     10,     1,      1,      1,      1,      0,      0,
@@ -478,8 +478,8 @@ extern weaptypes weaptype[];
 #define WEAPSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
 #endif
 #define WEAPLM(a,b,c)           (a*(m_limited(b, c) ? GAME(explodelimited) : GAME(explodescale)))
-#define WEAPS(a,b,c,d,e,f)      (!m_insta(d, e) || m_arena(d, e) || a != WEAP_RIFLE ? int(ceilf(WEAPLM(WEAP2(a, b, c)*f, d, e))) : 0)
-#define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? clamp(int(ceilf(max(WEAP2(a, spread, b), f)*e)), WEAP2(a, minspread, b), WEAP2(a, maxspread, b) ? WEAP2(a, maxspread, b) : INT_MAX) : 0)
+#define WEAPS(a,b,c,d,e,f)      (!m_insta(d, e) || m_arena(d, e) || a != WEAP_RIFLE ? WEAPLM(WEAP2(a, b, c)*f, d, e) : 0.f)
+#define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? clamp(max(WEAP2(a, spread, b), f*0.5f)*e, WEAP2(a, minspread, b), WEAP2(a, maxspread, b) > 0 ? WEAP2(a, maxspread, b) : FVAR_MAX) : 0.f)
 #define WEAPSND(a,b)            (weaptype[a].sound+b)
 #define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
 #define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
@@ -507,12 +507,12 @@ WEAPDEF2(int, power);
 WEAPDEF2(int, pdelay);
 WEAPDEF2(int, gdelay);
 WEAPDEF2(int, edelay);
-WEAPDEF2(int, explode);
+WEAPDEF2(float, explode);
 WEAPDEF2(int, rays);
-WEAPDEF2(int, spread);
-WEAPDEF2(int, minspread);
-WEAPDEF2(int, maxspread);
-WEAPDEF2(int, zdiv);
+WEAPDEF2(float, spread);
+WEAPDEF2(float, minspread);
+WEAPDEF2(float, maxspread);
+WEAPDEF2(float, zdiv);
 WEAPDEF2(int, aiskew);
 WEAPDEF2(int, flakweap);
 WEAPDEF2(int, flakdmg);

@@ -50,7 +50,7 @@ namespace ai
 
     float weapmindist(int weap, bool alt)
     {
-        return WEAPS(weap, explode, alt, game::gamemode, game::mutators, 1.f) && WEAP2(weap, collide, alt)&COLLIDE_OWNER ? WEAPS(weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
+        return WEAPS(weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0 && WEAP2(weap, collide, alt)&COLLIDE_OWNER ? WEAPS(weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
     }
 
     float weapmaxdist(int weap, bool alt)

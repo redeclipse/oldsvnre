@@ -165,16 +165,16 @@ namespace weapons
         else if(d->action[AC_DROP]) weapdrop(d, d->weapselect);
     }
 
-    void offsetray(vec &from, vec &to, int spread, int z, vec &dest)
+    void offsetray(vec &from, vec &to, float spread, float z, vec &dest)
     {
-        float f = to.dist(from)*float(spread)/10000.f;
+        float f = to.dist(from)*spread/10000.f;
         for(;;)
         {
             #define RNDD rnd(101)-50
             vec v(RNDD, RNDD, RNDD);
             if(v.magnitude() > 50) continue;
             v.mul(f);
-            v.z = z > 0 ? v.z/float(z) : 0;
+            v.z = z > 0 ? v.z/z : 0;
             dest = to;
             dest.add(v);
             vec dir = vec(dest).sub(from).normalize();
@@ -304,11 +304,11 @@ namespace weapons
             int rays = WEAP2(weap, rays, secondary), x = 0;
             if(rays > 1 && WEAP2(weap, power, secondary) && scale < 1) rays = int(ceilf(rays*scale));
             float m = accmod(d, WEAP(d->weapselect, zooms) && secondary, &x);
-            int spread = WEAPSP(weap, secondary, game::gamemode, game::mutators, m, x);
+            float spread = WEAPSP(weap, secondary, game::gamemode, game::mutators, m, x);
             loopi(rays)
             {
                 vec dest;
-                if(spread) offsetray(from, to, spread, WEAP2(weap, zdiv, secondary), dest);
+                if(spread > 0) offsetray(from, to, spread, WEAP2(weap, zdiv, secondary), dest);
                 else dest = to;
                 if(weaptype[weap].thrown[secondary ? 1 : 0] > 0)
                     dest.z += from.dist(dest)*weaptype[weap].thrown[secondary ? 1 : 0];
