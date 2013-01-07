@@ -24,7 +24,7 @@ namespace capture
 
     void preload()
     {
-        loadmodel("flag", -1, true);
+        preloadmodel("flag");
     }
 
     void drawblips(int w, int h, float blend)

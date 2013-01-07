@@ -1484,6 +1484,7 @@ namespace game
         if(m_edit(gamemode) || m_capture(gamemode)) capture::preload();
         if(m_edit(gamemode) || m_defend(gamemode)) defend::preload();
         if(m_edit(gamemode) || m_bomber(gamemode)) bomber::preload();
+        flushpreloadedmodels();
         maskpackagedirs(~0);
     }
 

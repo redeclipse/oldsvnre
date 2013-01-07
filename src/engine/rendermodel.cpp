@@ -379,6 +379,30 @@ ICOMMAND(0, mapmodelindex, "s", (char *a), {
 // model registry
 
 hashtable<const char *, model *> mdllookup;
+vector<const char *> preloadmodels;
+
+void preloadmodel(const char *name)
+{
+    if(!name || !name[0] || mdllookup.access(name)) return;
+    preloadmodels.add(newstring(name));
+}
+
+void flushpreloadedmodels(bool msg)
+{
+    loopv(preloadmodels)
+    {
+        loadprogress = float(i+1)/preloadmodels.length();
+        model *m = loadmodel(preloadmodels[i], -1, msg);
+        if(!m) { if(msg) conoutf("\frcould not load model: %s", preloadmodels[i]); }
+        else
+        {
+            m->preloadmeshes();
+            m->preloadshaders();
+        }
+    }
+    preloadmodels.deletearrays();
+    loadprogress = 0;
+}
 
 void preloadusedmapmodels(bool msg, bool bih)
 {
@@ -398,10 +422,14 @@ void preloadusedmapmodels(bool msg, bool bih)
         loadprogress = float(i+1)/mapmodels.length();
         int mmindex = mapmodels[i];
         mapmodelinfo *mmi = getmminfo(mmindex);
-        if(!mmi) conoutf("\frcould not find map model: %d", mmindex);
-        else if(!loadmodel(NULL, mmindex, true))
-            conoutf("\frcould not load model: %s", mmi->name);
-        else if(mmi->m && bih) mmi->m->preloadBIH();
+        if(!mmi) { if(msg) conoutf("\frcould not find map model: %d", mmindex); }
+        else if(!loadmodel(NULL, mmindex, true)) { if(msg) conoutf("\frcould not load model: %s", mmi->name); }
+        else if(mmi->m)
+        {
+            if(bih) mmi->m->preloadBIH();
+            mmi->m->preloadmeshes();
+            mmi->m->preloadshaders();
+        }
     }
     loadprogress = 0;
 }
@@ -440,12 +468,6 @@ model *loadmodel(const char *name, int i, bool msg)
     }
     if(mapmodels.inrange(i) && !mapmodels[i].m) mapmodels[i].m = m;
     return m;
-}
-
-void preloadmodelshaders()
-{
-    if(initing) return;
-    enumerate(mdllookup, model *, m, m->preloadshaders());
 }
 
 void clear_mdls()

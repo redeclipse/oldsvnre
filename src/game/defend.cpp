@@ -10,7 +10,7 @@ namespace defend
 
     void preload()
     {
-        loadmodel("flag", -1, true);
+        preloadmodel("flag");
     }
 
     static vec skewcolour(int owner, int enemy, float occupy)

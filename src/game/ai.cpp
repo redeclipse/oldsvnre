@@ -1744,8 +1744,8 @@ namespace ai
     {
         loopi(AI_TOTAL)
         {
-            loadmodel(aistyle[i+AI_START].playermodel[0], -1, true);
-            loadmodel(aistyle[i+AI_START].playermodel[1], -1, true);
+            preloadmodel(aistyle[i+AI_START].playermodel[0]);
+            preloadmodel(aistyle[i+AI_START].playermodel[1]);
         }
     }
 }

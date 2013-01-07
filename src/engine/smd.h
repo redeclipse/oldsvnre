@@ -462,7 +462,6 @@ struct smd : skelmodel, skelloader<smd>
             p->endanimparts();
             p->meshes->shared++;
         }
-        preloadshaders();
         return loaded = true;
     }
 };
