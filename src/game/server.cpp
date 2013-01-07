@@ -3270,7 +3270,7 @@ namespace server
         gs.lastdeath = gamemillis;
     }
 
-    int calcdamage(clientinfo *actor, clientinfo *target, int weap, int &flags, int radial, float size, float dist, float scale, bool self)
+    int calcdamage(clientinfo *actor, clientinfo *target, int weap, int &flags, float radial, float size, float dist, float scale, bool self)
     {
         flags &= ~HIT_SFLAGS;
         if(!hithurts(flags))
@@ -3280,7 +3280,7 @@ namespace server
         }
 
         float skew = clamp(scale, 0.f, 1.f)*GAME(damagescale);
-        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+        if(radial > 0) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WEAP2(weap, taperin, flags&HIT_ALT) > 0 || WEAP2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(gamemode, mutators))
         {
@@ -3370,12 +3370,11 @@ namespace server
                 else
                 {
                     int hflags = flags|h.flags;
-                    float skew = float(scale)/DNF;
-                    if(radial) radial = clamp(radial, 1, WEAPS(weap, explode, flags&HIT_ALT, gamemode, mutators, skew));
-                    float size = radial ? (hflags&HIT_WAVE ? radial*WEAP2(weap, wavepush, flags&HIT_ALT) : radial) : 0.f, dist = float(h.dist)/DNF;
+                    float skew = float(scale)/DNF, rad = clamp(float(radial)/DNF, 0.f, WEAPS(weap, explode, flags&HIT_ALT, gamemode, mutators, skew)),
+                          size = rad > 0 ? (hflags&HIT_WAVE ? rad*WEAP2(weap, wavepush, flags&HIT_ALT) : rad) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
-                        int damage = calcdamage(ci, target, weap, hflags, radial, size, dist, skew, ci == target);
+                        int damage = calcdamage(ci, target, weap, hflags, rad, size, dist, skew, ci == target);
                         if(damage) dodamage(target, ci, damage, weap, hflags, h.dir);
                         else if(GAME(serverdebug) >= 2)
                             srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] determined zero damage", weap, id, i, h.target);

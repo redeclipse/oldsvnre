@@ -47,7 +47,7 @@ namespace projs
     #define muzzlechk(a,b) (a == 3 || (a == 2 && game::thirdpersonview(true)) || (a == 1 && b != game::focus))
     #define notrayspam(a,b,c) (WEAP2(a, rays, b) <= c || !rnd(max(c, 2)))
 
-    int calcdamage(gameent *actor, gameent *target, int weap, int &flags, int radial, float size, float dist, float scale)
+    int calcdamage(gameent *actor, gameent *target, int weap, int &flags, float radial, float size, float dist, float scale)
     {
         int nodamage = 0; flags &= ~HIT_SFLAGS;
         if(actor->aitype < AI_START)
@@ -72,7 +72,7 @@ namespace projs
         }
 
         float skew = clamp(scale, 0.f, 1.f)*damagescale;
-        if(radial) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
+        if(radial > 0) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
         else if(WEAP2(weap, taper, flags&HIT_ALT)) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(game::gamemode, game::mutators))
         {
@@ -111,7 +111,7 @@ namespace projs
         return int(ceilf((flags&HIT_FLAK ? WEAP2(weap, flakdmg, flags&HIT_ALT) : WEAP2(weap, damage, flags&HIT_ALT))*skew));
     }
 
-    void hitpush(gameent *d, projent &proj, int flags = 0, int radial = 0, float dist = 0, float scale = 1)
+    void hitpush(gameent *d, projent &proj, int flags = 0, float radial = 0, float dist = 0, float scale = 1)
     {
         vec dir, middle = d->center();
         dir = vec(middle).sub(proj.o);
@@ -203,7 +203,7 @@ namespace projs
         return false;
     }
 
-    bool radialeffect(dynent *d, projent &proj, int flags, int radius)
+    bool radialeffect(dynent *d, projent &proj, int flags, float radius)
     {
         bool push = WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) > 1, radiated = false;
         float maxdist = push ? radius*WEAP2(proj.weap, wavepush, proj.flags&HIT_ALT) : radius;
@@ -468,7 +468,7 @@ namespace projs
                 if(ricochet)
                 {
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_BOUNCE), proj.o, NULL, 0, vol);
+                    if(vol) playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_BOUNCE), proj.o, NULL, 0, vol);
                 }
                 break;
             }
@@ -478,20 +478,20 @@ namespace projs
                 {
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                    playsound(S_SPLOSH, proj.o, NULL, 0, vol);
+                    if(vol) playsound(S_SPLOSH, proj.o, NULL, 0, vol);
                     break;
                 } // otherwise fall through
             }
             case PRJ_DEBRIS:
             {
                 int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                playsound(S_DEBRIS, proj.o, NULL, 0, vol);
+                if(vol) playsound(S_DEBRIS, proj.o, NULL, 0, vol);
                 break;
             }
             case PRJ_EJECT: case PRJ_AFFINITY:
             {
                 int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
-                playsound(S_SHELL, proj.o, NULL, 0, vol);
+                if(vol) playsound(S_SHELL, proj.o, NULL, 0, vol);
                 break;
             }
             default: break;
@@ -1096,7 +1096,7 @@ namespace projs
                         case 1: case 2: case 3: default: vol = 10+int(245*proj.lifespan*proj.lifesize*proj.curscale); break; // shorter
                     }
                     if(issound(proj.schan)) sounds[proj.schan].vol = vol;
-                    else playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
+                    else if(vol) playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, S_W_TRANSIT), proj.o, &proj, SND_LOOP, vol, -1, -1, &proj.schan);
                 }
                 int type = WEAP2(proj.weap, parttype, proj.flags&HIT_ALT);
                 switch(type)
@@ -1462,7 +1462,7 @@ namespace projs
                 if(!proj.limited && !proj.child && vol > 0 && proj.weap != WEAP_MELEE)
                 {
                     int slot = WEAPS(proj.weap, explode, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize) > 0 ? S_W_EXPLODE : S_W_DESTROY;
-                    playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
+                    if(vol) playsound(WEAPSND2(proj.weap, proj.flags&HIT_ALT, slot), proj.o, NULL, 0, vol);
                 }
                 if(proj.owner)
                 {
@@ -1531,7 +1531,7 @@ namespace projs
                     else size *= 2.5f;
                 }
                 else size *= 2.5f;
-                playsound(snd, proj.o, NULL, 0, vol);
+                if(vol) playsound(snd, proj.o, NULL, 0, vol);
                 part_create(PART_SMOKE, 500, proj.o, 0xAAAAAA, max(size, 1.5f), 1, -10);
                 proj.limited = true;
                 if(proj.projtype == PRJ_DEBRIS) proj.light.material[0] = bvec(255, 255, 255);
@@ -1571,7 +1571,7 @@ namespace projs
                     {
                         proj.o.add(dir);
                         if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT))
-                            return 0;
+                            return 1;
                     }
                     proj.o = orig; // continues below
                 }
@@ -1996,12 +1996,11 @@ namespace projs
             if(proj.local && proj.owner && proj.projtype == PRJ_SHOT)
             {
                 float expl = WEAPS(proj.weap, explode, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                int radius = expl > 0 ? int(ceilf(expl)) : 0;
                 if(!proj.child && weaptype[proj.weap].traced) proj.o = proj.to;
                 if(!proj.limited && proj.state != CS_DEAD)
                 {
                     if(!(proj.projcollide&DRILL_PLAYER)) proj.hit = NULL;
-                    bool radial = WEAP2(proj.weap, radial, proj.flags&HIT_ALT) && radius > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= WEAP2(proj.weap, radial, proj.flags&HIT_ALT)),
+                    bool radial = WEAP2(proj.weap, radial, proj.flags&HIT_ALT) && expl > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= WEAP2(proj.weap, radial, proj.flags&HIT_ALT)),
                          proximity = proj.stuck && !proj.beenused && WEAP2(proj.weap, proximity, proj.flags&HIT_ALT) > 0;
                     if(radial || proximity)
                     {
@@ -2011,7 +2010,7 @@ namespace projs
                         {
                             dynent *f = game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
-                            if(radial && radialeffect(f, proj, HIT_BURN, radius)) proj.lastradial = lastmillis;
+                            if(radial && radialeffect(f, proj, HIT_BURN, expl)) proj.lastradial = lastmillis;
                             if(proximity && !proj.beenused && f != proj.stick && f->center().dist(proj.o) <= dist)
                             {
                                 proj.beenused = 1;
@@ -2023,20 +2022,20 @@ namespace projs
                 if(proj.state == CS_DEAD)
                 {
                     if(!(proj.projcollide&DRILL_PLAYER)) proj.hit = NULL;
-                    if(!proj.limited && radius > 0)
+                    if(!proj.limited && expl > 0)
                     {
                         int numdyns = game::numdynents(true);
                         loopj(numdyns)
                         {
                             dynent *f = game::iterdynents(j, true);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, false, false)) continue;
-                            radialeffect(f, proj, HIT_EXPLODE, radius);
+                            radialeffect(f, proj, HIT_EXPLODE, expl);
                         }
                     }
                 }
                 if(!hits.empty())
                     client::addmsg(N_DESTROY, "ri7iv", proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, proj.child ? -proj.id : proj.id,
-                            int(radius), int(proj.curscale*DNF), hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                            int(expl*DNF), int(proj.curscale*DNF), hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 if(proj.weap == WEAP_MELEE && proj.flags&HIT_ALT) proj.target = NULL;
             }
             if(proj.state == CS_DEAD)
