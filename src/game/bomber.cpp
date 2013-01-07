@@ -58,7 +58,7 @@ namespace bomber
 
     void preload()
     {
-        loadmodel("ball", -1, true);
+        preloadmodel("ball");
     }
 
     vec pulsecolour()

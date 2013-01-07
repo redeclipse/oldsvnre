@@ -362,11 +362,11 @@ namespace projs
     {
         loopi(WEAP_MAX)
         {
-            if(*weaptype[i].proj) loadmodel(weaptype[i].proj, -1, true);
-            if(*weaptype[i].eprj) loadmodel(weaptype[i].eprj, -1, true);
+            if(*weaptype[i].proj) preloadmodel(weaptype[i].proj);
+            if(*weaptype[i].eprj) preloadmodel(weaptype[i].eprj);
         }
         const char *mdls[] = { "projs/gibs/gib01", "projs/gibs/gib02", "projs/gibs/gib03", "projs/debris/debris01", "projs/debris/debris02", "projs/debris/debris03", "projs/debris/debris04", "" };
-        for(int i = 0; *mdls[i]; i++) loadmodel(mdls[i], -1, true);
+        for(int i = 0; *mdls[i]; i++) preloadmodel(mdls[i]);
     }
 
     void reflect(projent &proj, vec &pos)
