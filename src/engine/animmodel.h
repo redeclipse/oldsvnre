@@ -1,7 +1,7 @@
-VAR(IDF_PERSIST, lightmodels, 0, 1, 1);
-VAR(IDF_PERSIST, envmapmodels, 0, 1, 1);
-VAR(IDF_PERSIST, glowmodels, 0, 1, 1);
-VAR(IDF_PERSIST, bumpmodels, 0, 1, 1);
+VARF(IDF_PERSIST, lightmodels, 0, 1, 1, preloadmodelshaders());
+VARF(IDF_PERSIST, envmapmodels, 0, 1, 1, preloadmodelshaders());
+VARF(IDF_PERSIST, glowmodels, 0, 1, 1, preloadmodelshaders());
+VARF(IDF_PERSIST, bumpmodels, 0, 1, 1, preloadmodelshaders());
 VAR(IDF_PERSIST, fullbrightmodels, 0, 0, 200);
 
 struct animmodel : model
