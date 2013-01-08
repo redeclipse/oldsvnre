@@ -42,7 +42,7 @@
 #else
 #define RE_PLATFORM         "nix"
 #endif
-#define RE_ARCH             (8*sizeof(void *))
+#define RE_ARCH             (int(8*sizeof(void *)))
 
 #ifdef STANDALONE
 extern void setupmaster();
