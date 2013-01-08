@@ -1617,22 +1617,18 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         e.attrs[3] = e.attrs[4] = 0;
                     }
                     if(maptype == MAP_MAPZ && hdr.gamever <= 219)
-                    {
+                    { // insert pitch at index 2 between yaw and roll
                         int num = e.attrs.length();
-                        loopk(num-3) e.attrs[num-k] = e.attrs[num-k-1];
+                        loopk(num-2) e.attrs[num-k] = e.attrs[num-k-1];
                         e.attrs[2] = 0;
                     }
                 }
                 if(e.type == ET_SUNLIGHT && hdr.version <= 38) e.attrs[1] -= 90; // reorient pitch axis
-                if((maptype == MAP_OCTA && hdr.version <= 30) || (maptype == MAP_MAPZ && hdr.version <= 39))
+                if((maptype == MAP_OCTA && hdr.version <= 30) || (maptype == MAP_MAPZ && hdr.version <= 39)) switch(e.type)
                 {
-                    int attr = 0;
-                    switch(e.type)
-                    {
-                        case ET_PLAYERSTART: if(maptype == MAP_MAPZ && hdr.gamever > 158) attr = 1;
-                        case ET_MAPMODEL: e.attrs[attr] = (e.attrs[attr] + 180)%360; break;
-                        case ET_SUNLIGHT: e.attrs[0] = (e.attrs[0] + 180)%360; break;
-                    }
+                    case ET_PLAYERSTART: case ET_MAPMODEL: e.attrs[1] = (e.attrs[1] + 180)%360; break;
+                    case ET_SUNLIGHT: e.attrs[0] = (e.attrs[0] + 180)%360; break;
+                    default: break;
                 }
                 if(verbose && !insideworld(e.o) && e.type != ET_LIGHT && e.type != ET_LIGHTFX && e.type != ET_SUNLIGHT)
                     conoutf("\frWARNING: ent outside of world: enttype[%s] index %d (%f, %f, %f)", entities::findname(e.type), i, e.o.x, e.o.y, e.o.z);

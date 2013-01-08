@@ -769,13 +769,13 @@ namespace entities
         {
             case MAPMODEL:
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
-                while(e.attrs[1] >= 360) e.attrs[1] -= 360;
+                while(e.attrs[1] >= 360) e.attrs[1] -= 360; // yaw
                 while(e.attrs[2] < -180) e.attrs[2] += 360;
-                while(e.attrs[2] > 180) e.attrs[2] -= 360;
+                while(e.attrs[2] > 180) e.attrs[2] -= 360; // pitch
                 while(e.attrs[3] < -180) e.attrs[3] += 360;
-                while(e.attrs[3] > 180) e.attrs[3] -= 360;
+                while(e.attrs[3] > 180) e.attrs[3] -= 360; // roll
                 while(e.attrs[4] < 0) e.attrs[4] += 101;
-                while(e.attrs[4] >= 101) e.attrs[3] -= 101;
+                while(e.attrs[4] > 100) e.attrs[4] -= 101; // blend
                 if(e.attrs[5] < 0) e.attrs[5] = 0;
             case PARTICLES:
             case MAPSOUND:
