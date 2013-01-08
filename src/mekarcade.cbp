@@ -525,7 +525,7 @@
 					<Add option="-s" />
 					<Add option="-m32" />
 					<Add option="-mwindows" />
-					<Add library="freetype" />
+					<Add library="freetype6" />
 					<Add library="zlib1" />
 					<Add directory="..\bin\x86" />
 					<Add directory="lib\x86" />
@@ -538,9 +538,21 @@
 		<VirtualTargets>
 			<Add alias="All" targets="client32;server32;client64;server64;" />
 			<Add alias="Tools" targets="cube2font;genkey;" />
-			<Add alias="x86" targets="client32;server32;" />
 			<Add alias="amd64" targets="client64;server64;" />
+			<Add alias="x86" targets="client32;server32;" />
 		</VirtualTargets>
+		<Unit filename="dpiaware.manifest">
+			<Option target="client32" />
+			<Option target="client32-dbg" />
+			<Option target="client32-prof" />
+			<Option target="server32" />
+			<Option target="server32-dbg" />
+			<Option target="client64" />
+			<Option target="client64-prof" />
+			<Option target="client64-dbg" />
+			<Option target="server64" />
+			<Option target="server64-dbg" />
+		</Unit>
 		<Unit filename="engine\animmodel.h">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
@@ -743,12 +755,6 @@
 			<Option target="client64-dbg" />
 		</Unit>
 		<Unit filename="engine\master.cpp">
-			<Option target="server32" />
-			<Option target="server32-dbg" />
-			<Option target="server64" />
-			<Option target="server64-dbg" />
-		</Unit>
-		<Unit filename="engine\master.h">
 			<Option target="server32" />
 			<Option target="server32-dbg" />
 			<Option target="server64" />
@@ -1398,6 +1404,18 @@
 			<Option target="client64" />
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
+		</Unit>
+		<Unit filename="game\weapdef.h">
+			<Option target="client32" />
+			<Option target="client32-dbg" />
+			<Option target="client32-prof" />
+			<Option target="server32" />
+			<Option target="server32-dbg" />
+			<Option target="client64" />
+			<Option target="client64-prof" />
+			<Option target="client64-dbg" />
+			<Option target="server64" />
+			<Option target="server64-dbg" />
 		</Unit>
 		<Unit filename="game\weapons.cpp">
 			<Option target="client32" />

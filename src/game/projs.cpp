@@ -1569,9 +1569,8 @@ namespace projs
                     vec orig = proj.o;
                     loopi(WEAP2(proj.weap, drill, proj.flags&HIT_ALT))
                     {
-                        proj.o.add(dir);
-                        if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT))
-                            return 1;
+                        proj.o.add(vec(dir).normalize());
+                        if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) return 1;
                     }
                     proj.o = orig; // continues below
                 }
