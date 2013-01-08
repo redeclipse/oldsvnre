@@ -6,17 +6,17 @@ extern time_t clocktime;
 extern int servertype, serverport, servermasterport;
 extern char *servermaster, *serverip;
 extern ENetAddress masteraddress;
-extern void fatal(const char *s, ...);
-extern void console(int type, const char *s, ...);
-extern void conoutft(int type, const char *s, ...);
-extern void conoutf(const char *s, ...);
+extern void fatal(const char *s, ...) PRINTFARGS(1, 2);
+extern void console(int type, const char *s, ...) PRINTFARGS(2, 3);
+extern void conoutft(int type, const char *s, ...) PRINTFARGS(2, 3);
+extern void conoutf(const char *s, ...) PRINTFARGS(1, 2);
 
 extern FILE *logfile;
 extern FILE *getlogfile();
 extern void setlogfile(const char *fname);
 extern void closelogfile();
 extern void logoutfv(const char *fmt, va_list args);
-extern void logoutf(const char *fmt, ...);
+extern void logoutf(const char *fmt, ...) PRINTFARGS(1, 2);
 
 #ifdef __GNUC__
 #define _dbg_ fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -164,7 +164,7 @@ extern bool pushfont(const char *name);
 extern bool popfont(int num = 1);
 extern int draw_text(const char *str, int rleft, int rtop, int r = 255, int g = 255, int b = 255, int a = 255, int flags = TEXT_SHADOW, int cursor = -1, int maxwidth = -1);
 extern int draw_textx(const char *fstr, int left, int top, int r = 255, int g = 255, int b = 255, int a = 255, int flags = TEXT_SHADOW, int cursor = -1, int maxwidth = -1, ...);
-extern int draw_textf(const char *fstr, int left, int top, ...);
+extern int draw_textf(const char *fstr, int left, int top, ...) PRINTFARGS(1, 4);
 extern float text_widthf(const char *str, int flags = 0);
 extern void text_boundsf(const char *str, float &width, float &height, int maxwidth = -1, int flags = 0);
 extern int text_visible(const char *str, float hitx, float hity, int maxwidth = -1, int flags = 0);
@@ -417,7 +417,7 @@ extern bool connectedmaster();
 extern ENetSocket connectmaster(bool reuse = true);
 extern void disconnectmaster();
 extern bool requestmaster(const char *req);
-extern bool requestmasterf(const char *fmt, ...);
+extern bool requestmasterf(const char *fmt, ...) PRINTFARGS(1, 2);
 
 extern bool findoctadir(const char *name, bool fallback = false);
 extern void trytofindocta(bool fallback = true);
@@ -531,13 +531,13 @@ struct guient
     virtual void end() = 0;
 
     virtual int text(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF) = 0;
-    int textf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, ...)
+    int textf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, ...) PRINTFARGS(2, 6)
     {
         defvformatstring(str, icolor, fmt);
         return text(str, color, icon, icolor);
     }
     virtual int button(const char *text, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true) = 0;
-    int buttonf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true, ...)
+    int buttonf(const char *fmt, int color, const char *icon = NULL, int icolor = 0xFFFFFF, bool faded = true, ...) PRINTFARGS(2, 7)
     {
         defvformatstring(str, faded, fmt);
         return button(str, color, icon, icolor, faded);
