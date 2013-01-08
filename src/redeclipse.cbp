@@ -1395,6 +1395,18 @@
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
+		<Unit filename="game\weapdef.h">
+			<Option target="client32" />
+			<Option target="client32-dbg" />
+			<Option target="client32-prof" />
+			<Option target="server32" />
+			<Option target="server32-dbg" />
+			<Option target="client64" />
+			<Option target="client64-prof" />
+			<Option target="client64-dbg" />
+			<Option target="server64" />
+			<Option target="server64-dbg" />
+		</Unit>
 		<Unit filename="game\weapons.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />

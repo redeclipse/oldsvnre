@@ -12,6 +12,7 @@
 		3E06CDDD14A30E1300F89530 /* team.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDD814A30E1300F89530 /* team.h */; };
 		3E06CDDE14A30E1300F89530 /* waypoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E06CDD914A30E1300F89530 /* waypoint.cpp */; };
 		3E06CDDF14A30E1300F89530 /* weapons.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDDA14A30E1300F89530 /* weapons.h */; };
+		3E06CDDF14A30E1300F89530 /* weapdef.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E06CDDA14A30E1300F89530 /* weapdef.h */; };
 		3E2522471255C29D003F3F5E /* scoreboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E2522461255C29D003F3F5E /* scoreboard.cpp */; };
 		3E469E9811E05C2B00873F83 /* bomber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E469E9511E05C2B00873F83 /* bomber.cpp */; };
 		3E469E9911E05C2B00873F83 /* bomber.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E469E9611E05C2B00873F83 /* bomber.h */; };
@@ -141,6 +142,7 @@
 		3E06CDD814A30E1300F89530 /* team.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = team.h; sourceTree = "<group>"; };
 		3E06CDD914A30E1300F89530 /* waypoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = waypoint.cpp; sourceTree = "<group>"; };
 		3E06CDDA14A30E1300F89530 /* weapons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weapons.h; sourceTree = "<group>"; };
+		3E06CDDA14A30E1300F89530 /* weapdef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weapdef.h; sourceTree = "<group>"; };
 		3E2522461255C29D003F3F5E /* scoreboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scoreboard.cpp; sourceTree = "<group>"; };
 		3E469E9511E05C2B00873F83 /* bomber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bomber.cpp; sourceTree = "<group>"; };
 		3E469E9611E05C2B00873F83 /* bomber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bomber.h; sourceTree = "<group>"; };
@@ -482,6 +484,7 @@
 				3E06CDD814A30E1300F89530 /* team.h */,
 				3E06CDD914A30E1300F89530 /* waypoint.cpp */,
 				3E06CDDA14A30E1300F89530 /* weapons.h */,
+				3E06CDDA14A30E1300F89530 /* weapdef.h */,
 				3E2522461255C29D003F3F5E /* scoreboard.cpp */,
 				3E469E9711E05C2B00873F83 /* bombermode.h */,
 				3E469E9611E05C2B00873F83 /* bomber.h */,
@@ -570,6 +573,7 @@
 				3E06CDDC14A30E1300F89530 /* gamemode.h in Headers */,
 				3E06CDDD14A30E1300F89530 /* team.h in Headers */,
 				3E06CDDF14A30E1300F89530 /* weapons.h in Headers */,
+				3E06CDDF14A30E1300F89530 /* weapdef.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
