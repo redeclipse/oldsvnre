@@ -170,13 +170,13 @@ namespace physics
     bool secondaryweap(gameent *d, bool zoom)
     {
         if(!isweap(d->weapselect)) return false;
-        if(WEAP(d->weapselect, zooms)) { if(d == game::player1 && game::zooming && game::inzoomswitch()) return true; }
+        if(W(d->weapselect, zooms)) { if(d == game::player1 && game::zooming && game::inzoomswitch()) return true; }
         else if(!zoom)
         {
-            if(d->weapselect != WEAP_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
+            if(d->weapselect != W_MELEE || (d->physstate == PHYS_FALL && !d->onladder))
             {
                 if(d->action[AC_ALTERNATE] && (!d->action[AC_ATTACK] || d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK])) return true;
-                else if(d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK] && WEAP2(d->weapselect, power, true) && d->weapstate[d->weapselect] == WEAP_S_POWER) return true;
+                else if(d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK] && W2(d->weapselect, power, true) && d->weapstate[d->weapselect] == W_S_POWER) return true;
             }
         }
         return false;
@@ -246,7 +246,7 @@ namespace physics
         if(allowimpulse(d, IM_A_SPRINT) && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && movesprint > 0)
         {
             gameent *e = (gameent *)d;
-            if(!iscrouching(e) && (e != game::player1 || !WEAP(e->weapselect, zooms) || !game::inzoom()))
+            if(!iscrouching(e) && (e != game::player1 || !W(e->weapselect, zooms) || !game::inzoom()))
             {
                 if(turn && e->turnside) return true;
                 if((e != game::player1 && !e->ai) || !impulsemeter || e->impulse[IM_METER] < impulsemeter)
@@ -931,7 +931,7 @@ namespace physics
                     loopv(projs::projs)
                     {
                         projent *p = projs::projs[i];
-                        if(p->owner != d || !p->ready() || p->projtype != PRJ_SHOT || p->weap != WEAP_MELEE || !(p->flags&HIT_ALT)) continue;
+                        if(p->owner != d || !p->ready() || p->projtype != PRJ_SHOT || p->weap != W_MELEE || !(p->flags&HIT_ALT)) continue;
                         p->target = (gameent *)hitplayer;
                     }
                 }
@@ -1039,7 +1039,7 @@ namespace physics
                 }
             }
         }
-        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true), onfloor)) weapons::doshot(d, d->o, WEAP_MELEE, true, true);
+        if(d->canmelee(m_weapon(game::gamemode, game::mutators), lastmillis, true, sliding(d, true), onfloor)) weapons::doshot(d, d->o, W_MELEE, true, true);
         if(!found && d->turnside) d->turnside = 0;
         d->action[AC_DASH] = false;
     }

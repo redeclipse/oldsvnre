@@ -71,7 +71,7 @@ struct duelservmode : servmode
         loopvj(clients) if(clients[j]->state.aitype < AI_START)
         {
             vector<int> shots;
-            loop(a, WEAP_MAX) loop(b, 2)
+            loop(a, W_MAX) loop(b, 2)
             {
                 loopv(clients[j]->state.weapshots[a][b].projs)
                     shots.add(clients[j]->state.weapshots[a][b].projs[i].id);
@@ -80,21 +80,21 @@ struct duelservmode : servmode
             if(!shots.empty()) sendf(-1, 1, "ri2iv", N_DESTROY, clients[j]->clientnum, shots.length(), shots.length(), shots.getbuf());
 
         }
-        if(m_survivor(gamemode, mutators) || GAME(duelclear))
+        if(m_survivor(gamemode, mutators) || G(duelclear))
             loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM) setspawn(i, hasitem(i), true, true);
     }
 
     void clear()
     {
         duelcheck = dueldeath = -1;
-        dueltime = gamemillis+GAME(duellimit);
+        dueltime = gamemillis+G(duellimit);
         bool reset = false;
-        if(m_duel(gamemode, mutators) && GAME(duelcycle)&(m_isteam(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
+        if(m_duel(gamemode, mutators) && G(duelcycle)&(m_isteam(gamemode, mutators) ? 2 : 1) && duelwinner >= 0 && duelwins > 0)
         {
             clientinfo *ci = (clientinfo *)getinfo(duelwinner);
             if(ci)
             {
-                int numwins = GAME(duelcycles), numplrs = 0;
+                int numwins = G(duelcycles), numplrs = 0;
                 loopv(clients)
                     if(clients[i]->state.aitype < AI_START && clients[i]->state.state != CS_SPECTATOR && clients[i]->team == ci->team)
                         numplrs++;
@@ -110,7 +110,7 @@ struct duelservmode : servmode
                 duelwins = 0;
             }
         }
-        loopv(clients) queue(clients[i], false, !reset && clients[i]->state.state == CS_ALIVE, reset || GAME(duelreset) || clients[i]->state.state != CS_ALIVE);
+        loopv(clients) queue(clients[i], false, !reset && clients[i]->state.state == CS_ALIVE, reset || G(duelreset) || clients[i]->state.state != CS_ALIVE);
         allowed.shrink(0);
         playing.shrink(0);
     }
@@ -297,7 +297,7 @@ struct duelservmode : servmode
         duelround = duelwins = 0;
         duelwinner = -1;
         duelcheck = dueldeath = -1;
-        dueltime = gamemillis+GAME(duellimit);
+        dueltime = gamemillis+G(duellimit);
         allowed.shrink(0);
         playing.shrink(0);
         duelqueue.shrink(0);

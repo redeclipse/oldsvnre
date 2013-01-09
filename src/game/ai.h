@@ -23,51 +23,51 @@ aistyles aistyle[] = {
                 "bot",      { "actors/mek1",     "actors/mek1/hwep" }
     },
     {
-        AI_TURRET,      WEAP_SMG,       100,
+        AI_TURRET,      W_SMG,       100,
             4.75,       4.75,       8.75,       150,        1,          1,
             false,      false,      false,      false,      false,      false,      false,
                 "turret",   { "actors/turret",          "actors/player/male/hwep" }
     },
     {
-        AI_GRUNT,       WEAP_MELEE,     30,
+        AI_GRUNT,       W_MELEE,     30,
             3,          3,          8,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    { "actors/grunt/small",           "actors/player/male/hwep" }
     },
     {
-        AI_TANK,       WEAP_RIFLE,     150,
+        AI_TANK,       W_RIFLE,     150,
             3,          3,          14,         7000,        30,         1,
             true,       false,      false,       false,       true,       false,       true,
                 "tank",     { "actors/tank",      "actors/weapons/rocket" }
     },
     {
-        AI_MECH1,       WEAP_RIFLE,     300,
+        AI_MECH1,       W_RIFLE,     300,
             3,          3,          25,         9000,         60,         1,
             true,       true,      false,       false,       true,       false,       true,
                 "mech",    { "actors/mek1",      "actors/mek1/hwep" }
     },
 
     {
-        AI_DROID,       WEAP_PLASMA,     150,
+        AI_DROID,       W_PLASMA,     150,
             3,          3,          14,         3000,         60,         1,
             true,       true,      false,       false,       true,       false,       true,
                 "droid",    { "actors/droid",      "actors/droid/hwep" }
     },
     {
-        AI_HELI,       WEAP_RIFLE,     80,
+        AI_HELI,       W_RIFLE,     80,
             6,          6,          14,         5000,        110,         1,
             true,       false,      false,       false,       true,       false,       true,
                 "heli",    { "aerospace/heli_hover",      "actors/player/male/hwep" }
     },
     {
-        AI_VTOL,     WEAP_GRENADE,    150,
+        AI_VTOL,     W_GRENADE,    150,
             8,          8,          14,         5000,        130,         1,
             true,       false,      false,       false,       true,       false,       true,
                 "vtol",   { "aerospace/vtol",     "actors/player/male/hwep" }
     },
     // temp using mek2 as placeholder model
      {
-        AI_MEK2,     WEAP_ROCKET,    400,
+        AI_MEK2,     W_ROCKET,    400,
             9,         9,          30,         9000,         90,         1,
             true,       true,      false,       false,       true,       false,       true,
                 "mech2",    { "actors/mek2",      "actors/mek1/hwep" }
@@ -91,13 +91,13 @@ aistyles aistyle[] = {
                 "bot",      { "actors/player/male",     "actors/player/male/hwep" }
     },
     {
-        AI_TURRET,      WEAP_SMG,       100,
+        AI_TURRET,      W_SMG,       100,
             4.75,       4.75,       8.75,       150,        1,          1,
             false,      false,      false,      false,      false,      false,      false,
                 "turret",   { "actors/turret",          "actors/player/male/hwep" }
     },
     {
-        AI_GRUNT,       WEAP_MELEE,     50,
+        AI_GRUNT,       W_MELEE,     50,
             3,          3,          14,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
                 "grunt",    { "actors/grunt",           "actors/player/male/hwep" }

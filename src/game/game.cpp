@@ -271,7 +271,7 @@ namespace game
 
     bool zoomallow()
     {
-        if(WEAP(player1->weapselect, zooms)) switch(zoomlock)
+        if(W(player1->weapselect, zooms)) switch(zoomlock)
         {
             case 4: if(!physics::iscrouching(player1)) break;
             case 3: if(player1->physstate != PHYS_FLOOR) break;
@@ -576,13 +576,13 @@ namespace game
             case 2: // weapons
             {
                 int weap = index;
-                if(weap < 0 || weap >= WEAP_MAX*2-1) weap = -1;
-                else if(weap >= WEAP_MAX) weap = w_attr(gamemode, weap%WEAP_MAX, m_weapon(gamemode, mutators));
+                if(weap < 0 || weap >= W_MAX*2-1) weap = -1;
+                else if(weap >= W_MAX) weap = w_attr(gamemode, weap%W_MAX, m_weapon(gamemode, mutators));
                 else
                 {
                     weap = w_attr(gamemode, weap, m_weapon(gamemode, mutators));
-                    if(!isweap(weap) || (m_arena(gamemode, mutators) && weap < WEAP_ITEM)) weap = -1;
-                    else switch(WEAP(weap, allowed))
+                    if(!isweap(weap) || (m_arena(gamemode, mutators) && weap < W_ITEM)) weap = -1;
+                    else switch(W(weap, allowed))
                     {
                         case 0: weap = -1; break;
                         case 1: if(m_duke(gamemode, mutators)) weap = -1; // fall through
@@ -590,7 +590,7 @@ namespace game
                         case 3: default: break;
                     }
                 }
-                if(isweap(weap)) return vec::hexcolor(WEAP(weap, colour));
+                if(isweap(weap)) return vec::hexcolor(W(weap, colour));
                 break;
             }
             default: break;
@@ -617,25 +617,25 @@ namespace game
                 if(d->state == CS_ALIVE && isweap(d->weapselect))
                 {
                     bool last = lastmillis-d->weaplast[d->weapselect] > 0,
-                         powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
-                         reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
+                         powering = last && d->weapstate[d->weapselect] == W_S_POWER,
+                         reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
                          secondary = physics::secondaryweap(d);
                     float amt = last ? clamp(float(lastmillis-d->weaplast[d->weapselect])/d->weapwait[d->weapselect], 0.f, 1.f) : 0.f;
-                    vec col = WEAPPCOL(d, d->weapselect, partcol, secondary);
-                    if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
+                    vec col = WPCOL(d, d->weapselect, partcol, secondary);
+                    if(d->weapselect == W_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                     {
-                        float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
+                        float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                         adddynlight(d->ejectpos(d->weapselect), 16*scale, col, 0, 0, DL_KEEP);
                     }
-                    if(d->weapselect == WEAP_SWORD || powering)
+                    if(d->weapselect == W_SWORD || powering)
                     {
-                        static float powerdl[WEAP_MAX] = {
+                        static float powerdl[W_MAX] = {
                             0, 16, 18, 20, 18, 20, 24, 18, 18, 18, 18
                         };
                         if(powerdl[d->weapselect] > 0)
                         {
                             float thresh = max(amt, 0.25f), size = 4+powerdl[d->weapselect]*thresh;
-                            int span = max(WEAP2(d->weapselect, power, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
+                            int span = max(W2(d->weapselect, power, physics::secondaryweap(d))/4, 500), interval = lastmillis%span, part = span/2;
                             if(interval) size += size*0.5f*(interval <= part ? interval/float(part) : (span-interval)/float(part));
                             adddynlight(d->muzzlepos(d->weapselect), size, vec(col).mul(thresh), 0, 0, DL_KEEP);
                         }
@@ -764,7 +764,7 @@ namespace game
             if(d == focus)
             {
                 if(third) total *= camera1->o.dist(d->o)/(d != player1 ? followdist : thirdpersondist);
-                else if(d->weapselect == WEAP_MELEE) return 0; // hack
+                else if(d->weapselect == W_MELEE) return 0; // hack
             }
             int prot = m_protect(gamemode, mutators), millis = d->protect(lastmillis, prot); // protect returns time left
             if(millis > 0) total *= 1.f-(float(millis)/float(prot));
@@ -843,18 +843,18 @@ namespace game
 
         d->checktags();
 
-        loopi(WEAP_MAX) if(d->weapstate[i] != WEAP_S_IDLE)
+        loopi(W_MAX) if(d->weapstate[i] != W_S_IDLE)
         {
-            bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != WEAP_S_POWER ? 0 : PHYSMILLIS);
-            if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == WEAP_S_RELOAD && timeexpired)
+            bool timeexpired = lastmillis-d->weaplast[i] >= d->weapwait[i]+(d->weapselect != i || d->weapstate[i] != W_S_POWER ? 0 : PHYSMILLIS);
+            if(d->state == CS_ALIVE && i == d->weapselect && d->weapstate[i] == W_S_RELOAD && timeexpired)
             {
-                if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= WEAP(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
-                    playsound(WEAPSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
+                if(timeexpired && playreloadnotify&(d == focus ? 1 : 2) && (d->ammo[i] >= W(i, max) || playreloadnotify&(d == focus ? 4 : 8)))
+                    playsound(WSND(i, S_W_NOTIFY), d->o, d, 0, reloadnotifyvol, -1, -1, &d->wschan);
             }
             if(d->state != CS_ALIVE || timeexpired)
-                d->setweapstate(i, WEAP_S_IDLE, 0, lastmillis);
+                d->setweapstate(i, W_S_IDLE, 0, lastmillis);
         }
-        if(d->state == CS_ALIVE && isweap(d->weapselect) && d->weapstate[d->weapselect] == WEAP_S_POWER)
+        if(d->state == CS_ALIVE && isweap(d->weapselect) && d->weapstate[d->weapselect] == W_S_POWER)
         {
             int millis = lastmillis-d->weaplast[d->weapselect];
             if(millis > 0)
@@ -862,13 +862,13 @@ namespace game
                 bool secondary = physics::secondaryweap(d);
                 float amt = millis/float(d->weapwait[d->weapselect]);
                 int vol = 255;
-                if(WEAP2(d->weapselect, power, secondary)) switch(WEAP2(d->weapselect, cooked, secondary))
+                if(W2(d->weapselect, power, secondary)) switch(W2(d->weapselect, cooked, secondary))
                 {
                     case 4: case 5: vol = 10+int(245*(1.f-amt)); break; // longer
                     case 1: case 2: case 3: default: vol = 10+int(245*amt); break; // shorter
                 }
                 if(issound(d->pschan)) sounds[d->pschan].vol = vol;
-                else playsound(WEAPSND2(d->weapselect, secondary, S_W_POWER), d->o, d, SND_LOOP, vol, -1, -1, &d->pschan);
+                else playsound(WSND2(d->weapselect, secondary, S_W_POWER), d->o, d, SND_LOOP, vol, -1, -1, &d->pschan);
             }
         }
         else if(issound(d->pschan)) removesound(d->pschan);
@@ -1040,19 +1040,19 @@ namespace game
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
-            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove) && WEAP2(weap, damage, flags&HIT_ALT) != 0)
+            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove) && W2(weap, damage, flags&HIT_ALT) != 0)
             {
-                float scale = damage/float(WEAP2(weap, damage, flags&HIT_ALT));
-                if(hithurts(flags) && WEAP2(weap, stuntime, flags&HIT_ALT))
-                    d->addstun(weap, lastmillis, int(scale*WEAP2(weap, stuntime, flags&HIT_ALT)), scale*WEAP2(weap, stunscale, flags&HIT_ALT));
-                if(WEAP2(weap, slow, flags&HIT_ALT) > 0)
-                    d->vel.mul(1.f-clamp((scale*WEAP2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
-                if(WEAP2(weap, hitpush, flags&HIT_ALT) != 0)
+                float scale = damage/float(W2(weap, damage, flags&HIT_ALT));
+                if(hithurts(flags) && W2(weap, stuntime, flags&HIT_ALT))
+                    d->addstun(weap, lastmillis, int(scale*W2(weap, stuntime, flags&HIT_ALT)), scale*W2(weap, stunscale, flags&HIT_ALT));
+                if(W2(weap, slow, flags&HIT_ALT) > 0)
+                    d->vel.mul(1.f-clamp((scale*W2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
+                if(W2(weap, hitpush, flags&HIT_ALT) != 0)
                 {
-                    if(d == actor && WEAP2(weap, selfdmg, flags&HIT_ALT) != 0)
-                        scale *= 1/float(WEAP2(weap, selfdmg, flags&HIT_ALT));
+                    if(d == actor && W2(weap, selfdmg, flags&HIT_ALT) != 0)
+                        scale *= 1/float(W2(weap, selfdmg, flags&HIT_ALT));
                     float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
-                    vec psh = vec(dir).mul(scale*WEAP2(weap, hitpush, flags&HIT_ALT)*WEAPRS(force, gamemode, mutators));
+                    vec psh = vec(dir).mul(scale*W2(weap, hitpush, flags&HIT_ALT)*WRS(force, gamemode, mutators));
                     if(!psh.iszero()) d->vel.add(psh);
                 }
             }
@@ -1115,7 +1115,7 @@ namespace game
             else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose != 2 ? "entered spectator" : "gave up their corporeal form");
             else if(flags && isweap(weap) && !burning && !bleeding)
             {
-                static const char *suicidenames[WEAP_MAX][2] = {
+                static const char *suicidenames[W_MAX][2] = {
                     { "hit themself", "hit themself" },
                     { "ate a bullet", "shot themself" },
                     { "created too much torsional stress", "cut themself" },
@@ -1144,7 +1144,7 @@ namespace game
             else if(bleeding) concatstring(d->obit, "fatally wounded by");
             else if(isweap(weap))
             {
-                static const char *obitnames[5][WEAP_MAX][2] = {
+                static const char *obitnames[5][W_MAX][2] = {
                     {
                         { "punched by", "punched by" },
                         { "pierced by", "pierced by" },
@@ -1496,7 +1496,7 @@ namespace game
     int lookupweap(const char *a)
     {
         if(isnumeric(*a)) return parseint(a);
-        else loopi(WEAP_MAX) if(!strcasecmp(WEAP(i, name), a)) return i;
+        else loopi(W_MAX) if(!strcasecmp(W(i, name), a)) return i;
         return -1;
     }
 
@@ -1514,7 +1514,7 @@ namespace game
                 {
                     if(!chunk[i] || !*chunk[i] || !isnumeric(*chunk[i])) continue;
                     int v = parseint(chunk[i]);
-                    items.add(v >= WEAP_OFFSET && v < WEAP_ITEM ? v : 0);
+                    items.add(v >= W_OFFSET && v < W_ITEM ? v : 0);
                 }
                 chunk.deletearrays();
             }
@@ -1525,7 +1525,7 @@ namespace game
                 int n = d->loadweap.find(items[i]);
                 d->loadweap[i] = n < 0 || n == i ? items[i] : 0;
             }
-            client::addmsg(N_LOADWEAP, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
+            client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
             vector<char> value, msg;
             loopi(r)
             {
@@ -1534,10 +1534,10 @@ namespace game
                     if(!value.empty()) value.add(' ');
                     value.add(char(d->loadweap[i]+48));
                 }
-                int colour = WEAP(d->loadweap[i] ? d->loadweap[i] : WEAP_MELEE, colour);
+                int colour = W(d->loadweap[i] ? d->loadweap[i] : W_MELEE, colour);
                 const char *pre = msg.empty() ? "" : (i == r-1 ? ", and " : ", "),
                            *tex = d->loadweap[i] ? hud::itemtex(WEAPON, d->loadweap[i]) : hud::questiontex,
-                           *name = d->loadweap[i] ? WEAP(d->loadweap[i], name) : "random";
+                           *name = d->loadweap[i] ? W(d->loadweap[i], name) : "random";
                 defformatstring(weap)("%s\fs\f[%d]\f(%s)%s\fS", pre, colour, tex, name);
                 msg.put(weap, strlen(weap));
             }
@@ -1548,7 +1548,7 @@ namespace game
     }
     ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
-    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && WEAP(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
+    ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && W(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
@@ -1651,7 +1651,7 @@ namespace game
         if(tone)
         {
             int col = d->aitype < AI_START ? d->colour : 0;
-            if(!col && isweap(d->weapselect)) col = WEAP(d->weapselect, colour);
+            if(!col && isweap(d->weapselect)) col = W(d->weapselect, colour);
             if(col)
             {
                 if(mix)
@@ -2337,13 +2337,13 @@ namespace game
             if(player1->state == CS_ALIVE)
             {
                 int state = player1->weapstate[player1->weapselect];
-                if(WEAP(player1->weapselect, zooms))
+                if(W(player1->weapselect, zooms))
                 {
-                    if(state == WEAP_S_PRIMARY || state == WEAP_S_SECONDARY || (state == WEAP_S_RELOAD && lastmillis-player1->weaplast[player1->weapselect] >= max(player1->weapwait[player1->weapselect]-zoomtime, 1)))
-                        state = WEAP_S_IDLE;
+                    if(state == W_S_PRIMARY || state == W_S_SECONDARY || (state == W_S_RELOAD && lastmillis-player1->weaplast[player1->weapselect] >= max(player1->weapwait[player1->weapselect]-zoomtime, 1)))
+                        state = W_S_IDLE;
                 }
-                if(zooming && (!WEAP(player1->weapselect, zooms) || state != WEAP_S_IDLE)) zoomset(false, lastmillis);
-                else if(WEAP(player1->weapselect, zooms) && state == WEAP_S_IDLE && zooming != player1->action[AC_ALTERNATE])
+                if(zooming && (!W(player1->weapselect, zooms) || state != W_S_IDLE)) zoomset(false, lastmillis);
+                else if(W(player1->weapselect, zooms) && state == W_S_IDLE && zooming != player1->action[AC_ALTERNATE])
                     zoomset(player1->action[AC_ALTERNATE], lastmillis);
             }
             else if(zooming) zoomset(false, lastmillis);
@@ -2506,7 +2506,7 @@ namespace game
                     if(melee)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->weaplast[WEAP_MELEE];
+                        basetime2 = d->weaplast[W_MELEE];
                     }
                     else if(d->move>0) anim |= (ANIM_JET_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_JET_LEFT : ANIM_JET_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -2522,7 +2522,7 @@ namespace game
                     else if(melee)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->weaplast[WEAP_MELEE];
+                        basetime2 = d->weaplast[W_MELEE];
                     }
                     else if(d->move>0) anim |= ANIM_DASH_FORWARD<<ANIM_SECONDARY;
                     else if(d->strafe) anim |= (d->strafe>0 ? ANIM_DASH_LEFT : ANIM_DASH_RIGHT)<<ANIM_SECONDARY;
@@ -2536,7 +2536,7 @@ namespace game
                     if(melee)
                     {
                         anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
-                        basetime2 = d->weaplast[WEAP_MELEE];
+                        basetime2 = d->weaplast[W_MELEE];
                     }
                     else if(d->action[AC_CROUCH] || d->actiontime[AC_CROUCH]<0)
                     {
@@ -2606,13 +2606,13 @@ namespace game
         {
             e->light.material[0] = bvec(getcolour(d, playerovertone));
             e->light.material[1] = bvec(getcolour(d, playerundertone));
-            if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (WEAP2(d->weapselect, sub, false) || WEAP2(d->weapselect, sub, true)) && WEAP(d->weapselect, max) > 1)
+            if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (W2(d->weapselect, sub, false) || W2(d->weapselect, sub, true)) && W(d->weapselect, max) > 1)
             {
-                int ammo = d->ammo[d->weapselect], maxammo = WEAP(d->weapselect, max);
+                int ammo = d->ammo[d->weapselect], maxammo = W(d->weapselect, max);
                 float scale = 1;
                 switch(d->weapstate[d->weapselect])
                 {
-                    case WEAP_S_RELOAD:
+                    case W_S_RELOAD:
                     {
                         int millis = lastmillis-d->weaplast[d->weapselect], check = d->weapwait[d->weapselect]/2;
                         scale = millis >= check ? float(millis-check)/check : 0.f;
@@ -2714,7 +2714,7 @@ namespace game
                         size *= aboveheadiconsize;
                         switch(d->icons[i].type)
                         {
-                            case eventicon::WEAPON: colour = WEAP(d->icons[i].value, colour); break;
+                            case eventicon::WEAPON: colour = W(d->icons[i].value, colour); break;
                             case eventicon::AFFINITY:
                                 if(m_bomber(gamemode))
                                 {
@@ -2785,8 +2785,8 @@ namespace game
                 animdelay = d->weapwait[weap];
                 switch(d->weapstate[weap])
                 {
-                    case WEAP_S_SWITCH:
-                    case WEAP_S_USE:
+                    case W_S_SWITCH:
+                    case W_S_USE:
                     {
                         if(lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3)
                         {
@@ -2794,10 +2794,10 @@ namespace game
                             else weap = d->lastweap;
                         }
                         else if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
-                        weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-WEAP_S_SWITCH);
+                        weapflags = animflags = ANIM_SWITCH+(d->weapstate[weap]-W_S_SWITCH);
                         break;
                     }
-                    case WEAP_S_POWER:
+                    case W_S_POWER:
                     {
                         switch(weaptype[weap].anim)
                         {
@@ -2806,21 +2806,21 @@ namespace game
                         }
                         break;
                     }
-                    case WEAP_S_PRIMARY:
-                    case WEAP_S_SECONDARY:
+                    case W_S_PRIMARY:
+                    case W_S_SECONDARY:
                     {
-                        if(weaptype[weap].thrown[d->weapstate[weap] != WEAP_S_SECONDARY ? 0 : 1] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
+                        if(weaptype[weap].thrown[d->weapstate[weap] != W_S_SECONDARY ? 0 : 1] > 0 && (lastmillis-d->weaplast[weap] <= d->weapwait[weap]/2 || !d->hasweap(weap, m_weapon(gamemode, mutators))))
                             showweap = false;
                         weapflags = animflags = (weaptype[weap].anim+d->weapstate[weap])|ANIM_CLAMP;
                         break;
                     }
-                    case WEAP_S_RELOAD:
+                    case W_S_RELOAD:
                     {
                         if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;// || (!d->canreload(weap, m_weapon(gamemode, mutators), false, lastmillis) && lastmillis-d->weaplast[weap] <= d->weapwait[weap]/3))
                         weapflags = animflags = weaptype[weap].anim+d->weapstate[weap];
                         break;
                     }
-                    case WEAP_S_IDLE: case WEAP_S_WAIT: default:
+                    case W_S_IDLE: case W_S_WAIT: default:
                     {
                         if(!d->hasweap(weap, m_weapon(gamemode, mutators))) showweap = false;
                         weapflags = animflags = weaptype[weap].anim|ANIM_LOOP;
@@ -2877,19 +2877,19 @@ namespace game
             if(d->state == CS_ALIVE)
             {
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
-                     powering = last && d->weapstate[d->weapselect] == WEAP_S_POWER,
-                     reloading = last && d->weapstate[d->weapselect] == WEAP_S_RELOAD,
+                     powering = last && d->weapstate[d->weapselect] == W_S_POWER,
+                     reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
                      secondary = physics::secondaryweap(d);
                 float amt = last ? (lastmillis-d->weaplast[d->weapselect])/float(d->weapwait[d->weapselect]) : 1.f;
-                int colour = WEAPHCOL(d, d->weapselect, partcol, secondary);
-                if(d->weapselect == WEAP_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
+                int colour = WHCOL(d, d->weapselect, partcol, secondary);
+                if(d->weapselect == W_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                 {
-                    float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == WEAP_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
+                    float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
                     part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.5f*scale, min(0.65f*scale, 0.8f)*blend, 0, 0);
                     part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
                     regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
-                if(d->weapselect == WEAP_RIFLE && WEAP(d->weapselect, laser) && !reloading)
+                if(d->weapselect == W_RIFLE && W(d->weapselect, laser) && !reloading)
                 {
                     vec v, origin = d->originpos(), muzzle = d->muzzlepos(d->weapselect);
                     origin.z += 0.25f; muzzle.z += 0.25f;
@@ -2898,12 +2898,12 @@ namespace game
                     findorientation(d->o, d->yaw, d->pitch, v);
                     part_flare(origin, v, 1, PART_FLARE, colour, 0.5f*amt, amt*blend);
                 }
-                if(d->weapselect == WEAP_SWORD || powering)
+                if(d->weapselect == W_SWORD || powering)
                 {
                     static const struct powerfxs {
                         int type, parttype;
                         float size, radius;
-                    } powerfx[WEAP_MAX] = {
+                    } powerfx[W_MAX] = {
                         { 0, 0, 0, 0 },
                         { 2, PART_SPARK, 0.1f, 1.5f },
                         { 4, PART_LIGHTNING, 1, 1 },
@@ -2932,7 +2932,7 @@ namespace game
                         }
                         case 4:
                         {
-                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, powerfx[d->weapselect].parttype, colour, WEAP2(d->weapselect, partsize, secondary)*0.75f, blend);
+                            part_flare(d->originpos(), d->muzzlepos(d->weapselect), 1, powerfx[d->weapselect].parttype, colour, W2(d->weapselect, partsize, secondary)*0.75f, blend);
                             break;
                         }
                         case 0: default: break;
@@ -2990,11 +2990,11 @@ namespace game
             previewent->spawnstate(G_DEATHMATCH, 0);
             previewent->light.color = vec(1, 1, 1);
             previewent->light.dir = vec(0, -1, 2).normalize();
-            loopi(WEAP_MAX) previewent->ammo[i] = WEAP(i, max);
+            loopi(W_MAX) previewent->ammo[i] = W(i, max);
         }
         previewent->setinfo(NULL, color, model);
         previewent->team = clamp(team, 0, int(TEAM_MULTI));
-        previewent->weapselect = clamp(weap, 0, WEAP_MAX-1);
+        previewent->weapselect = clamp(weap, 0, W_MAX-1);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
         previewent->light.millis = -1;
         renderplayer(previewent, true, 1, 1);

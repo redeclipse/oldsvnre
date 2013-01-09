@@ -416,7 +416,7 @@ namespace bomber
         part_create(PART_SMOKE_LERP_SOFT, 500, o, 0x333333, enttype[AFFINITY].radius*0.75f, 0.5f, -15);
         int debris = rnd(5)+5, amt = int((rnd(debris)+debris+1)*game::debrisscale);
         loopi(amt) projs::create(o, o, true, NULL, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
-        playsound(WEAPSND2(WEAP_GRENADE, false, S_W_EXPLODE), o, NULL, 0, 255);
+        playsound(WSND2(W_GRENADE, false, S_W_EXPLODE), o, NULL, 0, 255);
     }
 
     void resetaffinity(int i, int value)
@@ -608,7 +608,7 @@ namespace bomber
                     gameent *t;
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
-                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < WEAP_OFFSET))
+                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < W_OFFSET))
                         {
                             guard = true;
                             break;

@@ -374,8 +374,8 @@ extern char *gettime(time_t ctime = 0, char *format = NULL);
 
 #if defined(GAMEWORLD)
 #define IDF_GAME (IDF_CLIENT|IDF_REWRITE)
-#define GAME(name) (name)
-#define PHYS(name) ((GAME(name##force) >= 0 ? GAME(name##force) : physics::name)*GAME(name##scale))
+#define G(name) (name)
+#define PHYS(name) ((G(name##force) >= 0 ? G(name##force) : physics::name)*G(name##scale))
 #define GICOMMAND(flags, n, g, proto, svbody, ccbody) ICOMMAND(flags|IDF_GAME, n, g, proto, ccbody)
 #define GVARN(flags, name, global, min, cur, max) _VAR(name, global, min, cur, max, flags|IDF_GAME)
 #define GVAR(flags, name, min, cur, max) _VAR(name, name, min, cur, max, flags|IDF_GAME)
@@ -387,7 +387,7 @@ extern char *gettime(time_t ctime = 0, char *format = NULL);
 #define GSVAR(flags, name, cur) _SVAR(name, name, cur, flags|IDF_GAME)
 #define GSVARF(flags, name, cur, svbody, ccbody) _SVARF(name, name, cur, ccbody, flags|IDF_GAME)
 #elif defined(GAMESERVER)
-#define GAME(name) (sv_##name)
+#define G(name) (sv_##name)
 #define IDF_GAME (IDF_SERVER|IDF_REWRITE)
 #define GICOMMAND(flags, n, g, proto, svbody, ccbody) ICOMMAND(flags|(IDF_GAME&~IDF_REWRITE), sv_##n, g, proto, svbody)
 #define GVARN(flags, name, global, min, cur, max) _VAR(sv_##name, global, min, cur, max, flags|IDF_GAME)
@@ -400,8 +400,8 @@ extern char *gettime(time_t ctime = 0, char *format = NULL);
 #define GSVAR(flags, name, cur) _SVAR(sv_##name, sv_##name, cur, flags|IDF_GAME)
 #define GSVARF(flags, name, cur, svbody, ccbody) _SVARF(sv_##name, sv_##name, cur, svbody, flags|IDF_GAME)
 #else
-#define GAME(name) (name)
-#define PHYS(name) ((GAME(name##force) >= 0 ? GAME(name##force) : physics::name)*GAME(name##scale))
+#define G(name) (name)
+#define PHYS(name) ((G(name##force) >= 0 ? G(name##force) : physics::name)*G(name##scale))
 #define GICOMMAND(flags, n, g, proto, svbody, ccbody)
 #define GVARN(flags, name, global, min, cur, max) extern int name
 #define GVAR(flags, name, min, cur, max) extern int name

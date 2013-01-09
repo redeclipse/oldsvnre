@@ -102,12 +102,12 @@ namespace auth
         {
             if(adminpass[0] && checkpassword(ci, adminpass, pwd))
             {
-                if(GAME(autoadmin)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
+                if(G(autoadmin)) setprivilege(ci, true, PRIV_ADMINISTRATOR);
                 return DISC_NONE;
             }
             if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return DISC_NONE;
         }
-        if(numclients() >= GAME(serverclients)) return DISC_MAXCLIENTS;
+        if(numclients() >= G(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
         if(!ci->privilege && !checkipinfo(control, ipinfo::ALLOW, ip))
         {

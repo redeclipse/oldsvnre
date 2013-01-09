@@ -155,9 +155,9 @@
             { &sv_rocket##name##1,   &sv_rocket##name##2 } \
         };
 
-    #define WEAP(weap,name)         (*sv_weap_stat_##name[weap])
-    #define WEAP2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
-    #define WEAPSTR(a,weap,attr)    defformatstring(a)("sv_%s%s", weaptype[weap].name, #attr)
+    #define W(weap,name)         (*sv_weap_stat_##name[weap])
+    #define W2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
+    #define WSTR(a,weap,attr)    defformatstring(a)("sv_%s%s", weaptype[weap].name, #attr)
 #else
 #ifdef GAMEWORLD
     #define WPVAR(flags, name, mn, mx, w00, w01, w02, w03, w04, w05, w06, w07, w08, w09, w10) \
@@ -395,8 +395,8 @@
         GSVAR(flags, rocket##name##1, w110);  GSVAR(flags, rocket##name##2, w210); \
         extern char **weap_stat_##name[][2];
 #endif
-    #define WEAP(weap,name)         (*weap_stat_##name[weap])
-    #define WEAP2(weap,name,second) (*weap_stat_##name[weap][second ? 1 : 0])
-    #define WEAPSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
+    #define W(weap,name)         (*weap_stat_##name[weap])
+    #define W2(weap,name,second) (*weap_stat_##name[weap][second ? 1 : 0])
+    #define WSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
 #endif
 

@@ -168,7 +168,7 @@ namespace entities
                 {
                     addentinfo(aistyle[attr[0]+AI_START].name);
                     addmodeinfo(attr[3], attr[4]);
-                    addentinfo(WEAP(attr[6] > 0 && attr[6] <= WEAP_MAX ? attr[6]-1 : aistyle[attr[0]+AI_START].weap, name));
+                    addentinfo(W(attr[6] > 0 && attr[6] <= W_MAX ? attr[6]-1 : aistyle[attr[0]+AI_START].weap, name));
                 }
                 break;
             }
@@ -177,12 +177,12 @@ namespace entities
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, attr[0], sweap);
                 if(isweap(attr1))
                 {
-                    defformatstring(str)("\fs\f[%d]%s%s%s%s\fS", WEAP(attr1, colour), icon ? "\f(" : "", icon ? hud::itemtex(type, attr1) : WEAP(attr1, name), icon ? ")" : "", icon ? WEAP(attr1, name) : "");
+                    defformatstring(str)("\fs\f[%d]%s%s%s%s\fS", W(attr1, colour), icon ? "\f(" : "", icon ? hud::itemtex(type, attr1) : W(attr1, name), icon ? ")" : "", icon ? W(attr1, name) : "");
                     addentinfo(str);
                     if(full)
                     {
                         addmodeinfo(attr[2], attr[3]);
-                        if(attr[1]&WEAP_F_FORCED) addentinfo("forced");
+                        if(attr[1]&W_F_FORCED) addentinfo("forced");
                     }
                 }
                 break;
@@ -324,11 +324,11 @@ namespace entities
     {
         gameentity &e = *(gameentity *)ents[ent];
         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
-            colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF;
+            colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF;
         if(e.type == WEAPON) d->addicon(eventicon::WEAPON, lastmillis, game::eventiconshort, attr);
         if(isweap(weap))
         {
-            d->setweapstate(weap, WEAP_S_SWITCH, weaponswitchdelay, lastmillis);
+            d->setweapstate(weap, W_S_SWITCH, weaponswitchdelay, lastmillis);
             d->ammo[weap] = d->reloads[weap] = -1;
             if(d->weapselect != weap)
             {
@@ -337,7 +337,7 @@ namespace entities
             }
         }
         d->useitem(ent, e.type, attr, ammoamt, reloadamt, sweap, lastmillis, weaponswitchdelay);
-        playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, 0, -1, -1, -1, &d->wschan);
+        playsound(e.type == WEAPON && attr >= W_OFFSET ? WSND(attr, S_W_USE) : S_ITEMUSE, d->o, d, 0, -1, -1, -1, &d->wschan);
         if(game::dynlighteffects) adddynlight(d->center(), enttype[e.type].radius*2, vec::hexcolor(colour).mul(2.f), 250, 250);
         if(ents.inrange(drop) && ents[drop]->type == WEAPON)
         {
@@ -511,10 +511,10 @@ namespace entities
                 if(game::allowmove(d))
                 {
                     int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                    if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_FILTER))
+                    if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_FILTER))
                     {
                         client::addmsg(N_ITEMUSE, "ri3", d->clientnum, lastmillis-game::maptime, n);
-                        d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
+                        d->setweapstate(d->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
                         d->action[AC_USE] = false;
                     }
                     else tried = true;
@@ -843,9 +843,9 @@ namespace entities
                 break;
             }
             case WEAPON:
-                if(create && (e.attrs[0] < WEAP_OFFSET || e.attrs[0] >= WEAP_MAX)) e.attrs[0] = WEAP_OFFSET; // don't be stupid when creating the entity
-                while(e.attrs[0] < WEAP_OFFSET) e.attrs[0] += WEAP_MAX-WEAP_OFFSET; // don't allow superimposed weaps
-                while(e.attrs[0] >= WEAP_MAX) e.attrs[0] -= WEAP_MAX-WEAP_OFFSET;
+                if(create && (e.attrs[0] < W_OFFSET || e.attrs[0] >= W_MAX)) e.attrs[0] = W_OFFSET; // don't be stupid when creating the entity
+                while(e.attrs[0] < W_OFFSET) e.attrs[0] += W_MAX-W_OFFSET; // don't allow superimposed weaps
+                while(e.attrs[0] >= W_MAX) e.attrs[0] -= W_MAX-W_OFFSET;
                 break;
 #ifdef MEKARCADE
             case HEALTH:
@@ -881,8 +881,8 @@ namespace entities
                 while(e.attrs[2] > 90) e.attrs[2] -= 180;
                 while(e.attrs[5] < 0) e.attrs[5] += TRIGGERIDS;
                 while(e.attrs[5] >= TRIGGERIDS) e.attrs[5] -= TRIGGERIDS;
-                while(e.attrs[6] < 0) e.attrs[6] += WEAP_MAX+1; // allow any weapon
-                while(e.attrs[6] > WEAP_MAX) e.attrs[6] -= WEAP_MAX+1;
+                while(e.attrs[6] < 0) e.attrs[6] += W_MAX+1; // allow any weapon
+                while(e.attrs[6] > W_MAX) e.attrs[6] -= W_MAX+1;
                 if(e.attrs[7] < 0) e.attrs[7] = 0;
                 if(e.attrs[8] < 0) e.attrs[8] = 0;
                 if(e.attrs[9] < 0) e.attrs[9] = 0;
@@ -1150,18 +1150,18 @@ namespace entities
                 //                  -   SUNLIGHT
                 case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: break;
 
-                // I_SHELLS         -   WEAPON      WEAP_SHOTGUN
-                // I_BULLETS        -   WEAPON      WEAP_SMG
-                // I_ROCKETS        -   WEAPON      WEAP_FLAMER
-                // I_ROUNDS         -   WEAPON      WEAP_RIFLE
-                // I_GL             -   WEAPON      WEAP_GRENADE
-                // I_CARTRIDGES     -   WEAPON      WEAP_PLASMA
+                // I_SHELLS         -   WEAPON      W_SHOTGUN
+                // I_BULLETS        -   WEAPON      W_SMG
+                // I_ROCKETS        -   WEAPON      W_FLAMER
+                // I_ROUNDS         -   WEAPON      W_RIFLE
+                // I_GL             -   WEAPON      W_GRENADE
+                // I_CARTRIDGES     -   WEAPON      W_PLASMA
                 case 9: case 10: case 11: case 12: case 13: case 14:
                 {
                     int weap = f.type-8;
                     if(weap >= 0 && weap <= 5)
                     {
-                        const int weapmap[6] = { WEAP_SHOTGUN, WEAP_SMG, WEAP_FLAMER, WEAP_RIFLE, WEAP_GRENADE, WEAP_PLASMA };
+                        const int weapmap[6] = { W_SHOTGUN, W_SMG, W_FLAMER, W_RIFLE, W_GRENADE, W_PLASMA };
                         f.type = WEAPON;
                         f.attrs[0] = weapmap[weap];
                         f.attrs[1] = 0;
@@ -1169,11 +1169,11 @@ namespace entities
                     else f.type = NOTUSED;
                     break;
                 }
-                // I_QUAD           -   WEAPON      WEAP_ROCKET
+                // I_QUAD           -   WEAPON      W_ROCKET
                 case 19:
                 {
                     f.type = WEAPON;
-                    f.attrs[0] = WEAP_ROCKET;
+                    f.attrs[0] = W_ROCKET;
                     f.attrs[1] = 0;
                     break;
                 }
@@ -1371,8 +1371,8 @@ namespace entities
                 case WEAPON:
                 {
                     float mindist = float(enttype[WEAPON].radius*enttype[WEAPON].radius*6);
-                    int weaps[WEAP_MAX];
-                    loopj(WEAP_MAX) weaps[j] = j != e.attrs[0] ? 0 : 1;
+                    int weaps[W_MAX];
+                    loopj(W_MAX) weaps[j] = j != e.attrs[0] ? 0 : 1;
                     loopvj(ents) if(j != i)
                     {
                         gameentity &f = *(gameentity *)ents[j];
@@ -1384,7 +1384,7 @@ namespace entities
                         }
                     }
                     int best = e.attrs[0];
-                    loopj(WEAP_MAX) if(weaps[j] > weaps[best]) best = j;
+                    loopj(W_MAX) if(weaps[j] > weaps[best]) best = j;
                     e.attrs[0] = best;
                     break;
                 }
@@ -1565,7 +1565,7 @@ namespace entities
                     if(mtype == MAP_MAPZ && gver <= 160)
                     {
                         e.attrs[0]++; // add in melee
-                        if(e.attrs[0] < WEAP_OFFSET) e.attrs[0] = 8; // cleanup for fixentity
+                        if(e.attrs[0] < W_OFFSET) e.attrs[0] = 8; // cleanup for fixentity
                     }
                     if(mtype == MAP_MAPZ && gver <= 163) e.attrs[0]++; // add in sword
                     if(mtype == MAP_MAPZ && gver <= 213)
@@ -1731,8 +1731,8 @@ namespace entities
                 e.o = ents[i]->o;
                 e.attrs.add(0, max(5, enttype[ACTOR].numattrs));
                 e.attrs[0] = (i%5 != 4 ? AI_GRUNT : AI_TURRET)-1;
-                e.attrs[6] = (i/5)%(WEAP_MAX+1);
-                if(e.attrs[0] == AI_TURRET && e.attrs[5] == WEAP_MELEE) e.attrs[5] = WEAP_SMG;
+                e.attrs[6] = (i/5)%(W_MAX+1);
+                if(e.attrs[0] == AI_TURRET && e.attrs[5] == W_MELEE) e.attrs[5] = W_SMG;
                 switch(ents[i]->type)
                 {
                     case PLAYERSTART:
@@ -2030,7 +2030,7 @@ namespace entities
                                 yaw = e.attrs[1]+90;
                                 pitch = e.attrs[2];
                                 int weap = e.attrs[6] > 0 ? e.attrs[6]-1 : aistyle[e.attrs[0]].weap;
-                                if(isweap(weap)) colour = WEAP(weap, colour);
+                                if(isweap(weap)) colour = W(weap, colour);
                                 size = e.attrs[9] > 0 ? e.attrs[9]/100.f : aistyle[e.attrs[0]].scale;
                             }
                             //fade = 0.5f;
@@ -2048,7 +2048,7 @@ namespace entities
                         if(e.type == WEAPON)
                         {
                             flags |= MDL_LIGHTFX;
-                            int col = WEAP(w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
+                            int col = W(w_attr(game::gamemode, e.attrs[0], m_weapon(game::gamemode, game::mutators)), colour), interval = lastmillis%1000;
                             e.light.effect = vec::hexcolor(col).mul(interval >= 500 ? (1000-interval)/500.f : interval/500.f);
                         }
                         else e.light.effect = vec(0, 0, 0);
@@ -2094,7 +2094,7 @@ namespace entities
              hastop = hasent && e.o.squaredist(camera1->o) <= showentdist*showentdist;
         int sweap = m_weapon(game::gamemode, game::mutators),
             attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
-            colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
+            colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF, interval = lastmillis%1000;
         float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
         if(enttype[e.type].usetype == EU_ITEM && (active || isedit))
         {

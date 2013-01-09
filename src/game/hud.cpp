@@ -454,7 +454,7 @@ namespace hud
             } \
             else if(m_bomber(g)) \
             { \
-                if(GAME(bomberbasket)) ADDMODE(modebomberbaskettex) \
+                if(G(bomberbasket)) ADDMODE(modebomberbaskettex) \
                 else if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
                 else ADDMODE(modebombertex) \
             } \
@@ -480,7 +480,7 @@ namespace hud
             } \
             else if(m_bomber(g)) \
             { \
-                if(GAME(bomberbasket)) ADDMODE(modebomberbaskettex) \
+                if(G(bomberbasket)) ADDMODE(modebomberbaskettex) \
                 else if(m_gsp1(g, m)) ADDMODE(modebomberholdtex) \
                 else ADDMODE(modebombertex) \
             } \
@@ -692,7 +692,7 @@ namespace hud
             {
                 if(crosshairweapons&1 && isweap(weap))
                 {
-                    const char *crosshairtexs[WEAP_MAX] = {
+                    const char *crosshairtexs[W_MAX] = {
                         meleecrosshairtex, pistolcrosshairtex, swordcrosshairtex, shotguncrosshairtex, smgcrosshairtex,
                         flamercrosshairtex, plasmacrosshairtex, riflecrosshairtex, grenadecrosshairtex, minecrosshairtex,
                         rocketcrosshairtex, // end of regular weapons
@@ -707,7 +707,7 @@ namespace hud
             {
                 if(crosshairweapons&1 && isweap(weap))
                 {
-                    const char *hithairtexs[WEAP_MAX] = {
+                    const char *hithairtexs[W_MAX] = {
                         meleehithairtex, pistolhithairtex, swordhithairtex, shotgunhithairtex, smghithairtex,
                         flamerhithairtex, plasmahithairtex, riflehithairtex, grenadehithairtex, minehithairtex,
                         rockethithairtex, // end of regular weapons
@@ -728,13 +728,13 @@ namespace hud
         float r = 1, g = 1, b = 1, amt = 0;
         switch(game::focus->weapstate[weap])
         {
-            case WEAP_S_POWER: if(game::focus->weapwait[weap])
+            case W_S_POWER: if(game::focus->weapwait[weap])
             {
                 amt = clamp(float(millis)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 colourskew(r, g, b, 1.f-amt);
                 break;
             }
-            case WEAP_S_RELOAD: if(showindicator >= (WEAP(weap, add) < WEAP(weap, max) ? 3 : 2) && millis <= game::focus->weapwait[weap])
+            case W_S_RELOAD: if(showindicator >= (W(weap, add) < W(weap, max) ? 3 : 2) && millis <= game::focus->weapwait[weap])
             {
                 amt = 1.f-clamp(float(millis)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 colourskew(r, g, b, 1.f-amt);
@@ -756,27 +756,27 @@ namespace hud
         }
     }
 
-    static int clipsizes[WEAP_MAX] = {0};
+    static int clipsizes[W_MAX] = {0};
 
     void drawclip(int weap, int x, int y, float s)
     {
-        if(!isweap(weap) || (!WEAP2(weap, sub, false) && !WEAP2(weap, sub, true)) || WEAP(weap, max) <= 1) return;
-        const char *cliptexs[WEAP_MAX] = {
+        if(!isweap(weap) || (!W2(weap, sub, false) && !W2(weap, sub, true)) || W(weap, max) <= 1) return;
+        const char *cliptexs[W_MAX] = {
             progresstex, pistolcliptex, progresstex, shotguncliptex, smgcliptex,
             flamercliptex, plasmacliptex, riflecliptex, grenadecliptex, minecliptex, rocketcliptex, // end of regular weapons
         };
         if(!clipsizes[weap])
         {
-            WEAPSTR(clipmax, weap, max);
+            WSTR(clipmax, weap, max);
             clipsizes[weap] = getvardef(clipmax);
         }
-        int ammo = game::focus->ammo[weap], maxammo = WEAP(weap, max), weapid = weap;
+        int ammo = game::focus->ammo[weap], maxammo = W(weap, max), weapid = weap;
         if(clipsizes[weap] != maxammo) weapid = 0;
         Texture *t = textureload(cliptexs[weapid], 3);
         if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         else glBlendFunc(GL_ONE, GL_ONE);
 
-        const float clipskew[WEAP_MAX] = {
+        const float clipskew[W_MAX] = {
             1, pistolclipskew, 1, shotgunclipskew, smgclipskew,
             flamerclipskew, plasmaclipskew, rifleclipskew, grenadeclipskew, mineclipskew, rocketclipskew, // end of regular weapons
         };
@@ -784,14 +784,14 @@ namespace hud
         int interval = lastmillis-game::focus->weaplast[weap];
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
-            case WEAP_S_PRIMARY: case WEAP_S_SECONDARY:
+            case W_S_PRIMARY: case W_S_SECONDARY:
             {
                 float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
                 if(showclips >= 2) size *= amt;
                 break;
             }
-            case WEAP_S_RELOAD: case WEAP_S_USE:
+            case W_S_RELOAD: case W_S_USE:
             {
                 if(game::focus->weapload[weap] > 0)
                 {
@@ -811,32 +811,32 @@ namespace hud
                 }
                 // falls through
             }
-            case WEAP_S_SWITCH:
+            case W_S_SWITCH:
             {
                 float amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
-                if(showclips >= 2 && game::focus->weapstate[weap] != WEAP_S_RELOAD) size *= amt;
+                if(showclips >= 2 && game::focus->weapstate[weap] != W_S_RELOAD) size *= amt;
                 break;
             }
             default: break;
         }
         vec c(clipcolour, clipcolour, clipcolour);
-        if(clipcolour > 0) c.mul(vec::hexcolor(WEAP(weap, colour)));
+        if(clipcolour > 0) c.mul(vec::hexcolor(W(weap, colour)));
         else if(clipstone) skewcolour(c.r, c.g, c.b, clipstone);
         glColor4f(c.r, c.g, c.b, fade);
         glBindTexture(GL_TEXTURE_2D, t->id);
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
-            case WEAP_S_PRIMARY:
-            case WEAP_S_SECONDARY:
+            case W_S_PRIMARY:
+            case W_S_SECONDARY:
             {
                 int shot = game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1;
                 if(shot) switch(weapid)
                 {
-                    case WEAP_FLAMER: case WEAP_ROCKET: case WEAP_MINE:
+                    case W_FLAMER: case W_ROCKET: case W_MINE:
                         drawslice(ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
-                    case WEAP_GRENADE:
+                    case W_GRENADE:
                         drawslice(0.25f/maxammo+ammo/float(maxammo), shot/float(maxammo), x, y, size);
                         break;
                     default:
@@ -847,17 +847,17 @@ namespace hud
                 size = s*clipskew[weapid];
                 break;
             }
-            case WEAP_S_RELOAD: case WEAP_S_USE:
+            case W_S_RELOAD: case W_S_USE:
             {
                 if(game::focus->weapload[weap] > 0)
                 {
                     ammo -= game::focus->weapload[weap];
                     switch(weapid)
                     {
-                        case WEAP_FLAMER: case WEAP_ROCKET: case WEAP_MINE:
+                        case W_FLAMER: case W_ROCKET: case W_MINE:
                             drawslice(ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
-                        case WEAP_GRENADE:
+                        case W_GRENADE:
                             drawslice(0.25f/maxammo+ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
                             break;
                         default:
@@ -873,10 +873,10 @@ namespace hud
         }
         if(ammo > 0) switch(weapid)
         {
-            case WEAP_FLAMER: case WEAP_ROCKET: case WEAP_MINE:
+            case W_FLAMER: case W_ROCKET: case W_MINE:
                 drawslice(0, ammo/float(maxammo), x, y, size);
                 break;
-            case WEAP_GRENADE:
+            case W_GRENADE:
                 drawslice(0.25f/maxammo, ammo/float(maxammo), x, y, size);
                 break;
             default:
@@ -905,8 +905,8 @@ namespace hud
         vec c(1, 1, 1);
         if(game::focus->state == CS_ALIVE && index >= POINTER_HAIR)
         {
-            if(crosshairweapons&2) c = vec::hexcolor(WEAP(game::focus->weapselect, colour));
-            if(index == POINTER_ZOOM && game::inzoom() && WEAP(game::focus->weapselect, zooms))
+            if(crosshairweapons&2) c = vec::hexcolor(W(game::focus->weapselect, colour));
+            if(index == POINTER_ZOOM && game::inzoom() && W(game::focus->weapselect, zooms))
             {
                 int frame = lastmillis-game::lastzoom, off = int(zoomcrosshairsize*hudsize)-cs;
                 float amt = frame <= zoomtime ? clamp(float(frame)/float(zoomtime), 0.f, 1.f) : 1.f;
@@ -955,7 +955,7 @@ namespace hud
             index = POINTER_NONE;
         else if(game::focus->state == CS_EDITING) index = POINTER_EDIT;
         else if(game::focus->state >= CS_SPECTATOR) index = POINTER_SPEC;
-        else if(game::inzoom() && WEAP(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
+        else if(game::inzoom() && W(game::focus->weapselect, zooms)) index = POINTER_ZOOM;
         else if(m_isteam(game::gamemode, game::mutators))
         {
             vec pos = game::focus->headpos();
@@ -1150,7 +1150,7 @@ namespace hud
                                 if(enttype[e.type].usetype == EU_ITEM)
                                 {
                                     int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                                    if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_ALL))
+                                    if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_ALL))
                                     {
                                         if(e.type == WEAPON)
                                         {
@@ -1183,12 +1183,12 @@ namespace hud
                     if(shownotices >= 4)
                     {
                         pushfont("little");
-                        if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD)))
+                        if(target->canshoot(target->weapselect, 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<W_S_RELOAD)))
                         {
                             SEARCHBINDCACHE(attackkey)("action 0", 0);
                             ty += draw_textx("Press \fs\fc%s\fS to attack", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
                             SEARCHBINDCACHE(altkey)("action 1", 0);
-                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, WEAP(target->weapselect, zooms) ? "zoom" : "alt-attack");
+                            ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, altkey, W(target->weapselect, zooms) ? "zoom" : "alt-attack");
                         }
                         if(target->canreload(target->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
                         {
@@ -1701,7 +1701,7 @@ namespace hud
             {
                 int attr1 = w_attr(game::gamemode, attr[0], m_weapon(game::gamemode, game::mutators));
                 tex = itemtex(WEAPON, attr1);
-                colour = vec::hexcolor(WEAP(attr1, colour));
+                colour = vec::hexcolor(W(attr1, colour));
                 fade *= radaritemblend;
                 size = radaritemsize;
             }
@@ -2010,7 +2010,7 @@ namespace hud
 #endif
             case WEAPON:
             {
-                const char *weaptexs[WEAP_MAX] = {
+                const char *weaptexs[W_MAX] = {
                     meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
                 };
                 if(isweap(stype)) return weaptexs[stype];
@@ -2089,39 +2089,39 @@ namespace hud
         {
             if(inventoryammo)
             {
-                const char *hudtexs[WEAP_MAX] = {
+                const char *hudtexs[W_MAX] = {
                     meleetex, pistoltex, swordtex, shotguntex, smgtex, flamertex, plasmatex, rifletex, grenadetex, minetex, rockettex
                 };
                 int sweap = m_weapon(game::gamemode, game::mutators);
-                loopi(WEAP_MAX) if((i != WEAP_MELEE || sweap == WEAP_MELEE || game::focus->weapselect == WEAP_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
+                loopi(W_MAX) if((i != W_MELEE || sweap == W_MELEE || game::focus->weapselect == W_MELEE || !inventoryhidemelee) && game::focus->holdweap(i, sweap, lastmillis))
                 {
                     if(y-sy-s < m) break;
                     float size = s, skew = 0.f;
-                    if((game::focus->weapstate[i] == WEAP_S_SWITCH || game::focus->weapstate[i] == WEAP_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
+                    if((game::focus->weapstate[i] == W_S_SWITCH || game::focus->weapstate[i] == W_S_USE) && (i != game::focus->weapselect || i != game::focus->lastweap))
                     {
                         float amt = clamp(float(lastmillis-game::focus->weaplast[i])/float(game::focus->weapwait[i]), 0.f, 1.f);
                         if(i != game::focus->weapselect) skew = game::focus->hasweap(i, sweap) ? 1.f-(amt*(1.f-inventoryskew)) : 1.f-amt;
-                        else skew = game::focus->weapstate[i] == WEAP_S_USE ? amt : inventoryskew+(amt*(1.f-inventoryskew));
+                        else skew = game::focus->weapstate[i] == W_S_USE ? amt : inventoryskew+(amt*(1.f-inventoryskew));
                     }
                     else if(game::focus->hasweap(i, sweap) || i == game::focus->weapselect) skew = i != game::focus->weapselect ? inventoryskew : 1.f;
                     else continue;
                     vec c(1, 1, 1);
-                    if(inventorycolour) c.mul(vec::hexcolor(WEAP(i, colour)));
+                    if(inventorycolour) c.mul(vec::hexcolor(W(i, colour)));
                     else if(inventorytone) skewcolour(c.r, c.g, c.b, inventorytone);
                     int oldy = y-sy;
-                    if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
+                    if(inventoryammo >= 2 && (i == game::focus->weapselect || inventoryammo >= 3) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
                         sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew, "super", "%d", game::focus->ammo[i]);
                     else sy += drawitem(hudtexs[i], x, y-sy, size, 0, true, false, c.r, c.g, c.b, blend, skew);
-                    if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && WEAP(i, max) > 1 && game::focus->hasweap(i, sweap))
-                        drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, game::focus->ammo[i]/float(WEAP(i, max)));
+                    if(inventoryammobar && (i == game::focus->weapselect || inventoryammobar >= 2) && W(i, max) > 1 && game::focus->hasweap(i, sweap))
+                        drawitembar(x, oldy, size, false, c.r, c.g, c.b, blend, skew, game::focus->ammo[i]/float(W(i, max)));
                     if(inventoryweapids && (i == game::focus->weapselect || inventoryweapids >= 2))
                     {
-                        static string weapids[WEAP_MAX];
+                        static string weapids[W_MAX];
                         static int lastweapids = -1;
                         int n = weapons::slot(game::focus, i);
                         if(lastweapids != changedkeys)
                         {
-                            loopj(WEAP_MAX)
+                            loopj(W_MAX)
                             {
                                 defformatstring(action)("weapon %d", j);
                                 const char *actkey = searchbind(action, 0);
@@ -2130,7 +2130,7 @@ namespace hud
                             }
                             lastweapids = changedkeys;
                         }
-                        drawitemtext(x, oldy, size, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? WEAP(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
+                        drawitemtext(x, oldy, size, false, skew, "reduced", blend, "\f[%d]%s", inventorycolour >= 2 ? W(i, colour) : 0xAAAAAA, isweap(n) ? weapids[n] : "?");
                     }
                 }
             }
@@ -2553,7 +2553,7 @@ namespace hud
         if(!game::intermission)
         {
             bool third = game::thirdpersonview(true) && game::focus != game::player1;
-            if(game::focus->state == CS_ALIVE && game::inzoom() && WEAP(game::focus->weapselect, zooms)) drawzoom(w, h);
+            if(game::focus->state == CS_ALIVE && game::inzoom() && W(game::focus->weapselect, zooms)) drawzoom(w, h);
             if(showdamage && !third)
             {
                 if(burntime && game::focus->state == CS_ALIVE) drawfire(w, h, os, fade);
@@ -2694,7 +2694,7 @@ namespace hud
                         int size = int(FONTH*skew), width = int((t->w/float(t->h))*size);
                         switch(game::focus->icons[i].type)
                         {
-                            case eventicon::WEAPON: colour = WEAP(game::focus->icons[i].value, colour); break;
+                            case eventicon::WEAPON: colour = W(game::focus->icons[i].value, colour); break;
                             case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : TEAM(game::focus->icons[i].value, colour); break;
                             default: break;
                         }

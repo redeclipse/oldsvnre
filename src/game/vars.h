@@ -122,11 +122,11 @@ GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, us
 GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if numplayers >= this
 GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
 
-GVAR(0, maxcarry, 1, 2, WEAP_LOADOUT);
+GVAR(0, maxcarry, 1, 2, W_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
-GVAR(0, spawnweapon, 0, WEAP_PISTOL, WEAP_MAX-1);
-GVAR(0, instaweapon, 0, WEAP_RIFLE, WEAP_MAX-1);
-GVAR(0, trialweapon, 0, WEAP_MELEE, WEAP_MAX-1);
+GVAR(0, spawnweapon, 0, W_PISTOL, W_MAX-1);
+GVAR(0, instaweapon, 0, W_RIFLE, W_MAX-1);
+GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawnmines, 0, 2, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes

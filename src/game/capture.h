@@ -1,8 +1,8 @@
 #ifdef GAMESERVER
-#define capturedelay (m_gsp2(gamemode, mutators) ? GAME(capturedefenddelay) : GAME(captureresetdelay))
+#define capturedelay (m_gsp2(gamemode, mutators) ? G(capturedefenddelay) : G(captureresetdelay))
 #define capturestate captureservstate
 #else
-#define capturedelay (m_gsp2(game::gamemode, game::mutators) ? GAME(capturedefenddelay) : GAME(captureresetdelay))
+#define capturedelay (m_gsp2(game::gamemode, game::mutators) ? G(capturedefenddelay) : G(captureresetdelay))
 #endif
 struct capturestate
 {
