@@ -279,7 +279,7 @@ enum
 {
     N_CONNECT = 0, N_SERVERINIT, N_WELCOME, N_CLIENTINIT, N_POS, N_SPHY, N_TEXT, N_COMMAND, N_ANNOUNCE, N_DISCONNECT,
     N_SHOOT, N_DESTROY, N_STICKY, N_SUICIDE, N_DIED, N_POINTS, N_DAMAGE, N_SHOTFX,
-    N_LOADWEAP, N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_DROP, N_WEAPSELECT,
+    N_LOADW, N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_DROP, N_WSELECT,
     N_MAPCHANGE, N_MAPVOTE, N_CLEARVOTE, N_CHECKPOINT, N_ITEMSPAWN, N_ITEMUSE, N_TRIGGER, N_EXECLINK,
     N_PING, N_PONG, N_CLIENTPING, N_TICK, N_NEWGAME, N_ITEMACC, N_SERVMSG, N_GAMEINFO, N_RESUME,
     N_EDITMODE, N_EDITENT, N_EDITLINK, N_EDITVAR, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_REMIP, N_CLIPBOARD, N_NEWMAP,
@@ -305,8 +305,8 @@ char msgsizelookup(int msg)
         N_CONNECT, 0, N_SERVERINIT, 5, N_WELCOME, 1, N_CLIENTINIT, 0, N_POS, 0, N_SPHY, 0, N_TEXT, 0, N_COMMAND, 0,
         N_ANNOUNCE, 0, N_DISCONNECT, 3,
         N_SHOOT, 0, N_DESTROY, 0, N_STICKY, 0, N_SUICIDE, 3, N_DIED, 8, N_POINTS, 4, N_DAMAGE, 10, N_SHOTFX, 0,
-        N_LOADWEAP, 0, N_TRYSPAWN, 2, N_SPAWNSTATE, 0, N_SPAWN, 0,
-        N_DROP, 0, N_WEAPSELECT, 0,
+        N_LOADW, 0, N_TRYSPAWN, 2, N_SPAWNSTATE, 0, N_SPAWN, 0,
+        N_DROP, 0, N_WSELECT, 0,
         N_MAPCHANGE, 0, N_MAPVOTE, 0, N_CLEARVOTE, 0, N_CHECKPOINT, 0, N_ITEMSPAWN, 3, N_ITEMUSE, 0, N_TRIGGER, 0, N_EXECLINK, 3,
         N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
         N_TICK, 2, N_NEWGAME, 1, N_ITEMACC, 0,
@@ -451,7 +451,7 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
                 if(changed) break;
                 if(muts&(1<<mutstype[i].type))
                 {
-                    int mutators = i != G_M_INSTA ? mutstype[i].mutators : GAME(instagibfilter);
+                    int mutators = i != G_M_INSTA ? mutstype[i].mutators : G(instagibfilter);
                     loopj(G_M_NUM)
                     {
                         if(mutators && !(mutators&(1<<mutstype[j].type)) && (muts&(1<<mutstype[j].type)))
@@ -489,15 +489,15 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, ammo[WEAP_MAX], entid[WEAP_MAX], reloads[WEAP_MAX], colour, model;
-    int lastweap, weapselect, weapload[WEAP_MAX], weapshot[WEAP_MAX], weapstate[WEAP_MAX], weapwait[WEAP_MAX], weaplast[WEAP_MAX];
+    int health, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
+    int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime, lastbuff;
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 #ifdef MEKARCADE
     int armour;
 #endif
     vector<int> loadweap;
-    gamestate() : colour(0), model(0), weapselect(WEAP_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
+    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loadweap.shrink(0);
@@ -514,8 +514,8 @@ struct gamestate
                 case 1: if(w_carry(weap, sweap)) return true; break; // only carriable
                 case 2: if(ammo[weap] > 0) return true; break; // only with actual ammo
                 case 3: if(ammo[weap] > 0 && canreload(weap, sweap)) return true; break; // only reloadable with actual ammo
-                case 4: if(ammo[weap] >= (canreload(weap, sweap) ? 0 : WEAP(weap, max))) return true; break; // only reloadable or those with < max
-                case 5: if(w_carry(weap, sweap) || (!canreload(weap, sweap) && weap >= WEAP_OFFSET)) return true; break; // special case for usable weapons
+                case 4: if(ammo[weap] >= (canreload(weap, sweap) ? 0 : W(weap, max))) return true; break; // only reloadable or those with < max
+                case 5: if(w_carry(weap, sweap) || (!canreload(weap, sweap) && weap >= W_OFFSET)) return true; break; // special case for usable weapons
             }
         }
         return false;
@@ -529,16 +529,16 @@ struct gamestate
     int bestweap(int sweap, bool last = false)
     {
         if(last && hasweap(lastweap, sweap)) return lastweap;
-        loopirev(WEAP_MAX) if(hasweap(i, sweap, 3)) return i; // reloadable first
-        loopirev(WEAP_MAX) if(hasweap(i, sweap, 1)) return i; // carriable second
-        loopirev(WEAP_MAX) if(hasweap(i, sweap, 0)) return i; // any just to bail us out
+        loopirev(W_MAX) if(hasweap(i, sweap, 3)) return i; // reloadable first
+        loopirev(W_MAX) if(hasweap(i, sweap, 1)) return i; // carriable second
+        loopirev(W_MAX) if(hasweap(i, sweap, 0)) return i; // any just to bail us out
         return weapselect;
     }
 
     int carry(int sweap, int level = 1, int exclude = -1)
     {
         int carry = 0;
-        loopi(WEAP_MAX) if(hasweap(i, sweap, level, exclude)) carry++;
+        loopi(W_MAX) if(hasweap(i, sweap, level, exclude)) carry++;
         return carry;
     }
 
@@ -546,15 +546,15 @@ struct gamestate
     {
         if(hasweap(weapselect, sweap, 1)) return weapselect;
         if(hasweap(lastweap, sweap, 1)) return lastweap;
-        loopi(WEAP_MAX) if(hasweap(i, sweap, 1)) return i;
+        loopi(W_MAX) if(hasweap(i, sweap, 1)) return i;
         return -1;
     }
 
     void weapreset(bool full = false)
     {
-        loopi(WEAP_MAX)
+        loopi(W_MAX)
         {
-            weapstate[i] = WEAP_S_IDLE;
+            weapstate[i] = W_S_IDLE;
             weapwait[i] = weaplast[i] = weapload[i] = weapshot[i] = 0;
             if(full) ammo[i] = entid[i] = reloads[i] = -1;
         }
@@ -567,12 +567,12 @@ struct gamestate
         weaplast[weap] = millis;
     }
 
-    void weapswitch(int weap, int millis, int delay = 0, int state = WEAP_S_SWITCH)
+    void weapswitch(int weap, int millis, int delay = 0, int state = W_S_SWITCH)
     {
         if(isweap(weap))
         {
             lastweap = weapselect;
-            setweapstate(lastweap, WEAP_S_SWITCH, delay, millis);
+            setweapstate(lastweap, W_S_SWITCH, delay, millis);
             weapselect = weap;
             setweapstate(weap, state, delay, millis);
         }
@@ -580,43 +580,43 @@ struct gamestate
 
     bool weapwaited(int weap, int millis, int skip = 0)
     {
-        if(!weapwait[weap] || weapstate[weap] == WEAP_S_IDLE || weapstate[weap] == WEAP_S_POWER || (skip && skip&(1<<weapstate[weap]))) return true;
+        if(!weapwait[weap] || weapstate[weap] == W_S_IDLE || weapstate[weap] == W_S_POWER || (skip && skip&(1<<weapstate[weap]))) return true;
         return millis-weaplast[weap] >= weapwait[weap];
     }
 
     int skipwait(int weap, int flags, int millis, int skip = 0)
     {
         int skipstate = skip;
-        if(WEAP2(weap, sub, flags&HIT_ALT) && (skip&(1<<WEAP_S_RELOAD)) && weapstate[weap] == WEAP_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < WEAP2(weap, sub, flags&HIT_ALT))
-            skipstate &= ~(1<<WEAP_S_RELOAD);
+        if(W2(weap, sub, flags&HIT_ALT) && (skip&(1<<W_S_RELOAD)) && weapstate[weap] == W_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < W2(weap, sub, flags&HIT_ALT))
+            skipstate &= ~(1<<W_S_RELOAD);
         return skipstate;
     }
 
     bool candrop(int weap, int sweap, int millis, int skip = 0)
     {
-        if(weapwaited(weapselect, millis, skip) && weap >= WEAP_OFFSET && hasweap(weap, sweap) && weapwaited(weap, millis, skip) && (isweap(sweap) ? weap != sweap : weap >= 0-sweap))
+        if(weapwaited(weapselect, millis, skip) && weap >= W_OFFSET && hasweap(weap, sweap) && weapwaited(weap, millis, skip) && (isweap(sweap) ? weap != sweap : weap >= 0-sweap))
             return true;
         return false;
     }
 
     bool canswitch(int weap, int sweap, int millis, int skip = 0)
     {
-        if((aitype >= AI_START || weap != WEAP_MELEE || sweap == WEAP_MELEE || weapselect == WEAP_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skip) && hasweap(weap, sweap) && weapwaited(weap, millis, skip))
+        if((aitype >= AI_START || weap != W_MELEE || sweap == W_MELEE || weapselect == W_MELEE) && weap != weapselect && weapwaited(weapselect, millis, skip) && hasweap(weap, sweap) && weapwaited(weap, millis, skip))
             return true;
         return false;
     }
 
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
-        if(weap == weapselect || (weap == WEAP_MELEE && (flags&HIT_ALT || weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip)))))
-            if((hasweap(weap, sweap) && ammo[weap] >= (WEAP2(weap, power, flags&HIT_ALT) ? 1 : WEAP2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
+        if(weap == weapselect || (weap == W_MELEE && (flags&HIT_ALT || weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip)))))
+            if((hasweap(weap, sweap) && ammo[weap] >= (W2(weap, power, flags&HIT_ALT) ? 1 : W2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
                 return true;
         return false;
     }
 
     bool canreload(int weap, int sweap, bool check = true, int millis = 0, int skip = 0)
     {
-        if(check || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < WEAP(weap, max) && weapwaited(weap, millis, skip)))
+        if(check || (weap == weapselect && hasweap(weap, sweap) && ammo[weap] < W(weap, max) && weapwaited(weap, millis, skip)))
         {
             int n = w_reload(weap, sweap);
             switch(n)
@@ -662,9 +662,9 @@ struct gamestate
             case TRIGGER: break;
             case WEAPON:
             {
-                int prev = ammo[attr], ammoval = ammoamt >= 0 ? ammoamt : WEAPUSE(attr);
-                weapswitch(attr, millis, delay, WEAP_S_USE);
-                ammo[attr] = clamp(max(ammo[attr], 0)+ammoval, 0, WEAP(attr, max));
+                int prev = ammo[attr], ammoval = ammoamt >= 0 ? ammoamt : WUSE(attr);
+                weapswitch(attr, millis, delay, W_S_USE);
+                ammo[attr] = clamp(max(ammo[attr], 0)+ammoval, 0, W(attr, max));
                 weapload[attr] = ammo[attr]-prev;
                 reloads[attr] = reloadamt >= 0 ? reloadamt : 0;
                 entid[attr] = id;
@@ -724,10 +724,10 @@ struct gamestate
 #endif
     {
         weapreset(true);
-        if(!isweap(sweap)) sweap = aitype >= AI_START ? WEAP_MELEE : (isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : WEAP_PISTOL);
+        if(!isweap(sweap)) sweap = aitype >= AI_START ? W_MELEE : (isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL);
         if(isweap(sweap))
         {
-            ammo[sweap] = max(WEAPUSE(sweap), 1);
+            ammo[sweap] = max(WUSE(sweap), 1);
             reloads[sweap] = 0;
         }
         if(aitype >= AI_START)
@@ -738,45 +738,45 @@ struct gamestate
         else
         {
 #ifndef MEKARCADE
-            if(sweap != WEAP_MELEE)
+            if(sweap != W_MELEE)
             {
-                ammo[WEAP_MELEE] = WEAP(WEAP_MELEE, max);
-                reloads[WEAP_MELEE] = 0;
+                ammo[W_MELEE] = W(W_MELEE, max);
+                reloads[W_MELEE] = 0;
             }
 #endif
-            if(GAME(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != WEAP_GRENADE)
+            if(G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != W_GRENADE)
             {
-                ammo[WEAP_GRENADE] = max(WEAP(WEAP_GRENADE, max), 1);
-                reloads[WEAP_GRENADE] = 0;
+                ammo[W_GRENADE] = max(W(W_GRENADE, max), 1);
+                reloads[W_GRENADE] = 0;
             }
-            if(GAME(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != WEAP_MINE)
+            if(G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != W_MINE)
             {
-                ammo[WEAP_MINE] = max(WEAP(WEAP_MINE, max), 1);
-                reloads[WEAP_MINE] = 0;
+                ammo[W_MINE] = max(W(W_MINE, max), 1);
+                reloads[W_MINE] = 0;
             }
             if(m_arena(gamemode, mutators))
             {
                 vector<int> aweap;
-                loopj(GAME(maxcarry))
+                loopj(G(maxcarry))
                 {
                     if(!loadweap.inrange(j)) aweap.add(0);
-                    else if(loadweap[j] < WEAP_OFFSET || loadweap[j] >= WEAP_ITEM || hasweap(loadweap[j], sweap))
+                    else if(loadweap[j] < W_OFFSET || loadweap[j] >= W_ITEM || hasweap(loadweap[j], sweap))
                     {
-                        int r = rnd(WEAP_ITEM-WEAP_OFFSET)+WEAP_OFFSET; // random
+                        int r = rnd(W_ITEM-W_OFFSET)+W_OFFSET; // random
                         int iters = 0;
-                        while(hasweap(r, sweap) || WEAP(r, allowed) <= (m_duke(gamemode, mutators) ? 1 : 0))
+                        while(hasweap(r, sweap) || W(r, allowed) <= (m_duke(gamemode, mutators) ? 1 : 0))
                         {
-                            if(++iters > WEAP_MAX)
+                            if(++iters > W_MAX)
                             {
                                 r = 0;
                                 break;
                             }
-                            if(++r >= WEAP_ITEM) r = WEAP_OFFSET;
+                            if(++r >= W_ITEM) r = W_OFFSET;
                         }
                         aweap.add(r);
                     }
                     else aweap.add(loadweap[j]);
-                    ammo[aweap[j]] = max(WEAPUSE(aweap[j]), 1);
+                    ammo[aweap[j]] = max(WUSE(aweap[j]), 1);
                     reloads[aweap[j]] = 0;
                 }
                 lastweap = weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
@@ -1146,10 +1146,10 @@ struct gameent : dynent, gamestate
         if(muzzle == vec(-1, -1, -1))
         {
             if(!isweap(weap)) weap = weapselect;
-            if(weap == WEAP_SWORD && ((weapstate[weap] == WEAP_S_PRIMARY) || (weapstate[weap] == WEAP_S_SECONDARY)))
+            if(weap == W_SWORD && ((weapstate[weap] == W_S_PRIMARY) || (weapstate[weap] == W_S_SECONDARY)))
             {
                 float frac = (lastmillis-weaplast[weap])/float(weapwait[weap]), yx = yaw, px = pitch;
-                if(weapstate[weap] == WEAP_S_PRIMARY)
+                if(weapstate[weap] == W_S_PRIMARY)
                 {
                     yx -= 90;
                     yx += frac*180;
@@ -1179,8 +1179,8 @@ struct gameent : dynent, gamestate
 
     vec muzzlepos(int weap = -1, bool secondary = false)
     {
-        if(isweap(weap) && weap != WEAP_MELEE) return checkmuzzlepos(weap);
-        return originpos(weap == WEAP_MELEE, secondary);
+        if(isweap(weap) && weap != W_MELEE) return checkmuzzlepos(weap);
+        return originpos(weap == W_MELEE, secondary);
     }
 
     vec checkejectpos()
@@ -1191,7 +1191,7 @@ struct gameent : dynent, gamestate
 
     vec ejectpos(int weap = -1)
     {
-        if(isweap(weap) && weap != WEAP_MELEE) return checkejectpos();
+        if(isweap(weap) && weap != W_MELEE) return checkejectpos();
         return muzzlepos();
     }
 
@@ -1355,14 +1355,14 @@ struct gameent : dynent, gamestate
     bool hasmelee(int millis, bool check = false, bool slide = false, bool onfloor = true, bool can = true)
     {
         if(check && (!action[AC_SPECIAL] || onfloor) && !slide) return false;
-        if(can && (weapstate[WEAP_MELEE] != WEAP_S_SECONDARY || millis-weaplast[WEAP_MELEE] >= weapwait[WEAP_MELEE])) return false;
+        if(can && (weapstate[W_MELEE] != W_S_SECONDARY || millis-weaplast[W_MELEE] >= weapwait[W_MELEE])) return false;
         return true;
     }
 
     bool canmelee(int sweap, int millis, bool check = false, bool slide = false, bool onfloor = true)
     {
         if(!hasmelee(millis, check, slide, onfloor, false)) return false;
-        if(!canshoot(WEAP_MELEE, HIT_ALT, sweap, millis, (1<<WEAP_S_RELOAD))) return false;
+        if(!canshoot(W_MELEE, HIT_ALT, sweap, millis, (1<<W_S_RELOAD))) return false;
         return true;
     }
 };
@@ -1518,7 +1518,7 @@ namespace weapons
 {
     extern int autoreloading;
     extern int slot(gameent *d, int n, bool back = false);
-    extern bool weapselect(gameent *d, int weap, bool local = true, int filter = WEAP_S_FILTER);
+    extern bool weapselect(gameent *d, int weap, bool local = true, int filter = W_S_FILTER);
     extern bool weapreload(gameent *d, int weap, int load = -1, int ammo = -1, int reloads = -1, bool local = true);
     extern void weapdrop(gameent *d, int w = -1);
     extern void checkweapons(gameent *d);

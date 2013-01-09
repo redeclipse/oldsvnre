@@ -7,7 +7,7 @@ namespace ai
 
     VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
-    VAR(0, aiforcegun, -1, -1, WEAP_MAX-1);
+    VAR(0, aiforcegun, -1, -1, W_MAX-1);
 #ifdef MEKARCADE
     VAR(0, aicampaign, 0, 0, 1);
 #endif
@@ -50,17 +50,17 @@ namespace ai
 
     float weapmindist(int weap, bool alt)
     {
-        return WEAPS(weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0 && WEAP2(weap, collide, alt)&COLLIDE_OWNER ? WEAPS(weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
+        return WS(weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0 && W2(weap, collide, alt)&COLLIDE_OWNER ? WS(weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
     }
 
     float weapmaxdist(int weap, bool alt)
     {
-        return WEAP2(weap, aidist, alt) ? WEAP2(weap, aidist, alt) : hdr.worldsize;
+        return W2(weap, aidist, alt) ? W2(weap, aidist, alt) : hdr.worldsize;
     }
 
     bool weaprange(gameent *d, int weap, bool alt, float dist)
     {
-        if(!isweap(weap) || (WEAP2(weap, extinguish, alt) && d->inliquid)) return false;
+        if(!isweap(weap) || (W2(weap, extinguish, alt) && d->inliquid)) return false;
         float mindist = weapmindist(weap, alt), maxdist = weapmaxdist(weap, alt);
         return dist >= mindist*mindist && dist <= maxdist*maxdist;
     }
@@ -94,28 +94,28 @@ namespace ai
         {
             int prot = m_protect(game::gamemode, game::mutators);
             if((d->aitype >= AI_START || !d->protect(lastmillis, prot)) && targetable(d, e, true))
-                return d->canshoot(d->weapselect, alt ? HIT_ALT : 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<WEAP_S_RELOAD));
+                return d->canshoot(d->weapselect, alt ? HIT_ALT : 0, m_weapon(game::gamemode, game::mutators), lastmillis, (1<<W_S_RELOAD));
         }
         return false;
     }
 
     bool altfire(gameent *d, gameent *e)
     {
-        if(e && !WEAP(d->weapselect, zooms) && canshoot(d, e, true))
+        if(e && !W(d->weapselect, zooms) && canshoot(d, e, true))
         {
-            if(d->weapstate[d->weapselect] == WEAP_S_POWER)
+            if(d->weapstate[d->weapselect] == W_S_POWER)
             {
                 if(d->action[AC_ALTERNATE] && (!d->action[AC_ATTACK] || d->actiontime[AC_ALTERNATE] > d->actiontime[AC_ATTACK]))
                     return true;
             }
             switch(d->weapselect)
             {
-                case WEAP_PISTOL: return true; break;
-                case WEAP_MELEE: case WEAP_ROCKET: default: return false; break;
-                case WEAP_SWORD: case WEAP_SHOTGUN: case WEAP_SMG: case WEAP_PLASMA: case WEAP_GRENADE: case WEAP_MINE:
+                case W_PISTOL: return true; break;
+                case W_MELEE: case W_ROCKET: default: return false; break;
+                case W_SWORD: case W_SHOTGUN: case W_SMG: case W_PLASMA: case W_GRENADE: case W_MINE:
                     if(rnd(d->skill*3) <= d->skill) return false;
                     break;
-                case WEAP_RIFLE: if(weaprange(d, d->weapselect, false, e->o.squaredist(d->o))) return false; break;
+                case W_RIFLE: if(weaprange(d, d->weapselect, false, e->o.squaredist(d->o))) return false; break;
             }
             return true;
         }
@@ -127,7 +127,7 @@ namespace ai
         if(weaprange(d, d->weapselect, alt, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
             if(weaptype[d->weapselect].melee) return true;
-            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*WEAP(d->weapselect, rdelay)/5000.f)+(d->skill*WEAP2(d->weapselect, adelay, alt)/500.f)), 0.f, d->weapselect >= WEAP_ITEM ? 0.25f : 1e16f),
+            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*W(d->weapselect, rdelay)/5000.f)+(d->skill*W2(d->weapselect, adelay, alt)/500.f)), 0.f, d->weapselect >= W_ITEM ? 0.25f : 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
             if(offy > 180) offy -= 360;
             else if(offy < -180) offy += 360;
@@ -139,12 +139,12 @@ namespace ai
     vec getaimpos(gameent *d, gameent *e, bool alt)
     {
         vec o = e->headpos();
-        //if(WEAP2(d->weapselect, radial, alt)) o.z -= e->height;
+        //if(W2(d->weapselect, radial, alt)) o.z -= e->height;
         if(d->skill <= 100)
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                #define rndaioffset(r) ((rnd(int(r*WEAP2(d->weapselect, aiskew, alt)*2)+1)-(r*WEAP2(d->weapselect, aiskew, alt)))/float(max(d->skill, 1)))
+                #define rndaioffset(r) ((rnd(int(r*W2(d->weapselect, aiskew, alt)*2)+1)-(r*W2(d->weapselect, aiskew, alt)))/float(max(d->skill, 1)))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
                 int dur = (d->skill+10)*10;
                 d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
@@ -159,7 +159,7 @@ namespace ai
         if(!isweap(weap)) return false;
         if(w_carry(weap, m_weapon(game::gamemode, game::mutators)))
             return d->hasweap(weap, m_weapon(game::gamemode, game::mutators));
-        return d->ammo[weap] >= WEAP(weap, max);
+        return d->ammo[weap] >= W(weap, max);
     }
 
     bool wantsweap(gameent *d, int weap)
@@ -641,13 +641,13 @@ namespace ai
                 if(entities::ents.inrange(d->aientity) && entities::ents[d->aientity]->type == ACTOR && entities::ents[d->aientity]->attrs[6] > 0)
                     d->ai->weappref = entities::ents[d->aientity]->attrs[6]-1;
                 else d->ai->weappref = aistyle[d->aitype].weap;
-                if(!isweap(d->ai->weappref)) d->ai->weappref = rnd(WEAP_MAX);
+                if(!isweap(d->ai->weappref)) d->ai->weappref = rnd(W_MAX);
             }
             else
             {
                 if(m_limited(game::gamemode, game::mutators)) d->ai->weappref = m_weapon(game::gamemode, game::mutators);
-                else if(aiforcegun >= 0 && aiforcegun < WEAP_MAX) d->ai->weappref = aiforcegun;
-                else d->ai->weappref = rnd(WEAP_LOADOUT)+WEAP_OFFSET;
+                else if(aiforcegun >= 0 && aiforcegun < W_MAX) d->ai->weappref = aiforcegun;
+                else d->ai->weappref = rnd(W_LOADOUT)+W_OFFSET;
             }
             vec dp = d->headpos();
             findorientation(dp, d->yaw, d->pitch, d->ai->target);
@@ -1155,7 +1155,7 @@ namespace ai
                 game::getyawpitch(dp, ep, yaw, pitch);
                 game::fixrange(yaw, pitch);
                 bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
-                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (WEAP2(d->weapselect, fullauto, alt) ? WEAP2(d->weapselect, adelay, alt)*3 : skmod)+30;
+                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, adelay, alt)*3 : skmod)+30;
                 if(insight) d->ai->enemyseen = lastmillis;
                 if(idle || insight || hasseen || quick)
                 {
@@ -1171,9 +1171,9 @@ namespace ai
                     if(insight || quick)
                     {
                         bool shoot = canshoot(d, e, alt);
-                        if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && WEAP2(d->weapselect, power, alt) && WEAP2(d->weapselect, cooked, alt))
+                        if(d->action[alt ? AC_ALTERNATE : AC_ATTACK] && W2(d->weapselect, power, alt) && W2(d->weapselect, cooked, alt))
                         { // TODO: make AI more aware of what they're shooting
-                            int cooked = WEAP2(d->weapselect, cooked, alt);
+                            int cooked = W2(d->weapselect, cooked, alt);
                             if(cooked&8) shoot = false; // inverted life
                         }
                         if(shoot && hastarget(d, b, e, alt, yaw, pitch, dp.squaredist(ep)))
@@ -1282,15 +1282,15 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         int busy = process(d, b), sweap = m_weapon(game::gamemode, game::mutators);
-        bool haswaited = d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<WEAP_S_RELOAD)));
+        bool haswaited = d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<W_S_RELOAD)));
         if(d->aitype == AI_BOT)
         {
-            if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != WEAP_S_WAIT)
+            if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != W_S_WAIT)
             {
-                loopirev(WEAP_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, WEAP_S_FILTER))
+                loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, W_S_FILTER))
                 {
                     client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, i);
-                    d->setweapstate(d->weapselect, WEAP_S_WAIT, weaponswitchdelay, lastmillis);
+                    d->setweapstate(d->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
                     d->ai->lastaction = lastmillis;
                     return true;
                 }
@@ -1331,7 +1331,7 @@ namespace ai
                         {
                             extentity &e = *entities::ents[ent];
                             int attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, WEAP_S_FILTER)) switch(e.type)
+                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_FILTER)) switch(e.type)
                             {
                                 case WEAPON:
                                 {
@@ -1349,14 +1349,14 @@ namespace ai
             }
         }
 
-        bool timepassed = d->weapstate[d->weapselect] == WEAP_S_IDLE && (!d->ammo[d->weapselect] || lastmillis-d->weaplast[d->weapselect] >= max(6000-(d->skill*50), weaponswitchdelay));
+        bool timepassed = d->weapstate[d->weapselect] == W_S_IDLE && (!d->ammo[d->weapselect] || lastmillis-d->weaplast[d->weapselect] >= max(6000-(d->skill*50), weaponswitchdelay));
         if(busy <= 2 && haswaited && timepassed)
         {
             int weap = d->ai->weappref;
             gameent *e = game::getclient(d->ai->enemy);
             if(!isweap(weap) || !d->hasweap(weap, sweap) || !hasrange(d, e, weap))
             {
-                loopirev(WEAP_MAX) if(i >= WEAP_MELEE && d->hasweap(i, sweap) && hasrange(d, e, i)) { weap = i; break; }
+                loopirev(W_MAX) if(i >= W_MELEE && d->hasweap(i, sweap) && hasrange(d, e, i)) { weap = i; break; }
             }
             if(isweap(weap) && weap != d->weapselect && weapons::weapselect(d, weap))
             {
@@ -1523,7 +1523,7 @@ namespace ai
             projent *p = projs::projs[i];
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT)
             {
-                float expl = WEAPS(p->weap, explode, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale);
+                float expl = WS(p->weap, explode, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale);
                 if(expl > 0) obstacles.avoidnear(p, p->o.z + expl, p->o, guessradius + expl);
             }
         }
@@ -1566,7 +1566,7 @@ namespace ai
                         d->loadweap.shrink(0);
                         d->loadweap.add(d->ai->weappref);
                         if(maxcarry > 1) loopj(maxcarry-1) d->loadweap.add(0);
-                        client::addmsg(N_LOADWEAP, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
+                        client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
                     }
                     client::addmsg(N_TRYSPAWN, "ri", d->clientnum);
                     d->respawned = lastmillis;
@@ -1683,7 +1683,7 @@ namespace ai
                 {
                     if(isweap(d->ai->weappref))
                     {
-                        part_textcopy(pos, WEAP(d->ai->weappref, name));
+                        part_textcopy(pos, W(d->ai->weappref, name));
                         pos.z += 2;
                     }
                     gameent *e = game::getclient(d->ai->enemy);

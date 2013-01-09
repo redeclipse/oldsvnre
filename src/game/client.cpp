@@ -1296,16 +1296,16 @@ namespace client
         {
             d->weapreset(false);
             getint(p);
-            loopi(WEAP_MAX) getint(p);
-            loopi(WEAP_MAX) getint(p);
+            loopi(W_MAX) getint(p);
+            loopi(W_MAX) getint(p);
         }
         else
         {
             d->weapreset(true);
             int weap = getint(p);
-            d->lastweap = d->weapselect = isweap(weap) ? weap : WEAP_MELEE;
-            loopi(WEAP_MAX) d->ammo[i] = getint(p);
-            loopi(WEAP_MAX) d->reloads[i] = getint(p);
+            d->lastweap = d->weapselect = isweap(weap) ? weap : W_MELEE;
+            loopi(W_MAX) d->ammo[i] = getint(p);
+            loopi(W_MAX) d->reloads[i] = getint(p);
         }
     }
 
@@ -1503,7 +1503,7 @@ namespace client
                             game::impulseeffect(t);
                             break;
                         }
-                        case SPHY_POWER: t->setweapstate(t->weapselect, WEAP_S_POWER, param, lastmillis); break;
+                        case SPHY_POWER: t->setweapstate(t->weapselect, W_S_POWER, param, lastmillis); break;
                         case SPHY_EXTINGUISH:
                         {
                             t->resetburning();
@@ -1671,7 +1671,7 @@ namespace client
                     break;
                 }
 
-                case N_LOADWEAP:
+                case N_LOADW:
                 {
                     hud::showscores(false);
                     game::player1->loadweap.shrink(0);
@@ -1726,10 +1726,10 @@ namespace client
                     if(!t || !isweap(weap) || t == game::player1 || t->ai) break;
                     if(weap != t->weapselect) t->weapswitch(weap, lastmillis);
                     float scale = 1;
-                    int sub = WEAP2(weap, sub, flags&HIT_ALT);
-                    if(WEAP2(weap, power, flags&HIT_ALT))
+                    int sub = W2(weap, sub, flags&HIT_ALT);
+                    if(W2(weap, power, flags&HIT_ALT))
                     {
-                        scale = len/float(WEAP2(weap, power, flags&HIT_ALT));
+                        scale = len/float(W2(weap, power, flags&HIT_ALT));
                         if(sub > 1) sub = int(ceilf(sub*scale));
                     }
                     projs::shootv(weap, flags, sub, scale, from, shots, t, false);
@@ -1858,12 +1858,12 @@ namespace client
                     if(isweap(weap) && target)
                     {
                         target->weapswitch(weap, lastmillis, weaponswitchdelay);
-                        playsound(WEAPSND(weap, S_W_SWITCH), target->o, target, 0, -1, -1, -1, &target->wschan);
+                        playsound(WSND(weap, S_W_SWITCH), target->o, target, 0, -1, -1, -1, &target->wschan);
                     }
                     break;
                 }
 
-                case N_WEAPSELECT:
+                case N_WSELECT:
                 {
                     int trg = getint(p), weap = getint(p);
                     gameent *target = game::getclient(trg);
@@ -1896,8 +1896,8 @@ namespace client
                     if(e.spawned)
                     {
                         int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
-                            colour = e.type == WEAPON ? WEAP(attr, colour) : 0xFFFFFF;
-                        playsound(e.type == WEAPON && attr >= WEAP_OFFSET ? WEAPSND(attr, S_W_SPAWN) : S_ITEMSPAWN, e.o);
+                            colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF;
+                        playsound(e.type == WEAPON && attr >= W_OFFSET ? WSND(attr, S_W_SPAWN) : S_ITEMSPAWN, e.o);
                         if(entities::showentdescs)
                         {
                             vec pos = vec(e.o).add(vec(0, 0, 4));

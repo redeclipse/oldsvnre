@@ -62,7 +62,7 @@ struct defendservmode : defendstate, servmode
     void update()
     {
         endcheck();
-        int t = (gamemillis/GAME(defendinterval))-((gamemillis-(curtime+scoresec))/GAME(defendinterval));
+        int t = (gamemillis/G(defendinterval))-((gamemillis-(curtime+scoresec))/G(defendinterval));
         if(t < 1) { scoresec += curtime; return; }
         else scoresec = 0;
         loopv(flags)
@@ -72,8 +72,8 @@ struct defendservmode : defendstate, servmode
             {
                 if(!b.owners || !b.enemies)
                 {
-                    int pts = b.occupy(b.enemy, GAME(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, defendcount, defendinstant);
-                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], GAME(defendpoints));
+                    int pts = b.occupy(b.enemy, G(defendpoints)*(b.enemies ? b.enemies : -(1+b.owners))*t, defendcount, defendinstant);
+                    if(pts > 0) loopvk(clients) if(clients[k]->state.aitype < AI_START && b.owner == clients[k]->team && insideaffinity(b, clients[k]->state.o)) givepoints(clients[k], G(defendpoints));
                 }
                 sendaffinity(i);
             }
@@ -82,7 +82,7 @@ struct defendservmode : defendstate, servmode
                 if(!m_gsp3(gamemode, mutators) || b.owners)
                 {
                     b.securetime += t;
-                    int score = b.securetime/GAME(defendinterval) - (b.securetime-t)/GAME(defendinterval);
+                    int score = b.securetime/G(defendinterval) - (b.securetime-t)/G(defendinterval);
                     if(score) addscore(i, b.owner, score);
                 }
                 sendaffinity(i);
@@ -138,7 +138,7 @@ struct defendservmode : defendstate, servmode
 
     void endcheck()
     {
-        int maxscore = GAME(defendlimit) ? GAME(defendlimit) : INT_MAX-1;
+        int maxscore = G(defendlimit) ? G(defendlimit) : INT_MAX-1;
         loopi(numteams(gamemode, mutators))
         {
             int steam = i+TEAM_FIRST;
@@ -213,29 +213,29 @@ struct defendservmode : defendstate, servmode
 
     void regen(clientinfo *ci, int &total, int &amt, int &delay)
     {
-        if(!hasflaginfo || !GAME(defendregenbuff) || !ci->state.lastbuff) return;
-        if(GAME(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
-        if(ci->state.lastregen && GAME(defendregendelay)) delay = GAME(defendregendelay);
-        if(GAME(defendregenextra)) amt += GAME(defendregenextra);
+        if(!hasflaginfo || !G(defendregenbuff) || !ci->state.lastbuff) return;
+        if(G(maxhealth)) total = max(m_maxhealth(gamemode, mutators, ci->state.model), total);
+        if(ci->state.lastregen && G(defendregendelay)) delay = G(defendregendelay);
+        if(G(defendregenextra)) amt += G(defendregenextra);
     }
 
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define defendbuff4 (GAME(defendbuffing)&4 && b.occupied(defendinstant, defendcount >= GAME(defendbuffoccupy)))
-        #define defendbuff1 (GAME(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
-        #define defendbuff2 (GAME(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && (b.enemy == ci->team || defendbuff4))
-        if(GAME(defendbuffing)) loopv(flags)
+        #define defendbuff4 (G(defendbuffing)&4 && b.occupied(defendinstant, defendcount >= G(defendbuffoccupy)))
+        #define defendbuff1 (G(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
+        #define defendbuff2 (G(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && (b.enemy == ci->team || defendbuff4))
+        if(G(defendbuffing)) loopv(flags)
         {
             flag &b = flags[i];
-            if((defendbuff1 || defendbuff2) && insideaffinity(b, ci->state.o, GAME(defendbuffarea)))
+            if((defendbuff1 || defendbuff2) && insideaffinity(b, ci->state.o, G(defendbuffarea)))
             {
                 if(!ci->state.lastbuff) sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 1);
                 ci->state.lastbuff = gamemillis;
                 return;
             }
         }
-        if(ci->state.lastbuff && (!GAME(defendbuffing) || gamemillis-ci->state.lastbuff > GAME(defendbuffdelay)))
+        if(ci->state.lastbuff && (!G(defendbuffing) || gamemillis-ci->state.lastbuff > G(defendbuffdelay)))
         {
             ci->state.lastbuff = 0;
             sendf(-1, 1, "ri4", N_SPHY, ci->clientnum, SPHY_BUFF, 0);

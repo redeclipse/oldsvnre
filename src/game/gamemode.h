@@ -291,22 +291,22 @@ extern mutstypes mutstype[];
 #define m_scores(a)         (m_dm(a))
 #define m_sweaps(a,b)       (m_medieval(a, b) || m_ballistic(a, b) || m_arena(a, b))
 
-#define m_weapon(a,b)       (m_arena(a,b) ? 0-WEAP_ITEM : (m_medieval(a,b) ? WEAP_SWORD : (m_ballistic(a,b) ? WEAP_ROCKET : (m_insta(a,b) ? GAME(instaweapon) : (m_trial(a) ? GAME(trialweapon) : GAME(spawnweapon))))))
-#define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? GAME(trialdelay) : (m_bomber(a) ? GAME(bomberdelay) : (m_insta(a, b) ? GAME(instadelay) : GAME(spawndelay)))) : 0)
-#define m_protect(a,b)      (m_duke(a,b) ? GAME(duelprotect) : (m_insta(a, b) ? GAME(instaprotect) : GAME(spawnprotect)))
-#define m_noitems(a,b)      (m_trial(a) || GAME(itemsallowed) < (m_limited(a,b) ? 2 : 1))
+#define m_weapon(a,b)       (m_arena(a,b) ? 0-W_ITEM : (m_medieval(a,b) ? W_SWORD : (m_ballistic(a,b) ? W_ROCKET : (m_insta(a,b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon))))))
+#define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
+#define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
+#define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_limited(a,b) ? 2 : 1))
 #ifdef MEKARCADE
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : CLASS(c, health))
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : CLASS(c, armour))
 #else
-#define m_health(a,b,c)     (m_insta(a,b) ? 1 : GAME(spawnhealth))
+#define m_health(a,b,c)     (m_insta(a,b) ? 1 : G(spawnhealth))
 #endif
-#define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? GAME(maxhealthvampire) : GAME(maxhealth))))
+#define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
 
-#define w_reload(w1,w2)     (w1 != WEAP_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : WEAP(w1, reloads)) : (w1 < 0-w2 ? -1 : WEAP(w1, reloads))) : 0)
-#define w_carry(w1,w2)      (w1 > WEAP_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && WEAP(w1, carried)))
-#define w_attr(a,w1,w2)     (m_edit(a) || (w1 >= WEAP_OFFSET && w1 != w2) ? w1 : (w2 == WEAP_GRENADE ? WEAP_ROCKET : WEAP_GRENADE))
-#define w_spawn(weap)       int(ceilf(GAME(itemspawntime)*WEAP(weap, frequency)))
+#define w_reload(w1,w2)     (w1 != W_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : W(w1, reloads)) : (w1 < 0-w2 ? -1 : W(w1, reloads))) : 0)
+#define w_carry(w1,w2)      (w1 > W_MELEE && (isweap(w2) ? w1 != w2 : w1 >= 0-w2) && (isweap(w1) && W(w1, carried)))
+#define w_attr(a,w1,w2)     (m_edit(a) || (w1 >= W_OFFSET && w1 != w2) ? w1 : (w2 == W_GRENADE ? W_ROCKET : W_GRENADE))
+#define w_spawn(weap)       int(ceilf(G(itemspawntime)*W(weap, frequency)))
 
 #define mapshrink(a,b,c) if((a) && (b) && (c) && *(c)) \
 { \
@@ -320,25 +320,25 @@ extern mutstypes mutstype[];
 
 #define mapcull(a,b,c,d,e) \
 { \
-    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, GAME(multimaps)); \
-    mapshrink(m_duel(b, c), a, GAME(duelmaps)); \
-    mapshrink(m_jetpack(b, c), a, GAME(jetpackmaps)); \
+    mapshrink(m_multi(b, c) && (m_capture(b) || (m_bomber(b) && !m_gsp2(b, c))), a, G(multimaps)); \
+    mapshrink(m_duel(b, c), a, G(duelmaps)); \
+    mapshrink(m_jetpack(b, c), a, G(jetpackmaps)); \
     if(d > 0 && e >= 2 && m_fight(b) && !m_duel(b, c)) \
     { \
-        mapshrink(GAME(smallmapmax) && d <= GAME(smallmapmax), a, GAME(smallmaps)) \
-        else mapshrink(GAME(mediummapmax) && d <= GAME(mediummapmax), a, GAME(mediummaps)) \
-        else mapshrink(GAME(mediummapmax) && d > GAME(mediummapmax), a, GAME(largemaps)) \
+        mapshrink(G(smallmapmax) && d <= G(smallmapmax), a, G(smallmaps)) \
+        else mapshrink(G(mediummapmax) && d <= G(mediummapmax), a, G(mediummaps)) \
+        else mapshrink(G(mediummapmax) && d > G(mediummapmax), a, G(largemaps)) \
     } \
 }
 
 #define maplist(a,b,c,d,e) \
 { \
-    if(m_capture(b)) a = newstring(GAME(capturemaps)); \
-    else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? GAME(kingmaps) : GAME(defendmaps)); \
-    else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? GAME(holdmaps) : GAME(bombermaps)); \
-    else if(m_trial(b)) a = newstring(GAME(trialmaps)); \
-    else if(m_fight(b)) a = newstring(GAME(mainmaps)); \
-    else a = newstring(GAME(allowmaps)); \
+    if(m_capture(b)) a = newstring(G(capturemaps)); \
+    else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? G(kingmaps) : G(defendmaps)); \
+    else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? G(holdmaps) : G(bombermaps)); \
+    else if(m_trial(b)) a = newstring(G(trialmaps)); \
+    else if(m_fight(b)) a = newstring(G(mainmaps)); \
+    else a = newstring(G(allowmaps)); \
     if(e) mapcull(a, b, c, d, e); \
 }
 

@@ -1,18 +1,18 @@
 enum
 {
-    WEAP_MELEE = 0, WEAP_PISTOL, WEAP_OFFSET, // end of unselectable weapon set
-    WEAP_SWORD = WEAP_OFFSET, WEAP_SHOTGUN, WEAP_SMG, WEAP_FLAMER, WEAP_PLASMA, WEAP_RIFLE, WEAP_ITEM,
-    WEAP_GRENADE = WEAP_ITEM, WEAP_MINE, WEAP_ROCKET, // end of item weapon set
-    WEAP_MAX, WEAP_LOADOUT = WEAP_ITEM-WEAP_OFFSET // if you add to this at all, check all arrays with WEAP_MAX
+    W_MELEE = 0, W_PISTOL, W_OFFSET, // end of unselectable weapon set
+    W_SWORD = W_OFFSET, W_SHOTGUN, W_SMG, W_FLAMER, W_PLASMA, W_RIFLE, W_ITEM,
+    W_GRENADE = W_ITEM, W_MINE, W_ROCKET, // end of item weapon set
+    W_MAX, W_LOADOUT = W_ITEM-W_OFFSET // if you add to this at all, check all arrays with W_MAX
 };
-#define isweap(a)       (a >= 0 && a < WEAP_MAX)
+#define isweap(a)       (a >= 0 && a < W_MAX)
 
-enum { WEAP_F_NONE = 0, WEAP_F_FORCED = 1<<0 };
+enum { W_F_NONE = 0, W_F_FORCED = 1<<0 };
 enum {
-    WEAP_S_IDLE = 0, WEAP_S_PRIMARY, WEAP_S_SECONDARY, WEAP_S_RELOAD, WEAP_S_POWER,
-    WEAP_S_SWITCH, WEAP_S_USE, WEAP_S_WAIT, WEAP_S_MAX,
-    WEAP_S_FILTER = (1<<WEAP_S_RELOAD)|(1<<WEAP_S_SWITCH),
-    WEAP_S_ALL = (1<<WEAP_S_PRIMARY)|(1<<WEAP_S_SECONDARY)|(1<<WEAP_S_RELOAD)|(1<<WEAP_S_POWER)|(1<<WEAP_S_SWITCH)|(1<<WEAP_S_USE)|(1<<WEAP_S_WAIT)
+    W_S_IDLE = 0, W_S_PRIMARY, W_S_SECONDARY, W_S_RELOAD, W_S_POWER,
+    W_S_SWITCH, W_S_USE, W_S_WAIT, W_S_MAX,
+    W_S_FILTER = (1<<W_S_RELOAD)|(1<<W_S_SWITCH),
+    W_S_ALL = (1<<W_S_PRIMARY)|(1<<W_S_SECONDARY)|(1<<W_S_RELOAD)|(1<<W_S_POWER)|(1<<W_S_SWITCH)|(1<<W_S_USE)|(1<<W_S_WAIT)
 };
 
 enum
@@ -73,9 +73,9 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
 #define hithead(x)      (x&HIT_WHIPLASH || x&HIT_HEAD)
 #define hithurts(x)     (x&HIT_BURN || x&HIT_BLEED || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
-#define doesburn(x,y)   (isweap(x) && WEAP2(x, residual, y&HIT_ALT) == 1)
-#define doesbleed(x,y)  (isweap(x) && WEAP2(x, residual, y&HIT_ALT) == 2)
-#define WALT(x)         (WEAP_MAX+WEAP_##x)
+#define doesburn(x,y)   (isweap(x) && W2(x, residual, y&HIT_ALT) == 1)
+#define doesbleed(x,y)  (isweap(x) && W2(x, residual, y&HIT_ALT) == 2)
+#define WX(x)         (W_MAX+W_##x)
 
 #include "weapdef.h"
 
@@ -168,8 +168,8 @@ WPFVARM(0, flakminspeed, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      25.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
 WPFVARM(0, flakoffset, 0, FVAR_MAX,
-    8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       0.0f,       0.0f,       0.0f,
-    8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       0.0f,       0.0f,       0.0f
+    8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       4.0f,       4.0f,       2.0f,
+    8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       4.0f,       4.0f,       2.0f
 );
 WPVARM(0, flakrays, 0, VAR_MAX,
     5,          5,          5,          5,          5,          5,          5,          5,          75,         50,         75,
@@ -199,9 +199,9 @@ WPVARM(0, flaktime, 1, VAR_MAX,
     500,        500,        500,        250,        500,        1000,       500,        500,        3000,       3000,       3000,
     500,        750,        500,        2000,       800,        3000,       500,        500,        3000,       3000,       3000
 );
-WPVARM(0, flakweap, -1, WEAP_MAX*2-1,
-    -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         14,         14,         15,
-    -1,         1,          -1,         14,         15,         -1,         -1,         -1,         14,         14,         15
+WPVARM(0, flakweap, -1, W_MAX*2-1,
+    -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG,
+    -1,         W_PISTOL,   -1,         WX(SHOTGUN),WX(SMG),    -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG
 );
 WPFVAR(0, frequency, 0, FVAR_MAX,
     0.0f,       0.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       2.0f,       4.0f
@@ -268,9 +268,9 @@ WPFVARM(0, partsize, 0, FVAR_MAX,
     1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       1.5f,       1.0f,       4.0f,       3.0f,
     2.0f,       0.5f,       1.25f,      0.45f,      0.35f,      10.0f,      24.0f,      3.0f,       1.0f,       4.0f,       3.0f
 );
-WPVARM(0, parttype, 0, WEAP_MAX-1,
-    0,          1,          2,          3,          4,          5,          6,          7,          8,          9,          10,
-    0,          1,          2,          3,          4,          5,          6,          7,          8,          9,          10
+WPVARM(0, parttype, 0, W_MAX-1,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET
 );
 WPVARM(0, pdelay, 0, VAR_MAX,
     0,          0,          10,         0,          0,          0,          0,          0,          75,         75,         0,
@@ -280,13 +280,17 @@ WPVARM(0, power, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,          2000,
     0,          0,          0,          0,          0,          500,        2000,       0,          3000,       0,          2000
 );
-WPFVARM(0, proximity, 0, FVAR_MAX,
+WPFVARM(0, proxdist, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       24.0f,      0.0f,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       24.0f,      0.0f
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       FVAR_MAX,   0.0f
 );
 WPVARM(0, proxtime, 0, VAR_MAX,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          500,        0,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          500,        0
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          250,        0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          100,        0
+);
+WPVARM(0, proxtype, 0, 2,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          1,          0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          2,          0
 );
 WPVARM(0, radial, 0, VAR_MAX,
     0,          0,          0,          0,          0,          20,         40,         0,          0,          0,          0,
@@ -376,7 +380,7 @@ WPFVARM(0, visfade, 0, 1,
 );
 WPVARM(0, vistime, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          1000,       0
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0
 );
 WPFVARM(0, waterfric, 0, FVAR_MAX,
     0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f,
@@ -452,15 +456,15 @@ WPVARM(0, flakcollide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
 
-#define WEAPRS(a,b,c)           (a*(m_limited(b, c) ? GAME(radiallimited) : GAME(radialscale)))
-#define WEAPS(a,b,c,d,e,f)      (!m_insta(d, e) || m_arena(d, e) || a != WEAP_RIFLE ? WEAPRS(WEAP2(a, b, c)*f, d, e) : 0.f)
-#define WEAPSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != WEAP_RIFLE ? clamp(max(WEAP2(a, spread, b), f*0.5f)*e, WEAP2(a, minspread, b), WEAP2(a, maxspread, b) > 0 ? WEAP2(a, maxspread, b) : FVAR_MAX) : 0.f)
-#define WEAPSND(a,b)            (weaptype[a].sound+b)
-#define WEAPSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
-#define WEAPSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
-#define WEAPUSE(a)              (WEAP(a, reloads) != 0 ? WEAP(a, max) : WEAP(a, add))
-#define WEAPHCOL(d,a,b,c)       (WEAP2(a, b, c) >= 0 ? WEAP2(a, b, c) : game::hexpulsecolour(d, clamp(-1-WEAP2(a, b, c), 0, 2), 50))
-#define WEAPPCOL(d,a,b,c)       (WEAP2(a, b, c) >= 0 ? vec::hexcolor(WEAP2(a, b, c)) : game::pulsecolour(d, clamp(-1-WEAP2(a, b, c), 0, 2), 50))
+#define WRS(a,b,c)           (a*(m_limited(b, c) ? G(radiallimited) : G(radialscale)))
+#define WS(a,b,c,d,e,f)      (!m_insta(d, e) || m_arena(d, e) || a != W_RIFLE ? WRS(W2(a, b, c)*f, d, e) : 0.f)
+#define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*e, W2(a, minspread, b), W2(a, maxspread, b) > 0 ? W2(a, maxspread, b) : FVAR_MAX) : 0.f)
+#define WSND(a,b)            (weaptype[a].sound+b)
+#define WSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
+#define WSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))
+#define WUSE(a)              (W(a, reloads) != 0 ? W(a, max) : W(a, add))
+#define WHCOL(d,a,b,c)       (W2(a, b, c) >= 0 ? W2(a, b, c) : game::hexpulsecolour(d, clamp(-1-W2(a, b, c), 0, 2), 50))
+#define WPCOL(d,a,b,c)       (W2(a, b, c) >= 0 ? vec::hexcolor(W2(a, b, c)) : game::pulsecolour(d, clamp(-1-W2(a, b, c), 0, 2), 50))
 
 struct weaptypes
 {
@@ -540,21 +544,21 @@ weaptypes weaptype[] =
     }
 };
 SVAR(0, weapname, "melee pistol sword shotgun smg flamer plasma rifle grenade mine rocket");
-VAR(0, weapidxmelee, 1, WEAP_MELEE, -1);
-VAR(0, weapidxpistol, 1, WEAP_PISTOL, -1);
-VAR(0, weapidxsword, 1, WEAP_SWORD, -1);
-VAR(0, weapidxshotgun, 1, WEAP_SHOTGUN, -1);
-VAR(0, weapidxsmg, 1, WEAP_SMG, -1);
-VAR(0, weapidxflamer, 1, WEAP_FLAMER, -1);
-VAR(0, weapidxplasma, 1, WEAP_PLASMA, -1);
-VAR(0, weapidxrifle, 1, WEAP_RIFLE, -1);
-VAR(0, weapidxgrenade, 1, WEAP_GRENADE, -1);
-VAR(0, weapidxmine, 1, WEAP_MINE, -1);
-VAR(0, weapidxrocket, 1, WEAP_ROCKET, -1);
-VAR(0, weapidxoffset, 1, WEAP_OFFSET, -1);
-VAR(0, weapidxitem, 1, WEAP_ITEM, -1);
-VAR(0, weapidxloadout, 1, WEAP_LOADOUT, -1);
-VAR(0, weapidxnum, 1, WEAP_MAX, -1);
+VAR(0, weapidxmelee, 1, W_MELEE, -1);
+VAR(0, weapidxpistol, 1, W_PISTOL, -1);
+VAR(0, weapidxsword, 1, W_SWORD, -1);
+VAR(0, weapidxshotgun, 1, W_SHOTGUN, -1);
+VAR(0, weapidxsmg, 1, W_SMG, -1);
+VAR(0, weapidxflamer, 1, W_FLAMER, -1);
+VAR(0, weapidxplasma, 1, W_PLASMA, -1);
+VAR(0, weapidxrifle, 1, W_RIFLE, -1);
+VAR(0, weapidxgrenade, 1, W_GRENADE, -1);
+VAR(0, weapidxmine, 1, W_MINE, -1);
+VAR(0, weapidxrocket, 1, W_ROCKET, -1);
+VAR(0, weapidxoffset, 1, W_OFFSET, -1);
+VAR(0, weapidxitem, 1, W_ITEM, -1);
+VAR(0, weapidxloadout, 1, W_LOADOUT, -1);
+VAR(0, weapidxnum, 1, W_MAX, -1);
 #else
 extern weaptypes weaptype[];
 #endif

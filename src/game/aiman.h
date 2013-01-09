@@ -24,18 +24,18 @@ namespace aiman
             case AI_BOT:
                 if(m_coop(gamemode, mutators))
                 {
-                    m = max(GAME(coopskillmax), GAME(coopskillmin));
-                    n = min(GAME(coopskillmin), m);
+                    m = max(G(coopskillmax), G(coopskillmin));
+                    n = min(G(coopskillmin), m);
                 }
                 else
                 {
-                    m = max(GAME(botskillmax), GAME(botskillmin));
-                    n = min(GAME(botskillmin), m);
+                    m = max(G(botskillmax), G(botskillmin));
+                    n = min(G(botskillmin), m);
                 }
                 break;
             default:
-                m = max(GAME(enemyskillmax), GAME(enemyskillmin));
-                n = min(GAME(enemyskillmin), m);
+                m = max(G(enemyskillmax), G(enemyskillmin));
+                n = min(G(enemyskillmin), m);
                 break;
         }
     }
@@ -45,7 +45,7 @@ namespace aiman
         int numbots = 0;
         loopv(clients)
         {
-            if(type == AI_BOT && numbots >= GAME(botlimit)) return false;
+            if(type == AI_BOT && numbots >= G(botlimit)) return false;
             if(clients[i]->state.aitype == type)
             {
                 clientinfo *ci = clients[i];
@@ -63,7 +63,7 @@ namespace aiman
                 if(type == AI_BOT) numbots++;
             }
         }
-        if(type == AI_BOT && numbots >= GAME(botlimit)) return false;
+        if(type == AI_BOT && numbots >= G(botlimit)) return false;
         int cn = addclient(ST_REMOTE);
         if(cn >= 0)
         {
@@ -139,7 +139,7 @@ namespace aiman
         if(ci->state.ownernum < 0) deleteai(ci);
         else if(ci->state.aireinit >= 1)
         {
-            if(ci->state.aireinit == 2) loopk(WEAP_MAX) loopj(2) ci->state.weapshots[k][j].reset();
+            if(ci->state.aireinit == 2) loopk(W_MAX) loopj(2) ci->state.weapshots[k][j].reset();
             sendf(-1, 1, "ri6si3", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model);
             if(ci->state.aireinit == 2)
             {
@@ -198,26 +198,26 @@ namespace aiman
                 ci->state.skill = (m != n ? rnd(m-n) + n + 1 : m);
                 if(!ci->state.aireinit) ci->state.aireinit = 1;
             }
-            if(ci->state.aitype == AI_BOT && ++numbots >= GAME(botlimit)) shiftai(ci, NULL);
+            if(ci->state.aitype == AI_BOT && ++numbots >= G(botlimit)) shiftai(ci, NULL);
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
 #ifdef MEKARCADE
-        if(m_campaign(gamemode)) balance = GAME(campaignplayers); // campaigns strictly obeys nplayers
+        if(m_campaign(gamemode)) balance = G(campaignplayers); // campaigns strictly obeys nplayers
         else
 #endif
         if(m_coop(gamemode, mutators))
         {
             numt--; // filter out the human team
-            balance = people+int(ceilf(people*numt*(m_multi(gamemode, mutators) ? GAME(coopmultibalance) : GAME(coopbalance))));
+            balance = people+int(ceilf(people*numt*(m_multi(gamemode, mutators) ? G(coopmultibalance) : G(coopbalance))));
         }
-        else if(m_fight(gamemode) && !m_trial(gamemode) && GAME(botlimit) > 0)
+        else if(m_fight(gamemode) && !m_trial(gamemode) && G(botlimit) > 0)
         {
-            switch(GAME(botbalance))
+            switch(G(botbalance))
             {
                 case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : nplayers); break; // use distributed numplayers
                 case  0: balance = 0; break; // no bots
-                default: balance = max(people, m_duel(gamemode, mutators) ? 2 : GAME(botbalance)); break; // balance to at least this
+                default: balance = max(people, m_duel(gamemode, mutators) ? 2 : G(botbalance)); break; // balance to at least this
             }
             if(m_isteam(gamemode, mutators) && balance > 0)
             { // skew this if teams are unbalanced
@@ -239,9 +239,9 @@ namespace aiman
                 }
             }
         }
-        balance += GAME(botoffset)*numt;
+        balance += G(botoffset)*numt;
         int bots = balance-people;
-        if(bots > GAME(botlimit)) balance -= bots-GAME(botlimit);
+        if(bots > G(botlimit)) balance -= bots-G(botlimit);
         if(balance > 0)
         {
             while(numclients(-1, true, AI_BOT) < balance) if(!addai(AI_BOT)) break;
@@ -289,11 +289,11 @@ namespace aiman
                 loopvrev(clients) if(clients[i]->state.aientity == j)
                 {
                     count++;
-                    if(!allow || count > GAME(enemybalance)) deleteai(clients[i]);
+                    if(!allow || count > G(enemybalance)) deleteai(clients[i]);
                 }
-                if(allow && count < GAME(enemybalance))
+                if(allow && count < G(enemybalance))
                 {
-                    int amt = GAME(enemybalance)-count;
+                    int amt = G(enemybalance)-count;
                     loopk(amt) addai(sents[j].attrs[0]+AI_START, j);
                 }
             }
@@ -315,7 +315,7 @@ namespace aiman
             {
                 if(!dorefresh)
                 {
-                    #define checkold(n) if(old##n != GAME(n)) { dorefresh = 1; old##n = GAME(n); }
+                    #define checkold(n) if(old##n != G(n)) { dorefresh = 1; old##n = G(n); }
                     if(m_enemies(gamemode, mutators))
                     {
                         checkold(enemyskillmin);

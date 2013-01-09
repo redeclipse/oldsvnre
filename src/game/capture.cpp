@@ -585,7 +585,7 @@ namespace capture
                     gameent *t;
                     loopvk(targets) if((t = game::getclient(targets[k])))
                     {
-                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < WEAP_OFFSET))
+                        if((t->ai && !t->hasweap(t->ai->weappref, m_weapon(game::gamemode, game::mutators))) || (!t->ai && t->weapselect < W_OFFSET))
                         {
                             guard = true;
                             break;
