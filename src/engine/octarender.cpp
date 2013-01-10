@@ -1804,8 +1804,7 @@ void allchanged(bool load)
     lightents();
     if(load)
     {
-        genenvmaps();
-        drawminimap();
+        drawtextures();
     }
 }
 
