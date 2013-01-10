@@ -1171,6 +1171,16 @@ static void setfog(int fogmat, float below = 1, int abovemat = MAT_AIR)
     glClearColor(fogc[0], fogc[1], fogc[2], 1.0f);
 }
 
+bool deferdrawtextures = false;
+
+void drawtextures()
+{
+    if(minimized) { deferdrawtextures = true; return; }
+    deferdrawtextures = false;
+    genenvmaps();
+    drawminimap();
+}
+
 GLuint motiontex = 0;
 int motionw = 0, motionh = 0, lastmotion = 0;
 
@@ -2450,6 +2460,8 @@ void gl_drawframe(int w, int h)
     if(hasnoview()) drawnoview();
     else
     {
+        if(deferdrawtextures) drawtextures();
+
         fogmat = lookupmaterial(camera1->o)&(MATF_VOLUME|MATF_INDEX);
         causticspass = 0.f;
         if(isliquid(fogmat&MATF_VOLUME))
