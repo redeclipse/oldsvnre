@@ -250,7 +250,8 @@ namespace capture
                     if(f.proj) lac.z -= f.proj->height;
                 }
                 while(yaw >= 360.f) yaw -= 360.f;
-                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, 1);
+                float trans = f.owner == game::focus && game::thirdpersonview(true) ? 0.5f : 1.f;
+                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, trans);
                 lac.z += enttype[AFFINITY].radius*2/3;
                 if(f.owner) { lac.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));
