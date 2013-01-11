@@ -75,7 +75,7 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 #define hithurts(x)     (x&HIT_BURN || x&HIT_BLEED || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
 #define doesburn(x,y)   (isweap(x) && W2(x, residual, y&HIT_ALT) == 1)
 #define doesbleed(x,y)  (isweap(x) && W2(x, residual, y&HIT_ALT) == 2)
-#define WX(x)         (W_MAX+W_##x)
+#define WX(x)           (W_MAX+W_##x)
 
 #include "weapdef.h"
 
@@ -157,23 +157,23 @@ WPVARM(0, extinguish, 0, 7,
 );
 WPVARM(0, flakdmg, VAR_MIN, VAR_MAX,
     25,         10,         15,         16,         16,         12,         10,         18,         150,        100,        300,
-    10,         5,          30,         4,          4,          4,          5,          50,         150,        100,        300
+    10,         5,          30,         4,          2,          4,          5,          50,         150,        100,        300
 );
 WPVARM(0, flakffwd, 0, 1,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
 WPFVARM(0, flakminspeed, 0, FVAR_MAX,
-    0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
-    0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      25.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f
+    50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,
+    50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
 );
 WPFVARM(0, flakoffset, 0, FVAR_MAX,
-    8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       4.0f,       4.0f,       2.0f,
-    8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       8.0f,       4.0f,       4.0f,       2.0f
+    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       2.0f,
+    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       2.0f
 );
 WPVARM(0, flakrays, 0, VAR_MAX,
     5,          5,          5,          5,          5,          5,          5,          5,          75,         50,         75,
-    5,          5,          5,          40,         35,         5,          5,          5,          75,         50,         75
+    5,          5,          5,          50,         30,         5,          5,          5,          75,         50,         75
 );
 WPFVARM(0, flakrel, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       0.0f,       0.0f,
