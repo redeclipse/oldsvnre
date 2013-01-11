@@ -811,19 +811,20 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
+        if(proj.projtype != PRJ_SHOT || (!proj.child && !weaptype[proj.weap].traced))
         {
-            vec loc = vec(!proj.owner || proj.child || proj.projtype != PRJ_SHOT ? proj.o : proj.owner->o).sub(vec(proj.vel).normalize().mul(proj.radius+1e-3f)),
+            vec loc = !proj.owner || proj.projtype != PRJ_SHOT ? vec(proj.o).add(proj.vel) : proj.owner->o,
                 eyedir = vec(proj.o).sub(loc);
             float eyedist = eyedir.magnitude();
             if(eyedist >= 1e-3f)
             {
                 eyedir.div(eyedist);
                 float blocked = tracecollide(&proj, loc, eyedir, eyedist);
-                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked-proj.radius-0.1f).add(loc);
+                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked+proj.radius+1e-3f).add(loc);
             }
         }
-        if(proj.projtype != PRJ_SHOT) physics::entinmap(&proj, true);
+        if(proj.projtype != PRJ_SHOT || proj.child)
+            physics::entinmap(&proj, true);
         else proj.resetinterp();
     }
 
@@ -1490,19 +1491,21 @@ namespace projs
                     if(!proj.child && !m_insta(game::gamemode, game::mutators) && W2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                     {
                         int f = W2(proj.weap, flakweap, proj.flags&HIT_ALT), w = f%W_MAX, life = W2(proj.weap, flaktime, proj.flags&HIT_ALT);
-                        float mag = max(proj.vel.magnitude(), 1.f), scale = W2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.curscale,
+                        float mag = max(proj.vel.magnitude(), W2(proj.weap, flakminspeed, proj.flags&HIT_ALT)),
+                              scale = W2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.curscale,
+                              offset = proj.hit || proj.stick ? W2(proj.weap, flakoffset, proj.flags&HIT_ALT) : proj.radius*2,
                               skew = proj.hit || proj.stuck ? W2(proj.weap, flakskew, proj.flags&HIT_ALT) : W2(proj.weap, flakspread, proj.flags&HIT_ALT);
-                        vec pos = vec(proj.o).sub(vec(proj.stuck ? vec(proj.norm).neg() : proj.vel).normalize().mul(proj.hit || proj.stick ? W2(proj.weap, flakoffset, proj.flags&HIT_ALT) : proj.radius));
+                        vec dir = vec(proj.stuck ? (proj.stick && proj.stick->state == CS_ALIVE ? vec(proj.stickpos).rotate_around_z(proj.stick->yaw*RAD) : proj.norm) : proj.vel).normalize(),
+                            pos = vec(proj.o).sub(vec(dir).mul(offset));
                         if(W2(proj.weap, flakffwd, proj.flags&HIT_ALT) > 0) life -= int(ceilf(life*W2(proj.weap, flakffwd, proj.flags&HIT_ALT)));
                         loopi(W2(proj.weap, flakrays, proj.flags&HIT_ALT))
                         {
-                            vec dir(0, 0, 0);
+                            vec to = vec(pos).add(dir);
                             if(W2(proj.weap, flakspeed, proj.flags&HIT_ALT) > 0)
                                 mag = rnd(W2(proj.weap, flakspeed, proj.flags&HIT_ALT))*0.5f+W2(proj.weap, flakspeed, proj.flags&HIT_ALT)*0.5f;
-                            if(skew > 0) dir.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(skew*mag));
-                            if(W2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0)
-                                dir.add(vec(proj.vel).normalize().mul(W2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
-                            create(pos, dir.add(pos), proj.local, proj.owner, PRJ_SHOT, max(life, 1), W2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, W2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, -1, (f >= W_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
+                            if(skew > 0) to.add(vec(rnd(2001)-1000, rnd(2001)-1000, rnd(2001)-1000).normalize().mul(skew*mag));
+                            if(W2(proj.weap, flakrel, proj.flags&HIT_ALT) > 0) to.add(vec(dir).mul(W2(proj.weap, flakrel, proj.flags&HIT_ALT)*mag));
+                            create(pos, to, proj.local, proj.owner, PRJ_SHOT, max(life, 1), W2(proj.weap, flaktime, proj.flags&HIT_ALT), 0, W2(proj.weap, flakspeed, proj.flags&HIT_ALT), proj.id, w, -1, (f >= W_MAX ? HIT_ALT : 0)|HIT_FLAK, scale, true, &proj);
                         }
                     }
                     if(proj.local)
