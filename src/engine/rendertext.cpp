@@ -2,7 +2,7 @@
 
 VAR(IDF_PERSIST, blinkingtext, 0, 250, VAR_MAX);
 FVARF(IDF_PERSIST, textscale, FVAR_NONZERO, 1, FVAR_MAX, UI::setup());
-FVAR(IDF_PERSIST, commandposfade, 0, 0.65f, 1);
+FVAR(IDF_PERSIST, fadedtext, 0, 0.65f, 1);
 
 static inline bool htcmp(const char *key, const font &f) { return !strcmp(key, f.name); }
 
@@ -457,10 +457,10 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
         { \
             cx = x; \
             cy = y; \
-            if(!hasfade && commandposfade < 1) \
+            if(!hasfade && fadedtext < 1) \
             { \
                 hasfade = true; \
-                fade = int(fade*commandposfade); \
+                fade = int(fade*fadedtext); \
                 xtraverts += varray::end(); \
                 glColor4ub(color.x, color.y, color.z, fade); \
             } \
