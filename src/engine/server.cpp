@@ -1477,7 +1477,7 @@ void fatal(const char *s, ...)    // failure exit
     if(++errors <= 2) // print up to one extra recursive error
     {
         defvformatstring(msg, s, s);
-        if(logfile) logoutf(msg);
+        if(logfile) logoutf("%s", msg);
 #ifndef WIN32
         fprintf(stderr, "Exiting: %s\n", msg);
 #endif
