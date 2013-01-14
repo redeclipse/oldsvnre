@@ -747,27 +747,43 @@ namespace hud
         }
     }
 
-    void drawclipitem(const char *tex, float x, float y, float offset, float size, float blend, float angle, const vec &colour)
+    void vecfromyaw(float yaw, int move, int strafe, vec2 &m)
+    {
+        if(move)
+        {
+            m.x = move*-sinf(RAD*yaw);
+            m.y = move*cosf(RAD*yaw);
+        }
+        else m.x = m.y = 0;
+        if(strafe)
+        {
+            m.x += strafe*cosf(RAD*yaw);
+            m.y += strafe*sinf(RAD*yaw);
+        }
+    }
+
+    void drawclipitem(const char *tex, float x, float y, float offset, float size, float blend, float angle, float spin, const vec &colour)
     {
         while(angle < 0.0f) angle += 360.0f;
         while(angle >= 360.0f) angle -= 360.0f;
-        float tx = sinf(RAD*angle), ty = -cosf(RAD*angle);
-        vec loc(x+offset*tx, y+offset*ty, 0);
+        vec2 loc(x+offset*sinf(RAD*angle), y+offset*-cosf(RAD*angle));
         glColor4f(colour.x, colour.y, colour.z, blend);
         Texture *t = textureload(tex, 3);
         if(t)
         {
+            while(spin < 0.0f) spin += 360.0f;
+            while(spin >= 360.0f) spin -= 360.0f;
             glBindTexture(GL_TEXTURE_2D, t->id);
             glBegin(GL_TRIANGLE_STRIP);
             loopk(4)
             {
-                vec norm;
+                vec2 norm;
                 switch(k)
                 {
-                    case 0: vecfromyawpitch(angle, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
-                    case 1: vecfromyawpitch(angle, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
-                    case 2: vecfromyawpitch(angle, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
-                    case 3: vecfromyawpitch(angle, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                    case 0: vecfromyaw(spin, 1, -1, norm);   glTexCoord2f(0, 1); break;
+                    case 1: vecfromyaw(spin, 1, 1, norm);    glTexCoord2f(1, 1); break;
+                    case 2: vecfromyaw(spin, -1, -1, norm);  glTexCoord2f(0, 0); break;
+                    case 3: vecfromyaw(spin, -1, 1, norm);   glTexCoord2f(1, 0); break;
                 }
                 norm.normalize().mul(size*0.5f).add(loc);
                 glVertex2f(norm.x, norm.y);
@@ -791,15 +807,19 @@ namespace hud
         }
         int ammo = game::focus->ammo[weap], maxammo = W(weap, max), weapid = weap;
         if(clipsizes[weap] != maxammo) weapid = 0;
-        float fade = clipblend*hudblend, size = s*clipsize, offset = s*crosshairsize;
+        float fade = clipblend*hudblend, size = s*clipsize, offset = s*crosshairsize, amt = 0.f;
         int interval = lastmillis-game::focus->weaplast[weap];
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
             case W_S_PRIMARY: case W_S_SECONDARY:
             {
-                float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
-                if(showclips >= 2) size *= amt;
+                if(showclips >= 2)
+                {
+                    size *= amt;
+                    offset *= amt;
+                }
                 break;
             }
             case W_S_RELOAD: case W_S_USE:
@@ -809,14 +829,18 @@ namespace hud
                     int check = game::focus->weapwait[weap]/2;
                     if(interval >= check)
                     {
-                        float amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
+                        amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
                         fade *= amt;
-                        if(showclips >= 2) size *= amt*3/4;
+                        if(showclips >= 2)
+                        {
+                            size *= amt*3/4;
+                            offset *= amt*3/4;
+                        }
                     }
                     else
                     {
                         fade = 0.f;
-                        if(showclips >= 2) size = 0;
+                        if(showclips >= 2) size = offset = 0;
                     }
                     break;
                 }
@@ -824,9 +848,13 @@ namespace hud
             }
             case W_S_SWITCH:
             {
-                float amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
-                if(showclips >= 2 && game::focus->weapstate[weap] != W_S_RELOAD) size *= amt;
+                if(showclips >= 2 && game::focus->weapstate[weap] != W_S_RELOAD)
+                {
+                    size *= amt;
+                    offset *= amt;
+                }
                 break;
             }
             default: break;
@@ -835,7 +863,7 @@ namespace hud
         if(clipcolour > 0) c.mul(vec::hexcolor(W(weap, colour)));
         else if(clipstone) skewcolour(c.r, c.g, c.b, clipstone);
         float slice = 360/float(maxammo), angle = (maxammo > 2 ? 360.f : 360.f-slice*0.5f)-((maxammo-ammo)*slice),
-              need = s*clipsize*maxammo, have = 2*M_PI*offset, skew = clamp(have/need, 0.25f, 1.f);
+              need = s*clipsize*maxammo, have = 2*M_PI*s*crosshairsize, skew = clamp(have/need, 0.3f, 1.f), spin = 360*amt;
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
             case W_S_PRIMARY:
@@ -845,11 +873,13 @@ namespace hud
                 float rewind = angle+shot*slice;
                 loopi(shot)
                 {
-                    drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, rewind, c);
+                    drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, rewind, rewind+spin, c);
                     rewind -= angle;
                 }
                 fade = clipblend*hudblend;
                 size = s*clipsize;
+                offset = s*crosshairsize;
+                spin = 0;
                 break;
             }
             case W_S_RELOAD: case W_S_USE:
@@ -858,20 +888,22 @@ namespace hud
                 {
                     loopi(game::focus->weapload[weap])
                     {
-                        drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, angle, c);
+                        drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, angle, angle+spin, c);
                         angle -= slice;
                     }
                     ammo -= game::focus->weapload[weap];
-                    fade = clipblend*hudblend;
-                    size = s*clipsize;
                 }
+                fade = clipblend*hudblend;
+                size = s*clipsize;
+                offset = s*crosshairsize;
+                spin = 0;
                 break;
             }
             default: break;
         }
         loopi(ammo)
         {
-            drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, angle, c);
+            drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, angle, angle+spin, c);
             angle -= slice;
         }
     }
@@ -1551,17 +1583,18 @@ namespace hud
             glBegin(GL_TRIANGLE_STRIP);
             if(style != 2 && radarbliprotate)
             {
+                vec2 o(loc.x, loc.y);
                 loopk(4)
                 {
-                    vec norm;
+                    vec2 norm;
                     switch(k)
                     {
-                        case 0: vecfromyawpitch(yaw, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
-                        case 1: vecfromyawpitch(yaw, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
-                        case 2: vecfromyawpitch(yaw, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
-                        case 3: vecfromyawpitch(yaw, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                        case 0: vecfromyaw(yaw, 1, -1, norm);   glTexCoord2f(0, 1); break;
+                        case 1: vecfromyaw(yaw, 1, 1, norm);    glTexCoord2f(1, 1); break;
+                        case 2: vecfromyaw(yaw, -1, -1, norm);  glTexCoord2f(0, 0); break;
+                        case 3: vecfromyaw(yaw, -1, 1, norm);   glTexCoord2f(1, 0); break;
                     }
-                    norm.normalize().mul(tq).add(loc);
+                    norm.normalize().mul(tq).add(o);
                     glVertex2f(norm.x, norm.y);
                 }
             }
