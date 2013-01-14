@@ -298,15 +298,6 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, flamercliptex, "<grey>textures/flamerclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, plasmacliptex, "<grey>textures/plasmaclip", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, riflecliptex, "<grey>textures/rifleclip", 3);
-    FVAR(IDF_PERSIST, pistolclipskew, 0, 0.85f, 1000);
-    FVAR(IDF_PERSIST, shotgunclipskew, 0, 1, 1000);
-    FVAR(IDF_PERSIST, smgclipskew, 0, 0.85f, 1000);
-    FVAR(IDF_PERSIST, grenadeclipskew, 0, 1.25f, 1000);
-    FVAR(IDF_PERSIST, mineclipskew, 0, 1.25f, 1000);
-    FVAR(IDF_PERSIST, rocketclipskew, 0, 1, 1000);
-    FVAR(IDF_PERSIST, flamerclipskew, 0, 0.85f, 1000);
-    FVAR(IDF_PERSIST, plasmaclipskew, 0, 0.85f, 1000);
-    FVAR(IDF_PERSIST, rifleclipskew, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
 #ifdef MEKARCADE
@@ -756,8 +747,36 @@ namespace hud
         }
     }
 
-    static int clipsizes[W_MAX] = {0};
+    void drawclipitem(const char *tex, float x, float y, float offset, float size, float blend, float angle, const vec &colour)
+    {
+        while(angle < 0.0f) angle += 360.0f;
+        while(angle >= 360.0f) angle -= 360.0f;
+        float tx = sinf(RAD*angle), ty = -cosf(RAD*angle);
+        vec loc(x+offset*tx, y+offset*ty, 0);
+        glColor4f(colour.x, colour.y, colour.z, blend);
+        Texture *t = textureload(tex, 3);
+        if(t)
+        {
+            glBindTexture(GL_TEXTURE_2D, t->id);
+            glBegin(GL_TRIANGLE_STRIP);
+            loopk(4)
+            {
+                vec norm;
+                switch(k)
+                {
+                    case 0: vecfromyawpitch(angle, 0, 1, -1, norm);   glTexCoord2f(0, 1); break;
+                    case 1: vecfromyawpitch(angle, 0, 1, 1, norm);    glTexCoord2f(1, 1); break;
+                    case 2: vecfromyawpitch(angle, 0, -1, -1, norm);  glTexCoord2f(0, 0); break;
+                    case 3: vecfromyawpitch(angle, 0, -1, 1, norm);   glTexCoord2f(1, 0); break;
+                }
+                norm.normalize().mul(size*0.5f).add(loc);
+                glVertex2f(norm.x, norm.y);
+            }
+            glEnd();
+        }
+    }
 
+    static int clipsizes[W_MAX] = {0};
     void drawclip(int weap, int x, int y, float s)
     {
         if(!isweap(weap) || (!W2(weap, sub, false) && !W2(weap, sub, true)) || W(weap, max) <= 1) return;
@@ -772,15 +791,7 @@ namespace hud
         }
         int ammo = game::focus->ammo[weap], maxammo = W(weap, max), weapid = weap;
         if(clipsizes[weap] != maxammo) weapid = 0;
-        Texture *t = textureload(cliptexs[weapid], 3);
-        if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        else glBlendFunc(GL_ONE, GL_ONE);
-
-        const float clipskew[W_MAX] = {
-            1, pistolclipskew, 1, shotgunclipskew, smgclipskew,
-            flamerclipskew, plasmaclipskew, rifleclipskew, grenadeclipskew, mineclipskew, rocketclipskew, // end of regular weapons
-        };
-        float fade = clipblend*hudblend, size = s*clipskew[weapid];
+        float fade = clipblend*hudblend, size = s*clipsize, offset = s*crosshairsize;
         int interval = lastmillis-game::focus->weaplast[weap];
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
@@ -823,65 +834,45 @@ namespace hud
         vec c(clipcolour, clipcolour, clipcolour);
         if(clipcolour > 0) c.mul(vec::hexcolor(W(weap, colour)));
         else if(clipstone) skewcolour(c.r, c.g, c.b, clipstone);
-        glColor4f(c.r, c.g, c.b, fade);
-        glBindTexture(GL_TEXTURE_2D, t->id);
+        float slice = 360/float(maxammo), angle = (maxammo > 2 ? 360.f : 360.f-slice*0.5f)-((maxammo-ammo)*slice),
+              need = s*clipsize*maxammo, have = 2*M_PI*offset, skew = clamp(have/need, 0.25f, 1.f);
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
             case W_S_PRIMARY:
             case W_S_SECONDARY:
             {
                 int shot = game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1;
-                if(shot) switch(weapid)
+                float rewind = angle+shot*slice;
+                loopi(shot)
                 {
-                    case W_FLAMER: case W_ROCKET: case W_MINE:
-                        drawslice(ammo/float(maxammo), shot/float(maxammo), x, y, size);
-                        break;
-                    case W_GRENADE:
-                        drawslice(0.25f/maxammo+ammo/float(maxammo), shot/float(maxammo), x, y, size);
-                        break;
-                    default:
-                        drawslice(0.5f/maxammo+ammo/float(maxammo), shot/float(maxammo), x, y, size);
-                        break;
+                    drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, rewind, c);
+                    rewind -= angle;
                 }
-                glColor4f(c.r, c.g, c.b, clipblend*hudblend);
-                size = s*clipskew[weapid];
+                fade = clipblend*hudblend;
+                size = s*clipsize;
                 break;
             }
             case W_S_RELOAD: case W_S_USE:
             {
                 if(game::focus->weapload[weap] > 0)
                 {
-                    ammo -= game::focus->weapload[weap];
-                    switch(weapid)
+                    loopi(game::focus->weapload[weap])
                     {
-                        case W_FLAMER: case W_ROCKET: case W_MINE:
-                            drawslice(ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
-                            break;
-                        case W_GRENADE:
-                            drawslice(0.25f/maxammo+ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
-                            break;
-                        default:
-                            drawslice(0.5f/maxammo+ammo/float(maxammo), game::focus->weapload[weap]/float(maxammo), x, y, size);
-                            break;
+                        drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, angle, c);
+                        angle -= slice;
                     }
-                    glColor4f(c.r, c.g, c.b, clipblend*hudblend);
-                    size = s*clipskew[weapid];
+                    ammo -= game::focus->weapload[weap];
+                    fade = clipblend*hudblend;
+                    size = s*clipsize;
                 }
                 break;
             }
             default: break;
         }
-        if(ammo > 0) switch(weapid)
+        loopi(ammo)
         {
-            case W_FLAMER: case W_ROCKET: case W_MINE:
-                drawslice(0, ammo/float(maxammo), x, y, size);
-                break;
-            case W_GRENADE:
-                drawslice(0.25f/maxammo, ammo/float(maxammo), x, y, size);
-                break;
-            default:
-                drawslice(0.5f/maxammo, ammo/float(maxammo), x, y, size);
-                break;
+            drawclipitem(cliptexs[weapid], x, y, offset, size*skew, fade, angle, c);
+            angle -= slice;
         }
     }
 
@@ -937,7 +928,7 @@ namespace hud
             {
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
                 {
-                    if(showclips) drawclip(game::focus->weapselect, cx, cy, clipsize*hudsize);
+                    if(showclips) drawclip(game::focus->weapselect, cx, cy, hudsize);
                     if(showindicator) drawindicator(game::focus->weapselect, cx, cy, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
                 if(crosshairhitspeed && totalmillis-game::focus->lasthit <= crosshairhitspeed)
