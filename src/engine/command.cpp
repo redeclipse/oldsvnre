@@ -99,12 +99,12 @@ static inline ident *forceident(tagval &v)
             v.setident(id);
             return id;
         }
-        case VAL_STR: 
-        { 
-            ident *id = newident(v.s, IDF_UNKNOWN); 
-            delete[] v.s; 
-            v.setident(id); 
-            return id; 
+        case VAL_STR:
+        {
+            ident *id = newident(v.s, IDF_UNKNOWN);
+            delete[] v.s;
+            v.setident(id);
+            return id;
         }
     }
     freearg(v);
@@ -489,29 +489,26 @@ char *svariable(const char *name, const char *cur, char **storage, identfun fun,
     return newstring(cur);
 }
 
-#define _GETVAR(id, vartype, name, retval) \
+#define GETVAR(id, vartype, name, retval) \
     ident *id = idents.access(name); \
     if(!id || id->type!=vartype) return retval;
-#define GETVAR(id, name, retval) _GETVAR(id, ID_VAR, name, retval)
 void setvar(const char *name, int i, bool dofunc, bool def)
 {
-    GETVAR(id, name, );
+    GETVAR(id, ID_VAR, name, );
     *id->storage.i = clamp(i, id->minval, id->maxval);
     if(def) id->def.i = i;
     if(dofunc) id->changed();
-    //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %d", id->name, *id->storage.i);
 }
 void setfvar(const char *name, float f, bool dofunc, bool def)
 {
-    _GETVAR(id, ID_FVAR, name, );
+    GETVAR(id, ID_FVAR, name, );
     *id->storage.f = clamp(f, id->minvalf, id->maxvalf);
     if(def) id->def.f = f;
     if(dofunc) id->changed();
-    //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, floatstr(*id->storage.f));
 }
 void setsvar(const char *name, const char *str, bool dofunc, bool def)
 {
-    _GETVAR(id, ID_SVAR, name, );
+    GETVAR(id, ID_SVAR, name, );
     delete[] *id->storage.s;
     *id->storage.s = newstring(str);
     if(def)
@@ -520,32 +517,53 @@ void setsvar(const char *name, const char *str, bool dofunc, bool def)
         id->def.s = newstring(str);
     }
     if(dofunc) id->changed();
-    //if(!(id->flags&IDF_WORLD) && !(id->flags&IDF_REWRITE) && (verbose >= 4 || interactive)) conoutf("\fc%s set to %s", id->name, *id->storage.s);
 }
 int getvar(const char *name)
 {
-    GETVAR(id, name, 0);
-    return *id->storage.i;
+    GETVAR(id, ID_VAR, name, 0);
+    switch(id->type)
+    {
+        case ID_VAR: return *id->storage.i;
+        case ID_FVAR: return int(*id->storage.f);
+        case ID_SVAR: return atoi(*id->storage.s);
+        case ID_ALIAS: return id->getint();
+        default: break;
+    }
+    return 0;
 }
 int getvartype(const char *name)
 {
-    GETVAR(id, name, 0);
+    ident *id = idents.access(name);
+    if(!id) return -1;
     return id->type;
 }
 int getvarflags(const char *name)
 {
-    GETVAR(id, name, 0);
+    ident *id = idents.access(name);
+    if(!id) return -1;
     return id->flags;
 }
 int getvarmin(const char *name)
 {
-    GETVAR(id, name, 0);
-    return id->minval;
+    ident *id = idents.access(name);
+    if(!id) return 0;
+    if(id) switch(id->type)
+    {
+        case ID_VAR: return id->minval;
+        case ID_FVAR: return int(id->minvalf);
+    }
+    return 0;
 }
 int getvarmax(const char *name)
 {
-    GETVAR(id, name, 0);
-    return id->maxval;
+    ident *id = idents.access(name);
+    if(!id) return 0;
+    if(id) switch(id->type)
+    {
+        case ID_VAR: return id->maxval;
+        case ID_FVAR: return int(id->maxvalf);
+    }
+    return 0;
 }
 float getfvarmin(const char *name)
 {
@@ -929,7 +947,7 @@ static inline void compileident(vector<uint> &code, ident *id)
 {
     code.add((id->index < MAXARGS ? CODE_IDENTARG : CODE_IDENT)|(id->index<<8));
 }
-    
+
 static inline void compileident(vector<uint> &code, const char *word = NULL)
 {
     compileident(code, word ? newident(word, IDF_UNKNOWN) : dummyident);
@@ -942,7 +960,7 @@ static inline void compileint(vector<uint> &code, const char *word = NULL)
 
 static inline void compilefloat(vector<uint> &code, float f)
 {
-    if(int(f) == f && f >= -0x800000 && f <= 0x7FFFFF) 
+    if(int(f) == f && f >= -0x800000 && f <= 0x7FFFFF)
         code.add(CODE_VALI|RET_FLOAT|(int(f)<<8));
     else
     {
@@ -1023,7 +1041,7 @@ static void compilelookup(vector<uint> &code, const char *&p, int ltype)
                     for(const char *fmt = id->args; *fmt; fmt++) switch(*fmt)
                     {
                         case 's': compilestr(code, NULL, 0, true); numargs++; break;
-                        case 'i': compileint(code); numargs++; break;         
+                        case 'i': compileint(code); numargs++; break;
                         case 'b': compileint(code, INT_MIN); numargs++; break;
                         case 'f': compilefloat(code); numargs++; break;
                         case 't': compilenull(code); numargs++; break;
@@ -1036,7 +1054,7 @@ static void compilelookup(vector<uint> &code, const char *&p, int ltype)
 #endif
                         case 'C': comtype = CODE_COMC; numargs = 1; goto endfmt;
                         case 'V': comtype = CODE_COMV; numargs = 2; goto endfmt;
-                        case '1': case '2': case '3': case '4': break; 
+                        case '1': case '2': case '3': case '4': break;
                     }
                 endfmt:
                     code.add(comtype|(ltype < VAL_ANY ? ltype<<CODE_RET : 0)|(id->index<<8));
@@ -1757,7 +1775,7 @@ static const uint *runcode(const uint *code, tagval &result)
             case CODE_IDENTU:
             {
                 tagval &arg = args[numargs-1];
-                ident *id = arg.type == VAL_STR || arg.type == VAL_MACRO ? newident(arg.s, IDF_UNKNOWN) : dummyident; 
+                ident *id = arg.type == VAL_STR || arg.type == VAL_MACRO ? newident(arg.s, IDF_UNKNOWN) : dummyident;
                 if(id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index)))
                 {
                     pusharg(*id, nullval, aliasstack->argstack[id->index]);
@@ -2008,7 +2026,7 @@ static const uint *runcode(const uint *code, tagval &result)
                         loopj(numargs-1) pushalias(*forceident(args[j+1]), locals[j]);
                         code = runcode(code, result);
                         loopj(numargs-1) popalias(*args[j+1].id);
-                        goto exit;  
+                        goto exit;
                     case ID_VAR:
                         if(numargs <= 1) printvar(id);
                         else
@@ -2760,7 +2778,7 @@ void sortlist(char *list, ident *x, ident *y, uint *body)
 
     poparg(*x);
     poparg(*y);
-    
+
     char *sorted = macros;
     int sortedlen = total + max(items.length() - 1, 0);
     if(macrolen < sortedlen)
