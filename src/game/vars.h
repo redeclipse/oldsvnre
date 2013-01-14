@@ -137,6 +137,7 @@ GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to 
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
+
 #ifndef MEKARCADE
 GVAR(0, spawnhealth, 0, 100, VAR_MAX);
 #endif
@@ -388,6 +389,7 @@ GFVAR(0, radiallimited, 0, 0.5f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
 GVAR(0, criticalchance, 0, 100, VAR_MAX);
 GVAR(0, weaponswitchdelay, 0, 500, VAR_MAX);
+GVAR(0, weaponinterrupts, 0, W_S_INTERRUPT, W_S_ALL); // what weapon states can have their delay interrupted
 
 GFVAR(0, hitpushscale, 0, 1, FVAR_MAX);
 GFVAR(0, hitslowscale, 0, 1, FVAR_MAX);

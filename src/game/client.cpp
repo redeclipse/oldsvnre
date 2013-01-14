@@ -1868,7 +1868,7 @@ namespace client
                     int trg = getint(p), weap = getint(p);
                     gameent *target = game::getclient(trg);
                     if(!target || !isweap(weap)) break;
-                    weapons::weapselect(target, weap, false);
+                    weapons::weapselect(target, weap, G(weaponinterrupts), false);
                     break;
                 }
 
