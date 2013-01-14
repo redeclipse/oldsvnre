@@ -1287,7 +1287,7 @@ namespace ai
         {
             if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != W_S_WAIT)
             {
-                loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, W_S_FILTER))
+                loopirev(W_ITEM) if(i != d->ai->weappref && d->candrop(i, sweap, lastmillis, G(weaponinterrupts)))
                 {
                     client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, i);
                     d->setweapstate(d->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
@@ -1331,7 +1331,7 @@ namespace ai
                         {
                             extentity &e = *entities::ents[ent];
                             int attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_FILTER)) switch(e.type)
+                            if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts))) switch(e.type)
                             {
                                 case WEAPON:
                                 {
@@ -1358,7 +1358,7 @@ namespace ai
             {
                 loopirev(W_MAX) if(i >= W_MELEE && d->hasweap(i, sweap) && hasrange(d, e, i)) { weap = i; break; }
             }
-            if(isweap(weap) && weap != d->weapselect && weapons::weapselect(d, weap))
+            if(isweap(weap) && weap != d->weapselect && weapons::weapselect(d, weap, G(weaponinterrupts)))
             {
                 d->ai->lastaction = lastmillis;
                 return true;

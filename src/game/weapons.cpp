@@ -44,7 +44,7 @@ namespace weapons
         }
     });
 
-    bool weapselect(gameent *d, int weap, bool local, int filter)
+    bool weapselect(gameent *d, int weap, int filter, bool local)
     {
         if(!local || (!game::intermission && d->canswitch(weap, m_weapon(game::gamemode, game::mutators), lastmillis, filter)))
         {
@@ -89,7 +89,7 @@ namespace weapons
     {
         if(game::intermission || a < -1 || b < -1 || a >= W_MAX || b >= W_MAX) return;
         if(weapselectdelay && lastweapselect && totalmillis-lastweapselect < weapselectdelay) return;
-        if(!d->weapwaited(d->weapselect, lastmillis, W_S_FILTER)) return;
+        if(!d->weapwaited(d->weapselect, lastmillis, G(weaponinterrupts))) return;
         int s = slot(d, d->weapselect);
         loopi(W_MAX) // only loop the amount of times we have weaps for
         {
@@ -120,7 +120,7 @@ namespace weapons
                 skipweap(skipmine, W_MINE);
             }
 
-            if(weapselect(d, n))
+            if(weapselect(d, n, G(weaponinterrupts)))
             {
                 lastweapselect = totalmillis;
                 return;
@@ -136,7 +136,7 @@ namespace weapons
         if(game::intermission) return;
         int weap = isweap(w) ? w : d->weapselect, sweap = m_weapon(game::gamemode, game::mutators);
         d->action[AC_DROP] = false;
-        if(d->candrop(weap, sweap, lastmillis, W_S_FILTER))
+        if(d->candrop(weap, sweap, lastmillis, G(weaponinterrupts)))
         {
             client::addmsg(N_DROP, "ri3", d->clientnum, lastmillis-game::maptime, weap);
             d->setweapstate(weap, W_S_WAIT, weaponswitchdelay, lastmillis);
@@ -160,7 +160,7 @@ namespace weapons
     void checkweapons(gameent *d)
     {
         int sweap = m_weapon(game::gamemode, game::mutators);
-        if(!d->hasweap(d->weapselect, sweap)) weapselect(d, d->bestweap(sweap, true), true, (1<<W_S_RELOAD));
+        if(!d->hasweap(d->weapselect, sweap)) weapselect(d, d->bestweap(sweap, true), 1<<W_S_RELOAD, true);
         else if(d->action[AC_RELOAD] || autoreload(d)) weapreload(d, d->weapselect);
         else if(d->action[AC_DROP]) weapdrop(d, d->weapselect);
     }

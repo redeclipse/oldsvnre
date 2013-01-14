@@ -511,7 +511,7 @@ namespace entities
                 if(game::allowmove(d))
                 {
                     int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
-                    if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_FILTER))
+                    if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts)))
                     {
                         client::addmsg(N_ITEMUSE, "ri3", d->clientnum, lastmillis-game::maptime, n);
                         d->setweapstate(d->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);

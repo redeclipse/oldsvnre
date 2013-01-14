@@ -1518,7 +1518,7 @@ namespace weapons
 {
     extern int autoreloading;
     extern int slot(gameent *d, int n, bool back = false);
-    extern bool weapselect(gameent *d, int weap, bool local = true, int filter = W_S_FILTER);
+    extern bool weapselect(gameent *d, int weap, int filter, bool local = true);
     extern bool weapreload(gameent *d, int weap, int load = -1, int ammo = -1, int reloads = -1, bool local = true);
     extern void weapdrop(gameent *d, int w = -1);
     extern void checkweapons(gameent *d);
