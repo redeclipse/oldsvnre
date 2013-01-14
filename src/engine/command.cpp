@@ -258,6 +258,20 @@ static struct identlink
 
 VAR(0, dbgalias, 0, 4, 1000);
 
+static void debugalias()
+{
+    if(!dbgalias) return;
+    int total = 0, depth = 0;
+    for(identlink *l = aliasstack; l != &noalias; l = l->next) total++;
+    for(identlink *l = aliasstack; l != &noalias; l = l->next)
+    {
+        ident *id = l->id;
+        ++depth;
+        if(depth < dbgalias) conoutft(CON_MESG, "  %d) %s", total-depth+1, id->name);
+        else if(l->next == &noalias) conoutft(CON_MESG, depth == dbgalias ? "  %d) %s" : "  ..%d) %s", total-depth+1, id->name);
+    }
+}
+
 static int nodebug = 0;
 
 static void debugcode(const char *fmt, ...) PRINTFARGS(1, 2);
@@ -269,16 +283,19 @@ static void debugcode(const char *fmt, ...)
     defvformatstring(msg, fmt, fmt);
     conoutft(CON_MESG, "%s", msg);
 
-    if(!dbgalias) return;
-    int total = 0, depth = 0;
-    for(identlink *l = aliasstack; l != &noalias; l = l->next) total++;
-    for(identlink *l = aliasstack; l != &noalias; l = l->next)
-    {
-        ident *id = l->id;
-        ++depth;
-        if(depth < dbgalias) conoutft(CON_MESG, "  %d) %s", total-depth+1, id->name);
-        else if(l->next == &noalias) conoutft(CON_MESG, depth == dbgalias ? "  %d) %s" : "  ..%d) %s", total-depth+1, id->name);
-    }
+    debugalias();
+}
+
+static void debugcodeline(const char *p, const char *fmt, ...) PRINTFARGS(2, 3);
+
+static void debugcodeline(const char *p, const char *fmt, ...)
+{
+    if(nodebug) return;
+
+    defvformatstring(msg, fmt, debugline(p, fmt));
+    conoutft(CON_MESG, "%s", msg);
+
+    debugalias();
 }
 
 ICOMMAND(0, nodebug, "e", (uint *body), { nodebug++; executeret(body, *commandret); nodebug--; });
@@ -353,7 +370,7 @@ ident *newident(const char *name, int flags)
     {
         if(checknumber(name))
         {
-            debugcode("number %s is not a valid identifier name", name);
+            debugcode("\frnumber %s is not a valid identifier name", name);
             return dummyident;
         }
         id = addident(ident(ID_ALIAS, newstring(name), flags));
@@ -384,7 +401,7 @@ void resetvar(char *name)
 {
     ident *id = idents.access(name);
     if(!id) return;
-    if(id->flags&IDF_READONLY) debugcode("variable %s is read-only", id->name);
+    if(id->flags&IDF_READONLY) debugcode("\frvariable %s is read-only", id->name);
     else clearoverride(*id);
 }
 
@@ -433,7 +450,7 @@ static void setalias(const char *name, tagval &v)
     }
     else if(checknumber(name))
     {
-        debugcode("cannot alias number %s", name);
+        debugcode("\frcannot alias number %s", name);
         freearg(v);
     }
     else
@@ -1180,7 +1197,7 @@ static void compileblock(vector<uint> &code, const char *&p, int wordtype)
         switch(c)
         {
             case '\0':
-                debugcode(debugline(line, "\frmissing \"]\""));
+                debugcodeline(line, "\frmissing \"]\"");
                 p--;
                 goto done;
             case '\"':
@@ -1198,7 +1215,7 @@ static void compileblock(vector<uint> &code, const char *&p, int wordtype)
                 while(*p == '@') p++;
                 int level = p - (esc - 1);
                 if(brak > level) continue;
-                else if(brak < level) debugcode(debugline(line, "\frtoo many @s"));
+                else if(brak < level) debugcodeline(line, "\frtoo many @s");
                 if(!concs) code.add(CODE_ENTER);
                 if(concs + 2 > MAXARGS)
                 {
@@ -1286,7 +1303,7 @@ retry:
             compileblock(code, p, wordtype);
             return true;
         case '@':
-            debugcode(debugline(p, "\frunexpected \"@\""));
+            debugcodeline(p, "\frunexpected \"@\"");
             do ++p; while(*p == '@');
             goto retry;
         default: word = cutword(p, wordlen); break;
@@ -1439,14 +1456,14 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
         switch(c)
         {
             case '\0':
-                if(c != brak) debugcode(debugline(line, "\frmissing \"%c\""), brak);
+                if(c != brak) debugcodeline(line, "\frmissing \"%c\"", brak);
                 p--;
                 return;
 
             case ')':
             case ']':
                 if(c == brak) return;
-                debugcode(debugline(line, "\frunexpected \"%c\""), c);
+                debugcodeline(line, "\frunexpected \"%c\"", c);
                 break;
 
             case '/':
