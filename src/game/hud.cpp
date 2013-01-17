@@ -980,8 +980,8 @@ namespace hud
                     break;
                 case 2:
                 {
+                    if(!isweap(game::focus->weapselect)) continue;
                     int weap = game::focus->weapselect, interval = lastmillis-game::focus->weaplast[weap];
-                    if(!isweap(weap) || (!W2(weap, sub, false) && !W2(weap, sub, true)) || W(weap, max) < cliplength) continue;
                     val = game::focus->ammo[weap]/float(W(weap, max));
                     c = vec(0.8f, 0.55f, 0.15f);
                     if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
