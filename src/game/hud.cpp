@@ -960,13 +960,13 @@ namespace hud
         if(!num) return;
         Texture *t = circlebartex && *circlebartex ? textureload(circlebartex, 3) : NULL;
         if(!t || t == notexture) return;
-        float slice = 1.f/num, pos = num%2 ? slice*0.5f : 0.f, fade = hudblend*circlebarblend;
+        float slice = 1.f/num, pos = num%2 ? slice*0.5f : 0.f;
         if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         else glBlendFunc(GL_ONE, GL_ONE);
         glBindTexture(GL_TEXTURE_2D, t->id);
         loopi(3) if(showcirclebar&(1<<i))
         {
-            float val = 0;
+            float val = 0, fade = hudblend*circlebarblend;
             vec c(1, 1, 1);
             switch(i)
             {
@@ -1005,49 +1005,79 @@ namespace hud
                     break;
                 }
             }
-            glColor4f(c.r*0.25f, c.g*0.25f, c.b*0.25f, hudblend*circlebarblend*0.75f);
+            glColor4f(c.r*0.25f, c.g*0.25f, c.b*0.25f, hudblend*circlebarblend*0.65f);
             drawslice(pos, slice, x, y, s*circlebarsize);
             if(val > 0)
             {
                 glColor4f(c.r, c.g, c.b, fade);
                 drawslice(pos, val*slice, x, y, s*circlebarsize);
             }
-            if(i == 2)
+            float nps = pos+val*slice;
+            fade = hudblend*circlebarblend;
+            switch(i)
             {
-                float nps = pos+val*slice;
-                int weap = game::focus->weapselect, interval = lastmillis-game::focus->weaplast[weap];
-                fade = hudblend*circlebarblend;
-                val = 0;
-                if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
+                case 2:
                 {
-                    case W_S_PRIMARY: case W_S_SECONDARY:
+                    val = 0;
+                    int weap = game::focus->weapselect, interval = lastmillis-game::focus->weaplast[weap];
+                    if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
                     {
-                        float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
-                        fade *= amt;
-                        val = (game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1)/float(W(weap, max))*amt;
-                        break;
-                    }
-                    case W_S_RELOAD: case W_S_USE:
-                    {
-                        if(game::focus->weapload[weap] > 0)
+                        case W_S_PRIMARY: case W_S_SECONDARY:
                         {
-                            int check = game::focus->weapwait[weap]/2;
-                            if(interval >= check)
-                            {
-                                float amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
-                                fade *= amt;
-                                val = game::focus->weapload[weap]/float(W(weap, max))*amt;
-                            }
+                            float amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                            fade *= amt;
+                            val = (game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1)/float(W(weap, max))*amt;
+                            break;
                         }
-                        break;
+                        case W_S_RELOAD: case W_S_USE:
+                        {
+                            if(game::focus->weapload[weap] > 0)
+                            {
+                                int check = game::focus->weapwait[weap]/2;
+                                if(interval >= check)
+                                {
+                                    float amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
+                                    fade *= amt;
+                                    val = game::focus->weapload[weap]/float(W(weap, max))*amt;
+                                }
+                            }
+                            break;
+                        }
+                        default: break;
                     }
-                    default: break;
+                    if(val > 0)
+                    {
+                        glColor4f(c.r, c.g, c.b, fade);
+                        drawslice(nps, val*slice, x, y, s*circlebarsize);
+                    }
+                    break;
                 }
-                if(val > 0)
+                case 0:
                 {
-                    glColor4f(c.r, c.g, c.b, fade);
-                    drawslice(nps, val*slice, x, y, s*circlebarsize);
+                    loopv(damagelocs)
+                    {
+                        damageloc &d = damagelocs[i];
+                        int millis = lastmillis-d.outtime;
+                        if(millis >= d.damage*20 || d.dir.iszero()) { if(millis >= radardamagetime+radardamagefade) damagelocs.remove(i--); continue; }
+                        int in = d.damage*5, out = d.damage*15;
+                        val = d.damage/float(m_health(game::gamemode, game::mutators, game::focus->model));
+                        if(millis <= in) flashcolour(c.r, c.g, c.b, 0.35f, 0.55f, 0.1f, millis/float(in));
+                        else
+                        {
+                            float amt = 1.f-((millis-in)/float(out));
+                            c = vec(0.35f, 0.55f, 0.1f);
+                            fade *= amt;
+                            val *= amt;
+                        }
+                        if(val > 0)
+                        {
+                            glColor4f(c.r, c.g, c.b, fade);
+                            drawslice(nps, val*slice, x, y, s*circlebarsize);
+                            nps += val*slice;
+                        }
+                    }
                 }
+                default: case 1: break;
             }
             pos += slice;
         }
@@ -1931,7 +1961,7 @@ namespace hud
         {
             damageloc &d = damagelocs[i];
             int millis = lastmillis-d.outtime;
-            if(millis >= radardamagetime+radardamagefade || d.dir.iszero()) { damagelocs.remove(i--); continue; }
+            if(millis >= radardamagetime+radardamagefade || d.dir.iszero()) { if(millis >= d.damage*20) damagelocs.remove(i--); continue; }
             if(game::focus->state != CS_SPECTATOR && game::focus->state != CS_EDITING)
             {
                 float amt = millis >= radardamagetime ? 1.f-(float(millis-radardamagetime)/float(radardamagefade)) : float(millis)/float(radardamagetime),
