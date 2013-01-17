@@ -152,9 +152,8 @@ namespace hud
 
     VAR(IDF_PERSIST, showindicator, 0, 3, 4);
     FVAR(IDF_PERSIST, indicatorsize, 0, 0.025f, 1000);
-    FVAR(IDF_PERSIST, indicatorblend, 0, 1, 1);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, indicatortex, "<grey>textures/progress", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, zoomtex, "textures/zoom", 3);
+    FVAR(IDF_PERSIST, indicatorblend, 0, 0.75f, 1);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, indicatortex, "<grey>textures/indicator", 3);
 
     VAR(IDF_PERSIST, showcrosshair, 0, 2, 2); // 0 = off, 1 = on, 2 = blend depending on current accuracy level
     VAR(IDF_PERSIST, crosshairweapons, 0, 0, 3); // 0 = off, &1 = crosshair-specific weapons, &2 = also appy colour
@@ -200,13 +199,14 @@ namespace hud
     FVAR(IDF_PERSIST, cursorsize, 0, 0.025f, 1000);
     FVAR(IDF_PERSIST, cursorblend, 0, 1, 1);
 
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, zoomtex, "textures/zoom", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, zoomcrosshairtex, "crosshairs/cross-01", 3);
     FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
     VAR(IDF_PERSIST, showcirclebar, 0, 7, 7); // 0 = off, &1 = health, &2 = impulse, &4 = ammo
-    FVAR(IDF_PERSIST, circlebarsize, 0, 0.045f, 1000);
-    FVAR(IDF_PERSIST, circlebarblend, 0, 0.85f, 1);
+    FVAR(IDF_PERSIST, circlebarsize, 0, 0.04f, 1000);
+    FVAR(IDF_PERSIST, circlebarblend, 0, 0.75f, 1);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, circlebartex, "textures/circlebar", 3);
 
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
@@ -290,13 +290,13 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, plasmatex, "<grey>textures/plasma", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, rifletex, "<grey>textures/rifle", 3);
 
-    VAR(IDF_PERSIST, showclips, 0, 0, 1);
-    VAR(IDF_PERSIST, clipanims, 0, 1, 2);
-    FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
-    FVAR(IDF_PERSIST, clipoffset, 0, 0.04f, 1000);
+    VAR(IDF_PERSIST, showclips, 0, 1, 1);
+    VAR(IDF_PERSIST, clipanims, 0, 2, 2);
+    FVAR(IDF_PERSIST, clipsize, 0, 0.04f, 1000);
+    FVAR(IDF_PERSIST, clipoffset, 0, 0.05f, 1000);
     FVAR(IDF_PERSIST, clipminscale, 0, 0.3f, 1000);
     FVAR(IDF_PERSIST, clipmaxscale, 0, 1, 1000);
-    FVAR(IDF_PERSIST, clipblend, 0, 1, 1000);
+    FVAR(IDF_PERSIST, clipblend, 0, 0.75f, 1);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
     VAR(IDF_PERSIST, cliplength, 0, 0, VAR_MAX);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, meleecliptex, "<grey>textures/meleeclip", 3);
