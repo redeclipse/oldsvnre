@@ -9,15 +9,20 @@ Gameplay:
 
 Weapons:
  * Plasma primary damage and explosion radius increased
+ * Mines, new weapon, primary proximity mine, secondary tripwire mine
+ * Rifle damage and hitspush now scales with distance, considerably reduced at closer range
+ * Rifle zoom can now only be controlled via zoomlevels by players
+ * SMG secondary now sticks to objects and explodes radially after a short delay
 
 Maps:
  * Assigned map music to all maps
  * Canals, updated and added to rotations
- * Fourplex, updated
- * Starlibido, updated
+ * Fourplex, updated to version 1.3
+ * Starlibido, updated to version 1.4b
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.5)
  * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from Blood Frontier)
+ * Hawk, fixed a checkpoint bug
 
 Interface & Menus:
  * Overall reduced font sizes
@@ -34,6 +39,9 @@ Interface & Menus:
  * Incomplete demos discarded by default (/demokeep 1 to enable)
  * Added inline tab completion for commands and inline help descriptions
  * Added ammo bars in weapon inventory
+ * Carried flags & similar are now 50% trasparent in third person view
+ * Revamped clip display with variable clip sizes
+ * Added new "circle bar" showing health, impulse and ammo simultaneously at crosshair location
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
@@ -42,6 +50,17 @@ Modes & Mutators:
 
 Modding & Data Assets:
  * Added support for up to 4 types of water, lava, and glass
+ * Added possible missile behaviour guided style for weapons
+ * Added cloudoffsetx, cloudoffsety, envoffsetx, and envoffsety vars
+ * Added new variables for proximity & stealth mine weapons
+ * Changed weapon variables: pusharea -> wavepush1/wavepush2, removed weapon jamming
+ * Added variable number of loadout weapons in arena via 'maxcarry'
+ * Added new variables for projectile collision: "bounce shot" and "drill geom/player/shot" which allows penetration through normal collisions
+ * Added mapmodels 'roll' property
+ * Zooming is now limited by zoomlimitmin and zoomlimitmax
+ * Added 'weaponinterrupts' server variable which allows control over which weapon states may be interrupted by the player
+ * Renamed 'blarg' folder to 'misc' for random textures
+ * Added a few light textuers in 'misc' (used in starlibido)
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
@@ -52,6 +71,10 @@ Core & Install:
  * Client now uses log.txt in the homedir by default
  * Binary files moved to bin/{amd64,x86}/ subdirectories
  * MekArcade source code tree merged in
+ * Enet 1.3.6
+ * Workaround for intel/apple occlusion bug
+ * Network encoding functions moved into tools
+ * Weapon variable definititions structured into rows per variable
 
 Additional fixed bugs:
  * #218 - can no longer drop your loadout weapons in arena
