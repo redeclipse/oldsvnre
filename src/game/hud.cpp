@@ -204,6 +204,11 @@ namespace hud
     FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
+    VAR(IDF_PERSIST, showcirclebar, 0, 3, 7); // 0 = off, &1 = health, &2 = impulse, &4 = ammo
+    FVAR(IDF_PERSIST, circlebarsize, 0, 0.085f, 1000);
+    FVAR(IDF_PERSIST, circlebarblend, 0, 0.5f, 1);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, circlebartex, "textures/circlebar", 3);
+
     VAR(IDF_PERSIST, showinventory, 0, 1, 1);
     VAR(IDF_PERSIST, inventoryammo, 0, 1, 3);
     VAR(IDF_PERSIST, inventoryammobar, 0, 2, 2);
@@ -287,6 +292,7 @@ namespace hud
 
     VAR(IDF_PERSIST, showclips, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.045f, 1000);
+    FVAR(IDF_PERSIST, clipoffset, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, clipminscale, 0, 0.3f, 1000);
     FVAR(IDF_PERSIST, clipmaxscale, 0, 1, 1000);
     FVAR(IDF_PERSIST, clipblend, 0, 1, 1000);
@@ -856,7 +862,7 @@ namespace hud
             flamercliprotate, plasmacliprotate, riflecliprotate, grenadecliprotate, minecliprotate, rocketcliprotate
         };
         int ammo = game::focus->ammo[weap], maxammo = W(weap, max);
-        float fade = clipblend*hudblend, size = s*clipsize*clipskew[weap], offset = s*crosshairsize, amt = 0.f;
+        float fade = clipblend*hudblend, size = s*clipsize*clipskew[weap], offset = s*clipoffset, amt = 0.f;
         int interval = lastmillis-game::focus->weaplast[weap];
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
@@ -912,7 +918,7 @@ namespace hud
         if(clipcolour > 0) c.mul(vec::hexcolor(W(weap, colour)));
         else if(clipstone) skewcolour(c.r, c.g, c.b, clipstone);
         float slice = 360/float(maxammo), angle = (maxammo > (cliprots[weap]&4 ? 4 : 3) || maxammo%2 ? 360.f : 360.f-slice*0.5f)-((maxammo-ammo)*slice),
-              area = 1-clamp(clipoffs[weap]*2, 1e-3f, 1.f), need = s*clipsize*clipskew[weap]*area*maxammo, have = 2*M_PI*s*crosshairsize,
+              area = 1-clamp(clipoffs[weap]*2, 1e-3f, 1.f), need = s*clipsize*clipskew[weap]*area*maxammo, have = 2*M_PI*s*clipoffset,
               scale = clamp(have/need, clipminscale, clipmaxscale), spin = 360*amt;
         if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
         {
@@ -928,7 +934,7 @@ namespace hud
                 }
                 fade = clipblend*hudblend;
                 size = s*clipsize*clipskew[weap];
-                offset = s*crosshairsize;
+                offset = s*clipoffset;
                 spin = 0;
                 break;
             }
@@ -945,7 +951,7 @@ namespace hud
                 }
                 fade = clipblend*hudblend;
                 size = s*clipsize*clipskew[weap];
-                offset = s*crosshairsize;
+                offset = s*clipoffset;
                 spin = 0;
                 break;
             }
@@ -955,6 +961,51 @@ namespace hud
         {
             drawclipitem(cliptexs[weap], x, y, offset, size*scale, fade, angle, spin, cliprots[weap], c);
             angle -= slice;
+        }
+    }
+
+    void drawcirclebar(int x, int y, float s)
+    {
+        if(game::focus->state != CS_ALIVE) return;
+        int num = 0;
+        loopi(3) if(showcirclebar&(1<<i)) num++;
+        if(!num) return;
+        Texture *t = circlebartex && *circlebartex ? textureload(circlebartex, 3) : NULL;
+        if(!t || t == notexture) return;
+        float slice = 1.f/num, pos = num%2 ? slice*0.5f : 0.f;
+        if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        else glBlendFunc(GL_ONE, GL_ONE);
+        glBindTexture(GL_TEXTURE_2D, t->id);
+        loopi(3) if(showcirclebar&(1<<i))
+        {
+            float val = 0, r = 1, g = 1, b = 1;
+            switch(i)
+            {
+                case 0:
+                    val = min(1.f, game::focus->health/float(m_health(game::gamemode, game::mutators, game::focus->model)));
+                    r = 0.25f; g = 0.75f; b = 0.125f;
+                    break;
+                case 1:
+                    val = 1-clamp(float(game::focus->impulse[IM_METER])/float(impulsemeter), 0.f, 1.f);
+                    r = 0.65f; g = 0.25f; b = 0.85f;
+                    break;
+                case 2:
+                {
+                    int weap = game::focus->weapselect;
+                    if(!isweap(weap) || (!W2(weap, sub, false) && !W2(weap, sub, true)) || W(weap, max) < cliplength) continue;
+                    val = game::focus->ammo[weap]/float(W(weap, max));
+                    r = 0.75f; g = 0.5f; b = 0.125f;
+                    break;
+                }
+            }
+            glColor4f(r*0.5f, g*0.5f, b*0.5f, hudblend*circlebarblend*0.5f);
+            drawslice(pos, slice, x, y, s*circlebarsize);
+            if(val > 0)
+            {
+                glColor4f(r, g, b, hudblend*circlebarblend);
+                drawslice(pos, val*slice, x, y, s*circlebarsize);
+            }
+            pos += slice;
         }
     }
 
@@ -1008,6 +1059,7 @@ namespace hud
             drawpointertex(getpointer(index, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
             if(index > POINTER_GUI)
             {
+                if(showcirclebar) drawcirclebar(cx, cy, hudsize);
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
                 {
                     if(showclips) drawclip(game::focus->weapselect, cx, cy, hudsize);
