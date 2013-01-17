@@ -292,11 +292,11 @@ namespace hud
 
     VAR(IDF_PERSIST, showclips, 0, 1, 1);
     VAR(IDF_PERSIST, clipanims, 0, 2, 2);
-    FVAR(IDF_PERSIST, clipsize, 0, 0.04f, 1000);
+    FVAR(IDF_PERSIST, clipsize, 0, 0.035f, 1000);
     FVAR(IDF_PERSIST, clipoffset, 0, 0.05f, 1000);
     FVAR(IDF_PERSIST, clipminscale, 0, 0.3f, 1000);
     FVAR(IDF_PERSIST, clipmaxscale, 0, 1, 1000);
-    FVAR(IDF_PERSIST, clipblend, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, clipblend, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, clipcolour, 0, 1, 1);
     VAR(IDF_PERSIST, cliplength, 0, 0, VAR_MAX);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, meleecliptex, "<grey>textures/meleeclip", 3);
@@ -1057,9 +1057,9 @@ namespace hud
                     loopv(damagelocs)
                     {
                         damageloc &d = damagelocs[i];
-                        int millis = lastmillis-d.outtime;
-                        if(millis >= d.damage*20 || d.dir.iszero()) { if(millis >= radardamagetime+radardamagefade) damagelocs.remove(i--); continue; }
-                        int in = d.damage*5, out = d.damage*15;
+                        int millis = lastmillis-d.outtime, piece = min(20, d.damage);
+                        if(millis >= piece*50 || d.dir.iszero()) { if(millis >= radardamagetime+radardamagefade) damagelocs.remove(i--); continue; }
+                        int in = piece*10, out = piece*40;
                         val = d.damage/float(m_health(game::gamemode, game::mutators, game::focus->model));
                         if(millis <= in) flashcolour(c.r, c.g, c.b, 0.35f, 0.55f, 0.1f, millis/float(in));
                         else
@@ -1961,7 +1961,7 @@ namespace hud
         {
             damageloc &d = damagelocs[i];
             int millis = lastmillis-d.outtime;
-            if(millis >= radardamagetime+radardamagefade || d.dir.iszero()) { if(millis >= d.damage*20) damagelocs.remove(i--); continue; }
+            if(millis >= radardamagetime+radardamagefade || d.dir.iszero()) { if(millis >= min(20, d.damage)*50) damagelocs.remove(i--); continue; }
             if(game::focus->state != CS_SPECTATOR && game::focus->state != CS_EDITING)
             {
                 float amt = millis >= radardamagetime ? 1.f-(float(millis-radardamagetime)/float(radardamagefade)) : float(millis)/float(radardamagetime),
