@@ -206,7 +206,7 @@ WPVARM(0, flakcollide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
 WPVARM(0, flakdmg, VAR_MIN, VAR_MAX,
-    25,         10,         15,         16,         16,         12,         10,         18,         150,        100,        300,
+    25,         2,          15,         16,         16,         12,         10,         18,         150,        100,        300,
     10,         5,          30,         4,          2,          4,          5,          50,         150,        100,        300
 );
 WPFVARM(0, flakffwd, 0, 1,
@@ -243,11 +243,11 @@ WPVARM(0, flakspeed, 0, VAR_MAX,
 );
 WPFVARM(0, flakspread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       0.2f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f,
-    1.0f,       0.25f,      1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f
+    1.0f,       0.2f,       1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f
 );
 WPVARM(0, flaktime, 1, VAR_MAX,
     500,        500,        500,        250,        500,        1000,       500,        500,        3000,       3000,       3000,
-    500,        750,        500,        2000,       800,        3000,       500,        500,        3000,       3000,       3000
+    500,        500,        500,        2000,       800,        3000,       500,        500,        3000,       3000,       3000
 );
 WPVARM(0, flakweap, -1, W_MAX*2-1,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG,
@@ -352,7 +352,7 @@ WPFVARM(0, radius, FVAR_NONZERO, FVAR_MAX,
 );
 WPVARM(0, rays, 0, VAR_MAX,
     1,          1,          1,          10,         1,          1,          1,          1,          1,          1,          1,
-    1,          10,         1,          1,          1,          4,          1,          1,          1,          1,          1
+    1,          5,          1,          1,          1,          4,          1,          1,          1,          1,          1
 );
 WPVAR(0, rdelay, 0, VAR_MAX,
     50,         1000,       50,         750,        1500,       2000,       2000,       1750,       1500,       1500,       1500
