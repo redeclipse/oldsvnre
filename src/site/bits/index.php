@@ -24,6 +24,7 @@
     $app['targets']['devel'] = array('name' => 'Devel', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/', 'nav' => -1, 'redir' => 1);
     $app['targets']['svn'] = array('name' => 'SVN', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/changeset/', 'nav' => -1, 'redir' => 1);
     $app['targets']['ticket'] = array('name' => 'Tickets', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/report/1', 'alturl' => 'http://sourceforge.net/apps/trac/redeclipse/ticket/', 'nav' => -1, 'redir' => 1);
+    $app['targets']['old'] = array('name' => 'Old SVN', 'url' => 'http://bloodfrontier.svn.sourceforge.net/', 'alturl' => 'http://bloodfrontier.svn.sourceforge.net/viewvc/bloodfrontier?view=revision&revision=', 'nav' => -1, 'redir' => 1);
 
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
