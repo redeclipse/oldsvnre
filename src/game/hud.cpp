@@ -1013,12 +1013,12 @@ namespace hud
                 drawslice(pos, val*slice, x, y, s*circlebarsize);
             }
             float nps = pos+val*slice;
+            val = 0;
             fade = hudblend*circlebarblend;
             switch(i)
             {
                 case 2:
                 {
-                    val = 0;
                     int weap = game::focus->weapselect, interval = lastmillis-game::focus->weaplast[weap];
                     if(interval <= game::focus->weapwait[weap]) switch(game::focus->weapstate[weap])
                     {
@@ -1045,39 +1045,35 @@ namespace hud
                         }
                         default: break;
                     }
-                    if(val > 0)
-                    {
-                        glColor4f(c.r, c.g, c.b, fade);
-                        drawslice(nps, val*slice, x, y, s*circlebarsize);
-                    }
                     break;
                 }
                 case 0:
                 {
+                    float total = 0;
                     loopv(damagelocs)
                     {
                         damageloc &d = damagelocs[i];
-                        int millis = lastmillis-d.outtime, piece = min(20, d.damage);
-                        if(millis >= piece*50 || d.dir.iszero()) { if(millis >= radardamagetime+radardamagefade) damagelocs.remove(i--); continue; }
-                        int in = piece*10, out = piece*40;
-                        val = d.damage/float(m_health(game::gamemode, game::mutators, game::focus->model));
-                        if(millis <= in) flashcolour(c.r, c.g, c.b, 0.35f, 0.55f, 0.1f, millis/float(in));
-                        else
-                        {
-                            float amt = 1.f-((millis-in)/float(out));
-                            c = vec(0.35f, 0.55f, 0.1f);
-                            fade *= amt;
-                            val *= amt;
-                        }
-                        if(val > 0)
-                        {
-                            glColor4f(c.r, c.g, c.b, fade);
-                            drawslice(nps, val*slice, x, y, s*circlebarsize);
-                            nps += val*slice;
-                        }
+                        int millis = lastmillis-d.outtime, delay = min(20, d.damage)*50;
+                        if(millis >= delay || d.dir.iszero()) { if(millis >= radardamagetime+radardamagefade) damagelocs.remove(i--); continue; }
+                        float dam = d.damage/float(m_health(game::gamemode, game::mutators, game::focus->model)),
+                              amt = millis/float(delay);
+                        total += dam;
+                        val += dam*(1-amt);
                     }
+                    if(total > 0)
+                    {
+                        float amt = val/total;
+                        fade *= amt;
+                        flashcolour(c.r, c.g, c.b, 0.3f, 0.6f, 0.1f, amt);
+                    }
+                    else val = 0;
                 }
                 default: case 1: break;
+            }
+            if(val > 0)
+            {
+                glColor4f(c.r, c.g, c.b, fade);
+                drawslice(nps, val*slice, x, y, s*circlebarsize);
             }
             pos += slice;
         }
