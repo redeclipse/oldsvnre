@@ -823,6 +823,25 @@ template <class T> struct smallvector
         return e;
     }
 
+    void drop() { buf[len-1].~T(); growbuf(len-1); }
+
+    T &insert(int i, const T &e)
+    {
+        add(T());
+        for(int p = len-1; p>i; p--) buf[p] = buf[p-1];
+        buf[i] = e;
+        return buf[i];
+    }
+
+    T *insert(int i, const T *e, int n)
+    {
+        growbuf(len+n);
+        loopj(n) add(T());
+        for(int p = len-1; p>=i+n; p--) buf[p] = buf[p-n];
+        loopj(n) buf[i+j] = e[j];
+        return &buf[i];
+    }
+
     bool inrange(size_t i) const { return i<size_t(len); }
     bool inrange(int i) const { return i>=0 && i<len; }
 
