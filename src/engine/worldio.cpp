@@ -1618,9 +1618,8 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     }
                     if(maptype == MAP_MAPZ && hdr.gamever <= 219)
                     { // insert pitch at index 2 between yaw and roll
-                        int num = e.attrs.length();
-                        loopk(num-2) e.attrs[num-k] = e.attrs[num-k-1];
-                        e.attrs[2] = 0;
+                        e.attrs.insert(2, 0);
+                        if(e.attrs.length() > MAXENTATTRS) e.attrs.setsize(MAXENTATTRS);
                     }
                 }
                 if(e.type == ET_SUNLIGHT && hdr.version <= 38) e.attrs[1] -= 90; // reorient pitch axis
