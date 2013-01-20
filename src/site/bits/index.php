@@ -29,7 +29,6 @@
     $app['targets']['facebook'] = array('name' => 'Facebook', 'url' => 'http://www.facebook.com/redeclipse.net', 'nav' => 0, 'redir' => 1);
     $app['targets']['youtube'] = array('name' => 'Youtube', 'url' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22', 'alturl' => 'http://www.youtube.com/results?search_query=%22Red%20Eclipse%22+', 'nav' => 0, 'redir' => 1);
     $app['targets']['desura'] = array('name' => 'Desura', 'url' => 'http://www.desura.com/games/red-eclipse', 'nav' => 0, 'redir' => 1);
-    $app['targets']['playdeb'] = array('name' => 'Playdeb', 'url' => 'http://www.playdeb.net/software/Red%20Eclipse', 'nav' => 0, 'redir' => 1);
 
     $app['targets']['google'] = array('name' => 'Google', 'url' => 'http://www.google.com/search?q=%22Red%20Eclipse%22', 'alturl' => 'http://www.google.com/search?q=%22Red%20Eclipse%22+', 'nav' => -1, 'redir' => 1);
     $app['targets']['aur'] = array('name' => 'AUR', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
@@ -139,7 +138,7 @@
                     <h3>Builtin editor lets you create your own maps cooperatively online</h3>
                     <a href="/download" id="button">Free Download<br /><em><?php echo $app['releasever']; ?><br /> released <i><?php echo $app['releasedate']; ?></i></em></a>	 
                     <p id="digidist">or use <a href="/desura">Desura</a>, a free digital distribution application for Windows/Linux</p>
-                    <p id="mirror">and find Linux packages on <a href="/playdeb">PlayDeb</a>, <a href="/aur">AUR</a>, and <a href="/chakra">Chakra</a></p>
+                    <p id="mirror">and find Linux packages on <a href="/aur">AUR</a>, and <a href="/chakra">Chakra</a></p>
                     <p id="svn">get the <a href="/devel">development version</a> and live on the bleeding edge</p>
                 </div>
                 <div id="player">
