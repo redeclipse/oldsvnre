@@ -1092,7 +1092,6 @@ namespace game
         d->lastregen = 0;
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
-        d->deaths++;
         d->obliterated = (style&FRAG_OBLITERATE) != 0;
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), isfocus = d == focus || actor == focus,
              isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
