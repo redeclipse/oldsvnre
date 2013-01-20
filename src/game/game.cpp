@@ -263,7 +263,7 @@ namespace game
             resetcursor();
             lastzoom = millis-max(zoomtime-(millis-lastzoom), 0);
             prevzoom = zooming;
-            if(zoomdefault && on) zoomlevel = zoomdefault >= 0 ? zoomdefault : zoomlevels;
+            if(zoomdefault >= 0 && on) zoomlevel = zoomdefault;
         }
         checkzoom();
         zooming = on;
