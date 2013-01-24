@@ -72,6 +72,11 @@ Files: data/maps/battlefield*
 Copyright: 2012, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
+Files: data/misc/light2* data/misc/starllogo*
+Copyright: 2009 Georges "TRaK" Grondin <drognin@gmail.com>
+           2013 D.a.M.i.E.n. <daymeenn@gmail.com>
+License: Expat
+
 Files: data/jwin/*
 Copyright: JWindecker <jacobwindecker@hotmail.com>
 License: CC-BY-3.0
@@ -84,13 +89,17 @@ Files: data/penguins/*
 Copyright: 2009, 2012, skiingpenguins <roy153roy153@yahoo.com>
 License: CC-BY-SA-3.0
 
+Files: data/ulukai/*
+Copyright: Ulukai <jonathan.denil@gmail.com>
+License: CC-BY-SA-3.0
+
 Files: data/crosshairs/*
 Copyright: 2011, fluxord <fluxord> at <yahoo.com>
 License: CC-BY-SA-3.0
 
 Files: data/skyboxes/gradient* data/skyboxes/stars*
 Copyright: Quinton Reeves <qreeves@gmail.com>
-License: public-domain
+License: CC-BY-SA-3.0
  "gradient" by Quinton Reeves
      CC-BY-SA 3.0 license. Created using the gradient fill tool in GIMP.
 
