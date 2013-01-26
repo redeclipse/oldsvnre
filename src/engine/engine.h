@@ -23,7 +23,7 @@
 #define RE_VER_STR          "1.3.5"
 #define RE_NAME             "Red Eclipse"
 #define RE_UNAME            "redeclipse"
-#define RE_RELEASE          "Development"
+#define RE_RELEASE          "Elara"
 #define RE_URL              "www.redeclipse.net"
 #define RE_LAN_PORT         28799
 #define RE_MASTER_PORT      28800
