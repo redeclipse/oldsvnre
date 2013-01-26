@@ -1,4 +1,4 @@
-= Red Eclipse SVN (unreleased) =
+= Red Eclipse 1.3.5 =
 Gameplay:
  * Increased overall AI skill
  * Disable double-tap dashing by default (enable with /dashstyle 1)
