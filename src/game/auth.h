@@ -140,10 +140,13 @@ namespace auth
         int n = PRIV_NONE;
         for(const char *c = flags; *c; c++) switch(*c)
         {
-            case 'a': n = PRIV_ADMINISTRATOR; break;
-            case 'm': n = PRIV_MODERATOR; break;
-            case 'h': n = PRIV_HELPER; break;
-            case 'u': n = PRIV_PLAYER; break;
+            case 'c': case 'C': n = PRIV_CREATOR; break;
+            case 'd': case 'D': n = PRIV_DEVELOPER; break;
+            case 'a': case 'A': n = PRIV_ADMINISTRATOR; break;
+            case 'o': case 'O': n = PRIV_OPERATOR; break;
+            case 'm': case 'M': n = PRIV_MODERATOR; break;
+            case 'h': case 'H': n = PRIV_HELPER; break;
+            case 'u': case 'U': n = PRIV_PLAYER; break;
         }
         if(n > PRIV_NONE) setprivilege(ci, true, n, true);
         else ci->authname[0] = 0;

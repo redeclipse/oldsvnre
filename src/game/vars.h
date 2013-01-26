@@ -6,21 +6,21 @@ GSVAR(IDF_ADMIN, servermotd, "");
 
 GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
 
-GVAR(IDF_ADMIN, demolock, 0, 2, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
+GVAR(IDF_ADMIN, demolock, 0, PRIV(OPERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, democount, 1, 5, VAR_MAX);
 GVAR(IDF_ADMIN, demomaxsize, 1, 16, VAR_MAX);
 GVAR(IDF_ADMIN, demoautorec, 0, 1, 1); // 0 = off, 1 = automatically record demos each match
 GVAR(IDF_ADMIN, demokeep, 0, 0, 1); // 0 = off, 1 = keep demos that don't run to end of match
 
-GVAR(IDF_ADMIN, speclock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
-GVAR(IDF_ADMIN, kicklock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
-GVAR(IDF_ADMIN, allowlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
-GVAR(IDF_ADMIN, banlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
-GVAR(IDF_ADMIN, mutelock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
-GVAR(IDF_ADMIN, limitlock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
-GVAR(IDF_ADMIN, vetolock, 0, 1, 3); // 0 = helper, 1 = moderator, 2 = administrator, 3 = nobody
+GVAR(IDF_ADMIN, speclock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, kicklock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, allowlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, banlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, mutelock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, limitlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, vetolock, 0, PRIV(MODERATOR), PRIV(MAX));
 
-GVAR(IDF_ADMIN, floodlock, 0, 3, 4); // 0 = no flood lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
+GVAR(IDF_ADMIN, floodlock, 0, PRIVX(OPERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
 GVAR(IDF_ADMIN, floodtime, 250, 10000, VAR_MAX); // time span to check for floody messages
 GVAR(IDF_ADMIN, floodlines, 1, 5, VAR_MAX); // number of lines in aforementioned span before too many
@@ -37,7 +37,7 @@ GVAR(IDF_ADMIN, resetvarsonend, 0, 1, 2); // reset variables on end (1: just whe
 GVAR(IDF_ADMIN, resetmmonend, 0, 2, 2); // reset mastermode on end (1: just when empty, 2: when matches end)
 
 GVARF(0, gamespeed, 1, 100, 10000, timescale = sv_gamespeed, timescale = gamespeed);
-GVAR(IDF_ADMIN, gamespeedlock, 0, 3, 4); // 0 = off, 1 = helper, 2 = moderator, 3 = administrator, 4 = nobody
+GVAR(IDF_ADMIN, gamespeedlock, 0, PRIVX(ADMINISTRATOR), PRIVX(MAX));
 GVARF(IDF_ADMIN, gamepaused, 0, 0, 1, paused = sv_gamepaused, paused = gamepaused);
 
 GSVAR(IDF_ADMIN, defaultmap, "");
@@ -85,13 +85,15 @@ GSVAR(IDF_ADMIN, mediummaps, "ares battlefield biolytic blink canals cargo cente
 GSVAR(IDF_ADMIN, largemaps, "ares battlefield biolytic blink canals cargo center colony cutec dawn deadsimple deathtrap deli depot erosion facility forge foundation futuresport ghost industrial isolation lab linear mist nova processing pumpstation spacetech tower tranquility tribal ubik venus warp");
 #endif
 
-GVAR(IDF_ADMIN, modelock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administrator only, 4-6 = helper/moderator/administrator can only set limited mode and higher, 7 = no mode selection
+GVAR(IDF_ADMIN, modelock, 0, PRIVX(MODERATOR), PRIVX(MAX));
+GVAR(IDF_ADMIN, modelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can set limited mode and higher
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_FILTER, G_M_ALL);
 GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_ARENA), mutstype[G_M_INSTA].mutators, sv_instagibfilter &= ~(1<<G_M_VAMPIRE); sv_instagibfilter |= (1<<G_M_INSTA), instagibfilter &= ~(1<<G_M_VAMPIRE); instagibfilter |= (1<<G_M_INSTA));
 
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
-GVAR(IDF_ADMIN, mapslock, 0, 5, 7); // 0 = off, 1-3 = helper/moderator/administrator can select non-allow maps, 4-6 = helper/moderator/administrator can select non-rotation maps, 7 = no map selection
+GVAR(IDF_ADMIN, mapslock, 0, PRIVX(MODERATOR), PRIVX(MAX));
+GVAR(IDF_ADMIN, mapslocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select non-rotation
 
 GSVAR(IDF_READONLY, prevmaps, "");
 GVAR(IDF_ADMIN, maphistory, 0, 3, VAR_MAX);
@@ -103,8 +105,9 @@ GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the c
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_ROTATE, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 
-GVAR(IDF_ADMIN, varslock, 0, 2, 4); // 0 = off, 1 = helper, 2 = moderator, 3 = administrator, 4 = nobody
-GVAR(IDF_ADMIN, votelock, 0, 2, 7); // 0 = off, 1-3 = helper/moderator/administrator can select prevmaps, 4 = helper/moderator/administrator only can vote, 7 = no voting
+GVAR(IDF_ADMIN, varslock, 0, PRIVX(MODERATOR), PRIVX(MAX));
+GVAR(IDF_ADMIN, votelock, 0, PRIVX(MODERATOR), PRIVX(MAX));
+GVAR(IDF_ADMIN, votelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select prevmaps
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
 GVAR(IDF_ADMIN, votestyle, 0, 2, 2); // 0 = votes don't pass mid-match, 1 = passes if votethreshold is met, 2 = passes if unanimous
 GVAR(IDF_ADMIN, voteinterm, 0, 2, 2); // 0 = must wait entire time, 1 = passes if votethreshold is met, 2 = passes if unanimous

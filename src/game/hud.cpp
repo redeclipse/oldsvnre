@@ -19,9 +19,11 @@ namespace hud
     ICOMMAND(0, conout, "is", (int *n, char *s), conoutft(clamp(*n, 0, CON_MAX-1), "%s", s));
 
     VAR(IDF_PERSIST, showhud, 0, 1, 1);
-    VAR(IDF_PERSIST, showdemoplayback, 0, 1, 1);
     VAR(IDF_PERSIST, hudsize, 0, 2048, VAR_MAX);
     FVAR(IDF_PERSIST, hudblend, 0, 1, 1);
+    VAR(IDF_PERSIST, hudminimal, 0, 0, 1);
+
+    VAR(IDF_PERSIST, showdemoplayback, 0, 1, 1);
     FVAR(IDF_PERSIST, gapsize, 0, 0.01f, 1000);
 
     VAR(IDF_PERSIST, showconsole, 0, 2, 2);
@@ -557,6 +559,12 @@ namespace hud
     {
         if(val == 2 || (val && cond)) return true;
         return false;
+    }
+
+    bool minimal(int val, bool cond = false)
+    {
+        if(cond) return val != 0 && !hudminimal; // is not activated in minimal
+        return val != 0 || hudminimal; // is activated in minimal
     }
 
     bool hasinput(bool pass, bool focus)
@@ -1130,10 +1138,10 @@ namespace hud
             drawpointertex(getpointer(index, game::focus->weapselect), cx-cs/2, cy-cs/2, cs, c.r, c.g, c.b, fade*hudblend);
             if(index > POINTER_GUI)
             {
-                if(showcirclebar) drawcirclebar(cx, cy, hudsize);
+                if(minimal(showcirclebar)) drawcirclebar(cx, cy, hudsize);
                 if(game::focus->state == CS_ALIVE && game::focus->hasweap(game::focus->weapselect, m_weapon(game::gamemode, game::mutators)))
                 {
-                    if(showclips) drawclip(game::focus->weapselect, cx, cy, hudsize);
+                    if(minimal(showclips, true)) drawclip(game::focus->weapselect, cx, cy, hudsize);
                     if(showindicator) drawindicator(game::focus->weapselect, cx, cy, int(indicatorsize*hudsize), physics::secondaryweap(game::focus));
                 }
                 if(crosshairhitspeed && totalmillis-game::focus->lasthit <= crosshairhitspeed)
@@ -2783,7 +2791,7 @@ namespace hud
             if(!hasinput(true) && (game::focus->state == CS_EDITING ? showeditradar >= 1 : chkcond(showradar, !game::tvmode() || (game::focus != game::player1 && radarstyle==3))))
                 drawradar(w, h, fade);
         }
-        if(showinventory) drawinventory(w, h, os, fade);
+        if(minimal(showinventory, true)) drawinventory(w, h, os, fade);
 
         if(!texpaneltimer)
         {
