@@ -64,8 +64,8 @@ Files: data/maps/cutec*
 Copyright: 2012, Raiden
 License: CC-BY-SA-3.0
 
-Files: data/maps/erosion*
-Copyright: 2012, Matt "greasepirate" Kalt
+Files: data/maps/erosion* data/maps/suspended*
+Copyright: 2012-2013 Matt "greasepirate" Kalt
 License: CC-BY-3.0
 
 Files: data/maps/battlefield*
