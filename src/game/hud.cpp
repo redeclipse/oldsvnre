@@ -204,7 +204,8 @@ namespace hud
     FVAR(IDF_PERSIST, zoomcrosshairsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, zoomcrosshairblend, 0, 1, 1000);
 
-    VAR(IDF_PERSIST, showcirclebar, 0, 7, 7); // 0 = off, &1 = health, &2 = impulse, &4 = ammo
+    VAR(IDF_PERSIST, showcirclebar, 0, 0, 1);
+    VAR(IDF_PERSIST, circlebartype, 0, 7, 7); // 0 = off, &1 = health, &2 = impulse, &4 = ammo
     FVAR(IDF_PERSIST, circlebarsize, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, circlebarblend, 0, 0.75f, 1);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, circlebartex, "textures/circlebar", 3);
@@ -293,7 +294,7 @@ namespace hud
     VAR(IDF_PERSIST, showclips, 0, 1, 1);
     VAR(IDF_PERSIST, clipanims, 0, 2, 2);
     FVAR(IDF_PERSIST, clipsize, 0, 0.035f, 1000);
-    FVAR(IDF_PERSIST, clipoffset, 0, 0.05f, 1000);
+    FVAR(IDF_PERSIST, clipoffset, 0, 0.04f, 1000);
     FVAR(IDF_PERSIST, clipminscale, 0, 0.3f, 1000);
     FVAR(IDF_PERSIST, clipmaxscale, 0, 1, 1000);
     FVAR(IDF_PERSIST, clipblend, 0, 0.65f, 1);
@@ -956,7 +957,7 @@ namespace hud
     {
         if(game::focus->state != CS_ALIVE) return;
         int num = 0;
-        loopi(3) if(showcirclebar&(1<<i)) num++;
+        loopi(3) if(circlebartype&(1<<i)) num++;
         if(!num) return;
         Texture *t = circlebartex && *circlebartex ? textureload(circlebartex, 3) : NULL;
         if(!t || t == notexture) return;
@@ -964,7 +965,7 @@ namespace hud
         if(t->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         else glBlendFunc(GL_ONE, GL_ONE);
         glBindTexture(GL_TEXTURE_2D, t->id);
-        loopi(3) if(showcirclebar&(1<<i))
+        loopi(3) if(circlebartype&(1<<i))
         {
             float val = 0, fade = hudblend*circlebarblend;
             vec c(1, 1, 1);
