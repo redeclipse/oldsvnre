@@ -10,9 +10,10 @@ Gameplay:
 Weapons:
  * Plasma primary damage and explosion radius increased
  * Mines, new weapon, primary proximity mine, secondary tripwire mine
- * Rifle damage and hitspush now scales with distance, considerably reduced at closer range
+ * Rifle explosion size and hitpush reduced (reduces hit area, total explosion damage, and pushing force)
  * Rifle zoom can now only be controlled via zoomlevels by players
- * SMG secondary now sticks to objects and explodes radially after a short delay
+ * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread reduced
+ * Pistol secondary spread increased
 
 Maps:
  * Assigned map music to all maps
@@ -23,6 +24,7 @@ Maps:
  * Erosion, new map (added from mapversion 1.5)
  * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from Blood Frontier)
  * Hawk, fixed a checkpoint bug
+ * Suspended, new map (added from mapversion 1.4)
 
 Interface & Menus:
  * Overall reduced font sizes
@@ -65,6 +67,7 @@ Modding & Data Assets:
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
  * Added vetolock variable to determine who may force match votes
+ * Added additional privilege levels (creator, developer, operator)
 
 Core & Install:
  * Added IRC gudelines
