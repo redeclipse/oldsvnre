@@ -1267,6 +1267,7 @@ namespace projs
                 if(proj.stuck && !proj.stick && !proj.beenused && W2(proj.weap, proxtype, proj.flags&HIT_ALT) == 2)
                 {
                     float dist = WS(proj.weap, proxdist, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
+                    if(W2(proj.weap, proxdelay, proj.flags&HIT_ALT)) dist *= proj.lastbounce/float(W2(proj.weap, proxdelay, proj.flags&HIT_ALT));
                     vec from = vec(proj.o).add(vec(proj.norm).mul(proj.radius+1e-3f)), to = vec(proj.o).add(vec(proj.norm).mul(dist)), dir = vec(to).sub(from);
                     float mag = dir.magnitude();
                     if(mag > 0)
@@ -1496,7 +1497,7 @@ namespace projs
                         int f = W2(proj.weap, flakweap, proj.flags&HIT_ALT), w = f%W_MAX, life = W2(proj.weap, flaktime, proj.flags&HIT_ALT);
                         float mag = max(proj.vel.magnitude(), W2(proj.weap, flakminspeed, proj.flags&HIT_ALT)),
                               scale = W2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.curscale,
-                              offset = proj.hit || proj.stick ? W2(proj.weap, flakoffset, proj.flags&HIT_ALT) : 1e-3f,
+                              offset = proj.hit || proj.stick ? W2(proj.weap, flakoffset, proj.flags&HIT_ALT) : 1e-6f,
                               skew = proj.hit || proj.stuck ? W2(proj.weap, flakskew, proj.flags&HIT_ALT) : W2(proj.weap, flakspread, proj.flags&HIT_ALT);
                         vec dir = vec(proj.stuck ? (proj.stick && proj.stick->state == CS_ALIVE ? vec(proj.stickpos).rotate_around_z(proj.stick->yaw*RAD) : proj.norm) : proj.vel).normalize(),
                             pos = vec(proj.o).sub(vec(dir).mul(offset));
