@@ -9,7 +9,7 @@ Gameplay:
 
 Weapons:
  * Plasma primary damage and explosion radius increased
- * Mines, new weapon, primary proximity mine, secondary tripwire mine
+ * Mines, new weapon, primary proximity mine, secondary tripwire mine, pickup-based (like grenade)
  * Rifle explosion size and hitpush reduced (reduces hit area, total explosion damage, and pushing force)
  * Rifle zoom can now only be controlled via zoomlevels by players
  * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread reduced
@@ -25,6 +25,9 @@ Maps:
  * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from Blood Frontier)
  * Hawk, fixed a checkpoint bug
  * Suspended, new map (added from mapversion 1.4)
+ * Conflict, updated
+ * Blink, removed
+ * Facility, removed
 
 Interface & Menus:
  * Overall reduced font sizes
