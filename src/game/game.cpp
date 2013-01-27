@@ -120,6 +120,7 @@ namespace game
     VARF(IDF_PERSIST, zoomlevel, 0, 4, 10, checkzoom());
     VAR(IDF_PERSIST, zoomlevels, 1, 5, 10);
     VAR(IDF_PERSIST, zoomdefault, -1, -1, 10); // -1 = last used, else defines default level
+    VAR(IDF_PERSIST, zoomoffset, 0, 2, 10); // if zoomdefault = -1, then offset from zoomlevels this much for initial default
     VAR(IDF_PERSIST, zoomscroll, 0, 0, 1); // 0 = stop at min/max, 1 = go to opposite end
 
     VAR(IDF_PERSIST, aboveheadnames, 0, 1, 1);
@@ -243,7 +244,7 @@ namespace game
     void checkzoom()
     {
         if(zoomdefault > zoomlevels) zoomdefault = zoomlevels;
-        if(zoomlevel < 0) zoomlevel = zoomdefault >= 0 ? zoomdefault : zoomlevels;
+        if(zoomlevel < 0) zoomlevel = zoomdefault >= 0 ? zoomdefault : max(zoomlevels-zoomoffset, 0);
         if(zoomlevel > zoomlevels) zoomlevel = zoomlevels;
     }
 
