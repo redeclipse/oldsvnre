@@ -31,7 +31,7 @@ namespace game
     SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
-    VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
+    VARF(IDF_PERSIST, thirdperson, 0, 0, 1, resetcamera(true));
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
