@@ -173,17 +173,17 @@ WPVARM(IDF_HEX, explcol, -3, 0xFFFFFF,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808
 );
 WPFVARM(0, explode, 0, FVAR_MAX,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      10.0f,      16.0f,      75.0f,      24.0f,      100.0f,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      48.0f,      0.0f,       75.0f,      36.0f,      100.0f
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      10.0f,      16.0f,      75.0f,      28.0f,      100.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      48.0f,      0.0f,       75.0f,      42.0f,      100.0f
 );
 WPVARM(0, extinguish, 0, 7,
     2,          2,          2,          2,          2,          3,          1,          2,          2,          2,          2,
     2,          2,          2,          2,          2,          3,          0,          2,          2,          2,          2
 );
 WPVARM(0, flakcollide, 0, VAR_MAX,
-    IMPACT_PLAYER|COLLIDE_TRACE,
-    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
-    BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER,
+    IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
+    BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_OWNER,
@@ -193,21 +193,21 @@ WPVARM(0, flakcollide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ,
 
-    IMPACT_PLAYER|COLLIDE_TRACE,
-    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
-    BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER,
+    IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
+    BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|BOUNCE_PLAYER|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER,
-    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|DRILL_PLAYER,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|DRILL_PLAYER|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
 WPVARM(0, flakdmg, VAR_MIN, VAR_MAX,
-    25,         2,          15,         16,         16,         12,         10,         18,         150,        100,        300,
-    10,         5,          30,         4,          2,          4,          5,          50,         150,        100,        300
+    25,         2,          15,         16,         16,         12,         10,         15,         150,        100,        300,
+    10,         5,          30,         4,          2,          4,          5,          15,         150,        100,        300
 );
 WPFVARM(0, flakffwd, 0, 1,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
@@ -218,12 +218,16 @@ WPFVARM(0, flakminspeed, 0, FVAR_MAX,
     50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
 );
 WPFVARM(0, flakoffset, 0, FVAR_MAX,
-    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       2.0f,
-    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       2.0f
+    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f,
+    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f
+);
+WPVARM(IDF_HEX, flakpartcol, -3, 0xFFFFFF,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1
 );
 WPVARM(0, flakrays, 0, VAR_MAX,
     5,          5,          5,          5,          5,          5,          5,          5,          75,         50,         75,
-    5,          5,          5,          50,         30,         5,          5,          5,          75,         50,         75
+    5,          5,          5,          50,         30,         5,          5,          5,          75,         10,         75
 );
 WPFVARM(0, flakrel, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       0.0f,       0.0f,
@@ -235,15 +239,15 @@ WPFVARM(0, flakscale, FVAR_NONZERO, FVAR_MAX,
 );
 WPFVARM(0, flakskew, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
-    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       1.0f
 );
 WPVARM(0, flakspeed, 0, VAR_MAX,
     0,          0,          0,          0,          0,          200,        0,          0,          300,        300,        400,
-    0,          0,          0,          0,          0,          250,        0,          0,          300,        300,        400
+    0,          0,          0,          0,          0,          250,        0,          0,          300,        10000,      400
 );
 WPFVARM(0, flakspread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       0.2f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f,
-    1.0f,       0.2f,       1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f
+    1.0f,       0.2f,       1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       0.0f,       1.0f
 );
 WPVARM(0, flaktime, 1, VAR_MAX,
     500,        500,        500,        250,        500,        1000,       500,        500,        3000,       3000,       3000,
@@ -251,7 +255,7 @@ WPVARM(0, flaktime, 1, VAR_MAX,
 );
 WPVARM(0, flakweap, -1, W_MAX*2-1,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG,
-    -1,         W_PISTOL,   -1,         WX(SHOTGUN),WX(SMG),    -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG
+    -1,         W_PISTOL,   -1,         WX(SHOTGUN),WX(SMG),    -1,         -1,         -1,         W_SHOTGUN,  WX(RIFLE),  W_SMG
 );
 WPFVAR(0, frequency, 0, FVAR_MAX,
     0.0f,       0.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       2.0f,       4.0f
@@ -307,12 +311,12 @@ WPFVARM(0, minspread, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
 WPVARM(IDF_HEX, partcol, -3, 0xFFFFFF,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         -1,         -1,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         -1,         -1
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1
 );
 WPFVARM(0, partlen, 0, FVAR_MAX,
-    0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       256.0f,     0.0f,       0.0f,       0.0f,
-    0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       512.0f,     0.0f,       0.0f,       0.0f
+    0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       256.0f,     0.0f,       4.0f,       0.0f,
+    0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f
 );
 WPFVARM(0, partsize, 0, FVAR_MAX,
     1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       1.5f,       1.0f,       4.0f,       3.0f,
