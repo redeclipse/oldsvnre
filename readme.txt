@@ -85,8 +85,8 @@ too.
 * Kurt "Kurtis84" Kessler - Artist
     - Textures, Design and Testing
 
-* "LuckystrikeRx" - Artist
-    - Maps, Textures, Models, Weapons, Design and Testing, Website
+* Rémi "LuckystrikeRx" Clouet d'Orval - Artist
+    - Maps, Textures, Models, Weapons, Design and Testing, Website, Trailer
 
 * Jonathan "W!ck3d" Roels - Artist
     - Maps, Textures, Design and Testing
