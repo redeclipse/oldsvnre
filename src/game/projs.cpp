@@ -162,6 +162,9 @@ namespace projs
         }
     }
 
+    #define PHCOL(p) ((p).child ? WHCOL(&p, (p).weap, flakpartcol, (p).flags&HIT_ALT) : WHCOL(&p, (p).weap, partcol, (p).flags&HIT_ALT))
+    #define PPCOL(p) ((p).child ? WPCOL(&p, (p).weap, flakpartcol, (p).flags&HIT_ALT) : WPCOL(&p, (p).weap, partcol, (p).flags&HIT_ALT))
+
     bool hiteffect(projent &proj, physent *d, int flags, const vec &norm)
     {
         if(proj.projtype == PRJ_SHOT && physics::issolid(d, &proj))
@@ -186,15 +189,15 @@ namespace projs
             {
                 case -1: break;
                 case W_RIFLE:
-                    part_splash(PART_SPARK, 25, 500, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.125f, 1, 1, 0, 24, 20);
-                    part_create(PART_PLASMA, 500, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f, 0, 0);
-                    adddynlight(proj.o, expl*1.1f, WPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 250, 10);
+                    part_splash(PART_SPARK, 25, 500, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.125f, 1, 1, 0, 24, 20);
+                    part_create(PART_PLASMA, 500, proj.o, PHCOL(proj), expl*0.5f, 0.5f, 0, 0);
+                    adddynlight(proj.o, expl*1.1f, PPCOL(proj), 250, 10);
                     break;
                 default:
                     if(weaptype[proj.weap].melee)
                     {
-                        part_flare(proj.o, proj.from, 500, type == W_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
-                        part_create(PART_PLASMA, 500, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.5f);
+                        part_flare(proj.o, proj.from, 500, type == W_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f);
+                        part_create(PART_PLASMA, 500, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.5f);
                     }
                     break;
             }
@@ -453,12 +456,12 @@ namespace projs
                     //case W_MELEE:
                     case W_SWORD:
                     {
-                        part_splash(PART_SPARK, 25, 350, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
+                        part_splash(PART_SPARK, 25, 350, proj.o, PHCOL(proj), 0.35f, 1, 1, 0, 16, 15);
                         break;
                     }
                     case W_SHOTGUN: case W_SMG:
                     {
-                        part_splash(PART_SPARK, 10, 350, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.35f, 1, 1, 0, 16, 15);
+                        part_splash(PART_SPARK, 10, 350, proj.o, PHCOL(proj), 0.35f, 1, 1, 0, 16, 15);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 20)) adddecal(DECAL_BULLET, proj.o, proj.norm, W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale);
                         break;
                     }
@@ -1113,10 +1116,10 @@ namespace projs
                     //case W_MELEE:
                     case W_SWORD:
                     {
-                        part_flare(proj.from, proj.to, 1, PART_LIGHTNING_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, trans);
+                        part_flare(proj.from, proj.to, 1, PART_LIGHTNING_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, trans);
                         if(lastmillis-proj.lasteffect >= 25 && proj.effectpos.dist(proj.to) >= 0.5f)
                         {
-                            part_flare(proj.from, proj.to, 250, PART_LIGHTNING_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f*trans);
+                            part_flare(proj.from, proj.to, 250, PART_LIGHTNING_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.75f*trans);
                             proj.lasteffect = lastmillis - (lastmillis%25);
                             proj.effectpos = proj.to;
                         }
@@ -1128,10 +1131,10 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*trans);
-                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend*trans);
-                            part_create(PART_PLASMA, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*trans);
-                            if(projhints) part_create(PART_HINT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend*trans);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*trans);
+                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend*trans);
+                            part_create(PART_PLASMA, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*trans);
+                            if(projhints) part_create(PART_HINT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.35f, 0.85f)*projhintblend*trans);
                         }
                         break;
                     }
@@ -1142,19 +1145,19 @@ namespace projs
                             part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, 0x120228), size*projfirehintsize, blend*projhintblend);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay*2)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend, -5);
+                            part_create(PART_FIREBALL_SOFT, max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1), proj.o, PHCOL(proj), size, blend, -5);
                             proj.lasteffect = lastmillis - (lastmillis%(projtraildelay*2));
                         }
-                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size, blend);
-                        if(proj.flags&HIT_ALT) part_create(PART_FIREBALL_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), size*0.5f, blend);
+                        else part_create(PART_FIREBALL_SOFT, 1, proj.o, PHCOL(proj), size, blend);
+                        if(proj.flags&HIT_ALT) part_create(PART_FIREBALL_SOFT, 1, proj.o, PHCOL(proj), size*0.5f, blend);
                         break;
                     }
                     case W_GRENADE:
                     {
                         int interval = lastmillis%1000;
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
                             part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x888888, W2(proj.weap, partsize, proj.flags&HIT_ALT), 0.75f*trans, -10);
@@ -1166,19 +1169,19 @@ namespace projs
                     {
                         int interval = lastmillis%1000;
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
                         break;
                     }
                     case W_ROCKET:
                     {
                         int interval = lastmillis%1000;
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)+fluc, trans);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize+fluc, projhintblend*trans);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)+fluc, trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize+fluc, projhintblend*trans);
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
-                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.85f*trans, -5);
+                            part_create(PART_FIREBALL_SOFT, max(projtraillength/2, 1), proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*0.5f, 0.85f*trans, -5);
                             part_create(PART_SMOKE_LERP, projtraillength, proj.o, 0x222222, W2(proj.weap, partsize, proj.flags&HIT_ALT), trans, -10);
                             proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                         }
@@ -1188,9 +1191,9 @@ namespace projs
                     {
                         if(proj.stuck || (!proj.child && W2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0))
                         {
-                            part_create(PART_PLASMA, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*5*proj.curscale, 0.75f*trans);
-                            part_create(PART_PLASMA, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*10*proj.curscale, 0.75f*trans);
-                            if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*10*projhintsize*proj.curscale, 0.75f*projhintblend*trans);
+                            part_create(PART_PLASMA, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*5*proj.curscale, 0.75f*trans);
+                            part_create(PART_PLASMA, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*10*proj.curscale, 0.75f*trans);
+                            if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*10*projhintsize*proj.curscale, 0.75f*projhintblend*trans);
                         }
                         else
                         {
@@ -1198,8 +1201,8 @@ namespace projs
                             if(size > 0)
                             {
                                 proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                                part_flare(proj.to, proj.o, 1, PART_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*trans);
-                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend*trans);
+                                part_flare(proj.to, proj.o, 1, PART_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*trans);
+                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend*trans);
                             }
                         }
                         break;
@@ -1212,14 +1215,14 @@ namespace projs
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
                             if(!proj.stuck)
                             {
-                                part_flare(proj.to, proj.o, 1, PART_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*trans);
-                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend*trans);
+                                part_flare(proj.to, proj.o, 1, PART_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*trans);
+                                if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*projhintsize*proj.curscale, clamp(1.25f-proj.lifespan, 0.5f, 1.f)*projhintblend*trans);
                             }
                             if(proj.stuck || (!proj.child && W2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0))
                             {
-                                part_create(PART_PLASMA, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*4*proj.curscale, 0.75f*trans);
-                                if(proj.stuck) part_create(PART_PLASMA, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*6*proj.curscale, 0.75f*trans);
-                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*5.f*projhintsize*proj.curscale, 0.75f*projhintblend*trans);
+                                part_create(PART_PLASMA, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*4*proj.curscale, 0.75f*trans);
+                                if(proj.stuck) part_create(PART_PLASMA, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*6*proj.curscale, 0.75f*trans);
+                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*5.f*projhintsize*proj.curscale, 0.75f*projhintblend*trans);
                             }
                         }
                         break;
@@ -1229,18 +1232,18 @@ namespace projs
                         float expl = WS(proj.weap, explode, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
-                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 1.f, 0.95f);
+                            part_explosion(proj.o, expl, PART_SHOCKBALL, 1, PHCOL(proj), 1.f, 0.95f);
                             if(W2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
-                                part_explosion(proj.o, expl*W2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, 1, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend*trans);
+                                part_explosion(proj.o, expl*W2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, 1, projhint(proj.owner, PHCOL(proj)), 1.f, 0.125f*projhintblend*trans);
                         }
                         if(projtrails && lastmillis-proj.lasteffect >= projtraildelay)
                         {
-                            part_create(PART_PLASMA_SOFT, projtraillength, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.125f*trans, 20);
+                            part_create(PART_PLASMA_SOFT, projtraillength, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.125f*trans, 20);
                             proj.lasteffect = lastmillis - (lastmillis%projtraildelay);
                         }
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.5f*trans);
-                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale, 0.5f*trans);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend*trans);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale, 0.5f*trans);
+                        part_create(PART_ELECTRIC_SOFT, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*0.45f*proj.lifesize*proj.curscale, 0.5f*trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.lifesize*proj.curscale, 0.5f*projhintblend*trans);
                         break;
                     }
                     case W_RIFLE:
@@ -1249,12 +1252,12 @@ namespace projs
                         if(size > 0)
                         {
                             proj.to = vec(proj.o).sub(vec(proj.vel).normalize().mul(size));
-                            part_flare(proj.to, proj.o, 1, PART_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f*trans);
-                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend*trans);
+                            part_flare(proj.to, proj.o, 1, PART_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f*trans);
+                            if(projhints) part_flare(proj.to, proj.o, 1, PART_FLARE, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend*trans);
                             if(!proj.child && W2(proj.weap, flakweap, proj.flags&HIT_ALT) >= 0)
                             {
-                                part_create(PART_PLASMA, 1, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5, 0.5f*trans);
-                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*5*projhintsize*proj.curscale, projhintblend*trans);
+                                part_create(PART_PLASMA, 1, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*5, 0.5f*trans);
+                                if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*5*projhintsize*proj.curscale, projhintblend*trans);
                             }
                         }
                         break;
@@ -1272,7 +1275,7 @@ namespace projs
                         float blocked = tracecollide(&proj, from, dir, mag, RAY_CLIPMAT|RAY_ALPHAPOLY, true);
                         if(blocked >= 0) to = vec(from).add(vec(proj.norm).mul(blocked));
                     }
-                    part_flare(proj.o, to, 1, PART_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.5f*proj.curscale*proj.lifesize, 0.5f*trans);
+                    part_flare(proj.o, to, 1, PART_FLARE, PHCOL(proj), 0.5f*proj.curscale*proj.lifesize, 0.5f*trans);
                 }
                 break;
             }
@@ -1353,7 +1356,7 @@ namespace projs
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 200, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
-                            part_splash(PART_SPARK, 15, 250, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
+                            part_splash(PART_SPARK, 15, 250, proj.o, PHCOL(proj), 0.25f, 1, 1, 0, expl, 15);
                             if(W2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
                                 part_explosion(proj.o, expl*0.5f*W2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, 100, projhint(proj.owner, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                             if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
@@ -1375,13 +1378,13 @@ namespace projs
                         }
                         else
                         {
-                            part_create(PART_PLASMA_SOFT, projtraillength*(type != W_ROCKET ? 2 : 3), proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), max(expl*0.5f, 0.5f), 0.5f); // corona
+                            part_create(PART_PLASMA_SOFT, projtraillength*(type != W_ROCKET ? 2 : 3), proj.o, PHCOL(proj), max(expl*0.5f, 0.5f), 0.5f); // corona
                             if(expl > 0)
                             {
                                 quake(proj.o, proj.weap, proj.flags, proj.curscale);
                                 int len = type != W_ROCKET ? 500 : 750;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 1);
-                                part_splash(PART_SPARK, 50, len*2, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.75f, 1, 1, 0, expl, 20);
+                                part_splash(PART_SPARK, 50, len*2, proj.o, PHCOL(proj), 0.75f, 1, 1, 0, expl, 20);
                                 if(W2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
                                     part_explosion(proj.o, expl*W2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, len/2, projhint(proj.owner, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.5f*projhintblend);
                             }
@@ -1413,7 +1416,7 @@ namespace projs
                     case W_SHOTGUN: case W_SMG:
                     {
                         vol = int(vol*(1.f-proj.lifespan));
-                        part_splash(PART_SPARK, type == W_SHOTGUN ? 30 : 20, 250, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, 1, 1, 0, 16, 15);
+                        part_splash(PART_SPARK, type == W_SHOTGUN ? 30 : 20, 250, proj.o, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale*0.5f, 1, 1, 0, 16, 15);
                         float expl = WS(proj.weap, explode, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
@@ -1441,10 +1444,10 @@ namespace projs
                                 part_explosion(proj.o, expl*W2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, len/2, projhint(proj.owner, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.125f*projhintblend);
                         }
                         else expl = W2(proj.weap, partsize, proj.flags&HIT_ALT);
-                        part_splash(PART_SPARK, 50, len*2, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 20);
-                        part_create(PART_PLASMA_SOFT, len, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.75f, 0.5f);
-                        part_create(PART_ELECTRIC_SOFT, len/2, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.375f);
-                        part_create(PART_SMOKE, len, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.35f, 0.35f, -30);
+                        part_splash(PART_SPARK, 50, len*2, proj.o, PHCOL(proj), 0.25f, 1, 1, 0, expl, 20);
+                        part_create(PART_PLASMA_SOFT, len, proj.o, PHCOL(proj), expl*0.75f, 0.5f);
+                        part_create(PART_ELECTRIC_SOFT, len/2, proj.o, PHCOL(proj), expl*0.375f);
+                        part_create(PART_SMOKE, len, proj.o, PHCOL(proj), expl*0.35f, 0.35f, -30);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                         {
                             adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(WPCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)));
@@ -1462,15 +1465,15 @@ namespace projs
                         if(expl > 0)
                         {
                             quake(proj.o, proj.weap, proj.flags, proj.curscale);
-                            part_create(PART_PLASMA_SOFT, len, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), expl*0.5f, 0.5f); // corona
-                            part_splash(PART_SPARK, 50, len*2, proj.o, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), 0.25f, 1, 1, 0, expl, 15);
+                            part_create(PART_PLASMA_SOFT, len, proj.o, PHCOL(proj), expl*0.5f, 0.5f); // corona
+                            part_splash(PART_SPARK, 50, len*2, proj.o, PHCOL(proj), 0.25f, 1, 1, 0, expl, 15);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT), 1.f, 0.95f);
                             if(W2(proj.weap, wavepush, proj.flags&HIT_ALT) >= 1)
                                 part_explosion(proj.o, expl*W2(proj.weap, wavepush, proj.flags&HIT_ALT), PART_SHOCKWAVE, len/2, projhint(proj.owner, WHCOL(&proj, proj.weap, explcol, proj.flags&HIT_ALT)), 1.f, 0.25f*projhintblend);
                         }
                         else expl = W2(proj.weap, partsize, proj.flags&HIT_ALT);
-                        part_flare(proj.to, proj.o, len, PART_FLARE, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
-                        if(projhints) part_flare(proj.to, proj.o, len, PART_FLARE, projhint(proj.owner, WHCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend);
+                        part_flare(proj.to, proj.o, len, PART_FLARE, PHCOL(proj), W2(proj.weap, partsize, proj.flags&HIT_ALT)*proj.curscale, 0.85f);
+                        if(projhints) part_flare(proj.to, proj.o, len, PART_FLARE, projhint(proj.owner, PHCOL(proj)), W2(proj.weap, partsize, proj.flags&HIT_ALT)*projhintsize*proj.curscale, projhintblend);
                         if(notrayspam(proj.weap, proj.flags&HIT_ALT, 1))
                         {
                             adddecal(DECAL_SCORCH, proj.o, proj.norm, max(expl, 2.f));
@@ -1493,7 +1496,7 @@ namespace projs
                         int f = W2(proj.weap, flakweap, proj.flags&HIT_ALT), w = f%W_MAX, life = W2(proj.weap, flaktime, proj.flags&HIT_ALT);
                         float mag = max(proj.vel.magnitude(), W2(proj.weap, flakminspeed, proj.flags&HIT_ALT)),
                               scale = W2(proj.weap, flakscale, proj.flags&HIT_ALT)*proj.curscale,
-                              offset = proj.hit || proj.stick ? W2(proj.weap, flakoffset, proj.flags&HIT_ALT) : proj.radius*2,
+                              offset = proj.hit || proj.stick ? W2(proj.weap, flakoffset, proj.flags&HIT_ALT) : 1e-3f,
                               skew = proj.hit || proj.stuck ? W2(proj.weap, flakskew, proj.flags&HIT_ALT) : W2(proj.weap, flakspread, proj.flags&HIT_ALT);
                         vec dir = vec(proj.stuck ? (proj.stick && proj.stick->state == CS_ALIVE ? vec(proj.stickpos).rotate_around_z(proj.stick->yaw*RAD) : proj.norm) : proj.vel).normalize(),
                             pos = vec(proj.o).sub(vec(dir).mul(offset));
@@ -2198,17 +2201,17 @@ namespace projs
             float trans = fadeweap(proj);
             if(trans > 0) switch(W2(proj.weap, parttype, proj.flags&HIT_ALT))
             {
-                case W_SWORD: adddynlight(proj.o, 16*trans, WPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT)); break;
+                case W_SWORD: adddynlight(proj.o, 16*trans, PPCOL(proj)); break;
                 case W_PISTOL: case W_SHOTGUN: case W_SMG: case W_RIFLE: if(proj.movement >= 1)
                 {
                     float size = clamp(W2(proj.weap, partlen, proj.flags&HIT_ALT)*(1.f-proj.lifespan)*proj.curscale, proj.curscale, min(64.f, min(min(W2(proj.weap, partlen, proj.flags&HIT_ALT), proj.movement), proj.o.dist(proj.from))));
-                    adddynlight(proj.o, 1.25f*size*trans, WPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT));
+                    adddynlight(proj.o, 1.25f*size*trans, PPCOL(proj));
                 } break;
                 case W_PLASMA: case W_FLAMER: case W_GRENADE: case W_ROCKET:
                 {
                     float size = WS(proj.weap, explode, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                     if(size <= 0) size = W2(proj.weap, partlen, proj.flags&HIT_ALT)*proj.lifesize*proj.curscale;
-                    adddynlight(proj.o, 1.5f*size*trans, WPCOL(&proj, proj.weap, partcol, proj.flags&HIT_ALT));
+                    adddynlight(proj.o, 1.5f*size*trans, PPCOL(proj));
                 } break;
                 default: break;
             }
