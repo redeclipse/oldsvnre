@@ -90,7 +90,12 @@ Copyright: 2009, 2012, skiingpenguins <roy153roy153@yahoo.com>
 License: CC-BY-SA-3.0
 
 Files: data/ulukai/*
-Copyright: Ulukai <jonathan.denil@gmail.com>
+Copyright: 2013 Ulukai <jonathan.denil@gmail.com>
+License: CC-BY-SA-3.0
+
+Files: data/ulukai/redeclipse*
+Copyright: 2013 Dratz-C
+           2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
 Files: data/crosshairs/*
