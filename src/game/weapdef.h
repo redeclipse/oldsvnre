@@ -157,6 +157,7 @@
 
     #define W(weap,name)         (*sv_weap_stat_##name[weap])
     #define W2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
+    #define W2(weap,name,second) (*sv_weap_stat_##name[weap][second?1:0])
     #define WSTR(a,weap,attr)    defformatstring(a)("sv_%s%s", weaptype[weap].name, #attr)
 #else
 #ifdef GAMEWORLD
@@ -399,4 +400,15 @@
     #define W2(weap,name,second) (*weap_stat_##name[weap][second ? 1 : 0])
     #define WSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
 #endif
-#define FW(c,w,v,s) (c ? W2(w, flak##v, s) : W2(w, v, s))
+#define WPVARK(flags, name, mn, mx, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410) \
+    WPVARM(flags, name, mn, mx, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210); \
+    WPVARM(flags, flak##name, mn, mx, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410);
+#define WPFVARK(flags, name, mn, mx, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410) \
+    WPFVARM(flags, name, mn, mx, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210); \
+    WPFVARM(flags, flak##name, mn, mx, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410);
+#define WPSVARK(flags, name, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410) \
+    WPSVARM(flags, name, w100, w101, w102, w103, w104, w105, w106, w107, w108, w109, w110, w200, w201, w202, w203, w204, w205, w206, w207, w208, w209, w210); \
+    WPSVARM(flags, flak##name, w300, w301, w302, w303, w304, w305, w306, w307, w308, w309, w310, w400, w401, w402, w403, w404, w405, w406, w407, w408, w409, w410);
+#define WF(c,w,v,s) (c ? W2(w, flak##v, s) : W2(w, v, s))
+#define WS(flags)  (flags&HIT_ALT)
+#define WK(flags)  (flags&HIT_FLAK)

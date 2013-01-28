@@ -589,7 +589,7 @@ struct gamestate
     int skipwait(int weap, int flags, int millis, int skip = 0)
     {
         int skipstate = skip;
-        if(W2(weap, sub, flags&HIT_ALT) && (skip&(1<<W_S_RELOAD)) && weapstate[weap] == W_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < W2(weap, sub, flags&HIT_ALT))
+        if(W2(weap, sub, WS(flags)) && (skip&(1<<W_S_RELOAD)) && weapstate[weap] == W_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < W2(weap, sub, WS(flags)))
             skipstate &= ~(1<<W_S_RELOAD);
         return skipstate;
     }
@@ -610,8 +610,8 @@ struct gamestate
 
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
-        if(weap == weapselect || (weap == W_MELEE && (flags&HIT_ALT || weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip)))))
-            if((hasweap(weap, sweap) && ammo[weap] >= (W2(weap, power, flags&HIT_ALT) ? 1 : W2(weap, sub, flags&HIT_ALT))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
+        if(weap == weapselect || (weap == W_MELEE && (WS(flags) || weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip)))))
+            if((hasweap(weap, sweap) && ammo[weap] >= (W2(weap, power, WS(flags)) ? 1 : W2(weap, sub, WS(flags)))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
                 return true;
         return false;
     }
@@ -729,8 +729,8 @@ struct gamestate
         if(!isweap(sweap))
         {
             if(aitype >= AI_START) sweap = W_MELEE;
-            else if(!m_kaboom(gamemode, mutators))
-                sweap = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
+            else if(m_kaboom(gamemode, mutators)) sweap = W_GRENADE;
+            else sweap = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
         }
         if(isweap(sweap))
         {
@@ -751,7 +751,7 @@ struct gamestate
                 reloads[W_MELEE] = 0;
             }
 #endif
-            if(sweap != W_GRENADE && (m_kaboom(gamemode, mutators) || G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
+            if(sweap != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1))
             {
                 ammo[W_GRENADE] = max(W(W_GRENADE, max), 1);
                 reloads[W_GRENADE] = 0;

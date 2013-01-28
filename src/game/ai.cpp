@@ -50,7 +50,7 @@ namespace ai
 
     float weapmindist(int weap, bool alt)
     {
-        return WS(weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0 && W2(weap, collide, alt)&COLLIDE_OWNER ? WS(weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
+        return WX(false, weap, explode, alt, game::gamemode, game::mutators, 1.f) > 0 && W2(weap, collide, alt)&COLLIDE_OWNER ? WX(false, weap, explode, alt, game::gamemode, game::mutators, 1.f) : 2;
     }
 
     float weapmaxdist(int weap, bool alt)
@@ -1523,7 +1523,7 @@ namespace ai
             projent *p = projs::projs[i];
             if(p && p->state == CS_ALIVE && p->projtype == PRJ_SHOT)
             {
-                float expl = WS(p->weap, explode, p->flags&HIT_ALT, game::gamemode, game::mutators, p->curscale);
+                float expl = WX(WK(p->flags), p->weap, explode, WS(p->flags), game::gamemode, game::mutators, p->curscale);
                 if(expl > 0) obstacles.avoidnear(p, p->o.z + expl, p->o, guessradius + expl);
             }
         }

@@ -73,9 +73,9 @@ struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
 #define hithead(x)      (x&HIT_WHIPLASH || x&HIT_HEAD)
 #define hithurts(x)     (x&HIT_BURN || x&HIT_BLEED || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
-#define doesburn(x,y)   (isweap(x) && W2(x, residual, y&HIT_ALT) == 1)
-#define doesbleed(x,y)  (isweap(x) && W2(x, residual, y&HIT_ALT) == 2)
-#define WX(x)           (W_MAX+W_##x)
+#define doesburn(x,y)   (isweap(x) && WF(WK(y), x, residual, WS(y)) == 1)
+#define doesbleed(x,y)  (isweap(x) && WF(WK(y), x, residual, WS(y)) == 2)
+#define WZ(x)           (W_MAX+W_##x)
 
 #include "weapdef.h"
 
@@ -103,7 +103,7 @@ WPVAR(0, allowed, 0, 3,
 WPVAR(0, carried, 0, 1,
     0,          0,          1,          1,          1,          1,          1,          1,          0,          0,          1
 );
-WPVARM(0, collide, 0, VAR_MAX,
+WPVARK(0, collide, 0, VAR_MAX,
     IMPACT_PLAYER|COLLIDE_TRACE,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER,
@@ -126,61 +126,8 @@ WPVARM(0, collide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|DRILL_GEOM|DRILL_PLAYER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
-    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
-);
-WPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
-    0x707070,   0xC0C0C0,   0x2020F0,   0xF0F020,   0xF05820,   0xF02020,   0x40F0C8,   0xA020F0,   0x205000,   0x504800,   0x702D00
-);
-WPVARM(0, cooked, 0, VAR_MAX,
-    0,          0,          0,          0,          0,          0,          0,          0,          8,          8,          8,
-    0,          0,          0,          0,          0,          1,          33,         0,          8,          8,          8
-);
-WPFVAR(0, critboost, 0, FVAR_MAX,
-    2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f
-);
-WPVARM(0, critdash, 0, VAR_MAX,
-    500,        0,          500,        0,          0,          0,          0,          0,          0,          0,          0,
-    500,        0,          500,        0,          0,          0,          0,          0,          0,          0,          0
-);
-WPFVAR(0, critdist, 0, FVAR_MAX,
-    0.0f,       128.0f,     0.0f,       256.0f,     128.0f,     64.0f,      0.0f,       1024.0f,    0.0f,       0.0f,       0.0f
-);
-WPFVAR(0, critmult, 0, FVAR_MAX,
-    2.0f,       3.0f,       2.0f,       2.0f,       3.0f,       4.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f
-);
-WPVARM(0, damage, VAR_MIN, VAR_MAX,
-    30,         35,         30,         15,         22,         5,          15,         35,         100,        100,        150,
-    40,         5,          60,         4,          4,          5,          10,         150,        100,        50,         150
-);
-WPFVARM(0, delta, 0, FVAR_MAX,
-    10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,
-    10.0f,      10.0f,      10.0f,      10.0f,      1000.0f,    10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f
-);
-WPVARM(0, drill, 0, VAR_MAX,
-    0,          0,          0,          2,          2,          0,          0,          2,          0,          0,          0,
-    0,          0,          0,          0,          0,          0,          0,          4,          0,          0,          0
-);
-WPVARM(0, edelay, 0, VAR_MAX,
-    200,        200,        200,        200,        200,        200,        200,        200,        200,        200,        200,
-    200,        200,        200,        200,        200,        200,        200,        200,        200,        200,        200
-);
-WPFVARM(0, elasticity, 0, FVAR_MAX,
-    0.5f,       0.5f,       0.5f,       0.5f,       0.65f,      0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
-    0.5f,       0.5f,       0.5f,       0.5f,       0.45f,      0.35f,      0.5f,       0.5f,       0.5f,       0.5f,       0.5f
-);
-WPVARM(IDF_HEX, explcol, -3, 0xFFFFFF,
-    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808,
-    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808
-);
-WPFVARM(0, explode, 0, FVAR_MAX,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      10.0f,      16.0f,      75.0f,      28.0f,      100.0f,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      48.0f,      0.0f,       75.0f,      42.0f,      100.0f
-);
-WPVARM(0, extinguish, 0, 7,
-    2,          2,          2,          2,          2,          3,          1,          2,          2,          2,          2,
-    2,          2,          2,          2,          2,          3,          0,          2,          2,          2,          2
-);
-WPVARM(0, flakcollide, 0, VAR_MAX,
+    IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ,
+
     IMPACT_PLAYER|COLLIDE_TRACE|COLLIDE_OWNER,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_TRACE|COLLIDE_OWNER,
     BOUNCE_GEOM|IMPACT_PLAYER|COLLIDE_TRACE|IMPACT_SHOTS|DRILL_PLAYER|COLLIDE_OWNER,
@@ -205,21 +152,71 @@ WPVARM(0, flakcollide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
-WPVARM(0, flakdamage, VAR_MIN, VAR_MAX,
+WPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
+    0x707070,   0xC0C0C0,   0x2020F0,   0xF0F020,   0xF05820,   0xF02020,   0x40F0C8,   0xA020F0,   0x205000,   0x504800,   0x702D00
+);
+WPVARM(0, cooked, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          0,          0,          0,          8,          8,          8,
+    0,          0,          0,          0,          0,          1,          33,         0,          8,          8,          8
+);
+WPFVAR(0, critboost, 0, FVAR_MAX,
+    2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f
+);
+WPVARM(0, critdash, 0, VAR_MAX,
+    500,        0,          500,        0,          0,          0,          0,          0,          0,          0,          0,
+    500,        0,          500,        0,          0,          0,          0,          0,          0,          0,          0
+);
+WPFVAR(0, critdist, 0, FVAR_MAX,
+    0.0f,       128.0f,     0.0f,       256.0f,     128.0f,     64.0f,      0.0f,       1024.0f,    0.0f,       0.0f,       0.0f
+);
+WPFVAR(0, critmult, 0, FVAR_MAX,
+    2.0f,       3.0f,       2.0f,       2.0f,       3.0f,       4.0f,       2.0f,       2.0f,       2.0f,       2.0f,       2.0f
+);
+WPVARK(0, damage, VAR_MIN, VAR_MAX,
+    30,         35,         30,         15,         22,         5,          15,         35,         100,        100,        150,
+    40,         5,          60,         4,          4,          5,          10,         150,        100,        50,         150,
     25,         5,          15,         15,         15,         10,         10,         15,         150,        100,        300,
     10,         5,          30,         5,          5,          5,          5,          15,         150,        100,        300
 );
-WPVARM(IDF_HEX, flakexplcol, -3, 0xFFFFFF,
+WPFVARK(0, delta, 0, FVAR_MAX,
+    10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,
+    10.0f,      10.0f,      10.0f,      10.0f,      1000.0f,    10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,
+    10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f,
+    10.0f,      10.0f,      10.0f,      10.0f,      1000.0f,    10.0f,      10.0f,      10.0f,      10.0f,      10.0f,      10.0f
+);
+WPVARK(0, drill, 0, VAR_MAX,
+    0,          0,          0,          2,          2,          0,          0,          2,          0,          0,          0,
+    0,          0,          0,          0,          0,          0,          0,          4,          0,          0,          0,
+    0,          0,          0,          2,          2,          0,          0,          2,          0,          0,          0,
+    0,          0,          0,          0,          0,          0,          0,          4,          0,          0,          0
+);
+WPVARM(0, edelay, 0, VAR_MAX,
+    200,        200,        200,        200,        200,        200,        200,        200,        200,        200,        200,
+    200,        200,        200,        200,        200,        200,        200,        200,        200,        200,        200
+);
+WPFVARK(0, elasticity, 0, FVAR_MAX,
+    0.5f,       0.5f,       0.5f,       0.5f,       0.65f,      0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
+    0.5f,       0.5f,       0.5f,       0.5f,       0.45f,      0.35f,      0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
+    0.5f,       0.5f,       0.5f,       0.5f,       0.65f,      0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
+    0.5f,       0.5f,       0.5f,       0.5f,       0.45f,      0.35f,      0.5f,       0.5f,       0.5f,       0.5f,       0.5f
+);
+WPVARK(IDF_HEX, explcol, -3, 0xFFFFFF,
+    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808,
+    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808
 );
-WPFVARM(0, flakminspeed, 0, FVAR_MAX,
-    50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,
-    50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
+WPFVARK(0, explode, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      10.0f,      16.0f,      75.0f,      28.0f,      100.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      48.0f,      0.0f,       75.0f,      42.0f,      100.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      10.0f,      16.0f,      75.0f,      24.0f,      100.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      48.0f,      0.0f,       75.0f,      8.0f,       100.0f
 );
-WPVARM(IDF_HEX, flakpartcol, -3, 0xFFFFFF,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1
+WPVARK(0, extinguish, 0, 7,
+    2,          2,          2,          2,          2,          3,          1,          2,          2,          2,          2,
+    2,          2,          2,          2,          2,          3,          0,          2,          2,          2,          2,
+    2,          2,          2,          2,          2,          3,          1,          2,          2,          2,          2,
+    2,          2,          2,          2,          2,          3,          0,          2,          2,          2,          2
 );
 WPFVARM(0, fragjump, 0, 1,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
@@ -255,15 +252,15 @@ WPFVARM(0, fragspread, 0, FVAR_MAX,
 );
 WPVARM(0, fragdelay, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
-    0,          0,          0,          0,          10,         0,          0,          0,          0,          50,         0
+    0,          0,          0,          0,          10,         0,          0,          0,          0,          100,        0
 );
 WPVARM(0, fragtime, 1, VAR_MAX,
     500,        500,        500,        250,        500,        1000,       500,        500,        3000,       3000,       3000,
-    500,        500,        500,        2000,       800,        3000,       500,        500,        3000,       3000,       3000
+    500,        500,        500,        2000,       800,        3000,       500,        500,        3000,       1000,       3000
 );
 WPVARM(0, fragweap, -1, W_MAX*2-1,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG,
-    -1,         W_PISTOL,   -1,         WX(SHOTGUN),WX(SMG),    -1,         -1,         -1,         W_SHOTGUN,  WX(RIFLE),  W_SMG
+    -1,         W_PISTOL,   -1,         WZ(SHOTGUN),WZ(SMG),    -1,         -1,         -1,         W_SHOTGUN,  WZ(RIFLE),  W_SMG
 );
 WPFVAR(0, frequency, 0, FVAR_MAX,
     0.0f,       0.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       2.0f,       4.0f
@@ -272,19 +269,27 @@ WPVARM(0, fullauto, 0, 1,
     1,          0,          1,          0,          1,          1,          1,          0,          0,          0,          0,
     1,          0,          1,          0,          1,          0,          0,          0,          0,          0,          0
 );
-WPVARM(0, gdelay, 0, VAR_MAX,
+WPVARK(0, gdelay, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
+    0,          0,          0,          0,          100,        0,          0,          0,          0,          0,          0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
     0,          0,          0,          0,          100,        0,          0,          0,          0,          0,          0
 );
-WPVARM(0, guided, 0, 6,
+WPVARK(0, guided, 0, 6,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          1,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          1
 );
-WPFVARM(0, headmin, 0, FVAR_MAX,
+WPFVARK(0, headmin, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       4.0f,       8.0f,       4.0f,       8.0f,       8.0f,       16.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       4.0f,       4.0f,       4.0f,       8.0f,       8.0f,       16.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       4.0f,       8.0f,       4.0f,       8.0f,       8.0f,       16.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       4.0f,       4.0f,       4.0f,       8.0f,       8.0f,       16.0f
 );
-WPFVARM(0, hitpush, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, hitpush, FVAR_MIN, FVAR_MAX,
+    100.0f,     35.0f,      50.0f,      50.0f,      50.0f,      5.0f,       20.0f,      30.0f,      250.0f,     250.0f,     500.0f,
+    200.0f,     50.0f,      100.0f,     25.0f,      50.0f,      10.0f,      -100.0f,    100.0f,     250.0f,     250.0f,     500.0f,
     100.0f,     35.0f,      50.0f,      50.0f,      50.0f,      5.0f,       20.0f,      30.0f,      250.0f,     250.0f,     500.0f,
     200.0f,     50.0f,      100.0f,     25.0f,      50.0f,      10.0f,      -100.0f,    100.0f,     250.0f,     250.0f,     500.0f
 );
@@ -295,7 +300,9 @@ WPFVARM(0, kickpush, FVAR_MIN, FVAR_MAX,
 WPVAR(0, laser, 0, 1,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0
 );
-WPFVARM(0, legsdmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, legsdmg, FVAR_MIN, FVAR_MAX,
+    0.3f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f,
+    0.6f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f,
     0.3f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f,
     0.6f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f
 );
@@ -310,27 +317,37 @@ WPFVARM(0, maxspread, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
-WPFVARM(0, minspeed, 0, FVAR_MAX,
+WPFVARK(0, minspeed, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
-    0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      25.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f
+    0.0f,       0.0f,       0.0f,       25.0f,      25.0f,      25.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
+    50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,
+    50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
 );
 WPFVARM(0, minspread, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       16.0f,      0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
-WPVARM(IDF_HEX, partcol, -3, 0xFFFFFF,
+WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
     0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1
 );
-WPFVARM(0, partlen, 0, FVAR_MAX,
+WPFVARK(0, partlen, 0, FVAR_MAX,
+    0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       256.0f,     0.0f,       4.0f,       0.0f,
+    0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f,
     0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       256.0f,     0.0f,       4.0f,       0.0f,
     0.0f,       10.0f,      0.0f,       15.0f,      15.0f,      5.0f,       0.0f,       512.0f,     0.0f,       4.0f,       0.0f
 );
-WPFVARM(0, partsize, 0, FVAR_MAX,
+WPFVARK(0, partsize, 0, FVAR_MAX,
+    1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       1.5f,       1.0f,       4.0f,       3.0f,
+    2.0f,       0.5f,       1.25f,      0.45f,      0.35f,      10.0f,      24.0f,      3.0f,       1.0f,       4.0f,       3.0f,
     1.0f,       2.0f,       1.0f,       0.65f,      0.5f,       10.0f,      8.0f,       1.5f,       1.0f,       4.0f,       3.0f,
     2.0f,       0.5f,       1.25f,      0.45f,      0.35f,      10.0f,      24.0f,      3.0f,       1.0f,       4.0f,       3.0f
 );
-WPVARM(0, parttype, 0, W_MAX-1,
+WPVARK(0, parttype, 0, W_MAX-1,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
+    W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
     W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET,
     W_MELEE,    W_PISTOL,   W_SWORD,    W_SHOTGUN,  W_SMG,      W_FLAMER,   W_PLASMA,   W_RIFLE,    W_GRENADE,  W_MINE,     W_ROCKET
 );
@@ -342,27 +359,39 @@ WPVARM(0, power, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          3000,       0,          2000,
     0,          0,          0,          0,          0,          500,        2000,       0,          3000,       0,          2000
 );
-WPVARM(0, proxdelay, 0, VAR_MAX,
+WPVARK(0, proxdelay, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          250,        0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          500,        0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          250,        0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          500,        0
 );
-WPFVARM(0, proxdist, 0, FVAR_MAX,
+WPFVARK(0, proxdist, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       24.0f,      0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       FVAR_MAX,   0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       24.0f,      0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       FVAR_MAX,   0.0f
 );
-WPVARM(0, proxtime, 0, VAR_MAX,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          100,        0,
+WPVARK(0, proxtime, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          150,        0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          150,        0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0
 );
-WPVARM(0, proxtype, 0, 2,
+WPVARK(0, proxtype, 0, 2,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          1,          0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          2,          0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          1,          0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          2,          0
 );
-WPVARM(0, radial, 0, VAR_MAX,
+WPVARK(0, radial, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          20,         40,         0,          0,          0,          0,
+    0,          0,          0,          0,          0,          20,         80,         0,          0,          0,          0,
     0,          0,          0,          0,          0,          20,         40,         0,          0,          0,          0,
     0,          0,          0,          0,          0,          20,         80,         0,          0,          0,          0
 );
-WPFVARM(0, radius, FVAR_NONZERO, FVAR_MAX,
+WPFVARK(0, radius, FVAR_NONZERO, FVAR_MAX,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       2.0f,       1.0f,       1.0f,       1.0f,       1.0f
 );
@@ -373,7 +402,9 @@ WPVARM(0, rays, 0, VAR_MAX,
 WPVAR(0, rdelay, 0, VAR_MAX,
     50,         1000,       50,         750,        1500,       2000,       2000,       1750,       1500,       1500,       1500
 );
-WPFVARM(0, reflectivity, 0, FVAR_MAX,
+WPFVARK(0, reflectivity, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
@@ -384,17 +415,23 @@ WPFVARM(0, relativity, 0, FVAR_MAX,
 WPVAR(0, reloads, -1, VAR_MAX,
     0,          -1,         0,          -1,         -1,         -1,         -1,         -1,         0,          0,          0
 );
-WPVARM(0, residual, 0, 2,
+WPVARK(0, residual, 0, 2,
+    0,          0,          2,          0,          0,          1,          0,          0,          1,          1,          1,
+    0,          0,          2,          2,          0,          1,          0,          0,          1,          1,          1,
     0,          0,          2,          0,          0,          1,          0,          0,          1,          1,          1,
     0,          0,          2,          2,          0,          1,          0,          0,          1,          1,          1
 );
-WPFVARM(0, selfdmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, selfdmg, FVAR_MIN, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
+    0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f
 );
-WPFVARM(0, slow, 0, FVAR_MAX,
+WPFVARK(0, slow, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.2f,       0.0f,       0.0f,       0.0f,       0.0f
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.2f,       0.0f,       0.0f,       0.0f,       0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.2f,       1.0f,       0.0f,       0.0f,       0.0f
 );
 WPVARM(0, speed, 0, VAR_MAX,
     0,          3000,       0,          1000,       2500,       300,        1000,       10000,      250,        100,        1000,
@@ -404,27 +441,37 @@ WPFVARM(0, spread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       6.0f,       3.0f,       5.0f,       2.0f,       2.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       8.0f,       1.0f,       3.0f,       3.0f,       20.0f,      1.0f,       0.2f,       1.0f,       1.0f,       1.0f
 );
-WPFVARM(0, stunscale, 0, FVAR_MAX,
+WPFVARK(0, stunscale, 0, FVAR_MAX,
     0.5f,       0.25f,      1.0f,       1.0f,       2.0f,       0.0f,       0.5f,       0.35f,      2.0f,       2.0f,       4.0f,
-    1.0f,       0.25f,      2.0f,       0.5f,       2.0f,       0.0f,       1.0f,       1.0f,       2.0f,       2.0f,       4.0f
+    1.0f,       0.25f,      2.0f,       0.5f,       2.0f,       0.0f,       1.0f,       1.0f,       2.0f,       2.0f,       4.0f,
+    0.5f,       0.25f,      1.0f,       1.0f,       2.0f,       0.0f,       0.5f,       0.35f,      2.0f,       2.0f,       4.0f,
+    1.0f,       0.25f,      2.0f,       0.5f,       2.0f,       0.0f,       1.0f,       5.0f,       2.0f,       2.0f,       4.0f
 );
-WPVARM(0, stuntime, 0, VAR_MAX,
+WPVARK(0, stuntime, 0, VAR_MAX,
     100,        25,         200,        100,        200,        0,          50,         100,        200,        200,        500,
-    200,        25,         200,        100,        200,        0,          50,         200,        200,        200,        500
+    200,        25,         200,        100,        200,        0,          50,         200,        200,        200,        500,
+    100,        25,         200,        100,        200,        0,          50,         100,        200,        200,        500,
+    200,        25,         200,        100,        200,        0,          50,         250,        200,        200,        500
 );
 WPVARM(0, sub, 0, VAR_MAX,
     0,          1,          0,          1,          1,          1,          1,          1,          1,          1,          1,
     0,          2,          0,          2,          4,          5,          20,         1,          1,          1,          1
 );
-WPVARM(0, taper, 0, 6,
+WPVARK(0, taper, 0, 6,
+    0,          0,          0,          0,          0,          1,          1,          0,          0,          0,          0,
+    0,          0,          0,          0,          0,          1,          2,          0,          0,          0,          0,
     0,          0,          0,          0,          0,          1,          1,          0,          0,          0,          0,
     0,          0,          0,          0,          0,          1,          2,          0,          0,          0,          0
 );
-WPFVARM(0, taperin, 0, FVAR_MAX,
+WPFVARK(0, taperin, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.025f,     0.0f,       0.0f,       0.0f,       0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.025f,     0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f
 );
-WPFVARM(0, taperout, 0, FVAR_MAX,
+WPFVARK(0, taperout, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f
 );
@@ -432,7 +479,9 @@ WPVARM(0, time, 1, VAR_MAX,
     100,        2000,       350,        400,        500,        200,        600,        5000,       3000,       120000,     5000,
     500,        100,        500,        5000,       2000,       1500,       5000,       5000,       3000,       30000,      5000
 );
-WPFVARM(0, torsodmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, torsodmg, FVAR_MIN, FVAR_MAX,
+    0.5f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
+    0.8f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
     0.5f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
     0.8f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f
 );
@@ -440,27 +489,39 @@ WPFVARM(0, trace, 0, FVAR_MAX,
     4.0f,       1.0f,       3.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     4.0f,       1.0f,       5.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
 );
-WPFVARM(0, visfade, 0, 1,
+WPFVARK(0, visfade, 0, 1,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
 );
-WPVARM(0, vistime, 0, VAR_MAX,
+WPVARK(0, vistime, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0
 );
-WPFVARM(0, waterfric, 0, FVAR_MAX,
+WPFVARK(0, waterfric, 0, FVAR_MAX,
+    0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f,
+    0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f,
     0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f,
     0.0f,       2.0f,       0.0f,       2.0f,       2.0f,       1.0f,       1.0f,       2.0f,       2.0f,       2.0f,       2.0f
 );
-WPFVARM(0, wavepush, 0, FVAR_MAX,
+WPFVARK(0, wavepush, 0, FVAR_MAX,
+    1.5f,       1.5f,       1.5f,       1.5f,       1.5f,       0.0f,       1.5f,       1.5f,       2.0f,       2.0f,       4.0f,
+    1.5f,       1.5f,       1.5f,       1.5f,       1.5f,       0.0f,       2.0f,       1.5f,       2.0f,       2.0f,       4.0f,
     1.5f,       1.5f,       1.5f,       1.5f,       1.5f,       0.0f,       1.5f,       1.5f,       2.0f,       2.0f,       4.0f,
     1.5f,       1.5f,       1.5f,       1.5f,       1.5f,       0.0f,       2.0f,       1.5f,       2.0f,       2.0f,       4.0f
 );
-WPFVARM(0, weight, 0, FVAR_MAX,
+WPFVARK(0, weight, 0, FVAR_MAX,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       200.0f,     0.0f,       0.0f,       65.0f,      150.0f,     0.0f,
+    0.0f,       0.0f,       0.0f,       250.0f,     0.0f,       100.0f,     0.0f,       0.0f,       65.0f,      150.0f,     0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       200.0f,     0.0f,       0.0f,       65.0f,      150.0f,     0.0f,
     0.0f,       0.0f,       0.0f,       250.0f,     0.0f,       100.0f,     0.0f,       0.0f,       65.0f,      150.0f,     0.0f
 );
-WPFVARM(0, whipdmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, whipdmg, FVAR_MIN, FVAR_MAX,
+    0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f,
+    0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f,
     0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f,
     0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f
 );
@@ -473,7 +534,7 @@ WPVAR(0, zooms, 0, 1,
 );
 
 #define WRS(a,b,c)           (a*(m_limited(b, c) ? G(radiallimited) : G(radialscale)))
-#define WS(a,b,c,d,e,f)      (!m_insta(d, e) || m_loadout(d, e) || a != W_RIFLE ? WRS(W2(a, b, c)*f, d, e) : 0.f)
+#define WX(k,a,b,c,d,e,f)    (!m_insta(d, e) || m_loadout(d, e) || a != W_RIFLE ? WRS(WF(k, a, b, c)*f, d, e) : 0.f)
 #define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_loadout(c, d) || a != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*e, W2(a, minspread, b), W2(a, maxspread, b) > 0 ? W2(a, maxspread, b) : FVAR_MAX) : 0.f)
 #define WSND(a,b)            (weaptype[a].sound+b)
 #define WSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
