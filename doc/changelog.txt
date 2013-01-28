@@ -5,6 +5,8 @@ Gameplay:
  * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
  * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with /thirdpersondist and /thirdpersonside)
+ * Ballistic mutator removed
+ * Kaboom mutator added (only grenades and mines with reloading ammo, rocket single spawn as usual)
 
 Weapons:
  * Plasma primary damage and explosion radius increased
@@ -12,8 +14,14 @@ Weapons:
  * Mines, new weapon, primary proximity mine, secondary tripwire mine, pickup-based (like grenade)
  * Rifle explosion size and hitpush reduced (reduces hit area, total explosion damage, and pushing force)
  * Rifle zoom can now only be controlled via zoomlevels by players
- * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread reduced
+ * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread and hitpush reduced
  * Pistol secondary spread increased
+
+Modes & Mutators:
+ * Number of bots in coop reduced to 3/2 of humans
+ * Enabled multi-coop (one human team and multiple bot teams)
+ * Removed expert from default set of allowed mutators
+ * Arena mutator now set as default mutator (classic pickup play available as "classic" mutator)
 
 Maps:
  * Assigned map music to all maps
@@ -47,11 +55,6 @@ Interface & Menus:
  * Carried flags & similar are now 50% trasparent in third person view
  * Revamped clip display with variable clip sizes
  * Added new "circle bar" showing health, impulse and ammo simultaneously at crosshair location
-
-Modes & Mutators:
- * Number of bots in coop reduced to 3/2 of humans
- * Enabled multi-coop (one human team and multiple bot teams)
- * Removed expert from default set of allowed mutators
 
 Modding & Data Assets:
  * Added support for up to 4 types of water, lava, and glass
