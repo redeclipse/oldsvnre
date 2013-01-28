@@ -531,7 +531,7 @@ game/server.o: engine/octa.h engine/lightmap.h engine/bih.h engine/texture.h
 game/server.o: engine/model.h engine/varray.h game/weapons.h game/weapdef.h game/gamemode.h
 game/server.o: game/team.h game/ai.h game/vars.h game/capture.h game/defend.h
 game/server.o: game/bomber.h game/auth.h game/capturemode.h game/defendmode.h
-game/server.o: game/bombermode.h game/duelmut.h game/aiman.h game/extinfo.h
+game/server.o: game/bombermode.h game/duelmut.h game/aiman.h
 game/waypoint.o: game/game.h engine/engine.h shared/cube.h shared/tools.h
 game/waypoint.o: shared/command.h shared/geom.h shared/ents.h
 game/waypoint.o: shared/iengine.h shared/igame.h engine/irc.h engine/sound.h
@@ -583,7 +583,6 @@ game/server-standalone.o: game/gamemode.h game/team.h game/ai.h game/vars.h
 game/server-standalone.o: game/capture.h game/defend.h game/bomber.h
 game/server-standalone.o: game/auth.h game/capturemode.h game/defendmode.h
 game/server-standalone.o: game/bombermode.h game/duelmut.h game/aiman.h
-game/server-standalone.o: game/extinfo.h
 
 shared/cube.h.gch: shared/tools.h shared/command.h shared/geom.h
 shared/cube.h.gch: shared/ents.h shared/iengine.h shared/igame.h

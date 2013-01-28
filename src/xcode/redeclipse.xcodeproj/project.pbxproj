@@ -98,7 +98,6 @@
 		D16A834A0F130E9500EABB1F /* capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A83380F130E9500EABB1F /* capture.cpp */; };
 		D16A834B0F130E9500EABB1F /* capture.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A83390F130E9500EABB1F /* capture.h */; };
 		D16A834D0F130E9500EABB1F /* entities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833B0F130E9500EABB1F /* entities.cpp */; };
-		D16A834E0F130E9500EABB1F /* extinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A833C0F130E9500EABB1F /* extinfo.h */; };
 		D16A834F0F130E9500EABB1F /* game.h in Headers */ = {isa = PBXBuildFile; fileRef = D16A833D0F130E9500EABB1F /* game.h */; };
 		D16A83500F130E9500EABB1F /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833E0F130E9500EABB1F /* hud.cpp */; };
 		D16A83510F130E9500EABB1F /* physics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D16A833F0F130E9500EABB1F /* physics.cpp */; };
@@ -232,7 +231,6 @@
 		D16A83380F130E9500EABB1F /* capture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = capture.cpp; sourceTree = "<group>"; };
 		D16A83390F130E9500EABB1F /* capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = capture.h; sourceTree = "<group>"; };
 		D16A833B0F130E9500EABB1F /* entities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = entities.cpp; sourceTree = "<group>"; };
-		D16A833C0F130E9500EABB1F /* extinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = extinfo.h; sourceTree = "<group>"; };
 		D16A833D0F130E9500EABB1F /* game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = game.h; sourceTree = "<group>"; };
 		D16A833E0F130E9500EABB1F /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hud.cpp; sourceTree = "<group>"; };
 		D16A833F0F130E9500EABB1F /* physics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = physics.cpp; sourceTree = "<group>"; };
@@ -501,7 +499,6 @@
 				D16A83380F130E9500EABB1F /* capture.cpp */,
 				D16A83390F130E9500EABB1F /* capture.h */,
 				D16A833B0F130E9500EABB1F /* entities.cpp */,
-				D16A833C0F130E9500EABB1F /* extinfo.h */,
 				D16A833D0F130E9500EABB1F /* game.h */,
 				D16A833E0F130E9500EABB1F /* hud.cpp */,
 				D16A833F0F130E9500EABB1F /* physics.cpp */,
@@ -553,7 +550,6 @@
 				D1776F1F0E485DC5004CC402 /* depthfx.h in Headers */,
 				D1776F230E485DC5004CC402 /* sound.h in Headers */,
 				D16A834B0F130E9500EABB1F /* capture.h in Headers */,
-				D16A834E0F130E9500EABB1F /* extinfo.h in Headers */,
 				D16A834F0F130E9500EABB1F /* game.h in Headers */,
 				D16A83560F130E9500EABB1F /* defend.h in Headers */,
 				D16A83570F130E9500EABB1F /* vars.h in Headers */,

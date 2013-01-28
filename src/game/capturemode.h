@@ -78,7 +78,6 @@ struct captureservmode : capturestate, servmode
                     givepoints(ci, G(capturepoints));
                     if(flags[i].team != ci->team)
                     {
-                        ci->state.gscore++;
                         int score = addscore(ci->team);
                         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
                         if(G(capturelimit) && score >= G(capturelimit))
@@ -149,7 +148,6 @@ struct captureservmode : capturestate, servmode
                 {
                     capturestate::returnaffinity(i, gamemillis);
                     givepoints(ci, G(capturepoints));
-                    ci->state.gscore++;
                     int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
                     if(G(capturelimit) && score >= G(capturelimit))
