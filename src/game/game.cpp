@@ -582,7 +582,7 @@ namespace game
                 else
                 {
                     weap = w_attr(gamemode, weap, m_weapon(gamemode, mutators));
-                    if(!isweap(weap) || (m_arena(gamemode, mutators) && weap < W_ITEM)) weap = -1;
+                    if(!isweap(weap) || (m_loadout(gamemode, mutators) && weap < W_ITEM)) weap = -1;
                     else switch(W(weap, allowed))
                     {
                         case 0: weap = -1; break;
@@ -1502,7 +1502,7 @@ namespace game
 
     void chooseloadweap(gameent *d, const char *list, bool saved = false)
     {
-        if(m_arena(gamemode, mutators))
+        if(m_loadout(gamemode, mutators))
         {
             if(saved && d != player1) saved = false;
             vector<int> items;
@@ -1544,7 +1544,7 @@ namespace game
             if(!value.empty()) setsvar("favloadweaps", value.getbuf(), true);
             if(d == game::player1 && !msg.empty()) conoutft(CON_SELF, "weapon selection is now: %s", msg.getbuf());
         }
-        else conoutft(CON_MESG, "\foweapon selection is only available in arena");
+        else conoutft(CON_MESG, "\foweapon selection is not currently available");
     }
     ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
@@ -1573,7 +1573,8 @@ namespace game
 #else
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model));
 #endif
-        if(!client::demoplayback && m_arena(gamemode, mutators) && autoloadweap && *favloadweaps) chooseloadweap(player1, favloadweaps);
+        if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
+            chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         specreset();
         resetsway();
@@ -1800,13 +1801,13 @@ namespace game
 
     void project(int w, int h)
     {
-        bool input = hud::hasinput();
+        bool input = hud::hasinput(true);
         if(input != inputmouse)
         {
             resetcursor();
             inputmouse = input;
         }
-        if(!hud::hasinput(true))
+        if(!input)
         {
             if(thirdpersonview(true, focus))
             {
@@ -2358,7 +2359,7 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(m_arena(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap.empty() && !client::waiting() && !menuactive())
+            if(m_loadout(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->loadweap.empty() && !client::waiting() && !menuactive())
                 showgui("loadout", -1);
         }
         else if(!menuactive()) showgui("main", -1);
