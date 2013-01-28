@@ -228,7 +228,7 @@ namespace client
         loopv(ids)
         {
             ident &id = *ids[i];
-            if(id.flags&IDF_CLIENT && !(id.flags&IDF_ADMIN)) switch(id.type)
+            if(id.flags&IDF_CLIENT && !(id.flags&IDF_ADMIN) && !(id.flags&IDF_READONLY)) switch(id.type)
             {
                 case ID_VAR:
                     if(*id.storage.i == id.def.i)

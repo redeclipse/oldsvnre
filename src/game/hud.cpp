@@ -536,7 +536,7 @@ namespace hud
         if(m_ballistic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_BALLISTIC)))) ADDMODE(modeballistictex)
         if(m_duel(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_DUEL)))) ADDMODE(modedueltex)
         if(m_survivor(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
-        if(m_loadout(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)
+        if(m_classic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)
         if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
         if(m_jetpack(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_JETPACK)))) ADDMODE(modejetpacktex)
         if(m_vampire(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
@@ -1640,7 +1640,11 @@ namespace hud
                                         if(id->flags&IDF_HEX)
                                         {
                                             if(id->maxval == 0xFFFFFF)
-                                                tz += draw_textx("\famin: \fw0x%.6X\fa, max: \fw0x%.6X\fa, default: \fw0x%.6X\fa, current: \fw0x%.6X", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt, id->minval, id->maxval, id->def.i, *id->storage.i);
+                                                tz += draw_textx("\famin: \fw0x%.6X\fa (\fw%d\fa,\fw%d\fa,\fw%d\fa), max: \fw0x%.6X\fa (\fw%d\fa,\fw%d\fa,\fw%d\fa), default: \fw0x%.6X\fa (\fw%d\fa,\fw%d\fa,\fw%d\fa), current: \fw0x%.6X (\fw%d\fa,\fw%d\fa,\fw%d\fa)", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt,
+                                                        id->minval, (id->minval>>16)&0xFF, (id->minval>>8)&0xFF, id->minval&0xFF,
+                                                        id->maxval, (id->maxval>>16)&0xFF, (id->maxval>>8)&0xFF, id->maxval&0xFF,
+                                                        id->def.i, (id->def.i>>16)&0xFF, (id->def.i>>8)&0xFF, id->def.i&0xFF,
+                                                        *id->storage.i, (*id->storage.i>>16)&0xFF, (*id->storage.i>>8)&0xFF, *id->storage.i&0xFF);
                                             else tz += draw_textx("\famin: \fw0x%X\fa, max: \fw0x%X\fa, default: \fw0x%X\fa, current: \fw0x%X", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt, id->minval, id->maxval, id->def.i, *id->storage.i);
                                         }
                                         else tz += draw_textx("\famin: \fw%d\fa, max: \fw%d\fa, default: \fw%d\fa, current: \fw%d", tq, ty+tz, 255, 255, 255, int(255*fullconblend*fade), concenter ? TEXT_CENTERED : TEXT_LEFT_JUSTIFY, -1, tt, id->minval, id->maxval, id->def.i, *id->storage.i);
