@@ -1500,7 +1500,7 @@ namespace game
         return -1;
     }
 
-    void chooseloadweap(gameent *d, const char *list, bool saved = false)
+    void chooseloadweap(gameent *d, const char *list, bool saved = false, bool echo = false)
     {
         if(m_loadout(gamemode, mutators))
         {
@@ -1542,11 +1542,11 @@ namespace game
                 msg.put(weap, strlen(weap));
             }
             if(!value.empty()) setsvar("favloadweaps", value.getbuf(), true);
-            if(d == game::player1 && !msg.empty()) conoutft(CON_SELF, "weapon selection is now: %s", msg.getbuf());
+            if(d == game::player1 && !msg.empty() && echo) conoutft(CON_SELF, "weapon selection is now: %s", msg.getbuf());
         }
         else conoutft(CON_MESG, "\foweapon selection is not currently available");
     }
-    ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0));
+    ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0, true));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
     ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && W(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
     ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : gamemode, *m >= 0 ? *m : mutators) ? 1 : 0));
