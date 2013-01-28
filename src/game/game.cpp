@@ -1549,6 +1549,7 @@ namespace game
     ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
     ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && W(*n, allowed) >= (m_duke(gamemode, mutators) ? 2 : 1) ? 1 : 0));
+    ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : gamemode, *m >= 0 ? *m : mutators) ? 1 : 0));
 
     void startmap(const char *name, const char *reqname, bool empty)    // called just after a map load
     {
