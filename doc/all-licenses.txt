@@ -5,13 +5,14 @@ Copyright: Omitted
 License: Omitted
 
 Files: *
-Copyright: 2009-2012, Red Eclipse Team
+Copyright: 2009-2013, Red Eclipse Team
 License: CC-BY-SA-3.0
 
 Files: src/*
-Copyright: 2009-2012, Quinton Reeves, Lee Salzman
-           2001-2012, Wouter van Oortmerssen, Lee Salzman, Mike Dysart,
+Copyright: 2001-2013, Wouter van Oortmerssen, Lee Salzman, Mike Dysart,
            Robert Pointon, Quinton Reeves
+           2009-2013, Quinton Reeves, Lee Salzman
+
 License: Zlib
 
 Files: doc/trademark.txt
@@ -30,7 +31,7 @@ Copyright: 2011-2012, Red Eclipse Team
 License: Zlib
 
 Files: doc/examples/*
-Copyright: 2011-2012, Red Eclipse Team
+Copyright: 2011-2013, Red Eclipse Team
 License: Zlib
 
 Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
@@ -41,27 +42,27 @@ License: ZLib
 Files: data/maps/biolytic* data/maps/darkness* data/maps/mist* data/maps/nova*
        data/maps/panic* data/maps/oneiroi* data/maps/processing*
        data/maps/tranquility*
-Copyright: 2009-2012, Derek "favorito" Ponicki <favorito.redeclipse@gmail.com>
+Copyright: 2009-2013, Derek "favorito" Ponicki <favorito.redeclipse@gmail.com>
 License: Zlib
 
 Files: data/maps/ares* data/maps/canals* data/maps/conflict*
-Copyright: 2011-2012, Ulukai <jonathan.denil@gmail.com>
+Copyright: 2011-2013, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
 Files: data/maps/industrial* data/maps/isolation* data/maps/keystone2k*
-Copyright: 2012, John_III <snaginneb@yahoo.com>
+Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
 Files: data/maps/fourplex* data/maps/pumpstation* data/maps/starlibido*
-Copyright: 2012 D.a.M.i.E.n. <daymeenn@gmail.com>,
+Copyright: 2012-2013 D.a.M.i.E.n. <daymeenn@gmail.com>,
 License: CC-BY-SA-3.0
 
 Files: data/maps/neodrive* data/maps/hawk*
-Copyright: 2012, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
+Copyright: 2012-2013, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
 
 Files: data/maps/cutec*
-Copyright: 2012, Raiden
+Copyright: 2012-2013, Raiden
 License: CC-BY-SA-3.0
 
 Files: data/maps/erosion* data/maps/suspended*
@@ -69,7 +70,7 @@ Copyright: 2012-2013 Matt "greasepirate" Kalt
 License: CC-BY-3.0
 
 Files: data/maps/battlefield*
-Copyright: 2012, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
+Copyright: 2012-2013, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
 Files: data/misc/light2* data/misc/starllogo*
@@ -170,6 +171,12 @@ Files: data/mayhem/*
 Copyright: Mayhem
 License: CC-BY-SA-3.0
 
+Files: data/fonts/Play*.ttf
+Copyright: 2011, Jonas Hecksher, Playtypes, e-types AS (e-types.com)
+License: OFL-1.1
+Comment:
+ Reserved Font Names "Play", "Playtype", "Playtype Sans".
+
 Files: data/fonts/*.png
 Copyright: 2011, Jonas Hecksher, Playtypes, e-types AS (e-types.com)
            2011, Red Eclipse Team
@@ -177,7 +184,7 @@ License: OFL-1.1
 Comment:
  Reserved Font Names "Play", "Playtype", "Playtype Sans".
  .
- These are regenerated from the fonts-play package at build time
+ These font image grids are generated from the "Play" font via cube2font.
 
 Files: data/textures/lava.jpg
 Copyright: RaZgRiZ
