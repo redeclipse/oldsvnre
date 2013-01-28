@@ -205,7 +205,7 @@ WPVARM(0, flakcollide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|STICK_GEOM|STICK_PLAYER|COLLIDE_PROJ,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
-WPVARM(0, flakdmg, VAR_MIN, VAR_MAX,
+WPVARM(0, flakdamage, VAR_MIN, VAR_MAX,
     25,         5,          15,         15,         15,         10,         10,         15,         150,        100,        300,
     10,         5,          30,         5,          5,          5,          5,          15,         150,        100,        300
 );
@@ -213,51 +213,55 @@ WPVARM(IDF_HEX, flakexplcol, -3, 0xFFFFFF,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808
 );
-WPFVARM(0, flakffwd, 0, 1,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
-    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
-);
 WPFVARM(0, flakminspeed, 0, FVAR_MAX,
     50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,
     50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
-);
-WPFVARM(0, flakoffset, 0, FVAR_MAX,
-    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f,
-    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f
 );
 WPVARM(IDF_HEX, flakpartcol, -3, 0xFFFFFF,
     0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1,
     0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1
 );
-WPVARM(0, flakrays, 0, VAR_MAX,
+WPFVARM(0, fragjump, 0, 1,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
+    0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
+);
+WPFVARM(0, fragoffset, 0, FVAR_MAX,
+    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f,
+    4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       4.0f,       1.0f,       4.0f,       1.0f,       2.0f
+);
+WPVARM(0, fragrays, 0, VAR_MAX,
     5,          5,          5,          5,          5,          5,          5,          5,          75,         50,         75,
     5,          5,          5,          50,         30,         5,          5,          5,          75,         10,         75
 );
-WPFVARM(0, flakrel, 0, FVAR_MAX,
+WPFVARM(0, fragrel, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       0.0f,       0.0f,
     1.0f,       1.0f,       1.0f,       1.5f,       0.05f,      1.0f,       1.0f,       1.0f,       0.0f,       0.0f,       0.0f
 );
-WPFVARM(0, flakscale, FVAR_NONZERO, FVAR_MAX,
+WPFVARM(0, fragscale, FVAR_NONZERO, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.5f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       0.5f,       1.0f,       1.0f,       1.0f,       0.5f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
 );
-WPFVARM(0, flakskew, 0, FVAR_MAX,
+WPFVARM(0, fragskew, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
     1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       0.0f,       1.0f
 );
-WPVARM(0, flakspeed, 0, VAR_MAX,
+WPVARM(0, fragspeed, 0, VAR_MAX,
     0,          0,          0,          0,          0,          200,        0,          0,          300,        300,        400,
-    0,          0,          0,          0,          0,          250,        0,          0,          300,        10000,      400
+    0,          0,          0,          0,          0,          250,        0,          0,          300,        7500,       400
 );
-WPFVARM(0, flakspread, 0, FVAR_MAX,
+WPFVARM(0, fragspread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       0.2f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f,
-    1.0f,       0.15f,      1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       0.0f,       1.0f
+    1.0f,       0.15f,      1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       0.1f,       1.0f
 );
-WPVARM(0, flaktime, 1, VAR_MAX,
+WPVARM(0, fragdelay, 0, VAR_MAX,
+    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0,
+    0,          0,          0,          0,          10,         0,          0,          0,          0,          50,         0
+);
+WPVARM(0, fragtime, 1, VAR_MAX,
     500,        500,        500,        250,        500,        1000,       500,        500,        3000,       3000,       3000,
     500,        500,        500,        2000,       800,        3000,       500,        500,        3000,       3000,       3000
 );
-WPVARM(0, flakweap, -1, W_MAX*2-1,
+WPVARM(0, fragweap, -1, W_MAX*2-1,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         W_SHOTGUN,  W_SHOTGUN,  W_SMG,
     -1,         W_PISTOL,   -1,         WX(SHOTGUN),WX(SMG),    -1,         -1,         -1,         W_SHOTGUN,  WX(RIFLE),  W_SMG
 );
