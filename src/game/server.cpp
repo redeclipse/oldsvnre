@@ -150,19 +150,36 @@ namespace server
         dmghist(int c, int m) : clientnum(c), millis(m) {}
         ~dmghist() {}
     };
+
+    struct teamkill
+    {
+        int millis, team, points;
+        teamkill() {}
+        teamkill(int m, int t, int p) : millis(m), team(t), points(p) {}
+        ~teamkill() {}
+    };
+
     extern int gamemode, mutators;
+
+    enum { WARN_CHAT = 0, WARN_TEAMKILL, WARN_MAX };
+
     struct servstate : gamestate
     {
         vec o, vel, falling;
         float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[W_MAX][2];
-        int score, spree, crits, rewards, gscore, teamkills, shotdamage, damage;
-        int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost, chatwarns, lastwarn;
+        int score, spree, crits, rewards, gscore, shotdamage, damage;
+        int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes, chatmillis;
         vector<dmghist> damagelog;
+        vector<teamkill> teamkills;
+        int warnings[WARN_MAX][2];
 
-        servstate() : state(CS_SPECTATOR), aireinit(0), lastburnowner(-1), lastbleedowner(-1), chatwarns(0), lastwarn(0) {}
+        servstate() : state(CS_SPECTATOR), aireinit(0), lastburnowner(-1), lastbleedowner(-1)
+        {
+            loopi(WARN_MAX) loopj(2) warnings[i][j] = 0;
+        }
 
         bool isalive(int millis)
         {
@@ -176,8 +193,12 @@ namespace server
             loopi(W_MAX) loopj(2) weapshots[i][j].reset();
             if(!change) score = timeplayed = 0;
             else gamestate::mapchange();
-            frags = spree = crits = rewards = gscore = deaths = teamkills = shotdamage = damage = 0;
-            fraglog.shrink(0); fragmillis.shrink(0); cpnodes.shrink(0); damagelog.shrink(0);
+            frags = spree = crits = rewards = gscore = deaths = shotdamage = damage = 0;
+            fraglog.shrink(0);
+            fragmillis.shrink(0);
+            cpnodes.shrink(0);
+            damagelog.shrink(0);
+            teamkills.shrink(0);
             respawn();
         }
 
@@ -208,7 +229,9 @@ namespace server
     {
         uint ip;
         string name;
-        int points, score, frags, spree, crits, rewards, gscore, timeplayed, deaths, teamkills, shotdamage, damage, chatwarns;
+        int points, score, frags, spree, crits, rewards, gscore, timeplayed, deaths, shotdamage, damage;
+        int warnings[WARN_MAX][2];
+        vector<teamkill> teamkills;
 
         void save(servstate &gs)
         {
@@ -224,7 +247,7 @@ namespace server
             teamkills = gs.teamkills;
             shotdamage = gs.shotdamage;
             damage = gs.damage;
-            chatwarns = gs.chatwarns;
+            loopi(WARN_MAX) loopj(2) warnings[i][j] = gs.warnings[i][j];
         }
 
         void restore(servstate &gs)
@@ -241,12 +264,13 @@ namespace server
             gs.teamkills = teamkills;
             gs.shotdamage = shotdamage;
             gs.damage = damage;
-            gs.chatwarns = chatwarns;
+            loopi(WARN_MAX) loopj(2) gs.warnings[i][j] = warnings[i][j];
         }
 
         void mapchange()
         {
-            points = frags = spree = crits = rewards = gscore = deaths = teamkills = shotdamage = damage = 0;
+            points = frags = spree = crits = rewards = gscore = deaths = shotdamage = damage = 0;
+            teamkills.shrink(0);
         }
     };
 
@@ -3124,10 +3148,11 @@ namespace server
             if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
 #ifdef MEKARCADE
-            bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode);
+            bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode),
 #else
-            bool isai = target->state.aitype >= AI_START;
+            bool isai = target->state.aitype >= AI_START,
 #endif
+                 isteamkill = false;
             int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
             pointvalue *= isai ? G(enemybonus) : G(fragbonus);
             if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.model) : m_health(gamemode, mutators, target->state.model)*3/2)))
@@ -3138,8 +3163,8 @@ namespace server
                 actor->state.spree = 0;
                 if(actor->state.aitype < AI_START)
                 {
-                    if(actor != target) actor->state.teamkills++;
                     pointvalue *= G(teamkillpenalty);
+                    if(actor != target) isteamkill = true;
                 }
             }
             else if(actor != target && actor->state.aitype < AI_START)
@@ -3215,12 +3240,16 @@ namespace server
             if(pointvalue && !m_duke(gamemode, mutators))
             {
                 if(actor != target && actor->state.aitype >= AI_START && target->state.aitype < AI_START)
-                    givepoints(target, -pointvalue);
+                {
+                    pointvalue = -pointvalue;
+                    givepoints(target, pointvalue);
+                }
                 else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
             }
             target->state.deaths++;
             dropitems(target, aistyle[target->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
-            static vector<int> dmglog; dmglog.setsize(0);
+            static vector<int> dmglog;
+            dmglog.setsize(0);
             gethistory(target, actor, gamemillis, dmglog, true, 1);
             sendf(-1, 1, "ri9i2v", N_DIED, target->clientnum, target->state.deaths, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
             target->position.setsize(0);
@@ -3228,6 +3257,49 @@ namespace server
             mutate(smuts, mut->died(target, actor));
             target->state.state = CS_DEAD; // don't issue respawn yet until DEATHMILLIS has elapsed
             target->state.lastdeath = gamemillis;
+            if(isteamkill)
+            {
+                actor->state.teamkills.add(teamkill(totalmillis, actor->team, -pointvalue));
+                if(G(teamkilllock) && !haspriv(actor, G(teamkilllock)-1+PRIV_START))
+                {
+                    int numkills = 0;
+                    if(!G(teamkilltime)) numkills = actor->state.teamkills.length();
+                    else loopv(actor->state.teamkills)
+                        if(totalmillis-actor->state.teamkills[i].millis <= G(teamkilltime)*1000*60) numkills++;
+                    if(numkills >= G(teamkillwarn) && numkills%G(teamkillwarn) == 0)
+                    {
+                        uint ip = getclientip(actor->clientnum);
+                        actor->state.warnings[WARN_TEAMKILL][0]++;
+                        actor->state.warnings[WARN_TEAMKILL][1] = totalmillis ? totalmillis : 1;
+                        if(G(teamkillban) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(actor, PRIV_MODERATOR))
+                        {
+                            ipinfo &c = control.add();
+                            c.ip = ip;
+                            c.mask = 0xFFFFFFFF;
+                            c.type = ipinfo::BAN;
+                            c.time = totalmillis ? totalmillis : 1;
+                            srvoutf(-3, "\fs\fcban\fS added on %s: exceeded the number of allowed team kill warnings", colorname(actor));
+                            if(m_scores(gamemode) && G(teamkillrestore))
+                            {
+                                int restorepoints[TEAM_MAX] = {0};
+                                loopv(actor->state.teamkills) restorepoints[actor->state.teamkills[i].team] += actor->state.teamkills[i].points;
+                                loopi(TEAM_MAX) if(restorepoints[i])
+                                {
+                                    score &ts = teamscore(i);
+                                    ts.total += restorepoints[i];
+                                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                }
+                            }
+                        }
+                        else if(G(teamkillkick) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
+                        {
+                            srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colorname(actor));
+                            disconnect_client(actor->clientnum, DISC_KICK);
+                        }
+                        else srvmsgft(actor->clientnum, CON_CHAT, "\fs\fzoyWARNING:\fS team killing is not permitted, action will be taken if you continue");
+                    }
+                }
+            }
         }
     }
 
@@ -4801,11 +4873,11 @@ namespace server
                         }
                         if(numlines >= G(floodlines))
                         {
-                            if((!cp->state.lastwarn || totalmillis-cp->state.lastwarn >= 1000) && !haspriv(cp, G(floodlock)-1+PRIV_START, "send too many messages consecutively"))
+                            if((!cp->state.warnings[WARN_CHAT][1] || totalmillis-cp->state.warnings[WARN_CHAT][1] >= 1000) && !haspriv(cp, G(floodlock)-1+PRIV_START, "send too many messages consecutively"))
                             {
-                                cp->state.chatwarns++;
-                                cp->state.lastwarn = totalmillis ? totalmillis : 1;
-                                if(ip && G(floodmute) && cp->state.chatwarns >= G(floodmute) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, G(mutelock)+PRIV_START))
+                                cp->state.warnings[WARN_CHAT][0]++;
+                                cp->state.warnings[WARN_CHAT][1] = totalmillis ? totalmillis : 1;
+                                if(ip && G(floodmute) && cp->state.warnings[WARN_CHAT][0] >= G(floodmute) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, G(mutelock)+PRIV_START))
                                 {
                                     ipinfo &c = control.add();
                                     c.ip = ip;
@@ -5137,8 +5209,8 @@ namespace server
                                 } \
                                 else \
                                 { \
-                                    if(text[0]) srvoutf(-3, "%s kicked %s: %s", name, colorname(cp), text); \
-                                    else srvoutf(-3, "%s kicked %s", name, colorname(cp)); \
+                                    if(text[0]) srvoutf(-3, "%s \fs\fckicked\fS %s: %s", name, colorname(cp), text); \
+                                    else srvoutf(-3, "%s \fs\fckicked\fS %s", name, colorname(cp)); \
                                     disconnect_client(cp->clientnum, DISC_KICK); \
                                 } \
                             } \

@@ -2854,7 +2854,7 @@ namespace hud
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
             if(teamkillnum && m_isteam(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
-                to += draw_textx("\fzZyDon't shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                to += draw_textx("\fzZyDo NOT shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
             if(teamnotices >= 2)
             {
                 if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
