@@ -1318,8 +1318,8 @@ namespace server
         {
             case WEAPON:
             {
-                int attr = w_attr(gamemode, sents[i].attrs[0], m_weapon(gamemode, mutators));
-                if(!isweap(attr) || (m_loadout(gamemode, mutators) && attr < W_ITEM)) return false;
+                int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, sents[i].attrs[0], sweap);
+                if(!isweap(attr) || (sweap < 0 && attr < 0-sweap)) return false;
                 switch(W(attr, allowed))
                 {
                     case 0: return false;

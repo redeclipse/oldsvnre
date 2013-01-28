@@ -726,7 +726,12 @@ struct gamestate
 #endif
     {
         weapreset(true);
-        if(!isweap(sweap)) sweap = aitype >= AI_START ? W_MELEE : (isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL);
+        if(!isweap(sweap))
+        {
+            if(aitype >= AI_START) sweap = W_MELEE;
+            else if(!m_kaboom(gamemode, mutators))
+                sweap = isweap(m_weapon(gamemode, mutators)) ? m_weapon(gamemode, mutators) : W_PISTOL;
+        }
         if(isweap(sweap))
         {
             ammo[sweap] = max(WUSE(sweap), 1);
@@ -746,12 +751,12 @@ struct gamestate
                 reloads[W_MELEE] = 0;
             }
 #endif
-            if(G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != W_GRENADE)
+            if(sweap != W_GRENADE && (m_kaboom(gamemode, mutators) || G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
             {
                 ammo[W_GRENADE] = max(W(W_GRENADE, max), 1);
                 reloads[W_GRENADE] = 0;
             }
-            if(G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1) && sweap != W_MINE)
+            if(sweap != W_MINE && (m_kaboom(gamemode, mutators) || G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
             {
                 ammo[W_MINE] = max(W(W_MINE, max), 1);
                 reloads[W_MINE] = 0;
@@ -1374,9 +1379,9 @@ enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ
 struct projent : dynent
 {
     vec from, to, dest, norm, inertia, stickpos, effectpos;
-    int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish;
+    int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish, stuck;
     float movement, distance, lifespan, lifesize, minspeed;
-    bool local, limited, stuck, escaped, child;
+    bool local, limited, escaped, child;
     int projtype, projcollide;
     float elasticity, reflectivity, relativity, waterfric;
     int schan, id, weap, value, flags, hitflags;
@@ -1406,8 +1411,8 @@ struct projent : dynent
         schan = id = weap = value = -1;
         movement = distance = lifespan = lifesize = minspeed = 0;
         curscale = speedscale = 1;
-        extinguish = 0;
-        limited = stuck = escaped = child = false;
+        extinguish = stuck = 0;
+        limited = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
     }
 
