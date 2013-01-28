@@ -306,7 +306,7 @@ namespace hud
                                         SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
                                         uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, waitmodekey, game::tvmode() ? "interact" : "switch to TV"));
                                     }
-                                    if(m_arena(game::gamemode, game::mutators))
+                                    if(m_loadout(game::gamemode, game::mutators))
                                     {
                                         SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                                         uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap.empty() ? "\fzoyselect" : "change"));

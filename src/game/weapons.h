@@ -129,7 +129,7 @@ WPVARM(0, collide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
 WPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
-    0xEEEEEE,   0x888888,   0x4444FF,   0x999900,   0xFF6600,   0xFF2222,   0x44DDCC,   0x8822DD,   0x119911,   0x225522,   0xAA3300
+    0x707070,   0xC0C0C0,   0x2020F0,   0xF0F020,   0xF05820,   0xF02020,   0x40F0C8,   0xA020F0,   0x205000,   0x504800,   0x702D00
 );
 WPVARM(0, cooked, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          8,          8,          8,
@@ -206,8 +206,8 @@ WPVARM(0, flakcollide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
 WPVARM(0, flakdmg, VAR_MIN, VAR_MAX,
-    25,         2,          15,         16,         16,         12,         10,         15,         150,        100,        300,
-    10,         5,          30,         4,          2,          4,          5,          15,         150,        100,        300
+    25,         5,          15,         15,         15,         10,         10,         15,         150,        100,        300,
+    10,         5,          30,         5,          5,          5,          5,          15,         150,        100,        300
 );
 WPVARM(IDF_HEX, flakexplcol, -3, 0xFFFFFF,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808,
@@ -251,7 +251,7 @@ WPVARM(0, flakspeed, 0, VAR_MAX,
 );
 WPFVARM(0, flakspread, 0, FVAR_MAX,
     1.0f,       1.0f,       1.0f,       1.0f,       0.2f,       0.1f,       1.0f,       0.25f,      1.0f,       1.0f,       1.0f,
-    1.0f,       0.2f,       1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       0.0f,       1.0f
+    1.0f,       0.15f,      1.0f,       0.2f,       1.0f,       0.1f,       1.0f,       0.25f,      1.0f,       0.0f,       1.0f
 );
 WPVARM(0, flaktime, 1, VAR_MAX,
     500,        500,        500,        250,        500,        1000,       500,        500,        3000,       3000,       3000,
@@ -426,7 +426,7 @@ WPFVARM(0, taperout, 0, FVAR_MAX,
 );
 WPVARM(0, time, 1, VAR_MAX,
     100,        2000,       350,        400,        500,        200,        600,        5000,       3000,       120000,     5000,
-    500,        100,        500,        5000,       2500,       1500,       5000,       5000,       3000,       30000,      5000
+    500,        100,        500,        5000,       2000,       1500,       5000,       5000,       3000,       30000,      5000
 );
 WPFVARM(0, torsodmg, FVAR_MIN, FVAR_MAX,
     0.5f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
@@ -469,8 +469,8 @@ WPVAR(0, zooms, 0, 1,
 );
 
 #define WRS(a,b,c)           (a*(m_limited(b, c) ? G(radiallimited) : G(radialscale)))
-#define WS(a,b,c,d,e,f)      (!m_insta(d, e) || m_arena(d, e) || a != W_RIFLE ? WRS(W2(a, b, c)*f, d, e) : 0.f)
-#define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_arena(c, d) || a != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*e, W2(a, minspread, b), W2(a, maxspread, b) > 0 ? W2(a, maxspread, b) : FVAR_MAX) : 0.f)
+#define WS(a,b,c,d,e,f)      (!m_insta(d, e) || m_loadout(d, e) || a != W_RIFLE ? WRS(W2(a, b, c)*f, d, e) : 0.f)
+#define WSP(a,b,c,d,e,f)     (!m_insta(c, d) || m_loadout(c, d) || a != W_RIFLE ? clamp(max(W2(a, spread, b), f*0.5f)*e, W2(a, minspread, b), W2(a, maxspread, b) > 0 ? W2(a, maxspread, b) : FVAR_MAX) : 0.f)
 #define WSND(a,b)            (weaptype[a].sound+b)
 #define WSNDF(a,b)           (weaptype[a].sound+(b ? S_W_SECONDARY : S_W_PRIMARY))
 #define WSND2(a,b,c)         (weaptype[a].sound+(b ? c+1 : c))

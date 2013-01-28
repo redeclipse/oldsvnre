@@ -241,8 +241,8 @@ namespace capture
                 if(f.owner)
                 {
                     yaw = f.owner->yaw-45.f+(90/float(numflags[f.owner->clientnum]+1)*(iterflags[f.owner->clientnum]+1));
-                    pitch = f.owner->pitch;
-                    roll = f.owner->roll;
+                    //pitch = f.owner->pitch; // broken by mdlyaw 270
+                    //roll = f.owner->roll;
                 }
                 else
                 {

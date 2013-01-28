@@ -756,7 +756,7 @@ struct gamestate
                 ammo[W_MINE] = max(W(W_MINE, max), 1);
                 reloads[W_MINE] = 0;
             }
-            if(m_arena(gamemode, mutators))
+            if(m_loadout(gamemode, mutators))
             {
                 vector<int> aweap;
                 loopj(G(maxcarry))

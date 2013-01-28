@@ -1118,7 +1118,8 @@ namespace UI
     {
         if(actionon) mouseaction[0] |= GUI_PRESSED;
 
-        gui::reset(); guis.shrink(0);
+        gui::reset();
+        guis.shrink(0);
 
         // call all places in the engine that may want to render a gui from here, they call addcb()
         if(progressing) progressmenu();

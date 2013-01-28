@@ -607,13 +607,13 @@ namespace server
             if(ci->state.aitype >= AI_START) return true;
             else if(tryspawn)
             {
-                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
             else
             {
-                if(m_arena(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
                 if(m_trial(gamemode) && ci->state.cpmillis < 0) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
@@ -1297,7 +1297,7 @@ namespace server
             case WEAPON:
             {
                 int attr = w_attr(gamemode, sents[i].attrs[0], m_weapon(gamemode, mutators));
-                if(!isweap(attr) || (m_arena(gamemode, mutators) && attr < W_ITEM)) return false;
+                if(!isweap(attr) || (m_loadout(gamemode, mutators) && attr < W_ITEM)) return false;
                 switch(W(attr, allowed))
                 {
                     case 0: return false;
@@ -1606,7 +1606,7 @@ namespace server
         if(ci->state.aitype >= AI_START)
         {
             bool hasent = sents.inrange(ci->state.aientity) && sents[ci->state.aientity].type == ACTOR;
-            if(m_insta(gamemode, mutators) && !m_arena(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
+            if(m_insta(gamemode, mutators) && !m_loadout(gamemode, mutators)) weap = m_weapon(gamemode, mutators);
             else weap = hasent && sents[ci->state.aientity].attrs[6] > 0 ? sents[ci->state.aientity].attrs[6]-1 : aistyle[ci->state.aitype].weap;
             if(!m_insta(gamemode, mutators))
             {
@@ -3677,7 +3677,7 @@ namespace server
         else sendf(-1, 1, "ri2", N_WAITING, ci->clientnum);
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
-        if(m_arena(gamemode, mutators)) chkloadweap(ci);
+        if(m_loadout(gamemode, mutators)) chkloadweap(ci);
         if(!allowteam(ci, ci->team, TEAM_FIRST)) setteam(ci, chooseteam(ci), false, true);
     }
 
@@ -4514,7 +4514,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     vector<int> items;
                     loopk(n) items.add(getint(p));
-                    if(!hasclient(cp, ci) || !m_arena(gamemode, mutators)) break;
+                    if(!hasclient(cp, ci) || !m_loadout(gamemode, mutators)) break;
                     cp->state.loadweap.shrink(0);
                     loopvk(items) cp->state.loadweap.add(items[k]);
                     chkloadweap(cp);

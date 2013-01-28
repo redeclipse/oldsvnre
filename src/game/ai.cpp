@@ -1561,7 +1561,7 @@ namespace ai
             {
                 if(d->respawned < 0 && (!d->lastdeath || lastmillis-d->lastdeath > (d->aitype == AI_BOT ? 500 : enemyspawntime)))
                 {
-                    if(d->aitype == AI_BOT && m_arena(game::gamemode, game::mutators))
+                    if(d->aitype == AI_BOT && m_loadout(game::gamemode, game::mutators))
                     {
                         d->loadweap.shrink(0);
                         d->loadweap.add(d->ai->weappref);

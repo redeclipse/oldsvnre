@@ -461,7 +461,7 @@ namespace hud
     TVAR(IDF_PERSIST, modeballistictex, "<grey>textures/modeballistic.png", 3);
     TVAR(IDF_PERSIST, modedueltex, "<grey>textures/modeduel.png", 3);
     TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modesurvivor.png", 3);
-    TVAR(IDF_PERSIST, modearenatex, "<grey>textures/modearena.png", 3);
+    TVAR(IDF_PERSIST, modeclassictex, "<grey>textures/modeclassic.png", 3);
     TVAR(IDF_PERSIST, modeonslaughttex, "<grey>textures/modeonslaught.png", 3);
     TVAR(IDF_PERSIST, modejetpacktex, "<grey>textures/modejetpack.png", 3);
     TVAR(IDF_PERSIST, modevampiretex, "<grey>textures/modevampire.png", 3);
@@ -536,7 +536,7 @@ namespace hud
         if(m_ballistic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_BALLISTIC)))) ADDMODE(modeballistictex)
         if(m_duel(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_DUEL)))) ADDMODE(modedueltex)
         if(m_survivor(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
-        if(m_arena(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_ARENA)))) ADDMODE(modearenatex)
+        if(m_loadout(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)
         if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
         if(m_jetpack(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_JETPACK)))) ADDMODE(modejetpacktex)
         if(m_vampire(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
@@ -883,7 +883,7 @@ namespace hud
         {
             case W_S_PRIMARY: case W_S_SECONDARY:
             {
-                amt = 1.f-clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                amt = 1.f-clamp(interval/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
                 if(clipanims)
                 {
@@ -892,12 +892,8 @@ namespace hud
                     if(clipanims >= 2) spin = 360*amt;
                 }
                 int shot = game::focus->weapshot[weap] ? game::focus->weapshot[weap] : 1;
-                float rewind = angle+shot*slice;
-                loopi(shot)
-                {
-                    drawclipitem(cliptexs[weap], x, y, offset, size*scale, fade, rewind, spin, cliprots[weap], c);
-                    rewind -= angle;
-                }
+                float rewind = angle;
+                loopi(shot) drawclipitem(cliptexs[weap], x, y, offset, size*scale, fade, rewind += slice, spin, cliprots[weap], c);
                 fade = clipblend*hudblend;
                 size = s*clipsize*clipskew[weap];
                 offset = s*clipoffset;
@@ -911,7 +907,7 @@ namespace hud
                     int check = game::focus->weapwait[weap]/2;
                     if(interval >= check)
                     {
-                        amt = clamp(float(interval-check)/float(check), 0.f, 1.f);
+                        amt = clamp((interval-check)/float(check), 0.f, 1.f);
                         fade *= amt;
                         if(clipanims)
                         {
@@ -941,7 +937,7 @@ namespace hud
             }
             case W_S_SWITCH:
             {
-                amt = clamp(float(interval)/float(game::focus->weapwait[weap]), 0.f, 1.f);
+                amt = clamp(interval/float(game::focus->weapwait[weap]), 0.f, 1.f);
                 fade *= amt;
                 if(clipanims && game::focus->weapstate[weap] != W_S_RELOAD)
                 {
@@ -1294,7 +1290,7 @@ namespace hud
                             ty += draw_textx("Press \fs\fc%s\fS to %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, waitmodekey, game::tvmode() ? "interact" : "switch to TV");
                             popfont();
                         }
-                        if(m_arena(game::gamemode, game::mutators))
+                        if(m_loadout(game::gamemode, game::mutators))
                         {
                             SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
                             pushfont("little");
