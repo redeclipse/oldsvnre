@@ -169,7 +169,7 @@ namespace server
         float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[W_MAX][2];
-        int score, spree, crits, rewards, gscore, shotdamage, damage;
+        int score, spree, crits, rewards, shotdamage, damage;
         int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost;
         vector<int> fraglog, fragmillis, cpnodes, chatmillis;
         vector<dmghist> damagelog;
@@ -193,7 +193,7 @@ namespace server
             loopi(W_MAX) loopj(2) weapshots[i][j].reset();
             if(!change) score = timeplayed = 0;
             else gamestate::mapchange();
-            frags = spree = crits = rewards = gscore = deaths = shotdamage = damage = 0;
+            frags = spree = crits = rewards = deaths = shotdamage = damage = 0;
             fraglog.shrink(0);
             fragmillis.shrink(0);
             cpnodes.shrink(0);
@@ -229,7 +229,7 @@ namespace server
     {
         uint ip;
         string name;
-        int points, score, frags, spree, crits, rewards, gscore, timeplayed, deaths, shotdamage, damage;
+        int points, score, frags, spree, crits, rewards, timeplayed, deaths, shotdamage, damage;
         int warnings[WARN_MAX][2];
         vector<teamkill> teamkills;
 
@@ -241,7 +241,6 @@ namespace server
             spree = gs.spree;
             crits = gs.crits;
             rewards = gs.rewards;
-            gscore = gs.gscore;
             timeplayed = gs.timeplayed;
             deaths = gs.deaths;
             teamkills = gs.teamkills;
@@ -258,7 +257,6 @@ namespace server
             gs.spree = spree;
             gs.crits = crits;
             gs.rewards = rewards;
-            gs.gscore = gscore;
             gs.timeplayed = timeplayed;
             gs.deaths = deaths;
             gs.teamkills = teamkills;
@@ -269,7 +267,7 @@ namespace server
 
         void mapchange()
         {
-            points = frags = spree = crits = rewards = gscore = deaths = shotdamage = damage = 0;
+            points = frags = spree = crits = rewards = deaths = shotdamage = damage = 0;
             teamkills.shrink(0);
         }
     };
@@ -4039,14 +4037,9 @@ namespace server
         else shouldcheckvotes = true;
     }
 
-    #include "extinfo.h"
     void queryreply(ucharbuf &req, ucharbuf &p)
     {
-        if(!getint(req))
-        {
-            extqueryreply(req, p);
-            return;
-        }
+        if(!getint(req)) return;
         putint(p, numclients());
         putint(p, 8);                   // number of attrs following
         putint(p, GAMEVERSION);         // 1
