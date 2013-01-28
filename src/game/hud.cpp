@@ -458,7 +458,7 @@ namespace hud
     TVAR(IDF_PERSIST, modecooptex, "<grey>textures/modecoop.png", 3);
     TVAR(IDF_PERSIST, modeinstatex, "<grey>textures/modeinsta.png", 3);
     TVAR(IDF_PERSIST, modemedievaltex, "<grey>textures/modemedieval.png", 3);
-    TVAR(IDF_PERSIST, modeballistictex, "<grey>textures/modeballistic.png", 3);
+    TVAR(IDF_PERSIST, modekaboomtex, "<grey>textures/modekaboom.png", 3);
     TVAR(IDF_PERSIST, modedueltex, "<grey>textures/modeduel.png", 3);
     TVAR(IDF_PERSIST, modesurvivortex, "<grey>textures/modesurvivor.png", 3);
     TVAR(IDF_PERSIST, modeclassictex, "<grey>textures/modeclassic.png", 3);
@@ -533,7 +533,7 @@ namespace hud
         if(m_coop(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_COOP)))) ADDMODE(modecooptex)
         if(m_insta(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_INSTA)))) ADDMODE(modeinstatex)
         if(m_medieval(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MEDIEVAL)))) ADDMODE(modemedievaltex)
-        if(m_ballistic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_BALLISTIC)))) ADDMODE(modeballistictex)
+        if(m_kaboom(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_KABOOM)))) ADDMODE(modekaboomtex)
         if(m_duel(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_DUEL)))) ADDMODE(modedueltex)
         if(m_survivor(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
         if(m_classic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)

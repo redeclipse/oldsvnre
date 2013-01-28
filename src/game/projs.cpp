@@ -286,7 +286,7 @@ namespace projs
             if(projs[i]->target == owner) projs[i]->target = NULL;
             if(projs[i]->stick == owner)
             {
-                projs[i]->stuck = false;
+                projs[i]->stuck = 0;
                 projs[i]->stick = NULL;
                 projs[i]->lastbounce = lastmillis;
             }
@@ -316,7 +316,7 @@ namespace projs
     {
         if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
         {
-            proj.stuck = true;
+            proj.stuck = proj.lastbounce = max(lastmillis, 1);
             loopi(max(int(proj.radius), 100))
             {
                 proj.o.sub(dir);
@@ -332,7 +332,6 @@ namespace projs
                 client::addmsg(N_STICKY, "ri9i2",
                     proj.owner->clientnum, proj.weap, proj.flags, proj.child ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
                         int(proj.norm.x*DMF), int(proj.norm.y*DMF), int(proj.norm.z*DMF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
-            proj.lastbounce = lastmillis;
             vectoyawpitch(proj.norm, proj.yaw, proj.pitch); proj.pitch -= 90;
             game::fixfullrange(proj.yaw, proj.pitch, proj.roll, true);
         }
@@ -342,7 +341,7 @@ namespace projs
     {
         loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
         {
-            projs[i]->stuck = true;
+            projs[i]->stuck = projs[i]->lastbounce = max(lastmillis, 1);
             projs[i]->norm = norm;
             projs[i]->stickpos = pos;
             if(f)
@@ -355,7 +354,6 @@ namespace projs
                 projs[i]->o = pos;
                 projs[i]->stick = NULL;
             }
-            projs[i]->lastbounce = lastmillis;
             projs[i]->resetinterp();
             break;
         }
@@ -511,9 +509,9 @@ namespace projs
     float fadeweap(projent &proj)
     {
         float trans = 1;
-        if(proj.stuck && isweap(proj.weap) && W2(proj.weap, vistime, proj.flags&HIT_ALT) && proj.lastbounce)
+        if(proj.stuck && isweap(proj.weap) && W2(proj.weap, vistime, proj.flags&HIT_ALT))
         {
-            int millis = lastmillis-proj.lastbounce;
+            int millis = lastmillis-proj.stuck;
             if(millis < W2(proj.weap, vistime, proj.flags&HIT_ALT))
                 trans *= 1.f-(W2(proj.weap, visfade, proj.flags&HIT_ALT)*millis/float(W2(proj.weap, vistime, proj.flags&HIT_ALT)));
             else trans *= 1.f-W2(proj.weap, visfade, proj.flags&HIT_ALT);
@@ -1269,7 +1267,7 @@ namespace projs
                 if(proj.stuck && !proj.stick && !proj.beenused && W2(proj.weap, proxtype, proj.flags&HIT_ALT) == 2)
                 {
                     float dist = WS(proj.weap, proxdist, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                    if(W2(proj.weap, proxdelay, proj.flags&HIT_ALT)) dist *= proj.lastbounce/float(W2(proj.weap, proxdelay, proj.flags&HIT_ALT));
+                    if(W2(proj.weap, proxdelay, proj.flags&HIT_ALT)) dist *= proj.stuck/float(W2(proj.weap, proxdelay, proj.flags&HIT_ALT));
                     vec from = vec(proj.o).add(vec(proj.norm).mul(proj.radius+1e-3f)), to = vec(proj.o).add(vec(proj.norm).mul(dist)), dir = vec(to).sub(from);
                     float mag = dir.magnitude();
                     if(mag > 0)
@@ -1655,7 +1653,7 @@ namespace projs
 
     void escaped(projent &proj, const vec &pos, const vec &dir)
     {
-        if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
+        if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce || proj.stuck) proj.escaped = true;
         else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? W2(proj.weap, edelay, proj.flags&HIT_ALT) : PHYSMILLIS))
         {
             if(proj.projcollide&COLLIDE_TRACE)
@@ -1958,7 +1956,7 @@ namespace projs
                 {
                     if(proj.stick->state != CS_ALIVE)
                     {
-                        proj.stuck = false;
+                        proj.stuck = 0;
                         proj.stick = NULL;
                         proj.lastbounce = lastmillis;
                     }
@@ -2034,6 +2032,7 @@ namespace projs
                     if(radial || proxim)
                     {
                         float dist = WS(proj.weap, proxdist, proj.flags&HIT_ALT, game::gamemode, game::mutators, proj.curscale*proj.lifesize);
+                        if(W2(proj.weap, proxdelay, proj.flags&HIT_ALT)) dist *= proj.stuck/float(W2(proj.weap, proxdelay, proj.flags&HIT_ALT));
                         int numdyns = game::numdynents();
                         loopj(numdyns)
                         {
