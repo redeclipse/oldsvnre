@@ -3083,7 +3083,7 @@ namespace server
         {
             if(isweap(weap) && G(criticalchance) > 0 && W(weap, critmult) > 0)
             {
-                bool crdash = W2(weap, critdash, flags&HIT_ALT) && actor->state.lastboost && gamemillis-actor->state.lastboost <= W2(weap, critdash, flags&HIT_ALT);
+                bool crdash = W2(weap, critdash, WS(flags)) && actor->state.lastboost && gamemillis-actor->state.lastboost <= W2(weap, critdash, WS(flags));
                 actor->state.crits++;
                 int offset = G(criticalchance)-actor->state.crits;
                 if(target != actor)
@@ -3349,7 +3349,7 @@ namespace server
 
         float skew = clamp(scale, 0.f, 1.f)*G(damagescale);
         if(radial > 0) skew *= clamp(1.f-dist/size, 1e-6f, 1.f);
-        else if(W2(weap, taperin, flags&HIT_ALT) > 0 || W2(weap, taperout, flags&HIT_ALT) > 0) skew *= clamp(dist, 0.f, 1.f);
+        else if(WF(WK(flags), weap, taperin, WS(flags)) > 0 || WF(WK(flags), weap, taperout, WS(flags)) > 0) skew *= clamp(dist, 0.f, 1.f);
         if(!m_insta(gamemode, mutators))
         {
             if(m_capture(gamemode) && G(capturebuffdelay))
@@ -3370,14 +3370,14 @@ namespace server
         }
         if(!(flags&HIT_HEAD))
         {
-            if(flags&HIT_WHIPLASH) skew *= W2(weap, whipdmg, flags&HIT_ALT);
-            else if(flags&HIT_TORSO) skew *= W2(weap, torsodmg, flags&HIT_ALT);
-            else if(flags&HIT_LEGS) skew *= W2(weap, legsdmg, flags&HIT_ALT);
+            if(flags&HIT_WHIPLASH) skew *= WF(WK(flags), weap, whipdmg, WS(flags));
+            else if(flags&HIT_TORSO) skew *= WF(WK(flags), weap, torsodmg, WS(flags));
+            else if(flags&HIT_LEGS) skew *= WF(WK(flags), weap, legsdmg, WS(flags));
             else skew = 0;
         }
         if(self)
         {
-            if(W2(weap, selfdmg, flags&HIT_ALT) > 0) skew *= W2(weap, selfdmg, flags&HIT_ALT);
+            if(WF(WK(flags), weap, selfdmg, WS(flags)) > 0) skew *= WF(WK(flags), weap, selfdmg, WS(flags));
             else
             {
                 flags &= ~HIT_CLEAR;
@@ -3385,7 +3385,7 @@ namespace server
             }
         }
 
-        return int(ceilf((flags&HIT_FLAK ? W2(weap, flakdamage, flags&HIT_ALT) : W2(weap, damage, flags&HIT_ALT))*skew));
+        return int(ceilf(WF(WK(flags), weap, damage, WS(flags))*skew));
     }
 
     void destroyevent::process(clientinfo *ci)
@@ -3398,20 +3398,20 @@ namespace server
         }
         else if(isweap(weap))
         {
-            if(!gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
+            if(!gs.weapshots[weap][WS(flags) ? 1 : 0].find(id))
             {
-                if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d:%d (%d)] failed - not found", weap, flags&HIT_ALT ? 1 : 0, id);
+                if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: destroy [%d:%d (%d)] failed - not found", weap, WS(flags) ? 1 : 0, id);
                 return;
             }
             if(hits.empty())
             {
-                gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].remove(id);
+                gs.weapshots[weap][WS(flags) ? 1 : 0].remove(id);
                 if(id >= 0 && !m_insta(gamemode, mutators))
                 {
-                    int f = W2(weap, fragweap, flags&HIT_ALT);
+                    int f = W2(weap, fragweap, WS(flags));
                     if(f >= 0)
                     {
-                        int w = f%W_MAX, r = W2(weap, fragrays, flags&HIT_ALT);
+                        int w = f%W_MAX, r = W2(weap, fragrays, WS(flags));
                         loopi(r) gs.weapshots[w][f >= W_MAX ? 1 : 0].add(-id);
                     }
                 }
@@ -3438,8 +3438,8 @@ namespace server
                 else
                 {
                     int hflags = flags|h.flags;
-                    float skew = float(scale)/DNF, rad = clamp(float(radial)/DNF, 0.f, WS(weap, explode, flags&HIT_ALT, gamemode, mutators, skew)),
-                          size = rad > 0 ? (hflags&HIT_WAVE ? rad*W2(weap, wavepush, flags&HIT_ALT) : rad) : 0.f, dist = float(h.dist)/DNF;
+                    float skew = float(scale)/DNF, rad = clamp(float(radial)/DNF, 0.f, WX(WK(flags), weap, explode, WS(flags), gamemode, mutators, skew)),
+                          size = rad > 0 ? (hflags&HIT_WAVE ? rad*WF(WK(flags), weap, wavepush, WS(flags)) : rad) : 0.f, dist = float(h.dist)/DNF;
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
                         int damage = calcdamage(ci, target, weap, hflags, rad, size, dist, skew, ci == target);
@@ -3462,15 +3462,15 @@ namespace server
             if(G(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: shoot [%d] failed - unexpected message", weap);
             return;
         }
-        int sub = W2(weap, sub, flags&HIT_ALT);
-        if(sub > 1 && W2(weap, power, flags&HIT_ALT))
+        int sub = W2(weap, sub, WS(flags));
+        if(sub > 1 && W2(weap, power, WS(flags)))
         {
             if(ci->state.ammo[weap] < sub)
             {
-                int maxscale = int(ci->state.ammo[weap]/float(sub)*W2(weap, power, flags&HIT_ALT));
+                int maxscale = int(ci->state.ammo[weap]/float(sub)*W2(weap, power, WS(flags)));
                 if(scale > maxscale) scale = maxscale;
             }
-            sub = int(ceilf(sub*scale/float(W2(weap, power, flags&HIT_ALT))));
+            sub = int(ceilf(sub*scale/float(W2(weap, power, WS(flags)))));
         }
         if(!gs.canshoot(weap, flags, m_weapon(gamemode, mutators), millis))
         {
@@ -3491,11 +3491,11 @@ namespace server
             else return;
         }
         takeammo(ci, weap, sub);
-        gs.setweapstate(weap, flags&HIT_ALT ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, adelay, flags&HIT_ALT), millis);
+        gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, adelay, WS(flags)), millis);
         sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
-        gs.shotdamage += W2(weap, damage, flags&HIT_ALT)*shots.length();
-        loopv(shots) gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].add(shots[i].id);
+        gs.shotdamage += W2(weap, damage, WS(flags))*shots.length();
+        loopv(shots) gs.weapshots[weap][WS(flags) ? 1 : 0].add(shots[i].id);
         if(!gs.hasweap(weap, m_weapon(gamemode, mutators)))
         {
             //if(sents.inrange(gs.entid[weap])) setspawn(gs.entid[weap], false);
@@ -4642,7 +4642,7 @@ namespace server
                     if(!isweap(ev->weap)) havecn = false;
                     else
                     {
-                        ev->scale = clamp(ev->scale, 0, W2(ev->weap, power, ev->flags&HIT_ALT));
+                        ev->scale = clamp(ev->scale, 0, W2(ev->weap, power, WS(ev->flags)));
                         if(havecn) ev->millis = cp->getmillis(gamemillis, ev->id);
                     }
                     loopk(3) ev->from[k] = getint(p);
@@ -4657,8 +4657,8 @@ namespace server
                     }
                     if(havecn)
                     {
-                        int rays = W2(ev->weap, rays, ev->flags&HIT_ALT);
-                        if(rays > 1 && W2(ev->weap, power, ev->flags&HIT_ALT)) rays = int(ceilf(rays*ev->scale/float(W2(ev->weap, power, ev->flags&HIT_ALT))));
+                        int rays = W2(ev->weap, rays, WS(ev->flags));
+                        if(rays > 1 && W2(ev->weap, power, WS(ev->flags))) rays = int(ceilf(rays*ev->scale/float(W2(ev->weap, power, WS(ev->flags)))));
                         while(ev->shots.length() > rays) ev->shots.remove(rnd(ev->shots.length()));
                         cp->addevent(ev);
                     }
@@ -4732,7 +4732,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(isweap(weap) && cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum))
                     {
-                        if(!cp->state.weapshots[weap][flags&HIT_ALT ? 1 : 0].find(id))
+                        if(!cp->state.weapshots[weap][WS(flags) ? 1 : 0].find(id))
                         {
                             if(G(serverdebug) >= 2) srvmsgf(cp->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
                             return;

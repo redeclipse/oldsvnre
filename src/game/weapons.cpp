@@ -147,9 +147,9 @@ namespace weapons
 
     bool autoreload(gameent *d, int flags = 0)
     {
-        if(!game::intermission && d == game::player1 && W2(d->weapselect, sub, flags&HIT_ALT) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
+        if(!game::intermission && d == game::player1 && W2(d->weapselect, sub, WS(flags)) && d->canreload(d->weapselect, m_weapon(game::gamemode, game::mutators), false, lastmillis))
         {
-            bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, sub, flags&HIT_ALT),
+            bool noammo = d->ammo[d->weapselect] < W2(d->weapselect, sub, WS(flags)),
                  noattack = !d->action[AC_ATTACK] && !d->action[AC_ALTERNATE];
             if((noammo || noattack) && !d->action[AC_USE] && d->weapstate[d->weapselect] == W_S_IDLE && (noammo || lastmillis-d->weaplast[d->weapselect] >= autoreloaddelay))
                 return autoreloading >= (noammo ? 1 : (W(d->weapselect, add) < W(d->weapselect, max) ? 2 : (W(d->weapselect, zooms) ? 4 : 3)));

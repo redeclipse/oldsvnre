@@ -1041,19 +1041,19 @@ namespace game
                     if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
                 }
             }
-            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove) && W2(weap, damage, flags&HIT_ALT) != 0)
+            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove) && WF(WK(flags), weap, damage, WS(flags)) != 0)
             {
-                float scale = damage/float(W2(weap, damage, flags&HIT_ALT));
-                if(hithurts(flags) && W2(weap, stuntime, flags&HIT_ALT))
-                    d->addstun(weap, lastmillis, int(scale*W2(weap, stuntime, flags&HIT_ALT)), scale*W2(weap, stunscale, flags&HIT_ALT));
-                if(W2(weap, slow, flags&HIT_ALT) > 0)
-                    d->vel.mul(1.f-clamp((scale*W2(weap, slow, flags&HIT_ALT))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
-                if(W2(weap, hitpush, flags&HIT_ALT) != 0)
+                float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
+                if(hithurts(flags) && WF(WK(flags), weap, stuntime, WS(flags)))
+                    d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), scale*WF(WK(flags), weap, stunscale, WS(flags)));
+                if(WF(WK(flags), weap, slow, WS(flags)) > 0)
+                    d->vel.mul(1.f-clamp((scale*WF(WK(flags), weap, slow, WS(flags)))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
+                if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
                 {
-                    if(d == actor && W2(weap, selfdmg, flags&HIT_ALT) != 0)
-                        scale *= 1/float(W2(weap, selfdmg, flags&HIT_ALT));
+                    if(d == actor && WF(WK(flags), weap, selfdmg, WS(flags)) != 0)
+                        scale *= 1/float(WF(WK(flags), weap, selfdmg, WS(flags)));
                     float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
-                    vec psh = vec(dir).mul(scale*W2(weap, hitpush, flags&HIT_ALT)*WRS(force, gamemode, mutators));
+                    vec psh = vec(dir).mul(scale*WF(WK(flags), weap, hitpush, WS(flags))*WRS(force, gamemode, mutators));
                     if(!psh.iszero()) d->vel.add(psh);
                 }
             }
@@ -1211,7 +1211,7 @@ namespace game
                         { "obliterated by", "obliterated by" },
                     }
                 };
-                concatstring(d->obit, obitnames[flags&HIT_FLAK ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (flags&HIT_ALT ? 1 : 0)))][weap][obitverbose == 2 ? 0 : 1]);
+                concatstring(d->obit, obitnames[WK(flags) ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (WS(flags) ? 1 : 0)))][weap][obitverbose == 2 ? 0 : 1]);
             }
             else concatstring(d->obit, "killed by");
             bool override = false;

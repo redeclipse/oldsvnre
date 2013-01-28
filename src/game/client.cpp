@@ -1726,10 +1726,10 @@ namespace client
                     if(!t || !isweap(weap) || t == game::player1 || t->ai) break;
                     if(weap != t->weapselect) t->weapswitch(weap, lastmillis);
                     float scale = 1;
-                    int sub = W2(weap, sub, flags&HIT_ALT);
-                    if(W2(weap, power, flags&HIT_ALT))
+                    int sub = W2(weap, sub, WS(flags));
+                    if(W2(weap, power, WS(flags)))
                     {
-                        scale = len/float(W2(weap, power, flags&HIT_ALT));
+                        scale = len/float(W2(weap, power, WS(flags)));
                         if(sub > 1) sub = int(ceilf(sub*scale));
                     }
                     projs::shootv(weap, flags, sub, scale, from, shots, t, false);
