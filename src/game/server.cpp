@@ -3385,7 +3385,7 @@ namespace server
             }
         }
 
-        return int(ceilf((flags&HIT_FLAK ? W2(weap, flakdmg, flags&HIT_ALT) : W2(weap, damage, flags&HIT_ALT))*skew));
+        return int(ceilf((flags&HIT_FLAK ? W2(weap, flakdamage, flags&HIT_ALT) : W2(weap, damage, flags&HIT_ALT))*skew));
     }
 
     void destroyevent::process(clientinfo *ci)
@@ -3408,10 +3408,10 @@ namespace server
                 gs.weapshots[weap][flags&HIT_ALT ? 1 : 0].remove(id);
                 if(id >= 0 && !m_insta(gamemode, mutators))
                 {
-                    int f = W2(weap, flakweap, flags&HIT_ALT);
+                    int f = W2(weap, fragweap, flags&HIT_ALT);
                     if(f >= 0)
                     {
-                        int w = f%W_MAX, r = W2(weap, flakrays, flags&HIT_ALT);
+                        int w = f%W_MAX, r = W2(weap, fragrays, flags&HIT_ALT);
                         loopi(r) gs.weapshots[w][f >= W_MAX ? 1 : 0].add(-id);
                     }
                 }

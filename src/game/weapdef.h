@@ -399,4 +399,4 @@
     #define W2(weap,name,second) (*weap_stat_##name[weap][second ? 1 : 0])
     #define WSTR(a,weap,attr)    defformatstring(a)("%s%s", weaptype[weap].name, #attr)
 #endif
-
+#define FW(c,w,v,s) (c ? W2(w, flak##v, s) : W2(w, v, s))
