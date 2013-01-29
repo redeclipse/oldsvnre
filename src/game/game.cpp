@@ -38,8 +38,11 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersoninterp, 0, 100, VAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 10, FVAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 8, FVAR_MAX);
+    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 12, FVAR_MAX);
+    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, FVAR_MAX);
+    VAR(IDF_PERSIST, thirdpersoncursor, 0, 1, 2);
+    FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
 
     VAR(0, follow, -1, -1, VAR_MAX);
     void resetfollow()
@@ -1810,14 +1813,25 @@ namespace game
         }
         if(!input)
         {
-            if(thirdpersonview(true, focus))
+            int tpc = focus != player1 ? 1 : thirdpersoncursor;
+            if(tpc && thirdpersonview(true, focus)) switch(tpc)
             {
-                vec loc(0, 0, 0);
-                if(vectocursor(worldpos, loc.x, loc.y, loc.z))
+                case 1:
                 {
-                    float amt = curtime/float(thirdpersoninterp);
-                    cursorx = clamp(cursorx+((loc.x-cursorx)*amt), 0.f, 1.f);
-                    cursory = clamp(cursory+((loc.y-cursory)*amt), 0.f, 1.f);
+                    vec loc(0, 0, 0);
+                    if(vectocursor(worldpos, loc.x, loc.y, loc.z))
+                    {
+                        float amt = curtime/float(thirdpersoninterp);
+                        cursorx = clamp(cursorx+((loc.x-cursorx)*amt), 0.f, 1.f);
+                        cursory = clamp(cursory+((loc.y-cursory)*amt), 0.f, 1.f);
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    cursorx = thirdpersoncursorx;
+                    cursory = thirdpersoncursory;
+                    break;
                 }
             }
             vecfromcursor(cursorx, cursory, 1.f, cursordir);
@@ -2429,8 +2443,13 @@ namespace game
                 if(player1->state >= CS_SPECTATOR && focus != player1) camera1->resetinterp();
             }
             calcangles(camera1, focus);
-            physent *c = thirdpersonview(true, focus) ? focus : camera1;
-            findorientation(c->o, c->yaw, c->pitch, worldpos);
+            if(focus == player1 && thirdpersoncursor != 1 && thirdpersonview(true, focus))
+            {
+                float yaw = camera1->yaw, pitch = camera1->pitch;
+                vectoyawpitch(cursordir, yaw, pitch);
+                findorientation(camera1->o, yaw, pitch, worldpos);
+            }
+            else findorientation(focus->o, focus->yaw, focus->pitch, worldpos);
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
@@ -2483,7 +2502,12 @@ namespace game
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
-        if(!third && firstpersonsway && !intermission)
+        if(third)
+        {
+            if(d == focus && thirdpersonview(true, focus))
+                vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
+        }
+        else if(firstpersonsway && !intermission)
         {
             vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
             float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
