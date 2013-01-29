@@ -11,6 +11,31 @@ namespace client
     VAR(IDF_PERSIST, showpresence, 0, 1, 2); // 0 = never show join/leave, 1 = show only during game, 2 = show when connecting/disconnecting
     VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
 
+    int state() { return game::player1->state; }
+    ICOMMAND(0, getstate, "", (), intret(state()));
+
+    int otherclients()
+    {
+        int n = 0; // ai don't count
+        loopv(game::players) if(game::players[i] && game::players[i]->aitype == AI_NONE) n++;
+        return n;
+    }
+
+    int numplayers()
+    {
+        int n = 1; // count ourselves
+        loopv(game::players) if(game::players[i] && game::players[i]->aitype < AI_START) n++;
+        return n;
+    }
+
+    int waiting(bool state)
+    {
+        if(!connected(false) || !isready || game::maptime <= 0 || (state && needsmap && otherclients()))
+            return state && needsmap ? (gettingmap ? 3 : 2) : 1;
+        return 0;
+    }
+    ICOMMAND(0, waiting, "i", (int *n), intret(waiting(!*n)));
+
     ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), {
          char *list = NULL;
          maplist(list, *g, *m, *c, mapsfilter);
@@ -441,26 +466,18 @@ namespace client
     }
     ICOMMAND(0, getclientteam, "i", (int *cn), intret(getclientteam(*cn)));
 
-    bool ishelper(int cn)
+    bool haspriv(gameent *d, int priv)
     {
-        gameent *d = game::getclient(cn);
-        return d && d->privilege >= PRIV_HELPER;
+        if(!d) return false;
+        if(d == game::player1 && !remote) return true;
+        return d->privilege >= priv;
     }
-    ICOMMAND(0, ishelper, "i", (int *cn), intret(ishelper(*cn) ? 1 : 0));
-
-    bool ismoderator(int cn)
-    {
-        gameent *d = game::getclient(cn);
-        return d && d->privilege >= PRIV_MODERATOR;
-    }
-    ICOMMAND(0, ismoderator, "i", (int *cn), intret(ismoderator(*cn) ? 1 : 0));
-
-    bool isadministrator(int cn)
-    {
-        gameent *d = game::getclient(cn);
-        return d && d->privilege >= PRIV_ADMINISTRATOR;
-    }
-    ICOMMAND(0, isadministrator, "i", (int *cn), intret(isadministrator(*cn) ? 1 : 0));
+    ICOMMAND(0, ishelper, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_HELPER) ? 1 : 0));
+    ICOMMAND(0, ismoderator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_MODERATOR) ? 1 : 0));
+    ICOMMAND(0, isadministrator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_ADMINISTRATOR) ? 1 : 0));
+    ICOMMAND(0, isdeveloper, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_DEVELOPER) ? 1 : 0));
+    ICOMMAND(0, iscreator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_CREATOR) ? 1 : 0));
+    ICOMMAND(0, haspriv, "i", (int *cn, int *priv), intret(haspriv(game::getclient(*cn), *priv) ? 1 : 0));
 
     bool isspectator(int cn)
     {
@@ -476,6 +493,70 @@ namespace client
         return d && d->aitype == aitype;
     }
     ICOMMAND(0, isai, "ii", (int *cn, int *type), intret(isai(*cn, *type) ? 1 : 0));
+
+    bool mutscmp(int req, int limit)
+    {
+        if(req)
+        {
+            if(!limit) return false;
+            loopi(G_M_NUM) if(req&(1<<i) && !(limit&(1<<i))) return false;
+        }
+        return true;
+    }
+
+    bool ismodelocked(int reqmode, int reqmuts, const char *reqmap = NULL)
+    {
+        if(m_local(reqmode) && remote) return true;
+        if(G(modelock) == PRIV2(MAX) && G(mapslock) == PRIV2(MAX) && !haspriv(game::player1, PRIV_MAX)) return true;
+        else if(G(votelock)) switch(G(votelocktype))
+        {
+            case 1: if(!haspriv(game::player1, PRIVZ(G(votelock)))) return true; break;
+            case 2:
+                if(!m_edit(reqmode) && reqmap && *reqmap)
+                {
+                    int n = listincludes(prevmaps, reqmap, strlen(reqmap));
+                    if(n >= 0 && n < G(maphistory) && !haspriv(game::player1, PRIVZ(G(votelock)))) return true;
+                }
+                break;
+            case 0: default: break;
+        }
+        if(G(modelock)) switch(G(modelocktype))
+        {
+            case 1: if(!haspriv(game::player1, PRIVZ(G(modelock)))) return true; break;
+            case 2: if((!((1<<reqmode)&G(modelockfilter)) || !mutscmp(reqmuts, G(mutslockfilter))) && !haspriv(game::player1, PRIVZ(G(modelock)))) return true; break;
+            case 0: default: break;
+        }
+        if(reqmode != G_EDITMODE && G(mapslock) && reqmap && *reqmap)
+        {
+            char *list = NULL;
+            switch(G(mapslocktype))
+            {
+                case 1:
+                {
+                    list = newstring(G(allowmaps));
+                    mapcull(list, reqmode, reqmuts, numplayers(), G(mapsfilter));
+                    break;
+                }
+                case 2:
+                {
+                    maplist(list, reqmode, reqmuts, numplayers(), G(mapsfilter));
+                    break;
+                }
+                case 0: default: break;
+            }
+            if(list)
+            {
+                if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(game::player1, PRIVZ(G(modelock))))
+                {
+                    DELETEA(list);
+                    return true;
+                }
+                DELETEA(list);
+            }
+        }
+        return false;
+    }
+    ICOMMAND(0, ismodelocked, "iis", (int *g, int *m, char *s), intret(ismodelocked(*g, *m, s) ? 1 : 0));
 
     int parseplayer(const char *arg)
     {
@@ -1000,24 +1081,6 @@ namespace client
         }
     }
     ICOMMAND(0, goto, "s", (char *s), gotoplayer(s));
-
-    int state() { return game::player1->state; }
-    ICOMMAND(0, getstate, "", (), intret(state()));
-
-    int otherclients()
-    {
-        int n = 0; // ai don't count
-        loopv(game::players) if(game::players[i] && game::players[i]->aitype == AI_NONE) n++;
-        return n;
-    }
-
-    int waiting(bool state)
-    {
-        if(!connected(false) || !isready || game::maptime <= 0 || (state && needsmap && otherclients()))
-            return state && needsmap ? (gettingmap ? 3 : 2) : 1;
-        return 0;
-    }
-    ICOMMAND(0, waiting, "i", (int *n), intret(waiting(!*n)));
 
     void editvar(ident *id, bool local)
     {
