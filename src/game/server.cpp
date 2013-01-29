@@ -2035,14 +2035,14 @@ namespace server
             if(G(modelock) == PRIV2(MAX) && G(mapslock) == PRIV2(MAX) && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
             else if(G(votelock)) switch(G(votelocktype))
             {
-                case 1:
+                case 1: if(!haspriv(ci, PRIVZ(G(votelock)), "vote for a new game")) return; break;
+                case 2:
                     if(!m_edit(reqmode))
                     {
                         int n = listincludes(sv_prevmaps, reqmap, strlen(reqmap));
                         if(n >= 0 && n < G(maphistory) && !haspriv(ci, PRIVZ(G(votelock)), "vote for a recently played map")) return;
                     }
                     break;
-                case 2: if(!haspriv(ci, PRIVZ(G(votelock)), "vote for a new game")) return; break;
                 case 0: default: break;
             }
             if(m_local(reqmode) && !ci->local)
@@ -3269,7 +3269,7 @@ namespace server
                         uint ip = getclientip(actor->clientnum);
                         actor->state.warnings[WARN_TEAMKILL][0]++;
                         actor->state.warnings[WARN_TEAMKILL][1] = totalmillis ? totalmillis : 1;
-                        if(G(teamkillban) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(actor, PRIV_MODERATOR))
+                        if(G(teamkillban) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(actor, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::ALLOW, ip))
                         {
                             ipinfo &c = control.add();
                             c.ip = ip;
@@ -3278,17 +3278,6 @@ namespace server
                             c.time = totalmillis ? totalmillis : 1;
                             srvoutf(-3, "\fs\fcbanned\fS %s (%s): team killing is not permitted", colorname(actor), gethostname(actor->clientnum));
                             updatecontrols = true;
-                            if(m_scores(gamemode) && G(teamkillrestore))
-                            {
-                                int restorepoints[TEAM_MAX] = {0};
-                                loopv(actor->state.teamkills) restorepoints[actor->state.teamkills[i].team] += actor->state.teamkills[i].points;
-                                loopi(TEAM_MAX) if(restorepoints[i])
-                                {
-                                    score &ts = teamscore(i);
-                                    ts.total += restorepoints[i];
-                                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
-                                }
-                            }
                         }
                         else if(G(teamkillkick) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
                         {
@@ -3953,7 +3942,7 @@ namespace server
             loopvrev(clients)
             {
                 uint ip = getclientip(clients[i]->clientnum);
-                if(ip && !clients[i]->privilege && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                if(ip && !haspriv(clients[i], PRIV_MODERATOR) && checkipinfo(control, ipinfo::BAN, ip) && !checkipinfo(control, ipinfo::ALLOW, ip))
                 {
                     disconnect_client(clients[i]->clientnum, DISC_IPBAN);
                     continue;
@@ -4027,6 +4016,17 @@ namespace server
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
+                if(m_scores(gamemode) && m_isteam(gamemode, mutators) && G(teamkillrestore) && !interm)
+                {
+                    int restorepoints[TEAM_MAX] = {0};
+                    loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
+                    loopi(TEAM_MAX) if(restorepoints[i] >= G(teamkillrestore))
+                    {
+                        score &ts = teamscore(i);
+                        ts.total += restorepoints[i];
+                        sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                    }
+                }
                 savescore(ci);
                 aiman::removeai(ci, complete);
                 if(!complete) aiman::dorefresh = G(airefresh);
@@ -4320,6 +4320,17 @@ namespace server
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
+        if(m_scores(gamemode) && m_isteam(gamemode, mutators) && G(teamkillrestore) && !interm)
+        {
+            int restorepoints[TEAM_MAX] = {0};
+            loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
+            loopi(TEAM_MAX) if(restorepoints[i] >= G(teamkillrestore))
+            {
+                score &ts = teamscore(i);
+                ts.total -= restorepoints[i];
+                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+            }
+        }
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
         int amt = numclients();

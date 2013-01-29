@@ -31,7 +31,7 @@ GVAR(IDF_ADMIN, teamkillwarn, 1, 5, VAR_MAX); // automatically warn player every
 GVAR(IDF_ADMIN, teamkillkick, 0, 2, VAR_MAX); // automatically kick player at this many warnings
 GVAR(IDF_ADMIN, teamkillban, 0, 3, VAR_MAX); // automatically ban player at this many warnings
 GVAR(IDF_ADMIN, teamkilltime, 0, 5, VAR_MAX); // time threshold (in minutes) to count
-GVAR(IDF_ADMIN, teamkillrestore, 0, 1, 1); // restore the team score as if the offender was never there
+GVAR(IDF_ADMIN, teamkillrestore, 0, 1, VAR_MAX); // restore the team score as if the offender was never there if it was by this much
 
 GVAR(IDF_ADMIN, autospectate, 0, 1, 1); // auto spectate if idle, 1 = auto spectate when remaining dead for autospecdelay
 GVAR(IDF_ADMIN, autospecdelay, 0, 60000, VAR_MAX);
@@ -100,7 +100,7 @@ GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_CLASSI
 
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 GVAR(IDF_ADMIN, mapslock, 0, PRIV2(MODERATOR), PRIV2(MAX));
-GVAR(IDF_ADMIN, mapslocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select non-rotation
+GVAR(IDF_ADMIN, mapslocktype, 0, 2, 2); // 0 = off, 1 = allow maps, 2 = rotation maps
 
 GSVAR(IDF_READONLY, prevmaps, "");
 GVAR(IDF_ADMIN, maphistory, 0, 3, VAR_MAX);
