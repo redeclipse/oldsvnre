@@ -363,9 +363,13 @@ static inline void adjustscaled(T &n, int s)
 
 #define MAXNAMELEN 24
 enum { SAY_NONE = 0, SAY_ACTION = 1<<0, SAY_TEAM = 1<<1, SAY_NUM = 2 };
+
 enum { PRIV_NONE = 0, PRIV_PLAYER, PRIV_HELPER, PRIV_MODERATOR, PRIV_OPERATOR, PRIV_ADMINISTRATOR, PRIV_DEVELOPER, PRIV_CREATOR, PRIV_MAX, PRIV_START = PRIV_HELPER };
-#define PRIV(x) (PRIV_##x-PRIV_START)
-#define PRIVX(x) (PRIV_##x-PRIV_START+1)
+
+#define PRIV(x)     (PRIV_##x - PRIV_START)
+#define PRIV2(x)    (PRIV_##x - PRIV_START + 1)
+#define PRIVY(x)    (x + PRIV_START)
+#define PRIVZ(x)    (x - 1 + PRIV_START)
 
 #define MM_MODE 0xF
 #define MM_AUTOAPPROVE 0x1000
