@@ -1,18 +1,18 @@
 = Red Eclipse 1.4 =
 Gameplay:
  * Increased overall AI skill
- * Disable double-tap dashing by default (enable with /dashstyle 1)
  * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
  * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with /thirdpersondist and /thirdpersonside)
 
 Weapons:
+ * Weapons no longer reset gravity acceleration (reduces in-air pinning)
  * Plasma primary damage and explosion radius increased
  * Melee now only activates if player is airborne or dashing/sliding
  * Mines, new weapon, primary proximity mine, secondary tripwire mine, pickup-based (like grenade)
  * Rifle explosion size and hitpush reduced (reduces hit area, total explosion damage, and pushing force)
  * Rifle zoom can now only be controlled via zoomlevels by players
- * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread and hitpush reduced
+ * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread reduced
  * Pistol secondary spread increased
 
 Modes & Mutators:
