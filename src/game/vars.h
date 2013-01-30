@@ -19,6 +19,8 @@ GVAR(IDF_ADMIN, banlock, 0, PRIV(MODERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, mutelock, 0, PRIV(MODERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, limitlock, 0, PRIV(MODERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, vetolock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, editlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, masterlock, 0, PRIV(MODERATOR), PRIV(MAX));
 
 GVAR(IDF_ADMIN, floodlock, 0, PRIV2(OPERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
