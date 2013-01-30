@@ -1526,7 +1526,7 @@ namespace game
             loopi(r)
             {
                 int n = d->loadweap.find(items[i]);
-                d->loadweap[i] = n < 0 || n == i ? items[i] : 0;
+                d->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
             }
             client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
             vector<char> value, msg;
