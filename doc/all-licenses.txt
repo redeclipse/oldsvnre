@@ -383,37 +383,82 @@ License: Expat
  DEALINGS IN THE SOFTWARE.
 
 License: Akashi-Font
- http://www.tenbytwenty.com/
+ Basically, you can use the fonts for whatever you like, the only
+ restriction being that:
+ If the font is a "paid" one, rather than a free one, you should not make
+ the .ttf file available to the public.
  .
- License Agreement
+ Other than that I'm happy for you use the font however you like.
  .
- By downloading any product from Ten by Twenty, you agree to the following:
- .
-     * All products remain property of Ten by Twenty.
-     * Products may be used by the licensee in any personal or commercial
-       projects (royalty-free).
-     * Products may not be resold or redistributed.
-     * Wordpress themes may be edited and developed for individual use, but
-       credit links must remain in place and adapted themes may not be
-       reditributed.
- .
- Clarification:
- .
- I ("Arand") contacted Ed Merrit (of Ten by Twenty) via email, requesting a
- clarification for the font license and received this response:
- .
- > Hi Arand,
- >
- > Basically, you can use the fonts for whatever you like, the only restriction
-   being that:
- > If the font is a "paid" one, rather than a free one, you should not make the
-   .ttf file available to the public.
- > Other than that I'm happy for you use the font however you like.
- >
- > Ed
- .
+ Note:
  The "akashi" typeface (available from http://www.tenbytwenty.com/akashi.php) is
  made available for free by the author.
+ .
+ Background:
+ I ("Arand") contacted Ed Merrit (of Ten by Twenty) via email, requesting a
+ clarification for the font license, here is a copy of the response:
+ .
+ Date: Sat, 05 Nov 2011 14:53:39 +0000
+ From: Ed Merritt <ed@edmerritt.com>
+ To: Arand Nash <ienorand@gmail.com>
+ Subject: Re: Fwd: akashi license
+ .
+ Hi Arand,
+ .
+ Basically, you can use the fonts for whatever you like, the only
+ restriction being that:
+ If the font is a "paid" one, rather than a free one, you should not make
+ the .ttf file available to the public.
+ .
+ Other than that I'm happy for you use the font however you like.
+ .
+ Ed
+ .
+ .
+ .
+ .
+ On 05/11/2011 14:50, Arand Nash wrote:
+ > Hello, sorry, but would you have time to have a look at these questions?
+ >
+ > I noticed that you've released the typeface "Jura" under a SIL license,
+ > would it be at all feasible, to use the Akashi font under a similar license?
+ > I completely understand if this is not possible.
+ >
+ > I'm still looking for an answer regarding the current license, though:
+ >
+ > -------- Original Message --------
+ > Subject: akashi license
+ > Date: Fri, 14 Oct 2011 01:59:44 +0200
+ > From: Arand Nash<ienorand@gmail.com>
+ > To: ed@edmerritt.com
+ >
+ > Hello Ed Merrit,
+ >
+ > I've got a few questions about the license, set for the Ten by twenty
+ > products, in particular for the akashi.ttf font:
+ > ###
+ > By downloading any product from Ten by Twenty, you agree to the following:
+ >
+ > -All products remain property of Ten by Twenty.
+ > -Products may be used by the licensee in any personal or commercial
+ > projects (royalty-free).
+ > -Products may not be resold or redistributed.
+ > ###
+ > It is somewhat unclear in what way it may, and may not be used.
+ >
+ > What is meant by the "used by licensee" wording in this context?
+ > Does it mean strictly personal, "off-line" use only?
+ > Or displaying (publicly) of the font only (with no access by viewer to
+ > .ttf file, somehow)?
+ >
+ > The "may not be (...) redistributed" seems to imply that one may only
+ > receive the .ttf file from your site and that any other propagation of
+ > the font must be in some hardcoded-into-image format?
+ >
+ > Is my interpretation of the main intent of your license correct?
+ >
+ > --
+ > Martin Werner ("arand")
 
 License: OFL-1.1
  -----------------------------------------------------------
