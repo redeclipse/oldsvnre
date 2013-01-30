@@ -1787,7 +1787,7 @@ namespace client
                     }
                     gameent *t = game::getclient(scn);
                     if(!t || !isweap(weap) || t == game::player1 || t->ai) break;
-                    if(weap != t->weapselect) t->weapswitch(weap, lastmillis);
+                    if(weap != t->weapselect && weap != W_MELEE) t->weapswitch(weap, lastmillis);
                     float scale = 1;
                     int sub = W2(weap, sub, WS(flags));
                     if(W2(weap, power, WS(flags)))
