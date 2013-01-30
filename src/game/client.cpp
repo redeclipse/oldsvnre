@@ -472,6 +472,7 @@ namespace client
         if(d == game::player1 && !remote) return true;
         return d->privilege >= priv;
     }
+    ICOMMAND(0, issupporter, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_SUPPORTER) ? 1 : 0));
     ICOMMAND(0, ishelper, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_HELPER) ? 1 : 0));
     ICOMMAND(0, ismoderator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_MODERATOR) ? 1 : 0));
     ICOMMAND(0, isadministrator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_ADMINISTRATOR) ? 1 : 0));

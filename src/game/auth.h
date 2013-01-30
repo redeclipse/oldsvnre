@@ -61,10 +61,10 @@ namespace auth
             privilege = ci->privilege = flags;
             if(authed)
             {
-                if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS with \fs\fc%s\fS privileges", colorname(ci), ci->authname, privname(privilege, false));
+                if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS (\fs\fc%s\fS)", colorname(ci), ci->authname, privname(privilege));
                 else srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
             }
-            else srvoutforce(ci, -2, "\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege));
+            else srvoutforce(ci, -2, "\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege, true));
         }
         else
         {
@@ -73,7 +73,7 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_HELPER || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            srvoutforce(ci, -2, "\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege));
+            srvoutforce(ci, -2, "\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege, true));
         }
         privupdate = true;
         if(paused)
@@ -146,6 +146,7 @@ namespace auth
             case 'o': case 'O': n = PRIV_OPERATOR; break;
             case 'm': case 'M': n = PRIV_MODERATOR; break;
             case 'h': case 'H': n = PRIV_HELPER; break;
+            case 's': case 'S': n = PRIV_SUPPORTER; break;
             case 'u': case 'U': n = PRIV_PLAYER; break;
         }
         if(n > PRIV_NONE) setprivilege(ci, true, n, true);

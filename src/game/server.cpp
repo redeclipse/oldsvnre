@@ -885,7 +885,7 @@ namespace server
         }
     }
 
-    const char *privname(int type, bool prefix = true)
+    const char *privname(int type, bool prefix = false)
     {
         switch(type)
         {
@@ -895,6 +895,7 @@ namespace server
             case PRIV_OPERATOR: return prefix ? "an operator" : "operator";
             case PRIV_MODERATOR: return prefix ? "a moderator" : "moderator";
             case PRIV_HELPER: return prefix ? "a helper" : "helper";
+            case PRIV_SUPPORTER: return prefix ? "a supporter" : "supporter";
             case PRIV_PLAYER: return prefix ? "a player" : "player";
             case PRIV_MAX: return prefix ? "connected locally" : "local";
             default: return prefix ? "by yourself" : "alone";
@@ -938,9 +939,9 @@ namespace server
     bool haspriv(clientinfo *ci, int flag, const char *msg = NULL)
     {
         if(ci->local || ci->privilege >= flag) return true;
-        else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_START && !numclients(ci->clientnum)) return true;
+        else if(mastermask()&MM_AUTOAPPROVE && flag <= PRIV_ELEVATED && !numclients(ci->clientnum)) return true;
         else if(msg && *msg)
-            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag), msg);
+            srvmsgft(ci->clientnum, CON_CHAT, "\fraccess denied, you need to be \fs\fc%s\fS to \fs\fc%s\fS", privname(flag, true), msg);
         return false;
     }
 
@@ -2290,7 +2291,7 @@ namespace server
 
     //bool crclocked(clientinfo *ci)
     //{
-    //    if(m_play(gamemode) && G(mapcrclock) && ci->state.aitype == AI_NONE && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, G(mapcrclock)-1+PRIV_START))
+    //    if(m_play(gamemode) && G(mapcrclock) && ci->state.aitype == AI_NONE && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, PRIVZ(G(mapcrclock))))
     //        return true;
     //    return false;
     //}
@@ -4519,7 +4520,7 @@ namespace server
                 {
                     int val = getint(p);
                     if(!ci || ci->state.aitype > AI_NONE) break;
-                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, PRIV_START, val ? "enter editmode" : "exit editmode"))
+                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, PRIVY(G(editlock)), val ? "enter editmode" : "exit editmode"))
                     {
                         spectator(ci);
                         break;
@@ -5136,7 +5137,7 @@ namespace server
                 case N_MASTERMODE:
                 {
                     int mm = getint(p);
-                    if(haspriv(ci, PRIV_START, "change mastermode") && mm >= MM_OPEN && mm <= MM_PRIVATE)
+                    if(haspriv(ci, PRIVY(G(masterlock)), "change mastermode") && mm >= MM_OPEN && mm <= MM_PRIVATE)
                     {
                         if(haspriv(ci, PRIV_ADMINISTRATOR) || (mastermask()&(1<<mm)))
                         {
@@ -5255,7 +5256,7 @@ namespace server
                 case N_SETTEAM:
                 {
                     int who = getint(p), team = getint(p);
-                    if(who<0 || who>=getnumclients() || !haspriv(ci, PRIV_START, "change the team of others")) break;
+                    if(who<0 || who>=getnumclients() || !haspriv(ci, PRIVY(G(speclock)), "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_isteam(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, TEAM_FIRST)) break;
@@ -5447,13 +5448,13 @@ namespace server
                                 srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, you need \fs\fcmoderator/administrator\fS access to \fs\fcelevate privileges\fS");
                                 fail = true;
                             }
-                            else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_START)
+                            else loopv(clients) if(ci != clients[i] && clients[i]->privilege >= PRIV_ELEVATED)
                             {
                                 srvmsgft(ci->clientnum, CON_EVENT, "\fraccess denied, there is already another player with elevated privileges");
                                 fail = true;
                                 break;
                             }
-                            if(!fail) auth::setprivilege(ci, true, PRIV_START);
+                            if(!fail) auth::setprivilege(ci, true, PRIV_ELEVATED);
                         }
                     }
                     else auth::setprivilege(ci, false);
