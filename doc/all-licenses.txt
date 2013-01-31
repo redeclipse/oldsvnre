@@ -119,13 +119,6 @@ Files: data/skyboxes/skyhigh*
 Copyright: Pieter Verhoeven
 License: CC-BY-SA-3.0
 
-Files: data/particles/bullet.png data/particles/energy.png
-       data/particles/blob.png data/particles/scorch.png
-Copyright: Quinton Reeves <qreeves@gmail.com>
-License: public-domain
- bullet.png, energy.png, scorch.png, blob.png
-     Public domain sources
-
 Files: data/particles/entity.png data/particles/lightning.png
        data/particles/hint.png data/particles/mflare.png
        data/particles/sflare.png data/particles/spark.png
