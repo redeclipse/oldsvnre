@@ -6,7 +6,7 @@ smoke.png, and explosion.png
     Licensed publicly for everyone to use, modify and distribute as long as the author is credited for the original work.
 
 entity.png, lightning.png, hint.png, mflare.png, sflare.png, spark.png
-    Created by Quinton Reeves, released into the public domain
+    Created by Quinton Reeves, CC-BY-SA 3.0 license, or any later version.
 
 blood.png, fire.png
     Created by FischKopF, source: http://www.quadropolis.us/node/2693
