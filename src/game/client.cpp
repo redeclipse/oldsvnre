@@ -1959,7 +1959,7 @@ namespace client
                     ai::itemspawned(ent, value!=0);
                     if(e.spawned)
                     {
-                        int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0],
+                        int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0],
                             colour = e.type == WEAPON ? W(attr, colour) : 0xFFFFFF;
                         playsound(e.type == WEAPON && attr >= W_OFFSET ? WSND(attr, S_W_SPAWN) : S_ITEMSPAWN, e.o);
                         if(entities::showentdescs)

@@ -492,7 +492,7 @@ namespace ai
             {
                 case WEAPON:
                 {
-                    int attr = w_attr(game::gamemode, e.attrs[0], sweap);
+                    int attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
                     if(e.spawned && isweap(attr) && wantsweap(d, attr))
                     { // go get a weapon upgrade
                         interest &n = interests.add();
@@ -518,7 +518,7 @@ namespace ai
             {
                 case WEAPON:
                 {
-                    int attr = w_attr(game::gamemode, e.attrs[0], sweap);
+                    int attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
                     if(isweap(attr) && wantsweap(d, attr) && proj.owner != d)
                     { // go get a weapon upgrade
                         interest &n = interests.add();
@@ -668,7 +668,7 @@ namespace ai
     {
         if(!passive() && m_fight(game::gamemode) && entities::ents.inrange(ent) && entities::ents[ent]->type == WEAPON && spawned > 0)
         {
-            int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, entities::ents[ent]->attrs[0], sweap);
+            int sweap = m_weapon(game::gamemode, game::mutators), attr = w_attr(game::gamemode, game::mutators, entities::ents[ent]->attrs[0], sweap);
             loopv(game::players) if(game::players[i] && game::players[i]->ai && game::players[i]->aitype == AI_BOT && game::players[i]->state == CS_ALIVE && iswaypoint(game::players[i]->lastnode))
             {
                 gameent *d = game::players[i];
@@ -680,7 +680,7 @@ namespace ai
                     {
                         if(entities::ents.inrange(b.target))
                         {
-                            int weap = w_attr(game::gamemode, entities::ents[b.target]->attrs[0], sweap);
+                            int weap = w_attr(game::gamemode, game::mutators, entities::ents[b.target]->attrs[0], sweap);
                             if((attr == d->ai->weappref && weap != d->ai->weappref) || d->o.squaredist(entities::ents[ent]->o) < d->o.squaredist(entities::ents[b.target]->o))
                                 d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
                         }
@@ -785,7 +785,7 @@ namespace ai
                     gameentity &e = *(gameentity *)entities::ents[b.target];
                     if(enttype[e.type].usetype != EU_ITEM) return 0;
                     int sweap = m_weapon(game::gamemode, game::mutators),
-                        attr = w_attr(game::gamemode, e.attrs[0], sweap);
+                        attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
                     switch(e.type)
                     {
                         case WEAPON:
@@ -811,7 +811,7 @@ namespace ai
                     if(!entities::ents.inrange(proj.id) || enttype[entities::ents[proj.id]->type].usetype != EU_ITEM) return 0;
                     gameentity &e = *(gameentity *)entities::ents[proj.id];
                     int sweap = m_weapon(game::gamemode, game::mutators),
-                        attr = w_attr(game::gamemode, e.attrs[0], sweap);
+                        attr = w_attr(game::gamemode, game::mutators, e.attrs[0], sweap);
                     switch(e.type)
                     {
                         case WEAPON:
@@ -1330,7 +1330,7 @@ namespace ai
                         if(entities::ents.inrange(ent))
                         {
                             extentity &e = *entities::ents[ent];
-                            int attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
+                            int attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
                             if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts))) switch(e.type)
                             {
                                 case WEAPON:

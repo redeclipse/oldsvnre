@@ -489,7 +489,7 @@ namespace server
             sents[ent].spawned = spawned;
             sents[ent].millis = sents[ent].last = gamemillis;
             if(sents[ent].type == WEAPON && !(sents[ent].attrs[1]&W_F_FORCED))
-                sents[ent].millis += w_spawn(w_attr(gamemode, sents[ent].attrs[0], m_weapon(gamemode, mutators)));
+                sents[ent].millis += w_spawn(w_attr(gamemode, mutators, sents[ent].attrs[0], m_weapon(gamemode, mutators)));
             else sents[ent].millis += G(itemspawntime);
             if(msg) sendf(-1, 1, "ri3", N_ITEMSPAWN, ent, sents[ent].spawned ? 1 : 0);
         }
@@ -1319,7 +1319,7 @@ namespace server
         {
             case WEAPON:
             {
-                int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, sents[i].attrs[0], sweap);
+                int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
                 if(!isweap(attr) || (sweap < 0 && attr < 0-sweap)) return false;
                 switch(W(attr, allowed))
                 {
@@ -1396,7 +1396,7 @@ namespace server
                     case 1: items.add(i); break;
                     case 2:
                     {
-                        int delay = sents[i].type == WEAPON ? w_spawn(w_attr(gamemode, sents[i].attrs[0], sweap)) : G(itemspawntime);
+                        int delay = sents[i].type == WEAPON ? w_spawn(w_attr(gamemode, mutators, sents[i].attrs[0], sweap)) : G(itemspawntime);
                         if(delay > 1) sents[i].millis += (delay+rnd(delay))/2;
                         break;
                     }
@@ -3593,7 +3593,7 @@ namespace server
             if(G(serverdebug) >= 3) srvmsgf(ci->clientnum, "sync error: use [%d] failed - unexpected message", ent);
             return;
         }
-        int sweap = m_weapon(gamemode, mutators), attr = sents[ent].type == WEAPON ? w_attr(gamemode, sents[ent].attrs[0], sweap) : sents[ent].attrs[0];
+        int sweap = m_weapon(gamemode, mutators), attr = sents[ent].type == WEAPON ? w_attr(gamemode, mutators, sents[ent].attrs[0], sweap) : sents[ent].attrs[0];
         if(!finditem(ent))
         {
             if(G(serverdebug)) srvmsgf(ci->clientnum, "sync error: use [%d] failed - doesn't seem to be spawned anywhere", ent);
@@ -3765,7 +3765,7 @@ namespace server
             {
                 if(sents[i].type == WEAPON)
                 {
-                    int attr = w_attr(gamemode, sents[i].attrs[0], sweap);
+                    int attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
                     if(attr < W_OFFSET || attr >= W_ITEM) continue;
                 }
                 if(finditem(i, true, true)) items[sents[i].type]++;
