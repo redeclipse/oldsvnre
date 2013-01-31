@@ -4,7 +4,7 @@ namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
         lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1;
-    bool intermission = false, prevzoom = false, zooming = false, inputmouse = false;
+    bool intermission = false, prevzoom = false, zooming = false, inputmouse = false, inputview = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
 
@@ -31,7 +31,7 @@ namespace game
     SVARF(IDF_PERSIST, musicdir, "sounds/music", stopmapmusic());
     SVARF(IDF_WORLD, mapmusic, "", stopmapmusic());
 
-    VARF(IDF_PERSIST, thirdperson, 0, 0, 1, resetcamera(true));
+    VAR(IDF_PERSIST, thirdperson, 0, 0, 1);
     VAR(IDF_PERSIST, dynlighteffects, 0, 2, 2);
 
     VAR(IDF_PERSIST, thirdpersonmodel, 0, 1, 1);
@@ -1805,16 +1805,18 @@ namespace game
 
     void project(int w, int h)
     {
-        bool input = hud::hasinput(true);
-        if(input != inputmouse)
+        bool input = hud::hasinput(true), view = thirdpersonview(true, focus);
+        if(input != inputmouse || view != inputview)
         {
-            resetcursor();
+            if(view != inputview) resetcamera(false);
+            else resetcursor();
             inputmouse = input;
+            inputview = view;
         }
         if(!input)
         {
             int tpc = focus != player1 ? 1 : thirdpersoncursor;
-            if(tpc && thirdpersonview(true, focus)) switch(tpc)
+            if(tpc && view) switch(tpc)
             {
                 case 1:
                 {
