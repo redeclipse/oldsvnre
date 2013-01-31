@@ -31,7 +31,8 @@ enum
 
 enum
 {
-    S_MELEE     = S_GAME,
+    S_WEAPONS   = S_GAME,
+    S_MELEE     = S_WEAPONS,
     S_PISTOL    = S_MELEE+S_W_OFFSET,
     S_SWORD     = S_PISTOL+S_W_OFFSET,
     S_SHOTGUN   = S_SWORD+S_W_MAX,
