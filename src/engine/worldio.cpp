@@ -1122,6 +1122,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
     {
         loop(format, MAP_MAX)
         {
+            int mask = maskpackagedirs(format == MAP_OCTA ? ~0 : ~PACKAGEDIR_OCTA);
             setnames(mname, format);
             if(!tempfile) loopk(2)
             {
@@ -1130,7 +1131,11 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             }
 
             stream *f = opengzfile(mapfile, "rb");
-            if(!f) continue;
+            if(!f)
+            {
+                maskpackagedirs(mask);
+                continue;
+            }
 
             bool samegame = true;
             int eif = 0;
@@ -1140,6 +1145,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                 conoutf("\frerror loading %s: malformatted universal header", mapname);
                 delete f;
                 maploading = 0;
+                maskpackagedirs(mask);
                 return false;
             }
             lilswap(&newhdr.version, 2);
@@ -1156,8 +1162,10 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         conoutf("\frerror loading %s: malformatted mapz v%d[%d] header", mapname, newhdr.version, ver); \
                         delete f; \
                         maploading = 0; \
+                        maskpackagedirs(mask); \
                         return false; \
                     }
+
                 if(newhdr.version <= 25)
                 {
                     MAPZCOMPAT(25);
@@ -1207,6 +1215,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         conoutf("\frerror loading %s: malformatted mapz v%d header", mapname, newhdr.version);
                         delete f;
                         maploading = 0;
+                        maskpackagedirs(mask);
                         return false;
                     }
                     lilswap(&newhdr.worldsize, 8);
@@ -1217,6 +1226,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     conoutf("\frerror loading %s: requires a newer version of %s", mapname, RE_NAME);
                     delete f;
                     maploading = 0;
+                    maskpackagedirs(mask);
                     return false;
                 }
 
@@ -1344,6 +1354,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         conoutf("\frerror loading %s: malformatted octa v%d[%d] header", mapname, ver, ohdr.version); \
                         delete f; \
                         maploading = 0; \
+                        maskpackagedirs(mask); \
                         return false; \
                     }
 
@@ -1400,6 +1411,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                         conoutf("\frerror loading %s: malformatted octa v%d header", mapname, ohdr.version);
                         delete f;
                         maploading = 0;
+                        maskpackagedirs(mask);
                         return false;
                     }
                     lilswap(&ohdr.worldsize, 7);
@@ -1410,6 +1422,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     conoutf("\frerror loading %s: requires a newer version of Cube 2 support", mapname);
                     delete f;
                     maploading = 0;
+                    maskpackagedirs(mask);
                     return false;
                 }
 
@@ -1503,6 +1516,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             else
             {
                 delete f;
+                maskpackagedirs(mask);
                 continue;
             }
 
@@ -1749,6 +1763,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
 
             progress(0, "preloading textures...");
             preloadtextures(IDF_GAMEPRELOAD);
+            maskpackagedirs(mask);
 
             progress(0, "starting world...");
             game::startmap(mapname, mname);
