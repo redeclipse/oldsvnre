@@ -6,7 +6,7 @@ License: Omitted
 
 Files: *
 Copyright: 2009-2013, Red Eclipse Team
-License: CC-BY-SA-3.0
+License: CC-BY-SA-3.0+
 
 Files: src/*
 Copyright: 2001-2013, Wouter van Oortmerssen, Lee Salzman, Mike Dysart,
@@ -23,7 +23,7 @@ License: CC-BY-SA-3.0
 
 Files: src/redeclipse.ico src/install/nix/redeclipse*.png
 Copyright: 2011, Red Eclipse Team
-License: CC-BY-SA-3.0 and Mark-Policy
+License: CC-BY-SA-3.0+ and Mark-Policy
 
 Files: src/system-install.mk src/dist.mk src/install/nix/redeclipse.am
        src/install/nix/redeclipse.desktop.am
@@ -71,7 +71,7 @@ License: CC-BY-3.0
 
 Files: data/maps/battlefield*
 Copyright: 2012-2013, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
-License: CC-BY-SA-3.0
+License: CC-BY-SA-3.0+
 
 Files: data/misc/light2* data/misc/starllogo*
 Copyright: 2009 Georges "TRaK" Grondin <drognin@gmail.com>
@@ -109,13 +109,7 @@ License: CC-BY-SA-3.0
 
 Files: data/skyboxes/gradient* data/skyboxes/stars*
 Copyright: Quinton Reeves <qreeves@gmail.com>
-License: CC-BY-SA-3.0
- "gradient" by Quinton Reeves
-     CC-BY-SA 3.0 license. Created using the gradient fill tool in GIMP.
-
- "stars" by Quinton Reeves
-     CC-BY-SA 3.0 license. Created with Starbox 1.9 by Alex Grigny de Castro from the included xgStars.txt.
-     Generation parameters were set to 0'N / 0'E (Sidereal: 18.299266, or 00:00 July 26th, 2008) which is Red Eclipse's birthday.
+License: CC-BY-SA-3.0+
 
 Files: data/skyboxes/sunsetflat*
 Copyright: 2009, LedIris
@@ -127,16 +121,16 @@ License: CC-BY-SA-3.0
 
 Files: data/particles/bullet.png data/particles/energy.png
        data/particles/blob.png data/particles/scorch.png
-       data/particles/entity.png data/particles/lightning.png
-       data/particles/hint.png data/particles/mflare.png
-       data/particles/sflare.png data/particles/spark.png
 Copyright: Quinton Reeves <qreeves@gmail.com>
 License: public-domain
  bullet.png, energy.png, scorch.png, blob.png
      Public domain sources
- .
- entity.png, lightning.png, hint.png, mflare.png, sflare.png, spark.png
-     Created by Quinton Reeves, released into the public domain
+
+Files: data/particles/entity.png data/particles/lightning.png
+       data/particles/hint.png data/particles/mflare.png
+       data/particles/sflare.png data/particles/spark.png
+Copyright: Quinton Reeves <qreeves@gmail.com>
+License: CC-BY-SA-3.0+
 
 Files: data/skyboxes/interstellar* data/skyboxes/miramar*
        data/skyboxes/stormydays*
@@ -217,20 +211,20 @@ Files: data/textures/bloodbath.png data/textures/carnage.png
        data/textures/triple.png
 Copyright: Ed Merrit, Ten by Twenty, <http://www.tenbytwenty.com/>
            2011, Red Eclipse Team
-License: Akashi-Font and CC-BY-SA-3.0
+License: Akashi-Font and CC-BY-SA-3.0+
 Comment:
  The Akashi font is used as a basis for the word art in these images.
 
 Files: data/textures/logo.png data/luckystrike/pub2* data/luckystrike/pub1*
 Copyright: Ed Merrit, Ten by Twenty, <http://www.tenbytwenty.com/>
            2011, Red Eclipse Team
-License: Akashi-Font and CC-BY-SA-3.0 and Mark-Policy
+License: Akashi-Font and CC-BY-SA-3.0+ and Mark-Policy
 Comment:
  The Akashi font is used as a basis for the word art in this image.
 
 Files: data/textures/emblem.png
 Copyright: 2011, Red Eclipse Team
-License: CC-BY-SA-3.0 and Mark-Policy
+License: CC-BY-SA-3.0+ and Mark-Policy
 
 Files: data/torley/*
 Copyright: 2007-2008, Torley Linden
