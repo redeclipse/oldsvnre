@@ -1163,8 +1163,8 @@ namespace projs
                     {
                         int interval = lastmillis%1000;
                         float fluc = 1.f+(interval ? (interval <= 500 ? interval/500.f : (1000-interval)/500.f) : 0.f);
-                        part_create(PART_PLASMA_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
-                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
+                        part_create(PART_PLASMA_SOFT, 1, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.25f*max(proj.lifespan, 0.25f)+fluc, max(proj.lifespan, 0.25f)*trans);
+                        if(projhints) part_create(PART_HINT_SOFT, 1, proj.o, projhint(proj.owner, FWCOL(H, partcol, proj)), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.25f*max(proj.lifespan, 0.25f)*projhintsize+fluc, max(proj.lifespan, 0.25f)*projhintblend*trans);
                         break;
                     }
                     case W_ROCKET:
@@ -1386,12 +1386,12 @@ namespace projs
                             loopi(amt) create(proj.o, vec(proj.o).add(proj.vel), true, proj.owner, PRJ_DEBRIS, rnd(game::debrisfade)+game::debrisfade, 0, rnd(501), rnd(101)+50);
                             adddecal(DECAL_ENERGY, proj.o, proj.norm, expl*0.75f, bvec::fromcolor(FWCOL(P, explcol, proj)));
                         }
-                        int deviation = max(int(expl*0.75f), 1);
                         if(type != W_FLAMER || WK(proj.flags) || W2(proj.weap, fragweap, WS(proj.flags))%W_MAX != W_FLAMER)
                         {
                             loopi(type != W_ROCKET ? 5 : 10)
                             {
-                                vec to(proj.o); loopk(3) to.v[k] += rnd(deviation*2)-deviation;
+                                vec to(proj.o);
+                                loopk(3) to.v[k] += expl*(rnd(201)-100)/200.f;
                                 part_create(PART_FIREBALL_SOFT, projtraillength*(type != W_ROCKET ? 2 : 3), to, FWCOL(H, explcol, proj), expl*1.25f, 0.5f+(rnd(50)/100.f), -5);
                             }
                         }
