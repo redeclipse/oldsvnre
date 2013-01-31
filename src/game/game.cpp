@@ -4,13 +4,13 @@ namespace game
 {
     int nextmode = G_EDITMODE, nextmuts = 0, gamemode = G_EDITMODE, mutators = 0, maptime = 0, timeremaining = 0,
         lastcamera = 0, lasttvcam = 0, lasttvchg = 0, lastzoom = 0, liquidchan = -1;
-    bool intermission = false, prevzoom = false, zooming = false, inputmouse = false, inputview = false;
+    bool intermission = false, prevzoom = false, zooming = false, inputmouse = false, inputview = false, inputmode = false;
     float swayfade = 0, swayspeed = 0, swaydist = 0, bobfade = 0, bobdist = 0;
     vec swaydir(0, 0, 0), swaypush(0, 0, 0);
 
     string clientmap = "";
 
-    gameent *player1 = new gameent(), *focus = player1;
+    gameent *player1 = new gameent(), *focus = player1, *lastfocus = focus;
     avatarent avatarmodel;
     vector<gameent *> players, waiting;
     vector<cament *> cameras;
@@ -47,10 +47,8 @@ namespace game
     VAR(0, follow, -1, -1, VAR_MAX);
     void resetfollow()
     {
-        bool reset = focus != player1;
         focus = player1;
         follow = -1;
-        if(reset) resetcamera(false);
     }
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
@@ -232,7 +230,7 @@ namespace game
         return true;
     }
     ICOMMAND(0, isthirdperson, "i", (int *viewonly), intret(thirdpersonview(*viewonly ? true : false) ? 1 : 0));
-    ICOMMAND(0, thirdpersonswitch, "", (), int *n = (focus != player1 ? &followthirdperson : &thirdperson); *n = !*n;);
+    ICOMMAND(0, thirdpersonswitch, "", (), int *n = (focus != player1 ? &followthirdperson : &thirdperson); *n = !*n);
 
     int fov()
     {
@@ -478,7 +476,6 @@ namespace game
                     else
                     {
                         focus = d;
-                        resetcamera(true);
                         return true;
                     }
                 }
@@ -1805,13 +1802,16 @@ namespace game
 
     void project(int w, int h)
     {
-        bool input = hud::hasinput(true), view = thirdpersonview(true, focus);
-        if(input != inputmouse || view != inputview)
+        bool input = hud::hasinput(true), view = thirdpersonview(true, focus), mode = tvmode();
+        if(input != inputmouse || view != inputview || mode != inputmode || focus != lastfocus)
         {
-            if(view != inputview) resetcamera(false);
+            if(view != inputview || mode != inputmode || focus != lastfocus)
+                resetcamera(focus != lastfocus);
             else resetcursor();
             inputmouse = input;
             inputview = view;
+            inputmode = mode;
+            lastfocus = focus;
         }
         if(!input)
         {
