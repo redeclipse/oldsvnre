@@ -307,32 +307,41 @@ namespace projs
         }
     }
 
-    bool updatesticky(projent &proj)
+    void updatenormal(projent &proj)
     {
-        if(proj.stuck && proj.stick)
+        vectoyawpitch(proj.norm, proj.yaw, proj.pitch);
+        proj.pitch -= 90;
+        game::fixfullrange(proj.yaw, proj.pitch, proj.roll, true);
+        proj.resetinterp();
+    }
+
+    bool updatesticky(projent &proj, bool init = true)
+    {
+        if(proj.stuck)
         {
-            if(proj.stick->state != CS_ALIVE)
+            if(proj.stick)
             {
-                proj.stuck = 0;
-                proj.stick = NULL;
-                proj.lastbounce = lastmillis;
-                proj.resetinterp();
+                if(proj.stick->state != CS_ALIVE)
+                {
+                    proj.stuck = 0;
+                    proj.stick = NULL;
+                    proj.lastbounce = lastmillis;
+                    proj.resetinterp();
+                }
+                else
+                {
+                    proj.o = proj.stickpos;
+                    proj.o.rotate_around_z(proj.stick->yaw*RAD);
+                    proj.o.add(proj.stick->center());
+                    proj.norm = proj.sticknrm;
+                    proj.norm.rotate_around_z(proj.stick->yaw*RAD);
+                    proj.vel = vec(proj.stick->vel).add(proj.stick->falling);
+                    updatenormal(proj);
+                    return true;
+                }
+                return false;
             }
-            else
-            {
-                proj.o = proj.stickpos;
-                proj.o.rotate_around_z(proj.stick->yaw*RAD);
-                proj.o.add(proj.stick->center());
-                proj.norm = proj.sticknrm;
-                proj.norm.rotate_around_z(proj.stick->yaw*RAD);
-                proj.vel = vec(proj.stick->vel).add(proj.stick->falling);
-                vectoyawpitch(proj.norm, proj.yaw, proj.pitch);
-                proj.pitch -= 90;
-                game::fixfullrange(proj.yaw, proj.pitch, proj.roll, true);
-                proj.resetinterp();
-                return true;
-            }
-            return false;
+            if(init) updatenormal(proj);
         }
         return proj.stick;
     }
@@ -355,7 +364,7 @@ namespace projs
                 proj.stickpos.rotate_around_z(-d->yaw*RAD);
                 proj.sticknrm.rotate_around_z(-d->yaw*RAD);
             }
-            if(updatesticky(proj) && proj.projtype == PRJ_SHOT)
+            if(updatesticky(proj, true) && proj.projtype == PRJ_SHOT)
                 client::addmsg(N_STICKY, "ri9i2",
                     proj.owner->clientnum, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
                         int(proj.sticknrm.x*DMF), int(proj.sticknrm.y*DMF), int(proj.sticknrm.z*DMF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
@@ -379,7 +388,7 @@ namespace projs
                 projs[i]->o = pos;
                 projs[i]->stick = NULL;
             }
-            updatesticky(*projs[i]);
+            updatesticky(*projs[i], true);
             break;
         }
     }
