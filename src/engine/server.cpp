@@ -1290,12 +1290,20 @@ bool findoctadir(const char *name, bool fallback)
         addpackagedir(s, PACKAGEDIR_OCTA);
         addpackagedir(octadata, PACKAGEDIR_OCTA);
         addpackagedir(octapaks, PACKAGEDIR_OCTA);
+        maskpackagedirs(~PACKAGEDIR_OCTA);
         hasoctapaks = fallback ? 1 : 2;
         return true;
     }
     hasoctapaks = 0;
     return false;
 }
+void octapaks(uint *contents)
+{
+    int mask = maskpackagedirs(~0);
+    execute(contents);
+    maskpackagedirs(mask);
+}
+COMMAND(0, octapaks, "e");
 
 void trytofindocta(bool fallback)
 {
@@ -1441,7 +1449,6 @@ ICOMMAND(0, writecfg, "", (void), if(!(identflags&IDF_WORLD)) writecfg());
 
 void rehash(bool reload)
 {
-    maskpackagedirs(~PACKAGEDIR_OCTA);
     if(reload)
     {
         rehashing = 1;
@@ -1465,7 +1472,6 @@ void rehash(bool reload)
 #endif
     conoutf("\fwconfiguration reloaded");
     rehashing = 0;
-    maskpackagedirs(~0);
 }
 ICOMMAND(0, rehash, "i", (int *nosave), if(!(identflags&IDF_WORLD)) rehash(*nosave ? false : true));
 

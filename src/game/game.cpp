@@ -1477,7 +1477,6 @@ namespace game
 
     void preload()
     {
-        maskpackagedirs(~PACKAGEDIR_OCTA);
         ai::preload();
         weapons::preload();
         projs::preload();
@@ -1485,7 +1484,6 @@ namespace game
         if(m_edit(gamemode) || m_defend(gamemode)) defend::preload();
         if(m_edit(gamemode) || m_bomber(gamemode)) bomber::preload();
         flushpreloadedmodels();
-        maskpackagedirs(~0);
     }
 
     void resetmap(bool empty) // called just before a map load
