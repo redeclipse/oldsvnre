@@ -95,9 +95,13 @@ Copyright: 2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
 Files: data/ulukai/redeclipse*
-Copyright: 2013 Dratz-C
+Copyright: 1999 Luc Viatour
+           2006 David Iliff
+           2013 Dratz-C
            2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
+Comment:
+ Source: https://commons.wikimedia.org/wiki/File:Solar_eclipse_1999_4_NR.jpg
 
 Files: data/crosshairs/*
 Copyright: 2011, fluxord <fluxord> at <yahoo.com>
@@ -137,6 +141,18 @@ License: public-domain
 Files: data/skyboxes/interstellar* data/skyboxes/miramar*
        data/skyboxes/stormydays*
 Copyright: Jockum "hipshot" Skoglund <hipshot@zfight.com>
+License: CC-BY-3.0
+
+Files: data/elyvisions/*
+Copyright: 2012 3delyvisions
+License: CC-BY-3.0
+
+Files: data/mayhem/*
+Copyright: Mayhem
+License: CC-BY-SA (version unclear, probably not 3.0)
+
+Files: data/philipk/
+Copyright: Philip Klevestav <philipk@philipk.net>
 License: CC-BY-3.0
 
 Files: data/particles/smoke.png data/particles/explosion.png
