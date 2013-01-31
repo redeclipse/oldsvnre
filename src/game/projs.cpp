@@ -808,21 +808,21 @@ namespace projs
         proj.hit = NULL;
         proj.hitflags = HITFLAG_NONE;
         proj.movement = 1;
-        if(proj.projtype != PRJ_SHOT || (!proj.child && !weaptype[proj.weap].traced))
+        if(proj.projtype != PRJ_SHOT || (!proj.child && !WK(proj.flags) && !weaptype[proj.weap].traced))
         {
-            vec loc = !proj.owner || proj.projtype != PRJ_SHOT ? vec(proj.o).add(proj.vel) : proj.owner->o,
+            vec loc = proj.projtype != PRJ_SHOT || !proj.owner || proj.child || WK(proj.flags) ? vec(proj.o).sub(vec(proj.vel).normalize().mul(proj.radius*2)) : proj.owner->o,
                 eyedir = vec(proj.o).sub(loc);
             float eyedist = eyedir.magnitude();
-            if(eyedist >= 1e-3f)
+            if(eyedist >= 1e-6f)
             {
                 eyedir.div(eyedist);
                 float blocked = tracecollide(&proj, loc, eyedir, eyedist);
-                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked+proj.radius+1e-3f).add(loc);
+                if(blocked >= 0) proj.o = vec(eyedir).mul(blocked+proj.radius+1e-6f).add(loc);
             }
         }
-        if(proj.projtype != PRJ_SHOT || proj.child || WK(proj.flags))
-            physics::entinmap(&proj, true);
-        else proj.resetinterp();
+        //if(proj.projtype != PRJ_SHOT || proj.child || WK(proj.flags))
+            physics::entinmap(&proj, proj.projcollide&COLLIDE_PLAYER);
+        //else proj.resetinterp();
     }
 
     projent *create(const vec &from, const vec &to, bool local, gameent *d, int type, int lifetime, int lifemillis, int waittime, int speed, int id, int weap, int value, int flags, float scale, bool child, projent *parent)
