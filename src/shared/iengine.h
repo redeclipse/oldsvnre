@@ -392,8 +392,6 @@ extern void cleanragdoll(dynent *d);
 #define MAXCLIENTS 256                  // in a multiplayer game, can be arbitrarily changed
 #define MAXTRANS 5000                  // max amount of data to swallow in 1 go
 
-extern int maxclients;
-
 enum { DISC_NONE = 0, DISC_EOP, DISC_CN, DISC_KICK, DISC_MSGERR, DISC_IPBAN, DISC_PRIVATE, DISC_MAXCLIENTS, DISC_TIMEOUT, DISC_OVERFLOW, DISC_SHUTDOWN, DISC_NUM };
 
 extern void *getinfo(int i);

@@ -581,10 +581,10 @@ namespace game
             {
                 int weap = index;
                 if(weap < 0 || weap >= W_MAX*2-1) weap = -1;
-                else if(weap >= W_MAX) weap = w_attr(gamemode, weap%W_MAX, m_weapon(gamemode, mutators));
+                else if(weap >= W_MAX) weap = w_attr(gamemode, mutators, weap%W_MAX, m_weapon(gamemode, mutators));
                 else
                 {
-                    weap = w_attr(gamemode, weap, m_weapon(gamemode, mutators));
+                    weap = w_attr(gamemode, mutators, weap, m_weapon(gamemode, mutators));
                     if(!isweap(weap) || (m_loadout(gamemode, mutators) && weap < W_ITEM)) weap = -1;
                     else switch(W(weap, allowed))
                     {

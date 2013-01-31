@@ -1349,7 +1349,7 @@ namespace hud
                                 extentity &e = *entities::ents[ent];
                                 if(enttype[e.type].usetype == EU_ITEM)
                                 {
-                                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, e.attrs[0], sweap) : e.attrs[0];
+                                    int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
                                     if(target->canuse(e.type, attr, e.attrs, sweap, lastmillis, W_S_ALL))
                                     {
                                         if(e.type == WEAPON)
@@ -1903,7 +1903,7 @@ namespace hud
             float fade = insel ? 1.f : clamp(1.f-(dist/radarrange()), 0.1f, 1.f), size = radarblipsize;
             if(type == WEAPON)
             {
-                int attr1 = w_attr(game::gamemode, attr[0], m_weapon(game::gamemode, game::mutators));
+                int attr1 = w_attr(game::gamemode, game::mutators, attr[0], m_weapon(game::gamemode, game::mutators));
                 tex = itemtex(WEAPON, attr1);
                 colour = vec::hexcolor(W(attr1, colour));
                 fade *= radaritemblend;
