@@ -76,7 +76,7 @@ Modding & Data Assets:
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
  * Added vetolock variable to determine who may force match votes
- * Added additional privilege levels (creator, developer, operator)
+ * Added additional privilege levels (supporter, operator, developer)
 
 Core & Install:
  * Added IRC gudelines
