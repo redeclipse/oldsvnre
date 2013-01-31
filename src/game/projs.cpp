@@ -307,6 +307,36 @@ namespace projs
         }
     }
 
+    bool updatesticky(projent &proj)
+    {
+        if(proj.stuck && proj.stick)
+        {
+            if(proj.stick->state != CS_ALIVE)
+            {
+                proj.stuck = 0;
+                proj.stick = NULL;
+                proj.lastbounce = lastmillis;
+                proj.resetinterp();
+            }
+            else
+            {
+                proj.o = proj.stickpos;
+                proj.o.rotate_around_z(proj.stick->yaw*RAD);
+                proj.o.add(proj.stick->center());
+                proj.norm = proj.sticknrm;
+                proj.norm.rotate_around_z(proj.stick->yaw*RAD);
+                proj.vel = vec(proj.stick->vel).add(proj.stick->falling);
+                vectoyawpitch(proj.norm, proj.yaw, proj.pitch);
+                proj.pitch -= 90;
+                game::fixfullrange(proj.yaw, proj.pitch, proj.roll, true);
+                proj.resetinterp();
+                return true;
+            }
+            return false;
+        }
+        return proj.stick;
+    }
+
     void stick(projent &proj, const vec &dir, gameent *d = NULL)
     {
         if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
@@ -317,18 +347,18 @@ namespace projs
                 proj.o.sub(dir);
                 if(collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) break;
             }
+            proj.sticknrm = proj.norm;
             if(!(proj.stick = d)) proj.stickpos = proj.o;
             else
             {
                 proj.stickpos = vec(proj.o).sub(d->center());
                 proj.stickpos.rotate_around_z(-d->yaw*RAD);
+                proj.sticknrm.rotate_around_z(-d->yaw*RAD);
             }
-            if(proj.projtype == PRJ_SHOT)
+            if(updatesticky(proj) && proj.projtype == PRJ_SHOT)
                 client::addmsg(N_STICKY, "ri9i2",
                     proj.owner->clientnum, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
-                        int(proj.norm.x*DMF), int(proj.norm.y*DMF), int(proj.norm.z*DMF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
-            vectoyawpitch(proj.norm, proj.yaw, proj.pitch); proj.pitch -= 90;
-            game::fixfullrange(proj.yaw, proj.pitch, proj.roll, true);
+                        int(proj.sticknrm.x*DMF), int(proj.sticknrm.y*DMF), int(proj.sticknrm.z*DMF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
         }
     }
 
@@ -337,7 +367,7 @@ namespace projs
         loopv(projs) if(projs[i]->owner == d && projs[i]->projtype == PRJ_SHOT && projs[i]->id == id)
         {
             projs[i]->stuck = projs[i]->lastbounce = max(lastmillis, 1);
-            projs[i]->norm = norm;
+            projs[i]->sticknrm = norm;
             projs[i]->stickpos = pos;
             if(f)
             {
@@ -349,7 +379,7 @@ namespace projs
                 projs[i]->o = pos;
                 projs[i]->stick = NULL;
             }
-            projs[i]->resetinterp();
+            updatesticky(*projs[i]);
             break;
         }
     }
@@ -542,9 +572,9 @@ namespace projs
             m->boundbox(0, center, radius);
             center.mul(size*proj.curscale);
             radius.mul(size*proj.curscale);
-            rotatebb(center, radius, proj.yaw, proj.pitch, proj.roll);
-            proj.xradius = proj.yradius = proj.radius = max(radius.x, radius.y);
-            proj.height = proj.zradius = proj.aboveeye = radius.z;
+            //rotatebb(center, radius, proj.yaw, proj.pitch, proj.roll);
+            proj.xradius = proj.yradius = proj.radius = max(0.5f, max(radius.x, radius.y));
+            proj.height = proj.zradius = proj.aboveeye = max(0.5f, radius.z);
         }
         else switch(proj.projtype)
         {
@@ -776,7 +806,7 @@ namespace projs
         if(proj.projtype != PRJ_SHOT)
         {
             updatebb(proj, true);
-            proj.o.z += proj.projtype != PRJ_ENT ? proj.zradius : proj.zradius/2;
+            proj.o.z += proj.zradius/2;
         }
         if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
         {
@@ -1077,6 +1107,7 @@ namespace projs
     {
         proj.lifespan = clamp((proj.lifemillis-proj.lifetime)/float(max(proj.lifemillis, 1)), 0.f, 1.f);
         if(proj.target && proj.target->state != CS_ALIVE) proj.target = NULL;
+        updatesticky(proj);
         if(proj.projtype == PRJ_SHOT)
         {
             updatetargets(proj);
@@ -1476,7 +1507,7 @@ namespace projs
                               scale = W2(proj.weap, fragscale, WS(proj.flags))*proj.curscale,
                               offset = proj.hit || proj.stick ? W2(proj.weap, fragoffset, WS(proj.flags)) : 1e-6f,
                               skew = proj.hit || proj.stuck ? W2(proj.weap, fragskew, WS(proj.flags)) : W2(proj.weap, fragspread, WS(proj.flags));
-                        vec dir = vec(proj.stuck ? (proj.stick && proj.stick->state == CS_ALIVE ? vec(proj.stickpos).rotate_around_z(proj.stick->yaw*RAD) : proj.norm) : proj.vel).normalize(),
+                        vec dir = vec(proj.stuck ? proj.norm : proj.vel).normalize(),
                             pos = vec(proj.o).sub(vec(dir).mul(offset));
                         if(W2(proj.weap, fragjump, WS(proj.flags)) > 0) life -= int(ceilf(life*W2(proj.weap, fragjump, WS(proj.flags))));
                         loopi(W2(proj.weap, fragrays, WS(proj.flags)))
@@ -1929,23 +1960,6 @@ namespace projs
                         init(proj, true);
                     }
                     else continue;
-                }
-                if(proj.stuck && proj.stick)
-                {
-                    if(proj.stick->state != CS_ALIVE)
-                    {
-                        proj.stuck = 0;
-                        proj.stick = NULL;
-                        proj.lastbounce = lastmillis;
-                    }
-                    else
-                    {
-                        proj.o = proj.stickpos;
-                        proj.o.rotate_around_z(proj.stick->yaw*RAD);
-                        proj.o.add(proj.stick->center());
-                        proj.vel = vec(proj.stick->vel).add(proj.stick->falling);
-                        proj.resetinterp();
-                    }
                 }
                 iter(proj);
                 if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)
