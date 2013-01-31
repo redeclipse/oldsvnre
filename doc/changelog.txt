@@ -67,8 +67,11 @@ Modding & Data Assets:
  * Added mapmodels 'roll' property
  * Zooming is now limited by zoomlimitmin and zoomlimitmax
  * Added 'weaponinterrupts' server variable which allows control over which weapon states may be interrupted by the player
- * Renamed 'blarg' folder to 'misc' for random textures
+ * Renamed 'blarg' directory to 'misc' for random textures
  * Added a few light textuers in 'misc' (used in starlibido)
+ * Added 19 new skyboxes ('elyvisions' and 'mayhem' directories)
+ * Removed texture kurt/rock01
+ * Added 121 new textures from philipk's 'pk01' and 'pk02' sets
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same maps
