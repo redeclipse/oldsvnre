@@ -33,6 +33,8 @@ VAR(IDF_PERSIST, flarecutoff, 0, 1000, VAR_MAX);
 VAR(IDF_PERSIST, flaresize, 1, 100, VAR_MAX);
 VAR(IDF_PERSIST, flaresundist, 1, 8192, VAR_MAX);
 VAR(IDF_PERSIST, flareshine, 1, 50, VAR_MAX);
+FVAR(IDF_PERSIST, flareblend, 0, 0.9f, 1);
+FVAR(IDF_PERSIST, flareadjust, 0, 0.7f, 1);
 
 struct flarerenderer : partrenderer
 {
@@ -76,7 +78,7 @@ struct flarerenderer : partrenderer
         else
         {
             float len = flaredir.magnitude();
-            if(len > radius) return false;;
+            if(len > radius) return false;
             mod = (radius-len)/radius;
             size = flaresize/10.0f;
         }
@@ -169,8 +171,24 @@ struct flarerenderer : partrenderer
         loopi(numflares)
         {
             flare *f = flares+i;
-            vec center = f->center;
-            vec axis = vec(f->o).sub(center);
+            float blend = flareblend;
+            vec center = f->center, axis = vec(f->o).sub(center);
+            if(flareadjust > 0)
+            {
+                float yaw, pitch;
+                vec dir = vec(f->o).sub(camera1->o).normalize();
+                vectoyawpitch(dir, yaw, pitch);
+                yaw -= camera1->yaw;
+                while(yaw < -180.0f) yaw += 360.0f;
+                while(yaw >= 180.0f) yaw -= 360.0f;
+                if(yaw < 0) yaw = -yaw;
+                blend *= 1-min(yaw/(curfov*0.5f)*flareadjust, 1.f);
+                pitch -= camera1->pitch;
+                while(pitch < -180.0f) pitch += 360.0f;
+                while(pitch >= 180.0f) pitch -= 360.0f;
+                if(pitch < 0) pitch = -pitch;
+                blend *= 1-min(pitch/(fovy*0.5f)*flareadjust, 1.f);
+            }
             uchar color[4] = {f->color[0], f->color[1], f->color[2], 255};
             loopj(f->sparkle ? (f->sparkle != 2 ? 12 : 3) : 9)
             {
@@ -187,7 +205,7 @@ struct flarerenderer : partrenderer
                     color[2] = 0;
                     color[-ft.type-1] = f->color[-ft.type-1]; //only want a single channel
                 }
-                color[3] = ft.alpha;
+                color[3] = uchar(ceilf(ft.alpha*blend));
                 glColor4ubv(color);
                 const float tsz = 0.25f; //flares are aranged in 4x4 grid
                 float tx = tsz*(tex&0x03);
