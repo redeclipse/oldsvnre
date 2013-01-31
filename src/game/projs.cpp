@@ -2140,13 +2140,12 @@ namespace projs
                 {
                     if(shadowents) flags |= MDL_DYNSHADOW;
                     trans *= fadeweap(proj);
-                    if(WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)))
+                    if(WF(WK(proj.flags), proj.weap, partcol, WS(proj.flags)))
                     {
                         flags |= MDL_LIGHTFX;
-                        if(proj.lifetime%500 >= 300) proj.light.material[0] = bvec(1, 1, 1);
-                        else if(proj.beenused) proj.light.material[0] = bvec(64, 255, 64);
-                        else if(proj.stuck) proj.light.material[0] = bvec(255, 255, 0);
-                        else proj.light.material[0] = bvec(255, 32, 32);
+                        proj.light.material[0] = bvec::fromcolor(FWCOL(P, partcol, proj));
+                        if(WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)) && (!proj.stuck || proj.lifetime%500 >= 300))
+                            proj.light.material[0] = bvec(0, 0, 0);
                     }
                     yaw += 90;
                     break;
