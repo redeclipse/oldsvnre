@@ -153,7 +153,7 @@ WPVARK(0, collide, 0, VAR_MAX,
     IMPACT_GEOM|IMPACT_PLAYER|IMPACT_SHOTS|COLLIDE_OWNER|COLLIDE_PROJ
 );
 WPVAR(IDF_HEX, colour, 0, 0xFFFFFF,
-    0x707070,   0xC0C0C0,   0x2020F0,   0xF0F020,   0xF05820,   0xF02020,   0x40F0C8,   0xA020F0,   0x205000,   0x504800,   0x702D00
+    0x707070,   0xC0C0C0,   0x2020F0,   0xF0F020,   0xF05820,   0xF02020,   0x40F0C8,   0xA020F0,   0x205000,   0x00FF62,   0x702D00
 );
 WPVARM(0, cooked, 0, VAR_MAX,
     0,          0,          0,          0,          0,          0,          0,          0,          8,          8,          8,
@@ -203,8 +203,8 @@ WPFVARK(0, elasticity, 0, FVAR_MAX,
 WPVARK(IDF_HEX, explcol, -3, 0xFFFFFF,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808,
     -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   0x981808,   0x981808,   0x981808,
-    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808,
-    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   0x981808,   0xFF0000,   0x981808
+    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x00FF62,   0x981808,   0x00FF62,   0x981808,
+    -1,         -1,         0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x00FF62,   0x981808,   0x00FF62,   0x981808
 );
 WPFVARK(0, explode, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       10.0f,      10.0f,      16.0f,      75.0f,      28.0f,      100.0f,
@@ -328,10 +328,10 @@ WPFVARM(0, minspread, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f
 );
 WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0xFF0000,   -1,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1,
-    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0xFF0000,   -1,         0xFF0000,   -1
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0x00FF62,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x8822DD,   -1,         0x00FF62,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x00FF62,   -1,         0x00FF62,   -1,
+    0xEEEE22,   0x666611,   0x4444FF,   0x999900,   0xFF6600,   -1,         0x44DDCC,   0x00FF62,   -1,         0x00FF62,   -1
 );
 WPFVARK(0, partlen, 0, FVAR_MAX,
     0.0f,       10.0f,      0.0f,       25.0f,      30.0f,      0.0f,       0.0f,       256.0f,     0.0f,       4.0f,       0.0f,
