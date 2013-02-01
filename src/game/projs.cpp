@@ -342,20 +342,23 @@ namespace projs
                 return false;
             }
             if(init) updatenormal(proj);
+            else proj.o = proj.stickpos;
         }
-        return proj.stick;
+        return proj.stick != 0;
     }
 
     void stick(projent &proj, const vec &dir, gameent *d = NULL)
     {
         if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
         {
+            proj.vel = vec(0, 0, 0);
             proj.sticknrm = proj.norm;
             proj.stuck = proj.lastbounce = max(lastmillis, 1);
-            loopi(max(int(proj.radius), 100))
+            vec fwd = dir.iszero() ? vec(proj.vel).normalize() : dir;
+            if(!fwd.iszero()) loopi(max(int(proj.radius), 100))
             {
-                proj.o.sub(dir);
-                if(collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) break;
+                proj.o.sub(fwd);
+                if(collide(&proj, dir, 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) break;
             }
             if(d)
             {
@@ -1604,6 +1607,7 @@ namespace projs
             if(d)
             {
                 proj.norm = vec(proj.o).sub(d->center()).normalize();
+                if(proj.norm.iszero()) proj.norm = vec(proj.vel).normalize().neg();
                 if((d->type == ENT_AI || d->type == ENT_PLAYER) && proj.projcollide&IMPACT_PLAYER && proj.projcollide&STICK_PLAYER)
                 {
                     stick(proj, dir, (gameent *)d);
@@ -1614,6 +1618,7 @@ namespace projs
             else
             {
                 proj.norm = norm;
+                if(proj.norm.iszero()) proj.norm = vec(proj.vel).normalize().neg();
                 if(proj.projcollide&IMPACT_GEOM && proj.projcollide&STICK_GEOM)
                 {
                     stick(proj, dir);
@@ -1680,7 +1685,7 @@ namespace projs
 
     void escaped(projent &proj, const vec &pos, const vec &dir)
     {
-        if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce || proj.stuck) proj.escaped = true;
+        if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
         else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? W2(proj.weap, edelay, WS(proj.flags)) : PHYSMILLIS))
         {
             if(proj.projcollide&COLLIDE_TRACE)
