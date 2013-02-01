@@ -350,14 +350,18 @@ namespace projs
     {
         if(proj.projtype != PRJ_SHOT || (proj.owner && proj.local))
         {
+            proj.sticknrm = proj.norm;
             proj.stuck = proj.lastbounce = max(lastmillis, 1);
             loopi(max(int(proj.radius), 100))
             {
                 proj.o.sub(dir);
                 if(collide(&proj, vec(0, 0, 0), 0.f, proj.projcollide&COLLIDE_DYNENT) && !inside && !hitplayer) break;
             }
-            proj.sticknrm = proj.norm;
-            if(!(proj.stick = d)) proj.stickpos = proj.o;
+            if(d)
+            {
+                proj.stick = d;
+                proj.stickpos = proj.o;
+            }
             else
             {
                 proj.stickpos = vec(proj.o).sub(d->center());
