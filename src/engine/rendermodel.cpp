@@ -885,7 +885,7 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
                 loopv(d->ragdoll->skel->tris)
                 {
                     ragdollskel::tri &t = d->ragdoll->skel->tris[i];
-                    glColor3f(1, 1, 1);
+                    glColor3f(0.5f, 1, 1);
                     glBegin(GL_LINE_LOOP);
                     loopk(3) glVertex3fv(d->ragdoll->verts[t.vert[k]].pos.v);
                     glEnd();

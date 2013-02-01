@@ -1481,7 +1481,7 @@ namespace physics
 
     void complexboundbox(physent *d)
     {
-        render3dbox(d->o, d->height, d->aboveeye, d->radius);
+        render3dbox(d->o, d->height, d->aboveeye, d->xradius, d->yradius);
         renderellipse(d->o, d->xradius, d->yradius, d->yaw);
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
