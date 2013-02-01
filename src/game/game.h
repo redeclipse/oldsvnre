@@ -1598,6 +1598,7 @@ namespace game
     };
     extern avatarent avatarmodel;
 
+    extern bool followswitch(int n, bool other = false);
     extern vector<cament *> cameras;
     extern int numwaiting();
     extern gameent *newclient(int cn);

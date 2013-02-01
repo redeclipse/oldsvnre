@@ -44,7 +44,7 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.65f, 1);
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
 
-    VAR(0, follow, -1, -1, VAR_MAX);
+    VARF(0, follow, -1, -1, VAR_MAX, followswitch(0));
     void resetfollow()
     {
         focus = player1;
@@ -444,7 +444,7 @@ namespace game
         else waitmode = 1;
     });
 
-    bool followswitch(int n, bool other = false)
+    bool followswitch(int n, bool other)
     {
         if(!tvmode(true, false) && player1->state >= CS_SPECTATOR)
         {
@@ -467,6 +467,7 @@ namespace game
                 } \
             }
             addfollow;
+            if(!n) n = 1;
             loopi(players.length())
             {
                 if(!players.inrange(follow)) addfollow
