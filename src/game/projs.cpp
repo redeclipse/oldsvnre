@@ -581,9 +581,12 @@ namespace projs
             m->boundbox(0, center, radius);
             center.mul(size*proj.curscale);
             radius.mul(size*proj.curscale);
-            //rotatebb(center, radius, proj.yaw, proj.pitch, proj.roll);
-            proj.xradius = proj.yradius = proj.radius = max(0.5f, max(radius.x, radius.y));
-            proj.height = proj.zradius = proj.aboveeye = max(0.5f, radius.z);
+            rotatebb(center, radius, proj.yaw, proj.pitch, proj.roll);
+            proj.xradius = radius.x;
+            proj.yradius = radius.y;
+            proj.radius = max(radius.x, radius.y);
+            proj.o.z += radius.z-proj.zradius;
+            proj.height = proj.zradius = proj.aboveeye = radius.z;
         }
         else switch(proj.projtype)
         {
@@ -597,6 +600,8 @@ namespace projs
                 break;
             }
         }
+        if(!init) physics::entinmap(&proj, proj.projcollide&COLLIDE_PLAYER);
+        else if(proj.projtype == PRJ_AFFINITY) proj.o.z += proj.height*2;
     }
 
     void updatetargets(projent &proj, int style = 0)
@@ -812,11 +817,7 @@ namespace projs
             }
             default: break;
         }
-        if(proj.projtype != PRJ_SHOT)
-        {
-            updatebb(proj, true);
-            proj.o.z += proj.zradius/2;
-        }
+        if(proj.projtype != PRJ_SHOT) updatebb(proj, true);
         if(proj.projtype != PRJ_SHOT || !weaptype[proj.weap].traced)
         {
             vec dir = vec(proj.to).sub(proj.o);
@@ -1352,8 +1353,10 @@ namespace projs
                 if(moving && lastmillis-proj.lasteffect >= 25)
                 {
                     vec o(proj.o);
-                    if(m_capture(game::gamemode)) o.z -= proj.zradius/2;
-                    part_create(PART_SMOKE, 150, o, 0xFFFFFF, max(proj.xradius, proj.yradius)*1.5f, 0.5f, -10);
+                    float size = max(proj.xradius, proj.yradius);
+                    if(m_capture(game::gamemode)) o.z -= proj.zradius;
+                    else size = max(proj.zradius, size);
+                    part_create(PART_SMOKE, 150, o, 0xFFFFFF, size, 0.5f, -10);
                     proj.lasteffect = lastmillis - (lastmillis%100);
                 }
             }
