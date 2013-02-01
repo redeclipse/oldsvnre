@@ -397,17 +397,24 @@ GVAR(0, zoomlimitmax, 1, 65, 150);
 GVAR(0, zoomtime, 1, 100, VAR_MAX);
 
 GFVAR(0, radialscale, 0, 1, FVAR_MAX);
-GFVAR(0, radiallimited, 0, 0.5f, FVAR_MAX);
+GFVAR(0, radiallimited, 0, 0.75f, FVAR_MAX);
 GFVAR(0, damagescale, 0, 1, FVAR_MAX);
 GVAR(0, criticalchance, 0, 100, VAR_MAX);
 GVAR(0, weaponswitchdelay, 0, 500, VAR_MAX);
 GVAR(0, weaponinterrupts, 0, W_S_INTERRUPT, W_S_ALL); // what weapon states can have their delay interrupted
 
+GFVAR(0, pushscale, 0, 1, FVAR_MAX);
+GFVAR(0, pushlimited, 0, 0.75f, FVAR_MAX);
 GFVAR(0, hitpushscale, 0, 1, FVAR_MAX);
-GFVAR(0, hitslowscale, 0, 1, FVAR_MAX);
 GFVAR(0, deadpushscale, 0, 2, FVAR_MAX);
 GFVAR(0, wavepushscale, 0, 1, FVAR_MAX);
-GFVAR(0, waveslowscale, 0, 0.5f, FVAR_MAX);
+
+GFVAR(0, stunscale, 0, 1, FVAR_MAX);
+GFVAR(0, stunlimited, 0, 0.75f, FVAR_MAX);
+GFVAR(0, hitstunscale, 0, 1, FVAR_MAX);
+GFVAR(0, deadstunscale, 0, 2, FVAR_MAX);
+GFVAR(0, wavestunscale, 0, 1, FVAR_MAX);
+
 GFVAR(0, kickpushscale, 0, 1, FVAR_MAX);
 GFVAR(0, kickpushcrouch, 0, 0, FVAR_MAX);
 GFVAR(0, kickpushsway, 0, 0.0125f, FVAR_MAX);

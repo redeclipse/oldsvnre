@@ -738,7 +738,7 @@ struct gamestate
         }
         if(isweap(sweap))
         {
-            ammo[sweap] = max(WUSE(sweap), 1);
+            ammo[sweap] = max(1, W(sweap, max));
             reloads[sweap] = 0;
         }
         if(aitype >= AI_START)
@@ -751,18 +751,18 @@ struct gamestate
 #ifndef MEKARCADE
             if(sweap != W_MELEE)
             {
-                ammo[W_MELEE] = W(W_MELEE, max);
+                ammo[W_MELEE] = max(1, W(W_MELEE, max));
                 reloads[W_MELEE] = 0;
             }
 #endif
             if(sweap != W_GRENADE && G(spawngrenades) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1))
             {
-                ammo[W_GRENADE] = max(W(W_GRENADE, max), 1);
+                ammo[W_GRENADE] = max(1, W(W_GRENADE, max));
                 reloads[W_GRENADE] = 0;
             }
             if(sweap != W_MINE && (m_kaboom(gamemode, mutators) || G(spawnmines) >= (m_insta(gamemode, mutators) || m_trial(gamemode) ? 2 : 1)))
             {
-                ammo[W_MINE] = max(W(W_MINE, max), 1);
+                ammo[W_MINE] = max(1, W(W_MINE, max));
                 reloads[W_MINE] = 0;
             }
             if(m_loadout(gamemode, mutators))
@@ -787,7 +787,7 @@ struct gamestate
                         aweap.add(r);
                     }
                     else aweap.add(loadweap[j]);
-                    ammo[aweap[j]] = max(WUSE(aweap[j]), 1);
+                    ammo[aweap[j]] = max(1, W(aweap[j], max));
                     reloads[aweap[j]] = 0;
                 }
                 lastweap = weapselect = aweap[0]; // if '0' isn't present, maxcarry isn't doing its job
@@ -935,7 +935,7 @@ struct eventicon
 struct stunevent
 {
     int weap, millis, delay;
-    float scale;
+    float scale, gravity;
 };
 
 struct gameent : dynent, gamestate
@@ -943,8 +943,8 @@ struct gameent : dynent, gamestate
     editinfo *edit; ai::aiinfo *ai;
     int team, clientnum, privilege, projid, lastnode, checkpoint, cplast, respawned, suicided, lastupdate, lastpredict, plag, ping, lastflag, totaldamage,
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
-        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, stuntime, spree;
-    float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll, stunscale;
+        lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree;
+    float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
     string hostname, name, info, obit;
@@ -1342,23 +1342,24 @@ struct gameent : dynent, gamestate
         model = mdl;
     }
 
-    void addstun(int weap, int millis, int delay, float scale)
+    void addstun(int weap, int millis, int delay, float scale, float gravity)
     {
         stunevent &s = stuns.add();
         s.weap = weap;
         s.millis = millis;
         s.delay = delay;
         s.scale = scale;
+        s.gravity = gravity;
     }
 
-    float stunned(int millis)
+    float stunned(int millis, bool gravity = false)
     {
         float stun = 0;
         loopv(stuns)
         {
             stunevent &s = stuns[i];
             if(millis-s.millis >= s.delay) stuns.remove(i--);
-            else stun += s.scale*(1.f-(float(millis-s.millis)/float(s.delay)));
+            else stun += (gravity ? s.gravity : s.scale)*(1.f-(float(millis-s.millis)/float(s.delay)));
         }
         return stun;
     }

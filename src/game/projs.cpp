@@ -850,7 +850,8 @@ namespace projs
         proj.movement = 1;
         if(proj.projtype != PRJ_SHOT || (!proj.child && !WK(proj.flags) && !weaptype[proj.weap].traced))
         {
-            vec loc = proj.projtype != PRJ_SHOT || !proj.owner || proj.child || WK(proj.flags) ? vec(proj.o).sub(vec(proj.vel).normalize().mul(proj.radius*2)) : proj.owner->o,
+            vec retract = vec(proj.vel).normalize().mul(vec(proj.xradius, proj.yradius, proj.zradius)),
+                loc = vec(proj.projtype != PRJ_SHOT || !proj.owner || proj.child || WK(proj.flags) ? proj.o : proj.owner->o).sub(retract),
                 eyedir = vec(proj.o).sub(loc);
             float eyedist = eyedir.magnitude();
             if(eyedist >= 1e-6f)
@@ -1299,19 +1300,23 @@ namespace projs
                     }
                     default: break;
                 }
-                if(proj.stuck && !proj.stick && !proj.beenused && WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)) == 2)
+                if(proj.stuck && !proj.beenused && WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)) == 2)
                 {
                     float dist = WX(WK(proj.flags), proj.weap, proxdist, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                    if(WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags))) dist *= (lastmillis-proj.stuck)/float(WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags)));
-                    vec from = vec(proj.o).add(vec(proj.norm).mul(proj.radius+1e-3f)), to = vec(proj.o).add(vec(proj.norm).mul(dist)), dir = vec(to).sub(from);
-                    float mag = dir.magnitude();
-                    if(mag > 0)
+                    int stucktime = lastmillis-proj.stuck, stuckdelay = WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags));
+                    if(stuckdelay && stuckdelay > stucktime) dist *= stucktime/float(stuckdelay);
+                    if(dist > 1e-6f)
                     {
-                        dir.div(mag);
-                        float blocked = tracecollide(&proj, from, dir, mag, RAY_CLIPMAT|RAY_ALPHAPOLY, true);
-                        if(blocked >= 0) to = vec(from).add(vec(proj.norm).mul(blocked));
+                        vec from = vec(proj.o).add(vec(proj.norm).mul(proj.radius*2)), to = vec(from).add(vec(proj.norm).mul(dist)), dir = vec(to).sub(from);
+                        float mag = dir.magnitude();
+                        if(mag > 1e-6f)
+                        {
+                            dir.div(mag);
+                            float blocked = tracecollide(&proj, from, dir, mag, RAY_CLIPMAT|RAY_ALPHAPOLY, true);
+                            if(blocked >= 0) to = vec(from).add(vec(proj.norm).mul(blocked+proj.radius));
+                            part_flare(proj.o, to, 1, PART_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*0.25f*proj.curscale*proj.lifesize, 0.75f*trans);
+                        }
                     }
-                    part_flare(proj.o, to, 1, PART_FLARE, FWCOL(H, partcol, proj), 0.5f*proj.curscale*proj.lifesize, 0.5f*trans);
                 }
                 break;
             }
@@ -2031,19 +2036,21 @@ namespace projs
                 if(!proj.limited && proj.state != CS_DEAD)
                 {
                     if(!(proj.projcollide&DRILL_PLAYER)) proj.hit = NULL;
-                    bool radial = WF(WK(proj.flags), proj.weap, radial, WS(proj.flags)) && expl > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= WF(WK(proj.flags), proj.weap, radial, WS(proj.flags))),
-                         proxim = proj.stuck && !proj.beenused && WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags));
+                    bool radial = WF(WK(proj.flags), proj.weap, radial, WS(proj.flags)) && expl > 0 && (!proj.lastradial || lastmillis-proj.lastradial >= WF(WK(proj.flags), proj.weap, radial, WS(proj.flags)));
+                    int proxim = proj.stuck && !proj.beenused ? WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)) : 0;
                     if(radial || proxim)
                     {
                         float dist = WX(WK(proj.flags), proj.weap, proxdist, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-                        if(WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags))) dist *= (lastmillis-proj.stuck)/float(WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags)));
+                        int stucktime = lastmillis-proj.stuck, stuckdelay = WF(WK(proj.flags), proj.weap, proxdelay, WS(proj.flags));
+                        if(stuckdelay && stuckdelay > stucktime) dist *= stucktime/float(stuckdelay);
+                        if(dist <= 1e-6f) proxim = 0;
                         int numdyns = game::numdynents();
                         loopj(numdyns)
                         {
                             dynent *f = game::iterdynents(j);
                             if(!f || f->state != CS_ALIVE || !physics::issolid(f, &proj, true, false)) continue;
                             if(radial && radialeffect(f, proj, HIT_BURN, expl)) proj.lastradial = lastmillis;
-                            if(proxim && !proj.beenused && f != proj.stick && WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)) == 1)
+                            if(proxim == 1 && !proj.beenused && f != proj.stick)
                             {
                                 if(f->center().dist(proj.o) <= dist)
                                 {
@@ -2052,11 +2059,11 @@ namespace projs
                                 }
                             }
                         }
-                        if(proxim && dist > proj.radius+1e-3f && !proj.stick && !proj.beenused && WF(WK(proj.flags), proj.weap, proxtype, WS(proj.flags)) == 2)
+                        if(proxim == 2 && !proj.beenused)
                         {
-                            vec from = vec(proj.o).add(vec(proj.norm).mul(proj.radius+1e-3f)), to = vec(proj.o).add(vec(proj.norm).mul(dist)), dir = vec(to).sub(from);
+                            vec from = vec(proj.o).add(vec(proj.norm).mul(proj.radius*2)), to = vec(from).add(vec(proj.norm).mul(dist)), dir = vec(to).sub(from);
                             float mag = dir.magnitude();
-                            if(mag > 0)
+                            if(mag > 1e-6f)
                             {
                                 dir.div(mag);
                                 float blocked = tracecollide(&proj, from, dir, mag, RAY_CLIPMAT|RAY_ALPHAPOLY, true);
