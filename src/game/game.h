@@ -956,6 +956,7 @@ struct gameent : dynent, gamestate
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
+        type = ENT_PLAYER;
         copystring(hostname, "unknown");
         name[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
@@ -1355,10 +1356,10 @@ struct gameent : dynent, gamestate
     float stunned(int millis, bool gravity = false)
     {
         float stun = 0;
-        loopv(stuns)
+        loopvrev(stuns)
         {
             stunevent &s = stuns[i];
-            if(millis-s.millis >= s.delay) stuns.remove(i--);
+            if(!s.delay || millis-s.millis >= s.delay) stuns.remove(i);
             else stun += (gravity ? s.gravity : s.scale)*(1.f-(float(millis-s.millis)/float(s.delay)));
         }
         return stun;

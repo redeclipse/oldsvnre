@@ -102,7 +102,7 @@ struct physent                                  // base entity type, can be affe
 
     physent() : speed(100), weight(100), radius(3), aboveeye(1),
         xradius(3), yradius(3), zradius(14), zmargin(0), curscale(1), speedscale(1),
-        state(CS_ALIVE), type(ENT_PLAYER),
+        state(CS_ALIVE), type(ENT_INANIMATE),
         collidetype(COLLIDE_ELLIPSE)
     {
         reset();

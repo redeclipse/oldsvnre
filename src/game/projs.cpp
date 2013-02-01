@@ -360,14 +360,11 @@ namespace projs
             if(d)
             {
                 proj.stick = d;
-                proj.stickpos = proj.o;
-            }
-            else
-            {
                 proj.stickpos = vec(proj.o).sub(d->center());
                 proj.stickpos.rotate_around_z(-d->yaw*RAD);
                 proj.sticknrm.rotate_around_z(-d->yaw*RAD);
             }
+            else proj.stickpos = proj.o;
             if(updatesticky(proj, true) && proj.projtype == PRJ_SHOT)
                 client::addmsg(N_STICKY, "ri9i2",
                     proj.owner->clientnum, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
