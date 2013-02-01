@@ -1045,15 +1045,19 @@ namespace game
             {
                 float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
                 if(hithurts(flags) && WF(WK(flags), weap, stuntime, WS(flags)))
-                    d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), scale*WF(WK(flags), weap, stunscale, WS(flags)));
-                if(WF(WK(flags), weap, slow, WS(flags)) > 0)
-                    d->vel.mul(1.f-clamp((scale*WF(WK(flags), weap, slow, WS(flags)))*(flags&HIT_WAVE || !hithurts(flags) ? waveslowscale : hitslowscale), 0.f, 1.f));
+                {
+                    float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavestunscale : (d->health <= 0 ? deadstunscale : hitstunscale), stun, gamemode, mutators),
+                          s = WF(WK(flags), weap, stunscale, WS(flags))*amt, g = WF(WK(flags), weap, stunfall, WS(flags))*amt;
+                    if(s > 0 || g > 0) d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), s, g);
+                    if(s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
+                    if(g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
+                }
                 if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
                 {
+                    float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
                     if(d == actor && WF(WK(flags), weap, selfdmg, WS(flags)) != 0)
-                        scale *= 1/float(WF(WK(flags), weap, selfdmg, WS(flags)));
-                    float force = flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale);
-                    vec psh = vec(dir).mul(scale*WF(WK(flags), weap, hitpush, WS(flags))*WRS(force, gamemode, mutators));
+                        amt *= 1/float(WF(WK(flags), weap, selfdmg, WS(flags)));
+                    vec psh = vec(dir).mul(WF(WK(flags), weap, hitpush, WS(flags))*amt);
                     if(!psh.iszero()) d->vel.add(psh);
                 }
             }

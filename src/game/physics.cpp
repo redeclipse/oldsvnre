@@ -273,8 +273,27 @@ namespace physics
         return from;
     }
 
-    float jumpvel(physent *d, bool liquid) { return jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->speedscale; }
-    float gravityvel(physent *d) { return PHYS(gravity)*(d->weight/100.f); }
+    float jumpvel(physent *d, bool liquid)
+    {
+        float vel = jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->speedscale;
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        {
+            gameent *e = (gameent *)d;
+            vel *= 1.f-clamp(e->stunned(lastmillis), 0.f, 1.f);
+        }
+        return vel;
+    }
+
+    float gravityvel(physent *d)
+    {
+        float vel = PHYS(gravity)*(d->weight/100.f);
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        {
+            gameent *e = (gameent *)d;
+            vel *= 1.f-clamp(e->stunned(lastmillis, true), 0.f, 1.f);
+        }
+        return vel;
+    }
 
     float stepvel(physent *d, bool up)
     {
@@ -1519,12 +1538,12 @@ namespace physics
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-            inmapchk(100, d->o.add(vec(dir).mul(i/20.f)));
+            loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI || d->type == ENT_PROJ)
         {
             vec dir = vec(d->vel).normalize();
-            inmapchk(100, d->o.add(vec(dir).mul(i/20.f)));
+            loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
         }
         inmapchk(100, d->o.add(vec((rnd(21)-10)*i/20.f, (rnd(21)-10)*i/20.f, (rnd(21)-10)*i/20.f)));
         d->o = orig;
