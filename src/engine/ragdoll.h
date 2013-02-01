@@ -490,7 +490,7 @@ void ragdolldata::move(dynent *pl, float ts)
     }
 
     if(unsticks && ragdollunstick) tryunstick(ts*ragdollunstick);
- 
+
     timestep = ts;
     if(collisions)
     {
@@ -548,21 +548,21 @@ void cleanragdoll(dynent *d)
 
 vec rdabove(dynent *d, float offset)
 {
-    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::abovehead(offset);
+    if((d->type != ENT_PLAYER && d->type != ENT_AI) || !d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::abovehead(offset);
     return vec(d->ragdoll->center).add(vec(0, 0, 1+d->aboveeye+offset+d->ragdoll->ztop));
 }
 vec rdbottom(dynent *d, float offset)
 {
-    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::feetpos(offset);
+    if((d->type != ENT_PLAYER && d->type != ENT_AI) || !d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::feetpos(offset);
     return vec(d->ragdoll->center).add(vec(0, 0, offset+d->ragdoll->zbottom));
 }
 vec rdtop(dynent *d, float offset)
 {
-    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::headpos(offset);
+    if((d->type != ENT_PLAYER && d->type != ENT_AI) || !d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::headpos(offset);
     return vec(d->ragdoll->center).add(vec(0, 0, offset+d->ragdoll->ztop));
 }
 vec rdcenter(dynent *d)
 {
-    if(!d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::center();
+    if((d->type != ENT_PLAYER && d->type != ENT_AI) || !d->ragdoll || (d->state != CS_DEAD && d->state != CS_WAITING)) return d->physent::center();
     return d->ragdoll->center;
 }

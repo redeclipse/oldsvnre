@@ -840,7 +840,7 @@ namespace game
             else d->height = d->zradius;
         }
         else d->height = d->zradius;
-        d->o.z += d->timeinair ? offset+(d->height-offset) : d->height;
+        d->o.z += d->timeinair ? offset : d->height;
 
         d->checktags();
 
