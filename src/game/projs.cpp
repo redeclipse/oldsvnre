@@ -315,7 +315,7 @@ namespace projs
         proj.resetinterp();
     }
 
-    bool updatesticky(projent &proj, bool init = true)
+    bool updatesticky(projent &proj, bool init = false)
     {
         if(proj.stuck)
         {
@@ -1121,7 +1121,7 @@ namespace projs
     {
         proj.lifespan = clamp((proj.lifemillis-proj.lifetime)/float(max(proj.lifemillis, 1)), 0.f, 1.f);
         if(proj.target && proj.target->state != CS_ALIVE) proj.target = NULL;
-        updatesticky(proj, false);
+        updatesticky(proj);
         if(proj.projtype == PRJ_SHOT)
         {
             updatetargets(proj);
