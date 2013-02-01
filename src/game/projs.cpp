@@ -368,7 +368,7 @@ namespace projs
             if(updatesticky(proj, true) && proj.projtype == PRJ_SHOT)
                 client::addmsg(N_STICKY, "ri9i2",
                     proj.owner->clientnum, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
-                        int(proj.sticknrm.x*DMF), int(proj.sticknrm.y*DMF), int(proj.sticknrm.z*DMF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
+                        int(proj.sticknrm.x*DNF), int(proj.sticknrm.y*DNF), int(proj.sticknrm.z*DNF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
         }
     }
 
