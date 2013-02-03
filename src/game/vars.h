@@ -12,21 +12,20 @@ GVAR(IDF_ADMIN, demomaxsize, 1, 16, VAR_MAX);
 GVAR(IDF_ADMIN, demoautorec, 0, 1, 1); // 0 = off, 1 = automatically record demos each match
 GVAR(IDF_ADMIN, demokeep, 0, 0, 1); // 0 = off, 1 = keep demos that don't run to end of match
 
-GVAR(IDF_ADMIN, speclock, 0, PRIV(HELPER), PRIV(MAX));
-GVAR(IDF_ADMIN, kicklock, 0, PRIV(HELPER), PRIV(MAX));
-GVAR(IDF_ADMIN, allowlock, 0, PRIV(MODERATOR), PRIV(MAX));
-GVAR(IDF_ADMIN, banlock, 0, PRIV(MODERATOR), PRIV(MAX));
-GVAR(IDF_ADMIN, mutelock, 0, PRIV(HELPER), PRIV(MAX));
-GVAR(IDF_ADMIN, limitlock, 0, PRIV(HELPER), PRIV(MAX));
-GVAR(IDF_ADMIN, vetolock, 0, PRIV(MODERATOR), PRIV(MAX));
-GVAR(IDF_ADMIN, editlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, speclock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, kicklock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, allowlock, 0, PRIV(OPERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, banlock, 0, PRIV(OPERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, mutelock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, limitlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, vetolock, 0, PRIV(OPERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, editlock, 0, PRIV(OPERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, masterlock, 0, PRIV(MODERATOR), PRIV(MAX));
 
 GVAR(IDF_ADMIN, floodlock, 0, PRIV2(OPERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, floodmute, 0, 3, VAR_MAX); // automatically mute player when warned this many times
 GVAR(IDF_ADMIN, floodtime, 250, 10000, VAR_MAX); // time span to check for floody messages
 GVAR(IDF_ADMIN, floodlines, 1, 5, VAR_MAX); // number of lines in aforementioned span before too many
-//GVAR(IDF_ADMIN, mapcrclock, 0, 4, 4); // 0 = no mapcrc lock, 1 = lock below helper, 2 = lock below moderator, 3 = lock below administrator, 4 = lock everyone
 
 GVAR(IDF_ADMIN, teamkilllock, 0, PRIV2(OPERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, teamkillwarn, 1, 5, VAR_MAX); // automatically warn player every this many team kills
@@ -94,14 +93,14 @@ GSVAR(IDF_ADMIN, mediummaps, "ares battlefield biolytic canals cargo center colo
 GSVAR(IDF_ADMIN, largemaps, "ares battlefield biolytic canals cargo center colony cutec dawn deadsimple deathtrap deli depot erosion forge foundation futuresport ghost industrial isolation lab linear mist nova processing pumpstation spacetech suspended tower tranquility tribal ubik venus warp");
 #endif
 
-GVAR(IDF_ADMIN, modelock, 0, PRIV2(MODERATOR), PRIV2(MAX));
+GVAR(IDF_ADMIN, modelock, 0, PRIV2(OPERATOR), PRIV2(MAX));
 GVAR(IDF_ADMIN, modelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can set limited mode and higher
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_FILTER, G_M_ALL);
 GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_CLASSIC), mutstype[G_M_INSTA].mutators, sv_instagibfilter &= ~(1<<G_M_VAMPIRE); sv_instagibfilter |= (1<<G_M_INSTA), instagibfilter &= ~(1<<G_M_VAMPIRE); instagibfilter |= (1<<G_M_INSTA));
 
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
-GVAR(IDF_ADMIN, mapslock, 0, PRIV2(MODERATOR), PRIV2(MAX));
+GVAR(IDF_ADMIN, mapslock, 0, PRIV2(OPERATOR), PRIV2(MAX));
 GVAR(IDF_ADMIN, mapslocktype, 0, 2, 2); // 0 = off, 1 = allow maps, 2 = rotation maps
 
 GSVAR(IDF_READONLY, prevmaps, "");
@@ -114,8 +113,8 @@ GVAR(IDF_ADMIN, rotatemuts, 0, 3, VAR_MAX); // any more than one decreases the c
 GVAR(IDF_ADMIN, rotatemutsfilter, 0, G_M_ROTATE, G_M_ALL); // mutators not in this array are filtered out
 GVAR(IDF_ADMIN, rotatemapsfilter, 0, 2, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 
-GVAR(IDF_ADMIN, varslock, 0, PRIV2(MODERATOR), PRIV2(MAX));
-GVAR(IDF_ADMIN, votelock, 0, PRIV2(MODERATOR), PRIV2(MAX));
+GVAR(IDF_ADMIN, varslock, 0, PRIV2(OPERATOR), PRIV2(MAX));
+GVAR(IDF_ADMIN, votelock, 0, PRIV2(OPERATOR), PRIV2(MAX));
 GVAR(IDF_ADMIN, votelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can select prevmaps
 GVAR(IDF_ADMIN, votewait, 0, 2500, VAR_MAX);
 GVAR(IDF_ADMIN, votestyle, 0, 2, 2); // 0 = votes don't pass mid-match, 1 = passes if votethreshold is met, 2 = passes if unanimous

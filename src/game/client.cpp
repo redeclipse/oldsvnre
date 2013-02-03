@@ -473,12 +473,19 @@ namespace client
         return d->privilege >= priv;
     }
     ICOMMAND(0, issupporter, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_SUPPORTER) ? 1 : 0));
-    ICOMMAND(0, ishelper, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_HELPER) ? 1 : 0));
     ICOMMAND(0, ismoderator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_MODERATOR) ? 1 : 0));
     ICOMMAND(0, isadministrator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_ADMINISTRATOR) ? 1 : 0));
     ICOMMAND(0, isdeveloper, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_DEVELOPER) ? 1 : 0));
     ICOMMAND(0, iscreator, "i", (int *cn), intret(haspriv(game::getclient(*cn), PRIV_CREATOR) ? 1 : 0));
-    ICOMMAND(0, haspriv, "i", (int *cn, int *priv), intret(haspriv(game::getclient(*cn), *priv) ? 1 : 0));
+
+    ICOMMAND(0, getclientpriv, "i", (int *cn, int *priv), intret(haspriv(game::getclient(*cn), *priv) ? 1 : 0));
+
+    const char *getclienthandle(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? d->handle : "";
+    }
+    ICOMMAND(0, getclienthandle, "i", (int *cn), result(getclienthandle(*cn)));
 
     bool isspectator(int cn)
     {
@@ -727,6 +734,7 @@ namespace client
         removetrackedsounds(game::player1);
         game::player1->clientnum = -1;
         game::player1->privilege = PRIV_NONE;
+        game::player1->handle[0] = 0;
         game::gamemode = G_EDITMODE;
         game::mutators = 0;
         loopv(game::players) if(game::players[i]) game::clientdisconnected(i);
@@ -2200,10 +2208,15 @@ namespace client
                 case N_CURRENTPRIV:
                 {
                     int mn = getint(p), priv = getint(p);
+                    getstring(text, p);
                     if(mn >= 0)
                     {
                         gameent *m = game::getclient(mn);
-                        if(m) m->privilege = priv;
+                        if(m)
+                        {
+                            m->privilege = priv;
+                            copystring(m->handle, text);
+                        }
                     }
                     break;
                 }
