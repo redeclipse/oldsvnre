@@ -12,12 +12,12 @@ GVAR(IDF_ADMIN, demomaxsize, 1, 16, VAR_MAX);
 GVAR(IDF_ADMIN, demoautorec, 0, 1, 1); // 0 = off, 1 = automatically record demos each match
 GVAR(IDF_ADMIN, demokeep, 0, 0, 1); // 0 = off, 1 = keep demos that don't run to end of match
 
-GVAR(IDF_ADMIN, speclock, 0, PRIV(MODERATOR), PRIV(MAX));
-GVAR(IDF_ADMIN, kicklock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, speclock, 0, PRIV(HELPER), PRIV(MAX));
+GVAR(IDF_ADMIN, kicklock, 0, PRIV(HELPER), PRIV(MAX));
 GVAR(IDF_ADMIN, allowlock, 0, PRIV(MODERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, banlock, 0, PRIV(MODERATOR), PRIV(MAX));
-GVAR(IDF_ADMIN, mutelock, 0, PRIV(MODERATOR), PRIV(MAX));
-GVAR(IDF_ADMIN, limitlock, 0, PRIV(MODERATOR), PRIV(MAX));
+GVAR(IDF_ADMIN, mutelock, 0, PRIV(HELPER), PRIV(MAX));
+GVAR(IDF_ADMIN, limitlock, 0, PRIV(HELPER), PRIV(MAX));
 GVAR(IDF_ADMIN, vetolock, 0, PRIV(MODERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, editlock, 0, PRIV(MODERATOR), PRIV(MAX));
 GVAR(IDF_ADMIN, masterlock, 0, PRIV(MODERATOR), PRIV(MAX));
