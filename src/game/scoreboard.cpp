@@ -32,7 +32,7 @@ namespace hud
     VAR(IDF_PERSIST, autoshowscores, 0, 2, 3); // 1 = when dead, 2 = also in spectv, 3 = and in waittv too
     VAR(IDF_PERSIST, showscoresdelay, 0, 0, VAR_MAX); // otherwise use respawn delay
     VAR(IDF_PERSIST, showscoresinfo, 0, 1, 1);
-    VAR(IDF_PERSIST, scorehighlight, 0, 1, 1);
+    VAR(IDF_PERSIST, scorehandles, 0, 1, 1);
 
     VAR(IDF_PERSIST, showpj, 0, 0, 1);
     VAR(IDF_PERSIST, showping, 0, 1, 1);
@@ -368,19 +368,24 @@ namespace hud
         });
         g.space(0.5f);
         #define loopscoregroup(b) \
+        { \
             loopv(sg.players) \
             { \
                 gameent *o = sg.players[i]; \
                 b; \
-            }
+            } \
+        }
         uifont(g, numgroups > 1 ? "little" : "reduced", {
             float namepad = 0;
+            float handlepad = 0;
             loopk(numgroups)
             {
                 scoregroup &sg = *groups[k];
                 loopscoregroup(namepad = max(namepad, (float)text_width(game::colorname(o, NULL, "", false))));
+                if(scorehandles) loopscoregroup(if(o->handle[0]) handlepad = max(handlepad, (float)text_width(o->handle)));
             }
             namepad = (namepad-(text_width("name")-guibound[0]))*0.5f/guibound[0];
+            handlepad = (handlepad-(text_width("handle")-guibound[0]))*0.5f/guibound[0];
             loopk(numgroups)
             {
                 if((k%2)==0)
@@ -471,7 +476,7 @@ namespace hud
                         });
                     }
 
-                    if(showclientnum || game::player1->privilege>=PRIV_HELPER)
+                    if(showclientnum || game::player1->privilege >= PRIV_ELEVATED)
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 1, g.text("cn", fgcolor)));
@@ -505,33 +510,24 @@ namespace hud
                             });
                         }
                     }
-
+                    if(scorehandles)
+                    {
+                        uilist(g, {
+                            uicenterlist(g, uipad(g, handlepad, g.strut(1)));
+                            loopscoregroup({
+                                uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, hud::privtex(o->privilege), o == game::player1 ? 0xFFFFFF : 0xAAAAAA, o->handle)));
+                            });
+                        });
+                    }
                     if(showhostname)
                     {
                         uilist(g, {
-                            uicenterlist(g, uipad(g, 4, g.text("host", fgcolor)));
+                            uicenterlist(g, uipad(g, 4, g.strut(1)));
                             loopscoregroup({
                                 uicenterlist(g, uipad(g, 0.5f, {
                                     if(o->aitype == AI_NONE) g.textf("%s", 0xFFFFFF, NULL, 0, o->hostname);
                                     else g.strut(1);
                                 }));
-                            });
-                        });
-                    }
-                    if(scorehighlight)
-                    {
-                        uilist(g, {
-                            uicenterlist(g, uipad(g, 0.5f, g.strut(1)));
-                            loopscoregroup({
-                                int bgcol = o == game::player1 ? 0x888888 : 0x111111;
-                                switch(o->privilege)
-                                {
-                                    case PRIV_ADMINISTRATOR: bgcol |= 0x004444; break;
-                                    case PRIV_MODERATOR: bgcol |= 0x440044; break;
-                                    case PRIV_HELPER: bgcol |= 0x000044; break;
-                                    default: break;
-                                }
-                                uicenterlist(g, uipad(g, 0.5f, g.text("", 0, insigniatex, bgcol)));
                             });
                         });
                     }
@@ -562,21 +558,13 @@ namespace hud
                     }
                     uicenter(g, uipad(g, 0.5f, {
                         g.space(0.5f);
-                        if(showclientnum || game::player1->privilege>=PRIV_HELPER)
-                            g.textf("%s (%d)", 0x666666, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false), o->clientnum);
+                        if(showclientnum || game::player1->privilege >= PRIV_ELEVATED)
+                            g.textf("%s [%d]", 0x666666, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false, false), o->clientnum);
                         else g.textf("%s ", 0x666666, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false));
-                        if(scorehighlight)
+                        if(scorehandles)
                         {
-                            int bgcol = o == game::player1 ? 0x888888 : 0x111111;
-                            switch(o->privilege)
-                            {
-                                case PRIV_ADMINISTRATOR: bgcol |= 0x004444; break;
-                                case PRIV_MODERATOR: bgcol |= 0x440044; break;
-                                case PRIV_HELPER: bgcol |= 0x000044; break;
-                                default: break;
-                            }
-                            g.space(0.25f);
-                            g.text("", 0, insigniatex, bgcol);
+                            g.space(0.125f);
+                            g.text("", 0xFFFFFF, hud::privtex(o->privilege), o == game::player1 ? 0xFFFFFF : 0xAAAAAA);
                         }
                     }));
                     if(!((i+1)%count) && pushed)

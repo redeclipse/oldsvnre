@@ -433,6 +433,15 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, revengetex, "textures/revenge", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/firstblood", 3);
 
+    TVAR(IDF_PERSIST, privnonetex, "<grey>textures/privnone.png", 3);
+    TVAR(IDF_PERSIST, privplayertex, "<grey>textures/privplayer.png", 3);
+    TVAR(IDF_PERSIST, privsupportertex, "<grey>textures/privsupporter.png", 3);
+    TVAR(IDF_PERSIST, privmoderatortex, "<grey>textures/privmoderator.png", 3);
+    TVAR(IDF_PERSIST, privoperatortex, "<grey>textures/privoperator.png", 3);
+    TVAR(IDF_PERSIST, privadministratortex, "<grey>textures/privadministrator.png", 3);
+    TVAR(IDF_PERSIST, privdevelopertex, "<grey>textures/privdeveloper.png", 3);
+    TVAR(IDF_PERSIST, privcreatortex, "<grey>textures/privcreator.png", 3);
+
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
 #ifdef MEKARCADE
     TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
@@ -2199,7 +2208,13 @@ namespace hud
     const char *teamtexname(int team)
     {
         const char *teamtexs[TEAM_MAX] = { teamtex, teamalphatex, teamomegatex, teamkappatex, teamsigmatex, teamtex };
-        return teamtexs[team];
+        return teamtexs[clamp(team, 0, TEAM_MAX-1)];
+    }
+
+    const char *privtex(int priv)
+    {
+        const char *privtexs[PRIV_MAX] = { privplayertex, privsupportertex, privmoderatortex, privoperatortex, privadministratortex, privdevelopertex, privcreatortex };
+        return privtexs[clamp(priv, 0, PRIV_MAX-1)];
     }
 
     const char *itemtex(int type, int stype)

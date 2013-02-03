@@ -63,6 +63,7 @@ namespace auth
             {
                 if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS (\fs\fc%s\fS)", colorname(ci), ci->authname, privname(privilege));
                 else srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
+                copystring(ci->handle, ci->authname);
             }
             else srvoutforce(ci, -2, "\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege, true));
         }
@@ -70,8 +71,9 @@ namespace auth
         {
             if(!ci->privilege) return;
             ci->privilege = PRIV_NONE;
+            ci->handle[0] = 0;
             int others = 0;
-            loopv(clients) if(clients[i]->privilege >= PRIV_HELPER || clients[i]->local) others++;
+            loopv(clients) if(clients[i]->privilege >= PRIV_MODERATOR || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
             srvoutforce(ci, -2, "\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege, true));
         }
@@ -88,7 +90,7 @@ namespace auth
     {
         if(ci->local) return DISC_NONE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(ci->privilege >= PRIV_MODERATOR) return DISC_NONE;
+        if(ci->privilege >= PRIV_ELEVATED) return DISC_NONE;
         if(*authname)
         {
             if(ci->connectauth) return DISC_NONE;
@@ -145,7 +147,6 @@ namespace auth
             case 'a': case 'A': n = PRIV_ADMINISTRATOR; break;
             case 'o': case 'O': n = PRIV_OPERATOR; break;
             case 'm': case 'M': n = PRIV_MODERATOR; break;
-            case 'h': case 'H': n = PRIV_HELPER; break;
             case 's': case 'S': n = PRIV_SUPPORTER; break;
             case 'u': case 'U': n = PRIV_PLAYER; break;
         }

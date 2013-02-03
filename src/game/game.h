@@ -364,7 +364,7 @@ static inline void adjustscaled(T &n, int s)
 #define MAXNAMELEN 24
 enum { SAY_NONE = 0, SAY_ACTION = 1<<0, SAY_TEAM = 1<<1, SAY_NUM = 2 };
 
-enum { PRIV_NONE = 0, PRIV_PLAYER, PRIV_SUPPORTER, PRIV_HELPER, PRIV_MODERATOR, PRIV_OPERATOR, PRIV_ADMINISTRATOR, PRIV_DEVELOPER, PRIV_CREATOR, PRIV_MAX, PRIV_START = PRIV_PLAYER, PRIV_ELEVATED = PRIV_HELPER };
+enum { PRIV_NONE = 0, PRIV_PLAYER, PRIV_SUPPORTER, PRIV_MODERATOR, PRIV_OPERATOR, PRIV_ADMINISTRATOR, PRIV_DEVELOPER, PRIV_CREATOR, PRIV_MAX, PRIV_START = PRIV_PLAYER, PRIV_ELEVATED = PRIV_MODERATOR };
 
 #define PRIV(x)     (PRIV_##x - PRIV_START)
 #define PRIV2(x)    (PRIV_##x - PRIV_START + 1)
@@ -947,7 +947,7 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
-    string hostname, name, info, obit;
+    string hostname, name, handle, info, obit;
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
@@ -958,7 +958,7 @@ struct gameent : dynent, gamestate
     {
         type = ENT_PLAYER;
         copystring(hostname, "unknown");
-        name[0] = info[0] = obit[0] = 0;
+        name[0] = handle[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);
         cleartags();
@@ -1567,6 +1567,7 @@ namespace hud
     extern void damage(int n, const vec &loc, gameent *actor, int weap, int flags);
     extern const char *teamtexname(int team = TEAM_NEUTRAL);
     extern const char *itemtex(int type, int stype);
+    extern const char *privtex(int priv = PRIV_NONE);
     extern bool canshowscores();
     extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
     extern score &teamscore(int team);

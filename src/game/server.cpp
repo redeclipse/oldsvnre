@@ -283,7 +283,7 @@ namespace server
     struct clientinfo
     {
         int clientnum, connectmillis, sessionid, overflow, ping, team, lastteam;
-        string name, mapvote;
+        string name, handle, mapvote;
         int modevote, mutsvote, lastvote;
         int privilege;
         bool connected, ready, local, timesync, online, wantsmap, failedmap, connectauth;
@@ -334,7 +334,7 @@ namespace server
         void reset()
         {
             ping = 0;
-            name[0] = 0;
+            name[0] = handle[0] = 0;
             privilege = PRIV_NONE;
             connected = ready = local = online = wantsmap = failedmap = connectauth = kicked = false;
             authreq = 0;
@@ -894,7 +894,6 @@ namespace server
             case PRIV_ADMINISTRATOR: return prefix ? "an administrator" : "administrator";
             case PRIV_OPERATOR: return prefix ? "an operator" : "operator";
             case PRIV_MODERATOR: return prefix ? "a moderator" : "moderator";
-            case PRIV_HELPER: return prefix ? "a helper" : "helper";
             case PRIV_SUPPORTER: return prefix ? "a supporter" : "supporter";
             case PRIV_PLAYER: return prefix ? "a player" : "player";
             case PRIV_MAX: return prefix ? "connected locally" : "local";
@@ -3972,7 +3971,7 @@ namespace server
 
             if(privupdate)
             {
-                loopv(clients) sendf(-1, 1, "ri3", N_CURRENTPRIV, clients[i]->clientnum, clients[i]->privilege);
+                loopv(clients) sendf(-1, 1, "ri3s", N_CURRENTPRIV, clients[i]->clientnum, clients[i]->privilege, clients[i]->handle);
                 privupdate = false;
             }
 
