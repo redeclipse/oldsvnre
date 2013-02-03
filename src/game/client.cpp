@@ -1245,7 +1245,13 @@ namespace client
             q.put((o[k]>>8)&0xFF);
             if(o[k] < 0 || o[k] > 0xFFFF) q.put((o[k]>>16)&0xFF);
         }
-        uint dir = (d->yaw < 0 ? 360 + int(d->yaw)%360 : int(d->yaw)%360) + clamp(int(d->pitch+90), 0, 180)*360;
+        float yaw = d->yaw, pitch = d->pitch;
+        if(d == game::player1 && game::thirdpersonview(true, d))
+        {
+            vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
+            game::fixrange(yaw, pitch);
+        }
+        uint dir = (yaw < 0 ? 360 + int(yaw)%360 : int(yaw)%360) + clamp(int(pitch+90), 0, 180)*360;
         q.put(dir&0xFF);
         q.put((dir>>8)&0xFF);
         q.put(clamp(int(d->roll+90), 0, 180));

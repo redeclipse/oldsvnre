@@ -41,7 +41,7 @@ namespace game
     FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 12, FVAR_MAX);
     FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, FVAR_MAX);
     VAR(IDF_PERSIST, thirdpersoncursor, 0, 1, 2);
-    FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.65f, 1);
+    FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
 
     VARF(0, follow, -1, -1, VAR_MAX, followswitch(0));
@@ -471,6 +471,7 @@ namespace game
             loopi(players.length())
             {
                 if(!players.inrange(follow)) addfollow
+                else
                 {
                     gameent *d = players[follow];
                     if(!d || d->aitype >= AI_START || !allowspec(d, followdead)) addfollow
@@ -2448,13 +2449,31 @@ namespace game
                 if(player1->state >= CS_SPECTATOR && focus != player1) camera1->resetinterp();
             }
             calcangles(camera1, focus);
-            if(focus == player1 && thirdpersoncursor != 1 && thirdpersonview(true, focus))
+            bool pthird = focus == player1 && thirdpersonview(true, focus);
+            if(thirdpersoncursor != 1 && pthird)
             {
                 float yaw = camera1->yaw, pitch = camera1->pitch;
                 vectoyawpitch(cursordir, yaw, pitch);
                 findorientation(camera1->o, yaw, pitch, worldpos);
             }
             else findorientation(focus->o, focus->yaw, focus->pitch, worldpos);
+            if(pthird)
+            {
+                gameent *best = NULL, *o;
+                float bestdist = 1e16f;
+                int numdyns = numdynents();
+                loopi(numdyns) if((o = (gameent *)iterdynents(i)))
+                {
+                    if(!o || o==focus || o->state!=CS_ALIVE || !physics::issolid(o, focus)) continue;
+                    float dist;
+                    if(intersect(o, camera1->o, worldpos, dist) && dist < bestdist)
+                    {
+                        best = o;
+                        bestdist = dist;
+                    }
+                }
+                if(best) worldpos = vec(worldpos).sub(camera1->o).normalize().mul(bestdist+best->radius).add(camera1->o);
+            }
 
             vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
             vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
@@ -2509,7 +2528,7 @@ namespace game
         vec o = third ? d->feetpos() : camerapos(d);
         if(third)
         {
-            if(d == focus && thirdpersonview(true, focus))
+            if(d == focus && d == player1 && thirdpersonview(true, d))
                 vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
         }
         else if(firstpersonsway && !intermission)
