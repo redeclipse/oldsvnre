@@ -1845,7 +1845,7 @@ namespace server
     {
         int n = clamp(demos.length()+extra-G(democount), 0, demos.length());
         if(n <= 0) return;
-        loopi(n) delete[] demos[n].data;
+        loopi(n) delete[] demos[i].data;
         demos.remove(0, n);
     }
 
