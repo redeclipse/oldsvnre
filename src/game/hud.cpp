@@ -443,6 +443,15 @@ namespace hud
     TVAR(IDF_PERSIST, privdevelopertex, "<grey>textures/privdeveloper.png", 3);
     TVAR(IDF_PERSIST, privcreatortex, "<grey>textures/privcreator.png", 3);
 
+    VAR(IDF_PERSIST|IDF_HEX, privnonecolour, 0, 0x888888, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privplayercolour, 0, 0xAAAAAA, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privsupportercolour, 0, 0x44FFFF, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privmoderatorcolour, 0, 0x4444FF, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privoperatorcolour, 0, 0x44FF44, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privadministratorcolour, 0, 0xFF4444, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privdevelopercolour, 0, 0x44FF88, 0xFFFFFF);
+    VAR(IDF_PERSIST|IDF_HEX, privcreatorcolour, 0, 0x8844FF, 0xFFFFFF);
+
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
 #ifdef MEKARCADE
     TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
@@ -2217,6 +2226,14 @@ namespace hud
         if(aitype > AI_NONE) return privbottex;
         const char *privtexs[PRIV_MAX] = { privnonetex, privplayertex, privsupportertex, privmoderatortex, privoperatortex, privadministratortex, privdevelopertex, privcreatortex };
         return privtexs[clamp(priv, 0, PRIV_MAX-1)];
+    }
+
+    int privcolour(int priv, int aitype, bool dim)
+    {
+        const int privcols[PRIV_MAX] = { privnonecolour, privplayercolour, privsupportercolour, privmoderatorcolour, privoperatorcolour, privadministratorcolour, privdevelopercolour, privcreatorcolour };
+        int colour = privcols[clamp(priv, 0, PRIV_MAX-1)];
+        if(dim) colour = vec::hexcolor(colour).mul(aitype != AI_NONE ? 0.5f : 0.75f).tohexcolor();
+        return colour;
     }
 
     const char *itemtex(int type, int stype)
