@@ -542,9 +542,9 @@ namespace hud
                     if(scoreprivs)
                     {
                         uilist(g, {
-                            uicenterlist(g, uipad(g, 0.5f, g.strut(1)));
+                            uicenterlist(g, g.strut(1));
                             loopscoregroup({
-                                uicenterlist(g, uipad(g, 0.5f, g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), o == game::player1 ? 0xFFFFFF : 0xAAAAAA)));
+                                uicenterlist(g, g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype, o!=game::player1)));
                             });
                         });
                     }
@@ -553,7 +553,7 @@ namespace hud
                         uilist(g, {
                             uicenterlist(g, uipad(g, handlepad, g.strut(1)));
                             loopscoregroup({
-                                uicenterlist(g, uipad(g, 0.5f, g.textf("%s", o == game::player1 ? 0xFFFFFF : 0xAAAAAA, NULL, 0, o->handle)));
+                                uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->handle)));
                             });
                         });
                     }
@@ -592,12 +592,12 @@ namespace hud
                     uicenter(g, uipad(g, 0.5f, {
                         g.space(0.5f);
                         if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
-                            g.textf("%s [%d]", 0x666666, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false, false), o->clientnum);
-                        else g.textf("%s ", 0x666666, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", false));
+                            g.textf("%s [%d]", 0xFFFFFF, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", true, false), o->clientnum);
+                        else g.textf("%s ", 0xFFFFFF, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o));
                         if(scorehandles)
                         {
                             g.space(0.125f);
-                            g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), o == game::player1 ? 0xFFFFFF : 0xAAAAAA);
+                            g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype, o!=game::player1));
                         }
                     }));
                     if(!((i+1)%count) && pushed)
