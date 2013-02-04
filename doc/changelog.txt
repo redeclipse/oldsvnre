@@ -1,27 +1,35 @@
 = Red Eclipse 1.4 =
 Gameplay:
  * Increased overall AI skill
- * Radar now always tracks players who are dominating you, and shows everyone else if you are last alive in duel/survivor
- * Made duel/survivor enter overtime if a round is in progress when intermission is scheduled to start
- * New thirdperson style with camera postion to the side (adjust with /thirdpersondist and /thirdpersonside)
+ * Radar now always tracks players who are dominating you, and shows everyone
+   else if you are last alive in duel/survivor
+ * Made duel/survivor enter overtime if a round is in progress when
+   intermission is scheduled to start
+ * New thirdperson style with camera postion to the side (adjust with
+   /thirdpersondist and /thirdpersonside)
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
  * Plasma primary damage and explosion radius increased
  * Melee now only activates if player is airborne or dashing/sliding
- * Mines, new weapon, primary proximity mine, secondary tripwire mine, pickup-based (like grenade)
- * Rifle explosion size and hitpush reduced (reduces hit area, total explosion damage, and pushing force)
+ * Mines, new weapon, primary proximity mine, secondary tripwire mine,
+   pickup-based (like grenade)
+ * Rifle explosion size and hitpush reduced (reduces hit area, total explosion
+   damage, and pushing force)
  * Rifle zoom can now only be controlled via zoomlevels by players
- * SMG secondary now sticks to objects and explodes radially after a short delay, primary spread reduced
+ * SMG secondary now sticks to objects and explodes radially after a short
+   delay, primary spread reduced
  * Pistol secondary spread increased
 
 Modes & Mutators:
  * Number of bots in coop reduced to 3/2 of humans
  * Enabled multi-coop (one human team and multiple bot teams)
  * Removed expert from default set of allowed mutators
- * Arena mutator now set as default mutator (classic pickup play available as "classic" mutator)
+ * Arena mutator now set as default mutator (classic pickup play available as
+   "classic" mutator)
  * Ballistic mutator removed
- * Kaboom mutator added (only grenades and mines with reloading ammo, rockets spawn at normal mine & grenade spawns)
+ * Kaboom mutator added (only grenades and mines with reloading ammo, rockets
+   spawn at normal mine & grenade spawns)
 
 Maps:
  * Assigned map music to all maps
@@ -30,7 +38,8 @@ Maps:
  * Starlibido, updated to version 1.4b
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.5)
- * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from Blood Frontier)
+ * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from
+   Blood Frontier)
  * Hawk, fixed a checkpoint bug
  * Suspended, new map (added from mapversion 1.4)
  * Conflict, updated
@@ -39,34 +48,43 @@ Maps:
 
 Interface & Menus:
  * Overall reduced font sizes
- * Added variables for scaling text globally and for specific elements  (/{text,con,chatcon,command}scale)
+ * Added variables for scaling text globally and for specific elements
+   (/{text,con,chatcon,command}scale)
  * Added frames around most UI elements
  * Revamped score screen
- * Added ALT+ENTER/CMD+ENTER fullscreen toggle, and ALT+F4/CMD+Q for closing the window
+ * Added ALT+ENTER/CMD+ENTER fullscreen toggle, and ALT+F4/CMD+Q for closing
+   the window
  * Added ability to enable automatic demo recording each match (/demoautorec 1)
  * Added "reset selection" button for mutators
- * Added variables to control death/kill message content (/obit{verbose,styles})
+ * Added variables to control death/kill message content
+   (/obit{verbose,styles})
  * Removed alternative mouse styles
  * IRC improvements, fixed disconnecting properly
- * Demos and screenshots are now stored in "demos" and "screenshots" subdirectories in the homedir, using "<date><time>[.<number>]" for filename
+ * Demos and screenshots are now stored in "demos" and "screenshots"
+   subdirectories in the homedir, using "<date><time>[.<number>]" for filename
  * Incomplete demos discarded by default (/demokeep 1 to enable)
  * Added inline tab completion for commands and inline help descriptions
  * Added ammo bars in weapon inventory
  * Carried flags & similar are now 50% trasparent in third person view
  * Revamped clip display with variable clip sizes
- * Added new "circle bar" showing health, impulse and ammo simultaneously at crosshair location
+ * Added new "circle bar" showing health, impulse and ammo simultaneously at
+   crosshair location
+ * Added sliders to set player(over|under)tone in extra tab of profile menu
 
 Modding & Data Assets:
  * Added support for up to 4 types of water, lava, and glass
  * Added possible missile behaviour guided style for weapons
  * Added cloudoffsetx, cloudoffsety, envoffsetx, and envoffsety vars
  * Added new variables for proximity & stealth mine weapons
- * Changed weapon variables: pusharea -> wavepush1/wavepush2, removed weapon jamming
+ * Changed weapon variables: pusharea -> wavepush1/wavepush2, removed weapon
+   jamming
  * Added variable number of loadout weapons in arena via 'maxcarry'
- * Added new variables for projectile collision: "bounce shot" and "drill geom/player/shot" which allows penetration through normal collisions
+ * Added new variables for projectile collision: "bounce shot" and "drill
+   geom/player/shot" which allows penetration through normal collisions
  * Added mapmodels 'roll' property
  * Zooming is now limited by zoomlimitmin and zoomlimitmax
- * Added 'weaponinterrupts' server variable which allows control over which weapon states may be interrupted by the player
+ * Added 'weaponinterrupts' server variable which allows control over which
+   weapon states may be interrupted by the player
  * Renamed 'blarg' directory to 'misc' for random textures
  * Added a few light textuers in 'misc' (used in starlibido)
  * Added 19 new skyboxes ('elyvisions' and 'mayhem' directories)
@@ -74,7 +92,8 @@ Modding & Data Assets:
  * Added 121 new textures from philipk's 'pk01' and 'pk02' sets
 
 Multiplayer & Servers:
- * Implemented short-term map history to prevent players voting on the same maps
+ * Implemented short-term map history to prevent players voting on the same
+   maps
  * Added vetolock variable to determine who may force match votes
  * Added additional privilege levels (supporter, operator, developer)
 
@@ -89,10 +108,15 @@ Core & Install:
  * Weapon variable definititions structured into rows per variable
 
 Additional fixed bugs:
- * #218 - can no longer drop your loadout weapons in arena
- * #223 - can no longer use common file-writing commands from a map script
+ * #218 - "Dropping" a weapon in arena makes it unusable until next round
+ * #223 - File-writing commands should not be allowed in map scripts
  * #224 - Possible to cut in map "hawk"
  * #219 - Bots do not show proper weapons
+ * #320 - Falling or using a jumppad will not change a player's current
+   animation
+ * #303 - Red Eclipse shortly shows 1 death too many while waiting to respawn
+ * #254 - getvartype always returns 0
+ * #281 - /resetgl gives blurshader error if octadir is used
 
 
 = Red Eclipse 1.3.1 =
