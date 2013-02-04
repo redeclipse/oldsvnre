@@ -2228,12 +2228,10 @@ namespace hud
         return privtexs[clamp(priv, 0, PRIV_MAX-1)];
     }
 
-    int privcolour(int priv, int aitype, bool dim)
+    int privcolour(int priv, int aitype)
     {
         const int privcols[PRIV_MAX] = { privnonecolour, privplayercolour, privsupportercolour, privmoderatorcolour, privoperatorcolour, privadministratorcolour, privdevelopercolour, privcreatorcolour };
-        int colour = privcols[clamp(priv, 0, PRIV_MAX-1)];
-        if(dim) colour = vec::hexcolor(colour).mul(aitype != AI_NONE ? 0.5f : 0.75f).tohexcolor();
-        return colour;
+        return privcols[clamp(priv, 0, PRIV_MAX-1)];
     }
 
     const char *itemtex(int type, int stype)
