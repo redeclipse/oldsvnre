@@ -544,7 +544,7 @@ namespace hud
                         uilist(g, {
                             uicenterlist(g, g.strut(1));
                             loopscoregroup({
-                                uicenterlist(g, g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype, o!=game::player1)));
+                                uicenterlist(g, g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype)));
                             });
                         });
                     }
@@ -597,7 +597,7 @@ namespace hud
                         if(scorehandles)
                         {
                             g.space(0.125f);
-                            g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype, o!=game::player1));
+                            g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype));
                         }
                     }));
                     if(!((i+1)%count) && pushed)
