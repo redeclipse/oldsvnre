@@ -1,4 +1,5 @@
 FVAR(IDF_PERSIST, compasssize, 0, 0.15f, 1000);
+FVAR(IDF_PERSIST, compassblend, 0, 0.75f, 1);
 VAR(IDF_PERSIST, compassfade, 0, 250, VAR_MAX);
 FVAR(IDF_PERSIST, compassfadeamt, 0, 0.5f, 1);
 TVAR(IDF_PERSIST, compasstex, "<grey>textures/compass", 3);
@@ -169,14 +170,14 @@ void renderaction(int idx, int size, Texture *t, char code, const char *name, bo
     if(t && t != notexture)
     {
         glBindTexture(GL_TEXTURE_2D, t->id);
-        glColor4f(r/255.f, g/255.f, b/255.f, f/255.f);
+        glColor4f(r/255.f, g/255.f, b/255.f, f/255.f*compassblend);
         if(idx) drawslice(0.5f/8+(idx-2)/float(8), 1/float(8), hudwidth/2, hudheight/2, size);
         else drawsized(hudwidth/2-size*3/8, hudheight/2-size*3/8, size*3/4);
     }
-    if(code) y += draw_textx("[%s]", x, y, r, g, b, idx ? 255 : f, compassdir[idx].align, -1, -1, getkeyname(code));
+    if(code) y += draw_textx("[%s]", x, y, r, g, b, int((idx ? 255 : f)*compassblend), compassdir[idx].align, -1, -1, getkeyname(code));
     popfont();
     pushfont(!idx || hit ? "emphasis" : "reduced");
-    draw_textx("%s", x, y, r, g, b, f, compassdir[idx].align, -1, -1, name);
+    draw_textx("%s", x, y, r, g, b, int(f*compassblend), compassdir[idx].align, -1, -1, name);
     popfont();
 }
 
@@ -198,7 +199,7 @@ void rendercmenu()
         loopi(curcompass->actions.length()-8)
         {
             caction &c = curcompass->actions[i+8];
-            y += draw_textx("\fs\fa[\fS%s\fs\fa]\fS %s", x, y, 255, 255, 255, 192, TEXT_CENTERED, -1, -1, getkeyname(c.code), c.name);
+            y += draw_textx("\fs\fa[\fS%s\fs\fa]\fS %s", x, y, 255, 255, 255, int(192*compassblend), TEXT_CENTERED, -1, -1, getkeyname(c.code), c.name);
             if(y >= maxy) break;
         }
         popfont();

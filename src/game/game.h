@@ -1567,7 +1567,7 @@ namespace hud
     extern void damage(int n, const vec &loc, gameent *actor, int weap, int flags);
     extern const char *teamtexname(int team = TEAM_NEUTRAL);
     extern const char *itemtex(int type, int stype);
-    extern const char *privtex(int priv = PRIV_NONE);
+    extern const char *privtex(int priv = PRIV_NONE, int aitype = AI_NONE);
     extern bool canshowscores();
     extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
     extern score &teamscore(int team);
