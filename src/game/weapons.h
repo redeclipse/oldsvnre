@@ -301,7 +301,7 @@ WPFVARM(0, kickpush, FVAR_MIN, FVAR_MAX,
 WPVAR(0, laser, 0, 1,
     0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0
 );
-WPFVARK(0, legsdmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, legdamage, FVAR_MIN, FVAR_MAX,
     0.3f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f,
     0.6f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f,
     0.3f,       0.325f,     0.3f,       0.3f,       0.3f,       0.25f,      0.2f,       0.2f,       0.2f,       0.2f,       0.2f,
@@ -422,13 +422,12 @@ WPVARK(0, residual, 0, 2,
     0,          0,          2,          0,          0,          1,          0,          0,          1,          0,          1,
     0,          0,          2,          2,          0,          1,          0,          0,          1,          0,          1
 );
-WPFVARK(0, selfdmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, selfdamage, FVAR_MIN, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f
 );
-
 WPVARM(0, speed, 0, VAR_MAX,
     0,          3000,       0,          1000,       2500,       300,        1000,       10000,      250,        100,        1000,
     0,          1000,       0,          200,        350,        150,        85,         100000,     250,        100,        250
@@ -477,11 +476,17 @@ WPFVARK(0, taperout, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       0.5f,       0.0f,       0.0f,       0.0f,       0.0f
 );
+WPFVARK(0, teamdamage, FVAR_MIN, FVAR_MAX,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,
+    1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f,       1.0f
+);
 WPVARM(0, time, 1, VAR_MAX,
     100,        2000,       350,        400,        500,        200,        600,        5000,       3000,       120000,     5000,
     500,        100,        500,        5000,       2000,       1500,       5000,       5000,       3000,       30000,      5000
 );
-WPFVARK(0, torsodmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, torsodamage, FVAR_MIN, FVAR_MAX,
     0.5f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
     0.8f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
     0.5f,       0.65f,      0.65f,      0.6f,       0.6f,       0.45f,      0.4f,       0.4f,       0.4f,       0.4f,       0.4f,
@@ -521,7 +526,7 @@ WPFVARK(0, weight, 0, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.0f,       0.0f,       200.0f,     0.0f,       0.0f,       65.0f,      150.0f,     0.0f,
     0.0f,       0.0f,       0.0f,       250.0f,     0.0f,       100.0f,     0.0f,       0.0f,       65.0f,      150.0f,     0.0f
 );
-WPFVARK(0, whipdmg, FVAR_MIN, FVAR_MAX,
+WPFVARK(0, whipdamage, FVAR_MIN, FVAR_MAX,
     0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f,
     0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f,
     0.8f,       0.8f,       0.8f,       0.8f,       0.8f,       0.65f,      0.6f,       0.6f,       0.6f,       0.6f,       0.6f,

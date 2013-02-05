@@ -95,14 +95,25 @@ namespace projs
         }
         if(!(flags&HIT_HEAD))
         {
-            if(flags&HIT_WHIPLASH) skew *= WF(WK(flags), weap, whipdmg, WS(flags));
-            else if(flags&HIT_TORSO) skew *= WF(WK(flags), weap, torsodmg, WS(flags));
-            else if(flags&HIT_LEGS) skew *= WF(WK(flags), weap, legsdmg, WS(flags));
+            if(flags&HIT_WHIPLASH) skew *= WF(WK(flags), weap, whipdamage, WS(flags));
+            else if(flags&HIT_TORSO) skew *= WF(WK(flags), weap, torsodamage, WS(flags));
+            else if(flags&HIT_LEGS) skew *= WF(WK(flags), weap, legdamage, WS(flags));
             else skew = 0;
         }
         if(actor == target)
         {
-            if(WF(WK(flags), weap, selfdmg, WS(flags)) > 0) skew *= WF(WK(flags), weap, selfdmg, WS(flags));
+            float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
+            if(modify != 0) skew *= modify;
+            else
+            {
+                flags &= ~HIT_CLEAR;
+                flags |= HIT_WAVE;
+            }
+        }
+        else if(m_isteam(game::gamemode, game::mutators) && actor->team == target->team)
+        {
+            float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
+            if(modify != 0) skew *= modify;
             else
             {
                 flags &= ~HIT_CLEAR;
