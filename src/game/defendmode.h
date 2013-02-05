@@ -141,7 +141,7 @@ struct defendservmode : defendstate, servmode
         int maxscore = G(defendlimit) ? G(defendlimit) : INT_MAX-1;
         loopi(numteams(gamemode, mutators))
         {
-            int steam = i+TEAM_FIRST;
+            int steam = i+T_FIRST;
             if(teamscore(steam).total >= maxscore)
             {
                 teamscore(steam).total = maxscore;
@@ -152,7 +152,7 @@ struct defendservmode : defendstate, servmode
         }
         if(m_gsp2(gamemode, mutators))
         {
-            int steam = TEAM_NEUTRAL;
+            int steam = T_NEUTRAL;
             loopv(flags)
             {
                 flag &b = flags[i];
@@ -161,13 +161,13 @@ struct defendservmode : defendstate, servmode
                     if(!steam) steam = b.owner;
                     else if(steam != b.owner)
                     {
-                        steam = TEAM_NEUTRAL;
+                        steam = T_NEUTRAL;
                         break;
                     }
                 }
                 else
                 {
-                    steam = TEAM_NEUTRAL;
+                    steam = T_NEUTRAL;
                     break;
                 }
             }
@@ -224,7 +224,7 @@ struct defendservmode : defendstate, servmode
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
         #define defendbuff4 (G(defendbuffing)&4 && b.occupied(defendinstant, defendcount >= G(defendbuffoccupy)))
         #define defendbuff1 (G(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
-        #define defendbuff2 (G(defendbuffing)&2 && b.owner == TEAM_NEUTRAL && (b.enemy == ci->team || defendbuff4))
+        #define defendbuff2 (G(defendbuffing)&2 && b.owner == T_NEUTRAL && (b.enemy == ci->team || defendbuff4))
         if(G(defendbuffing)) loopv(flags)
         {
             flag &b = flags[i];

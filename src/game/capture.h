@@ -38,7 +38,7 @@ struct capturestate
             proj = NULL;
             displaytime = pickuptime = movetime = 0;
 #endif
-            team = TEAM_NEUTRAL;
+            team = T_NEUTRAL;
             taketime = droptime = 0;
         }
 

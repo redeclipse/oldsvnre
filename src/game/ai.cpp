@@ -70,7 +70,7 @@ namespace ai
         if(e && d != e && !passive() && e->state == CS_ALIVE && (!solid || physics::issolid(e, d)))
         {
             int dt = owner(d), et = owner(e);
-            if(dt == TEAM_ENEMY && et == TEAM_ENEMY) return false;
+            if(dt == T_ENEMY && et == T_ENEMY) return false;
             if(!m_isteam(game::gamemode, game::mutators) || dt != et) return true;
         }
         return false;
@@ -273,7 +273,7 @@ namespace ai
             if(teams)
             {
                 int dt = owner(d), et = owner(e);
-                if(dt != TEAM_ENEMY || et != TEAM_ENEMY)
+                if(dt != T_ENEMY || et != T_ENEMY)
                 {
                     if(m_isteam(game::gamemode, game::mutators) && dt != et) continue;
                 }

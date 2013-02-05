@@ -87,7 +87,7 @@ namespace aiman
                 ci->state.model = rnd(INT_MAX-1);
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
-                ci->team = type == AI_BOT ? TEAM_NEUTRAL : TEAM_ENEMY;
+                ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;
                 ci->online = ci->connected = ci->ready = true;
                 return true;
             }
@@ -221,10 +221,10 @@ namespace aiman
             }
             if(m_isteam(gamemode, mutators) && balance > 0)
             { // skew this if teams are unbalanced
-                int plrs[TEAM_TOTAL] = {0}, highest = -1; // we do this because humans can unbalance in odd ways
-                loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= TEAM_FIRST && isteam(gamemode, mutators, clients[i]->team, TEAM_FIRST))
+                int plrs[T_TOTAL] = {0}, highest = -1; // we do this because humans can unbalance in odd ways
+                loopv(clients) if(clients[i]->state.aitype == AI_NONE && clients[i]->team >= T_FIRST && isteam(gamemode, mutators, clients[i]->team, T_FIRST))
                 {
-                    int team = clients[i]->team-TEAM_FIRST;
+                    int team = clients[i]->team-T_FIRST;
                     plrs[team]++;
                     if(highest < 0 || plrs[team] > plrs[highest]) highest = team;
                 }

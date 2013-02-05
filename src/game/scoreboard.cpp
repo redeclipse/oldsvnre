@@ -110,7 +110,7 @@ namespace hud
                 if(o != game::player1 || !client::demoplayback) spectators.add(o);
                 continue;
             }
-            int team = m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? o->team : TEAM_NEUTRAL;
+            int team = m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators) ? o->team : T_NEUTRAL;
             bool found = false;
             loopj(numgroups)
             {

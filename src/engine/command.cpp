@@ -736,7 +736,7 @@ bool addcommand(const char *name, identfun fun, const char *args, int flags)
         case 'C': case 'V': limit = false; break;
         default: fatal("builtin %s declared with illegal type: %s", name, args); break;
     }
-    if(limit && numargs > 8) fatal("builtin %s declared with too many args: %d", name, numargs);
+    if(limit && numargs > 10) fatal("builtin %s declared with too many args: %d", name, numargs);
     addident(ident(ID_COMMAND, name, args, argmask, (void *)fun, flags));
     return false;
 }
@@ -1563,6 +1563,8 @@ typedef void (__cdecl *comfun5)(void *, void *, void *, void *, void *);
 typedef void (__cdecl *comfun6)(void *, void *, void *, void *, void *, void *);
 typedef void (__cdecl *comfun7)(void *, void *, void *, void *, void *, void *, void *);
 typedef void (__cdecl *comfun8)(void *, void *, void *, void *, void *, void *, void *, void *);
+typedef void (__cdecl *comfun9)(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+typedef void (__cdecl *comfun10)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 typedef void (__cdecl *comfunv)(tagval *, int);
 
 static const uint *skipcode(const uint *code, tagval &result)
@@ -1653,6 +1655,8 @@ static inline void callcommand(ident *id, tagval *args, int numargs, bool lookup
             case 6: ((comfun6)id->fun)(ARG(0), ARG(1), ARG(2), ARG(3), ARG(4), ARG(5)); break; \
             case 7: ((comfun7)id->fun)(ARG(0), ARG(1), ARG(2), ARG(3), ARG(4), ARG(5), ARG(6)); break; \
             case 8: ((comfun8)id->fun)(ARG(0), ARG(1), ARG(2), ARG(3), ARG(4), ARG(5), ARG(6), ARG(7)); break; \
+            case 9: ((comfun9)id->fun)(ARG(0), ARG(1), ARG(2), ARG(3), ARG(4), ARG(5), ARG(6), ARG(7), ARG(8)); break; \
+            case 10: ((comfun10)id->fun)(ARG(0), ARG(1), ARG(2), ARG(3), ARG(4), ARG(5), ARG(6), ARG(7), ARG(8), ARG(9)); break; \
         }
     ++i;
     CALLCOM(i)

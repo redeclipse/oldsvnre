@@ -319,7 +319,7 @@ namespace server
             overflow = 0;
             ready = timesync = wantsmap = failedmap = false;
             lastevent = gameoffset = lastvote = 0;
-            team = lastteam = TEAM_NEUTRAL;
+            team = lastteam = T_NEUTRAL;
             clientmap[0] = '\0';
             mapcrc = 0;
             warned = false;
@@ -1183,10 +1183,10 @@ namespace server
             int best = -1;
             loopi(numteams(gamemode, mutators))
             {
-                score &cs = teamscore(i+TEAM_FIRST);
+                score &cs = teamscore(i+T_FIRST);
                 if(best < 0 || cs.total > teamscore(best).total)
                 {
-                    best = i+TEAM_FIRST;
+                    best = i+T_FIRST;
                     result = false;
                 }
                 else if(best >= 0 && cs.total == teamscore(best).total)
@@ -1286,8 +1286,8 @@ namespace server
                 if(m_isteam(gamemode, mutators))
                 {
                     int best = -1;
-                    loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+TEAM_FIRST).total > teamscore(best).total)
-                        best = i+TEAM_FIRST;
+                    loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+T_FIRST).total > teamscore(best).total)
+                        best = i+T_FIRST;
                     if(best >= 0 && teamscore(best).total >= G(pointlimit))
                     {
                         ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
@@ -1475,12 +1475,12 @@ namespace server
             ents.add(n);
             cycle.add(0);
         }
-    } spawns[TEAM_ALL];
+    } spawns[T_ALL];
 
     void setupspawns(bool update, int players = 0)
     {
         nplayers = totalspawns = 0;
-        loopi(TEAM_ALL) spawns[i].reset();
+        loopi(T_ALL) spawns[i].reset();
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
@@ -1496,18 +1496,18 @@ namespace server
                 {
                     loopv(sents) if(sents[i].type == PLAYERSTART && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                     {
-                        if(!k && (m_isteam(gamemode, mutators) ? !isteam(gamemode, mutators, sents[i].attrs[0], TEAM_FIRST) : (sents[i].attrs[0] == TEAM_ALPHA || sents[i].attrs[0] == TEAM_OMEGA)))
+                        if(!k && (m_isteam(gamemode, mutators) ? !isteam(gamemode, mutators, sents[i].attrs[0], T_FIRST) : (sents[i].attrs[0] == T_ALPHA || sents[i].attrs[0] == T_OMEGA)))
                             continue;
-                        else if(k == 1 && sents[i].attrs[0] == TEAM_NEUTRAL) continue;
-                        else if(k == 2 && sents[i].attrs[0] != TEAM_NEUTRAL) continue;
-                        spawns[k ? TEAM_NEUTRAL : sents[i].attrs[0]].add(i);
+                        else if(k == 1 && sents[i].attrs[0] == T_NEUTRAL) continue;
+                        else if(k == 2 && sents[i].attrs[0] != T_NEUTRAL) continue;
+                        spawns[k ? T_NEUTRAL : sents[i].attrs[0]].add(i);
                         totalspawns++;
                     }
                     if(!k && m_isteam(gamemode, mutators))
                     {
-                        loopi(numt) if(spawns[i+TEAM_FIRST].ents.empty())
+                        loopi(numt) if(spawns[i+T_FIRST].ents.empty())
                         {
-                            loopj(TEAM_ALL) spawns[j].reset();
+                            loopj(T_ALL) spawns[j].reset();
                             totalspawns = 0;
                             break;
                         }
@@ -1517,9 +1517,9 @@ namespace server
             }
             else
             { // use all neutral spawns
-                loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == TEAM_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
+                loopv(sents) if(sents[i].type == PLAYERSTART && sents[i].attrs[0] == T_NEUTRAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
                 {
-                    spawns[TEAM_NEUTRAL].add(i);
+                    spawns[T_NEUTRAL].add(i);
                     totalspawns++;
                 }
             }
@@ -1527,7 +1527,7 @@ namespace server
             { // use all spawns
                 loopv(sents) if(sents[i].type == PLAYERSTART && (k || ((sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))))
                 {
-                    spawns[TEAM_NEUTRAL].add(i);
+                    spawns[T_NEUTRAL].add(i);
                     totalspawns++;
                 }
                 if(totalspawns) break;
@@ -1538,7 +1538,7 @@ namespace server
             { // we can cheat and use weapons for spawns
                 loopv(sents) if(sents[i].type == WEAPON)
                 {
-                    spawns[TEAM_NEUTRAL].add(i);
+                    spawns[T_NEUTRAL].add(i);
                     totalspawns++;
                 }
                 cplayers = totalspawns/3;
@@ -1564,11 +1564,11 @@ namespace server
             }
             if(totalspawns)
             {
-                int cycle = -1, team = TEAM_NEUTRAL, rotate = G(spawnrotate);
+                int cycle = -1, team = T_NEUTRAL, rotate = G(spawnrotate);
                 if(m_duel(gamemode, mutators) && !m_isteam(gamemode, mutators))
                 {
-                    if(!spawns[TEAM_ALPHA].ents.empty() && !spawns[TEAM_OMEGA].ents.empty())
-                        team = spawns[TEAM_ALPHA].iteration <= spawns[TEAM_OMEGA].iteration ? TEAM_ALPHA : TEAM_OMEGA;
+                    if(!spawns[T_ALPHA].ents.empty() && !spawns[T_OMEGA].ents.empty())
+                        team = spawns[T_ALPHA].iteration <= spawns[T_OMEGA].iteration ? T_ALPHA : T_OMEGA;
                     if(!rotate) rotate = 2;
                 }
                 else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && !spawns[ci->team].ents.empty()) team = ci->team;
@@ -2182,7 +2182,7 @@ namespace server
         float score;
         int clients;
 
-        teamcheck() : team(TEAM_NEUTRAL), score(0.f), clients(0) {}
+        teamcheck() : team(T_NEUTRAL), score(0.f), clients(0) {}
         teamcheck(int n) : team(n), score(0.f), clients(0) {}
         teamcheck(int n, float r) : team(n), score(r), clients(0) {}
         teamcheck(int n, int s) : team(n), score(s), clients(0) {}
@@ -2190,33 +2190,33 @@ namespace server
         ~teamcheck() {}
     };
 
-    bool allowteam(clientinfo *ci, int team, int first = TEAM_FIRST)
+    bool allowteam(clientinfo *ci, int team, int first = T_FIRST)
     {
         if(isteam(gamemode, mutators, team, first))
         {
             if(!m_coop(gamemode, mutators)) return true;
-            else if(ci->state.aitype > AI_NONE) return team != TEAM_ALPHA;
-            else return team == TEAM_ALPHA;
+            else if(ci->state.aitype > AI_NONE) return team != T_ALPHA;
+            else return team == T_ALPHA;
         }
         return false;
     }
 
     int chooseteam(clientinfo *ci, int suggest = -1)
     {
-        if(ci->state.aitype >= AI_START) return TEAM_ENEMY;
+        if(ci->state.aitype >= AI_START) return T_ENEMY;
         else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
             bool human = ci->state.aitype == AI_NONE;
             int team = -1, balance = human ? G(teambalance) : 1;
             if(human)
             {
-                if(m_coop(gamemode, mutators)) return TEAM_ALPHA;
+                if(m_coop(gamemode, mutators)) return T_ALPHA;
                 int teams[3][3] = {
                     { suggest, ci->team, -1 },
                     { suggest, ci->team, ci->lastteam },
                     { suggest, ci->lastteam, ci->team }
                 };
-                loopi(3) if(allowteam(ci, teams[G(teampersist)][i], TEAM_FIRST))
+                loopi(3) if(allowteam(ci, teams[G(teampersist)][i], T_FIRST))
                 {
                     team = teams[G(teampersist)][i];
                     if(G(teampersist) == 2) return team;
@@ -2225,8 +2225,8 @@ namespace server
             }
             if(balance || team < 0)
             {
-                teamcheck teamchecks[TEAM_TOTAL];
-                loopk(TEAM_TOTAL) teamchecks[k].team = TEAM_FIRST+k;
+                teamcheck teamchecks[T_TOTAL];
+                loopk(T_TOTAL) teamchecks[k].team = T_FIRST+k;
                 loopv(clients)
                 {
                     clientinfo *cp = clients[i];
@@ -2236,13 +2236,13 @@ namespace server
                     { // remember: ai just balance teams
                         cp->state.timeplayed += lastmillis-cp->state.lasttimeplayed;
                         cp->state.lasttimeplayed = lastmillis;
-                        teamcheck &ts = teamchecks[cp->team-TEAM_FIRST];
+                        teamcheck &ts = teamchecks[cp->team-T_FIRST];
                         ts.score += cp->state.score/float(max(cp->state.timeplayed, 1));
                         ts.clients++;
                     }
                 }
                 teamcheck *worst = &teamchecks[m_coop(gamemode, mutators) ? 1 : 0];
-                loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, TEAM_FIRST))
+                loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST))
                 {
                     teamcheck &ts = teamchecks[i];
                     switch(balance)
@@ -2265,7 +2265,7 @@ namespace server
             }
             return team;
         }
-        return TEAM_NEUTRAL;
+        return T_NEUTRAL;
     }
 
     void stopdemo()
@@ -2283,7 +2283,7 @@ namespace server
         if(!ci || ci->state.aitype > AI_NONE) return;
         ci->state.state = CS_SPECTATOR;
         sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, 1);
-        setteam(ci, TEAM_NEUTRAL, false, true);
+        setteam(ci, T_NEUTRAL, false, true);
     }
 
     enum { ALST_FIRST = 0, ALST_TRY, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
@@ -2969,7 +2969,7 @@ namespace server
         if(ci)
         {
             ci->state.state = CS_SPECTATOR;
-            ci->team = TEAM_NEUTRAL;
+            ci->team = T_NEUTRAL;
             putint(p, N_SPECTATOR);
             putint(p, ci->clientnum);
             putint(p, 1);
@@ -3738,7 +3738,7 @@ namespace server
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_loadout(gamemode, mutators)) chkloadweap(ci);
-        if(!allowteam(ci, ci->team, TEAM_FIRST)) setteam(ci, chooseteam(ci), false, true);
+        if(!allowteam(ci, ci->team, T_FIRST)) setteam(ci, chooseteam(ci), false, true);
     }
 
     int triggertime(int i)
@@ -3830,7 +3830,7 @@ namespace server
             ci->state.cpmillis = 0;
             ci->state.state = CS_SPECTATOR;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-            setteam(ci, TEAM_NEUTRAL, false, true);
+            setteam(ci, T_NEUTRAL, false, true);
             aiman::dorefresh = G(airefresh);
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
@@ -4018,9 +4018,9 @@ namespace server
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
                 if(m_scores(gamemode) && m_isteam(gamemode, mutators) && G(teamkillrestore) && !interm)
                 {
-                    int restorepoints[TEAM_MAX] = {0};
+                    int restorepoints[T_MAX] = {0};
                     loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
-                    loopi(TEAM_MAX) if(restorepoints[i] >= G(teamkillrestore))
+                    loopi(T_MAX) if(restorepoints[i] >= G(teamkillrestore))
                     {
                         score &ts = teamscore(i);
                         ts.total += restorepoints[i];
@@ -4322,9 +4322,9 @@ namespace server
         sendwelcome(ci);
         if(m_scores(gamemode) && m_isteam(gamemode, mutators) && G(teamkillrestore) && !interm)
         {
-            int restorepoints[TEAM_MAX] = {0};
+            int restorepoints[T_MAX] = {0};
             loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
-            loopi(TEAM_MAX) if(restorepoints[i] >= G(teamkillrestore))
+            loopi(T_MAX) if(restorepoints[i] >= G(teamkillrestore))
             {
                 score &ts = teamscore(i);
                 ts.total -= restorepoints[i];
@@ -4961,7 +4961,7 @@ namespace server
                 case N_SWITCHTEAM:
                 {
                     int team = getint(p);
-                    if(!allowteam(ci, team, TEAM_FIRST)) team = chooseteam(ci);
+                    if(!allowteam(ci, team, T_FIRST)) team = chooseteam(ci);
                     if(!m_isteam(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
                     uint ip = getclientip(ci->clientnum);
                     if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, PRIVY(G(limitlock)), "change teams while limited")) break;
@@ -5258,7 +5258,7 @@ namespace server
                     if(who<0 || who>=getnumclients() || !haspriv(ci, PRIVY(G(speclock)), "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_isteam(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
-                    if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, TEAM_FIRST)) break;
+                    if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST)) break;
                     setteam(cp, team, true, true);
                     break;
                 }

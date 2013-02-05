@@ -41,7 +41,7 @@ struct bomberservmode : bomberstate, servmode
         if(bombertime >= 0) return;
         if(m_isteam(gamemode, mutators))
         {
-            int alive[TEAM_MAX] = {0}, numt = numteams(gamemode, mutators);
+            int alive[T_MAX] = {0}, numt = numteams(gamemode, mutators);
             loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
             loopk(numt) if(!alive[k+1]) return;
         }
@@ -175,13 +175,13 @@ struct bomberservmode : bomberstate, servmode
         {
             if(gamemillis < bombertime) return;
             int hasaffinity = 0;
-            vector<int> candidates[TEAM_MAX];
+            vector<int> candidates[T_MAX];
             loopv(flags) candidates[flags[i].team].add(i);
             int wants = m_gsp1(gamemode, mutators) ? 1 : teamcount(gamemode, mutators);
             loopi(wants)
             {
                 int c = candidates[i].length(), r = c > 1 ? rnd(c) : 0;
-                if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, TEAM_NEUTRAL))
+                if(candidates[i].inrange(r) && flags.inrange(candidates[i][r]) && isteam(gamemode, mutators, flags[candidates[i][r]].team, T_NEUTRAL))
                 {
                     bomberstate::returnaffinity(candidates[i][r], gamemillis, true);
                     sendf(-1, 1, "ri3", N_RESETAFFIN, candidates[i][r], 1);
@@ -190,7 +190,7 @@ struct bomberservmode : bomberstate, servmode
             }
             if(hasaffinity < wants)
             {
-                if(!candidates[TEAM_NEUTRAL].empty() && !m_gsp1(gamemode, mutators))
+                if(!candidates[T_NEUTRAL].empty() && !m_gsp1(gamemode, mutators))
                 {
                     srvmsgf(-1, "\fzoythis map does have enough goals, switching on hold mutator");
                     sendf(-1, 1, "risi3", N_MAPCHANGE, smapname, 0, gamemode, mutators|(1<<G_M_GSP1));

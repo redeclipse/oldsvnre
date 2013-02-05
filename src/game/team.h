@@ -1,10 +1,10 @@
 enum
 {
-    TEAM_NEUTRAL = 0, TEAM_ALPHA, TEAM_OMEGA, TEAM_KAPPA, TEAM_SIGMA, TEAM_ENEMY, TEAM_MAX,
-    TEAM_FIRST = TEAM_ALPHA, TEAM_LAST = TEAM_OMEGA, TEAM_MULTI = TEAM_SIGMA,
-    TEAM_COUNT = TEAM_LAST+1, TEAM_ALL = TEAM_MULTI+1,
-    TEAM_NUM = (TEAM_LAST-TEAM_FIRST)+1,
-    TEAM_TOTAL = (TEAM_MULTI-TEAM_FIRST)+1
+    T_NEUTRAL = 0, T_ALPHA, T_OMEGA, T_KAPPA, T_SIGMA, T_ENEMY, T_MAX,
+    T_FIRST = T_ALPHA, T_LAST = T_OMEGA, T_MULTI = T_SIGMA,
+    T_COUNT = T_LAST+1, T_ALL = T_MULTI+1,
+    T_NUM = (T_LAST-T_FIRST)+1,
+    T_TOTAL = (T_MULTI-T_FIRST)+1
 };
 
 #define TEAMS(a,b) \
@@ -39,10 +39,10 @@ struct score
     score(int s, int n) : team(s), total(n) {}
 };
 
-#define numteams(a,b)   (m_fight(a) && m_isteam(a,b) ? (m_multi(a,b) ? TEAM_TOTAL : TEAM_NUM) : 1)
-#define teamcount(a,b)  (m_fight(a) && m_isteam(a,b) ? (m_multi(a,b) ? TEAM_ALL : TEAM_COUNT) : 1)
-#define isteam(a,b,c,d) (m_fight(a) && m_isteam(a,b) ? (c >= d && c <= numteams(a,b)) : c == TEAM_NEUTRAL)
-#define valteam(a,b)    (a >= b && a <= TEAM_TOTAL)
+#define numteams(a,b)   (m_fight(a) && m_isteam(a,b) ? (m_multi(a,b) ? T_TOTAL : T_NUM) : 1)
+#define teamcount(a,b)  (m_fight(a) && m_isteam(a,b) ? (m_multi(a,b) ? T_ALL : T_COUNT) : 1)
+#define isteam(a,b,c,d) (m_fight(a) && m_isteam(a,b) ? (c >= d && c <= numteams(a,b)) : c == T_NEUTRAL)
+#define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
 #ifdef MEKARCADE
 #define PLAYERTYPES 12

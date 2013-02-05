@@ -310,7 +310,7 @@ struct gui : guient
         return layout(size+guishadow, size+guishadow);
     }
 
-    int playerpreview(int model, int color, int team, int weap, float sizescale, bool overlaid)
+    int playerpreview(int model, int color, int team, int weap, float sizescale, bool overlaid, float scale, float blend)
     {
         autotab();
         if(sizescale==0) sizescale = 1;
@@ -328,14 +328,14 @@ struct gui : guient
                 xs -= 2*xpad;
                 ys -= 2*ypad;
             }
-            int x1 = int(floor(screen->w*(xi*scale.x+origin.x))), y1 = int(floor(screen->h*(1 - ((yi+ys)*scale.y+origin.y)))),
-                x2 = int(ceil(screen->w*((xi+xs)*scale.x+origin.x))), y2 = int(ceil(screen->h*(1 - (yi*scale.y+origin.y))));
+            int x1 = int(floor(screen->w*(xi*uiscale.x+uiorigin.x))), y1 = int(floor(screen->h*(1 - ((yi+ys)*uiscale.y+uiorigin.y)))),
+                x2 = int(ceil(screen->w*((xi+xs)*uiscale.x+uiorigin.x))), y2 = int(ceil(screen->h*(1 - (yi*uiscale.y+uiorigin.y))));
             glViewport(x1, y1, x2-x1, y2-y1);
             glScissor(x1, y1, x2-x1, y2-y1);
             glEnable(GL_SCISSOR_TEST);
             glDisable(GL_BLEND);
             modelpreview::start(overlaid);
-            game::renderplayerpreview(model, color, team, weap);
+            game::renderplayerpreview(model, color, team, weap, scale, blend);
             modelpreview::end();
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
@@ -353,7 +353,7 @@ struct gui : guient
         return layout(size+guishadow, size+guishadow);
     }
 
-    int modelpreview(const char *name, int anim, float sizescale, bool overlaid)
+    int modelpreview(const char *name, int anim, float sizescale, bool overlaid, float scale, float blend)
     {
         autotab();
         if(sizescale==0) sizescale = 1;
@@ -371,8 +371,8 @@ struct gui : guient
                 xs -= 2*xpad;
                 ys -= 2*ypad;
             }
-            int x1 = int(floor(screen->w*(xi*scale.x+origin.x))), y1 = int(floor(screen->h*(1 - ((yi+ys)*scale.y+origin.y)))),
-                x2 = int(ceil(screen->w*((xi+xs)*scale.x+origin.x))), y2 = int(ceil(screen->h*(1 - (yi*scale.y+origin.y))));
+            int x1 = int(floor(screen->w*(xi*uiscale.x+uiorigin.x))), y1 = int(floor(screen->h*(1 - ((yi+ys)*uiscale.y+uiorigin.y)))),
+                x2 = int(ceil(screen->w*((xi+xs)*uiscale.x+uiorigin.x))), y2 = int(ceil(screen->h*(1 - (yi*uiscale.y+uiorigin.y))));
             glViewport(x1, y1, x2-x1, y2-y1);
             glScissor(x1, y1, x2-x1, y2-y1);
             glEnable(GL_SCISSOR_TEST);
@@ -389,7 +389,7 @@ struct gui : guient
                 float dist =  2.0f*max(radius.magnitude2(), 1.1f*radius.z),
                       yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
                 vec o(-center.x, dist - center.y, -0.1f*dist - center.z);
-                rendermodel(&light, name, anim, o, yaw, 0, 0, NULL, NULL, 0);
+                rendermodel(&light, name, anim, o, yaw, 0, 0, NULL, NULL, 0, scale, blend);
             }
             modelpreview::end();
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -884,7 +884,7 @@ struct gui : guient
 
     static Texture *overlaytex, *slidertex;
 
-    vec origin, scale;
+    vec uiorigin, uiscale;
     guicb *cb;
 
     static float basescale, maxscale;
@@ -896,9 +896,9 @@ struct gui : guient
         float aspect = forceaspect ? 1.0f/forceaspect : float(screen->h)/float(screen->w), fit = 1.0f;
         if(w*aspect*basescale>1.0f) fit = 1.0f/(w*aspect*basescale);
         if(h*basescale*fit>maxscale) fit *= maxscale/(h*basescale*fit);
-        scale = vec(aspect*scale.x*fit, scale.y*fit, 1);
-        origin = vec(0.5f - ((w-xsize)/2 - guibound[0])*scale.x, 0.5f + (0.5f*h-guibound[1])*scale.y, 0);
-        //origin = vec(0.5f - (guibound[0]*2)*scale.x, 0.5f + (h-guibound[1]*2)*scale.y, 0);
+        uiscale = vec(aspect*uiscale.x*fit, uiscale.y*fit, 1);
+        uiorigin = vec(0.5f - ((w-xsize)/2 - guibound[0])*uiscale.x, 0.5f + (0.5f*h-guibound[1])*uiscale.y, 0);
+        //uiorigin = vec(0.5f - (guibound[0]*2)*uiscale.x, 0.5f + (h-guibound[1]*2)*uiscale.y, 0);
     }
 
     void start(int starttime, float initscale, int *tab, bool allowinput, bool wantstitle)
@@ -906,7 +906,7 @@ struct gui : guient
         initscale *= 0.025f;
         basescale = initscale;
         if(layoutpass)
-            scale.x = scale.y = scale.z = guiscaletime ? min(basescale*(totalmillis-starttime)/float(guiscaletime), basescale) : basescale;
+            uiscale.x = uiscale.y = uiscale.z = guiscaletime ? min(basescale*(totalmillis-starttime)/float(guiscaletime), basescale) : basescale;
         needsinput = allowinput;
         hastitle = wantstitle;
         passthrough = !allowinput;
@@ -925,8 +925,8 @@ struct gui : guient
             curx = -xsize/2;
 
             glPushMatrix();
-            glTranslatef(origin.x, origin.y, origin.z);
-            glScalef(scale.x, scale.y, scale.z);
+            glTranslatef(uiorigin.x, uiorigin.y, uiorigin.z);
+            glScalef(uiscale.x, uiscale.y, uiscale.z);
             int x = curx-guibound[0]*2, y = cury-guibound[1], w = xsize+guibound[0]*4, h = ysize+guibound[1]*2;
             if(hastitle)
             {
@@ -973,8 +973,8 @@ struct gui : guient
 
             if(!passthrough)
             {
-                hitx = (cursorx - origin.x)/scale.x;
-                hity = (cursory - origin.y)/scale.y;
+                hitx = (cursorx - uiorigin.x)/uiscale.x;
+                hity = (cursory - uiorigin.y)/uiscale.y;
                 if((mouseaction[0]&GUI_PRESSED) && (fabs(hitx-firstx) > 2 || fabs(hity - firsty) > 2)) mouseaction[0] |= GUI_DRAGGED;
             }
         }

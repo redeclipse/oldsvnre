@@ -51,7 +51,7 @@ namespace game
         follow = -1;
     }
 
-    VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 1);
+    VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 2);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
 
@@ -308,6 +308,7 @@ namespace game
 
     void addsway(gameent *d)
     {
+        if(firstpersonmodel == 2) return;
         float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
         if(d->state == CS_ALIVE && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside))
         {
@@ -570,9 +571,9 @@ namespace game
             case 1: // teams
             {
                 int team = index;
-                if(team < 0 || team >= TEAM_MAX+TEAM_TOTAL || (!m_isteam(gamemode, mutators) && !m_edit(gamemode) && team >= TEAM_FIRST && team <= TEAM_MULTI))
-                    team = TEAM_NEUTRAL; // abstract team coloured levels to neutral
-                else if(team >= TEAM_MAX) team = (team%TEAM_MAX)+TEAM_FIRST; // force team colour palette
+                if(team < 0 || team >= T_MAX+T_TOTAL || (!m_isteam(gamemode, mutators) && !m_edit(gamemode) && team >= T_FIRST && team <= T_MULTI))
+                    team = T_NEUTRAL; // abstract team coloured levels to neutral
+                else if(team >= T_MAX) team = (team%T_MAX)+T_FIRST; // force team colour palette
                 return vec::hexcolor(TEAM(team, colour));
                 break;
             }
@@ -1680,11 +1681,11 @@ namespace game
         switch(level)
         {
             case -1: return d->colour;
-            case CTONE_TMIX: return findcolour(d, true, d->team != TEAM_NEUTRAL); break;
-            case CTONE_AMIX: return findcolour(d, true, d->team == TEAM_NEUTRAL); break;
+            case CTONE_TMIX: return findcolour(d, true, d->team != T_NEUTRAL); break;
+            case CTONE_AMIX: return findcolour(d, true, d->team == T_NEUTRAL); break;
             case CTONE_MIXED: return findcolour(d, true, true); break;
-            case CTONE_ALONE: return findcolour(d, d->team != TEAM_NEUTRAL); break;
-            case CTONE_TEAMED: return findcolour(d, d->team == TEAM_NEUTRAL); break;
+            case CTONE_ALONE: return findcolour(d, d->team != T_NEUTRAL); break;
+            case CTONE_TEAMED: return findcolour(d, d->team == T_NEUTRAL); break;
             case CTONE_TONE: return findcolour(d, true); break;
             case CTONE_TEAM: default: return findcolour(d); break;
         }
@@ -1915,6 +1916,7 @@ namespace game
             }
             if(thirdpersonview(true, hasfoc ? d : focus))
                 pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist, d != player1 ? followside : thirdpersonside);
+            else if((d->type == ENT_PLAYER || d->type == ENT_AI) && firstpersonmodel == 2) pos = ((gameent *)d)->head;
             else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
             {
                 float scale = 1;
@@ -2252,7 +2254,7 @@ namespace game
     void calcangles(physent *c, gameent *d)
     {
         c->roll = calcroll(d);
-        if(firstpersonbob && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
+        if(firstpersonbob && firstpersonmodel != 2 && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
         {
             float scale = 1;
             if(d == player1 && inzoom())
@@ -2515,23 +2517,21 @@ namespace game
 
     void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
+        bool tpmdl = third || (d == focus && firstpersonmodel == 2);
 #ifdef MEKARCADE
-        const char *mdl = playertypes[0][third ? 0 : 1];
-        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : 1];
-        else mdl = playertypes[d->model%PLAYERTYPES][third ? 0 : 1];
+        const char *mdl = playertypes[0][tpmdl ? 0 : 1];
+        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
+        else mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
 #else
-        const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][third ? 0 : 1];
-        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : 1];
-        else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][third ? 0 : 1];
+        const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][tpmdl ? 0 : 1];
+        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
+        else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
-        vec o = third ? d->feetpos() : camerapos(d);
-        if(third)
-        {
-            if(d == focus && d == player1 && thirdpersonview(true, d))
-                vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
-        }
-        else if(firstpersonsway && !intermission)
+        vec o = tpmdl ? d->feetpos() : camerapos(d);
+        if(third && d == focus && d == player1 && thirdpersonview(true, d))
+            vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
+        else if(!tpmdl && firstpersonsway && !intermission)
         {
             vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
             float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
@@ -2793,13 +2793,13 @@ namespace game
     void renderplayer(gameent *d, bool third, float trans, float size, bool early = false)
     {
         if(d->state == CS_SPECTATOR) return;
-        if(trans <= 0.f || (d == focus && (third ? thirdpersonmodel : firstpersonmodel) < 1))
+        if(trans <= 0.f || (d == focus && !(third ? thirdpersonmodel : firstpersonmodel)))
         {
             if(d->state == CS_ALIVE && rendernormally && (early || d != focus))
                 trans = 1e-16f; // we need tag_muzzle/tag_waist
             else return; // screw it, don't render them
         }
-        int team = m_fight(gamemode) && m_isteam(gamemode, mutators) ? d->team : TEAM_NEUTRAL,
+        int team = m_fight(gamemode) && m_isteam(gamemode, mutators) ? d->team : T_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
         bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
 
@@ -3034,12 +3034,13 @@ namespace game
         if(rendernormally && early) rendercheck(focus);
     }
 
-    void renderplayerpreview(int model, int color, int team, int weap)
+    void renderplayerpreview(int model, int color, int team, int weap, float scale, float blend)
     {
         static gameent *previewent = NULL;
         if(!previewent)
         {
             previewent = new gameent;
+            previewent->physstate = PHYS_FLOOR;
             previewent->o = vec(0, 0.75f*(previewent->height + previewent->aboveeye), previewent->height - (previewent->height + previewent->aboveeye)/2);
             previewent->spawnstate(G_DEATHMATCH, 0);
             previewent->light.color = vec(1, 1, 1);
@@ -3047,11 +3048,11 @@ namespace game
             loopi(W_MAX) previewent->ammo[i] = W(i, max);
         }
         previewent->setinfo(NULL, color, model);
-        previewent->team = clamp(team, 0, int(TEAM_MULTI));
+        previewent->team = clamp(team, 0, int(T_MULTI));
         previewent->weapselect = clamp(weap, 0, W_MAX-1);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
         previewent->light.millis = -1;
-        renderplayer(previewent, true, 1, 1);
+        renderplayer(previewent, true, blend, scale);
     }
 
     bool clientoption(char *arg) { return false; }
