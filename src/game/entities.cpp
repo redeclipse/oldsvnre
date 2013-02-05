@@ -136,7 +136,7 @@ namespace entities
             {
                 if(type != CHECKPOINT)
                 {
-                    if(valteam(attr[0], TEAM_FIRST))
+                    if(valteam(attr[0], T_FIRST))
                     {
                         defformatstring(str)("team %s", TEAM(attr[0], name));
                         addentinfo(str);
@@ -858,8 +858,8 @@ namespace entities
                 break;
 #endif
             case PLAYERSTART:
-                while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
-                while(e.attrs[0] >= TEAM_ALL) e.attrs[0] -= TEAM_ALL;
+                while(e.attrs[0] < 0) e.attrs[0] += T_ALL;
+                while(e.attrs[0] >= T_ALL) e.attrs[0] -= T_ALL;
             case CHECKPOINT:
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
@@ -888,8 +888,8 @@ namespace entities
                 if(e.attrs[9] < 0) e.attrs[9] = 0;
                 break;
             case AFFINITY:
-                while(e.attrs[0] < 0) e.attrs[0] += TEAM_ALL;
-                while(e.attrs[0] >= TEAM_ALL) e.attrs[0] -= TEAM_ALL;
+                while(e.attrs[0] < 0) e.attrs[0] += T_ALL;
+                while(e.attrs[0] >= T_ALL) e.attrs[0] -= T_ALL;
                 while(e.attrs[1] < 0) e.attrs[1] += 360;
                 while(e.attrs[1] >= 360) e.attrs[1] -= 360;
                 while(e.attrs[2] < -90) e.attrs[2] += 180;
@@ -1217,12 +1217,12 @@ namespace entities
                     f.type = PUSHER;
                     break;
                 }
-                // BASE             -   AFFINITY    1:idx       TEAM_NEUTRAL
+                // BASE             -   AFFINITY    1:idx       T_NEUTRAL
                 case 25:
                 {
                     f.type = AFFINITY;
                     if(f.attrs[0] < 0) f.attrs[0] = 0;
-                    f.attrs[1] = TEAM_NEUTRAL; // spawn as neutrals
+                    f.attrs[1] = T_NEUTRAL; // spawn as neutrals
                     break;
                 }
                 // RESPAWNPOINT     -   CHECKPOINT
@@ -1299,7 +1299,7 @@ namespace entities
 
     void importentities(int mtype, int mver, int gver)
     {
-        int flag = 0, teams[TEAM_TOTAL] = {0};
+        int flag = 0, teams[T_TOTAL] = {0};
         progress(0, "importing entities...");
         loopv(octateles) // translate teledest to teleport and link them appropriately
         {
@@ -1390,8 +1390,8 @@ namespace entities
                 }
                 case AFFINITY: // replace bases/neutral flags near team flags
                 {
-                    if(valteam(e.attrs[1], TEAM_FIRST)) teams[e.attrs[1]-TEAM_FIRST]++;
-                    else if(e.attrs[1] == TEAM_NEUTRAL)
+                    if(valteam(e.attrs[1], T_FIRST)) teams[e.attrs[1]-T_FIRST]++;
+                    else if(e.attrs[1] == T_NEUTRAL)
                     {
                         int dest = -1;
 
@@ -1399,7 +1399,7 @@ namespace entities
                         {
                             gameentity &f = *(gameentity *)ents[j];
 
-                            if(f.type == AFFINITY && f.attrs[1] != TEAM_NEUTRAL &&
+                            if(f.type == AFFINITY && f.attrs[1] != T_NEUTRAL &&
                                 (!ents.inrange(dest) || e.o.dist(f.o) < ents[dest]->o.dist(f.o)) &&
                                     e.o.dist(f.o) <= enttype[AFFINITY].radius*4.f)
                                         dest = j;
@@ -1427,11 +1427,11 @@ namespace entities
                 case AFFINITY:
                 {
                     if(!e.attrs[0]) e.attrs[0] = ++flag; // assign a sane idx
-                    if(!valteam(e.attrs[1], TEAM_NEUTRAL)) // assign a team
+                    if(!valteam(e.attrs[1], T_NEUTRAL)) // assign a team
                     {
                         int lowest = -1;
-                        loopk(TEAM_TOTAL) if(lowest<0 || teams[k] < teams[lowest]) lowest = i;
-                        e.attrs[1] = lowest+TEAM_FIRST;
+                        loopk(T_TOTAL) if(lowest<0 || teams[k] < teams[lowest]) lowest = i;
+                        e.attrs[1] = lowest+T_FIRST;
                         teams[lowest]++;
                     }
                     break;
@@ -1492,7 +1492,7 @@ namespace entities
                         e.attrs[1] = yaw;
                         e.attrs[2] = e.attrs[3] = e.attrs[4] = 0;
                     }
-                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_MULTI) e.attrs[0] = TEAM_NEUTRAL;
+                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > T_MULTI) e.attrs[0] = T_NEUTRAL;
                     if(mtype == MAP_MAPZ && gver <= 201)
                     {
                         if(e.attrs[3] > 3)
@@ -1611,7 +1611,7 @@ namespace entities
                         e.attrs[2] = e.attrs[3];
                         e.attrs[3] = e.attrs[4] = 0;
                     }
-                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > TEAM_MULTI) e.attrs[0] = TEAM_NEUTRAL;
+                    if(mtype == MAP_MAPZ && gver <= 164 && e.attrs[0] > T_MULTI) e.attrs[0] = T_NEUTRAL;
                     checkyawmode(e, mtype, mver, gver, 1, 3);
                     if(mtype == MAP_MAPZ && gver <= 213)
                     {
@@ -1913,7 +1913,7 @@ namespace entities
             {
                 case PLAYERSTART: case CHECKPOINT:
                 {
-                    entdirpart(e.o, e.attrs[1], e.attrs[2], 4.f, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : TEAM_NEUTRAL, colour));
+                    entdirpart(e.o, e.attrs[1], e.attrs[2], 4.f, 1, TEAM(e.type == PLAYERSTART ? e.attrs[0] : T_NEUTRAL, colour));
                     break;
                 }
                 //case MAPMODEL:

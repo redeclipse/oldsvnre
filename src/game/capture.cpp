@@ -131,7 +131,7 @@ namespace capture
         {
             if(y-sy-s < m) break;
             capturestate::flag &f = st.flags[i];
-            bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.team == TEAM_NEUTRAL || f.team == game::focus->team);
+            bool headsup = hud::chkcond(hud::inventorygame, game::player1->state == CS_SPECTATOR || f.team == T_NEUTRAL || f.team == game::focus->team);
             if(headsup || f.lastowner == game::focus)
             {
                 int millis = lastmillis-f.displaytime, colour = TEAM(f.team, colour);
@@ -311,7 +311,7 @@ namespace capture
         loopv(entities::ents) if(entities::ents[i]->type == AFFINITY)
         {
             gameentity &e = *(gameentity *)entities::ents[i];
-            if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], TEAM_FIRST))
+            if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !isteam(game::gamemode, game::mutators, e.attrs[0], T_FIRST))
                 continue;
             st.addaffinity(e.o, e.attrs[0], i);
         }
@@ -420,7 +420,7 @@ namespace capture
         capturestate::flag &f = st.flags[i];
         if(value > 0)
         {
-            affinityeffect(i, TEAM_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
+            affinityeffect(i, T_NEUTRAL, f.droploc, f.spawnloc, 3, "RESET");
             game::announcef(S_V_FLAGRESET, CON_INFO, NULL, true, "\fathe \fs\f[%d]%s\fS flag has been reset", TEAM(f.team, colour), TEAM(f.team, name));
         }
         entities::execlink(NULL, f.ent, false);
@@ -564,7 +564,7 @@ namespace capture
             capturestate::flag &f = st.flags[j];
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
-            bool regen = d->aitype != AI_BOT || f.team == TEAM_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
+            bool regen = d->aitype != AI_BOT || f.team == T_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
             ai::checkothers(targets, d, f.team == ai::owner(d) || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {

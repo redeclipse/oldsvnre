@@ -45,6 +45,7 @@ namespace projs
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     VAR(IDF_PERSIST, muzzleflare, 0, 2, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     FVAR(IDF_PERSIST, muzzleblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, muzzlefade, 0, 0.75f, 1);
 
     #define muzzlechk(a,b) (a == 3 || (a == 2 && game::thirdpersonview(true)) || (a == 1 && b != game::focus))
     int calcdamage(gameent *actor, gameent *target, int weap, int &flags, float radial, float size, float dist, float scale)
@@ -973,27 +974,27 @@ namespace projs
                 }
             }
         }
-        float muz = muzzleblend; if(d == game::focus) muz *= 0.5f;
-        const struct weapfxs
-        {
-            int smoke, parttype, sparktime, sparknum, sparkrad;
-            float partsize, flaresize, flarelen, sparksize;
-        } weapfx[W_MAX] = {
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 200, PART_MUZZLE_FLASH, 200, 5, 4, 1, 1, 2, 0.0125f },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 350, PART_MUZZLE_FLASH, 500, 20, 8, 3, 3, 6, 0.025f },
-            { 50, PART_MUZZLE_FLASH, 350, 5, 6, 1.5f, 2, 4, 0.0125f },
-            { 150, PART_MUZZLE_FLASH, 250, 5, 8, 1.5f, 0, 0, 0.025f },
-            { 150, PART_PLASMA, 250, 10, 6, 1.5f, 0, 0, 0.0125f },
-            { 150, PART_PLASMA, 250, 5, 6, 2, 3, 6, 0.0125f },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 150, PART_MUZZLE_FLASH, 250, 10, 8, 3, 3, 6, 0.0125f },
-        };
         if(W2(weap, adelay, WS(flags)) >= 5)
         {
             int colour = WHCOL(d, weap, partcol, WS(flags));
+            float muz = d == game::focus ? muzzlefade : muzzleblend;
+            const struct weapfxs
+            {
+                int smoke, parttype, sparktime, sparknum, sparkrad;
+                float partsize, flaresize, flarelen, sparksize;
+            } weapfx[W_MAX] = {
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 200, PART_MUZZLE_FLASH, 200, 5, 4, 1, 1, 2, 0.0125f },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 350, PART_MUZZLE_FLASH, 500, 20, 8, 3, 3, 6, 0.025f },
+                { 50, PART_MUZZLE_FLASH, 350, 5, 6, 1.5f, 2, 4, 0.0125f },
+                { 150, PART_MUZZLE_FLASH, 250, 5, 8, 1.5f, 0, 0, 0.025f },
+                { 150, PART_PLASMA, 250, 10, 6, 1.5f, 0, 0, 0.0125f },
+                { 150, PART_PLASMA, 250, 5, 6, 2, 3, 6, 0.0125f },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 150, PART_MUZZLE_FLASH, 250, 10, 8, 3, 3, 6, 0.0125f },
+            };
             if(weapfx[weap].smoke) part_create(PART_SMOKE_LERP, weapfx[weap].smoke, from, 0x888888, 1, 0.25f, -20);
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
                 part_splash(weap == W_FLAMER ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 15);

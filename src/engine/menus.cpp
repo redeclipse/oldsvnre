@@ -615,10 +615,10 @@ COMMAND(0, guifield, "sisiis");
 COMMAND(0, guikeyfield, "sisiis");
 COMMAND(0, guieditor, "siiiiis");
 
-void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action, float *scale, int *overlaid, char *altact)
+void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
     if(!cgui) return;
-    int ret = cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0);
+    int ret = cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0, *size, *blend);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -631,9 +631,9 @@ void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action
         }
     }
 }
-COMMAND(0, guiplayerpreview, "iiiisfis");
+COMMAND(0, guiplayerpreview, "iiiisfiffs");
 
-void guimodelpreview(char *model, char *animspec, char *action, float *scale, int *overlaid, char *altact)
+void guimodelpreview(char *model, char *animspec, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
     if(!cgui) return;
     int anim = ANIM_ALL;
@@ -652,7 +652,7 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
             if(anims.length()) anim = anims[0];
         }
     }
-    int ret = cgui->modelpreview(model, anim|ANIM_LOOP, *scale, *overlaid!=0);
+    int ret = cgui->modelpreview(model, anim|ANIM_LOOP, *scale, *overlaid!=0, *size, *blend);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -665,7 +665,7 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
         }
     }
 }
-COMMAND(0, guimodelpreview, "sssfis");
+COMMAND(0, guimodelpreview, "sssfiffs");
 
 struct change
 {

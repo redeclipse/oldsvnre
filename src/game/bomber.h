@@ -1,6 +1,6 @@
-#define isbomberaffinity(a) (a.enabled && a.team == TEAM_NEUTRAL)
-#define isbomberhome(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != TEAM_NEUTRAL && a.team == b)
-#define isbombertarg(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != TEAM_NEUTRAL && a.team != b)
+#define isbomberaffinity(a) (a.enabled && a.team == T_NEUTRAL)
+#define isbomberhome(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != T_NEUTRAL && a.team == b)
+#define isbombertarg(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != T_NEUTRAL && a.team != b)
 
 #ifdef GAMESERVER
 #define bomberstate bomberservstate
@@ -41,7 +41,7 @@ struct bomberstate
             displaytime = pickuptime = movetime = inittime = viewtime = rendertime = 0;
             viewpos = renderpos = vec(-1, -1, -1);
 #endif
-            team = TEAM_NEUTRAL;
+            team = T_NEUTRAL;
             taketime = droptime = 0;
             enabled = false;
         }
@@ -49,7 +49,7 @@ struct bomberstate
 #ifndef GAMESERVER
         vec &position(bool render = false)
         {
-            if(team == TEAM_NEUTRAL)
+            if(team == T_NEUTRAL)
             {
                 if(owner)
                 {
@@ -74,7 +74,7 @@ struct bomberstate
 
         vec &pos(bool view = false, bool render = false)
         {
-            if(team == TEAM_NEUTRAL && view)
+            if(team == T_NEUTRAL && view)
             {
                 if(interptime && lastmillis-interptime < 500)
                 {

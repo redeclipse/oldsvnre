@@ -371,15 +371,15 @@ namespace client
 
                 loopi(numteams(game::gamemode, game::mutators))
                 {
-                    if((t && t == i+TEAM_FIRST) || !strcasecmp(TEAM(i+TEAM_FIRST, name), team))
+                    if((t && t == i+T_FIRST) || !strcasecmp(TEAM(i+T_FIRST, name), team))
                     {
-                        return i+TEAM_FIRST;
+                        return i+T_FIRST;
                     }
                 }
             }
-            return TEAM_FIRST;
+            return T_FIRST;
         }
-        return TEAM_NEUTRAL;
+        return T_NEUTRAL;
     }
 
     void switchteam(const char *team)
@@ -1736,7 +1736,7 @@ namespace client
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
                     }
-                    int team = clamp(getint(p), int(TEAM_NEUTRAL), int(TEAM_ENEMY));
+                    int team = clamp(getint(p), int(T_NEUTRAL), int(T_ENEMY));
                     if(d == game::focus && d->team != team) hud::lastteam = 0;
                     d->team = team;
                     break;
@@ -2290,7 +2290,7 @@ namespace client
                     if(!w) return;
                     if(w->team != tn)
                     {
-                        if(m_isteam(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != TEAM_NEUTRAL && tn != TEAM_NEUTRAL ? 1 : 2))
+                        if(m_isteam(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != T_NEUTRAL && tn != T_NEUTRAL ? 1 : 2))
                             conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(tn, colour), hud::teamtexname(tn), TEAM(tn, name));
                         w->team = tn;
                         if(w == game::focus) hud::lastteam = 0;

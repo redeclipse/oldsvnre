@@ -952,7 +952,7 @@ struct gameent : dynent, gamestate
     vector<eventicon> icons;
     vector<stunevent> stuns;
 
-    gameent() : edit(NULL), ai(NULL), team(TEAM_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
+    gameent() : edit(NULL), ai(NULL), team(T_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
@@ -1565,7 +1565,7 @@ namespace hud
     extern int drawhealth(int x, int y, int s, float blend = 1);
     extern void drawinventory(int w, int h, int edge, float blend = 1);
     extern void damage(int n, const vec &loc, gameent *actor, int weap, int flags);
-    extern const char *teamtexname(int team = TEAM_NEUTRAL);
+    extern const char *teamtexname(int team = T_NEUTRAL);
     extern const char *itemtex(int type, int stype);
     extern const char *privtex(int priv = PRIV_NONE, int aitype = AI_NONE);
     extern int privcolour(int priv = PRIV_NONE, int aitype = AI_NONE);

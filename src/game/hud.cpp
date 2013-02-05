@@ -2036,7 +2036,7 @@ namespace hud
         if(chkcond(radarplayers, radarplayerfilter != 3 || m_duke(game::gamemode, game::mutators) || m_edit(game::gamemode))) // 4
         {
             gameent *d = NULL;
-            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, others[TEAM_MAX] = {0};
+            int numdyns = game::numdynents(), style = radarstyle != 2 ? radarstyle : 1, others[T_MAX] = {0};
             if(radarplayerduke && game::focus->state == CS_ALIVE && m_survivor(game::gamemode, game::mutators))
             {
                 loopi(numdyns) if((d = (gameent *)game::iterdynents(i)) && d->state == CS_ALIVE && d->aitype < AI_START)
@@ -2049,7 +2049,7 @@ namespace hud
                 {
                     if(m_duel(game::gamemode, game::mutators)) force = true;
                     else if(m_survivor(game::gamemode, game::mutators))
-                        force = (m_isteam(game::gamemode, game::mutators) ? (d->team != game::focus->team && others[game::focus->team] == 1) : (others[TEAM_NEUTRAL] == 2));
+                        force = (m_isteam(game::gamemode, game::mutators) ? (d->team != game::focus->team && others[game::focus->team] == 1) : (others[T_NEUTRAL] == 2));
                 }
                 drawplayerblip(d, w, h, style, blend*radarblend, force);
             }
@@ -2217,8 +2217,8 @@ namespace hud
 
     const char *teamtexname(int team)
     {
-        const char *teamtexs[TEAM_MAX] = { teamtex, teamalphatex, teamomegatex, teamkappatex, teamsigmatex, teamtex };
-        return teamtexs[clamp(team, 0, TEAM_MAX-1)];
+        const char *teamtexs[T_MAX] = { teamtex, teamalphatex, teamomegatex, teamkappatex, teamsigmatex, teamtex };
+        return teamtexs[clamp(team, 0, T_MAX-1)];
     }
 
     const char *privtex(int priv, int aitype)

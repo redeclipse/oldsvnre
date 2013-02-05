@@ -18,7 +18,7 @@ namespace defend
         vec colour = vec::hexcolor(TEAM(owner, colour));
         if(enemy)
         {
-            int team = owner && enemy && !defendinstant ? TEAM_NEUTRAL : enemy;
+            int team = owner && enemy && !defendinstant ? T_NEUTRAL : enemy;
             int timestep = totalmillis%1000;
             float amt = clamp((timestep <= 500 ? timestep/500.f : (1000-timestep)/500.f)*occupy, 0.f, 1.f);
             colour.lerp(vec::hexcolor(TEAM(team, colour)), amt);
@@ -202,20 +202,20 @@ namespace defend
             {
                 case 3:
                 {
-                    if(team && !isteam(game::gamemode, game::mutators, team, TEAM_NEUTRAL)) team = TEAM_NEUTRAL;
+                    if(team && !isteam(game::gamemode, game::mutators, team, T_NEUTRAL)) team = T_NEUTRAL;
                     break;
                 }
                 case 2:
                 {
-                    if(!isteam(game::gamemode, game::mutators, team, TEAM_FIRST)) continue;
+                    if(!isteam(game::gamemode, game::mutators, team, T_FIRST)) continue;
                     break;
                 }
                 case 1:
                 {
-                    if(team && !isteam(game::gamemode, game::mutators, team, TEAM_NEUTRAL)) continue;
+                    if(team && !isteam(game::gamemode, game::mutators, team, T_NEUTRAL)) continue;
                     break;
                 }
-                case 0: team = TEAM_NEUTRAL; break;
+                case 0: team = T_NEUTRAL; break;
             }
             defendstate::flag &b = st.flags.add();
             b.o = e->o;
@@ -228,12 +228,12 @@ namespace defend
             b.reset();
         }
         if(!st.flags.length()) return; // map doesn't seem to support this mode at all..
-        int bases[TEAM_ALL] = {0};
+        int bases[T_ALL] = {0};
         bool hasteams = true;
         loopv(st.flags) bases[st.flags[i].kinship]++;
         loopi(numteams(game::gamemode, game::mutators)-1) if(!bases[i+1] || (bases[i+1] != bases[i+2]))
         {
-            loopvk(st.flags) st.flags[k].kinship = TEAM_NEUTRAL;
+            loopvk(st.flags) st.flags[k].kinship = T_NEUTRAL;
             hasteams = false;
             break;
         }
@@ -241,7 +241,7 @@ namespace defend
         {
             vec average(0, 0, 0);
             int count = 0;
-            loopv(st.flags) if(!hasteams || st.flags[i].kinship != TEAM_NEUTRAL)
+            loopv(st.flags) if(!hasteams || st.flags[i].kinship != T_NEUTRAL)
             {
                 average.add(st.flags[i].o);
                 count++;
@@ -260,7 +260,7 @@ namespace defend
             if(!st.flags.inrange(smallest)) smallest = rnd(st.flags.length());
             int ent = st.flags[smallest].ent;
             copystring(st.flags[smallest].name, "the flag");
-            st.flags[smallest].kinship = TEAM_NEUTRAL;
+            st.flags[smallest].kinship = T_NEUTRAL;
             loopv(st.flags) if(st.flags[i].ent != ent) st.flags.remove(i--);
         }
     }

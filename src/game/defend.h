@@ -23,7 +23,7 @@ struct defendstate
 
         flag()
         {
-            kinship = TEAM_NEUTRAL;
+            kinship = T_NEUTRAL;
 #ifndef GAMESERVER
             ent = -1;
 #endif
@@ -32,7 +32,7 @@ struct defendstate
 
         void noenemy()
         {
-            enemy = TEAM_NEUTRAL;
+            enemy = T_NEUTRAL;
             enemies = 0;
             converted = 0;
         }
@@ -98,7 +98,7 @@ struct defendstate
                 return -1;
             }
             else if(converted<(!instant && owner ? 2 : 1)*occupy) return -1;
-            if(!instant && owner) { owner = TEAM_NEUTRAL; converted = 0; enemy = team; return 0; }
+            if(!instant && owner) { owner = T_NEUTRAL; converted = 0; enemy = team; return 0; }
             else { owner = team; securetime = 0; owners = enemies; noenemy(); return 1; }
         }
 
