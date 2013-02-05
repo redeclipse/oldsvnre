@@ -948,7 +948,7 @@ namespace projs
 
     void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
-        int delay = W2(weap, pdelay, WS(flags)), adelay = W2(weap, adelay, WS(flags)),
+        int delay = W2(weap, projdelay, WS(flags)), attackdelay = W2(weap, attackdelay, WS(flags)),
             power = W2(weap, power, WS(flags)), cooked = W2(weap, cooked, WS(flags)),
             life = W2(weap, time, WS(flags)), speed = W2(weap, speed, WS(flags)),
             limspeed = W2(weap, limspeed, WS(flags));
@@ -970,7 +970,7 @@ namespace projs
             {
                 if(weap == W_FLAMER && !(WS(flags)))
                 {
-                    int ends = lastmillis+W2(weap, adelay, WS(flags))+PHYSMILLIS;
+                    int ends = lastmillis+attackdelay+PHYSMILLIS;
                     if(issound(d->wschan) && sounds[d->wschan].slotnum == slot) sounds[d->wschan].ends = ends;
                     else playsound(slot, d->o, d, SND_LOOP, vol, -1, -1, &d->wschan, ends);
                 }
@@ -985,7 +985,7 @@ namespace projs
                 }
             }
         }
-        if(W2(weap, adelay, WS(flags)) >= 5)
+        if(attackdelay >= 5)
         {
             int colour = WHCOL(d, weap, partcol, WS(flags));
             float muz = d == game::focus ? muzzlefade : muzzleblend;
@@ -1010,16 +1010,16 @@ namespace projs
             if(weapfx[weap].sparktime && weapfx[weap].sparknum)
                 part_splash(weap == W_FLAMER ? PART_FIREBALL : PART_SPARK, weapfx[weap].sparknum, weapfx[weap].sparktime, from, colour, weapfx[weap].sparksize, muz, 1, 0, weapfx[weap].sparkrad, 15);
             if(muzzlechk(muzzleflash, d) && weapfx[weap].partsize > 0)
-                part_create(weapfx[weap].parttype, W2(weap, adelay, WS(flags))/3, from, colour, weapfx[weap].partsize, muz, 0, 0, d);
+                part_create(weapfx[weap].parttype, attackdelay/3, from, colour, weapfx[weap].partsize, muz, 0, 0, d);
             if(muzzlechk(muzzleflare, d) && weapfx[weap].flaresize > 0)
             {
                 vec targ; findorientation(d->o, d->yaw, d->pitch, targ);
                 targ.sub(from).normalize().mul(weapfx[weap].flarelen).add(from);
-                part_flare(from, targ, W2(weap, adelay, WS(flags))/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
+                part_flare(from, targ, attackdelay/2, PART_MUZZLE_FLARE, colour, weapfx[weap].flaresize, muz, 0, 0, d);
             }
             if(weap != W_MELEE)
             {
-                int peak = W2(weap, adelay, WS(flags))/4, fade = min(peak/2, 75);
+                int peak = attackdelay/4, fade = min(peak/2, 75);
                 adddynlight(from, 32, vec::hexcolor(colour).mul(0.5f), fade, peak - fade, DL_FLASH);
             }
         }
@@ -1029,9 +1029,9 @@ namespace projs
         if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(offset, 1, W2(weap, sub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
-        if(d->aitype >= AI_BOT && d->skill <= 100 && (!W2(weap, fullauto, WS(flags)) || adelay >= PHYSMILLIS))
-            adelay += int(ceilf(adelay*(10.f/d->skill)));
-        d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, adelay, lastmillis);
+        if(d->aitype >= AI_BOT && d->skill <= 100 && (!W2(weap, fullauto, WS(flags)) || attackdelay >= PHYSMILLIS))
+            attackdelay += int(ceilf(attackdelay*(10.f/d->skill)));
+        d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, attackdelay, lastmillis);
         d->ammo[weap] = max(d->ammo[weap]-offset, 0);
         d->weapshot[weap] = offset;
         if(d->aitype < AI_START || aistyle[d->aitype].canmove)
@@ -1697,7 +1697,7 @@ namespace projs
     void escaped(projent &proj, const vec &pos, const vec &dir)
     {
         if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
-        else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? W2(proj.weap, edelay, WS(proj.flags)) : PHYSMILLIS))
+        else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? W2(proj.weap, escapedelay, WS(proj.flags)) : PHYSMILLIS))
         {
             if(proj.projcollide&COLLIDE_TRACE)
             {
@@ -1725,7 +1725,7 @@ namespace projs
                 if(!dir.iszero()) (proj.vel = dir).mul(mag);
             }
         }
-        else if(proj.projtype == PRJ_SHOT && proj.escaped && WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)) && lastmillis-proj.spawntime >= WF(WK(proj.flags), proj.weap, gdelay, WS(proj.flags)))
+        else if(proj.projtype == PRJ_SHOT && proj.escaped && WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)) && lastmillis-proj.spawntime >= WF(WK(proj.flags), proj.weap, guideddelay, WS(proj.flags)))
         {
             vec dir = vec(proj.vel).normalize();
             switch(WF(WK(proj.flags), proj.weap, guided, WS(proj.flags)))
