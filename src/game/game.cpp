@@ -1058,8 +1058,16 @@ namespace game
                 if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
                 {
                     float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
-                    if(d == actor && WF(WK(flags), weap, selfdmg, WS(flags)) != 0)
-                        amt *= 1/float(WF(WK(flags), weap, selfdmg, WS(flags)));
+                    if(d == actor)
+                    {
+                        float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
+                        if(modify != 0) amt *= 1/modify;
+                    }
+                    else if(m_isteam(gamemode, mutators) && d->team == actor->team)
+                    {
+                        float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
+                        if(modify != 0) amt *= 1/modify;
+                    }
                     vec psh = vec(dir).mul(WF(WK(flags), weap, hitpush, WS(flags))*amt);
                     if(!psh.iszero()) d->vel.add(psh);
                 }
