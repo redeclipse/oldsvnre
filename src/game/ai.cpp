@@ -127,7 +127,7 @@ namespace ai
         if(weaprange(d, d->weapselect, alt, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
             if(weaptype[d->weapselect].melee) return true;
-            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*W(d->weapselect, rdelay)/5000.f)+(d->skill*W2(d->weapselect, adelay, alt)/500.f)), 0.f, weaptype[d->weapselect].thrown ? 0.25f : 1e16f),
+            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*W(d->weapselect, reloaddelay)/5000.f)+(d->skill*W2(d->weapselect, attackdelay, alt)/500.f)), 0.f, weaptype[d->weapselect].thrown ? 0.25f : 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
             if(offy > 180) offy -= 360;
             else if(offy < -180) offy += 360;
@@ -1155,7 +1155,7 @@ namespace ai
                 game::getyawpitch(dp, ep, yaw, pitch);
                 game::fixrange(yaw, pitch);
                 bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
-                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, adelay, alt)*3 : skmod)+30;
+                    quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (W2(d->weapselect, fullauto, alt) ? W2(d->weapselect, attackdelay, alt)*3 : skmod)+30;
                 if(insight) d->ai->enemyseen = lastmillis;
                 if(idle || insight || hasseen || quick)
                 {

@@ -78,7 +78,7 @@ namespace weapons
             if(doact)
             {
                 playsound(WSND(weap, S_W_RELOAD), d->o, d, 0, -1, -1, -1, &d->wschan);
-                d->setweapstate(weap, W_S_RELOAD, W(weap, rdelay), lastmillis);
+                d->setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), lastmillis);
             }
             return true;
         }
@@ -308,7 +308,7 @@ namespace weapons
             loopi(rays)
             {
                 vec dest;
-                if(spread > 0) offsetray(from, to, spread, W2(weap, zdiv, secondary), dest);
+                if(spread > 0) offsetray(from, to, spread, W2(weap, spreadz, secondary), dest);
                 else dest = to;
                 if(weaptype[weap].thrown[secondary ? 1 : 0] > 0)
                     dest.z += from.dist(dest)*weaptype[weap].thrown[secondary ? 1 : 0];

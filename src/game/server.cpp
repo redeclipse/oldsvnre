@@ -3492,7 +3492,7 @@ namespace server
             else return;
         }
         takeammo(ci, weap, sub);
-        gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, adelay, WS(flags)), millis);
+        gs.setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, W2(weap, attackdelay, WS(flags)), millis);
         sendf(-1, 1, "ri8ivx", N_SHOTFX, ci->clientnum, weap, flags, scale, from.x, from.y, from.z, shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf(), ci->clientnum);
         gs.weapshot[weap] = sub;
         gs.shotdamage += W2(weap, damage, WS(flags))*shots.length();
@@ -3587,7 +3587,7 @@ namespace server
             sendf(ci->clientnum, 1, "ri6", N_RELOAD, ci->clientnum, weap, gs.weapload[weap], gs.ammo[weap], gs.reloads[weap]);
             return;
         }
-        gs.setweapstate(weap, W_S_RELOAD, W(weap, rdelay), millis);
+        gs.setweapstate(weap, W_S_RELOAD, W(weap, reloaddelay), millis);
         int oldammo = gs.ammo[weap];
         gs.ammo[weap] = min(max(gs.ammo[weap], 0) + W(weap, add), W(weap, max));
         gs.reloads[weap]++;
