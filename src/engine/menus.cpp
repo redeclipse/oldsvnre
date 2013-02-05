@@ -618,7 +618,7 @@ COMMAND(0, guieditor, "siiiiis");
 void guiplayerpreview(int *model, int *color, int *team, int *weap, char *action, float *scale, int *overlaid, float *size, float *blend, char *altact)
 {
     if(!cgui) return;
-    int ret = cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0, *size, *blend);
+    int ret = cgui->playerpreview(*model, *color, *team, *weap, *scale, *overlaid!=0, *size!=0 ? *size : 1.f, *blend!=0 ? *blend : 1.f);
     if(ret&GUI_UP)
     {
         char *act = NULL;
@@ -652,7 +652,7 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
             if(anims.length()) anim = anims[0];
         }
     }
-    int ret = cgui->modelpreview(model, anim|ANIM_LOOP, *scale, *overlaid!=0, *size, *blend);
+    int ret = cgui->modelpreview(model, anim|ANIM_LOOP, *scale, *overlaid!=0, *size!=0 ? *size : 1.f, *blend!=0 ? *blend : 1.f);
     if(ret&GUI_UP)
     {
         char *act = NULL;
