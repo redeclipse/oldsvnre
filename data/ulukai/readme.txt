@@ -7,7 +7,7 @@ The corona and redeclipse skyboxes were made with Spacescape version 0.3,
 (Spacescape is copyright 2010 Alex Peterson, MIT (Expat) License).
 
 The image of the red eclipse in the redeclipse skybox is originally based on a
-photo by Luc Viatour
-<https://en.wikipedia.org/wiki/File:Solar_eclipse_1999_4_NR.jpg> which is
-licensed under CC-BY-SA-3.0. It has been modified by David Iliff and Dratz-C
-prior to inclusion in the skybox.
+photo by Luc Viatour <http://www.Lucnix.be> taken from
+<https://en.wikipedia.org/wiki/File:Solar_eclips_1999_4.jpg> which is
+licensed under CC-BY-SA-3.0.
+It has been modified by Dratz-C prior to inclusion in the skybox.
