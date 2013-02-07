@@ -7,7 +7,8 @@ Gameplay:
    intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with
    /thirdpersondist and /thirdpersonside)
- * Updated shotgun animation
+ * Improved shotgun animation
+ * Improved player model animation
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
