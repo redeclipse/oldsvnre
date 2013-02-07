@@ -249,7 +249,7 @@ namespace projs
 
     bool hiteffect(projent &proj, physent *d, int flags, const vec &norm)
     {
-        if(!isdynent(d->type)) return false;
+        if(!d || !isdynent(d->type)) return false;
         if(proj.projtype == PRJ_SHOT && physics::issolid(d, &proj))
         {
             bool drill = (proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER)) ? false : true;
@@ -1621,7 +1621,7 @@ namespace projs
 
     int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
-        if(isdynent(d->type) && (d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM))
+        if((!d || isdynent(d->type)) && (d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM))
         {
             if(d)
             {
