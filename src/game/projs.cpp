@@ -174,47 +174,6 @@ namespace projs
         }
     }
 
-    bool hiteffect(projent &proj, physent *d, int flags, const vec &norm)
-    {
-        if(proj.projtype == PRJ_SHOT && physics::issolid(d, &proj))
-        {
-            proj.hit = d;
-            proj.hitflags = flags;
-            float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
-            if(proj.local && expl <= 0)
-            {
-                if(d->type == ENT_PLAYER || d->type == ENT_AI)
-                {
-                    int flags = 0;
-                    if(proj.hitflags&HITFLAG_LEGS) flags |= HIT_LEGS;
-                    if(proj.hitflags&HITFLAG_TORSO) flags |= HIT_TORSO;
-                    if(proj.hitflags&HITFLAG_HEAD) flags |= HIT_HEAD;
-                    if(flags) hitpush((gameent *)d, proj, flags|HIT_PROJ, 0, proj.lifesize, proj.curscale);
-                }
-                else if(d->type == ENT_PROJ) projpush((projent *)d);
-            }
-            int type = WF(WK(proj.flags), proj.weap, parttype, WS(proj.flags));
-            switch(type)
-            {
-                case -1: break;
-                case W_RIFLE:
-                    part_splash(PART_SPARK, 25, 500, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale*0.125f, 1, 1, 0, 24, 20);
-                    part_create(PART_PLASMA, 500, proj.o, FWCOL(H, partcol, proj), expl*0.5f, 0.5f, 0, 0);
-                    adddynlight(proj.o, expl*1.1f, FWCOL(P, partcol, proj), 250, 10);
-                    break;
-                default:
-                    if(weaptype[proj.weap].melee)
-                    {
-                        part_flare(proj.o, proj.from, 500, type == W_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.75f);
-                        part_create(PART_PLASMA, 500, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.5f);
-                    }
-                    break;
-            }
-            return (proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER)) ? false : true;
-        }
-        return false;
-    }
-
     bool radialeffect(dynent *d, projent &proj, int flags, float radius)
     {
         bool push = WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) > 1, radiated = false;
@@ -284,6 +243,55 @@ namespace projs
             if(dist >= 0 && dist <= radius) projpush(e);
         }
         return radiated;
+    }
+
+    #define isdynent(x) (x == ENT_PLAYER || x == ENT_AI || x == ENT_PROJ)
+
+    bool hiteffect(projent &proj, physent *d, int flags, const vec &norm)
+    {
+        if(!isdynent(d->type)) return false;
+        if(proj.projtype == PRJ_SHOT && physics::issolid(d, &proj))
+        {
+            bool drill = (proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER)) ? false : true;
+            proj.hit = d;
+            proj.hitflags = flags;
+            float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
+            if(!proj.limited && proj.local)
+            {
+                if(expl > 0)
+                {
+                    if(drill) radialeffect((dynent *)d, proj, HIT_EXPLODE, expl); // only if we're drilling
+                }
+                else if(d->type == ENT_PLAYER || d->type == ENT_AI)
+                {
+                    int flags = 0;
+                    if(proj.hitflags&HITFLAG_LEGS) flags |= HIT_LEGS;
+                    if(proj.hitflags&HITFLAG_TORSO) flags |= HIT_TORSO;
+                    if(proj.hitflags&HITFLAG_HEAD) flags |= HIT_HEAD;
+                    if(flags) hitpush((gameent *)d, proj, flags|HIT_PROJ, 0, proj.lifesize, proj.curscale);
+                }
+                else if(d->type == ENT_PROJ) projpush((projent *)d);
+            }
+            int type = WF(WK(proj.flags), proj.weap, parttype, WS(proj.flags));
+            switch(type)
+            {
+                case -1: break;
+                case W_RIFLE:
+                    part_splash(PART_SPARK, 25, 500, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale*0.125f, 1, 1, 0, 24, 20);
+                    part_create(PART_PLASMA, 500, proj.o, FWCOL(H, partcol, proj), expl*0.5f, 0.5f, 0, 0);
+                    adddynlight(proj.o, expl*1.1f, FWCOL(P, partcol, proj), 250, 10);
+                    break;
+                default:
+                    if(weaptype[proj.weap].melee)
+                    {
+                        part_flare(proj.o, proj.from, 500, type == W_SWORD ? PART_LIGHTNING_FLARE : PART_MUZZLE_FLARE, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.75f);
+                        part_create(PART_PLASMA, 500, proj.o, FWCOL(H, partcol, proj), WF(WK(proj.flags), proj.weap, partsize, WS(proj.flags))*proj.curscale, 0.5f);
+                    }
+                    break;
+            }
+            return !drill;
+        }
+        return false;
     }
 
     void remove(gameent *owner)
@@ -1613,7 +1621,7 @@ namespace projs
 
     int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
-        if(d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM)
+        if(isdynent(d->type) && (d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM))
         {
             if(d)
             {
