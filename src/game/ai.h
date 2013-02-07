@@ -75,7 +75,7 @@ aistyles aistyle[] = {
 };
 #endif
 #else
-enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
+enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_DRONE, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
     {
@@ -98,9 +98,15 @@ aistyles aistyle[] = {
     },
     {
         AI_GRUNT,       W_MELEE,     50,
+            3,          3,          14,         200,        50,         1,
+            true,       true,       true,       true,       true,       true,       true,
+                "player",   { "actors/player/male",     "actors/player/male/hwep" }
+    },
+    {
+        AI_DRONE,       W_MELEE,     50,
             3,          3,          14,         150,        40,         1,
             true,       false,      true,       true,       true,       true,       true,
-                "grunt",    { "actors/grunt",           "actors/player/male/hwep" }
+                "drone",    { "actors/drone",           "actors/player/male/hwep" }
     },
 };
 #endif

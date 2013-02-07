@@ -2532,7 +2532,7 @@ namespace game
         else mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
 #else
         const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][tpmdl ? 0 : 1];
-        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
+        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
         else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);

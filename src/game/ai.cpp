@@ -1220,7 +1220,7 @@ namespace ai
         if(!result) game::scaleyawpitch(d->yaw, d->pitch, d->ai->targyaw, d->ai->targpitch, frame, frame*0.5f);
 
         if(aistyle[d->aitype].canjump && (!d->ai->dontmove || b.idle)) jumpto(d, b, d->ai->spot, locked);
-        if(d->aitype == AI_BOT)
+        if(d->aitype == AI_BOT || d->aitype == AI_GRUNT)
         {
             bool wantsrun = false;
             if(physics::allowimpulse(d, IM_A_SPRINT))
