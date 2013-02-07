@@ -74,7 +74,7 @@ GSVAR(IDF_ADMIN, smallmaps, "riviera");
 GSVAR(IDF_ADMIN, mediummaps, "riviera");
 GSVAR(IDF_ADMIN, largemaps, "riviera");
 #else
-GSVAR(IDF_ADMIN, allowmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness dawn deadsimple deathtrap deli depot dropzone dutility echo erosion error forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone2k lab linear longestyard mist neodrive nova oneiroi panic processing pumpstation purge spacetech starlibido stone suspended testchamber tower tranquility tribal ubik venus warp wet");
+GSVAR(IDF_ADMIN, allowmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec cyanide darkness dawn deadsimple deathtrap deli depot dropzone dutility echo erosion error forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone2k lab linear longestyard mist neodrive nova oneiroi panic processing pumpstation purge spacetech starlibido stone suspended testchamber tower tranquility tribal ubik venus warp wet");
 
 GSVAR(IDF_ADMIN, mainmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deathtrap deli depot dropzone dutility echo erosion error foundation fourplex futuresport ghost industrial institute isolation keystone2k linear longestyard mist nova oneiroi panic processing pumpstation spacetech starlibido stone suspended tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, capturemaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost industrial institute isolation keystone2k linear mist nova panic pumpstation stone suspended tribal venus warp wet");
@@ -82,7 +82,7 @@ GSVAR(IDF_ADMIN, defendmaps, "ares bath battlefield biolytic canals cargo center
 GSVAR(IDF_ADMIN, kingmaps, "ares bath battlefield biolytic canals cargo center colony conflict darkness deadsimple depot dropzone dutility echo fourplex futuresport industrial linear processing stone suspended tower tribal ubik venus");
 GSVAR(IDF_ADMIN, bombermaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost industrial isolation linear mist nova pumpstation stone suspended tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost industrial isolation keystone2k linear mist nova panic processing pumpstation stone suspended tower tribal ubik venus warp wet");
-GSVAR(IDF_ADMIN, trialmaps, "hawk hinder neodrive purge testchamber");
+GSVAR(IDF_ADMIN, trialmaps, "cyanide hawk hinder neodrive purge testchamber");
 
 GSVAR(IDF_ADMIN, multimaps, "canals deadsimple depot keystone2k warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
