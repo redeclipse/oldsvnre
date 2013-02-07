@@ -97,15 +97,15 @@ aistyles aistyle[] = {
                 "turret",   { "actors/turret",          "actors/player/male/hwep" }
     },
     {
-        AI_GRUNT,       W_MELEE,     50,
+        AI_GRUNT,       W_PISTOL,   50,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "player",   { "actors/player/male",     "actors/player/male/hwep" }
+                "grunt",   { "actors/player/male",     "actors/player/male/hwep" }
     },
     {
         AI_DRONE,       W_MELEE,     50,
             3,          3,          14,         150,        40,         1,
-            true,       false,      true,       true,       true,       true,       true,
+            true,       true,       true,       true,       true,       true,       true,
                 "drone",    { "actors/drone",           "actors/player/male/hwep" }
     },
 };
