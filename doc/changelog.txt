@@ -7,6 +7,7 @@ Gameplay:
    intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with
    /thirdpersondist and /thirdpersonside)
+ * Updated shotgun animation
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
@@ -34,7 +35,7 @@ Modes & Mutators:
 Maps:
  * Assigned map music to all maps
  * Canals, updated and added to rotations
- * Fourplex, updated to version 1.3
+ * Fourplex, updated to version 1.6
  * Starlibido, updated to version 1.4b
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.5)
@@ -45,6 +46,8 @@ Maps:
  * Conflict, updated
  * Blink, removed
  * Facility, removed
+ * Cyanide, new trial map
+ * Deadsimple, updated
 
 Interface & Menus:
  * Overall reduced font sizes
@@ -90,6 +93,7 @@ Modding & Data Assets:
  * Added 19 new skyboxes ('elyvisions' and 'mayhem' directories)
  * Removed texture kurt/rock01
  * Added 121 new textures from philipk's 'pk01' and 'pk02' sets
+ * grunt renamed to drone
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same
