@@ -16,7 +16,7 @@ TEAMS(alpha, 0x5F66FF);
 TEAMS(omega, 0xFF4F44);
 TEAMS(kappa, 0xFFD022);
 TEAMS(sigma, 0x22FF22);
-TEAMS(enemy, 0xF8F0E8);
+TEAMS(enemy, 0xF88820);
 
 #ifdef GAMESERVER
 #define TEAMDEF(proto,name)     proto *sv_team_stat_##name[] = { &sv_teamneutral##name, &sv_teamalpha##name, &sv_teamomega##name, &sv_teamkappa##name, &sv_teamsigma##name, &sv_teamenemy##name };
