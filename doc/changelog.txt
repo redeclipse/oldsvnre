@@ -7,8 +7,6 @@ Gameplay:
    intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with
    /thirdpersondist and /thirdpersonside)
- * Improved shotgun animation
- * Improved player model animation
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
@@ -18,7 +16,6 @@ Weapons:
    pickup-based (like grenade)
  * Rifle explosion size and hitpush reduced (reduces hit area, total explosion
    damage, and pushing force)
- * Rifle zoom can now only be controlled via zoomlevels by players
  * SMG secondary now sticks to objects and explodes radially after a short
    delay, primary spread reduced
  * Pistol secondary spread increased
@@ -42,13 +39,12 @@ Maps:
  * Erosion, new map (added from mapversion 1.5)
  * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from
    Blood Frontier)
- * Hawk, fixed a checkpoint bug
  * Suspended, new map (added from mapversion 1.4)
  * Conflict, updated
  * Blink, removed
  * Facility, removed
  * Cyanide, new trial map
- * Deadsimple, updated
+ * Deadsimple, updated (retextured)
 
 Interface & Menus:
  * Overall reduced font sizes
@@ -79,14 +75,14 @@ Modding & Data Assets:
  * Added support for up to 4 types of water, lava, and glass
  * Added possible missile behaviour guided style for weapons
  * Added cloudoffsetx, cloudoffsety, envoffsetx, and envoffsety vars
- * Added new variables for proximity & stealth mine weapons
+ * Added new variables for proximity & stealth mine-type weapons
  * Changed weapon variables: pusharea -> wavepush1/wavepush2, removed weapon
    jamming
  * Added variable number of loadout weapons in arena via 'maxcarry'
  * Added new variables for projectile collision: "bounce shot" and "drill
    geom/player/shot" which allows penetration through normal collisions
  * Added mapmodels 'roll' property
- * Zooming is now limited by zoomlimitmin and zoomlimitmax
+ * Zooming of weapons is now limited by zoomlimit{min,max}, zoomfov removed
  * Added 'weaponinterrupts' server variable which allows control over which
    weapon states may be interrupted by the player
  * Renamed 'blarg' directory to 'misc' for random textures
@@ -95,15 +91,17 @@ Modding & Data Assets:
  * Removed texture kurt/rock01
  * Added 121 new textures from philipk's 'pk01' and 'pk02' sets
  * grunt renamed to drone
+ * Improved shotgun animation
+ * Improved thirdperson player model animation
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same
    maps
  * Added vetolock variable to determine who may force match votes
- * Added additional privilege levels (supporter, operator, developer)
+ * Added additional privilege levels (supporter, operator, developer) and icons for all levels
 
 Core & Install:
- * Added IRC gudelines
+ * Added IRC guidelines
  * Client now uses log.txt in the homedir by default
  * Binary files moved to bin/{amd64,x86}/ subdirectories
  * MekArcade source code tree merged in
