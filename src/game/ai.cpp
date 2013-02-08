@@ -329,6 +329,7 @@ namespace ai
 
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard, int pursue, bool force)
     {
+        if(passive() || (d->ai->enemy && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
         gameent *t = NULL, *e = NULL;
         vec dp = d->headpos();
         float mindist = guard*guard, bestdist = 1e16f;
@@ -391,7 +392,7 @@ namespace ai
 
     bool violence(gameent *d, aistate &b, gameent *e, int pursue)
     {
-        if(passive()) return false;
+        if(passive() || (d->ai->enemy && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
         if(e && targetable(d, e))
         {
             if(pursue)
