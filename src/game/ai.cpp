@@ -392,7 +392,7 @@ namespace ai
 
     bool violence(gameent *d, aistate &b, gameent *e, int pursue)
     {
-        if(passive() || (d->ai->enemy && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
+        if(passive() || (d->ai->enemy >= 0 && lastmillis-d->ai->enemymillis >= (111-d->skill)*50)) return false;
         if(e && targetable(d, e))
         {
             if(pursue)
@@ -456,6 +456,8 @@ namespace ai
             }
             if(t)
             {
+                d->ai->enemy = -1;
+                d->ai->enemymillis = d->ai->enemyseen = 0;
                 if(violence(d, b, t->d, pursue)) return true;
                 t->tried = true;
             }
@@ -610,7 +612,7 @@ namespace ai
     {
         if(d != e)
         {
-            if(d->ai && (d->aitype >= AI_START || hithurts(flags) || !game::getclient(d->ai->enemy))) // see if this ai is interested in a grudge
+            if(d->ai && (d->aitype >= AI_START || hithurts(flags) || d->ai->enemy < 0)) // see if this ai is interested in a grudge
             {
                 aistate &b = d->ai->getstate();
                 violence(d, b, e, d->aitype != AI_BOT || weaptype[d->weapselect].melee ? 1 : 0);
