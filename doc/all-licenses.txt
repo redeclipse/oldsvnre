@@ -232,14 +232,7 @@ License: CC-BY-SA-3.0+ and Mark-Policy
 Files: data/torley/*
 Copyright: 2007-2008, Torley Linden
            2010, Red Eclipse Team
-License: custom and CC-BY-3.0-US
- All Torley Textures are 512x512 in (lossless) PNG format and seamlessly tiling.
- Use 'em almost however you want — just don't resell as-is — and let me know if
- you make somethin' kewl with 'em. You can also get them in Second Life @
- http://torley.com/here
- .
- This work is licensed under a Creative Commons Attribution 3.0 United States
- License: http://creativecommons.org/licenses/by/3.0/us/
+License: CC-BY-SA-3.0
 
 Files: data/sounds/ambience/*
 Copyright: Quinton "quin" Reeves, Alex "blackshoe" Anguix
