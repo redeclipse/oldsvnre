@@ -1072,7 +1072,7 @@ namespace game
                     {
                         vec psh = vec(dir).mul(hit);
                         if(!psh.iszero()) d->vel.add(psh);
-                        d->quake = clamp(d->quake+max(int(hit), 1), 0, quakelimit);
+                        d->quake = min(d->quake+max(int(hit), 1), quakelimit);
                     }
                 }
             }
@@ -2252,7 +2252,7 @@ namespace game
     float calcroll(gameent *d)
     {
         bool thirdperson = d != focus || thirdpersonview(true);
-        float r = thirdperson ? 0 : d->roll, wobble = float(rnd(quakewobble)-quakewobble/2)*(float(min(d->quake, 100))/100.f);
+        float r = thirdperson ? 0 : d->roll, wobble = float(rnd(quakewobble)-quakewobble/2)*(float(min(d->quake, quakelimit))/1000.f);
         switch(d->state)
         {
             case CS_SPECTATOR: case CS_WAITING: r = wobble*0.5f; break;
