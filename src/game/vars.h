@@ -390,6 +390,7 @@ GFVAR(0, stillspread, 0, 0, FVAR_MAX);
 
 GVAR(0, quakefade, 0, 250, VAR_MAX);
 GVAR(0, quakewobble, 1, 19, VAR_MAX);
+GVAR(0, quakelimit, 0, 250, VAR_MAX);
 
 GVAR(0, zoomlock, 0, 0, 4); // 0 = unrestricted, 1 = must be on floor, 2 = also must not be moving, 3 = also must be on flat floor, 4 = must also be crouched
 GVAR(0, zoomlocktime, 0, 500, VAR_MAX); // time before zoomlock kicks in when in the air

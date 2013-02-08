@@ -1392,15 +1392,6 @@ namespace projs
         }
     }
 
-    void quake(const vec &o, int weap, int flags, float scale)
-    {
-        int q = int(WF(WK(flags), weap, damage, WS(flags))/float(W2(weap, rays, WS(flags)))), r = int(WF(WK(flags), weap, radius, WS(flags))*WF(WK(flags), weap, wavepush, WS(flags))*scale);
-        gameent *d;
-        int numdyns = game::numdynents();
-        loopi(numdyns) if((d = (gameent *)game::iterdynents(i)))
-            d->quake = clamp(d->quake+max(int(q*max(1.f-d->o.dist(o)/r, 1e-3f)), 1), 0, 1000);
-    }
-
     void destroy(projent &proj)
     {
         proj.lifespan = clamp((proj.lifemillis-proj.lifetime)/float(max(proj.lifemillis, 1)), 0.f, 1.f);
@@ -1420,7 +1411,6 @@ namespace projs
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
-                            quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 200, FWCOL(H, explcol, proj), 1.f, 0.95f);
                             part_splash(PART_SPARK, 15, 250, proj.o, FWCOL(H, partcol, proj), 0.25f, 1, 1, 0, expl, 15);
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
@@ -1444,7 +1434,6 @@ namespace projs
                             part_create(PART_PLASMA_SOFT, projtraillength*(type != W_ROCKET ? 2 : 3), proj.o, FWCOL(H, partcol, proj), max(expl*0.5f, 0.5f), 0.5f); // corona
                             if(expl > 0)
                             {
-                                quake(proj.o, proj.weap, proj.flags, proj.curscale);
                                 int len = type != W_ROCKET ? 500 : 750;
                                 part_explosion(proj.o, expl, PART_EXPLOSION, len, FWCOL(H, explcol, proj), 1.f, 1);
                                 part_splash(PART_SPARK, 50, len*2, proj.o, FWCOL(H, partcol, proj), 0.75f, 1, 1, 0, expl, 20);
@@ -1477,7 +1466,6 @@ namespace projs
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
-                            quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl*0.5f, PART_EXPLOSION, 250, FWCOL(H, explcol, proj), 1.f, 0.95f);
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*0.5f*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, 125, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.25f*projhintblend);
@@ -1492,7 +1480,6 @@ namespace projs
                         float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
                         if(expl > 0)
                         {
-                            quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, FWCOL(H, explcol, proj), 1.f, 0.95f);
                             if(WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)) >= 1)
                                 part_explosion(proj.o, expl*WF(WK(proj.flags), proj.weap, wavepush, WS(proj.flags)), PART_SHOCKWAVE, len/2, projhint(proj.owner, FWCOL(H, explcol, proj)), 1.f, 0.125f*projhintblend);
@@ -1515,7 +1502,6 @@ namespace projs
                         int len = WS(proj.flags) ? 750 : 500;
                         if(expl > 0)
                         {
-                            quake(proj.o, proj.weap, proj.flags, proj.curscale);
                             part_create(PART_PLASMA_SOFT, len, proj.o, FWCOL(H, partcol, proj), expl*0.5f, 0.5f); // corona
                             part_splash(PART_SPARK, 50, len*2, proj.o, FWCOL(H, partcol, proj), 0.25f, 1, 1, 0, expl, 15);
                             part_explosion(proj.o, expl, PART_SHOCKBALL, len, FWCOL(H, explcol, proj), 1.f, 0.95f);

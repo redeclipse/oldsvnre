@@ -1029,7 +1029,6 @@ namespace game
                             part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
                     }
                     if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
-                    if(!burning && !bleeding) d->quake = clamp(d->quake+max(damage/2, 1), 0, 1000);
                     d->lastpain = lastmillis;
                 }
                 if(d != actor)
@@ -1068,8 +1067,13 @@ namespace game
                         float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
                         if(modify != 0) amt *= 1/modify;
                     }
-                    vec psh = vec(dir).mul(WF(WK(flags), weap, hitpush, WS(flags))*amt);
-                    if(!psh.iszero()) d->vel.add(psh);
+                    float hit = WF(WK(flags), weap, hitpush, WS(flags))*amt;
+                    if(hit > 0)
+                    {
+                        vec psh = vec(dir).mul(hit);
+                        if(!psh.iszero()) d->vel.add(psh);
+                        d->quake = clamp(d->quake+max(int(hit), 1), 0, quakelimit);
+                    }
                 }
             }
             ai::damaged(d, actor, weap, flags, damage);
