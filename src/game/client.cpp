@@ -232,15 +232,15 @@ namespace client
     ICOMMAND(0, demoinfo, "bb", (int *idx, int *prop, int *numargs), infodemo(*idx, *prop));
 
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
-    string authname = "", authkey = "";
-
+    SVAR(IDF_PERSIST, accountuser, "");
+    SVAR(IDF_PERSIST, accountpass, "");
     void setauthkey(const char *name, const char *key)
     {
-        copystring(authname, name);
-        copystring(authkey, key);
+        copystring(accountuser, name);
+        copystring(accountpass, key);
     }
     ICOMMAND(0, authkey, "ss", (char *name, char *key), setauthkey(name, key));
-    ICOMMAND(0, hasauthkey, "", (), intret(authname[0] && authkey[0] ? 1 : 0));
+    ICOMMAND(0, hasauthkey, "", (), intret(accountuser[0] && accountpass[0] ? 1 : 0));
 
     void writegamevars(const char *name, bool all = false, bool server = false)
     {
@@ -689,8 +689,8 @@ namespace client
 
     void tryauth()
     {
-        if(!authname[0]) return;
-        addmsg(N_AUTHTRY, "rs", authname);
+        if(!accountuser[0]) return;
+        addmsg(N_AUTHTRY, "rs", accountuser);
     }
     ICOMMAND(0, auth, "", (), tryauth());
 
@@ -1215,7 +1215,7 @@ namespace client
             memset(connectpass, 0, sizeof(connectpass));
         }
         sendstring(hash, p);
-        sendstring(authconnect ? authname : "", p);
+        sendstring(authconnect ? accountuser : "", p);
         sendclientpacket(p.finalize(), 1);
     }
 
@@ -2496,11 +2496,11 @@ namespace client
                 {
                     uint id = (uint)getint(p);
                     getstring(text, p);
-                    if(authname[0])
+                    if(accountuser[0] && accountpass[0])
                     {
-                        conoutft(CON_MESG, "server is challenging authentication details..");
+                        conoutft(CON_MESG, "aswering account challenge..");
                         vector<char> buf;
-                        answerchallenge(authkey, text, buf);
+                        answerchallenge(accountpass, text, buf);
                         addmsg(N_AUTHANS, "ris", id, buf.getbuf());
                     }
                     break;
