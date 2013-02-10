@@ -234,12 +234,10 @@ namespace client
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
     SVAR(IDF_PERSIST, accountuser, "");
     SVAR(IDF_PERSIST, accountpass, "");
-    void setauthkey(const char *name, const char *key)
-    {
-        copystring(accountuser, name);
-        copystring(accountpass, key);
-    }
-    ICOMMAND(0, authkey, "ss", (char *name, char *key), setauthkey(name, key));
+    ICOMMAND(0, authkey, "ss", (char *name, char *key), {
+        setsvar("accountuser", name);
+        setsvar("accountpass", key);
+    });
     ICOMMAND(0, hasauthkey, "", (), intret(accountuser[0] && accountpass[0] ? 1 : 0));
 
     void writegamevars(const char *name, bool all = false, bool server = false)

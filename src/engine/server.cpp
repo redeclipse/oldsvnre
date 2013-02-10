@@ -1446,7 +1446,7 @@ void writecfg()
         }
     }
     if(found) f->printf("\n");
-    //writebinds(f);
+    writebinds(f);
     delete f;
 #endif
 }
