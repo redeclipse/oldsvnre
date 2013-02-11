@@ -853,6 +853,7 @@ namespace server
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
     extern const char *gamename(int mode, int muts, int compact = 0);
     extern void waiting(clientinfo *ci, int drop = 0, bool exclude = false);
+    extern void setteam(clientinfo *ci, int team, bool reset = true, bool info = false);
 }
 
 #if !defined(GAMESERVER) && !defined(STANDALONE)
@@ -1603,7 +1604,7 @@ namespace hud
 enum { CTONE_TEAM = 0, CTONE_TONE, CTONE_TEAMED, CTONE_ALONE, CTONE_MIXED, CTONE_TMIX, CTONE_AMIX, CTONE_MAX };
 namespace game
 {
-    extern int numplayers, gamemode, mutators, nextmode, nextmuts, timeremaining, maptime,
+    extern int gamemode, mutators, nextmode, nextmuts, timeremaining, maptime, mapplayers, mapbalance,
             lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson,

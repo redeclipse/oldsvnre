@@ -442,7 +442,7 @@ namespace server
     servmode *smode;
     vector<servmode *> smuts;
     #define mutate(a,b) { loopvk(a) { servmode *mut = a[k]; { b; } } }
-    int nplayers, totalspawns;
+    int mplayers = 0, mbalance = 0, mbaliter = 0, totalspawns = 0;
 
     vector<score> scores;
     score &teamscore(int team)
@@ -592,7 +592,7 @@ namespace server
                 if(wait && ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
                 if(msg && allowbroadcast(ci->clientnum) && !top)
                 {
-                    int maxplayers = max(int(G(maxalive)*nplayers), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
+                    int maxplayers = max(int(G(maxalive)*mplayers), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
                     if(m_isteam(gamemode, mutators))
                     {
                         if(maxplayers%2) maxplayers++;
@@ -650,7 +650,7 @@ namespace server
                 {
                     if(!hasgameinfo) return false;
                     if(G(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
-                    int maxplayers = max(int(G(maxalive)*nplayers), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
+                    int maxplayers = max(int(G(maxalive)*mplayers), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
                     if(m_isteam(gamemode, mutators))
                     {
                         if(maxplayers%2) maxplayers++;
@@ -833,6 +833,7 @@ namespace server
     {
         setpause(false);
         setmod(sv_botoffset, 0);
+        setmod(sv_forcebalance, 0);
         if(*sv_prevmaps) setmods(sv_prevmaps, "");
         if(G(resetmmonend)) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetbansonend)) resetbans();
@@ -1219,101 +1220,132 @@ namespace server
 
     void checklimits()
     {
-        if(m_fight(gamemode))
+        if(!m_fight(gamemode)) return;
+        if(m_trial(gamemode))
         {
-            if(m_trial(gamemode))
+            loopv(clients) if(clients[i]->state.cpmillis < 0 && gamemillis+clients[i]->state.cpmillis >= G(triallimit))
             {
-                loopv(clients) if(clients[i]->state.cpmillis < 0 && gamemillis+clients[i]->state.cpmillis >= G(triallimit))
-                {
-                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime trial wait period has timed out");
-                    startintermission();
-                    return;
-                }
+                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime trial wait period has timed out");
+                startintermission();
+                return;
             }
-            bool wasinovertime = inovertime;
-            int limit = inovertime ? G(overtimelimit) : G(timelimit);
-            if(limit != oldtimelimit || (gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000))
+        }
+        int limit = inovertime ? G(overtimelimit) : G(timelimit);
+        bool newlimit = limit != oldtimelimit, newtimer = gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000,
+             iterate = newlimit || newtimer, wasinovertime = inovertime;
+        if(iterate)
+        {
+            if(newlimit)
             {
-                if(limit != oldtimelimit)
+                if(limit) gamelimit += (limit-oldtimelimit)*60000;
+                oldtimelimit = limit;
+            }
+            if(timeremaining)
+            {
+                if(limit)
                 {
-                    if(limit) gamelimit += (limit-oldtimelimit)*60000;
-                    oldtimelimit = limit;
+                    if(gamemillis >= gamelimit) timeremaining = 0;
+                    else timeremaining = (gamelimit-gamemillis+999)/1000;
                 }
-                if(timeremaining)
+                else timeremaining = -1;
+                bool wantsoneminute = true;
+                if(!timeremaining)
                 {
-                    if(limit)
+                    if(!inovertime && G(overtimeallow) && wantsovertime())
                     {
-                        if(gamemillis >= gamelimit) timeremaining = 0;
-                        else timeremaining = (gamelimit-gamemillis+1000-1)/1000;
-                    }
-                    else timeremaining = -1;
-                    bool wantsoneminute = true;
-                    if(!timeremaining)
-                    {
-                        if(!inovertime && G(overtimeallow) && wantsovertime())
+                        limit = oldtimelimit = G(overtimelimit);
+                        if(limit)
                         {
-                            limit = oldtimelimit = G(overtimelimit);
-                            if(limit)
-                            {
-                                timeremaining = limit*60;
-                                gamelimit += timeremaining*1000;
-                                ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended by \fs\fc%d\fS %s", limit, limit > 1 ? "minutes" : "minute");
-                            }
-                            else
-                            {
-                                timeremaining = -1;
-                                gamelimit = 0;
-                                ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended until someone wins");
-                            }
-                            inovertime = true;
-                            wantsoneminute = false;
+                            timeremaining = limit*60;
+                            gamelimit += timeremaining*1000;
+                            ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended by \fs\fc%d\fS %s", limit, limit > 1 ? "minutes" : "minute");
                         }
                         else
                         {
-                            ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime limit has been reached");
-                            startintermission();
-                            return; // bail
+                            timeremaining = -1;
+                            gamelimit = 0;
+                            ancmsgft(-1, S_V_OVERTIME, CON_EVENT, "\fyovertime, match extended until someone wins");
                         }
+                        inovertime = true;
+                        wantsoneminute = false;
                     }
-                    if(timeremaining != 0)
+                    else
                     {
-                        sendf(-1, 1, "ri2", N_TICK, timeremaining);
-                        if(wantsoneminute && timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
-                    }
-                }
-            }
-            if(wasinovertime && !wantsovertime())
-            {
-                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyovertime has ended, a winner has been chosen");
-                startintermission();
-                return; // bail
-            }
-            if(G(pointlimit) && m_scores(gamemode))
-            {
-                if(m_isteam(gamemode, mutators))
-                {
-                    int best = -1;
-                    loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+T_FIRST).total > teamscore(best).total)
-                        best = i+T_FIRST;
-                    if(best >= 0 && teamscore(best).total >= G(pointlimit))
-                    {
-                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
+                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime limit has been reached");
                         startintermission();
                         return; // bail
                     }
                 }
-                else
+                if(timeremaining != 0)
                 {
-                    int best = -1;
-                    loopv(clients) if(clients[i]->state.aitype < AI_START && (best < 0 || clients[i]->state.points > clients[best]->state.points))
-                        best = i;
-                    if(best >= 0 && clients[best]->state.points >= G(pointlimit))
-                    {
-                        ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
-                        startintermission();
-                        return; // bail
-                    }
+                    sendf(-1, 1, "ri2", N_TICK, timeremaining);
+                    if(wantsoneminute && timeremaining == 60) ancmsgft(-1, S_V_ONEMINUTE, CON_EVENT, "\fzygone minute remains");
                 }
+            }
+        }
+        if(wasinovertime && !wantsovertime())
+        {
+            ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyovertime has ended, a winner has been chosen");
+            startintermission();
+            return; // bail
+        }
+        if(G(pointlimit) && m_scores(gamemode))
+        {
+            if(m_isteam(gamemode, mutators))
+            {
+                int best = -1;
+                loopi(numteams(gamemode, mutators)) if(best < 0 || teamscore(i+T_FIRST).total > teamscore(best).total)
+                    best = i+T_FIRST;
+                if(best >= 0 && teamscore(best).total >= G(pointlimit))
+                {
+                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
+                    startintermission();
+                    return; // bail
+                }
+            }
+            else
+            {
+                int best = -1;
+                loopv(clients) if(clients[i]->state.aitype < AI_START && (best < 0 || clients[i]->state.points > clients[best]->state.points))
+                    best = i;
+                if(best >= 0 && clients[best]->state.points >= G(pointlimit))
+                {
+                    ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
+                    startintermission();
+                    return; // bail
+                }
+            }
+        }
+        int balance = G(forcebalance) >= 0 ? G(forcebalance) : mbalance;
+        if(iterate && balance && m_isteam(gamemode, mutators))
+        {
+            const int bals[T_TOTAL][T_TOTAL] = {
+                { T_ALPHA, T_OMEGA, T_KAPPA, T_SIGMA },
+                { T_OMEGA, T_ALPHA, T_SIGMA, T_KAPPA },
+                { T_KAPPA, T_SIGMA, T_ALPHA, T_OMEGA },
+                { T_SIGMA, T_KAPPA, T_OMEGA, T_ALPHA }
+            };
+            int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
+            if(baliter != mbaliter)
+            {
+                int scores[T_TOTAL] = {0};
+                loopk(T_TOTAL)
+                {
+                    loopv(clients) if(clients[i]->team == bals[mbaliter][k])
+                        setteam(clients[i], bals[baliter][k], true, true);
+                    score &cs = teamscore(bals[mbaliter][k]);
+                    scores[bals[mbaliter][k]] = cs.total;
+                }
+                loopk(T_TOTAL)
+                {
+                    score &cs = teamscore(bals[mbaliter][k]);
+                    cs.total = scores[bals[baliter][k]];
+                    sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
+                }
+                mbaliter = baliter;
+                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyteams have been reassigned for map balance");
+                if(smode) smode->layout();
+                mutate(smuts, mut->layout());
             }
         }
     }
@@ -1484,9 +1516,10 @@ namespace server
         }
     } spawns[T_ALL];
 
-    void setupspawns(bool update, int players = 0)
+    void setupspawns(bool update, int plr = 0, int bal = 0)
     {
-        nplayers = totalspawns = 0;
+        mplayers = totalspawns = 0;
+        if(bal) mbalance = bal;
         loopi(T_ALL) spawns[i].reset();
         if(update)
         {
@@ -1550,11 +1583,11 @@ namespace server
                 }
                 cplayers = totalspawns/3;
             }
-            nplayers = players > 0 ? players : cplayers;
+            mplayers = plr > 0 ? plr : cplayers;
             if(m_fight(gamemode) && m_isteam(gamemode, mutators))
             {
-                int offt = nplayers%numt;
-                if(offt) nplayers += numt-offt;
+                int offt = mplayers%numt;
+                if(offt) mplayers += numt-offt;
             }
         }
     }
@@ -1619,11 +1652,11 @@ namespace server
         return -1;
     }
 
-    void setupgameinfo(int np)
+    void setupgameinfo(int plr, int bal)
     {
         setuptriggers(true);
         setupitems(true);
-        setupspawns(true, m_trial(gamemode) ? 0 : np);
+        setupspawns(true, m_trial(gamemode) || !m_fight(gamemode) ? 0 : plr, m_trial(gamemode) || !m_fight(gamemode) ? 0 : bal);
         hasgameinfo = true;
         aiman::dorefresh = G(airefresh);
     }
@@ -1930,6 +1963,7 @@ namespace server
         setpause(false);
         checkdemorecord(true);
         setmod(sv_botoffset, 0);
+        setmod(sv_forcebalance, 0);
         if(G(resetmmonend) >= 2) { mastermode = MM_OPEN; resetallows(); }
         if(G(resetvarsonend) >= 2) resetgamevars(true);
         if(G(resetbansonend) >= 2) resetbans();
@@ -2159,7 +2193,7 @@ namespace server
         if(sc) sc->save(ci->state);
     }
 
-    void setteam(clientinfo *ci, int team, bool reset = true, bool info = false)
+    void setteam(clientinfo *ci, int team, bool reset, bool info)
     {
         if(ci->team != team)
         {
@@ -2214,7 +2248,7 @@ namespace server
         else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && ci->state.state != CS_SPECTATOR && ci->state.state != CS_EDITING)
         {
             bool human = ci->state.aitype == AI_NONE;
-            int team = -1, balance = human ? G(teambalance) : 1;
+            int team = -1, bal = human ? G(teambalance) : 1;
             if(human)
             {
                 if(m_coop(gamemode, mutators)) return T_ALPHA;
@@ -2230,7 +2264,7 @@ namespace server
                     break;
                 }
             }
-            if(balance || team < 0)
+            if(bal || team < 0)
             {
                 teamcheck teamchecks[T_TOTAL];
                 loopk(T_TOTAL) teamchecks[k].team = T_FIRST+k;
@@ -2252,7 +2286,7 @@ namespace server
                 loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST))
                 {
                     teamcheck &ts = teamchecks[i];
-                    switch(balance)
+                    switch(bal)
                     {
                         case 2:
                         {
@@ -2350,7 +2384,7 @@ namespace server
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
-        nplayers = gamemillis = interm = 0;
+        mplayers = mbalance = mbaliter = gamemillis = interm = 0;
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
@@ -3777,12 +3811,12 @@ namespace server
     void checkents()
     {
         bool thresh = m_fight(gamemode) && !m_noitems(gamemode, mutators) && !m_special(gamemode, mutators) && G(itemthreshold) > 0;
-        int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators), players = 0;
+        int items[MAXENTTYPES], lowest[MAXENTTYPES], sweap = m_weapon(gamemode, mutators), plr = 0;
         memset(items, 0, sizeof(items)); memset(lowest, -1, sizeof(lowest));
         if(thresh)
         {
             loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->online && clients[i]->state.state == CS_ALIVE && clients[i]->state.aitype < AI_START)
-                players++;
+                plr++;
             loopv(sents) if(enttype[sents[i].type].usetype == EU_ITEM && hasitem(i))
             {
                 if(sents[i].type == WEAPON)
@@ -3822,7 +3856,7 @@ namespace server
                     bool found = finditem(i, true, true);
                     if(allowed && thresh && i == lowest[sents[i].type] && (gamemillis-sents[lowest[sents[i].type]].last > G(itemspawndelay)))
                     {
-                        float dist = items[sents[i].type]/float(players*G(maxcarry));
+                        float dist = items[sents[i].type]/float(plr*G(maxcarry));
                         if(dist < G(itemthreshold)) found = false;
                     }
                     if((!found && !sents[i].spawned) || (!allowed && sents[i].spawned))
@@ -5037,7 +5071,7 @@ namespace server
 
                 case N_GAMEINFO:
                 {
-                    int n, np = getint(p);
+                    int n, plr = getint(p), bal = getint(p);
                     while((n = getint(p)) != -1)
                     {
                         int type = getint(p), numattr = getint(p);
@@ -5070,7 +5104,7 @@ namespace server
                             }
                         }
                     }
-                    if(!hasgameinfo) setupgameinfo(np);
+                    if(!hasgameinfo) setupgameinfo(plr, bal);
                     break;
                 }
 

@@ -203,7 +203,7 @@ namespace aiman
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
 #ifdef MEKARCADE
-        if(m_campaign(gamemode)) balance = G(campaignplayers); // campaigns strictly obeys nplayers
+        if(m_campaign(gamemode)) balance = G(campaignplayers); // campaigns strictly obeys player setting
         else
 #endif
         if(m_coop(gamemode, mutators))
@@ -215,7 +215,7 @@ namespace aiman
         {
             switch(G(botbalance))
             {
-                case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : nplayers); break; // use distributed numplayers
+                case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : mplayers); break; // use distributed map players
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : G(botbalance)); break; // balance to at least this
             }

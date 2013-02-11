@@ -128,9 +128,9 @@ namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
-GFVAR(0, maxalive, 0, 0, FVAR_MAX); // only allow this*numplayers to be alive at once
+GFVAR(0, maxalive, 0, 0, FVAR_MAX); // only allow this*mapplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
-GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if numplayers >= this
+GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if mapplayers >= this
 GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
 
 GVAR(0, maxcarry, 1, 2, W_LOADOUT);
@@ -217,6 +217,7 @@ GFVAR(0, teamdamagescale, FVAR_MIN, 1, FVAR_MAX); // 0 = off, anything else = sc
 GVAR(0, teambalance, 0, 1, 2); // 0 = off, 1 = by number then rank, 2 = by rank then number
 GVAR(0, teampersist, 0, 1, 2); // 0 = off, 1 = only attempt, 2 = forced
 GVAR(0, pointlimit, 0, 0, VAR_MAX); // finish when score is this or more
+GVAR(0, forcebalance, -1, -1, 1); // -1 = off, 0 = force no balancing, 1 = force map balancing
 
 GVAR(0, capturelimit, 0, 0, VAR_MAX); // finish when score is this or more
 GVAR(0, captureresetdelay, 0, 30000, VAR_MAX);
@@ -298,7 +299,7 @@ GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the g
 GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are solid, but can't deal damage, 2 = regular gameplay style, solid+damage
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
-GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
+GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use mapplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botskillmin, 1, 75, 101);
 GVAR(0, botskillmax, 1, 85, 101);
 GVAR(0, botlimit, 0, 32, VAR_MAX);
