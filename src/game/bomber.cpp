@@ -64,7 +64,7 @@ namespace bomber
     vec pulsecolour()
     {
         uint n = lastmillis/100;
-        return vec::hexcolor(pulsecols[2][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[2][(n+1)%PULSECOLOURS]), (lastmillis%100)/100.0f);
+        return vec::hexcolor(pulsecols[PULSE_DISCO][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[PULSE_DISCO][(n+1)%PULSECOLOURS]), (lastmillis%100)/100.0f);
     }
 
     void drawblips(int w, int h, float blend)
@@ -105,7 +105,7 @@ namespace bomber
                 if(f.owner == game::player1)
                 {
                     pushfont("emphasis");
-                    ty += draw_textx("You have: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
+                    ty += draw_textx("You have: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
                     popfont();
                     if(bombercarrytime)
                     {

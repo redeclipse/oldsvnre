@@ -182,14 +182,14 @@ namespace physics
         return false;
     }
 
-    bool issolid(physent *d, physent *e, bool esc, bool impact)
+    bool issolid(physent *d, physent *e, bool esc, bool impact, bool reverse)
     {
-        if(e && e->type == ENT_PROJ)
+        if(e && e->type == ENT_PROJ && d->state == CS_ALIVE)
         {
-            if(d->state != CS_ALIVE) return false;
             projent *p = (projent *)e;
             if(d->type == ENT_PLAYER || d->type == ENT_AI)
             {
+                if(p->stick == d) return false;
                 if(impact && (p->hit == d || !(p->projcollide&COLLIDE_PLAYER))) return false;
                 if(p->owner == d && (!(p->projcollide&COLLIDE_OWNER) || (esc && !p->escaped))) return false;
             }
@@ -206,15 +206,17 @@ namespace physics
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
-            if(d->state == CS_ALIVE)
-            {
-                if(m_trial(game::gamemode) && !trialstyle) return false;
-                if(((gameent *)d)->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
-                return true;
-            }
-            return d->state == CS_DEAD || d->state == CS_WAITING;
+            if(d->state != CS_ALIVE) return false;
+            if(m_trial(game::gamemode) && !trialstyle) return false;
+            gameent *f = (gameent *)d;
+            if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
+            return true;
         }
-        return false;
+        else if(d->type == ENT_PROJ)
+        {
+            if(e && !reverse && issolid(e, d, esc, impact, true)) return true;
+        }
+        return true;
     }
 
     bool iscrouching(physent *d)
@@ -1186,7 +1188,7 @@ namespace physics
                 if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= PHYS(liquidextinguish))
                 {
                     gameent *d = (gameent *)pl;
-                    if(d->burning(lastmillis, burntime) && lastmillis-d->lastburn > PHYSMILLIS)
+                    if(d->burning(lastmillis, burntime) && lastmillis-d->lastres[WR_BURN] > PHYSMILLIS)
                     {
                         d->resetburning();
                         playsound(S_EXTINGUISH, d->o, d);
@@ -1534,7 +1536,7 @@ namespace physics
                 d->o = orig; \
             } \
         }
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);

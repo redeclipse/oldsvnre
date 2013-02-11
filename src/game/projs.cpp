@@ -37,13 +37,13 @@ namespace projs
     VAR(IDF_PERSIST, projhints, 0, 1, 6);
     VAR(IDF_PERSIST, projfirehint, 0, 1, 1);
     FVAR(IDF_PERSIST, projhintblend, 0, 0.75f, 1);
-    FVAR(IDF_PERSIST, projhintsize, 0, 1.25f, FVAR_MAX);
-    FVAR(IDF_PERSIST, projfirehintsize, 0, 1.5f, FVAR_MAX);
+    FVAR(IDF_PERSIST, projhintsize, 0, 1.45f, FVAR_MAX);
+    FVAR(IDF_PERSIST, projfirehintsize, 0, 1.85f, FVAR_MAX);
 
     #define projhint(a,b)   (projhints >= 2 ? game::getcolour(a, projhints-2) : b)
 
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
-    VAR(IDF_PERSIST, muzzleflare, 0, 2, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
+    VAR(IDF_PERSIST, muzzleflare, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     FVAR(IDF_PERSIST, muzzleblend, 0, 1, 1);
     FVAR(IDF_PERSIST, muzzlefade, 0, 0.75f, 1);
 
@@ -1360,7 +1360,7 @@ namespace projs
                     float radius = (proj.radius+0.5f)*(clamp(1.f-proj.lifespan, 0.1f, 1.f)+0.25f), blend = clamp(1.25f-proj.lifespan, 0.25f, 1.f)*(0.75f+(rnd(25)/100.f)); // gets smaller as it gets older
                     if(projtrails && lastmillis-proj.lasteffect >= projtraildelay) { effect = true; proj.lasteffect = lastmillis - (lastmillis%projtraildelay); }
                     int len = effect ? max(int(projtraillength*0.5f*max(1.f-proj.lifespan, 0.1f)), 1) : 1;
-                    part_create(PART_FIREBALL, len, proj.o, pulsecols[0][rnd(PULSECOLOURS)], radius, blend, -5);
+                    part_create(PART_FIREBALL, len, proj.o, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], radius, blend, -5);
                 }
                 break;
             }
@@ -2157,7 +2157,7 @@ namespace projs
                     if(!proj.limited)
                     {
                         flags |= MDL_LIGHTFX;
-                        vec burncol = game::burncolour(&proj);
+                        vec burncol = game::rescolour(&proj, PULSE_BURN);
                         burncol.lerp(proj.light.effect, clamp((proj.lifespan - 0.3f)/0.5f, 0.0f, 1.0f));
                         proj.light.effect.max(burncol);
                     }

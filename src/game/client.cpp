@@ -1877,8 +1877,7 @@ namespace client
                     if(!amt)
                     {
                         f->impulse[IM_METER] = 0;
-                        f->resetburning();
-                        f->resetbleeding();
+                        f->resetresidual();
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal;

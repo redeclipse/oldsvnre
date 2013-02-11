@@ -152,6 +152,7 @@ namespace game
     VAR(IDF_PERSIST, damagemergedelay, 0, 75, VAR_MAX);
     VAR(IDF_PERSIST, damagemergeburn, 0, 250, VAR_MAX);
     VAR(IDF_PERSIST, damagemergebleed, 0, 250, VAR_MAX);
+    VAR(IDF_PERSIST, damagemergeshock, 0, 250, VAR_MAX);
     VAR(IDF_PERSIST, playdamagetones, 0, 1, 3);
     VAR(IDF_PERSIST, damagetonevol, -1, -1, 255);
     VAR(IDF_PERSIST, playcrittones, 0, 2, 3);
@@ -170,8 +171,6 @@ namespace game
     VAR(IDF_PERSIST, debrisfade, 1, 5000, VAR_MAX);
     FVAR(IDF_PERSIST, gibscale, 0, 1, 1000);
     VAR(IDF_PERSIST, gibfade, 1, 5000, VAR_MAX);
-    VAR(IDF_PERSIST, onfirefade, 100, 200, VAR_MAX);
-    FVAR(IDF_PERSIST, onfireblend, 0.25f, 0.5f, 1);
     FVAR(IDF_PERSIST, impulsescale, 0, 1, 1000);
     VAR(IDF_PERSIST, impulsefade, 0, 200, VAR_MAX);
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
@@ -647,7 +646,7 @@ namespace game
                 }
                 if(burntime && d->burning(lastmillis, burntime))
                 {
-                    int millis = lastmillis-d->lastburn;
+                    int millis = lastmillis-d->lastres[WR_BURN];
                     size_t seed = size_t(d) + (millis/50);
                     float pc = 1, amt = (millis%50)/50.0f, intensity = 0.75f+(detrnd(seed, 25)*(1-amt) + detrnd(seed + 1, 25)*amt)/100.f;
                     if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
@@ -658,7 +657,20 @@ namespace game
                         pc *= 0.75f+fluc;
                     }
                     adddynlight(d->center(), d->height*intensity*pc, pulsecolour(d).mul(pc), 0, 0, DL_KEEP);
-                    continue;
+                }
+                if(shocktime && d->shocking(lastmillis, shocktime))
+                {
+                    int millis = lastmillis-d->lastres[WR_SHOCK];
+                    size_t seed = size_t(d) + (millis/50);
+                    float pc = 1, amt = (millis%50)/50.0f, intensity = 0.75f+(detrnd(seed, 25)*(1-amt) + detrnd(seed + 1, 25)*amt)/100.f;
+                    if(shocktime-millis < shockdelay) pc *= float(shocktime-millis)/float(shockdelay);
+                    else
+                    {
+                        float fluc = float(millis%shockdelay)*(0.25f+0.03f)/shockdelay;
+                        if(fluc >= 0.25f) fluc = (0.25f+0.03f-fluc)*(0.25f/0.03f);
+                        pc *= 0.75f+fluc;
+                    }
+                    adddynlight(d->center(), d->height*intensity*pc, vec(0.2f, 0.8f, 1.f).mul(pc), 0, 0, DL_KEEP);
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
@@ -674,8 +686,8 @@ namespace game
         float scale = 0.75f+(rnd(25)/100.f);
         part_create(PART_HINT, shape ? 10 : 1, pos, 0x1818A8, scale, min(0.75f*scale, 0.95f), 0, 0);
         part_create(PART_FIREBALL, shape ? 10 : 1, pos, 0xFF6818, scale*0.75f, min(0.75f*scale, 0.95f), 0, 0);
-        if(shape) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[0][rnd(PULSECOLOURS)], 21, num, len, pos, scale, 0.75f, -5, 0, 10);
-        else regular_part_create(PART_FIREBALL, len, pos, pulsecols[0][rnd(PULSECOLOURS)], 0.6f*scale, min(0.75f*scale, 0.95f), -10, 0);
+        if(shape) regularshape(PART_FIREBALL, int(d->radius)*2, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], 21, num, len, pos, scale, 0.75f, -5, 0, 10);
+        else regular_part_create(PART_FIREBALL, len, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], 0.6f*scale, min(0.75f*scale, 0.95f), -10, 0);
     }
 
     void impulseeffect(gameent *d, int effect)
@@ -881,13 +893,14 @@ namespace game
             if(d->respawned > 0 && lastmillis-d->respawned >= 2500) d->respawned = -1;
             if(d->suicided > 0 && lastmillis-d->suicided >= 2500) d->suicided = -1;
         }
-        if(d->lastburn > 0 && lastmillis-d->lastburn >= burntime-500)
+        if(d->lastres[WR_BURN] > 0 && lastmillis-d->lastres[WR_BURN] >= burntime-500)
         {
-            if(lastmillis-d->lastburn >= burntime) d->resetburning();
-            else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastburn-(burntime-500))/500.f));
+            if(lastmillis-d->lastres[WR_BURN] >= burntime) d->resetburning();
+            else if(issound(d->fschan)) sounds[d->fschan].vol = int((d != focus ? 128 : 224)*(1.f-(lastmillis-d->lastres[WR_BURN]-(burntime-500))/500.f));
         }
         else if(issound(d->fschan)) removesound(d->fschan);
-        if(d->lastbleed > 0 && lastmillis-d->lastbleed >= bleedtime) d->resetbleeding();
+        if(d->lastres[WR_BLEED] > 0 && lastmillis-d->lastres[WR_BLEED] >= bleedtime) d->resetbleeding();
+        if(d->lastres[WR_SHOCK] > 0 && lastmillis-d->lastres[WR_SHOCK] >= shocktime) d->resetshocking();
         if(issound(d->jschan))
         {
             if(physics::jetpack(d))
@@ -916,11 +929,11 @@ namespace game
 
     bool burn(gameent *d, int weap, int flags)
     {
-        if(burntime && hithurts(flags) && (flags&HIT_MELT || (weap == -1 && flags&HIT_BURN) || doesburn(weap, flags)))
+        if(wr_burns(weap, flags))
         {
-            d->lastburntime = lastmillis;
+            d->lastrestime[WR_BURN] = lastmillis;
             if(!issound(d->fschan)) playsound(S_BURNING, d->o, d, SND_LOOP, -1, -1, -1, &d->fschan);
-            if(isweap(weap)) d->lastburn = lastmillis;
+            if(isweap(weap)) d->lastres[WR_BURN] = lastmillis;
             else return true;
         }
         return false;
@@ -928,10 +941,21 @@ namespace game
 
     bool bleed(gameent *d, int weap, int flags)
     {
-        if(bleedtime && hithurts(flags) && ((weap == -1 && flags&HIT_BLEED) || doesbleed(weap, flags)))
+        if(wr_bleeds(weap, flags))
         {
-            d->lastbleedtime = lastmillis;
-            if(isweap(weap)) d->lastbleed = lastmillis;
+            d->lastrestime[WR_BLEED] = lastmillis;
+            if(isweap(weap)) d->lastres[WR_BLEED] = lastmillis;
+            else return true;
+        }
+        return false;
+    }
+
+    bool shock(gameent *d, int weap, int flags)
+    {
+        if(wr_shocks(weap, flags))
+        {
+            d->lastrestime[WR_SHOCK] = lastmillis;
+            if(isweap(weap)) d->lastres[WR_SHOCK] = lastmillis;
             else return true;
         }
         return false;
@@ -939,7 +963,7 @@ namespace game
 
     struct damagemerge
     {
-        enum { BURN = 1<<0, BLEED = 1<<1, CRIT = 1<<2 };
+        enum { CRIT = 1<<0, BURN = 1<<1, BLEED = 1<<2, SHOCK = 1<<3 };
 
         gameent *d, *actor;
         int weap, damage, flags, millis;
@@ -969,6 +993,7 @@ namespace game
                     int snd = -1;
                     if(flags&BURN) snd = S_BURNED;
                     else if(flags&BLEED) snd = S_BLEED;
+                    else if(flags&SHOCK) snd = S_SHOCK;
                     else loopirev(8) if(damage >= dmgsnd[i]) { snd = S_DAMAGE+i; break; }
                     if(snd >= 0) playsound(snd, d->o, d, actor == focus ? SND_FORCED : SND_DIRECT, damagetonevol);
                 }
@@ -1001,6 +1026,7 @@ namespace game
             int delay = damagemergedelay;
             if(damagemerges[i].flags&damagemerge::BURN) delay = damagemergeburn;
             else if(damagemerges[i].flags&damagemerge::BLEED) delay = damagemergebleed;
+            else if(damagemerges[i].flags&damagemerge::SHOCK) delay = damagemergeshock;
             if(damagemerges[i].flags&damagemerge::CRIT || totalmillis-damagemerges[i].millis >= delay)
             {
                 damagemerges[i].play();
@@ -1012,67 +1038,75 @@ namespace game
     static int alarmchan = -1;
     void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local)
     {
-        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags);
-        if(!local || burning || bleeding)
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags);
+        if(!local || burning || bleeding || shocking)
         {
             if(hithurts(flags))
             {
                 if(d == focus) hud::damage(damage, actor->o, actor, weap, flags);
-                if(d->type == ENT_PLAYER || d->type == ENT_AI)
+                if(aistyle[d->aitype].living)
                 {
-                    if(aistyle[d->aitype].living)
-                    {
-                        vec p = d->headpos(-d->height/4);
-                        if(!kidmode && bloodscale > 0)
-                            part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
-                        if(kidmode || bloodscale <= 0 || bloodsparks)
-                            part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
-                    }
-                    if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
-                    d->lastpain = lastmillis;
+                    vec p = d->headpos(-d->height/4);
+                    if(!kidmode && bloodscale > 0)
+                        part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
+                    if(kidmode || bloodscale <= 0 || bloodsparks)
+                        part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
                 }
                 if(d != actor)
                 {
                     bool sameteam = m_isteam(gamemode, mutators) && d->team == actor->team;
-                    if(!sameteam) pushdamagemerge(d, actor, weap, damage, burning ? damagemerge::BURN : (bleeding ? damagemerge::BLEED : 0));
-                    else if(actor == player1 && !burning && !bleeding)
+                    if(!sameteam) pushdamagemerge(d, actor, weap, damage, (burning ? damagemerge::BURN : 0)|(bleeding ? damagemerge::BLEED : 0)|(shocking ? damagemerge::SHOCK : 0));
+                    else if(actor == player1 && !burning && !bleeding && !shocking)
                     {
                         player1->lastteamhit = d->lastteamhit = lastmillis;
                         if(!issound(alarmchan)) playsound(S_ALARM, actor->o, actor, 0, -1, -1, -1, &alarmchan);
                     }
-                    if(!burning && !bleeding && !sameteam) actor->lasthit = totalmillis;
+                    if(!burning && !bleeding && !shocking && !sameteam) actor->lasthit = totalmillis;
                 }
+                if(d->aitype < AI_START && !issound(d->vschan)) playsound(S_PAIN, d->o, d, 0, -1, -1, -1, &d->vschan);
+                d->lastpain = lastmillis;
             }
-            if(isweap(weap) && !burning && !bleeding && (d->aitype < AI_START || aistyle[d->aitype].canmove) && WF(WK(flags), weap, damage, WS(flags)) != 0)
+            if(d->aitype < AI_START || aistyle[d->aitype].canmove)
             {
-                float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
-                if(hithurts(flags) && WF(WK(flags), weap, stuntime, WS(flags)))
+                if(weap == -1 && shocking)
                 {
-                    float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavestunscale : (d->health <= 0 ? deadstunscale : hitstunscale), stun, gamemode, mutators),
-                          s = WF(WK(flags), weap, stunscale, WS(flags))*amt, g = WF(WK(flags), weap, stunfall, WS(flags))*amt;
-                    if(s > 0 || g > 0) d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), s, g);
+                    float amt = WRS(d->health <= 0 ? deadstunscale : hitstunscale, stun, gamemode, mutators),
+                          s = G(shockstunscale)*amt, g = G(shockstunfall)*amt;
+                    if(s > 0 || g > 0) d->addstun(weap, lastmillis, G(shockstuntime), s, g);
                     if(s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
                     if(g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                 }
-                if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
+                else if(isweap(weap) && !burning && !bleeding && !shocking && WF(WK(flags), weap, damage, WS(flags)) != 0)
                 {
-                    float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
-                    if(d == actor)
+                    float scale = damage/float(WF(WK(flags), weap, damage, WS(flags)));
+                    if(WF(WK(flags), weap, stuntime, WS(flags)))
                     {
-                        float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
-                        if(modify != 0) amt *= 1/modify;
+                        float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavestunscale : (d->health <= 0 ? deadstunscale : hitstunscale), stun, gamemode, mutators),
+                              s = WF(WK(flags), weap, stunscale, WS(flags))*amt, g = WF(WK(flags), weap, stunfall, WS(flags))*amt;
+                        if(s > 0 || g > 0) d->addstun(weap, lastmillis, int(scale*WF(WK(flags), weap, stuntime, WS(flags))), s, g);
+                        if(s > 0) d->vel.mul(1.f-clamp(s, 0.f, 1.f));
+                        if(g > 0) d->falling.mul(1.f-clamp(g, 0.f, 1.f));
                     }
-                    else if(m_isteam(gamemode, mutators) && d->team == actor->team)
+                    if(WF(WK(flags), weap, hitpush, WS(flags)) != 0)
                     {
-                        float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
-                        if(modify != 0) amt *= 1/modify;
-                    }
-                    float hit = WF(WK(flags), weap, hitpush, WS(flags))*amt;
-                    if(hit > 0)
-                    {
-                        vec psh = vec(dir).mul(hit);
-                        if(!psh.iszero()) d->vel.add(psh);
-                        d->quake = min(d->quake+max(int(hit), 1), quakelimit);
+                        float amt = scale*WRS(flags&HIT_WAVE || !hithurts(flags) ? wavepushscale : (d->health <= 0 ? deadpushscale : hitpushscale), push, gamemode, mutators);
+                        if(d == actor)
+                        {
+                            float modify = WF(WK(flags), weap, selfdamage, WS(flags))*G(selfdamagescale);
+                            if(modify != 0) amt *= 1/modify;
+                        }
+                        else if(m_isteam(gamemode, mutators) && d->team == actor->team)
+                        {
+                            float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
+                            if(modify != 0) amt *= 1/modify;
+                        }
+                        float hit = WF(WK(flags), weap, hitpush, WS(flags))*amt;
+                        if(hit > 0)
+                        {
+                            vec psh = vec(dir).mul(hit);
+                            if(!psh.iszero()) d->vel.add(psh);
+                            d->quake = min(d->quake+max(int(hit), 1), quakelimit);
+                        }
                     }
                 }
             }
@@ -1113,7 +1147,7 @@ namespace game
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
         d->obliterated = (style&FRAG_OBLITERATE) != 0;
-        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), isfocus = d == focus || actor == focus,
+        bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || actor == focus,
              isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
         int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
             dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH;
@@ -1132,7 +1166,7 @@ namespace game
             else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose != 2 ? "died" : "tried to spawn inside solid matter");
             else if(flags&HIT_LOST) concatstring(d->obit, obitverbose != 2 ? "was lost" : "got very, very lost");
             else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose != 2 ? "entered spectator" : "gave up their corporeal form");
-            else if(flags && isweap(weap) && !burning && !bleeding)
+            else if(flags && isweap(weap) && !burning && !bleeding && !shocking)
             {
                 static const char *suicidenames[W_MAX][2] = {
                     { "hit themself", "hit themself" },
@@ -1151,6 +1185,7 @@ namespace game
             }
             else if(flags&HIT_BURN || burning) concatstring(d->obit, "burned up");
             else if(flags&HIT_BLEED || bleeding) concatstring(d->obit, "bled out");
+            else if(flags&HIT_SHOCK || shocking) concatstring(d->obit, "twitched to death");
             else if(d->obliterated) concatstring(d->obit, "was obliterated");
             else concatstring(d->obit, "suicided");
         }
@@ -1161,6 +1196,7 @@ namespace game
             else if(!obitverbose) concatstring(d->obit, "fragged by");
             else if(burning) concatstring(d->obit, "set ablaze by");
             else if(bleeding) concatstring(d->obit, "fatally wounded by");
+            else if(shocking) concatstring(d->obit, "given a terminal dose of shock therapy by");
             else if(isweap(weap))
             {
                 static const char *obitnames[5][W_MAX][2] = {
@@ -1714,11 +1750,11 @@ namespace game
     }
     ICOMMAND(0, kill, "",  (), { suicide(player1, 0); });
 
-    vec burncolour(dynent *d)
+    vec rescolour(dynent *d, int c)
     {
         size_t seed = size_t(d) + (lastmillis/50);
         int n = detrnd(seed, 2*PULSECOLOURS), n2 = detrnd(seed + 1, 2*PULSECOLOURS);
-        return vec::hexcolor(pulsecols[n/PULSECOLOURS][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[n2/PULSECOLOURS][n2%PULSECOLOURS]), (lastmillis%50)/50.0f);
+        return vec::hexcolor(pulsecols[c][n%PULSECOLOURS]).lerp(vec::hexcolor(pulsecols[c][n2%PULSECOLOURS]), (lastmillis%50)/50.0f);
     }
 
     void particletrack(particle *p, uint type, int &ts,  bool lastpass)
@@ -2696,7 +2732,14 @@ namespace game
             if(burntime && d->burning(lastmillis, burntime))
             {
                 flags |= MDL_LIGHTFX;
-                vec col = burncolour(d);
+                vec col = rescolour(d, PULSE_BURN);
+                e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
+                e->light.effect.max(col);
+            }
+            if(shocktime && d->shocking(lastmillis, shocktime))
+            {
+                flags |= MDL_LIGHTFX;
+                vec col = rescolour(d, PULSE_SHOCK);
                 e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
                 e->light.effect.max(col);
             }
@@ -2751,7 +2794,7 @@ namespace game
                 {
                     if(d->dominating.find(focus) >= 0) t = textureload(hud::dominatingtex, 3);
                     else if(d->dominated.find(focus) >= 0) t = textureload(hud::dominatedtex, 3);
-                    colour = pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
+                    colour = pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)];
                 }
             }
             if(t && t != notexture)
@@ -3009,12 +3052,24 @@ namespace game
             }
             if(burntime && d->burning(lastmillis, burntime))
             {
-                int millis = lastmillis-d->lastburn;
+                int millis = lastmillis-d->lastres[WR_BURN];
                 float pc = 1, intensity = 0.5f+(rnd(50)/100.f), fade = (d != focus ? 0.5f : 0.f)+(rnd(50)/100.f);
                 if(burntime-millis < burndelay) pc *= float(burntime-millis)/float(burndelay);
                 else pc *= 0.75f+(float(millis%burndelay)/float(burndelay*4));
                 vec pos = vec(d->center()).sub(vec(rnd(11)-5, rnd(11)-5, rnd(5)-2).mul(pc));
-                regular_part_create(PART_FIREBALL, max(onfirefade, 100), pos, pulsecols[0][rnd(PULSECOLOURS)], d->height*0.75f*intensity*pc, fade*blend*pc*onfireblend, -10, 0);
+                regular_part_create(PART_FIREBALL, 50, pos, pulsecols[PULSE_FIRE][rnd(PULSECOLOURS)], d->height*0.75f*intensity*pc, fade*blend*pc, -10, 0);
+            }
+            if(shocktime && d->shocking(lastmillis, shocktime))
+            {
+                int millis = lastmillis-d->lastres[WR_SHOCK];
+                float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4));
+                vec origin = d->center();
+                loopi(10+rnd(20))
+                {
+                    vec from = vec(origin).add(vec((rnd(201)-100)/100.f, (rnd(201)-100)/100.f, (rnd(201)-100)/100.f).normalize().mul(vec(d->xradius, d->yradius, d->height).mul(0.35f*pc))),
+                        to = vec(origin).add(vec((rnd(201)-100)/100.f, (rnd(201)-100)/100.f, (rnd(201)-100)/100.f).normalize().mul(d->height*pc*rnd(100)/80.f));
+                    part_flare(from, to, 1, PART_LIGHTNING_FLARE, 0x20B0F0, 0.1f+pc, 0.25f+pc*0.5f);
+                }
             }
         }
     }

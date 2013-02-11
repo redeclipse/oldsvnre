@@ -143,7 +143,7 @@ struct duelservmode : servmode
                     else
                     {
                         ci->state.lastregen = gamemillis;
-                        ci->state.lastburn = ci->state.lastburntime = ci->state.lastbleed = ci->state.lastbleedtime = 0;
+                        ci->state.resetresidual();
 #ifdef MEKARCADE
                         ci->state.health = m_health(gamemode, mutators, ci->state.model);
                         ci->state.armour = m_armour(gamemode, mutators, ci->state.model);

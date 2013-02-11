@@ -28,7 +28,7 @@ enum
     S_SPLASH1, S_SPLASH2, S_UNDERWATER, S_SPLOSH, S_DEBRIS, S_BURNLAVA, S_BURNING,
     S_EXTINGUISH, S_SHELL, S_ITEMUSE, S_ITEMSPAWN,
     S_REGEN, S_DAMAGE, S_DAMAGE2, S_DAMAGE3, S_DAMAGE4, S_DAMAGE5, S_DAMAGE6, S_DAMAGE7, S_DAMAGE8,
-    S_BURNED, S_BLEED, S_CRITICAL, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH,
+    S_BURNED, S_BLEED, S_SHOCK, S_CRITICAL, S_RESPAWN, S_CHAT, S_ERROR, S_ALARM, S_CATCH,
     S_V_FLAGSECURED, S_V_FLAGOVERTHROWN, S_V_FLAGPICKUP, S_V_FLAGDROP, S_V_FLAGRETURN, S_V_FLAGSCORE, S_V_FLAGRESET,
     S_V_BOMBSTART, S_V_BOMBPICKUP, S_V_BOMBSCORE, S_V_BOMBRESET,
     S_V_NOTIFY, S_V_FIGHT, S_V_CHECKPOINT, S_V_OVERTIME, S_V_ONEMINUTE, S_V_HEADSHOT,
@@ -245,11 +245,13 @@ enum
 };
 
 #ifndef GAMESERVER
+enum { PULSE_FIRE = 0, PULSE_BURN, PULSE_DISCO, PULSE_SHOCK, PULSE_MAX };
 #define PULSECOLOURS 8
-const int pulsecols[3][PULSECOLOURS] = {
+const int pulsecols[PULSE_MAX][PULSECOLOURS] = {
     { 0xFF5808, 0x981808, 0x782808, 0x481808, 0x983818, 0x681808, 0xC81808, 0x381808 },
     { 0xFFC848, 0xF86838, 0xA85828, 0xA84838, 0xF8A858, 0xC84828, 0xF86848, 0xA89858 },
-    { 0xFF8888, 0xFFAA88, 0xFFFF88, 0x88FF88, 0x88FFFF, 0x8888FF, 0xFF88FF, 0xFFFFFF }
+    { 0xFF8888, 0xFFAA88, 0xFFFF88, 0x88FF88, 0x88FFFF, 0x8888FF, 0xFF88FF, 0xFFFFFF },
+    { 0xAA88FF, 0xAA88FF, 0xAAAAFF, 0x44AAFF, 0x88AAFF, 0x4444FF, 0xAA44FF, 0xFFFFFF }
 };
 #endif
 
@@ -497,16 +499,17 @@ struct gamestate
 {
     int health, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
     int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
-    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastburn, lastburntime, lastbleed, lastbleedtime, lastbuff;
+    int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
 #ifdef MEKARCADE
     int armour;
 #endif
     vector<int> loadweap;
-    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastburn(0), lastburntime(0), lastbleed(0), lastbleedtime(0), lastbuff(0),
+    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loadweap.shrink(0);
+        resetresidual();
     }
     ~gamestate() {}
 
@@ -694,10 +697,17 @@ struct gamestate
         }
     }
 
+    void resetresidual(int n = -1)
+    {
+        if(n >= 0 && n < WR_MAX) lastres[n] = lastrestime[n] = 0;
+        else loopi(WR_MAX) lastres[i] = lastrestime[i] = 0;
+    }
+
     void clearstate()
     {
-        lastdeath = lastpain = lastregen = lastburn = lastburntime = lastbleed = lastbleedtime = lastbuff = 0;
+        lastdeath = lastpain = lastregen = lastbuff = 0;
         lastrespawn = -1;
+        resetresidual();
     }
 
     void mapchange()
@@ -830,8 +840,9 @@ struct gamestate
         return amt;
     }
 
-    bool burning(int millis, int len) { return len && lastburn && millis-lastburn <= len; }
-    bool bleeding(int millis, int len) { return len && lastbleed && millis-lastbleed <= len; }
+    bool burning(int millis, int len) { return len && lastres[WR_BURN] && millis-lastres[WR_BURN] <= len; }
+    bool bleeding(int millis, int len) { return len && lastres[WR_BLEED] && millis-lastres[WR_BLEED] <= len; }
+    bool shocking(int millis, int len) { return len && lastres[WR_SHOCK] && millis-lastres[WR_SHOCK] <= len; }
 };
 
 namespace server
@@ -1296,12 +1307,24 @@ struct gameent : dynent, gamestate
     {
         if(issound(fschan)) removesound(fschan);
         fschan = -1;
-        lastburn = lastburntime = 0;
+        gamestate::resetresidual(WR_BURN);
     }
 
     void resetbleeding()
     {
-        lastbleed = lastbleedtime = 0;
+        gamestate::resetresidual(WR_BLEED);
+    }
+
+    void resetshocking()
+    {
+        gamestate::resetresidual(WR_SHOCK);
+    }
+
+    void resetresidual()
+    {
+        resetburning();
+        resetbleeding();
+        resetshocking();
     }
 
     void addicon(int type, int millis, int fade, int value = 0)
@@ -1642,7 +1665,7 @@ namespace game
 #endif
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent*> &log, int style);
     extern void timeupdate(int timeremain);
-    extern vec burncolour(dynent *d);
+    extern vec rescolour(dynent *d, int c = PULSE_BURN);
     extern float rescale(gameent *d);
 }
 
