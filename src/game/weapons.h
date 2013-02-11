@@ -62,21 +62,31 @@ enum
 enum
 {
     HIT_NONE = 0, HIT_ALT = 1<<0, HIT_LEGS = 1<<1, HIT_TORSO = 1<<2, HIT_WHIPLASH = 1<<3, HIT_HEAD = 1<<4,
-    HIT_WAVE = 1<<5, HIT_PROJ = 1<<6, HIT_EXPLODE = 1<<7, HIT_BURN = 1<<8, HIT_BLEED = 1<<9,
-    HIT_MELT = 1<<10, HIT_DEATH = 1<<11, HIT_WATER = 1<<12, HIT_SPAWN = 1<<13,
-    HIT_LOST = 1<<14, HIT_KILL = 1<<15, HIT_CRIT = 1<<16, HIT_FLAK = 1<<17, HIT_SPEC = 1<<18,
+    HIT_WAVE = 1<<5, HIT_PROJ = 1<<6, HIT_EXPLODE = 1<<7, HIT_BURN = 1<<8, HIT_BLEED = 1<<9, HIT_SHOCK = 1<<10,
+    HIT_MELT = 1<<11, HIT_DEATH = 1<<12, HIT_WATER = 1<<13, HIT_SPAWN = 1<<14,
+    HIT_LOST = 1<<15, HIT_KILL = 1<<16, HIT_CRIT = 1<<17, HIT_FLAK = 1<<18, HIT_SPEC = 1<<19,
     HIT_CLEAR = HIT_PROJ|HIT_EXPLODE|HIT_BURN|HIT_BLEED|HIT_MELT|HIT_DEATH|HIT_WATER|HIT_SPAWN|HIT_LOST,
     HIT_SFLAGS = HIT_KILL|HIT_CRIT
 };
 
+enum { WR_BURN = 0, WR_BLEED, WR_SHOCK, WR_MAX, WR_ALL = (1<<WR_BURN)|(1<<WR_BLEED)|(1<<WR_SHOCK) };
+
 struct shotmsg { int id; ivec pos; };
 struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
-#define hithead(x)      (x&HIT_WHIPLASH || x&HIT_HEAD)
-#define hithurts(x)     (x&HIT_BURN || x&HIT_BLEED || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
-#define doesburn(x,y)   (isweap(x) && WF(WK(y), x, residual, WS(y)) == 1)
-#define doesbleed(x,y)  (isweap(x) && WF(WK(y), x, residual, WS(y)) == 2)
-#define WZ(x)           (W_MAX+W_##x)
+#define hithead(x)       (x&HIT_WHIPLASH || x&HIT_HEAD)
+#define hithurts(x)      (x&HIT_BURN || x&HIT_BLEED || x&HIT_SHOCK || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
+#define WR(x)            (1<<(WR_##x))
+#define wr_burn(x,y)     (isweap(x) && (WF(WK(y), x, residual, WS(y))&WR(BURN)))
+#define wr_burns(x,y)    (G(burntime) && hithurts(y) && (y&HIT_MELT || (x == -1 && y&HIT_BURN) || wr_burn(x, y)))
+#define wr_burning(x,y)  (G(burntime) && hithurts(y) && wr_burn(x, y))
+#define wr_bleed(x,y)    (isweap(x) && (WF(WK(y), x, residual, WS(y))&WR(BLEED)))
+#define wr_bleeds(x,y)   (G(bleedtime) && hithurts(y) && ((x == -1 && y&HIT_BLEED) || wr_bleed(x, y)))
+#define wr_bleeding(x,y) (G(bleedtime) && hithurts(y) && wr_bleed(x, y))
+#define wr_shock(x,y)    (isweap(x) && (WF(WK(y), x, residual, WS(y))&WR(SHOCK)))
+#define wr_shocks(x,y)   (G(shocktime) && hithurts(y) && ((x == -1 && y&HIT_SHOCK) || wr_shock(x, y)))
+#define wr_shocking(x,y) (G(shocktime) && hithurts(y) && wr_shock(x, y))
+#define WZ(x)            (W_MAX+(W_##x))
 
 #include "weapdef.h"
 
@@ -408,11 +418,11 @@ WPVAR(0, reloaddelay, 0, VAR_MAX,
 WPVAR(0, reloads, -1, VAR_MAX,
     -1,         -1,         -1,         -1,         -1,         -1,         -1,         -1,         0,          0,          0
 );
-WPVARK(0, residual, 0, 2,
-    0,          0,          2,          0,          0,          1,          0,          0,          1,          0,          1,
-    0,          0,          2,          2,          0,          1,          0,          0,          1,          0,          1,
-    0,          0,          2,          0,          0,          1,          0,          0,          1,          0,          1,
-    0,          0,          2,          2,          0,          1,          0,          0,          1,          0,          1
+WPVARK(0, residual, 0, WR_ALL,
+    0,          0,          WR(BLEED),  0,          0,          WR(BURN),   0,          0,          WR(BURN),   WR(SHOCK),  WR(BURN),
+    0,          0,          WR(BLEED),  WR(BLEED),  0,          WR(BURN),   0,          0,          WR(BURN),   WR(SHOCK),  WR(BURN),
+    0,          0,          WR(BLEED),  0,          0,          WR(BURN),   0,          WR(SHOCK),  WR(BURN),   WR(SHOCK),  WR(BURN),
+    0,          0,          WR(BLEED),  WR(BLEED),  0,          WR(BURN),   0,          WR(SHOCK),  WR(BURN),   WR(SHOCK),  WR(BURN)
 );
 WPFVARK(0, selfdamage, FVAR_MIN, FVAR_MAX,
     0.0f,       0.0f,       0.0f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,       0.5f,

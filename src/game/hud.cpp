@@ -276,6 +276,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, buffedtex, "<grey>textures/alertbuff", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, burningtex, "<grey>textures/alertburn", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bleedingtex, "<grey>textures/alertbleed", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shockingtex, "<grey>textures/alertshock", 3);
 
     VAR(IDF_PERSIST, inventoryconopen, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryconopenblend, 0, 0.5f, 1);
@@ -638,9 +639,11 @@ namespace hud
                 if(healthscale > 0) damage = max(damage, 1.f-max(game::focus->health, 0)/healthscale);
                 amt += damage*0.65f;
                 if(burntime && game::focus->burning(lastmillis, burntime))
-                    amt += 0.25f+(float((lastmillis-game::focus->lastburn)%burndelay)/float(burndelay))*0.35f;
+                    amt += 0.25f+(float((lastmillis-game::focus->lastres[WR_BURN])%burndelay)/float(burndelay))*0.35f;
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
-                    amt += 0.25f+(float((lastmillis-game::focus->lastbleed)%bleeddelay)/float(bleeddelay))*0.35f;
+                    amt += 0.25f+(float((lastmillis-game::focus->lastres[WR_BLEED])%bleeddelay)/float(bleeddelay))*0.35f;
+                if(shocktime && game::focus->shocking(lastmillis, shocktime))
+                    amt += 0.25f+(float((lastmillis-game::focus->lastres[WR_SHOCK])%shockdelay)/float(shockdelay))*0.35f;
                 if(game::focus->turnside || game::focus->impulse[IM_JUMP])
                     amt += game::focus->turnside ? 0.125f : 0.25f;
                 if(physics::jetpack(game::focus)) amt += 0.125f;
@@ -655,7 +658,7 @@ namespace hud
     void damage(int n, const vec &loc, gameent *actor, int weap, int flags)
     {
         damageresidue = clamp(damageresidue+(n*(flags&HIT_BLEED ? 3 : 1)), 0, 200);
-        vec colour = doesburn(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
+        vec colour = wr_burns(weap, flags) ? vec(1.f, 0.35f, 0.0625f) : (kidmode || game::bloodscale <= 0 ? vec(1, 0.25f, 1) : vec(1.f, 0, 0)),
             dir = vec(loc).sub(camera1->o).normalize();
         loopv(damagelocs)
         {
@@ -1845,21 +1848,29 @@ namespace hud
         if(force || killer || self || dominated || dist <= radarrange())
         {
             bool burning = radarplayereffects && burntime && lastmillis%150 < 50 && d->burning(lastmillis, burntime),
-                 bleeding = radarplayereffects && bleedtime && lastmillis%150 < 50 && d->bleeding(lastmillis, bleedtime);
+                 bleeding = radarplayereffects && bleedtime && lastmillis%150 < 50 && d->bleeding(lastmillis, bleedtime),
+                 shocking = radarplayereffects && shocktime && lastmillis%150 < 50 && d->shocking(lastmillis, shocktime);
             vec colour[2];
-            if(isdominated) colour[0] = vec::hexcolor(pulsecols[2][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
+            if(isdominated) colour[0] = vec::hexcolor(pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)]);
             else if(d->lastbuff)
             {
                 int millis = lastmillis%1000;
                 float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
                 flashcolour(colour[0].r, colour[0].g, colour[0].b, 1.f, 1.f, 1.f, amt);
             }
-            else if(burning) colour[0] = game::burncolour(d);
+            else if(burning) colour[0] = game::rescolour(d, PULSE_BURN);
             else if(bleeding)
             {
                 int millis = lastmillis%1000;
                 float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
                 flashcolour(colour[0].r, colour[0].g, colour[0].b, 1.f, 0.2f, 0.2f, amt);
+            }
+            else if(shocking)
+            {
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                vec c = game::rescolour(d, PULSE_SHOCK);
+                flashcolour(colour[0].r, colour[0].g, colour[0].b, c.r, c.g, c.b, amt);
             }
             else colour[0] = vec::hexcolor(game::getcolour(d, game::playerundertone));
             colour[1] = vec::hexcolor(game::getcolour(d, game::playerovertone));
@@ -2515,6 +2526,18 @@ namespace hud
                     }
                     sy += drawitem(buffedtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
+                if(burntime && game::focus->burning(lastmillis, burntime))
+                {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+                    if(inventoryalertflash)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
+                    }
+                    sy += drawitem(burningtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                }
                 if(bleedtime && game::focus->bleeding(lastmillis, bleedtime))
                 {
                     float gr = 1, gg = 1, gb = 1;
@@ -2527,7 +2550,7 @@ namespace hud
                     }
                     sy += drawitem(bleedingtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
-                if(burntime && game::focus->burning(lastmillis, burntime))
+                if(shocktime && game::focus->shocking(lastmillis, shocktime))
                 {
                     float gr = 1, gg = 1, gb = 1;
                     if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
@@ -2535,9 +2558,9 @@ namespace hud
                     {
                         int millis = lastmillis%1000;
                         float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
-                        flashcolour(gr, gg, gb, 1.f, 0.5f, 0.f, amt);
+                        flashcolour(gr, gg, gb, 0.f, 0.8f, 1.f, amt);
                     }
-                    sy += drawitem(burningtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                    sy += drawitem(shockingtex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
             }
             if(inventoryconopen)
@@ -2684,7 +2707,7 @@ namespace hud
     {
         if(game::focus->burning(lastmillis, burntime))
         {
-            int interval = lastmillis-game::focus->lastburn;
+            int interval = lastmillis-game::focus->lastres[WR_BURN];
             Texture *t = *burntex ? textureload(burntex, 3) : notexture;
             if(t != notexture)
             {
@@ -2931,7 +2954,7 @@ namespace hud
                         switch(game::focus->icons[i].type)
                         {
                             case eventicon::WEAPON: colour = W(game::focus->icons[i].value, colour); break;
-                            case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[2][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : TEAM(game::focus->icons[i].value, colour); break;
+                            case eventicon::AFFINITY: colour = m_bomber(game::gamemode) ? pulsecols[PULSE_DISCO][clamp((totalmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)] : TEAM(game::focus->icons[i].value, colour); break;
                             default: break;
                         }
                         glBindTexture(GL_TEXTURE_2D, t->id);

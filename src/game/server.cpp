@@ -170,15 +170,16 @@ namespace server
         int state;
         projectilestate dropped, weapshots[W_MAX][2];
         int score, spree, crits, rewards, shotdamage, damage;
-        int lasttimeplayed, timeplayed, aireinit, lastburnowner, lastbleedowner, lastboost;
+        int lasttimeplayed, timeplayed, aireinit, lastboost, lastresowner[WR_MAX];
         vector<int> fraglog, fragmillis, cpnodes, chatmillis;
         vector<dmghist> damagelog;
         vector<teamkill> teamkills;
         int warnings[WARN_MAX][2];
 
-        servstate() : state(CS_SPECTATOR), aireinit(0), lastburnowner(-1), lastbleedowner(-1)
+        servstate() : state(CS_SPECTATOR), aireinit(0)
         {
             loopi(WARN_MAX) loopj(2) warnings[i][j] = 0;
+            resetresidualowner();
         }
 
         bool isalive(int millis)
@@ -202,11 +203,17 @@ namespace server
             respawn();
         }
 
+        void resetresidualowner(int n = -1)
+        {
+            if(n >= 0 && n < WR_MAX) lastresowner[n] = -1;
+            else loopi(WR_MAX) lastresowner[i] = -1;
+        }
+
 #ifdef MEKARCADE
         void respawn(int millis = 0, int heal = 0, int armr = -1)
         {
             lastboost = 0;
-            lastburnowner = lastbleedowner = -1;
+            resetresidualowner();
             gamestate::respawn(millis, heal, armr);
             o = vec(-1e10f, -1e10f, -1e10f);
             vel = falling = vec(0, 0, 0);
@@ -216,7 +223,7 @@ namespace server
         void respawn(int millis = 0, int heal = 0)
         {
             lastboost = 0;
-            lastburnowner = lastbleedowner = -1;
+            resetresidualowner();
             gamestate::respawn(millis, heal);
             o = vec(-1e10f, -1e10f, -1e10f);
             vel = falling = vec(0, 0, 0);
@@ -3120,15 +3127,20 @@ namespace server
             target->state.lastpain = gamemillis;
             actor->state.damage += realdamage;
             if(target->state.health <= 0) realflags |= HIT_KILL;
-            if(G(burntime) && doesburn(weap, flags))
+            if(wr_burning(weap, flags))
             {
-                target->state.lastburn = target->state.lastburntime = gamemillis;
-                target->state.lastburnowner = actor->clientnum;
+                target->state.lastres[WR_BURN] = target->state.lastrestime[WR_BURN] = gamemillis;
+                target->state.lastresowner[WR_BURN] = actor->clientnum;
             }
-            else if(G(bleedtime) && doesbleed(weap, flags))
+            if(wr_bleeding(weap, flags))
             {
-                target->state.lastbleed = target->state.lastbleedtime = gamemillis;
-                target->state.lastbleedowner = actor->clientnum;
+                target->state.lastres[WR_BLEED] = target->state.lastrestime[WR_BLEED] = gamemillis;
+                target->state.lastresowner[WR_BLEED] = actor->clientnum;
+            }
+            if(wr_shocking(weap, flags))
+            {
+                target->state.lastres[WR_SHOCK] = target->state.lastrestime[WR_SHOCK] = gamemillis;
+                target->state.lastresowner[WR_SHOCK] = actor->clientnum;
             }
         }
         if(smode) smode->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush);
@@ -3315,8 +3327,8 @@ namespace server
         dropitems(ci, aistyle[ci->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
         if(G(burntime) && (flags&HIT_MELT || flags&HIT_BURN))
         {
-            ci->state.lastburn = ci->state.lastburntime = gamemillis;
-            ci->state.lastburnowner = ci->clientnum;
+            ci->state.lastres[WR_BURN] = ci->state.lastrestime[WR_BURN] = gamemillis;
+            ci->state.lastresowner[WR_BURN] = ci->clientnum;
         }
         static vector<int> dmglog; dmglog.setsize(0);
         gethistory(ci, ci, gamemillis, dmglog, true, 1);
@@ -3871,24 +3883,37 @@ namespace server
             {
                 if(ci->state.burning(gamemillis, G(burntime)))
                 {
-                    if(gamemillis-ci->state.lastburntime >= G(burndelay))
+                    if(gamemillis-ci->state.lastrestime[WR_BURN] >= G(burndelay))
                     {
-                        clientinfo *co = (clientinfo *)getinfo(ci->state.lastburnowner);
+                        clientinfo *co = (clientinfo *)getinfo(ci->state.lastresowner[WR_BURN]);
                         dodamage(ci, co ? co : ci, G(burndamage), -1, HIT_BURN);
-                        ci->state.lastburntime += G(burndelay);
+                        ci->state.lastrestime[WR_BURN] += G(burndelay);
+                        if(ci->state.state != CS_ALIVE) continue;
                     }
                 }
-                else if(ci->state.lastburn) ci->state.lastburn = ci->state.lastburntime = 0;
+                else if(ci->state.lastres[WR_BURN]) ci->state.lastres[WR_BURN] = ci->state.lastrestime[WR_BURN] = 0;
                 if(ci->state.bleeding(gamemillis, G(bleedtime)))
                 {
-                    if(gamemillis-ci->state.lastbleedtime >= G(bleeddelay))
+                    if(gamemillis-ci->state.lastrestime[WR_BLEED] >= G(bleeddelay))
                     {
-                        clientinfo *co = (clientinfo *)getinfo(ci->state.lastbleedowner);
+                        clientinfo *co = (clientinfo *)getinfo(ci->state.lastresowner[WR_BLEED]);
                         dodamage(ci, co ? co : ci, G(bleeddamage), -1, HIT_BLEED);
-                        ci->state.lastbleedtime += G(bleeddelay);
+                        ci->state.lastrestime[WR_BLEED] += G(bleeddelay);
+                        if(ci->state.state != CS_ALIVE) continue;
                     }
                 }
-                else if(ci->state.lastbleed) ci->state.lastbleed = ci->state.lastbleedtime = 0;
+                else if(ci->state.lastres[WR_BLEED]) ci->state.lastres[WR_BLEED] = ci->state.lastrestime[WR_BLEED] = 0;
+                if(ci->state.shocking(gamemillis, G(shocktime)))
+                {
+                    if(gamemillis-ci->state.lastrestime[WR_SHOCK] >= G(shockdelay))
+                    {
+                        clientinfo *co = (clientinfo *)getinfo(ci->state.lastresowner[WR_SHOCK]);
+                        dodamage(ci, co ? co : ci, G(shockdamage), -1, HIT_SHOCK);
+                        ci->state.lastrestime[WR_SHOCK] += G(shockdelay);
+                        if(ci->state.state != CS_ALIVE) continue;
+                    }
+                }
+                else if(ci->state.lastres[WR_SHOCK]) ci->state.lastres[WR_SHOCK] = ci->state.lastrestime[WR_SHOCK] = 0;
                 if(m_regen(gamemode, mutators) && ci->state.aitype < AI_START)
                 {
                     int total = m_health(gamemode, mutators, ci->state.model), amt = G(regenhealth),
@@ -4517,7 +4542,7 @@ namespace server
                     if(!hasclient(cp, ci)) break;
                     if(idx == SPHY_EXTINGUISH)
                     {
-                        if(cp->state.burning(gamemillis, G(burntime))) cp->state.lastburn = cp->state.lastburntime = 0;
+                        if(cp->state.burning(gamemillis, G(burntime))) cp->state.lastres[WR_BURN] = cp->state.lastrestime[WR_BURN] = 0;
                         else break; // don't propogate
                     }
                     else if((idx == SPHY_BOOST || idx == SPHY_DASH) && (!cp->state.lastboost || gamemillis-cp->state.lastboost > G(impulsedelay)))

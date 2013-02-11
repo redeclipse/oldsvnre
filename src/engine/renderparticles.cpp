@@ -104,9 +104,16 @@ struct partrenderer
                 if(ts > p->fade) ts = p->fade;
                 float secs = curtime/1000.f;
                 vec v = vec(p->d).mul(secs);
-                static physent dummy;
-                dummy.weight = weight;
-                v.z -= physics::gravityvel(&dummy)*secs;
+                static struct particleent : physent
+                {
+                    particleent()
+                    {
+                        physent::reset();
+                        type = ENT_DUMMY;
+                    }
+                } d;
+                d.weight = weight;
+                v.z -= physics::gravityvel(&d)*secs;
                 p->o.add(v);
             }
             if(p->collide && p->o.z < p->val && lastpass)
