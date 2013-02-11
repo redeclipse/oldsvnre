@@ -1320,7 +1320,8 @@ namespace client
         {
             p.reliable();
             putint(p, N_GAMEINFO);
-            putint(p, game::numplayers);
+            putint(p, game::mapplayers);
+            putint(p, game::mapbalance);
             entities::putitems(p);
             putint(p, -1);
             if(m_capture(game::gamemode)) capture::sendaffinity(p);

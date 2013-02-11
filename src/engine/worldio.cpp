@@ -1264,6 +1264,10 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                                 else if(!strcmp(name, "slidecurb")) copystring(name, "slidecoast");
                                 else if(!strcmp(name, "floatcurb")) copystring(name, "floatcoast");
                             }
+                            if(hdr.version <= 43)
+                            {
+                                if(!strcmp(name, "numplayers")) copystring(name, "mapplayers");
+                            }
                             ident *id = idents.access(name);
                             bool proceed = true;
                             int type = hdr.version >= 28 ? f->getlil<int>()+(hdr.version >= 29 ? 0 : 1) : (id ? id->type : ID_VAR);
