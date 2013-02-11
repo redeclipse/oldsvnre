@@ -45,6 +45,7 @@ Maps:
  * Facility, removed
  * Cyanide, new trial map
  * Deadsimple, updated (retextured)
+ * Vault, new map
 
 Interface & Menus:
  * Overall reduced font sizes
