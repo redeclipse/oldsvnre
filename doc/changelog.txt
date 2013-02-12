@@ -72,7 +72,7 @@ Interface & Menus:
    crosshair location
  * Added sliders to set player(over|under)tone in extra tab of profile menu
 
-Modding & Data Assets:
+Modding & Mapmaking:
  * Added support for up to 4 types of water, lava, and glass
  * Added possible missile behaviour guided style for weapons
  * Added cloudoffsetx, cloudoffsety, envoffsetx, and envoffsety vars
@@ -86,6 +86,15 @@ Modding & Data Assets:
  * Zooming of weapons is now limited by zoomlimit{min,max}, zoomfov removed
  * Added 'weaponinterrupts' server variable which allows control over which
    weapon states may be interrupted by the player
+ * Renamed frag/flak for distinction in weapon vers, 'frag' is created and
+   becomes 'flak'
+ * Added new residual style 'shock' which stuns, possib to combine multiple
+   residual effects
+ * Renamed 'numplayers'->'mapplayers'
+ * Added 'mapbalance' for unsymmetrical maps to swap teams at specified
+   intervals
+
+Data Assets:
  * Renamed 'blarg' directory to 'misc' for random textures
  * Added a few light textuers in 'misc' (used in starlibido)
  * Added 19 new skyboxes ('elyvisions' and 'mayhem' directories)
