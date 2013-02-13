@@ -183,8 +183,9 @@ namespace game
     VAR(IDF_PERSIST, playereffecttone, -1, CTONE_MIXED, CTONE_MAX-1);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.3f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
-#ifndef MEKARCADE
+#ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
+    VAR(IDF_PERSIST, forceplayervanity, -1, -1, AC_MAX);
 #endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -1116,7 +1117,7 @@ namespace game
         }
     }
 
-#ifdef MEKARCADE
+#ifdef MEK
     void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir)
 #else
     void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir)
@@ -1126,7 +1127,7 @@ namespace game
         if(hithurts(flags))
         {
             d->health = health;
-#ifdef MEKARCADE
+#ifdef MEK
             d->armour = armour;
 #endif
             if(d->health <= m_health(gamemode, mutators, d->model)) d->lastregen = 0;
@@ -1624,7 +1625,7 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
-#ifdef MEKARCADE
+#ifdef MEK
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
 #else
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model));
@@ -2568,7 +2569,7 @@ namespace game
     void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
         bool tpmdl = third || (d == focus && firstpersonmodel == 2);
-#ifdef MEKARCADE
+#ifdef MEK
         const char *mdl = playertypes[0][tpmdl ? 0 : 1];
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
         else mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
@@ -2949,13 +2950,26 @@ namespace game
         }
         if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
         const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
-#ifdef MEKARCADE
+#ifdef MEK
         bool hasweapon = false; // TEMP
 #else
         bool hasweapon = showweap && *weapmdl;
 #endif
-        modelattach a[11]; int ai = 0;
+        modelattach a[1+VT_MAX+10]; int ai = 0;
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
+        if(third)
+        {
+            int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
+            if(vanity)
+            {
+                bool found[VT_MAX] = {false};
+                loopk(VI_MAX) if(vanity&(1<<k) && !found[vanities[k].tag])
+                {
+                    a[ai++] = modelattach(vanitytags[vanities[k].tag], vanities[vanities[k].tag].model, weapflags, weapaction);
+                    found[vanities[k].tag] = true;
+                }
+            }
+        }
         if(rendernormally && (early || d != focus))
         {
             const char *muzzle = "tag_weapon";
@@ -3103,7 +3117,7 @@ namespace game
         if(rendernormally && early) rendercheck(focus);
     }
 
-    void renderplayerpreview(int model, int color, int team, int weap, float scale, float blend)
+    void renderplayerpreview(int model, int color, int team, int weap, int vanity, float scale, float blend)
     {
         static gameent *previewent = NULL;
         if(!previewent)
@@ -3116,7 +3130,7 @@ namespace game
             previewent->light.dir = vec(0, -1, 2).normalize();
             loopi(W_MAX) previewent->ammo[i] = W(i, max);
         }
-        previewent->setinfo(NULL, color, model);
+        previewent->setinfo(NULL, color, model, vanity);
         previewent->team = clamp(team, 0, int(T_MULTI));
         previewent->weapselect = clamp(weap, 0, W_MAX-1);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);

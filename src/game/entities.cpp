@@ -188,7 +188,7 @@ namespace entities
                 }
                 break;
             }
-#ifdef MEKARCADE
+#ifdef MEK
             case HEALTH:
             {
                 if(attr[0] >= 0 && attr[0] < HEALTH_MAX)
@@ -290,7 +290,7 @@ namespace entities
         switch(type)
         {
             case AFFINITY: return "props/flag";
-#ifdef MEKARCADE
+#ifdef MEK
             case PLAYERSTART: return playertypes[0][0];
             case HEALTH: return "props/health";
             case ARMOUR: return "props/armour";
@@ -848,7 +848,7 @@ namespace entities
                 while(e.attrs[0] < W_OFFSET) e.attrs[0] += W_MAX-W_OFFSET; // don't allow superimposed weaps
                 while(e.attrs[0] >= W_MAX) e.attrs[0] -= W_MAX-W_OFFSET;
                 break;
-#ifdef MEKARCADE
+#ifdef MEK
             case HEALTH:
                 while(e.attrs[0] < 0) e.attrs[0] += HEALTH_MAX;
                 while(e.attrs[0] >= HEALTH_MAX) e.attrs[0] -= HEALTH_MAX;
@@ -1664,7 +1664,7 @@ namespace entities
             }
             if(gver <= 216 && enttype[e.type].modesattr > 0) // mode/mutator array updates
             {
-#ifdef MEKARCADE
+#ifdef MEK
                 int attr = enttype[e.type].modesattr+1;
 #else
                 int attr = enttype[e.type].modesattr;
@@ -1754,7 +1754,7 @@ namespace entities
             progress(i/float(ents.length()), "updating entities...");
             if(mtype == MAP_MAPZ && gver <= 212)
             {
-#ifdef MEKARCADE
+#ifdef MEK
                 if(e.type == HEALTH) e.type = NOTUSED;
                 else if(e.type == ARMOUR)
 #else

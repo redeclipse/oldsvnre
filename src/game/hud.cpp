@@ -104,7 +104,7 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, chattex, "<grey>textures/chat", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthtex, "<grey>textures/health", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthbgtex, "<grey>textures/healthbg", 3);
-#ifdef MEKARCADE
+#ifdef MEK
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourtex, "<grey>textures/impulse", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourbgtex, "<grey>textures/impulsebg", 3);
 #endif
@@ -349,7 +349,7 @@ namespace hud
     VAR(IDF_PERSIST, rocketcliprotate, 0, 12, 15);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
-#ifdef MEKARCADE
+#ifdef MEK
     VAR(IDF_PERSIST, radarstyle, 0, 3, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
 #else
     VAR(IDF_PERSIST, radarstyle, 0, 1, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
@@ -454,7 +454,7 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, privcreatorcolour, 0, 0x8844FF, 0xFFFFFF);
 
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
-#ifdef MEKARCADE
+#ifdef MEK
     TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
 #endif
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modedeathmatch.png", 3);
@@ -492,7 +492,7 @@ namespace hud
     {
         modecheck(g, m);
         #define ADDMODE(s) { list.put(s, strlen(s)); list.add(' '); }
-#ifdef MEKARCADE
+#ifdef MEK
         #define ADDMODEICON \
         { \
             if(m_edit(g)) ADDMODE(modeeditingtex) \
@@ -2251,7 +2251,7 @@ namespace hud
         {
             case PLAYERSTART: return playertex; break;
             case AFFINITY: return flagtex; break;
-#ifdef MEKARCADE
+#ifdef MEK
             case HEALTH: return healthtex; break;
             case ARMOUR: return armourtex; break;
 #endif

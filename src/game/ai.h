@@ -6,7 +6,7 @@ struct aistyles
     const char  *name,      *playermodel[2];
 };
 
-#ifdef MEKARCADE
+#ifdef MEK
 enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_TANK, AI_MECH1, AI_DROID, AI_HELI, AI_VTOL, AI_MEK2, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
@@ -412,7 +412,7 @@ namespace ai
     extern bool altfire(gameent *d, gameent *e);
     extern int owner(gameent *d);
 
-    extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md);
+    extern void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, int vn);
 
     extern bool badhealth(gameent *d);
     extern int checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false, int *members = NULL);

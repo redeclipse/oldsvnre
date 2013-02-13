@@ -52,7 +52,7 @@ GSVAR(IDF_ADMIN, defaultmap, "");
 GVAR(IDF_ADMIN, defaultmode, G_START, G_DEATHMATCH, G_MAX-1);
 GVAR(IDF_ADMIN, defaultmuts, 0, 0, G_M_ALL);
 
-#ifdef MEKARCADE
+#ifdef MEK
 GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 
 GSVAR(IDF_ADMIN, allowmaps, "riviera campaign1");
@@ -149,7 +149,7 @@ GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
 
-#ifndef MEKARCADE
+#ifndef MEK
 GVAR(0, spawnhealth, 0, 100, VAR_MAX);
 #endif
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
@@ -178,7 +178,7 @@ GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating norm
 GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
 GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
 
-#ifdef MEKARCADE
+#ifdef MEK
 GVAR(0, kamikaze, 0, 3, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 #else
 GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always

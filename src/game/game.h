@@ -3,7 +3,7 @@
 
 #include "engine.h"
 
-#ifdef MEKARCADE
+#ifdef MEK
 #define GAMEID              "mek"
 #define GAMEVERSION         220
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
@@ -45,7 +45,7 @@ enum                                // entity types
     NOTUSED = ET_EMPTY, LIGHT = ET_LIGHT, MAPMODEL = ET_MAPMODEL, PLAYERSTART = ET_PLAYERSTART, ENVMAP = ET_ENVMAP, PARTICLES = ET_PARTICLES,
     MAPSOUND = ET_SOUND, LIGHTFX = ET_LIGHTFX, SUNLIGHT = ET_SUNLIGHT, WEAPON = ET_GAMESPECIFIC,
     TELEPORT, ACTOR, TRIGGER, PUSHER, AFFINITY, CHECKPOINT,
-#ifdef MEKARCADE
+#ifdef MEK
     HEALTH, ARMOUR,
 #else
     DUMMY1, DUMMY2,
@@ -61,7 +61,7 @@ enum { TA_MANUAL = 0, TA_AUTO, TA_ACTION, TA_MAX };
 #define TRIGSTATE(a,b)  (b%2 ? !a : a)
 
 enum { CP_RESPAWN = 0, CP_START, CP_FINISH, CP_LAST, CP_MAX };
-#ifdef MEKARCADE
+#ifdef MEK
 enum { HEALTH_SMALL = 0, HEALTH_REGULAR, HEALTH_LARGE, HEALTH_MAX };
 enum { ARMOUR_SMALL = 0, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
 #endif
@@ -180,7 +180,7 @@ enttypes enttype[] = {
             false,  true,   false,      false,      false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
-#ifdef MEKARCADE
+#ifdef MEK
     {
         HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,
             0, 0,
@@ -208,12 +208,12 @@ enttypes enttype[] = {
     }
 #endif
 };
-#ifdef MEKARCADE
+#ifdef MEK
 int healthamt[HEALTH_MAX] = { 25, 50, 100 }, armouramt[ARMOUR_MAX] = { 25, 50, 100 };
 #endif
 #else
 extern enttypes enttype[];
-#ifdef MEKARCADE
+#ifdef MEK
 extern int healthamt[HEALTH_MAX], armouramt[ARMOUR_MAX];
 #endif
 #endif
@@ -346,7 +346,7 @@ struct demoheader
     int version, gamever;
 };
 
-#include "team.h"
+#include "player.h"
 
 template<class T>
 static inline void adjustscaled(T &n, int s)
@@ -497,15 +497,15 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
+    int health, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model, vanity;
     int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
-#ifdef MEKARCADE
+#ifdef MEK
     int armour;
 #endif
     vector<int> loadweap;
-    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
+    gamestate() : colour(0), model(0), vanity(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
     {
         loadweap.shrink(0);
@@ -679,7 +679,7 @@ struct gamestate
                 entid[attr] = id;
                 break;
             }
-#ifdef MEKARCADE
+#ifdef MEK
             case HEALTH:
             {
                 int value = ammoamt >= 0 ? ammoamt : healthamt[attr];
@@ -716,7 +716,7 @@ struct gamestate
         loadweap.shrink(0);
     }
 
-#ifdef MEKARCADE
+#ifdef MEK
     void respawn(int millis, int heal = 0, int armr = -1)
     {
         health = heal ? heal : 100;
@@ -758,7 +758,7 @@ struct gamestate
         }
         else
         {
-#ifndef MEKARCADE
+#ifndef MEK
             if(sweap != W_MELEE)
             {
                 ammo[W_MELEE] = max(1, W(W_MELEE, max));
@@ -809,12 +809,12 @@ struct gamestate
             }
         }
         health = heal ? heal : m_health(gamemode, mutators, model);
-#ifdef MEKARCADE
+#ifdef MEK
         armour = armr >= 0 ? armr : m_armour(gamemode, mutators, model);
 #endif
     }
 
-#ifdef MEKARCADE
+#ifdef MEK
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
     {
         clearstate();
@@ -989,7 +989,7 @@ struct gameent : dynent, gamestate
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
         int type = clamp(aitype, 0, int(AI_MAX-1));
-#ifdef MEKARCADE
+#ifdef MEK
         if(type >= AI_START)
         {
 #endif
@@ -998,7 +998,7 @@ struct gameent : dynent, gamestate
             yradius = aistyle[type].yradius*curscale;
             zradius = height = aistyle[type].height*curscale;
             weight = aistyle[type].weight*curscale;
-#ifdef MEKARCADE
+#ifdef MEK
         }
         else
         {
@@ -1066,7 +1066,7 @@ struct gameent : dynent, gamestate
         stuns.shrink(0);
     }
 
-#ifdef MEKARCADE
+#ifdef MEK
     void respawn(int millis = 0, int heal = 0, int armr = -1, int gamemode = 0, int mutators = 0)
     {
         stopmoving(true);
@@ -1360,11 +1360,12 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setinfo(const char *n = NULL, int col = 0, int mdl = 0)
+    void setinfo(const char *n = NULL, int col = 0, int mdl = 0, int van = 0)
     {
         if(n && *n) copystring(name, n, MAXNAMELEN+1); else name[0] = 0;
         colour = max(col, 0);
         model = mdl;
+        vanity = van;
     }
 
     void addstun(int weap, int millis, int delay, float scale, float gravity)
@@ -1608,7 +1609,10 @@ namespace game
             lastzoom, lasttvcam, lasttvchg, spectvtime, waittvtime,
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson,
-            playerovertone, playerundertone, playerdisplaytone, playereffecttone, forceplayermodel;
+#ifndef MEK
+            forceplayermodel, forceplayervanity,
+#endif
+            playerovertone, playerundertone, playerdisplaytone, playereffecttone;
     extern float bloodscale, debrisscale, aboveitemiconsize;
     extern bool intermission, zooming;
     extern vec swaypush, swaydir;
@@ -1659,7 +1663,7 @@ namespace game
     extern void resetworld();
     extern void resetstate();
     extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local = false);
-#ifdef MEKARCADE
+#ifdef MEK
     extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir);
 #else
     extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir);

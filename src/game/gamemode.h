@@ -1,4 +1,4 @@
-#ifdef MEKARCADE
+#ifdef MEK
 enum
 {
     G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
@@ -62,7 +62,7 @@ gametypes gametype[] = {
         "editing",                          { "", "", "" },
         "create and edit existing maps",    { "", "", "" },
     },
-#ifdef MEKARCADE
+#ifdef MEK
     {
         G_CAMPAIGN,     (1<<G_M_TEAM),
         {
@@ -239,7 +239,7 @@ extern mutstypes mutstype[];
 
 #define m_demo(a)           (a == G_DEMO)
 #define m_edit(a)           (a == G_EDITMODE)
-#ifdef MEKARCADE
+#ifdef MEK
 #define m_campaign(a)       (a == G_CAMPAIGN)
 #endif
 #define m_dm(a)             (a == G_DEATHMATCH)
@@ -283,7 +283,7 @@ extern mutstypes mutstype[];
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
-#ifdef MEKARCADE
+#ifdef MEK
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
 #define m_checkpoint(a)     (m_campaign(a) || m_trial(a))
 #else
@@ -296,7 +296,7 @@ extern mutstypes mutstype[];
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
 #define m_protect(a,b)      (m_duke(a,b) ? G(duelprotect) : (m_insta(a, b) ? G(instaprotect) : G(spawnprotect)))
 #define m_noitems(a,b)      (m_trial(a) || G(itemsallowed) < (m_limited(a,b) ? 2 : 1))
-#ifdef MEKARCADE
+#ifdef MEK
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : CLASS(c, health))
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : CLASS(c, armour))
 #else
@@ -345,7 +345,7 @@ extern mutstypes mutstype[];
 }
 
 #ifdef GAMESERVER
-#ifdef MEKARCADE
+#ifdef MEK
 SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-the-flag bomber-ball time-trial");
 SVAR(0, modeidxname, "demo editing campaign deathmatch capture defend bomber trial");
 VAR(0, modeidxcampaign, 1, G_CAMPAIGN, -1);

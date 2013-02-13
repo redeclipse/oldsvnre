@@ -331,13 +331,14 @@ namespace client
     ICOMMAND(0, getname, "", (), result(game::player1->name));
     ICOMMAND(0, getcolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
     ICOMMAND(0, getmodel, "", (), intret(game::player1->model));
+    ICOMMAND(0, getvanity, "", (), intret(game::player1->vanity));
     ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getteamicon, "", (), result(hud::teamtexname(game::player1->team)));
     ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
 
     const char *getname() { return game::player1->name; }
 
-    void setplayerinfo(const char *name, int col, int mdl)
+    void setplayerinfo(const char *name, int col, int mdl, int van)
     {
         if(name[0])
         {
@@ -347,17 +348,17 @@ namespace client
             while(*namestr && iscubespace(*namestr)) namestr++;
             if(*namestr)
             {
-                game::player1->setinfo(namestr, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model);
-                addmsg(N_SETPLAYERINFO, "rsi2", game::player1->name, game::player1->colour, game::player1->model);
+                game::player1->setinfo(namestr, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model, van >= 0 ? van : game::player1->vanity);
+                addmsg(N_SETPLAYERINFO, "rsi3", game::player1->name, game::player1->colour, game::player1->model, game::player1->vanity);
             }
         }
-#ifdef MEKARCADE
+#ifdef MEK
         if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, class: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, CLASS(game::player1->model, name));
 #else
         if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playertypes[game::player1->model%PLAYERTYPES][2]);
 #endif
     }
-    ICOMMAND(0, setinfo, "sbb", (char *s, int *c, int *m, int *numargs), setplayerinfo(s, *c, *m));
+    ICOMMAND(0, setinfo, "sbbb", (char *s, int *c, int *m, int *v), setplayerinfo(s, *c, *m, *v));
 
     int teamname(const char *team)
     {
@@ -397,7 +398,7 @@ namespace client
 
     void writeclientinfo(stream *f)
     {
-        f->printf("setinfo %s 0x%06x %d\n\n", escapestring(game::player1->name), game::player1->colour, game::player1->model);
+        f->printf("setinfo %s 0x%06x %d 0x%06x\n\n", escapestring(game::player1->name), game::player1->colour, game::player1->model, game::player1->vanity);
     }
 
     bool allowedittoggle(bool edit)
@@ -449,6 +450,13 @@ namespace client
         return mdl >= 0 ? playertypes[mdl%PLAYERTYPES][clamp(idx, 0, 2)] : "";
     }
     ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 2)));
+
+    int getclientvanity(int cn)
+    {
+        gameent *d = game::getclient(cn);
+        return d ? d->vanity : 0;
+    }
+    ICOMMAND(0, getclientvanity, "i", (int *cn), intret(getclientvanity(*cn)));
 
     const char *getclienthost(int cn)
     {
@@ -1206,6 +1214,7 @@ namespace client
         sendstring(game::player1->name, p);
         putint(p, game::player1->colour);
         putint(p, game::player1->model);
+        putint(p, game::player1->vanity);
         mkstring(hash);
         if(connectpass[0])
         {
@@ -1365,7 +1374,7 @@ namespace client
         d->frags = getint(p);
         d->deaths = getint(p);
         d->health = getint(p);
-#ifdef MEKARCADE
+#ifdef MEK
         d->armour = getint(p);
 #endif
         d->cptime = getint(p);
@@ -1679,7 +1688,7 @@ namespace client
                 case N_SETPLAYERINFO:
                 {
                     getstring(text, p);
-                    int colour = getint(p), model = getint(p);
+                    int colour = getint(p), model = getint(p), vanity = getint(p);
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
@@ -1689,12 +1698,12 @@ namespace client
                     {
                         string oldname, newname;
                         copystring(oldname, game::colorname(d));
-                        d->setinfo(namestr, colour, model);
+                        d->setinfo(namestr, colour, model, vanity);
                         copystring(newname, game::colorname(d));
                         if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
                             conoutft(CON_EVENT, "\fm%s is now known as %s", oldname, newname);
                     }
-                    else d->setinfo(namestr, colour, model);
+                    else d->setinfo(namestr, colour, model, vanity);
                     break;
                 }
 
@@ -1711,7 +1720,7 @@ namespace client
                     getstring(d->hostname, p);
                     if(!d->hostname[0]) copystring(d->hostname, "unknown");
                     getstring(text, p);
-                    int colour = getint(p), model = getint(p);
+                    int colour = getint(p), model = getint(p), vanity = getint(p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
                     while(*namestr && iscubespace(*namestr)) namestr++;
@@ -1722,15 +1731,15 @@ namespace client
                         {
                             string oldname;
                             copystring(oldname, game::colorname(d, NULL, "", false));
-                            d->setinfo(namestr, colour, model);
+                            d->setinfo(namestr, colour, model, vanity);
                             if(showpresence >= (waiting(false) ? 2 : 1) && !isignored(d->clientnum))
                                 conoutft(CON_EVENT, "\fm%s (%s) is now known as %s", oldname, d->hostname, game::colorname(d));
                         }
-                        else d->setinfo(namestr, colour, model);
+                        else d->setinfo(namestr, colour, model, vanity);
                     }
                     else // new client
                     {
-                        d->setinfo(namestr, colour, model);
+                        d->setinfo(namestr, colour, model, vanity);
                         if(showpresence >= (waiting(false) ? 2 : 1)) conoutft(CON_EVENT, "\fg%s (%s) has joined the game", game::colorname(d), d->hostname);
                         if(needclipboard >= 0) needclipboard++;
                         game::specreset(d);
@@ -1839,7 +1848,7 @@ namespace client
                 case N_DAMAGE:
                 {
                     int tcn = getint(p), acn = getint(p), weap = getint(p), flags = getint(p), damage = getint(p),
-#ifdef MEKARCADE
+#ifdef MEK
                         health = getint(p), armour = getint(p);
 #else
                         health = getint(p);
@@ -1849,7 +1858,7 @@ namespace client
                     dir.normalize();
                     gameent *target = game::getclient(tcn), *actor = game::getclient(acn);
                     if(!target || !actor) break;
-#ifdef MEKARCADE
+#ifdef MEK
                     game::damaged(weap, flags, damage, health, armour, target, actor, lastmillis, dir);
 #else
                     game::damaged(weap, flags, damage, health, target, actor, lastmillis, dir);
@@ -1868,7 +1877,7 @@ namespace client
 
                 case N_REGEN:
                 {
-#ifdef MEKARCADE
+#ifdef MEK
                     int trg = getint(p), heal = getint(p), amt = getint(p), armour = getint(p);
 #else
                     int trg = getint(p), heal = getint(p), amt = getint(p);
@@ -1882,7 +1891,7 @@ namespace client
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal;
-#ifdef MEKARCADE
+#ifdef MEK
                     f->armour = armour;
 #endif
                     f->lastregen = lastmillis;
@@ -2483,10 +2492,10 @@ namespace client
                 {
                     int bn = getint(p), on = getint(p), at = getint(p), et = getint(p), sk = clamp(getint(p), 1, 101);
                     getstring(text, p);
-                    int tm = getint(p), cl = getint(p), md = getint(p);
+                    int tm = getint(p), cl = getint(p), md = getint(p), vn = getint(p);
                     gameent *b = game::newclient(bn);
                     if(!b) break;
-                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md);
+                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md, vn);
                     break;
                 }
 

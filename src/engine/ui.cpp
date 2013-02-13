@@ -310,7 +310,7 @@ struct gui : guient
         return layout(size+guishadow, size+guishadow);
     }
 
-    int playerpreview(int model, int color, int team, int weap, float sizescale, bool overlaid, float scale, float blend)
+    int playerpreview(int model, int color, int team, int weap, int vanity, float sizescale, bool overlaid, float scale, float blend)
     {
         autotab();
         if(sizescale==0) sizescale = 1;
@@ -335,7 +335,7 @@ struct gui : guient
             glEnable(GL_SCISSOR_TEST);
             glDisable(GL_BLEND);
             modelpreview::start(overlaid);
-            game::renderplayerpreview(model, color, team, weap, scale, blend);
+            game::renderplayerpreview(model, color, team, weap, vanity, scale, blend);
             modelpreview::end();
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
