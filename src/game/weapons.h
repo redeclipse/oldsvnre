@@ -580,7 +580,7 @@ weaptypes weaptype[] =
             ANIM_PISTOL,        S_PISTOL,   10,
             false,      false,      true,       true,
             { 0, 0 },               8,          0.35f,
-            "pistol",   "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projs/cartridge"
+            "pistol",   "weapons/pistol/item",      "weapons/pistol/vwep", "weapons/pistol/hwep",     "",                     "projectiles/cartridge"
     },
     {
             ANIM_SWORD,         S_SWORD,    1,
@@ -592,13 +592,13 @@ weaptypes weaptype[] =
             ANIM_SHOTGUN,       S_SHOTGUN,  10,
             false,      false,      true,       true,
             { 0, 0 },               12,         0.45f,
-            "shotgun",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projs/shell"
+            "shotgun",  "weapons/shotgun/item",     "weapons/shotgun/vwep", "weapons/shotgun/hwep",    "",                     "projectiles/shell"
     },
     {
             ANIM_SMG,           S_SMG,      20,
             false,      false,      true,       true,
             { 0, 0 },               10,         0.35f,
-            "smg",      "weapons/smg/item",         "weapons/smg/vwep", "weapons/smg/hwep",        "",                     "projs/cartridge"
+            "smg",      "weapons/smg/item",         "weapons/smg/vwep", "weapons/smg/hwep",        "",                     "projectiles/cartridge"
     },
     {
             ANIM_FLAMER,        S_FLAMER,   1,

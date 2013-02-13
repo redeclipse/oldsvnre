@@ -58,7 +58,7 @@ namespace bomber
 
     void preload()
     {
-        preloadmodel("ball");
+        preloadmodel("props/ball");
     }
 
     vec pulsecolour()
@@ -265,7 +265,7 @@ namespace bomber
                     }
                     light->material[0] = bvec::fromcolor(effect);
                     if(f.owner == game::focus && game::thirdpersonview(true)) trans *= 0.5f;
-                    rendermodel(light, "ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, size);
+                    rendermodel(light, "props/ball", ANIM_MAPMODEL|ANIM_LOOP, above, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHTFX, NULL, NULL, 0, 0, trans, size);
                     float fluc = interval >= 500 ? (1500-interval)/1000.f : (500+interval)/1000.f;
                     int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
                     part_create(PART_HINT_SOFT, 1, above, pcolour, enttype[AFFINITY].radius/4*trans+(2*fluc), fluc*trans);

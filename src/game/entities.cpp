@@ -289,11 +289,11 @@ namespace entities
     {
         switch(type)
         {
-            case AFFINITY: return "flag";
+            case AFFINITY: return "props/flag";
 #ifdef MEKARCADE
             case PLAYERSTART: return playertypes[0][0];
-            case HEALTH: return "health";
-            case ARMOUR: return "armour";
+            case HEALTH: return "props/health";
+            case ARMOUR: return "props/armour";
 #else
             case PLAYERSTART: return playertypes[game::forceplayermodel ? game::forceplayermodel-1 : 0][0];
 #endif
