@@ -1564,7 +1564,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     f->read(&e, sizeof(entbase));
                     lilswap(&e.o.x, 3);
                     int numattr = f->getlil<int>();
-                    e.attrs.add(0, clamp(numattr, 5, MAXENTATTRS));
+                    e.attrs.add(0, clamp(numattr, entities::numattrs(e.type), MAXENTATTRS));
                     loopk(numattr)
                     {
                         int val = f->getlil<int>();
