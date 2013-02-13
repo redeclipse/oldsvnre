@@ -430,7 +430,16 @@ namespace projs
             if(*weaptype[i].proj) preloadmodel(weaptype[i].proj);
             if(*weaptype[i].eprj) preloadmodel(weaptype[i].eprj);
         }
-        const char *mdls[] = { "projs/gibs/gib01", "projs/gibs/gib02", "projs/gibs/gib03", "projs/debris/debris01", "projs/debris/debris02", "projs/debris/debris03", "projs/debris/debris04", "" };
+        const char *mdls[] = {
+            "projectiles/gibs/gib01",
+            "projectiles/gibs/gib02",
+            "projectiles/gibs/gib03",
+            "projectiles/debris/debris01",
+            "projectiles/debris/debris02",
+            "projectiles/debris/debris03",
+            "projectiles/debris/debris04",
+            ""
+        };
         for(int i = 0; *mdls[i]; i++) preloadmodel(mdls[i]);
     }
 
@@ -707,9 +716,9 @@ namespace projs
                     }
                     switch(rnd(3))
                     {
-                        case 2: proj.mdl = "projs/gibs/gib03"; break;
-                        case 1: proj.mdl = "projs/gibs/gib02"; break;
-                        case 0: default: proj.mdl = "projs/gibs/gib01"; break;
+                        case 2: proj.mdl = "projectiles/gibs/gib03"; break;
+                        case 1: proj.mdl = "projectiles/gibs/gib02"; break;
+                        case 0: default: proj.mdl = "projectiles/gibs/gib01"; break;
                     }
                     proj.reflectivity = 0.f;
                     proj.elasticity = gibselasticity;
@@ -731,10 +740,10 @@ namespace projs
                 proj.lifesize = 1.5f-(rnd(100)/100.f);
                 switch(rnd(4))
                 {
-                    case 3: proj.mdl = "projs/debris/debris04"; break;
-                    case 2: proj.mdl = "projs/debris/debris03"; break;
-                    case 1: proj.mdl = "projs/debris/debris02"; break;
-                    case 0: default: proj.mdl = "projs/debris/debris01"; break;
+                    case 3: proj.mdl = "projectiles/debris/debris04"; break;
+                    case 2: proj.mdl = "projectiles/debris/debris03"; break;
+                    case 1: proj.mdl = "projectiles/debris/debris02"; break;
+                    case 0: default: proj.mdl = "projectiles/debris/debris01"; break;
                 }
                 proj.relativity = proj.reflectivity = 0.f;
                 proj.elasticity = debriselasticity;
@@ -754,13 +763,13 @@ namespace projs
                 if(isweap(proj.weap))
                 {
                     if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
-                    proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projs/catridge";
+                    proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projectiles/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
                     proj.light.material[0] = bvec(W(proj.weap, colour));
                 }
                 else
                 {
-                    proj.mdl = "projs/catridge";
+                    proj.mdl = "projectiles/catridge";
                     proj.lifesize = 1;
                 }
                 proj.reflectivity = 0.f;
@@ -816,7 +825,7 @@ namespace projs
                 switch(game::gamemode)
                 {
                     case G_BOMBER:
-                        proj.mdl = "ball";
+                        proj.mdl = "props/ball";
                         proj.projcollide = bombercollide;
                         proj.extinguish = bomberextinguish;
                         proj.elasticity = bomberelasticity;
@@ -826,7 +835,7 @@ namespace projs
                         proj.minspeed = bomberminspeed;
                         break;
                     case G_CAPTURE: default:
-                        proj.mdl = "flag";
+                        proj.mdl = "props/flag";
                         proj.projcollide = capturecollide;
                         proj.extinguish = captureextinguish;
                         proj.elasticity = captureelasticity;

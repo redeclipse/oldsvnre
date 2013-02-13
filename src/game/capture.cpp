@@ -24,7 +24,7 @@ namespace capture
 
     void preload()
     {
-        preloadmodel("flag");
+        preloadmodel("props/flag");
     }
 
     void drawblips(int w, int h, float blend)
@@ -233,7 +233,7 @@ namespace capture
             light->material[0] = bvec::fromcolor(effect);
             int pcolour = (int(light->material[0].x)<<16)|(int(light->material[0].y)<<8)|int(light->material[0].z);
             if(!f.owner && !f.droptime)
-                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
+                rendermodel(light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, f.pos(true), entities::ents[f.ent]->attrs[1], entities::ents[f.ent]->attrs[2], 0, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED, NULL, NULL, 0, 0, 1);
             else
             {
                 vec lac(f.pos(true));
@@ -251,7 +251,7 @@ namespace capture
                 }
                 while(yaw >= 360.f) yaw -= 360.f;
                 float trans = f.owner == game::focus && game::thirdpersonview(true) ? 0.5f : 1.f;
-                rendermodel(light, "flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, trans);
+                rendermodel(light, "props/flag", ANIM_MAPMODEL|ANIM_LOOP, lac, yaw, pitch, roll, MDL_DYNSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_LIGHT|MDL_LIGHTFX, NULL, NULL, 0, 0, trans);
                 lac.z += enttype[AFFINITY].radius*2/3;
                 if(f.owner) { lac.z += iterflags[f.owner->clientnum]*2; iterflags[f.owner->clientnum]++; }
                 defformatstring(info)("<super>%s flag", TEAM(f.team, name));
