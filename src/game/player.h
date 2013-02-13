@@ -44,7 +44,7 @@ struct score
 #define isteam(a,b,c,d) (m_fight(a) && m_isteam(a,b) ? (c >= d && c <= numteams(a,b)) : c == T_NEUTRAL)
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
-#ifdef MEKARCADE
+#ifdef MEK
 #define PLAYERTYPES 12
 #ifdef GAMEWORLD
 const char *playertypes[PLAYERTYPES][3] = {
@@ -108,7 +108,7 @@ CLASSDEF(float, yradius);
 CLASSDEF(float, height);
 CLASSDEF(float, weight);
 CLASSDEF(float, speed);
-#else
+#else // FPS
 #define PLAYERTYPES 2
 #ifdef GAMEWORLD
 const char *playertypes[PLAYERTYPES][3] = {
@@ -117,5 +117,41 @@ const char *playertypes[PLAYERTYPES][3] = {
 };
 #else
 extern const char *playertypes[PLAYERTYPES][3];
+#endif
+enum {
+    VI_MONOCLE = 0,
+    VI_TOPHAT_FELT,
+    VI_TOPHAT_METAL,
+    VI_MAX,
+    VI_ALL = (1<<VI_MONOCLE)|(1<<VI_TOPHAT_FELT)|(1<<VI_TOPHAT_METAL)
+};
+enum {
+    VT_EYEWEAR = 0,
+    VT_HAT,
+    VT_MAX
+};
+struct vanitys
+{
+    const char *model, *name;
+    int tag;
+};
+#ifdef GAMEWORLD
+const char *vanitytags[VT_MAX] = { "tag_eyewear", "tag_hat" };
+vanitys vanities[] = {
+    { "vanities/monocle",            "monocle",       VT_EYEWEAR },
+    { "vanities/tophat/felt",        "felttophat",    VT_HAT },
+    { "vanities/tophat/metal",       "metaltophat",   VT_HAT }
+};
+#else
+extern const char *vanitytags[VT_MAX];
+extern vanitys vanities[];
+#endif
+#ifdef GAMESERVER
+SVAR(0, vanityname, "monocle felttophat metaltophat");
+VAR(0, vanitymonocle, 1, VI_MONOCLE, -1);
+VAR(0, vanityfelttophat, 1, VI_TOPHAT_FELT, -1);
+VAR(0, vanitymetaltophat, 1, VI_TOPHAT_METAL, -1);
+VAR(0, vanityall, 1, VI_ALL, -1);
+VAR(0, vanitynum, 1, VI_MAX, -1);
 #endif
 #endif

@@ -209,7 +209,7 @@ namespace server
             else loopi(WR_MAX) lastresowner[i] = -1;
         }
 
-#ifdef MEKARCADE
+#ifdef MEK
         void respawn(int millis = 0, int heal = 0, int armr = -1)
         {
             lastboost = 0;
@@ -556,7 +556,7 @@ namespace server
                 {
                     actor->state.health = heal;
                     actor->state.lastregen = gamemillis;
-#ifdef MEKARCADE
+#ifdef MEK
                     sendf(-1, 1, "ri5", N_REGEN, actor->clientnum, actor->state.health, eff, actor->state.armour);
 #else
                     sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
@@ -1139,7 +1139,7 @@ namespace server
     bool canload(const char *type)
     {
         if(!strcmp(type, gameid())) return true;
-#ifdef MEKARCADE
+#ifdef MEK
         if(!strcmp(type, "fps")) return true;
 #endif
         if(!strcmp(type, "bfa") || !strcmp(type, "bfg")) return true;
@@ -1369,7 +1369,7 @@ namespace server
                 if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators)) return false;
                 break;
             }
-#ifdef MEKARCADE
+#ifdef MEK
             case HEALTH: case ARMOUR:
             {
                 if(m_insta(gamemode, mutators) || (sents[i].attrs[3] && sents[i].attrs[3] != triggerid) || !m_check(sents[i].attrs[1], sents[i].attrs[2], gamemode, mutators)) return false;
@@ -1414,7 +1414,7 @@ namespace server
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
-#ifdef MEKARCADE
+#ifdef MEK
                 sents[i].millis += m_campaign(gamemode) ? 50 : G(enemyspawndelay);
 #else
                 sents[i].millis += G(enemyspawndelay);
@@ -1451,7 +1451,7 @@ namespace server
         {
             sortrandomly(actors);
             loopv(actors)
-#ifdef MEKARCADE
+#ifdef MEK
                 sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : G(enemyspawndelay))*i;
 #else
                 sents[actors[i]].millis += G(enemyspawndelay)*i;
@@ -1679,7 +1679,7 @@ namespace server
             if(!isweap(weap)) weap = rnd(W_MAX-1)+1;
         }
         int spawn = pickspawn(ci);
-#ifdef MEKARCADE
+#ifdef MEK
         gs.spawnstate(gamemode, mutators, weap, health, 0);
         sendf(ci->clientnum, 1, "ri9i2vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
 #else
@@ -1697,7 +1697,7 @@ namespace server
         putint(p, gs.frags);
         putint(p, gs.deaths);
         putint(p, gs.health);
-#ifdef MEKARCADE
+#ifdef MEK
         putint(p, gs.armour);
 #endif
         putint(p, gs.cptime);
@@ -2853,7 +2853,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-#ifdef MEKARCADE
+#ifdef MEK
         sendf(-1, 1, "ri9ivvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
 #else
         sendf(-1, 1, "ri9vvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
@@ -2876,6 +2876,7 @@ namespace server
                 putint(p, ci->team);
                 putint(p, ci->state.colour);
                 putint(p, ci->state.model);
+                putint(p, ci->state.vanity);
             }
         }
         else
@@ -2886,6 +2887,7 @@ namespace server
             sendstring(ci->name, p);
             putint(p, ci->state.colour);
             putint(p, ci->state.model);
+            putint(p, ci->state.vanity);
             putint(p, ci->team);
         }
     }
@@ -3146,7 +3148,7 @@ namespace server
                     actor->state.crits = 0;
                 }
             }
-#ifdef MEKARCADE
+#ifdef MEK
             if(realdamage >= 0 && target->state.armour > 0)
             {
                 int absorb = realdamage/2; // armour absorbs half until depleted
@@ -3181,7 +3183,7 @@ namespace server
         mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush));
         if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team))
             addhistory(target, actor, gamemillis);
-#ifdef MEKARCADE
+#ifdef MEK
         sendf(-1, 1, "ri8i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, target->state.armour, hitpush.x, hitpush.y, hitpush.z);
 #else
         sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
@@ -3191,7 +3193,7 @@ namespace server
             int fragvalue = 1;
             if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
-#ifdef MEKARCADE
+#ifdef MEK
             bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode),
 #else
             bool isai = target->state.aitype >= AI_START,
@@ -3213,7 +3215,7 @@ namespace server
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
-#ifdef MEKARCADE
+#ifdef MEK
                 if(!m_campaign(gamemode) && !firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
 #else
                 if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
@@ -3698,7 +3700,7 @@ namespace server
                 }
                 break;
             }
-#ifdef MEKARCADE
+#ifdef MEK
             case HEALTH:
             {
                 ammoamt = healthamt[attr];
@@ -3770,7 +3772,7 @@ namespace server
 
     void waiting(clientinfo *ci, int drop, bool exclude)
     {
-#ifdef MEKARCADE
+#ifdef MEK
         if(m_campaign(gamemode) && ci->state.cpnodes.empty())
         {
             int maxnodes = -1;
@@ -3970,7 +3972,7 @@ namespace server
                             {
                                 ci->state.health = heal;
                                 ci->state.lastregen = gamemillis;
-#ifdef MEKARCADE
+#ifdef MEK
                                 sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, eff, ci->state.armour);
 #else
                                 sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, eff);
@@ -3990,7 +3992,7 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-#ifdef MEKARCADE
+#ifdef MEK
                     ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model), m_armour(gamemode, mutators, ci->state.model));
 #else
                     ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model));
@@ -4436,6 +4438,7 @@ namespace server
                     copystring(ci->name, namestr, MAXNAMELEN+1);
                     ci->state.colour = max(getint(p), 0);
                     ci->state.model = max(getint(p), 0);
+                    ci->state.vanity = max(getint(p), 0);
 
                     string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
@@ -5013,6 +5016,7 @@ namespace server
                     getstring(text, p);
                     ci->state.colour = max(getint(p), 0);
                     ci->state.model = max(getint(p), 0);
+                    ci->state.vanity = max(getint(p), 0);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
                     while(*namestr && iscubespace(*namestr)) namestr++;
@@ -5025,6 +5029,7 @@ namespace server
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
                     QUEUE_INT(ci->state.model);
+                    QUEUE_INT(ci->state.vanity);
                     break;
                 }
 

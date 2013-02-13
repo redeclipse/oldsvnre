@@ -1351,7 +1351,7 @@
 			<Option target="server64" />
 			<Option target="server64-dbg" />
 		</Unit>
-		<Unit filename="game\team.h">
+		<Unit filename="game\player.h">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
 			<Option target="client32-prof" />

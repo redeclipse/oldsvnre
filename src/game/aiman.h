@@ -85,6 +85,7 @@ namespace aiman
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
                 ci->state.model = rnd(INT_MAX-1);
+                ci->state.vanity = rnd(VI_MAX);
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;
@@ -140,7 +141,7 @@ namespace aiman
         else if(ci->state.aireinit >= 1)
         {
             if(ci->state.aireinit == 2) loopk(W_MAX) loopj(2) ci->state.weapshots[k][j].reset();
-            sendf(-1, 1, "ri6si3", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model);
+            sendf(-1, 1, "ri6si4", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model, ci->state.vanity);
             if(ci->state.aireinit == 2)
             {
                 waiting(ci, 1, DROP_RESET);
@@ -202,7 +203,7 @@ namespace aiman
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
-#ifdef MEKARCADE
+#ifdef MEK
         if(m_campaign(gamemode)) balance = G(campaignplayers); // campaigns strictly obeys player setting
         else
 #endif
@@ -267,7 +268,7 @@ namespace aiman
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
-#ifdef MEKARCADE
+#ifdef MEK
                 bool allow = !m_campaign(gamemode);
                 if(!allow)
                 {
