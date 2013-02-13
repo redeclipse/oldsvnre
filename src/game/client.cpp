@@ -2136,7 +2136,7 @@ namespace client
                     float x = getint(p)/DMF, y = getint(p)/DMF, z = getint(p)/DMF;
                     int type = getint(p), numattrs = getint(p);
                     attrvector attrs;
-                    attrs.add(0, min(numattrs, MAXENTATTRS));
+                    attrs.add(0, max(entities::numattrs(type), min(numattrs, MAXENTATTRS)));
                     loopk(numattrs)
                     {
                         int val = getint(p);

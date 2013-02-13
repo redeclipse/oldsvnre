@@ -660,7 +660,7 @@ extentity *newentity(bool local, const vec &o, int type, const attrvector &attrs
     else while(ents.length() < idx) ents.add(entities::newent())->type = ET_EMPTY;
     extentity &e = *entities::newent();
     e.o = o;
-    e.attrs.add(0, clamp(attrs.length(), 5, MAXENTATTRS) - e.attrs.length());
+    e.attrs.add(0, clamp(attrs.length(), entities::numattrs(type), MAXENTATTRS) - e.attrs.length());
     loopi(min(attrs.length(), e.attrs.length())) e.attrs[i] = attrs[i];
     e.type = type;
     e.spawned = false;
@@ -796,7 +796,7 @@ void entset(char *what, char *attr)
     entattrs(attr, attrs);
     groupedit({
         e.type = type;
-        e.attrs.add(0, clamp(attrs.length(), 5, MAXENTATTRS) - e.attrs.length());
+        e.attrs.add(0, clamp(attrs.length(), entities::numattrs(e.type), MAXENTATTRS) - e.attrs.length());
         loopk(min(attrs.length(), e.attrs.length())) e.attrs[k] = attrs[k];
     });
 }
@@ -1095,7 +1095,7 @@ void mpeditent(int i, const vec &o, int type, attrvector &attr, bool local)
         removeentity(i);
         e.type = type;
         e.o = o;
-        e.attrs.add(0, max(5, min(attr.length(), MAXENTATTRS)) - e.attrs.length());
+        e.attrs.add(0, max(entities::numattrs(e.type), min(attr.length(), MAXENTATTRS)) - e.attrs.length());
         loopk(min(attr.length(), e.attrs.length())) e.attrs[k] = attr[k];
         addentity(i);
     }

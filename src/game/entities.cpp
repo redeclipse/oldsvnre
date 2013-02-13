@@ -17,7 +17,8 @@ namespace entities
     FVAR(IDF_PERSIST, showentsize, 0, 2, FVAR_MAX);
 
     vector<extentity *> &getents() { return ents; }
-    int lastent(int type) { return lastenttype[type]; }
+    int lastent(int type) { return type >= 0 && type < MAXENTTYPES ? lastenttype[type] : 0; }
+    int numattrs(int type) { return type >= 0 && type < MAXENTTYPES ? enttype[type].numattrs : 0; }
 
     int triggertime(extentity &e)
     {
