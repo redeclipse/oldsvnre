@@ -1328,18 +1328,18 @@ namespace server
             int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
             if(baliter != mbaliter)
             {
+                static vector<clientinfo *> assign[T_TOTAL];
+                loopk(T_TOTAL) assign[k].setsize(0);
+                loopv(clients) if(clients[i]->team) assign[clients[i]->team-T_FIRST].add(clients[i]);
                 int scores[T_TOTAL] = {0};
+                loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
                 loopk(T_TOTAL)
                 {
-                    loopv(clients) if(clients[i]->team == bals[mbaliter][k])
-                        setteam(clients[i], bals[baliter][k], true, true);
-                    score &cs = teamscore(bals[mbaliter][k]);
-                    scores[bals[mbaliter][k]] = cs.total;
-                }
-                loopk(T_TOTAL)
-                {
-                    score &cs = teamscore(bals[mbaliter][k]);
-                    cs.total = scores[bals[baliter][k]];
+                    int from = bals[mbaliter][k], fromt = from-T_FIRST,
+                        to = bals[baliter][k], tot = to-T_FIRST;
+                    loopv(assign[fromt]) setteam(assign[fromt][i], to, true, true);
+                    score &cs = teamscore(from);
+                    cs.total = scores[tot];
                     sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                 }
                 mbaliter = baliter;
