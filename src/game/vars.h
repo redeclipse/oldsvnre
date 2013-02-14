@@ -63,8 +63,9 @@ GSVAR(IDF_ADMIN, defendmaps, "riviera");
 GSVAR(IDF_ADMIN, kingmaps, "riviera");
 GSVAR(IDF_ADMIN, bombermaps, "riviera");
 GSVAR(IDF_ADMIN, holdmaps, "riviera");
-GSVAR(IDF_ADMIN, trialmaps, "riviera");
 GSVAR(IDF_ADMIN, campaignmaps, "campaign1");
+GSVAR(IDF_ADMIN, trialmaps, "riviera");
+GSVAR(IDF_ADMIN, gauntletmaps, "riviera");
 
 GSVAR(IDF_ADMIN, multimaps, "riviera"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "riviera");
@@ -74,6 +75,9 @@ GSVAR(IDF_ADMIN, smallmaps, "riviera");
 GSVAR(IDF_ADMIN, mediummaps, "riviera");
 GSVAR(IDF_ADMIN, largemaps, "riviera");
 #else
+#ifdef CAMPAIGN
+GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
+#endif
 GSVAR(IDF_ADMIN, allowmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec cyanide darkness dawn deadsimple deathtrap deli depot dropzone dutility echo erosion error forge foundation fourplex futuresport ghost hawk hinder industrial institute isolation keystone2k lab linear longestyard mist neodrive nova oneiroi panic processing pumpstation purge spacetech starlibido stone suspended testchamber tower tranquility tribal ubik venus warp wet");
 
 GSVAR(IDF_ADMIN, mainmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deathtrap deli depot dropzone dutility echo erosion error foundation fourplex futuresport ghost industrial institute isolation keystone2k linear longestyard mist nova oneiroi panic processing pumpstation spacetech starlibido stone suspended tower tribal ubik venus warp wet");
@@ -83,6 +87,7 @@ GSVAR(IDF_ADMIN, kingmaps, "ares bath battlefield biolytic canals cargo center c
 GSVAR(IDF_ADMIN, bombermaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost industrial isolation linear mist nova pumpstation stone suspended tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost industrial isolation keystone2k linear mist nova panic processing pumpstation stone suspended tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "cyanide hawk hinder neodrive purge testchamber");
+GSVAR(IDF_ADMIN, gauntletmaps, "testchamber");
 
 GSVAR(IDF_ADMIN, multimaps, "canals deadsimple depot keystone2k warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
@@ -137,21 +142,25 @@ GVAR(0, maxcarry, 1, MAXCARRY, W_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
 GVAR(0, spawnweapon, 0, W_PISTOL, W_MAX-1);
 GVAR(0, instaweapon, 0, W_RIFLE, W_MAX-1);
-GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib matches
-GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
 GVAR(0, bomberdelay, 0, 3000, VAR_MAX); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
+GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
+GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
+GVAR(0, triallimit, 0, 60000, VAR_MAX);
+GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are solid, but can't deal damage, 2 = regular gameplay style, solid+damage
 
 #ifndef MEK
 GVAR(0, spawnhealth, 0, 100, VAR_MAX);
+GVAR(0, spawnarmour, 0, 0, VAR_MAX);
 #endif
+
 GFVAR(0, maxhealth, 0, 1.5f, FVAR_MAX);
 GFVAR(0, maxhealthvampire, 0, 2.0f, FVAR_MAX);
 
@@ -197,7 +206,6 @@ GFVAR(0, itemrepelspeed, 0, 25, FVAR_MAX);
 GVAR(0, timelimit, 0, 10, VAR_MAX); // maximum time a match may last, 0 = forever
 GVAR(0, overtimeallow, 0, 1, 1); // if scores are equal, go into overtime
 GVAR(0, overtimelimit, 0, 5, VAR_MAX); // maximum time overtime may last, 0 = forever
-GVAR(0, triallimit, 0, 60000, VAR_MAX);
 GVAR(0, intermlimit, 0, 15000, VAR_MAX); // .. before vote menu comes up
 GVAR(0, votelimit, 0, 45000, VAR_MAX); // .. before vote passes by default
 GVAR(0, duelreset, 0, 1, 1); // reset winner in duel
@@ -291,8 +299,6 @@ GVAR(0, bomberregenbuff, 0, 1, 1); // 0 = off, 1 = modify regeneration when buff
 GVAR(0, bomberregendelay, 0, 1000, VAR_MAX); // regen this often when buffed
 GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the goal
-
-GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are solid, but can't deal damage, 2 = regular gameplay style, solid+damage
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
 GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use mapplayers, 0 = don't balance, 1 or more = fill only with this*numteams

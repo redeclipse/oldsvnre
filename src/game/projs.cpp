@@ -59,7 +59,8 @@ namespace projs
         int nodamage = 0; flags &= ~HIT_SFLAGS;
         if(actor->aitype < AI_START)
         {
-            if((actor == target && !selfdamage) || (m_trial(game::gamemode) && trialstyle <= 1)) nodamage++;
+            if(actor == target && !selfdamage) nodamage++;
+            else if(m_trial(game::gamemode) && trialstyle <= 1) nodamage++;
             else if(m_play(game::gamemode) && m_isteam(game::gamemode, game::mutators) && actor->team == target->team && actor != target)
             {
                 switch(teamdamage)
@@ -872,7 +873,7 @@ namespace projs
                         return;
                     }
                 }
-#ifndef MEK
+#ifdef VANITY
                 proj.mdl = vanities[proj.weap].model;
 #endif
                 proj.reflectivity = 0.f;

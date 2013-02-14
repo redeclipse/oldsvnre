@@ -209,7 +209,6 @@ namespace server
             else loopi(WR_MAX) lastresowner[i] = -1;
         }
 
-#ifdef MEK
         void respawn(int millis = 0, int heal = 0, int armr = -1)
         {
             lastboost = 0;
@@ -219,17 +218,6 @@ namespace server
             vel = falling = vec(0, 0, 0);
             yaw = pitch = roll = 0;
         }
-#else
-        void respawn(int millis = 0, int heal = 0)
-        {
-            lastboost = 0;
-            resetresidualowner();
-            gamestate::respawn(millis, heal);
-            o = vec(-1e10f, -1e10f, -1e10f);
-            vel = falling = vec(0, 0, 0);
-            yaw = pitch = roll = 0;
-        }
-#endif
     };
 
     struct savedscore
@@ -557,11 +545,7 @@ namespace server
                 {
                     actor->state.health = heal;
                     actor->state.lastregen = gamemillis;
-#ifdef MEK
                     sendf(-1, 1, "ri5", N_REGEN, actor->clientnum, actor->state.health, eff, actor->state.armour);
-#else
-                    sendf(-1, 1, "ri4", N_REGEN, actor->clientnum, actor->state.health, eff);
-#endif
                 }
             }
         }
@@ -1418,7 +1402,7 @@ namespace server
         {
             if(sents[i].type == ACTOR && sents[i].attrs[0] >= 0 && sents[i].attrs[0] < AI_TOTAL && (sents[i].attrs[5] == triggerid || !sents[i].attrs[5]) && m_check(sents[i].attrs[3], sents[i].attrs[4], gamemode, mutators))
             {
-#ifdef MEK
+#ifdef CAMPAIGN
                 sents[i].millis += m_campaign(gamemode) ? 50 : G(enemyspawndelay);
 #else
                 sents[i].millis += G(enemyspawndelay);
@@ -1455,7 +1439,7 @@ namespace server
         {
             sortrandomly(actors);
             loopv(actors)
-#ifdef MEK
+#ifdef CAMPAIGN
                 sents[actors[i]].millis += (m_campaign(gamemode) ? 50 : G(enemyspawndelay))*i;
 #else
                 sents[actors[i]].millis += G(enemyspawndelay)*i;
@@ -1660,7 +1644,7 @@ namespace server
     {
         setuptriggers(true);
         setupitems(true);
-        setupspawns(true, m_trial(gamemode) || !m_fight(gamemode) ? 0 : plr, m_trial(gamemode) || !m_fight(gamemode) ? 0 : bal);
+        setupspawns(true, plr, bal);
         hasgameinfo = true;
         aiman::dorefresh = G(airefresh);
     }
@@ -1683,13 +1667,8 @@ namespace server
             if(!isweap(weap)) weap = rnd(W_MAX-1)+1;
         }
         int spawn = pickspawn(ci);
-#ifdef MEK
         gs.spawnstate(gamemode, mutators, weap, health, 0);
-        sendf(ci->clientnum, 1, "ri9i2vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
-#else
-        gs.spawnstate(gamemode, mutators, weap, health);
-        sendf(ci->clientnum, 1, "ri9ivv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
-#endif
+        sendf(ci->clientnum, 1, "ri9i3vv", N_SPAWNSTATE, ci->clientnum, spawn, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.cplaps, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0]);
         gs.lastrespawn = gs.lastspawn = gamemillis;
     }
 
@@ -1701,10 +1680,9 @@ namespace server
         putint(p, gs.frags);
         putint(p, gs.deaths);
         putint(p, gs.health);
-#ifdef MEK
         putint(p, gs.armour);
-#endif
         putint(p, gs.cptime);
+        putint(p, gs.cplaps);
         putint(p, gs.weapselect);
         loopi(W_MAX) putint(p, gs.ammo[i]);
         loopi(W_MAX) putint(p, gs.reloads[i]);
@@ -2857,11 +2835,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-#ifdef MEK
-        sendf(-1, 1, "ri9ivvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
-#else
-        sendf(-1, 1, "ri9vvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.cptime, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
-#endif
+        sendf(-1, 1, "ri9i2vvi", N_RESUME, ci->clientnum, gs.state, gs.points, gs.frags, gs.deaths, gs.health, gs.armour, gs.cptime, gs.cplaps, gs.weapselect, W_MAX, &gs.ammo[0], W_MAX, &gs.reloads[0], -1);
     }
 
     void putinitclient(clientinfo *ci, packetbuf &p)
@@ -3109,7 +3083,8 @@ namespace server
         mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; });
         if(actor->state.aitype < AI_START)
         {
-            if((actor == target && !G(selfdamage)) || (m_trial(gamemode) && G(trialstyle) <= 1)) nodamage++;
+            if(actor == target && !G(selfdamage)) nodamage++;
+            else if(m_trial(gamemode) && G(trialstyle) <= 1) nodamage++;
             else if(m_play(gamemode) && m_isteam(gamemode, mutators) && actor->team == target->team && actor != target)
             {
                 switch(G(teamdamage))
@@ -3152,7 +3127,6 @@ namespace server
                     actor->state.crits = 0;
                 }
             }
-#ifdef MEK
             if(realdamage >= 0 && target->state.armour > 0)
             {
                 int absorb = realdamage/2; // armour absorbs half until depleted
@@ -3160,7 +3134,6 @@ namespace server
                 target->state.armour -= absorb;
                 realdamage -= absorb;
             }
-#endif
             hurt = min(target->state.health, realdamage);
             target->state.health = min(target->state.health-realdamage, m_maxhealth(gamemode, mutators, target->state.model));
             if(target->state.health <= m_health(gamemode, mutators, target->state.model)) target->state.lastregen = 0;
@@ -3187,17 +3160,13 @@ namespace server
         mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush));
         if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team))
             addhistory(target, actor, gamemillis);
-#ifdef MEK
         sendf(-1, 1, "ri8i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, target->state.armour, hitpush.x, hitpush.y, hitpush.z);
-#else
-        sendf(-1, 1, "ri7i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, hitpush.x, hitpush.y, hitpush.z);
-#endif
         if(realflags&HIT_KILL)
         {
             int fragvalue = 1;
             if(target != actor && (!m_isteam(gamemode, mutators) || target->team != actor->team)) actor->state.frags++;
             else fragvalue = -fragvalue;
-#ifdef MEK
+#ifdef CAMPAIGN
             bool isai = target->state.aitype >= AI_START && !m_campaign(gamemode),
 #else
             bool isai = target->state.aitype >= AI_START,
@@ -3219,7 +3188,7 @@ namespace server
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
-#ifdef MEK
+#ifdef CAMPAIGN
                 if(!m_campaign(gamemode) && !firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
 #else
                 if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
@@ -3353,7 +3322,7 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags)) { return; });
         }
         ci->state.spree = 0;
-        if(m_trial(gamemode))
+        if(m_checkpoint(gamemode))
         {
             if(!flags || ci->state.cpnodes.length() == 1) // reset if suicided or hasn't reached another checkpoint yet
             {
@@ -3776,7 +3745,7 @@ namespace server
 
     void waiting(clientinfo *ci, int drop, bool exclude)
     {
-#ifdef MEK
+#ifdef CAMPAIGN
         if(m_campaign(gamemode) && ci->state.cpnodes.empty())
         {
             int maxnodes = -1;
@@ -3976,11 +3945,7 @@ namespace server
                             {
                                 ci->state.health = heal;
                                 ci->state.lastregen = gamemillis;
-#ifdef MEK
                                 sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, eff, ci->state.armour);
-#else
-                                sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, eff);
-#endif
                             }
                         }
                     }
@@ -3996,11 +3961,7 @@ namespace server
                     if(ci->state.lastdeath) flushevents(ci, ci->state.lastdeath + DEATHMILLIS);
                     cleartimedevents(ci);
                     ci->state.state = CS_DEAD; // safety
-#ifdef MEK
                     ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model), m_armour(gamemode, mutators, ci->state.model));
-#else
-                    ci->state.respawn(gamemillis, m_health(gamemode, mutators, ci->state.model));
-#endif
                     sendspawn(ci);
                 }
             }
@@ -4866,7 +4827,7 @@ namespace server
                         {
                             if(cp->state.cpnodes.find(ent) < 0 && (sents[ent].attrs[5] == triggerid || !sents[ent].attrs[5]) && m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators))
                             {
-                                if(m_trial(gamemode)) switch(sents[ent].attrs[6])
+                                if(m_trial(gamemode) || m_gauntlet(gamemode)) switch(sents[ent].attrs[6])
                                 {
                                     case CP_LAST: case CP_FINISH:
                                     {
@@ -4874,23 +4835,32 @@ namespace server
                                         if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
                                         {
                                             cp->state.cptime = laptime;
-                                            if(sents[ent].attrs[6] == CP_FINISH) { cp->state.cpmillis = -gamemillis; waiting(cp); }
                                         }
-                                        sendf(-1, 1, "ri5", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime);
+                                        cp->state.cplaps++;
+                                        if(sents[ent].attrs[6] == CP_FINISH)
+                                        {
+                                            if(m_trial(gamemode)) cp->state.cpmillis = -gamemillis;
+                                            waiting(cp);
+                                        }
+                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
                                         if(m_isteam(gamemode, mutators))
                                         {
-                                            score &ts = teamscore(cp->team);
-                                            if(!ts.total || ts.total > cp->state.cptime)
+                                            if(m_gauntlet(gamemode)) givepoints(cp, 1, true);
+                                            else
                                             {
-                                                ts.total = cp->state.cptime;
-                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                                score &ts = teamscore(cp->team);
+                                                if(!ts.total || ts.total > cp->state.cptime)
+                                                {
+                                                    ts.total = cp->state.cptime;
+                                                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                                }
                                             }
                                         }
                                     }
                                     case CP_RESPAWN: if(sents[ent].attrs[6] == CP_RESPAWN && cp->state.cpmillis) break;
                                     case CP_START:
                                     {
-                                        sendf(-1, 1, "ri5", N_CHECKPOINT, cp->clientnum, ent, -1, 0);
+                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, -1, 0, cp->state.cplaps);
                                         cp->state.cpmillis = gamemillis;
                                         cp->state.cpnodes.shrink(0);
                                     }

@@ -1,22 +1,22 @@
-#ifdef MEK
+#ifdef CAMPAIGN
 enum
 {
-    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
+    G_DEMO = 0, G_EDITMODE, G_CAMPAIGN, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_GAUNTLET, G_MAX,
     G_START = G_EDITMODE, G_PLAY = G_CAMPAIGN, G_FIGHT = G_DEATHMATCH,
     G_RAND = G_BOMBER-G_DEATHMATCH+1, G_COUNT = G_MAX-G_PLAY,
     G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE),
     G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER),
-    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_CAMPAIGN)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)
+    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_CAMPAIGN)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)|(1<<G_GAUNTLET)
 };
 #else
 enum
 {
-    G_DEMO = 0, G_EDITMODE, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_MAX,
+    G_DEMO = 0, G_EDITMODE, G_DEATHMATCH, G_CAPTURE, G_DEFEND, G_BOMBER, G_TRIAL, G_GAUNTLET, G_MAX,
     G_START = G_EDITMODE, G_PLAY = G_DEATHMATCH, G_FIGHT = G_DEATHMATCH,
     G_RAND = G_BOMBER-G_DEATHMATCH+1, G_COUNT = G_MAX-G_PLAY,
     G_NEVER = (1<<G_DEMO)|(1<<G_EDITMODE),
-    G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER),
-    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)
+    G_LIMIT = (1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_GAUNTLET),
+    G_ALL = (1<<G_DEMO)|(1<<G_EDITMODE)|(1<<G_DEATHMATCH)|(1<<G_CAPTURE)|(1<<G_DEFEND)|(1<<G_BOMBER)|(1<<G_TRIAL)|(1<<G_GAUNTLET)
 };
 #endif
 enum
@@ -62,7 +62,7 @@ gametypes gametype[] = {
         "editing",                          { "", "", "" },
         "create and edit existing maps",    { "", "", "" },
     },
-#ifdef MEK
+#ifdef CAMPAIGN
     {
         G_CAMPAIGN,     (1<<G_M_TEAM),
         {
@@ -122,6 +122,15 @@ gametypes gametype[] = {
         },
         "time-trial",                       { "", "", "" },
         "compete for the fastest time completing a lap", { "", "", "" },
+    },
+    {
+        G_GAUNTLET,        0,
+        {
+            (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
+            0, 0, 0
+        },
+        "gauntlet",                       { "", "", "" },
+        "compete for the most laps",      { "", "", "" },
     },
 };
 mutstypes mutstype[] = {
@@ -239,7 +248,7 @@ extern mutstypes mutstype[];
 
 #define m_demo(a)           (a == G_DEMO)
 #define m_edit(a)           (a == G_EDITMODE)
-#ifdef MEK
+#ifdef CAMPAIGN
 #define m_campaign(a)       (a == G_CAMPAIGN)
 #endif
 #define m_dm(a)             (a == G_DEATHMATCH)
@@ -247,6 +256,7 @@ extern mutstypes mutstype[];
 #define m_defend(a)         (a == G_DEFEND)
 #define m_bomber(a)         (a == G_BOMBER)
 #define m_trial(a)          (a == G_TRIAL)
+#define m_gauntlet(a)       (a == G_TRIAL)
 
 #define m_play(a)           (a >= G_PLAY)
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
@@ -283,13 +293,14 @@ extern mutstypes mutstype[];
 #define m_loadout(a,b)      (!m_classic(a, b) && !m_sweaps(a, b))
 #define m_duke(a,b)         (m_duel(a, b) || m_survivor(a, b))
 #define m_regen(a,b)        (!m_duke(a, b) && !m_insta(a, b))
-#ifdef MEK
+#ifdef CAMPAIGN
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
-#define m_checkpoint(a)     (m_campaign(a) || m_trial(a))
+#define m_checkpoint(a)     (m_campaign(a) || m_trial(a) || m_gauntlet(a))
 #else
-#define m_enemies(a,b)      (m_onslaught(a, b))
-#define m_checkpoint(a)     (m_trial(a))
+#define m_enemies(a,b)      (m_onslaught(a, b) || m_gauntlet(a))
+#define m_checkpoint(a)     (m_trial(a) || m_gauntlet(a))
 #endif
+#define m_bots(a)           (m_fight(a) && !m_trial(a) && !m_gauntlet(a))
 #define m_scores(a)         (m_dm(a))
 
 #define m_weapon(a,b)       (m_loadout(a, b) ? 0-W_ITEM : (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? 0-W_BOOM : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon))))))
@@ -301,6 +312,7 @@ extern mutstypes mutstype[];
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : CLASS(c, armour))
 #else
 #define m_health(a,b,c)     (m_insta(a,b) ? 1 : G(spawnhealth))
+#define m_armour(a,b,c)     (m_insta(a,b) ? 0 : G(spawnarmour))
 #endif
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
 
@@ -332,27 +344,41 @@ extern mutstypes mutstype[];
         else mapshrink(G(mediummapmax) && d > G(mediummapmax), a, G(largemaps)) \
     } \
 }
-
+#ifdef CAMPAIGN
+#define maplist(a,b,c,d,e) \
+{ \
+    if(m_campaign(b)) a = newstring(G(campaignmaps)); \
+    else if(m_capture(b)) a = newstring(G(capturemaps)); \
+    else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? G(kingmaps) : G(defendmaps)); \
+    else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? G(holdmaps) : G(bombermaps)); \
+    else if(m_trial(b)) a = newstring(G(trialmaps)); \
+    else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
+    else if(m_fight(b)) a = newstring(G(mainmaps)); \
+    else a = newstring(G(allowmaps)); \
+    if(e) mapcull(a, b, c, d, e); \
+}
+#else
 #define maplist(a,b,c,d,e) \
 { \
     if(m_capture(b)) a = newstring(G(capturemaps)); \
     else if(m_defend(b)) a = newstring(m_gsp3(b, c) ? G(kingmaps) : G(defendmaps)); \
     else if(m_bomber(b)) a = newstring(m_gsp2(b, c) ? G(holdmaps) : G(bombermaps)); \
     else if(m_trial(b)) a = newstring(G(trialmaps)); \
+    else if(m_gauntlet(b)) a = newstring(G(gauntletmaps)); \
     else if(m_fight(b)) a = newstring(G(mainmaps)); \
     else a = newstring(G(allowmaps)); \
     if(e) mapcull(a, b, c, d, e); \
 }
-
+#endif
 #ifdef GAMESERVER
-#ifdef MEK
-SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-the-flag bomber-ball time-trial");
-SVAR(0, modeidxname, "demo editing campaign deathmatch capture defend bomber trial");
+#ifdef CAMPAIGN
+SVAR(0, modename, "demo editing campaign deathmatch capture-the-flag defend-the-flag bomber-ball time-trial gauntlet");
+SVAR(0, modeidxname, "demo editing campaign deathmatch capture defend bomber trial gauntlet");
 VAR(0, modeidxcampaign, 1, G_CAMPAIGN, -1);
 VAR(0, modebitcampaign, 1, (1<<G_CAMPAIGN), -1);
 #else
-SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-the-flag bomber-ball time-trial");
-SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial");
+SVAR(0, modename, "demo editing deathmatch capture-the-flag defend-the-flag bomber-ball time-trial gauntlet");
+SVAR(0, modeidxname, "demo editing deathmatch capture defend bomber trial gauntlet");
 #endif
 VAR(0, modeidxdemo, 1, G_DEMO, -1);
 VAR(0, modeidxediting, 1, G_EDITMODE, -1);
@@ -361,6 +387,7 @@ VAR(0, modeidxcapture, 1, G_CAPTURE, -1);
 VAR(0, modeidxdefend, 1, G_DEFEND, -1);
 VAR(0, modeidxbomber, 1, G_BOMBER, -1);
 VAR(0, modeidxtrial, 1, G_TRIAL, -1);
+VAR(0, modeidxgauntlet, 1, G_GAUNTLET, -1);
 VAR(0, modeidxstart, 1, G_START, -1);
 VAR(0, modeidxplay, 1, G_PLAY, -1);
 VAR(0, modeidxfight, 1, G_FIGHT, -1);
@@ -376,6 +403,7 @@ VAR(0, modebitcapture, 1, (1<<G_CAPTURE), -1);
 VAR(0, modebitdefend, 1, (1<<G_DEFEND), -1);
 VAR(0, modebitbomber, 1, (1<<G_BOMBER), -1);
 VAR(0, modebittrial, 1, (1<<G_TRIAL), -1);
+VAR(0, modebitgauntlet, 1, (1<<G_GAUNTLET), -1);
 SVAR(0, mutsname, "multi teamplay coop instagib medieval kaboom duel survivor classic onslaught jetpack vampire expert resize");
 SVAR(0, mutsidxname, "multi team coop instagib medieval kaboom duel survivor classic onslaught jetpack vampire expert resize");
 VAR(0, mutsidxmulti, 1, G_M_MULTI, -1);

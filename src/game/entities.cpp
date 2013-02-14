@@ -1664,7 +1664,7 @@ namespace entities
             }
             if(gver <= 216 && enttype[e.type].modesattr > 0) // mode/mutator array updates
             {
-#ifdef MEK
+#ifdef CAMPAIGN
                 int attr = enttype[e.type].modesattr+1;
 #else
                 int attr = enttype[e.type].modesattr;

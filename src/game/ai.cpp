@@ -8,7 +8,7 @@ namespace ai
     VAR(0, aidebug, 0, 0, 7);
     VAR(0, aidebugfocus, 0, 1, 2);
     VAR(0, aiforcegun, -1, -1, W_MAX-1);
-#ifdef MEK
+#ifdef CAMPAIGN
     VAR(0, aicampaign, 0, 0, 1);
 #endif
     VAR(0, aipassive, 0, 0, 1);
@@ -550,7 +550,7 @@ namespace ai
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
                 if(m_isteam(game::gamemode, game::mutators))
-#ifdef MEK
+#ifdef CAMPAIGN
                     assist(d, b, interests, false, m_campaign(game::gamemode));
 #else
                     assist(d, b, interests, false, false);
@@ -562,7 +562,7 @@ namespace ai
                 else if(m_defend(game::gamemode)) defend::aifind(d, b, interests);
                 else if(m_bomber(game::gamemode)) bomber::aifind(d, b, interests);
             }
-#ifdef MEK
+#ifdef CAMPAIGN
             if(m_campaign(game::gamemode) && aicampaign)
             {
                 loopi(entities::lastent(TRIGGER)) if(entities::ents[i]->type == TRIGGER && entities::ents[i]->attrs[1] == TR_EXIT)
@@ -745,7 +745,7 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
-#ifdef MEK
+#ifdef CAMPAIGN
                 if(m_campaign(game::gamemode))
                 {
                     if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;
@@ -853,7 +853,7 @@ namespace ai
             }
             case AI_T_AFFINITY:
             {
-#ifdef MEK
+#ifdef CAMPAIGN
                 if(m_campaign(game::gamemode))
                 {
                     if(aicampaign && entities::ents.inrange(b.target)) return defense(d, b, entities::ents[b.target]->o) ? 1 : 0;

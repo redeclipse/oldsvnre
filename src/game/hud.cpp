@@ -104,10 +104,8 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, chattex, "<grey>textures/chat", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthtex, "<grey>textures/health", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, healthbgtex, "<grey>textures/healthbg", 3);
-#ifdef MEK
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourtex, "<grey>textures/impulse", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, armourbgtex, "<grey>textures/impulsebg", 3);
-#endif
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsetex, "<grey>textures/impulse", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, impulsebgtex, "<grey>textures/impulsebg", 3);
     TVAR(IDF_PERSIST|IDF_PRELOAD, progresstex, "<grey>textures/progress", 3);
@@ -349,11 +347,7 @@ namespace hud
     VAR(IDF_PERSIST, rocketcliprotate, 0, 12, 15);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
-#ifdef MEK
-    VAR(IDF_PERSIST, radarstyle, 0, 3, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
-#else
-    VAR(IDF_PERSIST, radarstyle, 0, 1, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
-#endif
+    VAR(IDF_PERSIST, radarstyle, 0, RADARSTYLE, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
     FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, radarcornertex, "<grey>textures/radar", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bliptex, "<grey>textures/blip", 3);
@@ -454,11 +448,12 @@ namespace hud
     VAR(IDF_PERSIST|IDF_HEX, privcreatorcolour, 0, 0x8844FF, 0xFFFFFF);
 
     TVAR(IDF_PERSIST, modeeditingtex, "<grey>textures/modeediting.png", 3);
-#ifdef MEK
+#ifdef CAMPAIGN
     TVAR(IDF_PERSIST, modecampaigntex, "<grey>textures/modecampaign.png", 3);
 #endif
     TVAR(IDF_PERSIST, modedeathmatchtex, "<grey>textures/modedeathmatch.png", 3);
     TVAR(IDF_PERSIST, modetimetrialtex, "<grey>textures/modetimetrial.png", 3);
+    TVAR(IDF_PERSIST, modegauntlettex, "<grey>textures/modegauntlet.png", 3);
 
     TVAR(IDF_PERSIST, modecapturetex, "<grey>textures/modecapture.png", 3);
     TVAR(IDF_PERSIST, modecapturereturntex, "<grey>textures/modecapturereturn.png", 3);
@@ -492,12 +487,13 @@ namespace hud
     {
         modecheck(g, m);
         #define ADDMODE(s) { list.put(s, strlen(s)); list.add(' '); }
-#ifdef MEK
+#ifdef CAMPAIGN
         #define ADDMODEICON \
         { \
             if(m_edit(g)) ADDMODE(modeeditingtex) \
-            else if(m_campaign(g)) ADDMODE(modecampaigntex) \
             else if(m_trial(g)) ADDMODE(modetimetrialtex) \
+            else if(m_gauntlet(g)) ADDMODE(modegauntlettex) \
+            else if(m_campaign(g)) ADDMODE(modecampaigntex) \
             else if(m_capture(g)) \
             { \
                 if(m_gsp1(g, m)) ADDMODE(modecapturereturntex) \
@@ -524,6 +520,7 @@ namespace hud
         { \
             if(m_edit(g)) ADDMODE(modeeditingtex) \
             else if(m_trial(g)) ADDMODE(modetimetrialtex) \
+            else if(m_gauntlet(g)) ADDMODE(modegauntlettex) \
             else if(m_capture(g)) \
             { \
                 if(m_gsp1(g, m)) ADDMODE(modecapturereturntex) \
@@ -1272,7 +1269,7 @@ namespace hud
                 if(shownotices >= 2)
                 {
                     SEARCHBINDCACHE(attackkey)("action 0", 0);
-                    if(delay || (m_trial(game::gamemode) && !target->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                    if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                     {
                         pushfont("reduced");
                         if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
@@ -2624,17 +2621,18 @@ namespace hud
             if((game::focus->cpmillis > 0 || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
                 pushfont("default");
-                if(game::focus->cpmillis > 0)
-                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(lastmillis-game::focus->cpmillis, 1));
-                else if(game::focus->cplast)
-                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cplast));
-                popfont();
+                sy += draw_textx("\falap:\fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
                 if(game::focus->cptime)
                 {
                     pushfont("reduced");
                     sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cptime));
                     popfont();
                 }
+                if(game::focus->cpmillis > 0)
+                    sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(lastmillis-game::focus->cpmillis, 1));
+                else if(game::focus->cplast)
+                    sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cplast));
+                popfont();
             }
             sy += trialinventory(x, y-sy, s, fade);
         }
@@ -2929,6 +2927,7 @@ namespace hud
                     if(!m_isteam(game::gamemode, game::mutators))
                     {
                         if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                        else if(m_gauntlet(game::gamemode)) to += draw_textx("Gauntlet", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         else to += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                     }
                     else to += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), teamtexname(game::focus->team), TEAM(game::focus->team, name));

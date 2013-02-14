@@ -203,7 +203,7 @@ namespace aiman
         }
 
         int balance = 0, people = numclients(-1, true, -1), numt = numteams(gamemode, mutators);
-#ifdef MEK
+#ifdef CAMPAIGN
         if(m_campaign(gamemode)) balance = G(campaignplayers); // campaigns strictly obeys player setting
         else
 #endif
@@ -212,7 +212,7 @@ namespace aiman
             numt--; // filter out the human team
             balance = people+int(ceilf(people*numt*(m_multi(gamemode, mutators) ? G(coopmultibalance) : G(coopbalance))));
         }
-        else if(m_fight(gamemode) && !m_trial(gamemode) && G(botlimit) > 0)
+        else if(m_bots(gamemode) && G(botlimit) > 0)
         {
             switch(G(botbalance))
             {
@@ -268,7 +268,7 @@ namespace aiman
         {
             loopvj(sents) if(sents[j].type == ACTOR && sents[j].attrs[0] >= 0 && sents[j].attrs[0] < AI_TOTAL && gamemillis >= sents[j].millis && (sents[j].attrs[5] == triggerid || !sents[j].attrs[5]) && m_check(sents[j].attrs[3], sents[j].attrs[4], gamemode, mutators))
             {
-#ifdef MEK
+#ifdef CAMPAIGN
                 bool allow = !m_campaign(gamemode);
                 if(!allow)
                 {

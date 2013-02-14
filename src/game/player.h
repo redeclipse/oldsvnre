@@ -113,6 +113,8 @@ const char *playertypes[PLAYERTYPES][3] = {
 #else
 extern const char *playertypes[PLAYERTYPES][3];
 #endif
+#endif
+#ifdef VANITY
 #define VANITYMAX 16
 struct vanityfile
 {
