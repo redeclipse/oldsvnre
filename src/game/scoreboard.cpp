@@ -250,7 +250,7 @@ namespace hud
 
     void renderscoreboard(guient &g, bool firstpass)
     {
-        g.start(menustart, menuscale, NULL, false, false);
+        g.start(menustart, menuscale, NULL, !scoresoff, false);
         int numgroups = groupplayers();
         uilist(g, {
             g.image(NULL, 6, true);

@@ -2232,6 +2232,13 @@ namespace hud
         return teamtexs[clamp(team, 0, T_MAX-1)];
     }
 
+    const char *privname(int priv, int aitype)
+    {
+        if(aitype > AI_NONE) return "bot";
+        const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
+        return privnames[clamp(priv, 0, PRIV_MAX-1)];
+    }
+
     const char *privtex(int priv, int aitype)
     {
         if(aitype > AI_NONE) return privbottex;
