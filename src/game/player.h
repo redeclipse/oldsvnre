@@ -103,48 +103,28 @@ const char *playertypes[PLAYERTYPES][3] = {
 extern const char *playertypes[PLAYERTYPES][3];
 #endif
 enum {
-    V_I_MONOCLE_CLASSY = 0,
-    V_I_MONOCLE_BIONIC,
-    V_I_TOPHAT_FELT,
-    V_I_TOPHAT_METAL,
-    V_I_HORNS,
-    V_I_MAX,
-    V_I_ALL = (1<<V_I_MONOCLE_CLASSY)|(1<<V_I_MONOCLE_BIONIC)|(1<<V_I_TOPHAT_FELT)|(1<<V_I_TOPHAT_METAL)|(1<<V_I_HORNS)
-};
-enum {
-    V_T_EYEPIECE = 0,
-    V_T_EYEWEAR,
-    V_T_HAT,
+    V_T_EYES = 0,
+    V_T_HEAD,
+    V_T_FACE,
     V_T_MAX
 };
 struct vanitys
 {
-    const char *model, *name;
-    int tag;
+    int type;
+    char *model, *name, *tag;
+
+    vanitys() : type(-1), model(NULL), name(NULL), tag(NULL) {}
+    vanitys(int t, char *m, char *n, char *g) : type(t), model(newstring(m)), name(newstring(n)), tag(newstring(g)) {}
+    ~vanitys()
+    {
+        if(model) delete[] model;
+        if(name) delete[] name;
+        if(tag) delete[] tag;
+    }
 };
 #ifdef GAMEWORLD
-const char *vanitytags[V_T_MAX] = { "tag_eyepiece", "tag_eyewear", "tag_hat" };
-vanitys vanities[V_I_MAX] = {
-    { "vanities/monocle/classy",    "classymonocle",    V_T_EYEPIECE },
-    { "vanities/monocle/bionic",    "bionicmonocle",    V_T_EYEPIECE },
-    { "vanities/tophat/felt",       "felttophat",       V_T_HAT },
-    { "vanities/tophat/metal",      "metaltophat",      V_T_HAT },
-    { "vanities/horns",             "horns",            V_T_HAT },
-};
+vector<vanitys> vanities;
 #else
-extern const char *vanitytags[V_T_MAX];
-extern vanitys vanities[V_I_MAX];
-#endif
-#ifdef GAMESERVER
-SVAR(0, vanityname, "classymonocle bionicmonocle felttophat metaltophat horns");
-SVAR(0, vanityeyepieces, "classymonocle bionicmonocle");
-SVAR(0, vanityhats, "felttophat metaltophat horns");
-VAR(0, vanityclassymonocle, 1, V_I_MONOCLE_CLASSY, -1);
-VAR(0, vanitybionicmonocle, 1, V_I_MONOCLE_BIONIC, -1);
-VAR(0, vanityfelttophat, 1, V_I_TOPHAT_FELT, -1);
-VAR(0, vanitymetaltophat, 1, V_I_TOPHAT_METAL, -1);
-VAR(0, vanityhorns, 1, V_I_HORNS, -1);
-VAR(0, vanityall, 1, V_I_ALL, -1);
-VAR(0, vanitynum, 1, V_I_MAX, -1);
+extern vector<vanitys> vanities;
 #endif
 #endif

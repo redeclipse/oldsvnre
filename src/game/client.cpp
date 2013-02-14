@@ -12,7 +12,7 @@ namespace client
     VAR(IDF_PERSIST, showteamchange, 0, 1, 2); // 0 = never show, 1 = show only when switching between, 2 = show when entering match too
 
     int state() { return game::player1->state; }
-    ICOMMAND(0, getstate, "", (), intret(state()));
+    ICOMMAND(0, getplayerstate, "", (), intret(state()));
 
     int otherclients()
     {
@@ -328,13 +328,13 @@ namespace client
     }
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
-    ICOMMAND(0, getname, "", (), result(game::player1->name));
-    ICOMMAND(0, getcolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
-    ICOMMAND(0, getmodel, "", (), intret(game::player1->model));
-    ICOMMAND(0, getvanity, "", (), intret(game::player1->vanity));
-    ICOMMAND(0, getteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
-    ICOMMAND(0, getteamicon, "", (), result(hud::teamtexname(game::player1->team)));
-    ICOMMAND(0, getteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
+    ICOMMAND(0, getplayername, "", (), result(game::player1->name));
+    ICOMMAND(0, getplayercolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
+    ICOMMAND(0, getplayermodel, "", (), intret(game::player1->model));
+    ICOMMAND(0, getplayervanity, "", (), intret(game::player1->vanity));
+    ICOMMAND(0, getplayerteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
+    ICOMMAND(0, getplayerteamicon, "", (), result(hud::teamtexname(game::player1->team)));
+    ICOMMAND(0, getplayerteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
 
     const char *getname() { return game::player1->name; }
 
@@ -384,7 +384,7 @@ namespace client
             sendplayerinfo = true;
         }
     }
-    VARF(IDF_PERSIST|IDF_HEX, playervanity, 0, 0, V_I_ALL, setplayervanity(playervanity));
+    VARF(IDF_PERSIST|IDF_HEX, playervanity, 0, 0, VAR_MAX, setplayervanity(playervanity));
 #endif
 
     int teamname(const char *team)
