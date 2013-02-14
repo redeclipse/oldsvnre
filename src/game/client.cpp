@@ -375,6 +375,7 @@ namespace client
     }
     VARF(IDF_PERSIST, playermodel, 0, 0, PLAYERTYPES-1, setplayermodel(playermodel));
 
+#ifndef MEK
     void setplayervanity(int vanity)
     {
         if(vanity >= 0 && game::player1->vanity != vanity)
@@ -384,6 +385,7 @@ namespace client
         }
     }
     VARF(IDF_PERSIST|IDF_HEX, playervanity, 0, 0, V_I_ALL, setplayervanity(playervanity));
+#endif
 
     int teamname(const char *team)
     {

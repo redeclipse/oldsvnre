@@ -1367,6 +1367,8 @@ void setlocations(bool wanthome)
         else fatal("could not find data directory");
     }
     addpackagedir("data");
+    defformatstring(gamedata)("game/%s", server::gameid());
+    addpackagedir(gamedata);
     if(wanthome)
     {
 #if defined(WIN32)

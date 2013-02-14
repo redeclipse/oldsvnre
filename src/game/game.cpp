@@ -2970,6 +2970,7 @@ namespace game
 #endif
         modelattach a[1+V_T_MAX+10]; int ai = 0;
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
+#ifndef MEK
         if(third)
         {
             int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
@@ -2983,6 +2984,7 @@ namespace game
                 }
             }
         }
+#endif
         if(rendernormally && (early || d != focus))
         {
             const char *muzzle = "tag_weapon";

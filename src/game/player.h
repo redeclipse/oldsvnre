@@ -45,12 +45,13 @@ struct score
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
 #ifdef MEK
-#define PLAYERTYPES 3
+#define PLAYERTYPES 4
 #ifdef GAMEWORLD
 const char *playertypes[PLAYERTYPES][4] = {
     { "actors/mek1",   "actors/mek1/hwep",    "mek1",   "light" },
     { "actors/mek2",   "actors/mek2/hwep",    "mek2",   "medium" },
-    { "actors/mek3",   "actors/mek3/hwep",    "mek3",   "heavy" },
+    { "actors/mek3",   "actors/mek3/hwep",    "mek3",   "flyer" },
+    { "actors/mek4",   "actors/mek4/hwep",    "mek4",   "heavy" },
 };
 #else
 extern const char *playertypes[PLAYERTYPES][3]; //3
@@ -67,16 +68,17 @@ extern const char *playertypes[PLAYERTYPES][3]; //3
     GFVAR(0, class##a##speed, 0, c5, FVAR_MAX);
 
 //      name    health  armour  xrad    yrad    height  weight      speed
-CLASSES(mek1,   300,    75,     6,      6,      16,     200,        80); // light
-CLASSES(mek2,   400,    100,    6,      6,      16,     300,        65); // medium
-CLASSES(mek3,   500,    200,    6,      6,      16,     350,        50); // heavy
+CLASSES(mek1,   300,    80,     6,      6,      16,     200,        80); // light
+CLASSES(mek2,   400,    100,    6,      6,      16,     300,        60); // medium
+CLASSES(mek3,   330,    90,     6,      6,      16,     250,        70); // flyer
+CLASSES(mek4,   500,    200,    6,      6,      16,     350,        40); // heavy
 
 #ifdef GAMESERVER
-#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmek1##name, &sv_classmek2##name, &sv_classmek3##name };
+#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmek1##name, &sv_classmek2##name, &sv_classmek3##name, &sv_classmek4##name };
 #define CLASS(id,name)           (*sv_class_stat_##name[max(id,0)%PLAYERTYPES])
 #else
 #ifdef GAMEWORLD
-#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classmek1##name, &classmek2##name, &classmek3##name };
+#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classmek1##name, &classmek2##name, &classmek3##name, &classmek4##name };
 #else
 #define CLASSDEF(proto,name)     extern proto *class_stat_##name[];
 #endif
