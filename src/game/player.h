@@ -44,6 +44,17 @@ struct score
 #define isteam(a,b,c,d) (m_fight(a) && m_isteam(a,b) ? (c >= d && c <= numteams(a,b)) : c == T_NEUTRAL)
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
+#ifdef GAMESERVER
+const int mapbals[T_TOTAL][T_TOTAL] = {
+    { T_ALPHA, T_OMEGA, T_KAPPA, T_SIGMA },
+    { T_OMEGA, T_ALPHA, T_SIGMA, T_KAPPA },
+    { T_KAPPA, T_SIGMA, T_ALPHA, T_OMEGA },
+    { T_SIGMA, T_KAPPA, T_OMEGA, T_ALPHA }
+};
+#else
+extern const int mapbals[T_TOTAL][T_TOTAL];
+#endif
+
 #ifdef MEK
 #define PLAYERTYPES 4
 #ifdef GAMEWORLD
@@ -54,7 +65,7 @@ const char *playertypes[PLAYERTYPES][4] = {
     { "actors/mek4",   "actors/mek4/hwep",    "mek4",   "heavy" },
 };
 #else
-extern const char *playertypes[PLAYERTYPES][3]; //3
+extern const char *playertypes[PLAYERTYPES][4]; //3
 #endif
 
 #define CLASSES(a,b1,b2,c1,c2,c3,c4,c5) \
