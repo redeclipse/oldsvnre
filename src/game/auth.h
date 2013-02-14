@@ -13,6 +13,35 @@ bool checkpassword(clientinfo *ci, const char *wanted, const char *given)
     return !strcmp(hash, given);
 }
 
+struct localop
+{
+    char *name, *flags;
+
+    localop() : name(NULL), flags(NULL) {}
+    localop(const char *n, const char *f) : name(newstring(n)), flags(newstring(f)) {}
+    ~localop()
+    {
+        if(name) delete[] name;
+        if(flags) delete[] flags;
+    }
+};
+vector<localop> localops;
+
+void localopreset()
+{
+    loopvrev(localops) localops.remove(i);
+}
+ICOMMAND(0, resetlocalop, "", (), localopreset());
+
+void localopadd(const char *name, const char *flags)
+{
+    if(!name || !flags) return;
+    localop &o = localops.add();
+    o.name = newstring(name);
+    o.flags = newstring(flags);
+}
+ICOMMAND(0, addlocalop, "ss", (char *n, char *f), localopadd(n, f));
+
 namespace auth
 {
     int lastconnect = 0, lastactivity = 0;
@@ -52,20 +81,26 @@ namespace auth
         return true;
     }
 
-    void setprivilege(clientinfo *ci, bool val, int flags = 0, bool authed = false)
+    void setprivilege(clientinfo *ci, bool val, int flags = 0, bool authed = false, bool local = true)
     {
         int privilege = ci->privilege;
+        mkstring(msg);
         if(val)
         {
             if(ci->privilege >= flags) return;
             privilege = ci->privilege = flags;
             if(authed)
             {
-                if(ci->privilege > PRIV_PLAYER) srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS (\fs\fc%s\fS)", colorname(ci), ci->authname, privname(privilege));
-                else srvoutforce(ci, -2, "\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
+                formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
+                if(ci->privilege > PRIV_PLAYER)
+                {
+                    defformatstring(msgx)(" (\fs\fc%s\fS)", privname(privilege));
+                    concatstring(msg, msgx);
+                }
                 copystring(ci->handle, ci->authname);
             }
-            else srvoutforce(ci, -2, "\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege, true));
+            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege, true));
+            if(local) concatstring(msg, " [\fs\fclocal\fS]");
         }
         else
         {
@@ -75,8 +110,9 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_MODERATOR || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            srvoutforce(ci, -2, "\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege, true));
+            formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege, true));
         }
+        if(*msg) srvoutforce(ci, -2, "%s", msg);
         privupdate = true;
         if(paused)
         {
@@ -139,7 +175,7 @@ namespace auth
         clientinfo *ci = findauth(id);
         if(!ci) return;
         ci->authreq = 0;
-        int n = PRIV_NONE;
+        int n = -1;
         for(const char *c = flags; *c; c++) switch(*c)
         {
             case 'c': case 'C': n = PRIV_CREATOR; break;
@@ -149,8 +185,26 @@ namespace auth
             case 'm': case 'M': n = PRIV_MODERATOR; break;
             case 's': case 'S': n = PRIV_SUPPORTER; break;
             case 'u': case 'U': n = PRIV_PLAYER; break;
+            default: break;
         }
-        if(n > PRIV_NONE) setprivilege(ci, true, n, true);
+        bool local = false;
+        loopv(localops) if(!strcmp(localops[i].name, name))
+        {
+            int o = -1;
+            for(const char *c = localops[i].flags; *c; c++) switch(*c)
+            {
+                case 'a': case 'A': o = PRIV_ADMINISTRATOR; break;
+                case 'o': case 'O': o = PRIV_OPERATOR; break;
+                case 'm': case 'M': o = PRIV_MODERATOR; break;
+                default: break;
+            }
+            if(o > n)
+            {
+                n = o;
+                local = true;
+            }
+        }
+        if(n > PRIV_NONE) setprivilege(ci, true, n, true, local);
         else ci->authname[0] = 0;
         if(ci->connectauth)
         {

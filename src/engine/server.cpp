@@ -307,6 +307,7 @@ void cleanupserver()
 void reloadserver()
 {
     loopvrev(control) if(control[i].flag == ipinfo::LOCAL) control.remove(i);
+    server::reload();
 }
 
 void process(ENetPacket *packet, int sender, int chan);

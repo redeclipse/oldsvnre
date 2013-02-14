@@ -272,4 +272,21 @@ struct defendservmode : defendstate, servmode
         loopv(flags) if(insideaffinity(flags[i], victim->state.o)) p += v;
         return p;
     }
+
+    void balance(int oldbal, int newbal)
+    {
+        static vector<int> assign[T_TOTAL];
+        loopk(T_TOTAL) assign[k].setsize(0);
+        loopv(flags)
+        {
+            if(flags[i].owner >= T_FIRST && flags[i].owner <= T_LAST)
+                assign[flags[i].owner-T_FIRST].add(i);
+            flags[i].noenemy();
+        }
+        loopk(T_TOTAL)
+        {
+            int from = mapbals[oldbal][k], fromt = from-T_FIRST, to = mapbals[newbal][k];
+            loopv(assign[fromt]) flags[assign[fromt][i]].owner = to;
+        }
+    }
 } defendmode;

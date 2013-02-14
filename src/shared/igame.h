@@ -125,6 +125,7 @@ namespace server
 {
     extern bool updatecontrols;
     extern void start();
+    extern void reload();
     extern void shutdown();
     extern void ancmsgft(int cn, int snd, int conlevel, const char *s, ...);
     extern void srvmsgft(int cn, int conlevel, const char *s, ...);

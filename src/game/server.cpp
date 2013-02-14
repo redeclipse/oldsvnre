@@ -429,6 +429,7 @@ namespace server
         virtual void update() {}
         virtual void reset(bool empty) {}
         virtual void layout() {}
+        virtual void balance(int oldbal, int newbal) {}
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
@@ -846,6 +847,12 @@ namespace server
     void start()
     {
         cleanup(true);
+    }
+
+    void reload()
+    {
+        extern void localopreset();
+        localopreset();
     }
 
     void shutdown()
@@ -1319,29 +1326,26 @@ namespace server
         int balance = G(forcebalance) >= 0 ? G(forcebalance) : mbalance;
         if(iterate && balance && m_isteam(gamemode, mutators))
         {
-            const int bals[T_TOTAL][T_TOTAL] = {
-                { T_ALPHA, T_OMEGA, T_KAPPA, T_SIGMA },
-                { T_OMEGA, T_ALPHA, T_SIGMA, T_KAPPA },
-                { T_KAPPA, T_SIGMA, T_ALPHA, T_OMEGA },
-                { T_SIGMA, T_KAPPA, T_OMEGA, T_ALPHA }
-            };
             int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
             if(baliter != mbaliter)
             {
                 static vector<clientinfo *> assign[T_TOTAL];
                 loopk(T_TOTAL) assign[k].setsize(0);
-                loopv(clients) if(clients[i]->team) assign[clients[i]->team-T_FIRST].add(clients[i]);
+                loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
+                    assign[clients[i]->team-T_FIRST].add(clients[i]);
                 int scores[T_TOTAL] = {0};
                 loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
                 loopk(T_TOTAL)
                 {
-                    int from = bals[mbaliter][k], fromt = from-T_FIRST,
-                        to = bals[baliter][k], tot = to-T_FIRST;
+                    int from = mapbals[mbaliter][k], fromt = from-T_FIRST,
+                        to = mapbals[baliter][k], tot = to-T_FIRST;
                     loopv(assign[fromt]) setteam(assign[fromt][i], to, true, true);
                     score &cs = teamscore(from);
                     cs.total = scores[tot];
                     sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                 }
+                if(smode) smode->balance(mbaliter, baliter);
+                mutate(smuts, mut->balance(mbaliter, baliter));
                 mbaliter = baliter;
                 ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyteams have been reassigned for map balance");
                 if(smode) smode->layout();
