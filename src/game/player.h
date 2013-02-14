@@ -153,6 +153,8 @@ extern vanitys vanities[VI_MAX];
 #endif
 #ifdef GAMESERVER
 SVAR(0, vanityname, "classymonocle bionicmonocle felttophat metaltophat horns");
+SVAR(0, vanityeyepieces, "classymonocle bionicmonocle");
+SVAR(0, vanityhats, "felttophat metaltophat horns");
 VAR(0, vanityclassymonocle, 1, VI_MONOCLE_CLASSY, -1);
 VAR(0, vanitybionicmonocle, 1, VI_MONOCLE_BIONIC, -1);
 VAR(0, vanityfelttophat, 1, VI_TOPHAT_FELT, -1);
