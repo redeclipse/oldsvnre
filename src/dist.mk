@@ -45,6 +45,7 @@ SRC_DIRS= \
 	src/shared
 
 SRC_FILES= \
+	src/core.mk \
 	src/dist.mk \
 	src/dpiaware.manifest \
 	src/system-install.mk \
