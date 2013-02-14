@@ -217,7 +217,7 @@ dist: dist-bz2 dist-bz2-all
 endif
 endif
 
-../$(tarname).bz2.torrent: ../$(tarname)
+../$(tarname).bz2.torrent: ../$(tarname).bz2
 	rm -f $@
 	cd ../ &&\
 		mktorrent \
@@ -229,7 +229,7 @@ endif
 
 dist-torrent: ../$(tarname).bz2.torrent
 
-../$(tarname-all).bz2.torrent: ../$(tarname-all)
+../$(tarname-all).bz2.torrent: ../$(tarname-all).bz2
 	rm -f $@
 	cd ../ &&\
 		mktorrent \
@@ -241,7 +241,7 @@ dist-torrent: ../$(tarname).bz2.torrent
 
 dist-torrent-all: ../$(tarname-all).bz2.torrent
 
-../$(tarname-osx).bz2.torrent: ../$(tarname-osx)
+../$(tarname-osx).bz2.torrent: ../$(tarname-osx).bz2
 	rm -f $@
 	cd ../ &&\
 		mktorrent \
