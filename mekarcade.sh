@@ -57,7 +57,7 @@ else
     read CC
     if [ "${CC}" != "n" ]; then
         cd ${RE_PATH}/src || exit 1
-        make clean install
+        make -f Makefile.mek clean install
         echo "Build complete, please try running the script again."
     else
         echo "Please follow the following steps to build:"
