@@ -123,6 +123,7 @@ enum {
     VI_MONOCLE_BIONIC,
     VI_TOPHAT_FELT,
     VI_TOPHAT_METAL,
+    VT_HORNS,
     VI_MAX,
     VI_ALL = (1<<VI_MONOCLE_CLASSY)|(1<<VI_MONOCLE_BIONIC)|(1<<VI_TOPHAT_FELT)|(1<<VI_TOPHAT_METAL)
 };
@@ -140,21 +141,23 @@ struct vanitys
 #ifdef GAMEWORLD
 const char *vanitytags[VT_MAX] = { "tag_eyepiece", "tag_eyewear", "tag_hat" };
 vanitys vanities[VI_MAX] = {
-    { "vanities/monocle/classy",     "classymonocle", VT_EYEPIECE },
-    { "vanities/monocle/bionic",     "bionicmonocle", VT_EYEPIECE },
-    { "vanities/tophat/felt",        "felttophat",    VT_HAT },
-    { "vanities/tophat/metal",       "metaltophat",   VT_HAT }
+    { "vanities/monocle/classy",    "classymonocle",    VT_EYEPIECE },
+    { "vanities/monocle/bionic",    "bionicmonocle",    VT_EYEPIECE },
+    { "vanities/tophat/felt",       "felttophat",       VT_HAT },
+    { "vanities/tophat/metal",      "metaltophat",      VT_HAT },
+    { "vanities/horns",             "horns",            VT_HAT },
 };
 #else
 extern const char *vanitytags[VT_MAX];
 extern vanitys vanities[VI_MAX];
 #endif
 #ifdef GAMESERVER
-SVAR(0, vanityname, "classymonocle bionicmonocle felttophat metaltophat");
+SVAR(0, vanityname, "classymonocle bionicmonocle felttophat metaltophat horns");
 VAR(0, vanityclassymonocle, 1, VI_MONOCLE_CLASSY, -1);
 VAR(0, vanitybionicmonocle, 1, VI_MONOCLE_BIONIC, -1);
 VAR(0, vanityfelttophat, 1, VI_TOPHAT_FELT, -1);
 VAR(0, vanitymetaltophat, 1, VI_TOPHAT_METAL, -1);
+VAR(0, vanityhorns, 1, VI_HORNS, -1);
 VAR(0, vanityall, 1, VI_ALL, -1);
 VAR(0, vanitynum, 1, VI_MAX, -1);
 #endif
