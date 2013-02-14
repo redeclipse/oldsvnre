@@ -1360,12 +1360,18 @@ struct gameent : dynent, gamestate
         else icons.insert(pos, e);
     }
 
-    void setinfo(const char *n = NULL, int col = 0, int mdl = 0, int van = 0)
+    void setname(const char *n = NULL)
     {
-        if(n && *n) copystring(name, n, MAXNAMELEN+1); else name[0] = 0;
-        colour = max(col, 0);
-        model = mdl;
-        vanity = van;
+        if(n && *n) copystring(name, n, MAXNAMELEN+1);
+        else name[0] = 0;
+    }
+
+    void setinfo(const char *n = NULL, int c = 0, int m = 0, int v = 0)
+    {
+        setname(n);
+        colour = c;
+        model = m;
+        vanity = v;
     }
 
     void addstun(int weap, int millis, int delay, float scale, float gravity)
@@ -1405,7 +1411,7 @@ struct gameent : dynent, gamestate
     }
 };
 
-enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ_MAX };
+enum { PRJ_SHOT = 0, PRJ_GIBS, PRJ_DEBRIS, PRJ_EJECT, PRJ_ENT, PRJ_AFFINITY, PRJ_VANITY, PRJ_MAX };
 
 struct projent : dynent
 {
@@ -1507,7 +1513,7 @@ struct cament
 namespace client
 {
     extern int showpresence, showteamchange;
-    extern bool demoplayback, sendinfo, sendcrc;
+    extern bool sendplayerinfo, sendcrcinfo, sendgameinfo, demoplayback;
     extern void clearvotes(gameent *d, bool msg = false);
     extern void ignore(int cn);
     extern void unignore(int cn);

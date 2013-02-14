@@ -45,21 +45,12 @@ struct score
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
 #ifdef MEK
-#define PLAYERTYPES 12
+#define PLAYERTYPES 3
 #ifdef GAMEWORLD
-const char *playertypes[PLAYERTYPES][3] = {
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
-    { "actors/mek2",   "actors/mek2/hwep",    "mek2" },
-    { "actors/mek3",   "actors/mek3/hwep",    "mek3" },
-    { "actors/mek4",   "actors/mek4/hwep",    "mek4" },
-    { "actors/mek5",   "actors/mek5/hwep",    "mek5" },
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
-    { "actors/mek8",   "actors/mek8/hwep",    "mek8" },
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
-    { "actors/mek1",   "actors/mek1/hwep",    "mek1" },
+const char *playertypes[PLAYERTYPES][4] = {
+    { "actors/mek1",   "actors/mek1/hwep",    "mek1",   "light" },
+    { "actors/mek2",   "actors/mek2/hwep",    "mek2",   "medium" },
+    { "actors/mek3",   "actors/mek3/hwep",    "mek3",   "heavy" },
 };
 #else
 extern const char *playertypes[PLAYERTYPES][3]; //3
@@ -76,25 +67,16 @@ extern const char *playertypes[PLAYERTYPES][3]; //3
     GFVAR(0, class##a##speed, 0, c5, FVAR_MAX);
 
 //      name    health  armour  xrad    yrad    height  weight      speed
-CLASSES(mek1,   300,    80,     6,      6,      16,     200,        80); // flyer
-CLASSES(mek2,   400,    100,    6,      6,      16,     300,        50); // medium
-CLASSES(mek3,   330,    90,     6,      6,      16,     250,        70); // engineer
-CLASSES(mek4,   300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek5,   300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek6,   300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek7,   300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek8,   300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek9,   300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek10,  300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek11,  300,    80,     6,      6,      16,     200,        80); // ??
-CLASSES(mek12,  300,    80,     6,      6,      16,     200,        80); // ??
+CLASSES(mek1,   300,    75,     6,      6,      16,     200,        80); // light
+CLASSES(mek2,   400,    100,    6,      6,      16,     300,        65); // medium
+CLASSES(mek3,   500,    200,    6,      6,      16,     350,        50); // heavy
 
 #ifdef GAMESERVER
-#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmek1##name, &sv_classmek2##name, &sv_classmek3##name, &sv_classmek4##name, &sv_classmek5##name, &sv_classmek6##name, &sv_classmek7##name, &sv_classmek8##name, &sv_classmek9##name, &sv_classmek10##name, &sv_classmek11##name, &sv_classmek12##name };
+#define CLASSDEF(proto,name)     proto *sv_class_stat_##name[] = { &sv_classmek1##name, &sv_classmek2##name, &sv_classmek3##name };
 #define CLASS(id,name)           (*sv_class_stat_##name[max(id,0)%PLAYERTYPES])
 #else
 #ifdef GAMEWORLD
-#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classmek1##name, &classmek2##name, &classmek3##name, &classmek4##name, &classmek5##name, &classmek6##name, &classmek7##name, &classmek8##name, &classmek9##name, &classmek10##name, &classmek11##name, &classmek12##name };
+#define CLASSDEF(proto,name)     proto *class_stat_##name[] = { &classmek1##name, &classmek2##name, &classmek3##name };
 #else
 #define CLASSDEF(proto,name)     extern proto *class_stat_##name[];
 #endif
@@ -119,19 +101,19 @@ const char *playertypes[PLAYERTYPES][3] = {
 extern const char *playertypes[PLAYERTYPES][3];
 #endif
 enum {
-    VI_MONOCLE_CLASSY = 0,
-    VI_MONOCLE_BIONIC,
-    VI_TOPHAT_FELT,
-    VI_TOPHAT_METAL,
-    VI_HORNS,
-    VI_MAX,
-    VI_ALL = (1<<VI_MONOCLE_CLASSY)|(1<<VI_MONOCLE_BIONIC)|(1<<VI_TOPHAT_FELT)|(1<<VI_TOPHAT_METAL)
+    V_I_MONOCLE_CLASSY = 0,
+    V_I_MONOCLE_BIONIC,
+    V_I_TOPHAT_FELT,
+    V_I_TOPHAT_METAL,
+    V_I_HORNS,
+    V_I_MAX,
+    V_I_ALL = (1<<V_I_MONOCLE_CLASSY)|(1<<V_I_MONOCLE_BIONIC)|(1<<V_I_TOPHAT_FELT)|(1<<V_I_TOPHAT_METAL)|(1<<V_I_HORNS)
 };
 enum {
-    VT_EYEPIECE = 0,
-    VT_EYEWEAR,
-    VT_HAT,
-    VT_MAX
+    V_T_EYEPIECE = 0,
+    V_T_EYEWEAR,
+    V_T_HAT,
+    V_T_MAX
 };
 struct vanitys
 {
@@ -139,28 +121,28 @@ struct vanitys
     int tag;
 };
 #ifdef GAMEWORLD
-const char *vanitytags[VT_MAX] = { "tag_eyepiece", "tag_eyewear", "tag_hat" };
-vanitys vanities[VI_MAX] = {
-    { "vanities/monocle/classy",    "classymonocle",    VT_EYEPIECE },
-    { "vanities/monocle/bionic",    "bionicmonocle",    VT_EYEPIECE },
-    { "vanities/tophat/felt",       "felttophat",       VT_HAT },
-    { "vanities/tophat/metal",      "metaltophat",      VT_HAT },
-    { "vanities/horns",             "horns",            VT_HAT },
+const char *vanitytags[V_T_MAX] = { "tag_eyepiece", "tag_eyewear", "tag_hat" };
+vanitys vanities[V_I_MAX] = {
+    { "vanities/monocle/classy",    "classymonocle",    V_T_EYEPIECE },
+    { "vanities/monocle/bionic",    "bionicmonocle",    V_T_EYEPIECE },
+    { "vanities/tophat/felt",       "felttophat",       V_T_HAT },
+    { "vanities/tophat/metal",      "metaltophat",      V_T_HAT },
+    { "vanities/horns",             "horns",            V_T_HAT },
 };
 #else
-extern const char *vanitytags[VT_MAX];
-extern vanitys vanities[VI_MAX];
+extern const char *vanitytags[V_T_MAX];
+extern vanitys vanities[V_I_MAX];
 #endif
 #ifdef GAMESERVER
 SVAR(0, vanityname, "classymonocle bionicmonocle felttophat metaltophat horns");
 SVAR(0, vanityeyepieces, "classymonocle bionicmonocle");
 SVAR(0, vanityhats, "felttophat metaltophat horns");
-VAR(0, vanityclassymonocle, 1, VI_MONOCLE_CLASSY, -1);
-VAR(0, vanitybionicmonocle, 1, VI_MONOCLE_BIONIC, -1);
-VAR(0, vanityfelttophat, 1, VI_TOPHAT_FELT, -1);
-VAR(0, vanitymetaltophat, 1, VI_TOPHAT_METAL, -1);
-VAR(0, vanityhorns, 1, VI_HORNS, -1);
-VAR(0, vanityall, 1, VI_ALL, -1);
-VAR(0, vanitynum, 1, VI_MAX, -1);
+VAR(0, vanityclassymonocle, 1, V_I_MONOCLE_CLASSY, -1);
+VAR(0, vanitybionicmonocle, 1, V_I_MONOCLE_BIONIC, -1);
+VAR(0, vanityfelttophat, 1, V_I_TOPHAT_FELT, -1);
+VAR(0, vanitymetaltophat, 1, V_I_TOPHAT_METAL, -1);
+VAR(0, vanityhorns, 1, V_I_HORNS, -1);
+VAR(0, vanityall, 1, V_I_ALL, -1);
+VAR(0, vanitynum, 1, V_I_MAX, -1);
 #endif
 #endif
