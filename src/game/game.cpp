@@ -185,7 +185,7 @@ namespace game
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
-    VAR(IDF_PERSIST|IDF_HEX, forceplayervanity, -1, -1, V_I_ALL);
+    VAR(IDF_PERSIST|IDF_HEX, forceplayervanity, -1, -1, VAR_MAX);
 #endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -207,6 +207,43 @@ namespace game
 
     const char *gametitle() { return connected() ? server::gamename(gamemode, mutators) : "ready"; }
     const char *gametext() { return connected() ? mapname : "not connected"; }
+
+#ifndef MEK
+    void vanityreset()
+    {
+        loopvrev(vanities) vanities.remove(i);
+    }
+    ICOMMAND(0, resetvanity, "", (), vanityreset());
+
+    int vanityitem(int type, const char *model, const char *name, const char *tag)
+    {
+        if(type < 0 || type >= V_T_MAX || !model || !name || !tag) return -1;
+        loopv(vanities) if(!strcmp(vanities[i].model, model) || !strcmp(vanities[i].name, name)) return i;
+        int num = vanities.length();
+        vanitys &v = vanities.add();
+        v.type = type;
+        v.model = newstring(model);
+        v.name = newstring(name);
+        v.tag = newstring(tag);
+        return num;
+    }
+    ICOMMAND(0, addvanity, "isss", (int *t, char *m, char *n, char *g), intret(vanityitem(*t, m, n, g)));
+
+    void vanityinfo(int id, int value)
+    {
+        if(id < 0) intret(vanities.length());
+        else if(value < 0) intret(4);
+        else if(vanities.inrange(id)) switch(value)
+        {
+            case 0: intret(vanities[id].type); break;
+            case 1: result(vanities[id].model); break;
+            case 2: result(vanities[id].name); break;
+            case 3: result(vanities[id].tag); break;
+            default: break;
+        }
+    }
+    ICOMMAND(0, getvanity, "bb", (int *t, int *v), vanityinfo(*t, *v));
+#endif
 
     bool allowspec(gameent *d, int level)
     {
@@ -1448,10 +1485,10 @@ namespace game
         {
             int len = d->aitype >= AI_START ? (aistyle[d->aitype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : 1000) : 1000) : m_delay(gamemode, mutators),
                 found[V_T_MAX] = {0};
-            loopk(V_I_MAX) if((vanity&(1<<k)) && !found[vanities[k].tag])
+            loopvk(vanities) if((vanity&(1<<k)) && !found[vanities[k].type])
             {
                 projs::create(pos, pos, true, d, PRJ_VANITY, len, 0, 0, rnd(50)+10, -1, k, 0, 0);
-                found[vanities[k].tag]++;
+                found[vanities[k].type]++;
             }
         }
 #endif
@@ -2978,10 +3015,10 @@ namespace game
             if(vanity)
             {
                 int found[V_T_MAX] = {0};
-                loopk(V_I_MAX) if((vanity&(1<<k)) && !found[vanities[k].tag])
+                loopvk(vanities) if((vanity&(1<<k)) && !found[vanities[k].type])
                 {
-                    a[ai++] = modelattach(vanitytags[vanities[k].tag], vanities[k].model);
-                    found[vanities[k].tag]++;
+                    a[ai++] = modelattach(vanities[k].tag, vanities[k].model);
+                    found[vanities[k].type]++;
                 }
             }
         }
