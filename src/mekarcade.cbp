@@ -28,7 +28,7 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -119,7 +119,7 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -167,7 +167,7 @@
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -208,7 +208,7 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -251,7 +251,7 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -297,7 +297,7 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-finline-functions" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -343,7 +343,7 @@
 					<Add option="-m64" />
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -390,7 +390,7 @@
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -431,7 +431,7 @@
 					<Add option="-mwindows" />
 					<Add option="-fsigned-char" />
 					<Add option="-DSTANDALONE" />
-					<Add option="-DMEKARCADE" />
+					<Add option="-DMEK" />
 					<Add directory="shared" />
 					<Add directory="engine" />
 					<Add directory="game" />
@@ -541,6 +541,9 @@
 			<Add alias="amd64" targets="client64;server64;" />
 			<Add alias="x86" targets="client32;server32;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add option="-DMEK=1" />
+		</Compiler>
 		<Unit filename="dpiaware.manifest">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
@@ -1333,6 +1336,18 @@
 			<Option target="client64-prof" />
 			<Option target="client64-dbg" />
 		</Unit>
+		<Unit filename="game\player.h">
+			<Option target="client32" />
+			<Option target="client32-dbg" />
+			<Option target="client32-prof" />
+			<Option target="server32" />
+			<Option target="server32-dbg" />
+			<Option target="client64" />
+			<Option target="client64-prof" />
+			<Option target="client64-dbg" />
+			<Option target="server64" />
+			<Option target="server64-dbg" />
+		</Unit>
 		<Unit filename="game\projs.cpp">
 			<Option target="client32" />
 			<Option target="client32-dbg" />
@@ -1354,18 +1369,6 @@
 			<Option target="client32-dbg" />
 			<Option target="server32" />
 			<Option target="client32-prof" />
-			<Option target="server32-dbg" />
-			<Option target="client64" />
-			<Option target="client64-prof" />
-			<Option target="client64-dbg" />
-			<Option target="server64" />
-			<Option target="server64-dbg" />
-		</Unit>
-		<Unit filename="game\player.h">
-			<Option target="client32" />
-			<Option target="client32-dbg" />
-			<Option target="client32-prof" />
-			<Option target="server32" />
 			<Option target="server32-dbg" />
 			<Option target="client64" />
 			<Option target="client64-prof" />
