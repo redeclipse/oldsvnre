@@ -2,8 +2,8 @@
 
 namespace client
 {
-    bool sendinfo = false, isready = false, remote = false,
-        demoplayback = false, needsmap = false, gettingmap = false, sendcrc = false;
+    bool sendplayerinfo = false, sendcrcinfo = false, sendgameinfo = false, isready = false, remote = false,
+        demoplayback = false, needsmap = false, gettingmap = false;
     int lastping = 0, sessionid = 0;
     string connectpass = "";
     int needclipboard = -1;
@@ -232,13 +232,13 @@ namespace client
     ICOMMAND(0, demoinfo, "bb", (int *idx, int *prop, int *numargs), infodemo(*idx, *prop));
 
     VAR(IDF_PERSIST, authconnect, 0, 1, 1);
-    SVAR(IDF_PERSIST, accountuser, "");
+    SVAR(IDF_PERSIST, accountname, "");
     SVAR(IDF_PERSIST, accountpass, "");
     ICOMMAND(0, authkey, "ss", (char *name, char *key), {
-        setsvar("accountuser", name);
+        setsvar("accountname", name);
         setsvar("accountpass", key);
     });
-    ICOMMAND(0, hasauthkey, "", (), intret(accountuser[0] && accountpass[0] ? 1 : 0));
+    ICOMMAND(0, hasauthkey, "", (), intret(accountname[0] && accountpass[0] ? 1 : 0));
 
     void writegamevars(const char *name, bool all = false, bool server = false)
     {
@@ -338,27 +338,52 @@ namespace client
 
     const char *getname() { return game::player1->name; }
 
-    void setplayerinfo(const char *name, int col, int mdl, int van)
+    void setplayername(const char *name)
     {
-        if(name[0])
+        if(name && *name)
         {
             string text;
             filtertext(text, name, true, true, true, MAXNAMELEN);
             const char *namestr = text;
             while(*namestr && iscubespace(*namestr)) namestr++;
-            if(*namestr)
+            if(*namestr && strcmp(game::player1->name, namestr))
             {
-                game::player1->setinfo(namestr, col >= 0 ? col : game::player1->colour, mdl >= 0 ? mdl : game::player1->model, van >= 0 ? van : game::player1->vanity);
-                addmsg(N_SETPLAYERINFO, "rsi3", game::player1->name, game::player1->colour, game::player1->model, game::player1->vanity);
+                game::player1->setname(namestr);
+                sendplayerinfo = true;
             }
         }
-#ifdef MEK
-        if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, class: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, CLASS(game::player1->model, name));
-#else
-        if(initing == NOT_INITING) conoutft(CON_INFO, "you are now: %s (colour: \fs\f[%d]0x%06x\fS, model: \fs\fc%s\fS)", *game::player1->name ? game::colorname(game::player1) : "<not set>", game::player1->colour, game::player1->colour, playertypes[game::player1->model%PLAYERTYPES][2]);
-#endif
     }
-    ICOMMAND(0, setinfo, "sbbb", (char *s, int *c, int *m, int *v), setplayerinfo(s, *c, *m, *v));
+    SVARF(IDF_PERSIST, playername, "", setplayername(playername));
+
+    void setplayercolour(int colour)
+    {
+        if(colour >= 0 && colour <= 0xFFFFFF && game::player1->colour != colour)
+        {
+            game::player1->colour = colour;
+            sendplayerinfo = true;
+        }
+    }
+    VARF(IDF_PERSIST|IDF_HEX, playercolour, -1, -1, 0xFFFFFF, setplayercolour(playercolour));
+
+    void setplayermodel(int model)
+    {
+        if(model >= 0 && game::player1->model != model)
+        {
+            game::player1->model = model;
+            sendplayerinfo = true;
+        }
+    }
+    VARF(IDF_PERSIST, playermodel, 0, 0, PLAYERTYPES-1, setplayermodel(playermodel));
+
+    void setplayervanity(int vanity)
+    {
+        if(vanity >= 0 && game::player1->vanity != vanity)
+        {
+            game::player1->vanity = vanity;
+            sendplayerinfo = true;
+        }
+    }
+    VARF(IDF_PERSIST|IDF_HEX, playervanity, 0, 0, V_I_ALL, setplayervanity(playervanity));
 
     int teamname(const char *team)
     {
@@ -395,11 +420,6 @@ namespace client
         else conoutft(CON_INFO, "\fs\fgyour team is:\fS \fs\f[%d]%s\fS", TEAM(game::player1->team, colour), TEAM(game::player1->team, name));
     }
     ICOMMAND(0, team, "s", (char *s), switchteam(s));
-
-    void writeclientinfo(stream *f)
-    {
-        f->printf("setinfo %s 0x%06x %d 0x%06x\n\n", escapestring(game::player1->name), game::player1->colour, game::player1->model, game::player1->vanity);
-    }
 
     bool allowedittoggle(bool edit)
     {
@@ -695,8 +715,8 @@ namespace client
 
     void tryauth()
     {
-        if(!accountuser[0]) return;
-        addmsg(N_AUTHTRY, "rs", accountuser);
+        if(!accountname[0]) return;
+        addmsg(N_AUTHTRY, "rs", accountname);
     }
     ICOMMAND(0, auth, "", (), tryauth());
 
@@ -729,7 +749,7 @@ namespace client
     void gamedisconnect(int clean)
     {
         if(editmode) toggleedit();
-        gettingmap = needsmap = remote = isready = sendinfo = false;
+        gettingmap = needsmap = remote = isready = sendgameinfo = sendplayerinfo = false;
         sessionid = 0;
         ignores.shrink(0);
         messages.shrink(0);
@@ -1222,7 +1242,7 @@ namespace client
             memset(connectpass, 0, sizeof(connectpass));
         }
         sendstring(hash, p);
-        sendstring(authconnect ? accountuser : "", p);
+        sendstring(authconnect ? accountname : "", p);
         sendclientpacket(p.finalize(), 1);
     }
 
@@ -1317,15 +1337,25 @@ namespace client
     void sendmessages()
     {
         packetbuf p(MAXTRANS);
-        if(sendcrc)
+        if(sendplayerinfo)
         {
             p.reliable();
-            sendcrc = false;
+            sendplayerinfo = false;
+            putint(p, N_SETPLAYERINFO);
+            sendstring(game::player1->name, p);
+            putint(p, game::player1->colour);
+            putint(p, game::player1->model);
+            putint(p, game::player1->vanity);
+        }
+        if(sendcrcinfo)
+        {
+            p.reliable();
+            sendcrcinfo = false;
             putint(p, N_MAPCRC);
             sendstring(game::clientmap, p);
             putint(p, game::clientmap[0] ? getmapcrc() : 0);
         }
-        if(sendinfo && !needsmap)
+        if(sendgameinfo && !needsmap)
         {
             p.reliable();
             putint(p, N_GAMEINFO);
@@ -1336,7 +1366,7 @@ namespace client
             if(m_capture(game::gamemode)) capture::sendaffinity(p);
             else if(m_defend(game::gamemode)) defend::sendaffinity(p);
             else if(m_bomber(game::gamemode)) bomber::sendaffinity(p);
-            sendinfo = false;
+            sendgameinfo = false;
         }
         if(messages.length())
         {
@@ -1673,7 +1703,7 @@ namespace client
                 {
                     int n;
                     while((n = getint(p)) != -1) entities::setspawn(n, getint(p));
-                    sendinfo = false;
+                    sendgameinfo = false;
                     break;
                 }
 
@@ -2503,7 +2533,7 @@ namespace client
                 {
                     uint id = (uint)getint(p);
                     getstring(text, p);
-                    if(accountuser[0] && accountpass[0])
+                    if(accountname[0] && accountpass[0])
                     {
                         conoutft(CON_MESG, "aswering account challenge..");
                         vector<char> buf;

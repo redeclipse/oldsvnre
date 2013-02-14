@@ -32,7 +32,6 @@ namespace client
     extern void gameconnect(bool _remote);
     extern bool allowedittoggle(bool edit);
     extern void edittoggled(bool edit);
-    extern void writeclientinfo(stream *f);
     extern void toserver(int flags, char *text);
     extern void editvar(ident *id, bool local);
     extern void edittrigger(const selinfo &sel, int op, int arg1 = 0, int arg2 = 0, int arg3 = 0);

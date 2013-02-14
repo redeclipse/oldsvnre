@@ -185,7 +185,7 @@ namespace game
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
-    VAR(IDF_PERSIST, forceplayervanity, -1, -1, AC_MAX);
+    VAR(IDF_PERSIST|IDF_HEX, forceplayervanity, -1, -1, V_I_ALL);
 #endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -1441,9 +1441,22 @@ namespace game
             else if(anc >= 0) announce(anc, d);
             if(anc >= 0 && d != actor) announce(anc, actor);
         }
+        vec pos = d->center();
+#if 0
+        int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
+        if(vanity)
+        {
+            int len = d->aitype >= AI_START ? (aistyle[d->aitype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : 1000) : 1000) : m_delay(gamemode, mutators),
+                found[V_T_MAX] = {0};
+            loopk(V_I_MAX) if((vanity&(1<<k)) && !found[vanities[k].tag])
+            {
+                projs::create(pos, pos, true, d, PRJ_VANITY, len, 0, 0, rnd(50)+10, -1, k, 0, 0);
+                found[vanities[k].tag]++;
+            }
+        }
+#endif
         if(aistyle[d->aitype].living && gibscale > 0)
         {
-            vec pos = d->center();
             int gib = clamp(max(damage,5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
             if(d->obliterated) amt *= 3;
             loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
@@ -1636,7 +1649,7 @@ namespace game
         specreset();
         resetsway();
         resetcamera(true);
-        if(!empty) client::sendinfo = client::sendcrc = true;
+        if(!empty) client::sendgameinfo = client::sendcrcinfo = client::sendplayerinfo = true;
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
     }
 
@@ -2955,18 +2968,18 @@ namespace game
 #else
         bool hasweapon = showweap && *weapmdl;
 #endif
-        modelattach a[1+VT_MAX+10]; int ai = 0;
+        modelattach a[1+V_T_MAX+10]; int ai = 0;
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
         if(third)
         {
             int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
             if(vanity)
             {
-                bool found[VT_MAX] = {false};
-                loopk(VI_MAX) if(vanity&(1<<k) && !found[vanities[k].tag])
+                int found[V_T_MAX] = {0};
+                loopk(V_I_MAX) if((vanity&(1<<k)) && !found[vanities[k].tag])
                 {
-                    a[ai++] = modelattach(vanitytags[vanities[k].tag], vanities[vanities[k].tag].model, weapflags, weapaction);
-                    found[vanities[k].tag] = true;
+                    a[ai++] = modelattach(vanitytags[vanities[k].tag], vanities[k].model);
+                    found[vanities[k].tag]++;
                 }
             }
         }

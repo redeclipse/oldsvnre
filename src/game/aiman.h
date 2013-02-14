@@ -85,7 +85,7 @@ namespace aiman
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
                 ci->state.model = rnd(INT_MAX-1);
-                ci->state.vanity = rnd(VI_MAX);
+                ci->state.vanity = rnd(V_I_MAX);
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;

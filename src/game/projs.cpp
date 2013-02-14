@@ -10,6 +10,7 @@ namespace projs
     VAR(IDF_PERSIST, shadowgibs, 0, 1, 1);
     VAR(IDF_PERSIST, shadoweject, 0, 1, 1);
     VAR(IDF_PERSIST, shadowents, 0, 1, 1);
+    VAR(IDF_PERSIST, shadowvanity, 0, 1, 1);
 
     VAR(IDF_PERSIST, maxprojectiles, 1, 128, VAR_MAX);
 
@@ -21,6 +22,11 @@ namespace projs
     FVAR(IDF_PERSIST, gibsrelativity, -10000, 0.95f, 10000);
     FVAR(IDF_PERSIST, gibswaterfric, 0, 2, 10000);
     FVAR(IDF_PERSIST, gibsweight, -10000, 150, 10000);
+
+    FVAR(IDF_PERSIST, vanityelasticity, -10000, 0.35f, 10000);
+    FVAR(IDF_PERSIST, vanityrelativity, -10000, 0.95f, 10000);
+    FVAR(IDF_PERSIST, vanitywaterfric, 0, 2, 10000);
+    FVAR(IDF_PERSIST, vanityweight, -10000, 150, 10000);
 
     FVAR(IDF_PERSIST, debriselasticity, -10000, 0.6f, 10000);
     FVAR(IDF_PERSIST, debriswaterfric, 0, 1.7f, 10000);
@@ -430,6 +436,7 @@ namespace projs
             if(*weaptype[i].proj) preloadmodel(weaptype[i].proj);
             if(*weaptype[i].eprj) preloadmodel(weaptype[i].eprj);
         }
+        loopi(V_I_MAX) preloadmodel(vanities[i].model);
         const char *mdls[] = {
             "projectiles/gibs/gib01",
             "projectiles/gibs/gib02",
@@ -555,9 +562,10 @@ namespace projs
                     break;
                 } // otherwise fall through
             }
-            case PRJ_DEBRIS:
+            case PRJ_DEBRIS: case PRJ_VANITY:
             {
                 int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
+                if(proj.projtype == PRJ_VANITY) vol /= 2;
                 if(vol) playsound(S_DEBRIS, proj.o, NULL, 0, vol);
                 break;
             }
@@ -592,7 +600,7 @@ namespace projs
         switch(proj.projtype)
         {
             case PRJ_AFFINITY: break;
-            case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_EJECT: size = proj.lifesize;
+            case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_EJECT: case PRJ_VANITY: size = proj.lifesize;
             case PRJ_ENT:
                 if(init) break;
                 else if(proj.lifemillis && proj.fadetime)
@@ -622,7 +630,7 @@ namespace projs
         }
         else switch(proj.projtype)
         {
-            case PRJ_GIBS: case PRJ_DEBRIS: proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f*size*proj.curscale; break;
+            case PRJ_GIBS: case PRJ_DEBRIS: case PRJ_VANITY: proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f*size*proj.curscale; break;
             case PRJ_EJECT: proj.height = proj.aboveeye = 0.25f*size*proj.curscale; proj.radius = proj.yradius = 0.5f*size*proj.curscale; proj.xradius = 0.125f*size*proj.curscale; break;
             case PRJ_ENT:
             {
@@ -845,6 +853,37 @@ namespace projs
                         proj.minspeed = captureminspeed;
                         break;
                 }
+                break;
+            }
+            case PRJ_VANITY:
+            {
+                proj.collidetype = COLLIDE_AABB;
+                proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
+                proj.lifesize = 1;
+                if(proj.owner)
+                {
+                    if(proj.owner->state == CS_DEAD || proj.owner->state == CS_WAITING)
+                        proj.o = proj.owner->center();
+                    else
+                    {
+                        proj.lifemillis = proj.lifetime = 1;
+                        proj.lifespan = 1.f;
+                        proj.state = CS_DEAD;
+                        proj.escaped = true;
+                        return;
+                    }
+                }
+                proj.mdl = vanities[proj.weap].model;
+                proj.reflectivity = 0.f;
+                proj.elasticity = vanityelasticity;
+                proj.relativity = vanityrelativity;
+                proj.waterfric = vanitywaterfric;
+                proj.weight = vanityweight;
+                proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(21)-10));
+                proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
+                proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
+                proj.fadetime = rnd(250)+250;
+                proj.extinguish = 6;
                 break;
             }
             default: break;
@@ -1864,7 +1903,7 @@ namespace projs
                 }
                 if(proj.weap != W_GRENADE) break;
             }
-            case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_AFFINITY:
+            case PRJ_DEBRIS: case PRJ_GIBS: case PRJ_AFFINITY: case PRJ_VANITY:
             {
                 if(!proj.lastbounce || proj.movement >= 1)
                 {
@@ -2172,9 +2211,9 @@ namespace projs
                     }
                     break;
                 }
-                case PRJ_GIBS:
+                case PRJ_GIBS: case PRJ_VANITY:
                 {
-                    if(shadowgibs) flags |= MDL_DYNSHADOW;
+                    if(proj.projtype == PRJ_GIBS ? shadowgibs : shadowvanity) flags |= MDL_DYNSHADOW;
                     size *= proj.lifesize;
                     flags |= MDL_LIGHT_FAST;
                     fadeproj(proj, trans, size);

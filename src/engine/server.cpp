@@ -1401,7 +1401,6 @@ void writecfg()
 #ifndef STANDALONE
     stream *f = openutf8file("config.cfg", "w");
     if(!f) return;
-    client::writeclientinfo(f);
     vector<ident *> ids;
     enumerate(idents, ident, id, ids.add(&id));
     ids.sort(ident::compare);
