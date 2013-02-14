@@ -215,30 +215,33 @@ namespace game
     }
     ICOMMAND(0, resetvanity, "", (), vanityreset());
 
-    int vanityitem(int type, const char *model, const char *name, const char *tag)
+    int vanityitem(int type, const char *model, const char *name, const char *tag, int style, int priv)
     {
         if(type < 0 || type >= V_T_MAX || !model || !name || !tag) return -1;
-        loopv(vanities) if(!strcmp(vanities[i].model, model) || !strcmp(vanities[i].name, name)) return i;
         int num = vanities.length();
         vanitys &v = vanities.add();
         v.type = type;
         v.model = newstring(model);
         v.name = newstring(name);
         v.tag = newstring(tag);
+        v.style = style;
+        v.priv = priv;
         return num;
     }
-    ICOMMAND(0, addvanity, "isss", (int *t, char *m, char *n, char *g), intret(vanityitem(*t, m, n, g)));
+    ICOMMAND(0, addvanity, "isssii", (int *t, char *m, char *n, char *g, int *s, int *p), intret(vanityitem(*t, m, n, g, *s, *p)));
 
     void vanityinfo(int id, int value)
     {
         if(id < 0) intret(vanities.length());
-        else if(value < 0) intret(4);
+        else if(value < 0) intret(6);
         else if(vanities.inrange(id)) switch(value)
         {
             case 0: intret(vanities[id].type); break;
             case 1: result(vanities[id].model); break;
             case 2: result(vanities[id].name); break;
             case 3: result(vanities[id].tag); break;
+            case 4: intret(vanities[id].style); break;
+            case 5: intret(vanities[id].priv); break;
             default: break;
         }
     }
@@ -1480,17 +1483,7 @@ namespace game
         }
         vec pos = d->center();
 #if 0
-        int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
-        if(vanity)
-        {
-            int len = d->aitype >= AI_START ? (aistyle[d->aitype].living ? min(ai::aideadfade, enemyspawntime ? enemyspawntime : 1000) : 1000) : m_delay(gamemode, mutators),
-                found[V_T_MAX] = {0};
-            loopvk(vanities) if((vanity&(1<<k)) && !found[vanities[k].type])
-            {
-                projs::create(pos, pos, true, d, PRJ_VANITY, len, 0, 0, rnd(50)+10, -1, k, 0, 0);
-                found[vanities[k].type]++;
-            }
-        }
+        projs::create(pos, pos, true, d, PRJ_VANITY, len, 0, 0, rnd(50)+10, -1, k, 0, 0);
 #endif
         if(aistyle[d->aitype].living && gibscale > 0)
         {
@@ -3015,10 +3008,32 @@ namespace game
             if(vanity)
             {
                 int found[V_T_MAX] = {0};
-                loopvk(vanities) if((vanity&(1<<k)) && !found[vanities[k].type])
+                loopvk(vanities) if((vanity&(1<<k)) && d->privilege >= vanities[k].priv && !found[vanities[k].type])
                 {
-                    a[ai++] = modelattach(vanities[k].tag, vanities[k].model);
-                    found[vanities[k].type]++;
+                    const char *file = NULL;
+                    switch(vanities[k].style)
+                    {
+                        case 1:
+                        {
+                            const char *id = hud::privname(d->privilege, d->aitype);
+                            loopv(vanities[k].files) if(!strcmp(vanities[k].files[i].id, id)) file = vanities[k].files[i].name;
+                            if(!file)
+                            {
+                                defformatstring(fn)("%s/%s", vanities[k].model, id);
+                                vanityfile &f = vanities[k].files.add();
+                                f.id = newstring(id);
+                                f.name = newstring(fn);
+                                file = f.name;
+                            }
+                            break;
+                        }
+                        case 0: default: file = vanities[k].model; break;
+                    }
+                    if(file)
+                    {
+                        a[ai++] = modelattach(vanities[k].tag, file);
+                        found[vanities[k].type]++;
+                    }
                 }
             }
         }

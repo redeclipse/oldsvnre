@@ -106,20 +106,37 @@ enum {
     V_T_EYES = 0,
     V_T_HEAD,
     V_T_FACE,
+    V_T_CHEST,
+    V_T_WAIST,
+    V_T_BACK,
     V_T_MAX
+};
+struct vanityfile
+{
+    char *id, *name;
+
+    vanityfile() : id(NULL), name(NULL) {}
+    vanityfile(const char *d, const char *n) : id(newstring(d)), name(newstring(n)) {}
+    ~vanityfile()
+    {
+        if(id) delete[] id;
+        if(name) delete[] name;
+    }
 };
 struct vanitys
 {
-    int type;
+    int type, style, priv;
     char *model, *name, *tag;
+    vector<vanityfile> files;
 
-    vanitys() : type(-1), model(NULL), name(NULL), tag(NULL) {}
-    vanitys(int t, char *m, char *n, char *g) : type(t), model(newstring(m)), name(newstring(n)), tag(newstring(g)) {}
+    vanitys() : type(-1), style(0), priv(0), model(NULL), name(NULL), tag(NULL) {}
+    vanitys(int t, const char *m, const char *n, const char *g, int s, int p) : type(t), style(s), priv(p), model(newstring(m)), name(newstring(n)), tag(newstring(g)) {}
     ~vanitys()
     {
         if(model) delete[] model;
         if(name) delete[] name;
         if(tag) delete[] tag;
+        loopvrev(files) files.remove(i);
     }
 };
 #ifdef GAMEWORLD
