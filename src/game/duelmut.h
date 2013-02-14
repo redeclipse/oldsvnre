@@ -144,14 +144,9 @@ struct duelservmode : servmode
                     {
                         ci->state.lastregen = gamemillis;
                         ci->state.resetresidual();
-#ifdef MEK
                         ci->state.health = m_health(gamemode, mutators, ci->state.model);
                         ci->state.armour = m_armour(gamemode, mutators, ci->state.model);
                         sendf(-1, 1, "ri5", N_REGEN, ci->clientnum, ci->state.health, ci->state.armour, 0); // amt = 0 regens impulse
-#else
-                        ci->state.health = m_health(gamemode, mutators, ci->state.model);
-                        sendf(-1, 1, "ri4", N_REGEN, ci->clientnum, ci->state.health, 0); // amt = 0 regens impulse
-#endif
                     }
                     playing.add(ci);
                 }

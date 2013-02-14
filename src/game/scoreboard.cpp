@@ -75,6 +75,11 @@ namespace hud
             if((a->cptime && !b->cptime) || (a->cptime && b->cptime && a->cptime < b->cptime)) return true;
             if((b->cptime && !a->cptime) || (a->cptime && b->cptime && b->cptime < a->cptime)) return false;
         }
+        else if(m_gauntlet(game::gamemode))
+        {
+            if((a->cplaps && !b->cplaps) || (a->cplaps && b->cplaps && a->cplaps > b->cplaps)) return true;
+            if((b->cplaps && !a->cplaps) || (a->cplaps && b->cplaps && b->cplaps > a->cplaps)) return false;
+        }
         if(a->points > b->points) return true;
         if(a->points < b->points) return false;
         if(a->frags > b->frags) return true;
@@ -160,7 +165,7 @@ namespace hud
                 int numgroups = groupplayers();
                 if(!numgroups) return;
                 scoregroup &sg = *groups[0];
-                if(!m_trial(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                if(!m_checkpoint(game::gamemode) && m_isteam(game::gamemode, game::mutators))
                 {
                     int anc = sg.players.find(game::player1) >= 0 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
                     if(m_defend(game::gamemode) && sg.total == INT_MAX)
@@ -204,6 +209,24 @@ namespace hud
                             game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                         }
                         else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                    }
+                    else if(m_gauntlet(game::gamemode))
+                    {
+                        if(sg.players.length() > 1 && sg.players[0]->cplaps == sg.players[1]->cplaps)
+                        {
+                            mkstring(winner);
+                            loopv(sg.players) if(i)
+                            {
+                                if(sg.players[0]->cplaps == sg.players[i]->cplaps)
+                                {
+                                    concatstring(winner, game::colorname(sg.players[i]));
+                                    concatstring(winner, ", ");
+                                }
+                                else break;
+                            }
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith most laps: \fs\fc%d\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cplaps);
+                        }
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the most laps: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->cplaps);
                     }
                     else
                     {
@@ -299,7 +322,7 @@ namespace hud
                                 g.space(1);
                                 SEARCHBINDCACHE(attackkey)("action 0", 0);
                                 uifont(g, "little", {
-                                    if(delay || (m_trial(game::gamemode) && !game::player1->lastdeath) || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                                    if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                                     {
                                         if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
                                         else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, timetostr(delay, -1));
@@ -490,6 +513,11 @@ namespace hud
                                 uicenterlist(g, uipad(g, 4, g.text("best", fgcolor)));
                                 loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
                             }
+                            else if(m_gauntlet(game::gamemode))
+                            {
+                                uicenterlist(g, uipad(g, 4, g.text("laps", fgcolor)));
+                                loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->cplaps))));
+                            }
                             else
                             {
                                 uicenterlist(g, uipad(g, 1, g.text("frags", fgcolor)));
@@ -643,7 +671,7 @@ namespace hud
 
     int drawscore(int x, int y, int s, int m, float blend)
     {
-        if(!m_fight(game::gamemode) || m_trial(game::gamemode) || (inventoryscore == 1 && game::player1->state == CS_SPECTATOR && game::focus == game::player1)) return 0;
+        if(!m_fight(game::gamemode) || (inventoryscore == 1 && game::player1->state == CS_SPECTATOR && game::focus == game::player1)) return 0;
         int sy = 0, numgroups = groupplayers(), numout = 0;
         loopi(2) loopk(numgroups)
         {

@@ -375,7 +375,7 @@ namespace client
     }
     VARF(IDF_PERSIST, playermodel, 0, 0, PLAYERTYPES-1, setplayermodel(playermodel));
 
-#ifndef MEK
+#ifdef VANITY
     void setplayervanity(int vanity)
     {
         if(vanity >= 0 && game::player1->vanity != vanity)
@@ -1406,10 +1406,9 @@ namespace client
         d->frags = getint(p);
         d->deaths = getint(p);
         d->health = getint(p);
-#ifdef MEK
         d->armour = getint(p);
-#endif
         d->cptime = getint(p);
+        d->cplaps = getint(p);
         if(resume && (d == game::player1 || d->ai))
         {
             d->weapreset(false);
@@ -1880,21 +1879,13 @@ namespace client
                 case N_DAMAGE:
                 {
                     int tcn = getint(p), acn = getint(p), weap = getint(p), flags = getint(p), damage = getint(p),
-#ifdef MEK
                         health = getint(p), armour = getint(p);
-#else
-                        health = getint(p);
-#endif
                     vec dir;
                     loopk(3) dir[k] = getint(p)/DNF;
                     dir.normalize();
                     gameent *target = game::getclient(tcn), *actor = game::getclient(acn);
                     if(!target || !actor) break;
-#ifdef MEK
                     game::damaged(weap, flags, damage, health, armour, target, actor, lastmillis, dir);
-#else
-                    game::damaged(weap, flags, damage, health, target, actor, lastmillis, dir);
-#endif
                     break;
                 }
 
@@ -1909,11 +1900,7 @@ namespace client
 
                 case N_REGEN:
                 {
-#ifdef MEK
                     int trg = getint(p), heal = getint(p), amt = getint(p), armour = getint(p);
-#else
-                    int trg = getint(p), heal = getint(p), amt = getint(p);
-#endif
                     gameent *f = game::getclient(trg);
                     if(!f) break;
                     if(!amt)
@@ -1923,9 +1910,7 @@ namespace client
                     }
                     else if(amt > 0 && (!f->lastregen || lastmillis-f->lastregen >= 500)) playsound(S_REGEN, f->o, f);
                     f->health = heal;
-#ifdef MEK
                     f->armour = armour;
-#endif
                     f->lastregen = lastmillis;
                     break;
                 }
@@ -2374,7 +2359,7 @@ namespace client
 
                 case N_CHECKPOINT:
                 {
-                    int tn = getint(p), ent = getint(p), laptime = getint(p), besttime = getint(p);
+                    int tn = getint(p), ent = getint(p), laptime = getint(p), besttime = getint(p), laps = getint(p);
                     gameent *t = game::getclient(tn);
                     if(!t) break;
                     if(ent >= 0)
@@ -2383,11 +2368,12 @@ namespace client
                         {
                             t->cplast = laptime;
                             t->cptime = besttime;
+                            t->cplaps = laps;
                             t->cpmillis = t->impulse[IM_METER] = 0;
                             if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
                             {
                                 defformatstring(best)("%s", hud::timetostr(besttime));
-                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS)", game::colorname(t), hud::timetostr(laptime), best);
+                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colorname(t), hud::timetostr(laptime), best, laps);
                             }
                         }
                         if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)

@@ -9,12 +9,16 @@
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
 #define MAXCARRY            3
 #define KAMIKAZE            3
+#define CAMPAIGN            1
+#define RADARSTYLE          3
 #else
 #define GAMEID              "fps"
 #define GAMEVERSION         220
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
 #define MAXCARRY            2
 #define KAMIKAZE            1
+#define RADARSTYLE          1
+#define VANITY              1
 #endif
 #define DEMO_VERSION        GAMEVERSION
 
@@ -501,16 +505,13 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model, vanity;
+    int health, armour, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model, vanity;
     int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
-    int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime;
-#ifdef MEK
-    int armour;
-#endif
+    int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
     vector<int> loadweap;
     gamestate() : colour(0), model(0), vanity(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
-        aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0)
+        aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0)
     {
         loadweap.shrink(0);
         resetresidual();
@@ -716,11 +717,10 @@ struct gamestate
 
     void mapchange()
     {
-        points = cpmillis = cptime = 0;
+        points = cpmillis = cptime = cplaps = 0;
         loadweap.shrink(0);
     }
 
-#ifdef MEK
     void respawn(int millis, int heal = 0, int armr = -1)
     {
         health = heal ? heal : 100;
@@ -731,17 +731,6 @@ struct gamestate
     }
 
     void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
-#else
-    void respawn(int millis, int heal = 0)
-    {
-        health = heal ? heal : 100;
-        lastspawn = millis;
-        clearstate();
-        weapreset(true);
-    }
-
-    void spawnstate(int gamemode, int mutators, int sweap = -1, int heal = 0)
-#endif
     {
         weapreset(true);
         if(!isweap(sweap))
@@ -813,24 +802,14 @@ struct gamestate
             }
         }
         health = heal ? heal : m_health(gamemode, mutators, model);
-#ifdef MEK
         armour = armr >= 0 ? armr : m_armour(gamemode, mutators, model);
-#endif
     }
 
-#ifdef MEK
     void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0, int armr = -1)
     {
         clearstate();
         spawnstate(gamemode, mutators, sweap, heal, armr);
     }
-#else
-    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
-    {
-        clearstate();
-        spawnstate(gamemode, mutators, sweap, heal);
-    }
-#endif
 
     int respawnwait(int millis, int delay)
     {
@@ -1070,7 +1049,6 @@ struct gameent : dynent, gamestate
         stuns.shrink(0);
     }
 
-#ifdef MEK
     void respawn(int millis = 0, int heal = 0, int armr = -1, int gamemode = 0, int mutators = 0)
     {
         stopmoving(true);
@@ -1109,46 +1087,6 @@ struct gameent : dynent, gamestate
         resetstate(millis, heal, armr);
         gamestate::mapchange();
     }
-#else
-    void respawn(int millis = 0, int heal = 0, int gamemode = 0, int mutators = 0)
-    {
-        stopmoving(true);
-        removesounds();
-        clearstate(gamemode, mutators);
-        physent::reset();
-        gamestate::respawn(millis, heal);
-    }
-
-    void editspawn(int gamemode, int mutators, int sweap = -1, int heal = 0)
-    {
-        stopmoving(true);
-        clearstate();
-        inmaterial = timeinair = 0;
-        inliquid = onladder = false;
-        strafe = move = 0;
-        physstate = PHYS_FALL;
-        vel = falling = vec(0, 0, 0);
-        floor = vec(0, 0, 1);
-        resetinterp();
-        gamestate::editspawn(gamemode, mutators, sweap, heal);
-    }
-
-    void resetstate(int millis, int heal)
-    {
-        respawn(millis, heal);
-        frags = deaths = totaldamage = 0;
-    }
-
-    void mapchange(int millis, int heal)
-    {
-        checkpoint = -1;
-        dominating.shrink(0);
-        dominated.shrink(0);
-        icons.shrink(0);
-        resetstate(millis, heal);
-        gamestate::mapchange();
-    }
-#endif
 
     void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = vec(-1, -1, -1); }
 
@@ -1621,7 +1559,10 @@ namespace game
             bloodfade, bloodsize, bloodsparks, debrisfade, eventiconfade, eventiconshort,
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson,
 #ifndef MEK
-            forceplayermodel, forceplayervanity,
+            forceplayermodel,
+#endif
+#ifdef VANITY
+            forceplayervanity,
 #endif
             playerovertone, playerundertone, playerdisplaytone, playereffecttone;
     extern float bloodscale, debrisscale, aboveitemiconsize;
@@ -1674,11 +1615,7 @@ namespace game
     extern void resetworld();
     extern void resetstate();
     extern void hiteffect(int weap, int flags, int damage, gameent *d, gameent *actor, vec &dir, bool local = false);
-#ifdef MEK
     extern void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir);
-#else
-    extern void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir);
-#endif
     extern void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent*> &log, int style);
     extern void timeupdate(int timeremain);
     extern vec rescolour(dynent *d, int c = PULSE_BURN);

@@ -185,6 +185,8 @@ namespace game
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
+#endif
+#ifdef VANITY
     VAR(IDF_PERSIST|IDF_HEX, forceplayervanity, -1, -1, VAR_MAX);
 #endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
@@ -208,7 +210,7 @@ namespace game
     const char *gametitle() { return connected() ? server::gamename(gamemode, mutators) : "ready"; }
     const char *gametext() { return connected() ? mapname : "not connected"; }
 
-#ifndef MEK
+#ifdef VANITY
     void vanityreset()
     {
         loopvrev(vanities) vanities.remove(i);
@@ -1157,19 +1159,13 @@ namespace game
         }
     }
 
-#ifdef MEK
     void damaged(int weap, int flags, int damage, int health, int armour, gameent *d, gameent *actor, int millis, vec &dir)
-#else
-    void damaged(int weap, int flags, int damage, int health, gameent *d, gameent *actor, int millis, vec &dir)
-#endif
     {
         if(d->state != CS_ALIVE || intermission) return;
         if(hithurts(flags))
         {
             d->health = health;
-#ifdef MEK
             d->armour = armour;
-#endif
             if(d->health <= m_health(gamemode, mutators, d->model)) d->lastregen = 0;
             d->lastpain = lastmillis;
             actor->totaldamage += damage;
@@ -1668,11 +1664,7 @@ namespace game
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
-#ifdef MEK
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
-#else
-            d->mapchange(lastmillis, m_health(gamemode, mutators, d->model));
-#endif
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
             chooseloadweap(player1, favloadweaps);
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
@@ -2993,15 +2985,9 @@ namespace game
         }
         if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
         const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
-#ifdef MEK
-        bool hasweapon = false; // TEMP
-        modelattach a[1+10]; int ai = 0;
-#else
-        bool hasweapon = showweap && *weapmdl;
-        modelattach a[1+VANITYMAX+10]; int ai = 0;
-#endif
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
-#ifndef MEK
+        int ai = 0;
+#ifdef VANITY
+        modelattach a[1+VANITYMAX+10];
         if(third)
         {
             int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
@@ -3037,7 +3023,15 @@ namespace game
                 }
             }
         }
+#else
+        modelattach a[1+10];
 #endif
+#ifdef MEK
+        bool hasweapon = false; // TEMP
+#else
+        bool hasweapon = showweap && *weapmdl;
+#endif
+        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
         if(rendernormally && (early || d != focus))
         {
             const char *muzzle = "tag_weapon";
