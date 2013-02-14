@@ -873,7 +873,9 @@ namespace projs
                         return;
                     }
                 }
+#ifndef MEK
                 proj.mdl = vanities[proj.weap].model;
+#endif
                 proj.reflectivity = 0.f;
                 proj.elasticity = vanityelasticity;
                 proj.relativity = vanityrelativity;
