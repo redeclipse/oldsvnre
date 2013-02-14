@@ -17,8 +17,8 @@ cat <<EOF >> "$2"
 {| border="1" cellpadding="10" cellspacing="0"
 EOF
 
-# grab everything from dev tag and onward
-sed -n '/== Developers ==/,$p' "$1" | sed '/^$/d' >> "$2"
+# convert to UTF-8 and grab everything from dev tag and onward
+iconv -f ISO-8859-1 -t UTF8 "$1" | sed -n '/== Developers ==/,$p;/^$/d' >> "$2"
 
 # join lines starting with two or more spaces
 sed -ne 'H;$x;$s%^\n%%;$s%\n   *% %g;$p' -i "$2"
