@@ -34,18 +34,18 @@ Maps:
  * Assigned map music to all maps
  * Canals, updated and added to rotations
  * Fourplex, updated to version 1.6
- * Starlibido, updated to version 1.5
+ * Star Libido, updated to version 1.5
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.5)
  * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from
    Blood Frontier)
- * Suspended, new map (added from mapversion 1.4)
+ * Suspended Apparatus of Doom "suspended", new map (added from mapversion 1.4)
  * Conflict, updated
  * Blink, removed
  * Facility, removed
  * Cyanide, new trial map
- * Deadsimple, updated (retextured)
- * Vault, new map
+ * Dead Simple, updated (retextured)
+ * Frag Vault "vault", new map
 
 Interface & Menus:
  * Overall reduced font sizes
