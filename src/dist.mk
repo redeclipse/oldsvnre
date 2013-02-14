@@ -96,7 +96,7 @@ DISTFILES:= \
 	# Transform relative to src/ dir
 	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
 ifeq ($(APPNAME),mekarcade)
-	mv $@/src/Makefile.mek $@/src/Makefile
+	$(MV) $@/src/Makefile.mek $@/src/Makefile
 	sed 's/-f Makefile.mek//' -i $@/$(APPNAME).sh
 	sed 's/-f Makefile.mek//' -i $@/$(appshortname)*server.sh
 endif
@@ -205,7 +205,7 @@ dist-xz-osx: ../$(tarname-osx).xz
 
 ../$(exename): ../$(dirname-win)
 	makensis $</src/install/win/$(APPNAME).nsi
-	mv $</src/install/win/$(exename) ../
+	$(MV) $</src/install/win/$(exename) ../
 
 dist-win: ../$(exename)
 
