@@ -16,6 +16,8 @@ menudir=$(DESTDIR)$(prefix)/share/applications
 icondir=$(DESTDIR)$(prefix)/share/icons/hicolor
 pixmapdir=$(DESTDIR)$(prefix)/share/pixmaps
 
+ICON=../data/textures/icon.png
+
 ICONS= \
 	install/nix/$(appsrcname)_x16.png \
 	install/nix/$(appsrcname)_x32.png \
@@ -24,22 +26,22 @@ ICONS= \
 	install/nix/$(appsrcname)_x128.png \
 	install/nix/$(appsrcname)_x32.xpm
 
-install/nix/$(appsrcname)_x16.png: ../data/textures/icon.png
+install/nix/$(appsrcname)_x16.png: $(ICON)
 	convert '$<' -resize 16x16 $@
 
-install/nix/$(appsrcname)_x32.png: ../data/textures/icon.png
+install/nix/$(appsrcname)_x32.png: $(ICON)
 	convert '$<' -resize 32x32 $@
 
-install/nix/$(appsrcname)_x48.png: ../data/textures/icon.png
+install/nix/$(appsrcname)_x48.png: $(ICON)
 	convert '$<' -resize 48x48 $@
 
-install/nix/$(appsrcname)_x64.png: ../data/textures/icon.png
+install/nix/$(appsrcname)_x64.png: $(ICON)
 	convert '$<' -resize 64x64 $@
 
-install/nix/$(appsrcname)_x128.png: ../data/textures/icon.png
+install/nix/$(appsrcname)_x128.png: $(ICON)
 	convert '$<' -resize 128x128 $@
 
-install/nix/$(appsrcname)_x32.xpm: ../data/textures/icon.png
+install/nix/$(appsrcname)_x32.xpm: $(ICON)
 	convert '$<' -resize 32x32 $@
 
 icons: $(ICONS)
@@ -57,6 +59,8 @@ system-install-client: client
 		-i $(gamesbindir)/$(appname)
 	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/data \
 		$(libexecdir)/$(appname)/data
+	ln -s $(patsubst $(DESTDIR)%,%,$(datadir))/$(appname)/game \
+		$(libexecdir)/$(appname)/game
 
 system-install-server: server
 	install -d $(libexecdir)/$(appname)
@@ -74,6 +78,7 @@ system-install-server: server
 system-install-data:
 	install -d $(datadir)/$(appname)
 	cp -r ../data $(datadir)/$(appname)/data
+	cp -r ../game $(datadir)/$(appname)/game
 
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
