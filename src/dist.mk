@@ -1,46 +1,105 @@
+ifeq ($(APPNAME),redeclipse)
+appnamefull=Red Eclipse
+else
+ifeq ($(APPNAME),mekarcade)
+appnamefull=MekArcade
+endif
+endif
+
 appversion:=$(shell \
-	VER="$$(sed -n '/else/,/Red Eclipse/ s,.*RE_VER_STR.*"\(.*\)",\1,p' engine/engine.h | tr '\n' ' ')"; \
+	VER="$$(sed -n '/$(appnamefull)/{g;1!s/.*RE_VER_STR.*"\(.*\)"/\1/p;};h' engine/engine.h)"; \
 	if [ -z $$VER ]; then VER=0; fi; \
 	echo $$VER)
+
+appshortname:=$(shell echo $(APPNAME) | sed 's/\(^..\).*/\1/')
+
 dirname=$(APPNAME)-$(appversion)
 dirname-osx=$(APPNAME).app
+dirname-win=$(dirname)-win
+
 resourcespath-osx=$(APPNAME).app/Contents/Resources
 tmpdir-osx:=$(shell cd ../ && DIR=$$(mktemp -d $(dirname)-osx_XXXXX); rmdir $$DIR; echo $$DIR)
-dirname-win=$(dirname)-win
+exename=$(APPNAME)_$(appversion)_win.exe
+
 tarname=$(APPNAME)_$(appversion)_nix_bsd.tar
 tarname-all=$(APPNAME)_$(appversion)_all.tar
 tarname-osx=$(APPNAME)_$(appversion)_osx.tar
-exename=$(APPNAME)_$(appversion)_win.exe
+
 torrent-trackers-url="udp://tracker.openbittorrent.com:80,udp://tracker.publicbt.com:80,udp://tracker.ccc.de:80,udp://tracker.istole.it:80"
 torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
 
-SRC_DIRS=src/enet src/engine src/game src/include src/install src/lib src/scripts src/shared src/xcode
+FILES:= \
+	$(APPNAME).bat \
+	$(APPNAME).sh \
+	$(appshortname)*server.bat \
+	$(appshortname)*server.sh \
 
-# Relative to root dir
-DISTFILES:= \
-	bin/amd64 \
-	bin/redeclipse.app \
-	bin/x86 \
-	data \
-	doc \
-	readme.txt \
-	redeclipse.sh \
-	server.sh \
-	redeclipse.bat \
-	server.bat \
-	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
-	src/Makefile \
+SRC_DIRS= \
+	src/enet \
+	src/engine \
+	src/game \
+	src/install \
+	src/include \
+	src/lib \
+	src/scripts \
+	src/shared
+
+SRC_FILES= \
 	src/dist.mk \
 	src/dpiaware.manifest \
-	src/redeclipse.cbp \
-	src/redeclipse.ico \
-	src/redeclipse.rc \
-	src/system-install.mk
+	src/system-install.mk \
+	src/$(APPNAME)*
+
+SRC_XCODE= \
+	src/xcode/*.h \
+	src/xcode/*.m \
+	src/xcode/*.mm \
+	src/xcode/*.lproj \
+	src/xcode/$(APPNAME)* \
+
+OSX_APP=
+ifeq ($(APPNAME),redeclipse)
+SRC_FILES+=src/Makefile
+GAME_DIR=game/fps
+FILES+= readme.txt
+OSX_APP=bin/$(APPNAME).app
+else
+ifeq ($(APPNAME),mekarcade)
+SRC_FILES+=src/Makefile.mek
+GAME_DIR=game/mek
+endif
+endif
+
+BIN_FILES= \
+	bin/amd64/*.txt \
+	bin/amd64/*.dll \
+	bin/amd64/$(appshortname)*client* \
+	bin/amd64/$(appshortname)*server* \
+	bin/x86/*.txt \
+	bin/x86/*.dll \
+	bin/x86/$(appshortname)*client.* \
+	bin/x86/$(appshortname)*server.* \
+	$(OSX_APP)
+
+DISTFILES:= \
+	$(FILES) \
+	$(BIN_FILES) \
+	data \
+	$(GAME_DIR) \
+	doc \
+	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
+	$(SRC_FILES) \
+	$(SRC_XCODE)
 
 ../$(dirname):
 	rm -rf $@
 	# Transform relative to src/ dir
 	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
+ifeq ($(APPNAME),mekarcade)
+	mv $@/src/Makefile.mek $@/src/Makefile
+	sed 's/-f Makefile.mek//' -i $@/$(APPNAME).sh
+	sed 's/-f Makefile.mek//' -i $@/$(appshortname)*server.sh
+endif
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
 	rm -rf $@/src/enet/autom4te.cache/
@@ -49,7 +108,7 @@ distdir: ../$(dirname)
 
 ../$(tarname): ../$(dirname)
 	tar \
-		--exclude='$</bin/redeclipse.app*' \
+		--exclude='$</bin/*.app*' \
 		--exclude='$</bin/*/*.exe' \
 		--exclude='$</bin/*/*.dll' \
 		--exclude='$</bin/*/*.txt' \
@@ -75,7 +134,9 @@ dist-tar-all: ../$(tarname-all)
 	ln -s ../../../$</data/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/data
 	ln -s ../../../$</doc/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/doc
 	ln -s ../../../$</src/ ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/src
+ifeq ($(APPNAME),redeclipse)
 	ln -s ../../../$</readme.txt ../$(tmpdir-osx)/$(dirname-osx)/Contents/Resources/readme.txt
+endif
 	tar \
 		-hrf $@ -C ../$(tmpdir-osx) $(dirname-osx)
 	rm -rf ../$(tmpdir-osx)/
@@ -84,7 +145,7 @@ dist-tar-osx: ../$(tarname-osx)
 
 ../$(dirname-win): ../$(dirname)
 	cp -r $< $@
-	rm -rf $@/bin/redeclipse.app/
+	rm -rf $@/bin/*.app/
 	rm -rf $@/bin/*/*linux*
 	rm -rf $@/bin/*/*freebsd*
 	rm -f $@/*.sh
@@ -143,12 +204,18 @@ dist-osx: ../$(tarname-osx).bz2
 dist-xz-osx: ../$(tarname-osx).xz
 
 ../$(exename): ../$(dirname-win)
-	makensis $</src/install/win/redeclipse.nsi
+	makensis $</src/install/win/$(APPNAME).nsi
 	mv $</src/install/win/$(exename) ../
 
 dist-win: ../$(exename)
 
+ifeq ($(APPNAME),redeclipse)
 dist: dist-bz2 dist-bz2-all dist-bz2-osx dist-win
+else
+ifeq ($(APPNAME),mekarcade)
+dist: dist-bz2 dist-bz2-all
+endif
+endif
 
 ../$(tarname).bz2.torrent: ../$(tarname)
 	rm -f $@
@@ -169,7 +236,7 @@ dist-torrent: ../$(tarname).bz2.torrent
 		-a $(torrent-trackers-url) \
 		-w $(torrent-webseed-baseurl)/$(tarname-all).bz2 \
 		-n $(tarname-all).bz2 \
-		-c "Red Eclipse $(appversion) for All Platforms" \
+		-c "$(appnamefull) $(appversion) for All Platforms" \
 		$(tarname-all).bz2
 
 dist-torrent-all: ../$(tarname-all).bz2.torrent
@@ -181,7 +248,7 @@ dist-torrent-all: ../$(tarname-all).bz2.torrent
 		-a $(torrent-trackers-url) \
 		-w $(torrent-webseed-baseurl)/$(tarname-osx).bz2 \
 		-n $(tarname-osx).bz2 \
-		-c "Red Eclipse $(appversion) for OSX" \
+		-c "$(appnamefull) $(appversion) for OSX" \
 		$(tarname-osx).bz2
 
 dist-torrent-osx: ../$(tarname-osx).bz2.torrent
@@ -193,12 +260,18 @@ dist-torrent-osx: ../$(tarname-osx).bz2.torrent
 		-a $(torrent-trackers-url) \
 		-w $(torrent-webseed-baseurl)/$(exename) \
 		-n $(exename) \
-		-c "Red Eclipse $(appversion) for Windows" \
+		-c "$(appnamefull) $(appversion) for Windows" \
 		$(exename)
 
 dist-torrent-win: ../$(exename).torrent
 
+ifeq ($(APPNAME),redeclipse)
 dist-torrents: dist-torrent dist-torrent-all dist-torrent-osx dist-torrent-win
+else
+ifeq ($(APPNAME),mekarcade)
+dist-torrents: dist-torrent dist-torrent-all
+endif
+endif
 
 dist-mostlyclean:
 	rm -rf ../$(dirname)
