@@ -1361,7 +1361,7 @@ void setlocations(bool wanthome)
         chdir(dir);
     }
 #endif
-    loopi(3) if(!fileexists(findfile("data/defaults.cfg", "r"), "r"))
+    loopi(3) if(!fileexists(findfile("data/keymap.cfg", "r"), "r"))
     {
         if(i != 2) chdir("..");
         else fatal("could not find data directory");

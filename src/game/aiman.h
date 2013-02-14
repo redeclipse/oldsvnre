@@ -84,8 +84,12 @@ namespace aiman
                 clients.add(ci);
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
-                ci->state.model = rnd(INT_MAX-1);
-                ci->state.vanity = rnd(V_I_MAX);
+                ci->state.model = rnd(PLAYERTYPES);
+#ifdef MEK
+                ci->state.vanity = 0;
+#else
+                ci->state.vanity = 1<<rnd(V_I_MAX); // only pick one
+#endif
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;

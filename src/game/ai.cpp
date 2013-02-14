@@ -217,14 +217,15 @@ namespace ai
                 conoutft(CON_EVENT, "\fg%s changed skill to %d", game::colorname(d, name), sk);
         }
 
-        copystring(d->name, name, MAXNAMELEN); // don't use setname so we keep our random colour
         if((d->aitype = at) >= AI_START) d->type = ENT_AI;
+        d->setname(name);
         d->aientity = et;
         d->ownernum = on;
         d->skill = sk;
         d->team = tm;
         d->colour = cl;
         d->model = md;
+        d->vanity = vn;
 
         formatstring(d->hostname)("bot#%d", d->ownernum);
 
