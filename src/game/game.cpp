@@ -217,7 +217,7 @@ namespace game
 
     int vanityitem(int type, const char *model, const char *name, const char *tag, int style, int priv)
     {
-        if(type < 0 || type >= V_T_MAX || !model || !name || !tag) return -1;
+        if(type < 0 || type >= VANITYMAX || !model || !name || !tag) return -1;
         int num = vanities.length();
         vanitys &v = vanities.add();
         v.type = type;
@@ -3007,7 +3007,7 @@ namespace game
             int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
             if(vanity)
             {
-                int found[V_T_MAX] = {0};
+                int found[VANITYMAX] = {0};
                 loopvk(vanities) if((vanity&(1<<k)) && d->privilege >= vanities[k].priv && !found[vanities[k].type])
                 {
                     const char *file = NULL;

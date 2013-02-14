@@ -102,15 +102,7 @@ const char *playertypes[PLAYERTYPES][3] = {
 #else
 extern const char *playertypes[PLAYERTYPES][3];
 #endif
-enum {
-    V_T_EYES = 0,
-    V_T_HEAD,
-    V_T_FACE,
-    V_T_CHEST,
-    V_T_WAIST,
-    V_T_BACK,
-    V_T_MAX
-};
+#define VANITYMAX 16
 struct vanityfile
 {
     char *id, *name;
