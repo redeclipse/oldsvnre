@@ -436,7 +436,9 @@ namespace projs
             if(*weaptype[i].proj) preloadmodel(weaptype[i].proj);
             if(*weaptype[i].eprj) preloadmodel(weaptype[i].eprj);
         }
+#ifndef MEK
         loopi(V_I_MAX) preloadmodel(vanities[i].model);
+#endif
         const char *mdls[] = {
             "projectiles/gibs/gib01",
             "projectiles/gibs/gib02",

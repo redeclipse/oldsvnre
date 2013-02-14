@@ -7,10 +7,14 @@
 #define GAMEID              "mek"
 #define GAMEVERSION         220
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
+#define MAXCARRY            3
+#define KAMIKAZE            3
 #else
 #define GAMEID              "fps"
 #define GAMEVERSION         220
 #define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
+#define MAXCARRY            2
+#define KAMIKAZE            1
 #endif
 #define DEMO_VERSION        GAMEVERSION
 
