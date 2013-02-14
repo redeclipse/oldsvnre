@@ -34,7 +34,7 @@ Maps:
  * Assigned map music to all maps
  * Canals, updated and added to rotations
  * Fourplex, updated to version 1.6
- * Starlibido, updated to version 1.4b
+ * Starlibido, updated to version 1.5
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.5)
  * Battlefield, new map (added from mapversion 1.1, remake of "Warground" from
@@ -103,6 +103,7 @@ Data Assets:
  * grunt renamed to drone
  * Improved shotgun animation
  * Improved thirdperson player model animation
+ * Added vanity items for players
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same
@@ -113,12 +114,13 @@ Multiplayer & Servers:
 Core & Install:
  * Added IRC guidelines
  * Client now uses log.txt in the homedir by default
- * Binary files moved to bin/{amd64,x86}/ subdirectories
- * MekArcade source code tree merged in
+ * Moved binary files to bin/{amd64,x86}/ subdirectories
+ * MekArcade source & data tree merged in
  * Enet 1.3.6
  * Workaround for intel/apple occlusion bug
  * Network encoding functions moved into tools
  * Weapon variable definititions structured into rows per variable
+ * Moved data/maps to game/fps/maps
 
 Additional fixed bugs:
  * #218 - "Dropping" a weapon in arena makes it unusable until next round
