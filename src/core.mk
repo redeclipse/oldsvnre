@@ -1,15 +1,24 @@
-APPNAME=mekarcade
-APPCLIENT=mekclient
-APPSERVER=mekserver
+ifndef APPNAME
+APPNAME=redeclipse
+endif
+ifndef APPCLIENT
+APPCLIENT=reclient
+endif
+ifndef APPSERVER
+APPSERVER=reserver
+endif
+ifndef APPFLAGS
+APPFLAGS=
+endif
 
 #CXXFLAGS= -ggdb3
-CXXFLAGS= -O3 -fomit-frame-pointer -DMEK=1
+CXXFLAGS= -O3 -fomit-frame-pointer
 override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
 
 PLATFORM= $(shell uname -s)
 PLATFORM_SUFFIX=_native
 
-INCLUDES= -Ishared -Iengine -Igame -Ienet/include
+INCLUDES= -Ishared -Iengine -Igame -Ienet/include $(APPFLAGS)
 
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
@@ -161,11 +170,11 @@ $(SERVER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
-	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff 
+	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff
 	$(CXX) $(CXXFLAGS) -o $(WINBIN)/$(APPCLIENT).exe $(APPNAME).res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
-	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff 
+	$(WINDRES) -i $(APPNAME).rc -J rc -o $(APPNAME).res -O coff
 	$(CXX) $(CXXFLAGS) -o $(WINBIN)/$(APPSERVER).exe $(APPNAME).res $(SERVER_OBJS) $(SERVER_LIBS)
 
 install-client: client
