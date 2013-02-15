@@ -39,47 +39,50 @@ Files: doc/man/cube2font.1 doc/man/redeclipse.6.am
 Copyright: 2011-2012, Martin Erik "arand" Werner <martinerikwerner@gmail.com>
 License: ZLib
 
-Files: data/maps/biolytic* data/maps/darkness* data/maps/mist* data/maps/nova*
-       data/maps/panic* data/maps/oneiroi* data/maps/processing*
-       data/maps/tranquility* data/maps/vault*
+Files: game/fps/maps/biolytic* game/fps/maps/darkness* game/fps/maps/mist*
+       game/fps/maps/nova* game/fps/maps/panic* game/fps/maps/oneiroi*
+       game/fps/maps/processing* game/fps/maps/tranquility*
+       game/fps/maps/vault*
 Copyright: 2009-2013, Derek "favorito" Ponicki <favorito.redeclipse@gmail.com>
 License: Zlib
 
-Files: data/maps/deadsimple*
+Files: game/fps/maps/deadsimple*
 Copyright: Jonathan 'Wicked' Roels
            2010-2013 Red Eclipse Team
            2013 Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: data/maps/ares* data/maps/canals* data/maps/conflict*
+Files: game/fps/maps/ares* game/fps/maps/canals* game/fps/maps/conflict*
 Copyright: 2011-2013, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0
 
-Files: data/maps/industrial* data/maps/isolation* data/maps/keystone2k*
+Files: game/fps/maps/industrial* game/fps/maps/isolation*
+       game/fps/maps/keystone2k*
 Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
-Files: data/maps/fourplex* data/maps/pumpstation* data/maps/starlibido*
+Files: game/fps/maps/fourplex* game/fps/maps/pumpstation*
+       game/fps/maps/starlibido*
 Copyright: 2012-2013 D.a.M.i.E.n. <daymeenn@gmail.com>,
 License: CC-BY-SA-3.0
 
-Files: data/maps/neodrive* data/maps/hawk*
+Files: game/fps/maps/neodrive* game/fps/maps/hawk*
 Copyright: 2012-2013, Kirill "TristamK" Kolesnikov <tristamk@bk.ru>
 License: CC-BY-SA-3.0
 
-Files: data/maps/cutec*
+Files: game/fps/maps/cutec*
 Copyright: 2012-2013, Raiden
 License: CC-BY-SA-3.0
 
-Files: data/maps/erosion* data/maps/suspended*
+Files: game/fps/maps/erosion* game/fps/maps/suspended*
 Copyright: 2012-2013 Matt "greasepirate" Kalt
 License: CC-BY-3.0
 
-Files: data/maps/battlefield*
+Files: game/fps/maps/battlefield*
 Copyright: 2012-2013, Quinton Reeves, Ulukai <jonathan.denil@gmail.com>
 License: CC-BY-SA-3.0+
 
-Files: data/maps/cyanide*
+Files: game/fps/maps/cyanide*
 Copyright: 2013  Ricky Thomson (unixfreak) <punkalert@gmail.com>
 License: CC-BY-SA-3.0
 
