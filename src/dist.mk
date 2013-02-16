@@ -1,9 +1,5 @@
-ifeq ($(APPNAME),redeclipse)
+ifndef appnamefull
 appnamefull=Red Eclipse
-else
-ifeq ($(APPNAME),mekarcade)
-appnamefull=MekArcade
-endif
 endif
 
 appversion:=$(shell \
@@ -74,12 +70,12 @@ endif
 BIN_FILES= \
 	bin/amd64/*.txt \
 	bin/amd64/*.dll \
-	bin/amd64/$(appshortname)*client* \
-	bin/amd64/$(appshortname)*server* \
+	bin/amd64/$(APPCLIENT)* \
+	bin/amd64/$(APPSERVER)* \
 	bin/x86/*.txt \
 	bin/x86/*.dll \
-	bin/x86/$(appshortname)*client.* \
-	bin/x86/$(appshortname)*server.* \
+	bin/x86/$(APPCLIENT)* \
+	bin/x86/$(APPSERVER)* \
 	$(OSX_APP)
 
 DISTFILES:= \
