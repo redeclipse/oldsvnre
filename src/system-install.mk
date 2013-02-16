@@ -1,3 +1,13 @@
+ifndef appnamefull
+appnamefull=Red Eclipse
+endif
+ifndef ICON
+ICON=../data/textures/icon.png
+endif
+ifndef EXTRADATA
+EXTRADATA=../game/fps
+endif
+
 appname=$(APPNAME)
 appsrcname=$(APPNAME)
 cappname:=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
@@ -15,8 +25,6 @@ mandir=$(DESTDIR)$(prefix)/share/man
 menudir=$(DESTDIR)$(prefix)/share/applications
 icondir=$(DESTDIR)$(prefix)/share/icons/hicolor
 pixmapdir=$(DESTDIR)$(prefix)/share/pixmaps
-
-ICON=../data/textures/icon.png
 
 ICONS= \
 	install/nix/$(appsrcname)_x16.png \
@@ -77,8 +85,9 @@ system-install-server: server
 
 system-install-data:
 	install -d $(datadir)/$(appname)
+	install -d $(datadir)/$(appname)/game
 	cp -r ../data $(datadir)/$(appname)/data
-	cp -r ../game $(datadir)/$(appname)/game
+	cp -r $(EXTRADATA) $(datadir)/$(appname)/game
 
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
@@ -141,6 +150,7 @@ system-install: system-install-client system-install-server system-install-data 
 system-uninstall-client:
 	@rm -fv $(libexecdir)/$(appname)/$(appname)
 	@rm -fv $(libexecdir)/$(appname)/data
+	@rm -fv $(libexecdir)/$(appname)/game
 	@rm -fv $(gamesbindir)/$(appname)
 
 system-uninstall-server:
@@ -149,6 +159,7 @@ system-uninstall-server:
 
 system-uninstall-data:
 	rm -rf $(datadir)/$(appname)/data
+	rm -rf $(datadir)/$(appname)/game
 
 system-uninstall-docs:
 	@rm -rfv $(docdir)/$(appname)/examples

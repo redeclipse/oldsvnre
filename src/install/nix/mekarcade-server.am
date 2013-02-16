@@ -1,0 +1,12 @@
+#!/bin/sh
+for arg
+do
+    if [ "$arg" = --help ]
+    then
+       exec man @APPNAME@-server
+    fi
+done
+
+RE_OPTIONS=""
+cd @LIBEXECDIR@/@APPNAME@ || exit 1
+exec ./@APPNAME@-server ${RE_OPTIONS} ${1+"$@"}
