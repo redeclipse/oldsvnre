@@ -625,7 +625,7 @@ namespace projs
             proj.xradius = radius.x;
             proj.yradius = radius.y;
             proj.radius = max(radius.x, radius.y);
-            proj.o.z += radius.z-proj.zradius;
+            if(!init) proj.o.z += radius.z-proj.zradius;
             proj.height = proj.zradius = proj.aboveeye = radius.z;
         }
         else switch(proj.projtype)
@@ -693,7 +693,6 @@ namespace projs
                 proj.projcollide = WF(WK(proj.flags), proj.weap, collide, WS(proj.flags));
                 proj.minspeed = WF(WK(proj.flags), proj.weap, minspeed, WS(proj.flags));
                 proj.extinguish = WF(WK(proj.flags), proj.weap, extinguish, WS(proj.flags))|4;
-                proj.lifesize = 1;
                 proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || proj.child || WK(proj.flags) || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
@@ -768,9 +767,9 @@ namespace projs
             {
                 proj.height = proj.aboveeye = 0.5f; proj.radius = proj.yradius = 1; proj.xradius = 0.25f;
                 if(!isweap(proj.weap) && proj.owner) proj.weap = proj.owner->weapselect;
+                if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
                 if(isweap(proj.weap))
                 {
-                    if(proj.owner) proj.o = proj.from = proj.owner->ejectpos(proj.weap);
                     proj.mdl = weaptype[proj.weap].eject && *weaptype[proj.weap].eprj ? weaptype[proj.weap].eprj : "projectiles/catridge";
                     proj.lifesize = weaptype[proj.weap].esize;
                     proj.light.material[0] = bvec(W(proj.weap, colour));
@@ -799,7 +798,6 @@ namespace projs
             {
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
                 proj.mdl = entities::entmdlname(entities::ents[proj.id]->type, entities::ents[proj.id]->attrs);
-                proj.lifesize = 1.f;
                 proj.reflectivity = 0.f;
                 proj.elasticity = itemelasticity;
                 proj.relativity = itemrelativity;
@@ -826,7 +824,6 @@ namespace projs
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 4;
                 vec dir = vec(proj.to).sub(proj.from).normalize();
                 vectoyawpitch(dir, proj.yaw, proj.pitch);
-                proj.lifesize = 1.f;
                 proj.reflectivity = 0.f;
                 proj.escaped = true;
                 proj.fadetime = 500;
@@ -859,7 +856,6 @@ namespace projs
             {
                 proj.collidetype = COLLIDE_AABB;
                 proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 1;
-                proj.lifesize = 1;
                 if(proj.owner)
                 {
                     if(proj.owner->state == CS_DEAD || proj.owner->state == CS_WAITING)
@@ -930,7 +926,7 @@ namespace projs
             if(eyedist >= 1e-6f)
             {
                 eyedir.div(eyedist);
-                float blocked = tracecollide(&proj, loc, eyedir, eyedist);
+                float blocked = tracecollide(&proj, loc, eyedir, eyedist, RAY_CLIPMAT|RAY_ALPHAPOLY, proj.projcollide&COLLIDE_PLAYER);
                 if(blocked >= 0) proj.o = vec(eyedir).mul(blocked+proj.radius+1e-6f).add(loc);
             }
         }
