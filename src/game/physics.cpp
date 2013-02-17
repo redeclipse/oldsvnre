@@ -208,15 +208,11 @@ namespace physics
         {
             if(d->state != CS_ALIVE) return false;
             if(m_trial(game::gamemode) && !trialstyle) return false;
-            gameent *f = (gameent *)d;
-            if(f->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
+            if(((gameent *)d)->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
             return true;
         }
-        else if(d->type == ENT_PROJ)
-        {
-            if(e && !reverse && issolid(e, d, esc, impact, true)) return true;
-        }
-        return true;
+        else if(d->type == ENT_PROJ && e && !reverse) return issolid(e, d, esc, impact, true);
+        return false;
     }
 
     bool iscrouching(physent *d)

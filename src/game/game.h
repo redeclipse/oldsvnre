@@ -1388,8 +1388,8 @@ struct projent : dynent
         effectpos = vec(-1e16f, -1e16f, -1e16f);
         addtime = lifetime = lifemillis = waittime = spawntime = fadetime = lastradial = lasteffect = lastbounce = beenused = flags = 0;
         schan = id = weap = value = -1;
-        movement = distance = lifespan = lifesize = minspeed = 0;
-        curscale = speedscale = 1;
+        movement = distance = lifespan = minspeed = 0;
+        curscale = speedscale = lifesize = 1;
         extinguish = stuck = 0;
         limited = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
