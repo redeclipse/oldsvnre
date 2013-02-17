@@ -171,14 +171,15 @@ void mdlshader(const char *shader)
 
 COMMAND(0, mdlshader, "s");
 
-void mdlspin(float *yaw, float *pitch)
+void mdlspin(float *yaw, float *pitch, float *roll)
 {
     checkmdl;
     loadingmodel->spinyaw = *yaw;
     loadingmodel->spinpitch = *pitch;
+    loadingmodel->spinroll = *roll;
 }
 
-COMMAND(0, mdlspin, "ff");
+COMMAND(0, mdlspin, "fff");
 
 void mdlscale(int *percent)
 {
