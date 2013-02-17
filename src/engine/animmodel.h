@@ -943,7 +943,7 @@ struct animmodel : model
                 switch(linktype(m))
                 {
                     case LINK_TAG:
-                        p->index = link(p, a[i].tag, vec(0, 0, 0), vec(m->offsetyaw + m->spinyaw*lastmillis/1000.0f, m->offsetpitch + m->spinpitch*lastmillis/1000.0f, m->offsetroll), a[i].anim, a[i].basetime, &a[i]) ? index : -1;
+                        p->index = link(p, a[i].tag, vec(0, 0, 0), vec(m->offsetyaw + m->spinyaw*lastmillis/1000.0f, m->offsetpitch + m->spinpitch*lastmillis/1000.0f, m->offsetroll + m->spinroll*lastmillis/1000.0f), a[i].anim, a[i].basetime, &a[i]) ? index : -1;
                         break;
 
                     case LINK_COOP:
@@ -993,6 +993,7 @@ struct animmodel : model
         if(!loaded) return;
 
         yaw += spinyaw*lastmillis/1000.0f;
+        roll += spinroll*lastmillis/1000.0f;
         pitch += offsetpitch + spinpitch*lastmillis/1000.0f;
 
         vec axis(0, -1, 0), forward(1, 0, 0);
