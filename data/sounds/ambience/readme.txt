@@ -120,3 +120,16 @@ License: CC-BY
  License. To view a copy of this license, visit
  http://creativecommons.org/licenses/by/3.0/ or send a letter to Creative
  Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
+
+Files: vapour.ogg
+This work "vapour", created by D.a.M.i.E.n. <daymeenn@gmail.com>
+
+It is licensed under the Creative Commons Attribution ShareAlike (CC-BY-SA)
+Unported License version 3.0.
+
+To view a copy of this license:
+1. visit http://creativecommons.org/licenses/by-sa/3.0/ or
+2. read cc-by-sa.txt file or
+3. send a letter to Creative Commons,
+444 Castro Street, Suite 900,
+Mountain View, California, 94041, USA.
