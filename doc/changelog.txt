@@ -43,9 +43,13 @@ Maps:
  * Conflict, updated
  * Blink, removed
  * Facility, removed
- * Cyanide, new trial map
+ * Cyanide, new time-trial map
  * Dead Simple, updated (retextured)
  * Frag Vault "vault", new map
+ * Steel Rat, new time-trial map
+ * Dawn, removed
+ * Industrial, removed
+ * Lab, removed
 
 Interface & Menus:
  * Overall reduced font sizes
@@ -104,6 +108,7 @@ Data Assets:
  * Improved shotgun animation
  * Improved thirdperson player model animation
  * Added vanity items for players
+ * Added new vapour sound
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same
