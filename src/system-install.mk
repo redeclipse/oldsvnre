@@ -35,22 +35,22 @@ ICONS= \
 	install/nix/$(appsrcname)_x32.xpm
 
 install/nix/$(appsrcname)_x16.png: $(ICON)
-	convert '$<' -resize 16x16 $@
+	gm convert '$<' -resize 16x16 $@
 
 install/nix/$(appsrcname)_x32.png: $(ICON)
-	convert '$<' -resize 32x32 $@
+	gm convert '$<' -resize 32x32 $@
 
 install/nix/$(appsrcname)_x48.png: $(ICON)
-	convert '$<' -resize 48x48 $@
+	gm convert '$<' -resize 48x48 $@
 
 install/nix/$(appsrcname)_x64.png: $(ICON)
-	convert '$<' -resize 64x64 $@
+	gm convert '$<' -resize 64x64 $@
 
 install/nix/$(appsrcname)_x128.png: $(ICON)
-	convert '$<' -resize 128x128 $@
+	gm convert '$<' -resize 128x128 $@
 
 install/nix/$(appsrcname)_x32.xpm: $(ICON)
-	convert '$<' -resize 32x32 $@
+	gm convert '$<' -resize 32x32 $@
 
 icons: $(ICONS)
 
