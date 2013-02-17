@@ -563,11 +563,11 @@ struct animmodel : model
     {
         part *p;
         int tag, anim, basetime;
-        vec translate;
+        vec translate, rotate;
         modelattach *attached;
         glmatrixf matrix;
 
-        linkedpart() : p(NULL), tag(-1), anim(-1), basetime(0), translate(0, 0, 0), attached(NULL) {}
+        linkedpart() : p(NULL), tag(-1), anim(-1), basetime(0), translate(0, 0, 0), rotate(0, 0, 0), attached(NULL) {}
     };
 
     struct part
@@ -626,12 +626,12 @@ struct animmodel : model
             }
         }
 
-        bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), int anim = -1, int basetime = 0, modelattach *attached = NULL)
+        bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), const vec &rotate = vec(0, 0, 0), int anim = -1, int basetime = 0, modelattach *attached = NULL)
         {
             int i = meshes ? meshes->findtag(tag) : -1;
             if(i<0)
             {
-                loopv(links) if(links[i].p && links[i].p->link(p, tag, translate, anim, basetime, attached)) return true;
+                loopv(links) if(links[i].p && links[i].p->link(p, tag, translate, rotate, anim, basetime, attached)) return true;
                 return false;
             }
             linkedpart &l = links.add();
@@ -640,6 +640,7 @@ struct animmodel : model
             l.anim = anim;
             l.basetime = basetime;
             l.translate = translate;
+            l.rotate = rotate;
             l.attached = attached;
             return true;
         }
@@ -862,8 +863,11 @@ struct animmodel : model
                 loopv(links)
                 {
                     linkedpart &link = links[i];
-                    link.matrix.transformedtranslate(links[i].translate, resize);
-
+                    link.matrix.transformedtranslate(link.translate, resize);
+                    if(link.rotate.x) link.matrix.rotate_around_z(link.rotate.x*RAD);
+                    if(link.rotate.z) link.matrix.rotate_around_x(-link.rotate.z*RAD);
+                    if(link.rotate.y) link.matrix.rotate_around_y(link.rotate.y*RAD);
+                    
                     matrixpos++;
                     matrixstack[matrixpos].mul(matrixstack[matrixpos-1], link.matrix);
 
@@ -932,14 +936,14 @@ struct animmodel : model
                 animmodel *m = (animmodel *)a[i].m;
                 if(!m || !m->loaded)
                 {
-                    if(a[i].pos) link(NULL, a[i].tag, vec(0, 0, 0), 0, 0, &a[i]);
+                    if(a[i].pos) link(NULL, a[i].tag, vec(0, 0, 0), vec(0, 0, 0), 0, 0, &a[i]);
                     continue;
                 }
                 part *p = m->parts[0];
                 switch(linktype(m))
                 {
                     case LINK_TAG:
-                        p->index = link(p, a[i].tag, vec(0, 0, 0), a[i].anim, a[i].basetime, &a[i]) ? index : -1;
+                        p->index = link(p, a[i].tag, vec(0, 0, 0), vec(m->offsetyaw + m->spinyaw*lastmillis/1000.0f, m->offsetpitch + m->spinpitch*lastmillis/1000.0f, m->offsetroll), a[i].anim, a[i].basetime, &a[i]) ? index : -1;
                         break;
 
                     case LINK_COOP:
@@ -1148,10 +1152,10 @@ struct animmodel : model
         return bih;
     }
 
-    bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), int anim = -1, int basetime = 0, modelattach *attached = NULL)
+    bool link(part *p, const char *tag, const vec &translate = vec(0, 0, 0), const vec &rotate = vec(0, 0, 0), int anim = -1, int basetime = 0, modelattach *attached = NULL)
     {
         if(parts.empty()) return false;
-        return parts[0]->link(p, tag, translate, anim, basetime, attached);
+        return parts[0]->link(p, tag, translate, rotate, anim, basetime, attached);
     }
 
     bool unlink(part *p)
@@ -1564,11 +1568,11 @@ template<class MDL, class MESH> struct modelcommands
         loopskins(meshname, s, { s.material = clamp(*material, 0, int(MAXLIGHTMATERIALS)); s.material2 = clamp(*material2, 0, int(MAXLIGHTMATERIALS)); });
     }
 
-    static void setlink(int *parent, int *child, char *tagname, float *x, float *y, float *z)
+    static void setlink(int *parent, int *child, char *tagname, float *x, float *y, float *z, float *yaw, float *pitch, float *roll)
     {
         if(!MDL::loading) { conoutf("\frnot loading an %s", MDL::formatname()); return; }
         if(!MDL::loading->parts.inrange(*parent) || !MDL::loading->parts.inrange(*child)) { conoutf("\frno models loaded to link"); return; }
-        if(!MDL::loading->parts[*parent]->link(MDL::loading->parts[*child], tagname, vec(*x, *y, *z))) conoutf("\frcould not link model %s", MDL::loading->loadname);
+        if(!MDL::loading->parts[*parent]->link(MDL::loading->parts[*child], tagname, vec(*x, *y, *z), vec(*yaw, *pitch, *roll))) conoutf("\frcould not link model %s", MDL::loading->loadname);
     }
 
     template<class F> void modelcommand(F *fun, const char *suffix, const char *args)
@@ -1598,7 +1602,7 @@ template<class MDL, class MESH> struct modelcommands
             modelcommand(setnoclip, "noclip", "si");
             modelcommand(setmaterial, "material", "sii");
         }
-        if(MDL::multiparted()) modelcommand(setlink, "link", "iisfff");
+        if(MDL::multiparted()) modelcommand(setlink, "link", "iisffffff");
     }
 };
 
