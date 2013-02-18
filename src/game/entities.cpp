@@ -624,6 +624,7 @@ namespace entities
                 case CHECKPOINT:
                 {
                     if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode)) break;
+                    if(m_gauntlet(game::gamemode) && d->team != T_ALPHA) break;
                     if(d->checkpoint != n)
                     {
                         client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
