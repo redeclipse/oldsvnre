@@ -256,7 +256,7 @@ extern mutstypes mutstype[];
 #define m_defend(a)         (a == G_DEFEND)
 #define m_bomber(a)         (a == G_BOMBER)
 #define m_trial(a)          (a == G_TRIAL)
-#define m_gauntlet(a)       (a == G_TRIAL)
+#define m_gauntlet(a)       (a == G_GAUNTLET)
 
 #define m_play(a)           (a >= G_PLAY)
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
