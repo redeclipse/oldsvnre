@@ -1307,7 +1307,7 @@ namespace server
                 }
             }
         }
-        int balance = G(forcebalance) >= 0 ? G(forcebalance) : mbalance;
+        int balance = m_gauntlet(gamemode) ? 1 : (G(forcebalance) >= 0 ? G(forcebalance) : mbalance);
         if(iterate && balance && m_isteam(gamemode, mutators))
         {
             int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
@@ -1585,7 +1585,7 @@ namespace server
         if(ci->state.aitype >= AI_START) return ci->state.aientity;
         else
         {
-            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty())
+            if(m_checkpoint(gamemode) && !ci->state.cpnodes.empty() && (!m_gauntlet(gamemode) || ci->team == T_ALPHA))
             {
                 int checkpoint = ci->state.cpnodes.last();
                 if(sents.inrange(checkpoint)) return checkpoint;
@@ -3322,7 +3322,7 @@ namespace server
             mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags)) { return; });
         }
         ci->state.spree = 0;
-        if(m_checkpoint(gamemode))
+        if(m_trial(gamemode)) // only want this in time sensitive games
         {
             if(!flags || ci->state.cpnodes.length() == 1) // reset if suicided or hasn't reached another checkpoint yet
             {
@@ -4825,54 +4825,56 @@ namespace server
                     {
                         if(sents[ent].type == CHECKPOINT)
                         {
-                            if(cp->state.cpnodes.find(ent) < 0 && (sents[ent].attrs[5] == triggerid || !sents[ent].attrs[5]) && m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators))
+                            if((m_gauntlet(gamemode) && cp->team != T_ALPHA) || cp->state.cpnodes.find(ent) >= 0) break;
+                            if(sents[ent].attrs[5] && sents[ent].attrs[5] != triggerid) break;
+                            if(!m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators)) break;
+                            if(m_trial(gamemode) || m_gauntlet(gamemode)) switch(sents[ent].attrs[6])
                             {
-                                if(m_trial(gamemode) || m_gauntlet(gamemode)) switch(sents[ent].attrs[6])
+                                case CP_LAST: case CP_FINISH:
                                 {
-                                    case CP_LAST: case CP_FINISH:
+                                    int laptime = gamemillis-cp->state.cpmillis;
+                                    if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
                                     {
-                                        int laptime = gamemillis-cp->state.cpmillis;
-                                        if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
+                                        cp->state.cptime = laptime;
+                                    }
+                                    cp->state.cplaps++;
+                                    if(sents[ent].attrs[6] == CP_FINISH)
+                                    {
+                                        if(m_trial(gamemode)) cp->state.cpmillis = -gamemillis;
+                                        waiting(cp);
+                                    }
+                                    sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
+                                    if(m_isteam(gamemode, mutators))
+                                    {
+                                        if(m_gauntlet(gamemode)) givepoints(cp, 1, true);
+                                        else
                                         {
-                                            cp->state.cptime = laptime;
-                                        }
-                                        cp->state.cplaps++;
-                                        if(sents[ent].attrs[6] == CP_FINISH)
-                                        {
-                                            if(m_trial(gamemode)) cp->state.cpmillis = -gamemillis;
-                                            waiting(cp);
-                                        }
-                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
-                                        if(m_isteam(gamemode, mutators))
-                                        {
-                                            if(m_gauntlet(gamemode)) givepoints(cp, 1, true);
-                                            else
+                                            score &ts = teamscore(cp->team);
+                                            if(!ts.total || ts.total > cp->state.cptime)
                                             {
-                                                score &ts = teamscore(cp->team);
-                                                if(!ts.total || ts.total > cp->state.cptime)
-                                                {
-                                                    ts.total = cp->state.cptime;
-                                                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
-                                                }
+                                                ts.total = cp->state.cptime;
+                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
                                             }
                                         }
                                     }
-                                    case CP_RESPAWN: if(sents[ent].attrs[6] == CP_RESPAWN && cp->state.cpmillis) break;
-                                    case CP_START:
-                                    {
-                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, -1, 0, cp->state.cplaps);
-                                        cp->state.cpmillis = gamemillis;
-                                        cp->state.cpnodes.shrink(0);
-                                    }
-                                    default: break;
                                 }
-                                cp->state.cpnodes.add(ent);
+                                case CP_RESPAWN: if(sents[ent].attrs[6] == CP_RESPAWN && cp->state.cpmillis) break;
+                                case CP_START:
+                                {
+                                    sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, -1, 0, cp->state.cplaps);
+                                    cp->state.cpmillis = gamemillis;
+                                    cp->state.cpnodes.shrink(0);
+                                }
+                                default: break;
                             }
+                            cp->state.cpnodes.add(ent);
                         }
                         else if(sents[ent].type == TRIGGER)
                         {
+                            if(sents[ent].attrs[4] && sents[ent].attrs[4] != triggerid) break;
+                            if(!m_check(sents[ent].attrs[5], sents[ent].attrs[6], gamemode, mutators)) break;
                             bool commit = false, kin = false;
-                            if((sents[ent].attrs[4] == triggerid || !sents[ent].attrs[4]) && m_check(sents[ent].attrs[5], sents[ent].attrs[6], gamemode, mutators)) switch(sents[ent].attrs[1])
+                            switch(sents[ent].attrs[1])
                             {
                                 case TR_TOGGLE:
                                 {

@@ -124,9 +124,9 @@ gametypes gametype[] = {
         "compete for the fastest time completing a lap", { "", "", "" },
     },
     {
-        G_GAUNTLET,        0,
+        G_GAUNTLET,        (1<<G_M_TEAM),
         {
-            (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
+            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
         "gauntlet",                       { "", "", "" },
