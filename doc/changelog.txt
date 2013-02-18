@@ -29,7 +29,7 @@ Modes & Mutators:
  * Removed ballistic mutator
  * Added kaboom mutator (only grenades and mines with reloading ammo, rockets
    spawn at normal mine & grenade spawns)
- * Added gauntlet mutator (work in progress)
+ * Added gauntlet mode (work in progress)
 
 Maps:
  * Assigned map music to all maps
