@@ -1483,7 +1483,7 @@ namespace server
 
     struct spawn
     {
-        int spawncycle, lastused, iteration;
+        int current, iteration;
         vector<int> ents;
         vector<int> cycle;
 
@@ -1494,8 +1494,8 @@ namespace server
         {
             ents.shrink(0);
             cycle.shrink(0);
-            spawncycle = iteration = 0;
-            lastused = -1;
+            iteration = 0;
+            current = -1;
         }
         void add(int n)
         {
@@ -1592,7 +1592,7 @@ namespace server
             }
             if(totalspawns)
             {
-                int cycle = -1, team = T_NEUTRAL, rotate = G(spawnrotate);
+                int team = T_NEUTRAL, rotate = G(spawnrotate);
                 if(m_duel(gamemode, mutators) && !m_isteam(gamemode, mutators))
                 {
                     if(!spawns[T_ALPHA].ents.empty() && !spawns[T_OMEGA].ents.empty())
@@ -1603,37 +1603,34 @@ namespace server
                 switch(rotate)
                 {
                     case 2:
-                    {
+                    { // random
                         static vector<int> lowest;
                         lowest.setsize(0);
                         loopv(spawns[team].cycle) if(lowest.empty() || spawns[team].cycle[i] <= spawns[team].cycle[lowest[0]])
                         {
-                            if(spawns[team].cycle.length() > 1 && cycle == i) continue; // avoid using this one again straight away
+                            if(spawns[team].cycle.length() >= 2 && spawns[team].current == i) continue; // avoid using this one again straight away
                             if(!lowest.empty() && spawns[team].cycle[i] < spawns[team].cycle[lowest[0]]) lowest.setsize(0);
                             lowest.add(i);
                         }
                         if(!lowest.empty())
                         {
-                            int r = lowest.length() > 1 ? rnd(lowest.length()) : 0, n = lowest[r];
-                            spawns[team].cycle[n]++;
-                            spawns[team].spawncycle = cycle = n;
+                            spawns[team].current = lowest[lowest.length() >= 2 ? rnd(lowest.length()) : 0];
                             break;
                         }
                         // fall through if this fails..
                     }
                     case 1:
-                    {
-                        if(++spawns[team].spawncycle >= spawns[team].ents.length()) spawns[team].spawncycle = 0;
-                        cycle = spawns[team].spawncycle;
+                    { // sequential
+                        if(++spawns[team].current >= spawns[team].ents.length()) spawns[team].current = 0;
                         break;
                     }
-                    case 0: default: break;
+                    case 0: default: spawns[team].current = -1; break;
                 }
-                if(spawns[team].ents.inrange(cycle))
+                if(spawns[team].ents.inrange(spawns[team].current))
                 {
-                    spawns[team].lastused = cycle;
                     spawns[team].iteration++;
-                    return spawns[team].ents[cycle];
+                    spawns[team].cycle[spawns[team].current]++;
+                    return spawns[team].ents[spawns[team].current];
                 }
             }
         }
