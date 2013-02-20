@@ -1313,6 +1313,9 @@ namespace server
             int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
             if(baliter != mbaliter)
             {
+                if(smode) smode->balance(mbaliter, baliter);
+                mutate(smuts, mut->balance(mbaliter, baliter));
+
                 static vector<clientinfo *> assign[T_TOTAL];
                 loopk(T_TOTAL) assign[k].setsize(0);
                 loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
@@ -1328,10 +1331,9 @@ namespace server
                     cs.total = scores[tot];
                     sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                 }
-                if(smode) smode->balance(mbaliter, baliter);
-                mutate(smuts, mut->balance(mbaliter, baliter));
+
                 mbaliter = baliter;
-                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyteams have been reassigned for map balance");
+                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyteams have been reassigned%s", !m_gauntlet(gamemode) ? " for map balance" : "");
                 if(smode) smode->layout();
                 mutate(smuts, mut->layout());
             }
