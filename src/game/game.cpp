@@ -67,6 +67,7 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonbobroll, 0, 0.3f, 10);
     FVAR(IDF_PERSIST, firstpersonbobside, 0, 0.6f, 10);
     FVAR(IDF_PERSIST, firstpersonbobup, 0, 0.6f, 10);
+    FVAR(IDF_PERSIST, firstpersonbobtopspeed, 0, 50, 1000);
     FVAR(IDF_PERSIST, firstpersonbobfocusmindist, 0, 64, 10000);
     FVAR(IDF_PERSIST, firstpersonbobfocusmaxdist, 0, 256, 10000);
     FVAR(IDF_PERSIST, firstpersonbobfocus, 0, 0.5f, 1);
@@ -2014,6 +2015,7 @@ namespace game
                 }
                 if(scale > 0)
                 {
+                    if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
                     vec dir;
                     vecfromyawpitch(yaw, 0, 0, 1, dir);
                     float steps = bobdist/firstpersonbobstep*M_PI;
@@ -2351,6 +2353,7 @@ namespace game
             }
             if(scale > 0)
             {
+                if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
                 vec dir(c->yaw, c->pitch);
                 float steps = bobdist/firstpersonbobstep*M_PI, dist = raycube(c->o, dir, firstpersonbobfocusmaxdist, RAY_CLIPMAT|RAY_POLY), yaw, pitch;
                 if(dist < 0 || dist > firstpersonbobfocusmaxdist) dist = firstpersonbobfocusmaxdist;
