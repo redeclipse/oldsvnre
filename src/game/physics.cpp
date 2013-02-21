@@ -220,7 +220,7 @@ namespace physics
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             if(d->state != CS_ALIVE) return false;
-            if(isghost((gameent *)d, (gameent *)(e && (e->type == ENT_PLAYER || e->type == ENT_AI ? e : NULL)))) return false;
+            if(isghost((gameent *)d, (gameent *)(e && (e->type == ENT_PLAYER || e->type == ENT_AI) ? e : NULL))) return false;
             if(((gameent *)d)->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
             return true;
         }
