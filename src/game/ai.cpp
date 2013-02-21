@@ -552,9 +552,9 @@ namespace ai
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
                 if(m_isteam(game::gamemode, game::mutators))
 #ifdef CAMPAIGN
-                    assist(d, b, interests, false, m_campaign(game::gamemode));
+                    assist(d, b, interests, false, m_campaign(game::gamemode) || m_gauntlet(game::gamemode));
 #else
-                    assist(d, b, interests, false, false);
+                    assist(d, b, interests, false, m_gauntlet(game::gamemode));
 #endif
             }
             if(m_fight(game::gamemode))
@@ -1125,6 +1125,7 @@ namespace ai
             {
                 d->ai->targyaw += 90+rnd(180);
                 d->ai->lastturn = lastmillis;
+                if(m_checkpoint(game::gamemode)) d->ai->dontmove = idle = true;
             }
             d->ai->targpitch = 0;
             vec dir(d->ai->targyaw, d->ai->targpitch);
