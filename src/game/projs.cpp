@@ -60,7 +60,7 @@ namespace projs
         if(actor->aitype < AI_START)
         {
             if(actor == target && !selfdamage) nodamage++;
-            else if(m_trial(game::gamemode) && trialstyle <= 1) nodamage++;
+            else if(physics::isghost(target, actor)) nodamage++;
             else if(m_play(game::gamemode) && m_isteam(game::gamemode, game::mutators) && actor->team == target->team && actor != target)
             {
                 switch(teamdamage)

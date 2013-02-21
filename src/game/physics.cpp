@@ -182,6 +182,18 @@ namespace physics
         return false;
     }
 
+    bool isghost(gameent *d, gameent *e)
+    {
+        switch(m_ghost(game::gamemode))
+        {
+            case 2:
+                if(!e || e->team == d->team) return true;
+            case 1: return true;
+            case 0: default: break;
+        }
+        return false;
+    }
+
     bool issolid(physent *d, physent *e, bool esc, bool impact, bool reverse)
     {
         if(e && e->type == ENT_PROJ && d->state == CS_ALIVE)
@@ -190,7 +202,7 @@ namespace physics
             if(d->type == ENT_PLAYER || d->type == ENT_AI)
             {
                 if(p->stick == d) return false;
-                if(impact && (p->hit == d || !(p->projcollide&COLLIDE_PLAYER))) return false;
+                if(impact && (p->hit == d || isghost((gameent *)d, p->owner) || !(p->projcollide&COLLIDE_PLAYER))) return false;
                 if(p->owner == d && (!(p->projcollide&COLLIDE_OWNER) || (esc && !p->escaped))) return false;
             }
             else if(d->type == ENT_PROJ)
@@ -207,7 +219,7 @@ namespace physics
         if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             if(d->state != CS_ALIVE) return false;
-            if(m_trial(game::gamemode) && !trialstyle) return false;
+            if(isghost((gameent *)d, (gameent *)(e && (e->type == ENT_PLAYER || e->type == ENT_AI ? e : NULL)))) return false;
             if(((gameent *)d)->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
             return true;
         }

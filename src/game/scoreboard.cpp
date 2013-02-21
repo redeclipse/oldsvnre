@@ -72,7 +72,7 @@ namespace hud
             else return false;
         }
         else if(b->state == CS_SPECTATOR) return true;
-        if(m_trial(game::gamemode))
+        if(m_laptime(game::gamemode, game::mutators))
         {
             if((a->cptime && !b->cptime) || (a->cptime && b->cptime && a->cptime < b->cptime)) return true;
             if((b->cptime && !a->cptime) || (a->cptime && b->cptime && b->cptime < a->cptime)) return false;
@@ -356,10 +356,12 @@ namespace hud
                             uifont(g, "little", {
                                 uicenterlist(g, {
                                     // In two cases, the main mode-description is not applicable
-                                    if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // bomber-ball hold
+                                    if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // hold bomber
                                         g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[1]);
-                                    else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // ctf protect
+                                    else if(m_capture(game::gamemode) && m_gsp3(game::gamemode, game::mutators)) // protect capture
                                         g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[2]);
+                                    else if(m_gauntlet(game::gamemode) && m_gsp1(game::gamemode, game::mutators)) // timed gauntlet
+                                        g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].gsd[0]);
                                     else g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
                                 });
                                 if(m_isteam(game::gamemode, game::mutators))
@@ -491,14 +493,14 @@ namespace hud
 
                     if(m_trial(game::gamemode) || m_gauntlet(game::gamemode))
                     {
-                        if(scoretimer && (scoretimer >= 2 || m_trial(game::gamemode)))
+                        if(scoretimer && (scoretimer >= 2 || !m_laptime(game::gamemode, game::mutators)))
                         {
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("best", fgcolor)));
                                 loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
                             });
                         }
-                        if(scorelaps && (scorelaps >= 2 || m_gauntlet(game::gamemode)))
+                        if(scorelaps && (scorelaps >= 2 || m_laptime(game::gamemode, game::mutators)))
                         {
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("laps", fgcolor)));

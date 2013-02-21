@@ -2465,7 +2465,7 @@ namespace hud
         int size = s+s/2, width = s-s/4, sy = 0;
         if(!interm && game::focus->state == CS_ALIVE)
         {
-            if(inventoryhealth && (!m_trial(game::gamemode) || trialstyle >= 2))
+            if(inventoryhealth)
             {
                 float fade = blend*inventoryhealthblend;
                 int heal = m_health(game::gamemode, game::mutators, game::focus->model);
@@ -2487,7 +2487,7 @@ namespace hud
                 if(inventoryhealth == 1) sy += ty;
                 popfont();
             }
-            if(inventoryvelocity >= (m_trial(game::gamemode) ? 1 : 2))
+            if(inventoryvelocity >= (m_trial(game::gamemode) || m_gauntlet(game::gamemode) ? 1 : 2))
             {
                 float fade = blend*inventoryvelocityblend;
                 pushfont("emphasis");
@@ -2615,7 +2615,7 @@ namespace hud
     int drawtimer(int x, int y, int s, float blend)
     {
         int sy = 0;
-        if(inventorytrial && m_trial(game::gamemode) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
+        if(inventorytrial && m_laptime(game::gamemode, game::mutators) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
             float fade = blend*inventorytrialblend;
             if((game::focus->cpmillis > 0 || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))

@@ -127,11 +127,12 @@ gametypes gametype[] = {
     {
         G_GAUNTLET,        (1<<G_M_TEAM),
         {
-            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
-            0, 0, 0
+            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
+            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
+            0, 0
         },
-        "gauntlet",                       { "", "", "" },
-        "compete for the most laps",      { "", "", "" },
+        "gauntlet",                       { "timed", "", "" },
+        "compete for the most laps while the other team attacks",      { "compete for the best lap time while the other team attacks", "", "" },
     },
 };
 mutstypes mutstype[] = {
@@ -297,12 +298,15 @@ extern mutstypes mutstype[];
 #ifdef CAMPAIGN
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
 #define m_checkpoint(a)     (m_campaign(a) || m_trial(a) || m_gauntlet(a))
+#define m_ghost(a)          (m_campaign(a) ? G(campaignghost) : (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0)))
 #else
 #define m_enemies(a,b)      (m_onslaught(a, b) || m_gauntlet(a))
 #define m_checkpoint(a)     (m_trial(a) || m_gauntlet(a))
+#define m_ghost(a)          (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0))
 #endif
 #define m_bots(a)           (m_fight(a) && !m_trial(a) && !m_gauntlet(a))
 #define m_scores(a)         (m_dm(a))
+#define m_laptime(a,b)      (m_trial(a) || (m_gauntlet(a) && m_gsp1(a, b)))
 
 #define m_weapon(a,b)       (m_loadout(a, b) ? 0-W_ITEM : (m_medieval(a, b) ? W_SWORD : (m_kaboom(a, b) ? 0-W_BOOM : (m_insta(a, b) ? G(instaweapon) : (m_trial(a) ? G(trialweapon) : G(spawnweapon))))))
 #define m_delay(a,b)        (m_play(a) && !m_duke(a,b) ? (m_trial(a) ? G(trialdelay) : (m_bomber(a) ? G(bomberdelay) : (m_insta(a, b) ? G(instadelay) : G(spawndelay)))) : 0)
