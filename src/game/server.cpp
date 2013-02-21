@@ -1012,6 +1012,7 @@ namespace server
         {
             if((type == 4 || type == 5) && m_capture(mode) && m_gsp3(mode, muts)) concatstring(mdname, gametype[mode].gsd[2]);
             else if((type == 4 || type == 5) && m_bomber(mode) && m_gsp2(mode, muts)) concatstring(mdname, gametype[mode].gsd[1]);
+            else if((type == 4 || type == 5) && m_gauntlet(mode) && m_gsp1(mode, muts)) concatstring(mdname, gametype[mode].gsd[0]);
             else concatstring(mdname, gametype[mode].desc);
         }
         return mdname;
@@ -3057,6 +3058,19 @@ namespace server
         if(clear) target->state.damagelog.shrink(0);
     }
 
+    bool isghost(clientinfo *d, clientinfo *e)
+    {
+        int style = m_ghost(gamemode);
+        switch(style)
+        {
+            case 2:
+                if(!e || e->team == d->team) return true;
+            case 1: return true;
+            case 0: default: break;
+        }
+        return false;
+    }
+
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0))
     {
         int realdamage = damage, realflags = flags, nodamage = 0, hurt = 0; realflags &= ~HIT_SFLAGS;
@@ -3065,7 +3079,7 @@ namespace server
         if(actor->state.aitype < AI_START)
         {
             if(actor == target && !G(selfdamage)) nodamage++;
-            else if(m_trial(gamemode) && G(trialstyle) <= 1) nodamage++;
+            else if(isghost(target, actor)) nodamage++;
             else if(m_play(gamemode) && m_isteam(gamemode, mutators) && actor->team == target->team && actor != target)
             {
                 switch(G(teamdamage))

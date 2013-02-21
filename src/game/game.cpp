@@ -810,7 +810,7 @@ namespace game
     float opacity(gameent *d, bool third = true)
     {
         float total = d == focus ? (third ? (d != player1 ? followblend : thirdpersonblend) : firstpersonblend) : playerblend;
-        if(m_trial(gamemode) && !trialstyle && d != focus) total *= 0.5f;
+        if(physics::isghost(d, focus)) total *= 0.5f;
         if(deathfade && (d->state == CS_DEAD || d->state == CS_WAITING)) total *= spawnfade(d);
         else if(d->state == CS_ALIVE)
         {

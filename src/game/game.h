@@ -1470,6 +1470,7 @@ namespace physics
 {
     extern float gravity, liquidspeed, liquidcoast, floorcoast, aircoast, slidecoast;
     extern int smoothmove, smoothdist, sprintstyle;
+    extern bool isghost(gameent *d, gameent *e);
     extern bool carryaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowjet(physent *d = NULL, bool fly = false);

@@ -157,7 +157,12 @@ GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
 GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
 GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
-GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are solid, but can't deal damage, 2 = regular gameplay style, solid+damage
+
+#ifdef CAMPAIGN
+GVAR(0, campaignghost, 0, 0, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team mates are ghosts
+#endif
+GVAR(0, trialghost, 0, 1, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team mates are ghosts
+GVAR(0, gauntletghost, 0, 2, 2); // 0 = all players are solid, 1 = all players are ghosts, 2 = team mates are ghosts
 
 #ifndef MEK
 GVAR(0, spawnhealth, 0, 100, VAR_MAX);
