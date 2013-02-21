@@ -3307,7 +3307,7 @@ namespace server
             {
                 ci->state.cpmillis = 0;
                 ci->state.cpnodes.shrink(0);
-                sendf(-1, 1, "ri5", N_CHECKPOINT, ci->clientnum, -1, -1, 0);
+                sendf(-1, 1, "ri3", N_CHECKPOINT, ci->clientnum, -1);
             }
         }
         else if(!m_duke(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
@@ -4807,22 +4807,24 @@ namespace server
                             if((m_gauntlet(gamemode) && cp->team != T_ALPHA) || cp->state.cpnodes.find(ent) >= 0) break;
                             if(sents[ent].attrs[5] && sents[ent].attrs[5] != triggerid) break;
                             if(!m_check(sents[ent].attrs[3], sents[ent].attrs[4], gamemode, mutators)) break;
-                            if(m_trial(gamemode) || m_gauntlet(gamemode)) switch(sents[ent].attrs[6])
+                            if(m_checkpoint(gamemode)) switch(sents[ent].attrs[6])
                             {
                                 case CP_LAST: case CP_FINISH:
                                 {
                                     if(cp->state.cpmillis > 0)
                                     {
                                         int laptime = gamemillis-cp->state.cpmillis;
-                                        if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
-                                        {
-                                            cp->state.cptime = laptime;
-                                        }
+                                        if(cp->state.cptime <= 0 || laptime < cp->state.cptime) cp->state.cptime = laptime;
                                         cp->state.cplaps++;
                                         sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
                                         if(m_isteam(gamemode, mutators))
                                         {
-                                            if(m_gauntlet(gamemode)) givepoints(cp, 1, true);
+                                            if(m_gauntlet(gamemode))
+                                            {
+                                                score &ts = teamscore(cp->team);
+                                                ts.total++;
+                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                            }
                                             else
                                             {
                                                 score &ts = teamscore(cp->team);
@@ -4834,21 +4836,19 @@ namespace server
                                             }
                                         }
                                     }
-                                    cp->state.cpmillis = gamemillis;
+                                    cp->state.cpmillis = 0;
                                     cp->state.cpnodes.shrink(0);
                                     if(sents[ent].attrs[6] == CP_FINISH) waiting(cp); // so they start again
                                     break;
                                 }
-                                case CP_RESPAWN: if(cp->state.cpmillis > 0) break;
-                                case CP_START:
+                                case CP_RESPAWN: case CP_START:
                                 {
-                                    sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, -1, 0, cp->state.cplaps);
+                                    sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, ent, -1);
                                     cp->state.cpmillis = gamemillis;
-                                    cp->state.cpnodes.shrink(0);
+                                    cp->state.cpnodes.add(ent);
                                 }
                                 default: break;
                             }
-                            cp->state.cpnodes.add(ent);
                         }
                         else if(sents[ent].type == TRIGGER)
                         {
