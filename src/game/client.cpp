@@ -556,9 +556,9 @@ namespace client
                 break;
             case 0: default: break;
         }
-        int oldmode = reqmode;
-        modecheck(reqmode, reqmuts, askmuts);
-        if(oldmode != reqmode || (askmuts && !mutscmp(askmuts, reqmuts))) return true;
+        int rmode = reqmode, rmuts = reqmuts;
+        modecheck(rmode, rmuts, askmuts);
+        if(askmuts && !mutscmp(askmuts, rmuts)) return true;
         if(G(modelock)) switch(G(modelocktype))
         {
             case 1: if(!haspriv(game::player1, PRIVZ(G(modelock)))) return true; break;
