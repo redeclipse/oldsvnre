@@ -273,7 +273,7 @@ struct defendservmode : defendstate, servmode
         return p;
     }
 
-    void balance(int oldbal, int newbal)
+    void balance(int obaliter)
     {
         static vector<int> owners[T_TOTAL], enemies[T_TOTAL];
         loopk(T_TOTAL)
@@ -290,7 +290,7 @@ struct defendservmode : defendstate, servmode
         }
         loopk(T_TOTAL)
         {
-            int from = mapbals[oldbal][k], fromt = from-T_FIRST, to = mapbals[newbal][k];
+            int from = mapbals[obaliter][k], fromt = from-T_FIRST, to = mapbals[mbaliter][k];
             loopv(owners[fromt]) flags[owners[fromt][i]].owner = to;
             loopv(enemies[fromt]) flags[enemies[fromt][i]].enemy = to;
         }
