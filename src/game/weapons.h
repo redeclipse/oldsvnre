@@ -328,10 +328,10 @@ WPFVARK(0, minspeed, 0, FVAR_MAX,
     50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f,      50.0f
 );
 WPVAR(0, modes, -G_ALL, G_ALL,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          0
+    -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW
 );
 WPVAR(0, muts, -G_M_ALL, G_M_ALL,
-    0,          0,          0,          0,          0,          0,          0,          0,          0,          0,          -G_M_DUKE
+    0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          0,          -G_M_DK
 );
 WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
     0xEEEE22,   0x666611,   0x4040F0,   0xF0F020,   0xF05820,   -1,         0x40F0C8,   0xA020F0,   -1,         0x00F068,   -1,
