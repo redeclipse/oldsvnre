@@ -2007,9 +2007,9 @@ namespace game
                     float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
                     scale *= zooming ? 1.f-pc : pc;
                 }
+                if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
                 if(scale > 0)
                 {
-                    if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
                     vec dir;
                     vecfromyawpitch(yaw, 0, 0, 1, dir);
                     float steps = bobdist/firstpersonbobstep*M_PI;
@@ -2345,9 +2345,9 @@ namespace game
                 float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
                 scale *= zooming ? 1.f-pc : pc;
             }
+            if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
             if(scale > 0)
             {
-                if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
                 vec dir(c->yaw, c->pitch);
                 float steps = bobdist/firstpersonbobstep*M_PI, dist = raycube(c->o, dir, firstpersonbobfocusmaxdist, RAY_CLIPMAT|RAY_POLY), yaw, pitch;
                 if(dist < 0 || dist > firstpersonbobfocusmaxdist) dist = firstpersonbobfocusmaxdist;
