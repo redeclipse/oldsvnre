@@ -275,13 +275,13 @@ struct defendservmode : defendstate, servmode
 
     void balance(int oldbalance)
     {
-        static vector<int> owners[T_TOTAL], enemies[T_TOTAL], modified[T_TOTAL];
+        static vector<int> owners[T_TOTAL], enemies[T_TOTAL], modified;
         loopk(T_TOTAL)
         {
             owners[k].setsize(0);
             enemies[k].setsize(0);
-            modified[k].setsize(0);
         }
+        modified.setsize(0);
         loopv(flags)
         {
             if(flags[i].owner >= T_FIRST && flags[i].owner <= T_LAST)
@@ -292,8 +292,16 @@ struct defendservmode : defendstate, servmode
         loopk(T_TOTAL)
         {
             int from = mapbals[oldbalance][k], fromt = from-T_FIRST, to = mapbals[curbalance][k];
-            loopv(owners[fromt]) { flags[owners[fromt][i]].owner = to; modified.add(owners[fromt][i]); }
-            loopv(enemies[fromt]) { flags[enemies[fromt][i]].enemy = to; modified.add(enemies[fromt][i]); }
+            loopv(owners[fromt])
+            {
+                flags[owners[fromt][i]].owner = to;
+                if(modified.find(owners[fromt][i]) < 0) modified.add(owners[fromt][i]);
+            }
+            loopv(enemies[fromt])
+            {
+                flags[enemies[fromt][i]].enemy = to;
+                if(modified.find(enemies[fromt][i]) < 0) modified.add(enemies[fromt][i]);
+            }
         }
         loopv(modified) sendaffinity(modified[i], true);
     }
