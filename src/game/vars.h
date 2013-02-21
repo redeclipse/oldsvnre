@@ -91,7 +91,7 @@ GSVAR(IDF_ADMIN, kingmaps, "ares bath battlefield biolytic canals cargo center c
 GSVAR(IDF_ADMIN, bombermaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost isolation linear mist nova pumpstation stone suspended tower tribal venus warp wet");
 GSVAR(IDF_ADMIN, holdmaps, "ares bath battlefield biolytic canals cargo center colony conflict cutec darkness deadsimple deli depot dropzone dutility echo erosion foundation fourplex futuresport ghost isolation keystone2k linear mist nova panic processing pumpstation stone suspended tower tribal ubik venus warp wet");
 GSVAR(IDF_ADMIN, trialmaps, "cyanide hawk hinder neodrive purge testchamber");
-GSVAR(IDF_ADMIN, gauntletmaps, "testchamber");
+GSVAR(IDF_ADMIN, gauntletmaps, "cyanide testchamber");
 
 GSVAR(IDF_ADMIN, multimaps, "canals deadsimple depot keystone2k warp isolation fourplex"); // applies to modes which *require* multi spawns (ctf/bb)
 GSVAR(IDF_ADMIN, duelmaps, "bath darkness deadsimple dutility echo fourplex ghost longestyard starlibido stone panic wet");
