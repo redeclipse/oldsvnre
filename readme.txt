@@ -108,7 +108,7 @@ too.
     - Maps, Models, Textures, HUD, Sound FX, Design and Testing
 
 * Jonathan "Ulukai" De Nil - Artist
-    - Maps (ares, conflict, canals), Testing, Support
+    - Maps, Testing, Support
 
 * Jeff "Architect" Cope - Collaborator
     - Design and Testing
@@ -119,11 +119,31 @@ too.
 * "SkiingPenguins" - Artist
     - Skyboxes
 
+* "Fleeky" - Artist
+    - Models
+
 * "fluxord" - Artist
     - Crosshairs
 
 * Stefan Norman and Peter McInerney - Hosting
     - Master and Game server hosting
+
+* "John_III" - Artist
+    - Maps and Models
+
+* "D.a.M.i.E.n" - Artist
+   - Maps and Textures
+
+== Contributors ==
+
+* RaZgRiZ - Textures and Cubescript maintenance
+* ZeroKnight - Documentation, Testing and Support
+* Kirill "TristamK" Kolesnikov - Maps
+* "Raiden" - Maps
+* Matt "greasepirate" Kalt - Maps
+* Ricky Thomson "unixfreak" - Maps
+* "Korsi" - Maps
+* "4rson" - Maps and Support
 
 == Supporters ==
 
@@ -147,5 +167,4 @@ too.
 * Robert Winkler
 * "fbt"
 * Eddie "skedz4u" Webb
-* "4rson"
 * Christopher "Dratz-_C" Dratz
