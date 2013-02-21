@@ -453,13 +453,10 @@ namespace server
         loopj(G(maxcarry))
         {
             int aweap = ci->state.loadweap[j];
-            if(ci->state.loadweap[j] >= W_ITEM) ci->state.loadweap[j] = 0;
-            else if(ci->state.loadweap[j] >= W_OFFSET) switch(W(ci->state.loadweap[j], allowed))
-            {
-                case 0: ci->state.loadweap[j] = -1; break;
-                case 1: if(m_duke(gamemode, mutators)) { ci->state.loadweap[j] = -1; break; } // fall through
-                case 2: case 3: default: break;
-            }
+            if(!isweap(ci->state.loadweap[j])) ci->state.loadweap[j] = -1;
+            else if(ci->state.loadweap[j] >= W_ITEM) ci->state.loadweap[j] = 0;
+            else if(ci->state.loadweap[j] >= W_OFFSET || !m_check(W(ci->state.loadweap[j], modes), W(ci->state.loadweap[j], muts), gamemode, mutators))
+                ci->state.loadweap[j] = -1;
             if(!isweap(ci->state.loadweap[j]))
             {
                 if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = 0;
@@ -1212,16 +1209,8 @@ namespace server
     void checklimits()
     {
         if(!m_fight(gamemode)) return;
-        if(m_trial(gamemode))
-        {
-            loopv(clients) if(clients[i]->state.cpmillis < 0 && gamemillis+clients[i]->state.cpmillis >= G(triallimit))
-            {
-                ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fytime trial wait period has timed out");
-                startintermission();
-                return;
-            }
-        }
-        int limit = inovertime ? G(overtimelimit) : G(timelimit);
+        int balance = m_balance(gamemode),
+            limit = inovertime ? max(G(overtimelimit), 1) : G(timelimit);
         bool newlimit = limit != oldtimelimit, newtimer = gamemillis-curtime>0 && gamemillis/1000!=(gamemillis-curtime)/1000,
              iterate = newlimit || newtimer, wasinovertime = inovertime;
         if(iterate)
@@ -1242,7 +1231,7 @@ namespace server
                 bool wantsoneminute = true;
                 if(!timeremaining)
                 {
-                    if(!inovertime && G(overtimeallow) && wantsovertime())
+                    if(!inovertime && !balance && G(overtimeallow) && wantsovertime())
                     {
                         limit = oldtimelimit = G(overtimelimit);
                         if(limit)
@@ -1280,7 +1269,7 @@ namespace server
             startintermission();
             return; // bail
         }
-        if(G(pointlimit) && m_scores(gamemode))
+        if(!balance && G(pointlimit) && m_scores(gamemode))
         {
             if(m_isteam(gamemode, mutators))
             {
@@ -1307,10 +1296,9 @@ namespace server
                 }
             }
         }
-        int balance = m_gauntlet(gamemode) ? 1 : (G(forcebalance) >= 0 ? G(forcebalance) : mbalance);
         if(iterate && balance && m_isteam(gamemode, mutators))
         {
-            int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
+            int numt = numteams(gamemode, mutators), balpart = (gamelimit > 0 ? gamelimit : 600000)/numt, baliter = gamemillis/balpart;
             if(baliter != mbaliter)
             {
                 int obaliter = mbaliter;
@@ -1321,13 +1309,13 @@ namespace server
                 loopk(T_TOTAL) assign[k].setsize(0);
                 loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
                     assign[clients[i]->team-T_FIRST].add(clients[i]);
-                int scores[T_TOTAL] = {0};
+                int scores[T_TOTAL] = {0}, flags = (m_balreset(gamemode) ? TT_DEFAULT : 0)|TT_INFO;
                 loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
                 loopk(T_TOTAL)
                 {
                     int from = mapbals[obaliter][k], fromt = from-T_FIRST,
                         to = mapbals[mbaliter][k], tot = to-T_FIRST;
-                    loopv(assign[fromt]) setteam(assign[fromt][i], to, true, true);
+                    loopv(assign[fromt]) setteam(assign[fromt][i], to, flags);
                     score &cs = teamscore(from);
                     cs.total = scores[tot];
                     sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
@@ -1347,15 +1335,10 @@ namespace server
             case WEAPON:
             {
                 int sweap = m_weapon(gamemode, mutators), attr = w_attr(gamemode, mutators, sents[i].attrs[0], sweap);
-                if(!isweap(attr) || (sweap < 0 && attr < 0-sweap)) return false;
-                switch(W(attr, allowed))
-                {
-                    case 0: return false;
-                    case 1: if(m_duke(gamemode, mutators)) return false; // fall through
-                    case 2: if(m_limited(gamemode, mutators)) return false;
-                    case 3: default: break;
-                }
-                if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators)) return false;
+                if(!isweap(attr) || (sweap < 0 && attr < 0-sweap) || !m_check(W(attr, modes), W(attr, muts), gamemode, mutators))
+                    return false;
+                if((sents[i].attrs[4] && sents[i].attrs[4] != triggerid) || !m_check(sents[i].attrs[2], sents[i].attrs[3], gamemode, mutators))
+                    return false;
                 break;
             }
 #ifdef MEK
@@ -2173,28 +2156,28 @@ namespace server
         if(sc) sc->save(ci->state);
     }
 
-    void setteam(clientinfo *ci, int team, bool reset, bool info)
+    void setteam(clientinfo *ci, int team, int flags)
     {
         if(ci->team != team)
         {
-            bool sm = false;
-            if(reset) waiting(ci, DROP_WEAPONS);
-            else if(ci->state.state == CS_ALIVE)
+            bool reenter = false;
+            if(flags&TT_RESET) waiting(ci, DROP_WEAPONS);
+            else if(flags&TT_SMODE && ci->state.state == CS_ALIVE)
             {
                 if(smode) smode->leavegame(ci);
                 mutate(smuts, mut->leavegame(ci));
-                sm = true;
+                reenter = true;
             }
             ci->lastteam = ci->team;
             ci->team = team;
-            if(sm)
+            if(reenter)
             {
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }
             if(ci->state.aitype == AI_NONE) aiman::dorefresh = G(airefresh); // get the ai to reorganise
         }
-        if(info) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
+        if(flags&TT_INFO) sendf(-1, 1, "ri3", N_SETTEAM, ci->clientnum, ci->team);
     }
 
     struct teamcheck
@@ -2304,7 +2287,7 @@ namespace server
         if(!ci || ci->state.aitype > AI_NONE) return;
         ci->state.state = CS_SPECTATOR;
         sendf(sender, 1, "ri3", N_SPECTATOR, ci->clientnum, 1);
-        setteam(ci, T_NEUTRAL, false, true);
+        setteam(ci, T_NEUTRAL, TT_SMINFO);
     }
 
     enum { ALST_FIRST = 0, ALST_TRY, ALST_SPAWN, ALST_SPEC, ALST_EDIT, ALST_WALK, ALST_MAX };
@@ -3768,7 +3751,7 @@ namespace server
         ci->state.state = CS_WAITING;
         ci->state.weapreset(false);
         if(m_loadout(gamemode, mutators)) chkloadweap(ci);
-        if(!allowteam(ci, ci->team, T_FIRST)) setteam(ci, chooseteam(ci), false, true);
+        if(!allowteam(ci, ci->team, T_FIRST)) setteam(ci, chooseteam(ci), TT_SMINFO);
     }
 
     int triggertime(int i)
@@ -3860,7 +3843,7 @@ namespace server
             ci->state.cpmillis = 0;
             ci->state.state = CS_SPECTATOR;
             ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-            setteam(ci, T_NEUTRAL, false, true);
+            setteam(ci, T_NEUTRAL, TT_SMINFO);
             aiman::dorefresh = G(airefresh);
         }
         else if(ci->state.state == CS_SPECTATOR && !val)
@@ -4830,33 +4813,35 @@ namespace server
                             {
                                 case CP_LAST: case CP_FINISH:
                                 {
-                                    int laptime = gamemillis-cp->state.cpmillis;
-                                    if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
+                                    if(cp->state.cpmillis > 0)
                                     {
-                                        cp->state.cptime = laptime;
-                                    }
-                                    cp->state.cplaps++;
-                                    if(sents[ent].attrs[6] == CP_FINISH)
-                                    {
-                                        if(m_trial(gamemode)) cp->state.cpmillis = -gamemillis;
-                                        waiting(cp);
-                                    }
-                                    sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
-                                    if(m_isteam(gamemode, mutators))
-                                    {
-                                        if(m_gauntlet(gamemode)) givepoints(cp, 1, true);
-                                        else
+                                        int laptime = gamemillis-cp->state.cpmillis;
+                                        if(cp->state.cptime <= 0 || laptime < cp->state.cptime)
                                         {
-                                            score &ts = teamscore(cp->team);
-                                            if(!ts.total || ts.total > cp->state.cptime)
+                                            cp->state.cptime = laptime;
+                                        }
+                                        cp->state.cplaps++;
+                                        sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
+                                        if(m_isteam(gamemode, mutators))
+                                        {
+                                            if(m_gauntlet(gamemode)) givepoints(cp, 1, true);
+                                            else
                                             {
-                                                ts.total = cp->state.cptime;
-                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                                score &ts = teamscore(cp->team);
+                                                if(!ts.total || ts.total > cp->state.cptime)
+                                                {
+                                                    ts.total = cp->state.cptime;
+                                                    sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
+                                                }
                                             }
                                         }
                                     }
+                                    cp->state.cpmillis = gamemillis;
+                                    cp->state.cpnodes.shrink(0);
+                                    if(sents[ent].attrs[6] == CP_FINISH) waiting(cp); // so they start again
+                                    break;
                                 }
-                                case CP_RESPAWN: if(sents[ent].attrs[6] == CP_RESPAWN && cp->state.cpmillis) break;
+                                case CP_RESPAWN: if(cp->state.cpmillis > 0) break;
                                 case CP_START:
                                 {
                                     sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, -1, 0, cp->state.cplaps);
@@ -4897,7 +4882,9 @@ namespace server
                                 {
                                     if(sents[ent].spawned) break;
                                     sents[ent].spawned = true;
-                                    startintermission();
+#ifdef CAMPAIGN
+                                    if(m_campaign(gamemode)) startintermission();
+#endif
                                 }
                             }
                             if(commit) sendf(-1, 1, "ri3x", N_TRIGGER, ent, sents[ent].spawned ? 1 : 0, cp->clientnum);
@@ -5022,7 +5009,7 @@ namespace server
                         if(!spectate(ci, false)) break;
                         reset = false;
                     }
-                    setteam(ci, team, reset, true);
+                    setteam(ci, team, (reset ? TT_RESET : 0)|TT_SMINFO);
                     break;
                 }
 
@@ -5308,7 +5295,7 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_isteam(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST)) break;
-                    setteam(cp, team, true, true);
+                    setteam(cp, team, TT_DFINFO);
                     break;
                 }
 

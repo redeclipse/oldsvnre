@@ -263,8 +263,8 @@ const int pulsecols[PULSE_MAX][PULSECOLOURS] = {
 };
 #endif
 
-#include "weapons.h"
 #include "gamemode.h"
+#include "weapons.h"
 
 enum
 {
@@ -778,7 +778,7 @@ struct gamestate
                     {
                         int r = rnd(W_ITEM-W_OFFSET)+W_OFFSET; // random
                         int iters = 0;
-                        while(hasweap(r, sweap) || W(r, allowed) <= (m_duke(gamemode, mutators) ? 1 : 0))
+                        while(hasweap(r, sweap) || !m_check(W(r, modes), W(r, muts), gamemode, mutators))
                         {
                             if(++iters > W_MAX)
                             {
@@ -830,13 +830,15 @@ struct gamestate
 
 namespace server
 {
-    struct clientinfo;
     extern void stopdemo();
     extern void hashpassword(int cn, int sessionid, const char *pwd, char *result, int maxlen = MAXSTRLEN);
     extern bool servcmd(int nargs, const char *cmd, const char *arg);
     extern const char *gamename(int mode, int muts, int compact = 0);
+#ifdef GAMESERVER
+    struct clientinfo;
     extern void waiting(clientinfo *ci, int drop = 0, bool exclude = false);
-    extern void setteam(clientinfo *ci, int team, bool reset = true, bool info = false);
+    extern void setteam(clientinfo *ci, int team, int flags = TT_DEFAULT);
+#endif
 }
 
 #if !defined(GAMESERVER) && !defined(STANDALONE)

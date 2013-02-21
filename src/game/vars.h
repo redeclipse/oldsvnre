@@ -153,7 +153,6 @@ GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
 
 GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
 GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
-GVAR(0, triallimit, 0, 60000, VAR_MAX);
 GVAR(0, trialstyle, 0, 0, 2); // 0 = all players are ghosts, 1 = all players are solid, but can't deal damage, 2 = regular gameplay style, solid+damage
 
 #ifndef MEK
