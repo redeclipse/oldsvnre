@@ -453,10 +453,8 @@ namespace server
         loopj(G(maxcarry))
         {
             int aweap = ci->state.loadweap[j];
-            if(!isweap(ci->state.loadweap[j])) ci->state.loadweap[j] = -1;
-            else if(ci->state.loadweap[j] >= W_ITEM) ci->state.loadweap[j] = 0;
-            else if(ci->state.loadweap[j] >= W_OFFSET || !m_check(W(ci->state.loadweap[j], modes), W(ci->state.loadweap[j], muts), gamemode, mutators))
-                ci->state.loadweap[j] = -1;
+            if(!isweap(ci->state.loadweap[j]) || ci->state.loadweap[j] < W_OFFSET || ci->state.loadweap[j] >= W_ITEM) ci->state.loadweap[j] = 0;
+            else if(!m_check(W(ci->state.loadweap[j], modes), W(ci->state.loadweap[j], muts), gamemode, mutators)) ci->state.loadweap[j] = request ? -1 : 0;
             if(!isweap(ci->state.loadweap[j]))
             {
                 if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = 0;
