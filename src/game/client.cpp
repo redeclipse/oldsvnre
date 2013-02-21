@@ -2359,21 +2359,22 @@ namespace client
 
                 case N_CHECKPOINT:
                 {
-                    int tn = getint(p), ent = getint(p), laptime = getint(p), besttime = getint(p), laps = getint(p);
+                    int tn = getint(p), ent = getint(p);
                     gameent *t = game::getclient(tn);
                     if(!t) break;
                     if(ent >= 0)
                     {
+                        int laptime = getint(p);
                         if(laptime >= 0)
                         {
                             t->cplast = laptime;
-                            t->cptime = besttime;
-                            t->cplaps = laps;
+                            t->cptime = getint(p);
+                            t->cplaps = getint(p);
                             t->cpmillis = t->impulse[IM_METER] = 0;
                             if(showlaptimes > (t != game::focus ? (t->aitype > AI_NONE ? 2 : 1) : 0))
                             {
-                                defformatstring(best)("%s", hud::timetostr(besttime));
-                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s lap time: \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colorname(t), hud::timetostr(laptime), best, laps);
+                                defformatstring(best)("%s", hud::timetostr(t->cptime));
+                                conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colorname(t), hud::timetostr(t->cplast), best, t->cplaps);
                             }
                         }
                         if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
