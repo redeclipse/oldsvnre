@@ -417,7 +417,7 @@ namespace server
         virtual void update() {}
         virtual void reset(bool empty) {}
         virtual void layout() {}
-        virtual void balance(int obaliter) {}
+        virtual void balance(int oldbalance) {}
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
@@ -431,7 +431,7 @@ namespace server
     servmode *smode;
     vector<servmode *> smuts;
     #define mutate(a,b) { loopvk(a) { servmode *mut = a[k]; { b; } } }
-    int mplayers = 0, mbalance = 0, mbaliter = 0, totalspawns = 0;
+    int curbalance = 0, totalspawns = 0;
 
     vector<score> scores;
     score &teamscore(int team)
@@ -572,15 +572,15 @@ namespace server
                 if(wait && ci->state.state != CS_WAITING) waiting(ci, DROP_RESET);
                 if(msg && allowbroadcast(ci->clientnum) && !top)
                 {
-                    int maxplayers = max(int(G(maxalive)*mplayers), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
+                    int x = max(int(G(maxalive)*G(maxplayers)), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
                     if(m_isteam(gamemode, mutators))
                     {
-                        if(maxplayers%2) maxplayers++;
-                        maxplayers = maxplayers/2;
+                        if(x%2) x++;
+                        x = x/2;
                     }
                     int alive = 0;
                     loopv(playing) if(playing[i] && ci->team == playing[i]->team) alive++;
-                    if(maxplayers-alive == 0)
+                    if(x-alive == 0)
                     {
                         int wait = 0;
                         loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
@@ -630,11 +630,11 @@ namespace server
                 {
                     if(!hasgameinfo) return false;
                     if(G(maxalivequeue) && spawnq.find(ci) < 0) queue(ci);
-                    int maxplayers = max(int(G(maxalive)*mplayers), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
+                    int x = max(int(G(maxalive)*G(maxplayers)), max(int(numclients()*G(maxalivethreshold)), G(maxaliveminimum)));
                     if(m_isteam(gamemode, mutators))
                     {
-                        if(maxplayers%2) maxplayers++;
-                        maxplayers = maxplayers/2;
+                        if(x%2) x++;
+                        x = x/2;
                     }
                     int alive = 0;
                     loopv(playing) if(playing[i])
@@ -650,7 +650,7 @@ namespace server
                         if(spawnq.find(playing[i]) >= 0) spawnq.removeobj(playing[i]);
                         if(ci->team == playing[i]->team) alive++;
                     }
-                    if(alive >= maxplayers) return false;
+                    if(alive >= x) return false;
                     if(G(maxalivequeue))
                     {
                         loopv(spawnq) if(spawnq[i] && spawnq[i]->team == ci->team)
@@ -659,7 +659,7 @@ namespace server
                             break;
                         }
                         // at this point is where it decides this player is spawning, so tell everyone else their position
-                        if(maxplayers-alive == 1)
+                        if(x-alive == 1)
                         {
                             int wait = 0;
                             loopv(spawnq) if(spawnq[i] && spawnq[i] != ci && spawnq[i]->team == ci->team && spawnq[i]->state.aitype == AI_NONE)
@@ -1296,13 +1296,13 @@ namespace server
         }
         if(iterate && balance && m_isteam(gamemode, mutators))
         {
-            int numt = numteams(gamemode, mutators), balpart = (gamelimit > 0 ? gamelimit : 600000)/numt, baliter = gamemillis/balpart;
-            if(baliter != mbaliter)
+            int numt = numteams(gamemode, mutators), balpart = (gamelimit > 0 ? gamelimit : 600000)/numt, balance = gamemillis/balpart;
+            if(balance != curbalance)
             {
-                int obaliter = mbaliter;
-                mbaliter = baliter;
-                if(smode) smode->balance(obaliter);
-                mutate(smuts, mut->balance(obaliter));
+                int oldbalance = curbalance;
+                curbalance = balance;
+                if(smode) smode->balance(oldbalance);
+                mutate(smuts, mut->balance(oldbalance));
                 static vector<clientinfo *> assign[T_TOTAL];
                 loopk(T_TOTAL) assign[k].setsize(0);
                 loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
@@ -1311,8 +1311,8 @@ namespace server
                 loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
                 loopk(T_TOTAL)
                 {
-                    int from = mapbals[obaliter][k], fromt = from-T_FIRST,
-                        to = mapbals[mbaliter][k], tot = to-T_FIRST;
+                    int from = mapbals[oldbalance][k], fromt = from-T_FIRST,
+                        to = mapbals[curbalance][k], tot = to-T_FIRST;
                     loopv(assign[fromt]) setteam(assign[fromt][i], to, flags);
                     score &cs = teamscore(from);
                     cs.total = scores[tot];
@@ -1486,10 +1486,9 @@ namespace server
         }
     } spawns[T_ALL];
 
-    void setupspawns(bool update, int plr = 0, int bal = 0)
+    void setupspawns(bool update)
     {
-        mplayers = totalspawns = 0;
-        if(bal) mbalance = bal;
+        totalspawns = 0;
         loopi(T_ALL) spawns[i].reset();
         if(update)
         {
@@ -1553,12 +1552,15 @@ namespace server
                 }
                 cplayers = totalspawns/3;
             }
-            mplayers = plr > 0 ? plr : cplayers;
+            if(!G(numplayers)) G(numplayers) = cplayers;
+            if(!G(maxplayers)) G(maxplayers) = G(numplayers)*2;
             if(m_fight(gamemode) && m_isteam(gamemode, mutators))
             {
-                int offt = mplayers%numt;
-                if(offt) mplayers += numt-offt;
+                int offt = G(numplayers)%numt, offq = G(maxplayers)%numt;
+                if(offt) G(numplayers) += numt-offt;
+                if(offq) G(maxplayers) += numt-offq;
             }
+            if(G(maxplayers) < G(numplayers)) G(maxplayers) = G(numplayers);
         }
     }
 
@@ -1619,11 +1621,11 @@ namespace server
         return -1;
     }
 
-    void setupgameinfo(int plr, int bal)
+    void setupgameinfo()
     {
         setuptriggers(true);
         setupitems(true);
-        setupspawns(true, plr, bal);
+        setupspawns(true);
         hasgameinfo = true;
         aiman::dorefresh = G(airefresh);
     }
@@ -2197,8 +2199,8 @@ namespace server
         if(isteam(gamemode, mutators, team, first))
         {
             if(!m_coop(gamemode, mutators)) return true;
-            else if(ci->state.aitype > AI_NONE) return team != mapbals[mbaliter][0];
-            else return team == mapbals[mbaliter][0];
+            else if(ci->state.aitype > AI_NONE) return team != mapbals[curbalance][0];
+            else return team == mapbals[curbalance][0];
         }
         return false;
     }
@@ -2212,7 +2214,7 @@ namespace server
             int team = -1, bal = human ? G(teambalance) : 1;
             if(human)
             {
-                if(m_coop(gamemode, mutators)) return mapbals[mbaliter][0];
+                if(m_coop(gamemode, mutators)) return mapbals[curbalance][0];
                 int teams[3][3] = {
                     { suggest, ci->team, -1 },
                     { suggest, ci->team, ci->lastteam },
@@ -2345,7 +2347,7 @@ namespace server
         hasgameinfo = maprequest = mapsending = shouldcheckvotes = firstblood = false;
         stopdemo();
         changemode(gamemode = mode, mutators = muts);
-        mplayers = mbalance = mbaliter = gamemillis = interm = 0;
+        curbalance = gamemillis = interm = 0;
         oldtimelimit = G(timelimit);
         timeremaining = G(timelimit) ? G(timelimit)*60 : -1;
         gamelimit = G(timelimit) ? timeremaining*1000 : 0;
@@ -2504,7 +2506,7 @@ namespace server
 
     void checkvar(ident *id, const char *arg)
     {
-        if(id && id->flags&IDF_SERVER && !(id->flags&IDF_ADMIN)) switch(id->type)
+        if(id && id->flags&IDF_SERVER && !(id->flags&IDF_ADMIN) && !(id->flags&IDF_WORLD)) switch(id->type)
         {
             case ID_VAR:
             {
@@ -2915,7 +2917,7 @@ namespace server
         putint(p, mutators);
 
         enumerate(idents, ident, id, {
-            if(id.flags&IDF_SERVER) // reset vars
+            if(id.flags&IDF_SERVER && !(id.flags&IDF_WORLD)) // reset vars
             {
                 const char *val = NULL;
                 switch(id.type)
@@ -5035,7 +5037,51 @@ namespace server
 
                 case N_GAMEINFO:
                 {
-                    int n, plr = getint(p), bal = getint(p);
+                    int n;
+                    while((n = getint(p)) != -1)
+                    {
+                        getstring(text, p);
+                        defformatstring(cmdname)("sv_%s", text);
+                        ident *id = idents.access(cmdname);
+                        if(id && id->flags&IDF_SERVER && id->flags&IDF_WORLD && n == id->type)
+                        {
+                            switch(id->type)
+                            {
+                                case ID_VAR:
+                                {
+                                    int ret = getint(p);
+                                    if(ret < id->minval || ret > id->maxval) break;
+                                    *id->storage.i = ret;
+                                    id->changed();
+                                    break;
+                                }
+                                case ID_FVAR:
+                                {
+                                    float ret = getfloat(p);
+                                    if(ret < id->minvalf || ret > id->maxvalf) break;
+                                    *id->storage.f = ret;
+                                    id->changed();
+                                    break;
+                                }
+                                case ID_SVAR:
+                                {
+                                    getstring(text, p);
+                                    delete[] *id->storage.s;
+                                    *id->storage.s = newstring(text);
+                                    id->changed();
+                                    break;
+                                }
+                                default: return;
+                            }
+                        }
+                        else switch(n)
+                        {
+                            case ID_VAR: getint(p); break;
+                            case ID_FVAR: getfloat(p); break;
+                            case ID_SVAR: getstring(text, p); break;
+                            default: break;
+                        }
+                    }
                     while((n = getint(p)) != -1)
                     {
                         int type = getint(p), numattr = getint(p);
@@ -5068,7 +5114,7 @@ namespace server
                             }
                         }
                     }
-                    if(!hasgameinfo) setupgameinfo(plr, bal);
+                    if(!hasgameinfo) setupgameinfo();
                     break;
                 }
 

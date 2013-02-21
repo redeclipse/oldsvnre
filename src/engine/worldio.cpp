@@ -827,7 +827,7 @@ void save_config(char *mname)
     loopv(ids)
     {
         ident &id = *ids[i];
-        if(id.flags&IDF_WORLD) switch(id.type)
+        if(id.flags&IDF_WORLD && !(id.flags&IDF_SERVER)) switch(id.type)
         {
             case ID_VAR: h->printf((id.flags&IDF_HEX && *id.storage.i >= 0 ? (id.maxval==0xFFFFFF ? "// %s 0x%.6X\n" : "// %s 0x%X\n") : "// %s %d\n"), escapeid(id), *id.storage.i); vars++;break;
             case ID_FVAR: h->printf("// %s %s\n", escapeid(id), floatstr(*id.storage.f)); vars++; break;
@@ -842,7 +842,7 @@ void save_config(char *mname)
     loopv(ids)
     {
         ident &id = *ids[i];
-        if(id.type == ID_ALIAS && id.flags&IDF_WORLD && strlen(id.name))
+        if(id.type == ID_ALIAS && id.flags&IDF_WORLD && !(id.flags&IDF_SERVER) && strlen(id.name))
         {
             const char *str = id.getstr();
             if(str[0])
@@ -981,11 +981,11 @@ void save_world(const char *mname, bool nodata, bool forcesave)
     // world variables
     int numvars = 0, vars = 0;
     enumerate(idents, ident, id, {
-        if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && strlen(id.name)) numvars++;
+        if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && !(id.flags&IDF_SERVER) && strlen(id.name)) numvars++;
     });
     f->putlil<int>(numvars);
     enumerate(idents, ident, id, {
-        if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && strlen(id.name))
+        if((id.type == ID_VAR || id.type == ID_FVAR || id.type == ID_SVAR) && id.flags&IDF_WORLD && !(id.flags&IDF_SERVER) && strlen(id.name))
         {
             vars++;
             progress(vars/float(numvars), "saving world variables...");
@@ -1264,10 +1264,6 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                                 else if(!strcmp(name, "slidecurb")) copystring(name, "slidecoast");
                                 else if(!strcmp(name, "floatcurb")) copystring(name, "floatcoast");
                             }
-                            if(hdr.version <= 43)
-                            {
-                                if(!strcmp(name, "numplayers")) copystring(name, "mapplayers");
-                            }
                             ident *id = idents.access(name);
                             bool proceed = true;
                             int type = hdr.version >= 28 ? f->getlil<int>()+(hdr.version >= 29 ? 0 : 1) : (id ? id->type : ID_VAR);
@@ -1277,7 +1273,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                                     type = ID_FVAR;
                                 else proceed = false;
                             }
-                            if(!id || !(id->flags&IDF_WORLD)) proceed = false;
+                            if(!id || !(id->flags&IDF_WORLD) || id->flags&IDF_SERVER) proceed = false;
 
                             switch(type)
                             {
@@ -1460,7 +1456,7 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
                     if(!strcmp(name, "cloudcolour")) copystring(name, "cloudlayercolour");
                     if(!strcmp(name, "cloudboxcolour")) copystring(name, "cloudcolour");
                     ident *id = getident(name);
-                    bool exists = id && id->type == type && id->flags&IDF_WORLD;
+                    bool exists = id && id->type == type && id->flags&IDF_WORLD && !(id->flags&IDF_SERVER);
                     switch(type)
                     {
                         case ID_VAR:

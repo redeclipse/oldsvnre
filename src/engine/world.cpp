@@ -916,7 +916,7 @@ void clearworldvars(bool msg)
     setfvar("sunlightscale", 1, false);
     identflags |= IDF_WORLD;
     enumerate(idents, ident, id, {
-        if(id.flags&IDF_WORLD) // reset world vars
+        if(id.flags&IDF_WORLD && !(id.flags&IDF_SERVER)) // reset world vars
         {
             switch (id.type)
             {
