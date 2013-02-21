@@ -540,7 +540,7 @@ namespace client
         return true;
     }
 
-    bool ismodelocked(int reqmode, int reqmuts, const char *reqmap = NULL)
+    bool ismodelocked(int reqmode, int reqmuts, int askmuts = 0, const char *reqmap = NULL)
     {
         if(m_local(reqmode) && remote) return true;
         if(G(modelock) == PRIV2(MAX) && G(mapslock) == PRIV2(MAX) && !haspriv(game::player1, PRIV_MAX)) return true;
@@ -556,6 +556,9 @@ namespace client
                 break;
             case 0: default: break;
         }
+        int oldmode = reqmode;
+        modecheck(reqmode, reqmuts, askmuts);
+        if(oldmode != reqmode || (askmuts && !mutscmp(askmuts, reqmuts))) return true;
         if(G(modelock)) switch(G(modelocktype))
         {
             case 1: if(!haspriv(game::player1, PRIVZ(G(modelock)))) return true; break;
@@ -592,7 +595,7 @@ namespace client
         }
         return false;
     }
-    ICOMMAND(0, ismodelocked, "iis", (int *g, int *m, char *s), intret(ismodelocked(*g, *m, s) ? 1 : 0));
+    ICOMMAND(0, ismodelocked, "iiis", (int *g, int *m, int *a, char *s), intret(ismodelocked(*g, *m, *a, s) ? 1 : 0));
 
     int parseplayer(const char *arg)
     {

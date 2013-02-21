@@ -298,7 +298,7 @@ extern mutstypes mutstype[];
 #ifdef CAMPAIGN
 #define m_enemies(a,b)      (m_campaign(a) || m_onslaught(a, b))
 #define m_checkpoint(a)     (m_campaign(a) || m_trial(a) || m_gauntlet(a))
-#define m_ghost(a)          (m_campaign(a) ? G(campaignghost) : (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0)))
+#define m_ghost(a)          (m_campaign(a) ? (G(campaignghost) ? 2 : 0) : (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0)))
 #else
 #define m_enemies(a,b)      (m_onslaught(a, b) || m_gauntlet(a))
 #define m_checkpoint(a)     (m_trial(a) || m_gauntlet(a))
