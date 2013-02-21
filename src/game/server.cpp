@@ -1494,7 +1494,7 @@ namespace server
         if(update)
         {
             int numt = numteams(gamemode, mutators), cplayers = 0;
-            bool teamspawns = m_isteam(gamemode, mutators);
+            bool teamspawns = m_isteam(gamemode, mutators) && !m_trial(gamemode);
             if(!teamspawns && m_duel(gamemode, mutators))
             { // iterate through teams so players spawn on opposite sides in duel
                 teamspawns = true;
@@ -1584,7 +1584,8 @@ namespace server
                         team = spawns[T_ALPHA].iteration <= spawns[T_OMEGA].iteration ? T_ALPHA : T_OMEGA;
                     if(!rotate) rotate = 2;
                 }
-                else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && !spawns[ci->team].ents.empty()) team = ci->team;
+                else if(m_fight(gamemode) && m_isteam(gamemode, mutators) && !m_trial(gamemode) && !spawns[ci->team].ents.empty())
+                    team = ci->team;
                 switch(rotate)
                 {
                     case 2:
