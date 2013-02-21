@@ -38,7 +38,8 @@ namespace ai
     {
         if(d->aitype >= AI_START)
         {
-            if(entities::ents.inrange(d->aientity))
+            if(m_gauntlet(game::gamemode)) return T_OMEGA;
+            else if(entities::ents.inrange(d->aientity))
             {
                 if(m_capture(game::gamemode)) return capture::aiowner(d);
                 else if(m_defend(game::gamemode)) return defend::aiowner(d);
