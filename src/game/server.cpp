@@ -417,7 +417,7 @@ namespace server
         virtual void update() {}
         virtual void reset(bool empty) {}
         virtual void layout() {}
-        virtual void balance(int oldbal, int newbal) {}
+        virtual void balance(int obaliter) {}
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
         virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
@@ -1313,9 +1313,10 @@ namespace server
             int numt = numteams(gamemode, mutators), balpart = gamelimit/numt, baliter = gamemillis/balpart;
             if(baliter != mbaliter)
             {
-                if(smode) smode->balance(mbaliter, baliter);
-                mutate(smuts, mut->balance(mbaliter, baliter));
-
+                int obaliter = mbaliter;
+                mbaliter = baliter;
+                if(smode) smode->balance(obaliter);
+                mutate(smuts, mut->balance(obaliter));
                 static vector<clientinfo *> assign[T_TOTAL];
                 loopk(T_TOTAL) assign[k].setsize(0);
                 loopv(clients) if(clients[i]->team >= T_FIRST && clients[i]->team <= T_LAST)
@@ -1324,15 +1325,13 @@ namespace server
                 loopk(T_TOTAL) scores[k] = teamscore(k+T_FIRST).total;
                 loopk(T_TOTAL)
                 {
-                    int from = mapbals[mbaliter][k], fromt = from-T_FIRST,
-                        to = mapbals[baliter][k], tot = to-T_FIRST;
+                    int from = mapbals[obaliter][k], fromt = from-T_FIRST,
+                        to = mapbals[mbaliter][k], tot = to-T_FIRST;
                     loopv(assign[fromt]) setteam(assign[fromt][i], to, true, true);
                     score &cs = teamscore(from);
                     cs.total = scores[tot];
                     sendf(-1, 1, "ri3", N_SCORE, cs.team, cs.total);
                 }
-
-                mbaliter = baliter;
                 ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyteams have been reassigned%s", !m_gauntlet(gamemode) ? " for map balance" : "");
                 if(smode) smode->layout();
                 mutate(smuts, mut->layout());
@@ -2217,8 +2216,8 @@ namespace server
         if(isteam(gamemode, mutators, team, first))
         {
             if(!m_coop(gamemode, mutators)) return true;
-            else if(ci->state.aitype > AI_NONE) return team != T_ALPHA;
-            else return team == T_ALPHA;
+            else if(ci->state.aitype > AI_NONE) return team != mapbals[mbaliter][0];
+            else return team == mapbals[mbaliter][0];
         }
         return false;
     }
@@ -2232,7 +2231,7 @@ namespace server
             int team = -1, bal = human ? G(teambalance) : 1;
             if(human)
             {
-                if(m_coop(gamemode, mutators)) return T_ALPHA;
+                if(m_coop(gamemode, mutators)) return mapbals[mbaliter][0];
                 int teams[3][3] = {
                     { suggest, ci->team, -1 },
                     { suggest, ci->team, ci->lastteam },
@@ -2263,7 +2262,7 @@ namespace server
                         ts.clients++;
                     }
                 }
-                teamcheck *worst = &teamchecks[m_coop(gamemode, mutators) ? 1 : 0];
+                teamcheck *worst = &teamchecks[0];
                 loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST))
                 {
                     teamcheck &ts = teamchecks[i];
