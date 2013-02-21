@@ -194,7 +194,7 @@ namespace hud
                 else
                 {
                     int anc = sg.players[0] == game::player1 ? S_V_YOUWIN : (game::player1->state != CS_SPECTATOR ? S_V_YOULOSE : -1);
-                    if(m_trial(game::gamemode))
+                    if(m_laptime(game::gamemode, game::mutators))
                     {
                         if(sg.players.length() > 1 && sg.players[0]->cptime == sg.players[1]->cptime)
                         {
@@ -465,13 +465,14 @@ namespace hud
                         });
                     });
 
-                    if(sg.team && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+                    if(sg.team && m_isteam(game::gamemode, game::mutators))
                     {
                         g.pushlist();
                         uilist(g, {
                             g.background(bgcolor);
                             if(m_defend(game::gamemode) && ((defendlimit && sg.total >= defendlimit) || sg.total == INT_MAX))
                                 g.textf("%s: WIN", fgcolor, NULL, 0, TEAM(sg.team, name));
+                            else if(m_laptime(game::gamemode, game::mutators)) g.textf("%s: %s", fgcolor, NULL, 0, TEAM(sg.team, name), sg.total ? timetostr(sg.total) : "\fadnf");
                             else g.textf("%s: %d", fgcolor, NULL, 0, TEAM(sg.team, name), sg.total);
                             g.spring();
                         });
@@ -493,14 +494,14 @@ namespace hud
 
                     if(m_trial(game::gamemode) || m_gauntlet(game::gamemode))
                     {
-                        if(scoretimer && (scoretimer >= 2 || !m_laptime(game::gamemode, game::mutators)))
+                        if(scoretimer && (scoretimer >= 2 || m_laptime(game::gamemode, game::mutators)))
                         {
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("best", fgcolor)));
                                 loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
                             });
                         }
-                        if(scorelaps && (scorelaps >= 2 || m_laptime(game::gamemode, game::mutators)))
+                        if(scorelaps && (scorelaps >= 2 || !m_laptime(game::gamemode, game::mutators)))
                         {
                             uilist(g, {
                                 uicenterlist(g, uipad(g, 4, g.text("laps", fgcolor)));
