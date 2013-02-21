@@ -4837,13 +4837,7 @@ namespace server
                                         sendf(-1, 1, "ri6", N_CHECKPOINT, cp->clientnum, ent, laptime, cp->state.cptime, cp->state.cplaps);
                                         if(m_isteam(gamemode, mutators))
                                         {
-                                            if(m_gauntlet(gamemode))
-                                            {
-                                                score &ts = teamscore(cp->team);
-                                                ts.total++;
-                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
-                                            }
-                                            else
+                                            if(m_laptime(gamemode, mutators))
                                             {
                                                 score &ts = teamscore(cp->team);
                                                 if(!ts.total || ts.total > cp->state.cptime)
@@ -4851,6 +4845,12 @@ namespace server
                                                     ts.total = cp->state.cptime;
                                                     sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
                                                 }
+                                            }
+                                            else
+                                            {
+                                                score &ts = teamscore(cp->team);
+                                                ts.total++;
+                                                sendf(-1, 1, "ri3", N_SCORE, ts.team, ts.total);
                                             }
                                         }
                                     }
