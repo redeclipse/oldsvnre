@@ -259,7 +259,7 @@ namespace projs
         if(!d || !isdynent(d->type)) return false;
         if(proj.projtype == PRJ_SHOT && physics::issolid(d, &proj))
         {
-            bool drill = (proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER)) ? false : true;
+            bool drill = proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER);
             proj.hit = d;
             proj.hitflags = flags;
             float expl = WX(WK(proj.flags), proj.weap, explode, WS(proj.flags), game::gamemode, game::mutators, proj.curscale*proj.lifesize);
