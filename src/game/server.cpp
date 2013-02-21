@@ -2779,7 +2779,8 @@ namespace server
     {
         bool found = false;
         const char *argstr = numargs > 2 ? conc(&args[1], numargs-1, true) : (numargs > 1 ? args[1].getstr() : "");
-        if(id && id->flags&IDF_SERVER && id->type!=ID_COMMAND) found = servcmd(numargs, args[0].s, argstr);
+        if(id && id->flags&IDF_WORLD && identflags&IDF_WORLD) found = true;
+        else if(id && id->flags&IDF_SERVER && id->type!=ID_COMMAND) found = servcmd(numargs, args[0].s, argstr);
 #ifndef STANDALONE
         else if(!id || id->flags&IDF_CLIENT) found = client::sendcmd(numargs, args[0].s, argstr);
 #endif

@@ -187,8 +187,9 @@ namespace physics
         switch(m_ghost(game::gamemode))
         {
             case 2:
-                if(!e || e->team == d->team) return true;
-            case 1: return true;
+                if(!e || ai::owner(e) == ai::owner(d)) return true;
+                break;
+            case 1: return true; break;
             case 0: default: break;
         }
         return false;
