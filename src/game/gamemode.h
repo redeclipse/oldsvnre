@@ -316,7 +316,7 @@ extern mutstypes mutstype[];
 #define m_armour(a,b,c)     (m_insta(a,b) ? 0 : G(spawnarmour))
 #endif
 #define m_maxhealth(a,b,c)  (int(m_health(a, b, c)*(m_vampire(a,b) ? G(maxhealthvampire) : G(maxhealth))))
-#define m_balance(a)        (m_trial(a) ? 0 : (m_gauntlet(a) ? 1 : (G(forcebalance) >= 0 ? G(forcebalance) : mbalance)))
+#define m_balance(a)        (m_trial(a) ? 0 : (m_gauntlet(a) ? 1 : (G(forcebalance) >= 0 ? G(forcebalance) : G(mapbalance))))
 #define m_balreset(a)       (m_capture(a) || m_bomber(a) || m_gauntlet(a))
 
 #define w_reload(w1,w2)     (w1 != W_MELEE ? (isweap(w2) ? (w1 == w2 ? -1 : W(w1, reloads)) : (w1 < 0-w2 ? -1 : W(w1, reloads))) : 0)

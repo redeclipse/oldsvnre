@@ -15,9 +15,6 @@ namespace game
     vector<gameent *> players, waiting;
     vector<cament *> cameras;
 
-    VAR(IDF_WORLD, mapplayers, 0, 4, MAXCLIENTS);
-    VAR(IDF_WORLD, mapbalance, 0, 1, 1);
-
     FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
     VAR(IDF_WORLD, illumradius, 0, 0, VAR_MAX);
     SVAR(IDF_WORLD, obitlava, "");

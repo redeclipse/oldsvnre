@@ -216,7 +216,7 @@ namespace aiman
         {
             switch(G(botbalance))
             {
-                case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : mplayers); break; // use distributed map players
+                case -1: balance = max(people, m_duel(gamemode, mutators) ? 2 : G(numplayers)); break; // use distributed map players
                 case  0: balance = 0; break; // no bots
                 default: balance = max(people, m_duel(gamemode, mutators) ? 2 : G(botbalance)); break; // balance to at least this
             }

@@ -251,7 +251,7 @@ namespace client
         loopv(ids)
         {
             ident &id = *ids[i];
-            if(id.flags&IDF_CLIENT && !(id.flags&IDF_ADMIN) && !(id.flags&IDF_READONLY)) switch(id.type)
+            if(id.flags&IDF_CLIENT) switch(id.type)
             {
                 case ID_VAR:
                     if(*id.storage.i == id.def.i)
@@ -1121,7 +1121,7 @@ namespace client
 
     void editvar(ident *id, bool local)
     {
-        if(id && id->flags&IDF_WORLD && local && m_edit(game::gamemode))
+        if(id && id->flags&IDF_WORLD && !(id->flags&IDF_SERVER) && local && m_edit(game::gamemode))
         {
             switch(id->type)
             {
@@ -1361,8 +1361,28 @@ namespace client
         {
             p.reliable();
             putint(p, N_GAMEINFO);
-            putint(p, game::mapplayers);
-            putint(p, game::mapbalance);
+            enumerate(idents, ident, id, {
+                if(id.flags&IDF_CLIENT && id.flags&IDF_WORLD) switch(id.type)
+                {
+                    case ID_VAR:
+                        putint(p, id.type);
+                        sendstring(id.name, p);
+                        putint(p, *id.storage.i);
+                        break;
+                    case ID_FVAR:
+                        putint(p, id.type);
+                        sendstring(id.name, p);
+                        putfloat(p, *id.storage.f);
+                        break;
+                    case ID_SVAR:
+                        putint(p, id.type);
+                        sendstring(id.name, p);
+                        sendstring(*id.storage.s, p);
+                        break;
+                    default: break;
+                }
+            });
+            putint(p, -1);
             entities::putitems(p);
             putint(p, -1);
             if(m_capture(game::gamemode)) capture::sendaffinity(p);

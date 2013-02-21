@@ -1,3 +1,7 @@
+GVAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS); // 0 = determine from number of spawns
+GVAR(IDF_WORLD, maxplayers, 0, 0, MAXCLIENTS); // 0 = numplayers*2
+GVAR(IDF_WORLD, mapbalance, 0, 0, 1); // switches teams for asymmetrical maps
+
 GVAR(IDF_ADMIN, serverdebug, 0, 0, 3);
 GVAR(IDF_ADMIN, serverclients, 1, 16, MAXCLIENTS);
 GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
@@ -133,10 +137,10 @@ namespace server { extern void resetgamevars(bool flush); }
 GICOMMAND(0, resetvars, "", (), server::resetgamevars(true), return);
 GICOMMAND(IDF_ADMIN, resetconfig, "", (), rehash(true), );
 
-GFVAR(0, maxalive, 0, 0, FVAR_MAX); // only allow this*mapplayers to be alive at once
+GFVAR(0, maxalive, 0, 1, FVAR_MAX); // only allow this*maxplayers to be alive at once
 GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, use a queue system
-GVAR(0, maxaliveminimum, 2, 8, VAR_MAX); // kicks in if mapplayers >= this
-GFVAR(0, maxalivethreshold, 0, 0.5f, FVAR_MAX); // .. or this percentage of players
+GVAR(0, maxaliveminimum, 2, 4, VAR_MAX); // kicks in if alive >= this
+GFVAR(0, maxalivethreshold, 0, 0, FVAR_MAX); // .. or this percentage of clients
 
 GVAR(0, maxcarry, 1, MAXCARRY, W_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
@@ -300,7 +304,7 @@ GVAR(0, bomberregenextra, 0, 2, VAR_MAX); // add this to regen when buffed
 GVAR(0, bomberbasket, 0, 1, 1); // you can score by throwing the bomb into the goal
 
 GVAR(IDF_ADMIN, airefresh, 0, 1000, VAR_MAX);
-GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use mapplayers, 0 = don't balance, 1 or more = fill only with this*numteams
+GVAR(0, botbalance, -1, -1, VAR_MAX); // -1 = always use numplayers, 0 = don't balance, 1 or more = fill only with this*numteams
 GVAR(0, botskillmin, 1, 75, 101);
 GVAR(0, botskillmax, 1, 85, 101);
 GVAR(0, botlimit, 0, 32, VAR_MAX);

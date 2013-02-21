@@ -38,7 +38,9 @@ namespace hud
     VAR(IDF_PERSIST, scorepj, 0, 0, 1);
     VAR(IDF_PERSIST, scoreping, 0, 1, 1);
     VAR(IDF_PERSIST, scorepoints, 0, 1, 1);
-    VAR(IDF_PERSIST, scoretally, 0, 2, 2);
+    VAR(IDF_PERSIST, scoretimer, 0, 1, 2);
+    VAR(IDF_PERSIST, scorelaps, 0, 1, 2);
+    VAR(IDF_PERSIST, scorefrags, 0, 1, 2);
     VAR(IDF_PERSIST, scoreclientnum, 0, 1, 1);
     VAR(IDF_PERSIST, scorebotinfo, 0, 0, 1);
     VAR(IDF_PERSIST, scorespectators, 0, 1, 1);
@@ -489,17 +491,23 @@ namespace hud
 
                     if(m_trial(game::gamemode) || m_gauntlet(game::gamemode))
                     {
-                        uilist(g, {
-                            uicenterlist(g, uipad(g, 4, g.text("best", fgcolor)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
-                        });
-                        uilist(g, {
-                            uicenterlist(g, uipad(g, 4, g.text("laps", fgcolor)));
-                            loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->cplaps))));
-                        });
+                        if(scoretimer && (scoretimer >= 2 || m_trial(game::gamemode)))
+                        {
+                            uilist(g, {
+                                uicenterlist(g, uipad(g, 4, g.text("best", fgcolor)));
+                                loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%s", 0xFFFFFF, NULL, 0, o->cptime ? timetostr(o->cptime) : "\fadnf"))));
+                            });
+                        }
+                        if(scorelaps && (scorelaps >= 2 || m_gauntlet(game::gamemode)))
+                        {
+                            uilist(g, {
+                                uicenterlist(g, uipad(g, 4, g.text("laps", fgcolor)));
+                                loopscoregroup(uicenterlist(g, uipad(g, 0.5f, g.textf("%d", 0xFFFFFF, NULL, 0, o->cplaps))));
+                            });
+                        }
                     }
 
-                    if(scoretally && (scoretally >= 2 || m_dm(game::gamemode)))
+                    if(scorefrags && (scorefrags >= 2 || m_dm(game::gamemode)))
                     {
                         uilist(g, {
                             uicenterlist(g, uipad(g, 1, g.text("frags", fgcolor)));
