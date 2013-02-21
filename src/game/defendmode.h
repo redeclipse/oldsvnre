@@ -90,10 +90,10 @@ struct defendservmode : defendstate, servmode
         }
     }
 
-    void sendaffinity(int i)
+    void sendaffinity(int i, bool interim = false)
     {
         flag &b = flags[i];
-        sendf(-1, 1, "ri5", N_INFOAFFIN, i, b.enemy ? b.converted : 0, b.owner, b.enemy);
+        sendf(-1, 1, "ri5", N_INFOAFFIN, i, interim ? -1 : (b.enemy ? b.converted : 0), b.owner, b.enemy);
     }
 
     void sendaffinity()
@@ -275,11 +275,12 @@ struct defendservmode : defendstate, servmode
 
     void balance(int oldbalance)
     {
-        static vector<int> owners[T_TOTAL], enemies[T_TOTAL];
+        static vector<int> owners[T_TOTAL], enemies[T_TOTAL], modified[T_TOTAL];
         loopk(T_TOTAL)
         {
             owners[k].setsize(0);
             enemies[k].setsize(0);
+            modified[k].setsize(0);
         }
         loopv(flags)
         {
@@ -291,8 +292,9 @@ struct defendservmode : defendstate, servmode
         loopk(T_TOTAL)
         {
             int from = mapbals[oldbalance][k], fromt = from-T_FIRST, to = mapbals[curbalance][k];
-            loopv(owners[fromt]) flags[owners[fromt][i]].owner = to;
-            loopv(enemies[fromt]) flags[enemies[fromt][i]].enemy = to;
+            loopv(owners[fromt]) { flags[owners[fromt][i]].owner = to; modified.add(owners[fromt][i]); }
+            loopv(enemies[fromt]) { flags[enemies[fromt][i]].enemy = to; modified.add(enemies[fromt][i]); }
         }
+        loopv(modified) sendaffinity(modified[i], true);
     }
 } defendmode;
