@@ -555,8 +555,8 @@ namespace game
         if(local)
         {
             d->state = CS_ALIVE;
-            client::addmsg(N_SPAWN, "ri", d->clientnum);
             entities::spawnplayer(d, ent, true);
+            client::addmsg(N_SPAWN, "ri", d->clientnum);
         }
         d->setscale(rescale(d), 0, true, gamemode, mutators);
 
@@ -1192,9 +1192,9 @@ namespace game
             if(!aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
             else if(!obitverbose) concatstring(d->obit, "died");
             else if(flags&HIT_MELT) concatstring(d->obit, obitverbose != 2 ? "melted" : (*obitlava ? obitlava : "melted into a ball of fire"));
-            else if(flags&HIT_WATER) concatstring(d->obit, obitverbose != 2 || !*obitwater ? "died" : obitwater);
-            else if(flags&HIT_DEATH) concatstring(d->obit, obitverbose != 2 || !*obitdeath ? "died" : obitdeath);
-            else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose != 2 ? "died" : "tried to spawn inside solid matter");
+            else if(flags&HIT_WATER) concatstring(d->obit, obitverbose != 2 || !*obitwater ? "drowned" : obitwater);
+            else if(flags&HIT_DEATH) concatstring(d->obit, obitverbose != 2 || !*obitdeath ? "met their end" : obitdeath);
+            else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose != 2 ? "couldn't respawn" : "tried to spawn inside solid matter");
             else if(flags&HIT_LOST) concatstring(d->obit, obitverbose != 2 ? "was lost" : "got very, very lost");
             else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose != 2 ? "entered spectator" : "gave up their corporeal form");
             else if(flags && isweap(weap) && !burning && !bleeding && !shocking)

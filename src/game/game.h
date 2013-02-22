@@ -953,6 +953,7 @@ struct gameent : dynent, gamestate
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
         conopen(false), k_up(false), k_down(false), k_left(false), k_right(false), obliterated(false)
     {
+        state = CS_DEAD;
         type = ENT_PLAYER;
         copystring(hostname, "unknown");
         name[0] = handle[0] = info[0] = obit[0] = 0;
