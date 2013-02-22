@@ -976,7 +976,7 @@ namespace entities
     bool tryspawn(dynent *d, const vec &o, float yaw, float pitch)
     {
         game::fixfullrange(d->yaw = yaw, d->pitch = pitch, d->roll = 0);
-        d->o = vec(o).add(vec(0, 0, d->height+d->aboveeye));
+        d->o = vec(o).add(vec(0, 0, d->zradius+d->aboveeye));
         return physics::entinmap(d, true);
     }
 
@@ -991,7 +991,7 @@ namespace entities
                 default: if(tryspawn(d, ents[ent]->o, rnd(360), 0)) return;
             }
         }
-        else if(d->type == ENT_PLAYER)
+        if(d->type == ENT_PLAYER || d->type == ENT_AI)
         {
             vector<int> spawns;
             loopk(4)

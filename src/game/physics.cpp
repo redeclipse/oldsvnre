@@ -184,10 +184,10 @@ namespace physics
 
     bool isghost(gameent *d, gameent *e)
     {
-        switch(m_ghost(game::gamemode))
+        if(d != e) switch(m_ghost(game::gamemode))
         {
             case 2:
-                if(!e || ai::owner(e) == ai::owner(d)) return true;
+                if(e && ai::owner(d) == ai::owner(e)) return true;
                 break;
             case 1: return true; break;
             case 0: default: break;
@@ -197,13 +197,14 @@ namespace physics
 
     bool issolid(physent *d, physent *e, bool esc, bool impact, bool reverse)
     {
+        if(d == e) return false; // don't collide with themself
         if(e && e->type == ENT_PROJ && d->state == CS_ALIVE)
         {
             projent *p = (projent *)e;
             if(d->type == ENT_PLAYER || d->type == ENT_AI)
             {
-                if(p->stick == d) return false;
-                if(impact && (p->hit == d || isghost((gameent *)d, p->owner) || !(p->projcollide&COLLIDE_PLAYER))) return false;
+                if(p->stick == d || isghost((gameent *)d, p->owner)) return false;
+                if(impact && (p->hit == d || !(p->projcollide&COLLIDE_PLAYER))) return false;
                 if(p->owner == d && (!(p->projcollide&COLLIDE_OWNER) || (esc && !p->escaped))) return false;
             }
             else if(d->type == ENT_PROJ)
@@ -1530,14 +1531,18 @@ namespace physics
 
     bool entinmap(physent *d, bool avoidplayers)
     {
-        if(d->state != CS_ALIVE) { d->resetinterp(); return insideworld(d->o); }
+        if(d->state != CS_ALIVE)
+        {
+            d->resetinterp();
+            return insideworld(d->o);
+        }
         vec orig = d->o;
         #define inmapchk(x,y) \
         { \
             loopi(x) \
             { \
                 if(i) { y; } \
-                if(collide(d) && !inside && (!avoidplayers || !hitplayer)) \
+                if(insideworld(d->o) && collide(d) && !inside && (!avoidplayers || !hitplayer)) \
                 { \
                     d->resetinterp(); \
                     return true; \
@@ -1549,12 +1554,12 @@ namespace physics
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
-            loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
+            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
         }
         if(d->type == ENT_PLAYER || d->type == ENT_AI || d->type == ENT_PROJ)
         {
             vec dir = vec(d->vel).normalize();
-            loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
+            if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
         }
         inmapchk(100, d->o.add(vec((rnd(21)-10)*i/20.f, (rnd(21)-10)*i/20.f, (rnd(21)-10)*i/20.f)));
         d->o = orig;
