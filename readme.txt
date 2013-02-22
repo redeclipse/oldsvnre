@@ -136,6 +136,7 @@ too.
 
 == Contributors ==
 
+* Riidom Li - Models
 * RaZgRiZ - Textures and Cubescript maintenance
 * ZeroKnight - Documentation, Testing and Support
 * Kirill "TristamK" Kolesnikov - Maps
