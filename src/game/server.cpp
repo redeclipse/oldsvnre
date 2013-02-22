@@ -2247,7 +2247,7 @@ namespace server
                         ts.clients++;
                     }
                 }
-                teamcheck *worst = &teamchecks[0];
+                teamcheck *worst = NULL;
                 loopi(numteams(gamemode, mutators)) if(allowteam(ci, teamchecks[i].team, T_FIRST))
                 {
                     teamcheck &ts = teamchecks[i];
@@ -2255,19 +2255,19 @@ namespace server
                     {
                         case 2:
                         {
-                            if(ts.score < worst->score || (ts.score == worst->score && ts.clients < worst->clients))
+                            if(!worst || ts.score < worst->score || (ts.score == worst->score && ts.clients < worst->clients))
                                 worst = &ts;
                             break;
                         }
                         case 1: default:
                         {
-                            if(ts.clients < worst->clients || (ts.clients == worst->clients && ts.score < worst->score))
+                            if(!worst || ts.clients < worst->clients || (ts.clients == worst->clients && ts.score < worst->score))
                                 worst = &ts;
                             break;
                         }
                     }
                 }
-                team = worst->team;
+                team = worst ? worst->team : T_ALPHA;
             }
             return team;
         }

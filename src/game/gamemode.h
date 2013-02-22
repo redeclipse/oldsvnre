@@ -129,8 +129,8 @@ gametypes gametype[] = {
     {
         G_GAUNTLET,        (1<<G_M_TEAM),
         {
-            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
-            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
+            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
+            (1<<G_M_TEAM)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             0, 0
         },
         "gauntlet",                       { "timed", "", "" },
@@ -302,7 +302,7 @@ extern mutstypes mutstype[];
 #define m_checkpoint(a)     (m_campaign(a) || m_trial(a) || m_gauntlet(a))
 #define m_ghost(a)          (m_campaign(a) ? (G(campaignghost) ? 2 : 0) : (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0)))
 #else
-#define m_enemies(a,b)      (m_onslaught(a, b) || m_gauntlet(a))
+#define m_enemies(a,b)      (m_onslaught(a, b))
 #define m_checkpoint(a)     (m_trial(a) || m_gauntlet(a))
 #define m_ghost(a)          (m_trial(a) ? G(trialghost) : (m_gauntlet(a) ? G(gauntletghost) : 0))
 #endif
