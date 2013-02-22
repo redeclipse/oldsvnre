@@ -310,7 +310,7 @@ struct gui : guient
         return layout(size+guishadow, size+guishadow);
     }
 
-    int playerpreview(int model, int color, int team, int weap, int vanity, float sizescale, bool overlaid, float scale, float blend)
+    int playerpreview(int model, int color, int team, int weap, const char *vanity, float sizescale, bool overlaid, float scale, float blend)
     {
         autotab();
         if(sizescale==0) sizescale = 1;

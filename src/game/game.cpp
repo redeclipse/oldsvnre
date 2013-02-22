@@ -184,9 +184,6 @@ namespace game
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
 #endif
-#ifdef VANITY
-    VAR(IDF_PERSIST|IDF_HEX, forceplayervanity, -1, -1, VAR_MAX);
-#endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
 
@@ -215,20 +212,21 @@ namespace game
     }
     ICOMMAND(0, resetvanity, "", (), vanityreset());
 
-    int vanityitem(int type, const char *model, const char *name, const char *tag, int style, int priv)
+    int vanityitem(int type, const char *ref, const char *name, const char *tag, int style, int priv)
     {
-        if(type < 0 || type >= VANITYMAX || !model || !name || !tag) return -1;
+        if(type < 0 || type >= VANITYMAX || !ref || !name || !tag) return -1;
         int num = vanities.length();
         vanitys &v = vanities.add();
         v.type = type;
-        v.model = newstring(model);
+        v.ref = newstring(ref);
+        v.setmodel(ref);
         v.name = newstring(name);
         v.tag = newstring(tag);
         v.style = style;
         v.priv = priv;
         return num;
     }
-    ICOMMAND(0, addvanity, "isssii", (int *t, char *m, char *n, char *g, int *s, int *p), intret(vanityitem(*t, m, n, g, *s, *p)));
+    ICOMMAND(0, addvanity, "isssii", (int *t, char *r, char *n, char *g, int *s, int *p), intret(vanityitem(*t, r, n, g, *s, *p)));
 
     void vanityinfo(int id, int value)
     {
@@ -237,11 +235,12 @@ namespace game
         else if(vanities.inrange(id)) switch(value)
         {
             case 0: intret(vanities[id].type); break;
-            case 1: result(vanities[id].model); break;
+            case 1: result(vanities[id].ref); break;
             case 2: result(vanities[id].name); break;
             case 3: result(vanities[id].tag); break;
             case 4: intret(vanities[id].style); break;
             case 5: intret(vanities[id].priv); break;
+            case 6: result(vanities[id].model); break;
             default: break;
         }
     }
@@ -2982,38 +2981,43 @@ namespace game
         int ai = 0;
 #ifdef VANITY
         modelattach a[1+VANITYMAX+10];
-        if(third)
+        if(third && *d->vanity)
         {
-            int vanity = forceplayervanity >= 0 ? forceplayervanity : d->vanity;
-            if(vanity)
+            if(d->vitems.empty())
             {
-                int found[VANITYMAX] = {0};
-                loopvk(vanities) if((vanity&(1<<k)) && d->privilege >= vanities[k].priv && !found[vanities[k].type])
+                vector<char *> vanitylist;
+                explodelist(d->vanity, vanitylist);
+                loopv(vanitylist) if(vanitylist[i] && *vanitylist[i])
+                    loopvk(vanities) if(!strcmp(vanities[k].ref, vanitylist[i]))
+                        d->vitems.add(k);
+                vanitylist.deletearrays();
+            }
+            int found[VANITYMAX] = {0};
+            loopvk(d->vitems) if(vanities.inrange(d->vitems[k]) && d->privilege >= vanities[d->vitems[k]].priv && !found[vanities[d->vitems[k]].type])
+            {
+                const char *file = NULL;
+                switch(vanities[d->vitems[k]].style)
                 {
-                    const char *file = NULL;
-                    switch(vanities[k].style)
+                    case 1:
                     {
-                        case 1:
+                        const char *id = hud::privname(d->privilege, d->aitype);
+                        loopv(vanities[d->vitems[k]].files) if(!strcmp(vanities[d->vitems[k]].files[i].id, id)) file = vanities[d->vitems[k]].files[i].name;
+                        if(!file)
                         {
-                            const char *id = hud::privname(d->privilege, d->aitype);
-                            loopv(vanities[k].files) if(!strcmp(vanities[k].files[i].id, id)) file = vanities[k].files[i].name;
-                            if(!file)
-                            {
-                                defformatstring(fn)("%s/%s", vanities[k].model, id);
-                                vanityfile &f = vanities[k].files.add();
-                                f.id = newstring(id);
-                                f.name = newstring(fn);
-                                file = f.name;
-                            }
-                            break;
+                            defformatstring(fn)("%s/%s", vanities[d->vitems[k]].model, id);
+                            vanityfile &f = vanities[d->vitems[k]].files.add();
+                            f.id = newstring(id);
+                            f.name = newstring(fn);
+                            file = f.name;
                         }
-                        case 0: default: file = vanities[k].model; break;
+                        break;
                     }
-                    if(file)
-                    {
-                        a[ai++] = modelattach(vanities[k].tag, file);
-                        found[vanities[k].type]++;
-                    }
+                    case 0: default: file = vanities[d->vitems[k]].model; break;
+                }
+                if(file)
+                {
+                    a[ai++] = modelattach(vanities[d->vitems[k]].tag, file);
+                    found[vanities[d->vitems[k]].type]++;
                 }
             }
         }
@@ -3173,12 +3177,13 @@ namespace game
         if(rendernormally && early) rendercheck(focus);
     }
 
-    void renderplayerpreview(int model, int color, int team, int weap, int vanity, float scale, float blend)
+    void renderplayerpreview(int model, int color, int team, int weap, const char *vanity, float scale, float blend)
     {
         static gameent *previewent = NULL;
         if(!previewent)
         {
             previewent = new gameent;
+            previewent->state = CS_ALIVE;
             previewent->physstate = PHYS_FLOOR;
             previewent->o = vec(0, 0.75f*(previewent->height + previewent->aboveeye), previewent->height - (previewent->height + previewent->aboveeye)/2);
             previewent->spawnstate(G_DEATHMATCH, 0);

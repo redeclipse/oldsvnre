@@ -505,18 +505,27 @@ static inline void modecheck(int &mode, int &muts, int trying = 0)
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, armour, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model, vanity;
+    int health, armour, ammo[W_MAX], entid[W_MAX], reloads[W_MAX], colour, model;
     int lastweap, weapselect, weapload[W_MAX], weapshot[W_MAX], weapstate[W_MAX], weapwait[W_MAX], weaplast[W_MAX];
     int lastdeath, lastspawn, lastrespawn, lastpain, lastregen, lastbuff, lastres[WR_MAX], lastrestime[WR_MAX];
     int aitype, aientity, ownernum, skill, points, frags, deaths, cpmillis, cptime, cplaps;
+    string vanity;
     vector<int> loadweap;
-    gamestate() : colour(0), model(0), vanity(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
+    gamestate() : colour(0), model(0), weapselect(W_MELEE), lastdeath(0), lastspawn(0), lastrespawn(0), lastpain(0), lastregen(0), lastbuff(0),
         aitype(AI_NONE), aientity(-1), ownernum(-1), skill(0), points(0), frags(0), deaths(0), cpmillis(0), cptime(0), cplaps(0)
     {
+        setvanity();
         loadweap.shrink(0);
         resetresidual();
     }
     ~gamestate() {}
+
+    bool setvanity(const char *v = "")
+    {
+        bool changed = strcmp(v, vanity);
+        copystring(vanity, v);
+        return changed;
+    }
 
     bool hasweap(int weap, int sweap, int level = 0, int exclude = -1)
     {
@@ -948,6 +957,7 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
+    vector<int> vitems;
 
     gameent() : edit(NULL), ai(NULL), team(T_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
         totaldamage(0), smoothmillis(-1), turnmillis(0), aschan(-1), cschan(-1), vschan(-1), wschan(-1), pschan(-1), fschan(-1), jschan(-1), lastattacker(-1), lastpoints(0), quake(0),
@@ -959,6 +969,7 @@ struct gameent : dynent, gamestate
         name[0] = handle[0] = info[0] = obit[0] = 0;
         dominating.shrink(0);
         dominated.shrink(0);
+        vitems.shrink(0);
         cleartags();
         checktags();
         respawn(-1, 100);
@@ -1311,12 +1322,22 @@ struct gameent : dynent, gamestate
         else name[0] = 0;
     }
 
-    void setinfo(const char *n = NULL, int c = 0, int m = 0, int v = 0)
+    bool setvanity(const char *v = "")
+    {
+        if(gamestate::setvanity(v))
+        {
+            vitems.shrink(0);
+            return true;
+        }
+        return false;
+    }
+
+    void setinfo(const char *n = NULL, int c = 0, int m = 0, const char *v = "")
     {
         setname(n);
         colour = c;
         model = m;
-        vanity = v;
+        setvanity(v);
     }
 
     void addstun(int weap, int millis, int delay, float scale, float gravity)
@@ -1563,9 +1584,6 @@ namespace game
             announcefilter, dynlighteffects, aboveheadnames, followthirdperson,
 #ifndef MEK
             forceplayermodel,
-#endif
-#ifdef VANITY
-            forceplayervanity,
 #endif
             playerovertone, playerundertone, playerdisplaytone, playereffecttone;
     extern float bloodscale, debrisscale, aboveitemiconsize;

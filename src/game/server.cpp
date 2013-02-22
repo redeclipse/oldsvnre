@@ -2838,7 +2838,7 @@ namespace server
                 putint(p, ci->team);
                 putint(p, ci->state.colour);
                 putint(p, ci->state.model);
-                putint(p, ci->state.vanity);
+                sendstring(ci->state.vanity, p);
             }
         }
         else
@@ -2849,7 +2849,7 @@ namespace server
             sendstring(ci->name, p);
             putint(p, ci->state.colour);
             putint(p, ci->state.model);
-            putint(p, ci->state.vanity);
+            sendstring(ci->state.vanity, p);
             putint(p, ci->team);
         }
     }
@@ -4400,7 +4400,8 @@ namespace server
                     copystring(ci->name, namestr, MAXNAMELEN+1);
                     ci->state.colour = max(getint(p), 0);
                     ci->state.model = max(getint(p), 0);
-                    ci->state.vanity = max(getint(p), 0);
+                    getstring(text, p);
+                    ci->state.setvanity(text);
 
                     string password = "", authname = "";
                     getstring(text, p); copystring(password, text);
@@ -4991,9 +4992,6 @@ namespace server
                     QUEUE_MSG;
                     defformatstring(oldname)("%s", colorname(ci));
                     getstring(text, p);
-                    ci->state.colour = max(getint(p), 0);
-                    ci->state.model = max(getint(p), 0);
-                    ci->state.vanity = max(getint(p), 0);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
                     while(*namestr && iscubespace(*namestr)) namestr++;
@@ -5003,10 +5001,14 @@ namespace server
                         copystring(ci->name, namestr, MAXNAMELEN+1);
                         relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
                     }
+                    ci->state.colour = max(getint(p), 0);
+                    ci->state.model = max(getint(p), 0);
+                    getstring(text, p);
+                    ci->state.setvanity(text);
                     QUEUE_STR(ci->name);
                     QUEUE_INT(ci->state.colour);
                     QUEUE_INT(ci->state.model);
-                    QUEUE_INT(ci->state.vanity);
+                    QUEUE_STR(ci->state.vanity);
                     break;
                 }
 

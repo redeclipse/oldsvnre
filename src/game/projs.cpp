@@ -23,10 +23,12 @@ namespace projs
     FVAR(IDF_PERSIST, gibswaterfric, 0, 2, 10000);
     FVAR(IDF_PERSIST, gibsweight, -10000, 150, 10000);
 
+#ifdef VANITY
     FVAR(IDF_PERSIST, vanityelasticity, -10000, 0.35f, 10000);
     FVAR(IDF_PERSIST, vanityrelativity, -10000, 0.95f, 10000);
     FVAR(IDF_PERSIST, vanitywaterfric, 0, 2, 10000);
     FVAR(IDF_PERSIST, vanityweight, -10000, 150, 10000);
+#endif
 
     FVAR(IDF_PERSIST, debriselasticity, -10000, 0.6f, 10000);
     FVAR(IDF_PERSIST, debriswaterfric, 0, 1.7f, 10000);
@@ -871,12 +873,12 @@ namespace projs
                 }
 #ifdef VANITY
                 proj.mdl = vanities[proj.weap].model;
-#endif
                 proj.reflectivity = 0.f;
                 proj.elasticity = vanityelasticity;
                 proj.relativity = vanityrelativity;
                 proj.waterfric = vanitywaterfric;
                 proj.weight = vanityweight;
+#endif
                 proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(21)-10));
                 proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                 proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;

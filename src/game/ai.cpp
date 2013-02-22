@@ -185,7 +185,7 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, int vn)
+    void init(gameent *d, int at, int et, int on, int sk, int bn, char *name, int tm, int cl, int md, const char *vn)
     {
         getwaypoints();
 
@@ -226,7 +226,7 @@ namespace ai
         d->team = tm;
         d->colour = cl;
         d->model = md;
-        d->vanity = vn;
+        d->setvanity(vn);
 
         formatstring(d->hostname)("bot#%d", d->ownernum);
 
