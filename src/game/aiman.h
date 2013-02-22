@@ -85,7 +85,7 @@ namespace aiman
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
                 ci->state.model = rnd(PLAYERTYPES);
-                ci->state.vanity = 1<<0; // the first slot is special
+                ci->state.setvanity("badge"); // the first slot is special
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;
@@ -141,7 +141,7 @@ namespace aiman
         else if(ci->state.aireinit >= 1)
         {
             if(ci->state.aireinit == 2) loopk(W_MAX) loopj(2) ci->state.weapshots[k][j].reset();
-            sendf(-1, 1, "ri6si4", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model, ci->state.vanity);
+            sendf(-1, 1, "ri6si3s", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model, ci->state.vanity);
             if(ci->state.aireinit == 2)
             {
                 waiting(ci, 1, DROP_RESET);

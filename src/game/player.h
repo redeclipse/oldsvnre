@@ -133,17 +133,25 @@ struct vanityfile
 struct vanitys
 {
     int type, style, priv;
-    char *model, *name, *tag;
+    char *ref, *model, *name, *tag;
     vector<vanityfile> files;
 
-    vanitys() : type(-1), style(0), priv(0), model(NULL), name(NULL), tag(NULL) {}
-    vanitys(int t, const char *m, const char *n, const char *g, int s, int p) : type(t), style(s), priv(p), model(newstring(m)), name(newstring(n)), tag(newstring(g)) {}
+    vanitys() : type(-1), style(0), priv(0), ref(NULL), model(NULL), name(NULL), tag(NULL) {}
+    vanitys(int t, const char *r, const char *n, const char *g, int s, int p) : type(t), style(s), priv(p), ref(newstring(r)), name(newstring(n)), tag(newstring(g)) { setmodel(r); }
     ~vanitys()
     {
+        if(ref) delete[] ref;
         if(model) delete[] model;
         if(name) delete[] name;
         if(tag) delete[] tag;
         loopvrev(files) files.remove(i);
+    }
+
+    void setmodel(const char *r)
+    {
+        if(model) delete[] model;
+        defformatstring(m)("vanities/%s", r);
+        model = newstring(m);
     }
 };
 #ifdef GAMEWORLD

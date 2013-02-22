@@ -327,11 +327,24 @@ namespace client
         styles.deletearrays();
     }
 
+    void getvitem(gameent *d, int n, int v)
+    {
+        if(n < 0) intret(d->vitems.length());
+        else if(v < 0) intret(2);
+        else if(d->vitems.inrange(n)) switch(v)
+        {
+            case 0: intret(d->vitems[n]); break;
+            case 1: if(vanities.inrange(d->vitems[n])) result(vanities[d->vitems[n]].ref); break;
+            default: break;
+        }
+    }
+
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getplayername, "", (), result(game::player1->name));
     ICOMMAND(0, getplayercolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
     ICOMMAND(0, getplayermodel, "", (), intret(game::player1->model));
-    ICOMMAND(0, getplayervanity, "", (), intret(game::player1->vanity));
+    ICOMMAND(0, getplayervanity, "", (), result(game::player1->vanity));
+    ICOMMAND(0, getplayervitem, "bi", (int *n, int *v), getvitem(game::player1, *n, *v));
     ICOMMAND(0, getplayerteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getplayerteamicon, "", (), result(hud::teamtexname(game::player1->team)));
     ICOMMAND(0, getplayerteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
@@ -376,15 +389,7 @@ namespace client
     VARF(IDF_PERSIST, playermodel, 0, 0, PLAYERTYPES-1, setplayermodel(playermodel));
 
 #ifdef VANITY
-    void setplayervanity(int vanity)
-    {
-        if(vanity >= 0 && game::player1->vanity != vanity)
-        {
-            game::player1->vanity = vanity;
-            sendplayerinfo = true;
-        }
-    }
-    VARF(IDF_PERSIST|IDF_HEX, playervanity, 0, 0, VAR_MAX, setplayervanity(playervanity));
+    SVARF(IDF_PERSIST, playervanity, "", if(game::player1->setvanity(playervanity)) sendplayerinfo = true;);
 #endif
 
     int teamname(const char *team)
@@ -473,12 +478,19 @@ namespace client
     }
     ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 2)));
 
-    int getclientvanity(int cn)
+    const char *getclientvanity(int cn)
     {
         gameent *d = game::getclient(cn);
-        return d ? d->vanity : 0;
+        return d ? d->vanity : "";
     }
-    ICOMMAND(0, getclientvanity, "i", (int *cn), intret(getclientvanity(*cn)));
+    ICOMMAND(0, getclientvanity, "i", (int *cn), result(getclientvanity(*cn)));
+
+    void getclientvitem(int cn, int n, int v)
+    {
+        gameent *d = game::getclient(cn);
+        if(d) getvitem(d, n, v);
+    }
+    ICOMMAND(0, getclientvitem, "ibi", (int *cn, int *n, int *v), getclientvitem(*cn, *n, *v));
 
     const char *getclienthost(int cn)
     {
@@ -1239,7 +1251,7 @@ namespace client
         sendstring(game::player1->name, p);
         putint(p, game::player1->colour);
         putint(p, game::player1->model);
-        putint(p, game::player1->vanity);
+        sendstring(game::player1->vanity, p);
         mkstring(hash);
         if(connectpass[0])
         {
@@ -1350,7 +1362,7 @@ namespace client
             sendstring(game::player1->name, p);
             putint(p, game::player1->colour);
             putint(p, game::player1->model);
-            putint(p, game::player1->vanity);
+            sendstring(game::player1->vanity, p);
         }
         if(sendcrcinfo)
         {
@@ -1742,7 +1754,9 @@ namespace client
                 case N_SETPLAYERINFO:
                 {
                     getstring(text, p);
-                    int colour = getint(p), model = getint(p), vanity = getint(p);
+                    int colour = getint(p), model = getint(p);
+                    string vanity;
+                    getstring(vanity, p);
                     if(!d) break;
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
@@ -1769,12 +1783,16 @@ namespace client
                     {
                         loopi(2) getstring(text, p);
                         loopi(2) getint(p);
+                        getstring(text, p);
+                        getint(p);
                         break;
                     }
                     getstring(d->hostname, p);
                     if(!d->hostname[0]) copystring(d->hostname, "unknown");
                     getstring(text, p);
-                    int colour = getint(p), model = getint(p), vanity = getint(p);
+                    int colour = getint(p), model = getint(p);
+                    string vanity;
+                    getstring(vanity, p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
                     while(*namestr && iscubespace(*namestr)) namestr++;
@@ -2534,10 +2552,12 @@ namespace client
                 {
                     int bn = getint(p), on = getint(p), at = getint(p), et = getint(p), sk = clamp(getint(p), 1, 101);
                     getstring(text, p);
-                    int tm = getint(p), cl = getint(p), md = getint(p), vn = getint(p);
+                    int tm = getint(p), cl = getint(p), md = getint(p);
+                    string vanity;
+                    getstring(vanity, p);
                     gameent *b = game::newclient(bn);
                     if(!b) break;
-                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md, vn);
+                    ai::init(b, at, et, on, sk, bn, text, tm, cl, md, vanity);
                     break;
                 }
 
