@@ -29,7 +29,8 @@ Modes & Mutators:
  * Removed ballistic mutator
  * Added kaboom mutator (only grenades and mines with reloading ammo, rockets
    spawn at normal mine & grenade spawns)
- * Added gauntlet mode (work in progress)
+ * Added gauntlet mode (one team tries to run a trial map, other team tries to
+   hinder, switches at half-time)
 
 Maps:
  * Assigned map music to all maps
@@ -47,7 +48,7 @@ Maps:
  * Cyanide, new time-trial map
  * Dead Simple, updated (retextured)
  * Frag Vault "vault", new map
- * Steel Rat, new time-trial map
+ * Steel Rat, new time-trial map (added from mapversion 1.3b)
  * Dawn, removed
  * Industrial, removed
  * Lab, removed
@@ -111,12 +112,17 @@ Data Assets:
  * Added vanity items for players
  * Added new vapour sound
  * Added support for models rotating off of their model links and spin rolling
+ * Improved SMG animation
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same
    maps
  * Added vetolock variable to determine who may force match votes
- * Added additional privilege levels (supporter, operator, developer) and icons for all levels
+ * Added additional privilege levels (supporter, operator, developer) and icons
+   for all levels
+ * Added "maxplayers" server-world variable (defaults to 2x"numplayers")
+ * Enabled "maxalive" by default (now corresponds to "maxplayers", limits
+   amount of players based on map settings)
 
 Core & Install:
  * Added IRC guidelines
