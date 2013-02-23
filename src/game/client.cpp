@@ -2412,7 +2412,7 @@ namespace client
                     {
                         if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
                         {
-                            if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent].attrs[6] == CP_START))
+                            if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent]->attrs[6] == CP_START))
                                 t->cpmillis = lastmillis;
                             entities::execlink(t, ent, false);
                         }
