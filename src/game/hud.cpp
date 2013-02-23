@@ -2618,17 +2618,17 @@ namespace hud
         if(inventorytrial && m_laptime(game::gamemode, game::mutators) && game::focus->state != CS_EDITING && game::focus->state != CS_SPECTATOR)
         {
             float fade = blend*inventorytrialblend;
-            if((game::focus->cpmillis > 0 || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
+            if((game::focus->cpmillis || game::focus->cptime) && (game::focus->state == CS_ALIVE || game::focus->state == CS_DEAD || game::focus->state == CS_WAITING))
             {
-                pushfont("default");
-                sy += draw_textx("\falap:\fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
+                pushfont("emphasis");
+                sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
                 if(game::focus->cptime)
                 {
-                    pushfont("reduced");
+                    pushfont("default");
                     sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cptime));
                     popfont();
                 }
-                if(game::focus->cpmillis > 0)
+                if(game::focus->cpmillis)
                     sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(lastmillis-game::focus->cpmillis, 1));
                 else if(game::focus->cplast)
                     sy += draw_textx("\fzwe%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cplast));

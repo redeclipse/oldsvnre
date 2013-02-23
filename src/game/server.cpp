@@ -623,7 +623,6 @@ namespace server
             else
             {
                 if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
-                if(m_trial(gamemode) && ci->state.cpmillis < 0) return false;
                 int delay = ci->state.aitype >= AI_START && ci->state.lastdeath ? G(enemyspawntime) : m_delay(gamemode, mutators);
                 if(delay && ci->state.respawnwait(gamemillis, delay)) return false;
                 if(spawnqueue() && playing.find(ci) < 0)
@@ -4830,7 +4829,7 @@ namespace server
                             {
                                 case CP_LAST: case CP_FINISH:
                                 {
-                                    if(cp->state.cpmillis > 0)
+                                    if(cp->state.cpmillis)
                                     {
                                         int laptime = gamemillis-cp->state.cpmillis;
                                         if(cp->state.cptime <= 0 || laptime < cp->state.cptime) cp->state.cptime = laptime;
@@ -4863,7 +4862,7 @@ namespace server
                                 case CP_RESPAWN: case CP_START:
                                 {
                                     sendf(-1, 1, "ri4", N_CHECKPOINT, cp->clientnum, ent, -1);
-                                    cp->state.cpmillis = gamemillis;
+                                    if(!cp->state.cpmillis || sents[ent].attrs[6] != CP_RESPAWN) cp->state.cpmillis = gamemillis;
                                     cp->state.cpnodes.add(ent);
                                 }
                                 default: break;
