@@ -706,7 +706,7 @@ namespace game
                         if(fluc >= 0.25f) fluc = (0.25f+0.03f-fluc)*(0.25f/0.03f);
                         pc *= 0.75f+fluc;
                     }
-                    adddynlight(d->center(), d->height*intensity*pc, vec(0.2f, 0.8f, 1.f).mul(pc), 0, 0, DL_KEEP);
+                    adddynlight(d->center(), d->height*intensity*pc, rescolour(d, PULSE_SHOCK).mul(pc), 0, 0, DL_KEEP);
                 }
                 if(d->aitype < AI_START && illumlevel > 0 && illumradius > 0)
                 {
@@ -3137,14 +3137,14 @@ namespace game
             }
             if(shocktime && d->shocking(lastmillis, shocktime))
             {
-                int millis = lastmillis-d->lastres[WR_SHOCK];
+                vec origin = d->center(), col = rescolour(d, PULSE_SHOCK);
+                int millis = lastmillis-d->lastres[WR_SHOCK], colour = (int(col.x*255)<<16)|(int(col.y*255)<<8)|(int(col.z*255));
                 float pc = shocktime-millis < shockdelay ? (shocktime-millis)/float(shockdelay) : 0.5f+(float(millis%shockdelay)/float(shockdelay*4));
-                vec origin = d->center();
                 loopi(10+rnd(20))
                 {
                     vec from = vec(origin).add(vec((rnd(201)-100)/100.f, (rnd(201)-100)/100.f, (rnd(201)-100)/100.f).normalize().mul(vec(d->xradius, d->yradius, d->height).mul(0.35f*pc))),
                         to = vec(origin).add(vec((rnd(201)-100)/100.f, (rnd(201)-100)/100.f, (rnd(201)-100)/100.f).normalize().mul(d->height*pc*rnd(100)/80.f));
-                    part_flare(from, to, 1, PART_LIGHTNING_FLARE, 0x20B0F0, 0.1f+pc, 0.25f+pc*0.5f);
+                    part_flare(from, to, 1, PART_LIGHTNING_FLARE, colour, 0.1f+pc, 0.25f+pc*0.5f);
                 }
             }
         }

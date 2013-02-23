@@ -2402,9 +2402,20 @@ namespace client
                 {
                     int tn = getint(p), ent = getint(p);
                     gameent *t = game::getclient(tn);
-                    if(!t) break;
+                    if(!t)
+                    {
+                        if(getint(p) < 0) break;
+                        loopi(2) getint(p);
+                        break;
+                    }
                     if(ent >= 0)
                     {
+                        if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
+                        {
+                            if(t != game::player1 && !t->ai && (!t->cpmillis || entities::ents[ent].attrs[6] == CP_START))
+                                t->cpmillis = lastmillis;
+                            entities::execlink(t, ent, false);
+                        }
                         int laptime = getint(p);
                         if(laptime >= 0)
                         {
@@ -2418,8 +2429,6 @@ namespace client
                                 conoutft(t != game::player1 ? CON_INFO : CON_SELF, "%s completed in \fs\fg%s\fS (best: \fs\fy%s\fS, laps: \fs\fc%d\fS)", game::colorname(t), hud::timetostr(t->cplast), best, t->cplaps);
                             }
                         }
-                        if(entities::ents.inrange(ent) && entities::ents[ent]->type == CHECKPOINT)
-                            entities::execlink(t, ent, false);
                     }
                     else
                     {
