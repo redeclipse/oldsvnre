@@ -782,7 +782,7 @@ void renderradius(const vec &o, float radius)
                     d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_x(90*RAD));
                     break;
                 case 1:
-                    d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_y(90*RAD));
+                    d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_y(-90*RAD));
                     break;
                 case 2: default:
                     d.add(vec(radius*cosf(2*M_PI*i/16.0f), radius*sinf(2*M_PI*i/16.0f), 0).rotate_around_z(90*RAD));
