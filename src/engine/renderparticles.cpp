@@ -903,7 +903,7 @@ struct loopprimitiverenderer : listrenderer<loopprimitive>
                     v = vec(p->value.x*cosf(2*M_PI*i/16.0f), p->value.z*sinf(2*M_PI*i/16.0f), 0).rotate_around_x(90*RAD);
                     break;
                 case 1:
-                    v = vec(p->value.z*cosf(2*M_PI*i/16.0f), p->value.y*sinf(2*M_PI*i/16.0f), 0).rotate_around_y(90*RAD);
+                    v = vec(p->value.z*cosf(2*M_PI*i/16.0f), p->value.y*sinf(2*M_PI*i/16.0f), 0).rotate_around_y(-90*RAD);
                     break;
                 case 2: default:
                     v = vec(p->value.x*cosf(2*M_PI*i/16.0f), p->value.y*sinf(2*M_PI*i/16.0f), 0).rotate_around_z(90*RAD);

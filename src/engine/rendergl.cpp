@@ -908,6 +908,10 @@ void readmatrices()
     mvpmatrix.mul(projmatrix, mvmatrix);
     invmvmatrix.invert(mvmatrix);
     invmvpmatrix.invert(mvpmatrix);
+
+    mvmatrix.transposedtransformnormal(vec(viewmatrix.getcolumn(1)), camdir);
+    mvmatrix.transposedtransformnormal(vec(viewmatrix.getcolumn(0)).neg(), camright);
+    mvmatrix.transposedtransformnormal(vec(viewmatrix.getcolumn(2)), camup);
 }
 
 FVAR(0, nearplane, 0.01f, 0.54f, 2.0f);

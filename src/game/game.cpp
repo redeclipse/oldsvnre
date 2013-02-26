@@ -2556,10 +2556,6 @@ namespace game
                 if(best) worldpos = vec(worldpos).sub(camera1->o).normalize().mul(bestdist+best->radius).add(camera1->o);
             }
 
-            vecfromyawpitch(camera1->yaw, camera1->pitch, 1, 0, camdir);
-            vecfromyawpitch(camera1->yaw, 0, 0, -1, camright);
-            vecfromyawpitch(camera1->yaw, camera1->pitch+90, 1, 0, camup);
-
             camera1->inmaterial = lookupmaterial(camera1->o);
             camera1->inliquid = isliquid(camera1->inmaterial&MATF_VOLUME);
 
