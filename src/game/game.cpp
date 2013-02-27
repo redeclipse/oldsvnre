@@ -212,7 +212,7 @@ namespace game
     }
     ICOMMAND(0, resetvanity, "", (), vanityreset());
 
-    int vanityitem(int type, const char *ref, const char *name, const char *tag, int style, int priv)
+    int vanityitem(int type, const char *ref, const char *name, const char *tag, int cond, int style, int priv)
     {
         if(type < 0 || type >= VANITYMAX || !ref || !name || !tag) return -1;
         int num = vanities.length();
@@ -222,25 +222,27 @@ namespace game
         v.setmodel(ref);
         v.name = newstring(name);
         v.tag = newstring(tag);
+        v.cond = cond;
         v.style = style;
         v.priv = priv;
         return num;
     }
-    ICOMMAND(0, addvanity, "isssii", (int *t, char *r, char *n, char *g, int *s, int *p), intret(vanityitem(*t, r, n, g, *s, *p)));
+    ICOMMAND(0, addvanity, "isssiii", (int *t, char *r, char *n, char *g, int *c, int *s, int *p), intret(vanityitem(*t, r, n, g, *c, *s, *p)));
 
     void vanityinfo(int id, int value)
     {
         if(id < 0) intret(vanities.length());
-        else if(value < 0) intret(6);
+        else if(value < 0) intret(7);
         else if(vanities.inrange(id)) switch(value)
         {
             case 0: intret(vanities[id].type); break;
             case 1: result(vanities[id].ref); break;
             case 2: result(vanities[id].name); break;
             case 3: result(vanities[id].tag); break;
-            case 4: intret(vanities[id].style); break;
-            case 5: intret(vanities[id].priv); break;
-            case 6: result(vanities[id].model); break;
+            case 4: intret(vanities[id].cond); break;
+            case 5: intret(vanities[id].style); break;
+            case 6: intret(vanities[id].priv); break;
+            case 7: result(vanities[id].model); break;
             default: break;
         }
     }
@@ -2598,9 +2600,9 @@ namespace game
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
         else mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
 #else
-        const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][tpmdl ? 0 : 1];
-        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
-        else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
+        const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][third ? 0 : (tpmdl ? 2 : 1)];
+        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : (tpmdl ? 2 : 1)];
+        else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][third ? 0 : (tpmdl ? 2 : 1)];
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = tpmdl ? d->feetpos() : camerapos(d);
@@ -2883,7 +2885,7 @@ namespace game
         }
         int team = m_fight(gamemode) && m_isteam(gamemode, mutators) ? d->team : T_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
-        bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
+        bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap), tpmdl = third || (d == focus && firstpersonmodel == 2);
 
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
@@ -2914,7 +2916,7 @@ namespace game
         }
         else
         {
-            secondary = third;
+            secondary = tpmdl;
             if(showweap)
             {
                 weapaction = lastaction = d->weaplast[weap];
@@ -2964,20 +2966,20 @@ namespace game
                     }
                 }
             }
-            if(third && (animflags&ANIM_IDLE) && lastmillis-d->lastpain <= 300)
+            if(tpmdl && (animflags&ANIM_IDLE) && lastmillis-d->lastpain <= 300)
             {
-                secondary = third;
+                secondary = tpmdl;
                 lastaction = d->lastpain;
                 animflags = ANIM_PAIN;
                 animdelay = 300;
             }
         }
         if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
-        const char *weapmdl = isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
+        const char *weapmdl = isweap(weap) ? (tpmdl ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         int ai = 0;
 #ifdef VANITY
         modelattach a[1+VANITYMAX+10];
-        if(third && *d->vanity)
+        if(tpmdl && *d->vanity)
         {
             if(d->vitems.empty())
             {
@@ -2989,8 +2991,10 @@ namespace game
                 vanitylist.deletearrays();
             }
             int found[VANITYMAX] = {0};
-            loopvk(d->vitems) if(vanities.inrange(d->vitems[k]) && d->privilege >= vanities[d->vitems[k]].priv && !found[vanities[d->vitems[k]].type])
+            loopvk(d->vitems) if(vanities.inrange(d->vitems[k]))
             {
+                if(found[vanities[d->vitems[k]].type] || d->privilege < vanities[d->vitems[k]].priv) continue;
+                if(vanities[d->vitems[k]].cond && !third) continue;
                 const char *file = NULL;
                 switch(vanities[d->vitems[k]].style)
                 {
@@ -3026,17 +3030,20 @@ namespace game
         bool hasweapon = showweap && *weapmdl;
 #endif
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
-        if(rendernormally && (early || d != focus))
+        if(rendernormally)
         {
-            const char *muzzle = "tag_weapon";
-            if(hasweapon)
+            if(early || d != focus)
             {
-                muzzle = "tag_muzzle";
-                if(weaptype[weap].eject) a[ai++] = modelattach("tag_eject", &d->eject);
+                const char *muzzle = "tag_weapon";
+                if(hasweapon)
+                {
+                    muzzle = "tag_muzzle";
+                    if(weaptype[weap].eject) a[ai++] = modelattach("tag_eject", &d->eject);
+                }
+                a[ai++] = modelattach(muzzle, &d->muzzle);
+                a[ai++] = modelattach("tag_weapon", &d->origin);
             }
-            a[ai++] = modelattach(muzzle, &d->muzzle);
-            a[ai++] = modelattach("tag_weapon", &d->origin);
-            if(third && d->wantshitbox())
+            if((d != focus ? third : (tpmdl && early)) && d->wantshitbox())
             {
                 a[ai++] = modelattach("tag_head", &d->head);
                 a[ai++] = modelattach("tag_torso", &d->torso);
