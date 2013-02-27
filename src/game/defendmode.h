@@ -1,4 +1,3 @@
-// server side stf manager
 struct defendservmode : defendstate, servmode
 {
     int scoresec;
@@ -222,7 +221,7 @@ struct defendservmode : defendstate, servmode
     void checkclient(clientinfo *ci)
     {
         if(!hasflaginfo || ci->state.state != CS_ALIVE || m_insta(gamemode, mutators)) return;
-        #define defendbuff4 (G(defendbuffing)&4 && b.occupied(defendinstant, defendcount >= G(defendbuffoccupy)))
+        #define defendbuff4 (G(defendbuffing)&4 && b.occupied(defendinstant, defendcount) >= G(defendbuffoccupy))
         #define defendbuff1 (G(defendbuffing)&1 && b.owner == ci->team && (!b.enemy || defendbuff4))
         #define defendbuff2 (G(defendbuffing)&2 && b.owner == T_NEUTRAL && (b.enemy == ci->team || defendbuff4))
         if(G(defendbuffing)) loopv(flags)

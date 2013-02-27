@@ -1,4 +1,3 @@
-// server-side bomber manager
 struct bomberservmode : bomberstate, servmode
 {
     bool hasflaginfo;

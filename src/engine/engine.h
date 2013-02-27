@@ -3,46 +3,24 @@
 
 #include "cube.h"
 
-#ifdef MEK
-#define RE_VER_MAJOR        0
-#define RE_VER_MINOR        1
-#define RE_VER_PATCH        0
-#define RE_VER_STR          "0.1"
-#define RE_NAME             "MekArcade"
-#define RE_UNAME            "mekarcade"
-#define RE_RELEASE          "Pre-Alpha"
-#define RE_URL              "www.mekarcade.com"
-#define RE_LAN_PORT         28799
-#define RE_MASTER_PORT      28800
-#define RE_SERVER_PORT      28801
-#define RE_MASTER_HOST      ""
-#else
-#define RE_VER_MAJOR        1
-#define RE_VER_MINOR        4
-#define RE_VER_PATCH        0
-#define RE_VER_STR          "1.4"
-#define RE_NAME             "Red Eclipse"
-#define RE_UNAME            "redeclipse"
-#define RE_RELEASE          "Elara"
-#define RE_URL              "www.redeclipse.net"
-#define RE_LAN_PORT         28799
-#define RE_MASTER_PORT      28800
-#define RE_SERVER_PORT      28801
-#define RE_MASTER_HOST      "play.redeclipse.net"
-#endif
+#define LAN_PORT         28799
+#define MASTER_PORT      28800
+#define SERVER_PORT      28801
 
-#define RE_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
-#define RE_VER              RE_VER_MAKE(RE_VER_MAJOR, RE_VER_MINOR, RE_VER_PATCH)
-#define RE_VERSION          (RE_VER_MAJOR*100)+(RE_VER_MINOR*10)+RE_VER_PATCH
+extern int versionmajor, versionminor, versionpatch;
+extern char *versionstring, *versionname, *versionuname, *versionrelease, *versionurl, *versionmaster;
+#define CUR_VER_MAKE(a,b,c)  (((a)<<16) | ((b)<<8) | (c))
+#define CUR_VER              CUR_VER_MAKE(versionmajor, versionminor, versionpatch)
+#define CUR_VERSION          (versionmajor*100)+(versionminor*10)+versionpatch
 
 #ifdef WIN32
-#define RE_PLATFORM         "win"
+#define CUR_PLATFORM         "win"
 #elif defined(__APPLE__)
-#define RE_PLATFORM         "mac"
+#define CUR_PLATFORM         "mac"
 #else
-#define RE_PLATFORM         "nix"
+#define CUR_PLATFORM         "nix"
 #endif
-#define RE_ARCH             (int(8*sizeof(void *)))
+#define CUR_ARCH             (int(8*sizeof(void *)))
 
 #ifdef STANDALONE
 extern void setupmaster();
@@ -579,7 +557,7 @@ extern char *connectname;
 extern int connectport;
 extern void localservertoclient(int chan, ENetPacket *packet);
 extern bool connected(bool attempt = true, bool local = true);
-extern void connectserv(const char *name = NULL, int port = RE_SERVER_PORT, const char *password = NULL);
+extern void connectserv(const char *name = NULL, int port = MASTER_PORT, const char *password = NULL);
 extern void reconnect(const char *pass);
 extern void lanconnect();
 extern void abortconnect(bool msg = true);

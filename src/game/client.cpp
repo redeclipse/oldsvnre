@@ -172,8 +172,8 @@ namespace client
         else
         {
             lilswap(&d.hdr.version, 2);
-            if(d.hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", name, d.hdr.version<DEMO_VERSION ? "an older" : "a newer", RE_NAME);
-            else if(d.hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", name, d.hdr.gamever<GAMEVERSION ? "an older" : "a newer", RE_NAME);
+            if(d.hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", name, d.hdr.version<DEMO_VERSION ? "an older" : "a newer", versionname);
+            else if(d.hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", name, d.hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
         }
         if(msg[0])
         {

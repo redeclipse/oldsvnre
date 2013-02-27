@@ -2796,8 +2796,8 @@ namespace hud
                 else y -= draw_textx("%s", FONTH*7/2, y, 255, 255, 255, 255, TEXT_LEFT_UP, -1, -1, *progresstitle ? progresstitle : "please wait...");
             }
             y = h-FONTH/2;
-            y -= draw_textx("v%s-%s %d bit (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, RE_VER_STR, RE_PLATFORM, RE_ARCH, RE_RELEASE);
-            y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, RE_URL);
+            y -= draw_textx("v%s-%s %d bit (%s)", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
+            y -= draw_textx("%s", w-FONTH, y, 255, 255, 255, 255, TEXT_RIGHT_UP, -1, -1, versionurl);
             popfont();
         }
     }
