@@ -61,24 +61,24 @@ GVAR(IDF_ADMIN, campaignplayers, 1, 4, MAXPLAYERS);
 GSVAR(IDF_ADMIN, campaignmaps, "");
 #endif
 
-GSVAR(IDF_ADMIN, allowmaps, "bath");
+GSVAR(IDF_ADMIN, allowmaps, "untitled");
 
-GSVAR(IDF_ADMIN, mainmaps, "bath");
-GSVAR(IDF_ADMIN, capturemaps, "bath");
-GSVAR(IDF_ADMIN, defendmaps, "bath");
-GSVAR(IDF_ADMIN, kingmaps, "bath");
-GSVAR(IDF_ADMIN, bombermaps, "bath");
-GSVAR(IDF_ADMIN, holdmaps, "bath");
-GSVAR(IDF_ADMIN, trialmaps, "bath");
-GSVAR(IDF_ADMIN, gauntletmaps, "bath");
+GSVAR(IDF_ADMIN, mainmaps, "untitled");
+GSVAR(IDF_ADMIN, capturemaps, "untitled");
+GSVAR(IDF_ADMIN, defendmaps, "untitled");
+GSVAR(IDF_ADMIN, kingmaps, "untitled");
+GSVAR(IDF_ADMIN, bombermaps, "untitled");
+GSVAR(IDF_ADMIN, holdmaps, "untitled");
+GSVAR(IDF_ADMIN, trialmaps, "untitled");
+GSVAR(IDF_ADMIN, gauntletmaps, "untitled");
 
-GSVAR(IDF_ADMIN, multimaps, "bath"); // applies to modes which *require* multi spawns (ctf/bb)
-GSVAR(IDF_ADMIN, duelmaps, "bath");
-GSVAR(IDF_ADMIN, jetpackmaps, "bath");
+GSVAR(IDF_ADMIN, multimaps, "untitled"); // applies to modes which *require* multi spawns (ctf/bb)
+GSVAR(IDF_ADMIN, duelmaps, "untitled");
+GSVAR(IDF_ADMIN, jetpackmaps, "untitled");
 
-GSVAR(IDF_ADMIN, smallmaps, "bath");
-GSVAR(IDF_ADMIN, mediummaps, "bath");
-GSVAR(IDF_ADMIN, largemaps, "bath");
+GSVAR(IDF_ADMIN, smallmaps, "untitled");
+GSVAR(IDF_ADMIN, mediummaps, "untitled");
+GSVAR(IDF_ADMIN, largemaps, "untitled");
 
 GVAR(IDF_ADMIN, modelock, 0, PRIV2(OPERATOR), PRIV2(MAX));
 GVAR(IDF_ADMIN, modelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can set limited mode and higher
@@ -120,7 +120,7 @@ GVAR(0, maxalivequeue, 0, 1, 1); // if number of players exceeds this amount, us
 GVAR(0, maxaliveminimum, 2, 4, VAR_MAX); // kicks in if alive >= this
 GFVAR(0, maxalivethreshold, 0, 0, FVAR_MAX); // .. or this percentage of clients
 
-GVAR(0, maxcarry, 1, MAXCARRY, W_LOADOUT);
+GVAR(0, maxcarry, 1, 2, W_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
 GVAR(0, spawnweapon, 0, W_PISTOL, W_MAX-1);
 GVAR(0, instaweapon, 0, W_RIFLE, W_MAX-1);
@@ -173,7 +173,7 @@ GVAR(0, regentime, 0, 1000, VAR_MAX); // regen this often when regenerating norm
 GVAR(0, regenhealth, 0, 5, VAR_MAX); // regen this amount each regen
 GVAR(0, regendecay, 0, 3, VAR_MAX); // if over maxhealth, decay this amount each regen
 
-GVAR(0, kamikaze, 0, KAMIKAZE, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
+GVAR(0, kamikaze, 0, 1, 3); // 0 = never, 1 = holding grenade, 2 = have grenade, 3 = always
 GVAR(0, itemsallowed, 0, 2, 2); // 0 = never, 1 = all but limited, 2 = always
 GVAR(0, itemspawntime, 1, 15000, VAR_MAX); // when items respawn
 GVAR(0, itemspawndelay, 0, 1000, VAR_MAX); // after map start items first spawn
