@@ -108,9 +108,9 @@ CLASSDEF(float, speed);
 #else // FPS
 #define PLAYERTYPES 2
 #ifdef GAMEWORLD
-const char *playertypes[PLAYERTYPES][3] = {
-    { "actors/player/male",     "actors/player/male/hwep",      "male" },
-    { "actors/player/female",   "actors/player/female/hwep",    "female" }
+const char *playertypes[PLAYERTYPES][4] = {
+    { "actors/player/male",     "actors/player/male/hwep",      "actors/player/male/body",      "male" },
+    { "actors/player/female",   "actors/player/female/hwep",    "actors/player/male/body",      "female" }
 };
 #else
 extern const char *playertypes[PLAYERTYPES][3];
@@ -132,12 +132,12 @@ struct vanityfile
 };
 struct vanitys
 {
-    int type, style, priv;
+    int type, cond, style, priv;
     char *ref, *model, *name, *tag;
     vector<vanityfile> files;
 
-    vanitys() : type(-1), style(0), priv(0), ref(NULL), model(NULL), name(NULL), tag(NULL) {}
-    vanitys(int t, const char *r, const char *n, const char *g, int s, int p) : type(t), style(s), priv(p), ref(newstring(r)), name(newstring(n)), tag(newstring(g)) { setmodel(r); }
+    vanitys() : type(-1), cond(0), style(0), priv(0), ref(NULL), model(NULL), name(NULL), tag(NULL) {}
+    vanitys(int t, const char *r, const char *n, const char *g, int c, int s, int p) : type(t), cond(c), style(s), priv(p), ref(newstring(r)), name(newstring(n)), tag(newstring(g)) { setmodel(r); }
     ~vanitys()
     {
         if(ref) delete[] ref;

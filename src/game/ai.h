@@ -3,78 +3,9 @@ struct aistyles
     int type,           weap,           health;
     float   xradius,    yradius,    height,     weight,     speed,      scale;
     bool    canmove,    canstrafe,  canjump,    cancrouch,  useweap,    living,     hitbox;
-    const char  *name,      *playermodel[2];
+    const char  *name,      *playermodel[3];
 };
 
-#ifdef MEK
-enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_TANK, AI_MECH1, AI_DROID, AI_HELI, AI_VTOL, AI_MEK2, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
-#ifdef GAMESERVER
-aistyles aistyle[] = {
-    {
-        AI_NONE,         -1,             0,
-            3,          3,          15,         200,        50,         1,
-            true,       true,       true,       true,       true,       true,       true,
-                "player",   { "actors/mek1",     "actors/mek1/hwep" }
-    },
-    {
-        AI_BOT,         -1,             0,
-            3,          3,          15,         200,        50,         1,
-            true,       true,       false,       true,       true,       true,       true,
-                "bot",      { "actors/mek1",     "actors/mek1/hwep" }
-    },
-    {
-        AI_TURRET,      W_SMG,       100,
-            4.75,       4.75,       8.75,       150,        1,          1,
-            false,      false,      false,      false,      false,      false,      false,
-                "turret",   { "actors/turret",          "actors/player/male/hwep" }
-    },
-    {
-        AI_GRUNT,       W_MELEE,     30,
-            3,          3,          8,         150,        40,         1,
-            true,       false,      true,       true,       true,       true,       true,
-                "grunt",    { "actors/grunt/small",           "actors/player/male/hwep" }
-    },
-    {
-        AI_TANK,       W_RIFLE,     150,
-            3,          3,          14,         7000,        30,         1,
-            true,       false,      false,       false,       true,       false,       true,
-                "tank",     { "actors/tank",      "actors/weapons/rocket" }
-    },
-    {
-        AI_MECH1,       W_RIFLE,     300,
-            3,          3,          25,         9000,         60,         1,
-            true,       true,      false,       false,       true,       false,       true,
-                "mech",    { "actors/mek1",      "actors/mek1/hwep" }
-    },
-
-    {
-        AI_DROID,       W_PLASMA,     150,
-            3,          3,          14,         3000,         60,         1,
-            true,       true,      false,       false,       true,       false,       true,
-                "droid",    { "actors/droid",      "actors/droid/hwep" }
-    },
-    {
-        AI_HELI,       W_RIFLE,     80,
-            6,          6,          14,         5000,        110,         1,
-            true,       false,      false,       false,       true,       false,       true,
-                "heli",    { "aerospace/heli_hover",      "actors/player/male/hwep" }
-    },
-    {
-        AI_VTOL,     W_GRENADE,    150,
-            8,          8,          14,         5000,        130,         1,
-            true,       false,      false,       false,       true,       false,       true,
-                "vtol",   { "aerospace/vtol",     "actors/player/male/hwep" }
-    },
-    // temp using mek2 as placeholder model
-     {
-        AI_MEK2,     W_ROCKET,    400,
-            9,         9,          30,         9000,         90,         1,
-            true,       true,      false,       false,       true,       false,       true,
-                "mech2",    { "actors/mek2",      "actors/mek1/hwep" }
-    },
-};
-#endif
-#else
 enum { AI_NONE = 0, AI_BOT, AI_TURRET, AI_GRUNT, AI_DRONE, AI_MAX, AI_START = AI_TURRET, AI_TOTAL = AI_MAX-AI_START };
 #ifdef GAMESERVER
 aistyles aistyle[] = {
@@ -82,34 +13,33 @@ aistyles aistyle[] = {
         AI_NONE,         -1,             0,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "player",   { "actors/player/male",     "actors/player/male/hwep" }
+                "player",   { "actors/player/male",     "actors/player/male/hwep",      "actors/player/male/body" }
     },
     {
         AI_BOT,         -1,             0,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "bot",      { "actors/player/male",     "actors/player/male/hwep" }
+                "bot",      { "actors/player/male",     "actors/player/male/hwep",      "actors/player/male/body" }
     },
     {
         AI_TURRET,      W_SMG,       100,
             4.75,       4.75,       8.75,       150,        1,          1,
             false,      false,      false,      false,      false,      false,      false,
-                "turret",   { "actors/turret",          "actors/player/male/hwep" }
+                "turret",   { "actors/turret",          "actors/player/male/hwep",      "actors/player/male/body" }
     },
     {
         AI_GRUNT,       W_PISTOL,   50,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "grunt",   { "actors/player/male",     "actors/player/male/hwep" }
+                "grunt",   { "actors/player/male",      "actors/player/male/hwep",      "actors/player/male/body" }
     },
     {
         AI_DRONE,       W_MELEE,     50,
             3,          3,          14,         150,        40,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "drone",    { "actors/drone",           "actors/player/male/hwep" }
+                "drone",    { "actors/drone",           "actors/player/male/hwep",      "actors/player/male/body" }
     },
 };
-#endif
 #endif
 #ifndef GAMESERVER
 struct gameent;
