@@ -61,7 +61,7 @@ Files: game/fps/maps/isolation* game/fps/maps/keystone2k*
 Copyright: 2012-2013, John_III <snaginneb@yahoo.com>
 License: CC-BY-SA-3.0
 
-Files: game/fps/maps/4plex* game/fps/maps/pumpstation*
+Files: game/fps/maps/fourplex* game/fps/maps/pumpstation*
        game/fps/maps/starlibido*
 Copyright: 2012-2013 D.a.M.i.E.n. <daymeenn@gmail.com>
 License: CC-BY-SA-3.0

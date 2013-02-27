@@ -35,7 +35,7 @@ Modes & Mutators:
 Maps:
  * Assigned map music to all maps
  * Canals, updated and added to rotations
- * Fourplex, renamed to 4plex and updated to version 1.6
+ * Fourplex, updated to version 1.6
  * Star Libido, updated to version 1.5
  * Cutec, new map (added from mapversion 1.6)
  * Erosion, new map (added from mapversion 1.5)
