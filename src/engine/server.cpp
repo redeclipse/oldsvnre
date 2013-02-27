@@ -8,15 +8,14 @@
 
 bool versioning = false;
 VAR(0, version, 1, 0, -1);
-VARF(0, versionmajor, 0, 0, VAR_MAX, setversion());
-VARF(0, versionminor, 0, 0, VAR_MAX, setversion());
-VARF(0, versionpatch, 0, 0, VAR_MAX, setversion());
+VAR(0, versionmajor, 0, 0, VAR_MAX);
+VAR(0, versionminor, 0, 0, VAR_MAX);
+VAR(0, versionpatch, 0, 0, VAR_MAX);
 SVAR(0, versionstring, "0.0");
 SVAR(0, versionname, "");
 SVAR(0, versionuname, "");
 SVAR(0, versionrelease, "");
 SVAR(0, versionurl, "");
-SVARF(0, versionmaster, "", setsvar("servermaster", versionmaster, true));
 
 VAR(0, rehashing, 1, 0, -1);
 VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
