@@ -184,13 +184,20 @@ namespace physics
 
     bool isghost(gameent *d, gameent *e)
     {
-        if(d != e) switch(m_ghost(game::gamemode))
+        if(d != e)
         {
-            case 2:
-                if(e && ai::owner(d) == ai::owner(e)) return true;
-                break;
-            case 1: return true; break;
-            case 0: default: break;
+            switch(m_ghost(game::gamemode))
+            {
+                case 2: if(e && ai::owner(d) == ai::owner(e)) return true; break;
+                case 1: return true; break;
+                case 0: default: break;
+            }
+            if(m_isteam(game::gamemode, game::mutators)) switch(G(teamdamage))
+            {
+                case 1: if(d->aitype == AI_NONE || (e && e->aitype > AI_NONE)) break;
+                case 0: if(e && ai::owner(d) == ai::owner(e)) return true; break;
+                case 2: default: break;
+            }
         }
         return false;
     }
