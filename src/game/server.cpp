@@ -2583,7 +2583,11 @@ namespace server
                     }
                     checkvar(id, arg);
                     *id->storage.i = ret;
+                    if(versioning) id->def.i = ret;
                     id->changed();
+#ifndef STANDALONE
+                    if(versioning) setvar(&id->name[3], ret, true);
+#endif
                     val = intstr(id);
                     break;
                 }
@@ -2607,7 +2611,11 @@ namespace server
                     }
                     checkvar(id, arg);
                     *id->storage.f = ret;
+                    if(versioning) id->def.f = ret;
                     id->changed();
+#ifndef STANDALONE
+                    if(versioning) setfvar(&id->name[3], ret, true);
+#endif
                     val = floatstr(*id->storage.f);
                     break;
                 }
@@ -2626,7 +2634,15 @@ namespace server
                     checkvar(id, arg);
                     delete[] *id->storage.s;
                     *id->storage.s = newstring(arg);
+                    if(versioning)
+                    {
+                        delete[] id->def.s;
+                        id->def.s = newstring(arg);
+                    }
                     id->changed();
+#ifndef STANDALONE
+                    if(versioning) setsvar(&id->name[3], arg, true);
+#endif
                     val = *id->storage.s;
                     break;
                 }
@@ -3061,13 +3077,20 @@ namespace server
 
     bool isghost(clientinfo *d, clientinfo *e)
     {
-        int style = m_ghost(gamemode);
-        switch(style)
+        if(d != e)
         {
-            case 2:
-                if(!e || e->team == d->team) return true;
-            case 1: return true;
-            case 0: default: break;
+            switch(m_ghost(gamemode))
+            {
+                case 2: if(!e || e->team == d->team) return true; break;
+                case 1: return true; break;
+                case 0: default: break;
+            }
+            if(m_isteam(gamemode, mutators)) switch(G(teamdamage))
+            {
+                case 1: if(d->state.aitype == AI_NONE || (e && e->state.aitype > AI_NONE)) break;
+                case 0: if(e && d->team == e->team) return true; break;
+                case 2: default: break;
+            }
         }
         return false;
     }
@@ -3081,15 +3104,6 @@ namespace server
         {
             if(actor == target && !G(selfdamage)) nodamage++;
             else if(isghost(target, actor)) nodamage++;
-            else if(m_play(gamemode) && m_isteam(gamemode, mutators) && actor->team == target->team && actor != target)
-            {
-                switch(G(teamdamage))
-                {
-                    case 2: default: break;
-                    case 1: if(actor->state.aitype == AI_NONE || target->state.aitype > AI_NONE) break;
-                    case 0: nodamage++; break;
-                }
-            }
             if(m_expert(gamemode, mutators) && !hithead(flags)) nodamage++;
         }
         if(nodamage || !hithurts(realflags))

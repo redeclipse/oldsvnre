@@ -63,15 +63,6 @@ namespace projs
         {
             if(actor == target && !selfdamage) nodamage++;
             else if(physics::isghost(target, actor)) nodamage++;
-            else if(m_play(game::gamemode) && m_isteam(game::gamemode, game::mutators) && actor->team == target->team && actor != target)
-            {
-                switch(teamdamage)
-                {
-                    case 2: default: break;
-                    case 1: if(actor->aitype == AI_NONE || target->aitype > AI_NONE) break;
-                    case 0: nodamage++; break;
-                }
-            }
             if(m_expert(game::gamemode, game::mutators) && !hithead(flags)) nodamage++;
         }
 

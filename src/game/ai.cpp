@@ -36,6 +36,7 @@ namespace ai
 
     int owner(gameent *d)
     {
+        if(!d) return -1;
         if(d->aitype >= AI_START)
         {
             if(m_gauntlet(game::gamemode)) return T_OMEGA;

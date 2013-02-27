@@ -6,6 +6,7 @@
 #include <shlobj.h>
 #endif
 
+bool versioning = false;
 VAR(0, version, 1, 0, -1);
 SVAR(0, versionstring, "0.0.0");
 void setversion()
@@ -23,7 +24,7 @@ SVAR(0, versionname, "");
 SVAR(0, versionuname, "");
 SVAR(0, versionrelease, "");
 SVAR(0, versionurl, "");
-SVARF(0, versionmaster, "", setsvar("servermaster", versionmaster, true, true));
+SVARF(0, versionmaster, "", setsvar("servermaster", versionmaster, true));
 
 VAR(0, rehashing, 1, 0, -1);
 VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
@@ -1387,7 +1388,9 @@ void setlocations(bool wanthome)
     addpackagedir("data");
     defformatstring(gamedata)("game/%s", server::gameid());
     addpackagedir(gamedata);
+    versioning = true;
     execfile("version.cfg");
+    versioning = false;
     if(wanthome)
     {
 #if defined(WIN32)

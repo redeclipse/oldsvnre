@@ -509,31 +509,41 @@ char *svariable(const char *name, const char *cur, char **storage, identfun fun,
 #define GETVAR(id, vartype, name, retval) \
     ident *id = idents.access(name); \
     if(!id || id->type!=vartype) return retval;
+
 void setvar(const char *name, int i, bool dofunc, bool def)
 {
     GETVAR(id, ID_VAR, name, );
     *id->storage.i = clamp(i, id->minval, id->maxval);
-    if(def) id->def.i = i;
+    if(def || versioning) id->def.i = i;
     if(dofunc) id->changed();
+#ifndef STANDALONE
+    if(versioning && id->flags&IDF_SERVER) setvar(&id->name[3], i, dofunc, def);
+#endif
 }
 void setfvar(const char *name, float f, bool dofunc, bool def)
 {
     GETVAR(id, ID_FVAR, name, );
     *id->storage.f = clamp(f, id->minvalf, id->maxvalf);
-    if(def) id->def.f = f;
+    if(def || versioning) id->def.f = f;
     if(dofunc) id->changed();
+#ifndef STANDALONE
+    if(versioning && id->flags&IDF_SERVER) setfvar(&id->name[3], f, dofunc, def);
+#endif
 }
 void setsvar(const char *name, const char *str, bool dofunc, bool def)
 {
     GETVAR(id, ID_SVAR, name, );
     delete[] *id->storage.s;
     *id->storage.s = newstring(str);
-    if(def)
+    if(def || versioning)
     {
         delete[] id->def.s;
         id->def.s = newstring(str);
     }
     if(dofunc) id->changed();
+#ifndef STANDALONE
+    if(versioning && id->flags&IDF_SERVER) setsvar(&id->name[3], str, dofunc, def);
+#endif
 }
 int getvar(const char *name)
 {
@@ -675,9 +685,11 @@ void setvarchecked(ident *id, int val)
                 id->name, id->minval, id->maxval);
         }
         *id->storage.i = val;
+        if(versioning) id->def.i = val;
         id->changed();                                             // call trigger function if available
 #ifndef STANDALONE
         client::editvar(id, interactive && !(identflags&IDF_WORLD));
+        if(versioning && id->flags&IDF_SERVER) setvar(&id->name[3], val, true);
 #endif
     }
 }
@@ -696,9 +708,11 @@ void setfvarchecked(ident *id, float val)
             debugcode("\frvalid range for %s is %s..%s", id->name, floatstr(id->minvalf), floatstr(id->maxvalf));
         }
         *id->storage.f = val;
+        if(versioning) id->def.f = val;
         id->changed();
 #ifndef STANDALONE
         client::editvar(id, interactive && !(identflags&IDF_WORLD));
+        if(versioning && id->flags&IDF_SERVER) setfvar(&id->name[3], val, true);
 #endif
     }
 }
@@ -713,9 +727,15 @@ void setsvarchecked(ident *id, const char *val)
 #endif
         delete[] *id->storage.s;
         *id->storage.s = newstring(val);
+        if(versioning)
+        {
+            delete[] id->def.s;
+            id->def.s = newstring(val);
+        }
         id->changed();
 #ifndef STANDALONE
         client::editvar(id, interactive && !(identflags&IDF_WORLD));
+        if(versioning && id->flags&IDF_SERVER) setsvar(&id->name[3], val, true);
 #endif
     }
 }
