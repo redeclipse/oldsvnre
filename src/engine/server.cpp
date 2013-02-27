@@ -6,8 +6,25 @@
 #include <shlobj.h>
 #endif
 
-VAR(0, version, 1, RE_VERSION, -1); // for scripts
-SVAR(0, gamestr, RE_UNAME);
+VAR(0, version, 1, 0, -1);
+SVAR(0, versionstring, "0.0.0");
+void setversion()
+{
+    string ver;
+    if(versionpatch) formatstring(ver)("%d.%d.%d", versionmajor, versionminor, versionpatch);
+    else formatstring(ver)("%d.%d", versionmajor, versionminor);
+    setsvar("versionstring", ver);
+    setvar("version", CUR_VERSION);
+}
+VARF(0, versionmajor, 0, 0, VAR_MAX, setversion());
+VARF(0, versionminor, 0, 0, VAR_MAX, setversion());
+VARF(0, versionpatch, 0, 0, VAR_MAX, setversion());
+SVAR(0, versionname, "");
+SVAR(0, versionuname, "");
+SVAR(0, versionrelease, "");
+SVAR(0, versionurl, "");
+SVARF(0, versionmaster, "", setsvar("servermaster", versionmaster, true, true));
+
 VAR(0, rehashing, 1, 0, -1);
 VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 
@@ -178,7 +195,7 @@ VAR(0, servertype, 1, 3, 3); // 1: private, 2: public, 3: dedicated
 VARF(0, servertype, 0, 0, 3, changeservertype()); // 0: local only, 1: private, 2: public, 3: dedicated
 #endif
 VAR(0, serveruprate, 0, 0, VAR_MAX);
-VAR(0, serverport, 1, RE_SERVER_PORT, VAR_MAX);
+VAR(0, serverport, 1, SERVER_PORT, VAR_MAX);
 SVAR(0, serverip, "");
 
 int curtime = 0, totalmillis = 1, lastmillis = 1, timescale = 100, paused = 0, timeerr = 0;
@@ -535,8 +552,8 @@ void disconnectmaster()
     masteraddress.port = ENET_PORT_ANY;
 }
 
-VARF(0, servermasterport, 1, RE_MASTER_PORT, INT_MAX-1, disconnectmaster());
-SVARF(0, servermaster, RE_MASTER_HOST, disconnectmaster());
+VARF(0, servermasterport, 1, MASTER_PORT, INT_MAX-1, disconnectmaster());
+SVARF(0, servermaster, "", disconnectmaster());
 
 ENetSocket connectmaster(bool reuse)
 {
@@ -1105,7 +1122,7 @@ void logoutfv(const char *fmt, va_list args)
 void serverloop()
 {
 #ifdef WIN32
-    defformatstring(cap)("%s server", RE_NAME);
+    defformatstring(cap)("%s server", versionname);
     setupwindow(cap);
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 #endif
@@ -1178,7 +1195,7 @@ int setupserversockets()
         }
         enet_socket_set_option(pongsock, ENET_SOCKOPT_NONBLOCK, 1);
 
-        address.port = RE_LAN_PORT;
+        address.port = LAN_PORT;
         lansock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
         if(lansock != ENET_SOCKET_NULL && (enet_socket_set_option(lansock, ENET_SOCKOPT_REUSEADDR, 1) < 0 || enet_socket_bind(lansock, &address) < 0))
         {
@@ -1370,13 +1387,14 @@ void setlocations(bool wanthome)
     addpackagedir("data");
     defformatstring(gamedata)("game/%s", server::gameid());
     addpackagedir(gamedata);
+    execfile("version.cfg");
     if(wanthome)
     {
 #if defined(WIN32)
         mkstring(dir);
         if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, dir) == S_OK)
         {
-            defformatstring(s)("%s\\My Games\\%s", dir, RE_NAME);
+            defformatstring(s)("%s\\My Games\\%s", dir, versionname);
             sethomedir(s);
         }
 #elif defined(__APPLE__)
@@ -1384,14 +1402,14 @@ void setlocations(bool wanthome)
         const char *dir = mac_personaldir(); // typically  /Users/<name>/Application Support/
         if(dir && *dir)
         {
-            defformatstring(s)("%s/%s", dir, RE_UNAME);
+            defformatstring(s)("%s/%s", dir, versionuname);
             sethomedir(s);
         }
 #else
         const char *dir = getenv("HOME");
         if(dir && *dir)
         {
-            defformatstring(s)("%s/.%s", dir, RE_UNAME);
+            defformatstring(s)("%s/.%s", dir, versionuname);
             sethomedir(s);
         }
 #endif
@@ -1507,7 +1525,7 @@ void fatal(const char *s, ...)    // failure exit
 #endif
             enet_deinitialize();
 #ifdef WIN32
-            defformatstring(cap)("%s: Error", RE_NAME);
+            defformatstring(cap)("%s: Error", versionname);
             MessageBox(NULL, msg, cap, MB_OK|MB_SYSTEMMODAL);
 #endif
         }

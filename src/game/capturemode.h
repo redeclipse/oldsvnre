@@ -1,4 +1,3 @@
-// server-side capture manager
 struct captureservmode : capturestate, servmode
 {
     bool hasflaginfo;

@@ -263,7 +263,7 @@ bool sortedservers = true;
 ENetSocket pingsock = ENET_SOCKET_NULL;
 int lastinfo = 0;
 
-static serverinfo *newserver(const char *name, int port = RE_SERVER_PORT, const char *desc = NULL, int priority = 0, uint ip = ENET_HOST_ANY)
+static serverinfo *newserver(const char *name, int port = SERVER_PORT, const char *desc = NULL, int priority = 0, uint ip = ENET_HOST_ANY)
 {
     serverinfo *si = new serverinfo(ip, port);
 
@@ -287,7 +287,7 @@ void addserver(const char *name, int port, const char *desc)
     if(newserver(name, port, desc) && verbose >= 2)
         conoutf("added server %s (%d) [%s]", name, port, desc);
 }
-ICOMMAND(0, addserver, "sis", (char *n, int *p, char *d), addserver(n, *p > 0 ? *p : RE_SERVER_PORT, d));
+ICOMMAND(0, addserver, "sis", (char *n, int *p, char *d), addserver(n, *p > 0 ? *p : SERVER_PORT, d));
 VAR(0, searchlan, 0, 0, 1);
 VAR(IDF_PERSIST, maxservpings, 0, 10, 1000);
 VAR(IDF_PERSIST, serverupdateinterval, 0, 10, VAR_MAX);
@@ -330,7 +330,7 @@ void pingservers()
     {
         ENetAddress address;
         address.host = ENET_HOST_BROADCAST;
-        address.port = RE_LAN_PORT;
+        address.port = LAN_PORT;
         buf.data = ping;
         buf.dataLength = p.length();
         enet_socket_send(pingsock, &address, &buf, 1);

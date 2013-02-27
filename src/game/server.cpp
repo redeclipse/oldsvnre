@@ -952,10 +952,10 @@ namespace server
     {
         switch(n)
         {
-            case 0: return RE_VERSION;
+            case 0: return CUR_VERSION;
             case 1: return GAMEVERSION;
             case 2: case 3: return version[n%2];
-            case 4: return RE_ARCH;
+            case 4: return CUR_ARCH;
             default: break;
         }
         return 0;
@@ -1789,8 +1789,8 @@ namespace server
         else
         {
             lilswap(&hdr.version, 2);
-            if(hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", RE_NAME);
-            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", RE_NAME);
+            if(hdr.version!=DEMO_VERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.version<DEMO_VERSION ? "an older" : "a newer", versionname);
+            else if(hdr.gamever!=GAMEVERSION) formatstring(msg)("\frdemo \fs\fc%s\fS requires %s version of %s", file, hdr.gamever<GAMEVERSION ? "an older" : "a newer", versionname);
         }
         if(msg[0])
         {

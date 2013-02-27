@@ -10,7 +10,7 @@
 #define PING_RETRY 5
 
 VAR(0, masterserver, 0, 0, 1);
-VAR(0, masterport, 1, RE_MASTER_PORT, VAR_MAX);
+VAR(0, masterport, 1, MASTER_PORT, VAR_MAX);
 SVAR(0, masterip, "");
 SVAR(0, masterscriptclient, "");
 SVAR(0, masterscriptserver, "");
@@ -41,7 +41,7 @@ struct masterclient
     vector<authreq> authreqs;
     bool isserver, ishttp, listserver, shouldping, shouldpurge;
 
-    masterclient() : inputpos(0), outputpos(0), port(RE_SERVER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
+    masterclient() : inputpos(0), outputpos(0), port(MASTER_PORT), numpings(0), lastcontrol(-1), lastping(0), lastpong(0), lastactivity(0), isserver(false), ishttp(false), listserver(false), shouldping(false), shouldpurge(false) {}
 };
 
 static vector<masterclient *> masterclients;
@@ -285,7 +285,7 @@ bool checkmasterclientinput(masterclient &c)
         bool found = false;
         if(!strcmp(w[0], "server") && !c.ishttp)
         {
-            c.port = RE_SERVER_PORT;
+            c.port = MASTER_PORT;
             if(w[1]) c.port = clamp(atoi(w[1]), 1, VAR_MAX);
             c.shouldping = true;
             c.numpings = 0;

@@ -427,7 +427,7 @@ void ircprocess(ircnet *n, char *user[3], int g, int numargs, char *w[])
                             ircprintf(n, 4, g ? w[g+1] : NULL, "\fr%s requests: %s %s", user[0], q, r);
 
                             if(!strcasecmp(q, "VERSION"))
-                                ircsend(n, "NOTICE %s :\vVERSION %s v%s-%s %d bit (%s), %s\v", user[0], RE_NAME, RE_VER_STR, RE_PLATFORM, RE_ARCH, RE_RELEASE, RE_URL);
+                                ircsend(n, "NOTICE %s :\vVERSION %s v%s-%s %d bit (%s), %s\v", user[0], versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease, versionurl);
                             else if(!strcasecmp(q, "PING")) // eh, echo back
                                 ircsend(n, "NOTICE %s :\vPING %s\v", user[0], r);
                         }
@@ -690,7 +690,7 @@ void irccleanup()
     loopv(ircnets) if(ircnets[i]->sock != ENET_SOCKET_NULL)
     {
         ircnet *n = ircnets[i];
-        ircsend(n, "QUIT :%s, %s", RE_NAME, RE_URL);
+        ircsend(n, "QUIT :%s, %s", versionname, versionurl);
         ircdiscon(n, "shutdown");
     }
 }
@@ -726,7 +726,7 @@ void ircslice()
                 {
                     if(*n->passkey) ircsend(n, "PASS %s", n->passkey);
                     ircsend(n, "NICK %s", n->nick);
-                    ircsend(n, "USER %s +iw %s :%s v%s-%s %d bit (%s)", RE_UNAME, RE_UNAME, RE_NAME, RE_VER_STR, RE_PLATFORM, RE_ARCH, RE_RELEASE);
+                    ircsend(n, "USER %s +iw %s :%s v%s-%s %d bit (%s)", versionuname, versionuname, versionname, versionstring, CUR_PLATFORM, CUR_ARCH, versionrelease);
                     n->state = IRC_CONN;
                     loopvj(n->channels)
                     {
