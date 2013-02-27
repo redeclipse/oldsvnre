@@ -8,18 +8,10 @@
 
 bool versioning = false;
 VAR(0, version, 1, 0, -1);
-SVAR(0, versionstring, "0.0.0");
-void setversion()
-{
-    string ver;
-    if(versionpatch) formatstring(ver)("%d.%d.%d", versionmajor, versionminor, versionpatch);
-    else formatstring(ver)("%d.%d", versionmajor, versionminor);
-    setsvar("versionstring", ver);
-    setvar("version", CUR_VERSION);
-}
 VARF(0, versionmajor, 0, 0, VAR_MAX, setversion());
 VARF(0, versionminor, 0, 0, VAR_MAX, setversion());
 VARF(0, versionpatch, 0, 0, VAR_MAX, setversion());
+SVAR(0, versionstring, "0.0");
 SVAR(0, versionname, "");
 SVAR(0, versionuname, "");
 SVAR(0, versionrelease, "");

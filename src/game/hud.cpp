@@ -347,7 +347,7 @@ namespace hud
     VAR(IDF_PERSIST, rocketcliprotate, 0, 12, 15);
 
     VAR(IDF_PERSIST, showradar, 0, 1, 2);
-    VAR(IDF_PERSIST, radarstyle, 0, RADARSTYLE, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
+    VAR(IDF_PERSIST, radarstyle, 0, 1, 3); // 0 = compass-sectional, 1 = compass-distance, 2 = screen-space, 3 = right-corner-positional
     FVAR(IDF_PERSIST, radaraspect, 0, 1, 2); // 0 = off, else = (for radarstyle 0/1) radar forms an ellipse
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, radarcornertex, "<grey>textures/radar", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bliptex, "<grey>textures/blip", 3);
