@@ -173,6 +173,7 @@ system-uninstall-menus:
 	@rm -fv $(icondir)/48x48/apps/$(appname).png
 	@rm -fv $(icondir)/64x64/apps/$(appname).png
 	@rm -fv $(icondir)/128x128/apps/$(appname).png
+	@rm -fv $(pixmapdir)/$(appname).xpm
 
 system-uninstall: system-uninstall-client system-uninstall-server system-uninstall-data system-uninstall-docs system-uninstall-menus
 	-@rmdir -v $(libexecdir)/$(appname)
