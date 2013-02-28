@@ -1739,10 +1739,10 @@ bool load_world(const char *mname, bool temp)       // still supports all map fo
             defformatstring(cfgname)("%s.cfg", mapname);
             if(maptype == MAP_OCTA)
             {
-                execfile("octa.cfg"); // for use with -pSAUER_DIR
+                execfile("config/map/octa.cfg"); // for use with -pSAUER_DIR
                 execfile(cfgname);
             }
-            else if(!execfile(cfgname, false)) execfile("map.cfg");
+            else if(!execfile(cfgname, false)) execfile("config/map/default.cfg");
             identflags &= ~IDF_WORLD;
 
             progress(0, "preloading models...");

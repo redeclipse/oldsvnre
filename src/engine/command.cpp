@@ -1377,7 +1377,7 @@ static void compilestatements(vector<uint> &code, const char *&p, int rettype, i
         else
         {
             id = idents.access(idname);
-            if(!id || id->flags&IDF_REWRITE)
+            if(!id || (id->flags&IDF_REWRITE && (!(identflags&IDF_WORLD) || !(id->flags&IDF_WORLD))))
             {
                 if(!checknumber(idname)) { compilestr(code, idname, idlen); delete[] idname; goto noid; }
                 char *end = idname;
@@ -2044,11 +2044,11 @@ static const uint *runcode(const uint *code, tagval &result)
             case CODE_CALLU|RET_NULL: case CODE_CALLU|RET_STR: case CODE_CALLU|RET_FLOAT: case CODE_CALLU|RET_INT:
                 if(args[0].type != VAL_STR) goto litval;
                 id = idents.access(args[0].s);
-                if(!id || id->flags&IDF_REWRITE)
+                if(!id || (id->flags&IDF_REWRITE && (!(identflags&IDF_WORLD) || !(id->flags&IDF_WORLD))))
                 {
                 noid:
                     if(checknumber(args[0].s)) goto litval;
-                    if(!id || id->flags&IDF_REWRITE)
+                    if(!id || (id->flags&IDF_REWRITE && (!(identflags&IDF_WORLD) || !(id->flags&IDF_WORLD))))
                     {
                         if(server::rewritecommand(id, args, numargs)) goto forceresult;
                     }

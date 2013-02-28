@@ -980,7 +980,7 @@ int main(int argc, char **argv)
 
     conoutf("loading defaults..");
 
-    if(!execfile("stdlib.cfg", false)) fatal("cannot find data files");
+    if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files");
     if(!setfont("default")) fatal("no default font specified");
     inbetweenframes = true;
     progress(0, "please wait..");
