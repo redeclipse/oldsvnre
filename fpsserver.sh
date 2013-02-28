@@ -15,7 +15,7 @@ SYSTEM_NAME=`uname -s`
 #MACHINE_NAME=i686
 MACHINE_NAME=`uname -m`
 
-if [ -x ${RE_PATH}/bin/reserver_native ]
+if [ -x ${RE_PATH}/bin/fpsserver_native ]
 then
     SYSTEM_SUFFIX="_native"
     RE_ARCH=""
@@ -46,10 +46,10 @@ else
     esac
 fi
 
-if [ -x ${RE_PATH}/bin/${RE_ARCH}reserver${SYSTEM_SUFFIX} ]
+if [ -x ${RE_PATH}/bin/${RE_ARCH}fpsserver${SYSTEM_SUFFIX} ]
 then
     cd ${RE_PATH} || exit 1
-    exec ${RE_PATH}/bin/${RE_ARCH}reserver${SYSTEM_SUFFIX} ${RE_OPTIONS} "$@"
+    exec ${RE_PATH}/bin/${RE_ARCH}fpsserver${SYSTEM_SUFFIX} ${RE_OPTIONS} "$@"
 else
     echo "Your platform does not have a pre-compiled Red Eclipse server."
     echo -n "Would you like to build one now? [Yn] "

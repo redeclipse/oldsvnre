@@ -1716,7 +1716,7 @@ Windows,InstallType
 Typical
 
 Windows,ProgramExecutable
-<%InstallDir%>/redeclipse.bat
+<%InstallDir%>/fpsclient.bat
 
 Windows,ProgramFolderAllUsers
 Yes
