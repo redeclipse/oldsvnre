@@ -865,10 +865,10 @@ template<class T> inline void flashcolourf(T &r, T &g, T &b, T &f, T br, T bg, T
 struct gameentity : extentity
 {
     int schan;
-    int lastuse, lastspawn;
+    int lastspawn;
     linkvector kin;
 
-    gameentity() : schan(-1), lastuse(0), lastspawn(0) {}
+    gameentity() : schan(-1), lastspawn(0) {}
     ~gameentity()
     {
         if(issound(schan)) removesound(schan);
@@ -940,6 +940,11 @@ struct stunevent
     float scale, gravity;
 };
 
+struct usedent
+{
+    int ent, millis;
+};
+
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
@@ -953,6 +958,7 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
+    vector<usedent> used;
     vector<int> vitems;
 
     gameent() : edit(NULL), ai(NULL), team(T_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
@@ -1036,6 +1042,20 @@ struct gameent : dynent, gamestate
         aschan = cschan = vschan = wschan = pschan = fschan = jschan = -1;
     }
 
+    int lastused(int n, bool millis = false)
+    {
+        loopv(used) if(used[i].ent == n) return millis ? used[i].millis : i;
+        return millis ? 0 : -1;
+    }
+
+    void setused(int n, int millis)
+    {
+        int p = lastused(n);
+        usedent &u = used.inrange(p) ? used[p] : used.add();
+        u.ent = n;
+        u.millis = millis ? millis : 1;
+    }
+
     void stopmoving(bool full)
     {
         if(full) move = strafe = 0;
@@ -1057,6 +1077,7 @@ struct gameent : dynent, gamestate
         setscale(1, 0, true, gamemode, mutators);
         icons.shrink(0);
         stuns.shrink(0);
+        used.shrink(0);
     }
 
     void respawn(int millis = 0, int heal = 0, int armr = -1, int gamemode = 0, int mutators = 0)

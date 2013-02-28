@@ -350,7 +350,7 @@ namespace entities
         if(e.spawned != spawn)
         {
             e.spawned = spawn;
-            e.lastuse = lastmillis;
+            e.lastemit = lastmillis;
         }
         checkspawns(ent);
     }
@@ -451,14 +451,19 @@ namespace entities
     gameent *trigger = NULL;
     ICOMMAND(0, triggerclientnum, "", (), intret(trigger ? trigger->clientnum : -1));
 
-    bool cantrigger(gameentity &e, bool check = false)
+    bool cantrigger(int n, gameent *d = NULL)
     {
+        gameentity &e = *(gameentity *)ents[n];
         switch(e.type)
         {
             case TRIGGER:
             {
                 if(!m_check(e.attrs[5], e.attrs[6], game::gamemode, game::mutators)) return false;
-                if(check && lastmillis-e.lastuse < triggertime(e)/2) return false;
+                if(d)
+                {
+                    int millis = d->lastused(n, true);
+                    if(millis && lastmillis-millis < triggertime(e)/2) return false;
+                }
                 return true;
                 break;
             }
@@ -470,9 +475,10 @@ namespace entities
     void runtrigger(int n, gameent *d, bool act = true)
     {
         gameentity &e = *(gameentity *)ents[n];
-        if(cantrigger(e, true))
+        if(cantrigger(n, d))
         {
-            e.lastuse = lastmillis;
+            e.lastemit = lastmillis;
+            d->setused(n, lastmillis);
             switch(e.attrs[1])
             {
                 case TR_EXIT: if(d->aitype >= AI_BOT) break;
@@ -527,7 +533,9 @@ namespace entities
             {
                 case TELEPORT:
                 {
-                    e.lastuse = e.lastemit = lastmillis;
+                    int millis = d->lastused(n, true);
+                    if(millis && lastmillis-millis < triggertime(e)) break;
+                    e.lastemit = lastmillis;
                     static vector<int> teleports;
                     teleports.shrink(0);
                     loopv(e.links)
@@ -538,8 +546,8 @@ namespace entities
                         bool teleported = false;
                         while(!teleports.empty())
                         {
-                            int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
-                            gameentity &f = *(gameentity *)ents[teleports[r]];
+                            int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
+                            gameentity &f = *(gameentity *)ents[q];
                             d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(d->o));
                             if(physics::entinmap(d, true))
                             {
@@ -569,10 +577,12 @@ namespace entities
                                     }
                                 }
                                 game::fixfullrange(d->yaw, d->pitch, d->roll, true);
-                                f.lastuse = f.lastemit = e.lastemit;
+                                f.lastemit = lastmillis;
+                                d->setused(n, lastmillis);
+                                d->setused(q, lastmillis);
                                 if(d == game::focus) game::resetcamera(true);
                                 execlink(d, n, true);
-                                execlink(d, teleports[r], true);
+                                execlink(d, q, true);
                                 d->resetair();
                                 teleported = true;
                                 ai::inferwaypoints(d, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
@@ -586,7 +596,8 @@ namespace entities
                 }
                 case PUSHER:
                 {
-                    e.lastuse = e.lastemit = lastmillis;
+                    e.lastemit = lastmillis;
+                    d->setused(n, lastmillis);
                     float mag = max(e.attrs[2], 1);
                     if(e.attrs[4] && e.attrs[4] < e.attrs[3])
                     {
@@ -703,7 +714,7 @@ namespace entities
             gameentity &e = *(gameentity *)ents[n];
             bool on = m%2, spawned = e.spawned;
             if((e.spawned = on) == true) e.lastspawn = lastmillis;
-            if(e.type == TRIGGER && cantrigger(e))
+            if(e.type == TRIGGER && cantrigger(n))
             {
                 if((m >= 2 || e.lastemit <= 0 || e.spawned != spawned) && (e.attrs[1] == TR_TOGGLE || e.attrs[1] == TR_LINK || e.attrs[1] == TR_ONCE))
                 {
@@ -712,7 +723,7 @@ namespace entities
                     loopv(e.kin) if(ents.inrange(e.kin[i]))
                     {
                         gameentity &f = *(gameentity *)ents[e.kin[i]];
-                        if(!cantrigger(f)) continue;
+                        if(!cantrigger(e.kin[i])) continue;
                         f.spawned = e.spawned; f.lastemit = e.lastemit;
                         execlink(NULL, e.kin[i], false, n);
                     }
@@ -787,7 +798,7 @@ namespace entities
                 loopv(e.links) if(ents.inrange(e.links[i]))
                 {
                     gameentity &f = *(gameentity *)ents[e.links[i]];
-                    if(f.type != TRIGGER || !cantrigger(f)) continue;
+                    if(f.type != TRIGGER || !cantrigger(e.links[i])) continue;
                     e.lastemit = f.lastemit;
                     e.spawned = TRIGSTATE(f.spawned, f.attrs[4]);
                     break;
@@ -838,7 +849,7 @@ namespace entities
                     while(e.attrs[0] < 0) e.attrs[0] += TRIGGERIDS+1;
                     while(e.attrs[0] > TRIGGERIDS) e.attrs[0] -= TRIGGERIDS+1;
                 }
-                if(cantrigger(e)) loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
+                if(cantrigger(n)) loopv(e.links) if(ents.inrange(e.links[i]) && (ents[e.links[i]]->type == MAPMODEL || ents[e.links[i]]->type == PARTICLES || ents[e.links[i]]->type == MAPSOUND || ents[e.links[i]]->type == LIGHTFX))
                 {
                     ents[e.links[i]]->lastemit = e.lastemit;
                     ents[e.links[i]]->spawned = TRIGSTATE(e.spawned, e.attrs[4]);
@@ -930,7 +941,7 @@ namespace entities
         if(ents.inrange(index) && maylink(ents[index]->type))
         {
             gameentity &e = *(gameentity *)ents[index];
-            if(e.type == TRIGGER && !cantrigger(e)) return;
+            if(e.type == TRIGGER && !cantrigger(index)) return;
             bool commit = false;
             int numents = max(lastenttype[MAPMODEL], max(lastenttype[LIGHTFX], max(lastenttype[PARTICLES], lastenttype[MAPSOUND])));
             loopi(numents) if(ents[i]->links.find(index) >= 0)
@@ -2009,7 +2020,7 @@ namespace entities
             {
                 gameentity &e = *(gameentity *)ents[i];
                 if(e.type <= NOTUSED || e.type >= MAXENTTYPES) continue;
-                bool active = enttype[e.type].usetype == EU_ITEM && (e.spawned || (e.lastuse && lastmillis-e.lastuse < 500));
+                bool active = enttype[e.type].usetype == EU_ITEM && (e.spawned || (e.lastemit && lastmillis-e.lastemit < 500));
                 if((m_edit(game::gamemode) && rendermainview) || active)
                 {
                     const char *mdlname = entmdlname(e.type, e.attrs);
@@ -2043,9 +2054,9 @@ namespace entities
                             int millis = lastmillis-e.lastspawn;
                             if(millis < 500) size = fade = float(millis)/500.f;
                         }
-                        else if(e.lastuse)
+                        else if(e.lastemit)
                         {
-                            int millis = lastmillis-e.lastuse;
+                            int millis = lastmillis-e.lastemit;
                             if(millis < 500) size = fade = 1.f-(float(millis)/500.f);
                         }
                         if(e.type == WEAPON)
@@ -2166,9 +2177,9 @@ namespace entities
                 if(millis < 500) skew = float(millis)/500.f;
                 active = true;
             }
-            else if(e.lastuse)
+            else if(e.lastemit)
             {
-                int millis = lastmillis-e.lastuse;
+                int millis = lastmillis-e.lastemit;
                 if(millis < 500)
                 {
                     skew = 1.f-(float(millis)/500.f);
