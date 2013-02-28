@@ -1588,7 +1588,7 @@ namespace game
         return -1;
     }
 
-    void chooseloadweap(gameent *d, const char *list, bool saved = false, bool echo = false)
+    void chooseloadweap(gameent *d, const char *list, bool saved = false, bool respawn = false, bool echo = false)
     {
         if(m_loadout(gamemode, mutators))
         {
@@ -1613,7 +1613,7 @@ namespace game
                 int n = d->loadweap.find(items[i]);
                 d->loadweap[i] = n < 0 || n >= i ? items[i] : 0;
             }
-            client::addmsg(N_LOADW, "ri2v", d->clientnum, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
+            client::addmsg(N_LOADW, "ri3v", d->clientnum, respawn ? 1 : 0, d->loadweap.length(), d->loadweap.length(), d->loadweap.getbuf());
             vector<char> value, msg;
             loopi(r)
             {
@@ -1634,7 +1634,7 @@ namespace game
         }
         else conoutft(CON_MESG, "\foweapon selection is not currently available");
     }
-    ICOMMAND(0, loadweap, "si", (char *s, int *n), chooseloadweap(player1, s, *n!=0, true));
+    ICOMMAND(0, loadweap, "sii", (char *s, int *n, int *r), chooseloadweap(player1, s, *n!=0, *r!=0, true));
     ICOMMAND(0, getloadweap, "i", (int *n), intret(player1->loadweap.inrange(*n) ? player1->loadweap[*n] : -1));
     ICOMMAND(0, allowedweap, "i", (int *n), intret(isweap(*n) && m_check(W(*n, modes), W(*n, muts), gamemode, mutators) ? 1 : 0));
     ICOMMAND(0, hasloadweap, "bb", (int *g, int *m), intret(m_loadout(m_game(*g) ? *g : gamemode, *m >= 0 ? *m : mutators) ? 1 : 0));

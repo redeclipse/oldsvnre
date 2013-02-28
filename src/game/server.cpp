@@ -449,12 +449,15 @@ namespace server
 
     bool chkloadweap(clientinfo *ci, bool request = true)
     {
-        while(ci->state.loadweap.length() < G(maxcarry)) ci->state.loadweap.add(0);
+        while(ci->state.loadweap.length() < G(maxcarry)) ci->state.loadweap.add(-1);
         loopj(G(maxcarry))
         {
             int aweap = ci->state.loadweap[j];
-            if(!isweap(ci->state.loadweap[j]) || ci->state.loadweap[j] < W_OFFSET || ci->state.loadweap[j] >= W_ITEM) ci->state.loadweap[j] = 0;
-            else if(!m_check(W(ci->state.loadweap[j], modes), W(ci->state.loadweap[j], muts), gamemode, mutators)) ci->state.loadweap[j] = request ? -1 : 0;
+            if(isweap(ci->state.loadweap[j]))
+            {
+                if(aweap < W_OFFSET || aweap >= W_ITEM) ci->state.loadweap[j] = 0;
+                else if(!m_check(W(aweap, modes), W(aweap, muts), gamemode, mutators)) ci->state.loadweap[j] = request ? -1 : 0;
+            }
             if(!isweap(ci->state.loadweap[j]))
             {
                 if(ci->state.aitype != AI_NONE) ci->state.loadweap[j] = 0;
@@ -616,7 +619,7 @@ namespace server
             if(ci->state.aitype >= AI_START) return true;
             else if(tryspawn)
             {
-                if(m_loadout(gamemode, mutators) && !chkloadweap(ci, false)) return false;
+                if(m_loadout(gamemode, mutators) && !chkloadweap(ci)) return false;
                 if(spawnqueue(true) && spawnq.find(ci) < 0 && playing.find(ci) < 0) queue(ci);
                 return true;
             }
@@ -4643,16 +4646,15 @@ namespace server
 
                 case N_LOADW:
                 {
-                    int lcn = getint(p), n = getint(p);
+                    int lcn = getint(p), r = getint(p), n = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     vector<int> items;
                     loopk(n) items.add(getint(p));
                     if(!hasclient(cp, ci) || !m_loadout(gamemode, mutators)) break;
                     cp->state.loadweap.shrink(0);
                     loopvk(items) cp->state.loadweap.add(items[k]);
-                    chkloadweap(cp);
-                    //if(cp->state.state == CS_ALIVE && !m_duke(gamemode, mutators)) TODO: make respawn optional
-                    //    waiting(cp, DROP_WEAPONS);
+                    if(chkloadweap(cp) && r && cp->state.state == CS_ALIVE)
+                        waiting(cp, DROP_WEAPONS);
                     break;
                 }
 
