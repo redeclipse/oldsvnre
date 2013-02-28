@@ -16,7 +16,7 @@ SYSTEM_NAME=`uname -s`
 #MACHINE_NAME=i686
 MACHINE_NAME=`uname -m`
 
-if [ -x ${RE_PATH}/bin/reclient_native ]
+if [ -x ${RE_PATH}/bin/fpsclient_native ]
 then
     SYSTEM_SUFFIX="_native"
     RE_ARCH=""
@@ -47,10 +47,10 @@ else
     esac
 fi
 
-if [ -x ${RE_PATH}/bin/${RE_ARCH}reclient${SYSTEM_SUFFIX} ]
+if [ -x ${RE_PATH}/bin/${RE_ARCH}fpsclient${SYSTEM_SUFFIX} ]
 then
     cd ${RE_PATH} || exit 1
-    exec ${RE_PATH}/bin/${RE_ARCH}reclient${SYSTEM_SUFFIX} ${RE_OPTIONS} "$@"
+    exec ${RE_PATH}/bin/${RE_ARCH}fpsclient${SYSTEM_SUFFIX} ${RE_OPTIONS} "$@"
 else
     echo "Your platform does not have a pre-compiled Red Eclipse client."
     echo -n "Would you like to build one now? [Yn] "

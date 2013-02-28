@@ -2,10 +2,10 @@ ifndef APPNAME
 APPNAME=redeclipse
 endif
 ifndef APPCLIENT
-APPCLIENT=reclient
+APPCLIENT=fpsclient
 endif
 ifndef APPSERVER
-APPSERVER=reserver
+APPSERVER=fpsserver
 endif
 ifndef APPFLAGS
 APPFLAGS=

@@ -12,12 +12,12 @@ IF /I "%PROCESSOR_ARCHITEW6432%" == "amd64" (
 )
 
 :RETRY
-IF EXIST bin\%RE_ARCH%\reserver.exe (
-    start bin\%RE_ARCH%\reserver.exe %RE_OPTIONS% %* 
+IF EXIST bin\%RE_ARCH%\fpsserver.exe (
+    start bin\%RE_ARCH%\fpsserver.exe %RE_OPTIONS% %* 
 ) ELSE (
-    IF EXIST %RE_DIR%\bin\%RE_ARCH%\reserver.exe (
+    IF EXIST %RE_DIR%\bin\%RE_ARCH%\fpsserver.exe (
         pushd %RE_DIR%
-        start bin\%RE_ARCH%\reserver.exe %RE_OPTIONS% %*
+        start bin\%RE_ARCH%\fpsserver.exe %RE_OPTIONS% %*
         popd
     ) ELSE (
         IF %RE_ARCH% == amd64 (
