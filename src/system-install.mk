@@ -1,7 +1,3 @@
-ifndef ICON
-ICON=../data/textures/icon.png
-endif
-
 appname=$(APPNAME)
 appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
 appsrcname=$(APPNAME)
