@@ -1,15 +1,6 @@
-ifndef APPNAME
-APPNAME=redeclipse
-endif
-ifndef APPCLIENT
-APPCLIENT=fpsclient
-endif
-ifndef APPSERVER
-APPSERVER=fpsserver
-endif
-ifndef APPFLAGS
-APPFLAGS=
-endif
+APPNAME?=appname
+APPCLIENT=$(APPSHORTNAME)client
+APPSERVER=$(APPSHORTNAME)server
 
 #CXXFLAGS= -ggdb3
 CXXFLAGS= -O3 -fomit-frame-pointer

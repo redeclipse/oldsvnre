@@ -1,4 +1,5 @@
-# defaults to redeclipse
+APPNAME=redeclipse
+
 all:
 
 include mekarcade.mk
