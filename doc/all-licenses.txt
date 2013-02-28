@@ -219,12 +219,7 @@ License:
  Licensed publicly for everyone to use, modify and distribute as long as the
  author is credited for the original work.
 
-Files: data/textures/bloodbath.png data/textures/carnage.png
-       data/textures/critical.png data/textures/dominate.png
-       data/textures/firstblood.png data/textures/headshot.png
-       data/textures/massacre.png data/textures/multi.png
-       data/textures/revenge.png data/textures/slaughter.png
-       data/textures/triple.png
+Files: data/textures/announcer/*
 Copyright: Ed Merrit, Ten by Twenty, <http://www.tenbytwenty.com/>
            2011, Red Eclipse Team
 License: Akashi-Font and CC-BY-SA-3.0+
