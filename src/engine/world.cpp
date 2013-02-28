@@ -991,7 +991,7 @@ bool emptymap(int scale, bool force, char *mname, bool nocfg)   // main empty wo
     if(!nocfg)
     {
         identflags |= IDF_WORLD;
-        execfile("map.cfg");
+        execfile("config/map/default.cfg");
         identflags &= ~IDF_WORLD;
     }
 

@@ -1371,7 +1371,7 @@ void setlocations(bool wanthome)
         chdir(dir);
     }
 #endif
-    loopi(3) if(!fileexists(findfile("data/keymap.cfg", "r"), "r"))
+    loopi(3) if(!fileexists(findfile("data/config/keymap.cfg", "r"), "r"))
     {
         if(i != 2) chdir("..");
         else fatal("could not find data directory");
@@ -1485,7 +1485,7 @@ void rehash(bool reload)
 #else
     execfile("localinit.cfg", false);
     initing = INIT_DEFAULTS;
-    execfile("defaults.cfg");
+    execfile("config/defaults.cfg");
     initing = INIT_LOAD;
     interactive = true;
     execfile("servers.cfg", false);

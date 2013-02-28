@@ -34,7 +34,7 @@ VAR(0, dbgshader, 0, 0, 2);
 void loadshaders()
 {
     standardshader = true;
-    execfile(renderpath==R_GLSLANG ? "glsl.cfg" : "stdshader.cfg");
+    execfile(renderpath==R_GLSLANG ? "config/glsl.cfg" : "config/stdshader.cfg");
     standardshader = false;
 
     defaultshader = lookupshaderbyname("default");
@@ -239,14 +239,14 @@ static void linkglslprogram(Shader &s, bool msg = true)
 
 bool checkglslsupport()
 {
-    const GLchar *vsstr = 
-        "void main(void) {\n" 
+    const GLchar *vsstr =
+        "void main(void) {\n"
         "    gl_Position = ftransform();\n"
         "}\n";
 #if 0
     /* check if GLSL profile supports loops
      */
-    const GLchar *psstr = 
+    const GLchar *psstr =
         "uniform int N;\n"
         "uniform vec4 delta;\n"
         "void main(void) {\n"
@@ -682,7 +682,7 @@ static inline void setasmslotparam(const ShaderParam &p, LocalShaderParamState &
             float palval[4] = { p.val[0]*palcol.x, p.val[1]*palcol.y, p.val[2]*palcol.z, p.val[3] };
             if(memcmp(val.val, palval, sizeof(val.val))) memcpy(val.val, palval, sizeof(val.val));
             else if(val.dirty==ShaderParamState::CLEAN) return;
-        } 
+        }
         else if(memcmp(val.val, p.val, sizeof(val.val))) memcpy(val.val, p.val, sizeof(val.val));
         else if(val.dirty==ShaderParamState::CLEAN) return;
         glProgramEnvParameter4fvARB_(l.type==SHPARAM_VERTEX ? GL_VERTEX_PROGRAM_ARB : GL_FRAGMENT_PROGRAM_ARB, RESERVEDSHADERPARAMS+l.index, val.val);
@@ -919,14 +919,14 @@ void setupshaders()
     if(renderpath == R_GLSLANG)
     {
         defaultshader = newshader(SHADER_GLSLANG, "<init>default",
-            "void main(void) {\n" 
-            "    gl_Position = ftransform();\n" 
-            "    gl_TexCoord[0] = gl_MultiTexCoord0;\n" 
+            "void main(void) {\n"
+            "    gl_Position = ftransform();\n"
+            "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
             "    gl_FrontColor = gl_Color;\n"
             "}\n",
-            "uniform sampler2D tex0;\n" 
-            "void main(void) {\n" 
-            "    gl_FragColor = gl_Color * texture2D(tex0, gl_TexCoord[0].xy);\n" 
+            "uniform sampler2D tex0;\n"
+            "void main(void) {\n"
+            "    gl_FragColor = gl_Color * texture2D(tex0, gl_TexCoord[0].xy);\n"
             "}\n");
         notextureshader = newshader(SHADER_GLSLANG, "<init>notexture",
             "void main(void) {\n"
@@ -1784,7 +1784,7 @@ void linkvslotshader(VSlot &s, bool load)
     if(s.slot->texmask&(1<<TEX_GLOW))
     {
         ShaderParam *cparam = findshaderparam(s, "glowcolor");
-        s.glowcolor = cparam; 
+        s.glowcolor = cparam;
         //if(cparam) loopk(3) s.glowcolor[k] = clamp(cparam->val[k], 0.0f, 1.0f);
         ShaderParam *pulseparam = findshaderparam(s, "pulseglowcolor"),
                     *speedparam = findshaderparam(s, "pulseglowspeed");
