@@ -47,7 +47,7 @@ namespace bomber
             vec o = d->feetpos(1), inertia;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, inertia);
             inertia.normalize().mul(bomberspeed).add(vec(d->vel).add(d->falling).mul(bomberrelativity));
-            bool guided = m_isteam(game::gamemode, game::mutators) && bomberlockondelay && lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay;
+            bool guided = m_team(game::gamemode, game::mutators) && bomberlockondelay && lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay;
             client::addmsg(N_DROPAFFIN, "ri8", d->clientnum, guided ? findtarget(d) : -1, int(o.x*DMF), int(o.y*DMF), int(o.z*DMF), int(inertia.x*DMF), int(inertia.y*DMF), int(inertia.z*DMF));
             d->action[AC_AFFINITY] = false;
             d->actiontime[AC_AFFINITY] = 0;
@@ -169,7 +169,7 @@ namespace bomber
                     }
                     hud::drawitembar(x, oldy, s, false, colour.r, colour.g, colour.b, blend, skew, wait);
                 }
-                if(f.owner == game::focus && m_isteam(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                if(f.owner == game::focus && m_team(game::gamemode, game::mutators) && bomberlockondelay && f.owner->action[AC_AFFINITY] && lastmillis-f.owner->actiontime[AC_AFFINITY] >= bomberlockondelay)
                 {
                     gameent *e = game::getclient(findtarget(f.owner));
                     float cx = 0.5f, cy = 0.5f, cz = 1;
@@ -520,7 +520,7 @@ namespace bomber
     bool aihomerun(gameent *d, ai::aistate &b)
     {
         vec pos = d->feetpos();
-        if(m_isteam(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators))
+        if(m_team(game::gamemode, game::mutators) && !m_gsp1(game::gamemode, game::mutators))
         {
             int goal = -1;
             loopv(st.flags)

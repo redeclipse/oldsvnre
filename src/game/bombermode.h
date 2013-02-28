@@ -38,7 +38,7 @@ struct bomberservmode : bomberstate, servmode
     void spawned(clientinfo *ci)
     {
         if(bombertime >= 0) return;
-        if(m_isteam(gamemode, mutators))
+        if(m_team(gamemode, mutators))
         {
             int alive[T_MAX] = {0}, numt = numteams(gamemode, mutators);
             loopv(clients) if(clients[i]->state.state == CS_ALIVE) alive[clients[i]->team]++;
@@ -108,7 +108,7 @@ struct bomberservmode : bomberstate, servmode
 
     void scoreaffinity(clientinfo *ci, int relay, int goal)
     {
-        if(!m_isteam(gamemode, mutators) || !G(bomberbasket) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
+        if(!m_team(gamemode, mutators) || !G(bomberbasket) || !flags.inrange(relay) || !flags.inrange(goal) || flags[relay].lastowner != ci->clientnum || !flags[relay].droptime) return;
         scorebomb(ci, relay, goal);
     }
 
@@ -117,7 +117,7 @@ struct bomberservmode : bomberstate, servmode
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         if(G(bomberthreshold) > 0 && oldpos.dist(newpos) >= G(bomberthreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
-        if(!m_isteam(gamemode, mutators) || m_gsp1(gamemode, mutators)) return;
+        if(!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) return;
         loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
@@ -212,14 +212,14 @@ struct bomberservmode : bomberstate, servmode
             if(f.owner >= 0)
             {
                 clientinfo *ci = (clientinfo *)getinfo(f.owner);
-                if((!m_isteam(gamemode, mutators) || m_gsp1(gamemode, mutators)) && t > 0)
+                if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && t > 0)
                 {
                     int score = G(bomberholdpoints)*t;
                     if(score)
                     {
                         int total = 0;
                         givepoints(ci, score);
-                        if(m_isteam(gamemode, mutators))
+                        if(m_team(gamemode, mutators))
                         {
                             total = addscore(ci->team, score);
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
@@ -237,10 +237,10 @@ struct bomberservmode : bomberstate, servmode
                     ci->state.weapshots[W_GRENADE][0].add(1);
                     sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1, -1);
                     dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
-                    if((!m_isteam(gamemode, mutators) || m_gsp1(gamemode, mutators)) && G(bomberholdpenalty))
+                    if((!m_team(gamemode, mutators) || m_gsp1(gamemode, mutators)) && G(bomberholdpenalty))
                     {
                         givepoints(ci, -G(bomberholdpenalty));
-                        if(m_isteam(gamemode, mutators) && m_gsp1(gamemode, mutators))
+                        if(m_team(gamemode, mutators) && m_gsp1(gamemode, mutators))
                         {
                             int total = addscore(ci->team, -G(bomberholdpenalty));
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
@@ -359,8 +359,8 @@ struct bomberservmode : bomberstate, servmode
 
     int points(clientinfo *victim, clientinfo *actor)
     {
-        bool isteam = victim==actor || (m_isteam(gamemode, mutators) && victim->team == actor->team);
-        int p = isteam ? -1 : (m_isteam(gamemode, mutators) ? 1 : 0), v = p;
+        bool isteam = victim==actor || (m_team(gamemode, mutators) && victim->team == actor->team);
+        int p = isteam ? -1 : (m_team(gamemode, mutators) ? 1 : 0), v = p;
         if(p) { loopv(flags) if(flags[i].owner == victim->clientnum) p += v; }
         return p;
     }

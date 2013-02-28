@@ -41,9 +41,9 @@ struct score
     score(int s, int n) : team(s), total(n) {}
 };
 
-#define numteams(a,b)   (m_fight(a) && m_isteam(a,b) ? (m_multi(a,b) ? T_TOTAL : T_NUM) : 1)
-#define teamcount(a,b)  (m_fight(a) && m_isteam(a,b) ? (m_multi(a,b) ? T_ALL : T_COUNT) : 1)
-#define isteam(a,b,c,d) (m_fight(a) && m_isteam(a,b) ? (c >= d && c <= numteams(a,b)) : c == T_NEUTRAL)
+#define numteams(a,b)   (m_fight(a) && m_team(a,b) ? (m_multi(a,b) ? T_TOTAL : T_NUM) : 1)
+#define teamcount(a,b)  (m_fight(a) && m_team(a,b) ? (m_multi(a,b) ? T_ALL : T_COUNT) : 1)
+#define isteam(a,b,c,d) (m_fight(a) && m_team(a,b) ? (c >= d && c <= numteams(a,b)) : c == T_NEUTRAL)
 #define valteam(a,b)    (a >= b && a <= T_TOTAL)
 
 #ifdef GAMESERVER
