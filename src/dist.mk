@@ -1,13 +1,6 @@
-ifndef appnamefull
-appnamefull=Red Eclipse
-endif
-
-appversion:=$(shell \
-	VER="$$(sed -n '/$(appnamefull)/{g;1!s/.*RE_VER_STR.*"\(.*\)"/\1/p;};h' engine/engine.h)"; \
-	if [ -z $$VER ]; then VER=0; fi; \
-	echo $$VER)
-
-appshortname:=$(shell echo $(APPNAME) | sed 's/\(^..\).*/\1/')
+appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
+appversion:=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
+appshortname:=$(shell echo $(APPCLIENT) | sed 's/\(^...\).*/\1/')
 
 dirname=$(APPNAME)-$(appversion)
 dirname-osx=$(APPNAME).app
