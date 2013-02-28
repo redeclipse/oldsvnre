@@ -41,6 +41,7 @@ SRC_DIRS= \
 	src/shared
 
 SRC_FILES= \
+	src/Makefile \
 	src/core.mk \
 	src/dist.mk \
 	src/dpiaware.manifest \
@@ -92,11 +93,6 @@ DISTFILES:= \
 	rm -rf $@
 	# Transform relative to src/ dir
 	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
-ifeq ($(APPNAME),mekarcade)
-	$(MV) $@/src/Makefile.mek $@/src/Makefile
-	sed 's/-f Makefile.mek//' -i $@/$(APPNAME).sh
-	sed 's/-f Makefile.mek//' -i $@/$(appshortname)*server.sh
-endif
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
 	rm -rf $@/src/enet/autom4te.cache/
