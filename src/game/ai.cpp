@@ -73,7 +73,7 @@ namespace ai
         {
             int dt = owner(d), et = owner(e);
             if(dt == T_ENEMY && et == T_ENEMY) return false;
-            if(!m_isteam(game::gamemode, game::mutators) || dt != et) return true;
+            if(!m_team(game::gamemode, game::mutators) || dt != et) return true;
         }
         return false;
     }
@@ -278,7 +278,7 @@ namespace ai
                 int dt = owner(d), et = owner(e);
                 if(dt != T_ENEMY || et != T_ENEMY)
                 {
-                    if(m_isteam(game::gamemode, game::mutators) && dt != et) continue;
+                    if(m_team(game::gamemode, game::mutators) && dt != et) continue;
                 }
             }
             if(members) (*members)++;
@@ -551,7 +551,7 @@ namespace ai
             {
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
-                if(m_isteam(game::gamemode, game::mutators))
+                if(m_team(game::gamemode, game::mutators))
 #ifdef CAMPAIGN
                     assist(d, b, interests, false, m_campaign(game::gamemode) || m_gauntlet(game::gamemode));
 #else
@@ -594,7 +594,7 @@ namespace ai
             int q = interests.length()-1;
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
-            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+            if(d->aitype == AI_BOT && m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);

@@ -2,8 +2,8 @@ FVAR(IDF_PERSIST, compasssize, 0, 0.15f, 1000);
 FVAR(IDF_PERSIST, compassblend, 0, 0.75f, 1);
 VAR(IDF_PERSIST, compassfade, 0, 250, VAR_MAX);
 FVAR(IDF_PERSIST, compassfadeamt, 0, 0.5f, 1);
-TVAR(IDF_PERSIST, compasstex, "<grey>textures/compass", 3);
-TVAR(IDF_PERSIST, compassringtex, "<grey>textures/progress", 3);
+TVAR(IDF_PERSIST, compasstex, "<grey>textures/hud/compass", 3);
+TVAR(IDF_PERSIST, compassringtex, "<grey>textures/hud/progress", 3);
 
 struct cstate
 {

@@ -110,7 +110,7 @@ namespace projs
                 flags |= HIT_WAVE;
             }
         }
-        else if(m_isteam(game::gamemode, game::mutators) && actor->team == target->team)
+        else if(m_team(game::gamemode, game::mutators) && actor->team == target->team)
         {
             float modify = WF(WK(flags), weap, teamdamage, WS(flags))*G(teamdamagescale);
             if(modify != 0) skew *= modify;
@@ -1790,7 +1790,7 @@ namespace projs
                             break;
                         }
                     }
-                    if(t && (!m_isteam(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
+                    if(t && (!m_team(game::gamemode, game::mutators) || (t->type != ENT_PLAYER && t->type != ENT_AI) || ((gameent *)t)->team != proj.owner->team))
                     {
                         if(proj.target && proj.o.dist(proj.target->o) < proj.o.dist(t->o)) break;
                         proj.target = t;

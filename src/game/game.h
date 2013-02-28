@@ -3,16 +3,18 @@
 
 #include "engine.h"
 
-#ifdef MEK
+#if defined(FPS)
+#define GAMEID              "fps"
+#define GAMEVERSION         220
+#define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
+#define VANITY              1
+#elif defined(MEK)
 #define GAMEID              "mek"
 #define GAMEVERSION         220
 #define DEMO_MAGIC          "MEK_ARCADE_DEMO"
 #define CAMPAIGN            1
 #else
-#define GAMEID              "fps"
-#define GAMEVERSION         220
-#define DEMO_MAGIC          "RED_ECLIPSE_DEMO"
-#define VANITY              1
+#error "You must add either -DFPS or -DMEK"
 #endif
 #define DEMO_VERSION        GAMEVERSION
 

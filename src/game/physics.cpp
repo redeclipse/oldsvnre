@@ -192,9 +192,9 @@ namespace physics
                 case 1: return true; break;
                 case 0: default: break;
             }
-            if(m_isteam(game::gamemode, game::mutators)) switch(G(teamdamage))
+            if(m_team(game::gamemode, game::mutators)) switch(G(teamdamage))
             {
-                case 1: if(d->aitype == AI_NONE || (e && e->aitype > AI_NONE)) break;
+                case 1: if(d->aitype > AI_NONE || (e && e->aitype == AI_NONE)) break;
                 case 0: if(e && ai::owner(d) == ai::owner(e)) return true; break;
                 case 2: default: break;
             }

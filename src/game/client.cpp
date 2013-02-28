@@ -36,16 +36,17 @@ namespace client
     }
     ICOMMAND(0, waiting, "i", (int *n), intret(waiting(!*n)));
 
-    ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), {
+    void makemaplist(int g, int m, int c)
+    {
          char *list = NULL;
-         maplist(list, *g, *m, *c, mapsfilter);
+         maplist(list, g, m, c, mapsfilter);
          if(list)
          {
              result(list);
              DELETEA(list);
          }
-         else result("");
-    });
+    }
+    ICOMMAND(0, getmaplist, "iii", (int *g, int *m, int *c), makemaplist(*g, *m, *c));
 
     extern int sortvotes;
     struct mapvote
@@ -327,6 +328,7 @@ namespace client
         styles.deletearrays();
     }
 
+#ifdef VANITY
     void getvitem(gameent *d, int n, int v)
     {
         if(n < 0) intret(d->vitems.length());
@@ -338,13 +340,14 @@ namespace client
             default: break;
         }
     }
+    ICOMMAND(0, getplayervanity, "", (), result(game::player1->vanity));
+    ICOMMAND(0, getplayervitem, "bi", (int *n, int *v), getvitem(game::player1, *n, *v));
+#endif
 
     ICOMMAND(0, mastermode, "i", (int *val), addmsg(N_MASTERMODE, "ri", *val));
     ICOMMAND(0, getplayername, "", (), result(game::player1->name));
     ICOMMAND(0, getplayercolour, "i", (int *m), intret(*m >= 0 ? game::getcolour(game::player1, *m) : game::player1->colour));
     ICOMMAND(0, getplayermodel, "", (), intret(game::player1->model));
-    ICOMMAND(0, getplayervanity, "", (), result(game::player1->vanity));
-    ICOMMAND(0, getplayervitem, "bi", (int *n, int *v), getvitem(game::player1, *n, *v));
     ICOMMAND(0, getplayerteam, "i", (int *p), *p ? intret(game::player1->team) : result(TEAM(game::player1->team, name)));
     ICOMMAND(0, getplayerteamicon, "", (), result(hud::teamtexname(game::player1->team)));
     ICOMMAND(0, getplayerteamcolour, "", (), intret(TEAM(game::player1->team, colour)));
@@ -394,7 +397,7 @@ namespace client
 
     int teamname(const char *team)
     {
-        if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+        if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
         {
             if(team[0])
             {
@@ -417,7 +420,7 @@ namespace client
     {
         if(team[0])
         {
-            if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+            if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
             {
                 int t = teamname(team);
                 if(t != game::player1->team) addmsg(N_SWITCHTEAM, "ri", t);
@@ -478,6 +481,7 @@ namespace client
     }
     ICOMMAND(0, getmodelname, "iiN", (int *mdl, int *idx, int *numargs), result(getmodelname(*mdl, *numargs >= 2 ? *idx : 2)));
 
+#ifdef VANITY
     const char *getclientvanity(int cn)
     {
         gameent *d = game::getclient(cn);
@@ -491,6 +495,7 @@ namespace client
         if(d) getvitem(d, n, v);
     }
     ICOMMAND(0, getclientvitem, "ibi", (int *cn, int *n, int *v), getclientvitem(*cn, *n, *v));
+#endif
 
     const char *getclienthost(int cn)
     {
@@ -697,7 +702,7 @@ namespace client
 
     void setteam(const char *arg1, const char *arg2)
     {
-        if(m_fight(game::gamemode) && m_isteam(game::gamemode, game::mutators))
+        if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
         {
             int i = parseplayer(arg1);
             if(i>=0)
@@ -873,7 +878,7 @@ namespace client
     {
         if(!waiting(false) && !client::demoplayback)
         {
-            if(flags&SAY_TEAM && !m_isteam(game::gamemode, game::mutators))
+            if(flags&SAY_TEAM && !m_team(game::gamemode, game::mutators))
                 flags &= ~SAY_TEAM;
             saytext(game::player1, flags, text);
             addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, text);
@@ -2355,7 +2360,7 @@ namespace client
                     if(!w) return;
                     if(w->team != tn)
                     {
-                        if(m_isteam(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != T_NEUTRAL && tn != T_NEUTRAL ? 1 : 2))
+                        if(m_team(game::gamemode, game::mutators) && w->aitype == AI_NONE && showteamchange >= (w->team != T_NEUTRAL && tn != T_NEUTRAL ? 1 : 2))
                             conoutft(CON_EVENT, "\fa%s is now on team \fs\f[%d]\f(%s)%s", game::colorname(w), TEAM(tn, colour), hud::teamtexname(tn), TEAM(tn, name));
                         w->team = tn;
                         if(w == game::focus) hud::lastteam = 0;
@@ -2440,7 +2445,7 @@ namespace client
                 case N_SCORE:
                 {
                     int team = getint(p), total = getint(p);
-                    if(m_isteam(game::gamemode, game::mutators))
+                    if(m_team(game::gamemode, game::mutators))
                     {
                         score &ts = hud::teamscore(team);
                         ts.total = total;
