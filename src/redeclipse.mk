@@ -1,7 +1,7 @@
 ifeq ($(APPNAME),redeclipse)
 # core
 APPSHORTNAME=fps
-APPFLAGS=
+APPFLAGS= -DFPS=1
 
 # system-install and dist
 ICON=../data/textures/icon.png
