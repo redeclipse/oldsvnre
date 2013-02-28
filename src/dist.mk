@@ -1,6 +1,5 @@
 appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
 appversion:=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
-appshortname:=$(shell echo $(APPCLIENT) | sed 's/\(^...\).*/\1/')
 
 dirname=$(APPNAME)-$(appversion)
 dirname-osx=$(APPNAME).app
@@ -18,10 +17,10 @@ torrent-trackers-url="udp://tracker.openbittorrent.com:80,udp://tracker.publicbt
 torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
 
 FILES:= \
-	$(APPNAME).bat \
-	$(APPNAME).sh \
-	$(appshortname)*server.bat \
-	$(appshortname)*server.sh \
+	$(APPCLIENT).bat \
+	$(APPCLIENT).sh \
+	$(APPSERVER).bat \
+	$(APPSERVER).sh
 
 SRC_DIRS= \
 	src/enet \
@@ -51,13 +50,11 @@ SRC_XCODE= \
 OSX_APP=
 ifeq ($(APPNAME),redeclipse)
 SRC_FILES+=src/Makefile
-GAME_DIR=game/fps
 FILES+= readme.txt
 OSX_APP=bin/$(APPNAME).app
 else
 ifeq ($(APPNAME),mekarcade)
 SRC_FILES+=src/Makefile.mek
-GAME_DIR=game/mek
 endif
 endif
 
@@ -76,7 +73,7 @@ DISTFILES:= \
 	$(FILES) \
 	$(BIN_FILES) \
 	data \
-	$(GAME_DIR) \
+	game/$(APPSHORTNAME) \
 	doc \
 	$(shell cd ../ && find $(SRC_DIRS) -not -iname *.lo -not -iname *.gch -not -iname *.o) \
 	$(SRC_FILES) \

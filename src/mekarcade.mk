@@ -8,7 +8,6 @@ APPSERVER=mekserver
 
 # system-install and dist
 ICON=../game/mek/textures/emblem.png
-EXTRADATA=../game/mek
 endif
 
 MEK_DEFINES= \
