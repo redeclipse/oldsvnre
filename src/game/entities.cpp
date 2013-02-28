@@ -276,6 +276,7 @@ namespace entities
                     case 0: addentinfo("absolute"); break;
                     case 1: addentinfo("relative"); break;
                     case 2: addentinfo("keep"); break;
+                    case 3: addentinfo("positional"); break;
                     default: break;
                 }
                 break;
@@ -526,23 +527,23 @@ namespace entities
             {
                 case TELEPORT:
                 {
-                    if(lastmillis-e.lastuse >= triggertime(e)/2)
+                    e.lastuse = e.lastemit = lastmillis;
+                    static vector<int> teleports;
+                    teleports.shrink(0);
+                    loopv(e.links)
+                        if(ents.inrange(e.links[i]) && ents[e.links[i]]->type == e.type)
+                            teleports.add(e.links[i]);
+                    if(!teleports.empty())
                     {
-                        e.lastuse = e.lastemit = lastmillis;
-                        static vector<int> teleports;
-                        teleports.shrink(0);
-                        loopv(e.links)
-                            if(ents.inrange(e.links[i]) && ents[e.links[i]]->type == e.type)
-                                teleports.add(e.links[i]);
-                        if(!teleports.empty())
+                        bool teleported = false;
+                        while(!teleports.empty())
                         {
-                            bool teleported = false;
-                            while(!teleports.empty())
+                            int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
+                            gameentity &f = *(gameentity *)ents[teleports[r]];
+                            d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(d->o));
+                            if(physics::entinmap(d, true))
                             {
-                                int r = e.type == TELEPORT ? rnd(teleports.length()) : 0;
-                                gameentity &f = *(gameentity *)ents[teleports[r]];
-                                d->o = vec(f.o).add(vec(0, 0, d->height*0.5f));
-                                if(physics::entinmap(d, true))
+                                if(f.attrs[5] != 3)
                                 {
                                     float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
                                           yaw = f.attrs[0] < 0 ? (lastmillis/5)%360 : f.attrs[0], pitch = f.attrs[1];
@@ -566,20 +567,20 @@ namespace entities
                                             break;
                                         }
                                     }
-                                    game::fixfullrange(d->yaw, d->pitch, d->roll, true);
-                                    f.lastuse = f.lastemit = e.lastemit;
-                                    if(d == game::focus) game::resetcamera(true);
-                                    execlink(d, n, true);
-                                    execlink(d, teleports[r], true);
-                                    d->resetair();
-                                    teleported = true;
-                                    ai::inferwaypoints(d, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
-                                    break;
                                 }
-                                teleports.remove(r); // must've really sucked, try another one
+                                game::fixfullrange(d->yaw, d->pitch, d->roll, true);
+                                f.lastuse = f.lastemit = e.lastemit;
+                                if(d == game::focus) game::resetcamera(true);
+                                execlink(d, n, true);
+                                execlink(d, teleports[r], true);
+                                d->resetair();
+                                teleported = true;
+                                ai::inferwaypoints(d, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
+                                break;
                             }
-                            if(!teleported) game::suicide(d, HIT_SPAWN);
+                            teleports.remove(r); // must've really sucked, try another one
                         }
+                        if(!teleported) game::suicide(d, HIT_SPAWN);
                     }
                     break;
                 }
