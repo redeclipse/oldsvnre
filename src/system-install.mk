@@ -1,9 +1,6 @@
 ifndef ICON
 ICON=../data/textures/icon.png
 endif
-ifndef EXTRADATA
-EXTRADATA=../game/fps
-endif
 
 appname=$(APPNAME)
 appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
@@ -11,6 +8,8 @@ appsrcname=$(APPNAME)
 cappname:=$(shell echo $(appname) | tr '[:lower:]' '[:upper:]')# Captial appname
 appclient=$(APPCLIENT)
 appserver=$(APPSERVER)
+appgamedir=game/$(APPSHORTNAME)
+
 prefix=/usr/local
 games=
 gamesbin=/bin
@@ -91,7 +90,7 @@ system-install-data:
 	install -d $(datadir)/$(appname)
 	install -d $(datadir)/$(appname)/game
 	cp -r ../data $(datadir)/$(appname)/data
-	cp -r $(EXTRADATA) $(datadir)/$(appname)/game
+	cp -r ../$(appgamedir) $(datadir)/$(appname)/game
 
 system-install-docs: $(MANPAGES)
 	install	-d $(mandir)/man6
