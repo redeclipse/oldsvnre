@@ -92,8 +92,7 @@ Modding & Mapmaking:
  * Zooming of weapons is now limited by zoomlimit{min,max}, zoomfov removed
  * Added 'weaponinterrupts' server variable which allows control over which
    weapon states may be interrupted by the player
- * Renamed frag/flak for distinction in weapon vers, 'frag' is created and
-   becomes 'flak'
+ * Renamed frag/flak weapon vars for clarity: 'frag' events create 'flak'
  * Added new residual style 'shock' which stuns, possib to combine multiple
    residual effects
  * Renamed 'numplayers'->'mapplayers'
