@@ -1,17 +1,17 @@
+appname=$(APPNAME)
 appnamefull:=$(shell sed -n 's/versionname *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
 appversion:=$(shell sed -n 's/versionstring *"\([^"]*\)"/\1/p' ../game/$(APPSHORTNAME)/version.cfg)
 
-dirname=$(APPNAME)-$(appversion)
-dirname-osx=$(APPNAME).app
+dirname=$(appname)-$(appversion)
+dirname-osx=$(appname).app
 dirname-win=$(dirname)-win
 
-resourcespath-osx=$(APPNAME).app/Contents/Resources
 tmpdir-osx:=$(shell cd ../ && DIR=$$(mktemp -d $(dirname)-osx_XXXXX); rmdir $$DIR; echo $$DIR)
-exename=$(APPNAME)_$(appversion)_win.exe
+exename=$(appname)_$(appversion)_win.exe
 
-tarname=$(APPNAME)_$(appversion)_nix_bsd.tar
-tarname-all=$(APPNAME)_$(appversion)_all.tar
-tarname-osx=$(APPNAME)_$(appversion)_osx.tar
+tarname=$(appname)_$(appversion)_nix_bsd.tar
+tarname-all=$(appname)_$(appversion)_all.tar
+tarname-osx=$(appname)_$(appversion)_osx.tar
 
 torrent-trackers-url="udp://tracker.openbittorrent.com:80,udp://tracker.publicbt.com:80,udp://tracker.ccc.de:80,udp://tracker.istole.it:80"
 torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
@@ -33,7 +33,6 @@ SRC_DIRS= \
 	src/shared
 
 SRC_FILES= \
-	src/Makefile \
 	src/core.mk \
 	src/dist.mk \
 	src/dpiaware.manifest \
@@ -78,7 +77,10 @@ DISTFILES:= \
 	# Transform relative to src/ dir
 	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
 	# create dedicated Makefile
-	echo "APPNAME=$(APPNAME)" > $@/src/Makefile
+	echo "APPNAME=$(APPNAME)" >$@/src/Makefile
+ifneq ($(APPNAME),$(appname))
+	echo "appname=$(appname)" >>$@/src/Makefile
+endif
 	echo >>$@/src/Makefile
 	echo "all:" >>$@/src/Makefile
 	echo >>$@/src/Makefile
