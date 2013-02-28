@@ -16,7 +16,7 @@ tarname-osx=$(APPNAME)_$(appversion)_osx.tar
 torrent-trackers-url="udp://tracker.openbittorrent.com:80,udp://tracker.publicbt.com:80,udp://tracker.ccc.de:80,udp://tracker.istole.it:80"
 torrent-webseed-baseurl="http://downloads.sourceforge.net/redeclipse"
 
-FILES:= \
+FILES+= \
 	$(APPCLIENT).bat \
 	$(APPCLIENT).sh \
 	$(APPSERVER).bat \
@@ -38,9 +38,9 @@ SRC_FILES= \
 	src/dist.mk \
 	src/dpiaware.manifest \
 	src/system-install.mk \
-	src/$(APPNAME)*
+	src/$(APPNAME).*
 
-SRC_XCODE= \
+SRC_XCODE:= \
 	src/xcode/*.h \
 	src/xcode/*.m \
 	src/xcode/*.mm \
@@ -49,16 +49,10 @@ SRC_XCODE= \
 
 OSX_APP=
 ifeq ($(APPNAME),redeclipse)
-SRC_FILES+=src/Makefile
-FILES+= readme.txt
 OSX_APP=bin/$(APPNAME).app
-else
-ifeq ($(APPNAME),mekarcade)
-SRC_FILES+=src/Makefile.mek
-endif
 endif
 
-BIN_FILES= \
+BIN_FILES:= \
 	bin/amd64/*.txt \
 	bin/amd64/*.dll \
 	bin/amd64/$(APPCLIENT)* \
@@ -83,6 +77,14 @@ DISTFILES:= \
 	rm -rf $@
 	# Transform relative to src/ dir
 	tar -cf - $(DISTFILES:%=../%) | (mkdir $@/; cd $@/ ; tar -xpf -)
+	# create dedicated Makefile
+	echo "APPNAME=$(APPNAME)" > $@/src/Makefile
+	echo >>$@/src/Makefile
+	echo "all:" >>$@/src/Makefile
+	echo >>$@/src/Makefile
+	echo "include $(APPNAME).mk" >>$@/src/Makefile
+	echo >>$@/src/Makefile
+	echo "include core.mk" >>$@/src/Makefile
 	$(MAKE) -C $@/src clean
 	-$(MAKE) -C $@/src/enet distclean
 	rm -rf $@/src/enet/autom4te.cache/

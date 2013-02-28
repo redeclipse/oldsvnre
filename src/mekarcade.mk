@@ -5,6 +5,7 @@ APPFLAGS= -DMEK=1
 
 # system-install and dist
 ICON=../game/mek/textures/emblem.png
+FILES=
 endif
 
 MEK_DEFINES= \
