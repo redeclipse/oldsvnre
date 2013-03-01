@@ -292,18 +292,18 @@ namespace entities
         {
             case AFFINITY: return "props/flag";
 #ifdef MEK
-            case PLAYERSTART: return playertypes[0][0];
+            case PLAYERSTART: return playertypes[0][1];
             case HEALTH: return "props/health";
             case ARMOUR: return "props/armour";
 #else
-            case PLAYERSTART: return playertypes[game::forceplayermodel ? game::forceplayermodel-1 : 0][0];
+            case PLAYERSTART: return playertypes[game::forceplayermodel ? game::forceplayermodel-1 : 0][1];
 #endif
             case WEAPON:
             {
                 int sweap = m_weapon(game::gamemode, game::mutators), attr1 = w_attr(game::gamemode, game::mutators, attr[0], sweap);
                 return weaptype[attr1].item;
             }
-            case ACTOR: return aistyle[clamp(attr[0]+AI_START, int(AI_START), int(AI_MAX-1))].playermodel[0];
+            case ACTOR: return aistyle[clamp(attr[0]+AI_START, int(AI_START), int(AI_MAX-1))].playermodel[1];
             default: break;
         }
         return "";

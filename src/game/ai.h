@@ -13,31 +13,31 @@ aistyles aistyle[] = {
         AI_NONE,         -1,             0,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "player",   { "actors/player/male",     "actors/player/male/hwep",      "actors/player/male/body" }
+                "player",   { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body" }
     },
     {
         AI_BOT,         -1,             0,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "bot",      { "actors/player/male",     "actors/player/male/hwep",      "actors/player/male/body" }
+                "bot",      { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body" }
     },
     {
         AI_TURRET,      W_SMG,       100,
             4.75,       4.75,       8.75,       150,        1,          1,
             false,      false,      false,      false,      false,      false,      false,
-                "turret",   { "actors/turret",          "actors/player/male/hwep",      "actors/player/male/body" }
+                "turret",   { "actors/player/male/hwep",      "actors/turret",          "actors/player/male/body" }
     },
     {
         AI_GRUNT,       W_PISTOL,   50,
             3,          3,          14,         200,        50,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "grunt",   { "actors/player/male",      "actors/player/male/hwep",      "actors/player/male/body" }
+                "grunt",   { "actors/player/male/hwep",      "actors/player/male",      "actors/player/male/body" }
     },
     {
         AI_DRONE,       W_MELEE,     50,
             3,          3,          14,         150,        40,         1,
             true,       true,       true,       true,       true,       true,       true,
-                "drone",    { "actors/drone",           "actors/player/male/hwep",      "actors/player/male/body" }
+                "drone",    { "actors/player/male/hwep",      "actors/drone",           "actors/player/male/body" }
     },
 };
 #endif

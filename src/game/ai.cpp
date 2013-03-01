@@ -1749,10 +1749,6 @@ namespace ai
 
     void preload()
     {
-        loopi(AI_TOTAL)
-        {
-            preloadmodel(aistyle[i+AI_START].playermodel[0]);
-            preloadmodel(aistyle[i+AI_START].playermodel[1]);
-        }
+        loopi(AI_TOTAL) loopk(3) preloadmodel(aistyle[i+AI_START].playermodel[1]);
     }
 }
