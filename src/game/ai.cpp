@@ -179,6 +179,7 @@ namespace ai
             fatal("could not create ai");
             return;
         }
+        d->respawned = -1;
     }
 
     void destroy(gameent *d)
