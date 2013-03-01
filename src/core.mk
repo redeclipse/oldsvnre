@@ -37,7 +37,7 @@ MV=mv
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 WINDRES=windres
-WINDRES_TEMP=:$(WINDRES)
+WINDRES_TEMP:=$(WINDRES)
 override WINDRES=$(TOOLSET_PREFIX)$(WINDRES_TEMP)
 ifneq (,$(findstring 64,$(PLATFORM)))
 WINLIB=lib/amd64
