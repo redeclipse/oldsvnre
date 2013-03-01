@@ -1728,7 +1728,7 @@ namespace projs
 
     void escaped(projent &proj, const vec &pos, const vec &dir)
     {
-        if(!(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
+        if(!proj.owner || !(proj.projcollide&COLLIDE_OWNER) || proj.lastbounce) proj.escaped = true;
         else if(proj.spawntime && lastmillis-proj.spawntime >= (proj.projtype == PRJ_SHOT ? W2(proj.weap, escapedelay, WS(proj.flags)) : PHYSMILLIS))
         {
             if(proj.projcollide&COLLIDE_TRACE)

@@ -296,7 +296,7 @@ namespace entities
             case HEALTH: return "props/health";
             case ARMOUR: return "props/armour";
 #else
-            case PLAYERSTART: return playertypes[game::forceplayermodel ? game::forceplayermodel-1 : 0][1];
+            case PLAYERSTART: return aistyle[AI_NONE].playermodel[1];
 #endif
             case WEAPON:
             {
@@ -558,6 +558,7 @@ namespace entities
                             d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(d->o));
                             if(physics::entinmap(d, true))
                             {
+                                d->resetinterp();
                                 if(f.attrs[5] != 3)
                                 {
                                     float mag = max(vec(d->vel).add(d->falling).magnitude(), f.attrs[2] ? float(f.attrs[2]) : 50.f),
@@ -595,6 +596,11 @@ namespace entities
                                     execlink(g, q, true);
                                     g->resetair();
                                     ai::inferwaypoints(g, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
+                                }
+                                else if(projent::is(d))
+                                {
+                                    projent *g = (projent *)d;
+                                    g->lastbounce = lastmillis;
                                 }
                                 teleported = true;
                                 break;
@@ -644,6 +650,11 @@ namespace entities
                         gameent *g = (gameent *)d;
                         execlink(g, n, true);
                         g->resetair();
+                    }
+                    else if(projent::is(d))
+                    {
+                        projent *g = (projent *)d;
+                        g->lastbounce = lastmillis;
                     }
                     break;
                 }
