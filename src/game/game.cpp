@@ -37,8 +37,8 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersoninterp, 0, 100, VAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 12, FVAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, FVAR_MAX);
+    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 12, 100);
+    FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, 10);
     VAR(IDF_PERSIST, thirdpersoncursor, 0, 1, 2);
     FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
@@ -51,10 +51,13 @@ namespace game
     }
 
     VAR(IDF_PERSIST, firstpersonmodel, 0, 2, 2);
-    FVAR(IDF_PERSIST, firstpersonbodyoffset, 0, 1.5f, FVAR_MAX);
-    FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 90, 90);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
+
+    FVAR(IDF_PERSIST, firstpersonbodydist, -10, 0, 10);
+    FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
+    FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 1, 1);
+    FVAR(IDF_PERSIST, firstpersonbodyspine, 0, 5, 20);
 
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.f, 1000);
@@ -1997,24 +2000,32 @@ namespace game
             }
             if(thirdpersonview(true, hasfoc ? d : focus))
                 pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist, d != player1 ? followside : thirdpersonside);
-            else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
+            else
             {
-                float scale = 1;
-                if(d == player1 && inzoom())
+                if(firstpersonmodel == 2)
                 {
-                    int frame = lastmillis-lastzoom;
-                    float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
-                    scale *= zooming ? 1.f-pc : pc;
+                    pos.z -= firstpersonbodyspine;
+                    pos.add(vec(yaw*RAD, ((pitch*firstpersonbodypitch)+90)*RAD).mul(firstpersonbodyspine));
                 }
-                if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
-                if(scale > 0)
+                if(firstpersonbob && !intermission && d->state == CS_ALIVE)
                 {
-                    vec dir;
-                    vecfromyawpitch(yaw, 0, 0, 1, dir);
-                    float steps = bobdist/firstpersonbobstep*M_PI;
-                    dir.mul(firstpersonbobside*cosf(steps)*scale);
-                    dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
-                    pos.add(dir);
+                    float scale = 1;
+                    if(d == player1 && inzoom())
+                    {
+                        int frame = lastmillis-lastzoom;
+                        float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
+                        scale *= zooming ? 1.f-pc : pc;
+                    }
+                    if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
+                    if(scale > 0)
+                    {
+                        vec dir;
+                        vecfromyawpitch(yaw, 0, 0, 1, dir);
+                        float steps = bobdist/firstpersonbobstep*M_PI;
+                        dir.mul(firstpersonbobside*cosf(steps)*scale);
+                        dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
+                        pos.add(dir);
+                    }
                 }
             }
         }
@@ -2604,11 +2615,11 @@ namespace game
         else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][third];
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
-        vec o = third == 1 ? d->feetpos() : camerapos(d);
+        vec o = third ? d->feetpos() : camerapos(d);
         if(third == 2)
         {
-            o.z -= d->height;
-            o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodyoffset));
+            o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist));
+            o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
         }
         if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
             vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
@@ -2796,7 +2807,7 @@ namespace game
                 }
             }
         }
-        rendermodel(NULL, mdl, anim, o, yaw, third != 2 || firstpersonbodypitch < 0 ? pitch : firstpersonbodypitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
+        rendermodel(NULL, mdl, anim, o, yaw, third != 2 || firstpersonbodypitch < 0 ? pitch : pitch*firstpersonbodypitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
     void renderabovehead(gameent *d, float trans)
