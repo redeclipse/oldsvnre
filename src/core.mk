@@ -9,7 +9,20 @@ override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
 PLATFORM= $(shell uname -s)
 PLATFORM_SUFFIX=_native
 
+TOOLSET_PREFIX=
+ifneq (,$(findstring CROSS,$(PLATFORM)))
+ifneq (,$(findstring 64,$(PLATFORM)))
+TOOLSET_PREFIX=x86_64-w64-mingw32-
+else
+TOOLSET_PREFIX=i686-w64-mingw32-
+endif
+CXX=g++
+endif
+CXX_TEMP:=$(CXX)
+override CXX=$(TOOLSET_PREFIX)$(CXX_TEMP)
+
 INCLUDES= -Ishared -Iengine -Igame -Ienet/include $(APPFLAGS)
+
 
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
@@ -17,18 +30,22 @@ ifeq (,$(findstring -pg,$(CXXFLAGS)))
 	STRIP=strip
 endif
 endif
+STRIP_TEMP:=$(STRIP)
+override STRIP=$(TOOLSET_PREFIX)$(STRIP_TEMP)
 
 MV=mv
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
-WINDRES= windres
+WINDRES=windres
+WINDRES_TEMP=:$(WINDRES)
+override WINDRES=$(TOOLSET_PREFIX)$(WINDRES_TEMP)
 ifneq (,$(findstring 64,$(PLATFORM)))
-WINLIB=lib\amd64
+WINLIB=lib/amd64
 WINBIN=../bin/amd64
 override CXX+= -m64
 override WINDRES+= -F pe-x86-64
 else
-WINLIB=lib\x86
+WINLIB=lib/x86
 WINBIN=../bin/x86
 override CXX+= -m32
 override WINDRES+= -F pe-i386
