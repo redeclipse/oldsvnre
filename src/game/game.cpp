@@ -62,6 +62,7 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 10);
 
     VAR(IDF_PERSIST, firstpersonbob, 0, 1, 1);
+    FVAR(IDF_PERSIST, firstpersonbobmin, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, firstpersonbobstep, 1, 28.f, 1000);
     FVAR(IDF_PERSIST, firstpersonbobroll, 0, 0.3f, 10);
     FVAR(IDF_PERSIST, firstpersonbobside, 0, 0.6f, 10);
@@ -356,7 +357,7 @@ namespace game
         float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
         if(d->state == CS_ALIVE && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside))
         {
-            swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed);
+            swayspeed = max(speed*firstpersonbobmin, min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed));
             swaydist += swayspeed*curtime/1000.0f;
             swaydist = fmod(swaydist, 2*step);
             bobdist += swayspeed*curtime/1000.0f;
@@ -2005,7 +2006,7 @@ namespace game
                     float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
                     scale *= zooming ? 1.f-pc : pc;
                 }
-                if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
+                if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
                 if(scale > 0)
                 {
                     vec dir;
@@ -2343,7 +2344,7 @@ namespace game
                 float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
                 scale *= zooming ? 1.f-pc : pc;
             }
-            if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, 0.0f, 1.0f);
+            if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
             if(scale > 0)
             {
                 vec dir(c->yaw, c->pitch);
