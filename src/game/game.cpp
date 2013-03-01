@@ -434,7 +434,7 @@ namespace game
             }
             else if(maptime > 0)
             {
-                if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->aitype < AI_START)
+                if((gameent::is(d)) && d->aitype < AI_START)
                 {
                     cament *c = cameras.add(new cament);
                     c->o = d->headpos();
@@ -535,7 +535,7 @@ namespace game
 
     bool allowmove(physent *d)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             if((d == player1 && tvmode()) || d->state == CS_DEAD || d->state >= CS_SPECTATOR || intermission)
                 return false;
@@ -731,7 +731,7 @@ namespace game
 
     void impulseeffect(gameent *d, int effect)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             int num = int((effect ? 5 : 25)*impulsescale), len = effect ? impulsefade/5 : impulsefade;
             switch(effect)
@@ -1657,7 +1657,7 @@ namespace game
         // reset perma-state
         gameent *d;
         int numdyns = numdynents();
-        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && (gameent::is(d)))
             d->mapchange(lastmillis, m_health(gamemode, mutators, d->model), m_armour(gamemode, mutators, d->model));
         if(!client::demoplayback && m_loadout(gamemode, mutators) && autoloadweap && *favloadweaps)
             chooseloadweap(player1, favloadweaps);
@@ -2436,8 +2436,7 @@ namespace game
         {
             player1->conopen = commandmillis > 0 || hud::hasinput(true);
             checkoften(player1, true);
-            loopv(players) if(players[i] && (players[i]->type == ENT_PLAYER || players[i]->type == ENT_AI))
-                checkoften(players[i], players[i]->ai != NULL);
+            loopv(players) if(players[i]) checkoften(players[i], players[i]->ai != NULL);
             if(!allowmove(player1)) player1->stopmoving(player1->state < CS_SPECTATOR);
             if(player1->state == CS_ALIVE)
             {

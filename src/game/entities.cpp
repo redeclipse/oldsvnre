@@ -422,10 +422,15 @@ namespace entities
         return a.score > b.score;
     }
 
-    bool collateitems(gameent *d, vector<actitem> &actitems)
+    bool collateitems(dynent *d, vector<actitem> &actitems)
     {
-        float eye = d->height*0.5f;
-        vec m = vec(d->o).sub(vec(0, 0, eye));
+        float eye = d->radius;
+        vec m = d->o;
+        if(gameent::is(d))
+        {
+            eye = d->height*0.5f;
+            m.z -= eye;
+        }
 
         collateents(m, d->radius, eye, actitems);
         loopv(projs::projs)
@@ -433,6 +438,7 @@ namespace entities
             projent &proj = *projs::projs[i];
             if(proj.projtype != PRJ_ENT || !proj.ready()) continue;
             if(!ents.inrange(proj.id) || enttype[ents[proj.id]->type].usetype != EU_ITEM) continue;
+            if(!(enttype[ents[proj.id]->type].canuse&(1<<d->type))) continue;
             if(!overlapsbox(m, eye, d->radius, proj.o, enttype[ents[proj.id]->type].radius, enttype[ents[proj.id]->type].radius))
                 continue;
             actitem &t = actitems.add();
@@ -509,21 +515,22 @@ namespace entities
     }
     ICOMMAND(0, exectrigger, "i", (int *n), if(identflags&IDF_WORLD) runtriggers(*n, trigger ? trigger : game::player1));
 
-    void execitem(int n, gameent *d, bool &tried)
+    void execitem(int n, dynent *d, bool &tried)
     {
         gameentity &e = *(gameentity *)ents[n];
         switch(enttype[e.type].usetype)
         {
-            case EU_ITEM: if(e.type != WEAPON || d->action[AC_USE])
+            case EU_ITEM: if(gameent::is(d) && (e.type != WEAPON || ((gameent *)d)->action[AC_USE]))
             {
-                if(game::allowmove(d))
+                gameent *f = (gameent *)d;
+                if(game::allowmove(f))
                 {
                     int sweap = m_weapon(game::gamemode, game::mutators), attr = e.type == WEAPON ? w_attr(game::gamemode, game::mutators, e.attrs[0], sweap) : e.attrs[0];
-                    if(d->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts)))
+                    if(f->canuse(e.type, attr, e.attrs, sweap, lastmillis, G(weaponinterrupts)))
                     {
-                        client::addmsg(N_ITEMUSE, "ri3", d->clientnum, lastmillis-game::maptime, n);
-                        d->setweapstate(d->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
-                        d->action[AC_USE] = false;
+                        client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
+                        f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
+                        f->action[AC_USE] = false;
                     }
                     else tried = true;
                 }
@@ -580,17 +587,25 @@ namespace entities
                                 f.lastemit = lastmillis;
                                 d->setused(n, lastmillis);
                                 d->setused(q, lastmillis);
-                                if(d == game::focus) game::resetcamera(true);
-                                execlink(d, n, true);
-                                execlink(d, q, true);
-                                d->resetair();
+                                if(gameent::is(d))
+                                {
+                                    gameent *g = (gameent *)d;
+                                    if(g == game::focus) game::resetcamera(true);
+                                    execlink(g, n, true);
+                                    execlink(g, q, true);
+                                    g->resetair();
+                                    ai::inferwaypoints(g, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
+                                }
                                 teleported = true;
-                                ai::inferwaypoints(d, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
                                 break;
                             }
                             teleports.remove(r); // must've really sucked, try another one
                         }
-                        if(!teleported) game::suicide(d, HIT_SPAWN);
+                        if(!teleported)
+                        {
+                            if(gameent::is(d)) game::suicide((gameent *)d, HIT_SPAWN);
+                            else d->state = CS_DEAD;
+                        }
                     }
                     break;
                 }
@@ -624,31 +639,39 @@ namespace entities
                         case 3: d->vel = rel; break;
                         default: break;
                     }
-                    execlink(d, n, true);
-                    d->resetair();
+                    if(gameent::is(d))
+                    {
+                        gameent *g = (gameent *)d;
+                        execlink(g, n, true);
+                        g->resetair();
+                    }
                     break;
                 }
                 case TRIGGER:
                 {
-                    if((e.attrs[2] == TA_ACTION && d->action[AC_USE] && d == game::player1) || e.attrs[2] == TA_AUTO) runtrigger(n, d);
+                    if(!gameent::is(d)) break;
+                    gameent *g = (gameent *)d;
+                    if((e.attrs[2] == TA_ACTION && g->action[AC_USE] && g == game::player1) || e.attrs[2] == TA_AUTO) runtrigger(n, g);
                     break;
                 }
                 case CHECKPOINT:
                 {
+                    if(!gameent::is(d)) break;
+                    gameent *g = (gameent *)d;
                     if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode)) break;
-                    if(m_gauntlet(game::gamemode) && d->team != T_ALPHA) break;
-                    if(d->checkpoint != n)
+                    if(m_gauntlet(game::gamemode) && g->team != T_ALPHA) break;
+                    if(g->checkpoint != n)
                     {
-                        client::addmsg(N_TRIGGER, "ri2", d->clientnum, n);
-                        d->checkpoint = n;
-                        if(!d->cpmillis || e.attrs[6] == CP_START) d->cpmillis = lastmillis;
+                        client::addmsg(N_TRIGGER, "ri2", g->clientnum, n);
+                        g->checkpoint = n;
+                        if(!g->cpmillis || e.attrs[6] == CP_START) g->cpmillis = lastmillis;
                     }
                 }
             } break;
         }
     }
 
-    void checkitems(gameent *d)
+    void checkitems(dynent *d)
     {
         static vector<actitem> actitems;
         actitems.setsize(0);
@@ -679,10 +702,14 @@ namespace entities
                 if(ents.inrange(ent)) execitem(ent, d, tried);
                 actitems.pop();
             }
-            if(tried && d->action[AC_USE])
+            if(tried && gameent::is(d))
             {
-                game::errorsnd(d);
-                d->action[AC_USE] = false;
+                gameent *e = (gameent *)d;
+                if(e->action[AC_USE])
+                {
+                    game::errorsnd(e);
+                    e->action[AC_USE] = false;
+                }
             }
         }
         if(m_capture(game::gamemode)) capture::checkaffinity(d);
@@ -1003,7 +1030,7 @@ namespace entities
                 default: if(tryspawn(d, ents[ent]->o, rnd(360), 0)) return;
             }
         }
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             vector<int> spawns;
             loopk(4)

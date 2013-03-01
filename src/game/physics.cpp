@@ -37,21 +37,21 @@ namespace physics
     #define isjetpack (PHYS(gravity) == 0 || m_jetpack(game::gamemode, game::mutators))
     bool allowjet(physent *d, bool fly)
     {
-        if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        if(d && (gameent::is(d)))
            return isjetpack ? (fly ? m_jetpack(game::gamemode, game::mutators) || PHYS(gravity) == 0 : true) : false;
         return false;
     }
 
     bool allowimpulse(physent *d, int type)
     {
-        if(d && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        if(d && (gameent::is(d)))
             return (type ? impulseallowed&type : impulseallowed != 0) && (impulsestyle || allowjet(d));
         return false;
     }
 
     bool canimpulse(physent *d, int type, bool kick)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             if(e->aitype < AI_START && allowimpulse(d, type))
@@ -67,7 +67,7 @@ namespace physics
 
     bool canjet(physent *d)
     {
-        if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && allowjet(d))
+        if((gameent::is(d)) && d->state == CS_ALIVE && allowjet(d))
         {
             gameent *e = (gameent *)d;
             if(e->physstate == PHYS_FALL && !e->onladder && (!e->impulse[IM_TIME] || lastmillis-e->impulse[IM_TIME] > jetdelay) && e->aitype < AI_START)
@@ -208,7 +208,7 @@ namespace physics
         if(e && e->type == ENT_PROJ && d->state == CS_ALIVE)
         {
             projent *p = (projent *)e;
-            if(d->type == ENT_PLAYER || d->type == ENT_AI)
+            if(gameent::is(d))
             {
                 if(p->stick == d || isghost((gameent *)d, p->owner)) return false;
                 if(impact && (p->hit == d || !(p->projcollide&COLLIDE_PLAYER))) return false;
@@ -225,10 +225,10 @@ namespace physics
             }
             else return false;
         }
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             if(d->state != CS_ALIVE) return false;
-            if(isghost((gameent *)d, (gameent *)(e && (e->type == ENT_PLAYER || e->type == ENT_AI) ? e : NULL))) return false;
+            if(isghost((gameent *)d, (gameent *)(e && gameent::is(e) ? e : NULL))) return false;
             if(((gameent *)d)->protect(lastmillis, m_protect(game::gamemode, game::mutators))) return false;
             return true;
         }
@@ -238,7 +238,7 @@ namespace physics
 
     bool iscrouching(physent *d)
     {
-        if(d->state == CS_ALIVE && (d->type == ENT_PLAYER || d->type == ENT_AI))
+        if(d->state == CS_ALIVE && (gameent::is(d)))
         {
             gameent *e = (gameent *)d;
             return e->action[AC_CROUCH] || e->actiontime[AC_CROUCH] < 0 || lastmillis-e->actiontime[AC_CROUCH] <= PHYSMILLIS;
@@ -262,7 +262,7 @@ namespace physics
 
     bool sprinting(physent *d, bool turn)
     {
-        if(allowimpulse(d, IM_A_SPRINT) && (d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE && movesprint > 0)
+        if(allowimpulse(d, IM_A_SPRINT) && (gameent::is(d)) && d->state == CS_ALIVE && movesprint > 0)
         {
             gameent *e = (gameent *)d;
             if(!iscrouching(e) && (e != game::player1 || !W(e->weapselect, zooms) || !game::inzoom()))
@@ -295,7 +295,7 @@ namespace physics
     float jumpvel(physent *d, bool liquid)
     {
         float vel = jumpspeed*(liquid ? liquidmerge(d, 1.f, PHYS(liquidspeed)) : 1.f)*d->speedscale;
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             vel *= 1.f-clamp(e->stunned(lastmillis), 0.f, 1.f);
@@ -306,7 +306,7 @@ namespace physics
     float gravityvel(physent *d)
     {
         float vel = PHYS(gravity)*(d->weight/100.f);
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             vel *= 1.f-clamp(e->stunned(lastmillis, true), 0.f, 1.f);
@@ -322,7 +322,7 @@ namespace physics
 
     bool sliding(physent *d, bool power)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             if((!power && e->turnside) || (impulseslip && e->impulse[IM_SLIP] && lastmillis-e->impulse[IM_SLIP] <= impulseslip) || (impulseslide && e->impulse[IM_SLIDE] && lastmillis-e->impulse[IM_SLIDE] <= impulseslide))
@@ -340,7 +340,7 @@ namespace physics
 
     bool sticktofloor(physent *d)
     {
-        if(!d->onladder && !liquidcheck(d) && (d->type == ENT_PLAYER || d->type == ENT_AI) && PHYS(gravity) > 0)
+        if(!d->onladder && !liquidcheck(d) && (gameent::is(d)) && PHYS(gravity) > 0)
         {
             gameent *e = (gameent *)d;
             if((e->turnside || !e->action[AC_CROUCH]) && sliding(e)) return false;
@@ -351,7 +351,7 @@ namespace physics
 
     bool sticktospecial(physent *d)
     {
-        if(d->type == ENT_PLAYER || d->type == ENT_AI) { if(((gameent *)d)->turnside) return true; }
+        if(gameent::is(d)) { if(((gameent *)d)->turnside) return true; }
         return false;
     }
 
@@ -365,7 +365,7 @@ namespace physics
         physent *pl = d->type == ENT_CAMERA ? game::player1 : d;
         float vel = pl->speed*pl->speedscale;
         if(floating) vel *= floatspeed/100.0f;
-        else if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+        else if(gameent::is(pl))
         {
             gameent *e = (gameent *)pl;
             vel *= movespeed/100.f*(1.f-clamp(e->stunned(lastmillis), 0.f, 1.f));
@@ -393,7 +393,7 @@ namespace physics
     float impulsevelocity(physent *d, float amt, int &cost)
     {
         float scale = d->speedscale;
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             scale *= 1.f-clamp(e->stunned(lastmillis), 0.f, 1.f);
@@ -718,7 +718,7 @@ namespace physics
         {
             obstacle = wall;
             /* check to see if there is an obstacle that would prevent this one from being used as a floor */
-            if((d->type == ENT_PLAYER || d->type == ENT_AI) && ((wall.z>=slopez && dir.z<0) || (wall.z<=-slopez && dir.z>0)) && (dir.x || dir.y) && !collide(d, vec(dir.x, dir.y, 0)))
+            if((gameent::is(d)) && ((wall.z>=slopez && dir.z<0) || (wall.z<=-slopez && dir.z>0)) && (dir.x || dir.y) && !collide(d, vec(dir.x, dir.y, 0)))
             {
                 if(wall.dot(dir) >= 0) slidecollide = true;
                 obstacle = wall;
@@ -750,7 +750,7 @@ namespace physics
                 d->o.add(dir);
             }
         }
-        else if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->physstate == PHYS_STEP_DOWN && dir.dot(d->floor) <= 1e-6f)
+        else if((gameent::is(d)) && d->physstate == PHYS_STEP_DOWN && dir.dot(d->floor) <= 1e-6f)
         {
             vec moved(d->o);
             d->o = old;
@@ -955,7 +955,7 @@ namespace physics
                 d->o.add(dir.normalize());
                 bool collided = collide(d, dir);
                 d->o = oldpos;
-                if(!collided && hitplayer && (hitplayer->type == ENT_PLAYER || hitplayer->type == ENT_AI))
+                if(!collided && hitplayer && gameent::is(hitplayer))
                 {
                     d->action[AC_SPECIAL] = false;
                     d->resetjump();
@@ -1119,14 +1119,14 @@ namespace physics
             vecfromyawpitch(pl->yaw, movepitch(pl) ? pl->pitch : 0, pl->move, pl->strafe, m);
             m.normalize();
         }
-        if(!floating && (pl->type == ENT_PLAYER || pl->type == ENT_AI)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
+        if(!floating && gameent::is(pl)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
         else pl->timeinair = 0;
         m.mul(movevelocity(pl, floating));
         float coast = PHYS(floorcoast);
         if(floating || pl->type == ENT_CAMERA) coast = floatcoast;
         else
         {
-            bool slide = (pl->type == ENT_PLAYER || pl->type == ENT_AI) && sliding((gameent *)pl);
+            bool slide = gameent::is(pl) && sliding((gameent *)pl);
             float c = pl->physstate >= PHYS_SLOPE || pl->onladder ? (slide ? PHYS(slidecoast) : PHYS(floorcoast))*coastscale(pl->feetpos(-2)) : PHYS(aircoast);
             coast = pl->inliquid ? liquidmerge(pl, c, PHYS(liquidcoast)) : c;
         }
@@ -1182,7 +1182,7 @@ namespace physics
                 mattrig(center, lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
             }
         }
-        if(local && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->state == CS_ALIVE && flagmat&MAT_DEATH)
+        if(local && gameent::is(pl) && pl->state == CS_ALIVE && flagmat&MAT_DEATH)
             game::suicide((gameent *)pl, curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH));
         pl->inmaterial = matid;
         if((pl->inliquid = isliquid(curmat)) != false)
@@ -1202,7 +1202,7 @@ namespace physics
             pl->submerged = found ? found/20.f : 1.f;
             if(local)
             {
-                if(curmat == MAT_WATER && (pl->type == ENT_PLAYER || pl->type == ENT_AI) && pl->submerged >= PHYS(liquidextinguish))
+                if(curmat == MAT_WATER && gameent::is(pl) && pl->submerged >= PHYS(liquidextinguish))
                 {
                     gameent *d = (gameent *)pl;
                     if(d->burning(lastmillis, burntime) && lastmillis-d->lastres[WR_BURN] > PHYSMILLIS)
@@ -1228,7 +1228,7 @@ namespace physics
 
     bool moveplayer(physent *pl, int moveres, bool local, int millis)
     {
-        bool floating = isfloating(pl), player = !floating && (pl->type == ENT_PLAYER || pl->type == ENT_AI), jetting = false;
+        bool floating = isfloating(pl), player = !floating && gameent::is(pl), jetting = false;
         float secs = millis/1000.f;
 
         pl->blocked = false;
@@ -1289,7 +1289,7 @@ namespace physics
             }
         }
 
-        if(pl->type == ENT_PLAYER || pl->type == ENT_AI)
+        if(gameent::is(pl))
         {
             if(pl->state == CS_ALIVE) updatedynentcache(pl);
             if(local)
@@ -1458,7 +1458,7 @@ namespace physics
     bool xcollide(physent *d, const vec &dir, physent *o)
     {
         hitflags = HITFLAG_NONE;
-        if(d->type == ENT_PROJ && (o->type == ENT_PLAYER || o->type == ENT_AI))
+        if(d->type == ENT_PROJ && gameent::is(o))
         {
             gameent *e = (gameent *)o;
             if(e->wantshitbox())
@@ -1483,7 +1483,7 @@ namespace physics
     bool xtracecollide(physent *d, const vec &from, const vec &to, float x1, float x2, float y1, float y2, float maxdist, float &dist, physent *o)
     {
         hitflags = HITFLAG_NONE;
-        if(d && d->type == ENT_PROJ && (o->type == ENT_PLAYER || o->type == ENT_AI))
+        if(d && d->type == ENT_PROJ && gameent::is(o))
         {
             gameent *e = (gameent *)o;
             if(e->wantshitbox())
@@ -1521,7 +1521,7 @@ namespace physics
     {
         render3dbox(d->o, d->height, d->aboveeye, d->xradius, d->yradius);
         renderellipse(d->o, d->xradius, d->yradius, d->yaw);
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             if(e->wantshitbox())
@@ -1557,13 +1557,13 @@ namespace physics
                 d->o = orig; \
             } \
         }
-        if((d->type == ENT_PLAYER || d->type == ENT_AI) && d->state == CS_ALIVE)
+        if((gameent::is(d)) && d->state == CS_ALIVE)
         {
             vec dir;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, dir);
             if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));
         }
-        if(d->type == ENT_PLAYER || d->type == ENT_AI || d->type == ENT_PROJ)
+        if(gameent::is(d) || d->type == ENT_PROJ)
         {
             vec dir = vec(d->vel).normalize();
             if(!dir.iszero()) loopk(2) inmapchk(100, d->o.add(vec(dir).mul(i/20.f).mul(k ? 1 : -1)));

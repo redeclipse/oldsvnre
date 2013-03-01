@@ -73,7 +73,7 @@ enum { ARMOUR_SMALL = 0, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
 struct enttypes
 {
     int type,           priority, links,    radius, usetype,    numattrs,   modesattr,
-            canlink, reclink;
+            canlink, reclink, canuse;
     bool    noisy,  syncs,  resyncs,    syncpos,    synckin;
     const char *name,           *attrs[11];
 };
@@ -81,19 +81,19 @@ struct enttypes
 enttypes enttype[] = {
     {
         NOTUSED,        -1,         0,      0,      EU_NONE,    0,          -1,
-            0, 0,
+            0, 0, 0,
             true,   false,  false,      false,      false,
                 "none",         { "" }
     },
     {
         LIGHT,          1,          59,     0,      EU_NONE,    5,          -1,
-            (1<<LIGHTFX), (1<<LIGHTFX),
+            (1<<LIGHTFX), (1<<LIGHTFX), 0,
             false,  false,  false,      false,      false,
                 "light",        { "radius", "red",      "green",    "blue",     "flare"  }
     },
     {
         MAPMODEL,       1,          58,     0,      EU_NONE,    10,         -1,
-            (1<<TRIGGER), (1<<TRIGGER),
+            (1<<TRIGGER), (1<<TRIGGER), 0,
             false,  false,  false,      false,      false,
                 "mapmodel",     { "type",   "yaw",      "pitch",    "roll",     "blend",    "scale",    "flags",    "colour",   "palette",  "palindex" }
     },
@@ -101,12 +101,13 @@ enttypes enttype[] = {
         PLAYERSTART,    1,          59,     0,      EU_NONE,    6,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            0,
             false,  true,  false,      false,      false,
                 "playerstart",  { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
     {
         ENVMAP,         1,          0,      0,      EU_NONE,    3,          -1,
-            0, 0,
+            0, 0, 0,
             false,  false,  false,      false,      false,
                 "envmap",       { "radius", "size", "blur" }
     },
@@ -114,6 +115,7 @@ enttypes enttype[] = {
         PARTICLES,      1,          59,     0,      EU_NONE,    11,         -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
+            0,
             false,  false,  false,      false,      false,
                 "particles",    { "type",   "a",        "b",        "c",        "d",        "e",        "f",        "g",        "i",        "j",        "k" }
     },
@@ -121,6 +123,7 @@ enttypes enttype[] = {
         MAPSOUND,       1,          58,     0,      EU_NONE,    5,          -1,
             (1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
+            0,
             false,  false,  false,      false,      false,
                 "sound",        { "type",   "maxrad",   "minrad",   "volume",   "flags" }
     },
@@ -128,18 +131,20 @@ enttypes enttype[] = {
         LIGHTFX,        1,          1,      0,      EU_NONE,    5,          -1,
             (1<<LIGHT)|(1<<TELEPORT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
             (1<<LIGHT)|(1<<TRIGGER)|(1<<PUSHER)|(1<<PLAYERSTART)|(1<<AFFINITY)|(1<<CHECKPOINT),
+            0,
             false,  false,  false,      false,      false,
                 "lightfx",      { "type",   "mod",      "min",      "max",      "flags" }
     },
     {
         SUNLIGHT,       1,          160,    0,      EU_NONE,    7,          -1,
-            0, 0,
+            0, 0, 0,
             false,  false,  false,      false,      false,
                 "sunlight",     { "yaw",    "pitch",    "red",      "green",    "blue",     "offset",   "flare" }
     },
     {
         WEAPON,         2,          59,     24,     EU_ITEM,    5,          2,
             0, 0,
+            (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "weapon",       { "type",   "flags",    "modes",    "muts",     "id" }
     },
@@ -147,12 +152,13 @@ enttypes enttype[] = {
         TELEPORT,       1,          50,     12,     EU_AUTO,    8,          -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<ENT_PLAYER)|(1<<ENT_AI)|(1<<ENT_PROJ),
             false,  false,  false,      false,      false,
                 "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex" }
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    10,         3,
-            (1<<AFFINITY), 0,
+            (1<<AFFINITY), 0, 0,
             false,  true,   false,      true,       false,
                 "actor",        { "type",   "yaw",      "pitch",    "modes",    "muts",     "id",       "weap",     "health",   "speed",    "scale" }
     },
@@ -160,6 +166,7 @@ enttypes enttype[] = {
         TRIGGER,        1,          58,     16,     EU_AUTO,    7,          5,
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPMODEL)|(1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,       false,      true,
                 "trigger",      { "id",     "type",     "action",   "radius",   "state",    "modes",    "muts" }
     },
@@ -167,6 +174,7 @@ enttypes enttype[] = {
         PUSHER,         1,          58,     12,     EU_AUTO,    6,          -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<ENT_PLAYER)|(1<<ENT_AI)|(1<<ENT_PROJ),
             false,  false,  false,      false,      false,
                 "pusher",       { "yaw",    "pitch",    "force",    "maxrad",   "minrad",   "type" }
     },
@@ -174,6 +182,7 @@ enttypes enttype[] = {
         AFFINITY,       1,          48,     32,     EU_NONE,    7,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            0,
             false,  false,  false,      false,      false,
                 "affinity",     { "team",   "yaw",      "pitch",    "modes",    "muts",     "id" }
     },
@@ -181,32 +190,35 @@ enttypes enttype[] = {
         CHECKPOINT,     1,          48,     16,     EU_AUTO,    7,          3,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
+            (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   false,      false,      false,
                 "checkpoint",   { "radius", "yaw",      "pitch",    "modes",    "muts",     "id",       "type" }
     },
 #ifdef MEK
     {
         HEALTH,         2,          59,     24,     EU_ITEM,    4,          1,
-            0, 0,
+            0, 0, 0,
+            (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "health",       { "type",   "modes",    "muts",     "id" }
     },
     {
         ARMOUR,         2,          59,     24,     EU_ITEM,    4,          1,
-            0, 0,
+            0, 0, 0,
+            (1<<ENT_PLAYER)|(1<<ENT_AI),
             false,  true,   true,      false,      false,
                 "armour",       { "type",   "modes",    "muts",     "id" }
     }
 #else
     {
         DUMMY1,         1,          48,     0,      EU_NONE,    4,          -1,
-            0, 0,
+            0, 0, 0,
             true,   false,  false,      false,      false,
                 "dummy1",       { "" }
     },
     {
         DUMMY2,         0,          1,      16,     EU_NONE,    2,          -1,
-            (1<<DUMMY2), 0,
+            0, 0, 0,
             true,   false,  false,      false,      false,
                 "dummy2",     { "" }
     }
@@ -940,11 +952,6 @@ struct stunevent
     float scale, gravity;
 };
 
-struct usedent
-{
-    int ent, millis;
-};
-
 struct gameent : dynent, gamestate
 {
     editinfo *edit; ai::aiinfo *ai;
@@ -958,7 +965,6 @@ struct gameent : dynent, gamestate
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
     vector<stunevent> stuns;
-    vector<usedent> used;
     vector<int> vitems;
 
     gameent() : edit(NULL), ai(NULL), team(T_NEUTRAL), clientnum(-1), privilege(PRIV_NONE), projid(0), checkpoint(-1), cplast(0), lastupdate(0), lastpredict(0), plag(0), ping(0),
@@ -969,9 +975,6 @@ struct gameent : dynent, gamestate
         type = ENT_PLAYER;
         copystring(hostname, "unknown");
         name[0] = handle[0] = info[0] = obit[0] = 0;
-        dominating.shrink(0);
-        dominated.shrink(0);
-        vitems.shrink(0);
         cleartags();
         checktags();
         respawn(-1, 100);
@@ -984,6 +987,9 @@ struct gameent : dynent, gamestate
         removetrackedparticles(this);
         removetrackedsounds(this);
     }
+
+    static bool is(int t) { return t == ENT_PLAYER || t == ENT_AI; }
+    static bool is(physent *d) { return d->type == ENT_PLAYER || d->type == ENT_AI; }
 
     void setparams(bool reset = false, int gamemode = 0, int mutators = 0)
     {
@@ -1040,20 +1046,6 @@ struct gameent : dynent, gamestate
         if(issound(fschan)) removesound(fschan);
         if(issound(jschan)) removesound(jschan);
         aschan = cschan = vschan = wschan = pschan = fschan = jschan = -1;
-    }
-
-    int lastused(int n, bool millis = false)
-    {
-        loopv(used) if(used[i].ent == n) return millis ? used[i].millis : i;
-        return millis ? 0 : -1;
-    }
-
-    void setused(int n, int millis)
-    {
-        int p = lastused(n);
-        usedent &u = used.inrange(p) ? used[p] : used.add();
-        u.ent = n;
-        u.millis = millis ? millis : 1;
     }
 
     void stopmoving(bool full)
@@ -1419,6 +1411,9 @@ struct projent : dynent
         schan = -1;
     }
 
+    static bool is(int t) { return t == ENT_PROJ; }
+    static bool is(physent *d) { return d->type == ENT_PROJ; }
+
     void reset()
     {
         physent::reset();
@@ -1665,8 +1660,8 @@ namespace entities
     extern int showentdescs;
     extern vector<extentity *> ents;
     extern int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
-    extern bool collateitems(gameent *d, vector<actitem> &actitems);
-    extern void checkitems(gameent *d);
+    extern bool collateitems(dynent *d, vector<actitem> &actitems);
+    extern void checkitems(dynent *d);
     extern void putitems(packetbuf &p);
     extern void execlink(gameent *d, int index, bool local, int ignore = -1);
     extern void setspawn(int n, int m);
