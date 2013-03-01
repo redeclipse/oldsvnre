@@ -1943,19 +1943,27 @@ namespace projs
         if(physics::physsteps <= 0)
         {
             physics::interppos(&proj);
+            entities::checkitems(&proj);
             return true;
         }
 
         bool alive = true;
         proj.o = proj.newpos;
         proj.o.z += proj.height;
-        loopi(physics::physsteps-1) if(!(alive = moveframe(proj))) break;
+        loopi(physics::physsteps-1)
+            if(!(alive = moveframe(proj))) break;
+            else entities::checkitems(&proj);
         proj.deltapos = proj.o;
         if(alive) alive = moveframe(proj);
+        if(alive) entities::checkitems(&proj);
         proj.newpos = proj.o;
         proj.deltapos.sub(proj.newpos);
         proj.newpos.z -= proj.height;
-        if(alive) physics::interppos(&proj);
+        if(alive)
+        {
+            physics::interppos(&proj);
+            entities::checkitems(&proj);
+        }
         return alive;
     }
 
@@ -2030,23 +2038,19 @@ namespace projs
                 iter(proj);
                 if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)
                 {
-                    if(proj.projtype == PRJ_SHOT && !WK(proj.flags) && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj))
+                    if(proj.projtype == PRJ_SHOT && !WK(proj.flags) && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj)) switch(proj.projtype)
                     {
-                        switch(proj.projtype)
+                        case PRJ_ENT: case PRJ_AFFINITY:
                         {
-                            case PRJ_ENT: case PRJ_AFFINITY:
+                            if(!proj.beenused)
                             {
-                                if(!proj.beenused)
-                                {
-                                    proj.beenused = 1;
-                                    proj.lifetime = min(proj.lifetime, proj.fadetime);
-                                }
-                                if(proj.lifetime > 0) break;
+                                proj.beenused = 1;
+                                proj.lifetime = min(proj.lifetime, proj.fadetime);
                             }
-                            default: proj.state = CS_DEAD; proj.escaped = true; break;
+                            if(proj.lifetime > 0) break;
                         }
+                        default: proj.state = CS_DEAD; proj.escaped = true; break;
                     }
-                    else entities::checkitems(&proj);
                 }
                 else for(int rtime = curtime; proj.state != CS_DEAD && rtime > 0;)
                 {
