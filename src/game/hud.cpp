@@ -2626,11 +2626,7 @@ namespace hud
                 pushfont("emphasis");
                 sy += draw_textx("\falap: \fw%d", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, game::focus->cplaps+1);
                 if(game::focus->cptime)
-                {
-                    pushfont("default");
                     sy += draw_textx("\fy%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(game::focus->cptime));
-                    popfont();
-                }
                 if(game::focus->cpmillis)
                     sy += draw_textx("%s", x, y-sy, 255, 255, 255, int(fade*255), TEXT_LEFT_UP, -1, -1, timetostr(lastmillis-game::focus->cpmillis, 1));
                 else if(game::focus->cplast)
