@@ -201,6 +201,11 @@ extern vec rdbottom(dynent *d, float offset = 0);
 extern vec rdtop(dynent *d, float offset = 0);
 extern vec rdcenter(dynent *d);
 
+struct usedent
+{
+    int ent, millis;
+};
+
 struct dynent : physent                         // animated characters, or characters that can receive input
 {
     entitylight light;
@@ -208,6 +213,7 @@ struct dynent : physent                         // animated characters, or chara
     ragdolldata *ragdoll;
     occludequery *query;
     int occluded, lastrendered;
+    vector<usedent> used;
 
     dynent() : ragdoll(NULL), query(NULL), occluded(0), lastrendered(0)
     {
@@ -221,6 +227,9 @@ struct dynent : physent                         // animated characters, or chara
         if(ragdoll) cleanragdoll(this);
 #endif
     }
+
+    static bool is(int t) { return t == ENT_PLAYER || t == ENT_AI || t == ENT_PROJ; }
+    static bool is(physent *d) { return d->type == ENT_PLAYER || d->type == ENT_AI || d->type == ENT_PROJ; }
 
     void reset()
     {
@@ -238,6 +247,20 @@ struct dynent : physent                         // animated characters, or chara
     vec feetpos(float offset = 0) { return rdbottom(this, offset); }
     vec headpos(float offset = 0) { return rdtop(this, offset); }
     vec center() { return rdcenter(this); }
+
+    int lastused(int n, bool millis = false)
+    {
+        loopv(used) if(used[i].ent == n) return millis ? used[i].millis : i;
+        return millis ? 0 : -1;
+    }
+
+    void setused(int n, int millis)
+    {
+        int p = lastused(n);
+        usedent &u = used.inrange(p) ? used[p] : used.add();
+        u.ent = n;
+        u.millis = millis ? millis : 1;
+    }
 };
 
 

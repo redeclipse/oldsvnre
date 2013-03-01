@@ -184,7 +184,7 @@ namespace projs
                 vec bottom(xx), top(xx); bottom.z -= yz1; top.z += yz2; \
                 zz = closestpointcylinder(proj.o, bottom, top, max(yx, yy)).dist(proj.o); \
             }
-        if(d->type == ENT_PLAYER || d->type == ENT_AI)
+        if(gameent::is(d))
         {
             gameent *e = (gameent *)d;
             if(aistyle[e->aitype].hitbox)
@@ -245,11 +245,10 @@ namespace projs
         return radiated;
     }
 
-    #define isdynent(x) (x == ENT_PLAYER || x == ENT_AI || x == ENT_PROJ)
 
     bool hiteffect(projent &proj, physent *d, int flags, const vec &norm)
     {
-        if(!d || !isdynent(d->type)) return false;
+        if(!d || !dynent::is(d)) return false;
         if(proj.projtype == PRJ_SHOT && physics::issolid(d, &proj))
         {
             bool drill = proj.projcollide&(d->type == ENT_PROJ ? DRILL_SHOTS : DRILL_PLAYER);
@@ -262,7 +261,7 @@ namespace projs
                 {
                     if(drill) radialeffect((dynent *)d, proj, HIT_EXPLODE, expl); // only if we're drilling
                 }
-                else if(d->type == ENT_PLAYER || d->type == ENT_AI)
+                else if(gameent::is(d))
                 {
                     int flags = 0;
                     if(proj.hitflags&HITFLAG_LEGS) flags |= HIT_LEGS;
@@ -1646,7 +1645,7 @@ namespace projs
 
     int impact(projent &proj, const vec &dir, physent *d, int flags, const vec &norm)
     {
-        if((!d || isdynent(d->type)) && (d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM))
+        if((!d || dynent::is(d)) && (d ? proj.projcollide&(d->type == ENT_PROJ ? COLLIDE_SHOTS : COLLIDE_PLAYER) : proj.projcollide&COLLIDE_GEOM))
         {
             if(d)
             {
@@ -2031,19 +2030,23 @@ namespace projs
                 iter(proj);
                 if(proj.projtype == PRJ_SHOT || proj.projtype == PRJ_ENT || proj.projtype == PRJ_AFFINITY)
                 {
-                    if(proj.projtype == PRJ_SHOT && !WK(proj.flags) && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj)) switch(proj.projtype)
+                    if(proj.projtype == PRJ_SHOT && !WK(proj.flags) && weaptype[proj.weap].traced ? !raymove(proj) : !move(proj))
                     {
-                        case PRJ_ENT: case PRJ_AFFINITY:
+                        switch(proj.projtype)
                         {
-                            if(!proj.beenused)
+                            case PRJ_ENT: case PRJ_AFFINITY:
                             {
-                                proj.beenused = 1;
-                                proj.lifetime = min(proj.lifetime, proj.fadetime);
+                                if(!proj.beenused)
+                                {
+                                    proj.beenused = 1;
+                                    proj.lifetime = min(proj.lifetime, proj.fadetime);
+                                }
+                                if(proj.lifetime > 0) break;
                             }
-                            if(proj.lifetime > 0) break;
+                            default: proj.state = CS_DEAD; proj.escaped = true; break;
                         }
-                        default: proj.state = CS_DEAD; proj.escaped = true; break;
                     }
+                    else entities::checkitems(&proj);
                 }
                 else for(int rtime = curtime; proj.state != CS_DEAD && rtime > 0;)
                 {

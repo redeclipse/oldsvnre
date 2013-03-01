@@ -195,7 +195,7 @@ namespace capture
     extern void reset();
     extern void setup();
     extern void setscore(int team, int total);
-    extern void checkaffinity(gameent *d);
+    extern void checkaffinity(dynent *e);
     extern void drawnotices(int w, int h, int &tx, int &ty, float blend);
     extern void drawblips(int w, int h, float blend);
     extern int drawinventory(int x, int y, int s, int m, float blend);

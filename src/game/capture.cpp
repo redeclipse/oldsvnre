@@ -457,8 +457,10 @@ namespace capture
         st.takeaffinity(i, d, lastmillis);
     }
 
-    void checkaffinity(gameent *d)
+    void checkaffinity(dynent *e)
     {
+        if(!gameent::is(e)) return;
+        gameent *d = (gameent *)e;
         vec o = d->feetpos();
         loopv(st.flags)
         {
