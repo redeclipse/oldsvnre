@@ -50,7 +50,9 @@ namespace game
         follow = -1;
     }
 
-    VAR(IDF_PERSIST, firstpersonmodel, 0, 1, 2);
+    VAR(IDF_PERSIST, firstpersonmodel, 0, 2, 2);
+    FVAR(IDF_PERSIST, firstpersonbodyoffset, 0, 1.5f, FVAR_MAX);
+    FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 90, 90);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
 
@@ -182,7 +184,7 @@ namespace game
     FVAR(IDF_PERSIST, playertonemix, 0, 0.3f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
-    VAR(IDF_PERSIST, forceplayermodel, 0, 0, PLAYERTYPES);
+    VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES);
 #endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -351,7 +353,6 @@ namespace game
 
     void addsway(gameent *d)
     {
-        if(firstpersonmodel == 2) return;
         float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
         if(d->state == CS_ALIVE && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside))
         {
@@ -1995,7 +1996,6 @@ namespace game
             }
             if(thirdpersonview(true, hasfoc ? d : focus))
                 pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist, d != player1 ? followside : thirdpersonside);
-            else if((d->type == ENT_PLAYER || d->type == ENT_AI) && firstpersonmodel == 2) pos = ((gameent *)d)->head;
             else if(firstpersonbob && !intermission && d->state == CS_ALIVE)
             {
                 float scale = 1;
@@ -2334,7 +2334,7 @@ namespace game
     void calcangles(physent *c, gameent *d)
     {
         c->roll = calcroll(d);
-        if(firstpersonbob && firstpersonmodel != 2 && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
+        if(firstpersonbob && !intermission && d->state == CS_ALIVE && !thirdpersonview(true))
         {
             float scale = 1;
             if(d == player1 && inzoom())
@@ -2592,23 +2592,27 @@ namespace game
                 anims.add(i);
     }
 
-    void renderclient(gameent *d, bool third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
+    void renderclient(gameent *d, int third, float trans, float size, int team, modelattach *attachments, bool secondary, int animflags, int animdelay, int lastaction, bool early)
     {
-        bool tpmdl = third || (d == focus && firstpersonmodel == 2);
 #ifdef MEK
-        const char *mdl = playertypes[0][tpmdl ? 0 : 1];
-        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[tpmdl ? 0 : 1];
-        else mdl = playertypes[d->model%PLAYERTYPES][tpmdl ? 0 : 1];
+        const char *mdl = playertypes[0][third];
+        if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
+        else mdl = playertypes[d->model%PLAYERTYPES][third];
 #else
-        const char *mdl = playertypes[forceplayermodel ? forceplayermodel-1 : 0][third ? 0 : (tpmdl ? 2 : 1)];
-        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[third ? 0 : (tpmdl ? 2 : 1)];
-        else if(!forceplayermodel) mdl = playertypes[d->model%PLAYERTYPES][third ? 0 : (tpmdl ? 2 : 1)];
+        const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][third];
+        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
+        else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][third];
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
-        vec o = tpmdl ? d->feetpos() : camerapos(d);
-        if(third && d == focus && d == player1 && thirdpersonview(true, d))
+        vec o = third == 1 ? d->feetpos() : camerapos(d);
+        if(third == 2)
+        {
+            o.z -= d->height;
+            o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodyoffset));
+        }
+        if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
             vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
-        else if(!tpmdl && firstpersonsway && !intermission)
+        else if(!third && firstpersonsway && !intermission)
         {
             vec dir; vecfromyawpitch(d->yaw, 0, 0, 1, dir);
             float steps = swaydist/(firstpersonbob ? firstpersonbobstep : firstpersonswaystep)*M_PI;
@@ -2716,7 +2720,7 @@ namespace game
             }
         }
 
-        if(third && testanims && d == focus) yaw = 0; else yaw += 90;
+        if(third == 1 && testanims && d == focus) yaw = 0; else yaw += 90;
 
         if(d->ragdoll && (deathanim!=2 || (anim&ANIM_INDEX)!=ANIM_DYING)) cleanragdoll(d);
 
@@ -2792,7 +2796,7 @@ namespace game
                 }
             }
         }
-        rendermodel(NULL, mdl, anim, o, yaw, pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
+        rendermodel(NULL, mdl, anim, o, yaw, third != 2 || firstpersonbodypitch < 0 ? pitch : firstpersonbodypitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
     void renderabovehead(gameent *d, float trans)
@@ -2874,10 +2878,10 @@ namespace game
         }
     }
 
-    void renderplayer(gameent *d, bool third, float trans, float size, bool early = false)
+    void renderplayer(gameent *d, int third, float trans, float size, bool early = false)
     {
         if(d->state == CS_SPECTATOR) return;
-        if(trans <= 0.f || (d == focus && !(third ? thirdpersonmodel : firstpersonmodel)))
+        if(trans <= 0.f || (d == focus && !(third == 1 ? thirdpersonmodel : firstpersonmodel)))
         {
             if(d->state == CS_ALIVE && rendernormally && (early || d != focus))
                 trans = 1e-16f; // we need tag_muzzle/tag_waist
@@ -2885,7 +2889,7 @@ namespace game
         }
         int team = m_fight(gamemode) && m_team(gamemode, mutators) ? d->team : T_NEUTRAL,
             weap = d->weapselect, lastaction = 0, animflags = ANIM_IDLE|ANIM_LOOP, weapflags = animflags, weapaction = 0, animdelay = 0;
-        bool secondary = false, showweap = isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap), tpmdl = third || (d == focus && firstpersonmodel == 2);
+        bool secondary = false, showweap = third != 2 && isweap(weap) && (d->aitype < AI_START || aistyle[d->aitype].useweap);
 
         if(d->state == CS_DEAD || d->state == CS_WAITING)
         {
@@ -2916,7 +2920,7 @@ namespace game
         }
         else
         {
-            secondary = tpmdl;
+            secondary = third;
             if(showweap)
             {
                 weapaction = lastaction = d->weaplast[weap];
@@ -2966,20 +2970,20 @@ namespace game
                     }
                 }
             }
-            if(tpmdl && (animflags&ANIM_IDLE) && lastmillis-d->lastpain <= 300)
+            if(third && (animflags&ANIM_IDLE) && lastmillis-d->lastpain <= 300)
             {
-                secondary = tpmdl;
+                secondary = true;
                 lastaction = d->lastpain;
                 animflags = ANIM_PAIN;
                 animdelay = 300;
             }
         }
-        if(!early && third && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
-        const char *weapmdl = isweap(weap) ? (tpmdl ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
+        if(!early && third == 1 && d->type == ENT_PLAYER && !shadowmapping && !envmapping) renderabovehead(d, trans);
+        const char *weapmdl = showweap && isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         int ai = 0;
 #ifdef VANITY
         modelattach a[1+VANITYMAX+10];
-        if(tpmdl && *d->vanity)
+        if(third && *d->vanity)
         {
             if(d->vitems.empty())
             {
@@ -2994,7 +2998,7 @@ namespace game
             loopvk(d->vitems) if(vanities.inrange(d->vitems[k]))
             {
                 if(found[vanities[d->vitems[k]].type] || d->privilege < vanities[d->vitems[k]].priv) continue;
-                if(vanities[d->vitems[k]].cond && !third) continue;
+                if(vanities[d->vitems[k]].cond && third == 2) continue;
                 const char *file = NULL;
                 switch(vanities[d->vitems[k]].style)
                 {
@@ -3030,9 +3034,9 @@ namespace game
         bool hasweapon = showweap && *weapmdl;
 #endif
         if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
-        if(rendernormally)
+        if(rendernormally && (early || d != focus))
         {
-            if(early || d != focus)
+            if(third != 2)
             {
                 const char *muzzle = "tag_weapon";
                 if(hasweapon)
@@ -3043,7 +3047,7 @@ namespace game
                 a[ai++] = modelattach(muzzle, &d->muzzle);
                 a[ai++] = modelattach("tag_weapon", &d->origin);
             }
-            if((d != focus ? third : (tpmdl && early)) && d->wantshitbox())
+            if(third && d->wantshitbox())
             {
                 a[ai++] = modelattach("tag_head", &d->head);
                 a[ai++] = modelattach("tag_torso", &d->torso);
@@ -3158,7 +3162,7 @@ namespace game
         startmodelbatches();
         gameent *d;
         int numdyns = numdynents();
-        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, true, opacity(d, true), d->curscale);
+        loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, 1, opacity(d, true), d->curscale);
         entities::render();
         projs::render();
         if(m_capture(gamemode)) capture::render();
@@ -3174,9 +3178,12 @@ namespace game
     {
         if(rendernormally && early) focus->cleartags();
         if(thirdpersonview() || !rendernormally)
-            renderplayer(focus, true, opacity(focus, thirdpersonview(true)), focus->curscale, early);
+            renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
         else if(!thirdpersonview() && focus->state == CS_ALIVE)
-            renderplayer(focus, false, opacity(focus, false), focus->curscale, early);
+        {
+            if(firstpersonmodel == 2) renderplayer(focus, 2, opacity(focus, false), focus->curscale, early);
+            renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
+        }
         if(rendernormally && early) rendercheck(focus);
     }
 
@@ -3199,7 +3206,7 @@ namespace game
         previewent->weapselect = clamp(weap, 0, W_MAX-1);
         previewent->yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
         previewent->light.millis = -1;
-        renderplayer(previewent, true, blend, scale);
+        renderplayer(previewent, 1, blend, scale);
     }
 
     bool clientoption(char *arg) { return false; }
