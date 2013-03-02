@@ -1977,15 +1977,64 @@ namespace game
                 state = CS_ALIVE;
                 height = zradius = radius = xradius = yradius = 2;
             }
-        } d;
-        if(!dist && !side) return d.o = pos;
+        } c;
+        if(!dist && !side) return c.o = pos;
         vec dir[3];
         if(dist) vecfromyawpitch(yaw, pitch, -1, 0, dir[0]);
         if(side) vecfromyawpitch(yaw, pitch, 0, -1, dir[1]);
         dir[2] = dir[0].mul(dist).add(dir[1].mul(side)).normalize();
-        d.o = pos;
-        physics::movecamera(&d, dir[2], dist, 0.1f);
-        return d.o;
+        c.o = pos;
+        physics::movecamera(&c, dir[2], dist, 0.1f);
+        return c.o;
+    }
+
+    vec firstpos(physent *d, const vec &pos, float yaw, float pitch)
+    {
+        static struct fpcam : physent
+        {
+            fpcam()
+            {
+                physent::reset();
+                type = ENT_CAMERA;
+                collidetype = COLLIDE_AABB;
+                state = CS_ALIVE;
+                height = zradius = radius = xradius = yradius = 2;
+            }
+        } c;
+
+        vec to = pos;
+        c.o = pos;
+        if(firstpersonmodel == 2)
+        {
+            to.z -= firstpersonbodyspine;
+            to.add(vec(yaw*RAD, ((pitch*firstpersonbodypitch)+90)*RAD).mul(firstpersonbodyspine));
+        }
+        if(firstpersonbob && !intermission && d->state == CS_ALIVE)
+        {
+            float scale = 1;
+            if(d == player1 && inzoom())
+            {
+                int frame = lastmillis-lastzoom;
+                float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
+                scale *= zooming ? 1.f-pc : pc;
+            }
+            if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
+            if(scale > 0)
+            {
+                vec dir;
+                vecfromyawpitch(yaw, 0, 0, 1, dir);
+                float steps = bobdist/firstpersonbobstep*M_PI;
+                dir.mul(firstpersonbobside*cosf(steps)*scale);
+                dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
+                to.add(dir);
+            }
+        }
+        vec dir = vec(to).sub(c.o);
+        if(dir.iszero()) return c.o;
+        float dist = dir.magnitude();
+        dir.normalize();
+        physics::movecamera(&c, dir, dist, 0.1f);
+        return c.o;
     }
 
     vec camerapos(physent *d, bool hasfoc, bool hasyp, float yaw, float pitch)
@@ -2000,34 +2049,7 @@ namespace game
             }
             if(thirdpersonview(true, hasfoc ? d : focus))
                 pos = thirdpos(pos, yaw, pitch, d != player1 ? followdist : thirdpersondist, d != player1 ? followside : thirdpersonside);
-            else
-            {
-                if(firstpersonmodel == 2)
-                {
-                    pos.z -= firstpersonbodyspine;
-                    pos.add(vec(yaw*RAD, ((pitch*firstpersonbodypitch)+90)*RAD).mul(firstpersonbodyspine));
-                }
-                if(firstpersonbob && !intermission && d->state == CS_ALIVE)
-                {
-                    float scale = 1;
-                    if(d == player1 && inzoom())
-                    {
-                        int frame = lastmillis-lastzoom;
-                        float pc = frame <= zoomtime ? (frame)/float(zoomtime) : 1.f;
-                        scale *= zooming ? 1.f-pc : pc;
-                    }
-                    if(firstpersonbobtopspeed) scale *= clamp(d->vel.magnitude()/firstpersonbobtopspeed, firstpersonbobmin, 1.f);
-                    if(scale > 0)
-                    {
-                        vec dir;
-                        vecfromyawpitch(yaw, 0, 0, 1, dir);
-                        float steps = bobdist/firstpersonbobstep*M_PI;
-                        dir.mul(firstpersonbobside*cosf(steps)*scale);
-                        dir.z = firstpersonbobup*(fabs(sinf(steps)) - 1)*scale;
-                        pos.add(dir);
-                    }
-                }
-            }
+            else pos = firstpos(d, pos, yaw, pitch);
         }
         return pos;
     }
