@@ -1090,9 +1090,9 @@ namespace game
                 if(aistyle[d->aitype].living)
                 {
                     vec p = d->headpos(-d->height/4);
-                    if(!kidmode && bloodscale > 0)
+                    if(bloodscale > 0)
                         part_splash(PART_BLOOD, int(clamp(damage/2, 2, 10)*bloodscale)*(bleeding ? 2 : 1), bloodfade, p, 0x229999, (rnd(bloodsize/2)+(bloodsize/2))/10.f, 1, 100, DECAL_BLOOD, int(d->radius), 10);
-                    if(kidmode || bloodscale <= 0 || bloodsparks)
+                    if(bloodscale <= 0 || bloodsparks)
                         part_splash(PART_PLASMA, int(clamp(damage/2, 2, 10))*(bleeding ? 2: 1), bloodfade, p, 0x882222, 1, 0.5f, 50, DECAL_STAIN, int(d->radius));
                 }
                 if(d != actor)
