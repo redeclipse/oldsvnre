@@ -193,6 +193,10 @@ Files: data/models/weapons/plasma/* data/models/weapons/flamer/*
 Copyright: Mike Ledger ( mikeplus[i] )
 License: CC-BY-SA-3.0-AU
 
+Files: data/models/john/*
+Copyright: John_III
+License: CC-BY-SA-3.0
+
 Files: data/mayhem/*
 Copyright: Mayhem
 License: CC-BY-SA-3.0
