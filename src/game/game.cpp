@@ -56,8 +56,10 @@ namespace game
 
     FVAR(IDF_PERSIST, firstpersonbodydist, -10, 0, 10);
     FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
-    FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 1, 1);
     FVAR(IDF_PERSIST, firstpersonbodyspine, 0, 5, 20);
+    FVAR(IDF_PERSIST, firstpersonbodypitchmin, 0, 90, 90);
+    FVAR(IDF_PERSIST, firstpersonbodypitchmax, 0, 45, 90);
+    FVAR(IDF_PERSIST, firstpersonbodypitchscale, -1, 1, 1);
 
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.f, 1000);
@@ -1320,7 +1322,7 @@ namespace game
             }
             else if(m_team(gamemode, mutators) && d->team == actor->team)
             {
-                concatstring(d->obit, " \fs\fzawteam-mate\fS ");
+                concatstring(d->obit, " \fs\fzPwteam-mate\fS ");
                 concatstring(d->obit, colorname(actor));
                 if(actor == focus) { anc = S_ALARM; override = true; }
             }
@@ -1355,19 +1357,19 @@ namespace game
 
                 if(style&FRAG_MKILL1)
                 {
-                    concatstring(d->obit, " \fs\fzZedouble-killing\fS");
+                    concatstring(d->obit, " double-killing");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
                     if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
-                    concatstring(d->obit, " \fs\fzZetriple-killing\fS");
+                    concatstring(d->obit, " triple-killing");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
                     if(!override && allowanc) anc = S_V_MULTI2;
                 }
                 else if(style&FRAG_MKILL3)
                 {
-                    concatstring(d->obit, " \fs\fzZemulti-killing\fS");
+                    concatstring(d->obit, " \fs\fzcwmulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
                     if(!override && allowanc) anc = S_V_MULTI3;
                 }
@@ -1381,7 +1383,7 @@ namespace game
             {
                 if(style&FRAG_FIRSTBLOOD)
                 {
-                    concatstring(d->obit, " for \fs\fzwRfirst blood\fS");
+                    concatstring(d->obit, " for \fs\fzwrfirst blood\fS");
                     actor->addicon(eventicon::FIRSTBLOOD, lastmillis, eventiconfade, 0);
                     if(!override && allowanc)
                     {
@@ -1392,7 +1394,7 @@ namespace game
 
                 if(style&FRAG_SPREE1)
                 {
-                    concatstring(d->obit, " in total \fs\fzcgcarnage\fS");
+                    concatstring(d->obit, " in total \fs\fzcwcarnage\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 0);
                     if(!override && allowanc)
                     {
@@ -1402,7 +1404,7 @@ namespace game
                 }
                 else if(style&FRAG_SPREE2)
                 {
-                    concatstring(d->obit, " on a \fs\fzcgslaughter\fS");
+                    concatstring(d->obit, " on a \fs\fzcwslaughter\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 1);
                     if(!override && allowanc)
                     {
@@ -1412,7 +1414,7 @@ namespace game
                 }
                 else if(style&FRAG_SPREE3)
                 {
-                    concatstring(d->obit, " on a \fs\fzcgmassacre\fS");
+                    concatstring(d->obit, " on a \fs\fzcwmassacre\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 2);
                     if(!override && allowanc)
                     {
@@ -1422,7 +1424,7 @@ namespace game
                 }
                 else if(style&FRAG_SPREE4)
                 {
-                    concatstring(d->obit, " in a \fs\fzcgbloodbath\fS");
+                    concatstring(d->obit, " in a \fs\fzcwbloodbath\fS");
                     actor->addicon(eventicon::SPREE, lastmillis, eventiconfade, 3);
                     if(!override && allowanc)
                     {
@@ -1430,7 +1432,7 @@ namespace game
                         override = true;
                     }
                 }
-                if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzgrcritical\fS hit");
+                if(flags&HIT_CRIT) concatstring(d->obit, " with a \fs\fzywcritical\fS hit");
             }
         }
         if(!log.empty())
@@ -2008,7 +2010,9 @@ namespace game
         if(firstpersonmodel == 2)
         {
             to.z -= firstpersonbodyspine;
-            to.add(vec(yaw*RAD, ((pitch*firstpersonbodypitch)+90)*RAD).mul(firstpersonbodyspine));
+            float bodypitch = clamp(pitch, -firstpersonbodypitchmin, firstpersonbodypitchmax);
+            if(firstpersonbodypitchscale >= 0) bodypitch *= firstpersonbodypitchscale;
+            to.add(vec(yaw*RAD, (bodypitch+90)*RAD).mul(firstpersonbodyspine));
         }
         if(firstpersonbob && !intermission && d->state == CS_ALIVE)
         {
@@ -2831,7 +2835,7 @@ namespace game
                 }
             }
         }
-        rendermodel(NULL, mdl, anim, o, yaw, third != 2 || firstpersonbodypitch < 0 ? pitch : pitch*firstpersonbodypitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
+        rendermodel(NULL, mdl, anim, o, yaw, third == 2 && firstpersonbodypitchscale >= 0 ? pitch*firstpersonbodypitchscale : pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
     void renderabovehead(gameent *d, float trans)

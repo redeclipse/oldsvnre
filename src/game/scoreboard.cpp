@@ -296,38 +296,43 @@ namespace hud
                     {
                         if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
                         {
-                            int sdelay = m_delay(game::gamemode, game::mutators);
-                            int delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
                             g.pushlist();
                             g.spring();
-                            uifont(g, "reduced", g.textf("%s", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged"));
-                            if(shownotices >= 2)
-                            {
-                                g.space(1);
-                                SEARCHBINDCACHE(attackkey)("action 0", 0);
-                                uifont(g, "little", {
+                            SEARCHBINDCACHE(attackkey)("action 0", 0);
+                            uifont(g, "little", {
+                                if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                                {
+                                    int n = game::numwaiting();
+                                    if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
+                                    else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
+                                    //g.spring();
+                                    //g.poplist();
+                                }
+                                else
+                                {
+                                    int sdelay = m_delay(game::gamemode, game::mutators);
+                                    int delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
                                     if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                                     {
                                         if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
-                                        else if(delay) g.textf("Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, timetostr(delay, -1));
-                                        else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
-                                        {
-                                            int n = game::numwaiting();
-                                            if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
-                                            else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
-                                        }
-                                        g.spring();
-                                        g.poplist();
+                                        else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
+                                        //g.spring();
+                                        //g.poplist();
                                         if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
                                             uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey));
                                     }
                                     else
                                     {
                                         g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
-                                        g.spring();
-                                        g.poplist();
+                                        //g.spring();
+                                        //g.poplist();
                                         if(game::player1->state != CS_WAITING) uicenterlist(g, g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey));
                                     }
+                                }
+                            });
+                            if(shownotices >= 2)
+                            {
+                                uifont(g, "little", {
                                     if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
                                     {
                                         SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
@@ -345,11 +350,11 @@ namespace hud
                                     }
                                 });
                             }
-                            else
-                            {
-                                g.spring();
-                                g.poplist();
-                            }
+                            //else
+                            //{
+                            //    g.spring();
+                            //    g.poplist();
+                            //}
                         }
                         else if(game::player1->state == CS_ALIVE)
                         {
@@ -365,7 +370,7 @@ namespace hud
                                     else g.textf("%s", 0xFFFFFF, NULL, 0, gametype[game::gamemode].desc);
                                 });
                                 if(m_team(game::gamemode, game::mutators))
-                                uicenterlist(g, g.textf("Playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), teamtexname(game::player1->team), TEAM(game::player1->team, name)));
+                                    uicenterlist(g, g.textf("Playing for team \fs\f[%d]\f(%s)%s\fS", 0xFFFFFF, NULL, 0, TEAM(game::player1->team, colour), teamtexname(game::player1->team), TEAM(game::player1->team, name)));
                             });
                         }
                         else if(game::player1->state == CS_SPECTATOR)

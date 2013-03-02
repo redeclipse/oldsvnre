@@ -1257,33 +1257,20 @@ namespace hud
             gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
             if(target->state == CS_DEAD || target->state == CS_WAITING)
             {
-                int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
-                if(target == game::player1)
+                if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                 {
-                    const char *msg = target->state == CS_WAITING ? "Please Wait" : "Fragged";
-                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, msg);
+                    int n = game::numwaiting();
+                    if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
+                    else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
                 }
-                if(obitnotices && target->lastdeath && (delay || target->state == CS_DEAD) && *target->obit)
+                else
                 {
-                    pushfont("reduced");
-                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
-                    popfont();
-                }
-                if(shownotices >= 2)
-                {
+                    int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
                     SEARCHBINDCACHE(attackkey)("action 0", 0);
                     if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                     {
-                        pushfont("reduced");
-                        if(m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                        else if(delay) ty += draw_textx("Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, timetostr(delay, -1));
-                        else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
-                        {
-                            int n = game::numwaiting();
-                            if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
-                            else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                        }
-                        popfont();
+                        if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                        else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
                         if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
                         {
                             pushfont("little");
@@ -1293,9 +1280,7 @@ namespace hud
                     }
                     else
                     {
-                        pushfont("reduced");
                         ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        popfont();
                         if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
                         {
                             pushfont("little");
@@ -1303,6 +1288,15 @@ namespace hud
                             popfont();
                         }
                     }
+                }
+                if(obitnotices && target->lastdeath && (target->state == CS_WAITING || target->state == CS_DEAD) && *target->obit)
+                {
+                    pushfont("reduced");
+                    ty += draw_textx("%s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target->obit);
+                    popfont();
+                }
+                if(shownotices >= 2)
+                {
                     if(target == game::player1 && !client::demoplayback)
                     {
                         if(target->state == CS_WAITING && shownotices >= 3)
@@ -2917,7 +2911,7 @@ namespace hud
                 tw = int((hudwidth-(int(hudsize*gapsize)*2+int(hudsize*inventorysize)*2))/noticescale);
             if(noticestone) skewcolour(tr, tg, tb, noticestone);
             if(teamkillnum && m_team(game::gamemode, game::mutators) && numteamkills() >= teamkillnum)
-                to += draw_textx("\fzZyDo NOT shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                to += draw_textx("\fzryDo NOT shoot team mates", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
             if(teamnotices >= 2)
             {
                 if(game::focus->state == CS_ALIVE && !lastteam) lastteam = totalmillis;
@@ -2927,9 +2921,9 @@ namespace hud
                     {
                         if(m_trial(game::gamemode)) to += draw_textx("Time Trial", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                         else if(m_gauntlet(game::gamemode)) to += draw_textx("Gauntlet", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        else to += draw_textx("\fzZeFree-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                        else to += draw_textx("Free-for-all Deathmatch", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
                     }
-                    else to += draw_textx("\fzZeYou are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), teamtexname(game::focus->team), TEAM(game::focus->team, name));
+                    else to += draw_textx("You are on team \fs\f[%d]\f(%s)%s\fS", tx, ty-to, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, TEAM(game::focus->team, colour), teamtexname(game::focus->team), TEAM(game::focus->team, name));
                 }
             }
             popfont();
