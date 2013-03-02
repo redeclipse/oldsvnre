@@ -56,10 +56,12 @@ namespace game
 
     FVAR(IDF_PERSIST, firstpersonbodydist, -10, 0, 10);
     FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
-    FVAR(IDF_PERSIST, firstpersonbodyspine, 0, 5, 20);
-    FVAR(IDF_PERSIST, firstpersonbodypitchmin, 0, 90, 90);
-    FVAR(IDF_PERSIST, firstpersonbodypitchmax, 0, 45, 90);
-    FVAR(IDF_PERSIST, firstpersonbodypitchscale, -1, 1, 1);
+    FVAR(IDF_PERSIST, firstpersonbodypitch, -1, 1, 1);
+
+    FVAR(IDF_PERSIST, firstpersonspine, 0, 3, 20);
+    FVAR(IDF_PERSIST, firstpersonpitchmin, 0, 90, 90);
+    FVAR(IDF_PERSIST, firstpersonpitchmax, 0, 45, 90);
+    FVAR(IDF_PERSIST, firstpersonpitchscale, -1, 1, 1);
 
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
     FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.f, 1000);
@@ -2009,10 +2011,10 @@ namespace game
         c.o = pos;
         if(firstpersonmodel == 2)
         {
-            to.z -= firstpersonbodyspine;
-            float bodypitch = clamp(pitch, -firstpersonbodypitchmin, firstpersonbodypitchmax);
-            if(firstpersonbodypitchscale >= 0) bodypitch *= firstpersonbodypitchscale;
-            to.add(vec(yaw*RAD, (bodypitch+90)*RAD).mul(firstpersonbodyspine));
+            to.z -= firstpersonspine;
+            float lean = clamp(pitch, -firstpersonpitchmin, firstpersonpitchmax);
+            if(firstpersonpitchscale >= 0) lean *= firstpersonpitchscale;
+            to.add(vec(yaw*RAD, (lean+90)*RAD).mul(firstpersonspine));
         }
         if(firstpersonbob && !intermission && d->state == CS_ALIVE)
         {
@@ -2835,7 +2837,7 @@ namespace game
                 }
             }
         }
-        rendermodel(NULL, mdl, anim, o, yaw, third == 2 && firstpersonbodypitchscale >= 0 ? pitch*firstpersonbodypitchscale : pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
+        rendermodel(NULL, mdl, anim, o, yaw, third == 2 && firstpersonbodypitch >= 0 ? pitch*firstpersonbodypitch : pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
     void renderabovehead(gameent *d, float trans)
