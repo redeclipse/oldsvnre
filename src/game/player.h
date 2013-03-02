@@ -60,11 +60,11 @@ extern const int mapbals[T_TOTAL][T_TOTAL];
 #ifdef MEK
 #define PLAYERTYPES 4
 #ifdef GAMEWORLD
-const char *playertypes[PLAYERTYPES][4] = {
-    { "actors/mek1/hwep",    "actors/mek1",   "mek1",   "light" },
-    { "actors/mek2/hwep",    "actors/mek2",   "mek2",   "medium" },
-    { "actors/mek3/hwep",    "actors/mek3",   "mek3",   "flyer" },
-    { "actors/mek4/hwep",    "actors/mek4",   "mek4",   "heavy" },
+const char *playertypes[PLAYERTYPES][5] = {
+    { "actors/mek1/hwep",    "actors/mek1",    "actors/mek1",   "mek1",   "light" },
+    { "actors/mek2/hwep",    "actors/mek2",    "actors/mek2",   "mek2",   "medium" },
+    { "actors/mek3/hwep",    "actors/mek3",    "actors/mek3",   "mek3",   "flyer" },
+    { "actors/mek4/hwep",    "actors/mek4",    "actors/mek4"    ,   "mek4",   "heavy" },
 };
 #else
 extern const char *playertypes[PLAYERTYPES][4]; //3
@@ -108,9 +108,9 @@ CLASSDEF(float, speed);
 #else // FPS
 #define PLAYERTYPES 2
 #ifdef GAMEWORLD
-const char *playertypes[PLAYERTYPES][4] = {
-    { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "male" },
-    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "female" }
+const char *playertypes[PLAYERTYPES][5] = {
+    { "actors/player/male/hwep",      "actors/player/male",     "actors/player/male/body",      "actors/player/male/headless",      "male" },
+    { "actors/player/female/hwep",    "actors/player/female",   "actors/player/male/body",      "actors/player/male/headless",      "female" }
 };
 #else
 extern const char *playertypes[PLAYERTYPES][3];

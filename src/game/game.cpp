@@ -1183,7 +1183,8 @@ namespace game
         d->lastregen = 0;
         d->lastpain = lastmillis;
         d->state = CS_DEAD;
-        d->obliterated = (style&FRAG_OBLITERATE) != 0;
+        if(style&FRAG_OBLITERATE) d->obliterated = true;
+        if(style&FRAG_HEADSHOT) d->headless = true;
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || actor == focus,
              isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
         int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
@@ -1303,11 +1304,11 @@ namespace game
                         { "obliterated by", "obliterated by" },
                     }
                 };
-                concatstring(d->obit, obitnames[WK(flags) ? 4 : (d->obliterated ? 3 : (style&FRAG_HEADSHOT ? 2 : (WS(flags) ? 1 : 0)))][weap][obitverbose == 2 ? 0 : 1]);
+                concatstring(d->obit, obitnames[WK(flags) ? 4 : (d->obliterated ? 3 : (d->headless ? 2 : (WS(flags) ? 1 : 0)))][weap][obitverbose == 2 ? 0 : 1]);
             }
             else concatstring(d->obit, "killed by");
             bool override = false;
-            if(style&FRAG_HEADSHOT)
+            if(d->headless)
             {
                 actor->addicon(eventicon::HEADSHOT, lastmillis, eventiconfade, 0);
                 if(!override && allowanc) anc = S_V_HEADSHOT;
@@ -2632,9 +2633,10 @@ namespace game
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
         else mdl = playertypes[d->model%PLAYERTYPES][third];
 #else
-        const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][third];
-        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
-        else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][third];
+        int idx = third == 1 && d->headless ? 3 : third;
+        const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][idx];
+        if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[idx];
+        else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][idx];
 #endif
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
@@ -3018,6 +3020,7 @@ namespace game
         modelattach a[1+VANITYMAX+10];
         if(third && *d->vanity)
         {
+            int idx = third == 1 && d->state == CS_DEAD && d->headless ? 3 : third;
             if(d->vitems.empty())
             {
                 vector<char *> vanitylist;
@@ -3031,7 +3034,8 @@ namespace game
             loopvk(d->vitems) if(vanities.inrange(d->vitems[k]))
             {
                 if(found[vanities[d->vitems[k]].type] || d->privilege < vanities[d->vitems[k]].priv) continue;
-                if(vanities[d->vitems[k]].cond && third == 2) continue;
+                if(vanities[d->vitems[k]].cond&1 && idx == 2) continue;
+                if(vanities[d->vitems[k]].cond&2 && idx == 3) continue;
                 const char *file = NULL;
                 switch(vanities[d->vitems[k]].style)
                 {

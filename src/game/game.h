@@ -960,7 +960,7 @@ struct gameent : dynent, gamestate
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
     vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
-    bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated;
+    bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated, headless;
     string hostname, name, handle, info, obit;
     vector<gameent *> dominating, dominated;
     vector<eventicon> icons;
@@ -1065,7 +1065,7 @@ struct gameent : dynent, gamestate
         turnroll = turnyaw = 0;
         lastteamhit = lastflag = respawned = suicided = lastnode = -1;
         obit[0] = 0;
-        obliterated = false;
+        obliterated = headless = false;
         setscale(1, 0, true, gamemode, mutators);
         icons.shrink(0);
         stuns.shrink(0);
