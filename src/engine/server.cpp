@@ -18,7 +18,6 @@ SVAR(0, versionrelease, "");
 SVAR(0, versionurl, "");
 
 VAR(0, rehashing, 1, 0, -1);
-VAR(IDF_PERSIST, kidmode, 0, 0, 1); // kid protections
 
 extern const char * const disc_reasons[] = { "normal", "end of packet", "client num", "user was kicked", "message error", "address is banned", "server is in private mode", "server is full", "connection timed out", "packet overflow", "server shutting down" };
 
@@ -1259,7 +1258,6 @@ bool serveroption(char *opt)
 {
     switch(opt[1])
     {
-        case 'k': kidmode = atoi(opt+2); return true;
         case 'h': sethomedir(&opt[2]); logoutf("set home directory: %s", &opt[2]); return true;
         case 'o': setsvar("octadir", &opt[2]); return true;
         case 'p': addpackagedir(&opt[2]); logoutf("add package directory: %s", &opt[2]); return true;

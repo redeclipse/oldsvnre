@@ -546,7 +546,7 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                if(!kidmode && game::bloodscale > 0)
+                if(game::bloodscale > 0)
                 {
                     adddecal(DECAL_BLOOD, proj.o, proj.norm, proj.radius*clamp(proj.vel.magnitude()/2, 1.f, 4.f), bvec(125, 255, 255));
                     int mag = int(proj.vel.magnitude()), vol = int(ceilf(clamp(mag*2, 10, 255)*proj.curscale));
@@ -695,7 +695,7 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                if(!kidmode)
+                if(bloodscale > 0)
                 {
                     proj.collidetype = COLLIDE_AABB;
                     proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
@@ -1383,7 +1383,7 @@ namespace projs
             }
             case PRJ_GIBS: case PRJ_DEBRIS:
             {
-                if(proj.projtype == PRJ_GIBS && !kidmode && game::bloodscale > 0)
+                if(proj.projtype == PRJ_GIBS && game::bloodscale > 0)
                 {
                     if(proj.movement >= 1 && lastmillis-proj.lasteffect >= 1000 && proj.lifetime >= min(proj.lifemillis, proj.fadetime))
                     {
