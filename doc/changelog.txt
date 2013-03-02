@@ -7,6 +7,7 @@ Gameplay:
    intermission is scheduled to start
  * New thirdperson style with camera postion to the side (adjust with
    /thirdpersondist and /thirdpersonside)
+ * New default firstperson style with visible legs
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
@@ -133,6 +134,8 @@ Core & Install:
  * Network encoding functions moved into tools
  * Weapon variable definititions structured into rows per variable
  * Moved data/maps to game/fps/maps
+ * Reorganised data/ with more subdirectories
+ * Enabled simpler cross-compile via PLATFORM=CROSSMINGW
 
 Additional fixed bugs:
  * #218 - "Dropping" a weapon in arena makes it unusable until next round
