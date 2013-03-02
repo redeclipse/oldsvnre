@@ -236,6 +236,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
         case 'O': color = bvec(172,  56,   0); break; // dark orange
         case 'C': color = bvec(48,  172, 172); break; // dark cyan
         case 'A': case 'd': color = bvec(102, 102, 102); break; // dark grey
+        case 'P': color = bvec(255, 168, 168); break; // pink
         case 'e': case 'E': f -= d!='E' ? f/2 : f/4; break;
         case 'u': color = bvec(r, g, b); break; // user colour
         case 'Z': default: break; // everything else

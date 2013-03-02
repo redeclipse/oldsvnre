@@ -695,7 +695,7 @@ namespace projs
             }
             case PRJ_GIBS:
             {
-                if(bloodscale > 0)
+                if(game::bloodscale > 0)
                 {
                     proj.collidetype = COLLIDE_AABB;
                     proj.height = proj.aboveeye = proj.radius = proj.xradius = proj.yradius = 0.5f;
