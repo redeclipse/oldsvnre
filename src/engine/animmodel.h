@@ -867,7 +867,7 @@ struct animmodel : model
                     if(link.rotate.x) link.matrix.rotate_around_z(link.rotate.x*RAD);
                     if(link.rotate.z) link.matrix.rotate_around_x(-link.rotate.z*RAD);
                     if(link.rotate.y) link.matrix.rotate_around_y(link.rotate.y*RAD);
-                    
+
                     matrixpos++;
                     matrixstack[matrixpos].mul(matrixstack[matrixpos-1], link.matrix);
 
