@@ -2014,6 +2014,7 @@ namespace game
         return c.o;
     }
 
+    float firstpersonspineoffset = 0;
     vec firstpos(physent *d, const vec &pos, float yaw, float pitch)
     {
         static struct fpcam : physent
@@ -2057,11 +2058,13 @@ namespace game
                 to.add(dir);
             }
         }
-        vec dir = vec(to).sub(c.o);
+        c.o.z = to.z; // assume inside ourselves is safe
+        vec dir = vec(to).sub(c.o), old = c.o;
         if(dir.iszero()) return c.o;
         float dist = dir.magnitude();
         dir.normalize();
         physics::movecamera(&c, dir, dist, 0.1f);
+        firstpersonspineoffset = max(dist-old.dist(c.o), 0.f);
         return c.o;
     }
 
@@ -2669,7 +2672,7 @@ namespace game
         vec o = third ? d->feetpos() : camerapos(d);
         if(third == 2)
         {
-            o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist));
+            o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
         }
         if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
@@ -2781,9 +2784,7 @@ namespace game
         }
 
         if(third == 1 && testanims && d == focus) yaw = 0; else yaw += 90;
-
         if(d->ragdoll && (deathanim!=2 || (anim&ANIM_INDEX)!=ANIM_DYING)) cleanragdoll(d);
-
         if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
         int flags = MDL_LIGHT;
@@ -3096,7 +3097,7 @@ namespace game
 #else
         bool hasweapon = showweap && *weapmdl;
 #endif
-        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction); // we could probably animate this too now..
+        if(hasweapon) a[ai++] = modelattach("tag_weapon", weapmdl, weapflags, weapaction);
         if(rendernormally && (early || d != focus))
         {
             if(third != 2)
@@ -3223,6 +3224,8 @@ namespace game
     void render()
     {
         startmodelbatches();
+        if(!thirdpersonview() && focus->state == CS_ALIVE && firstpersonmodel == 2)
+            renderplayer(focus, 2, opacity(focus, false), focus->curscale);
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, 1, opacity(d, true), d->curscale);
@@ -3243,10 +3246,7 @@ namespace game
         if(thirdpersonview() || !rendernormally)
             renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
         else if(!thirdpersonview() && focus->state == CS_ALIVE)
-        {
-            if(firstpersonmodel == 2) renderplayer(focus, 2, opacity(focus, false), focus->curscale, early);
             renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
-        }
         if(rendernormally && early) rendercheck(focus);
     }
 
