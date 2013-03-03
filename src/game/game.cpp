@@ -85,6 +85,7 @@ namespace game
     FVAR(IDF_PERSIST, firstpersonpitchscale, -1, 1, 1);
 
     VAR(IDF_PERSIST, firstpersonsway, 0, 1, 1);
+    FVAR(IDF_PERSIST, firstpersonswaymin, 0, 0.1f, 1);
     FVAR(IDF_PERSIST, firstpersonswaystep, 1, 28.f, 1000);
     FVAR(IDF_PERSIST, firstpersonswayside, 0, 0.05f, 10);
     FVAR(IDF_PERSIST, firstpersonswayup, 0, 0.06f, 10);
@@ -213,7 +214,7 @@ namespace game
     FVAR(IDF_PERSIST, playertonemix, 0, 0.3f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
-    VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES);
+    VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
 #endif
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
@@ -385,7 +386,7 @@ namespace game
         float speed = physics::movevelocity(d), step = firstpersonbob ? firstpersonbobstep : firstpersonswaystep;
         if(d->state == CS_ALIVE && (d->physstate >= PHYS_SLOPE || d->onladder || d->turnside))
         {
-            swayspeed = max(speed*firstpersonbobmin, min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed));
+            swayspeed = max(speed*firstpersonswaymin, min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), speed));
             swaydist += swayspeed*curtime/1000.0f;
             swaydist = fmod(swaydist, 2*step);
             bobdist += swayspeed*curtime/1000.0f;
@@ -2725,9 +2726,7 @@ namespace game
                     }
                     else
                     {
-                        if(d->impulse[IM_JUMP] && d->timeinair) basetime2 = d->impulse[IM_JUMP];
-                        else if(d->timeinair) basetime2 = lastmillis-d->timeinair;
-                        else basetime2 = lastmillis;
+                        basetime2 = d->impulse[IM_JUMP] && d->timeinair ? d->impulse[IM_JUMP] : lastmillis-d->timeinair;
                         if(melee)
                         {
                             anim |= ANIM_FLYKICK<<ANIM_SECONDARY;
@@ -3059,9 +3058,10 @@ namespace game
             int found[VANITYMAX] = {0};
             loopvk(d->vitems) if(vanities.inrange(d->vitems[k]))
             {
-                if(found[vanities[d->vitems[k]].type] || d->privilege < vanities[d->vitems[k]].priv) continue;
+                if(found[vanities[d->vitems[k]].type]) continue;
                 if(vanities[d->vitems[k]].cond&1 && idx == 2) continue;
                 if(vanities[d->vitems[k]].cond&2 && idx == 3) continue;
+                if(d->privilege < vanities[d->vitems[k]].priv) continue;
                 const char *file = NULL;
                 switch(vanities[d->vitems[k]].style)
                 {
@@ -3144,7 +3144,7 @@ namespace game
                     part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
                     regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
-                if(d->weapselect == W_RIFLE && W(d->weapselect, laser) && !reloading)
+                if(W(d->weapselect, laser) && !reloading)
                 {
                     vec v, origin = d->originpos(), muzzle = d->muzzlepos(d->weapselect);
                     origin.z += 0.25f; muzzle.z += 0.25f;
