@@ -87,7 +87,7 @@ namespace server
 
     struct suicideevent : gameevent
     {
-        int flags;
+        int flags, material;
         void process(clientinfo *ci);
     };
 
@@ -420,8 +420,8 @@ namespace server
         virtual void balance(int oldbalance) {}
         virtual void intermission() {}
         virtual bool wantsovertime() { return false; }
-        virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
-        virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0)) { }
+        virtual bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0)) { return true; }
+        virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
     };
@@ -534,7 +534,7 @@ namespace server
     struct vampireservmode : servmode
     {
         vampireservmode() {}
-        void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, const ivec &hitpush = ivec(0, 0, 0))
+        void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0))
         {
             if(actor != target && (!m_team(gamemode, mutators) || actor->team != target->team) && actor->state.state == CS_ALIVE && hurt > 0)
             {
@@ -3098,17 +3098,21 @@ namespace server
         return false;
     }
 
-    void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush = ivec(0, 0, 0))
+    void dodamage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, int material, const ivec &hitpush = ivec(0, 0, 0))
     {
-        int realdamage = damage, realflags = flags, nodamage = 0, hurt = 0; realflags &= ~HIT_SFLAGS;
-        if(smode && !smode->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; }
-        mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, hitpush)) { nodamage++; });
+        int realdamage = damage, realflags = flags, nodamage = 0, hurt = 0;
+        realflags &= ~HIT_SFLAGS;
+        if(realflags&HIT_MATERIAL && (material&MATF_VOLUME) == MAT_LAVA) realflags |= HIT_BURN;
+
+        if(smode && !smode->damage(target, actor, realdamage, weap, realflags, material, hitpush)) { nodamage++; }
+        mutate(smuts, if(!mut->damage(target, actor, realdamage, weap, realflags, material, hitpush)) { nodamage++; });
         if(actor->state.aitype < AI_START)
         {
             if(actor == target && !G(selfdamage)) nodamage++;
             else if(isghost(target, actor)) nodamage++;
             if(m_expert(gamemode, mutators) && !hithead(flags)) nodamage++;
         }
+
         if(nodamage || !hithurts(realflags))
         {
             realflags &= ~HIT_CLEAR;
@@ -3169,8 +3173,8 @@ namespace server
                 target->state.lastresowner[WR_SHOCK] = actor->clientnum;
             }
         }
-        if(smode) smode->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush);
-        mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, hitpush));
+        if(smode) smode->dodamage(target, actor, realdamage, hurt, weap, realflags, material, hitpush);
+        mutate(smuts, mut->dodamage(target, actor, realdamage, hurt, weap, realflags, material, hitpush));
         if(target != actor && (!m_team(gamemode, mutators) || target->team != actor->team))
             addhistory(target, actor, gamemillis);
         sendf(-1, 1, "ri8i3", N_DAMAGE, target->clientnum, actor->clientnum, weap, realflags, realdamage, target->state.health, target->state.armour, hitpush.x, hitpush.y, hitpush.z);
@@ -3283,7 +3287,7 @@ namespace server
             static vector<int> dmglog;
             dmglog.setsize(0);
             gethistory(target, actor, gamemillis, dmglog, true, 1);
-            sendf(-1, 1, "ri9i2v", N_DIED, target->clientnum, target->state.deaths, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, dmglog.length(), dmglog.length(), dmglog.getbuf());
+            sendf(-1, 1, "ri9i3v", N_DIED, target->clientnum, target->state.deaths, actor->clientnum, actor->state.frags, actor->state.spree, style, weap, realflags, realdamage, material, dmglog.length(), dmglog.length(), dmglog.getbuf());
             target->position.setsize(0);
             if(smode) smode->died(target, actor);
             mutate(smuts, mut->died(target, actor));
@@ -3329,10 +3333,11 @@ namespace server
     {
         servstate &gs = ci->state;
         if(gs.state != CS_ALIVE) return;
-        if(!(flags&HIT_DEATH) && !(flags&HIT_LOST))
+        if(flags&HIT_MATERIAL && (material&MATF_VOLUME) == MAT_LAVA) flags |= HIT_BURN;
+        if(!(flags&HIT_MATERIAL) && !(flags&HIT_LOST))
         {
-            if(smode && !smode->damage(ci, ci, ci->state.health, -1, flags)) { return; }
-            mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags)) { return; });
+            if(smode && !smode->damage(ci, ci, ci->state.health, -1, flags, material)) { return; }
+            mutate(smuts, if(!mut->damage(ci, ci, ci->state.health, -1, flags, material)) { return; });
         }
         ci->state.spree = 0;
         if(m_trial(gamemode)) // only want this in time sensitive games
@@ -3347,14 +3352,14 @@ namespace server
         else if(!m_duke(gamemode, mutators)) givepoints(ci, smode ? smode->points(ci, ci) : -1);
         ci->state.deaths++;
         dropitems(ci, aistyle[ci->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
-        if(G(burntime) && (flags&HIT_MELT || flags&HIT_BURN))
+        if(G(burntime) && flags&HIT_BURN)
         {
             ci->state.lastres[WR_BURN] = ci->state.lastrestime[WR_BURN] = gamemillis;
             ci->state.lastresowner[WR_BURN] = ci->clientnum;
         }
         static vector<int> dmglog; dmglog.setsize(0);
         gethistory(ci, ci, gamemillis, dmglog, true, 1);
-        sendf(-1, 1, "ri9i2v", N_DIED, ci->clientnum, ci->state.deaths, ci->clientnum, ci->state.frags, 0, 0, -1, flags, ci->state.health, dmglog.length(), dmglog.length(), dmglog.getbuf());
+        sendf(-1, 1, "ri9i3v", N_DIED, ci->clientnum, ci->state.deaths, ci->clientnum, ci->state.frags, 0, 0, -1, flags, ci->state.health*2, material, dmglog.length(), dmglog.length(), dmglog.getbuf());
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
         mutate(smuts, mut->died(ci, NULL));
@@ -3478,7 +3483,7 @@ namespace server
                     if(target->state.state == CS_ALIVE && !target->state.protect(gamemillis, m_protect(gamemode, mutators)))
                     {
                         int damage = calcdamage(ci, target, weap, hflags, rad, size, dist, skew, ci == target);
-                        if(damage) dodamage(target, ci, damage, weap, hflags, h.dir);
+                        if(damage) dodamage(target, ci, damage, weap, hflags, 0, h.dir);
                         else if(G(serverdebug) >= 2)
                             srvmsgf(ci->clientnum, "sync error: destroy [%d (%d)] failed - hit %d [%d] determined zero damage", weap, id, i, h.target);
                     }
@@ -3908,7 +3913,7 @@ namespace server
                     if(gamemillis-ci->state.lastrestime[WR_BURN] >= G(burndelay))
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastresowner[WR_BURN]);
-                        dodamage(ci, co ? co : ci, G(burndamage), -1, HIT_BURN);
+                        dodamage(ci, co ? co : ci, G(burndamage), -1, HIT_BURN, 0);
                         ci->state.lastrestime[WR_BURN] += G(burndelay);
                         if(ci->state.state != CS_ALIVE) continue;
                     }
@@ -3919,7 +3924,7 @@ namespace server
                     if(gamemillis-ci->state.lastrestime[WR_BLEED] >= G(bleeddelay))
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastresowner[WR_BLEED]);
-                        dodamage(ci, co ? co : ci, G(bleeddamage), -1, HIT_BLEED);
+                        dodamage(ci, co ? co : ci, G(bleeddamage), -1, HIT_BLEED, 0);
                         ci->state.lastrestime[WR_BLEED] += G(bleeddelay);
                         if(ci->state.state != CS_ALIVE) continue;
                     }
@@ -3930,7 +3935,7 @@ namespace server
                     if(gamemillis-ci->state.lastrestime[WR_SHOCK] >= G(shockdelay))
                     {
                         clientinfo *co = (clientinfo *)getinfo(ci->state.lastresowner[WR_SHOCK]);
-                        dodamage(ci, co ? co : ci, G(shockdamage), -1, HIT_SHOCK);
+                        dodamage(ci, co ? co : ci, G(shockdamage), -1, HIT_SHOCK, 0);
                         ci->state.lastrestime[WR_SHOCK] += G(shockdelay);
                         if(ci->state.state != CS_ALIVE) continue;
                     }
@@ -4690,11 +4695,12 @@ namespace server
 
                 case N_SUICIDE:
                 {
-                    int lcn = getint(p), flags = getint(p);
+                    int lcn = getint(p), flags = getint(p), material = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
                     suicideevent *ev = new suicideevent;
                     ev->flags = flags;
+                    ev->material = material;
                     cp->addevent(ev);
                     break;
                 }

@@ -63,9 +63,8 @@ enum
 {
     HIT_NONE = 0, HIT_ALT = 1<<0, HIT_LEGS = 1<<1, HIT_TORSO = 1<<2, HIT_WHIPLASH = 1<<3, HIT_HEAD = 1<<4,
     HIT_WAVE = 1<<5, HIT_PROJ = 1<<6, HIT_EXPLODE = 1<<7, HIT_BURN = 1<<8, HIT_BLEED = 1<<9, HIT_SHOCK = 1<<10,
-    HIT_MELT = 1<<11, HIT_DEATH = 1<<12, HIT_WATER = 1<<13, HIT_SPAWN = 1<<14,
-    HIT_LOST = 1<<15, HIT_KILL = 1<<16, HIT_CRIT = 1<<17, HIT_FLAK = 1<<18, HIT_SPEC = 1<<19,
-    HIT_CLEAR = HIT_PROJ|HIT_EXPLODE|HIT_BURN|HIT_BLEED|HIT_MELT|HIT_DEATH|HIT_WATER|HIT_SPAWN|HIT_LOST,
+    HIT_MATERIAL = 1<<11, HIT_SPAWN = 1<<12, HIT_LOST = 1<<13, HIT_KILL = 1<<14, HIT_CRIT = 1<<15, HIT_FLAK = 1<<16, HIT_SPEC = 1<<17,
+    HIT_CLEAR = HIT_PROJ|HIT_EXPLODE|HIT_BURN|HIT_BLEED|HIT_MATERIAL|HIT_SPAWN|HIT_LOST,
     HIT_SFLAGS = HIT_KILL|HIT_CRIT
 };
 
@@ -75,10 +74,10 @@ struct shotmsg { int id; ivec pos; };
 struct hitmsg { int flags, proj, target, dist; ivec dir; };
 
 #define hithead(x)       (x&HIT_WHIPLASH || x&HIT_HEAD)
-#define hithurts(x)      (x&HIT_BURN || x&HIT_BLEED || x&HIT_SHOCK || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MELT || x&HIT_DEATH || x&HIT_WATER)
+#define hithurts(x)      (x&HIT_BURN || x&HIT_BLEED || x&HIT_SHOCK || x&HIT_EXPLODE || x&HIT_PROJ || x&HIT_MATERIAL)
 #define WR(x)            (1<<(WR_##x))
 #define wr_burn(x,y)     (isweap(x) && (WF(WK(y), x, residual, WS(y))&WR(BURN)))
-#define wr_burns(x,y)    (G(burntime) && hithurts(y) && (y&HIT_MELT || (x == -1 && y&HIT_BURN) || wr_burn(x, y)))
+#define wr_burns(x,y)    (G(burntime) && hithurts(y) && ((x == -1 && y&HIT_BURN) || wr_burn(x, y)))
 #define wr_burning(x,y)  (G(burntime) && hithurts(y) && wr_burn(x, y))
 #define wr_bleed(x,y)    (isweap(x) && (WF(WK(y), x, residual, WS(y))&WR(BLEED)))
 #define wr_bleeds(x,y)   (G(bleedtime) && hithurts(y) && ((x == -1 && y&HIT_BLEED) || wr_bleed(x, y)))
