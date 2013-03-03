@@ -51,7 +51,7 @@ struct duelservmode : servmode
         playing.removeobj(ci);
     }
 
-    bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, const ivec &hitpush)
+    bool damage(clientinfo *target, clientinfo *actor, int damage, int weap, int flags, int material, const ivec &hitpush)
     {
         if(dueltime >= 0 && target->state.aitype < AI_START) return false;
         return true;

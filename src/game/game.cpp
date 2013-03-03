@@ -17,9 +17,30 @@ namespace game
 
     FVAR(IDF_WORLD, illumlevel, 0, 0, 2);
     VAR(IDF_WORLD, illumradius, 0, 0, VAR_MAX);
-    SVAR(IDF_WORLD, obitlava, "");
-    SVAR(IDF_WORLD, obitwater, "");
+    #define OBITVARS(name) \
+        SVAR(IDF_WORLD, obit##name, ""); \
+        SVAR(IDF_WORLD, obit##name##2, ""); \
+        SVAR(IDF_WORLD, obit##name##3, ""); \
+        SVAR(IDF_WORLD, obit##name##4, ""); \
+        const char *getobit##name(int mat, const char *def = NULL) \
+        { \
+            loopi(2) \
+            { \
+                int type = i ? 0 : mat&MATF_INDEX; \
+                switch(type) \
+                { \
+                    default: case 0: if(!def || *obit##name) return obit##name; break; \
+                    case 1: if(*obit##name##2) return obit##name##2; break; \
+                    case 2: if(*obit##name##3) return obit##name##3; break; \
+                    case 3: if(*obit##name##4) return obit##name##4; break; \
+                } \
+            } \
+            return def ? def : ""; \
+        }
+    OBITVARS(lava)
+    OBITVARS(water)
     SVAR(IDF_WORLD, obitdeath, "");
+    SVAR(IDF_WORLD, obitfall, "");
 
     void stopmapmusic()
     {
@@ -1181,7 +1202,7 @@ namespace game
         }
     }
 
-    void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style)
+    void killed(int weap, int flags, int damage, gameent *d, gameent *actor, vector<gameent *> &log, int style, int material)
     {
         if(d->type != ENT_PLAYER && d->type != ENT_AI) return;
         d->lastregen = 0;
@@ -1192,7 +1213,7 @@ namespace game
         bool burning = burn(d, weap, flags), bleeding = bleed(d, weap, flags), shocking = shock(d, weap, flags), isfocus = d == focus || actor == focus,
              isme = d == player1 || actor == player1, allowanc = obitannounce && (obitannounce >= 2 || isfocus) && (m_fight(gamemode) || isme) && actor->aitype < AI_START;
         int anc = d == focus && !m_duke(gamemode, mutators) && !m_trial(gamemode) && allowanc ? S_V_FRAGGED : -1,
-            dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH;
+            dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
         if(d != player1) d->resetinterp();
         if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
         formatstring(d->obit)("%s ", colorname(d));
@@ -1202,12 +1223,12 @@ namespace game
         {
             if(!aistyle[d->aitype].living) concatstring(d->obit, "was destroyed");
             else if(!obitverbose) concatstring(d->obit, "died");
-            else if(flags&HIT_MELT) concatstring(d->obit, obitverbose != 2 ? "melted" : (*obitlava ? obitlava : "melted into a ball of fire"));
-            else if(flags&HIT_WATER) concatstring(d->obit, obitverbose != 2 || !*obitwater ? "drowned" : obitwater);
-            else if(flags&HIT_DEATH) concatstring(d->obit, obitverbose != 2 || !*obitdeath ? "met their end" : obitdeath);
             else if(flags&HIT_SPAWN) concatstring(d->obit, obitverbose != 2 ? "couldn't respawn" : "tried to spawn inside solid matter");
-            else if(flags&HIT_LOST) concatstring(d->obit, obitverbose != 2 ? "was lost" : "got very, very lost");
             else if(flags&HIT_SPEC) concatstring(d->obit, obitverbose != 2 ? "entered spectator" : "gave up their corporeal form");
+            else if(flags&HIT_MATERIAL && curmat&MAT_WATER) concatstring(d->obit, getobitwater(material, "drowned"));
+            else if(flags&HIT_MATERIAL && curmat&MAT_LAVA) concatstring(d->obit, getobitlava(material, "melted into a ball of fire"));
+            else if(flags&HIT_MATERIAL) concatstring(d->obit, *obitdeath ? obitdeath : "met their end");
+            else if(flags&HIT_LOST) concatstring(d->obit, *obitfall ? obitfall : "fell to their death");
             else if(flags && isweap(weap) && !burning && !bleeding && !shocking)
             {
                 static const char *suicidenames[W_MAX][2] = {
@@ -1785,7 +1806,7 @@ namespace game
         if((d == player1 || d->ai) && d->state == CS_ALIVE && d->suicided < 0)
         {
             burn(d, -1, flags);
-            client::addmsg(N_SUICIDE, "ri2", d->clientnum, flags);
+            client::addmsg(N_SUICIDE, "ri3", d->clientnum, flags, d->inmaterial);
             d->suicided = lastmillis;
         }
     }
@@ -1899,9 +1920,8 @@ namespace game
         bool input = hud::hasinput(true), view = thirdpersonview(true, focus), mode = tvmode();
         if(input != inputmouse || view != inputview || mode != inputmode || focus != lastfocus)
         {
-            if(view != inputview || mode != inputmode || focus != lastfocus)
-                resetcamera(focus != lastfocus);
-            else resetcursor();
+            if(input != inputmouse) resetcursor();
+            else resetcamera(focus != lastfocus);
             inputmouse = input;
             inputview = view;
             inputmode = mode;

@@ -1182,9 +1182,8 @@ namespace physics
                 mattrig(center, lavacol, 2.f, int(radius), PHYSMILLIS*2, 1.f, PART_FIREBALL, S_BURNLAVA);
             }
         }
-        if(local && gameent::is(pl) && pl->state == CS_ALIVE && flagmat&MAT_DEATH)
-            game::suicide((gameent *)pl, curmat == MAT_LAVA ? HIT_MELT : (curmat == MAT_WATER ? HIT_WATER : HIT_DEATH));
         pl->inmaterial = matid;
+        if(local && gameent::is(pl) && pl->state == CS_ALIVE && flagmat&MAT_DEATH) game::suicide((gameent *)pl, HIT_MATERIAL);
         if((pl->inliquid = isliquid(curmat)) != false)
         {
             float frac = radius/10.f, sub = pl->submerged;
@@ -1299,7 +1298,7 @@ namespace physics
                 {
                     if(d->o.z < 0)
                     {
-                        game::suicide(d, HIT_DEATH);
+                        game::suicide(d, HIT_LOST);
                         return false;
                     }
                     if(d->turnmillis > 0)

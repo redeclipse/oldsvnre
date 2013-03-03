@@ -1963,7 +1963,7 @@ namespace client
 
                 case N_DIED:
                 {
-                    int vcn = getint(p), deaths = getint(p), acn = getint(p), frags = getint(p), spree = getint(p), style = getint(p), weap = getint(p), flags = getint(p), damage = getint(p);
+                    int vcn = getint(p), deaths = getint(p), acn = getint(p), frags = getint(p), spree = getint(p), style = getint(p), weap = getint(p), flags = getint(p), damage = getint(p), material = getint(p);
                     gameent *victim = game::getclient(vcn), *actor = game::getclient(acn);
                     static vector<gameent *> assist; assist.setsize(0);
                     int count = getint(p);
@@ -1977,7 +1977,7 @@ namespace client
                     victim->deaths = deaths;
                     actor->frags = frags;
                     actor->spree = spree;
-                    game::killed(weap, flags, damage, victim, actor, assist, style);
+                    game::killed(weap, flags, damage, victim, actor, assist, style, material);
                     victim->lastdeath = lastmillis;
                     victim->weapreset(true);
                     break;
