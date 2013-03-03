@@ -2029,7 +2029,7 @@ namespace game
 
         vec to = pos;
         c.o = pos;
-        if(firstpersonmodel == 2)
+        if(firstpersonspine > 0)
         {
             to.z -= firstpersonspine;
             float lean = clamp(pitch, -firstpersonpitchmin, firstpersonpitchmax);
