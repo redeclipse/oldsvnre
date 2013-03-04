@@ -216,6 +216,7 @@ namespace game
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
 #endif
+    VAR(IDF_PERSIST, headlessmodels, 0, 1, 1);
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
 
@@ -2017,6 +2018,7 @@ namespace game
     float firstpersonspineoffset = 0;
     vec firstpos(physent *d, const vec &pos, float yaw, float pitch)
     {
+        if(d->state != CS_ALIVE) return pos;
         static struct fpcam : physent
         {
             fpcam()
@@ -2663,7 +2665,7 @@ namespace game
         if(d->aitype >= AI_START) mdl = aistyle[d->aitype%AI_MAX].playermodel[third];
         else mdl = playertypes[d->model%PLAYERTYPES][third];
 #else
-        int idx = third == 1 && d->headless ? 3 : third;
+        int idx = third == 1 && d->headless && headlessmodels ? 3 : third;
         const char *mdl = playertypes[forceplayermodel >= 0 ? forceplayermodel : 0][idx];
         if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[idx];
         else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][idx];
@@ -2857,7 +2859,7 @@ namespace game
                 }
             }
         }
-        rendermodel(NULL, mdl, anim, o, yaw, third == 2 && firstpersonbodypitch >= 0 ? pitch*firstpersonbodypitch : pitch, roll, flags, e, attachments, basetime, basetime2, trans, size);
+        rendermodel(NULL, mdl, anim, o, yaw, third == 2 && firstpersonbodypitch >= 0 ? pitch*firstpersonbodypitch : pitch, third == 2 ? 0.f : roll, flags, e, attachments, basetime, basetime2, trans, size);
     }
 
     void renderabovehead(gameent *d, float trans)
@@ -3046,7 +3048,7 @@ namespace game
         modelattach a[1+VANITYMAX+10];
         if(third && *d->vanity)
         {
-            int idx = third == 1 && d->state == CS_DEAD && d->headless ? 3 : third;
+            int idx = third == 1 && d->state == CS_DEAD && d->headless && headlessmodels ? 3 : third;
             if(d->vitems.empty())
             {
                 vector<char *> vanitylist;
