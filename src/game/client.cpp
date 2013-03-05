@@ -2581,7 +2581,7 @@ namespace client
                     getstring(text, p);
                     if(accountname[0] && accountpass[0])
                     {
-                        conoutft(CON_MESG, "aswering account challenge..");
+                        conoutft(CON_MESG, "answering account challenge..");
                         vector<char> buf;
                         answerchallenge(accountpass, text, buf);
                         addmsg(N_AUTHANS, "ris", id, buf.getbuf());
