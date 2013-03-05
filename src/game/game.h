@@ -1626,7 +1626,7 @@ namespace game
     {
         avatarent() { type = ENT_CAMERA; }
     };
-    extern avatarent avatarmodel;
+    extern avatarent avatarmodel, bodymodel;
 
     extern bool followswitch(int n, bool other = false);
     extern vector<cament *> cameras;
