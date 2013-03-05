@@ -11,7 +11,7 @@ namespace game
     string clientmap = "";
 
     gameent *player1 = new gameent(), *focus = player1, *lastfocus = focus;
-    avatarent avatarmodel;
+    avatarent avatarmodel, bodymodel;
     vector<gameent *> players, waiting;
     vector<cament *> cameras;
 
@@ -2804,7 +2804,7 @@ namespace game
         if(early) flags |= MDL_NORENDER;
         else if(third && (anim&ANIM_INDEX)!=ANIM_DEAD) flags |= MDL_DYNSHADOW;
         if(modelpreviewing) flags &= ~(MDL_LIGHT|MDL_FULLBRIGHT|MDL_CULL_VFC|MDL_CULL_OCCLUDED|MDL_CULL_QUERY|MDL_CULL_DIST|MDL_DYNSHADOW);
-        dynent *e = third ? (dynent *)d : (dynent *)&avatarmodel;
+        dynent *e = third ? (third != 2 ? (dynent *)d : (dynent *)&bodymodel) : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
             e->light.material[0] = bvec(getcolour(d, playerovertone));
