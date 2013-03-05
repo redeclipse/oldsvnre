@@ -221,6 +221,13 @@ namespace game
     VAR(IDF_PERSIST, autoloadweap, 0, 0, 1); // 0 = off, 1 = auto-set loadout weapons
     SVAR(IDF_PERSIST, favloadweaps, "");
 
+    bool needloadout(gameent *d)
+    {
+        if(!d || !m_loadout(gamemode, mutators) || client::waiting()) return false;
+        return player1->state == CS_WAITING && player1->loadweap.empty();
+    }
+    ICOMMAND(0, needloadout, "b", (int *cn), intret(needloadout(*cn >= 0 ? getclient(*cn) : player1) ? 1 : 0));
+
     ICOMMAND(0, gamemode, "", (), intret(gamemode));
     ICOMMAND(0, mutators, "", (), intret(mutators));
 
@@ -2528,8 +2535,7 @@ namespace game
                 if(player1->state == CS_ALIVE) weapons::shoot(player1, worldpos);
             }
             otherplayers();
-            if(m_loadout(gamemode, mutators) && player1->state != CS_SPECTATOR && player1->state != CS_EDITING && player1->loadweap.empty() && !client::waiting() && !menuactive())
-                showgui("loadout", -1);
+            if(needloadout(game::player1) && !menuactive()) showgui("loadout", -1);
         }
         else if(!menuactive()) showgui("main", -1);
 
