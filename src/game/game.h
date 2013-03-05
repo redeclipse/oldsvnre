@@ -959,7 +959,7 @@ struct gameent : dynent, gamestate
         actiontime[AC_MAX], impulse[IM_MAX], smoothmillis, turnmillis, turnside, aschan, cschan, vschan, wschan, pschan, fschan, jschan,
         lasthit, lastteamhit, lastkill, lastattacker, lastpoints, quake, spree;
     float deltayaw, deltapitch, newyaw, newpitch, turnyaw, turnroll;
-    vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad;
+    vec head, torso, muzzle, origin, eject, waist, jet[3], legs, hrad, trad, lrad, toe[2];
     bool action[AC_MAX], conopen, k_up, k_down, k_left, k_right, obliterated, headless;
     string hostname, name, handle, info, obit;
     vector<gameent *> dominating, dominated;
@@ -1111,7 +1111,7 @@ struct gameent : dynent, gamestate
         gamestate::mapchange();
     }
 
-    void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = vec(-1, -1, -1); }
+    void cleartags() { head = torso = muzzle = origin = eject = waist = jet[0] = jet[1] = jet[2] = toe[0] = toe[1] = vec(-1, -1, -1); }
 
     vec checkoriginpos()
     {
@@ -1232,6 +1232,21 @@ struct gameent : dynent, gamestate
             dir.mul(radius*1.25f);
             dir.z -= height*0.35f;
             jet[2] = vec(o).add(dir);
+        }
+        if(toe[0] == vec(-1, -1, -1))
+        {
+            vec dir; vecfromyawpitch(yaw, 0, 1, -1, dir);
+            dir.mul(radius);
+            dir.z -= height;
+            toe[0] = vec(o).add(dir);
+        }
+        if(toe[1] == vec(-1, -1, -1))
+        {
+            vec dir;
+            vecfromyawpitch(yaw, 0, 1, 1, dir);
+            dir.mul(radius);
+            dir.z -= height;
+            toe[1] = vec(o).add(dir);
         }
     }
 

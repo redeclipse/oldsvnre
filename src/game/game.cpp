@@ -74,6 +74,7 @@ namespace game
     VAR(IDF_PERSIST, firstpersonmodel, 0, 2, 2);
     VAR(IDF_PERSIST, firstpersonfov, 90, 100, 150);
     FVAR(IDF_PERSIST, firstpersonblend, 0, 1, 1);
+    FVAR(IDF_PERSIST, firstpersondepth, 0, 0.5f, 1);
 
     FVAR(IDF_PERSIST, firstpersonbodydist, -10, 0, 10);
     FVAR(IDF_PERSIST, firstpersonbodyside, -10, 0, 10);
@@ -762,27 +763,25 @@ namespace game
 
     void impulseeffect(gameent *d, int effect)
     {
-        if(gameent::is(d))
+        if(!gameent::is(d)) return;
+        int num = int((effect ? 5 : 25)*impulsescale), len = effect ? impulsefade/5 : impulsefade;
+        switch(effect)
         {
-            int num = int((effect ? 5 : 25)*impulsescale), len = effect ? impulsefade/5 : impulsefade;
-            switch(effect)
+            case 0: playsound(S_IMPULSE, d->o, d); // fail through
+            case 1:
             {
-                case 0: playsound(S_IMPULSE, d->o, d); // faill through
-                case 1:
+                if(num > 0 && len > 0) loopi(2) boosteffect(d, d->jet[i], num, len, effect==0);
+                break;
+            }
+            case 2:
+            {
+                if(issound(d->jschan))
                 {
-                    if(num > 0 && len > 0) loopi(2) boosteffect(d, d->jet[i], num, len, effect==0);
-                    break;
+                    sounds[d->jschan].vol = min(lastmillis-sounds[d->jschan].millis, 255);
+                    sounds[d->jschan].ends = lastmillis+250;
                 }
-                case 2:
-                {
-                    if(issound(d->jschan))
-                    {
-                        sounds[d->jschan].vol = min(lastmillis-sounds[d->jschan].millis, 255);
-                        sounds[d->jschan].ends = lastmillis+250;
-                    }
-                    else playsound(S_JET, d->o, d, SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
-                    if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
-                }
+                else playsound(S_JET, d->o, d, SND_LOOP, 1, -1, -1, &d->jschan, lastmillis+250);
+                if(num > 0 && len > 0) boosteffect(d, d->jet[2], num, len);
             }
         }
     }
@@ -3045,7 +3044,7 @@ namespace game
         const char *weapmdl = showweap && isweap(weap) ? (third ? weaptype[weap].vwep : weaptype[weap].hwep) : "";
         int ai = 0;
 #ifdef VANITY
-        modelattach a[1+VANITYMAX+10];
+        modelattach a[1+VANITYMAX+12];
         if(third && *d->vanity)
         {
             int idx = third == 1 && d->state == CS_DEAD && d->headless && headlessmodels ? 3 : third;
@@ -3092,7 +3091,7 @@ namespace game
             }
         }
 #else
-        modelattach a[1+10];
+        modelattach a[1+12];
 #endif
 #ifdef MEK
         bool hasweapon = false; // TEMP
@@ -3121,6 +3120,8 @@ namespace game
                 a[ai++] = modelattach("tag_ljet", &d->jet[0]);
                 a[ai++] = modelattach("tag_rjet", &d->jet[1]);
                 a[ai++] = modelattach("tag_bjet", &d->jet[2]);
+                a[ai++] = modelattach("tag_ltoe", &d->toe[0]);
+                a[ai++] = modelattach("tag_rtoe", &d->toe[1]);
             }
         }
         renderclient(d, third, trans, size, team, a[0].tag ? a : NULL, secondary, animflags, animdelay, lastaction, early);
@@ -3134,6 +3135,11 @@ namespace game
             float blend = opacity(d, thirdpersonview(true));
             if(d->state == CS_ALIVE)
             {
+                if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
+                {
+                    float amt = (lastmillis-d->weaplast[W_MELEE])/float(d->weapwait[W_MELEE]), scale = (amt > 0.5f ? 1.f-amt : amt)*2;
+                    part_create(PART_HINT, 1, d->toe[i], TEAM(d->team, colour), 2.f, scale*blend, 0, 0);
+                }
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
                      powering = last && d->weapstate[d->weapselect] == W_S_POWER,
                      reloading = last && d->weapstate[d->weapselect] == W_S_RELOAD,
@@ -3143,9 +3149,9 @@ namespace game
                 if(d->weapselect == W_FLAMER && (!reloading || amt > 0.5f) && !physics::liquidcheck(d))
                 {
                     float scale = powering ? 1.f+(amt*1.5f) : (d->weapstate[d->weapselect] == W_S_IDLE ? 1.f : (reloading ? (amt-0.5f)*2 : amt));
-                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.5f*scale, min(0.65f*scale, 0.8f)*blend, 0, 0);
-                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
-                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.75f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
+                    part_create(PART_HINT, 1, d->ejectpos(d->weapselect), 0x1818A8, 0.75f*scale, min(0.65f*scale, 0.8f)*blend, 0, 0);
+                    part_create(PART_FIREBALL, 1, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f)*blend, 0, 0);
+                    regular_part_create(PART_FIREBALL, d->vel.magnitude() > 10 ? 30 : 75, d->ejectpos(d->weapselect), colour, 0.5f*scale, min(0.75f*scale, 0.95f)*blend, d->vel.magnitude() > 10 ? -40 : -10, 0);
                 }
                 if(W(d->weapselect, laser) && !reloading)
                 {
@@ -3226,8 +3232,6 @@ namespace game
     void render()
     {
         startmodelbatches();
-        if(!thirdpersonview() && focus->state == CS_ALIVE && firstpersonmodel == 2)
-            renderplayer(focus, 2, opacity(focus, false), focus->curscale);
         gameent *d;
         int numdyns = numdynents();
         loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) renderplayer(d, 1, opacity(d, true), d->curscale);
@@ -3242,13 +3246,15 @@ namespace game
         if(rendernormally) loopi(numdyns) if((d = (gameent *)iterdynents(i)) && d != focus) rendercheck(d);
     }
 
-    void renderavatar(bool early)
+    void renderavatar(bool early, bool project)
     {
+        bool third = thirdpersonview();
         if(rendernormally && early) focus->cleartags();
-        if(thirdpersonview() || !rendernormally)
-            renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
-        else if(!thirdpersonview() && focus->state == CS_ALIVE)
-            renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
+        if(project && !third) viewproject(firstpersondepth);
+        if(third || !rendernormally) renderplayer(focus, 1, opacity(focus, thirdpersonview(true)), focus->curscale, early);
+        else if(!third && focus->state == CS_ALIVE) renderplayer(focus, 0, opacity(focus, false), focus->curscale, early);
+        if(project && !third) viewproject();
+        if(!third && focus->state == CS_ALIVE && firstpersonmodel == 2) renderplayer(focus, 2, opacity(focus, false), focus->curscale, early);
         if(rendernormally && early) rendercheck(focus);
     }
 
