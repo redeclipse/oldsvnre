@@ -1351,15 +1351,12 @@ void rendergame()
     if(!shadowmapping) renderedgame = true;
 }
 
-void renderavatar(bool early)
+void renderavatar(bool early, bool project)
 {
-    game::renderavatar(early);
+    game::renderavatar(early, project);
 }
 
-extern void viewproject(float zscale = 1);
-
 VAR(IDF_PERSIST, skyboxglare, 0, 1, 1);
-FVAR(0, firstpersondepth, 0, 0.5f, 1);
 
 void drawglare()
 {
@@ -1392,14 +1389,7 @@ void drawglare()
     rendermaterials();
     renderalphageom();
     renderparticles();
-
-    if(game::thirdpersonview()) renderavatar(false);
-    else
-    {
-        viewproject(firstpersondepth);
-        renderavatar(false);
-        viewproject();
-    }
+    renderavatar(false, true);
 
     glFogf(GL_FOG_START, oldfogstart);
     glFogf(GL_FOG_END, oldfogend);
@@ -1527,7 +1517,7 @@ void drawreflection(float z, bool refract, int fogdepth, const bvec &col)
     renderalphageom(fogging);
     renderparticles();
 
-    if(game::thirdpersonview() || reflecting) renderavatar(false);
+    if(game::thirdpersonview() || reflecting) renderavatar();
 
     if(fading) glColorMask(COLORMASK, GL_TRUE);
 
@@ -2377,13 +2367,7 @@ void drawviewtype(int targtype)
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    if(game::thirdpersonview()) renderavatar(false);
-    else
-    {
-        viewproject(0.5f);
-        renderavatar(false);
-        viewproject();
-    }
+    renderavatar(false, true);
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
