@@ -144,7 +144,7 @@ namespace aiman
             sendf(-1, 1, "ri6si3s", N_INITAI, ci->clientnum, ci->state.ownernum, ci->state.aitype, ci->state.aientity, ci->state.skill, ci->name, ci->team, ci->state.colour, ci->state.model, ci->state.vanity);
             if(ci->state.aireinit == 2)
             {
-                waiting(ci, 1, DROP_RESET);
+                waiting(ci, DROP_RESET);
                 if(smode) smode->entergame(ci);
                 mutate(smuts, mut->entergame(ci));
             }

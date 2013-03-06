@@ -299,51 +299,46 @@ namespace hud
                             SEARCHBINDCACHE(attackkey)("action 0", 0);
                             uicenterlist(g, {
                                 uifont(g, "little", {
-                                    if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                                    int sdelay = m_delay(game::gamemode, game::mutators);
+                                    int delay = game::player1->respawnwait(lastmillis, sdelay);
+                                    if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                                     {
-                                        int n = game::numwaiting();
-                                        if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
-                                        else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
+                                        if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                                        else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
+                                        else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                                        {
+                                            int n = game::numwaiting();
+                                            if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
+                                            else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
+                                        }
+                                        if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
+                                            uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey));
                                     }
                                     else
                                     {
-                                        int sdelay = m_delay(game::gamemode, game::mutators);
-                                        int delay = game::player1->lastdeath ? game::player1->respawnwait(lastmillis, sdelay) : 0;
-                                        if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
-                                        {
-                                            if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
-                                            else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
-                                            if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath > 500)
-                                                uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey));
-                                        }
-                                        else
-                                        {
-                                            g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
-                                            if(game::player1->state != CS_WAITING) uicenterlist(g, g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey));
-                                        }
+                                        g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
+                                        if(game::player1->state != CS_WAITING) uicenterlist(g, g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey));
                                     }
                                 });
                             });
                             if(shownotices >= 2)
                             {
-                                uicenterlist(g, {
-                                    uifont(g, "little", {
-                                        if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
-                                        {
-                                            SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
-                                            uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, waitmodekey, game::tvmode() ? "interact" : "switch to TV"));
-                                        }
-                                        if(m_loadout(game::gamemode, game::mutators))
-                                        {
-                                            SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
-                                            uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap.empty() ? "\fzoyselect" : "change"));
-                                        }
-                                        if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
-                                        {
-                                            SEARCHBINDCACHE(teamkey)("showgui team", 0);
-                                            uicenterlist(g, g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey));
-                                        }
-                                    });
+                                uifont(g, "little", {
+                                    if(game::player1->state == CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
+                                    {
+                                        SEARCHBINDCACHE(waitmodekey)("waitmodeswitch", 3);
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to %s", 0xFFFFFF, NULL, 0, waitmodekey, game::tvmode() ? "interact" : "switch to TV"));
+                                    }
+                                    if(m_loadout(game::gamemode, game::mutators))
+                                    {
+                                        SEARCHBINDCACHE(loadkey)("showgui loadout", 0);
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to \fs%s\fS loadout", 0xFFFFFF, NULL, 0, loadkey, game::player1->loadweap.empty() ? "\fzoyselect" : "change"));
+                                    }
+                                    if(m_fight(game::gamemode) && m_team(game::gamemode, game::mutators))
+                                    {
+                                        SEARCHBINDCACHE(teamkey)("showgui team", 0);
+                                        uicenterlist(g, g.textf("Press \fs\fc%s\fS to change teams", 0xFFFFFF, NULL, 0, teamkey));
+                                    }
                                 });
                             }
                         }
