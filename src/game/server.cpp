@@ -184,7 +184,7 @@ namespace server
 
         bool isalive(int millis)
         {
-            return state == CS_ALIVE || ((state == CS_DEAD || state == CS_WAITING) && millis-lastdeath <= DEATHMILLIS);
+            return state == CS_ALIVE || ((state == CS_DEAD || state == CS_WAITING) && lastdeath && millis-lastdeath <= DEATHMILLIS);
         }
 
         void reset(bool change = false)
@@ -3773,6 +3773,7 @@ namespace server
             mutate(smuts, mut->died(ci));
             ci->state.lastdeath = gamemillis;
         }
+        //else if(!ci->state.lastdeath) ci->state.lastdeath = gamemillis;
         if(exclude) sendf(-1, 1, "ri2x", N_WAITING, ci->clientnum, ci->clientnum);
         else sendf(-1, 1, "ri2", N_WAITING, ci->clientnum);
         ci->state.state = CS_WAITING;

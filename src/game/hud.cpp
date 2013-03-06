@@ -1258,36 +1258,33 @@ namespace hud
             gameent *target = game::player1->state != CS_SPECTATOR ? game::player1 : game::focus;
             if(target->state == CS_DEAD || target->state == CS_WAITING)
             {
-                if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                int sdelay = m_delay(game::gamemode, game::mutators), delay = target->respawnwait(lastmillis, sdelay);
+                SEARCHBINDCACHE(attackkey)("action 0", 0);
+                if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
                 {
-                    int n = game::numwaiting();
-                    if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
-                    else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
+                    else if(target == game::player1 && target->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
+                    {
+                        int n = game::numwaiting();
+                        if(n) ty += draw_textx("Respawn queued, waiting for \fs\fy%d\fS %s", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, n, n != 1 ? "players" : "player");
+                        else ty += draw_textx("Prepare to respawn, you are \fs\fgnext\fS in the queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
+                    }
+                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
+                    {
+                        pushfont("little");
+                        ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                        popfont();
+                    }
                 }
                 else
                 {
-                    int sdelay = m_delay(game::gamemode, game::mutators), delay = target->lastdeath ? target->respawnwait(lastmillis, sdelay) : 0;
-                    SEARCHBINDCACHE(attackkey)("action 0", 0);
-                    if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                    ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
+                    if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
                     {
-                        if(target->state == CS_WAITING && m_duke(game::gamemode, game::mutators)) ty += draw_textx("Queued for new round", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw);
-                        else if(delay) ty += draw_textx("%s: Down for \fs\fy%s\fS", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, target == game::player1 && target->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
-                        if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3 && lastmillis-target->lastdeath >= 500)
-                        {
-                            pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to enter respawn queue", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
-                            popfont();
-                        }
-                    }
-                    else
-                    {
-                        ty += draw_textx("Ready to respawn", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, -1);
-                        if(target == game::player1 && target->state != CS_WAITING && shownotices >= 3)
-                        {
-                            pushfont("little");
-                            ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
-                            popfont();
-                        }
+                        pushfont("little");
+                        ty += draw_textx("Press \fs\fc%s\fS to respawn now", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, attackkey);
+                        popfont();
                     }
                 }
                 if(obitnotices && target->lastdeath && (target->state == CS_WAITING || target->state == CS_DEAD) && *target->obit)
