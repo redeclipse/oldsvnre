@@ -99,6 +99,8 @@ Modding & Mapmaking:
  * Renamed 'numplayers'->'mapplayers'
  * Added 'mapbalance' for unsymmetrical maps to swap teams at specified
    intervals
+ * Added extra obituary message vars for the new lava/water+death variantions
+   (obit<type>[234]), and for falling out of the level (obitfall)
 
 Data Assets:
  * Renamed 'blarg' directory to 'misc' for random textures
@@ -129,7 +131,7 @@ Core & Install:
  * Client now uses log.txt in the homedir by default
  * Moved binary files to bin/{amd64,x86}/ subdirectories
  * MekArcade source & data tree merged in
- * Enet 1.3.6
+ * Enet 1.3.7
  * Workaround for intel/apple occlusion bug
  * Network encoding functions moved into tools
  * Weapon variable definititions structured into rows per variable
