@@ -111,7 +111,7 @@ gametypes gametype[] = {
     {
         G_BOMBER,       0,
         {
-            (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
+            (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             0, 0
         },
@@ -121,7 +121,7 @@ gametypes gametype[] = {
     {
         G_TRIAL,        0,
         {
-            (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
+            (1<<G_M_FFA)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
         "time-trial",                       { "", "", "" },
@@ -267,7 +267,7 @@ extern mutstypes mutstype[];
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
-#define m_implied(a,b)      (a == G_BOMBER && !(b&(1<<G_M_GSP1)) ? gametype[a].implied&~(1<<G_M_FFA) : gametype[a].implied)
+#define m_implied(a,b)      (gametype[a].implied)
 #define m_doimply(a,b,c)    (mutstype[c].implied|m_implied(a, b))
 
 #define m_multi(a,b)        ((b&(1<<G_M_MULTI)) || (m_implied(a,b)&(1<<G_M_MULTI)))
@@ -290,7 +290,7 @@ extern mutstypes mutstype[];
 #define m_gsp3(a,b)         ((b&(1<<G_M_GSP3)) || (m_implied(a,b)&(1<<G_M_GSP3)))
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
-#define m_team(a,b)       (m_multi(a, b) || (!(b&(1<<G_M_FFA)) && !(m_implied(a,b)&(1<<G_M_FFA))))
+#define m_team(a,b)         (m_multi(a, b) || (!(b&(1<<G_M_FFA)) && !(m_implied(a,b)&(1<<G_M_FFA))))
 #define m_sweaps(a,b)       (m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b))
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b))
 #define m_special(a,b)      (m_sweaps(a, b) || !m_classic(a, b))
