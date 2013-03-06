@@ -414,87 +414,73 @@ enum { SPHY_NONE = 0, SPHY_JUMP, SPHY_BOOST, SPHY_DASH, SPHY_MELEE, SPHY_KICK, S
 
 static inline void modecheck(int &mode, int &muts, int trying = 0)
 {
-    if(!m_game(mode))
+    if(!m_game(mode)) mode = G_DEATHMATCH;
+    if(gametype[mode].implied) muts |= gametype[mode].implied;
+    int retries = G_M_NUM*G_M_NUM;
+    loop(r, retries)
     {
-        mode = G_DEATHMATCH;
-        muts = m_implied(mode, 0);
-    }
-    int implied = m_implied(mode, muts);
-    if(implied) muts |= implied;
-    loop(r, G_M_NUM*G_M_NUM)
-    {
-        if(!muts) break;
+        if(!muts) break; // nothing to do then
         bool changed = false;
-        loopi(G_M_NUM)
+        int mutsidx = gametype[mode].mutators[0];
+        loopj(G_M_GSN) if(gametype[mode].mutators[j+1])
         {
-            bool isgsp = false;
-            loopj(G_M_GSN)
+            int m = 1<<(j+G_M_GSP);
+            if(!(muts&m)) continue;
+            if(trying&m) loopi(G_M_GSN) if(i != j && gametype[mode].mutators[i+1])
             {
-                int m = 1<<(j+G_M_GSP);
-                if(!(muts&m)) continue;
-                isgsp = true;
-                loopk(G_M_GSN)
+                int n = 1<<(i+G_M_GSP);
+                if(!(muts&n)) continue;
+                if(!(gametype[mode].mutators[i+1]&m))
                 {
-                    int n = 1<<(k+G_M_GSP);
-                    if(!(muts&n)) continue;
-                    if(trying && (trying&m) && !(gametype[mode].mutators[k+1]&m))
-                    {
-                        muts &= ~n;
-                        trying &= ~n;
-                        changed = true;
-                        break;
-                    }
+                    muts &= ~n;
+                    trying &= ~n;
+                    changed = true;
+                    break;
                 }
-                if(changed) break;
             }
             if(changed) break;
-            if(!isgsp)
+            if(gametype[mode].flags&(1<<G_F_GSP))
             {
-                if(trying && !(gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (trying&(1<<mutstype[i].type)))
+                trying |= m; // game specific mutator exclusively provides allowed bits
+                mutsidx = gametype[mode].mutators[j+1];
+            }
+        }
+        if(changed) continue;
+        loop(s, G_M_NUM)
+        {
+            if(!(mutsidx&(1<<mutstype[s].type)) && (muts&(1<<mutstype[s].type)))
+            {
+                muts &= ~(1<<mutstype[s].type);
+                trying &= ~(1<<mutstype[s].type);
+                changed = true;
+                break;
+            }
+            if(muts&(1<<mutstype[s].type)) loopj(G_M_NUM)
+            {
+                if(!(mutstype[s].mutators&(1<<mutstype[j].type)) && (muts&(1<<mutstype[j].type)))
                 {
-                    trying &= ~(1<<mutstype[i].type);
+                    if(trying && (trying&(1<<mutstype[j].type)) && !(gametype[mode].implied&(1<<mutstype[s].type)))
+                    {
+                        muts &= ~(1<<mutstype[s].type);
+                        trying &= ~(1<<mutstype[s].type);
+                    }
+                    else
+                    {
+                        muts &= ~(1<<mutstype[j].type);
+                        trying &= ~(1<<mutstype[j].type);
+                    }
                     changed = true;
                     break;
                 }
-                if(!(gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)))
+                int implying = gametype[mode].implied|mutstype[s].implied;
+                if(implying && (implying&(1<<mutstype[j].type)) && !(muts&(1<<mutstype[j].type)))
                 {
-                    muts &= ~(1<<mutstype[i].type);
-                    trying &= ~(1<<mutstype[i].type);
+                    muts |= (1<<mutstype[j].type);
                     changed = true;
                     break;
                 }
             }
-            if(muts&(1<<mutstype[i].type))
-            {
-                int mutators = i != G_M_INSTA ? mutstype[i].mutators : G(instagibfilter);
-                loopj(G_M_NUM)
-                {
-                    if(mutators && !(mutators&(1<<mutstype[j].type)) && (muts&(1<<mutstype[j].type)))
-                    {
-                        implied = m_implied(mode, muts);
-                        if(trying && (trying&(1<<mutstype[j].type)) && !(implied&(1<<mutstype[i].type)))
-                        {
-                            muts &= ~(1<<mutstype[i].type);
-                            trying &= ~(1<<mutstype[i].type);
-                        }
-                        else
-                        {
-                            muts &= ~(1<<mutstype[j].type);
-                            trying &= ~(1<<mutstype[j].type);
-                        }
-                        changed = true;
-                        break;
-                    }
-                    int implying = m_doimply(mode, muts, i);
-                    if(implying && (implying&(1<<mutstype[j].type)) && !(muts&(1<<mutstype[j].type)))
-                    {
-                        muts |= (1<<mutstype[j].type);
-                        changed = true;
-                        break;
-                    }
-                }
-                if(changed) break;
-            }
+            if(changed) break;
         }
         if(!changed) break;
     }

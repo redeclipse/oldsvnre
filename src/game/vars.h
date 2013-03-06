@@ -84,7 +84,6 @@ GVAR(IDF_ADMIN, modelock, 0, PRIV2(OPERATOR), PRIV2(MAX));
 GVAR(IDF_ADMIN, modelocktype, 0, 2, 2); // 0 = off, 1 = lock level only, 2 = lock level can set limited mode and higher
 GVAR(IDF_ADMIN, modelockfilter, 0, G_LIMIT, G_ALL);
 GVAR(IDF_ADMIN, mutslockfilter, 0, G_M_FILTER, G_M_ALL);
-GVARF(IDF_ADMIN, instagibfilter, 0, mutstype[G_M_INSTA].mutators&~(1<<G_M_CLASSIC), mutstype[G_M_INSTA].mutators, sv_instagibfilter &= ~(1<<G_M_VAMPIRE); sv_instagibfilter |= (1<<G_M_INSTA), instagibfilter &= ~(1<<G_M_VAMPIRE); instagibfilter |= (1<<G_M_INSTA));
 
 GVAR(IDF_ADMIN, mapsfilter, 0, 1, 2); // 0 = off, 1 = filter based on mutators, 2 = also filter based on players
 GVAR(IDF_ADMIN, mapslock, 0, PRIV2(OPERATOR), PRIV2(MAX));

@@ -967,16 +967,12 @@ namespace server
 
     const char *gamename(int mode, int muts, int compact)
     {
-        if(!m_game(mode))
-        {
-            mode = G_DEATHMATCH;
-            muts = m_implied(mode, 0);
-        }
-        static string gname;
-        gname[0] = 0;
+        if(!m_game(mode)) mode = G_DEATHMATCH;
+        if(gametype[mode].implied) muts |= gametype[mode].implied;
+        static string gname; gname[0] = 0;
         if(gametype[mode].mutators[0] && muts)
         {
-            int implied = m_implied(mode, muts);
+            int implied = gametype[mode].implied;
             loopi(G_M_NUM) if(muts&(1<<mutstype[i].type)) implied |= mutstype[i].implied&~(1<<mutstype[i].type);
             loopi(G_M_NUM) if((gametype[mode].mutators[0]&(1<<mutstype[i].type)) && (muts&(1<<mutstype[i].type)) && (!implied || !(implied&(1<<mutstype[i].type))))
             {
@@ -1002,11 +998,8 @@ namespace server
 
     const char *modedesc(int mode, int muts, int type)
     {
-        if(!m_game(mode))
-        {
-            mode = G_DEATHMATCH;
-            muts = m_implied(mode, 0);
-        }
+        if(!m_game(mode)) mode = G_DEATHMATCH;
+        if(gametype[mode].implied) muts |= gametype[mode].implied;
         static string mdname; mdname[0] = 0;
         if(type == 1 || type == 3 || type == 4) concatstring(mdname, gametype[mode].name);
         if(type == 3 || type == 4) concatstring(mdname, ": ");
@@ -1023,11 +1016,8 @@ namespace server
 
     const char *mutsdesc(int mode, int muts, int type)
     {
-        if(!m_game(mode))
-        {
-            mode = G_DEATHMATCH;
-            muts = m_implied(mode, 0);
-        }
+        if(!m_game(mode)) mode = G_DEATHMATCH;
+        if(gametype[mode].implied) muts |= gametype[mode].implied;
         static string mtname; mtname[0] = 0;
         loopi(G_M_NUM) if(muts&(1<<mutstype[i].type))
         {

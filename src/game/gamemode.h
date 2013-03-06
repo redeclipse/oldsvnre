@@ -34,140 +34,131 @@ enum
     G_M_DK = (1<<G_M_DUEL)|(1<<G_M_SURVIVOR)
 };
 
+enum { G_F_GSP = 0, G_F_NUM };
+
 struct gametypes
 {
-    int type,           implied,
-        mutators[G_M_GSN+1];
-    const char *name,                       *gsp[G_M_GSN],
-        *desc,                              *gsd[G_M_GSN];
+    int type, flags, implied, mutators[G_M_GSN+1];
+    const char *name, *gsp[G_M_GSN], *desc, *gsd[G_M_GSN];
 };
 struct mutstypes
 {
-    int type,           implied,            mutators;
-    const char *name,
-        *desc;
+    int type, implied, mutators;
+    const char *name, *desc;
 };
 #ifdef GAMESERVER
 gametypes gametype[] = {
     {
-        G_DEMO,         0,
-        {
-            0, 0, 0, 0
-        },
-        "demo",                             { "", "", "" },
+        G_DEMO, 0, 0, { 0, 0, 0, 0 },
+        "demo", { "", "", "" },
         "play back previously recorded games", { "", "", "" },
     },
     {
-        G_EDITMODE,     (1<<G_M_FFA)|(1<<G_M_CLASSIC),
+        G_EDITMODE, 0, (1<<G_M_FFA)|(1<<G_M_CLASSIC),
         {
             (1<<G_M_FFA)|(1<<G_M_CLASSIC)|(1<<G_M_JETPACK),
             0, 0, 0
         },
-        "editing",                          { "", "", "" },
-        "create and edit existing maps",    { "", "", "" },
+        "editing", { "", "", "" },
+        "create and edit existing maps", { "", "", "" },
     },
 #ifdef CAMPAIGN
     {
-        G_CAMPAIGN,     0,
+        G_CAMPAIGN, 0, 0,
         {
             (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
-        "campaign",                         { "", "", "" },
+        "campaign", { "", "", "" },
         "make your way through the mission alive", { "", "", "" },
     },
 #endif
     {
-        G_DEATHMATCH,   0,
+        G_DEATHMATCH, 0, 0,
         {
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
-        "deathmatch",                       { "", "", "" },
+        "deathmatch", { "", "", "" },
         "shoot to kill and earn points by fragging", { "", "", "" },
     },
     {
-        G_CAPTURE,      0,
+        G_CAPTURE, 0, 0,
         {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
-        "capture-the-flag",                 { "return", "defend", "protect" },
+        "capture-the-flag", { "return", "defend", "protect" },
         "take the enemy flag and return it to the base", { "dropped flags must be carried back to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
     },
     {
-        G_DEFEND,       0,
+        G_DEFEND, 0, 0,
         {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
-        "defend-the-flag",                  { "quick", "conquer", "king" },
+        "defend-the-flag", { "quick", "conquer", "king" },
         "defend the flags to earn points", { "flags secure quicker than normal", "match ends when all flags are secured", "king of the hill with one flag" },
     },
     {
-        G_BOMBER,       0,
+        G_BOMBER, (1<<G_F_GSP), 0,
         {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             0, 0
         },
-        "bomber-ball",                      { "hold", "", "" },
+        "bomber-ball", { "hold", "", "" },
         "get the bomb into the enemy goal to score", { "hold the bomb as long as possible to score points", "", "" },
     },
     {
-        G_TRIAL,        0,
+        G_TRIAL, 0, 0,
         {
             (1<<G_M_FFA)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE),
             0, 0, 0
         },
-        "time-trial",                       { "", "", "" },
+        "time-trial", { "", "", "" },
         "compete for the fastest time completing a lap", { "", "", "" },
     },
     {
-        G_GAUNTLET,        0,
+        G_GAUNTLET, 0, 0,
         {
             (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             (1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1),
             0, 0
         },
-        "gauntlet",                       { "timed", "", "" },
-        "compete for the most laps while the other team attacks",      { "compete for the best lap time while the other team attacks", "", "" },
+        "gauntlet", { "timed", "", "" },
+        "compete for the most laps while the other team attacks", { "compete for the best lap time while the other team attacks", "", "" },
     },
 };
 mutstypes mutstype[] = {
     {
-        G_M_MULTI,      (1<<G_M_MULTI),
+        G_M_MULTI, (1<<G_M_MULTI),
         (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "multi",
-        "four teams fight to determine the winning side"
+        "multi", "four teams fight to determine the winning side"
     },
     {
-        G_M_FFA,       (1<<G_M_FFA),
+        G_M_FFA, (1<<G_M_FFA),
         (1<<G_M_FFA)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "ffa",
-        "every player for themselves"
+        "ffa", "every player for themselves"
     },
     {
-        G_M_COOP,       (1<<G_M_COOP),
+        G_M_COOP, (1<<G_M_COOP),
         (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "coop",
-        "players versus drones"
+        "coop", "players versus drones"
     },
     {
-        G_M_INSTA,      (1<<G_M_INSTA),
+        G_M_INSTA, (1<<G_M_INSTA),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "instagib",
-        "one shot, one kill"
+        "instagib", "one shot, one kill"
     },
     {
-        G_M_MEDIEVAL,   (1<<G_M_MEDIEVAL),
+        G_M_MEDIEVAL, (1<<G_M_MEDIEVAL),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_MEDIEVAL)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "medieval",
-        "everyone spawns only with swords"
+        "medieval", "everyone spawns only with swords"
     },
     {
         G_M_KABOOM,  (1<<G_M_KABOOM),
@@ -176,16 +167,14 @@ mutstypes mutstype[] = {
         "everyone spawns with explosives only"
     },
     {
-        G_M_DUEL,       (1<<G_M_DUEL),
+        G_M_DUEL, (1<<G_M_DUEL),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_DUEL)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "duel",
-        "one on one battles to determine the winner"
+        "duel", "one on one battles to determine the winner"
     },
     {
-        G_M_SURVIVOR,   (1<<G_M_SURVIVOR),
+        G_M_SURVIVOR, (1<<G_M_SURVIVOR),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "survivor",
-        "everyone battles to determine the winner"
+        "survivor", "everyone battles to determine the winner"
     },
     {
         G_M_CLASSIC,    (1<<G_M_CLASSIC),
@@ -194,52 +183,44 @@ mutstypes mutstype[] = {
         "weapons must be collected from spawns in the arena"
     },
     {
-        G_M_ONSLAUGHT,  (1<<G_M_ONSLAUGHT),
+        G_M_ONSLAUGHT, (1<<G_M_ONSLAUGHT),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "onslaught",
-        "waves of enemies fill the battle arena"
+        "onslaught", "waves of enemies fill the battle arena"
     },
     {
-        G_M_JETPACK,    (1<<G_M_JETPACK),
+        G_M_JETPACK, (1<<G_M_JETPACK),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "jetpack",
-        "everyone comes equipped with a jetpack"
+        "jetpack", "everyone comes equipped with a jetpack"
     },
     {
-        G_M_VAMPIRE,    (1<<G_M_VAMPIRE),
+        G_M_VAMPIRE, (1<<G_M_VAMPIRE),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "vampire",
-        "deal damage to regenerate health"
+        "vampire", "deal damage to regenerate health"
     },
     {
-        G_M_EXPERT,     (1<<G_M_EXPERT),
+        G_M_EXPERT, (1<<G_M_EXPERT),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "expert",
-        "headshot damage only"
+        "expert", "players can only deal damage by landing headshots"
     },
     {
-        G_M_RESIZE,     (1<<G_M_RESIZE),
+        G_M_RESIZE, (1<<G_M_RESIZE),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "resize",
-        "everyone changes size depending on their health"
+        "resize", "everyone changes size depending on their health"
     },
     {
-        G_M_GSP1,       (1<<G_M_GSP1),
+        G_M_GSP1, (1<<G_M_GSP1),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "gsp1",
-        ""
+        "gsp1", ""
     },
     {
-        G_M_GSP2,       (1<<G_M_GSP2),
+        G_M_GSP2, (1<<G_M_GSP2),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "gsp2",
-        ""
+        "gsp2", ""
     },
     {
-        G_M_GSP3,       (1<<G_M_GSP3),
+        G_M_GSP3, (1<<G_M_GSP3),
         (1<<G_M_MULTI)|(1<<G_M_FFA)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_DUEL)|(1<<G_M_SURVIVOR)|(1<<G_M_CLASSIC)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP1)|(1<<G_M_GSP2)|(1<<G_M_GSP3),
-        "gsp3",
-        ""
+        "gsp3", ""
     },
 };
 #else
@@ -267,30 +248,27 @@ extern mutstypes mutstype[];
 #define m_affinity(a)       (m_capture(a) || m_defend(a) || m_bomber(a))
 #define m_fight(a)          (a >= G_FIGHT)
 
-#define m_implied(a,b)      (gametype[a].implied)
-#define m_doimply(a,b,c)    (mutstype[c].implied|m_implied(a, b))
+#define m_multi(a,b)        ((b&(1<<G_M_MULTI)) || (gametype[a].implied&(1<<G_M_MULTI)))
+#define m_ffa(a,b)          ((b&(1<<G_M_FFA)) || (gametype[a].implied&(1<<G_M_FFA)))
+#define m_coop(a,b)         ((b&(1<<G_M_COOP)) || (gametype[a].implied&(1<<G_M_COOP)))
+#define m_insta(a,b)        ((b&(1<<G_M_INSTA)) || (gametype[a].implied&(1<<G_M_INSTA)))
+#define m_medieval(a,b)     ((b&(1<<G_M_MEDIEVAL)) || (gametype[a].implied&(1<<G_M_MEDIEVAL)))
+#define m_kaboom(a,b)       ((b&(1<<G_M_KABOOM)) || (gametype[a].implied&(1<<G_M_KABOOM)))
+#define m_duel(a,b)         ((b&(1<<G_M_DUEL)) || (gametype[a].implied&(1<<G_M_DUEL)))
+#define m_survivor(a,b)     ((b&(1<<G_M_SURVIVOR)) || (gametype[a].implied&(1<<G_M_SURVIVOR)))
+#define m_classic(a,b)      ((b&(1<<G_M_CLASSIC)) || (gametype[a].implied&(1<<G_M_CLASSIC)))
+#define m_onslaught(a,b)    ((b&(1<<G_M_ONSLAUGHT)) || (gametype[a].implied&(1<<G_M_ONSLAUGHT)))
+#define m_jetpack(a,b)      ((b&(1<<G_M_JETPACK)) || (gametype[a].implied&(1<<G_M_JETPACK)))
+#define m_vampire(a,b)      ((b&(1<<G_M_VAMPIRE)) || (gametype[a].implied&(1<<G_M_VAMPIRE)))
+#define m_expert(a,b)       ((b&(1<<G_M_EXPERT)) || (gametype[a].implied&(1<<G_M_EXPERT)))
+#define m_resize(a,b)       ((b&(1<<G_M_RESIZE)) || (gametype[a].implied&(1<<G_M_RESIZE)))
 
-#define m_multi(a,b)        ((b&(1<<G_M_MULTI)) || (m_implied(a,b)&(1<<G_M_MULTI)))
-#define m_ffa(a,b)          ((b&(1<<G_M_FFA)) || (m_implied(a,b)&(1<<G_M_FFA)))
-#define m_coop(a,b)         ((b&(1<<G_M_COOP)) || (m_implied(a,b)&(1<<G_M_COOP)))
-#define m_insta(a,b)        ((b&(1<<G_M_INSTA)) || (m_implied(a,b)&(1<<G_M_INSTA)))
-#define m_medieval(a,b)     ((b&(1<<G_M_MEDIEVAL)) || (m_implied(a,b)&(1<<G_M_MEDIEVAL)))
-#define m_kaboom(a,b)       ((b&(1<<G_M_KABOOM)) || (m_implied(a,b)&(1<<G_M_KABOOM)))
-#define m_duel(a,b)         ((b&(1<<G_M_DUEL)) || (m_implied(a,b)&(1<<G_M_DUEL)))
-#define m_survivor(a,b)     ((b&(1<<G_M_SURVIVOR)) || (m_implied(a,b)&(1<<G_M_SURVIVOR)))
-#define m_classic(a,b)      ((b&(1<<G_M_CLASSIC)) || (m_implied(a,b)&(1<<G_M_CLASSIC)))
-#define m_onslaught(a,b)    ((b&(1<<G_M_ONSLAUGHT)) || (m_implied(a,b)&(1<<G_M_ONSLAUGHT)))
-#define m_jetpack(a,b)      ((b&(1<<G_M_JETPACK)) || (m_implied(a,b)&(1<<G_M_JETPACK)))
-#define m_vampire(a,b)      ((b&(1<<G_M_VAMPIRE)) || (m_implied(a,b)&(1<<G_M_VAMPIRE)))
-#define m_expert(a,b)       ((b&(1<<G_M_EXPERT)) || (m_implied(a,b)&(1<<G_M_EXPERT)))
-#define m_resize(a,b)       ((b&(1<<G_M_RESIZE)) || (m_implied(a,b)&(1<<G_M_RESIZE)))
-
-#define m_gsp1(a,b)         ((b&(1<<G_M_GSP1)) || (m_implied(a,b)&(1<<G_M_GSP1)))
-#define m_gsp2(a,b)         ((b&(1<<G_M_GSP2)) || (m_implied(a,b)&(1<<G_M_GSP2)))
-#define m_gsp3(a,b)         ((b&(1<<G_M_GSP3)) || (m_implied(a,b)&(1<<G_M_GSP3)))
+#define m_gsp1(a,b)         ((b&(1<<G_M_GSP1)) || (gametype[a].implied&(1<<G_M_GSP1)))
+#define m_gsp2(a,b)         ((b&(1<<G_M_GSP2)) || (gametype[a].implied&(1<<G_M_GSP2)))
+#define m_gsp3(a,b)         ((b&(1<<G_M_GSP3)) || (gametype[a].implied&(1<<G_M_GSP3)))
 #define m_gsp(a,b)          (m_gsp1(a,b) || m_gsp2(a,b) || m_gsp3(a,b))
 
-#define m_team(a,b)         (m_multi(a, b) || (!(b&(1<<G_M_FFA)) && !(m_implied(a,b)&(1<<G_M_FFA))))
+#define m_team(a,b)         (m_multi(a, b) || (!(b&(1<<G_M_FFA)) && !(gametype[a].implied&(1<<G_M_FFA))))
 #define m_sweaps(a,b)       (m_insta(a, b) || m_medieval(a, b) || m_kaboom(a, b))
 #define m_limited(a,b)      (m_insta(a, b) || m_medieval(a, b))
 #define m_special(a,b)      (m_sweaps(a, b) || !m_classic(a, b))

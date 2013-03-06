@@ -548,20 +548,20 @@ namespace hud
 #endif
 
         if(before) ADDMODEICON
-        if(m_multi(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MULTI)))) ADDMODE(modemultitex)
-        if(m_ffa(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_FFA)))) ADDMODE(modeffatex)
-        if(m_coop(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_COOP)))) ADDMODE(modecooptex)
-        if(m_insta(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_INSTA)))) ADDMODE(modeinstatex)
-        if(m_medieval(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_MEDIEVAL)))) ADDMODE(modemedievaltex)
-        if(m_kaboom(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_KABOOM)))) ADDMODE(modekaboomtex)
-        if(m_duel(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_DUEL)))) ADDMODE(modedueltex)
-        if(m_survivor(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
-        if(m_classic(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)
-        if(m_onslaught(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
-        if(m_jetpack(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_JETPACK)))) ADDMODE(modejetpacktex)
-        if(m_vampire(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
-        if(m_expert(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_EXPERT)))) ADDMODE(modeexperttex)
-        if(m_resize(g, m) && (implied || !(m_implied(g, m)&(1<<G_M_RESIZE)))) ADDMODE(moderesizetex)
+        if(m_multi(g, m) && (implied || !(gametype[g].implied&(1<<G_M_MULTI)))) ADDMODE(modemultitex)
+        if(m_ffa(g, m) && (implied || !(gametype[g].implied&(1<<G_M_FFA)))) ADDMODE(modeffatex)
+        if(m_coop(g, m) && (implied || !(gametype[g].implied&(1<<G_M_COOP)))) ADDMODE(modecooptex)
+        if(m_insta(g, m) && (implied || !(gametype[g].implied&(1<<G_M_INSTA)))) ADDMODE(modeinstatex)
+        if(m_medieval(g, m) && (implied || !(gametype[g].implied&(1<<G_M_MEDIEVAL)))) ADDMODE(modemedievaltex)
+        if(m_kaboom(g, m) && (implied || !(gametype[g].implied&(1<<G_M_KABOOM)))) ADDMODE(modekaboomtex)
+        if(m_duel(g, m) && (implied || !(gametype[g].implied&(1<<G_M_DUEL)))) ADDMODE(modedueltex)
+        if(m_survivor(g, m) && (implied || !(gametype[g].implied&(1<<G_M_SURVIVOR)))) ADDMODE(modesurvivortex)
+        if(m_classic(g, m) && (implied || !(gametype[g].implied&(1<<G_M_CLASSIC)))) ADDMODE(modeclassictex)
+        if(m_onslaught(g, m) && (implied || !(gametype[g].implied&(1<<G_M_ONSLAUGHT)))) ADDMODE(modeonslaughttex)
+        if(m_jetpack(g, m) && (implied || !(gametype[g].implied&(1<<G_M_JETPACK)))) ADDMODE(modejetpacktex)
+        if(m_vampire(g, m) && (implied || !(gametype[g].implied&(1<<G_M_VAMPIRE)))) ADDMODE(modevampiretex)
+        if(m_expert(g, m) && (implied || !(gametype[g].implied&(1<<G_M_EXPERT)))) ADDMODE(modeexperttex)
+        if(m_resize(g, m) && (implied || !(gametype[g].implied&(1<<G_M_RESIZE)))) ADDMODE(moderesizetex)
         if(!before) ADDMODEICON
     }
 
