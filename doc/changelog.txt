@@ -53,6 +53,7 @@ Maps:
  * Dawn, removed
  * Industrial, removed
  * Lab, removed
+ * Wet, updated
 
 Interface & Menus:
  * Overall reduced font sizes
@@ -115,6 +116,7 @@ Data Assets:
  * Added new vapour sound
  * Added support for models rotating off of their model links and spin rolling
  * Improved SMG animation
+ * Added headless model for headshots
 
 Multiplayer & Servers:
  * Implemented short-term map history to prevent players voting on the same
