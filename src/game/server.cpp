@@ -1141,7 +1141,7 @@ namespace server
         if(req)
         {
             checkdemorecord(true);
-            if(!maprequest && G(votelimit) && G(votelock) != PRIV2(MAX) && G(modelock) != PRIV2(MAX) && G(mapslock) != PRIV2(MAX))
+            if(!maprequest && G(votelimit) && G(votelock) != PRIV_MAX && G(modelock) != PRIV_MAX && G(mapslock) != PRIV_MAX)
             {
                 sendf(-1, 1, "ri", N_NEWGAME);
                 maprequest = true;
@@ -2012,7 +2012,7 @@ namespace server
         clientinfo *ci = (clientinfo *)getinfo(sender);
         modecheck(reqmode, reqmuts);
         if(!ci || !m_game(reqmode) || !reqmap || !*reqmap) return;
-        bool hasvote = false, hasveto = haspriv(ci, PRIVY(G(vetolock))) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
+        bool hasvote = false, hasveto = haspriv(ci, G(vetolock)) && (mastermode >= MM_VETO || !numclients(ci->clientnum));
         if(!hasveto)
         {
             if(ci->lastvote && totalmillis-ci->lastvote <= G(votewait)) return;
@@ -2030,15 +2030,15 @@ namespace server
         }
         if(!hasvote)
         {
-            if(G(modelock) == PRIV2(MAX) && G(mapslock) == PRIV2(MAX) && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
+            if(G(modelock) == PRIV_MAX && G(mapslock) == PRIV_MAX && !haspriv(ci, PRIV_MAX, "vote for a new game")) return;
             else if(G(votelock)) switch(G(votelocktype))
             {
-                case 1: if(!haspriv(ci, PRIVZ(G(votelock)), "vote for a new game")) return; break;
+                case 1: if(!haspriv(ci, G(votelock), "vote for a new game")) return; break;
                 case 2:
                     if(!m_edit(reqmode))
                     {
                         int n = listincludes(sv_prevmaps, reqmap, strlen(reqmap));
-                        if(n >= 0 && n < G(maphistory) && !haspriv(ci, PRIVZ(G(votelock)), "vote for a recently played map")) return;
+                        if(n >= 0 && n < G(maphistory) && !haspriv(ci, G(votelock), "vote for a recently played map")) return;
                     }
                     break;
                 case 0: default: break;
@@ -2050,8 +2050,8 @@ namespace server
             }
             if(G(modelock)) switch(G(modelocktype))
             {
-                case 1: if(!haspriv(ci, PRIVZ(G(modelock)), "change game modes")) return; break;
-                case 2: if((!((1<<reqmode)&G(modelockfilter)) || !mutscmp(reqmuts, G(mutslockfilter))) && !haspriv(ci, PRIVZ(G(modelock)), "change to a locked game mode")) return; break;
+                case 1: if(!haspriv(ci, G(modelock), "change game modes")) return; break;
+                case 2: if((!((1<<reqmode)&G(modelockfilter)) || !mutscmp(reqmuts, G(mutslockfilter))) && !haspriv(ci, G(modelock), "change to a locked game mode")) return; break;
                 case 0: default: break;
             }
             if(reqmode != G_EDITMODE && G(mapslock))
@@ -2074,7 +2074,7 @@ namespace server
                 }
                 if(list)
                 {
-                    if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, PRIVZ(G(modelock)), "select maps not in the rotation"))
+                    if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(ci, G(modelock), "select maps not in the rotation"))
                     {
                         DELETEA(list);
                         return;
@@ -2288,7 +2288,7 @@ namespace server
 
     //bool crclocked(clientinfo *ci)
     //{
-    //    if(m_play(gamemode) && G(mapcrclock) && ci->state.aitype == AI_NONE && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, PRIVZ(G(mapcrclock))))
+    //    if(m_play(gamemode) && G(mapcrclock) && ci->state.aitype == AI_NONE && (!ci->clientmap[0] || ci->mapcrc <= 0 || ci->warned) && !haspriv(ci, G(mapcrclock)))
     //        return true;
     //    return false;
     //}
@@ -2658,7 +2658,7 @@ namespace server
         if(id && id->flags&IDF_SERVER)
         {
             const char *name = &id->name[3], *val = NULL;
-            int locked = max(id->flags&IDF_ADMIN ? PRIV_ADMINISTRATOR : 0, PRIVZ(G(varslock)));
+            int locked = max(id->flags&IDF_ADMIN ? PRIV_ADMINISTRATOR : 0, G(varslock));
             #ifndef STANDALONE
             if(servertype < 3)
             {
@@ -2666,7 +2666,7 @@ namespace server
                 if(!strcmp(id->name, "sv_gamepaused")) locked = PRIV_MAX;
             }
             #endif
-            if(!strcmp(id->name, "sv_gamespeed") && PRIVZ(G(gamespeedlock)) > locked) locked = PRIVZ(G(gamespeedlock));
+            if(!strcmp(id->name, "sv_gamespeed") && G(gamespeedlock) > locked) locked = G(gamespeedlock);
             switch(id->type)
             {
                 case ID_COMMAND:
@@ -3286,7 +3286,7 @@ namespace server
             if(isteamkill)
             {
                 actor->state.teamkills.add(teamkill(totalmillis, actor->team, -pointvalue));
-                if(G(teamkilllock) && !haspriv(actor, PRIVZ(G(teamkilllock))))
+                if(G(teamkilllock) && !haspriv(actor, G(teamkilllock)))
                 {
                     int numkills = 0;
                     if(!G(teamkilltime)) numkills = actor->state.teamkills.length();
@@ -3297,7 +3297,7 @@ namespace server
                         uint ip = getclientip(actor->clientnum);
                         actor->state.warnings[WARN_TEAMKILL][0]++;
                         actor->state.warnings[WARN_TEAMKILL][1] = totalmillis ? totalmillis : 1;
-                        if(G(teamkillban) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(actor, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::ALLOW, ip))
+                        if(ip && G(teamkillban) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillban) && !haspriv(actor, PRIV_MODERATOR) && !checkipinfo(control, ipinfo::ALLOW, ip))
                         {
                             ipinfo &c = control.add();
                             c.ip = ip;
@@ -4567,7 +4567,7 @@ namespace server
                 {
                     int val = getint(p);
                     if(!ci || ci->state.aitype > AI_NONE) break;
-                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, PRIVY(G(editlock)), val ? "enter editmode" : "exit editmode"))
+                    if(!allowstate(ci, val ? ALST_EDIT : ALST_WALK) && !haspriv(ci, G(editlock), val ? "enter editmode" : "exit editmode"))
                     {
                         spectator(ci);
                         break;
@@ -4937,7 +4937,11 @@ namespace server
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
                     uint ip = getclientip(cp->clientnum);
-                    if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, PRIVY(G(mutelock)), "send messages while muted")) break;
+                    if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
+                    {
+                        if(!haspriv(ci, G(messagelock), "send messages on this server")) break;
+                        if(ip && checkipinfo(control, ipinfo::MUTE, ip) && !haspriv(cp, G(mutelock), "send messages while muted")) break;
+                    }
                     if(G(floodlock))
                     {
                         int numlines = 0;
@@ -4948,11 +4952,11 @@ namespace server
                         }
                         if(numlines >= G(floodlines))
                         {
-                            if((!cp->state.warnings[WARN_CHAT][1] || totalmillis-cp->state.warnings[WARN_CHAT][1] >= 1000) && !haspriv(cp, PRIVZ(G(floodlock)), "send too many messages consecutively"))
+                            if((!cp->state.warnings[WARN_CHAT][1] || totalmillis-cp->state.warnings[WARN_CHAT][1] >= 1000) && !haspriv(cp, G(floodlock), "send too many messages consecutively"))
                             {
                                 cp->state.warnings[WARN_CHAT][0]++;
                                 cp->state.warnings[WARN_CHAT][1] = totalmillis ? totalmillis : 1;
-                                if(ip && G(floodmute) && cp->state.warnings[WARN_CHAT][0] >= G(floodmute) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, PRIVY(G(mutelock))))
+                                if(ip && G(floodmute) && cp->state.warnings[WARN_CHAT][0] >= G(floodmute) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(cp, G(mutelock)))
                                 {
                                     ipinfo &c = control.add();
                                     c.ip = ip;
@@ -5030,11 +5034,11 @@ namespace server
                     if(!allowteam(ci, team, T_FIRST)) team = chooseteam(ci);
                     if(!m_team(gamemode, mutators) || ci->state.aitype >= AI_START || team == ci->team) break;
                     uint ip = getclientip(ci->clientnum);
-                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, PRIVY(G(limitlock)), "change teams while limited")) break;
+                    if(ip && checkipinfo(control, ipinfo::LIMIT, ip) && !checkipinfo(control, ipinfo::ALLOW, ip) && !haspriv(ci, G(limitlock), "change teams while limited")) break;
                     bool reset = true;
                     if(ci->state.state == CS_SPECTATOR)
                     {
-                        if(!allowstate(ci, ALST_TRY) && !haspriv(ci, PRIVY(G(speclock)), "exit spectator"))
+                        if(!allowstate(ci, ALST_TRY) && !haspriv(ci, G(speclock), "exit spectator"))
                             break;
                         if(!spectate(ci, false)) break;
                         reset = false;
@@ -5246,7 +5250,7 @@ namespace server
                 case N_MASTERMODE:
                 {
                     int mm = getint(p);
-                    if(haspriv(ci, PRIVY(G(masterlock)), "change mastermode") && mm >= MM_OPEN && mm <= MM_PRIVATE)
+                    if(haspriv(ci, G(masterlock), "change mastermode") && mm >= MM_OPEN && mm <= MM_PRIVATE)
                     {
                         if(haspriv(ci, PRIV_ADMINISTRATOR) || (mastermask()&(1<<mm)))
                         {
@@ -5276,7 +5280,7 @@ namespace server
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
-                            if(haspriv(ci, PRIVY(G(y##lock)), "clear " #y "s")) \
+                            if(haspriv(ci, G(y##lock), "clear " #y "s")) \
                             { \
                                 reset##y##s(); \
                                 srvoutf(-3, "%s cleared existing \fs\fc" #y "s\fS", colorname(ci)); \
@@ -5303,7 +5307,7 @@ namespace server
                     #define CONTROLSWITCH(x,y) \
                         case x: \
                         { \
-                            if(haspriv(ci, PRIVY(G(y##lock)), #y " people") && victim >= 0) \
+                            if(haspriv(ci, G(y##lock), #y " people") && victim >= 0) \
                             { \
                                 clientinfo *cp = (clientinfo *)getinfo(victim); \
                                 if(!cp || cp->state.ownernum >= 0 || (value != ipinfo::ALLOW && !cmppriv(ci, cp, #y))) break; \
@@ -5356,7 +5360,7 @@ namespace server
                     int sn = getint(p), val = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(sn);
                     if(!cp || cp->state.aitype > AI_NONE || (val ? cp->state.state == CS_SPECTATOR : cp->state.state != CS_SPECTATOR)) break;
-                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, PRIVY(G(speclock)), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
+                    if((sn != sender || !allowstate(cp, val ? ALST_SPEC : ALST_TRY)) && !haspriv(ci, G(speclock), sn != sender ? "control other players" : (val ? "enter spectator" : "exit spectator")))
                         break;
                     spectate(cp, val);
                     break;
@@ -5365,7 +5369,7 @@ namespace server
                 case N_SETTEAM:
                 {
                     int who = getint(p), team = getint(p);
-                    if(who<0 || who>=getnumclients() || !haspriv(ci, PRIVY(G(speclock)), "change the team of others")) break;
+                    if(who<0 || who>=getnumclients() || !haspriv(ci, G(speclock), "change the team of others")) break;
                     clientinfo *cp = (clientinfo *)getinfo(who);
                     if(!cp || cp == ci || !m_team(gamemode, mutators) || m_local(gamemode) || cp->state.aitype >= AI_START) break;
                     if(cp->state.state == CS_SPECTATOR || !allowteam(cp, team, T_FIRST)) break;
@@ -5376,14 +5380,14 @@ namespace server
                 case N_RECORDDEMO:
                 {
                     int val = getint(p);
-                    if(!haspriv(ci, PRIVY(G(demolock)), "record demos")) break;
+                    if(!haspriv(ci, G(demolock), "record demos")) break;
                     setdemorecord(val != 0, true);
                     break;
                 }
 
                 case N_STOPDEMO:
                 {
-                    if(!haspriv(ci, PRIVY(G(demolock)), "stop demos")) break;
+                    if(!haspriv(ci, G(demolock), "stop demos")) break;
                     if(m_demo(gamemode)) enddemoplayback();
                     else checkdemorecord(interm != 0);
                     break;
@@ -5392,7 +5396,7 @@ namespace server
                 case N_CLEARDEMOS:
                 {
                     int demo = getint(p);
-                    if(!haspriv(ci, PRIVY(G(demolock)), "clear demos")) break;
+                    if(!haspriv(ci, G(demolock), "clear demos")) break;
                     cleardemos(demo);
                     break;
                 }
