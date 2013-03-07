@@ -2675,14 +2675,24 @@ namespace game
         if(d->aitype >= AI_START && d->aitype != AI_GRUNT) mdl = aistyle[d->aitype%AI_MAX].playermodel[idx];
         else if(forceplayermodel < 0) mdl = playertypes[d->model%PLAYERTYPES][idx];
 #endif
+        bool onfloor = d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d);
         float yaw = d->yaw, pitch = d->pitch, roll = calcroll(focus);
         vec o = third ? d->feetpos() : camerapos(d);
         if(third == 2)
         {
             o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
+            //vec aim = vec(yaw*RAD, pitch*RAD).rotate_around_z(180*RAD).mul(d->height*0.5f).mul((0-d->pitch)/90.f);
+            //if(onfloor) aim.z = d->timeonfloor < 25 ? aim.z*(25-d->timeonfloor)/25.f : 0.f;
+            //o.sub(aim);
+            float hoff = d->zradius-d->height;
+            if(hoff > 0 && (!onfloor || d->timeonfloor < 25))
+            {
+                if(onfloor) hoff *= (25-d->timeonfloor)/25.f;
+                o.z -= hoff;
+            }
         }
-        if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
+        else if(third == 1 && d == focus && d == player1 && thirdpersonview(true, d))
             vectoyawpitch(vec(worldpos).sub(d->headpos()).normalize(), yaw, pitch);
         else if(!third && firstpersonsway && !intermission)
         {
@@ -2701,7 +2711,7 @@ namespace game
         }
         else
         {
-            bool melee = d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d));
+            bool melee = d->hasmelee(lastmillis, true, physics::sliding(d, true), onfloor);
             if(secondary && allowmove(d) && aistyle[d->aitype].canmove)
             {
                 if(physics::jetpack(d))
@@ -2736,7 +2746,7 @@ namespace game
                     }
                     else
                     {
-                        basetime2 = d->impulse[IM_JUMP] && d->timeinair ? d->impulse[IM_JUMP] : lastmillis-d->timeinair;
+                        basetime2 = d->impulse[IM_JUMP] ? d->impulse[IM_JUMP] : lastmillis-d->timeinair;
                         if(melee)
                         {
                             anim |= ANIM_FLYKICK<<ANIM_SECONDARY;

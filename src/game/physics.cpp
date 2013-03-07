@@ -1096,8 +1096,16 @@ namespace physics
             if(game::allowmove(d)) modifyinput(d, m, wantsmove, millis);
             else d->action[AC_JUMP] = d->action[AC_CROUCH] = false;
         }
-        if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside) d->timeinair += millis;
-        else d->timeinair = 0;
+        if(d->physstate == PHYS_FALL && !d->onladder && !d->turnside)
+        {
+            d->timeinair += millis;
+            d->timeonfloor = 0;
+        }
+        else
+        {
+            d->timeinair = 0;
+            d->timeonfloor += millis;
+        }
         if(!d->turnside)
         {
             if(d->onladder && !m.iszero()) m.add(vec(0, 0, m.z >= 0 ? 1 : -1)).normalize();
@@ -1120,7 +1128,20 @@ namespace physics
             m.normalize();
         }
         if(!floating && gameent::is(pl)) modifymovement((gameent *)pl, m, local, wantsmove, millis);
-        else pl->timeinair = 0;
+        else
+        {
+            if(pl->physstate == PHYS_FALL && !pl->onladder)
+            {
+                pl->timeinair += millis;
+                pl->timeonfloor = 0;
+            }
+            else
+            {
+                pl->timeinair = 0;
+                pl->timeonfloor += millis;
+            }
+        }
+
         m.mul(movevelocity(pl, floating));
         float coast = PHYS(floorcoast);
         if(floating || pl->type == ENT_CAMERA) coast = floatcoast;
@@ -1257,7 +1278,7 @@ namespace physics
             if(pl->physstate != PHYS_FLOAT)
             {
                 pl->physstate = PHYS_FLOAT;
-                pl->timeinair = 0;
+                pl->timeinair = pl->timeonfloor = 0;
                 pl->falling = vec(0, 0, 0);
             }
             pl->o.add(vel);

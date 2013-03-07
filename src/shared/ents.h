@@ -85,7 +85,7 @@ struct physent                                  // base entity type, can be affe
     vec deltapos, newpos;
     float yaw, pitch, roll;
     float speed, weight;
-    int timeinair;
+    int timeinair, timeonfloor;
     float radius, height, aboveeye;             // bounding box size
     float xradius, yradius, zradius, zmargin;
     vec floor;                                  // the normal of floor the dynent is on
@@ -118,7 +118,7 @@ struct physent                                  // base entity type, can be affe
 
     void reset()
     {
-        inmaterial = timeinair = 0;
+        inmaterial = timeinair = timeonfloor = 0;
         blocked = inliquid = onladder = false;
         strafe = move = 0;
         physstate = PHYS_FALL;
