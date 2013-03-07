@@ -560,15 +560,15 @@ namespace client
     bool ismodelocked(int reqmode, int reqmuts, int askmuts = 0, const char *reqmap = NULL)
     {
         if(m_local(reqmode) && remote) return true;
-        if(G(modelock) == PRIV2(MAX) && G(mapslock) == PRIV2(MAX) && !haspriv(game::player1, PRIV_MAX)) return true;
+        if(G(modelock) == PRIV_MAX && G(mapslock) == PRIV_MAX && !haspriv(game::player1, PRIV_MAX)) return true;
         else if(G(votelock)) switch(G(votelocktype))
         {
-            case 1: if(!haspriv(game::player1, PRIVZ(G(votelock)))) return true; break;
+            case 1: if(!haspriv(game::player1, G(votelock))) return true; break;
             case 2:
                 if(!m_edit(reqmode) && reqmap && *reqmap)
                 {
                     int n = listincludes(prevmaps, reqmap, strlen(reqmap));
-                    if(n >= 0 && n < G(maphistory) && !haspriv(game::player1, PRIVZ(G(votelock)))) return true;
+                    if(n >= 0 && n < G(maphistory) && !haspriv(game::player1, G(votelock))) return true;
                 }
                 break;
             case 0: default: break;
@@ -578,8 +578,8 @@ namespace client
         if(askmuts && !mutscmp(askmuts, rmuts)) return true;
         if(G(modelock)) switch(G(modelocktype))
         {
-            case 1: if(!haspriv(game::player1, PRIVZ(G(modelock)))) return true; break;
-            case 2: if((!((1<<reqmode)&G(modelockfilter)) || !mutscmp(reqmuts, G(mutslockfilter))) && !haspriv(game::player1, PRIVZ(G(modelock)))) return true; break;
+            case 1: if(!haspriv(game::player1, G(modelock))) return true; break;
+            case 2: if((!((1<<reqmode)&G(modelockfilter)) || !mutscmp(reqmuts, G(mutslockfilter))) && !haspriv(game::player1, G(modelock))) return true; break;
             case 0: default: break;
         }
         if(reqmode != G_EDITMODE && G(mapslock) && reqmap && *reqmap)
@@ -602,7 +602,7 @@ namespace client
             }
             if(list)
             {
-                if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(game::player1, PRIVZ(G(modelock))))
+                if(listincludes(list, reqmap, strlen(reqmap)) < 0 && !haspriv(game::player1, G(modelock)))
                 {
                     DELETEA(list);
                     return true;

@@ -126,7 +126,8 @@ namespace auth
     {
         if(ci->local) return DISC_NONE;
         if(m_local(gamemode)) return DISC_PRIVATE;
-        if(ci->privilege >= PRIV_ELEVATED) return DISC_NONE;
+        int minpriv = max(int(PRIV_ELEVATED), G(connectlock));
+        if(haspriv(ci, minpriv)) return DISC_NONE;
         if(*authname)
         {
             if(ci->connectauth) return DISC_NONE;
@@ -145,11 +146,12 @@ namespace auth
             }
             if(serverpass[0] && checkpassword(ci, serverpass, pwd)) return DISC_NONE;
         }
+        // above here are short circuits
         if(numclients() >= G(serverclients)) return DISC_MAXCLIENTS;
         uint ip = getclientip(ci->clientnum);
-        if(!ci->privilege && !checkipinfo(control, ipinfo::ALLOW, ip))
+        if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
         {
-            if(mastermode >= MM_PRIVATE || serverpass[0]) return DISC_PRIVATE;
+            if(G(connectlock) || mastermode >= MM_PRIVATE || serverpass[0]) return DISC_PRIVATE;
             if(checkipinfo(control, ipinfo::BAN, ip)) return DISC_IPBAN;
         }
         return DISC_NONE;
