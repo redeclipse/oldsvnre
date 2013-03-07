@@ -1061,7 +1061,7 @@ struct gameent : dynent, gamestate
     {
         stopmoving(true);
         clearstate();
-        inmaterial = timeinair = 0;
+        inmaterial = timeinair = timeonfloor = 0;
         inliquid = onladder = false;
         strafe = move = 0;
         physstate = PHYS_FALL;
