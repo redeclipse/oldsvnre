@@ -1,28 +1,28 @@
 @ECHO OFF
 
 rem set SDL_VIDEO_WINDOW_POS=0,0
-set RE_DIR=.
-set RE_OPTIONS=
-set RE_ARCH=x86
+set APP_DIR=.
+set APP_OPTIONS=
+set APP_ARCH=x86
 
 IF /I "%PROCESSOR_ARCHITECTURE%" == "amd64" (
-    set RE_ARCH=amd64
+    set APP_ARCH=amd64
 )
 IF /I "%PROCESSOR_ARCHITEW6432%" == "amd64" (
-    set RE_ARCH=amd64
+    set APP_ARCH=amd64
 )
 
 :RETRY
-IF EXIST %RE_ARCH%\bin\mekarcade.exe (
-    start %RE_ARCH%\bin\mekarcade.exe %RE_OPTIONS% %*
+IF EXIST %APP_ARCH%\bin\mekarcade.exe (
+    start %APP_ARCH%\bin\mekarcade.exe %APP_OPTIONS% %*
 ) ELSE (
-    IF EXIST %RE_DIR%\bin\%RE_ARCH%\mekarcade.exe (
-        pushd %RE_DIR%
-        start bin\%RE_ARCH%\mekarcade.exe %RE_OPTIONS% %*
+    IF EXIST %APP_DIR%\bin\%APP_ARCH%\mekarcade.exe (
+        pushd %APP_DIR%
+        start bin\%APP_ARCH%\mekarcade.exe %APP_OPTIONS% %*
         popd
     ) ELSE (
-        IF %RE_ARCH% == amd64 (
-            set RE_ARCH=x86
+        IF %APP_ARCH% == amd64 (
+            set APP_ARCH=x86
             goto RETRY
         )
         echo Unable to find the MekArcade client

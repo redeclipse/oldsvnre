@@ -1,11 +1,11 @@
 #!/bin/sh
-# RE_PATH should refer to the directory in which Red Eclipse data files are placed.
-#RE_PATH=~/redeclipse
-#RE_PATH=/usr/local/redeclipse
-RE_PATH="$(cd "$(dirname "$0")" && pwd)"
+# APP_PATH should refer to the directory in which Red Eclipse data files are placed.
+#APP_PATH=~/redeclipse
+#APP_PATH=/usr/local/redeclipse
+APP_PATH="$(cd "$(dirname "$0")" && pwd)"
 
-# RE_OPTIONS contains any command line options you would like to start Red Eclipse with.
-RE_OPTIONS=""
+# APP_OPTIONS contains any command line options you would like to start Red Eclipse with.
+APP_OPTIONS=""
 
 # SYSTEM_NAME should be set to the name of your operating system.
 #SYSTEM_NAME=Linux
@@ -15,10 +15,10 @@ SYSTEM_NAME="$(uname -s)"
 #MACHINE_NAME=i686
 MACHINE_NAME="$(uname -m)"
 
-if [ -x "${RE_PATH}/bin/redeclipse_server_native" ]
+if [ -x "${APP_PATH}/bin/redeclipse_server_native" ]
 then
     SYSTEM_SUFFIX="_native"
-    RE_ARCH=""
+    APP_ARCH=""
 else
     case "$SYSTEM_NAME" in
     Linux)
@@ -34,28 +34,28 @@ else
 
     case "$MACHINE_NAME" in
     i486|i586|i686)
-        RE_ARCH="x86/"
+        APP_ARCH="x86/"
         ;;
     x86_64|amd64)
-        RE_ARCH="amd64/"
+        APP_ARCH="amd64/"
         ;;
     *)
         SYSTEM_SUFFIX="_native"
-        RE_ARCH=""
+        APP_ARCH=""
         ;;
     esac
 fi
 
-if [ -x "${RE_PATH}/bin/${RE_ARCH}redeclipse_server${SYSTEM_SUFFIX}" ]
+if [ -x "${APP_PATH}/bin/${APP_ARCH}redeclipse_server${SYSTEM_SUFFIX}" ]
 then
-    cd "$RE_PATH" || exit 1
-    exec "${RE_PATH}/bin/${RE_ARCH}redeclipse_server${SYSTEM_SUFFIX}" $RE_OPTIONS "$@"
+    cd "$APP_PATH" || exit 1
+    exec "${APP_PATH}/bin/${APP_ARCH}redeclipse_server${SYSTEM_SUFFIX}" $APP_OPTIONS "$@"
 else
     echo "Your platform does not have a pre-compiled Red Eclipse server."
     echo -n "Would you like to build one now? [Yn] "
     read CC
     if [ "$CC" != "n" ]; then
-        cd "${RE_PATH}/src" || exit 1
+        cd "${APP_PATH}/src" || exit 1
         make clean install-server
         echo "Build complete, please try running the script again."
     else
