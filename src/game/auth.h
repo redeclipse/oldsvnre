@@ -151,7 +151,7 @@ namespace auth
         uint ip = getclientip(ci->clientnum);
         if(!ip || !checkipinfo(control, ipinfo::ALLOW, ip))
         {
-            if(G(connectlock) || mastermode >= MM_PRIVATE || serverpass[0]) return DISC_PRIVATE;
+            if(mastermode >= MM_PRIVATE || serverpass[0] || (G(connectlock) && !haspriv(ci, G(connectlock)))) return DISC_PRIVATE;
             if(checkipinfo(control, ipinfo::BAN, ip)) return DISC_IPBAN;
         }
         return DISC_NONE;
