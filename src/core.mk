@@ -1,6 +1,6 @@
 APPNAME?=appname
-APPCLIENT=$(APPSHORTNAME)client
-APPSERVER=$(APPSHORTNAME)server
+APPCLIENT=$(APPNAME)
+APPSERVER=$(APPNAME)_server
 
 #CXXFLAGS= -ggdb3
 CXXFLAGS= -O3 -fomit-frame-pointer

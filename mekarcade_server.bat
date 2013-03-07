@@ -12,19 +12,19 @@ IF /I "%PROCESSOR_ARCHITEW6432%" == "amd64" (
 )
 
 :RETRY
-IF EXIST bin\%RE_ARCH%\fpsserver.exe (
-    start bin\%RE_ARCH%\fpsserver.exe %RE_OPTIONS% %* 
+IF EXIST bin\%RE_ARCH%\mekarcade_server.exe (
+    start bin\%RE_ARCH%\mekarcade_server.exe %RE_OPTIONS% %* 
 ) ELSE (
-    IF EXIST %RE_DIR%\bin\%RE_ARCH%\fpsserver.exe (
+    IF EXIST %RE_DIR%\bin\%RE_ARCH%\mekarcade_server.exe (
         pushd %RE_DIR%
-        start bin\%RE_ARCH%\fpsserver.exe %RE_OPTIONS% %*
+        start bin\%RE_ARCH%\mekarcade_server.exe %RE_OPTIONS% %*
         popd
     ) ELSE (
         IF %RE_ARCH% == amd64 (
             set RE_ARCH=x86
             goto RETRY
         )
-        echo Unable to find the Red Eclipse server binary
+        echo Unable to find the MekArcade server binary
         pause
     )
 )

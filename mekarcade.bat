@@ -13,12 +13,12 @@ IF /I "%PROCESSOR_ARCHITEW6432%" == "amd64" (
 )
 
 :RETRY
-IF EXIST %RE_ARCH%\bin\mekclient.exe (
-    start %RE_ARCH%\bin\mekclient.exe %RE_OPTIONS% %*
+IF EXIST %RE_ARCH%\bin\mekarcade.exe (
+    start %RE_ARCH%\bin\mekarcade.exe %RE_OPTIONS% %*
 ) ELSE (
-    IF EXIST %RE_DIR%\bin\%RE_ARCH%\mekclient.exe (
+    IF EXIST %RE_DIR%\bin\%RE_ARCH%\mekarcade.exe (
         pushd %RE_DIR%
-        start bin\%RE_ARCH%\mekclient.exe %RE_OPTIONS% %*
+        start bin\%RE_ARCH%\mekarcade.exe %RE_OPTIONS% %*
         popd
     ) ELSE (
         IF %RE_ARCH% == amd64 (
