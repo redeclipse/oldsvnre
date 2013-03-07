@@ -758,11 +758,6 @@ namespace server
                 if(flush && val) sendf(-1, 1, "ri2sis", N_COMMAND, -1, &id.name[3], strlen(val), val);
             }
         });
-#ifndef STANDALONE
-        execfile("localexec.cfg", false);
-#else
-        execfile("servexec.cfg", false);
-#endif
     }
 
     const char *pickmap(const char *suggest, int mode, int muts)

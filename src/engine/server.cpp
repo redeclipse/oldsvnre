@@ -1377,9 +1377,7 @@ void setlocations(bool wanthome)
     addpackagedir("data");
     defformatstring(gamedata)("game/%s", server::gameid());
     addpackagedir(gamedata);
-    versioning = true;
-    execfile("version.cfg");
-    versioning = false;
+    execfile("version.cfg", false, EXEC_VERSION);
     if(wanthome)
     {
 #if defined(WIN32)
@@ -1479,9 +1477,9 @@ void rehash(bool reload)
     reloadserver();
 #ifdef STANDALONE
     reloadmaster();
-    execfile("servinit.cfg", false);
+    execfile("servinit.cfg", false, EXEC_VERSION);
 #else
-    execfile("localinit.cfg", false);
+    execfile("localinit.cfg", false, EXEC_VERSION);
     initing = INIT_DEFAULTS;
     execfile("config/defaults.cfg");
     initing = INIT_LOAD;

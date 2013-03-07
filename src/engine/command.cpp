@@ -2229,27 +2229,30 @@ bool executebool(const char *p)
     return b;
 }
 
-bool execfile(const char *cfgfile, bool msg, bool nonworld)
+bool execfile(const char *cfgfile, bool msg, int flags)
 {
     string s;
     copystring(s, cfgfile);
     char *buf = loadfile(s, NULL);
     if(!buf)
     {
-        if(msg) conoutf("\frcould not read %s", cfgfile);
+        if(msg || verbose >= 2) conoutf("\frcould not read %s", cfgfile);
         return false;
     }
     int oldflags = identflags;
-    if(nonworld) identflags &= ~IDF_WORLD;
+    bool oldversion = versioning;
+    if(flags&EXEC_NOWORLD) identflags &= ~IDF_WORLD;
+    if(flags&EXEC_VERSION) versioning = true;
     const char *oldsourcefile = sourcefile, *oldsourcestr = sourcestr;
     sourcefile = cfgfile;
     sourcestr = buf;
     execute(buf);
     sourcefile = oldsourcefile;
     sourcestr = oldsourcestr;
-    if(nonworld) identflags = oldflags;
+    if(flags&EXEC_NOWORLD) identflags = oldflags;
+    if(flags&EXEC_VERSION) versioning = oldversion;
     delete[] buf;
-    if(verbose >= 3) conoutf("\faloaded script %s", cfgfile);
+    if(verbose >= 2) conoutf("\faloaded script %s", cfgfile);
     return true;
 }
 
@@ -2588,7 +2591,7 @@ void getalias_(char *s)
     result(getalias(s));
 }
 
-ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n!=0));
+ICOMMAND(0, exec, "si", (char *file, int *n), execfile(file, true, *n));
 COMMAND(0, at, "si1V");
 ICOMMAND(0, escape, "s", (char *s), result(escapestring(s)));
 ICOMMAND(0, unescape, "s", (char *s),
