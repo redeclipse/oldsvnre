@@ -3285,7 +3285,7 @@ namespace server
             mutate(smuts, mut->died(target, actor));
             target->state.state = CS_DEAD; // don't issue respawn yet until DEATHMILLIS has elapsed
             target->state.lastdeath = gamemillis;
-            if(isteamkill)
+            if(isteamkill && actor->state.aitype == AI_NONE) // don't punish the idiot bots
             {
                 actor->state.teamkills.add(teamkill(totalmillis, actor->team, -pointvalue));
                 if(G(teamkilllock) && !haspriv(actor, G(teamkilllock)))
@@ -4081,7 +4081,7 @@ namespace server
                 if(smode) smode->leavegame(ci, true);
                 mutate(smuts, mut->leavegame(ci, true));
                 ci->state.timeplayed += lastmillis-ci->state.lasttimeplayed;
-                if(m_scores(gamemode) && m_team(gamemode, mutators) && G(teamkillrestore) && !interm)
+                if(m_scores(gamemode) && m_team(gamemode, mutators) && G(teamkillrestore) && !interm && ci->state.aitype == AI_NONE)
                 {
                     int restorepoints[T_MAX] = {0};
                     loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
@@ -4385,7 +4385,7 @@ namespace server
         ci->state.lasttimeplayed = lastmillis;
 
         sendwelcome(ci);
-        if(m_scores(gamemode) && m_team(gamemode, mutators) && G(teamkillrestore) && !interm)
+        if(m_scores(gamemode) && m_team(gamemode, mutators) && G(teamkillrestore) && !interm && ci->state.aitype == AI_NONE)
         {
             int restorepoints[T_MAX] = {0};
             loopv(ci->state.teamkills) restorepoints[ci->state.teamkills[i].team] += ci->state.teamkills[i].points;
