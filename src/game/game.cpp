@@ -1000,6 +1000,7 @@ namespace game
             if(d->ai || !lagtime || intermission) continue;
             //else if(lagtime > 1000) continue;
             physics::smoothplayer(d, 1, false);
+            if(!intermission && (d->state == CS_DEAD || d->state == CS_WAITING)) entities::checkitems(d);
         }
     }
 
@@ -2560,13 +2561,14 @@ namespace game
                 else if(player1->state == CS_ALIVE && !intermission && !tvmode())
                 {
                     physics::move(player1, 10, true);
-                    entities::checkitems(player1);
                     weapons::checkweapons(player1);
                 }
             }
             if(!intermission)
             {
                 addsway(focus);
+                if(player1->state == CS_ALIVE || player1->state == CS_DEAD || player1->state == CS_WAITING)
+                    entities::checkitems(player1);
                 if(!tvmode() && player1->state >= CS_SPECTATOR)
                 {
                     camera1->move = player1->move;

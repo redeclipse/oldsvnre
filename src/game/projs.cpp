@@ -455,21 +455,11 @@ namespace projs
         pushers.shrink(0);
         loopv(entities::ents) switch(entities::ents[i]->type)
         {
-            case TELEPORT:
+            case TELEPORT: case PUSHER:
             {
-                toolent &t = teleports.add();
+                toolent &t = entities::ents[i]->type == TELEPORT ? teleports.add() : pushers.add();
                 t.ent = i;
                 t.radius = entities::ents[i]->attrs[3] > 0 ? entities::ents[i]->attrs[3] : enttype[entities::ents[i]->type].radius;
-                t.radius *= t.radius;
-                t.pos = entities::ents[i]->o;
-                break;
-            }
-            case PUSHER:
-            {
-                toolent &t = pushers.add();
-                t.ent = i;
-                t.radius = entities::ents[i]->attrs[3] > 0 ? entities::ents[i]->attrs[3] : enttype[entities::ents[i]->type].radius;
-                t.radius *= 0.25f;
                 t.radius *= t.radius;
                 t.pos = entities::ents[i]->o;
                 break;
