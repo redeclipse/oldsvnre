@@ -85,7 +85,7 @@ namespace aiman
                 ci->state.lasttimeplayed = lastmillis;
                 ci->state.colour = rnd(0xFFFFFF);
                 ci->state.model = rnd(PLAYERTYPES);
-                ci->state.setvanity("badge"); // the first slot is special
+                ci->state.setvanity("tophat/metal badge"); // the first slot is special
                 copystring(ci->name, aistyle[ci->state.aitype].name, MAXNAMELEN);
                 ci->state.state = CS_DEAD;
                 ci->team = type == AI_BOT ? T_NEUTRAL : T_ENEMY;
