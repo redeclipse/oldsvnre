@@ -1258,6 +1258,7 @@ namespace game
             else if(flags&HIT_BLEED || bleeding) concatstring(d->obit, "bled out");
             else if(flags&HIT_SHOCK || shocking) concatstring(d->obit, "twitched to death");
             else if(d->obliterated) concatstring(d->obit, "was obliterated");
+            else if(d->headless) concatstring(d->obit, "had their head caved in");
             else concatstring(d->obit, "suicided");
         }
         else
@@ -1509,13 +1510,14 @@ namespace game
             else if(anc >= 0) announce(anc, d);
             if(anc >= 0 && d != actor) announce(anc, actor);
         }
-        vec pos = d->center();
+        vec pos = d->wantshitbox() ? d->head : d->headpos();
+        pos.z -= d->zradius*0.125f;
 #if 0
         projs::create(pos, pos, true, d, PRJ_VANITY, len, 0, 0, rnd(50)+10, -1, k, 0, 0);
 #endif
         if(aistyle[d->aitype].living && gibscale > 0)
         {
-            int gib = clamp(max(damage,5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
+            int gib = clamp(max(damage, 5)/5, 1, 15), amt = int((rnd(gib)+gib+1)*gibscale);
             if(d->obliterated) amt *= 3;
             loopi(amt) projs::create(pos, pos, true, d, PRJ_GIBS, rnd(gibfade)+gibfade, 0, rnd(500)+1, rnd(50)+10);
         }

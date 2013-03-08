@@ -699,7 +699,10 @@ namespace projs
                     if(proj.owner)
                     {
                         if(proj.owner->state == CS_DEAD || proj.owner->state == CS_WAITING)
-                            proj.o = proj.owner->center();
+                        {
+                            proj.o = proj.owner->wantshitbox() ? proj.owner->head : proj.owner->headpos();
+                            proj.o.z -= proj.owner->zradius*0.125f;
+                        }
                         else
                         {
                             proj.lifemillis = proj.lifetime = 1;
@@ -720,10 +723,10 @@ namespace projs
                     proj.relativity = gibsrelativity;
                     proj.waterfric = gibswaterfric;
                     proj.weight = gibsweight*proj.lifesize;
-                    proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(21)-10));
+                    proj.vel.add(vec(rnd(21)-10, rnd(21)-10, rnd(proj.owner->headless ? 71 : 21)-10));
                     proj.projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
                     proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
-                    proj.fadetime = rnd(250)+250;
+                    proj.fadetime = rnd(50)+50;
                     proj.extinguish = 6;
                     break;
                 } // otherwise fall through

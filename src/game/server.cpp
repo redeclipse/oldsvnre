@@ -3184,7 +3184,7 @@ namespace server
                  isteamkill = false;
             int pointvalue = (smode && !isai ? smode->points(target, actor) : fragvalue), style = FRAG_NONE;
             pointvalue *= isai ? G(enemybonus) : G(fragbonus);
-            if(!m_insta(gamemode, mutators) && (realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.model) : m_health(gamemode, mutators, target->state.model)*3/2)))
+            if(realdamage >= (realflags&HIT_EXPLODE ? m_health(gamemode, mutators, target->state.model)/2 : m_health(gamemode, mutators, target->state.model)))
                 style = FRAG_OBLITERATE;
             target->state.spree = 0;
             if(m_team(gamemode, mutators) && actor->team == target->team)
