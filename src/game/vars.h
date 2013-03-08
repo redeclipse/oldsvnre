@@ -2,6 +2,24 @@ GVAR(IDF_WORLD, numplayers, 0, 4, MAXCLIENTS); // 0 = determine from number of s
 GVAR(IDF_WORLD, maxplayers, 0, 0, MAXCLIENTS); // 0 = numplayers*2
 GVAR(IDF_WORLD, mapbalance, 0, 0, 1); // switches teams for asymmetrical maps
 
+GFVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
+GFVAR(0, gravityscale, 0, 1, FVAR_MAX);
+GFVAR(IDF_WORLD, floorcoast, 0, 5.f, 1000);
+GFVAR(0, floorcoastscale, 0, 1, FVAR_MAX);
+GFVAR(IDF_WORLD, aircoast, 0, 25.f, 1000);
+GFVAR(0, aircoastscale, 0, 1, FVAR_MAX);
+GFVAR(IDF_WORLD, slidecoast, 0, 40.f, 1000);
+GFVAR(0, slidecoastscale, 0, 1, FVAR_MAX);
+
+GFVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
+GFVAR(0, liquidspeedscale, 0, 1, FVAR_MAX);
+GFVAR(IDF_WORLD, liquidcoast, 0, 10.f, 1000);
+GFVAR(0, liquidcoastscale, 0, 1, FVAR_MAX);
+GFVAR(IDF_WORLD, liquidsubmerge, 0, 0.75f, 1);
+GFVAR(0, liquidsubmergescale, 0, 1, FVAR_MAX);
+GFVAR(IDF_WORLD, liquidextinguish, 0, 0.25f, 1);
+GFVAR(0, liquidextinguishscale, 0, 1, FVAR_MAX);
+
 GVAR(IDF_ADMIN, serverdebug, 0, 0, 3);
 GVAR(IDF_ADMIN, serverclients, 1, 16, MAXCLIENTS);
 GVAR(IDF_ADMIN, serveropen, 0, 3, 3);
@@ -309,23 +327,6 @@ GVAR(0, enemyspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random
 GFVAR(0, enemyspeed, 0, 1, FVAR_MAX);
 GFVAR(0, enemyscale, FVAR_NONZERO, 1, FVAR_MAX);
 GFVAR(0, enemystrength, FVAR_NONZERO, 1, FVAR_MAX); // scale enemy health values by this much
-
-GFVAR(0, gravityforce, -1, -1, FVAR_MAX);
-GFVAR(0, gravityscale, 0, 1, FVAR_MAX);
-GFVAR(0, liquidspeedforce, -1, -1, 1);
-GFVAR(0, liquidspeedscale, 0, 1, FVAR_MAX);
-GFVAR(0, liquidcoastforce, -1, -1, FVAR_MAX);
-GFVAR(0, liquidcoastscale, 0, 1, FVAR_MAX);
-GFVAR(0, liquidsubmergeforce, -1, -1, 1);
-GFVAR(0, liquidsubmergescale, 0, 1, FVAR_MAX);
-GFVAR(0, liquidextinguishforce, -1, -1, 1);
-GFVAR(0, liquidextinguishscale, 0, 1, FVAR_MAX);
-GFVAR(0, floorcoastforce, -1, -1, FVAR_MAX);
-GFVAR(0, floorcoastscale, 0, 1, FVAR_MAX);
-GFVAR(0, aircoastforce, -1, -1, FVAR_MAX);
-GFVAR(0, aircoastscale, 0, 1, FVAR_MAX);
-GFVAR(0, slidecoastforce, -1, -1, FVAR_MAX);
-GFVAR(0, slidecoastscale, 0, 1, FVAR_MAX);
 
 GFVAR(0, movespeed, FVAR_NONZERO, 100, FVAR_MAX); // speed
 GFVAR(0, movecrawl, 0, 0.6f, FVAR_MAX); // crawl modifier

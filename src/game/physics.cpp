@@ -1,16 +1,6 @@
 #include "game.h"
 namespace physics
 {
-    FVAR(IDF_WORLD, gravity, 0, 50.f, 1000); // gravity
-    FVAR(IDF_WORLD, floorcoast, 0, 5.f, 1000);
-    FVAR(IDF_WORLD, aircoast, 0, 25.f, 1000);
-    FVAR(IDF_WORLD, slidecoast, 0, 40.f, 1000);
-
-    FVAR(IDF_WORLD, liquidspeed, 0, 0.85f, 1);
-    FVAR(IDF_WORLD, liquidcoast, 0, 10.f, 1000);
-    FVAR(IDF_WORLD, liquidsubmerge, 0, 0.75f, 1);
-    FVAR(IDF_WORLD, liquidextinguish, 0, 0.25f, 1);
-
     FVAR(IDF_WORLD, stairheight, 0, 4.1f, 1000);
     FVAR(IDF_WORLD, floorz, 0, 0.867f, 1);
     FVAR(IDF_WORLD, slopez, 0, 0.5f, 1);

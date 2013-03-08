@@ -1490,7 +1490,6 @@ namespace client
 
 namespace physics
 {
-    extern float gravity, liquidspeed, liquidcoast, floorcoast, aircoast, slidecoast;
     extern int smoothmove, smoothdist, sprintstyle;
     extern bool isghost(gameent *d, gameent *e);
     extern bool carryaffinity(gameent *d);
