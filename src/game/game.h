@@ -1382,7 +1382,7 @@ struct projent : dynent
     int addtime, lifetime, lifemillis, waittime, spawntime, fadetime, lastradial, lasteffect, lastbounce, beenused, extinguish, stuck;
     float movement, distance, lifespan, lifesize, minspeed;
     bool local, limited, escaped, child;
-    int projtype, projcollide;
+    int projtype, projcollide, interacts;
     float elasticity, reflectivity, relativity, waterfric;
     int schan, id, weap, value, flags, hitflags;
     entitylight light;
@@ -1414,7 +1414,7 @@ struct projent : dynent
         schan = id = weap = value = -1;
         movement = distance = lifespan = minspeed = 0;
         curscale = speedscale = lifesize = 1;
-        extinguish = stuck = 0;
+        extinguish = stuck = interacts = 0;
         limited = escaped = child = false;
         projcollide = BOUNCE_GEOM|BOUNCE_PLAYER;
     }
@@ -1648,6 +1648,7 @@ namespace entities
     extern int showentdescs;
     extern vector<extentity *> ents;
     extern int lastenttype[MAXENTTYPES], lastusetype[EU_MAX];
+    extern bool execitem(int n, dynent *d);
     extern bool collateitems(dynent *d, vector<actitem> &actitems);
     extern void checkitems(dynent *d);
     extern void putitems(packetbuf &p);

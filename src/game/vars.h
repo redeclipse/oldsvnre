@@ -201,6 +201,7 @@ GVAR(0, itemspawnstyle, 0, 1, 3); // 0 = all at once, 1 = staggered, 2 = random,
 GFVAR(0, itemthreshold, 0, 2, FVAR_MAX); // if numitems/(players*maxcarry) is less than this, spawn one of this type
 GVAR(0, itemcollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, itemextinguish, 0, 6, 7);
+GVAR(0, iteminteracts, 0, 3, 3);
 GFVAR(0, itemelasticity, FVAR_MIN, 0.4f, FVAR_MAX);
 GFVAR(0, itemrelativity, FVAR_MIN, 1, FVAR_MAX);
 GFVAR(0, itemwaterfric, 0, 1.75f, FVAR_MAX);
@@ -239,6 +240,7 @@ GVAR(0, capturepoints, 0, 5, VAR_MAX); // points added to score
 GVAR(0, capturepickuppoints, 0, 3, VAR_MAX); // points added to score
 GVAR(0, capturecollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, captureextinguish, 0, 6, 7);
+GVAR(0, captureinteracts, 0, 2, 3);
 GFVAR(0, capturerelativity, 0, 0.25f, FVAR_MAX);
 GFVAR(0, captureelasticity, FVAR_MIN, 0.5f, FVAR_MAX);
 GFVAR(0, capturewaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
@@ -290,6 +292,7 @@ GFVAR(0, bomberspeed, 0, 200, FVAR_MAX);
 GFVAR(0, bomberdelta, 0, 1000, FVAR_MAX);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, VAR_MAX);
 GVAR(0, bomberextinguish, 0, 6, 7);
+GVAR(0, bomberinteracts, 0, 2, 3);
 GFVAR(0, bomberrelativity, 0, 0.25f, FVAR_MAX);
 GFVAR(0, bomberelasticity, FVAR_MIN, 0.7f, FVAR_MAX);
 GFVAR(0, bomberwaterfric, FVAR_MIN, 1.75f, FVAR_MAX);
