@@ -1929,7 +1929,7 @@ namespace game
     void project(int w, int h)
     {
         bool input = hud::hasinput(true), view = thirdpersonview(true, focus), mode = tvmode();
-        if(input != inputmouse || view != inputview || mode != inputmode || focus != lastfocus)
+        if(input != inputmouse || ((!input || !intermission) && (view != inputview || mode != inputmode || focus != lastfocus)))
         {
             if(input != inputmouse) resetcursor();
             else resetcamera(focus != lastfocus);
