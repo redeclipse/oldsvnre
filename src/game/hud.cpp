@@ -279,6 +279,10 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, bleedingtex, "<grey>textures/alerts/bleed", 3);
     TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, shockingtex, "<grey>textures/alerts/shock", 3);
 
+    VAR(IDF_PERSIST, inventorygameinfo, 0, 1, 1);
+    FVAR(IDF_PERSIST, inventorygameinfoblend, 0, 0.5f, 1);
+    VAR(IDF_PERSIST, inventorygameinfoflash, 0, 0, 1);
+
     VAR(IDF_PERSIST, inventoryconopen, 0, 1, 1);
     FVAR(IDF_PERSIST, inventoryconopenblend, 0, 0.5f, 1);
     VAR(IDF_PERSIST, inventoryconopenflash, 0, 0, 1);
@@ -2508,6 +2512,46 @@ namespace hud
                     pushfont("reduced");
                     sy += draw_textx("impulse", x+width/2, y-sy, 255, 255, 255, int(fade*255), TEXT_CENTER_UP, -1, -1);
                     popfont();
+                }
+            }
+            if(inventorygameinfo)
+            {
+                float fade = blend*inventorygameinfoblend;
+                if(PHYS(gravity) == 0 || m_jetpack(game::gamemode, game::mutators))
+                {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+                    if(inventorygameinfoflash || lastmillis-game::focus->lastspawn <= 5000)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
+                    }
+                    sy += drawitem(modejetpacktex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                }
+                if(m_vampire(game::gamemode, game::mutators))
+                {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+                    if(inventorygameinfoflash || lastmillis-game::focus->lastspawn <= 5000)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
+                    }
+                    sy += drawitem(modevampiretex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
+                }
+                if(m_expert(game::gamemode, game::mutators))
+                {
+                    float gr = 1, gg = 1, gb = 1;
+                    if(inventorytone) skewcolour(gr, gg, gb, inventorytone);
+                    if(inventorygameinfoflash || lastmillis-game::focus->lastspawn <= 5000)
+                    {
+                        int millis = lastmillis%1000;
+                        float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                        flashcolour(gr, gg, gb, 1.f, 1.f, 1.f, amt);
+                    }
+                    sy += drawitem(modeexperttex, x, y-sy, width, 0, false, true, gr, gg, gb, fade);
                 }
             }
             if(inventoryalert)
