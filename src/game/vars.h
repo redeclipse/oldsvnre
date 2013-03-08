@@ -30,6 +30,7 @@ GVAR(IDF_ADMIN, autoadmin, 0, 0, 1);
 
 GVAR(IDF_ADMIN, connectlock, 0, PRIV_NONE, PRIV_MAX);
 GVAR(IDF_ADMIN, messagelock, 0, PRIV_NONE, PRIV_MAX);
+GVAR(IDF_ADMIN, messagelength, 32, 128, MAXSTRLEN-1);
 
 GVAR(IDF_ADMIN, demolock, 0, PRIV_OPERATOR, PRIV_MAX);
 GVAR(IDF_ADMIN, democount, 1, 5, VAR_MAX);

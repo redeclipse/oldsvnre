@@ -4985,13 +4985,15 @@ namespace server
                         }
                         cp->state.chatmillis.add(totalmillis ? totalmillis : 1);
                     }
+                    string output;
+                    copystring(output, text, G(messagelength));
                     if(flags&SAY_TEAM && !m_team(gamemode, mutators)) flags &= ~SAY_TEAM;
-                    sendf(-1, -1, "ri3s", N_TEXT, cp->clientnum, flags, text); // sent to nagative chan for recordpacket
+                    sendf(-1, -1, "ri3s", N_TEXT, cp->clientnum, flags, output); // sent to nagative chan for recordpacket
                     loopv(clients)
                     {
                         clientinfo *t = clients[i];
                         if(t == cp || !allowbroadcast(t->clientnum) || (flags&SAY_TEAM && cp->team != t->team)) continue;
-                        sendf(t->clientnum, 1, "ri3s", N_TEXT, cp->clientnum, flags, text);
+                        sendf(t->clientnum, 1, "ri3s", N_TEXT, cp->clientnum, flags, output);
                     }
                     defformatstring(m)("%s", colorname(cp));
                     if(flags&SAY_TEAM)
@@ -4999,8 +5001,8 @@ namespace server
                         defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(cp->team, colour), TEAM(cp->team, name));
                         concatstring(m, t);
                     }
-                    if(flags&SAY_ACTION) relayf(0, "\fv* \fs%s\fS \fs\fv%s\fS", m, text);
-                    else relayf(0, "\fa<\fs\fw%s\fS> \fs\fw%s\fS", m, text);
+                    if(flags&SAY_ACTION) relayf(0, "\fv* \fs%s\fS \fs\fv%s\fS", m, output);
+                    else relayf(0, "\fa<\fs\fw%s\fS> \fs\fw%s\fS", m, output);
                     break;
                 }
 

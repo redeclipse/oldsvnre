@@ -879,10 +879,12 @@ namespace client
     {
         if(!waiting(false) && !client::demoplayback)
         {
+            string output;
+            copystring(output, text, messagelength);
             if(flags&SAY_TEAM && !m_team(game::gamemode, game::mutators))
                 flags &= ~SAY_TEAM;
-            saytext(game::player1, flags, text);
-            addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, text);
+            saytext(game::player1, flags, output);
+            addmsg(N_TEXT, "ri2s", game::player1->clientnum, flags, output);
         }
     }
     ICOMMAND(0, say, "C", (char *s), toserver(SAY_NONE, s));
