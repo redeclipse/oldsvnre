@@ -101,6 +101,7 @@ namespace server
     {
         int id, weap, flags, target;
         ivec norm, pos;
+        bool keepable() const { return true; }
         void process(clientinfo *ci);
     };
 

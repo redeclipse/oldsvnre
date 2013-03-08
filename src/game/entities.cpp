@@ -271,13 +271,18 @@ namespace entities
             }
             case TELEPORT:
             {
-                if(full) switch(attr[5])
+                if(full)
                 {
-                    case 0: addentinfo("absolute"); break;
-                    case 1: addentinfo("relative"); break;
-                    case 2: addentinfo("keep"); break;
-                    case 3: addentinfo("positional"); break;
-                    default: break;
+                    switch(attr[5])
+                    {
+                        case 0: addentinfo("absolute"); break;
+                        case 1: addentinfo("relative"); break;
+                        case 2: addentinfo("keep"); break;
+                        case 3: addentinfo("positional"); break;
+                        default: break;
+                    }
+                    const char *telenames[TELE_MAX] = { "no affinity" };
+                    loopj(TELE_MAX) if(attr[8]&(1<<j)) { addentinfo(telenames[j]); }
                 }
                 break;
             }
@@ -550,6 +555,8 @@ namespace entities
                             teleports.add(e.links[i]);
                     if(!teleports.empty())
                     {
+                        if(e.attrs[8]&(1<<TELE_NOAFFIN) && gameent::is(d) && physics::carryaffinity((gameent *)d))
+                            physics::dropaffinity((gameent *)d);
                         bool teleported = false;
                         while(!teleports.empty())
                         {
