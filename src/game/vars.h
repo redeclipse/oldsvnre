@@ -145,17 +145,17 @@ GVAR(0, maxcarry, 1, 2, W_LOADOUT);
 GVAR(0, spawnrotate, 0, 2, 2); // 0 = let client decide, 1 = sequence, 2 = random
 GVAR(0, spawnweapon, 0, W_PISTOL, W_MAX-1);
 GVAR(0, instaweapon, 0, W_RIFLE, W_MAX-1);
+GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
+GVAR(0, gauntletweapon, 0, W_RIFLE, W_MAX-1);
 GVAR(0, spawngrenades, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawnmines, 0, 0, 2); // 0 = never, 1 = all but insta/trial, 2 = always
 GVAR(0, spawndelay, 0, 5000, VAR_MAX); // delay before spawning in most modes
 GVAR(0, instadelay, 0, 3000, VAR_MAX); // .. in instagib matches
+GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
 GVAR(0, bomberdelay, 0, 3000, VAR_MAX); // delay before spawning in bomber
 GVAR(0, spawnprotect, 0, 3000, VAR_MAX); // delay before damage can be dealt to spawning player
 GVAR(0, duelprotect, 0, 5000, VAR_MAX); // .. in duel/survivor matches
 GVAR(0, instaprotect, 0, 3000, VAR_MAX); // .. in instagib matches
-
-GVAR(0, trialweapon, 0, W_MELEE, W_MAX-1);
-GVAR(0, trialdelay, 0, 500, VAR_MAX); // .. in time trial matches
 
 #ifdef CAMPAIGN
 GVAR(0, campaignghost, 0, 0, 1); // 0 = all players are solid, 1 = all players are ghosts
