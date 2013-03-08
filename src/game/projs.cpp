@@ -387,8 +387,8 @@ namespace projs
             }
             else proj.stickpos = proj.o;
             if(updatesticky(proj, true) && proj.projtype == PRJ_SHOT)
-                client::addmsg(N_STICKY, "ri9i2",
-                    proj.owner->clientnum, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
+                client::addmsg(N_STICKY, "ri9i3",
+                    proj.owner->clientnum, lastmillis-game::maptime, proj.weap, proj.flags, WK(proj.flags) ? -proj.id : proj.id, proj.stick ? proj.stick->clientnum : -1,
                         int(proj.sticknrm.x*DNF), int(proj.sticknrm.y*DNF), int(proj.sticknrm.z*DNF), int(proj.stickpos.x*DMF), int(proj.stickpos.y*DMF), int(proj.stickpos.z*DMF));
         }
     }

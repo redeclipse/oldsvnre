@@ -97,6 +97,13 @@ namespace server
         void process(clientinfo *ci);
     };
 
+    struct stickyevent : timedevent
+    {
+        int id, weap, flags, target;
+        ivec norm, pos;
+        void process(clientinfo *ci);
+    };
+
     struct projectile
     {
         int id, ammo, reloads;
@@ -3413,6 +3420,23 @@ namespace server
         return int(ceilf(WF(WK(flags), weap, damage, WS(flags))*skew));
     }
 
+    void stickyevent::process(clientinfo *ci)
+    {
+        if(isweap(weap))
+        {
+            servstate &gs = ci->state;
+            if(!gs.weapshots[weap][WS(flags) ? 1 : 0].find(id))
+            {
+                if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
+                return;
+            }
+            clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
+            if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
+                sendf(-1, 1, "ri9ix", N_STICKY, ci->clientnum, target, id, norm.x, norm.y, norm.z, pos.x, pos.y, pos.z, ci->clientnum);
+            else if(G(serverdebug) >= 2) srvmsgf(ci->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
+        }
+    }
+
     void destroyevent::process(clientinfo *ci)
     {
         servstate &gs = ci->state;
@@ -4785,26 +4809,21 @@ namespace server
                     break;
                 }
 
-                case N_STICKY: // cn weap id flags target norm pos
+                case N_STICKY: // cn millis weap flags id target norm pos
                 {
-                    int lcn = getint(p), weap = getint(p), flags = getint(p), id = getint(p), target = getint(p);
-                    ivec norm(0, 0, 0), pos(0, 0, 0);
-                    loopk(3) norm[k] = getint(p);
-                    loopk(3) pos[k] = getint(p);
+                    int lcn = getint(p), millis = getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
-                    if(isweap(weap) && cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum))
-                    {
-                        if(!cp->state.weapshots[weap][WS(flags) ? 1 : 0].find(id))
-                        {
-                            if(G(serverdebug) >= 2) srvmsgf(cp->clientnum, "sync error: sticky [%d (%d)] failed - not found", weap, id);
-                            return;
-                        }
-                        clientinfo *victim = target >= 0 ? (clientinfo *)getinfo(target) : NULL;
-                        if(target < 0 || (victim && victim->state.state == CS_ALIVE && !victim->state.protect(gamemillis, m_protect(gamemode, mutators))))
-                            sendf(-1, 1, "ri9ix", N_STICKY, cp->clientnum, target, id, norm.x, norm.y, norm.z, pos.x, pos.y, pos.z, cp->clientnum);
-                        else if(G(serverdebug) >= 2)
-                            srvmsgf(cp->clientnum, "sync error: sticky [%d (%d)] failed - state disallows it", weap, id);
-                    }
+                    bool havecn = (cp && (cp->clientnum == ci->clientnum || cp->state.ownernum == ci->clientnum));
+                    stickyevent *ev = new stickyevent;
+                    ev->weap = getint(p);
+                    ev->flags = getint(p);
+                    if(havecn) ev->millis = cp->getmillis(gamemillis, millis);
+                    ev->id = getint(p);
+                    ev->target = getint(p);
+                    loopk(3) ev->norm[k] = getint(p);
+                    loopk(3) ev->pos[k] = getint(p);
+                    if(havecn) cp->events.add(ev);
+                    else delete ev;
                     break;
                 }
 
