@@ -50,7 +50,7 @@ binary from the
 .I @LIBEXECDIR@/@APPNAME@
 directory.
 .PP
-The recommended way to change the settings of the server is to create and edit the files servexec.cfg and servinit.cfg files in your home directory. Examples are available in
+The recommended way to change the settings of the server is to create and edit the file servinit.cfg in your home directory. Examples are available in
 .IR @DOCDIR@/@APPNAME@/examples/
 
 
@@ -62,7 +62,7 @@ The recommended way to change the settings of the server is to create and edit t
 .BI \-h homedir
 Sets your home directory to
 .IR homedir .
-This is where servinit.cfg and servexec.cfg are read from, it defaults to
+This is where servinit.cfg is read from, it defaults to
 .IR $HOME/.@APPNAME@/ .
 .TP
 
