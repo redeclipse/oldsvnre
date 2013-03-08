@@ -127,7 +127,9 @@ Multiplayer & Servers:
  * Added "maxplayers" server-world variable (defaults to 2x"numplayers")
  * Enabled "maxalive" by default (now corresponds to "maxplayers", limits
    amount of players based on map settings)
- * Merged servexec.cfg into servinit.cfg, servexec.cfg is now unused.
+ * Merged servexec.cfg into servinit.cfg, servexec.cfg is now unused
+ * Changed servinit to only set the "default values" on start, it is never
+   re-executed
 
 Core & Install:
  * Added IRC guidelines
