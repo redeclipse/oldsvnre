@@ -520,7 +520,7 @@ namespace entities
     }
     ICOMMAND(0, exectrigger, "i", (int *n), if(identflags&IDF_WORLD) runtriggers(*n, trigger ? trigger : game::player1));
 
-    void execitem(int n, dynent *d, bool &tried)
+    bool execitem(int n, dynent *d)
     {
         gameentity &e = *(gameentity *)ents[n];
         switch(enttype[e.type].usetype)
@@ -536,10 +536,10 @@ namespace entities
                         client::addmsg(N_ITEMUSE, "ri3", f->clientnum, lastmillis-game::maptime, n);
                         f->setweapstate(f->weapselect, W_S_WAIT, weaponswitchdelay, lastmillis);
                         f->action[AC_USE] = false;
+                        return false;
                     }
-                    else tried = true;
                 }
-                else tried = true;
+                return true;
             } break;
             case EU_AUTO: switch(e.type)
             {
@@ -687,6 +687,7 @@ namespace entities
                 }
             } break;
         }
+        return false;
     }
 
     void checkitems(dynent *d)
@@ -717,7 +718,7 @@ namespace entities
                     }
                     default: break;
                 }
-                if(ents.inrange(ent)) execitem(ent, d, tried);
+                if(ents.inrange(ent) && execitem(ent, d)) tried = true;
                 actitems.pop();
             }
             if(tried && gameent::is(d))

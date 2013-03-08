@@ -6,6 +6,14 @@ namespace projs
     vector<hitmsg> hits;
     vector<projent *> projs, collideprojs;
 
+    struct toolent
+    {
+        int ent;
+        float radius;
+        vec pos;
+    };
+    vector<toolent> teleports, pushers;
+
     VAR(IDF_PERSIST, shadowdebris, 0, 1, 1);
     VAR(IDF_PERSIST, shadowgibs, 0, 1, 1);
     VAR(IDF_PERSIST, shadoweject, 0, 1, 1);
@@ -411,11 +419,63 @@ namespace projs
         }
     }
 
+    bool checkitems(projent &proj, vector<toolent> &list)
+    {
+        float closedist = 1e16f;
+        int closeent = -1;
+        loopv(list)
+        {
+            float dist = proj.o.squaredist(list[i].pos);
+            if(dist <= list[i].radius && (closeent < 0 || dist <= closedist))
+            {
+                closeent = list[i].ent;
+                closedist = dist;
+            }
+        }
+        if(entities::ents.inrange(closeent))
+        {
+            entities::execitem(closeent, &proj);
+            return true;
+        }
+        return false;
+    }
+
+    void checkitems(projent &proj)
+    {
+        if(proj.interacts&1) if(checkitems(proj, teleports)) return;
+        if(proj.interacts&2) if(checkitems(proj, pushers)) return;
+    }
+
     void reset()
     {
         collideprojs.setsize(0);
         projs.deletecontents();
         projs.shrink(0);
+        teleports.shrink(0);
+        pushers.shrink(0);
+        loopv(entities::ents) switch(entities::ents[i]->type)
+        {
+            case TELEPORT:
+            {
+                toolent &t = teleports.add();
+                t.ent = i;
+                t.radius = entities::ents[i]->attrs[3] > 0 ? entities::ents[i]->attrs[3] : enttype[entities::ents[i]->type].radius;
+                t.radius *= t.radius;
+                t.pos = entities::ents[i]->o;
+                break;
+            }
+            case PUSHER:
+            {
+                toolent &t = pushers.add();
+                t.ent = i;
+                t.radius = entities::ents[i]->attrs[3] > 0 ? entities::ents[i]->attrs[3] : enttype[entities::ents[i]->type].radius;
+                t.radius *= 0.25f;
+                t.radius *= t.radius;
+                t.pos = entities::ents[i]->o;
+                break;
+            }
+            default: break;
+        }
     }
 
     void preload()
@@ -681,6 +741,7 @@ namespace projs
                 proj.projcollide = WF(WK(proj.flags), proj.weap, collide, WS(proj.flags));
                 proj.minspeed = WF(WK(proj.flags), proj.weap, minspeed, WS(proj.flags));
                 proj.extinguish = WF(WK(proj.flags), proj.weap, extinguish, WS(proj.flags))|4;
+                proj.interacts = WF(WK(proj.flags), proj.weap, interacts, WS(proj.flags));
                 proj.mdl = weaptype[proj.weap].proj;
                 proj.escaped = !proj.owner || proj.child || WK(proj.flags) || weaptype[proj.weap].traced;
                 updatetargets(proj, waited ? 1 : 0);
@@ -728,6 +789,7 @@ namespace projs
                     proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                     proj.fadetime = rnd(50)+50;
                     proj.extinguish = 6;
+                    proj.interacts = 3;
                     break;
                 } // otherwise fall through
             }
@@ -752,6 +814,7 @@ namespace projs
                 proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                 proj.fadetime = rnd(250)+250;
                 proj.extinguish = 1;
+                proj.interacts = 3;
                 break;
             }
             case PRJ_EJECT:
@@ -779,6 +842,7 @@ namespace projs
                 proj.escaped = true;
                 proj.fadetime = rnd(300)+300;
                 proj.extinguish = 6;
+                proj.interacts = 3;
                 if(proj.owner == game::focus && !game::thirdpersonview())
                     proj.o = proj.from.add(vec(proj.from).sub(camera1->o).normalize().mul(4));
                 vecfromyawpitch(proj.yaw+40+rnd(41), proj.pitch+50-proj.speed+rnd(41), 1, 0, proj.to);
@@ -808,6 +872,7 @@ namespace projs
                 if(proj.flags) proj.inertia.div(proj.flags+1);
                 proj.fadetime = 500;
                 proj.extinguish = itemextinguish;
+                proj.interacts = iteminteracts;
                 break;
             }
             case PRJ_AFFINITY:
@@ -824,6 +889,7 @@ namespace projs
                         proj.mdl = "props/ball";
                         proj.projcollide = bombercollide;
                         proj.extinguish = bomberextinguish;
+                        proj.interacts = bomberinteracts;
                         proj.elasticity = bomberelasticity;
                         proj.weight = bomberweight;
                         proj.relativity = bomberrelativity;
@@ -834,6 +900,7 @@ namespace projs
                         proj.mdl = "props/flag";
                         proj.projcollide = capturecollide;
                         proj.extinguish = captureextinguish;
+                        proj.interacts = captureinteracts;
                         proj.elasticity = captureelasticity;
                         proj.weight = captureweight;
                         proj.relativity = capturerelativity;
@@ -873,6 +940,7 @@ namespace projs
                 proj.escaped = !proj.owner || proj.owner->state != CS_ALIVE;
                 proj.fadetime = rnd(250)+250;
                 proj.extinguish = 6;
+                proj.interacts = 3;
                 break;
             }
             default: break;
@@ -1744,6 +1812,7 @@ namespace projs
 
     bool move(projent &proj, int qtime)
     {
+        if(proj.interacts) checkitems(proj);
         float secs = float(qtime)/1000.f;
         if(proj.projtype == PRJ_AFFINITY && m_bomber(game::gamemode) && proj.target && !proj.lastbounce)
         {
@@ -1942,27 +2011,20 @@ namespace projs
         if(physics::physsteps <= 0)
         {
             physics::interppos(&proj);
-            entities::checkitems(&proj);
+            if(proj.interacts) checkitems(proj);
             return true;
         }
 
         bool alive = true;
         proj.o = proj.newpos;
         proj.o.z += proj.height;
-        loopi(physics::physsteps-1)
-            if(!(alive = moveframe(proj))) break;
-            else entities::checkitems(&proj);
+        loopi(physics::physsteps-1) if(!(alive = moveframe(proj))) break;
         proj.deltapos = proj.o;
         if(alive) alive = moveframe(proj);
-        if(alive) entities::checkitems(&proj);
         proj.newpos = proj.o;
         proj.deltapos.sub(proj.newpos);
         proj.newpos.z -= proj.height;
-        if(alive)
-        {
-            physics::interppos(&proj);
-            entities::checkitems(&proj);
-        }
+        if(alive) physics::interppos(&proj);
         return alive;
     }
 
