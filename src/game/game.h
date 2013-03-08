@@ -1601,6 +1601,12 @@ namespace game
     };
     extern avatarent avatarmodel, bodymodel;
 
+#ifdef VANITY
+    extern void vanityreset();
+    extern void vanitybuild(gameent *d);
+    extern const char *vanityfname(gameent *d, int n);
+#endif
+
     extern bool followswitch(int n, bool other = false);
     extern vector<cament *> cameras;
     extern int numwaiting();

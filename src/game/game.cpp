@@ -288,6 +288,40 @@ namespace game
         }
     }
     ICOMMAND(0, getvanity, "bb", (int *t, int *v), vanityinfo(*t, *v));
+
+    void vanitybuild(gameent *d)
+    {
+        vector<char *> vanitylist;
+        explodelist(d->vanity, vanitylist);
+        loopv(vanitylist) if(vanitylist[i] && *vanitylist[i])
+            loopvk(vanities) if(!strcmp(vanities[k].ref, vanitylist[i]))
+                d->vitems.add(k);
+        vanitylist.deletearrays();
+    }
+
+    const char *vanityfname(gameent *d, int n)
+    {
+        const char *file = NULL;
+        if(vanities.inrange(n)) switch(vanities[n].style)
+        {
+            case 1:
+            {
+                const char *id = hud::privname(d->privilege, d->aitype);
+                loopv(vanities[n].files) if(!strcmp(vanities[n].files[i].id, id)) file = vanities[n].files[i].name;
+                if(!file)
+                {
+                    vanityfile &f = vanities[n].files.add();
+                    defformatstring(fn)("%s/%s", vanities[n].model, id);
+                    f.id = newstring(id);
+                    f.name = newstring(fn);
+                    file = f.name;
+                }
+                break;
+            }
+            case 0: default: file = vanities[n].model; break;
+        }
+        return file;
+    }
 #endif
 
     bool allowspec(gameent *d, int level)
@@ -1513,8 +1547,20 @@ namespace game
         }
         vec pos = d->wantshitbox() ? d->head : d->headpos();
         pos.z -= d->zradius*0.125f;
-#if 0
-        projs::create(pos, pos, true, d, PRJ_VANITY, len, 0, 0, rnd(50)+10, -1, k, 0, 0);
+#ifdef VANITY
+        if(d->headless && headlessmodels && *d->vanity)
+        {
+            if(d->vitems.empty()) vanitybuild(d);
+            int found[VANITYMAX] = {0};
+            loopvk(d->vitems) if(vanities.inrange(d->vitems[k]))
+            {
+                if(found[vanities[d->vitems[k]].type]) continue;
+                if(!(vanities[d->vitems[k]].cond&2)) continue;
+                if(d->privilege < vanities[d->vitems[k]].priv) continue;
+                projs::create(pos, pos, true, d, PRJ_VANITY, rnd(gibfade)+gibfade, 0, 0, rnd(50)+10, -1, d->vitems[k], 0, 0);
+                found[vanities[d->vitems[k]].type]++;
+            }
+        }
 #endif
         if(aistyle[d->aitype].living && gibscale > 0)
         {
