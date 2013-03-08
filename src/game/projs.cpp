@@ -400,11 +400,7 @@ namespace projs
             projs[i]->stuck = projs[i]->lastbounce = max(lastmillis, 1);
             projs[i]->sticknrm = norm;
             projs[i]->stickpos = pos;
-            if(f)
-            {
-                projs[i]->stick = f;
-                projs[i]->vel = vec(f->vel).add(f->falling);
-            }
+            if(f) projs[i]->stick = f;
             else
             {
                 projs[i]->o = pos;

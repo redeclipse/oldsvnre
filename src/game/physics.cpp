@@ -167,6 +167,13 @@ namespace physics
         return false;
     }
 
+    bool dropaffinity(gameent *d)
+    {
+        if(m_capture(game::gamemode)) return capture::dropaffinity(d);
+        if(m_bomber(game::gamemode)) return bomber::dropaffinity(d);
+        return false;
+    }
+
     bool secondaryweap(gameent *d, bool zoom)
     {
         if(!isweap(d->weapselect)) return false;

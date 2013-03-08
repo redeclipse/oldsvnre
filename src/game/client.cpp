@@ -1911,7 +1911,7 @@ namespace client
                     break;
                 }
 
-                case N_STICKY:
+                case N_STICKY: // cn target id norm pos
                 {
                     int scn = getint(p), tcn = getint(p), id = getint(p);
                     vec norm(0, 0, 0), pos(0, 0, 0);

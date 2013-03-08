@@ -70,6 +70,8 @@ enum { HEALTH_SMALL = 0, HEALTH_REGULAR, HEALTH_LARGE, HEALTH_MAX };
 enum { ARMOUR_SMALL = 0, ARMOUR_REGULAR, ARMOUR_LARGE, ARMOUR_MAX };
 #endif
 
+enum { TELE_NOAFFIN = 0, TELE_MAX };
+
 struct enttypes
 {
     int type,           priority, links,    radius, usetype,    numattrs,   modesattr,
@@ -149,12 +151,12 @@ enttypes enttype[] = {
                 "weapon",       { "type",   "flags",    "modes",    "muts",     "id" }
     },
     {
-        TELEPORT,       1,          50,     12,     EU_AUTO,    8,          -1,
+        TELEPORT,       1,          50,     12,     EU_AUTO,    9,          -1,
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX)|(1<<TELEPORT),
             (1<<MAPSOUND)|(1<<PARTICLES)|(1<<LIGHTFX),
             (1<<ENT_PLAYER)|(1<<ENT_AI)|(1<<ENT_PROJ),
             false,  false,  false,      false,      false,
-                "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex" }
+                "teleport",     { "yaw",    "pitch",    "push",     "radius",   "colour",   "type",     "palette",  "palindex", "flags" }
     },
     {
         ACTOR,          1,          59,     0,      EU_NONE,    10,         3,
@@ -1492,6 +1494,7 @@ namespace physics
     extern int smoothmove, smoothdist, sprintstyle;
     extern bool isghost(gameent *d, gameent *e);
     extern bool carryaffinity(gameent *d);
+    extern bool dropaffinity(gameent *d);
     extern bool secondaryweap(gameent *d, bool zoom = false);
     extern bool allowjet(physent *d = NULL, bool fly = false);
     extern bool allowimpulse(physent *d, int level = 0);
