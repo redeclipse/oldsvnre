@@ -13,7 +13,7 @@ get_values ()
 {
     sed -n 's%\/\/\ \(sv_[a-z]*\)\ .*\ //\ .*%\1;%p' "$1" \
         | tr '\n' ' ' \
-        | xargs -0 -I '{}' timeout 2 "$DIR"/../../server.sh -g -x''{}'' 2>/dev/null \
+        | xargs -0 -I '{}' timeout 2 "$DIR"/../../redeclipse_server.sh -g -x''{}'' 2>/dev/null \
         | grep sv_ \
         | grep -v "sv_serverdesc" | grep -v "sv_servermotd"
 }

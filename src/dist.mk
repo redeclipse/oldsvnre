@@ -278,11 +278,11 @@ dist-clean: dist-mostlyclean
 
 cube2font-txt: ../doc/cube2font.txt
 
-../doc/examples/servexec.cfg: ../data/usage.cfg install-server
-	scripts/update-servexec-defaults $@
-	scripts/update-servexec-comments $< $@
+../doc/examples/servinit.cfg: ../data/config/usage.cfg install-server
+	scripts/update-servinit-defaults $@
+	scripts/update-servinit-comments $< $@
 
-update-servexec: ../doc/examples/servexec.cfg
+update-servinit: ../doc/examples/servinit.cfg
 
 ../doc/wiki-contributors.txt: ../readme.txt
 	scripts/generate-wiki-contributors $< $@
@@ -294,7 +294,7 @@ wiki-contributors: ../doc/wiki-contributors.txt
 
 wiki-guidelines: ../doc/wiki-guidelines.txt
 
-../doc/wiki-%.txt: ../data/usage.cfg scripts/wiki-common
+../doc/wiki-%.txt: ../data/config/usage.cfg scripts/wiki-common
 	scripts/generate-wiki-$* $< $@
 
 ../doc/wiki-all-vars-commands.txt: ../doc/wiki-game-vars.txt ../doc/wiki-engine-vars.txt ../doc/wiki-weapon-vars.txt ../doc/wiki-commands.txt ../doc/wiki-aliases.txt
@@ -313,4 +313,4 @@ wiki-aliases: ../doc/wiki-aliases.txt
 wiki-all-vars-commands: ../doc/wiki-all-vars-commands.txt
 
 wiki-check-all-result: ../doc/wiki-all-vars-commands.txt
-	scripts/check-wiki-all-result ../data/usage.cfg ../doc/wiki-all-vars-commands.txt
+	scripts/check-wiki-all-result ../data/config/usage.cfg ../doc/wiki-all-vars-commands.txt
