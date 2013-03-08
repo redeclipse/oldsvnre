@@ -1501,7 +1501,6 @@ namespace ai
                 if(d->speedscale != 0)
                 {
                     physics::move(d, 1, true);
-                    entities::checkitems(d);
                     if(aistyle[d->aitype].canmove && !b.idle) timeouts(d, b);
                 }
                 else
@@ -1511,6 +1510,8 @@ namespace ai
                 }
             }
         }
+        if(!game::intermission && (d->state == CS_ALIVE || d->state == CS_DEAD || d->state == CS_WAITING))
+            entities::checkitems(d);
     }
 
     void avoid()

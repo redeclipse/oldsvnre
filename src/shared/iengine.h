@@ -387,6 +387,7 @@ extern void setbbfrommodel(dynent *d, const char *mdl, float size = 1);
 extern bool validragdoll(dynent *d, int millis);
 extern void moveragdoll(dynent *d, bool smooth);
 extern void cleanragdoll(dynent *d);
+extern void warpragdoll(dynent *d, const vec &vel, const vec &offset = vec(0, 0, 0));
 
 // server
 #define MAXCLIENTS 256                  // in a multiplayer game, can be arbitrarily changed

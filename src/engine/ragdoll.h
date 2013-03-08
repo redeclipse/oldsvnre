@@ -236,6 +236,7 @@ struct ragdolldata
     void calcrotfriction();
     void applyrotfriction(float ts);
     void tryunstick(float speed);
+    void warppos(const vec &vel, const vec &offset);
 
     static inline bool collidevert(const vec &pos, const vec &dir, float radius)
     {
@@ -403,6 +404,19 @@ void ragdolldata::tryunstick(float speed)
     }
 }
 
+void ragdolldata::warppos(const vec &vel, const vec &offset)
+{
+    extern int ragdolltimestepmin;
+    float ts = ragdolltimestepmin/1000.0f;
+    vec frame = vec(vel).mul(ts);
+    loopv(skel->verts)
+    {
+        vert &v = verts[i];
+        v.oldpos = v.pos.add(offset);
+        v.oldpos.sub(frame);
+    }
+}
+
 extern vec wall;
 
 void ragdolldata::updatepos()
@@ -544,6 +558,12 @@ void moveragdoll(dynent *d, bool smooth)
 void cleanragdoll(dynent *d)
 {
     DELETEP(d->ragdoll);
+}
+
+void warpragdoll(dynent *d, const vec &vel, const vec &offset)
+{
+    if(!d->ragdoll) return;
+    d->ragdoll->warppos(vel, offset);
 }
 
 vec rdabove(dynent *d, float offset)

@@ -473,7 +473,7 @@ namespace bomber
 
     void checkaffinity(dynent *e)
     {
-        if(!gameent::is(e)) return;
+        if(e->state != CS_ALIVE || !gameent::is(e)) return;
         gameent *d = (gameent *)e;
         vec o = d->feetpos();
         loopv(st.flags)

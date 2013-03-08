@@ -360,14 +360,14 @@ namespace entities
         checkspawns(ent);
     }
 
-    static inline void collateents(octaentities &oe, const vec &pos, float xyrad, float zrad, vector<actitem> &actitems)
+    static inline void collateents(octaentities &oe, const vec &pos, float xyrad, float zrad, bool alive, vector<actitem> &actitems)
     {
         vector<extentity *> &ents = entities::getents();
         loopv(oe.other)
         {
             int n = oe.other[i];
             extentity &e = *ents[n];
-            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype!=EU_ITEM || e.spawned))
+            if(enttype[e.type].usetype != EU_NONE && (enttype[e.type].usetype != EU_ITEM || (alive && e.spawned)))
             {
                 float radius = enttype[e.type].radius;
                 switch(e.type)
@@ -386,20 +386,20 @@ namespace entities
         }
     }
 
-    static inline void collateents(cube *c, const ivec &o, int size, const ivec &bo, const ivec &br, const vec &pos, float xyrad, float zrad, vector<actitem> &actitems)
+    static inline void collateents(cube *c, const ivec &o, int size, const ivec &bo, const ivec &br, const vec &pos, float xyrad, float zrad, bool alive, vector<actitem> &actitems)
     {
         loopoctabox(o, size, bo, br)
         {
-            if(c[i].ext && c[i].ext->ents) collateents(*c[i].ext->ents, pos, xyrad, zrad, actitems);
+            if(c[i].ext && c[i].ext->ents) collateents(*c[i].ext->ents, pos, xyrad, zrad, alive, actitems);
             if(c[i].children && size > octaentsize)
             {
                 ivec co(i, o.x, o.y, o.z, size);
-                collateents(c[i].children, co, size>>1, bo, br, pos, xyrad, zrad, actitems);
+                collateents(c[i].children, co, size>>1, bo, br, pos, xyrad, zrad, alive, actitems);
             }
         }
     }
 
-    void collateents(const vec &pos, float xyrad, float zrad, vector<actitem> &actitems)
+    void collateents(const vec &pos, float xyrad, float zrad, bool alive, vector<actitem> &actitems)
     {
         ivec bo = vec(pos).sub(vec(xyrad, xyrad, zrad)).sub(1),
              br = vec(xyrad, xyrad, zrad).add(1).mul(2);
@@ -407,19 +407,19 @@ namespace entities
             scale = worldscale-1;
         if(diff&~((1<<scale)-1) || uint(bo.x|bo.y|bo.z|(bo.x+br.x)|(bo.y+br.y)|(bo.z+br.z)) >= uint(hdr.worldsize))
         {
-            collateents(worldroot, ivec(0, 0, 0), 1<<scale, bo, br, pos, xyrad, zrad, actitems);
+            collateents(worldroot, ivec(0, 0, 0), 1<<scale, bo, br, pos, xyrad, zrad, alive, actitems);
             return;
         }
         cube *c = &worldroot[octastep(bo.x, bo.y, bo.z, scale)];
-        if(c->ext && c->ext->ents) collateents(*c->ext->ents, pos, xyrad, zrad, actitems);
+        if(c->ext && c->ext->ents) collateents(*c->ext->ents, pos, xyrad, zrad, alive, actitems);
         scale--;
         while(c->children && !(diff&(1<<scale)))
         {
             c = &c->children[octastep(bo.x, bo.y, bo.z, scale)];
-            if(c->ext && c->ext->ents) collateents(*c->ext->ents, pos, xyrad, zrad, actitems);
+            if(c->ext && c->ext->ents) collateents(*c->ext->ents, pos, xyrad, zrad, alive, actitems);
             scale--;
         }
-        if(c->children && 1<<scale >= octaentsize) collateents(c->children, ivec(bo).mask(~((2<<scale)-1)), 1<<scale, bo, br, pos, xyrad, zrad, actitems);
+        if(c->children && 1<<scale >= octaentsize) collateents(c->children, ivec(bo).mask(~((2<<scale)-1)), 1<<scale, bo, br, pos, xyrad, zrad, alive, actitems);
     }
 
     static inline bool sortitems(const actitem &a, const actitem &b)
@@ -429,16 +429,10 @@ namespace entities
 
     bool collateitems(dynent *d, vector<actitem> &actitems)
     {
-        float eye = d->radius;
-        vec m = d->o;
-        if(gameent::is(d))
-        {
-            eye = d->height*0.5f;
-            m.z -= eye;
-        }
-
-        collateents(m, d->radius, eye, actitems);
-        loopv(projs::projs)
+        vec m = d->center();
+        float eye = gameent::is(d) ? d->height*0.5f : d->radius;
+        collateents(m, d->radius, eye, d->state == CS_ALIVE, actitems);
+        if(d->state == CS_ALIVE) loopv(projs::projs)
         {
             projent &proj = *projs::projs[i];
             if(proj.projtype != PRJ_ENT || !proj.ready()) continue;
@@ -545,6 +539,8 @@ namespace entities
             {
                 case TELEPORT:
                 {
+                    if(e.attrs[8]&(1<<TELE_NOAFFIN) && d->state == CS_ALIVE && gameent::is(d) && physics::carryaffinity((gameent *)d))
+                        break;
                     int millis = d->lastused(n, true);
                     if(millis && lastmillis-millis < triggertime(e)) break;
                     e.lastemit = lastmillis;
@@ -555,15 +551,13 @@ namespace entities
                             teleports.add(e.links[i]);
                     if(!teleports.empty())
                     {
-                        if(e.attrs[8]&(1<<TELE_NOAFFIN) && gameent::is(d) && physics::carryaffinity((gameent *)d))
-                            physics::dropaffinity((gameent *)d);
                         bool teleported = false;
                         while(!teleports.empty())
                         {
                             int r = e.type == TELEPORT ? rnd(teleports.length()) : 0, q = teleports[r];
                             gameentity &f = *(gameentity *)ents[q];
                             d->o = vec(f.o).add(f.attrs[5] != 3 ? vec(0, 0, d->height*0.5f) : vec(e.o).sub(d->o));
-                            if(physics::entinmap(d, true))
+                            if(d->state != CS_ALIVE || physics::entinmap(d, true))
                             {
                                 d->resetinterp();
                                 if(f.attrs[5] != 3)
@@ -573,7 +567,7 @@ namespace entities
                                     game::fixrange(yaw, pitch);
                                     vecfromyawpitch(yaw, pitch, 1, 0, d->vel);
                                     d->vel.mul(mag);
-                                    switch(f.attrs[5])
+                                    if(d->state == CS_ALIVE) switch(f.attrs[5])
                                     {
                                         case 2: break; // keep
                                         case 1:
@@ -595,20 +589,25 @@ namespace entities
                                 f.lastemit = lastmillis;
                                 d->setused(n, lastmillis);
                                 d->setused(q, lastmillis);
-                                if(gameent::is(d))
+                                if(d->state == CS_ALIVE)
                                 {
-                                    gameent *g = (gameent *)d;
-                                    if(g == game::focus) game::resetcamera(true);
-                                    execlink(g, n, true);
-                                    execlink(g, q, true);
-                                    g->resetair();
-                                    ai::inferwaypoints(g, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
+                                    if(gameent::is(d))
+                                    {
+                                        gameent *g = (gameent *)d;
+                                        if(g == game::focus) game::resetcamera(true);
+                                        execlink(g, n, true);
+                                        execlink(g, q, true);
+                                        g->resetair();
+                                        ai::inferwaypoints(g, e.o, f.o, float(e.attrs[3] ? e.attrs[3] : enttype[e.type].radius)+ai::CLOSEDIST);
+                                    }
+                                    else if(projent::is(d))
+                                    {
+                                        projent *g = (projent *)d;
+                                        g->lastbounce = lastmillis;
+                                        g->from = g->o;
+                                    }
                                 }
-                                else if(projent::is(d))
-                                {
-                                    projent *g = (projent *)d;
-                                    g->lastbounce = lastmillis;
-                                }
+                                else if(gameent::is(d)) warpragdoll(d, d->vel, vec(f.o).sub(e.o));
                                 teleported = true;
                                 break;
                             }
@@ -652,29 +651,34 @@ namespace entities
                         case 3: d->vel = rel; break;
                         default: break;
                     }
-                    if(gameent::is(d))
+                    if(d->state == CS_ALIVE)
                     {
-                        gameent *g = (gameent *)d;
-                        execlink(g, n, true);
-                        g->resetair();
+                        if(gameent::is(d))
+                        {
+                            gameent *g = (gameent *)d;
+                            execlink(g, n, true);
+                            g->resetair();
+                        }
+                        else if(projent::is(d))
+                        {
+                            projent *g = (projent *)d;
+                            g->lastbounce = lastmillis;
+                            g->from = g->o;
+                        }
                     }
-                    else if(projent::is(d))
-                    {
-                        projent *g = (projent *)d;
-                        g->lastbounce = lastmillis;
-                    }
+                    else if(gameent::is(d)) warpragdoll(d, d->vel);
                     break;
                 }
                 case TRIGGER:
                 {
-                    if(!gameent::is(d)) break;
+                    if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
                     if((e.attrs[2] == TA_ACTION && g->action[AC_USE] && g == game::player1) || e.attrs[2] == TA_AUTO) runtrigger(n, g);
                     break;
                 }
                 case CHECKPOINT:
                 {
-                    if(!gameent::is(d)) break;
+                    if(d->state != CS_ALIVE || !gameent::is(d)) break;
                     gameent *g = (gameent *)d;
                     if(!m_check(e.attrs[3], e.attrs[4], game::gamemode, game::mutators) || !m_checkpoint(game::gamemode)) break;
                     if(m_gauntlet(game::gamemode) && g->team != T_ALPHA) break;
