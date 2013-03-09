@@ -2732,9 +2732,6 @@ namespace game
         {
             o.sub(vec(yaw*RAD, 0.f).mul(firstpersonbodydist+firstpersonspineoffset));
             o.sub(vec(yaw*RAD, 0.f).rotate_around_z(90*RAD).mul(firstpersonbodyside));
-            //vec aim = vec(yaw*RAD, pitch*RAD).rotate_around_z(180*RAD).mul(d->height*0.5f).mul((0-d->pitch)/90.f);
-            //if(onfloor) aim.z = d->timeonfloor < 25 ? aim.z*(25-d->timeonfloor)/25.f : 0.f;
-            //o.sub(aim);
             float hoff = d->zradius-d->height;
             if(hoff > 0 && (!onfloor || d->timeonfloor < 25))
             {

@@ -61,7 +61,7 @@ namespace projs
     VAR(IDF_PERSIST, muzzleflash, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     VAR(IDF_PERSIST, muzzleflare, 0, 3, 3); // 0 = off, 1 = only other players, 2 = only thirdperson, 3 = all
     FVAR(IDF_PERSIST, muzzleblend, 0, 1, 1);
-    FVAR(IDF_PERSIST, muzzlefade, 0, 0.75f, 1);
+    FVAR(IDF_PERSIST, muzzlefade, 0, 0.5f, 1);
 
     #define muzzlechk(a,b) (a == 3 || (a == 2 && game::thirdpersonview(true)) || (a == 1 && b != game::focus))
     int calcdamage(gameent *actor, gameent *target, int weap, int &flags, float radial, float size, float dist, float scale)
@@ -1091,7 +1091,8 @@ namespace projs
         if(attackdelay >= 5)
         {
             int colour = WHCOL(d, weap, partcol, WS(flags));
-            float muz = d == game::focus ? muzzlefade : muzzleblend;
+            float muz = muzzleblend;
+            if(d == game::focus) muz *= muzzlefade;
             const struct weapfxs
             {
                 int smoke, parttype, sparktime, sparknum, sparkrad;
