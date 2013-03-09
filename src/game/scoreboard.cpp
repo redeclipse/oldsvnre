@@ -472,7 +472,10 @@ namespace hud
 
                     uilist(g, {
                         uicenterlist(g, uipad(g, namepad, uicenterlist(g, g.text("name", fgcolor))));
-                        loopscoregroup(uicenterlist(g, uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))))));
+                        loopscoregroup(uicenterlist(g, {
+                            if(o == game::player1) g.background(0x406040);
+                            uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))));
+                        }));
                     });
 
                     if(scorepoints)
@@ -600,17 +603,17 @@ namespace hud
                         g.pushlist();
                         pushed = true;
                     }
-                    uicenter(g, uipad(g, 0.5f, {
-                        g.space(0.5f);
-                        if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
-                            g.textf("%s [%d]", 0xFFFFFF, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o, NULL, "", true, false), o->clientnum);
-                        else g.textf("%s ", 0xFFFFFF, spectex, game::getcolour(o, game::playerdisplaytone), game::colorname(o));
+                    uicenter(g, uilistv(g, 2, uipad(g, 0.5f, {
+                        g.text("", 0xFFFFFF, spectex, game::getcolour(o, game::playerdisplaytone));
+                        uilistv(g, 2, uipad(g, 0.125f, {
+                            if(o == game::player1) g.background(0x406040);
+                            if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
+                                g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", true, false), o->clientnum);
+                            else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o));
+                        }));
                         if(scorehandles)
-                        {
-                            g.space(0.125f);
                             g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype));
-                        }
-                    }));
+                    })));
                     if(!((i+1)%count) && pushed)
                     {
                         g.poplist();
