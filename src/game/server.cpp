@@ -3195,19 +3195,22 @@ namespace server
                     pointvalue *= G(teamkillpenalty);
                     if(actor != target) isteamkill = true;
                 }
+                if(flags&HIT_HEAD) style |= FRAG_HEADSHOT;
             }
             else if(actor != target && actor->state.aitype < AI_START)
             {
 #ifdef CAMPAIGN
-                if(!m_campaign(gamemode) && !firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
-#else
-                if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
+                if(!m_campaign(gamemode))
 #endif
                 {
-                    firstblood = true;
-                    style |= FRAG_FIRSTBLOOD;
-                    pointvalue += G(firstbloodpoints);
+                    if(!firstblood && !m_duel(gamemode, mutators) && actor->state.aitype == AI_NONE && target->state.aitype < AI_START)
+                    {
+                        firstblood = true;
+                        style |= FRAG_FIRSTBLOOD;
+                        pointvalue += G(firstbloodpoints);
+                    }
                 }
+
                 if(flags&HIT_HEAD) // NOT HZONE
                 {
                     style |= FRAG_HEADSHOT;

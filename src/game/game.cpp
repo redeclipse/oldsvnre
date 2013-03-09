@@ -212,7 +212,9 @@ namespace game
     VAR(IDF_PERSIST, playerundertone, -1, CTONE_TMIX, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_MIXED, CTONE_MAX-1);
     VAR(IDF_PERSIST, playereffecttone, -1, CTONE_MIXED, CTONE_MAX-1);
-    FVAR(IDF_PERSIST, playertonemix, 0, 0.3f, 1);
+    VAR(IDF_PERSIST, playerlighttone, -1, CTONE_TEAM, CTONE_MAX-1);
+    FVAR(IDF_PERSIST, playertonelight, 0, 0.25f, 100);
+    FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
     VAR(IDF_PERSIST, forceplayermodel, -1, -1, PLAYERTYPES-1);
@@ -2886,7 +2888,7 @@ namespace game
                 e->light.material[2] = bvec(wepmat, wepmat, wepmat);
             }
             else e->light.material[2] = bvec(255, 255, 255);
-            e->light.effect = vec(0, 0, 0);
+            e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playertonelight);
             if(burntime && d->burning(lastmillis, burntime))
             {
                 flags |= MDL_LIGHTFX;
