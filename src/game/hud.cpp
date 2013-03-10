@@ -422,18 +422,19 @@ namespace hud
     TVAR(IDF_PERSIST|IDF_PRELOAD, logotex, "textures/logo", 3);
     TVAR(IDF_PERSIST|IDF_PRELOAD, badgetex, "textures/cube2badge", 3);
 
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree1tex, "textures/announcer/carnage", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree2tex, "textures/announcer/slaughter", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree3tex, "textures/announcer/massacre", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree4tex, "textures/announcer/bloodbath", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi1tex, "textures/announcer/double", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi2tex, "textures/announcer/triple", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi3tex, "textures/announcer/multi", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, headshottex, "textures/announcer/headshot", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, criticaltex, "textures/announcer/critical", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatetex, "textures/announcer/dominate", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, revengetex, "textures/announcer/revenge", 3);
-    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/announcer/firstblood", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree1tex, "textures/rewards/carnage", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree2tex, "textures/rewards/slaughter", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree3tex, "textures/rewards/massacre", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, spree4tex, "textures/rewards/bloodbath", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi1tex, "textures/rewards/double", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi2tex, "textures/rewards/triple", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, multi3tex, "textures/rewards/multi", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, headshottex, "textures/rewards/headshot", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, criticaltex, "textures/rewards/critical", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, dominatetex, "textures/rewards/dominate", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, revengetex, "textures/rewards/revenge", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, firstbloodtex, "textures/rewards/firstblood", 3);
+    TVAR(IDF_PERSIST|IDF_GAMEPRELOAD, breakertex, "textures/rewards/breaker", 3);
 
     TVAR(IDF_PERSIST, privnonetex, "<grey>textures/privs/none.png", 3);
     TVAR(IDF_PERSIST, privbottex, "<grey>textures/privs/bot.png", 3);
@@ -2301,6 +2302,7 @@ namespace hud
             case eventicon::DOMINATE: return dominatetex; break;
             case eventicon::REVENGE: return revengetex; break;
             case eventicon::FIRSTBLOOD: return firstbloodtex; break;
+            case eventicon::BREAKER: return breakertex; break;
             case eventicon::WEAPON: return itemtex(WEAPON, value);
             case eventicon::AFFINITY:
             {
