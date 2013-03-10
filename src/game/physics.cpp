@@ -405,14 +405,19 @@ namespace physics
                 int diff = impulsemeter-e->impulse[IM_METER];
                 if(cost > diff)
                 {
-                    scale *= float(diff)/float(cost);
-                    cost = diff;
+                    if(impulsecostrelax)
+                    {
+                        scale *= float(diff)/float(cost);
+                        cost = diff;
+                    }
+                    else return 0.f;
                 }
             }
             else cost = 0;
         }
-        float speed = (impulsespeed*amt*scale)+vec(d->vel).add(d->falling).magnitude(), limit = impulselimit*scale;
-        return limit > 0 && speed > limit ? limit : speed;
+        float speed = (impulsespeed*amt*scale)+vec(d->vel).add(d->falling).magnitude();
+        if(impulselimit > 0) return min(speed, impulselimit*scale);
+        return speed;
     }
 
     bool movepitch(physent *d)
