@@ -71,7 +71,7 @@ namespace weapons
                 doact = true;
             }
             else if(d != game::player1 && !d->ai) doact = true;
-            else if(load < 0 && d->ammo[weap] < ammo) return false; // because we've already gone ahead..
+            else if(load < 0) return false; // because we've already gone ahead..
             d->weapload[weap] = load;
             d->ammo[weap] = min(ammo, W(weap, max));
             d->reloads[weap] = max(reloads, 0);
@@ -196,7 +196,7 @@ namespace weapons
 
     bool doshot(gameent *d, vec &targ, int weap, bool pressed, bool secondary, int force)
     {
-        int offset = W2(weap, sub, secondary), sweap = m_weapon(game::gamemode, game::mutators);
+        int offset = 0, sweap = m_weapon(game::gamemode, game::mutators);
         if(!d->canshoot(weap, secondary ? HIT_ALT : 0, sweap, lastmillis))
         {
             if(!d->canshoot(weap, secondary ? HIT_ALT : 0, sweap, lastmillis, (1<<W_S_RELOAD)))
@@ -205,7 +205,8 @@ namespace weapons
                 if(autoreload(d, secondary ? HIT_ALT : 0)) weapreload(d, weap);
                 return false;
             }
-            else offset = -1;
+            else if(d->weapload[weap] <= 0 || weap != d->weapselect) return false;
+            else offset = d->weapload[weap];
         }
         float scale = 1;
         int sub = W2(weap, sub, secondary), cooked = force;
@@ -220,6 +221,12 @@ namespace weapons
                 {
                     if(pressed)
                     {
+                        if(offset > 0)
+                        {
+                            d->ammo[weap] = max(d->ammo[weap]-offset, 0);
+                            d->reloads[weap] = max(d->reloads[weap]-1, 0);
+                            d->weapload[weap] = -offset;
+                        }
                         client::addmsg(N_SPHY, "ri3", d->clientnum, SPHY_POWER, len);
                         d->setweapstate(weap, W_S_POWER, len, lastmillis);
                     }
@@ -232,23 +239,6 @@ namespace weapons
             if(sub > 1 && scale < 1) sub = int(ceilf(sub*scale));
         }
         else if(!pressed) return false;
-
-        if(offset < 0)
-        {
-            if(weap == d->weapselect)
-            {
-                offset = max(d->weapload[weap], 1)+sub;
-                d->weapload[weap] = -d->weapload[weap];
-            }
-            else
-            {
-                offset = max(d->weapload[d->weapselect], 1);
-                d->weapload[d->weapselect] = -d->weapload[d->weapselect];
-                d->ammo[d->weapselect] = max(d->ammo[d->weapselect]-offset, 0);
-                offset = sub;
-            }
-        }
-        else offset = sub;
 
         vec to, from;
         vector<shotmsg> shots;
@@ -315,7 +305,7 @@ namespace weapons
                 addshot(dest);
             }
         }
-        projs::shootv(weap, secondary ? HIT_ALT : 0, offset, scale, from, shots, d, true);
+        projs::shootv(weap, secondary ? HIT_ALT : 0, sub, offset, scale, from, shots, d, true);
         client::addmsg(N_SHOOT, "ri8iv", d->clientnum, lastmillis-game::maptime, weap, secondary ? HIT_ALT : 0, cooked, int(from.x*DMF), int(from.y*DMF), int(from.z*DMF), shots.length(), shots.length()*sizeof(shotmsg)/sizeof(int), shots.getbuf());
 
         return true;

@@ -508,6 +508,15 @@ struct gamestate
         return changed;
     }
 
+    int getammo(int weap, int millis = 0)
+    {
+        if(!isweap(weap)) return 0;
+        int a = ammo[weap];
+        if(millis && weapstate[weap] == W_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && weapload[weap] > 0)
+            a -= weapload[weap];
+        return a;
+    }
+
     bool hasweap(int weap, int sweap, int level = 0, int exclude = -1)
     {
         if(isweap(weap) && weap != exclude)
@@ -584,16 +593,9 @@ struct gamestate
 
     bool weapwaited(int weap, int millis, int skip = 0)
     {
+        if(weap != weapselect) skip &= ~(1<<W_S_RELOAD);
         if(!weapwait[weap] || weapstate[weap] == W_S_IDLE || weapstate[weap] == W_S_POWER || (skip && skip&(1<<weapstate[weap]))) return true;
         return millis-weaplast[weap] >= weapwait[weap];
-    }
-
-    int skipwait(int weap, int flags, int millis, int skip = 0)
-    {
-        int skipstate = skip;
-        if(W2(weap, sub, WS(flags)) && (skip&(1<<W_S_RELOAD)) && weapstate[weap] == W_S_RELOAD && millis-weaplast[weap] < weapwait[weap] && ammo[weap]-weapload[weap] < W2(weap, sub, WS(flags)))
-            skipstate &= ~(1<<W_S_RELOAD);
-        return skipstate;
     }
 
     bool candrop(int weap, int sweap, int millis, int skip = 0)
@@ -612,8 +614,8 @@ struct gamestate
 
     bool canshoot(int weap, int flags, int sweap, int millis, int skip = 0)
     {
-        if(weap == weapselect || (weap == W_MELEE && (WS(flags) || weapwaited(weapselect, millis, skipwait(weapselect, flags, millis, skip)))))
-            if((hasweap(weap, sweap) && ammo[weap] >= (W2(weap, power, WS(flags)) ? 1 : W2(weap, sub, WS(flags)))) && weapwaited(weap, millis, skipwait(weap, flags, millis, skip)))
+        if(weap == weapselect || weap == W_MELEE)
+            if(hasweap(weap, sweap) && getammo(weap, millis) >= (W2(weap, power, WS(flags)) ? 1 : W2(weap, sub, WS(flags))) && weapwaited(weap, millis, skip))
                 return true;
         return false;
     }
@@ -635,8 +637,6 @@ struct gamestate
 
     bool canuse(int type, int attr, attrvector &attrs, int sweap, int millis, int skip = 0)
     {
-        //if((type != TRIGGER || attrs[2] == TA_AUTO) && enttype[type].usetype == EU_AUTO) return true;
-        //if(weapwaited(weapselect, millis, skipwait(weapselect, 0, millis, skip)))
         switch(enttype[type].usetype)
         {
             case EU_AUTO: case EU_ACT: return true; break;
@@ -1519,7 +1519,7 @@ namespace projs
     extern void remove(gameent *owner);
     extern void destruct(gameent *d, int id);
     extern void sticky(gameent *d, int id, vec &norm, vec &pos, gameent *f = NULL);
-    extern void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local);
+    extern void shootv(int weap, int flags, int sub, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local);
     extern void drop(gameent *d, int weap, int ent, int ammo = -1, int reloads = -1, bool local = true, int index = 0, int targ = -1);
     extern void adddynlights();
     extern void render();

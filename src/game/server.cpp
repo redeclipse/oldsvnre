@@ -4575,7 +4575,28 @@ namespace server
                     if(idx == SPHY_POWER) getint(p);
                     clientinfo *cp = (clientinfo *)getinfo(lcn);
                     if(!hasclient(cp, ci)) break;
-                    if(idx == SPHY_EXTINGUISH)
+                    if(idx == SPHY_POWER)
+                    {
+                        gamestate &gs = cp->state;
+                        if(gs.weapstate[gs.weapselect] == W_S_RELOAD && !gs.weapwaited(gs.weapselect, gamemillis))
+                        {
+                            if(!gs.weapwaited(gs.weapselect, gamemillis, (1<<W_S_RELOAD)))
+                            {
+                                if(!gs.hasweap(gs.weapselect, m_weapon(gamemode, mutators))) gs.entid[gs.weapselect] = -1; // its gone..
+                                if(G(serverdebug)) srvmsgf(cp->clientnum, "sync error: power [%d] failed - current state disallows it", gs.weapselect);
+                                break;
+                            }
+                            else if(gs.weapload[gs.weapselect] > 0)
+                            {
+                                takeammo(cp, gs.weapselect, gs.weapload[gs.weapselect]);
+                                gs.reloads[gs.weapselect] = max(gs.reloads[gs.weapselect]-1, 0);
+                                gs.weapload[gs.weapselect] = -gs.weapload[gs.weapselect];
+                                sendf(-1, 1, "ri6", N_RELOAD, cp->clientnum, gs.weapselect, gs.weapload[gs.weapselect], gs.ammo[gs.weapselect], gs.reloads[gs.weapselect]);
+                            }
+                            else break;
+                        }
+                    }
+                    else if(idx == SPHY_EXTINGUISH)
                     {
                         if(cp->state.burning(gamemillis, G(burntime))) cp->state.lastres[WR_BURN] = cp->state.lastrestime[WR_BURN] = 0;
                         else break; // don't propogate

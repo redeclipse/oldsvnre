@@ -1898,7 +1898,7 @@ namespace client
                         scale = len/float(W2(weap, power, WS(flags)));
                         if(sub > 1) sub = int(ceilf(sub*scale));
                     }
-                    projs::shootv(weap, flags, sub, scale, from, shots, t, false);
+                    projs::shootv(weap, flags, sub, 0, scale, from, shots, t, false);
                     break;
                 }
 
