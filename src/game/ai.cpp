@@ -1290,7 +1290,7 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         int busy = process(d, b), sweap = m_weapon(game::gamemode, game::mutators);
-        bool haswaited = d->weapwaited(d->weapselect, lastmillis, d->skipwait(d->weapselect, 0, lastmillis, (1<<W_S_RELOAD)));
+        bool haswaited = d->weapwaited(d->weapselect, lastmillis, (1<<W_S_RELOAD));
         if(d->aitype == AI_BOT)
         {
             if(b.idle && busy <= 1 && d->carry(sweap, 1) > 1 && d->weapstate[d->weapselect] != W_S_WAIT)

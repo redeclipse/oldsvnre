@@ -1049,7 +1049,7 @@ namespace projs
         }
     }
 
-    void shootv(int weap, int flags, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
+    void shootv(int weap, int flags, int sub, int offset, float scale, vec &from, vector<shotmsg> &shots, gameent *d, bool local)
     {
         int delay = W2(weap, projdelay, WS(flags)), attackdelay = W2(weap, attackdelay, WS(flags)),
             power = W2(weap, power, WS(flags)), cooked = W2(weap, cooked, WS(flags)),
@@ -1130,14 +1130,19 @@ namespace projs
 
         loopv(shots)
             create(from, shots[i].pos.tovec().div(DMF), local, d, PRJ_SHOT, max(life, 1), W2(weap, time, WS(flags)), delay, speed, shots[i].id, weap, -1, flags, skew);
-        if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(offset, 1, W2(weap, sub, WS(flags))))
+        if(ejectfade && weaptype[weap].eject && *weaptype[weap].eprj) loopi(clamp(sub, 1, W2(weap, sub, WS(flags))))
             create(from, from, local, d, PRJ_EJECT, rnd(ejectfade)+ejectfade, 0, delay, rnd(weaptype[weap].espeed)+weaptype[weap].espeed, 0, weap, -1, flags);
 
         if(d->aitype >= AI_BOT && d->skill <= 100 && (!W2(weap, fullauto, WS(flags)) || attackdelay >= PHYSMILLIS))
             attackdelay += int(ceilf(attackdelay*(10.f/d->skill)));
         d->setweapstate(weap, WS(flags) ? W_S_SECONDARY : W_S_PRIMARY, attackdelay, lastmillis);
-        d->ammo[weap] = max(d->ammo[weap]-offset, 0);
-        d->weapshot[weap] = offset;
+        d->ammo[weap] = max(d->ammo[weap]-sub-offset, 0);
+        d->weapshot[weap] = sub;
+        if(offset > 0)
+        {
+            d->reloads[weap] = max(d->reloads[weap]-1, 0);
+            d->weapload[weap] = -offset;
+        }
         if(d->aitype < AI_START || aistyle[d->aitype].canmove)
         {
             vec kick;
