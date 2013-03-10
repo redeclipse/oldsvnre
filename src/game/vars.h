@@ -371,7 +371,8 @@ GFVAR(0, impulsevaultmin, FVAR_NONZERO, 0.25f, FVAR_MAX); // minimum percentage 
 GFVAR(0, impulsevaultmax, FVAR_NONZERO, 1.f, FVAR_MAX); // maximum percentage of height for vault
 
 GVAR(0, impulsemeter, 0, 20000, VAR_MAX); // impulse dash length; 0 = unlimited, anything else = timer
-GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse jump
+GVAR(0, impulsecost, 0, 4000, VAR_MAX); // cost of impulse move
+GVAR(0, impulsecostrelax, 0, 0, 1); // whether the cost of an impulse move is unimportant (scale velocity)
 GVAR(0, impulsecostscale, 0, 0, 1); // whether the cost scales depend on the amount the impulse scales
 GVAR(0, impulseskate, 0, 1000, VAR_MAX); // length of time a run along a wall can last
 GFVAR(0, impulsesprint, 0, 0, FVAR_MAX); // sprinting impulse meter depletion
