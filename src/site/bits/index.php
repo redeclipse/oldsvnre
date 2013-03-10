@@ -34,6 +34,13 @@
     $app['targets']['aur'] = array('name' => 'AUR', 'url' => 'http://aur.archlinux.org/packages.php?ID=47449', 'nav' => -1, 'redir' => 1);
     $app['targets']['chakra'] = array('name' => 'Chakra', 'url' => 'http://www.chakra-project.org/packages/index.php?act=search&subdir=&sortby=date&order=descending&searchpattern=redeclipse', 'nav' => -1, 'redir' => 1);
 
+    $app['targets']['guidelines'] = array('name' => 'Guidelines', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Multiplayer_Guidelines', 'nav' => -1, 'redir' => 1);
+    $app['targets']['faq'] = array('name' => 'FAQ', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=FAQ_for_Red_Eclipse', 'nav' => -1, 'redir' => 1);
+    $app['targets']['trademark'] = array('name' => 'Trademark', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=Trademark_Policy', 'nav' => -1, 'redir' => 1);
+    $app['targets']['install'] = array('name' => 'Install', 'url' => 'http://sourceforge.net/apps/mediawiki/redeclipse/index.php?title=How_to_install', 'nav' => -1, 'redir' => 1);
+    $app['targets']['license'] = array('name' => 'License', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser/doc/license.txt', 'nav' => -1, 'redir' => 1);
+    $app['targets']['readme'] = array('name' => 'Credits', 'url' => 'http://sourceforge.net/apps/trac/redeclipse/browser/readme.txt', 'nav' => -1, 'redir' => 1);
+
     function checkarg($arg = "", $def = "") {
         return isset($_GET[$arg]) && $_GET[$arg] != "" ? $_GET[$arg] : $def;
     }
