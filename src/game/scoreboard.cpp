@@ -297,30 +297,28 @@ namespace hud
                         if(game::player1->state == CS_DEAD || game::player1->state == CS_WAITING)
                         {
                             SEARCHBINDCACHE(attackkey)("action 0", 0);
-                            uicenterlist(g, {
-                                uifont(g, "little", {
-                                    int sdelay = m_delay(game::gamemode, game::mutators);
-                                    int delay = game::player1->respawnwait(lastmillis, sdelay);
-                                    if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                            int sdelay = m_delay(game::gamemode, game::mutators);
+                            int delay = game::player1->respawnwait(lastmillis, sdelay);
+                            if(delay || m_duke(game::gamemode, game::mutators) || (m_fight(game::gamemode) && maxalive > 0))
+                            {
+                                uicenterlist(g, uifont(g, "reduced", {
+                                    if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
+                                    else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
+                                    else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
                                     {
-                                        if(m_duke(game::gamemode, game::mutators)) g.textf("Queued for new round", 0xFFFFFF, NULL, 0);
-                                        else if(delay) g.textf("%s: Down for \fs\fy%s\fS", 0xFFFFFF, NULL, 0, game::player1->state == CS_WAITING ? "Please Wait" : "Fragged", timetostr(delay, -1));
-                                        else if(game::player1->state == CS_WAITING && m_fight(game::gamemode) && maxalive > 0 && maxalivequeue)
-                                        {
-                                            int n = game::numwaiting();
-                                            if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
-                                            else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
-                                        }
-                                        if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
-                                            uicenterlist(g, g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey));
+                                        int n = game::numwaiting();
+                                        if(n) g.textf("Waiting for \fs\fy%d\fS %s", 0xFFFFFF, NULL, 0, n, n != 1 ? "players" : "player");
+                                        else g.textf("You are \fs\fgnext\fS in the queue", 0xFFFFFF, NULL, 0);
                                     }
-                                    else
-                                    {
-                                        g.textf("Ready to respawn", 0xFFFFFF, NULL, 0);
-                                        if(game::player1->state != CS_WAITING) uicenterlist(g, g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey));
-                                    }
-                                });
-                            });
+                                }));
+                                if(game::player1->state != CS_WAITING && lastmillis-game::player1->lastdeath >= 500)
+                                    uicenterlist(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to enter respawn queue", 0xFFFFFF, NULL, 0, attackkey)));
+                            }
+                            else
+                            {
+                                uicenterlist(g, uifont(g, "reduced", g.textf("Ready to respawn", 0xFFFFFF, NULL, 0)));
+                                if(game::player1->state != CS_WAITING) uicenterlist(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to respawn now", 0xFFFFFF, NULL, 0, attackkey)));
+                            }
                             if(shownotices >= 2)
                             {
                                 uifont(g, "little", {
@@ -344,7 +342,7 @@ namespace hud
                         }
                         else if(game::player1->state == CS_ALIVE)
                         {
-                            uifont(g, "little", {
+                            uifont(g, "reduced", {
                                 uicenterlist(g, {
                                     // In two cases, the main mode-description is not applicable
                                     if(m_bomber(game::gamemode) && m_gsp2(game::gamemode, game::mutators)) // hold bomber
@@ -376,7 +374,7 @@ namespace hud
                         if(m_edit(game::gamemode) && (game::focus->state != CS_EDITING || shownotices >= 4))
                         {
                             SEARCHBINDCACHE(editkey)("edittoggle", 1);
-                            uicenterlist(g, uifont(g, "little", g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
+                            uicenterlist(g, uifont(g, "reduced", g.textf("Press \fs\fc%s\fS to %s editmode", 0xFFFFFF, NULL, 0, editkey, game::focus->state != CS_EDITING ? "enter" : "exit")));
                         }
                     }
 
