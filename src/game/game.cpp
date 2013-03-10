@@ -3212,7 +3212,7 @@ namespace game
             {
                 if(d->hasmelee(lastmillis, true, physics::sliding(d, true), d->physstate >= PHYS_SLOPE || d->onladder || physics::liquidcheck(d))) loopi(2)
                 {
-                    float amt = (lastmillis-d->weaplast[W_MELEE])/float(W(W_MELEE, time, true)), scale = (amt > 0.5f ? 1.f-amt : amt)*2;
+                    float amt = (lastmillis-d->weaplast[W_MELEE])/float(W(W_MELEE, time)), scale = (amt > 0.5f ? 1.f-amt : amt)*2;
                     part_create(PART_HINT, 1, d->toe[i], TEAM(d->team, colour), 2.f, scale*blend, 0, 0);
                 }
                 bool last = lastmillis-d->weaplast[d->weapselect] > 0,
