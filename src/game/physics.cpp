@@ -881,6 +881,7 @@ namespace physics
                 impulsemod(d->move || d->strafe, impulseregenmove);
                 impulsemod((!onfloor && PHYS(gravity) > 0) || sliding(d), impulseregeninair);
                 impulsemod(onfloor && iscrouching(d) && !sliding(d), impulseregencrouch);
+                impulsemod(sliding(d), impulseregenslide);
                 if(collect)
                 {
                     if(timeslice > 0)
