@@ -1137,7 +1137,7 @@ namespace client
             vec dir(game::player1->yaw, game::player1->pitch);
             game::player1->o.add(dir.mul(-32));
             game::player1->resetinterp();
-            game::resetcamera(true);
+            game::resetcamera();
         }
     }
     ICOMMAND(0, goto, "s", (char *s), gotoplayer(s));
