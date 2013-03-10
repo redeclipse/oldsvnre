@@ -1424,20 +1424,30 @@ namespace game
                 concatstring(d->obit, " ");
                 concatstring(d->obit, colorname(actor));
 
+                if(style&FRAG_BREAKER)
+                {
+                    concatstring(d->obit, " \fs\fzywspree-breaking\fS");
+                    actor->addicon(eventicon::BREAKER, lastmillis, eventiconfade);
+                    if(!override && allowanc) anc = S_V_BREAKER;
+                }
+
                 if(style&FRAG_MKILL1)
                 {
-                    concatstring(d->obit, " double-killing");
+                    if(style&FRAG_BREAKER) concatstring(d->obit, " and");
+                    concatstring(d->obit, " \fs\fzcwdouble-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 0);
                     if(!override && allowanc) anc = S_V_MULTI;
                 }
                 else if(style&FRAG_MKILL2)
                 {
-                    concatstring(d->obit, " triple-killing");
+                    if(style&FRAG_BREAKER) concatstring(d->obit, " and");
+                    concatstring(d->obit, " \fs\fzcwtriple-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 1);
                     if(!override && allowanc) anc = S_V_MULTI2;
                 }
                 else if(style&FRAG_MKILL3)
                 {
+                    if(style&FRAG_BREAKER) concatstring(d->obit, " and");
                     concatstring(d->obit, " \fs\fzcwmulti-killing\fS");
                     actor->addicon(eventicon::MULTIKILL, lastmillis, eventiconfade, 2);
                     if(!override && allowanc) anc = S_V_MULTI3;

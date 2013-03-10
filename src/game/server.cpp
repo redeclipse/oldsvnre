@@ -177,7 +177,7 @@ namespace server
         float yaw, pitch, roll;
         int state;
         projectilestate dropped, weapshots[W_MAX][2];
-        int score, spree, crits, rewards, shotdamage, damage;
+        int score, spree, crits, rewards[2], shotdamage, damage;
         int lasttimeplayed, timeplayed, aireinit, lastboost, lastresowner[WR_MAX];
         vector<int> fraglog, fragmillis, cpnodes, chatmillis;
         vector<dmghist> damagelog;
@@ -202,7 +202,7 @@ namespace server
             loopi(W_MAX) loopj(2) weapshots[i][j].reset();
             if(!change) score = timeplayed = 0;
             else gamestate::mapchange();
-            frags = spree = crits = rewards = deaths = shotdamage = damage = 0;
+            frags = spree = crits = rewards[0] = rewards[1] = deaths = shotdamage = damage = 0;
             fraglog.shrink(0);
             fragmillis.shrink(0);
             cpnodes.shrink(0);
@@ -219,7 +219,7 @@ namespace server
 
         void respawn(int millis = 0, int heal = 0, int armr = -1)
         {
-            lastboost = 0;
+            lastboost = rewards[1] = 0;
             resetresidualowner();
             gamestate::respawn(millis, heal, armr);
             o = vec(-1e10f, -1e10f, -1e10f);
@@ -243,7 +243,7 @@ namespace server
             frags = gs.frags;
             spree = gs.spree;
             crits = gs.crits;
-            rewards = gs.rewards;
+            rewards = gs.rewards[0];
             timeplayed = gs.timeplayed;
             deaths = gs.deaths;
             teamkills = gs.teamkills;
@@ -259,7 +259,7 @@ namespace server
             gs.frags = frags;
             gs.spree = spree;
             gs.crits = crits;
-            gs.rewards = rewards;
+            gs.rewards[0] = rewards;
             gs.timeplayed = timeplayed;
             gs.deaths = deaths;
             gs.teamkills = teamkills;
@@ -3210,7 +3210,6 @@ namespace server
                         pointvalue += G(firstbloodpoints);
                     }
                 }
-
                 if(flags&HIT_HEAD) // NOT HZONE
                 {
                     style |= FRAG_HEADSHOT;
@@ -3229,28 +3228,34 @@ namespace server
                             if(lastmillis-actor->state.fragmillis[i] > G(multikilldelay)) actor->state.fragmillis.remove(i--);
                             else logs++;
                         }
-                        if(!logs) actor->state.rewards &= ~FRAG_MULTI;
+                        if(!logs) actor->state.rewards[0] &= ~FRAG_MULTI;
                         actor->state.fragmillis.add(lastmillis); logs++;
                         if(logs >= 2)
                         {
                             int offset = clamp(logs-2, 0, 2), type = 1<<(FRAG_MKILL+offset); // double, triple, multi..
-                            if(!(actor->state.rewards&type))
+                            if(!(actor->state.rewards[0]&type))
                             {
                                 style |= type;
-                                actor->state.rewards |= type;
+                                actor->state.rewards[0] |= type;
                                 pointvalue *= (G(multikillpoints) ? offset+1 : 1)*G(multikillbonus);
                                 //loopv(actor->state.fragmillis) actor->state.fragmillis[i] = lastmillis;
                             }
                         }
                     }
+                    loopj(FRAG_SPREES) if(target->state.rewards[1]&(1<<(FRAG_SPREE+j)))
+                    {
+                        style |= FRAG_BREAKER;
+                        pointvalue += G(spreebreaker);
+                        break;
+                    }
                     if(actor->state.spree <= G(spreecount)*FRAG_SPREES && !(actor->state.spree%G(spreecount)))
                     {
                         int offset = clamp((actor->state.spree/G(spreecount)), 1, int(FRAG_SPREES))-1, type = 1<<(FRAG_SPREE+offset);
-                        if(!(actor->state.rewards&type))
+                        if(!(actor->state.rewards[0]&type))
                         {
                             style |= type;
-                            actor->state.rewards |= type;
-                            pointvalue *= (G(spreepoints) ? offset+1 : 1)*G(spreebonus);
+                            loopj(2) actor->state.rewards[j] |= type;
+                            pointvalue += G(spreepoints);
                         }
                     }
                     logs = 0;
@@ -3279,6 +3284,7 @@ namespace server
                 else if(actor->state.aitype < AI_START) givepoints(actor, pointvalue);
             }
             target->state.deaths++;
+            target->state.rewards[1] = 0;
             dropitems(target, aistyle[target->state.aitype].living ? DROP_DEATH : DROP_EXPIRE);
             static vector<int> dmglog;
             dmglog.setsize(0);
