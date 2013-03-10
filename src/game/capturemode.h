@@ -71,7 +71,7 @@ struct captureservmode : capturestate, servmode
             loopvk(flags)
             {
                 flag &f = flags[k];
-                if(f.team == ci->team && (f.owner < 0 || (!m_gsp1(gamemode, mutators) && f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
+                if(f.team == ci->team && (f.owner < 0 || (f.owner == ci->clientnum && i == k)) && !f.droptime && newpos.dist(f.spawnloc) <= enttype[AFFINITY].radius*2/3)
                 {
                     capturestate::returnaffinity(i, gamemillis);
                     givepoints(ci, G(capturepoints));
@@ -97,7 +97,7 @@ struct captureservmode : capturestate, servmode
         flag &f = flags[i];
         if(f.owner >= 0 || (f.team == ci->team && !m_gsp3(gamemode, mutators) && (m_gsp2(gamemode, mutators) || !f.droptime))) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(capturepickupdelay) < 0 || lastmillis-f.droptime <= G(capturepickupdelay))) return;
-        if(!m_gsp(gamemode, mutators) && f.team == ci->team)
+        if(m_gsp1(gamemode, mutators) && f.team == ci->team)
         {
             capturestate::returnaffinity(i, gamemillis);
             givepoints(ci, G(capturepoints));
