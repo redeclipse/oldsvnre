@@ -91,8 +91,8 @@ gametypes gametype[] = {
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP2),
             (1<<G_M_MULTI)|(1<<G_M_COOP)|(1<<G_M_INSTA)|(1<<G_M_CLASSIC)|(1<<G_M_MEDIEVAL)|(1<<G_M_KABOOM)|(1<<G_M_ONSLAUGHT)|(1<<G_M_JETPACK)|(1<<G_M_VAMPIRE)|(1<<G_M_EXPERT)|(1<<G_M_RESIZE)|(1<<G_M_GSP3)
         },
-        "capture-the-flag", { "return", "defend", "protect" },
-        "take the enemy flag and return it to the base", { "dropped flags must be carried back to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
+        "capture-the-flag", { "quick", "defend", "protect" },
+        "take the enemy flag and return it to the base", { "dropped flags instantly return to base", "dropped flags must be defended until they reset", "protect the flag and hold the enemy flag to score" },
     },
     {
         G_DEFEND, 0, 0,
