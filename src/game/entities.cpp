@@ -594,7 +594,7 @@ namespace entities
                                     if(gameent::is(d))
                                     {
                                         gameent *g = (gameent *)d;
-                                        if(g == game::focus) game::resetcamera(true);
+                                        if(g == game::focus) game::resetcamera();
                                         execlink(g, n, true);
                                         execlink(g, q, true);
                                         g->resetair();

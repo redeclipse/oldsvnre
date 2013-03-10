@@ -301,10 +301,10 @@ WPFVARK(0, hitpush, FVAR_MIN, FVAR_MAX,
     200.0f,     50.0f,      100.0f,     25.0f,      50.0f,      10.0f,      -100.0f,    0.0f,       250.0f,     0.0f,       500.0f
 );
 WPVARK(0, interacts, 0, 3,
-    0,          3,          0,          1,          1,          1,          1,          1,          3,          3,          1,
-    0,          3,          0,          3,          1,          1,          1,          1,          3,          3,          1,
-    0,          3,          0,          1,          1,          1,          1,          1,          3,          3,          1,
-    0,          3,          0,          1,          1,          1,          1,          1,          3,          3,          1
+    0,          1,          0,          1,          1,          1,          1,          1,          3,          3,          1,
+    0,          1,          0,          3,          1,          1,          1,          1,          3,          3,          1,
+    0,          1,          0,          1,          1,          1,          1,          1,          3,          3,          1,
+    0,          1,          0,          1,          1,          1,          1,          1,          3,          3,          1
 );
 WPFVARM(0, kickpush, FVAR_MIN, FVAR_MAX,
     0.0f,       6.0f,       0.0f,       50.0f,      5.0f,       1.0f,       25.0f,      30.0f,      5.0f,       5.0f,       150.0f,
@@ -336,7 +336,7 @@ WPVAR(0, modes, -G_ALL, G_ALL,
     -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW,      -G_SW
 );
 WPVAR(0, muts, -G_M_ALL, G_M_ALL,
-    0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          0,          -G_M_DK
+    0,          -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    -G_M_SW,    0,          -G_M_IN,    -G_M_DK
 );
 WPVARK(IDF_HEX, partcol, -3, 0xFFFFFF,
     0xEEEE22,   0x666611,   0x4040F0,   0xF0F020,   0xF05820,   -1,         0x40F0C8,   0xA020F0,   -1,         0x00F068,   -1,

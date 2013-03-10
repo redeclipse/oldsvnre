@@ -605,14 +605,15 @@ namespace hud
                     }
                     uicenter(g, uilistv(g, 2, uipad(g, 0.5f, {
                         g.text("", 0xFFFFFF, spectex, game::getcolour(o, game::playerdisplaytone));
-                        uilistv(g, 2, uipad(g, 0.125f, {
+                        uilistv(g, 2, {
                             if(o == game::player1) g.background(0x406040);
-                            if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
-                                g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", true, false), o->clientnum);
-                            else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o));
-                        }));
-                        if(scorehandles)
-                            g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype));
+                            uilistv(g, 2, uipad(g, 0.25f, {
+                                if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
+                                    g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", true, false), o->clientnum);
+                                else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o));
+                            }));
+                        });
+                        if(scorehandles) g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype));
                     })));
                     if(!((i+1)%count) && pushed)
                     {

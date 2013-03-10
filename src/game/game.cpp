@@ -638,7 +638,7 @@ namespace game
         d->setscale(rescale(d), 0, true, gamemode, mutators);
 
         if(d == player1) resetfollow();
-        if(d == focus) resetcamera(true);
+        if(d == focus) resetcamera();
 
         if(d->aitype < AI_START)
         {
@@ -1753,7 +1753,7 @@ namespace game
         entities::spawnplayer(player1, -1, false); // prevent the player from being in the middle of nowhere
         specreset();
         resetsway();
-        resetcamera(true);
+        resetcamera();
         if(!empty) client::sendgameinfo = client::sendcrcinfo = client::sendplayerinfo = true;
         copystring(clientmap, reqname ? reqname : (name ? name : ""));
     }
@@ -1977,7 +1977,7 @@ namespace game
     void project(int w, int h)
     {
         bool input = hud::hasinput(true), view = thirdpersonview(true, focus), mode = tvmode();
-        if(input != inputmouse || ((!input || !intermission) && (view != inputview || mode != inputmode || focus != lastfocus)))
+        if(input != inputmouse || (view != inputview || mode != inputmode || focus != lastfocus))
         {
             if(input != inputmouse) resetcursor();
             else resetcamera(focus != lastfocus);
@@ -2483,13 +2483,13 @@ namespace game
         }
     }
 
-    void resetcamera(bool full)
+    void resetcamera(bool cam, bool input)
     {
         lastcamera = 0;
         zoomset(false, 0);
-        resetcursor();
+        if(input && !hud::hasinput(true)) resetcursor();
         checkcamera();
-        if(full || !focus)
+        if(cam || !focus)
         {
             if(!focus) focus = player1;
             camera1->o = camerapos(focus);
@@ -2511,7 +2511,7 @@ namespace game
     void resetstate()
     {
         resetworld();
-        resetcamera(true);
+        resetcamera();
     }
 
     void updateworld()      // main game update loop
@@ -3112,7 +3112,7 @@ namespace game
         modelattach a[1+VANITYMAX+12];
         if(third && *d->vanity)
         {
-            int idx = third == 1 && d->state == CS_DEAD && d->headless && headlessmodels ? 3 : third;
+            int idx = third == 1 && (d->state == CS_DEAD || d->state == CS_WAITING) && d->headless && headlessmodels ? 3 : third;
             if(d->vitems.empty())
             {
                 vector<char *> vanitylist;
