@@ -383,6 +383,7 @@ GFVAR(0, impulseregensprint, 0, 0.75f, FVAR_MAX); // impulse regen sprinting mod
 GFVAR(0, impulseregenjet, 0, 1.5f, FVAR_MAX); // impulse regen jetpack modifier
 GFVAR(0, impulseregenmove, 0, 1, FVAR_MAX); // impulse regen moving modifier
 GFVAR(0, impulseregeninair, 0, 0.75f, FVAR_MAX); // impulse regen in-air modifier
+GFVAR(0, impulseregenslide, 0, 0, FVAR_MAX); // impulse regen sliding modifier
 GVAR(0, impulseregendelay, 0, 250, VAR_MAX); // delay before impulse regens
 GVAR(0, impulseregenjetdelay, -1, -1, VAR_MAX); // delay before impulse regens after jetting, -1 = must touch ground
 
