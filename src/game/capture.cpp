@@ -409,7 +409,7 @@ namespace capture
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.spawnloc, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
-        game::announcef(S_V_FLAGRETURN, CON_INFO, d, true, "\fa%s returned the \fs\f[%d]%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name), hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) || m_gsp3(game::gamemode, game::mutators) ? f.taketime : f.droptime)));
+        game::announcef(S_V_FLAGRETURN, CON_INFO, d, true, "\fa%s returned the \fs\f[%d]%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name), hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) ? f.droptime : f.taketime)));
         entities::execlink(NULL, f.ent, false);
         st.returnaffinity(i, lastmillis);
     }
