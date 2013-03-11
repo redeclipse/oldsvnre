@@ -432,6 +432,7 @@ namespace server
         virtual void dodamage(clientinfo *target, clientinfo *actor, int &damage, int &hurt, int &weap, int &flags, int &material, const ivec &hitpush = ivec(0, 0, 0)) { }
         virtual void regen(clientinfo *ci, int &total, int &amt, int &delay) {}
         virtual void checkclient(clientinfo *ci) {}
+        virtual void scoreaffinity(clientinfo *ci, bool win = true) {}
     };
 
     vector<srventity> sents;

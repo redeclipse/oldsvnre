@@ -288,7 +288,6 @@ GVAR(0, bomberholdpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, VAR_MAX);
 GVAR(0, bomberlockondelay, 0, 250, VAR_MAX);
-GVAR(0, bomberreset, 0, 0, 2); // 0 = off, 1 = kill winners, 2 = kill everyone
 GFVAR(0, bomberspeed, 0, 200, FVAR_MAX);
 GFVAR(0, bomberdelta, 0, 1000, FVAR_MAX);
 GVAR(0, bombercollide, 0, BOUNCE_GEOM, VAR_MAX);

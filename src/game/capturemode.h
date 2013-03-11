@@ -79,6 +79,7 @@ struct captureservmode : capturestate, servmode
                     {
                         int score = addscore(ci->team);
                         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, k, score);
+                        mutate(smuts, mut->scoreaffinity(ci));
                         if(!m_balance(gamemode) && G(capturelimit) && score >= G(capturelimit))
                         {
                             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
@@ -149,6 +150,7 @@ struct captureservmode : capturestate, servmode
                     givepoints(ci, G(capturepoints));
                     int score = addscore(ci->team);
                     sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, i, -1, score);
+                    mutate(smuts, mut->scoreaffinity(ci));
                     if(!m_balance(gamemode) && G(capturelimit) && score >= G(capturelimit))
                     {
                         ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
