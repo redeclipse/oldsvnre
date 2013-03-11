@@ -1585,6 +1585,7 @@ namespace game
             hud::teamkills.add(totalmillis);
             if(hud::numteamkills() >= hud::teamkillnum) hud::lastteam = totalmillis;
         }
+        if(m_bomber(gamemode)) bomber::killed(d, actor);
         ai::killed(d, actor);
     }
 
@@ -2876,6 +2877,8 @@ namespace game
         dynent *e = third ? (third != 2 ? (dynent *)d : (dynent *)&bodymodel) : (dynent *)&avatarmodel;
         if(e->light.millis != lastmillis)
         {
+            flags |= MDL_LIGHTFX;
+            e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playertonelight);
             e->light.material[0] = bvec(getcolour(d, playerovertone));
             e->light.material[1] = bvec(getcolour(d, playerundertone));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (W2(d->weapselect, sub, false) || W2(d->weapselect, sub, true)) && W(d->weapselect, max) > 1)
@@ -2898,39 +2901,37 @@ namespace game
                 e->light.material[2] = bvec(wepmat, wepmat, wepmat);
             }
             else e->light.material[2] = bvec(255, 255, 255);
-            e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playertonelight);
             if(burntime && d->burning(lastmillis, burntime))
             {
-                flags |= MDL_LIGHTFX;
                 vec col = rescolour(d, PULSE_BURN);
                 e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
                 e->light.effect.max(col);
             }
             if(shocktime && d->shocking(lastmillis, shocktime))
             {
-                flags |= MDL_LIGHTFX;
                 vec col = rescolour(d, PULSE_SHOCK);
                 e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
                 e->light.effect.max(col);
             }
-            if(d->state == CS_ALIVE)
+            if(d->state == CS_ALIVE && bleedtime && d->bleeding(lastmillis, bleedtime))
             {
-                if(d->lastbuff)
-                {
-                    flags |= MDL_LIGHTFX;
-                    int millis = lastmillis%1000;
-                    float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
-                    flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(255), uchar(255), uchar(255), amt);
-                    flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 1.f, 1.f, amt);
-                }
-                if(bleedtime && d->bleeding(lastmillis, bleedtime))
-                {
-                    flags |= MDL_LIGHTFX;
-                    int millis = lastmillis%1000;
-                    float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
-                    flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(255), uchar(52), uchar(52), amt);
-                    flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 0.2f, 0.2f, amt);
-                }
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? millis/500.f : 1.f-((millis-500)/500.f);
+                flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(255), uchar(52), uchar(52), amt);
+                flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 0.2f, 0.2f, amt);
+            }
+            if(d->state == CS_ALIVE && d->lastbuff)
+            {
+                int millis = lastmillis%1000;
+                float amt = millis <= 500 ? 1.f-(millis/500.f) : (millis-500)/500.f;
+                flashcolour(e->light.material[1].r, e->light.material[1].g, e->light.material[1].b, uchar(192), uchar(192), uchar(192), amt);
+                flashcolour(e->light.effect.r, e->light.effect.g, e->light.effect.b, 1.f, 1.f, 1.f, amt);
+            }
+            if(m_bomber(gamemode) && m_gsp1(gamemode, mutators) && bomber::carryaffinity(d))
+            {
+                vec col = rescolour(d, PULSE_DISCO);
+                e->light.material[1] = bvec::fromcolor(e->light.material[1].tocolor().max(col));
+                e->light.effect.max(col);
             }
         }
         rendermodel(NULL, mdl, anim, o, yaw, third == 2 && firstpersonbodypitch >= 0 ? pitch*firstpersonbodypitch : pitch, third == 2 ? 0.f : roll, flags, e, attachments, basetime, basetime2, trans, size);

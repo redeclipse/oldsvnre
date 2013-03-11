@@ -3,7 +3,10 @@
 #define isbombertarg(a,b)   (a.enabled && !isbomberaffinity(a) && a.team != T_NEUTRAL && a.team != b)
 
 #ifdef GAMESERVER
+#define carrytime (m_gsp1(gamemode, mutators) ? G(bomberholdtime) : G(bombercarrytime))
 #define bomberstate bomberservstate
+#else
+#define carrytime (m_gsp1(game::gamemode, game::mutators) ? G(bomberholdtime) : G(bombercarrytime))
 #endif
 struct bomberstate
 {
@@ -216,6 +219,7 @@ namespace bomber
     extern void setup();
     extern void setscore(int team, int total);
     extern void checkaffinity(dynent *e);
+    extern void killed(gameent *d, gameent *actor);
     extern void drawnotices(int w, int h, int &tx, int &ty, float blend);
     extern void drawblips(int w, int h, float blend);
     extern int drawinventory(int x, int y, int s, int m, float blend);

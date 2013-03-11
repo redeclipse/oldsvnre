@@ -284,6 +284,7 @@ GFVAR(0, bombercarryspeed, 0, 0.75f, FVAR_MAX);
 GVAR(0, bomberpoints, 0, 5, VAR_MAX); // points added to score
 GVAR(0, bomberpenalty, 0, 5, VAR_MAX); // points taken from score
 GVAR(0, bomberpickuppoints, 0, 3, VAR_MAX); // points added to score
+GVAR(0, bomberholdtime, 0, 15000, VAR_MAX);
 GVAR(0, bomberholdpoints, 0, 1, VAR_MAX); // points added to score
 GVAR(0, bomberholdpenalty, 0, 10, VAR_MAX); // penalty for holding too long
 GVAR(0, bomberholdinterval, 0, 1000, VAR_MAX);
