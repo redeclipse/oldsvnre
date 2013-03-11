@@ -1540,7 +1540,7 @@ namespace weapons
 
 namespace hud
 {
-    extern char *chattex, *insigniatex, *playertex, *deadtex, *waittex, *spectex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *flagtex, *bombtex, *arrowtex, *alerttex, *questiontex, *flagdroptex, *flagtakentex, *bombdroptex, *bombtakentex, *attacktex,
+    extern char *chattex, *insigniatex, *playertex, *deadtex, *waitingtex, *spectatortex, *editingtex, *dominatingtex, *dominatedtex, *inputtex, *bliptex, *flagtex, *bombtex, *arrowtex, *alerttex, *questiontex, *flagdroptex, *flagtakentex, *bombdroptex, *bombtakentex, *attacktex,
                 *inventorytex, *indicatortex, *crosshairtex, *hithairtex, *spree1tex, *spree2tex, *spree3tex, *spree4tex, *multi1tex, *multi2tex, *multi3tex, *headshottex, *criticaltex, *dominatetex, *revengetex, *firstbloodtex, *breakertex;
     extern int hudwidth, hudheight, hudsize, lastteam, lastnewgame, damageresidue, damageresiduefade, shownotices, radarstyle, radaraffinitynames, inventorygame, teamkillnum, inventoryscore, inventoryscorebg;
     extern float noticescale, inventoryblend, inventoryskew, radaraffinityblend, radarblipblend, radaraffinitysize, inventoryglow, inventoryscoresize, inventoryscoreshrink, inventoryscoreshrinkmax;
@@ -1566,7 +1566,6 @@ namespace hud
     extern const char *itemtex(int type, int stype);
     extern const char *privname(int priv = PRIV_NONE, int aitype = AI_NONE);
     extern const char *privtex(int priv = PRIV_NONE, int aitype = AI_NONE);
-    extern int privcolour(int priv = PRIV_NONE, int aitype = AI_NONE);
     extern bool canshowscores();
     extern void showscores(bool on, bool interm = false, bool onauto = true, bool ispress = false);
     extern score &teamscore(int team);
@@ -1614,8 +1613,8 @@ namespace game
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);
     extern void clientdisconnected(int cn, int reason = DISC_NONE);
     extern const char *colourname(gameent *d, char *name = NULL, bool icon = true, bool dupname = true);
+    extern int findcolour(gameent *d, bool tone = true, bool mix = false);
     extern int getcolour(gameent *d, int level = 0);
-    extern int findcolour(gameent *d, bool tone = false, bool mix = false);
     extern void errorsnd(gameent *d);
     extern void announce(int idx, gameent *d = NULL, bool forced = false);
     extern void announcef(int idx, int targ, gameent *d, bool forced, const char *msg, ...);

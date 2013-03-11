@@ -66,7 +66,7 @@ struct captureservmode : capturestate, servmode
         if(!hasflaginfo || ci->state.aitype >= AI_START) return;
         if(G(capturethreshold) > 0 && oldpos.dist(newpos) >= G(capturethreshold))
             dropaffinity(ci, oldpos, vec(ci->state.vel).add(ci->state.falling));
-        loopv(flags) if(flags[i].owner == ci->clientnum)
+        if(!m_gsp3(gamemode, mutators)) loopv(flags) if(flags[i].owner == ci->clientnum)
         {
             loopvk(flags)
             {

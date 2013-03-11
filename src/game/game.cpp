@@ -1853,7 +1853,7 @@ namespace game
             case CTONE_ALONE: return findcolour(d, d->team != T_NEUTRAL); break;
             case CTONE_TEAMED: return findcolour(d, d->team == T_NEUTRAL); break;
             case CTONE_TONE: return findcolour(d, true); break;
-            case CTONE_TEAM: default: return findcolour(d); break;
+            case CTONE_TEAM: default: return findcolour(d, false); break;
         }
     }
 
@@ -1863,7 +1863,7 @@ namespace game
         static string colored; colored[0] = 0;
         if(icon)
         {
-            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", getcolour(d, CTONE_TONE), hud::privname(d->privilege, d->aitype));
+            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", findcolour(d), hud::privname(d->privilege, d->aitype));
             concatstring(colored, cicon);
         }
         defformatstring(cname)("\fs\f[%d]%s", TEAM(d->team, colour), name);
