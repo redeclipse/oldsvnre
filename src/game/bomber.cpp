@@ -31,18 +31,19 @@ namespace bomber
     {
         vec dest;
         gameent *e = NULL;
-        if(bombertargetintersect)
-        {
-            findorientation(d->o, d->yaw, d->pitch, dest);
-            if((e = game::intersectclosest(d->o, dest, d)) != NULL) return e->clientnum;
-        }
         float bestangle = 1e16f, bestdist = 1e16f;
         int best = -1;
         int numdyns = game::numdynents();
         loopk(d->aitype != AI_NONE ? 4 : 2)
         {
+            if(bombertargetintersect)
+            {
+                findorientation(d->o, d->yaw, d->pitch, dest);
+                if((e = game::intersectclosest(d->o, dest, d)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->aitype != AI_BOT))
+                    return e->clientnum;
+            }
             float fx = k >= 2 ? 360 : (d->ai ? d->ai->views[0] : curfov), fy = k >= 2 ? 360 : (d->ai ? d->ai->views[1] : fovy);
-            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 ? d->aitype == AI_BOT : d->aitype == AI_NONE))
+            loopi(numdyns) if((e = (gameent *)game::iterdynents(i)) && e->team == d->team && e->state == CS_ALIVE && (k%2 || e->aitype != AI_BOT))
             {
                 if(getsight(d->o, d->yaw, d->pitch, e->o, dest, 1e16f, fx, fy))
                 {
