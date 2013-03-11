@@ -8,11 +8,15 @@ Gameplay:
  * New thirdperson style with camera postion to the side (adjust with
    /thirdpersondist and /thirdpersonside)
  * New default firstperson style with visible legs
+ * Disabled half-impulses when the impulse meter is close to empty (back to 1.1
+   behaviour, toggle with /impulsecostrelax)
+ * Added reward for ending killing sprees
 
 Weapons:
  * Weapons no longer reset gravity acceleration (reduces in-air pinning)
  * Plasma primary damage and explosion radius increased
- * Melee now only activates if player is airborne or dashing/sliding
+ * Melee now only activates if player is airborne or dashing/sliding, and only
+   in a short window of time
  * Mines, new weapon, primary proximity mine, secondary tripwire mine,
    pickup-based (like grenade)
  * Rifle explosion size and hitpush reduced (reduces hit area, total explosion
@@ -20,6 +24,8 @@ Weapons:
  * SMG secondary now sticks to objects and explodes radially after a short
    delay, primary spread reduced
  * Pistol secondary spread increased
+ * Sword range halved
+ * Projectiles now pass through teleporters
 
 Modes & Mutators:
  * Reduced number of bots in coop to 3/2 of humans
