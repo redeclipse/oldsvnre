@@ -58,6 +58,11 @@ struct bomberservmode : bomberstate, servmode
     {
         if(!hasflaginfo) return;
         dropaffinity(ci, ci->state.o, vec(ci->state.vel).add(ci->state.falling));
+        if(m_gsp1(gamemode, mutators) && ci->team != actor->team)
+        {
+            loopv(flags) if(isbomberaffinity(flags[i]) && flags[i].owner == actor->clientnum)
+                flags[i].taketime = gamemillis;
+        }
     }
 
     int addscore(int team, int points)
@@ -127,7 +132,7 @@ struct bomberservmode : bomberstate, servmode
         if(!isbomberaffinity(f) || f.owner >= 0 || !f.enabled) return;
         if(f.lastowner == ci->clientnum && f.droptime && (G(bomberpickupdelay) < 0 || lastmillis-f.droptime <= G(bomberpickupdelay))) return;
         bomberstate::takeaffinity(i, ci->clientnum, gamemillis);
-        if(!m_gsp1(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
+        if(!m_nopoints(gamemode, mutators) && (!f.droptime || f.lastowner != ci->clientnum)) givepoints(ci, G(bomberpickuppoints));
         sendf(-1, 1, "ri3", N_TAKEAFFIN, ci->clientnum, i);
     }
 
@@ -209,14 +214,13 @@ struct bomberservmode : bomberstate, servmode
                     int score = G(bomberholdpoints)*t;
                     if(score)
                     {
-                        int total = 0;
+                        int total = ci->state.points;
                         givepoints(ci, score);
                         if(m_team(gamemode, mutators))
                         {
                             total = addscore(ci->team, score);
                             sendf(-1, 1, "ri3", N_SCORE, ci->team, total);
                         }
-                        else total = ci->state.points;
                         if(!m_balance(gamemode) && G(bomberholdlimit) && total >= G(bomberholdlimit))
                         {
                             ancmsgft(-1, S_V_NOTIFY, CON_EVENT, "\fyscore limit has been reached");
@@ -224,7 +228,7 @@ struct bomberservmode : bomberstate, servmode
                         }
                     }
                 }
-                if(ci && G(bombercarrytime) && gamemillis-f.taketime >= G(bombercarrytime))
+                if(ci && carrytime && gamemillis-f.taketime >= carrytime)
                 {
                     ci->state.weapshots[W_GRENADE][0].add(1);
                     sendf(-1, 1, "ri8", N_DROP, ci->clientnum, -1, 1, W_GRENADE, -1, -1, -1);

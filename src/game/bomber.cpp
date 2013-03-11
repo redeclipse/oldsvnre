@@ -3,6 +3,15 @@ namespace bomber
 {
     bomberstate st;
 
+    void killed(gameent *d, gameent *actor)
+    {
+        if(m_gsp1(game::gamemode, game::mutators) && d->team != actor->team) loopv(st.flags)
+        {
+            if(isbomberaffinity(st.flags[i]) && st.flags[i].owner == actor)
+                st.flags[i].taketime = lastmillis;
+        }
+    }
+
     bool carryaffinity(gameent *d)
     {
         loopv(st.flags) if(st.flags[i].owner == d) return true;
@@ -134,12 +143,18 @@ namespace bomber
                     pushfont("emphasis");
                     ty += draw_textx("You have: \fs\f[%d]\f(%s)bomb\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, pulsecols[PULSE_DISCO][clamp((lastmillis/100)%PULSECOLOURS, 0, PULSECOLOURS-1)], hud::bombtex)*hud::noticescale;
                     popfont();
-                    if(bombercarrytime)
+                    if(carrytime)
                     {
-                        int delay = bombercarrytime-(lastmillis-f.taketime);
+                        int delay = carrytime-(lastmillis-f.taketime);
                         pushfont("default");
                         ty += draw_textx("Explodes in \fs\fzgy%s\fS", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED, -1, -1, hud::timetostr(delay, -1))*hud::noticescale;
                         popfont();
+                        if(m_gsp1(game::gamemode, game::mutators))
+                        {
+                            pushfont("reduced");
+                            ty += draw_textx("Kill enemies to reset the fuse timer", tx, ty, 255, 255, 255, int(255*blend), TEXT_CENTERED)*hud::noticescale;
+                            popfont();
+                        }
                     }
                     SEARCHBINDCACHE(altkey)("action 9", 0);
                     pushfont("reduced");
@@ -173,7 +188,7 @@ namespace bomber
                 else skew = 1;
             }
             else if(millis <= 1000) skew += ((1.f-skew)-(clamp(float(millis)/1000.f, 0.f, 1.f)*(1.f-skew)));
-            float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : (f.owner ? clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f) : 1.f);
+            float wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : (f.owner ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 1.f);
             int oldy = y-sy;
             if(!game::intermission && (f.owner || f.droptime))
                 sy += hud::drawitem(hud::bombtex, x, oldy, s, 0, true, false, colour.x, colour.y, colour.z, blend, skew, "super", "%d%%", int(wait*100.f));
@@ -186,7 +201,7 @@ namespace bomber
             else if(f.droptime) hud::drawitem(hud::bombdroptex, x, oldy, s, 0.5f, true, false, 0.25f, 1.f, 1.f, blend, skew);
             if(!game::intermission)
             {
-                if(f.droptime || (f.owner && bombercarrytime))
+                if(f.droptime || (f.owner && carrytime))
                 {
                     if(wait > 0.5f)
                     {
@@ -281,7 +296,7 @@ namespace bomber
                     if(!f.owner && !f.droptime) above.z += enttype[AFFINITY].radius/4*trans;
                     entitylight *light = &entities::ents[f.ent]->light;
                     float size = trans, yaw = !f.owner && f.proj ? f.proj->yaw : (lastmillis/4)%360, pitch = !f.owner && f.proj ? f.proj->pitch : 0, roll = !f.owner && f.proj ? f.proj->roll : 0,
-                          wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : ((f.owner && bombercarrytime) ? clamp((lastmillis-f.taketime)/float(bombercarrytime), 0.f, 1.f) : 0.f);
+                          wait = f.droptime ? clamp((lastmillis-f.droptime)/float(bomberresetdelay), 0.f, 1.f) : ((f.owner && carrytime) ? clamp((lastmillis-f.taketime)/float(carrytime), 0.f, 1.f) : 0.f);
                     int interval = lastmillis%1000;
                     vec effect = pulsecolour();
                     if(wait > 0.5f)
@@ -510,11 +525,11 @@ namespace bomber
             if(f.owner)
             {
                 int takemillis = lastmillis-f.taketime;
-                if(bombercarrytime && d->ai && f.owner == d && takemillis >= bombercarrytime-550-bomberlockondelay)
+                if(carrytime && d->ai && f.owner == d && takemillis >= carrytime-550-bomberlockondelay)
                 {
                     if(d->action[AC_AFFINITY])
                     {
-                        if(takemillis >= bombercarrytime-500 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
+                        if(takemillis >= carrytime-500 || lastmillis-d->actiontime[AC_AFFINITY] >= bomberlockondelay)
                             d->action[AC_AFFINITY] = false;
                     }
                     else
