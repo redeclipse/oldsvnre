@@ -84,16 +84,8 @@ struct bomberservmode : bomberstate, servmode
         }
         bomberstate::returnaffinity(relay, gamemillis, false);
         sendf(-1, 1, "ri5", N_SCOREAFFIN, ci->clientnum, relay, goal, score);
-        if(G(bomberreset))
-        {
-            loopvj(clients) if(clients[j]->state.state != CS_SPECTATOR && clients[j]->state.aitype < AI_START)
-            {
-                if((G(bomberreset) >= 2 || clients[j]->team == ci->team) && clients[j]->state.state == CS_ALIVE)
-                    waiting(clients[j], DROP_EXPIRE);
-            }
-            bombertime = -1;
-        }
-        else bombertime = gamemillis+G(bomberdelay);
+        mutate(smuts, mut->scoreaffinity(ci, g.team != ci->team));
+        bombertime = m_duke(gamemode, mutators) ? -1 : gamemillis+G(bomberdelay);
         loopvj(flags) if(flags[j].enabled)
         {
             bomberstate::returnaffinity(j, gamemillis, false);
