@@ -195,15 +195,15 @@ namespace ai
         bool resetthisguy = false;
 
         string m;
-        if(o) copystring(m, game::colorname(o));
+        if(o) copystring(m, game::colourname(o));
         else formatstring(m)("\fs\faunknown [\fs\fr%d\fS]\fS", on);
 
         if(!d->name[0])
         {
             if(showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
             {
-                if(showaiinfo > 1) conoutft(CON_EVENT, "\fg%s assigned to %s at skill %d", game::colorname(d, name), m, sk);
-                else conoutft(CON_EVENT, "\fg%s joined the game", game::colorname(d, name));//, m, sk);
+                if(showaiinfo > 1) conoutft(CON_EVENT, "\fg%s assigned to %s at skill %d", game::colourname(d, name), m, sk);
+                else conoutft(CON_EVENT, "\fg%s joined the game", game::colourname(d, name));//, m, sk);
             }
             game::specreset(d);
             resetthisguy = true;
@@ -213,11 +213,11 @@ namespace ai
             if(d->ownernum != on)
             {
                 if(showaiinfo && client::showpresence >= (client::waiting(false) ? 2 : 1))
-                    conoutft(CON_EVENT, "\fg%s reassigned to %s", game::colorname(d, name), m);
+                    conoutft(CON_EVENT, "\fg%s reassigned to %s", game::colourname(d, name), m);
                 resetthisguy = true;
             }
             if(d->skill != sk && showaiinfo > 1 && client::showpresence >= (client::waiting(false) ? 2 : 1))
-                conoutft(CON_EVENT, "\fg%s changed skill to %d", game::colorname(d, name), sk);
+                conoutft(CON_EVENT, "\fg%s changed skill to %d", game::colourname(d, name), sk);
         }
 
         if((d->aitype = at) >= AI_START) d->type = ENT_AI;
@@ -1441,7 +1441,7 @@ namespace ai
                         break;
                 }
                 if(aidebug >= 6 && dbgfocus(d))
-                    conoutf("%s blocked %dms sequence %d", game::colorname(d), d->ai->blocktime, d->ai->blockseq);
+                    conoutf("%s blocked %dms sequence %d", game::colourname(d), d->ai->blocktime, d->ai->blockseq);
             }
         }
         else d->ai->blocktime = d->ai->blockseq = 0;
@@ -1466,7 +1466,7 @@ namespace ai
                         break;
                 }
                 if(aidebug >= 6 && dbgfocus(d))
-                    conoutf("%s targeted %d too long %dms sequence %d", game::colorname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
+                    conoutf("%s targeted %d too long %dms sequence %d", game::colourname(d), d->ai->targnode, d->ai->targtime, d->ai->targseq);
             }
         }
         else
@@ -1698,7 +1698,7 @@ namespace ai
                     gameent *e = game::getclient(d->ai->enemy);
                     if(e)
                     {
-                        part_textcopy(pos, game::colorname(e, NULL, "<default>"));
+                        part_textcopy(pos, game::colourname(e));
                         pos.z += 2;
                     }
                 }

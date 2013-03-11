@@ -21,9 +21,8 @@ void newfont(char *name, char *tex, int *defaultw, int *defaulth)
     f->texs.add(textureload(tex));
     f->chars.shrink(0);
     f->charoffset = '!';
-    f->defaultw = *defaultw;
-    f->defaulth = *defaulth;
-    f->scale = f->defaulth;
+    f->maxw = f->defaultw = *defaultw;
+    f->maxh = f->defaulth = f->scale = *defaulth;
 
     fontdef = f;
     fontdeftex = 0;
@@ -64,6 +63,8 @@ void fontchar(int *x, int *y, int *w, int *h, int *offsetx, int *offsety, int *a
     c.h = *h ? *h : fontdef->defaulth;
     c.offsetx = *offsetx;
     c.offsety = *offsety;
+    if(c.offsetx+c.w > fontdef->maxw) fontdef->maxw = c.offsetx+c.w;
+    if(c.offsety+c.h > fontdef->maxh) fontdef->maxh = c.offsety+c.h;
     c.advance = *advance ? *advance : c.offsetx + c.w;
     c.tex = fontdeftex;
 }
@@ -108,6 +109,8 @@ void fontalias(const char *dst, const char *src)
     d->defaultw = s->defaultw;
     d->defaulth = s->defaulth;
     d->scale = s->scale;
+    d->maxw = s->maxw;
+    d->maxh = s->maxh;
 
     fontdef = d;
     fontdeftex = d->texs.length()-1;
@@ -244,7 +247,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec &color, int 
     glColor4ub(color.x, color.y, color.z, f);
 }
 
-#define FONTX ((FONTH*9)/8)
+#define FONTX int(curfont->maxh*textscale)
 static const char *gettexvar(const char *var)
 {
     ident *id = getident(var);
@@ -282,8 +285,8 @@ static float icon_width(const char *name, float scale)
 {
     if(*name == '$') name = gettexvar(++name);
     Texture *t = textureload(name, 3);
-    if(t) return (t->w*scale*FONTX)/t->h;
-    return 0;
+    if(!t) return 0;
+    return (t->w*scale*FONTX)/t->h;
 }
 
 #define TEXTCOLORIZE(g,h) \
@@ -358,7 +361,7 @@ static float icon_width(const char *name, float scale)
                     if(c=='\f') { if(str[i+2]) i++; continue; }\
                     if(i-j > 16) break;\
                     if(!curfont->chars.inrange(c-curfont->charoffset)) break;\
-                    float cw = scale*curfont->chars[c-curfont->charoffset].advance;\
+                    cw = scale*curfont->chars[c-curfont->charoffset].advance;\
                     if(cw <= 0 || w + cw > maxwidth) break; \
                     w += cw;\
                 }\
@@ -388,7 +391,7 @@ int text_visible(const char *str, float hitx, float hity, int maxwidth, int flag
     #define TEXTLINE(idx) if(y+FONTH > hity) return idx;
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += icon_width(ret, scale);
+    #define TEXTICON(ret) x += icon_width(ret, scale)+2;
     #define TEXTCHAR(idx) x += cw; TEXTWHITE(idx)
     #define TEXTWORD TEXTWORDSKELETON
     TEXTSKELETON
@@ -411,7 +414,7 @@ void text_posf(const char *str, int cursor, float &cx, float &cy, int maxwidth, 
     #define TEXTLINE(idx)
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += icon_width(ret, scale);
+    #define TEXTICON(ret) x += icon_width(ret, scale)+2;
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON if(i >= cursor) break;
     cx = cy = 0;
@@ -434,7 +437,7 @@ void text_boundsf(const char *str, float &width, float &height, int maxwidth, in
     #define TEXTLINE(idx) if(x > width) width = x;
     #define TEXTCOLOR(idx)
     #define TEXTHEXCOLOR(ret)
-    #define TEXTICON(ret) x += icon_width(ret, scale);
+    #define TEXTICON(ret) x += icon_width(ret, scale)+2;
     #define TEXTCHAR(idx) x += cw;
     #define TEXTWORD TEXTWORDSKELETON
     width = 0;
@@ -470,7 +473,7 @@ int draw_text(const char *str, int rleft, int rtop, int r, int g, int b, int a, 
     #define TEXTLINE(idx) ly += FONTH;
     #define TEXTCOLOR(idx) if(usecolor) text_color(str[idx], colorstack, sizeof(colorstack), colorpos, color, r, g, b, fade);
     #define TEXTHEXCOLOR(ret) if(usecolor) { xtraverts += varray::end(); color = ret; glColor4ub(color.x, color.y, color.z, fade); }
-    #define TEXTICON(ret) { x += draw_icon(tex, ret, left+x, top+y, scale); }
+    #define TEXTICON(ret) { x += draw_icon(tex, ret, left+x, top+y, scale)+2; }
     #define TEXTCHAR(idx) { draw_char(tex, c, left+x, top+y, scale); x += cw; }
     #define TEXTWORD TEXTWORDSKELETON
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

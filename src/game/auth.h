@@ -91,7 +91,7 @@ namespace auth
             privilege = ci->privilege = flags;
             if(authed)
             {
-                formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colorname(ci), ci->authname);
+                formatstring(msg)("\fy%s identified as \fs\fc%s\fS", colourname(ci), ci->authname);
                 if(ci->privilege > PRIV_PLAYER)
                 {
                     defformatstring(msgx)(" (\fs\fc%s\fS)", privname(privilege));
@@ -99,7 +99,7 @@ namespace auth
                 }
                 copystring(ci->handle, ci->authname);
             }
-            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colorname(ci), privname(privilege, true));
+            else formatstring(msg)("\fy%s elevated to \fs\fc%s\fS", colourname(ci), privname(privilege, true));
             if(local) concatstring(msg, " [\fs\falocal\fS]");
         }
         else
@@ -110,7 +110,7 @@ namespace auth
             int others = 0;
             loopv(clients) if(clients[i]->privilege >= PRIV_MODERATOR || clients[i]->local) others++;
             if(!others) mastermode = MM_OPEN;
-            if(privilege >= PRIV_ELEVATED) formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colorname(ci), privname(privilege, true));
+            if(privilege >= PRIV_ELEVATED) formatstring(msg)("\fy%s is no longer \fs\fc%s\fS", colourname(ci), privname(privilege, true));
         }
         if(*msg) srvoutforce(ci, -2, "%s", msg);
         privupdate = true;
