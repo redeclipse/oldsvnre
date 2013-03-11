@@ -564,10 +564,12 @@ namespace capture
         loopvj(st.flags)
         {
             capturestate::flag &f = st.flags[j];
+            bool home = f.team == ai::owner(d);
+            if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators) && home) continue;
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
             bool regen = d->aitype != AI_BOT || f.team == T_NEUTRAL || m_gsp3(game::gamemode, game::mutators) || !m_regen(game::gamemode, game::mutators) || d->health >= m_health(game::gamemode, game::mutators, d->model);
-            ai::checkothers(targets, d, f.team == ai::owner(d) || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
+            ai::checkothers(targets, d, home || d->aitype != AI_BOT ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
             if(d->aitype == AI_BOT)
             {
                 gameent *e = NULL;
@@ -579,7 +581,7 @@ namespace capture
                         targets.add(e->clientnum);
                 }
             }
-            if(f.team == ai::owner(d))
+            if(home)
             {
                 bool guard = false;
                 if(f.owner || f.droptime || targets.empty()) guard = true;
@@ -642,8 +644,11 @@ namespace capture
 
     bool aidefense(gameent *d, ai::aistate &b)
     {
-        if(!m_gsp3(game::gamemode, game::mutators) && d->aitype == AI_BOT)
-            loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
+        if(d->aitype == AI_BOT)
+        {
+            if(!m_gsp3(game::gamemode, game::mutators)) loopv(st.flags) if(st.flags[i].owner == d) return aihomerun(d, b);
+            if(d->aitype == AI_BOT && m_duke(game::gamemode, game::mutators)) return false;
+        }
         if(st.flags.inrange(b.target))
         {
             capturestate::flag &f = st.flags[b.target];

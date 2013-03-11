@@ -552,7 +552,7 @@ namespace ai
             {
                 int sweap = m_weapon(game::gamemode, game::mutators);
                 if(!hasweap(d, d->ai->weappref) || d->carry(sweap) == 0) items(d, b, interests, d->carry(sweap) == 0);
-                if(m_team(game::gamemode, game::mutators))
+                if(m_team(game::gamemode, game::mutators) && !m_duke(game::gamemode, game::mutators))
 #ifdef CAMPAIGN
                     assist(d, b, interests, false, m_campaign(game::gamemode) || m_gauntlet(game::gamemode));
 #else
@@ -600,7 +600,7 @@ namespace ai
                 int members = 0;
                 static vector<int> targets; targets.setsize(0);
                 int others = checkothers(targets, d, n.state, n.targtype, n.target, n.team, &members);
-                if(n.state == AI_S_DEFEND && members == 1) continue;
+                if(d->aitype == AI_BOT && n.state == AI_S_DEFEND && members == 1) continue;
                 if(others >= int(ceilf(members*n.tolerance))) continue;
             }
             if(!aistyle[d->aitype].canmove || makeroute(d, b, n.node))
