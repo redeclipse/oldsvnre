@@ -1039,7 +1039,6 @@ namespace server
     const char *mutsdesc(int mode, int muts, int type)
     {
         if(!m_game(mode)) mode = G_DEATHMATCH;
-        if(gametype[mode].implied) muts |= gametype[mode].implied;
         static string mtname; mtname[0] = 0;
         loopi(G_M_NUM) if(muts&(1<<mutstype[i].type))
         {
