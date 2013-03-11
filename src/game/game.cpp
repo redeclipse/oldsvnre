@@ -58,9 +58,9 @@ namespace game
     VAR(IDF_PERSIST, thirdpersonfov, 90, 120, 150);
     FVAR(IDF_PERSIST, thirdpersonblend, 0, 1, 1);
     VAR(IDF_PERSIST, thirdpersoninterp, 0, 100, VAR_MAX);
-    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 12, 100);
+    FVAR(IDF_PERSIST, thirdpersondist, FVAR_NONZERO, 14, 100);
     FVAR(IDF_PERSIST, thirdpersonside, FVAR_MIN, 14, 10);
-    VAR(IDF_PERSIST, thirdpersoncursor, 0, 1, 2);
+    VAR(IDF_PERSIST, thirdpersoncursor, 0, 2, 2);
     FVAR(IDF_PERSIST, thirdpersoncursorx, 0, 0.5f, 1);
     FVAR(IDF_PERSIST, thirdpersoncursory, 0, 0.5f, 1);
 
@@ -209,11 +209,11 @@ namespace game
     VAR(IDF_PERSIST, ragdolleffect, 2, 500, VAR_MAX);
 
     VAR(IDF_PERSIST, playerovertone, -1, CTONE_TEAM, CTONE_MAX-1);
-    VAR(IDF_PERSIST, playerundertone, -1, CTONE_TMIX, CTONE_MAX-1);
-    VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_MIXED, CTONE_MAX-1);
-    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_MIXED, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerundertone, -1, CTONE_TONE, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playerdisplaytone, -1, CTONE_TONE, CTONE_MAX-1);
+    VAR(IDF_PERSIST, playereffecttone, -1, CTONE_TEAM, CTONE_MAX-1);
     VAR(IDF_PERSIST, playerlighttone, -1, CTONE_TEAM, CTONE_MAX-1);
-    FVAR(IDF_PERSIST, playertonelight, 0, 0.25f, 100);
+    FVAR(IDF_PERSIST, playerlightmix, 0, 0.75f, 100);
     FVAR(IDF_PERSIST, playertonemix, 0, 0.25f, 1);
     FVAR(IDF_PERSIST, playerblend, 0, 1, 1);
 #ifndef MEK
@@ -2878,7 +2878,7 @@ namespace game
         if(e->light.millis != lastmillis)
         {
             flags |= MDL_LIGHTFX;
-            e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playertonelight);
+            e->light.effect = vec::hexcolor(getcolour(d, playerlighttone)).mul(playerlightmix);
             e->light.material[0] = bvec(getcolour(d, playerovertone));
             e->light.material[1] = bvec(getcolour(d, playerundertone));
             if(renderpath != R_FIXEDFUNCTION && isweap(d->weapselect) && (W2(d->weapselect, sub, false) || W2(d->weapselect, sub, true)) && W(d->weapselect, max) > 1)
