@@ -415,6 +415,7 @@ void ragdolldata::warppos(const vec &vel, const vec &offset)
         v.oldpos = v.pos.add(offset);
         v.oldpos.sub(frame);
     }
+    collidemillis = 0;
 }
 
 extern vec wall;
