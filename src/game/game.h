@@ -1613,7 +1613,7 @@ namespace game
     extern gameent *getclient(int cn);
     extern gameent *intersectclosest(vec &from, vec &to, gameent *at);
     extern void clientdisconnected(int cn, int reason = DISC_NONE);
-    extern char *colorname(gameent *d, char *name = NULL, const char *prefix = "", bool team = true, bool dupname = true);
+    extern const char *colourname(gameent *d, char *name = NULL, bool icon = true, bool dupname = true);
     extern int getcolour(gameent *d, int level = 0);
     extern int findcolour(gameent *d, bool tone = false, bool mix = false);
     extern void errorsnd(gameent *d);

@@ -368,7 +368,7 @@ namespace capture
     {
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
-        game::announcef(S_V_FLAGDROP, CON_INFO, d, true, "\fa%s dropped the the \fs\f[%d]%s\fS flag", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name));
+        game::announcef(S_V_FLAGDROP, CON_INFO, d, true, "\fa%s dropped the the \fs\f[%d]%s\fS flag", game::colourname(d), TEAM(f.team, colour), TEAM(f.team, name));
         st.dropaffinity(i, droploc, inertia, lastmillis);
     }
 
@@ -409,7 +409,7 @@ namespace capture
         if(!st.flags.inrange(i)) return;
         capturestate::flag &f = st.flags[i];
         affinityeffect(i, d->team, d->feetpos(), f.spawnloc, m_gsp(game::gamemode, game::mutators) ? 2 : 3, "RETURNED");
-        game::announcef(S_V_FLAGRETURN, CON_INFO, d, true, "\fa%s returned the \fs\f[%d]%s\fS flag (time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name), hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) ? f.droptime : f.taketime)));
+        game::announcef(S_V_FLAGRETURN, CON_INFO, d, true, "\fa%s returned the \fs\f[%d]%s\fS flag (time taken: \fs\fc%s\fS)", game::colourname(d), TEAM(f.team, colour), TEAM(f.team, name), hud::timetostr(lastmillis-(m_gsp1(game::gamemode, game::mutators) ? f.droptime : f.taketime)));
         entities::execlink(NULL, f.ent, false);
         st.returnaffinity(i, lastmillis);
     }
@@ -440,7 +440,7 @@ namespace capture
         else affinityeffect(goal, d->team, f.pos(true), f.spawnloc, 3, "CAPTURED");
         entities::execlink(NULL, f.ent, false);
         hud::teamscore(d->team).total = score;
-        game::announcef(S_V_FLAGSCORE, CON_INFO, d, true, "\fa%s captured the \fs\f[%d]%s\fS flag for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colorname(d), TEAM(f.team, colour), TEAM(f.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.taketime));
+        game::announcef(S_V_FLAGSCORE, CON_INFO, d, true, "\fa%s captured the \fs\f[%d]%s\fS flag for team \fs\f[%d]%s\fS (score: \fs\fc%d\fS, time taken: \fs\fc%s\fS)", game::colourname(d), TEAM(f.team, colour), TEAM(f.team, name), TEAM(d->team, colour), TEAM(d->team, name), score, hud::timetostr(lastmillis-f.taketime));
         st.returnaffinity(relay, lastmillis);
     }
 
@@ -452,7 +452,7 @@ namespace capture
         d->actiontime[AC_AFFINITY] = 0;
         playsound(S_CATCH, d->o, d);
         affinityeffect(i, d->team, d->feetpos(), f.pos(true), 1, f.team == d->team ? "SECURED" : "TAKEN");
-        game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, CON_INFO, d, true, "\fa%s %s the \fs\f[%d]%s\fS flag", game::colorname(d), f.team == d->team ? "secured" : (f.droptime ? "picked up" : "stole"), TEAM(f.team, colour), TEAM(f.team, name));
+        game::announcef(f.team == d->team ? S_V_FLAGSECURED : S_V_FLAGPICKUP, CON_INFO, d, true, "\fa%s %s the \fs\f[%d]%s\fS flag", game::colourname(d), f.team == d->team ? "secured" : (f.droptime ? "picked up" : "stole"), TEAM(f.team, colour), TEAM(f.team, name));
         entities::execlink(NULL, f.ent, false);
         st.takeaffinity(i, d, lastmillis);
     }

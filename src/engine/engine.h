@@ -190,7 +190,7 @@ struct font
     char *name;
     vector<Texture *> texs;
     vector<charinfo> chars;
-    int charoffset, defaultw, defaulth, scale;
+    int charoffset, defaultw, defaulth, maxw, maxh, scale;
 
     font() : name(NULL) {}
     ~font() { DELETEA(name); }

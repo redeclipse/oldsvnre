@@ -1250,9 +1250,9 @@ namespace hud
         }
 
         if(game::player1->state == CS_SPECTATOR)
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colorname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, showname() ? game::colourname(game::focus) : (game::tvmode() ? "SpecTV" : "Spectating"));
         else if(game::player1->state == CS_WAITING && showname())
-            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colorname(game::focus));
+            ty += draw_textx("[ %s ]", tx, ty, tr, tg, tb, tf, TEXT_CENTERED, -1, tw, game::colourname(game::focus));
 
         if(game::intermission)
             ty += draw_textx("Intermission", tx, ty, 255, 255, 255, tf, TEXT_CENTERED, -1, tw);
@@ -1898,12 +1898,12 @@ namespace hud
                 {
                     if(killer && d->state == CS_ALIVE)
                     {
-                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s (%d)", game::colorname(d, NULL, "", false), d->health);
+                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s (%d)", game::colourname(d), d->health);
                         continue;
                     }
                     if(force || self || chkcond(radarplayernames, !game::tvmode()))
                     {
-                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", d != game::player1 ? game::colorname(d, NULL, "", false) : "you");
+                        drawblip(tex, 1, w, h, size*(i ? radarplayersize : radarplayerhintsize), fade*(i ? radarplayerblend : radarplayerhintblend), style, d->o, colour[i], "tiny", "%s", d != game::player1 ? game::colourname(d) : "you");
                         continue;
                     }
                 }
@@ -2003,7 +2003,7 @@ namespace hud
                 if(radardamage >= 5)
                 {
                     gameent *a = game::getclient(d.attacker);
-                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour, "tiny", "%s +%d", a ? game::colorname(a) : "?", d.damage);
+                    drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour, "tiny", "%s +%d", a ? game::colourname(a) : "?", d.damage);
                 }
                 else drawblip(hurttex, 2+size/3, w, h, size, fade, 0, d.dir, d.colour);
             }
@@ -2231,7 +2231,7 @@ namespace hud
 
     const char *privname(int priv, int aitype)
     {
-        if(aitype > AI_NONE) return "bot";
+        if(aitype != AI_NONE) return "bot";
         const char *privnames[PRIV_MAX] = { "none", "player", "supporter", "moderator", "operator", "administrator", "developer", "creator" };
         return privnames[clamp(priv, 0, PRIV_MAX-1)];
     }

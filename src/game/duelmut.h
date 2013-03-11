@@ -174,8 +174,8 @@ struct duelservmode : servmode
                     string fight;
                     if(m_duel(gamemode, mutators))
                     {
-                        defformatstring(namea)("%s", colorname(playing[0]));
-                        defformatstring(nameb)("%s", colorname(playing[1]));
+                        defformatstring(namea)("%s", colourname(playing[0]));
+                        defformatstring(nameb)("%s", colourname(playing[1]));
                         formatstring(fight)("\fyduel between %s and %s, round \fs\fr#%d\fS", namea, nameb, duelround);
                     }
                     else if(m_survivor(gamemode, mutators))
@@ -270,12 +270,12 @@ struct duelservmode : servmode
                                 {
                                     duelwinner = alive[0]->clientnum;
                                     duelwins = 1;
-                                    formatstring(end)("\fy%s was the winner%s", colorname(alive[0]), hp);
+                                    formatstring(end)("\fy%s was the winner%s", colourname(alive[0]), hp);
                                 }
                                 else
                                 {
                                     duelwins++;
-                                    formatstring(end)("\fy%s was the winner%s (\fs\fc%d\fS in a row)", colorname(alive[0]), hp, duelwins);
+                                    formatstring(end)("\fy%s was the winner%s (\fs\fc%d\fS in a row)", colourname(alive[0]), hp, duelwins);
                                 }
                                 loopv(clients) if(playing.find(clients[i]) >= 0)
                                 {

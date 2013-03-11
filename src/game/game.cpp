@@ -1261,7 +1261,7 @@ namespace game
             dth = d->aitype >= AI_START || d->obliterated ? S_SPLOSH : S_DEATH, curmat = material&MATF_VOLUME;
         if(d != player1) d->resetinterp();
         if(!isme) { loopv(log) if(log[i] == player1) { isme = true; break; } }
-        formatstring(d->obit)("%s ", colorname(d));
+        formatstring(d->obit)("%s ", colourname(d));
         if(d != actor && actor->lastattacker == d->clientnum) actor->lastattacker = -1;
         d->lastattacker = actor->clientnum;
         if(d == actor)
@@ -1387,12 +1387,12 @@ namespace game
             if(!m_fight(gamemode) || actor->aitype >= AI_START)
             {
                 concatstring(d->obit, actor->aitype >= AI_START ? " a " : " ");
-                concatstring(d->obit, colorname(actor));
+                concatstring(d->obit, colourname(actor));
             }
             else if(m_team(gamemode, mutators) && d->team == actor->team)
             {
                 concatstring(d->obit, " \fs\fzPwteam-mate\fS ");
-                concatstring(d->obit, colorname(actor));
+                concatstring(d->obit, colourname(actor));
                 if(actor == focus) { anc = S_ALARM; override = true; }
             }
             else if(obitstyles)
@@ -1422,7 +1422,7 @@ namespace game
                     }
                 }
                 concatstring(d->obit, " ");
-                concatstring(d->obit, colorname(actor));
+                concatstring(d->obit, colourname(actor));
 
                 if(style&FRAG_BREAKER)
                 {
@@ -1456,7 +1456,7 @@ namespace game
             else
             {
                 concatstring(d->obit, " ");
-                concatstring(d->obit, colorname(actor));
+                concatstring(d->obit, colourname(actor));
             }
             if(obitstyles)
             {
@@ -1524,7 +1524,7 @@ namespace game
                     concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " and " : (i ? ", " : " "));
                 else concatstring(d->obit, log.length() > 1 && i == log.length()-1 ? " + " : (i ? " + " : " "));
                 if(log[i]->aitype >= AI_START) concatstring(d->obit, "a ");
-                concatstring(d->obit, colorname(log[i]));
+                concatstring(d->obit, colourname(log[i]));
             }
         }
         if(d != actor)
@@ -1644,7 +1644,7 @@ namespace game
         gameent *d = players[cn];
         if(!d) return;
         if(d->name[0] && client::showpresence >= (client::waiting(false) ? 2 : 1) && (d->aitype == AI_NONE || ai::showaiinfo))
-            conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colorname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
+            conoutft(CON_EVENT, "\fo%s (%s) left the game (%s)", colourname(d), d->hostname, reason >= 0 ? disc_reasons[reason] : "normal");
         gameent *e = NULL;
         int numdyns = numdynents();
         loopi(numdyns) if((e = (gameent *)iterdynents(i)))
@@ -1819,20 +1819,6 @@ namespace game
         return false;
     }
 
-    char *colorname(gameent *d, char *name, const char *prefix, bool team, bool dupname)
-    {
-        if(!name) name = d->name;
-        static string cname;
-        formatstring(cname)("%s\fs\f[%d]%s", *prefix ? prefix : "", TEAM(d->team, colour), name);
-        if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
-        {
-            defformatstring(s)(" [%d]", d->clientnum);
-            concatstring(cname, s);
-        }
-        concatstring(cname, "\fS");
-        return cname;
-    }
-
     int findcolour(gameent *d, bool tone, bool mix)
     {
         if(tone)
@@ -1869,6 +1855,26 @@ namespace game
             case CTONE_TONE: return findcolour(d, true); break;
             case CTONE_TEAM: default: return findcolour(d); break;
         }
+    }
+
+    const char *colourname(gameent *d, char *name, bool icon, bool dupname)
+    {
+        if(!name) name = d->name;
+        static string colored; colored[0] = 0;
+        if(icon)
+        {
+            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", getcolour(d, CTONE_TONE), hud::privname(d->privilege, d->aitype));
+            concatstring(colored, cicon);
+        }
+        defformatstring(cname)("\fs\f[%d]%s", TEAM(d->team, colour), name);
+        concatstring(colored, cname);
+        if(!name[0] || d->aitype == AI_BOT || (d->aitype < AI_START && dupname && duplicatename(d, name)))
+        {
+            defformatstring(s)("%s[%d]", name[0] ? " " : "", d->clientnum);
+            concatstring(colored, s);
+        }
+        concatstring(colored, "\fS");
+        return colored;
     }
 
     void suicide(gameent *d, int flags)
@@ -2943,13 +2949,9 @@ namespace game
         float blend = aboveheadblend*trans;
         if(aboveheadnames && d != player1)
         {
-            const char *name = colorname(d, NULL, d->aitype == AI_NONE ? "<super>" : "<emphasis>");
-            if(name && *name)
-            {
-                pos.z += aboveheadnamesize/2;
-                part_textcopy(pos, name, PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
-                pos.z += aboveheadnamesize/2+0.5f;
-            }
+            pos.z += aboveheadnamesize/2;
+            part_textcopy(pos, colourname(d), PART_TEXT, 1, 0xFFFFFF, aboveheadnamesize, blend);
+            pos.z += aboveheadnamesize/2+0.5f;
         }
         if(aboveheadstatus)
         {

@@ -885,8 +885,9 @@ namespace server
         }
     }
 
-    const char *privname(int type, bool prefix = false)
+    const char *privname(int type, bool prefix = false, int aitype = AI_NONE)
     {
+        if(aitype != AI_NONE) return prefix ? "a bot" : "bot";
         switch(type)
         {
             case PRIV_CREATOR: return prefix ? "a creator" : "creator";
@@ -897,7 +898,7 @@ namespace server
             case PRIV_SUPPORTER: return prefix ? "a supporter" : "supporter";
             case PRIV_PLAYER: return prefix ? "a player" : "player";
             case PRIV_MAX: return prefix ? "connected locally" : "local";
-            default: return prefix ? "by yourself" : "alone";
+            default: return prefix ? "playing alone" : "alone";
         }
     }
 
@@ -921,18 +922,35 @@ namespace server
         return false;
     }
 
-    const char *colorname(clientinfo *ci, char *name = NULL, bool team = true, bool dupname = true)
+    int findcolour(clientinfo *ci, bool tone = true)
+    {
+        if(tone)
+        {
+            int col = ci->state.aitype < AI_START ? ci->state.colour : 0;
+            if(!col && isweap(ci->state.weapselect)) col = W(ci->state.weapselect, colour);
+            if(col) return col;
+        }
+        return TEAM(ci->team, colour);
+    }
+
+    const char *colourname(clientinfo *ci, char *name = NULL, bool icon = true, bool dupname = true)
     {
         if(!name) name = ci->name;
-        static string cname;
-        formatstring(cname)("\fs\f[%d]%s", TEAM(ci->team, colour), name);
+        static string colored; colored[0] = 0;
+        if(icon)
+        {
+            defformatstring(cicon)("\fs\f[%d]\f($priv%stex)\fS", findcolour(ci), privname(ci->privilege, false, ci->state.aitype));
+            concatstring(colored, cicon);
+        }
+        defformatstring(cname)("\fs\f[%d]%s", TEAM(ci->team, colour), name);
+        concatstring(colored, cname);
         if(!name[0] || ci->state.aitype == AI_BOT || (ci->state.aitype < AI_START && dupname && duplicatename(ci, name)))
         {
-            defformatstring(s)(" [%d]", ci->clientnum);
-            concatstring(cname, s);
+            defformatstring(s)("%s[%d]", name[0] ? " " : "", ci->clientnum);
+            concatstring(colored, s);
         }
-        concatstring(cname, "\fS");
-        return cname;
+        concatstring(colored, "\fS");
+        return colored;
     }
 
     bool haspriv(clientinfo *ci, int flag, const char *msg = NULL)
@@ -947,7 +965,7 @@ namespace server
     bool cmppriv(clientinfo *ci, clientinfo *cp, const char *msg = NULL)
     {
         mkstring(str);
-        if(msg && *msg) formatstring(str)("%s %s", msg, colorname(cp));
+        if(msg && *msg) formatstring(str)("%s %s", msg, colourname(cp));
         if(haspriv(ci, cp->local ? PRIV_MAX : cp->privilege, str)) return true;
         return false;
     }
@@ -2094,13 +2112,13 @@ namespace server
         if(hasveto)
         {
             endmatch();
-            srvoutf(-3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+            srvoutf(-3, "%s forced: \fs\fy%s\fS on map \fs\fo%s\fS", colourname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
             sendf(-1, 1, "risi3", N_MAPCHANGE, ci->mapvote, 0, ci->modevote, ci->mutsvote);
             changemap(ci->mapvote, ci->modevote, ci->mutsvote);
             return;
         }
         sendf(-1, 1, "ri2si2", N_MAPVOTE, ci->clientnum, ci->mapvote, ci->modevote, ci->mutsvote);
-        relayf(3, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS", colorname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
+        relayf(3, "%s suggests: \fs\fy%s\fS on map \fs\fo%s\fS", colourname(ci), gamename(ci->modevote, ci->mutsvote), ci->mapvote);
         checkvotes();
     }
 
@@ -2485,7 +2503,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(ci->state.aitype > AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
-            srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
+            srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colourname(ci), smapname);
             if(req < 0) ci->warned = true;
         }
         if(crcs.empty() || crcs.length() < 2) return;
@@ -2496,7 +2514,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.aitype > AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colorname(ci), smapname);
+                srvmsgf(req, "\fy\fs%s\fS has modified map \"%s\"", colourname(ci), smapname);
                 if(req < 0) ci->warned = true;
             }
         }
@@ -2683,8 +2701,8 @@ namespace server
                     else formatstring(s)(slen, "%s %s", id->name, arg);
                     char *ret = executestr(s);
                     delete[] s;
-                    if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colorname(ci), name, ret);
-                    else srvoutf(-3, "\fc%s executed %s", colorname(ci), name);
+                    if(ret && *ret) srvoutf(-3, "\fc%s executed %s (returned: %s)", colourname(ci), name, ret);
+                    else srvoutf(-3, "\fc%s executed %s", colourname(ci), name);
                     delete[] ret;
                     return;
                 }
@@ -2781,7 +2799,7 @@ namespace server
             if(val)
             {
                 sendf(-1, 1, "ri2sis", N_COMMAND, ci->clientnum, name, strlen(val), val);
-                relayf(3, "\fc%s set %s to %s", colorname(ci), name, val);
+                relayf(3, "\fc%s set %s to %s", colourname(ci), name, val);
             }
         }
         else srvmsgf(ci->clientnum, "\frunknown command: %s", cmd);
@@ -3317,12 +3335,12 @@ namespace server
                             c.mask = 0xFFFFFFFF;
                             c.type = ipinfo::BAN;
                             c.time = totalmillis ? totalmillis : 1;
-                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): team killing is not permitted", colorname(actor), gethostname(actor->clientnum));
+                            srvoutf(-3, "\fs\fcbanned\fS %s (%s): team killing is not permitted", colourname(actor), gethostname(actor->clientnum));
                             updatecontrols = true;
                         }
                         else if(G(teamkillkick) && actor->state.warnings[WARN_TEAMKILL][0] >= G(teamkillkick))
                         {
-                            srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colorname(actor));
+                            srvoutf(-3, "\fs\fckicked\fS %s: team killing is not permitted", colourname(actor));
                             actor->kicked = updatecontrols = true;
                         }
                         else srvmsgft(actor->clientnum, CON_CHAT, "\fs\fzoyWARNING:\fS team killing is not permitted, action will be taken if you continue");
@@ -4112,7 +4130,7 @@ namespace server
             if(ci->name[0])
             {
                 int amt = numclients(ci->clientnum);
-                relayf(2, "\fo%s (%s) has left the game (%s, %d %s)", colorname(ci), gethostname(n), reason >= 0 ? disc_reasons[reason] : "normal", amt, amt != 1 ? "players" : "player");
+                relayf(2, "\fo%s (%s) has left the game (%s, %d %s)", colourname(ci), gethostname(n), reason >= 0 ? disc_reasons[reason] : "normal", amt, amt != 1 ? "players" : "player");
             }
             clients.removeobj(ci);
         }
@@ -4147,7 +4165,7 @@ namespace server
             #endif
         }
         loopv(clients) if(clients[i]->clientnum >= 0 && clients[i]->name[0] && clients[i]->state.aitype == AI_NONE)
-            sendstring(colorname(clients[i]), p);
+            sendstring(colourname(clients[i]), p);
         sendqueryreply(p);
     }
 
@@ -4410,7 +4428,7 @@ namespace server
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
         int amt = numclients();
-        relayf(2, "\fg%s (%s) has joined the game (%d %s)", colorname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
+        relayf(2, "\fg%s (%s) has joined the game (%d %s)", colourname(ci), gethostname(ci->clientnum), amt, amt != 1 ? "players" : "player");
 
         if(m_demo(gamemode)) setupdemoplayback();
         else if(m_edit(gamemode))
@@ -5009,7 +5027,7 @@ namespace server
                                     c.mask = 0xFFFFFFFF;
                                     c.type = ipinfo::MUTE;
                                     c.time = totalmillis ? totalmillis : 1;
-                                    srvoutf(-3, "\fs\fcmute\fS added on %s: exceeded the number of allowed flood warnings", colorname(cp));
+                                    srvoutf(-3, "\fs\fcmute\fS added on %s: exceeded the number of allowed flood warnings", colourname(cp));
                                 }
                             }
                             break;
@@ -5026,7 +5044,7 @@ namespace server
                         if(t == cp || !allowbroadcast(t->clientnum) || (flags&SAY_TEAM && cp->team != t->team)) continue;
                         sendf(t->clientnum, 1, "ri3s", N_TEXT, cp->clientnum, flags, output);
                     }
-                    defformatstring(m)("%s", colorname(cp));
+                    defformatstring(m)("%s", colourname(cp));
                     if(flags&SAY_TEAM)
                     {
                         defformatstring(t)(" (\fs\f[%d]%s\fS)", TEAM(cp->team, colour), TEAM(cp->team, name));
@@ -5054,7 +5072,7 @@ namespace server
                 case N_SETPLAYERINFO:
                 {
                     QUEUE_MSG;
-                    defformatstring(oldname)("%s", colorname(ci));
+                    defformatstring(oldname)("%s", colourname(ci));
                     getstring(text, p);
                     filtertext(text, text, true, true, true, MAXNAMELEN);
                     const char *namestr = text;
@@ -5063,7 +5081,7 @@ namespace server
                     if(strcmp(ci->name, namestr))
                     {
                         copystring(ci->name, namestr, MAXNAMELEN+1);
-                        relayf(2, "\fm* %s is now known as %s", oldname, colorname(ci));
+                        relayf(2, "\fm* %s is now known as %s", oldname, colourname(ci));
                     }
                     ci->state.colour = max(getint(p), 0);
                     ci->state.model = max(getint(p), 0);
@@ -5331,7 +5349,7 @@ namespace server
                             if(haspriv(ci, G(y##lock), "clear " #y "s")) \
                             { \
                                 reset##y##s(); \
-                                srvoutf(-3, "%s cleared existing \fs\fc" #y "s\fS", colorname(ci)); \
+                                srvoutf(-3, "%s cleared existing \fs\fc" #y "s\fS", colourname(ci)); \
                             } \
                             break; \
                         }
@@ -5369,7 +5387,7 @@ namespace server
                                             control.remove(i); \
                                 } \
                                 string name; \
-                                copystring(name, colorname(ci)); \
+                                copystring(name, colourname(ci)); \
                                 if(value >= 0) \
                                 { \
                                     ipinfo &c = control.add(); \
@@ -5377,14 +5395,14 @@ namespace server
                                     c.mask = 0xFFFFFFFF; \
                                     c.type = value; \
                                     c.time = totalmillis ? totalmillis : 1; \
-                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s (%s): %s", name, colorname(cp), gethostname(cp->clientnum), text); \
-                                    else srvoutf(-3, "%s added \fs\fc" #y "\fS on %s", name, colorname(cp)); \
+                                    if(text[0]) srvoutf(-3, "%s added \fs\fc" #y "\fS on %s (%s): %s", name, colourname(cp), gethostname(cp->clientnum), text); \
+                                    else srvoutf(-3, "%s added \fs\fc" #y "\fS on %s", name, colourname(cp)); \
                                     if(value == ipinfo::BAN) updatecontrols = true; \
                                 } \
                                 else \
                                 { \
-                                    if(text[0]) srvoutf(-3, "%s \fs\fckicked\fS %s: %s", name, colorname(cp), text); \
-                                    else srvoutf(-3, "%s \fs\fckicked\fS %s", name, colorname(cp)); \
+                                    if(text[0]) srvoutf(-3, "%s \fs\fckicked\fS %s: %s", name, colourname(cp), text); \
+                                    else srvoutf(-3, "%s \fs\fckicked\fS %s", name, colourname(cp)); \
                                     cp->kicked = updatecontrols = true; \
                                 } \
                             } \
@@ -5513,14 +5531,14 @@ namespace server
                         case ID_VAR:
                         {
                             int val = getint(p);
-                            relayf(3, "\fc%s set worldvar %s to %d", colorname(ci), text, val);
+                            relayf(3, "\fc%s set worldvar %s to %d", colourname(ci), text, val);
                             QUEUE_INT(val);
                             break;
                         }
                         case ID_FVAR:
                         {
                             float val = getfloat(p);
-                            relayf(3, "\fc%s set worldvar %s to %s", colorname(ci), text, floatstr(val));
+                            relayf(3, "\fc%s set worldvar %s to %s", colourname(ci), text, floatstr(val));
                             QUEUE_FLT(val);
                             break;
                         }
@@ -5531,7 +5549,7 @@ namespace server
                             if(vlen < 0 || vlen > p.remaining()) break;
                             char *val = newstring(vlen);
                             getstring(val, p, vlen+1);
-                            relayf(3, "\fc%s set world%s %s to %s", colorname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
+                            relayf(3, "\fc%s set world%s %s to %s", colourname(ci), t == ID_ALIAS ? "alias" : "var", text, val);
                             QUEUE_INT(vlen);
                             QUEUE_STR(val);
                             delete[] val;

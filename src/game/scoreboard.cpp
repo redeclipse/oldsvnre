@@ -203,14 +203,14 @@ namespace hud
                             {
                                 if(sg.players[0]->cptime == sg.players[i]->cptime)
                                 {
-                                    concatstring(winner, game::colorname(sg.players[i]));
+                                    concatstring(winner, game::colourname(sg.players[i]));
                                     concatstring(winner, ", ");
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), winner, sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colorname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with the fastest lap: \fs\fc%s\fS", game::colourname(sg.players[0]), sg.players[0]->cptime ? timetostr(sg.players[0]->cptime) : "dnf");
                     }
                     else
                     {
@@ -221,14 +221,14 @@ namespace hud
                             {
                                 if(sg.players[0]->points == sg.players[i]->points)
                                 {
-                                    concatstring(winner, game::colorname(sg.players[i]));
+                                    concatstring(winner, game::colourname(sg.players[i]));
                                     concatstring(winner, ", ");
                                 }
                                 else break;
                             }
-                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), winner, sg.players[0]->points);
+                            game::announcef(S_V_DRAW, CON_MESG, NULL, true, "\fw%s tied %swith a total score of: \fs\fc%d\fS", game::colourname(sg.players[0]), winner, sg.players[0]->points);
                         }
-                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colorname(sg.players[0]), sg.players[0]->points);
+                        else game::announcef(anc, CON_MESG, NULL, true, "\fw%s won the match with a total score of: \fs\fc%d\fS", game::colourname(sg.players[0]), sg.players[0]->points);
                     }
                 }
             }
@@ -245,8 +245,8 @@ namespace hud
             gameent *e = game::getclient(d->ownernum);
             if(e)
             {
-                concatstring(hoststr, game::colorname(e, NULL, "", false, false));
-                concatstring(hoststr, " ");
+                concatstring(hoststr, game::colourname(e));
+                concatstring(hoststr, ":");
             }
             defformatstring(owner)("[%d]", d->ownernum);
             concatstring(hoststr, owner);
@@ -402,7 +402,7 @@ namespace hud
             loopk(numgroups)
             {
                 scoregroup &sg = *groups[k];
-                loopscoregroup(namepad = max(namepad, (float)text_width(game::colorname(o, NULL, "", false))));
+                loopscoregroup(namepad = max(namepad, (float)text_width(game::colourname(o, NULL, false))));
                 if(scorehandles) loopscoregroup({
                     if(o->handle[0])
                     {
@@ -472,7 +472,7 @@ namespace hud
                         uicenterlist(g, uipad(g, namepad, uicenterlist(g, g.text("name", fgcolor))));
                         loopscoregroup(uicenterlist(g, {
                             if(o == game::player1) g.background(0x406040);
-                            uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", false))));
+                            uipad(g, 0.5f, uicenterlist(g, g.textf("%s", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, false))));
                         }));
                     });
 
@@ -607,8 +607,8 @@ namespace hud
                             if(o == game::player1) g.background(0x406040);
                             uilistv(g, 2, uipad(g, 0.25f, {
                                 if(scoreclientnum || game::player1->privilege >= PRIV_ELEVATED)
-                                    g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colorname(o, NULL, "", true, false), o->clientnum);
-                                else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colorname(o));
+                                    g.textf("%s [%d]", 0xFFFFFF, NULL, 0, game::colourname(o, NULL, true, false), o->clientnum);
+                                else g.textf("%s ", 0xFFFFFF, NULL, 0, game::colourname(o));
                             }));
                         });
                         if(scorehandles) g.text("", 0xFFFFFF, hud::privtex(o->privilege, o->aitype), hud::privcolour(o->privilege, o->aitype));
@@ -677,7 +677,7 @@ namespace hud
                     gameent *d = sg.players[j];
                     if((d != game::focus) == !i) continue;
                     float sk = numout && inventoryscoreshrink > 0 ? 1.f-min(numout*inventoryscoreshrink, inventoryscoreshrinkmax) : 1;
-                    sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colorname(d, NULL, "", false));
+                    sy += drawscoreitem(playertex, game::getcolour(d, game::playerdisplaytone), x, y+sy, s, sk*inventoryscoresize, blend*inventoryblend, j, d->points, game::colourname(d));
                     if(++numout >= inventoryscore) return sy;
                 }
             }
